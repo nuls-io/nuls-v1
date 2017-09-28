@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.nuls.db.dao.mybatis.BlockMapper" >
+  <resultMap id="BaseResultMap" type="io.nuls.db.entity.Block" >
+    <id column="hash" property="hash" jdbcType="VARCHAR" />
+    <result column="height" property="height" jdbcType="BIGINT" />
+    <result column="createtime" property="createtime" jdbcType="BIGINT" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    hash, height, createtime
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from block
+    where hash = #{hash,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from block
+    where hash = #{hash,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="io.nuls.db.entity.Block" >
+    insert into block (hash, height, createtime
+      )
+    values (#{hash,jdbcType=VARCHAR}, #{height,jdbcType=BIGINT}, #{createtime,jdbcType=BIGINT}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="io.nuls.db.entity.Block" >
+    insert into block
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="hash != null" >
+        hash,
+      </if>
+      <if test="height != null" >
+        height,
+      </if>
+      <if test="createtime != null" >
+        createtime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="hash != null" >
+        #{hash,jdbcType=VARCHAR},
+      </if>
+      <if test="height != null" >
+        #{height,jdbcType=BIGINT},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="io.nuls.db.entity.Block" >
+    update block
+    <set >
+      <if test="height != null" >
+        height = #{height,jdbcType=BIGINT},
+      </if>
+      <if test="createtime != null" >
+        createtime = #{createtime,jdbcType=BIGINT},
+      </if>
+    </set>
+    where hash = #{hash,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="io.nuls.db.entity.Block" >
+    update block
+    set height = #{height,jdbcType=BIGINT},
+      createtime = #{createtime,jdbcType=BIGINT}
+    where hash = #{hash,jdbcType=VARCHAR}
+  </update>
+</mapper>

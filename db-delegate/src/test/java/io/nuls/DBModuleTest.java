@@ -53,6 +53,7 @@ public class DBModuleTest extends TestCase {
 
         IStoreService<Block,String> blockStore = (IStoreService) applicationContext.getBean("blockStoreService");
         Block b = blockStore.getByKey("fdsafsdfadsfasdafsd");
+        System.out.println(b.getCreatetime());
 //        Block b = new Block();
 //        b.setHash("fdsafsdfadsfasdafsd");
 //        b.setHeight(1L);
