@@ -1,5 +1,7 @@
 package io.nuls;
 
+import io.nuls.db.entity.Block;
+import io.nuls.db.intf.IStoreService;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -44,7 +46,19 @@ public class DBModuleTest extends TestCase {
             }
             return;
         }
+
+
         Log.info("System is started!");
+
+
+        IStoreService blockStore = (IStoreService) applicationContext.getBean("");
+        Block b = new Block();
+        b.setHash("fdsafsdfadsfasdafsd");
+        b.setHeight(1L);
+        b.setCreatetime(System.currentTimeMillis());
+
+        blockStore.save(b);
+
     }
 
     @org.junit.Test

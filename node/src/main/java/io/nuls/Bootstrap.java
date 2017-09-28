@@ -91,7 +91,7 @@ public class Bootstrap {
         } catch (Exception e) {
             Log.error("", e);
         }
-        //        RpcServerService service = applicationContext.getBean(RpcServerService.class);
+        //        RpcServerService intf = applicationContext.getBean(RpcServerService.class);
         return result;
     }
 

@@ -12,7 +12,7 @@ public class InchainContext {
     private QueueService queueService;
 
     /**
-     * get The Queue service instance
+     * get The Queue intf instance
      * @return
      */
     public QueueService getQueueService() {

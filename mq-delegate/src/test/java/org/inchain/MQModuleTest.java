@@ -37,7 +37,7 @@ public class MQModuleTest {
 
             Long data = null;
 //            try {
-//                data = service.take(queueName);
+//                data = intf.take(queueName);
 //            } catch (InterruptedException e) {
 //                log.error("", e);
 //            }
