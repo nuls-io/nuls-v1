@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
  * Created by win10 on 2017/9/26.
  */
 @Service("blockStoreService")
-public class BlockStoreService implements IStoreService<Block> {
+public class BlockStoreService implements IStoreService<Block,String> {
 
     @Autowired
     private BlockMapper blockMapper;
@@ -18,5 +18,10 @@ public class BlockStoreService implements IStoreService<Block> {
     @Override
     public void save(Block b) {
         blockMapper.insert(b);
+    }
+
+    @Override
+    public Block getByKey(String hash) {
+        return blockMapper.selectByPrimaryKey(hash);
     }
 }

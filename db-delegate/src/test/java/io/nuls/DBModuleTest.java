@@ -51,13 +51,14 @@ public class DBModuleTest extends TestCase {
         Log.info("System is started!");
 
 
-        IStoreService blockStore = (IStoreService) applicationContext.getBean("blockStoreService");
-        Block b = new Block();
-        b.setHash("fdsafsdfadsfasdafsd");
-        b.setHeight(1L);
-        b.setCreatetime(System.currentTimeMillis());
-
-        blockStore.save(b);
+        IStoreService<Block,String> blockStore = (IStoreService) applicationContext.getBean("blockStoreService");
+        Block b = blockStore.getByKey("fdsafsdfadsfasdafsd");
+//        Block b = new Block();
+//        b.setHash("fdsafsdfadsfasdafsd");
+//        b.setHeight(1L);
+//        b.setCreatetime(System.currentTimeMillis());
+//
+//        blockStore.save(b);
 
     }
 
