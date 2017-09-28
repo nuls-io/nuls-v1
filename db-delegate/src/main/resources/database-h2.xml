@@ -7,12 +7,13 @@
         http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.0.xsd"
        default-autowire="byName">
 
+
     <!-- 数据源配置 -->
     <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
-        <property name="driverClassName" value="${h2.driverClass}" />
+        <property name="driverClassName" value="org.h2.Driver" />
         <property name="url" value="jdbc:h2:file:../data/h2;LOG=2;DB_CLOSE_DELAY=10;;TRACE_LEVEL_SYSTEM_OUT=3;MODE=MySQL;AUTO_RECONNECT=TRUE;DATABASE_TO_UPPER=FALSE" />
-        <property name="username" value="${h2.username}" />
-        <property name="password" value="${h2.password}" />
+        <property name="username" value="sa" />
+        <property name="password" value="123456" />
         <!-- 配置初始化大小、最小、最大 -->
         <property name="initialSize" value="1" />
         <property name="minIdle" value="1" />
