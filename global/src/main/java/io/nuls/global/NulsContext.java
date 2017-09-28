@@ -11,7 +11,7 @@ public class NulsContext {
 
     private static ApplicationContext applicationContext;
 
-    @Autowired
+
     private QueueService queueService;
 
     /**

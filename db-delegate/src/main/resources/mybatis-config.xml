@@ -30,7 +30,7 @@
 
     <plugins>
         <!-- com.github.pagehelper为PageHelper类所在包名 -->
-        <plugin interceptor="com.github.pagehelper.PageHelper">
+        <plugin interceptor="com.github.pagehelper.PageInterceptor">
             <!-- 4.0.0以后版本可以不设置该参数 -->
             <!-- <property name="dialect" value="mysql"/>   -->
             <!-- 该参数默认为false -->
