@@ -82,7 +82,7 @@ public class Bootstrap {
             List<String> filePath = new ArrayList<>();
             filePath.add("classpath:/applicationContext.xml");
             //todo 这里追加数据库配置文件
-//            filePath.add("classpath:/database-"+dbType+".xml");
+            filePath.add("classpath:/database-"+dbType+".xml");
             ctx.setConfigLocations(filePath.toArray(new String[]{}));
             ctx.refresh();
             NulsContext.setApplicationContext(ctx);

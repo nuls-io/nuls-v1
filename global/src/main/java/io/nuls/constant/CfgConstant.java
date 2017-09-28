@@ -6,6 +6,6 @@ package io.nuls.constant;
  */
 public interface CfgConstant {
     String SpringProfile = "spring.profiles";
-    String MybatisDbType = "mybatis.db.type";
+    String MybatisDbType = "mapping.db.type";
 
 }

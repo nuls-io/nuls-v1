@@ -1,5 +1,7 @@
 package io.nuls.rpcserver.resources;
 
+import org.springframework.stereotype.Component;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -8,7 +10,7 @@ import javax.ws.rs.Produces;
  * Created by Niels on 2017/9/25.
  * nuls.io
  */
-
+@Component
 @Path("/")
 public class TestResouce {
 
