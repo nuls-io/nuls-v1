@@ -6,7 +6,7 @@ import io.nuls.util.constant.ErrorCode;
  * Created by Niels on 2017/9/26.
  * nuls.io
  */
-public class InchainException extends RuntimeException {
+public class NulsException extends RuntimeException {
 
     private int code;
     private String message;
@@ -18,7 +18,7 @@ public class InchainException extends RuntimeException {
      * @param message the detail message. The detail message is saved for
      *                later retrieval by the {@link #getMessage()} method.
      */
-    public InchainException(String message) {
+    public NulsException(String message) {
         super(message);
         this.message = message;
     }
@@ -30,7 +30,7 @@ public class InchainException extends RuntimeException {
      * @param message the detail message. The detail message is saved for
      *                later retrieval by the {@link #getMessage()} method.
      */
-    public InchainException(ErrorCode message) {
+    public NulsException(ErrorCode message) {
         super(message.getMsg());
         this.code = message.getCode();
         this.message = message.getMsg();
@@ -51,7 +51,7 @@ public class InchainException extends RuntimeException {
      *                unknown.)
      * @since 1.4
      */
-    public InchainException(ErrorCode message, Throwable cause) {
+    public NulsException(ErrorCode message, Throwable cause) {
         super(message.getMsg(), cause);
         this.code = message.getCode();
         this.message = message.getMsg();
@@ -72,7 +72,7 @@ public class InchainException extends RuntimeException {
      *              unknown.)
      * @since 1.4
      */
-    public InchainException(Throwable cause) {
+    public NulsException(Throwable cause) {
         super(cause);
     }
 
@@ -90,7 +90,7 @@ public class InchainException extends RuntimeException {
      *                           be writable
      * @since 1.7
      */
-    protected InchainException(ErrorCode message, Throwable cause,
+    protected NulsException(ErrorCode message, Throwable cause,
                                boolean enableSuppression,
                                boolean writableStackTrace) {
         super(message.getMsg(), cause, enableSuppression, writableStackTrace);

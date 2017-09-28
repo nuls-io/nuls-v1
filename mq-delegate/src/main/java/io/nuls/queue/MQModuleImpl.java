@@ -3,7 +3,7 @@ package io.nuls.queue;
 import io.nuls.mq.MQModule;
 import io.nuls.mq.intf.StatInfo;
 import io.nuls.queue.impl.manager.QueueManager;
-import io.nuls.task.InchainThread;
+import io.nuls.task.NulsThread;
 import io.nuls.task.ModuleManager;
 import io.nuls.task.ModuleStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +30,7 @@ public class MQModuleImpl extends MQModule {
     @Override
     public void start() {
         this.setStatus(ModuleStatus.STARTING);
-        InchainThread t1 = new InchainThread(this, "queueStatusLogThread") {
+        NulsThread t1 = new NulsThread(this, "queueStatusLogThread") {
             @Override
             public void run() {
                 QueueManager.logQueueStatus();
@@ -59,10 +59,10 @@ public class MQModuleImpl extends MQModule {
         str.append(",moduleStatus:");
         str.append(getStatus());
         str.append(",ThreadCount:");
-        Map<String, InchainThread> threadMap = moduleManager.getThreadsByModule(getModuleName());
+        Map<String, NulsThread> threadMap = moduleManager.getThreadsByModule(getModuleName());
         str.append(threadMap.size());
         str.append("ThreadInfo:\n");
-        for (InchainThread t : threadMap.values()) {
+        for (NulsThread t : threadMap.values()) {
             str.append(t.getInfo());
         }
         str.append("QueueInfo:\n");

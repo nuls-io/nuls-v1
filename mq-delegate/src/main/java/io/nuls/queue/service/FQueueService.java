@@ -3,7 +3,7 @@ package io.nuls.queue.service;
 import io.nuls.mq.exception.QueueException;
 import io.nuls.mq.intf.QueueService;
 import io.nuls.mq.intf.StatInfo;
-import io.nuls.queue.impl.InchainFQueue;
+import io.nuls.queue.impl.NulsFQueue;
 import io.nuls.queue.impl.manager.QueueManager;
 import io.nuls.util.log.Log;
 import org.springframework.stereotype.Service;
@@ -36,7 +36,7 @@ public class FQueueService<T> implements QueueService<T> {
      */
     public boolean createQueue(String queueName, long maxSize, int latelySecond) {
         try {
-            InchainFQueue queue = new InchainFQueue(queueName, maxSize);
+            NulsFQueue queue = new NulsFQueue(queueName, maxSize);
             QueueManager.initQueue(queueName, queue, latelySecond);
             return true;
         } catch (Exception e) {

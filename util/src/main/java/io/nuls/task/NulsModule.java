@@ -7,7 +7,7 @@ import java.util.Map;
  * Created by Niels on 2017/9/26.
  * nuls.io
  */
-public interface InchainModule {
+public interface NulsModule {
 
     String getModuleName();
 

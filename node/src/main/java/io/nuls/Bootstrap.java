@@ -1,6 +1,7 @@
 package io.nuls;
 
 import io.nuls.constant.CfgConstant;
+import io.nuls.global.NulsContext;
 import io.nuls.mq.MQModule;
 import io.nuls.rpcserver.intf.RpcServerModule;
 import io.nuls.util.cfg.ConfigLoader;
@@ -17,7 +18,6 @@ import java.util.Properties;
  * System start class
  */
 public class Bootstrap {
-    public static ClassPathXmlApplicationContext applicationContext;
 
     public static void main(String[] args) {
         do {
@@ -53,7 +53,7 @@ public class Bootstrap {
     }
 
     private static void initMQ() {
-        MQModule module = applicationContext.getBean(MQModule.class);
+        MQModule module = NulsContext.getApplicationContext().getBean(MQModule.class);
         module.start();
         Log.info(module.getInfo());
     }
@@ -63,7 +63,7 @@ public class Bootstrap {
      * @return 启动结果
      */
     private static boolean initRpcServer() {
-        RpcServerModule module = applicationContext.getBean(RpcServerModule.class);
+        RpcServerModule module = NulsContext.getApplicationContext().getBean(RpcServerModule.class);
         module.start();
         Log.info(module.getInfo());
         return true;
@@ -85,7 +85,7 @@ public class Bootstrap {
 //            filePath.add("classpath:/database-"+dbType+".xml");
             ctx.setConfigLocations(filePath.toArray(new String[]{}));
             ctx.refresh();
-            applicationContext = ctx;
+            NulsContext.setApplicationContext(ctx);
             Log.info("System is started!");
             result = true;
         } catch (Exception e) {

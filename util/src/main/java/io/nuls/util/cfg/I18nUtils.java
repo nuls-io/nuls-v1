@@ -1,6 +1,6 @@
 package io.nuls.util.cfg;
 
-import io.nuls.exception.InchainException;
+import io.nuls.exception.NulsException;
 import io.nuls.util.constant.ErrorCode;
 import org.springframework.util.StringUtils;
 
@@ -41,13 +41,13 @@ public class I18nUtils {
                 AllMapping.put(key,prop);
             }
         } catch (IOException e) {
-            throw new InchainException(e);
+            throw new NulsException(e);
         }
     }
 
     public static void setLanguage(String _key){
         if(StringUtils.isEmpty(_key)){
-            throw new InchainException(ErrorCode.LANGUAGECANNOTSETTONULL);
+            throw new NulsException(ErrorCode.LANGUAGECANNOTSETTONULL);
         }
         key = _key;
         nowMapping = AllMapping.get(_key);

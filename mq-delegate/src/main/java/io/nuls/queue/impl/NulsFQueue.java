@@ -13,7 +13,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * 用Fqueue实现的持久化队列
  * Created by Niels on 2017/9/20.
  */
-public class InchainFQueue<T> extends PersistentQueue<T> {
+public class NulsFQueue<T> extends PersistentQueue<T> {
 
     private FQueue queue = null;
     /**
@@ -34,7 +34,7 @@ public class InchainFQueue<T> extends PersistentQueue<T> {
      * @throws IOException
      * @throws FileFormatException
      */
-    public InchainFQueue(String queueName, long maxSize) throws IOException, FileFormatException {
+    public NulsFQueue(String queueName, long maxSize) throws IOException, FileFormatException {
         this.queueName = "queue/" + queueName;
         this.maxSize = maxSize;
         this.queue = new FQueue(this.queueName, maxSize);

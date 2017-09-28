@@ -1,7 +1,7 @@
 package io.nuls.mq.intf;
 
 
-import io.nuls.exception.InchainException;
+import io.nuls.exception.NulsException;
 import io.nuls.mq.exception.QueueException;
 
 import java.io.IOException;
@@ -78,7 +78,7 @@ public interface QueueService<T> {
      *
      * @param queueName
      * @throws IOException
-     * @throws InchainException
+     * @throws NulsException
      */
     void close(String queueName) throws QueueException;
 

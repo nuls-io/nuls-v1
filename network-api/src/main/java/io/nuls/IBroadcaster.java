@@ -1,8 +1,8 @@
 package io.nuls;
 
 
-import io.nuls.message.InchainMessage;
+import io.nuls.message.NulsMessage;
 
 public interface IBroadcaster {
-    void Boradcast(InchainMessage msg);
+    void Boradcast(NulsMessage msg);
 }

@@ -1,6 +1,6 @@
 package io.nuls.task;
 
-import io.nuls.exception.InchainException;
+import io.nuls.exception.NulsException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -18,27 +18,27 @@ public class ModuleManager implements ApplicationContextInitializer {
 
     private ApplicationContext applicationContext;
 
-    private static final Map<String, InchainThread> threadMap = new HashMap<>();
+    private static final Map<String, NulsThread> threadMap = new HashMap<>();
 
-    public Map<String, InchainModule> getModules() {
-        Map<String, InchainModule> moduleMap = this.applicationContext.getBeansOfType(InchainModule.class);
+    public Map<String, NulsModule> getModules() {
+        Map<String, NulsModule> moduleMap = this.applicationContext.getBeansOfType(NulsModule.class);
         if (moduleMap == null || moduleMap.isEmpty()) {
             return moduleMap;
         }
-        Map<String, InchainModule> resultMap = new HashMap<>();
-        for (InchainModule module : moduleMap.values()) {
+        Map<String, NulsModule> resultMap = new HashMap<>();
+        for (NulsModule module : moduleMap.values()) {
             resultMap.put(module.getModuleName(), module);
         }
         return resultMap;
     }
 
-    public InchainModule getModule(String moduleName) {
-        Map<String, InchainModule> moduleMap = this.applicationContext.getBeansOfType(InchainModule.class);
+    public NulsModule getModule(String moduleName) {
+        Map<String, NulsModule> moduleMap = this.applicationContext.getBeansOfType(NulsModule.class);
         if (moduleMap == null || moduleMap.isEmpty()) {
             return null;
         }
-        InchainModule module = null;
-        for (InchainModule mdl : moduleMap.values()) {
+        NulsModule module = null;
+        for (NulsModule mdl : moduleMap.values()) {
             if (mdl.getModuleName().equals(moduleName)) {
                 module = mdl;
                 break;
@@ -48,35 +48,35 @@ public class ModuleManager implements ApplicationContextInitializer {
     }
 
     public String getInfo() {
-        Map<String, InchainModule> moduleMap = this.applicationContext.getBeansOfType(InchainModule.class);
+        Map<String, NulsModule> moduleMap = this.applicationContext.getBeansOfType(NulsModule.class);
         if (moduleMap == null || moduleMap.isEmpty()) {
             return "";
         }
         StringBuilder str = new StringBuilder();
-        for (InchainModule module : moduleMap.values()) {
+        for (NulsModule module : moduleMap.values()) {
             str.append(module.getInfo());
         }
         return str.toString();
     }
 
-    public static void regThread(String threadName, InchainThread thread) {
+    public static void regThread(String threadName, NulsThread thread) {
         if (threadMap.keySet().contains(threadName)) {
-            throw new InchainException("the name of thread is already exist(" + threadName + ")");
+            throw new NulsException("the name of thread is already exist(" + threadName + ")");
         }
         threadMap.put(threadName, thread);
     }
 
-    public InchainThread getThread(String threadName){
+    public NulsThread getThread(String threadName){
         return threadMap.get(threadName);
     }
 
-    public Map<String, InchainThread> getAllThreads(){
+    public Map<String, NulsThread> getAllThreads(){
         return threadMap;
     }
 
-    public Map<String, InchainThread> getThreadsByModule(String moduleName){
-        Map<String, InchainThread> map = new HashMap<>();
-        for(InchainThread t:threadMap.values()){
+    public Map<String, NulsThread> getThreadsByModule(String moduleName){
+        Map<String, NulsThread> map = new HashMap<>();
+        for(NulsThread t:threadMap.values()){
             if(t.getModule().getModuleName().equals(moduleName)){
                 map.put(t.getName(),t);
             }

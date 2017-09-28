@@ -1,13 +1,13 @@
 package io.nuls.task;
 
-import io.nuls.exception.InchainException;
+import io.nuls.exception.NulsException;
 import io.nuls.util.date.DateUtil;
 import io.nuls.util.log.Log;
 
 import java.util.Date;
 
 
-public class InchainThread extends Thread {
+public class NulsThread extends Thread {
 
     public enum STATUS {
         RUNING,
@@ -15,17 +15,17 @@ public class InchainThread extends Thread {
     }
 
     private STATUS status;
-    private InchainModule module = null;
+    private NulsModule module = null;
     private Date starttime;
 
-    public InchainThread(InchainModule module) {
+    public NulsThread(NulsModule module) {
         this(module,"noName");
     }
 
-    public InchainThread(InchainModule module, String name) {
+    public NulsThread(NulsModule module, String name) {
         super();
         if(null==module){
-            throw new InchainException("thread must knows the module");
+            throw new NulsException("thread must knows the module");
         }
         this.setName(name);
         starttime = new Date();
@@ -47,7 +47,7 @@ public class InchainThread extends Thread {
         return this.status;
     }
 
-    public InchainModule getModule() {
+    public NulsModule getModule() {
         return module;
     }
 
