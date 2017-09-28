@@ -81,7 +81,6 @@ public class Bootstrap {
             ctx.getEnvironment().setActiveProfiles(profile);
             List<String> filePath = new ArrayList<>();
             filePath.add("classpath:/applicationContext.xml");
-            //todo 这里追加数据库配置文件
             filePath.add("classpath:/database-"+dbType+".xml");
             ctx.setConfigLocations(filePath.toArray(new String[]{}));
             ctx.refresh();
@@ -91,7 +90,7 @@ public class Bootstrap {
         } catch (Exception e) {
             Log.error("", e);
         }
-        //        RpcServerService intf = applicationContext.getBean(RpcServerService.class);
+        //RpcServerService intf = applicationContext.getBean(RpcServerService.class);
         return result;
     }
 
