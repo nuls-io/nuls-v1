@@ -35,6 +35,7 @@ public class RpcServerServiceImpl implements RpcServerService {
         URI serverURI = UriBuilder.fromUri("http://" + serverIp + "/").port(Integer.parseInt(serverPort)).build();
         final Map<String, Object> initParams = new HashMap<>();
 //        initParams.put("jersey.config.server.provider.packages", packages);
+        initParams.put("load-on-startup", "1");
         NulsResourceConfig rc = new NulsResourceConfig();
         rc.addProperties(initParams);
         httpServer = GrizzlyHttpServerFactory.createHttpServer(serverURI, rc);
