@@ -1,5 +1,6 @@
 package io.nuls.rpcserver.impl.services;
 
+import io.nuls.rpcserver.resources.NulsResourceConfig;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -25,8 +26,6 @@ public class RpcServerServiceImpl implements RpcServerService {
     private String serverIp;
     @Value("${server.port}")
     private String serverPort;
-    @Value("${rest.packages}")
-    private String packages;
 
     private HttpServer httpServer;
 
@@ -35,8 +34,8 @@ public class RpcServerServiceImpl implements RpcServerService {
     public void init() {
         URI serverURI = UriBuilder.fromUri("http://" + serverIp + "/").port(Integer.parseInt(serverPort)).build();
         final Map<String, Object> initParams = new HashMap<>();
-        initParams.put("jersey.config.server.provider.packages", packages);
-        ResourceConfig rc = new ResourceConfig();
+//        initParams.put("jersey.config.server.provider.packages", packages);
+        NulsResourceConfig rc = new NulsResourceConfig();
         rc.addProperties(initParams);
         httpServer = GrizzlyHttpServerFactory.createHttpServer(serverURI, rc);
         Log.info("http restFul server is started!");
@@ -60,7 +59,4 @@ public class RpcServerServiceImpl implements RpcServerService {
         this.serverPort = serverPort;
     }
 
-    public void setPackages(String packages) {
-        this.packages = packages;
-    }
 }

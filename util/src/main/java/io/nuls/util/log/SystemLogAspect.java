@@ -25,12 +25,12 @@ public class SystemLogAspect {
     @Around("aspectJMethod()")
     public Object doAround(ProceedingJoinPoint pjp) throws Throwable{
 
-        Object[] args=pjp.getArgs();
-        long start = System.currentTimeMillis();
+//        Object[] args=pjp.getArgs();
+//        long start = System.currentTimeMillis();
         //核心逻辑
         Object retval=pjp.proceed();
-        long useTime = System.currentTimeMillis()-start;
-        Log.debug(pjp.getSignature()+"args:{},return:{},useTime:{}ms",args,retval,useTime);
+//        long useTime = System.currentTimeMillis()-start;
+//        Log.debug(pjp.getSignature()+"args:{},return:{},useTime:{}ms",args,retval,useTime);
         return retval;
     }
 //    @After(value="aspectJMethod()")
