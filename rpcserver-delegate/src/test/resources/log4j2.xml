@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration monitorInterval="60">
+	<Properties>
+		<Property name="log-path">./log</Property>
+	</Properties>
+	<Appenders>
+		<Console name="console" target="SYSTEM_OUT">
+			<PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss,SSS}] %-5p %m%n" />
+		</Console>
+		<!--<RollingFile name="logFile" append="true"-->
+			<!--fileName="${log-path}/file.log" filePattern="${log-path}/file.log.%d{yyyy-MM-dd-HH}.log.gz"-->
+			<!--bufferedIO="true">-->
+			<!--<PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss,SSS}] %-5p %m%n" />-->
+			<!--<Policies>-->
+				<!--&lt;!&ndash; 时间规则：每天（24小时）生成1个日志备份 &ndash;&gt;-->
+				<!--&lt;!&ndash; 注：如果用 TimeBasedTriggeringPolicy，filePattern必需带上 HH（小时），否则无法生成备份文件 &ndash;&gt;-->
+				<!--<TimeBasedTriggeringPolicy interval="24"-->
+					<!--modulate="true" />-->
+				<!--&lt;!&ndash; 大小规则：超过XXX大小生成1个日志备份 &ndash;&gt;-->
+				<!--&lt;!&ndash; <SizeBasedTriggeringPolicy size="10KB" /> &ndash;&gt;-->
+			<!--</Policies>-->
+		<!--</RollingFile>-->
+	</Appenders>
+	<Loggers>
+		<Root level="debug">
+			<AppenderRef ref="console" />
+			<!--<AppenderRef ref="logFile"></AppenderRef>-->
+		</Root>
+	</Loggers>
+</configuration>
