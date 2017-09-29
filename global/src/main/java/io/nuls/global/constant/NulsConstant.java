@@ -8,5 +8,5 @@ public interface NulsConstant {
 
     String SPRING_PROFILE = "spring.profiles";
     String SYSTEM_LANGUAGE = "language";
-
+    String DATABASE_TYPE = "database.type";
 }
