@@ -34,7 +34,6 @@ public class NulsException extends RuntimeException {
         super(message.getMsg());
         this.code = message.getCode();
         this.message = message.getMsg();
-        ;
     }
 
     /**

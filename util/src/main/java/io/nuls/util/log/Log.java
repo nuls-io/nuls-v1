@@ -11,7 +11,7 @@ import java.util.Map;
 /**
  * 公共日志输出工具 <br>
  * 该类提供了基本的日志输出。该类不可以继承。
- * 依赖于log4j2
+ * 依赖于slf4j
  *
  * @author Niels
  * @date [2017年9月25日]

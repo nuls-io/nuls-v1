@@ -10,11 +10,15 @@ public enum ErrorCode {
 
     SUCCESS(0, 10000),
     FAILED(1, 10001),
-    FILENOTFOUND(2, 10002),
-    NULLPARAMETER(3, 10003),
+    FILE_NOT_FOUND(2, 10002),
+    NULL_PARAMETER(3, 10003),
 
-    LANGUAGECANNOTSETTONULL(100,10100),
-    UNKOWN(88, 99999);
+
+
+    LANGUAGE_CANNOT_SET_NULL(100,10100),
+    UNKOWN(88, 99999),
+    //    request denied
+    REQUEST_DENIED(400,10400);
 
     private final int msg;
     private final int code;
