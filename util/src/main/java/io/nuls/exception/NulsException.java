@@ -21,6 +21,10 @@ public class NulsException extends RuntimeException {
     public NulsException(String message) {
         super(message);
         this.message = message;
+    }  public NulsException(int code,String message) {
+        super(message);
+        this.code = code;
+        this.message = message;
     }
     /**
      * Constructs a new exception with the specified detail message.  The

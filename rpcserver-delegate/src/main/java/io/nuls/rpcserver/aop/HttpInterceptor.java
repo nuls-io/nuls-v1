@@ -1,6 +1,5 @@
 package io.nuls.rpcserver.aop;
 
-import io.nuls.exception.NulsException;
 import io.nuls.rpcserver.entity.RpcResult;
 import io.nuls.util.constant.ErrorCode;
 import io.nuls.util.log.Log;
@@ -49,6 +48,10 @@ public class HttpInterceptor {
     }
 
     private boolean whiteSheetVerifier(Request request) {
+        System.out.println(request.getRemoteAddr());
+        System.out.println(request.getRemoteHost());
+        System.out.println(request.getRemotePort());
+        System.out.println(request.getRemoteUser());
         return true;
     }
 }
