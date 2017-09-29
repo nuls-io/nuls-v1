@@ -28,6 +28,10 @@ public class MQModuleImpl extends MQModule {
     private ModuleManager moduleManager;
 
     @Override
+    public void init(Map<String, String> initParams) {
+    }
+
+    @Override
     public void start() {
         this.setStatus(ModuleStatus.STARTING);
         NulsThread t1 = new NulsThread(this, "queueStatusLogThread") {

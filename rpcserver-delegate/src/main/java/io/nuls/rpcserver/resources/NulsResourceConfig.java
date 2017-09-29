@@ -1,6 +1,8 @@
 package io.nuls.rpcserver.resources;
 
 import io.nuls.global.NulsContext;
+import io.nuls.rpcserver.aop.RpcServerExceptionMapper;
+import io.nuls.rpcserver.aop.RpcServerFilter;
 import io.nuls.util.log.Log;
 import org.glassfish.jersey.server.ResourceConfig;
 
@@ -13,6 +15,8 @@ import java.lang.annotation.Annotation;
 public class NulsResourceConfig extends ResourceConfig {
 
     public NulsResourceConfig(){
+        register(RpcServerFilter.class);
+        register(RpcServerExceptionMapper.class);
         String names[] = NulsContext.getApplicationContext().getBeanDefinitionNames();
         for (String name : names)
         {

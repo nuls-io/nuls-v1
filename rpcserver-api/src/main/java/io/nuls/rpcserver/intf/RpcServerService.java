@@ -8,7 +8,8 @@ public interface RpcServerService {
     /**
      * start http server，restFul
      */
-    void init();
+    void startServer();
+    void startServer(String ip,int port,String moduleUrl);
 
     void shutdown();
 

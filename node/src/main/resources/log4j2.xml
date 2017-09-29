@@ -1,30 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration monitorInterval="60">
-	<Properties>
-		<Property name="log-path">./log</Property>
-	</Properties>
-	<Appenders>
-		<Console name="console" target="SYSTEM_OUT">
-			<PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss,SSS}] %-5p %m%n" />
-		</Console>
-		<!--<RollingFile name="logFile" append="true"-->
-			<!--fileName="${log-path}/file.log" filePattern="${log-path}/file.log.%d{yyyy-MM-dd-HH}.log.gz"-->
-			<!--bufferedIO="true">-->
-			<!--<PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss,SSS}] %-5p %m%n" />-->
-			<!--<Policies>-->
-				<!--&lt;!&ndash; 时间规则：每天（24小时）生成1个日志备份 &ndash;&gt;-->
-				<!--&lt;!&ndash; 注：如果用 TimeBasedTriggeringPolicy，filePattern必需带上 HH（小时），否则无法生成备份文件 &ndash;&gt;-->
-				<!--<TimeBasedTriggeringPolicy interval="24"-->
-					<!--modulate="true" />-->
-				<!--&lt;!&ndash; 大小规则：超过XXX大小生成1个日志备份 &ndash;&gt;-->
-				<!--&lt;!&ndash; <SizeBasedTriggeringPolicy size="10KB" /> &ndash;&gt;-->
-			<!--</Policies>-->
-		<!--</RollingFile>-->
-	</Appenders>
-	<Loggers>
-		<Root level="debug">
-			<AppenderRef ref="console" />
-			<!--<AppenderRef ref="logFile"></AppenderRef>-->
-		</Root>
-	</Loggers>
+<configuration debug="false">
+	<!--定义日志文件的存储地址 勿在 LogBack 的配置中使用相对路径-->
+	<property name="LOG_HOME" value="./logs" />
+	<property name="LOG_FILE" value="nuls" />
+
+	<!-- 控制台输出 -->
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<!-- 按照每天生成日志文件 -->
+	<appender name="FILE"  class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!--日志文件输出的文件名-->
+			<FileNamePattern>${LOG_HOME}/${LOG_FILE}.%d{yyyy-MM-dd}.log</FileNamePattern>
+			<!--日志文件保留天数-->
+			<MaxFileSize>100MB</MaxFileSize>
+			<MaxHistory>7</MaxHistory>
+		</rollingPolicy>
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<!-- 日志输出级别 -->
+	<root level="debug">
+		<appender-ref ref="STDOUT" />
+		<appender-ref ref="FILE" />
+	</root>
+	<!--    日志异步到数据库
+        <appender name="DB" class="ch.qos.logback.classic.db.DBAppender">
+        &lt;!&ndash;日志异步到数据库 &ndash;&gt;
+        <connectionSource class="ch.qos.logback.core.db.DriverManagerConnectionSource">
+        &lt;!&ndash;连接池 &ndash;&gt;
+        <dataSource class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <driverClass>com.mysql.jdbc.Driver</driverClass>
+        <url>jdbc:mysql://127.0.0.1:3306/databaseName</url>
+        <user>root</user>
+        <password>root</password>
+        </dataSource>
+        </connectionSource>
+        </appender>-->
 </configuration>

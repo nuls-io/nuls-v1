@@ -11,6 +11,8 @@ public interface NulsModule {
 
     String getModuleName();
 
+    void init(Map<String,String> initParams);
+
     void start();
 
     void reboot();
