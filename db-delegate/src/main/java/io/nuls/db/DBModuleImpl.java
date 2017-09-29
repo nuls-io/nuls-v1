@@ -1,11 +1,16 @@
 package io.nuls.db;
 
-import io.nuls.mq.MQModule;
+import io.nuls.db.entity.Block;
+import io.nuls.db.intf.IBlockStore;
+import io.nuls.global.NulsContext;
 import io.nuls.task.ModuleManager;
 import io.nuls.task.ModuleStatus;
 import io.nuls.task.NulsThread;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
@@ -16,16 +21,22 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
  * nuls.io
  */
 @Service("dbModule")
-public class DBModuleImpl extends MQModule {
+public class DBModuleImpl extends DBModule {
 
     private ScheduledExecutorService service;
 
     @Autowired
     private ModuleManager moduleManager;
 
+    @Value("${database.type}")
+    private String dataBaseType;
+
     @Override
     public void init(Map<String, String> initParams) {
-
+        if (!StringUtils.isEmpty(dataBaseType) && hasType(dataBaseType)) {
+            String path = "classpath:/database-" + dataBaseType + ".xml";
+            NulsContext.setApplicationContext(new ClassPathXmlApplicationContext(new String[]{path}, true, NulsContext.getApplicationContext()));
+        }
     }
 
     @Override
@@ -33,7 +44,7 @@ public class DBModuleImpl extends MQModule {
         this.setStatus(ModuleStatus.STARTING);
         NulsThread t1 = new NulsThread(this, "queueStatusLogThread") {
             @Override
-            public void run(){
+            public void run() {
             }
         };
         //启动速度统计任务
@@ -72,4 +83,15 @@ public class DBModuleImpl extends MQModule {
 //        }
         return str.toString();
     }
+
+
+    private boolean hasType(String dataBaseType) {
+        switch (dataBaseType) {
+            case "h2":
+                return true;
+
+        }
+        return false;
+    }
+
 }

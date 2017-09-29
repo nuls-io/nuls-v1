@@ -1,7 +1,11 @@
 package io.nuls.db.intf;
 
+import io.nuls.db.entity.Block;
+
+
 /**
- * Created by win10 on 2017/9/29.
+ * Created by zoro on 2017/9/29.
  */
-public class IBlockStore {
+public interface IBlockStore extends IStore<Block,String>{
+
 }

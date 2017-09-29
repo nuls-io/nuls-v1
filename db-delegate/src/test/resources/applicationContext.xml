@@ -9,14 +9,17 @@
 	       ">
 
     <!--开启spring注解扫描 -->
-    <context:component-scan base-package="io.nuls.*"/>
+    <context:component-scan base-package="io.nuls.*">
+        <context:exclude-filter type="regex" expression="io.nuls.db.dao.*" />
+        <context:exclude-filter type="regex" expression="io.nuls.db.impl.*" />
+    </context:component-scan>
 
     <!-- 配置加载的外部配置项 -->
     <bean id="propertyConfigurer"
           class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="locations">
             <list>
-                <value>classpath:db_cfg.properties</value>
+                <value>classpath:cfg.properties</value>
             </list>
         </property>
     </bean>
