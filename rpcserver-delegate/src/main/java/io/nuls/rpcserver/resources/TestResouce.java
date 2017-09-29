@@ -37,7 +37,7 @@ public class TestResouce {
     @Path("/hello")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getMessage2(String key) {
-        if(key==null){
+        if("".equals(key)){
             throw new NulsException("测试抛出异常");
         }
         return RpcResult.getSuccess().setData("hello world3333333333333333333333");
