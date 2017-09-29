@@ -8,6 +8,7 @@ import io.nuls.global.NulsContext;
 import io.nuls.util.cfg.ConfigLoader;
 import io.nuls.util.log.Log;
 import org.junit.Before;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.io.IOException;
@@ -25,7 +26,7 @@ public class DBModuleTest {
      *
      * @param testName name of the test case
      */
-
+    private static ApplicationContext applicationContext;
 
     private DBModule dbModule;
     /**
@@ -33,8 +34,8 @@ public class DBModuleTest {
      */
     @Before
     public void init() {
-        NulsContext.setApplicationContext(new ClassPathXmlApplicationContext("classpath:/applicationContext.xml"));
-        dbModule = (DBModule) NulsContext.getApplicationContext().getBean("dbModule");
+        applicationContext = new ClassPathXmlApplicationContext("classpath:/applicationContext.xml");
+        dbModule = (DBModule) applicationContext.getBean("dbModule");
         Map<String,String> map = new HashMap<>();
         map.put("dataBaseType", "h2");
         dbModule.init(map);

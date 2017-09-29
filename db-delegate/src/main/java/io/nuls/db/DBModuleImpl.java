@@ -30,12 +30,12 @@ public class DBModuleImpl extends DBModule {
 
     @Override
     public void init(Map<String, String> initParams) {
-        String dataBaseType = null;
-        if(initParams.get("dataBaseType") != null) {
-            dataBaseType = initParams.get("dataBaseType");
+        String databaseType = null;
+        if(initParams.get("databaseType") != null) {
+            databaseType = initParams.get("databaseType");
         }
-        if (!StringUtils.isEmpty(dataBaseType) && hasType(dataBaseType)) {
-            String path = "classpath:/database-" + dataBaseType + ".xml";
+        if (!StringUtils.isEmpty(databaseType) && hasType(databaseType)) {
+            String path = "classpath:/database-" + databaseType + ".xml";
             NulsContext.setApplicationContext(new ClassPathXmlApplicationContext(new String[]{path}, true, NulsContext.getApplicationContext()));
         }
     }

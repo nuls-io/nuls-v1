@@ -74,6 +74,6 @@
   </delete>
 
   <select id="count" resultType="Long">
-    select getCount(1) from block;
+    select count(1) as getCount from block;
   </select>
 </mapper>

@@ -1,5 +1,7 @@
 package io.nuls;
 
+import io.nuls.db.DBModule;
+import io.nuls.db.intf.IBlockStore;
 import io.nuls.global.constant.NulsConstant;
 import io.nuls.global.NulsContext;
 import io.nuls.mq.MQModule;
@@ -10,9 +12,7 @@ import io.nuls.util.log.Log;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * System start class
@@ -31,6 +31,7 @@ public class Bootstrap {
             }
             String profile = prop.getProperty(NulsConstant.SPRING_PROFILE);
             String language = prop.getProperty(NulsConstant.SYSTEM_LANGUAGE);
+            String databaseType = prop.getProperty(NulsConstant.DATABASE_TYPE);
             I18nUtils.setLanguage(language);
             //load spring context
             boolean result = loadSpringContext(profile);
@@ -38,7 +39,7 @@ public class Bootstrap {
                 break;
             }
             //init modules
-            initDB();
+            initDB(databaseType);
 
             initMQ();
             //init rpc server
@@ -50,7 +51,16 @@ public class Bootstrap {
         } while (false);
     }
 
-    private static void initDB() {
+    private static void initDB(String databaseType) {
+        DBModule dbModule = NulsContext.getApplicationContext().getBean(DBModule.class);
+        Map<String,String> map = new HashMap<>();
+        map.put("databaseType", databaseType);
+        dbModule.init(map);
+
+        IBlockStore blockStore = (IBlockStore) NulsContext.getApplicationContext().getBean("blockStore");
+
+        long count = blockStore.count();
+        System.out.println("-------------count:" + count);
     }
 
     private static void initMQ() {
