@@ -1,6 +1,5 @@
 package io.nuls.rpcserver.aop;
 
-import io.nuls.exception.NulsException;
 import io.nuls.rpcserver.entity.RpcResult;
 
 import javax.ws.rs.container.ContainerRequestContext;
@@ -16,7 +15,7 @@ import java.io.IOException;
  * Created by Niels on 2017/9/28.
  * nuls.io
  */
-public class RpcServerFilter implements ContainerRequestFilter, ContainerResponseFilter,ExceptionMapper<Exception> {
+public class RpcServerFilter implements ContainerRequestFilter, ContainerResponseFilter, ExceptionMapper<Exception> {
     @Override
     public void filter(ContainerRequestContext containerRequestContext) throws IOException {
         HttpContextHelper.put(containerRequestContext.getRequest());
@@ -25,14 +24,12 @@ public class RpcServerFilter implements ContainerRequestFilter, ContainerRespons
 
     @Override
     public void filter(ContainerRequestContext containerRequestContext, ContainerResponseContext containerResponseContext) throws IOException {
-        System.out.println(containerRequestContext);
+//        System.out.println(containerRequestContext);
     }
 
     @Override
     public Response toResponse(Exception e) {
-        Response.ResponseBuilder ResponseBuilder = null;
-         RpcResult result = RpcResult.getFailed().setData(e.getMessage());
-            ResponseBuilder = Response.ok(result, MediaType.APPLICATION_JSON);
-        return ResponseBuilder.build();
+        RpcResult result = RpcResult.getFailed().setData(e.getMessage());
+        return Response.ok(result, MediaType.APPLICATION_JSON).build();
     }
 }
