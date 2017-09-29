@@ -28,7 +28,7 @@ public class DBModuleImpl extends DBModule {
     @Autowired
     private ModuleManager moduleManager;
 
-    @Value("${database.type}")
+
     private String dataBaseType;
 
     @Override
