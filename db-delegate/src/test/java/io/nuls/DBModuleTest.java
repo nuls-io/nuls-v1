@@ -11,6 +11,8 @@ import org.junit.Before;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 
@@ -29,16 +31,17 @@ public class DBModuleTest {
     /**
      * start spring
      */
+    @Before
     public void init() {
         NulsContext.setApplicationContext(new ClassPathXmlApplicationContext("classpath:/applicationContext.xml"));
         dbModule = (DBModule) NulsContext.getApplicationContext().getBean("dbModule");
-        dbModule.init(null);
+        Map<String,String> map = new HashMap<>();
+        map.put("dataBaseType", "h2");
+        dbModule.init(map);
     }
 
     @org.junit.Test
     public void testDB() {
-
-        init();
 
         IBlockStore blockStore = (IBlockStore) NulsContext.getApplicationContext().getBean("blockStore");
 
