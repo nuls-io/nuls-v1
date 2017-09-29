@@ -1,4 +1,4 @@
-package io.nuls.constant;
+package io.nuls.global.constant;
 
 /**
  * Created by Niels on 2017/9/26.

@@ -1,11 +1,10 @@
 package io.nuls;
 
-import io.nuls.constant.CfgConstant;
+import io.nuls.global.constant.CfgConstant;
 import io.nuls.global.NulsContext;
 import io.nuls.mq.MQModule;
 import io.nuls.rpcserver.intf.RpcServerModule;
 import io.nuls.util.cfg.ConfigLoader;
-import io.nuls.util.cfg.I18nUtils;
 import io.nuls.util.log.Log;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
