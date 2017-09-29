@@ -14,7 +14,7 @@ import java.util.List;
 @Service("blockStoreService")
 public class BlockStoreService implements IStoreService<Block,String> {
 
-//    @Autowired
+    @Autowired
     private BlockMapper blockMapper;
 
     @Override
