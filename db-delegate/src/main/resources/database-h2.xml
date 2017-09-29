@@ -2,11 +2,14 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:jdbc="http://www.springframework.org/schema/jdbc"
-       xsi:schemaLocation="
-        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.0.xsd"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.0.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd"
        default-autowire="byName">
 
+
+    <context:component-scan base-package="io.nuls.db.* "/>
 
     <!-- 数据源配置 -->
     <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
@@ -61,8 +64,8 @@
     <!-- 配置mybatis数据库连接-->
     <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
         <property name="dataSource" ref="dataSource"/>
-        <property name="configLocation" value="classpath:db/mybatis-config.xml" />
-        <property name="mapperLocations" value="classpath:db/mapping/*.xml"></property>
+        <property name="configLocation" value="classpath:mybatis/mybatis-config.xml" />
+        <property name="mapperLocations" value="classpath:mybatis/mapping/*.xml"></property>
     </bean>
 
     <!-- 配置mybatis扫描包, 扫描basePackage下所有以@MyBatisMapper标识的 接口-->
@@ -75,7 +78,7 @@
 
     <!-- 初始化数据表结构 -->
     <jdbc:initialize-database data-source="dataSource" ignore-failures="ALL">
-        <jdbc:script location="classpath:/db/sql/h2-schema.sql" />
+        <jdbc:script location="classpath:/sql/schema-h2.sql" />
     </jdbc:initialize-database>
 
 

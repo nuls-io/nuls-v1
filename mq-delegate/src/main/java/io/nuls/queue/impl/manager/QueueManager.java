@@ -69,7 +69,7 @@ public abstract class QueueManager {
      */
     public static void initQueue(String queueName, PersistentQueue queue, int latelySecond) {
         if(!Running){
-            throw new NulsException("The MQModule is not running!");
+            throw new NulsException("The DBModule is not running!");
         }
         if (queuesMap.containsKey(queueName)) {
             throw new QueueException("队列名称已存在");
@@ -84,7 +84,7 @@ public abstract class QueueManager {
     }
 
     public static void destroyQueue(String queueName) throws IOException, FileFormatException { if(!Running){
-        throw new NulsException("The MQModule is not running!");
+        throw new NulsException("The DBModule is not running!");
     }
         PersistentQueue queue = queuesMap.get(queueName);
         if (null == queue) {
@@ -96,7 +96,7 @@ public abstract class QueueManager {
     }
 
     public static Object take(String queueName) throws InterruptedException { if(!Running){
-        throw new NulsException("The MQModule is not running!");
+        throw new NulsException("The DBModule is not running!");
     }
         PersistentQueue queue = queuesMap.get(queueName);
         if (null == queue) {
@@ -109,7 +109,7 @@ public abstract class QueueManager {
     }
 
     public static Object poll(String queueName) { if(!Running){
-        throw new NulsException("The MQModule is not running!");
+        throw new NulsException("The DBModule is not running!");
     }
         PersistentQueue queue = queuesMap.get(queueName);
         if (null == queue) {
@@ -125,7 +125,7 @@ public abstract class QueueManager {
     }
 
     public static void offer(String queueName, Object item) { if(!Running){
-        throw new NulsException("The MQModule is not running!");
+        throw new NulsException("The DBModule is not running!");
     }
         PersistentQueue queue = queuesMap.get(queueName);
         if (null == queue) {
@@ -138,7 +138,7 @@ public abstract class QueueManager {
     }
 
     public static void clear(String queueName) { if(!Running){
-        throw new NulsException("The MQModule is not running!");
+        throw new NulsException("The DBModule is not running!");
     }
         PersistentQueue queue = queuesMap.get(queueName);
         if (null == queue) {
@@ -149,7 +149,7 @@ public abstract class QueueManager {
     }
 
     public static void close(String queueName) throws QueueException { if(!Running){
-        throw new NulsException("The MQModule is not running!");
+        throw new NulsException("The DBModule is not running!");
     }
         PersistentQueue queue = queuesMap.get(queueName);
         if (null == queue) {
@@ -164,7 +164,7 @@ public abstract class QueueManager {
     }
 
     public static long size(String queueName) { if(!Running){
-        throw new NulsException("The MQModule is not running!");
+        throw new NulsException("The DBModule is not running!");
     }
         PersistentQueue queue = queuesMap.get(queueName);
         if (null == queue) {
@@ -174,7 +174,7 @@ public abstract class QueueManager {
     }
 
     public static long getMaxSize(String queueName) { if(!Running){
-        throw new NulsException("The MQModule is not running!");
+        throw new NulsException("The DBModule is not running!");
     }
         PersistentQueue queue = queuesMap.get(queueName);
         if (null == queue) {
@@ -184,7 +184,7 @@ public abstract class QueueManager {
     }
 
     public static StatInfo getStatInfo(String queueName) { if(!Running){
-        throw new NulsException("The MQModule is not running!");
+        throw new NulsException("The DBModule is not running!");
     }
         PersistentQueue queue = queuesMap.get(queueName);
         if (null == queue) {
