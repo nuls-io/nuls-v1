@@ -14,4 +14,8 @@ public interface BlockMapper {
     int updateByPrimaryKeySelective(Block record);
 
     int updateByPrimaryKey(Block record);
+
+    int truncate();
+
+    long count();
 }

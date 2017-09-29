@@ -68,4 +68,11 @@
       createtime = #{createtime,jdbcType=BIGINT}
     where hash = #{hash,jdbcType=VARCHAR}
   </update>
+  <delete id="truncate" >
+    delete from block;
+  </delete>
+
+  <select id="count" resultType="Long">
+    select count(1) getCount from block;
+  </select>
 </mapper>

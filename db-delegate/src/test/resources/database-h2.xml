@@ -11,13 +11,13 @@
     <!-- 数据源配置 -->
     <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
         <property name="driverClassName" value="org.h2.Driver" />
-        <property name="url" value="jdbc:h2:file:../data/h2;LOG=2;DB_CLOSE_DELAY=10;;TRACE_LEVEL_SYSTEM_OUT=3;MODE=MySQL;AUTO_RECONNECT=TRUE;DATABASE_TO_UPPER=FALSE" />
+        <property name="url" value="jdbc:h2:file:../data/h2;LOG=2;DB_CLOSE_DELAY=-1;MODE=MySQL;AUTO_RECONNECT=TRUE;DATABASE_TO_UPPER=FALSE" />
         <property name="username" value="sa" />
         <property name="password" value="123456" />
         <!-- 配置初始化大小、最小、最大 -->
-        <property name="initialSize" value="1" />
-        <property name="minIdle" value="1" />
-        <property name="maxActive" value="10" />
+        <property name="initialSize" value="10" />
+        <property name="minIdle" value="10" />
+        <property name="maxActive" value="30" />
 
         <!-- 配置获取连接等待超时的时间 -->
         <property name="maxWait" value="10000" />
@@ -42,7 +42,7 @@
 
         <property name="defaultAutoCommit" value="true" />
 
-        <!-- 验证连接有效与否的SQL，不同的数据配置不同 -->
+        <!-- 验证连接有效与否的SQL，不同的数据配置不同
         <property name="validationQuery" value="select 1 " />
         <property name="filters" value="stat" />
         <property name="proxyFilters">
@@ -50,6 +50,7 @@
                 <ref bean="logFilter" />
             </list>
         </property>
+         -->
     </bean>
 
     <bean id="logFilter" class="com.alibaba.druid.filter.logging.Slf4jLogFilter">

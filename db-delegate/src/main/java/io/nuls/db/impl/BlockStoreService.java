@@ -6,6 +6,8 @@ import io.nuls.db.intf.IStoreService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * Created by win10 on 2017/9/26.
  */
@@ -16,12 +18,37 @@ public class BlockStoreService implements IStoreService<Block,String> {
     private BlockMapper blockMapper;
 
     @Override
-    public void save(Block b) {
-        blockMapper.insert(b);
+    public int save(Block b) {
+       return blockMapper.insert(b);
     }
 
     @Override
     public Block getByKey(String hash) {
         return blockMapper.selectByPrimaryKey(hash);
+    }
+
+    @Override
+    public List<Block> getList() {
+        return null;
+    }
+
+    @Override
+    public int update(Block block) {
+        return 0;
+    }
+
+    @Override
+    public int remove(Block block) {
+        return 0;
+    }
+
+    @Override
+    public int truncate() {
+        return blockMapper.truncate();
+    }
+
+    @Override
+    public long count() {
+        return blockMapper.count();
     }
 }
