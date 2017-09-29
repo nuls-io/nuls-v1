@@ -80,7 +80,9 @@ public class Bootstrap {
             ctx.getEnvironment().setActiveProfiles(profile);
             List<String> filePath = new ArrayList<>();
             filePath.add("classpath:/applicationContext.xml");
-            filePath.add("classpath:/db/database-"+dbType+".xml");
+            if(null==dbType){
+                filePath.add("classpath:/db/database-"+dbType+".xml");
+            }
             ctx.setConfigLocations(filePath.toArray(new String[]{}));
             ctx.refresh();
             NulsContext.setApplicationContext(ctx);
