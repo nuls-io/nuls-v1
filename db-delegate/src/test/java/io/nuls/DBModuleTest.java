@@ -25,7 +25,6 @@ public class DBModuleTest extends TestCase {
     /**
      * start spring
      */
-    @Before
     public static void init() {
         //加载spring环境
         if (null != applicationContext) {
@@ -55,11 +54,11 @@ public class DBModuleTest extends TestCase {
 
         init();
 
-        IStoreService<Block, String> blockStore = (IStoreService) applicationContext.getBean("blockStoreService");
+        final IStoreService<Block, String> blockStore = (IStoreService) applicationContext.getBean("blockStoreService");
         blockStore.truncate();
 
         try {
-            for (int j = 0; j < 10; j++) {
+            for (int j = 0; j < 20; j++) {
                 new Thread(
                         new Runnable() {
                             @Override
@@ -72,7 +71,11 @@ public class DBModuleTest extends TestCase {
                                     b.setHash("blockkey" + i);
                                     b.setHeight(i);
                                     b.setCreatetime(System.currentTimeMillis());
-                                    blockStore.save(b);
+                                    try{
+                                        blockStore.save(b);
+                                    }catch(Exception e){
+                                        e.printStackTrace();
+                                    }
                                 }
 
 
@@ -82,8 +85,8 @@ public class DBModuleTest extends TestCase {
                             }
                         }
                 ).start();
-
             }
+            Thread.sleep(30000l);
         }catch (Exception e) {
             e.printStackTrace();
         }
