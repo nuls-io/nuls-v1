@@ -1,10 +1,11 @@
 package io.nuls;
 
-import io.nuls.global.constant.CfgConstant;
+import io.nuls.global.constant.NulsConstant;
 import io.nuls.global.NulsContext;
 import io.nuls.mq.MQModule;
 import io.nuls.rpcserver.intf.RpcServerModule;
 import io.nuls.util.cfg.ConfigLoader;
+import io.nuls.util.cfg.I18nUtils;
 import io.nuls.util.log.Log;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -28,10 +29,11 @@ public class Bootstrap {
                 Log.error("Client start faild", e);
                 break;
             }
-            String profile = prop.getProperty(CfgConstant.SpringProfile);
-            String dbType = prop.getProperty(CfgConstant.MybatisDbType);
+            String profile = prop.getProperty(NulsConstant.SPRING_PROFILE);
+            String language = prop.getProperty(NulsConstant.SYSTEM_LANGUAGE);
+            I18nUtils.setLanguage(language);
             //load spring context
-            boolean result = loadSpringContext(profile, dbType);
+            boolean result = loadSpringContext(profile);
             if (!result) {
                 break;
             }
@@ -71,7 +73,7 @@ public class Bootstrap {
     /**
      * start spring
      */
-    private static boolean loadSpringContext(String profile, String dbType) {
+    private static boolean loadSpringContext(String profile) {
         //加载spring环境
         Log.info("get application context");
         boolean result = false;
@@ -80,9 +82,6 @@ public class Bootstrap {
             ctx.getEnvironment().setActiveProfiles(profile);
             List<String> filePath = new ArrayList<>();
             filePath.add("classpath:/applicationContext.xml");
-            if(null==dbType){
-                filePath.add("classpath:/db/database-"+dbType+".xml");
-            }
             ctx.setConfigLocations(filePath.toArray(new String[]{}));
             ctx.refresh();
             NulsContext.setApplicationContext(ctx);

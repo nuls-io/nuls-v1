@@ -1,15 +1,16 @@
 package io.nuls.rpcserver.aop;
 
+import io.nuls.exception.NulsException;
+import io.nuls.rpcserver.entity.RpcResult;
+import io.nuls.util.constant.ErrorCode;
 import io.nuls.util.log.Log;
-import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
+import org.glassfish.grizzly.http.server.Request;
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.core.Request;
 
 /**
  * Created by Niels on 2017/9/28.
@@ -24,23 +25,30 @@ public class HttpInterceptor {
     }
 
     @Around("aspectJHttpMethod()")
-    public Object doAround(ProceedingJoinPoint pjp) throws Throwable{
+    public Object doAround(ProceedingJoinPoint pjp) throws Throwable {
         long start = System.currentTimeMillis();
-        Request request = HttpContextHelper.getRequest();
+        Object result ;
+        Object[] args = null;
+        do {
+            Request request = HttpContextHelper.getRequest();
+            if (!whiteSheetVerifier(request)) {
+                result = RpcResult.getFailed(ErrorCode.REQUEST_DENIED);
+                break;
+            }
+            args = pjp.getArgs();
+            try {
+                result = pjp.proceed();
+            } catch (Exception e) {
+                Log.error(e);
+                result = RpcResult.getFailed(ErrorCode.FAILED).setData(e.getMessage());
+            }
+        } while (false);
+        long useTime = System.currentTimeMillis() - start;
+        Log.info(pjp.getSignature() + "args:{},return:{},useTime:{}ms", args, result, useTime);
+        return result;
+    }
 
-        Object returnObj = null;
-        do{
-        Object[] args=pjp.getArgs();
-
-            returnObj=pjp.proceed();
-
-            long useTime = System.currentTimeMillis()-start;
-            Log.info(pjp.getSignature() + "args:{},return:{},useTime:{}ms", args, returnObj, useTime);
-        }while(false);
-
-        //核心逻辑
-//
-//        Log.debug(pjp.getSignature()+"args:{},return:{},useTime:{}ms",args,retval,useTime);
-        return returnObj;
+    private boolean whiteSheetVerifier(Request request) {
+        return true;
     }
 }

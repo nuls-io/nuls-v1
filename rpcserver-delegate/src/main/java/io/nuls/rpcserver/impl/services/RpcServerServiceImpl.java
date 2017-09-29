@@ -44,7 +44,7 @@ public class RpcServerServiceImpl implements RpcServerService {
         NulsResourceConfig rc = new NulsResourceConfig();
         rc.addProperties(initParams);
         httpServer = GrizzlyHttpServerFactory.createHttpServer(serverURI, rc);
-        Log.info("http restFul server is started!url is " + serverURI.getPath());
+        Log.info("http restFul server is started!url is " + serverURI.toString());
     }
 
     @Override

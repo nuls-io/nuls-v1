@@ -2,34 +2,40 @@ package io.nuls.rpcserver.aop;
 
 import io.nuls.rpcserver.entity.RpcResult;
 
+import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 import javax.ws.rs.ext.ExceptionMapper;
 import java.io.IOException;
+import org.glassfish.grizzly.http.server.Request;
 
 /**
  * Created by Niels on 2017/9/28.
  * nuls.io
  */
-public class RpcServerFilter implements ContainerRequestFilter, ContainerResponseFilter, ExceptionMapper<Exception> {
-    @Override
-    public void filter(ContainerRequestContext containerRequestContext) throws IOException {
-        HttpContextHelper.put(containerRequestContext.getRequest());
-//        throw new NulsException("hello exception ");
-    }
+public class RpcServerFilter implements ContainerRequestFilter//, ContainerResponseFilter, ExceptionMapper<Exception>
+{
+
+    @Inject
+    private Provider<Request> grizzlyRequestProvider;
 
     @Override
-    public void filter(ContainerRequestContext containerRequestContext, ContainerResponseContext containerResponseContext) throws IOException {
-//        System.out.println(containerRequestContext);
+    public void filter(ContainerRequestContext requestContext) throws IOException {
+        HttpContextHelper.put(grizzlyRequestProvider.get());
     }
 
-    @Override
-    public Response toResponse(Exception e) {
-        RpcResult result = RpcResult.getFailed().setData(e.getMessage());
-        return Response.ok(result, MediaType.APPLICATION_JSON).build();
-    }
+//    @Override
+//    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
+//        System.out.println(requestContext);
+//    }
+//
+//    @Override
+//    public Response toResponse(Exception e) {
+//        RpcResult result = RpcResult.getFailed().setData(e.getMessage());
+//        return Response.ok(result, MediaType.APPLICATION_JSON).build();
+//    }
 }
