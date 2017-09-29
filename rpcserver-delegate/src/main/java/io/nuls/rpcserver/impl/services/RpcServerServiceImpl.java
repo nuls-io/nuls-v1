@@ -31,15 +31,20 @@ public class RpcServerServiceImpl implements RpcServerService {
 
 
     @Override
-    public void init() {
-        URI serverURI = UriBuilder.fromUri("http://" + serverIp + "/").port(Integer.parseInt(serverPort)).build();
+    public void startServer() {
+        this.startServer(serverIp, Integer.parseInt(serverPort), "");
+    }
+
+    @Override
+    public void startServer(String ip, int port, String moduleUrl) {
+        URI serverURI = UriBuilder.fromUri("http://" + ip + "/" + moduleUrl).port(port).build();
         final Map<String, Object> initParams = new HashMap<>();
 //        initParams.put("jersey.config.server.provider.packages", packages);
         initParams.put("load-on-startup", "1");
         NulsResourceConfig rc = new NulsResourceConfig();
         rc.addProperties(initParams);
         httpServer = GrizzlyHttpServerFactory.createHttpServer(serverURI, rc);
-        Log.info("http restFul server is started!");
+        Log.info("http restFul server is started!url is " + serverURI.getPath());
     }
 
     @Override

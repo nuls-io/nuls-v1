@@ -40,7 +40,7 @@ public class TestHttp extends TestCase {
         start();
         RpcServerService service = applicationContext.getBean(RpcServerService.class);
 
-        service.init();
+        service.startServer();
 
         try {
             Thread.sleep(100000l);
