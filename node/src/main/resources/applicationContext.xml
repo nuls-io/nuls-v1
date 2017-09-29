@@ -11,13 +11,7 @@
        http://www.springframework.org/schema/aop/spring-aop.xsd">
 
     <!--开启spring注解扫描 -->
-    <context:component-scan base-package="io.nuls.*" use-default-filters="false">
-        <context:exclude-filter type="regex" expression="io.nuls.db.impl.*"/>
-    </context:component-scan>
-
-
-
-
+    <context:component-scan base-package="io.nuls.*"/>
     <beans profile="dev">
         <context:property-placeholder location="classpath:config/dev/rpc-server.properties" ignore-unresolvable="false"/>
     </beans>
