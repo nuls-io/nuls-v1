@@ -61,8 +61,8 @@
     <!-- 配置mybatis数据库连接-->
     <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
         <property name="dataSource" ref="dataSource"/>
-        <property name="configLocation" value="classpath:db/mybatis-config.xml" />
-        <property name="mapperLocations" value="classpath:db/mapping/*.xml"></property>
+        <property name="configLocation" value="classpath:mybatis/mybatis-config.xml" />
+        <property name="mapperLocations" value="classpath:mybatis/mapping/*.xml"></property>
     </bean>
 
     <!-- 配置mybatis扫描包, 扫描basePackage下所有以@MyBatisMapper标识的 接口-->
@@ -75,7 +75,7 @@
 
     <!-- 初始化数据表结构 -->
     <jdbc:initialize-database data-source="dataSource" ignore-failures="ALL">
-        <jdbc:script location="classpath:/db/sql/h2-schema.sql" />
+        <jdbc:script location="classpath:/sql/schema-h2.sql" />
     </jdbc:initialize-database>
 
 
