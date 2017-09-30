@@ -18,12 +18,16 @@ public enum ErrorCode {
     LANGUAGE_CANNOT_SET_NULL("100",10100),
     UNKOWN("99", 99999),
     //    request denied
-    REQUEST_DENIED("400",10400);
+    REQUEST_DENIED("400",10400),
+
+    /**----------  DBException code   ---------*/
+    DB_SAVE_CANNOT_NULL("DB001", 50001),
+    DB_SAVE_BATCH_LIMIT_OVER("DB002", 50002);
 
     private final int msg;
     private final String code;
 
-    private ErrorCode(String code, int msg) {
+    ErrorCode(String code, int msg) {
         this.code = code;
         this.msg = msg;
     }

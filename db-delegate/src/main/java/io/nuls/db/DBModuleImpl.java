@@ -36,6 +36,9 @@ public class DBModuleImpl extends DBModule {
         }
         if (!StringUtils.isEmpty(databaseType) && hasType(databaseType)) {
             String path = "classpath:/database-" + databaseType + ".xml";
+
+
+
             NulsContext.setApplicationContext(new ClassPathXmlApplicationContext(new String[]{path}, true, NulsContext.getApplicationContext()));
         }
     }
