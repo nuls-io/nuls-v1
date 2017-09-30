@@ -10,6 +10,7 @@ import io.nuls.util.cfg.ConfigLoader;
 import io.nuls.util.cfg.I18nUtils;
 import io.nuls.util.log.Log;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.util.*;
@@ -31,15 +32,15 @@ public class Bootstrap {
             }
             String profile = prop.getProperty(NulsConstant.SPRING_PROFILE);
             String language = prop.getProperty(NulsConstant.SYSTEM_LANGUAGE);
-            String databaseType = prop.getProperty(NulsConstant.DATABASE_TYPE);
+            String springImport = prop.getProperty(NulsConstant.SPRING_IMPORT);
             I18nUtils.setLanguage(language);
             //load spring context
-            boolean result = loadSpringContext(profile);
+            boolean result = loadSpringContext(profile,springImport);
             if (!result) {
                 break;
             }
             //init modules
-            initDB(databaseType);
+            initDB();
 
             initMQ();
             //init rpc server
@@ -51,11 +52,9 @@ public class Bootstrap {
         } while (false);
     }
 
-    private static void initDB(String databaseType) {
+    private static void initDB() {
         DBModule dbModule = NulsContext.getApplicationContext().getBean(DBModule.class);
-        Map<String,String> map = new HashMap<>();
-        map.put("databaseType", databaseType);
-        dbModule.init(map);
+        dbModule.init(null);
 
         IBlockStore blockStore = (IBlockStore) NulsContext.getApplicationContext().getBean("blockStore");
         long count = blockStore.count();
@@ -82,7 +81,7 @@ public class Bootstrap {
     /**
      * start spring
      */
-    private static boolean loadSpringContext(String profile) {
+    private static boolean loadSpringContext(String profile,String springImport) {
         //加载spring环境
         Log.info("get application context");
         boolean result = false;
@@ -91,6 +90,15 @@ public class Bootstrap {
             ctx.getEnvironment().setActiveProfiles(profile);
             List<String> filePath = new ArrayList<>();
             filePath.add("classpath:/applicationContext.xml");
+            if(!StringUtils.isEmpty(springImport)){
+                String xmlPath[] = springImport.split(",");
+                for(String path:xmlPath){
+                    if(StringUtils.isEmpty(path)){
+                        continue;
+                    }
+                    filePath.add(path);
+                }
+            }
             ctx.setConfigLocations(filePath.toArray(new String[]{}));
             ctx.refresh();
             NulsContext.setApplicationContext(ctx);
