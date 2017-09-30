@@ -4,12 +4,13 @@ import io.nuls.mq.intf.QueueService;
 import io.nuls.rpcserver.intf.RpcServerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Service;
 
 @Service
 public class NulsContext {
 
-    private static ApplicationContext applicationContext;
+    private static ClassPathXmlApplicationContext applicationContext;
 
 //    @Autowired
     private QueueService queueService;
@@ -22,11 +23,11 @@ public class NulsContext {
         return queueService;
     }
 
-    public static void setApplicationContext(ApplicationContext applicationContext) {
+    public static void setApplicationContext(ClassPathXmlApplicationContext applicationContext) {
         NulsContext.applicationContext = applicationContext;
     }
 
-    public static ApplicationContext getApplicationContext() {
+    public static ClassPathXmlApplicationContext getApplicationContext() {
 
         return applicationContext;
     }

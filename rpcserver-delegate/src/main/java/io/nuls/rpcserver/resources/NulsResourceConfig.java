@@ -29,8 +29,8 @@ public class NulsResourceConfig extends ResourceConfig {
             register(obj);
             Log.debug("loading:" + obj.getClass().getName());
         }
-        if (context.getParent() != null) {
-            initResources(context.getParent());
-        }
+//        if (context.getParent() != null) {
+//            initResources(context.getParent());
+//        }
     }
 }

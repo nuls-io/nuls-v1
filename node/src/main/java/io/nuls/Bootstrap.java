@@ -58,7 +58,6 @@ public class Bootstrap {
         dbModule.init(map);
 
         IBlockStore blockStore = (IBlockStore) NulsContext.getApplicationContext().getBean("blockStore");
-
         long count = blockStore.count();
         System.out.println("-------------count:" + count);
     }
