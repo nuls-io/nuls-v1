@@ -32,6 +32,5 @@ public class NulsResourceConfig extends ResourceConfig {
                 }
             }
         }
-        register(NulsContext.getApplicationContext().getBean(TestResouce.class));
     }
 }
