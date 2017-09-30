@@ -1,6 +1,8 @@
 package io.nuls.db.impl;
 
+import io.nuls.db.DBException;
 import io.nuls.db.dao.mybatis.BlockMapper;
+import io.nuls.db.dao.mybatis.util.Searchable;
 import io.nuls.db.entity.Block;
 import io.nuls.db.intf.IBlockStore;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,9 @@ public class BlockStoreImpl implements IBlockStore {
 
     @Override
     public int saveBatch(List<Block> list) {
+        if(list == null || list.size() == 0) {
+//            throw new DBException()
+        }
         return 0;
     }
 
@@ -41,7 +46,6 @@ public class BlockStoreImpl implements IBlockStore {
         return blockMapper.deleteByPrimaryKey(key);
     }
 
-    @Override
     public int truncate() {
         return blockMapper.truncate();
     }
@@ -58,7 +62,7 @@ public class BlockStoreImpl implements IBlockStore {
 
     @Override
     public long count() {
-        return blockMapper.count();
+        return blockMapper.count(new Searchable());
     }
 
     @Override

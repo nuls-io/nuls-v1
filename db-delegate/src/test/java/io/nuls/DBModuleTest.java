@@ -34,17 +34,18 @@ public class DBModuleTest {
      */
     @Before
     public void init() {
-        applicationContext = new ClassPathXmlApplicationContext("classpath:/applicationContext.xml");
-        dbModule = (DBModule) applicationContext.getBean("dbModule");
-        Map<String,String> map = new HashMap<>();
-        map.put("dataBaseType", "h2");
-        dbModule.init(map);
+        String[] xmls = {"classpath:/applicationContext.xml","classpath:/database-h2.xml"};
+        applicationContext = new ClassPathXmlApplicationContext(xmls);
+//        dbModule = (DBModule) applicationContext.getBean("dbModule");
+//        Map<String,String> map = new HashMap<>();
+//        map.put("dataBaseType", "h2");
+//        dbModule.init(map);
     }
 
     @org.junit.Test
     public void testDB() {
 
-        IBlockStore blockStore = (IBlockStore) NulsContext.getApplicationContext().getBean("blockStore");
+        IBlockStore blockStore = (IBlockStore) applicationContext.getBean("blockStore");
 
         long count = blockStore.count();
         System.out.println(count);
