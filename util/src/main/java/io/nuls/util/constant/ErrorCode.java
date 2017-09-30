@@ -8,22 +8,22 @@ import io.nuls.util.cfg.I18nUtils;
  */
 public enum ErrorCode {
 
-    SUCCESS(0, 10000),
-    FAILED(1, 10001),
-    FILE_NOT_FOUND(2, 10002),
-    NULL_PARAMETER(3, 10003),
+    SUCCESS("0", 10000),
+    FAILED("1", 10001),
+    FILE_NOT_FOUND("2", 10002),
+    NULL_PARAMETER("3", 10003),
 
 
 
-    LANGUAGE_CANNOT_SET_NULL(100,10100),
-    UNKOWN(88, 99999),
+    LANGUAGE_CANNOT_SET_NULL("100",10100),
+    UNKOWN("99", 99999),
     //    request denied
-    REQUEST_DENIED(400,10400);
+    REQUEST_DENIED("400",10400);
 
     private final int msg;
-    private final int code;
+    private final String code;
 
-    private ErrorCode(int code, int msg) {
+    private ErrorCode(String code, int msg) {
         this.code = code;
         this.msg = msg;
     }
@@ -32,7 +32,7 @@ public enum ErrorCode {
         return I18nUtils.get(msg);
     }
 
-    public int getCode() {
+    public String getCode() {
         return code;
     }
 }

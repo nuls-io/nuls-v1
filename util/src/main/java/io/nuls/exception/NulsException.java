@@ -8,7 +8,7 @@ import io.nuls.util.constant.ErrorCode;
  */
 public class NulsException extends RuntimeException {
 
-    private int code;
+    private String code;
     private String message;
     /**
      * Constructs a new exception with the specified detail message.  The
@@ -20,6 +20,10 @@ public class NulsException extends RuntimeException {
      */
     public NulsException(String message) {
         super(message);
+        this.message = message;
+    }  public NulsException(String code,String message) {
+        super(message);
+        this.code = code;
         this.message = message;
     }
     /**

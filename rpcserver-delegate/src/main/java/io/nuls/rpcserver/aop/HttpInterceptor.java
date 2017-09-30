@@ -1,8 +1,8 @@
 package io.nuls.rpcserver.aop;
 
-import io.nuls.exception.NulsException;
 import io.nuls.rpcserver.entity.RpcResult;
 import io.nuls.util.constant.ErrorCode;
+import io.nuls.util.json.JSONUtils;
 import io.nuls.util.log.Log;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -29,8 +29,8 @@ public class HttpInterceptor {
         long start = System.currentTimeMillis();
         Object result ;
         Object[] args = null;
+        Request request = HttpContextHelper.getRequest();
         do {
-            Request request = HttpContextHelper.getRequest();
             if (!whiteSheetVerifier(request)) {
                 result = RpcResult.getFailed(ErrorCode.REQUEST_DENIED);
                 break;
@@ -44,11 +44,15 @@ public class HttpInterceptor {
             }
         } while (false);
         long useTime = System.currentTimeMillis() - start;
-        Log.info(pjp.getSignature() + "args:{},return:{},useTime:{}ms", args, result, useTime);
+        Log.info(pjp.getSignature() +",remote:"+request.getRemoteAddr()+ ",args:{},return:{},useTime:{}ms", JSONUtils.obj2json(args), result, useTime);
         return result;
     }
 
     private boolean whiteSheetVerifier(Request request) {
+        System.out.println(request.getRemoteAddr());
+        System.out.println(request.getRemoteHost());
+        System.out.println(request.getRemotePort());
+        System.out.println(request.getRemoteUser());
         return true;
     }
 }

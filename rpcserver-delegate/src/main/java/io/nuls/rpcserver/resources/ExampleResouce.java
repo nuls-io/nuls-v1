@@ -2,11 +2,10 @@ package io.nuls.rpcserver.resources;
 
 import io.nuls.exception.NulsException;
 import io.nuls.rpcserver.entity.RpcResult;
+import io.nuls.util.param.AssertUtil;
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
 /**
@@ -15,9 +14,9 @@ import javax.ws.rs.core.MediaType;
  */
 @Component
 @Path("/")
-public class TestResouce {
+public class ExampleResouce {
 
-    public TestResouce() {
+    public ExampleResouce() {
     }
 
     @GET
@@ -36,10 +35,8 @@ public class TestResouce {
     @GET
     @Path("/hello")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult getMessage2(String key) {
-        if("".equals(key)){
-            throw new NulsException("测试抛出异常");
-        }
+    public RpcResult getMessage2(@QueryParam("key") String key) {
+        AssertUtil.canNotEmpty(key,"测试抛出异常");
         return RpcResult.getSuccess().setData("hello world3333333333333333333333");
     }
 }
