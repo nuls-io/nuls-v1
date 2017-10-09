@@ -9,6 +9,7 @@ import io.nuls.task.NulsModule;
  */
 public abstract class DBModule implements NulsModule {
 
+
     protected DBModule(){
         this.moduleName = this.getClass().getSimpleName();
         this.status = ModuleStatus.UNSTART;
@@ -39,4 +40,6 @@ public abstract class DBModule implements NulsModule {
     public void setStatus(ModuleStatus status) {
         this.status = status;
     }
+
+
 }
