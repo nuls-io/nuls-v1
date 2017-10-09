@@ -10,22 +10,7 @@ public class NulsRuntimeException extends RuntimeException {
 
     private String code;
     private String message;
-    /**
-     * Constructs a new exception with the specified detail message.  The
-     * cause is not initialized, and may subsequently be initialized by
-     * a call to {@link #initCause}.
-     *
-     * @param message the detail message. The detail message is saved for
-     *                later retrieval by the {@link #getMessage()} method.
-     */
-    public NulsRuntimeException(String message) {
-        super(message);
-        this.message = message;
-    }  public NulsRuntimeException(String code,String message) {
-        super(message);
-        this.code = code;
-        this.message = message;
-    }
+
     /**
      * Constructs a new exception with the specified detail message.  The
      * cause is not initialized, and may subsequently be initialized by
@@ -94,10 +79,16 @@ public class NulsRuntimeException extends RuntimeException {
      * @since 1.7
      */
     protected NulsRuntimeException(ErrorCode message, Throwable cause,
-                               boolean enableSuppression,
-                               boolean writableStackTrace) {
+                                   boolean enableSuppression,
+                                   boolean writableStackTrace) {
         super(message.getMsg(), cause, enableSuppression, writableStackTrace);
         this.code = message.getCode();
         this.message = message.getMsg();
+    }
+
+    public NulsRuntimeException(ErrorCode errorCode, String msg) {
+        super(msg);
+        this.code = errorCode.getCode();
+        this.message = msg;
     }
 }

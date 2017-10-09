@@ -10,7 +10,7 @@ import java.io.IOException;
  * 提供给外部使用的接口
  * Created by Niels on 2017/9/20.
  */
-public interface QueueService<T> {
+public interface IQueueService<T> {
     /**
      * 创建一个持久化队列
      *

@@ -1,6 +1,7 @@
 package io.nuls.util.date;
 
 import io.nuls.exception.NulsRuntimeException;
+import io.nuls.util.constant.ErrorCode;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -71,7 +72,7 @@ public class DateUtil {
 		try {
 			return new SimpleDateFormat(pattern).parse(date);
 		} catch (ParseException e) {
-			throw  new NulsRuntimeException("date error");
+			throw  new NulsRuntimeException(ErrorCode.DATA_ERROR);
 		}
 	}
 

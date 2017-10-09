@@ -21,7 +21,7 @@ public class MQModuleImpl extends MQModule {
 
     private ScheduledExecutorService service;
 
-    private ModuleManager moduleManager;
+    private ModuleManager moduleManager = ModuleManager.getInstance();
 
     @Override
     public void init(Map<String, String> initParams) {
@@ -30,6 +30,7 @@ public class MQModuleImpl extends MQModule {
     @Override
     public void start() {
         this.setStatus(ModuleStatus.STARTING);
+
         NulsThread t1 = new NulsThread(this, "queueStatusLogThread") {
             @Override
             public void run() {

@@ -10,22 +10,7 @@ public class NulsException extends Exception {
 
     private String code;
     private String message;
-    /**
-     * Constructs a new exception with the specified detail message.  The
-     * cause is not initialized, and may subsequently be initialized by
-     * a call to {@link #initCause}.
-     *
-     * @param message the detail message. The detail message is saved for
-     *                later retrieval by the {@link #getMessage()} method.
-     */
-    public NulsException(String message) {
-        super(message);
-        this.message = message;
-    }  public NulsException(String code,String message) {
-        super(message);
-        this.code = code;
-        this.message = message;
-    }
+
     /**
      * Constructs a new exception with the specified detail message.  The
      * cause is not initialized, and may subsequently be initialized by

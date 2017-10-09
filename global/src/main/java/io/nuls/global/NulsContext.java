@@ -1,7 +1,9 @@
 package io.nuls.global;
 
-import io.nuls.mq.intf.QueueService;
+import io.nuls.exception.NulsRuntimeException;
 import io.nuls.task.ModuleManager;
+import io.nuls.task.NulsModule;
+import io.nuls.util.constant.ErrorCode;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,36 +15,29 @@ public class NulsContext {
     }
 
     private static final NulsContext nc = new NulsContext();
-    private static final Map<String, Object> intfMap = new HashMap<>();
-    private static ModuleManager moduleManager;
-
-
+    private static final Map<Class, Object> intfMap = new HashMap<>();
+    private static ModuleManager moduleManager = ModuleManager.getInstance();
 
     public static final NulsContext getInstance() {
         return nc;
     }
 
-    public <T> T getService(String serviceName, Class<T> tclass) {
-        return (T) intfMap.get(serviceName);
+    public <T> T getService(Class<T> tclass) {
+        return (T) intfMap.get(tclass);
     }
 
-    public void putService(String serviceName,Object service){
-        if(intfMap.keySet().contains(serviceName)){
-
+    public void regService(Object service) {
+        if (intfMap.keySet().contains(service.getClass().getSuperclass())) {
+            throw new NulsRuntimeException(ErrorCode.INTF_REPETITION);
         }
+        intfMap.put(service.getClass().getSuperclass(), service);
     }
 
-
-    //    @Autowired
-    private QueueService queueService;
-
-    /**
-     * get The Queue intf instance
-     *
-     * @return
-     */
-    public QueueService getQueueService() {
-        return queueService;
+    public static ModuleManager getModuleManager() {
+        return moduleManager;
     }
 
+    public NulsModule getModule(String moduleName) {
+        return moduleManager.getModule(moduleName);
+    }
 }

@@ -1,7 +1,8 @@
 package io.nuls.rpcserver.impl.services;
 
+import io.nuls.global.NulsContext;
 import io.nuls.rpcserver.constant.RpcConstant;
-import io.nuls.rpcserver.intf.RpcServerService;
+import io.nuls.rpcserver.intf.IRpcServerService;
 import io.nuls.rpcserver.resources.NulsResourceConfig;
 import io.nuls.util.log.Log;
 import org.glassfish.grizzly.http.server.HttpServer;
@@ -16,7 +17,17 @@ import java.util.Map;
  * Created by Niels on 2017/9/25.
  * nuls.io
  */
-public class RpcServerServiceImpl implements RpcServerService {
+public class RpcServerServiceImpl implements IRpcServerService {
+
+    private RpcServerServiceImpl() {
+        NulsContext.getInstance().regService(this);
+    }
+
+    private static final RpcServerServiceImpl service = new RpcServerServiceImpl();
+
+    public static IRpcServerService getInstance() {
+        return service;
+    }
 
     private HttpServer httpServer;
 

@@ -1,7 +1,8 @@
 package io.nuls.queue.service;
 
+import io.nuls.global.NulsContext;
 import io.nuls.mq.exception.QueueException;
-import io.nuls.mq.intf.QueueService;
+import io.nuls.mq.intf.IQueueService;
 import io.nuls.mq.intf.StatInfo;
 import io.nuls.queue.impl.NulsFQueue;
 import io.nuls.queue.impl.manager.QueueManager;
@@ -11,7 +12,18 @@ import io.nuls.util.log.Log;
  * 队列服务类
  * Created by Niels on 2017/9/20.
  */
-public class FQueueService<T> implements QueueService<T> {
+public class FQueueServiceImpl<T> implements IQueueService<T> {
+
+    private static final FQueueServiceImpl service = new FQueueServiceImpl();
+
+    private FQueueServiceImpl() {
+        NulsContext.getInstance().regService(this);
+    }
+
+    public static IQueueService getInstance() {
+        return service;
+    }
+
 
     /**
      * 创建一个持久化队列
@@ -27,8 +39,8 @@ public class FQueueService<T> implements QueueService<T> {
     /**
      * 创建一个持久化队列
      *
-     * @param queueName 队列名称
-     * @param maxSize   单个文件最大大小fileLimitLength
+     * @param queueName    队列名称
+     * @param maxSize      单个文件最大大小fileLimitLength
      * @param latelySecond 统计日志打印时间段
      * @return 是否创建成功
      */
@@ -87,7 +99,7 @@ public class FQueueService<T> implements QueueService<T> {
     }
 
     @Override
-    public void close(String queueName) throws  QueueException {
+    public void close(String queueName) throws QueueException {
         QueueManager.close(queueName);
     }
 

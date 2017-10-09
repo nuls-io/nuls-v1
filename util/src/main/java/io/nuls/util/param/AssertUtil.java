@@ -42,7 +42,7 @@ public abstract class AssertUtil {
             }
         }while (false);
         if(b){
-            throw new NulsRuntimeException(ErrorCode.NULL_PARAMETER.getCode(),msg);
+            throw new NulsRuntimeException(ErrorCode.NULL_PARAMETER,msg);
         }
     }
 }

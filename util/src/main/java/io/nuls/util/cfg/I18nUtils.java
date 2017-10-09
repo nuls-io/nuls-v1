@@ -1,5 +1,6 @@
 package io.nuls.util.cfg;
 
+import io.nuls.exception.NulsException;
 import io.nuls.exception.NulsRuntimeException;
 import io.nuls.util.constant.ErrorCode;
 import io.nuls.util.str.StringUtils;
@@ -41,9 +42,9 @@ public class I18nUtils {
         }
     }
 
-    public static void setLanguage(String _key) {
+    public static void setLanguage(String _key) throws NulsException {
         if (StringUtils.isBlank(_key)) {
-            throw new NulsRuntimeException(ErrorCode.LANGUAGE_CANNOT_SET_NULL);
+            throw new NulsException(ErrorCode.LANGUAGE_CANNOT_SET_NULL);
         }
         key = _key;
         nowMapping = AllMapping.get(_key);

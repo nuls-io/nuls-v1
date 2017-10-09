@@ -2,7 +2,7 @@ package io.nuls.rpcserver.impl;
 
 import io.nuls.rpcserver.impl.services.RpcServerServiceImpl;
 import junit.framework.TestCase;
-import io.nuls.rpcserver.intf.RpcServerService;
+import io.nuls.rpcserver.intf.IRpcServerService;
 import io.nuls.util.log.Log;
 import org.junit.Test;
 
@@ -23,7 +23,7 @@ public class TestHttp extends TestCase {
     @Test
     public void test() {
         start();
-        RpcServerService service = new RpcServerServiceImpl()  ;
+        IRpcServerService service = RpcServerServiceImpl.getInstance()  ;
 
         service.startServer("0.0.0.0",8002,"nuls");
 

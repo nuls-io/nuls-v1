@@ -1,7 +1,7 @@
 package io.nuls;
 
-import io.nuls.mq.intf.QueueService;
-import io.nuls.queue.service.FQueueService;
+import io.nuls.mq.intf.IQueueService;
+import io.nuls.queue.service.FQueueServiceImpl;
 import io.nuls.util.log.Log;
 import org.junit.Test;
 
@@ -13,7 +13,7 @@ import static org.junit.Assert.assertTrue;
 public class MQModuleTest {
 
     private final String queueName = "test1";
-    private QueueService<Long> service = new FQueueService<Long>();
+    private IQueueService<Long> service = FQueueServiceImpl.getInstance();
 
 
     @Test

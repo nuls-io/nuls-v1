@@ -1,8 +1,9 @@
 package io.nuls.rpcserver.impl;
 
 import io.nuls.rpcserver.constant.RpcConstant;
+import io.nuls.rpcserver.impl.services.RpcServerServiceImpl;
+import io.nuls.rpcserver.intf.IRpcServerService;
 import io.nuls.rpcserver.intf.RpcServerModule;
-import io.nuls.rpcserver.intf.RpcServerService;
 import io.nuls.util.str.StringUtils;
 
 import java.util.Map;
@@ -13,7 +14,7 @@ import java.util.Map;
  */
 public class RpcServerModuleImpl extends RpcServerModule {
 
-    private RpcServerService rpcServerService;
+    private IRpcServerService rpcServerService = RpcServerServiceImpl.getInstance();
     private String ip;
     private String port;
     private String moduleUrl;

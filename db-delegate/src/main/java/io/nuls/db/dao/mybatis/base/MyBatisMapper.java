@@ -1,6 +1,5 @@
 package io.nuls.db.dao.mybatis.base;
 
-import org.springframework.stereotype.Component;
 
 import java.lang.annotation.*;
 
@@ -13,7 +12,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Component
 public @interface MyBatisMapper {
 	String value() default "";
 }
