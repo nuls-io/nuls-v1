@@ -14,7 +14,16 @@
     <!-- 数据源配置 -->
     <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
         <property name="driverClassName" value="org.h2.Driver" />
-        <property name="url" value="jdbc:h2:file:./data/h2;LOG=2;DB_CLOSE_DELAY=10;MODE=MySQL;AUTO_RECONNECT=TRUE;DATABASE_TO_UPPER=FALSE" />
+        <!-- 文件模式 -->
+        <!-- LOG=2 数据变化时，更新索引，会消耗一定的性能
+        DB_CLOSE_DELAY：-1要求最后一个正在连接的连接断开后，不要关闭数据库
+        MODE=MySQL：兼容模式，H2兼容多种数据库，该值可以为：DB2、Derby、HSQLDB、MSSQLServer、MySQL、Oracle、PostgreSQL
+        AUTO_RECONNECT=TRUE：连接丢失后自动重新连接
+        AUTO_SERVER=TRUE：启动自动混合模式，允许开启多个连接，该参数不支持在内存中运行模式
+        TRACE_LEVEL_SYSTEM_OUT、TRACE_LEVEL_FILE：输出跟踪日志到控制台或文件， 取值0为OFF，1为ERROR（默认值），2为INFO，3为DEBUG
+        SET TRACE_MAX_FILE_SIZE mb：设置跟踪日志文件的大小，默认为16M
+        -->
+        <property name="url" value="jdbc:h2:file:./data/h2;LOG=2;DB_CLOSE_DELAY=10;MODE=MySQL;TRACE_LEVEL_SYSTEM_OUT=1;AUTO_RECONNECT=TRUE;DATABASE_TO_UPPER=FALSE" />
         <property name="username" value="sa" />
         <property name="password" value="123456" />
         <!-- 配置初始化大小、最小、最大 -->
@@ -45,7 +54,7 @@
 
         <property name="defaultAutoCommit" value="true" />
 
-        <!-- 验证连接有效与否的SQL，不同的数据配置不同
+        <!-- 验证连接有效与否的SQL，不同的数据配置不同     -->
         <property name="validationQuery" value="select 1 " />
         <property name="filters" value="stat" />
         <property name="proxyFilters">
@@ -53,7 +62,7 @@
                 <ref bean="logFilter" />
             </list>
         </property>
-         -->
+
     </bean>
 
     <bean id="logFilter" class="com.alibaba.druid.filter.logging.Slf4jLogFilter">
@@ -72,7 +81,7 @@
     <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
         <property name="basePackage" value="io.nuls.db.dao.mybatis" />
         <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
-
+        <property name="annotationClass" value="io.nuls.db.dao.mybatis.base.MyBatisMapper"/>
     </bean>
 
 

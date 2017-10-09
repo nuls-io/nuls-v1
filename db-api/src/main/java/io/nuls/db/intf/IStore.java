@@ -13,8 +13,6 @@ public interface IStore<T,K> {
 
     int update(T t, boolean selective);
 
-
-
     T getByKey(K k);
 
     List<T> getList();
@@ -24,7 +22,5 @@ public interface IStore<T,K> {
     int exist();
 
     int deleteByKey(K k);
-
-    int truncate();
 
 }
