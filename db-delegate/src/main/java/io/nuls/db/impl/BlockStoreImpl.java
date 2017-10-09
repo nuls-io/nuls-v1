@@ -3,18 +3,14 @@ package io.nuls.db.impl;
 import io.nuls.db.dao.mybatis.BlockMapper;
 import io.nuls.db.entity.Block;
 import io.nuls.db.intf.IBlockStore;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 /**
  * Created by win10 on 2017/9/29.
  */
-@Service("blockStore")
 public class BlockStoreImpl implements IBlockStore {
 
-    @Autowired
     private BlockMapper blockMapper;
 
     @Override

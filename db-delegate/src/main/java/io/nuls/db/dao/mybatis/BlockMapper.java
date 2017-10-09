@@ -1,7 +1,6 @@
 package io.nuls.db.dao.mybatis;
 
 import io.nuls.db.entity.Block;
-import org.springframework.stereotype.Component;
 
 
 public interface BlockMapper {

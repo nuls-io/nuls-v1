@@ -1,6 +1,6 @@
 package io.nuls.task;
 
-import io.nuls.exception.NulsException;
+import io.nuls.exception.NulsRuntimeException;
 import io.nuls.util.date.DateUtil;
 import io.nuls.util.log.Log;
 
@@ -25,7 +25,7 @@ public class NulsThread extends Thread {
     public NulsThread(NulsModule module, String name) {
         super();
         if(null==module){
-            throw new NulsException("thread must knows the module");
+            throw new NulsRuntimeException("thread must knows the module");
         }
         this.setName(name);
         starttime = new Date();

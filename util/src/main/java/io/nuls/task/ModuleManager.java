@@ -1,11 +1,8 @@
 package io.nuls.task;
 
-import io.nuls.exception.NulsException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.stereotype.Service;
+import io.nuls.exception.NulsRuntimeException;
 
+import javax.management.monitor.StringMonitor;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,45 +10,21 @@ import java.util.Map;
  * Created by Niels on 2017/9/26.
  * nuls.io
  */
-@Service
-public class ModuleManager implements ApplicationContextInitializer {
-
-    private ApplicationContext applicationContext;
+public class ModuleManager {
 
     private static final Map<String, NulsThread> threadMap = new HashMap<>();
 
+    private static final Map<String, NulsModule> moduleMap = new HashMap<>();
+
     public Map<String, NulsModule> getModules() {
-        Map<String, NulsModule> moduleMap = this.applicationContext.getBeansOfType(NulsModule.class);
-        if (moduleMap == null || moduleMap.isEmpty()) {
-            return moduleMap;
-        }
-        Map<String, NulsModule> resultMap = new HashMap<>();
-        for (NulsModule module : moduleMap.values()) {
-            resultMap.put(module.getModuleName(), module);
-        }
-        return resultMap;
+        return moduleMap;
     }
 
     public NulsModule getModule(String moduleName) {
-        Map<String, NulsModule> moduleMap = this.applicationContext.getBeansOfType(NulsModule.class);
-        if (moduleMap == null || moduleMap.isEmpty()) {
-            return null;
-        }
-        NulsModule module = null;
-        for (NulsModule mdl : moduleMap.values()) {
-            if (mdl.getModuleName().equals(moduleName)) {
-                module = mdl;
-                break;
-            }
-        }
-        return module;
+        return moduleMap.get(moduleName);
     }
 
-    public String getInfo() {
-        Map<String, NulsModule> moduleMap = this.applicationContext.getBeansOfType(NulsModule.class);
-        if (moduleMap == null || moduleMap.isEmpty()) {
-            return "";
-        }
+    public static String getInfo() {
         StringBuilder str = new StringBuilder();
         for (NulsModule module : moduleMap.values()) {
             str.append(module.getInfo());
@@ -61,31 +34,42 @@ public class ModuleManager implements ApplicationContextInitializer {
 
     public static void regThread(String threadName, NulsThread thread) {
         if (threadMap.keySet().contains(threadName)) {
-            throw new NulsException("the name of thread is already exist(" + threadName + ")");
+            throw new NulsRuntimeException("the name of thread is already exist(" + threadName + ")");
         }
         threadMap.put(threadName, thread);
     }
 
-    public NulsThread getThread(String threadName){
+    public static void cancelThread(String threadName) {
+        threadMap.remove(threadName);
+    }
+
+    public static void regModule(String moduleName, NulsModule module) {
+        if (moduleMap.keySet().contains(moduleName)) {
+            throw new NulsRuntimeException("the name of Module is already exist(" + moduleName + ")");
+        }
+        moduleMap.put(moduleName, module);
+    }
+
+    public static void cancelModule(String moduleName){
+        moduleMap.remove(moduleName);
+    }
+
+    public NulsThread getThread(String threadName) {
         return threadMap.get(threadName);
     }
 
-    public Map<String, NulsThread> getAllThreads(){
+    public Map<String, NulsThread> getAllThreads() {
         return threadMap;
     }
 
-    public Map<String, NulsThread> getThreadsByModule(String moduleName){
+    public Map<String, NulsThread> getThreadsByModule(String moduleName) {
         Map<String, NulsThread> map = new HashMap<>();
-        for(NulsThread t:threadMap.values()){
-            if(t.getModule().getModuleName().equals(moduleName)){
-                map.put(t.getName(),t);
+        for (NulsThread t : threadMap.values()) {
+            if (t.getModule().getModuleName().equals(moduleName)) {
+                map.put(t.getName(), t);
             }
         }
         return map;
     }
 
-    @Override
-    public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-        this.applicationContext = configurableApplicationContext;
-    }
 }

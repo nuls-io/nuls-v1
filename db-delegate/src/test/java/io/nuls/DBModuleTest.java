@@ -2,31 +2,18 @@ package io.nuls;
 
 import io.nuls.db.DBModule;
 import io.nuls.db.DBModuleImpl;
-import io.nuls.db.entity.Block;
+import io.nuls.db.impl.BlockStoreImpl;
 import io.nuls.db.intf.IBlockStore;
 import io.nuls.global.NulsContext;
-import io.nuls.util.cfg.ConfigLoader;
-import io.nuls.util.log.Log;
 import org.junit.Before;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 
 /**
  * Unit test for simple DBModule.
  */
 public class DBModuleTest {
-    /**
-     * Create the test case
-     *
-     * @param testName name of the test case
-     */
-    private static ApplicationContext applicationContext;
 
     private DBModule dbModule;
     /**
@@ -34,8 +21,7 @@ public class DBModuleTest {
      */
     @Before
     public void init() {
-        applicationContext = new ClassPathXmlApplicationContext("classpath:/applicationContext.xml");
-        dbModule = (DBModule) applicationContext.getBean("dbModule");
+        dbModule = new DBModuleImpl();
         Map<String,String> map = new HashMap<>();
         map.put("dataBaseType", "h2");
         dbModule.init(map);
@@ -44,7 +30,7 @@ public class DBModuleTest {
     @org.junit.Test
     public void testDB() {
 
-        IBlockStore blockStore = (IBlockStore) NulsContext.getApplicationContext().getBean("blockStore");
+        IBlockStore blockStore = new BlockStoreImpl();
 
         long count = blockStore.count();
         System.out.println(count);

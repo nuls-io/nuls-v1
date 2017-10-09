@@ -6,13 +6,11 @@ import io.nuls.mq.intf.StatInfo;
 import io.nuls.queue.impl.NulsFQueue;
 import io.nuls.queue.impl.manager.QueueManager;
 import io.nuls.util.log.Log;
-import org.springframework.stereotype.Service;
 
 /**
  * 队列服务类
  * Created by Niels on 2017/9/20.
  */
-@Service
 public class FQueueService<T> implements QueueService<T> {
 
     /**

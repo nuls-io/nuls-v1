@@ -1,10 +1,9 @@
 package io.nuls.util.param;
 
-import io.nuls.exception.NulsException;
+import io.nuls.exception.NulsRuntimeException;
 import io.nuls.util.constant.ErrorCode;
-import org.springframework.util.StringUtils;
+import io.nuls.util.str.StringUtils;
 
-import java.lang.reflect.Array;
 import java.util.List;
 import java.util.Map;
 
@@ -22,7 +21,7 @@ public abstract class AssertUtil {
                 break;
             }
             if(val instanceof String){
-                b = StringUtils.isEmpty(val+"");
+                b = StringUtils.isBlank(val+"");
                 break;
             }
             if(val instanceof List){
@@ -43,7 +42,7 @@ public abstract class AssertUtil {
             }
         }while (false);
         if(b){
-            throw new NulsException(ErrorCode.NULL_PARAMETER.getCode(),msg);
+            throw new NulsRuntimeException(ErrorCode.NULL_PARAMETER.getCode(),msg);
         }
     }
 }

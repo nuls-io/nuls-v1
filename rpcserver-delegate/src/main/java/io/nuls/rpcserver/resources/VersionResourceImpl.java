@@ -2,8 +2,6 @@ package io.nuls.rpcserver.resources;
 
 import io.nuls.global.NulsContext;
 import io.nuls.rpcserver.entity.RpcResult;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -14,11 +12,9 @@ import javax.ws.rs.core.MediaType;
  * Created by Niels on 2017/9/30.
  * nuls.io
  */
-@Component
 @Path("/version")
 public class VersionResourceImpl implements VersionResource {
-    @Autowired
-    private NulsContext context;
+    private NulsContext context= NulsContext.getInstance();
 
     @GET
     @Path("/query")

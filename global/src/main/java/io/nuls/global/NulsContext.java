@@ -1,34 +1,48 @@
 package io.nuls.global;
 
 import io.nuls.mq.intf.QueueService;
-import io.nuls.rpcserver.intf.RpcServerService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.stereotype.Service;
+import io.nuls.task.ModuleManager;
 
-@Service
+import java.util.HashMap;
+import java.util.Map;
+
 public class NulsContext {
 
-    private static ClassPathXmlApplicationContext applicationContext;
+    private NulsContext() {
+        // single
+    }
 
-//    @Autowired
+    private static final NulsContext nc = new NulsContext();
+    private static final Map<String, Object> intfMap = new HashMap<>();
+    private static ModuleManager moduleManager;
+
+
+
+    public static final NulsContext getInstance() {
+        return nc;
+    }
+
+    public <T> T getService(String serviceName, Class<T> tclass) {
+        return (T) intfMap.get(serviceName);
+    }
+
+    public void putService(String serviceName,Object service){
+        if(intfMap.keySet().contains(serviceName)){
+
+        }
+    }
+
+
+    //    @Autowired
     private QueueService queueService;
 
     /**
      * get The Queue intf instance
+     *
      * @return
      */
     public QueueService getQueueService() {
         return queueService;
     }
 
-    public static void setApplicationContext(ClassPathXmlApplicationContext applicationContext) {
-        NulsContext.applicationContext = applicationContext;
-    }
-
-    public static ClassPathXmlApplicationContext getApplicationContext() {
-
-        return applicationContext;
-    }
 }
