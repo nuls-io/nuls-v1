@@ -1,16 +1,10 @@
 package io.nuls.db;
 
-import io.nuls.db.entity.Block;
-import io.nuls.db.intf.IBlockStore;
-import io.nuls.global.NulsContext;
 import io.nuls.task.ModuleManager;
 import io.nuls.task.ModuleStatus;
 import io.nuls.task.NulsThread;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;

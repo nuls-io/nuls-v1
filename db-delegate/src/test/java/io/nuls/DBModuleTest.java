@@ -12,9 +12,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 
 /**
@@ -28,7 +26,6 @@ public class DBModuleTest {
      */
     private static ApplicationContext applicationContext;
 
-    private DBModule dbModule;
     /**
      * start spring
      */
@@ -36,34 +33,32 @@ public class DBModuleTest {
     public void init() {
         String[] xmls = {"classpath:/applicationContext.xml","classpath:/database-h2.xml"};
         applicationContext = new ClassPathXmlApplicationContext(xmls);
-//        dbModule = (DBModule) applicationContext.getBean("dbModule");
-//        Map<String,String> map = new HashMap<>();
-//        map.put("dataBaseType", "h2");
-//        dbModule.init(map);
     }
 
     @org.junit.Test
     public void testDB() {
 
         IBlockStore blockStore = (IBlockStore) applicationContext.getBean("blockStore");
+        Block b = new Block();
+        b.setHeight(123L);
+        b.setCreatetime(System.currentTimeMillis());
+        b.setHash("dfsdfsd");
+        blockStore.save(b);
 
-        long count = blockStore.count();
-        System.out.println(count);
+//        long count = blockStore.count();
+//        System.out.println(count);
+//
+//        List<Block> blocks = new ArrayList<>();
 //        long start = System.currentTimeMillis();
 //
-//        for (long i = 0; i < 100000; i++) {
+//        for (long i = 0; i < 100; i++) {
 //            Block b = new Block();
 //            b.setHash("blockkey" + i);
 //            b.setHeight(i);
 //            b.setCreatetime(System.currentTimeMillis());
-//            try{
-//                blockStore.save(b);
-//            }catch(Exception e){
-//                e.printStackTrace();
-//            }
+//            blocks.add(b);
 //        }
-//
-//
+//        blockStore.saveBatch(blocks);
 //        long end = System.currentTimeMillis();
 //
 //        System.out.println("-----------------use:" + (start - end));

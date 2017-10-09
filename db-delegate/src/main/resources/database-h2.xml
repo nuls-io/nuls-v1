@@ -2,14 +2,9 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:jdbc="http://www.springframework.org/schema/jdbc"
-       xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.0.xsd
-        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd"
+        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.0.xsd"
        default-autowire="byName">
-
-
-    <context:component-scan base-package="io.nuls.db.* "/>
 
     <!-- 数据源配置 -->
     <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
@@ -23,7 +18,7 @@
         TRACE_LEVEL_SYSTEM_OUT、TRACE_LEVEL_FILE：输出跟踪日志到控制台或文件， 取值0为OFF，1为ERROR（默认值），2为INFO，3为DEBUG
         SET TRACE_MAX_FILE_SIZE mb：设置跟踪日志文件的大小，默认为16M
         -->
-        <property name="url" value="jdbc:h2:file:./data/h2;LOG=2;DB_CLOSE_DELAY=10;MODE=MySQL;TRACE_LEVEL_SYSTEM_OUT=1;AUTO_RECONNECT=TRUE;DATABASE_TO_UPPER=FALSE" />
+        <property name="url" value="jdbc:h2:file:../data/h2;LOG=2;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=1;AUTO_RECONNECT=TRUE;DATABASE_TO_UPPER=FALSE" />
         <property name="username" value="sa" />
         <property name="password" value="123456" />
         <!-- 配置初始化大小、最小、最大 -->
@@ -62,12 +57,16 @@
                 <ref bean="logFilter" />
             </list>
         </property>
-
     </bean>
 
     <bean id="logFilter" class="com.alibaba.druid.filter.logging.Slf4jLogFilter">
         <property name="statementExecutableSqlLogEnable" value="false" />
     </bean>
+
+    <!-- 初始化数据表结构 -->
+    <jdbc:initialize-database data-source="dataSource" ignore-failures="ALL">
+        <jdbc:script location="classpath:/sql/schema-h2.sql" />
+    </jdbc:initialize-database>
 
 
     <!-- 配置mybatis数据库连接-->
@@ -83,12 +82,5 @@
         <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
         <property name="annotationClass" value="io.nuls.db.dao.mybatis.base.MyBatisMapper"/>
     </bean>
-
-
-    <!-- 初始化数据表结构 -->
-    <jdbc:initialize-database data-source="dataSource" ignore-failures="ALL">
-        <jdbc:script location="classpath:/sql/schema-h2.sql" />
-    </jdbc:initialize-database>
-
 
 </beans>

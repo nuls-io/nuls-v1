@@ -55,10 +55,6 @@ public class Bootstrap {
     private static void initDB() {
         DBModule dbModule = NulsContext.getApplicationContext().getBean(DBModule.class);
         dbModule.init(null);
-
-        IBlockStore blockStore = (IBlockStore) NulsContext.getApplicationContext().getBean("blockStore");
-        long count = blockStore.count();
-        System.out.println("-------------count:" + count);
     }
 
     private static void initMQ() {

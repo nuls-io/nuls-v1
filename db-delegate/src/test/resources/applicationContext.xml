@@ -9,10 +9,7 @@
 	       ">
 
     <!--开启spring注解扫描 -->
-    <context:component-scan base-package="io.nuls.db.*">
-        <context:exclude-filter type="regex" expression="io.nuls.db.dao.*" />
-        <context:exclude-filter type="regex" expression="io.nuls.db.impl.*" />
-    </context:component-scan>
+    <context:component-scan base-package="io.nuls.db.*" />
 
     <!-- 配置加载的外部配置项 -->
     <bean id="propertyConfigurer"
