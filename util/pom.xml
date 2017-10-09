@@ -25,4 +25,12 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+    <dependencies>
+
+        <dependency>
+            <groupId>org.ini4j</groupId>
+            <artifactId>ini4j</artifactId>
+            <version>0.5.4</version>
+        </dependency>
+    </dependencies>
 </project>
