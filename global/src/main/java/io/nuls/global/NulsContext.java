@@ -30,7 +30,11 @@ public class NulsContext {
         if (intfMap.keySet().contains(service.getClass().getSuperclass())) {
             throw new NulsRuntimeException(ErrorCode.INTF_REPETITION);
         }
-        intfMap.put(service.getClass().getSuperclass(), service);
+        Class key =service.getClass().getSuperclass();
+        if(null==key||key.equals(Object.class)){
+            key = service.getClass();
+        }
+        intfMap.put(key, service);
     }
 
     public static ModuleManager getModuleManager() {

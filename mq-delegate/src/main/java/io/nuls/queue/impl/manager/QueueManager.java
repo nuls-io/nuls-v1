@@ -3,8 +3,8 @@ package io.nuls.queue.impl.manager;
 import io.nuls.exception.NulsRuntimeException;
 import io.nuls.fqueue.exception.FileFormatException;
 import io.nuls.mq.exception.QueueException;
+import io.nuls.mq.intf.NulsQueue;
 import io.nuls.mq.intf.StatInfo;
-import io.nuls.queue.impl.PersistentQueue;
 import io.nuls.queue.impl.util.stat.StatInfoImpl;
 import io.nuls.util.constant.ErrorCode;
 import io.nuls.util.log.Log;
@@ -22,7 +22,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * Created by Niels on 2017/9/20.
  */
 public abstract class QueueManager {
-    private static final Map<String, PersistentQueue> queuesMap = new HashMap<>();
+    private static final Map<String, NulsQueue> queuesMap = new HashMap<>();
     private static final Map<String, Lock> lockMap = new HashMap<>();
     //统计日志时间段
     private static final int LatelySecond = 10;
@@ -30,9 +30,9 @@ public abstract class QueueManager {
     private static boolean Running = false;
 
     public static void logQueueStatus() {
-        for (Map.Entry<String, PersistentQueue> entry : queuesMap.entrySet()) {
+        for (Map.Entry<String, NulsQueue> entry : queuesMap.entrySet()) {
             try {
-                PersistentQueue queue = entry.getValue();
+                NulsQueue queue = entry.getValue();
                 long nowIn = queue.getStatInfo().getInCount().get();
                 long nowOut = queue.getStatInfo().getOutCount().get();
                 long latelyInTps = (nowIn - queue.getStatInfo().getLastInCount()) / queue.getStatInfo().getLatelySecond();
@@ -57,7 +57,7 @@ public abstract class QueueManager {
      * @param queueName 队列名称
      * @param queue     队列实例
      */
-    public static void initQueue(String queueName, PersistentQueue queue) {
+    public static void initQueue(String queueName, NulsQueue queue) {
         initQueue(queueName, queue, LatelySecond);
     }
 
@@ -68,7 +68,7 @@ public abstract class QueueManager {
      * @param queue        队列实例
      * @param latelySecond 统计日志时间段
      */
-    public static void initQueue(String queueName, PersistentQueue queue, int latelySecond) {
+    public static void initQueue(String queueName, NulsQueue queue, int latelySecond) {
         if(!Running){
             throw new NulsRuntimeException(ErrorCode.FAILED,"The DBModule is not running!");
         }
@@ -87,7 +87,7 @@ public abstract class QueueManager {
     public static void destroyQueue(String queueName) throws IOException, FileFormatException { if(!Running){
         throw new NulsRuntimeException(ErrorCode.FAILED,"The DBModule is not running!");
     }
-        PersistentQueue queue = queuesMap.get(queueName);
+        NulsQueue queue = queuesMap.get(queueName);
         if (null == queue) {
             throw new QueueException(ErrorCode.FAILED,"queue not exist");
         }
@@ -99,7 +99,7 @@ public abstract class QueueManager {
     public static Object take(String queueName) throws InterruptedException { if(!Running){
         throw new NulsRuntimeException(ErrorCode.FAILED,"The DBModule is not running!");
     }
-        PersistentQueue queue = queuesMap.get(queueName);
+        NulsQueue queue = queuesMap.get(queueName);
         if (null == queue) {
             throw new QueueException(ErrorCode.FAILED,"queue not exist");
         }
@@ -112,7 +112,7 @@ public abstract class QueueManager {
     public static Object poll(String queueName) { if(!Running){
         throw new NulsRuntimeException(ErrorCode.FAILED,"The DBModule is not running!");
     }
-        PersistentQueue queue = queuesMap.get(queueName);
+        NulsQueue queue = queuesMap.get(queueName);
         if (null == queue) {
             throw new QueueException(ErrorCode.FAILED,"queue not exist");
         }
@@ -128,7 +128,7 @@ public abstract class QueueManager {
     public static void offer(String queueName, Object item) { if(!Running){
         throw new NulsRuntimeException(ErrorCode.FAILED,"The DBModule is not running!");
     }
-        PersistentQueue queue = queuesMap.get(queueName);
+        NulsQueue queue = queuesMap.get(queueName);
         if (null == queue) {
             throw new QueueException(ErrorCode.FAILED,"queue not exist");
         }
@@ -141,7 +141,7 @@ public abstract class QueueManager {
     public static void clear(String queueName) { if(!Running){
         throw new NulsRuntimeException(ErrorCode.FAILED,"The DBModule is not running!");
     }
-        PersistentQueue queue = queuesMap.get(queueName);
+        NulsQueue queue = queuesMap.get(queueName);
         if (null == queue) {
             throw new QueueException(ErrorCode.FAILED,"queue not exist");
         }
@@ -152,7 +152,7 @@ public abstract class QueueManager {
     public static void close(String queueName) throws QueueException { if(!Running){
         throw new NulsRuntimeException(ErrorCode.FAILED,"The DBModule is not running!");
     }
-        PersistentQueue queue = queuesMap.get(queueName);
+        NulsQueue queue = queuesMap.get(queueName);
         if (null == queue) {
             throw new QueueException(ErrorCode.FAILED,"queue not exist");
         }
@@ -167,7 +167,7 @@ public abstract class QueueManager {
     public static long size(String queueName) { if(!Running){
         throw new NulsRuntimeException(ErrorCode.FAILED,"The DBModule is not running!");
     }
-        PersistentQueue queue = queuesMap.get(queueName);
+        NulsQueue queue = queuesMap.get(queueName);
         if (null == queue) {
             throw new QueueException(ErrorCode.FAILED,"queue not exist");
         }
@@ -177,7 +177,7 @@ public abstract class QueueManager {
     public static long getMaxSize(String queueName) { if(!Running){
         throw new NulsRuntimeException(ErrorCode.FAILED,"The DBModule is not running!");
     }
-        PersistentQueue queue = queuesMap.get(queueName);
+        NulsQueue queue = queuesMap.get(queueName);
         if (null == queue) {
             throw new QueueException(ErrorCode.FAILED,"queue not exist");
         }
@@ -187,7 +187,7 @@ public abstract class QueueManager {
     public static StatInfo getStatInfo(String queueName) { if(!Running){
         throw new NulsRuntimeException(ErrorCode.FAILED,"The DBModule is not running!");
     }
-        PersistentQueue queue = queuesMap.get(queueName);
+        NulsQueue queue = queuesMap.get(queueName);
         if (null == queue) {
             throw new QueueException(ErrorCode.FAILED,"queue not exist");
         }
@@ -196,7 +196,7 @@ public abstract class QueueManager {
 
     public static List<StatInfo> getAllStatInfo(){
         List<StatInfo> list = new ArrayList<>();
-        for(PersistentQueue queue:queuesMap.values()){
+        for(NulsQueue queue:queuesMap.values()){
             list.add(queue.getStatInfo());
         }
         return list;

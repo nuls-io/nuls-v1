@@ -13,6 +13,13 @@ import java.util.Map;
  */
 public abstract class AssertUtil {
 
+    public static void isEquals(Object val1,Object val2,String msg){
+        if(val1==val2||(val1!=null&&val1.equals(val2))){
+            return;
+        }
+        throw new NulsRuntimeException(ErrorCode.DATA_ERROR,msg);
+    }
+
     public static void canNotEmpty(Object val,String msg){
         boolean b = false;
         do{

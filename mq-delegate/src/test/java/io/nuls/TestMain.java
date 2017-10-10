@@ -1,7 +1,7 @@
 package io.nuls;
 
 import io.nuls.mq.intf.IQueueService;
-import io.nuls.queue.service.FQueueServiceImpl;
+import io.nuls.queue.service.QueueServiceImpl;
 
 /**
  * Created by Niels on 2017/9/21.
@@ -10,8 +10,8 @@ import io.nuls.queue.service.FQueueServiceImpl;
 public class TestMain {
 
     public static void main(String[] args) {
-        final IQueueService<String> service = FQueueServiceImpl.getInstance();
-        service.createQueue("test", 10 * 1024 * 1024);
+        final IQueueService<String> service = QueueServiceImpl.getInstance();
+        service.createQueue("test", 10 * 1024 * 1024,true);
         new Thread(new Runnable() {
             @Override
             public void run() {

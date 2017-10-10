@@ -1,8 +1,5 @@
 package io.nuls.chain;
 
-/**
- * Created by win10 on 2017/9/21.
- */
 public class Chain {
     private String chainName = "";
 
