@@ -50,6 +50,9 @@ public class RpcServerServiceImpl implements IRpcServerService {
 
     @Override
     public boolean isStarted() {
+        if(null==this.httpServer){
+            return false;
+        }
         return this.httpServer.isStarted();
     }
 

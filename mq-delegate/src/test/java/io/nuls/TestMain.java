@@ -11,7 +11,7 @@ public class TestMain {
 
     public static void main(String[] args) {
         final IQueueService<String> service = QueueServiceImpl.getInstance();
-        service.createQueue("test", 10 * 1024 * 1024,true);
+        service.createQueue("test", 10 * 1024 * 1024l,true);
         new Thread(new Runnable() {
             @Override
             public void run() {
