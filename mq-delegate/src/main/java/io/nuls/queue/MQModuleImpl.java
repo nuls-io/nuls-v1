@@ -25,12 +25,12 @@ public class MQModuleImpl extends MQModule {
 
     @Override
     public void init(Map<String, String> initParams) {
+        this.setStatus(ModuleStatus.INITED);
     }
 
     @Override
     public void start() {
         this.setStatus(ModuleStatus.STARTING);
-
         NulsThread t1 = new NulsThread(this, "queueStatusLogThread") {
             @Override
             public void run() {

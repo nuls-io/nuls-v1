@@ -1,10 +1,12 @@
 package io.nuls.rpcserver.impl;
 
 import io.nuls.rpcserver.constant.RpcConstant;
+import io.nuls.rpcserver.constant.RpcServerConstant;
 import io.nuls.rpcserver.impl.services.RpcServerServiceImpl;
 import io.nuls.rpcserver.intf.IRpcServerService;
 import io.nuls.rpcserver.intf.RpcServerModule;
 import io.nuls.task.ModuleStatus;
+import io.nuls.util.log.Log;
 import io.nuls.util.str.StringUtils;
 
 import java.util.Map;
@@ -25,16 +27,16 @@ public class RpcServerModuleImpl extends RpcServerModule {
         if(null==initParams){
             return;
         }
-        this.ip = initParams.get("ip");
-        this.port = initParams.get("port");
-        this.moduleUrl = initParams.get("moduleUrl");
+        this.ip = initParams.get(RpcServerConstant.INIT_PARAM_IP);
+        this.port = initParams.get(RpcServerConstant.INIT_PARAM_PORT);
+        this.moduleUrl = initParams.get(RpcServerConstant.INIT_PARAM_URL);
         setStatus(ModuleStatus.INITED);
     }
 
     @Override
     public void start() {
-        if(getStatus()!=ModuleStatus.INITED){
-            //TODO
+        if(getStatus()==ModuleStatus.UNINITED){
+            Log.warn("Rpc server module not init!");
         }
         setStatus(ModuleStatus.STARTING);
         if(StringUtils.isBlank(ip)|| StringUtils.isBlank(port)){

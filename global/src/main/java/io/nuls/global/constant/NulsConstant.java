@@ -20,5 +20,9 @@ public interface NulsConstant {
     String CFG_BOOTSTRAP_NETWORK_MODULE = "";
 
 
+    String CFG_RPC_SERVER_IP = "server.ip";
+    String CFG_RPC_SERVER_PORT = "server.port";
+    String CFG_RPC_SERVER_URL = "server.url";
+
     String SYSTEM_LANGUAGE = "language";
 }

@@ -6,6 +6,7 @@ import io.nuls.exception.NulsException;
 import io.nuls.global.constant.NulsConstant;
 import io.nuls.global.NulsContext;
 import io.nuls.mq.MQModule;
+import io.nuls.rpcserver.constant.RpcServerConstant;
 import io.nuls.rpcserver.intf.RpcServerModule;
 import io.nuls.task.ModuleManager;
 import io.nuls.task.NulsModule;
@@ -52,32 +53,48 @@ public class Bootstrap {
     }
 
     private static boolean initDB() {
-        return startModule(NulsConstant.CFG_BOOTSTRAP_DB_MODULE);
+        NulsModule dbModule = regModule(NulsConstant.CFG_BOOTSTRAP_DB_MODULE);
+        dbModule.init(null);
+        dbModule.start();
+        return true;
     }
 
     private static boolean initMQ() {
-        return startModule(NulsConstant.CFG_BOOTSTRAP_QUEUE_MODULE);
+        NulsModule module = regModule(NulsConstant.CFG_BOOTSTRAP_QUEUE_MODULE);
+        module.init(null);
+        module.start();
+        return true;
     }
 
     /**
      * @return 启动结果
      */
     private static boolean initRpcServer() {
-       return startModule( NulsConstant.CFG_BOOTSTRAP_RPC_SERVER_MODULE);
-    }
-
-
-    private static boolean startModule(String key) {
-        String moduleClass = null;
+        NulsModule module = regModule(NulsConstant.CFG_BOOTSTRAP_RPC_SERVER_MODULE);
+        Map<String, String> initParams = new HashMap<>();
         try {
-            moduleClass = ConfigLoader.getCfgValue(NulsConstant.CFG_BOOTSTRAP_SECTION,key);
+            initParams.put(RpcServerConstant.INIT_PARAM_IP, ConfigLoader.getCfgValue(NulsConstant.CFG_RPC_SERVER_SECTION, NulsConstant.CFG_RPC_SERVER_IP));
+            initParams.put(RpcServerConstant.INIT_PARAM_PORT, ConfigLoader.getCfgValue(NulsConstant.CFG_RPC_SERVER_SECTION, NulsConstant.CFG_RPC_SERVER_PORT));
+            initParams.put(RpcServerConstant.INIT_PARAM_URL, ConfigLoader.getCfgValue(NulsConstant.CFG_RPC_SERVER_SECTION, NulsConstant.CFG_RPC_SERVER_URL));
         } catch (NulsException e) {
             Log.error(e);
         }
-        boolean result = false;
+        module.init(null);
+        module.start();
+        return true;
+    }
+
+
+    private static NulsModule regModule(String key) {
+        String moduleClass = null;
+        try {
+            moduleClass = ConfigLoader.getCfgValue(NulsConstant.CFG_BOOTSTRAP_SECTION, key);
+        } catch (NulsException e) {
+            Log.error(e);
+        }
         do {
             if (StringUtils.isBlank(moduleClass)) {
-                Log.warn("module cannot start:"+key);
+                Log.warn("module cannot start:" + key);
                 break;
             }
             Class clazz = null;
@@ -97,12 +114,12 @@ public class Bootstrap {
                 Log.error(e);
                 break;
             }
-            module.start();
+//            module.start();
             ModuleManager.regModule(module.getModuleName(), module);
             Log.info(module.getInfo());
-            result = true;
+            return module;
         } while (false);
-        return result;
+        return null;
     }
 
 }
