@@ -19,7 +19,7 @@ public class MQModuleTest {
     @Test
     public void test() {
         //创建
-        boolean b = service.createQueue(queueName, 64, true);
+        boolean b = service.createQueue(queueName, 64l, true);
         assertTrue(b);
 
         //写入
