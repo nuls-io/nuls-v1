@@ -15,20 +15,22 @@ public interface IQueueService<T> {
      * 创建一个持久化队列
      *
      * @param queueName 队列名称
-     * @param maxSize   单个文件最大大小fileLimitLength
+     * @param maxSize   单个文件最大大小fileLimitLength/非持久化时是队列的最大长度
+     * @param persist   是否持久化
      * @return 是否创建成功
      */
-    public boolean createQueue(String queueName, long maxSize);
+    public boolean createQueue(String queueName, Long maxSize, boolean persist);
 
     /**
      * 创建一个持久化队列
      *
      * @param queueName    队列名称
-     * @param maxSize      单个文件最大大小fileLimitLength
+     * @param maxSize      单个文件最大大小fileLimitLength/非持久化时是队列的最大长度
+     * @param persist      是否持久化
      * @param latelySecond 统计日志时间段
      * @return 是否创建成功
      */
-    public boolean createQueue(String queueName, long maxSize, int latelySecond);
+    public boolean createQueue(String queueName, Long maxSize, boolean persist, int latelySecond);
 
     /**
      * 销毁该队列，并删除磁盘文件

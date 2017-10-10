@@ -1,5 +1,6 @@
 package io.nuls.fqueue;
 
+import io.nuls.exception.NulsRuntimeException;
 import io.nuls.fqueue.exception.FileFormatException;
 
 import java.io.File;
@@ -122,7 +123,7 @@ public class FQueue extends AbstractQueue<byte[]> implements Serializable {
      * @throws IOException
      * @throws FileFormatException
      */
-    public void close() throws IOException, FileFormatException {
+    public void close() throws IOException {
         if (fsQueue != null) {
             fsQueue.close();
         }

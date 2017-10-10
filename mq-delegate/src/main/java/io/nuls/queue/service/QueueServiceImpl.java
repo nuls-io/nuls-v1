@@ -3,8 +3,10 @@ package io.nuls.queue.service;
 import io.nuls.global.NulsContext;
 import io.nuls.mq.exception.QueueException;
 import io.nuls.mq.intf.IQueueService;
+import io.nuls.mq.intf.NulsQueue;
 import io.nuls.mq.intf.StatInfo;
-import io.nuls.queue.impl.NulsFQueue;
+import io.nuls.queue.impl.BlockingQueueImpl;
+import io.nuls.queue.impl.PersistentQueue;
 import io.nuls.queue.impl.manager.QueueManager;
 import io.nuls.util.log.Log;
 
@@ -12,11 +14,11 @@ import io.nuls.util.log.Log;
  * 队列服务类
  * Created by Niels on 2017/9/20.
  */
-public class FQueueServiceImpl<T> implements IQueueService<T> {
+public class QueueServiceImpl<T> implements IQueueService<T> {
 
-    private static final FQueueServiceImpl service = new FQueueServiceImpl();
+    private static final QueueServiceImpl service = new QueueServiceImpl();
 
-    private FQueueServiceImpl() {
+    private QueueServiceImpl() {
         NulsContext.getInstance().regService(this);
     }
 
@@ -29,25 +31,30 @@ public class FQueueServiceImpl<T> implements IQueueService<T> {
      * 创建一个持久化队列
      *
      * @param queueName 队列名称
-     * @param maxSize   单个文件最大大小fileLimitLength
+     * @param maxSize   单个文件最大大小fileLimitLength/非持久化时是队列的最大长度
      * @return 是否创建成功
      */
-    public boolean createQueue(String queueName, long maxSize) {
-        return createQueue(queueName, maxSize, 0);
+    public boolean createQueue(String queueName, Long maxSize,boolean persist) {
+        return createQueue(queueName, maxSize,persist, 0);
     }
 
     /**
      * 创建一个持久化队列
      *
      * @param queueName    队列名称
-     * @param maxSize      单个文件最大大小fileLimitLength
+     * @param maxSize      单个文件最大大小fileLimitLength/非持久化时是队列的最大长度
      * @param latelySecond 统计日志打印时间段
      * @return 是否创建成功
      */
-    public boolean createQueue(String queueName, long maxSize, int latelySecond) {
+    public boolean createQueue(String queueName, Long maxSize,boolean persist, int latelySecond) {
         try {
-            NulsFQueue queue = new NulsFQueue(queueName, maxSize);
-            QueueManager.initQueue(queueName, queue, latelySecond);
+            NulsQueue queue = null;
+            if(persist){
+                queue = new PersistentQueue(queueName, maxSize);
+            }else{
+                queue = new BlockingQueueImpl(queueName,Integer.parseInt(maxSize+""));
+            }
+            QueueManager.initQueue(queueName, queue,latelySecond);
             return true;
         } catch (Exception e) {
             Log.error("", e);

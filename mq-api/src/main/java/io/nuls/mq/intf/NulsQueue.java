@@ -8,7 +8,7 @@ import java.io.IOException;
  * 持久化队列定义
  * Created by Niels on 2017/9/20.
  */
-public abstract class PersistentQueue<T> {
+public abstract class NulsQueue<T> {
 
     protected String queueName;
     protected long maxSize;
@@ -50,7 +50,7 @@ public abstract class PersistentQueue<T> {
     /**
      * 销毁改队列，包括删除磁盘文件
      */
-    public abstract void distroy() throws IOException, NulsRuntimeException;
+    public abstract void distroy() throws IOException;
 
     /**
      * 关闭队列
@@ -58,7 +58,7 @@ public abstract class PersistentQueue<T> {
      * @throws IOException
      * @throws NulsRuntimeException
      */
-    public abstract void close() throws IOException, NulsRuntimeException;
+    public abstract void close() throws IOException;
 
     /**
      * 清空队列
