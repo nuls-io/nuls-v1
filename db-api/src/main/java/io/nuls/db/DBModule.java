@@ -12,7 +12,7 @@ public abstract class DBModule implements NulsModule {
 
     protected DBModule(){
         this.moduleName = this.getClass().getSimpleName();
-        this.status = ModuleStatus.UNSTART;
+        this.status = ModuleStatus.UNINITED;
     }
     private String moduleName;
     private ModuleStatus status;

@@ -67,7 +67,7 @@ public class Bootstrap {
     }
 
 
-    private static boolean startModule(  String key) {
+    private static boolean startModule(String key) {
         String moduleClass = null;
         try {
             moduleClass = ConfigLoader.getCfgValue(NulsConstant.CFG_BOOTSTRAP_SECTION,key);
