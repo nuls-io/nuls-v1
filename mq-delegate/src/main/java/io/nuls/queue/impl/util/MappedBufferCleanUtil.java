@@ -17,17 +17,17 @@ public class MappedBufferCleanUtil {
             return;
         }
         try {
-            // 加上这几行代码,手动unmap
+            //unmap
             Method m = FileChannelImpl.class.getDeclaredMethod("unmap",
                     MappedByteBuffer.class);
             m.setAccessible(true);
             m.invoke(FileChannelImpl.class, buffer);
-//另一种实现方式
-//            Method getCleanerMethod = buffer.getClass().getMethod("cleaner", new Class[0]);
-//            getCleanerMethod.setAccessible(true);
-//            sun.misc.Cleaner cleaner = (sun.misc.Cleaner) getCleanerMethod.invoke(buffer, new Object[0]);
-//            cleaner.clean();
-//            getCleanerMethod.setAccessible(false);
+            //Another way of implementation
+            //            Method getCleanerMethod = buffer.getClass().getMethod("cleaner", new Class[0]);
+            //            getCleanerMethod.setAccessible(true);
+            //            sun.misc.Cleaner cleaner = (sun.misc.Cleaner) getCleanerMethod.invoke(buffer, new Object[0]);
+            //            cleaner.clean();
+            //            getCleanerMethod.setAccessible(false);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
