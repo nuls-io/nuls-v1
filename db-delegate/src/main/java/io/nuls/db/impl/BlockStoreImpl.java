@@ -1,24 +1,18 @@
 package io.nuls.db.impl;
 
-import io.nuls.db.DBConstant;
 import io.nuls.db.DBException;
 import io.nuls.db.dao.mybatis.BlockMapper;
 import io.nuls.db.dao.mybatis.util.Searchable;
 import io.nuls.db.entity.Block;
 import io.nuls.db.intf.IBlockStore;
-import io.nuls.util.constant.ErrorCode;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 /**
  * Created by win10 on 2017/9/29.
  */
-@Service("blockStore")
 public class BlockStoreImpl implements IBlockStore {
 
-    @Autowired
     private BlockMapper blockMapper;
 
     @Override
@@ -29,12 +23,9 @@ public class BlockStoreImpl implements IBlockStore {
     @Override
     public int saveBatch(List<Block> list) {
         if(list == null || list.size() == 0) {
-            throw new DBException(ErrorCode.DB_SAVE_CANNOT_NULL);
+//            throw new DBException()
         }
-        if(list.size() > DBConstant.DB_SAVE_LIMIT) {
-            throw new DBException(ErrorCode.DB_SAVE_BATCH_LIMIT_OVER);
-        }
-        return blockMapper.insertBatch(list);
+        return 0;
     }
 
     @Override

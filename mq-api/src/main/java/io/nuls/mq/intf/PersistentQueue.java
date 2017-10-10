@@ -1,6 +1,6 @@
 package io.nuls.mq.intf;
 
-import io.nuls.exception.NulsException;
+import io.nuls.exception.NulsRuntimeException;
 
 import java.io.IOException;
 
@@ -50,15 +50,15 @@ public abstract class PersistentQueue<T> {
     /**
      * 销毁改队列，包括删除磁盘文件
      */
-    public abstract void distroy() throws IOException, NulsException;
+    public abstract void distroy() throws IOException, NulsRuntimeException;
 
     /**
      * 关闭队列
      *
      * @throws IOException
-     * @throws NulsException
+     * @throws NulsRuntimeException
      */
-    public abstract void close() throws IOException, NulsException;
+    public abstract void close() throws IOException, NulsRuntimeException;
 
     /**
      * 清空队列

@@ -1,7 +1,7 @@
 package io.nuls.mq.intf;
 
 
-import io.nuls.exception.NulsException;
+import io.nuls.exception.NulsRuntimeException;
 import io.nuls.mq.exception.QueueException;
 
 import java.io.IOException;
@@ -10,7 +10,7 @@ import java.io.IOException;
  * 提供给外部使用的接口
  * Created by Niels on 2017/9/20.
  */
-public interface QueueService<T> {
+public interface IQueueService<T> {
     /**
      * 创建一个持久化队列
      *
@@ -78,7 +78,7 @@ public interface QueueService<T> {
      *
      * @param queueName
      * @throws IOException
-     * @throws NulsException
+     * @throws NulsRuntimeException
      */
     void close(String queueName) throws QueueException;
 

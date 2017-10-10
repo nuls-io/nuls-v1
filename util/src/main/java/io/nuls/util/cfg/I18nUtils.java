@@ -1,8 +1,9 @@
 package io.nuls.util.cfg;
 
 import io.nuls.exception.NulsException;
+import io.nuls.exception.NulsRuntimeException;
 import io.nuls.util.constant.ErrorCode;
-import org.springframework.util.StringUtils;
+import io.nuls.util.str.StringUtils;
 
 import java.io.*;
 import java.net.URL;
@@ -37,12 +38,12 @@ public class I18nUtils {
                 AllMapping.put(key, prop);
             }
         } catch (IOException e) {
-            throw new NulsException(e);
+            throw new NulsRuntimeException(e);
         }
     }
 
-    public static void setLanguage(String _key) {
-        if (StringUtils.isEmpty(_key)) {
+    public static void setLanguage(String _key) throws NulsException {
+        if (StringUtils.isBlank(_key)) {
             throw new NulsException(ErrorCode.LANGUAGE_CANNOT_SET_NULL);
         }
         key = _key;

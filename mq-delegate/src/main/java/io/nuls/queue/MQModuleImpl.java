@@ -6,8 +6,6 @@ import io.nuls.queue.impl.manager.QueueManager;
 import io.nuls.task.NulsThread;
 import io.nuls.task.ModuleManager;
 import io.nuls.task.ModuleStatus;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
@@ -19,13 +17,11 @@ import java.util.concurrent.TimeUnit;
  * Created by Niels on 2017/9/27.
  * nuls.io
  */
-@Service("mqModule")
 public class MQModuleImpl extends MQModule {
 
     private ScheduledExecutorService service;
 
-    @Autowired
-    private ModuleManager moduleManager;
+    private ModuleManager moduleManager = ModuleManager.getInstance();
 
     @Override
     public void init(Map<String, String> initParams) {
@@ -34,6 +30,7 @@ public class MQModuleImpl extends MQModule {
     @Override
     public void start() {
         this.setStatus(ModuleStatus.STARTING);
+
         NulsThread t1 = new NulsThread(this, "queueStatusLogThread") {
             @Override
             public void run() {

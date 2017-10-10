@@ -3,6 +3,7 @@ package io.nuls.queue.impl.util.stat;
 import io.nuls.mq.exception.QueueException;
 import io.nuls.mq.intf.StatInfo;
 import io.nuls.queue.impl.manager.QueueManager;
+import io.nuls.util.constant.ErrorCode;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -38,7 +39,7 @@ public class StatInfoImpl implements StatInfo {
      */
     public StatInfoImpl(String queueName, long lastSize, int latelySecond) {
         if (queueName==null||queueName.trim().isEmpty()) {
-            throw new QueueException("队列名称不正确");
+            throw new QueueException(ErrorCode.QUEUE_NAME_ERROR);
         }
         this.name = queueName.substring(6);
         this.lastSize = lastSize;

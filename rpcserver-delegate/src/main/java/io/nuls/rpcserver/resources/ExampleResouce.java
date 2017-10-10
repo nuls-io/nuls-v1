@@ -1,9 +1,7 @@
 package io.nuls.rpcserver.resources;
 
-import io.nuls.exception.NulsException;
 import io.nuls.rpcserver.entity.RpcResult;
 import io.nuls.util.param.AssertUtil;
-import org.springframework.stereotype.Component;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -12,7 +10,6 @@ import javax.ws.rs.core.MediaType;
  * Created by Niels on 2017/9/25.
  * nuls.io
  */
-@Component
 @Path("/")
 public class ExampleResouce {
 

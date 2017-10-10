@@ -1,34 +1,43 @@
 package io.nuls.global;
 
-import io.nuls.mq.intf.QueueService;
-import io.nuls.rpcserver.intf.RpcServerService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.stereotype.Service;
+import io.nuls.exception.NulsRuntimeException;
+import io.nuls.task.ModuleManager;
+import io.nuls.task.NulsModule;
+import io.nuls.util.constant.ErrorCode;
 
-@Service
+import java.util.HashMap;
+import java.util.Map;
+
 public class NulsContext {
 
-    private static ClassPathXmlApplicationContext applicationContext;
-
-//    @Autowired
-    private QueueService queueService;
-
-    /**
-     * get The Queue intf instance
-     * @return
-     */
-    public QueueService getQueueService() {
-        return queueService;
+    private NulsContext() {
+        // single
     }
 
-    public static void setApplicationContext(ClassPathXmlApplicationContext applicationContext) {
-        NulsContext.applicationContext = applicationContext;
+    private static final NulsContext nc = new NulsContext();
+    private static final Map<Class, Object> intfMap = new HashMap<>();
+    private static ModuleManager moduleManager = ModuleManager.getInstance();
+
+    public static final NulsContext getInstance() {
+        return nc;
     }
 
-    public static ClassPathXmlApplicationContext getApplicationContext() {
+    public <T> T getService(Class<T> tclass) {
+        return (T) intfMap.get(tclass);
+    }
 
-        return applicationContext;
+    public void regService(Object service) {
+        if (intfMap.keySet().contains(service.getClass().getSuperclass())) {
+            throw new NulsRuntimeException(ErrorCode.INTF_REPETITION);
+        }
+        intfMap.put(service.getClass().getSuperclass(), service);
+    }
+
+    public static ModuleManager getModuleManager() {
+        return moduleManager;
+    }
+
+    public NulsModule getModule(String moduleName) {
+        return moduleManager.getModule(moduleName);
     }
 }

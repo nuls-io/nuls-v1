@@ -3,10 +3,10 @@ package io.nuls.exception;
 import io.nuls.util.constant.ErrorCode;
 
 /**
- * Created by Niels on 2017/10/9.
+ * Created by Niels on 2017/9/26.
  * nuls.io
  */
-public class NulsException extends Exception {
+public class NulsRuntimeException extends RuntimeException {
 
     private String code;
     private String message;
@@ -19,7 +19,7 @@ public class NulsException extends Exception {
      * @param message the detail message. The detail message is saved for
      *                later retrieval by the {@link #getMessage()} method.
      */
-    public NulsException(ErrorCode message) {
+    public NulsRuntimeException(ErrorCode message) {
         super(message.getMsg());
         this.code = message.getCode();
         this.message = message.getMsg();
@@ -39,7 +39,7 @@ public class NulsException extends Exception {
      *                unknown.)
      * @since 1.4
      */
-    public NulsException(ErrorCode message, Throwable cause) {
+    public NulsRuntimeException(ErrorCode message, Throwable cause) {
         super(message.getMsg(), cause);
         this.code = message.getCode();
         this.message = message.getMsg();
@@ -60,7 +60,7 @@ public class NulsException extends Exception {
      *              unknown.)
      * @since 1.4
      */
-    public NulsException(Throwable cause) {
+    public NulsRuntimeException(Throwable cause) {
         super(cause);
     }
 
@@ -78,11 +78,17 @@ public class NulsException extends Exception {
      *                           be writable
      * @since 1.7
      */
-    protected NulsException(ErrorCode message, Throwable cause,
+    protected NulsRuntimeException(ErrorCode message, Throwable cause,
                                    boolean enableSuppression,
                                    boolean writableStackTrace) {
         super(message.getMsg(), cause, enableSuppression, writableStackTrace);
         this.code = message.getCode();
         this.message = message.getMsg();
+    }
+
+    public NulsRuntimeException(ErrorCode errorCode, String msg) {
+        super(msg);
+        this.code = errorCode.getCode();
+        this.message = msg;
     }
 }
