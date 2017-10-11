@@ -3,12 +3,13 @@ package io.nuls.db;
 import io.nuls.task.ModuleStatus;
 import io.nuls.task.NulsModule;
 
+import javax.sql.DataSource;
+
 /**
  * Created by Niels on 2017/9/26.
  * nuls.io
  */
 public abstract class DBModule implements NulsModule {
-
 
     protected DBModule(){
         this.moduleName = this.getClass().getSimpleName();

@@ -4,6 +4,7 @@ import io.nuls.task.ModuleManager;
 import io.nuls.task.ModuleStatus;
 import io.nuls.task.NulsThread;
 
+import javax.sql.DataSource;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -18,8 +19,11 @@ public class DBModuleImpl extends DBModule {
 
     private ModuleManager moduleManager;
 
+    private DataSource dataSource;
+
     @Override
     public void init(Map<String, String> initParams) {
+
 
     }
 

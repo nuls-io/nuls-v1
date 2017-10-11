@@ -22,7 +22,7 @@
         <setting name="defaultStatementTimeout" value="60000" />
 
 
-		<!-- 控制台打印sql语句,正式发布项目时记得关闭 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-->
+		<!--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 控制台打印sql语句,正式发布项目时记得关闭 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-->
         <setting name="logImpl" value="STDOUT_LOGGING" />
 
     </settings>
@@ -59,7 +59,20 @@
         </plugin>
     </plugins>
 
+    <!-- dataSource only use druidDataSource -->
+    <environments default="h2">
+        <environment id="h2">
+            <transactionManager type="JDBC"></transactionManager>
+            <dataSource type="io.nuls.db.DataSourceFactory">
+                <property name="driverClass" value="org.h2.Driver"/>
+                <property name="url" value="jdbc:h2:file:../data/h2;LOG=2;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=1;AUTO_RECONNECT=TRUE;DATABASE_TO_UPPER=FALSE"/>
+                <property name="username" value="sa"/>
+                <property name="password" value="123456"/>
+            </dataSource>
+        </environment>
+    </environments>
 
     <mappers>
+        <mapper resource="mybatis/mapping/BlockMapper.xml" />
     </mappers>
 </configuration>
