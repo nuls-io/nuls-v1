@@ -1,5 +1,6 @@
 package io.nuls.rpcserver.impl;
 
+import io.nuls.global.NulsContext;
 import io.nuls.rpcserver.constant.RpcConstant;
 import io.nuls.rpcserver.constant.RpcServerConstant;
 import io.nuls.rpcserver.impl.services.RpcServerServiceImpl;
@@ -54,6 +55,14 @@ public class RpcServerModuleImpl extends RpcServerModule {
         }
         rpcServerService.shutdown();
         setStatus(ModuleStatus.INITED);
+    }
+
+    @Override
+    public void desdroy(){
+        shutdown();
+        NulsContext.getInstance().remService(rpcServerService);
+        setStatus(ModuleStatus.UNINITED);
+        NulsContext.getInstance().getModuleManager().remModule(this.getModuleName());
     }
 
     @Override

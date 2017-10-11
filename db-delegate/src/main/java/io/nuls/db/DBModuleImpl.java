@@ -1,5 +1,6 @@
 package io.nuls.db;
 
+import io.nuls.global.NulsContext;
 import io.nuls.task.ModuleManager;
 import io.nuls.task.ModuleStatus;
 import io.nuls.task.NulsThread;
@@ -15,8 +16,6 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 public class DBModuleImpl extends DBModule {
 
     private ScheduledExecutorService service;
-
-    private ModuleManager moduleManager;
 
     @Override
     public void init(Map<String, String> initParams) {
@@ -47,6 +46,14 @@ public class DBModuleImpl extends DBModule {
     }
 
     @Override
+    public void desdroy(){
+        shutdown();
+        NulsContext.getInstance().remService(service);
+        NulsContext.getInstance().getModuleManager().remModule(this.getModuleName());
+        setStatus(ModuleStatus.UNINITED);
+    }
+
+    @Override
     public String getInfo() {
         StringBuilder str = new StringBuilder();
         str.append("moduleName:");
@@ -54,7 +61,7 @@ public class DBModuleImpl extends DBModule {
         str.append(",moduleStatus:");
         str.append(getStatus());
         str.append(",ThreadCount:");
-        Map<String, NulsThread> threadMap = moduleManager.getThreadsByModule(getModuleName());
+        Map<String, NulsThread> threadMap = NulsContext.getInstance().getModuleManager().getThreadsByModule(getModuleName());
         str.append(threadMap.size());
         str.append("ThreadInfo:\n");
         for (NulsThread t : threadMap.values()) {

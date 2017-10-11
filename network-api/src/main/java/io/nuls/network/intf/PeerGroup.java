@@ -1,4 +1,4 @@
-package io.nuls;
+package io.nuls.network.intf;
 
 import java.util.List;
 
@@ -38,5 +38,9 @@ public class PeerGroup {
 
     public void removeAll(){
         peers.clear();
+    }
+
+    public String toString(){
+        return "";
     }
 }

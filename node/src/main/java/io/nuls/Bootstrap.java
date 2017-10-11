@@ -43,6 +43,7 @@ public class Bootstrap {
             //init modules
 //            initDB();
             initMQ();
+            initP2p();
             //init rpc server
             boolean result = initRpcServer();
             if (!result) {
@@ -50,6 +51,9 @@ public class Bootstrap {
             }
             Log.info("");
         } while (false);
+        System.out.println("--------------------------------------------");
+        System.out.println(NulsContext.getInstance().getModuleManager().getInfo());
+        System.out.println("--------------------------------------------");
     }
 
     private static boolean initDB() {
@@ -61,6 +65,13 @@ public class Bootstrap {
 
     private static boolean initMQ() {
         NulsModule module = regModule(NulsConstant.CFG_BOOTSTRAP_QUEUE_MODULE);
+        module.init(null);
+        module.start();
+        return true;
+    }
+
+    private static boolean initP2p() {
+        NulsModule module = regModule(NulsConstant.CFG_BOOTSTRAP_P2P_MODULE);
         module.init(null);
         module.start();
         return true;
@@ -115,7 +126,7 @@ public class Bootstrap {
                 break;
             }
 //            module.start();
-            ModuleManager.regModule(module.getModuleName(), module);
+            ModuleManager.getInstance().regModule(module.getModuleName(), module);
             Log.info(module.getInfo());
             return module;
         } while (false);
