@@ -19,6 +19,8 @@ public interface NulsModule {
 
     void shutdown();
 
+    void desdroy();
+
     String getInfo();
 
     ModuleStatus getStatus();

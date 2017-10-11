@@ -37,7 +37,18 @@ public class NulsContext {
         intfMap.put(key, service);
     }
 
-    public static ModuleManager getModuleManager() {
+    public void remService(Object service){
+        if (!intfMap.keySet().contains(service.getClass().getSuperclass())) {
+            throw new NulsRuntimeException(ErrorCode.INTF_NOTFOUND);
+        }
+        Class key = service.getClass().getSuperclass();
+        if(null==key||key.equals(Object.class)){
+            key = service.getClass();
+        }
+        intfMap.remove(key);
+    }
+
+    public ModuleManager getModuleManager() {
         return moduleManager;
     }
 

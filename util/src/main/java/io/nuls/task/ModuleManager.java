@@ -34,7 +34,7 @@ public final class ModuleManager {
         return moduleMap.get(moduleName);
     }
 
-    public static String getInfo() {
+    public String getInfo() {
         StringBuilder str = new StringBuilder();
         for (NulsModule module : moduleMap.values()) {
             str.append(module.getInfo());
@@ -42,25 +42,25 @@ public final class ModuleManager {
         return str.toString();
     }
 
-    public static void regThread(String threadName, NulsThread thread) {
+    public void regThread(String threadName, NulsThread thread) {
         if (threadMap.keySet().contains(threadName)) {
             throw new NulsRuntimeException(ErrorCode.THREAD_REPETITION,"the name of thread is already exist(" + threadName + ")");
         }
         threadMap.put(threadName, thread);
     }
 
-    public static void cancelThread(String threadName) {
+    public void cancelThread(String threadName) {
         threadMap.remove(threadName);
     }
 
-    public static void regModule(String moduleName, NulsModule module) {
+    public void regModule(String moduleName, NulsModule module) {
         if (moduleMap.keySet().contains(moduleName)) {
             throw new NulsRuntimeException(ErrorCode.THREAD_REPETITION,"the name of Module is already exist(" + moduleName + ")");
         }
         moduleMap.put(moduleName, module);
     }
 
-    public static void cancelModule(String moduleName){
+    public void remModule(String moduleName){
         moduleMap.remove(moduleName);
     }
 

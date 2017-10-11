@@ -1,5 +1,6 @@
 package io.nuls.queue;
 
+import io.nuls.global.NulsContext;
 import io.nuls.mq.MQModule;
 import io.nuls.mq.intf.StatInfo;
 import io.nuls.queue.impl.manager.QueueManager;
@@ -50,6 +51,14 @@ public class MQModuleImpl extends MQModule {
         QueueManager.setRunning(false);
         service.shutdown();
         this.setStatus(ModuleStatus.STOPED);
+    }
+
+    @Override
+    public void desdroy(){
+        shutdown();
+        NulsContext.getInstance().remService(service);
+        NulsContext.getInstance().getModuleManager().remModule(this.getModuleName());
+        setStatus(ModuleStatus.UNINITED);
     }
 
     @Override
