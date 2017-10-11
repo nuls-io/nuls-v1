@@ -15,4 +15,6 @@ public interface IDisruptorService {
     void offer(String name, Object obj);
 
     void handleEventsWith(String name, EventHandler<DisruptorEvent> handler);
+
+    String getStaticInfo(String name);
 }
