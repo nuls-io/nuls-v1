@@ -1,6 +1,7 @@
 package io.nuls.rpcserver.resources;
 
 import io.nuls.rpcserver.entity.RpcResult;
+import io.nuls.task.NulsModule;
 import io.nuls.util.param.AssertUtil;
 
 import javax.ws.rs.*;
@@ -23,10 +24,10 @@ public class ExampleResouce {
     }
 
     @GET
-    @Path("/test")
+    @Path("/hello/{key1}")
     @Produces("application/json")
-    public String getMessage() {
-        return RpcResult.getSuccess().setData("hello world222222222222222222").toString();
+    public String getMessage(@PathParam("key1") String key1          ,@QueryParam("key") String key) {
+        return RpcResult.getSuccess().setData("hello world222222222222222222,"+key1+","+key).toString();
     }
 
     @GET

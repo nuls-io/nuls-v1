@@ -19,10 +19,6 @@ public class NulsThread extends Thread {
     private NulsModule module = null;
     private Date starttime;
 
-    public NulsThread(NulsModule module) {
-        this(module,"noName");
-    }
-
     public NulsThread(NulsModule module, String name) {
         super();
         if(null==module){
@@ -31,6 +27,7 @@ public class NulsThread extends Thread {
         this.setName(name);
         starttime = new Date();
         this.module = module;
+        ModuleManager.getInstance().regThread(module.getModuleName(),this);
         Log.debug(this.getClass().getName() + " start runing");
     }
 

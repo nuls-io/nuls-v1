@@ -19,7 +19,6 @@ public class QueueServiceImpl<T> implements IQueueService<T> {
     private static final QueueServiceImpl service = new QueueServiceImpl();
 
     private QueueServiceImpl() {
-        NulsContext.getInstance().regService(this);
     }
 
     public static IQueueService getInstance() {

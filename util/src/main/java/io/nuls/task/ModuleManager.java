@@ -3,31 +3,85 @@ package io.nuls.task;
 import io.nuls.exception.NulsRuntimeException;
 import io.nuls.util.constant.ErrorCode;
 
-import javax.management.monitor.StringMonitor;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Niels on 2017/9/26.
  * nuls.io
  */
-public final class ModuleManager {
+public class ModuleManager {
 
     private static final Map<String, NulsThread> threadMap = new HashMap<>();
 
-    private static final Map<String, NulsModule> moduleMap = new HashMap<>();
+    private static final Map<String, NulsModuleProxy> moduleMap = new HashMap<>();
 
     private static final ModuleManager manager = new ModuleManager();
 
-    private ModuleManager(){}
+    private static final Map<Class, Object> intfMap = new HashMap<>();
+    private static final Map<String, Set<Class>> moduleIntfMap = new HashMap<>();
 
-    public static ModuleManager getInstance(){
-        return manager;
+    private ModuleManager() {
     }
 
+    public <T> T getService(Class<T> tclass) {
+        return (T) intfMap.get(tclass);
+    }
 
-    public Map<String, NulsModule> getModules() {
-        return moduleMap;
+    protected void regService(String moduleName, Object service) {
+        if (intfMap.keySet().contains(service.getClass().getSuperclass())) {
+            throw new NulsRuntimeException(ErrorCode.INTF_REPETITION);
+        }
+        Class key = service.getClass().getSuperclass();
+        if (key.equals(Object.class)) {
+            key = service.getClass();
+        }
+        if (null == key || key.equals(Object.class)) {
+            key = service.getClass();
+        }
+        intfMap.put(key, service);
+        Set<Class> set = moduleIntfMap.get(moduleName);
+        if (null == set) {
+            set = new HashSet<>();
+        }
+        set.add(key);
+        moduleIntfMap.put(moduleName, set);
+    }
+
+    protected void removeService(String moduleName, Object service) {
+        if (!intfMap.keySet().contains(service.getClass().getSuperclass())) {
+            throw new NulsRuntimeException(ErrorCode.INTF_NOTFOUND);
+        }
+        Class key = service.getClass().getSuperclass();
+        if (key.equals(Object.class)) {
+            key = service.getClass();
+        }
+        if (null == key || key.equals(Object.class)) {
+            key = service.getClass();
+        }
+        removeService(moduleName, key);
+    }
+
+    protected void removeService(String moduleName, Class clazz) {
+        intfMap.remove(clazz);
+        Set<Class> set = moduleIntfMap.get(moduleName);
+        if (null != set) {
+            set.remove(clazz);
+            moduleIntfMap.put(moduleName, set);
+        }
+    }
+
+    protected void removeService(String moduleName) {
+        Set<Class> set = moduleIntfMap.get(moduleName);
+        if (null == set) {
+            return;
+        }
+        for (Class clazz : set) {
+            removeService(moduleName, clazz);
+        }
+    }
+
+    public static ModuleManager getInstance() {
+        return manager;
     }
 
     public NulsModule getModule(String moduleName) {
@@ -42,44 +96,45 @@ public final class ModuleManager {
         return str.toString();
     }
 
-    public void regThread(String threadName, NulsThread thread) {
+    protected void regThread(String threadName, NulsThread thread) {
         if (threadMap.keySet().contains(threadName)) {
-            throw new NulsRuntimeException(ErrorCode.THREAD_REPETITION,"the name of thread is already exist(" + threadName + ")");
+            throw new NulsRuntimeException(ErrorCode.THREAD_REPETITION, "the name of thread is already exist(" + threadName + ")");
         }
         threadMap.put(threadName, thread);
     }
 
-    public void cancelThread(String threadName) {
+    private void cancelThread(String threadName) {
         threadMap.remove(threadName);
     }
 
-    public void regModule(String moduleName, NulsModule module) {
+    protected void regModule(String moduleName, NulsModule module) {
         if (moduleMap.keySet().contains(moduleName)) {
-            throw new NulsRuntimeException(ErrorCode.THREAD_REPETITION,"the name of Module is already exist(" + moduleName + ")");
+            throw new NulsRuntimeException(ErrorCode.THREAD_REPETITION, "the name of Module is already exist(" + moduleName + ")");
         }
-        moduleMap.put(moduleName, module);
+        if (module instanceof NulsModuleProxy) {
+            moduleMap.put(moduleName, (NulsModuleProxy) module);
+        } else {
+            moduleMap.put(moduleName, new NulsModuleProxy(module));
+        }
     }
 
-    public void remModule(String moduleName){
+    protected void remModule(String moduleName) {
         moduleMap.remove(moduleName);
     }
 
-    public NulsThread getThread(String threadName) {
-        return threadMap.get(threadName);
-    }
 
-    public Map<String, NulsThread> getAllThreads() {
-        return threadMap;
-    }
-
-    public Map<String, NulsThread> getThreadsByModule(String moduleName) {
-        Map<String, NulsThread> map = new HashMap<>();
+    protected List<NulsThread> getThreadsByModule(String moduleName) {
+        List<NulsThread> list = new ArrayList<>();
         for (NulsThread t : threadMap.values()) {
             if (t.getModule().getModuleName().equals(moduleName)) {
-                map.put(t.getName(), t);
+                list.add(t);
             }
         }
-        return map;
+        return list;
     }
-
+    protected void remThreadsByModule(String moduleName) {
+        for (NulsThread t : getThreadsByModule(moduleName) ) {
+             threadMap.remove(t.getName());
+        }
+    }
 }

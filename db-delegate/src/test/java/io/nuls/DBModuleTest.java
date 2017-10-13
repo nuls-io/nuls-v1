@@ -22,9 +22,9 @@ public class DBModuleTest {
     @Before
     public void init() {
         dbModule = new DBModuleImpl();
-        Map<String,String> map = new HashMap<>();
-        map.put("dataBaseType", "h2");
-        dbModule.init(map);
+//        Map<String,String> map = new HashMap<>();
+//        map.put("dataBaseType", "h2");
+//        dbModule.init(map);
     }
 
     @org.junit.Test

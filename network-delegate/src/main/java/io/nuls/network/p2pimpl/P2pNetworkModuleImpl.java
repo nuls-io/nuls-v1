@@ -5,28 +5,25 @@ import io.nuls.network.intf.IPeersManager;
 import io.nuls.network.intf.NetworkModule;
 import io.nuls.network.p2pimpl.service.P2pPeersManagerImpl;
 import io.nuls.task.ModuleStatus;
+import io.nuls.task.NulsThread;
 import io.nuls.util.log.Log;
 
+import java.util.List;
 import java.util.Map;
 
 public class P2pNetworkModuleImpl extends NetworkModule {
 
+    public P2pNetworkModuleImpl(){
+        this.registerService(p2pNetworkManager);
+    }
+
     private IPeersManager p2pNetworkManager = P2pPeersManagerImpl.getInstance();
 
-    @Override
-    public void init(Map<String, String> initParams) {
-        setStatus(ModuleStatus.INITED);
-    }
 
     @Override
     public void start() {
-        if(getStatus()== ModuleStatus.UNINITED){
-            Log.warn("p2p networke module not init!");
-        }
-        setStatus(ModuleStatus.STARTING);
         //TODO start the module
         p2pNetworkManager.start();
-        setStatus(ModuleStatus.RUNNING);
     }
 
     @Override
@@ -35,15 +32,11 @@ public class P2pNetworkModuleImpl extends NetworkModule {
             return;
         }
         p2pNetworkManager.shutdown();
-        setStatus(ModuleStatus.INITED);
     }
 
     @Override
-    public void desdroy(){
+    public void destroy(){
         shutdown();
-        NulsContext.getInstance().remService(p2pNetworkManager);
-        setStatus(ModuleStatus.UNINITED);
-        NulsContext.getInstance().getModuleManager().remModule(this.getModuleName());
 
     }
     @Override
@@ -55,5 +48,4 @@ public class P2pNetworkModuleImpl extends NetworkModule {
         str.append("here is info");
         return str.toString();
     }
-
 }

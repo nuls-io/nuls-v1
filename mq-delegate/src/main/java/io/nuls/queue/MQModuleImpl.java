@@ -1,15 +1,12 @@
 package io.nuls.queue;
 
-import io.nuls.global.NulsContext;
 import io.nuls.mq.MQModule;
 import io.nuls.mq.intf.StatInfo;
 import io.nuls.queue.impl.manager.QueueManager;
-import io.nuls.task.NulsThread;
-import io.nuls.task.ModuleManager;
 import io.nuls.task.ModuleStatus;
+import io.nuls.task.NulsThread;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -22,16 +19,12 @@ public class MQModuleImpl extends MQModule {
 
     private ScheduledExecutorService service;
 
-    private ModuleManager moduleManager = ModuleManager.getInstance();
-
-    @Override
-    public void init(Map<String, String> initParams) {
-        this.setStatus(ModuleStatus.INITED);
+    public MQModuleImpl() {
+        super();
     }
 
     @Override
     public void start() {
-        this.setStatus(ModuleStatus.STARTING);
         NulsThread t1 = new NulsThread(this, "queueStatusLogThread") {
             @Override
             public void run() {
@@ -41,24 +34,19 @@ public class MQModuleImpl extends MQModule {
         //启动速度统计任务
         service = new ScheduledThreadPoolExecutor(1);
         service.scheduleAtFixedRate(t1, 0, QueueManager.getLatelySecond(), TimeUnit.SECONDS);
+        this.registerService(service);
         QueueManager.setRunning(true);
-        this.setStatus(ModuleStatus.RUNNING);
     }
 
     @Override
     public void shutdown() {
-        this.setStatus(ModuleStatus.STOPPING);
         QueueManager.setRunning(false);
         service.shutdown();
-        this.setStatus(ModuleStatus.STOPED);
     }
 
     @Override
-    public void desdroy(){
+    public void destroy() {
         shutdown();
-        NulsContext.getInstance().remService(service);
-        NulsContext.getInstance().getModuleManager().remModule(this.getModuleName());
-        setStatus(ModuleStatus.UNINITED);
     }
 
     @Override
@@ -69,15 +57,15 @@ public class MQModuleImpl extends MQModule {
         str.append(",moduleStatus:");
         str.append(getStatus());
         str.append(",ThreadCount:");
-        Map<String, NulsThread> threadMap = moduleManager.getThreadsByModule(getModuleName());
-        str.append(threadMap.size());
+        List<NulsThread> threadList = this.getThreadList();
+        str.append(threadList.size());
         str.append("ThreadInfo:\n");
-        for (NulsThread t : threadMap.values()) {
+        for (NulsThread t : threadList) {
             str.append(t.getInfo());
         }
         str.append("QueueInfo:\n");
         List<StatInfo> list = QueueManager.getAllStatInfo();
-        for(StatInfo si :list){
+        for (StatInfo si : list) {
             str.append(si.toString());
         }
         return str.toString();

@@ -33,7 +33,6 @@ public class DisruptorServiceImpl implements IDisruptorService {
     }
 
     private DisruptorServiceImpl() {
-        NulsContext.getInstance().regService(this);
     }
 
     private static final EventFactory factory = new EventFactory() {

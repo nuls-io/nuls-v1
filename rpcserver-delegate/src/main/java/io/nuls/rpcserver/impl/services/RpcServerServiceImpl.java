@@ -19,10 +19,6 @@ import java.util.Map;
  */
 public class RpcServerServiceImpl implements IRpcServerService {
 
-    private RpcServerServiceImpl() {
-        NulsContext.getInstance().regService(this);
-    }
-
     private static final RpcServerServiceImpl service = new RpcServerServiceImpl();
 
     public static IRpcServerService getInstance() {

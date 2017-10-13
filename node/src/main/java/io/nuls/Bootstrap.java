@@ -1,23 +1,16 @@
 package io.nuls;
 
-import io.nuls.db.DBModule;
-import io.nuls.db.intf.IBlockStore;
 import io.nuls.exception.NulsException;
-import io.nuls.global.constant.NulsConstant;
 import io.nuls.global.NulsContext;
-import io.nuls.mq.MQModule;
-import io.nuls.rpcserver.constant.RpcServerConstant;
-import io.nuls.rpcserver.intf.RpcServerModule;
+import io.nuls.global.constant.NulsConstant;
 import io.nuls.task.ModuleManager;
 import io.nuls.task.NulsModule;
 import io.nuls.util.cfg.ConfigLoader;
 import io.nuls.util.cfg.I18nUtils;
 import io.nuls.util.log.Log;
 import io.nuls.util.str.StringUtils;
-import sun.security.krb5.Config;
 
 import java.io.IOException;
-import java.util.*;
 
 /**
  * System start class
@@ -52,27 +45,24 @@ public class Bootstrap {
             Log.info("");
         } while (false);
         System.out.println("--------------------------------------------");
-        System.out.println(NulsContext.getInstance().getModuleManager().getInfo());
+        System.out.println(ModuleManager.getInstance().getInfo());
         System.out.println("--------------------------------------------");
     }
 
     private static boolean initDB() {
         NulsModule dbModule = regModule(NulsConstant.CFG_BOOTSTRAP_DB_MODULE);
-        dbModule.init(null);
         dbModule.start();
         return true;
     }
 
     private static boolean initMQ() {
         NulsModule module = regModule(NulsConstant.CFG_BOOTSTRAP_QUEUE_MODULE);
-        module.init(null);
         module.start();
         return true;
     }
 
     private static boolean initP2p() {
         NulsModule module = regModule(NulsConstant.CFG_BOOTSTRAP_P2P_MODULE);
-        module.init(null);
         module.start();
         return true;
     }
@@ -82,15 +72,6 @@ public class Bootstrap {
      */
     private static boolean initRpcServer() {
         NulsModule module = regModule(NulsConstant.CFG_BOOTSTRAP_RPC_SERVER_MODULE);
-        Map<String, String> initParams = new HashMap<>();
-        try {
-            initParams.put(RpcServerConstant.INIT_PARAM_IP, ConfigLoader.getCfgValue(NulsConstant.CFG_RPC_SERVER_SECTION, NulsConstant.CFG_RPC_SERVER_IP));
-            initParams.put(RpcServerConstant.INIT_PARAM_PORT, ConfigLoader.getCfgValue(NulsConstant.CFG_RPC_SERVER_SECTION, NulsConstant.CFG_RPC_SERVER_PORT));
-            initParams.put(RpcServerConstant.INIT_PARAM_URL, ConfigLoader.getCfgValue(NulsConstant.CFG_RPC_SERVER_SECTION, NulsConstant.CFG_RPC_SERVER_URL));
-        } catch (NulsException e) {
-            Log.error(e);
-        }
-        module.init(null);
         module.start();
         return true;
     }
@@ -125,8 +106,6 @@ public class Bootstrap {
                 Log.error(e);
                 break;
             }
-//            module.start();
-            ModuleManager.getInstance().regModule(module.getModuleName(), module);
             Log.info(module.getInfo());
             return module;
         } while (false);

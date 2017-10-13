@@ -1,15 +1,18 @@
 package io.nuls.rpcserver.impl;
 
 import io.nuls.global.NulsContext;
+import io.nuls.global.constant.NulsConstant;
 import io.nuls.rpcserver.constant.RpcConstant;
 import io.nuls.rpcserver.constant.RpcServerConstant;
 import io.nuls.rpcserver.impl.services.RpcServerServiceImpl;
 import io.nuls.rpcserver.intf.IRpcServerService;
 import io.nuls.rpcserver.intf.RpcServerModule;
 import io.nuls.task.ModuleStatus;
+import io.nuls.task.NulsThread;
 import io.nuls.util.log.Log;
 import io.nuls.util.str.StringUtils;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -23,29 +26,21 @@ public class RpcServerModuleImpl extends RpcServerModule {
     private String port;
     private String moduleUrl;
 
-    @Override
-    public void init(Map<String, String> initParams) {
-        if(null==initParams){
-            return;
-        }
-        this.ip = initParams.get(RpcServerConstant.INIT_PARAM_IP);
-        this.port = initParams.get(RpcServerConstant.INIT_PARAM_PORT);
-        this.moduleUrl = initParams.get(RpcServerConstant.INIT_PARAM_URL);
-        setStatus(ModuleStatus.INITED);
+    public RpcServerModuleImpl(){
+        super();
+        this.ip = getCfgProperty(RpcServerConstant.CFG_RPC_SERVER_SECTION,RpcServerConstant.CFG_RPC_SERVER_IP);
+        this.port = getCfgProperty(RpcServerConstant.CFG_RPC_SERVER_SECTION,RpcServerConstant.CFG_RPC_SERVER_PORT);
+        this.moduleUrl = getCfgProperty(RpcServerConstant.CFG_RPC_SERVER_SECTION,RpcServerConstant.CFG_RPC_SERVER_URL);
+        this.registerService(rpcServerService);
     }
 
     @Override
     public void start() {
-        if(getStatus()==ModuleStatus.UNINITED){
-            Log.warn("Rpc server module not init!");
-        }
-        setStatus(ModuleStatus.STARTING);
         if(StringUtils.isBlank(ip)|| StringUtils.isBlank(port)){
             rpcServerService.startServer(RpcConstant.DEFAULT_IP,RpcConstant.DEFAULT_PORT,RpcConstant.DEFAULT_URL);
         }else{
             rpcServerService.startServer(ip,Integer.parseInt(port),moduleUrl);
         }
-        setStatus(ModuleStatus.RUNNING);
     }
 
     @Override
@@ -54,15 +49,10 @@ public class RpcServerModuleImpl extends RpcServerModule {
             return;
         }
         rpcServerService.shutdown();
-        setStatus(ModuleStatus.INITED);
     }
 
-    @Override
-    public void desdroy(){
+    public void destroy(){
         shutdown();
-        NulsContext.getInstance().remService(rpcServerService);
-        setStatus(ModuleStatus.UNINITED);
-        NulsContext.getInstance().getModuleManager().remModule(this.getModuleName());
     }
 
     @Override
@@ -74,4 +64,5 @@ public class RpcServerModuleImpl extends RpcServerModule {
         str.append(rpcServerService.isStarted());
         return str.toString();
     }
+
 }

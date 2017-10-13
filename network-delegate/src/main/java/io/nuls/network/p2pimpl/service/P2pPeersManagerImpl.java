@@ -6,7 +6,6 @@ import io.nuls.network.intf.IPeersManager;
 public class P2pPeersManagerImpl implements IPeersManager {
 
     private P2pPeersManagerImpl() {
-        NulsContext.getInstance().regService(this);
     }
 
     private static final P2pPeersManagerImpl service = new P2pPeersManagerImpl();

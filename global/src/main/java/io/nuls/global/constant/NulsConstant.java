@@ -8,7 +8,7 @@ public interface NulsConstant {
 
     String CONFIG_FILE = "nuls.ini";
     String CFG_SYSTEM_SECTION = "System";
-    String CFG_RPC_SERVER_SECTION = "RPC_Server";
+
     String CFG_DB_SECTION = "db_config";
     String CFG_QUEUE_SECTION = "queue";
     String CFG_NETWORK_SECTION = "Network";
@@ -21,9 +21,6 @@ public interface NulsConstant {
     String CFG_BOOTSTRAP_NETWORK_MODULE = "";
 
 
-    String CFG_RPC_SERVER_IP = "server.ip";
-    String CFG_RPC_SERVER_PORT = "server.port";
-    String CFG_RPC_SERVER_URL = "server.url";
 
     String SYSTEM_LANGUAGE = "language";
 }

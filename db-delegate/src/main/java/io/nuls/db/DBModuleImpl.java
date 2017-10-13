@@ -5,6 +5,7 @@ import io.nuls.task.ModuleManager;
 import io.nuls.task.ModuleStatus;
 import io.nuls.task.NulsThread;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -18,13 +19,7 @@ public class DBModuleImpl extends DBModule {
     private ScheduledExecutorService service;
 
     @Override
-    public void init(Map<String, String> initParams) {
-
-    }
-
-    @Override
     public void start() {
-        this.setStatus(ModuleStatus.STARTING);
         NulsThread t1 = new NulsThread(this, "queueStatusLogThread") {
             @Override
             public void run() {
@@ -32,25 +27,20 @@ public class DBModuleImpl extends DBModule {
         };
         //启动速度统计任务
         service = new ScheduledThreadPoolExecutor(1);
+        this.registerService(service);
 //        service.scheduleAtFixedRate(t1, 0, QueueManager.getLatelySecond(), TimeUnit.SECONDS);
 //        QueueManager.setRunning(true);
-        this.setStatus(ModuleStatus.RUNNING);
     }
 
     @Override
     public void shutdown() {
-        this.setStatus(ModuleStatus.STOPPING);
 //        QueueManager.setRunning(false);
         service.shutdown();
-        this.setStatus(ModuleStatus.STOPED);
     }
 
     @Override
-    public void desdroy(){
+    public void destroy(){
         shutdown();
-        NulsContext.getInstance().remService(service);
-        NulsContext.getInstance().getModuleManager().remModule(this.getModuleName());
-        setStatus(ModuleStatus.UNINITED);
     }
 
     @Override
@@ -61,10 +51,10 @@ public class DBModuleImpl extends DBModule {
         str.append(",moduleStatus:");
         str.append(getStatus());
         str.append(",ThreadCount:");
-        Map<String, NulsThread> threadMap = NulsContext.getInstance().getModuleManager().getThreadsByModule(getModuleName());
-        str.append(threadMap.size());
+        List<NulsThread> threadList = this.getThreadList();
+        str.append(threadList.size());
         str.append("ThreadInfo:\n");
-        for (NulsThread t : threadMap.values()) {
+        for (NulsThread t : threadList) {
             str.append(t.getInfo());
         }
 //        str.append("QueueInfo:\n");
@@ -74,7 +64,6 @@ public class DBModuleImpl extends DBModule {
 //        }
         return str.toString();
     }
-
 
     private boolean hasType(String dataBaseType) {
         switch (dataBaseType) {
