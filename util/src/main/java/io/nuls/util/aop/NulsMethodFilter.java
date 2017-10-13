@@ -10,9 +10,9 @@ import java.lang.reflect.Method;
  */
 public interface NulsMethodFilter {
 
-    void before(Object obj, Method method, Object[] args, MethodProxy methodProxy);
+    void before(Object obj, Method method, Object[] args);
 
-    void after(Object obj, Method method, Object[] args, MethodProxy methodProxy,Object result);
+    void after(Object obj, Method method, Object[] args, Object result);
 
-    void exception(Object obj, Method method, Object[] args, MethodProxy methodProxy,Exception e);
+    void exception(Object obj, Method method, Object[] args, Exception e);
 }

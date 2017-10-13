@@ -20,15 +20,15 @@ public class NulsMethodInterceptor implements MethodInterceptor {
 
     @Override
     public Object intercept(Object obj, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
-        filter.before(obj,method,args,methodProxy);
+        filter.before(obj,method,args);
         Object result;
         try{
             result = methodProxy.invokeSuper(obj, args);
         }catch (Exception e){
-            filter.exception(obj,method,args,methodProxy,e);
+            filter.exception(obj,method,args,e);
             throw e;
         }
-        filter.after(obj,method,args,methodProxy,result);
+        filter.after(obj,method,args,result);
         return result;
     }
 }
