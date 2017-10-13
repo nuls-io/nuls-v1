@@ -15,12 +15,6 @@ public interface IStore<T,K> {
 
     T getByKey(K k);
 
-    List<T> getList();
-
-    long count();
-
-    int exist();
-
     int deleteByKey(K k);
 
 }
