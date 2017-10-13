@@ -28,15 +28,15 @@ public class ModuleManager {
     }
 
     protected void regService(String moduleName, Object service) {
-        if (intfMap.keySet().contains(service.getClass().getSuperclass())) {
-            throw new NulsRuntimeException(ErrorCode.INTF_REPETITION);
-        }
         Class key = service.getClass().getSuperclass();
         if (key.equals(Object.class)) {
             key = service.getClass();
         }
         if (null == key || key.equals(Object.class)) {
             key = service.getClass();
+        }
+        if (intfMap.keySet().contains(key)) {
+            throw new NulsRuntimeException(ErrorCode.INTF_REPETITION);
         }
         intfMap.put(key, service);
         Set<Class> set = moduleIntfMap.get(moduleName);
@@ -48,9 +48,6 @@ public class ModuleManager {
     }
 
     protected void removeService(String moduleName, Object service) {
-        if (!intfMap.keySet().contains(service.getClass().getSuperclass())) {
-            throw new NulsRuntimeException(ErrorCode.INTF_NOTFOUND);
-        }
         Class key = service.getClass().getSuperclass();
         if (key.equals(Object.class)) {
             key = service.getClass();
