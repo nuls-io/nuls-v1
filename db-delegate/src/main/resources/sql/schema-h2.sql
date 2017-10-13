@@ -1,5 +1,4 @@
 -- Create table
-DROP TABLE block;
 create table IF NOT EXISTS block
 (
   hash       VARCHAR2(100) not null,

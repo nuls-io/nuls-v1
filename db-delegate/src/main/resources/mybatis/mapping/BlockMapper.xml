@@ -83,4 +83,11 @@
       (#{hash,jdbcType=VARCHAR}, #{height,jdbcType=BIGINT}, #{createtime,jdbcType=BIGINT})
     </foreach>
   </insert>
+
+  <select id="selectList" parameterType="Searchable" resultType="io.nuls.db.entity.Block">
+    select <include refid="Base_Column_List" />
+    from block
+    <include refid="io.nuls.db.dao.mybatis.base.CommonMapper.Serach_Where"/>
+  </select>
+
 </mapper>

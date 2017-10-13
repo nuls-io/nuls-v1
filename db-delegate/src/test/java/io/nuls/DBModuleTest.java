@@ -3,10 +3,16 @@ package io.nuls;
 import com.alibaba.druid.pool.DruidDataSource;
 import io.nuls.db.DBModule;
 import io.nuls.db.DBModuleImpl;
+import io.nuls.db.dao.mybatis.BlockMapper;
+import io.nuls.db.dao.mybatis.base.CommonMapper;
+import io.nuls.db.dao.mybatis.util.Condition;
+import io.nuls.db.dao.mybatis.util.SearchOperator;
+import io.nuls.db.dao.mybatis.util.Searchable;
 import io.nuls.db.entity.Block;
 import io.nuls.db.impl.BlockStoreImpl;
 import io.nuls.db.intf.IBlockStore;
 import io.nuls.global.NulsContext;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -15,6 +21,7 @@ import org.junit.Before;
 
 import javax.sql.DataSource;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -24,23 +31,20 @@ import java.util.Map;
 public class DBModuleTest {
 
     private DBModule dbModule;
+
+    private SqlSessionFactory sqlSessionFactory;
     /**
      * start spring
      */
     @Before
     public void init() {
-//        dbModule = new DBModuleImpl();
-//        Map<String,String> map = new HashMap<>();
-//        map.put("dataBaseType", "h2");
-//        dbModule.init(map);
+
     }
 
     @org.junit.Test
     public void testMybatis() {
-        SqlSessionFactory sqlSessionFactory;
         try {
-
-            sqlSessionFactory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsReader("mybatis/mybatis-config.xml"),"h2");
+            sqlSessionFactory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsReader("mybatis/mybatis-config.xml"),"druid");
             SqlSession session = sqlSessionFactory.openSession();
             DataSource ds = session.getConfiguration().getEnvironment().getDataSource();
             if(ds instanceof DruidDataSource){
@@ -48,8 +52,19 @@ public class DBModuleTest {
             }else{
                 System.out.println("No");
             }
-            Long block = session.selectOne("io.nuls.db.dao.mybatis.BlockMapper.count");
-            System.out.println("------------" + block);
+
+            CommonMapper commonMapper = session.getMapper(CommonMapper.class);
+
+            BlockMapper blockMapper = session.getMapper(BlockMapper.class);
+//            Long block = session.selectOne("io.nuls.db.dao.mybatis.BlockMapper.count");
+            Searchable searchable = new Searchable();
+            searchable.addCondition(new Condition("hash", SearchOperator.eq, "shshh"));
+            List<Block> blockList = blockMapper.selectList(searchable);
+            for(Block block : blockList) {
+                System.out.println(block.getHash());
+            }
+            long num = blockMapper.count(new Searchable());
+            System.out.println("------------" + num);
         }catch (Exception e) {
             e.printStackTrace();
         }

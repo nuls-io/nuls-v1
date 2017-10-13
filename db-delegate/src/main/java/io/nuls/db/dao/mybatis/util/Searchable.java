@@ -30,6 +30,11 @@ public class Searchable {
     public void addCondition(Condition c) {
     	this.operators.add(c);
     }
+
+
+    public void addCondition(String key ,SearchOperator operator, String value) {
+    	this.addCondition(new Condition(key,operator,value));
+	}
     
     /**
      * 根据key删除某个条件

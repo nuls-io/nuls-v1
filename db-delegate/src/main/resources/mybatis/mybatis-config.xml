@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "./mybatis-3-config.dtd">
 <configuration>
-
+    <properties resource="db_config.properties"></properties>
     <settings>
         <!-- 全局映射器启用缓存 -->
         <setting name="cacheEnabled" value="true" />
@@ -26,6 +26,10 @@
         <setting name="logImpl" value="STDOUT_LOGGING" />
 
     </settings>
+
+    <typeAliases>
+        <typeAlias type="io.nuls.db.dao.mybatis.util.Searchable" />
+    </typeAliases>
 
 
     <plugins>
@@ -59,20 +63,22 @@
         </plugin>
     </plugins>
 
+
     <!-- dataSource only use druidDataSource -->
-    <environments default="h2">
-        <environment id="h2">
+    <environments default="druid">
+        <environment id="druid">
             <transactionManager type="JDBC"></transactionManager>
-            <dataSource type="io.nuls.db.DataSourceFactory">
-                <property name="driverClass" value="org.h2.Driver"/>
-                <property name="url" value="jdbc:h2:file:../data/h2;LOG=2;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=1;AUTO_RECONNECT=TRUE;DATABASE_TO_UPPER=FALSE"/>
-                <property name="username" value="sa"/>
-                <property name="password" value="123456"/>
+            <dataSource type="io.nuls.db.DataSourceBuilder">
+                <property name="driverClass" value="${druid.driverClassName}"/>
+                <property name="url" value="${druid..url}"/>
+                <property name="username" value="${druid.username}"/>
+                <property name="password" value="${druid.password}"/>
             </dataSource>
         </environment>
     </environments>
 
     <mappers>
         <mapper resource="mybatis/mapping/BlockMapper.xml" />
+        <mapper resource="mybatis/mapping/CommonMapper.xml" />
     </mappers>
 </configuration>

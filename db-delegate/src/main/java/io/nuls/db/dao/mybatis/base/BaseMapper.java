@@ -12,7 +12,6 @@ import java.util.List;
  * @author zhouwei
  *
  */
-@MyBatisMapper
 public interface BaseMapper<M, ID extends Serializable> {
 	
 	int insert(M m);
