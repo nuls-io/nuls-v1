@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "./mybatis-3-config.dtd">
 <configuration>
-
+    <properties resource="db_config.properties"></properties>
     <settings>
         <!-- 全局映射器启用缓存 -->
         <setting name="cacheEnabled" value="true" />
@@ -22,10 +22,14 @@
         <setting name="defaultStatementTimeout" value="60000" />
 
 
-		<!-- 控制台打印sql语句,正式发布项目时记得关闭 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-->
+		<!--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 控制台打印sql语句,正式发布项目时记得关闭 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-->
         <setting name="logImpl" value="STDOUT_LOGGING" />
 
     </settings>
+
+    <typeAliases>
+        <typeAlias type="io.nuls.db.dao.mybatis.util.Searchable" />
+    </typeAliases>
 
 
     <plugins>
@@ -60,6 +64,21 @@
     </plugins>
 
 
+    <!-- dataSource only use druidDataSource -->
+    <environments default="druid">
+        <environment id="druid">
+            <transactionManager type="JDBC"></transactionManager>
+            <dataSource type="io.nuls.db.DataSourceBuilder">
+                <property name="driverClass" value="${druid.driverClassName}"/>
+                <property name="url" value="${druid..url}"/>
+                <property name="username" value="${druid.username}"/>
+                <property name="password" value="${druid.password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+
     <mappers>
+        <mapper resource="mybatis/mapping/BlockMapper.xml" />
+        <mapper resource="mybatis/mapping/CommonMapper.xml" />
     </mappers>
 </configuration>

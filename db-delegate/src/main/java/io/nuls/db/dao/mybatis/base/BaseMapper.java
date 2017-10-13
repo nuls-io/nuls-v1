@@ -12,12 +12,13 @@ import java.util.List;
  * @author zhouwei
  *
  */
-@MyBatisMapper
 public interface BaseMapper<M, ID extends Serializable> {
 	
 	int insert(M m);
 
     int insertSelective(M m);
+
+    int insertBatch(List<M> list);
     
     int updateByPrimaryKey(M m);
     

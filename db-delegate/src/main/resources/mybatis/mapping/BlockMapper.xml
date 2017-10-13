@@ -20,10 +20,9 @@
     where hash = #{hash,jdbcType=VARCHAR}
   </delete>
   <insert id="insert" parameterType="io.nuls.db.entity.Block" >
-    insert into block (hash, height, createtime
-      )
-    values (#{hash,jdbcType=VARCHAR}, #{height,jdbcType=BIGINT}, #{createtime,jdbcType=BIGINT}
-      )
+    insert into block (hash, height, createtime)
+    values (#{hash,jdbcType=VARCHAR}, #{height,jdbcType=BIGINT}, #{createtime,jdbcType=BIGINT}),
+    (#{hash,jdbcType=VARCHAR}, #{height,jdbcType=BIGINT}, #{createtime,jdbcType=BIGINT})
   </insert>
   <insert id="insertSelective" parameterType="io.nuls.db.entity.Block" >
     insert into block
@@ -76,4 +75,19 @@
   <select id="count" resultType="Long">
     select count(1) as getCount from block;
   </select>
+
+  <insert id="insertBatch" parameterType="java.util.List">
+    insert into block (hash, height, createtime)
+    values
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{hash,jdbcType=VARCHAR}, #{height,jdbcType=BIGINT}, #{createtime,jdbcType=BIGINT})
+    </foreach>
+  </insert>
+
+  <select id="selectList" parameterType="Searchable" resultType="io.nuls.db.entity.Block">
+    select <include refid="Base_Column_List" />
+    from block
+    <include refid="io.nuls.db.dao.mybatis.base.CommonMapper.Serach_Where"/>
+  </select>
+
 </mapper>

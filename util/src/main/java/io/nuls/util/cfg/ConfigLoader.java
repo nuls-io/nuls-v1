@@ -1,7 +1,6 @@
 package io.nuls.util.cfg;
 
 import io.nuls.exception.NulsException;
-import io.nuls.exception.NulsRuntimeException;
 import io.nuls.util.constant.ErrorCode;
 import io.nuls.util.str.StringUtils;
 import org.ini4j.Config;
@@ -9,12 +8,7 @@ import org.ini4j.Ini;
 import org.ini4j.Profile;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
 
 /**
  * Created by Niels on 2017/9/26.
@@ -41,13 +35,13 @@ public abstract class ConfigLoader {
         config = ini;
     }
 
-    public static String getCfgValue(String section,String key) throws NulsException {
+    public static String getCfgValue(String section, String key) throws NulsException {
         Profile.Section ps = config.get(section);
-        if(null==ps){
+        if (null == ps) {
             throw new NulsException(ErrorCode.CONFIGURATION_ITEM_DOES_NOT_EXIST);
         }
         String value = ps.get(key);
-        if(StringUtils.isBlank(value)){
+        if (StringUtils.isBlank(value)) {
             throw new NulsException(ErrorCode.CONFIGURATION_ITEM_DOES_NOT_EXIST);
         }
         return value;
@@ -55,7 +49,7 @@ public abstract class ConfigLoader {
 
     public static Profile.Section getSection(String section) throws NulsException {
         Profile.Section ps = config.get(section);
-        if(null==ps){
+        if (null == ps) {
             throw new NulsException(ErrorCode.CONFIGURATION_ITEM_DOES_NOT_EXIST);
         }
         return ps;
