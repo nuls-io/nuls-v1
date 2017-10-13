@@ -14,14 +14,14 @@ import javax.ws.rs.ext.ExceptionMapper;
 import java.io.IOException;
 
 import io.nuls.util.constant.ErrorCode;
+import io.nuls.util.log.Log;
 import org.glassfish.grizzly.http.server.Request;
 
 /**
  * Created by Niels on 2017/9/28.
  * nuls.io
  */
-public class RpcServerFilter implements ContainerRequestFilter,ContainerResponseFilter, ExceptionMapper<Exception>
-{
+public class RpcServerFilter implements ContainerRequestFilter, ContainerResponseFilter, ExceptionMapper<Exception> {
 
     @Inject
     private Provider<Request> grizzlyRequestProvider;
@@ -32,11 +32,13 @@ public class RpcServerFilter implements ContainerRequestFilter,ContainerResponse
         if (!whiteSheetVerifier(grizzlyRequestProvider.get())) {
             throw new NulsRuntimeException(ErrorCode.REQUEST_DENIED);
         }
+        requestContext.setProperty("start", System.currentTimeMillis());
     }
 
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
-        System.out.println(requestContext);
+        Log.info("url:{},IP:{},start:{},end:{},params:{},result:{}", requestContext.getUriInfo().getRequestUri().getPath()+"?"+requestContext.getUriInfo().getRequestUri().getQuery(), grizzlyRequestProvider.get().getRemoteHost()
+        ,requestContext.getProperty("start"),System.currentTimeMillis(),null,null);
     }
 
     @Override
@@ -46,10 +48,11 @@ public class RpcServerFilter implements ContainerRequestFilter,ContainerResponse
     }
 
     private boolean whiteSheetVerifier(Request request) {
-        System.out.println(request.getRemoteAddr());
-        System.out.println(request.getRemoteHost());
-        System.out.println(request.getRemotePort());
-        System.out.println(request.getRemoteUser());
+        //TODO
+//        System.out.println(request.getRemoteAddr());
+//        System.out.println(request.getRemoteHost());
+//        System.out.println(request.getRemotePort());
+//        System.out.println(request.getRemoteUser());
         return true;
     }
 }

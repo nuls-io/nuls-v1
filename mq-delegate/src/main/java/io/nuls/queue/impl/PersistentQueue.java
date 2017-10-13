@@ -4,6 +4,7 @@ import io.nuls.exception.NulsRuntimeException;
 import io.nuls.fqueue.FQueue;
 import io.nuls.fqueue.exception.FileFormatException;
 import io.nuls.mq.intf.NulsQueue;
+import io.nuls.mq.intf.StatInfo;
 import io.nuls.queue.impl.util.SerializeUtils;
 
 import java.io.File;
@@ -51,6 +52,11 @@ public class PersistentQueue<T> extends NulsQueue<T> {
         this.queue.offer(obj);
         if (size() > 0)
             signalNotEmpty();
+    }
+
+    @Override
+    public StatInfo getStatInfo() {
+        return super.getStatInfo();
     }
 
     @Override
