@@ -7,10 +7,13 @@ import io.nuls.util.cfg.I18nUtils;
  * nuls.io
  */
 public enum ErrorCode {
+
+
+    SUCCESS("0", 00000),
     /**
      * ----------  System Exception code   ---------
      */
-    SUCCESS("0", 10000),
+    SYS_UNKOWN_EXCEPTION("SYS000",10000),
     FAILED("1", 10001),
     FILE_NOT_FOUND("2", 10002),
     NULL_PARAMETER("3", 10003),
@@ -25,9 +28,22 @@ public enum ErrorCode {
     CONFIGURATION_ITEM_DOES_NOT_EXIST("401", 10401),
 
     QUEUE_NAME_ERROR("200",10200),
+
+    /**
+     * ----------  Consensus Network code   ---------
+     */
+    CS_UNKOWN_EXCEPTION("CS000",30000),
+
+    /**
+     * ----------  p2p Network code   ---------
+     */
+    P2P_UNKOWN_EXCEPTION("P2P000",40000),
+    P2P_GROUP_ALREADY_EXISTS("P2P001",40001),
+
     /**
      * ----------  DBException code   ---------
      */
+    DB_UNKOWN_EXCEPTION("DB000",50000),
     DB_SAVE_CANNOT_NULL("DB001", 50001),
     DB_SAVE_BATCH_LIMIT_OVER("DB002", 50002);
 
