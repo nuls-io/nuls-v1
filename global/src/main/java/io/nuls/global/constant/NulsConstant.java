@@ -7,11 +7,10 @@ package io.nuls.global.constant;
 public interface NulsConstant {
 
     String CONFIG_FILE = "nuls.ini";
-    String CFG_SYSTEM_SECTION = "System";
 
-    String CFG_DB_SECTION = "db_config";
-    String CFG_QUEUE_SECTION = "queue";
-    String CFG_NETWORK_SECTION = "Network";
+    String CFG_SYSTEM_SECTION = "System";
+    String SYSTEM_LANGUAGE = "language";
+
     String CFG_SYSTEM_LANGUAGE = "language";
     String CFG_BOOTSTRAP_SECTION = "Bootstrap";
     String CFG_BOOTSTRAP_RPC_SERVER_MODULE = "rpcServerModule";
@@ -22,5 +21,4 @@ public interface NulsConstant {
 
 
 
-    String SYSTEM_LANGUAGE = "language";
 }

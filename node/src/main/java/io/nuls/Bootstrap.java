@@ -4,6 +4,7 @@ import io.nuls.exception.NulsException;
 import io.nuls.global.NulsContext;
 import io.nuls.global.constant.NulsConstant;
 import io.nuls.task.ModuleManager;
+import io.nuls.task.ModuleService;
 import io.nuls.task.NulsModule;
 import io.nuls.util.cfg.ConfigLoader;
 import io.nuls.util.cfg.I18nUtils;
@@ -68,7 +69,7 @@ public class Bootstrap {
     }
 
     /**
-     * @return 启动结果
+     * @return result
      */
     private static boolean initRpcServer() {
         NulsModule module = regModule(NulsConstant.CFG_BOOTSTRAP_RPC_SERVER_MODULE);
@@ -84,32 +85,7 @@ public class Bootstrap {
         } catch (NulsException e) {
             Log.error(e);
         }
-        do {
-            if (StringUtils.isBlank(moduleClass)) {
-                Log.warn("module cannot start:" + key);
-                break;
-            }
-            Class clazz = null;
-            try {
-                clazz = Class.forName(moduleClass);
-            } catch (ClassNotFoundException e) {
-                Log.error(e);
-                break;
-            }
-            NulsModule module = null;
-            try {
-                module = (NulsModule) clazz.newInstance();
-            } catch (InstantiationException e) {
-                Log.error(e);
-                break;
-            } catch (IllegalAccessException e) {
-                Log.error(e);
-                break;
-            }
-            Log.info(module.getInfo());
-            return module;
-        } while (false);
-        return null;
+        return ModuleService.getInstance().loadModule(moduleClass);
     }
 
 }
