@@ -85,7 +85,16 @@ public class Bootstrap {
         } catch (NulsException e) {
             Log.error(e);
         }
-        return ModuleService.getInstance().loadModule(moduleClass);
+        try {
+            return ModuleService.getInstance().loadModule(moduleClass);
+        } catch (ClassNotFoundException e) {
+            Log.error(e);
+        } catch (IllegalAccessException e) {
+            Log.error(e);
+        } catch (InstantiationException e) {
+            Log.error(e);
+        }
+        return null;
     }
 
 }

@@ -1,7 +1,6 @@
 package io.nuls.rpcserver.resources;
 
-import io.nuls.rpcserver.entity.RpcResult;
-import io.nuls.task.NulsModule;
+import io.nuls.rpcserver.vo.RpcResult;
 import io.nuls.util.param.AssertUtil;
 
 import javax.ws.rs.*;
@@ -15,6 +14,7 @@ import javax.ws.rs.core.MediaType;
 public class ExampleResouce {
 
     public ExampleResouce() {
+        System.out.println("haha");
     }
 
     @GET
