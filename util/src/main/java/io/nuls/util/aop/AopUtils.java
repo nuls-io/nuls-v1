@@ -14,4 +14,11 @@ public class AopUtils {
         enhancer.setCallback(new NulsMethodInterceptor(filter));
         return (T) enhancer.create();
     }
+
+    public static final <T> T createProxy(Class<T> clazz,Class[] paramsClass,Object[] params,NulsMethodFilter filter) {
+        Enhancer enhancer = new Enhancer();
+        enhancer.setSuperclass(clazz);
+        enhancer.setCallback(new NulsMethodInterceptor(filter));
+        return (T) enhancer.create(paramsClass,params);
+    }
 }
