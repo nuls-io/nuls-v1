@@ -2,9 +2,12 @@ package io.nuls.db.impl;
 
 import io.nuls.db.DBException;
 import io.nuls.db.dao.mybatis.BlockMapper;
+import io.nuls.db.dao.mybatis.session.NulsSqlSession;
+import io.nuls.db.dao.mybatis.session.NulsSqlSessionFactory;
 import io.nuls.db.dao.mybatis.util.Searchable;
 import io.nuls.db.entity.Block;
 import io.nuls.db.intf.IBlockStore;
+import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
 import java.util.List;
@@ -12,16 +15,13 @@ import java.util.List;
 /**
  * Created by win10 on 2017/9/29.
  */
-public class BlockStoreImpl implements IBlockStore {
+public class BlockStoreImpl extends BaseStore implements IBlockStore {
 
     private BlockMapper blockMapper;
 
-
-    private SqlSessionFactory sqlSessionFactory;
-
-
-    public BlockStoreImpl(SqlSessionFactory sqlSessionFactory) {
+    public BlockStoreImpl(NulsSqlSessionFactory sqlSessionFactory) {
         this.sqlSessionFactory = sqlSessionFactory;
+        this.blockMapper = sqlSessionFactory.openSession().getMapper(BlockMapper.class);
     }
 
     @Override
@@ -39,12 +39,16 @@ public class BlockStoreImpl implements IBlockStore {
 
     @Override
     public int update(Block block, boolean selective) {
-
+        NulsSqlSession session = sqlSessionFactory.openSession(false);
+        session.setOpenSessionClass(this);
+        int result = 0;
         if(!selective) {
-            return blockMapper.updateByPrimaryKey(block);
+            result = blockMapper.updateByPrimaryKey(block);
         }else {
-            return blockMapper.updateByPrimaryKeySelective(block);
+            result = blockMapper.updateByPrimaryKeySelective(block);
         }
+        session.commit();
+        return result;
     }
 
     @Override
@@ -79,6 +83,9 @@ public class BlockStoreImpl implements IBlockStore {
 
     @Override
     public List<Block> getList(Integer pageNum, Integer pageSize) {
-        return null;
+        NulsSqlSession session = sqlSessionFactory.openSession(false);
+        session.setOpenSessionClass(this);
+
+        return blockMapper.selectList(new Searchable());
     }
 }

@@ -2,11 +2,13 @@ package io.nuls;
 
 import io.nuls.db.DBModule;
 import io.nuls.db.DBModuleImpl;
+import io.nuls.db.entity.Block;
 import io.nuls.db.impl.BlockStoreImpl;
 import io.nuls.db.intf.IBlockStore;
 import io.nuls.global.NulsContext;
 import org.junit.Before;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -27,7 +29,20 @@ public class DBModuleTest {
 
     @org.junit.Test
     public void testDB() {
+        long start = System.currentTimeMillis();
+        Block b1= new Block();
+        b1.setHash("dfsdfsd");
+        b1.setCreatetime(System.currentTimeMillis());
+        b1.setHeight(222L);
+        dbModule.getBlockStore().update(b1,true);
 
+        List<Block> blockList = dbModule.getBlockStore().getList(1,1);
+        long end = System.currentTimeMillis();
+
+        System.out.println("time;" + (end - start));
+        for(Block b : blockList) {
+            System.out.println(b.getHash() + "," + b.getHeight());
+        }
 //        IBlockStore blockStore = new BlockStoreImpl();
 
 //        long count = blockStore.count();

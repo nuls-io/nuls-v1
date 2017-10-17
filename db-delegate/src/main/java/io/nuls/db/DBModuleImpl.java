@@ -1,10 +1,14 @@
 package io.nuls.db;
 
+import io.nuls.db.dao.mybatis.session.NulsSqlSessionFactory;
+import io.nuls.db.dao.mybatis.session.NulsSqlSessionFactoryBuilder;
+import io.nuls.db.impl.BlockStoreImpl;
 import io.nuls.db.intf.IBlockStore;
 import io.nuls.global.NulsContext;
 import io.nuls.task.ModuleManager;
 import io.nuls.task.ModuleStatus;
 import io.nuls.task.NulsThread;
+import io.nuls.util.aop.AopUtils;
 import io.nuls.util.constant.ErrorCode;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -25,9 +29,9 @@ public class DBModuleImpl extends DBModule {
 
     private ScheduledExecutorService dbExecutor;
 
-    private SqlSessionFactory sqlSessionFactory;
+    private NulsSqlSessionFactory sqlSessionFactory;
 
-    private IBlockStore iBlockStore;
+
 
     @Override
     public void start(){
@@ -43,6 +47,7 @@ public class DBModuleImpl extends DBModule {
 //        QueueManager.setRunning(true);
         try {
             initSqlSessionFactory();
+            initService();
         }catch (Exception e) {
             throw new DBException(ErrorCode.DB_SQLSESSION_INIT_FAIL);
         }
@@ -53,12 +58,15 @@ public class DBModuleImpl extends DBModule {
     private void initSqlSessionFactory()throws IOException{
         String resource = "mybatis/mybatis-config.xml";
         InputStream in = Resources.getResourceAsStream(resource);
-        sqlSessionFactory = new SqlSessionFactoryBuilder().build(in);
+        sqlSessionFactory = new NulsSqlSessionFactoryBuilder().build(in);
+        System.out.println(sqlSessionFactory.getClass());
     }
 
 
     private void initService() {
 
+
+        this.iBlockStore = AopUtils.createProxy(BlockStoreImpl.class, new DBMethodFilter());
     }
 
     @Override
@@ -94,11 +102,13 @@ public class DBModuleImpl extends DBModule {
         return str.toString();
     }
 
-    public SqlSessionFactory getSqlSessionFactory() {
+    public NulsSqlSessionFactory getSqlSessionFactory() {
         return sqlSessionFactory;
     }
 
-    public void setSqlSessionFactory(SqlSessionFactory sqlSessionFactory) {
+    public void setSqlSessionFactory(NulsSqlSessionFactory sqlSessionFactory) {
         this.sqlSessionFactory = sqlSessionFactory;
     }
+
+
 }
