@@ -6,7 +6,7 @@ import io.nuls.cache.entity.CacheElement;
  * Created by Niels on 2017/10/18.
  * nuls.io
  */
-public interface ICacheEventListenner {
+public interface ICacheEventListener {
 
     void onAdd(CacheElement element);
 

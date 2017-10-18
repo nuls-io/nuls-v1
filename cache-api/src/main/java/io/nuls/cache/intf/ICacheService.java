@@ -79,6 +79,21 @@ public interface ICacheService<T> {
      * @param title
      * @param listenner
      */
-    void addCacheListenner(String title,ICacheEventListenner listenner);
+    void addCacheListener(String title,ICacheEventListener listenner);
+
+    /**
+     * remove an operating listener
+     * add a oprateion
+     * @param title
+     * @param listenner
+     */
+    void removeCacheListener(String title,ICacheEventListener listenner);
+
+    /**
+     * get all listener of the cache named title
+     * @param title
+     * @return
+     */
+    List<ICacheEventListener> getCacheListener(String title);
 
 }
