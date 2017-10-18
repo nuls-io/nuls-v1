@@ -1,7 +1,7 @@
 package io.nuls.rpcserver.resources;
 
 import io.nuls.global.NulsContext;
-import io.nuls.rpcserver.entity.RpcResult;
+import io.nuls.rpcserver.vo.RpcResult;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

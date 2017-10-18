@@ -5,7 +5,7 @@ import java.util.List;
 
 /**
  * dao查询接口，封装查询语句工具类
- * @author zhouwei
+ * @author zoro
  *
  */
 public class Searchable {

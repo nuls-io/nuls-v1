@@ -22,18 +22,16 @@ public class DBModuleTest {
     @Before
     public void init() {
         dbModule = new DBModuleImpl();
-//        Map<String,String> map = new HashMap<>();
-//        map.put("dataBaseType", "h2");
-//        dbModule.init(map);
+        dbModule.start();
     }
 
     @org.junit.Test
     public void testDB() {
 
-        IBlockStore blockStore = new BlockStoreImpl();
+//        IBlockStore blockStore = new BlockStoreImpl();
 
-        long count = blockStore.count();
-        System.out.println(count);
+//        long count = blockStore.count();
+//        System.out.println(count);
 //        long start = System.currentTimeMillis();
 //
 //        for (long i = 0; i < 100000; i++) {

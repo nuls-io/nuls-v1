@@ -43,9 +43,10 @@ public enum ErrorCode {
     /**
      * ----------  DBException code   ---------
      */
-    DB_UNKOWN_EXCEPTION("DB000",50000),
-    DB_SAVE_CANNOT_NULL("DB001", 50001),
-    DB_SAVE_BATCH_LIMIT_OVER("DB002", 50002);
+    DB_SQLSESSION_INIT_FAIL("DB000",50000),
+    DB_UNKOWN_EXCEPTION("DB010",50010),
+    DB_SAVE_CANNOT_NULL("DB011", 50011),
+    DB_SAVE_BATCH_LIMIT_OVER("DB012", 50012);
 
     private final int msg;
     private final String code;

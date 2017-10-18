@@ -86,7 +86,7 @@ public class DisruptorServiceImpl implements IDisruptorService {
     }
 
     @Override
-    public String getStaticInfo(String name) {
+    public String getStatInfo(String name) {
         NulsDisruptor disruptor = disruptorMap.get(name);
         AssertUtil.canNotEmpty(disruptor, "the disruptor is not exist!name:" + name);
         return disruptor.getStatInfo().toString();

@@ -15,7 +15,6 @@ public class NulsContext {
         return nc;
     }
 
-
     public NulsModule getModule(String moduleName) {
         return ModuleManager.getInstance().getModule(moduleName);
     }

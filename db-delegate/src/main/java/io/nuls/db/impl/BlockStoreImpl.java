@@ -5,6 +5,7 @@ import io.nuls.db.dao.mybatis.BlockMapper;
 import io.nuls.db.dao.mybatis.util.Searchable;
 import io.nuls.db.entity.Block;
 import io.nuls.db.intf.IBlockStore;
+import org.apache.ibatis.session.SqlSessionFactory;
 
 import java.util.List;
 
@@ -14,6 +15,14 @@ import java.util.List;
 public class BlockStoreImpl implements IBlockStore {
 
     private BlockMapper blockMapper;
+
+
+    private SqlSessionFactory sqlSessionFactory;
+
+
+    public BlockStoreImpl(SqlSessionFactory sqlSessionFactory) {
+        this.sqlSessionFactory = sqlSessionFactory;
+    }
 
     @Override
     public int save(Block block) {
@@ -30,6 +39,7 @@ public class BlockStoreImpl implements IBlockStore {
 
     @Override
     public int update(Block block, boolean selective) {
+
         if(!selective) {
             return blockMapper.updateByPrimaryKey(block);
         }else {
@@ -51,22 +61,24 @@ public class BlockStoreImpl implements IBlockStore {
         return blockMapper.selectByPrimaryKey(key);
     }
 
-    @Override
     public List<Block> getList() {
         return null;
     }
 
-    @Override
     public long count() {
         return blockMapper.count(new Searchable());
     }
 
-    @Override
     public int exist() {
         return 0;
     }
 
     public void setBlockMapper(BlockMapper blockMapper) {
         this.blockMapper = blockMapper;
+    }
+
+    @Override
+    public List<Block> getList(Integer pageNum, Integer pageSize) {
+        return null;
     }
 }

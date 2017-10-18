@@ -326,8 +326,7 @@ public class Util
  
     /**
      * �����ַ���תASCII���ַ���
-     * 
-     * @param String
+     *
      *            �ַ���
      * @return ASCII�ַ���
      */
@@ -455,8 +454,7 @@ public class Util
     
     /**
      * ASCII���ַ���ת�����ַ���
-     * 
-     * @param String
+     *
      *            ASCII�ַ���
      * @return �ַ���
      */

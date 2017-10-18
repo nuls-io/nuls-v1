@@ -7,14 +7,37 @@ import com.lmax.disruptor.EventHandler;
  * nuls.io
  */
 public interface IDisruptorService {
-
+    /**
+     * create a disruptor
+     * @param name The title of the disruptor
+     * @param ringBufferSize The size of ringBuffer
+     */
     void createDisruptor(String name, int ringBufferSize);
 
+    /**
+     * start a disruptor service
+     * @param name
+     */
     void start(String name);
 
+    /**
+     * add the data obj to the disruptor named the field name
+     * @param name
+     * @param obj
+     */
     void offer(String name, Object obj);
 
+    /**
+     * add a handler for the disruptor
+     * @param name
+     * @param handler
+     */
     void handleEventsWith(String name, EventHandler<DisruptorEvent> handler);
 
-    String getStaticInfo(String name);
+    /**
+     * get the info of running status
+     * @param name
+     * @return
+     */
+    String getStatInfo(String name);
 }

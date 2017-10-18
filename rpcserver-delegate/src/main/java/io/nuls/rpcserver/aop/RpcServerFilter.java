@@ -1,7 +1,7 @@
 package io.nuls.rpcserver.aop;
 
 import io.nuls.exception.NulsRuntimeException;
-import io.nuls.rpcserver.entity.RpcResult;
+import io.nuls.rpcserver.vo.RpcResult;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
