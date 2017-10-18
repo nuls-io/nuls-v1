@@ -23,13 +23,32 @@ public abstract class NulsModule {
         ModuleManager.getInstance().regModule(this.moduleName,this);
     }
 
+    /**
+     * start the module
+     */
     public abstract void start();
 
+    /**
+     * stop the module
+     */
     public abstract void shutdown();
 
+    /**
+     * destroy the module
+     */
     public abstract void destroy();
 
+    /**
+     * get all info of the module
+     * @return
+     */
     public abstract String getInfo();
+
+    /**
+     * get the version of the module
+     * @return
+     */
+    public abstract String getVersion();
 
     protected final List<NulsThread> getThreadList(){
         return ModuleManager.getInstance().getThreadsByModule(this.moduleName);

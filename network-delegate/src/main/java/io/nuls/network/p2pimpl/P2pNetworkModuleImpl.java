@@ -51,4 +51,9 @@ public class P2pNetworkModuleImpl extends NetworkModule {
         str.append("here is info");
         return str.toString();
     }
+
+    @Override
+    public String getVersion() {
+        return "";
+    }
 }

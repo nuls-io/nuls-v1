@@ -94,6 +94,11 @@ public class DBModuleImpl extends DBModule {
         return str.toString();
     }
 
+    @Override
+    public String getVersion() {
+        return null;
+    }
+
     public SqlSessionFactory getSqlSessionFactory() {
         return sqlSessionFactory;
     }

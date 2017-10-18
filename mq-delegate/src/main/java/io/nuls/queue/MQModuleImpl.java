@@ -74,4 +74,9 @@ public class MQModuleImpl extends MQModule {
         }
         return str.toString();
     }
+
+    @Override
+    public String getVersion() {
+        return null;
+    }
 }
