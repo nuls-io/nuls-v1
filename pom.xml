@@ -32,6 +32,8 @@
         <module>network-delegate</module>
         <module>account-api</module>
         <module>account-delegate</module>
+        <module>cache-api</module>
+        <module>cache-delegate</module>
     </modules>
     <packaging>pom</packaging>
 
