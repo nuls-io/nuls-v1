@@ -70,7 +70,7 @@
             <transactionManager type="JDBC"></transactionManager>
             <dataSource type="io.nuls.db.DataSourceBuilder">
                 <property name="driverClass" value="${druid.driverClassName}"/>
-                <property name="url" value="${druid..url}"/>
+                <property name="url" value="${druid.url}"/>
                 <property name="username" value="${druid.username}"/>
                 <property name="password" value="${druid.password}"/>
             </dataSource>

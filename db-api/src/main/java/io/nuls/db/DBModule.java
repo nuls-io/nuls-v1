@@ -10,13 +10,16 @@ import io.nuls.task.NulsModule;
  */
 public abstract class DBModule extends NulsModule {
 
-    protected IBlockStore iBlockStore;
+    private IBlockStore iBlockStore;
     protected DBModule() {
         super(DBModule.class.getSimpleName());
     }
 
-    public IBlockStore getBlockStore() {
+    public IBlockStore getiBlockStore() {
         return iBlockStore;
     }
 
+    public void setiBlockStore(IBlockStore iBlockStore) {
+        this.iBlockStore = iBlockStore;
+    }
 }

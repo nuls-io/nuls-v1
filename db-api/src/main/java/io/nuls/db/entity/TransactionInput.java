@@ -1,20 +1,20 @@
 package io.nuls.db.entity;
 
-public class Block {
-    private String hash;
+public class TransactionInput {
+    private Long id;
 
     private Long height;
 
-    private Long createTime;
+    private String txhash;
 
     private byte[] script;
 
-    public String getHash() {
-        return hash;
+    public Long getId() {
+        return id;
     }
 
-    public void setHash(String hash) {
-        this.hash = hash;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long getHeight() {
@@ -25,12 +25,12 @@ public class Block {
         this.height = height;
     }
 
-    public Long getCreateTime() {
-        return createTime;
+    public String getTxhash() {
+        return txhash;
     }
 
-    public void setCreateTime(Long createTime) {
-        this.createTime = createTime;
+    public void setTxhash(String txhash) {
+        this.txhash = txhash;
     }
 
     public byte[] getScript() {

@@ -32,11 +32,11 @@ public class DBModuleTest {
         long start = System.currentTimeMillis();
         Block b1= new Block();
         b1.setHash("dfsdfsd");
-        b1.setCreatetime(System.currentTimeMillis());
+        b1.setCreateTime(System.currentTimeMillis());
         b1.setHeight(222L);
-        dbModule.getBlockStore().update(b1,true);
+        dbModule.getiBlockStore().update(b1);
 
-        List<Block> blockList = dbModule.getBlockStore().getList(1,1);
+        List<Block> blockList = dbModule.getiBlockStore().getList(1,1);
         long end = System.currentTimeMillis();
 
         System.out.println("time;" + (end - start));

@@ -12,7 +12,7 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 /**
- * Created by zoro on 2017/10/10.
+ * Created by zhouwei on 2017/10/10.
  */
 public class DataSourceBuilder extends UnpooledDataSourceFactory {
 
@@ -30,22 +30,27 @@ public class DataSourceBuilder extends UnpooledDataSourceFactory {
      * @throws Exception
      */
     public DataSourceBuilder() throws Exception {
-        DruidDataSource druidDataSource = new DruidDataSource();
+        InputStream in = null;
+        try {
+            Properties conf = new Properties();
+            in = this.getClass().getResourceAsStream("/db_config.properties");
+            conf.load(in);
 
-        Properties conf = new Properties();
-        InputStream in = this.getClass().getResourceAsStream("/db_config.properties");
-        conf.load(in);
-        in.close();
+            DruidDataSource druidDataSource = new DruidDataSource();
+            long maxWait = Long.parseLong(conf.getProperty("druid.maxWait"));
+            long timeBetweenEvictionRunsMillis = Long.parseLong(conf.getProperty("druid.timeBetweenEvictionRunsMillis"));
+            boolean testOnReturn = Boolean.parseBoolean(conf.getProperty("druid.testOnReturn"));
+            druidDataSource.configFromPropety(conf);
+            druidDataSource.setMaxWait(maxWait);
+            druidDataSource.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);
+            druidDataSource.setTestOnReturn(testOnReturn);
+            this.dataSource = druidDataSource;
 
-        long maxWait = Long.parseLong(conf.getProperty("druid.maxWait"));
-        long timeBetweenEvictionRunsMillis = Long.parseLong(conf.getProperty("druid.timeBetweenEvictionRunsMillis"));
-        boolean testOnReturn = Boolean.parseBoolean(conf.getProperty("druid.testOnReturn"));
-        druidDataSource.configFromPropety(conf);
-        druidDataSource.setMaxWait(maxWait);
-        druidDataSource.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);
-        druidDataSource.setTestOnReturn(testOnReturn);
-        this.dataSource = druidDataSource;
-
+        }finally {
+            if (in != null) {
+                in.close();
+            }
+        }
     }
 
     public String getDriverClassName() {

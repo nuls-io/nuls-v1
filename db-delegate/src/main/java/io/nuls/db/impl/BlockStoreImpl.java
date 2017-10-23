@@ -6,6 +6,7 @@ import io.nuls.db.dao.mybatis.session.NulsSqlSession;
 import io.nuls.db.dao.mybatis.session.NulsSqlSessionFactory;
 import io.nuls.db.dao.mybatis.util.Searchable;
 import io.nuls.db.entity.Block;
+import io.nuls.db.entity.BlockHeader;
 import io.nuls.db.intf.IBlockStore;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -38,17 +39,17 @@ public class BlockStoreImpl extends BaseStore implements IBlockStore {
     }
 
     @Override
-    public int update(Block block, boolean selective) {
+    public int update(Block block) {
         NulsSqlSession session = sqlSessionFactory.openSession(false);
         session.setOpenSessionClass(this);
-        int result = 0;
-        if(!selective) {
-            result = blockMapper.updateByPrimaryKey(block);
-        }else {
-            result = blockMapper.updateByPrimaryKeySelective(block);
-        }
-        session.commit();
-        return result;
+        return blockMapper.updateByPrimaryKey(block);
+    }
+
+    @Override
+    public int updateSelective(Block block) {
+        NulsSqlSession session = sqlSessionFactory.openSession(false);
+        session.setOpenSessionClass(this);
+        return blockMapper.updateByPrimaryKeySelective(block);
     }
 
     @Override
@@ -69,8 +70,48 @@ public class BlockStoreImpl extends BaseStore implements IBlockStore {
         return null;
     }
 
-    public long count() {
-        return blockMapper.count(new Searchable());
+    /**
+     *
+     * @return
+     */
+    public long getAllCount() {
+        return count(new Searchable());
+    }
+
+    public long getBestHeight() {
+        return 0;
+    }
+
+    public String getBestHash() {
+        return null;
+    }
+
+    @Override
+    public Block getBlockByHeight(long height) {
+        return null;
+    }
+
+    @Override
+    public BlockHeader getBlockHeaderByKey(String hash) {
+        return null;
+    }
+
+    @Override
+    public BlockHeader getBlockHeaderByKey(byte[] hash) {
+        return null;
+    }
+
+    public BlockHeader getBlockHeaderByHash(String hash) {
+        return null;
+    }
+
+    @Override
+    public BlockHeader getBlockHeaderByHeight(long height) {
+        return null;
+    }
+
+    public long count(Searchable searchable) {
+        return blockMapper.count(searchable);
     }
 
     public int exist() {
@@ -87,5 +128,15 @@ public class BlockStoreImpl extends BaseStore implements IBlockStore {
         session.setOpenSessionClass(this);
 
         return blockMapper.selectList(new Searchable());
+    }
+
+    @Override
+    public Block getBestBlock() {
+        return null;
+    }
+
+    @Override
+    public Block getByKey(byte[] hash) {
+        return null;
     }
 }
