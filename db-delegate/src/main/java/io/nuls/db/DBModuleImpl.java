@@ -16,6 +16,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.h2.tools.RunScript;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
@@ -43,19 +44,10 @@ public class DBModuleImpl extends DBModule {
 
     @Override
     public void start(){
-        NulsThread t1 = new NulsThread(this, "queueStatusLogThread") {
-            @Override
-            public void run() {
-            }
-        };
-        //启动速度统计任务
-        dbExecutor = new ScheduledThreadPoolExecutor(1);
-        this.registerService(dbExecutor);
-//        service.scheduleAtFixedRate(t1, 0, QueueManager.getLatelySecond(), TimeUnit.SECONDS);
-//        QueueManager.setRunning(true);
+
         try {
             initSqlSessionFactory();
-            initDataBaseTables();
+            //initDataBaseTables();
             initService();
         }catch (Exception e) {
             e.printStackTrace();
@@ -72,9 +64,9 @@ public class DBModuleImpl extends DBModule {
     }
 
     private void initDataBaseTables() throws Exception {
-        String schema = getClass().getResource("/sql/schema-h2.sql").toURI().toString();
-        RunScript runScript = new RunScript();
+        String schemaFile = getClass().getResource("/sql/schema-h2.sql").toURI().toString();
         InputStream in = null;
+
         try {
             Properties conf = new Properties();
             in = this.getClass().getResourceAsStream("/db_config.properties");
@@ -83,7 +75,9 @@ public class DBModuleImpl extends DBModule {
             String user = conf.getProperty("druid.username");
             String password = conf.getProperty("druid.password");
 
-            String url = "-url jdbc:h2:tcp://localhost/lsa -user sa -script backup.sql";
+            String url = "-url jdbc:h2:file:../data/h2";
+
+            RunScript.execute(url,user,password,schemaFile,null,true);
         }finally {
             if(in != null) {
                 in.close();
@@ -144,6 +138,11 @@ public class DBModuleImpl extends DBModule {
 //            str.append(si.toString());
 //        }
         return str.toString();
+    }
+
+    @Override
+    public String getVersion() {
+        return null;
     }
 
     public NulsSqlSessionFactory getSqlSessionFactory() {
