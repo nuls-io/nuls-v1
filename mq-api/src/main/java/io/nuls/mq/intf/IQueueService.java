@@ -86,7 +86,7 @@ public interface IQueueService<T> {
 
     /**
      * @param queueName
-     * @return
+     * @return 状态描述对象
      */
     StatInfo getStatInfo(String queueName);
 }

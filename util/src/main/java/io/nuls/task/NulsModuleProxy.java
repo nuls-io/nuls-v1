@@ -69,4 +69,9 @@ public class NulsModuleProxy extends NulsModule {
     public String getInfo() {
         return module.getInfo();
     }
+
+    @Override
+    public String getVersion() {
+        return module.getVersion();
+    }
 }

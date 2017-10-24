@@ -1,13 +1,17 @@
 package io.nuls.network.p2pimpl;
 
+import io.nuls.exception.NulsRuntimeException;
 import io.nuls.global.NulsContext;
 import io.nuls.network.intf.IPeersManager;
 import io.nuls.network.intf.NetworkModule;
+import io.nuls.network.intf.PeerGroup;
 import io.nuls.network.p2pimpl.service.P2pPeersManagerImpl;
 import io.nuls.task.ModuleStatus;
+import io.nuls.util.constant.ErrorCode;
 import io.nuls.task.NulsThread;
 import io.nuls.util.log.Log;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +22,6 @@ public class P2pNetworkModuleImpl extends NetworkModule {
     }
 
     private IPeersManager p2pNetworkManager = P2pPeersManagerImpl.getInstance();
-
 
     @Override
     public void start() {
@@ -47,5 +50,10 @@ public class P2pNetworkModuleImpl extends NetworkModule {
         str.append(",p2p module info:");
         str.append("here is info");
         return str.toString();
+    }
+
+    @Override
+    public String getVersion() {
+        return "";
     }
 }

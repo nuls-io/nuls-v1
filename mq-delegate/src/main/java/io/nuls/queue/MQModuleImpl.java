@@ -3,6 +3,8 @@ package io.nuls.queue;
 import io.nuls.mq.MQModule;
 import io.nuls.mq.intf.StatInfo;
 import io.nuls.queue.impl.manager.QueueManager;
+import io.nuls.queue.service.DisruptorServiceImpl;
+import io.nuls.queue.service.QueueServiceImpl;
 import io.nuls.task.ModuleStatus;
 import io.nuls.task.NulsThread;
 
@@ -35,6 +37,8 @@ public class MQModuleImpl extends MQModule {
         service = new ScheduledThreadPoolExecutor(1);
         service.scheduleAtFixedRate(t1, 0, QueueManager.getLatelySecond(), TimeUnit.SECONDS);
         this.registerService(service);
+        this.registerService(QueueServiceImpl.getInstance());
+        this.registerService(DisruptorServiceImpl.getInstance());
         QueueManager.setRunning(true);
     }
 
@@ -69,5 +73,10 @@ public class MQModuleImpl extends MQModule {
             str.append(si.toString());
         }
         return str.toString();
+    }
+
+    @Override
+    public String getVersion() {
+        return null;
     }
 }
