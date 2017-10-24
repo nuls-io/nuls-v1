@@ -1,11 +1,9 @@
 package io.nuls.network.p2pimpl.service;
 
 import io.nuls.exception.NulsException;
-import io.nuls.exception.NulsRuntimeException;
-import io.nuls.global.NulsContext;
 import io.nuls.network.intf.IPeersManager;
-import io.nuls.network.intf.Peer;
-import io.nuls.network.intf.PeerGroup;
+import io.nuls.network.entity.Peer;
+import io.nuls.network.entity.PeerGroup;
 import io.nuls.util.constant.ErrorCode;
 
 import java.util.HashMap;

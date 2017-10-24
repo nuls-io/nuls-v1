@@ -1,4 +1,4 @@
-package io.nuls.network.intf;
+package io.nuls.network.entity;
 
 public class Peer {
     public void destroy() {

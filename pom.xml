@@ -34,6 +34,14 @@
         <module>account-delegate</module>
         <module>cache-api</module>
         <module>cache-delegate</module>
+        <module>accountapi</module>
+        <module>ledger-api</module>
+        <module>account-api</module>
+        <module>account-api</module>
+        <module>accountapi</module>
+        <module>account-api</module>
+        <module>account-api</module>
+        <module>ledger-api</module>
     </modules>
     <packaging>pom</packaging>
 

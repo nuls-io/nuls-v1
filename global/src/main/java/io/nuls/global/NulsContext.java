@@ -11,6 +11,7 @@ public class NulsContext {
 
     private static final NulsContext nc = new NulsContext();
 
+
     public static final NulsContext getInstance() {
         return nc;
     }

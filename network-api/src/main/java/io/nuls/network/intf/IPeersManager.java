@@ -1,8 +1,7 @@
 package io.nuls.network.intf;
 
 import io.nuls.exception.NulsException;
-
-import java.util.Map;
+import io.nuls.network.entity.PeerGroup;
 
 public interface IPeersManager {
     void start();

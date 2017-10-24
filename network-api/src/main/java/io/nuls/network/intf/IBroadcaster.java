@@ -2,6 +2,9 @@ package io.nuls.network.intf;
 
 
 import io.nuls.message.NulsMessage;
+import io.nuls.network.entity.BroadcastResult;
+import io.nuls.network.entity.Peer;
+import io.nuls.network.entity.PeerGroup;
 
 
 public abstract class IBroadcaster {
