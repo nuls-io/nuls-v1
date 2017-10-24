@@ -2,9 +2,13 @@ package io.nuls.db.impl;
 
 import io.nuls.db.DBException;
 import io.nuls.db.dao.mybatis.BlockMapper;
+import io.nuls.db.dao.mybatis.session.NulsSqlSession;
+import io.nuls.db.dao.mybatis.session.NulsSqlSessionFactory;
 import io.nuls.db.dao.mybatis.util.Searchable;
 import io.nuls.db.entity.Block;
+import io.nuls.db.entity.BlockHeader;
 import io.nuls.db.intf.IBlockStore;
+import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
 import java.util.List;
@@ -12,16 +16,13 @@ import java.util.List;
 /**
  * Created by win10 on 2017/9/29.
  */
-public class BlockStoreImpl implements IBlockStore {
+public class BlockStoreImpl extends BaseStore implements IBlockStore {
 
     private BlockMapper blockMapper;
 
-
-    private SqlSessionFactory sqlSessionFactory;
-
-
-    public BlockStoreImpl(SqlSessionFactory sqlSessionFactory) {
+    public BlockStoreImpl(NulsSqlSessionFactory sqlSessionFactory) {
         this.sqlSessionFactory = sqlSessionFactory;
+        this.blockMapper = sqlSessionFactory.openSession().getMapper(BlockMapper.class);
     }
 
     @Override
@@ -38,13 +39,17 @@ public class BlockStoreImpl implements IBlockStore {
     }
 
     @Override
-    public int update(Block block, boolean selective) {
+    public int update(Block block) {
+        NulsSqlSession session = sqlSessionFactory.openSession(false);
+        session.setOpenSessionClass(this);
+        return blockMapper.updateByPrimaryKey(block);
+    }
 
-        if(!selective) {
-            return blockMapper.updateByPrimaryKey(block);
-        }else {
-            return blockMapper.updateByPrimaryKeySelective(block);
-        }
+    @Override
+    public int updateSelective(Block block) {
+        NulsSqlSession session = sqlSessionFactory.openSession(false);
+        session.setOpenSessionClass(this);
+        return blockMapper.updateByPrimaryKeySelective(block);
     }
 
     @Override
@@ -65,8 +70,48 @@ public class BlockStoreImpl implements IBlockStore {
         return null;
     }
 
-    public long count() {
-        return blockMapper.count(new Searchable());
+    /**
+     *
+     * @return
+     */
+    public long getAllCount() {
+        return count(new Searchable());
+    }
+
+    public long getBestHeight() {
+        return 0;
+    }
+
+    public String getBestHash() {
+        return null;
+    }
+
+    @Override
+    public Block getBlockByHeight(long height) {
+        return null;
+    }
+
+    @Override
+    public BlockHeader getBlockHeaderByKey(String hash) {
+        return null;
+    }
+
+    @Override
+    public BlockHeader getBlockHeaderByKey(byte[] hash) {
+        return null;
+    }
+
+    public BlockHeader getBlockHeaderByHash(String hash) {
+        return null;
+    }
+
+    @Override
+    public BlockHeader getBlockHeaderByHeight(long height) {
+        return null;
+    }
+
+    public long count(Searchable searchable) {
+        return blockMapper.count(searchable);
     }
 
     public int exist() {
@@ -79,6 +124,19 @@ public class BlockStoreImpl implements IBlockStore {
 
     @Override
     public List<Block> getList(Integer pageNum, Integer pageSize) {
+        NulsSqlSession session = sqlSessionFactory.openSession(false);
+        session.setOpenSessionClass(this);
+
+        return blockMapper.selectList(new Searchable());
+    }
+
+    @Override
+    public Block getBestBlock() {
+        return null;
+    }
+
+    @Override
+    public Block getByKey(byte[] hash) {
         return null;
     }
 }
