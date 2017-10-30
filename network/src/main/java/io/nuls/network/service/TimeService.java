@@ -104,35 +104,9 @@ public final class TimeService {
             }
         }
 
-
-    public void monitorTimeChange() {
-
-        //不监控本地时间变化是最保险的，难免遇到机器卡顿的时候，会把本来正确的时间置为错误的
-        //如果用户在运行过程中自己去调整电脑的时候，这是他的问题，出错也无可厚非
-
-        long lastTime = System.currentTimeMillis();
-
-        running = true;
-
-        while(running) {
-            //动态调整网络时间
-
-            long newTime = System.currentTimeMillis();
-            if(Math.abs(newTime - lastTime) > TIME_OFFSET_BOUNDARY) {
-                //log.info("本地时间调整了：{}", newTime - lastTime);
-                initTime();
-            } else if(currentTimeMillis() - lastInitTime > TIME_REFRESH_TIME) {
-                //每隔一段时间更新网络时间
-                initTime();
-            }
-            lastTime = newTime;
-            try {
-                Thread.sleep(500l);
-            } catch (InterruptedException e) {
-            }
-        }
-    }
 */
+    public void monitorTimeChange() {
+    }
     /**
      * 以给定的秒数推进（或倒退）网络时间
      */
@@ -204,31 +178,6 @@ public final class TimeService {
         return getSystemRuningTimeMillis() / 1000;
     }
 
-    /**
-     * 返回当前时间毫秒数的字节数组
-     * @return byte[]
-     *//*
-    public static byte[] currentTimeMillisOfBytes() {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
-        try {
-            //Utils.int64ToByteStreamLE(currentTimeMillis(), bos);
-            return bos.toByteArray();
-        } catch (Exception e) {
-            return null;
-        } finally {
-            try {
-                bos.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-    */
-
-    /**
-     * 设置网络偏移时间
-     * @param netTimeOffset
-     */
     public static void setNetTimeOffset(long netTimeOffset) {
         if(!netTimeHasSync) {
             TimeService.netTimeOffset = netTimeOffset;

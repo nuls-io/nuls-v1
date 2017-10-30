@@ -1,6 +1,7 @@
 package io.nuls.mq.intf;
 
 import com.lmax.disruptor.EventHandler;
+import com.lmax.disruptor.WorkHandler;
 import io.nuls.mq.entity.DisruptorEvent;
 
 /**
@@ -34,6 +35,13 @@ public interface DisruptorService {
      * @param handler
      */
     void handleEventsWith(String name, EventHandler<DisruptorEvent> handler);
+
+    /**
+     * add some handler to worker pool of the disruptor
+     * @param name
+     * @param handler
+     */
+    void handleEventsWithWorkerPool(String name, WorkHandler<DisruptorEvent>...handler);
 
     /**
      * get the info of running status

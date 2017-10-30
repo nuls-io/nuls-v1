@@ -69,7 +69,6 @@ public abstract class NulsQueue<T> {
     }
 
     public StatInfo getStatInfo() {
-
         return statInfo;
     }
 }

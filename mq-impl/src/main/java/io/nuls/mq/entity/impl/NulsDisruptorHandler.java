@@ -12,13 +12,18 @@ public class NulsDisruptorHandler<T> implements EventHandler<T> {
     private final EventHandler<T> handler;
     private final StatInfo statInfo;
 
-    public NulsDisruptorHandler(EventHandler<T> handler, StatInfo statInfo){
+    public NulsDisruptorHandler(EventHandler<T> handler, StatInfo statInfo) {
         this.handler = handler;
         this.statInfo = statInfo;
     }
+
     @Override
     public void onEvent(T t, long l, boolean b) throws Exception {
-        handler.onEvent(t,l,b);
+        if (null == handler) {
+            return;
+        }
+        handler.onEvent(t, l, b);
         statInfo.takeOne();
     }
 }
+

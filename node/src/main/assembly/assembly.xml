@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assembly>
+	<!-- must have id, but in pom.xml file can set zip file without id: appendAssemblyId=false -->
+	<id>nuls</id>
+	<formats>
+		<format>tar.gz</format>
+	</formats>
+	<!-- the zip file with self directory,default:true -->
+	<includeBaseDirectory>false</includeBaseDirectory>
+	<dependencySets>
+		<dependencySet>
+			<!-- without project jar self -->
+			<useProjectArtifact>false</useProjectArtifact>
+			<!-- automatic without test jar, can set <scope>compile</scope> to control -->
+			<outputDirectory>/libs</outputDirectory>
+		</dependencySet>
+	</dependencySets>
+	<fileSets>
+		<fileSet>
+			<directory>src/main/resources</directory>
+			<outputDirectory>/conf</outputDirectory>
+		</fileSet>
+		<fileSet>
+			<directory>src/main/script</directory>
+			<outputDirectory>/bin</outputDirectory>
+			<includes>
+				<include>*.sh</include>
+			</includes>
+		</fileSet>
+		<fileSet>
+			<!-- copy project jar self -->
+			<directory>${project.build.directory}</directory>
+			<outputDirectory>/dist_lib</outputDirectory>
+			<includes>
+				<include>*.jar</include>
+			</includes>
+		</fileSet>
+		<fileSet>
+			<directory>../</directory>
+			<outputDirectory>/</outputDirectory>
+			<includes>
+				<include>*.md</include>
+			</includes>
+		</fileSet>
+	</fileSets>
+</assembly>

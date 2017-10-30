@@ -6,7 +6,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.network.entity.Peer;
 import io.nuls.network.entity.PeerGroup;
-import io.nuls.network.peer.PeersManager;
+import io.nuls.network.service.PeersManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -51,6 +51,7 @@ public class P2pPeersManagerImpl implements PeersManager {
     @Override
     public void start() {
         /** start p2p discovery thread
+         *    start a peers server
          *    query config find original peers
          *    query database find cached peers
          *    find peers from connetcted peers

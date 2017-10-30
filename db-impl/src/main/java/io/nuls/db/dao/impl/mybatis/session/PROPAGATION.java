@@ -1,0 +1,17 @@
+package io.nuls.db.dao.impl.mybatis.session;
+
+/**
+ * Created by win10 on 2017/10/26.
+ */
+public enum  PROPAGATION {
+
+    REQUIRED("required"),
+    NEW("new");
+
+
+    private PROPAGATION(String value) {
+        this.value = value;
+    }
+
+    private String value;
+}

@@ -21,14 +21,13 @@
         <!-- 数据库超过25000秒仍未响应则超时 -->
         <setting name="defaultStatementTimeout" value="60000" />
 
-
-		<!--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 控制台打印sql语句,正式发布项目时记得关闭 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-->
+        <!--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 控制台打印sql语句,正式发布项目时记得关闭 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-->
         <setting name="logImpl" value="STDOUT_LOGGING" />
 
     </settings>
 
     <typeAliases>
-        <typeAlias type="io.nuls.db.dao.mybatis.util.Searchable" />
+        <typeAlias type="io.nuls.db.dao.impl.mybatis.util.Searchable" />
     </typeAliases>
 
 
@@ -69,10 +68,10 @@
         <environment id="druid">
             <transactionManager type="JDBC"></transactionManager>
             <dataSource type="io.nuls.db.DataSourceBuilder">
-                <property name="driverClass" value="${druid.driverClassName}"/>
-                <property name="url" value="${druid..url}"/>
-                <property name="username" value="${druid.username}"/>
-                <property name="password" value="${druid.password}"/>
+                <property name="driverClass" value="${driverClass}"/>
+                <property name="url" value="${url}"/>
+                <property name="username" value="${username}"/>
+                <property name="password" value="${password}"/>
             </dataSource>
         </environment>
     </environments>

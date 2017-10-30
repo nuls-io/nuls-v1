@@ -2,7 +2,7 @@ package io.nuls.network.module.impl;
 
 
 import io.nuls.network.module.NetworkModule;
-import io.nuls.network.peer.PeersManager;
+import io.nuls.network.service.PeersManager;
 import io.nuls.network.service.impl.P2pPeersManagerImpl;
 
 public class P2pNetworkModuleImpl extends NetworkModule {

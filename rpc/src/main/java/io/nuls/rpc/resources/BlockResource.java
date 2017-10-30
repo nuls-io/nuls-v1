@@ -8,7 +8,7 @@ import io.nuls.rpc.entity.RpcResult;
  */
 public interface BlockResource {
 
-    RpcResult getBlock(String hash);
+    RpcResult loadBlock(String hash);
 
     RpcResult getBlockCount();
 
@@ -18,5 +18,10 @@ public interface BlockResource {
 
     RpcResult getHashByHeight(Integer height);
 
+    RpcResult getHeaderByHeight(Integer height);
+
+    RpcResult getHeader(String hash);
+
+    RpcResult getBlock(Integer height);
 
 }

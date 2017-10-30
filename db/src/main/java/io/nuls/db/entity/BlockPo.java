@@ -5,7 +5,9 @@ public class BlockPo {
 
     private Long height;
 
-    private Long createtime;
+    private Long createTime;
+
+    private byte[] script;
 
     public String getHash() {
         return hash;
@@ -23,11 +25,19 @@ public class BlockPo {
         this.height = height;
     }
 
-    public Long getCreatetime() {
-        return createtime;
+    public Long getCreateTime() {
+        return createTime;
     }
 
-    public void setCreatetime(Long createtime) {
-        this.createtime = createtime;
+    public void setCreateTime(Long createTime) {
+        this.createTime = createTime;
+    }
+
+    public byte[] getScript() {
+        return script;
+    }
+
+    public void setScript(byte[] script) {
+        this.script = script;
     }
 }

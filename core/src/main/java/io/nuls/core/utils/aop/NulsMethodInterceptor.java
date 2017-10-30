@@ -9,25 +9,19 @@ import java.lang.reflect.Method;
  * Created by Niels on 2017/10/13.
  * nuls.io
  */
-public class NulsMethodInterceptor implements MethodInterceptor {
+public final class NulsMethodInterceptor implements MethodInterceptor {
 
-    private final NulsMethodFilter filter;
+    private MethodInterceptor interceptor;
 
-    public NulsMethodInterceptor(NulsMethodFilter filter) {
-        this.filter = filter;
+    public NulsMethodInterceptor(MethodInterceptor interceptor){
+        this.interceptor = interceptor;
     }
 
     @Override
-    public Object intercept(Object obj, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
-        filter.before(obj,method,args);
-        Object result;
-        try{
-            result = methodProxy.invokeSuper(obj, args);
-        }catch (Exception e){
-            filter.exception(obj,method,args,e);
-            throw e;
+    public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
+        if(method.isBridge()){
+           return methodProxy.invokeSuper(o,objects);
         }
-        filter.after(obj,method,args,result);
-        return result;
+        return interceptor.intercept(o,method,objects,methodProxy);
     }
 }

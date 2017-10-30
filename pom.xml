@@ -1,0 +1,37 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>io.nuls</groupId>
+    <artifactId>nuls</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>nuls</name>
+    <url>http://maven.apache.org</url>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    <modules>
+        <module>core</module>
+        <module>account</module>
+        <module>account-impl</module>
+        <module>cache</module>
+        <module>cache-impl</module>
+        <module>db</module>
+        <module>db-impl</module>
+        <module>ledger</module>
+        <module>ledger-impl</module>
+        <module>mq</module>
+        <module>mq-impl</module>
+        <module>network</module>
+        <module>network-impl</module>
+        <module>rpc</module>
+        <module>rpc-impl</module>
+        <module>node</module>
+    </modules>
+    <build>
+        <finalName>nuls</finalName>
+    </build>
+</project>

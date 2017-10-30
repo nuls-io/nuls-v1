@@ -44,8 +44,10 @@ public enum ErrorCode {
     /**
      * ----------  DBException code   ---------
      */
-    DB_SQLSESSION_INIT_FAIL("DB000",50000),
+
+    DB_MODULE_START_FAIL("DB000",50000),
     DB_UNKOWN_EXCEPTION("DB010",50010),
+    DB_SESSION_MISS_INIT("DB011",50011),
     DB_SAVE_CANNOT_NULL("DB011", 50011),
     DB_SAVE_BATCH_LIMIT_OVER("DB012", 50012);
 

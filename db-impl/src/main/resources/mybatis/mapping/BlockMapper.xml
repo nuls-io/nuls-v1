@@ -1,70 +1,95 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="io.nuls.db.dao.mapper.BlockMapper" >
-  <resultMap id="BaseResultMap" type="io.nuls.db.entity.BlockPo" >
-    <id column="hash" property="hash" jdbcType="VARCHAR" />
-    <result column="height" property="height" jdbcType="BIGINT" />
-    <result column="createtime" property="createtime" jdbcType="BIGINT" />
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.nuls.db.dao.impl.mybatis.mapper.BlockMapper">
+  <resultMap id="BaseResultMap" type="io.nuls.db.entity.BlockPo">
+    <id column="hash" jdbcType="VARCHAR" property="hash" />
+    <result column="height" jdbcType="BIGINT" property="height" />
+    <result column="create_time" jdbcType="BIGINT" property="createTime" />
   </resultMap>
-  <sql id="Base_Column_List" >
-    hash, height, createtime
+  <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="io.nuls.db.entity.BlockPo">
+    <result column="script" jdbcType="BINARY" property="script" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    hash, height, create_time
   </sql>
-  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
-    select 
+  <sql id="Blob_Column_List">
+    script
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="ResultMapWithBLOBs">
+    select
     <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
     from block
     where hash = #{hash,jdbcType=VARCHAR}
   </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
     delete from block
     where hash = #{hash,jdbcType=VARCHAR}
   </delete>
-  <insert id="insert" parameterType="io.nuls.db.entity.BlockPo" >
-    insert into block (hash, height, createtime)
-    values (#{hash,jdbcType=VARCHAR}, #{height,jdbcType=BIGINT}, #{createtime,jdbcType=BIGINT}),
-    (#{hash,jdbcType=VARCHAR}, #{height,jdbcType=BIGINT}, #{createtime,jdbcType=BIGINT})
+  <insert id="insert" parameterType="io.nuls.db.entity.BlockPo">
+    insert into block (hash, height, create_time,
+    script)
+    values (#{hash,jdbcType=VARCHAR}, #{height,jdbcType=BIGINT}, #{createTime,jdbcType=BIGINT},
+    #{script,jdbcType=BINARY})
   </insert>
-  <insert id="insertSelective" parameterType="io.nuls.db.entity.BlockPo" >
+  <insert id="insertSelective" parameterType="io.nuls.db.entity.BlockPo">
     insert into block
-    <trim prefix="(" suffix=")" suffixOverrides="," >
-      <if test="hash != null" >
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="hash != null">
         hash,
       </if>
-      <if test="height != null" >
+      <if test="height != null">
         height,
       </if>
-      <if test="createtime != null" >
-        createtime,
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="script != null">
+        script,
       </if>
     </trim>
-    <trim prefix="values (" suffix=")" suffixOverrides="," >
-      <if test="hash != null" >
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="hash != null">
         #{hash,jdbcType=VARCHAR},
       </if>
-      <if test="height != null" >
+      <if test="height != null">
         #{height,jdbcType=BIGINT},
       </if>
-      <if test="createtime != null" >
-        #{createtime,jdbcType=BIGINT},
+      <if test="createTime != null">
+        #{createTime,jdbcType=BIGINT},
+      </if>
+      <if test="script != null">
+        #{script,jdbcType=BINARY},
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="io.nuls.db.entity.BlockPo" >
+  <update id="updateByPrimaryKeySelective" parameterType="io.nuls.db.entity.BlockPo">
     update block
-    <set >
-      <if test="height != null" >
+    <set>
+      <if test="height != null">
         height = #{height,jdbcType=BIGINT},
       </if>
-      <if test="createtime != null" >
-        createtime = #{createtime,jdbcType=BIGINT},
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=BIGINT},
+      </if>
+      <if test="script != null">
+        script = #{script,jdbcType=BINARY},
       </if>
     </set>
     where hash = #{hash,jdbcType=VARCHAR}
   </update>
-  <update id="updateByPrimaryKey" parameterType="io.nuls.db.entity.BlockPo" >
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="io.nuls.db.entity.BlockPo">
     update block
     set height = #{height,jdbcType=BIGINT},
-      createtime = #{createtime,jdbcType=BIGINT}
+    create_time = #{createTime,jdbcType=BIGINT},
+    script = #{script,jdbcType=BINARY}
+    where hash = #{hash,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="io.nuls.db.entity.BlockPo">
+    update block
+    set height = #{height,jdbcType=BIGINT},
+    create_time = #{createTime,jdbcType=BIGINT}
     where hash = #{hash,jdbcType=VARCHAR}
   </update>
 
@@ -85,9 +110,12 @@
   </insert>
 
   <select id="selectList" parameterType="Searchable" resultType="io.nuls.db.entity.BlockPo">
-    select <include refid="Base_Column_List" />
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
     from block
-    <include refid="io.nuls.db.dao.mybatis.base.CommonMapper.Serach_Where"/>
+    <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Serach_Where"/>
   </select>
 
 </mapper>

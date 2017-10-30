@@ -5,6 +5,7 @@ import io.nuls.rpc.entity.RpcResult;
 import io.nuls.rpc.resources.ConsensusResource;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -18,9 +19,30 @@ public class ConsensusResourceImpl implements ConsensusResource {
     private NulsContext context = NulsContext.getInstance();
 
     @GET
-    @Path("/query")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult query() {
+    public RpcResult getInfo() {
         return RpcResult.getSuccess();
     }
+
+    @GET
+    @Path("/condition")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult getCondition() {
+        return RpcResult.getSuccess();
+    }
+
+    @POST
+    @Path("/in")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult in(String address, String password) {
+        return RpcResult.getSuccess();
+    }
+
+    @POST
+    @Path("/out")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult out(String address, String password) {
+        return RpcResult.getSuccess();
+    }
+
 }

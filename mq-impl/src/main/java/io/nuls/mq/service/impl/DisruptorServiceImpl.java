@@ -1,9 +1,6 @@
 package io.nuls.mq.service.impl;
 
-import com.lmax.disruptor.EventFactory;
-import com.lmax.disruptor.EventHandler;
-import com.lmax.disruptor.RingBuffer;
-import com.lmax.disruptor.YieldingWaitStrategy;
+import com.lmax.disruptor.*;
 import com.lmax.disruptor.dsl.ProducerType;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -52,6 +49,7 @@ public class DisruptorServiceImpl implements DisruptorService {
                 new YieldingWaitStrategy());
         disruptor.setName(name);
         disruptor.setStatInfo(new StatInfoImpl(name, 0, QueueManager.getLatelySecond()));
+        disruptor.handleEventsWith(new NulsDisruptorHandler<>(null,disruptor.getStatInfo()));
         disruptorMap.put(name, disruptor);
     }
 
@@ -83,7 +81,12 @@ public class DisruptorServiceImpl implements DisruptorService {
         AssertUtil.canNotEmpty(disruptor, "the disruptor is not exist!name:" + name);
         disruptor.handleEventsWith(new NulsDisruptorHandler(handler, disruptor.getStatInfo()));
     }
-
+    @Override
+    public void handleEventsWithWorkerPool(String name, WorkHandler<DisruptorEvent> ...handler) {
+        NulsDisruptor disruptor = disruptorMap.get(name);
+        AssertUtil.canNotEmpty(disruptor, "the disruptor is not exist!name:" + name);
+        disruptor.handleEventsWithWorkerPool(handler);
+    }
     @Override
     public String getStatInfo(String name) {
         NulsDisruptor disruptor = disruptorMap.get(name);

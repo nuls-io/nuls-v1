@@ -13,13 +13,14 @@ public interface CacheService<T> {
 
     /**
      * create a cache named title
+     *
      * @param title
      */
     void createCache(String title);
 
-
     /**
      * create a cache named title by configurations
+     *
      * @param title
      * @param initParams
      */
@@ -27,12 +28,14 @@ public interface CacheService<T> {
 
     /**
      * remove a cache by title
+     *
      * @param title
      */
     void removeCache(String title);
 
     /**
      * put data to a cache
+     *
      * @param cacheTitle
      * @param key
      * @param value
@@ -41,6 +44,7 @@ public interface CacheService<T> {
 
     /**
      * put data to a cache
+     *
      * @param cacheTitle
      * @param element
      */
@@ -48,14 +52,16 @@ public interface CacheService<T> {
 
     /**
      * get data from the cache named cacheTitle
+     *
      * @param cacheTitle
      * @param key
      * @return
      */
-    T getElement(String cacheTitle, String key);
+    T getElementValue(String cacheTitle, String key);
 
     /**
      * remove an element from the cache named cacheTitle
+     *
      * @param cacheTitle
      * @param key
      */
@@ -63,10 +69,11 @@ public interface CacheService<T> {
 
     /**
      * Batch addition
+     *
      * @param cacheTitle
-     * @param elementList
+     * @param map
      */
-    void putElements(String cacheTitle, List<CacheElement<T>> elementList);
+    void putElements(String cacheTitle, Map map);
 
     /**
      * @param Title
@@ -76,6 +83,7 @@ public interface CacheService<T> {
     /**
      * Add an operating listener
      * add a oprateion
+     *
      * @param title
      * @param listenner
      */
@@ -84,6 +92,7 @@ public interface CacheService<T> {
     /**
      * remove an operating listener
      * add a oprateion
+     *
      * @param title
      * @param listenner
      */
@@ -91,9 +100,12 @@ public interface CacheService<T> {
 
     /**
      * get all listener of the cache named title
+     *
      * @param title
      * @return
      */
     List<CacheEventListener> getCacheListener(String title);
+
+    List<String> getCacheTitleList();
 
 }

@@ -1,4 +1,4 @@
-package io.nuls.validate;
+package io.nuls.core.validate;
 
 public class NulsValidateChain {
 }
