@@ -11,13 +11,13 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class HttpContextHelper {
 
-    private static final Map<String,Request> map = new ConcurrentHashMap<>();
+    private static final ThreadLocal<Request> map = new ThreadLocal<>();
 
-    public static void put(Request request){
-        map.put(Thread.currentThread().getName(),request);
+    public static void put(Request request) {
+        map.set(request);
     }
 
-    public static Request getRequest(){
-        return map.get(Thread.currentThread().getName());
+    public static Request getRequest() {
+        return map.get();
     }
 }

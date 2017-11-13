@@ -10,13 +10,14 @@ import io.nuls.core.utils.log.Log;
 import java.util.Date;
 
 
-public class NulsThread extends Thread {
+public abstract class NulsThread implements Runnable{
 
     public enum STATUS {
         RUNING,
         HUNGUP,
     }
-
+    private String name;
+    private Thread realThread;
     private STATUS status;
     private NulsModule module = null;
     private Date starttime;
@@ -29,7 +30,7 @@ public class NulsThread extends Thread {
         this.setName(name);
         starttime = new Date();
         this.module = module;
-        ModuleManager.getInstance().regThread(module.getModuleName(),this);
+        ModuleManager.getInstance().regThread(name,this);
         Log.debug(this.getClass().getName() + " start runing");
     }
 
@@ -63,4 +64,18 @@ public class NulsThread extends Thread {
         return str.toString();
     }
 
+    public synchronized void start() {
+        if(null==realThread){
+            realThread = new Thread(this);
+            realThread.start();
+        }
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

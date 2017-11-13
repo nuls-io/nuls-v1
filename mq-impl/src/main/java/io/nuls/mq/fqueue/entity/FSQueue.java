@@ -11,7 +11,7 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * 基于文件的先进先出的读写队列
+ *
  *
  * @author opensource
  */
@@ -173,7 +173,6 @@ public class FSQueue {
 
     public void clear() throws IOException, FileFormatException {
         idx.clear();
-        //TODO 释放旧的资源
         initHandle();
     }
 

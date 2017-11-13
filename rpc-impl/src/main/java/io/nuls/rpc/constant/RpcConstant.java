@@ -5,7 +5,12 @@ package io.nuls.rpc.constant;
  * nuls.io
  */
 public interface RpcConstant {
-    String PACKAGES = "io.nuls.rpcserver.resources";
+    //todo version
+    int RPC_MODULE_VERSION = 1111;
+    //Minimum version supported
+    int MINIMUM_VERSION_SUPPORTED = 0;
+
+    String PACKAGES = "io.nuls.rpc.resources.impl";
     int DEFAULT_PORT = 8001;
     String DEFAULT_IP = "0.0.0.0";
     String DEFAULT_URL = "nuls";

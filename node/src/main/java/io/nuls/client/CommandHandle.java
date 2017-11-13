@@ -1,5 +1,8 @@
 package io.nuls.client;
 
+import io.nuls.client.constant.CommandConstant;
+import io.nuls.core.utils.str.StringUtils;
+
 import java.io.IOException;
 import java.util.Scanner;
 
@@ -9,20 +12,24 @@ import java.util.Scanner;
  */
 public class CommandHandle {
     public static void main(String[] args) throws IOException {
-        System.out.print("nuls>>> ");
+        System.out.print(CommandConstant.COMMAND_PS1);
         Scanner scan = new Scanner(System.in);
         while (true) {
             String read = scan.nextLine();
             doCommand(read);
-            System.out.print("nuls>>> ");
+            System.out.print(CommandConstant.COMMAND_PS1);
         }
     }
 
     private static void doCommand(String read) {
-        switch (read.toUpperCase()){
-            case "EXIT":
+        if(StringUtils.isBlank(read)){
+            return;
+        }
+        read = read.trim();
+        switch (read){
+            case CommandConstant.CMD_EXIT:
                 doStop();
-            case "":
+            case CommandConstant.CMD_HELP:
                 break;
         }
     }

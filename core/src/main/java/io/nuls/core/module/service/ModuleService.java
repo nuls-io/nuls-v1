@@ -15,7 +15,7 @@ public class ModuleService {
     private static final ModuleService service = new ModuleService();
 
     private ModuleService() {
-        ModuleManager.getInstance().regService("system", this);
+        ModuleManager.getInstance().regService("system",null, this);
     }
 
     public static ModuleService getInstance() {

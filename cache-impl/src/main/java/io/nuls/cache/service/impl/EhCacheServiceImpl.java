@@ -3,13 +3,9 @@ package io.nuls.cache.service.impl;
 import io.nuls.cache.constant.EhCacheConstant;
 import io.nuls.cache.entity.CacheElement;
 import io.nuls.cache.manager.EhCacheManager;
-import io.nuls.cache.service.intf.CacheEventListener;
 import io.nuls.cache.service.intf.CacheService;
-import org.ehcache.CacheManager;
-import org.ehcache.config.builders.CacheConfigurationBuilder;
-import org.ehcache.config.builders.ResourcePoolsBuilder;
-import org.ehcache.config.units.MemoryUnit;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -39,7 +35,7 @@ public class EhCacheServiceImpl<T> implements CacheService<T> {
 
     @Override
     public void createCache(String title) {
-        cacheManager.createCache(title,String.class,Object.class,EhCacheConstant.DEFAULT_MAX_SIZE);
+        cacheManager.createCache(title,String.class,Serializable.class,EhCacheConstant.DEFAULT_MAX_SIZE);
     }
 
 
@@ -69,23 +65,8 @@ public class EhCacheServiceImpl<T> implements CacheService<T> {
     }
 
     @Override
-    public void clearCache(String Title) {
-        cacheManager.getCache(Title).clear();
-    }
-
-    @Override
-    public void addCacheListener(String title, CacheEventListener listenner) {
-
-    }
-
-    @Override
-    public void removeCacheListener(String title, CacheEventListener listenner) {
-
-    }
-
-    @Override
-    public List<CacheEventListener> getCacheListener(String title) {
-        return null;
+    public void clearCache(String title) {
+        cacheManager.getCache(title).clear();
     }
 
     @Override

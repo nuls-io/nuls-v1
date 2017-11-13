@@ -74,7 +74,15 @@ public class NulsModuleProxy extends NulsModule {
     }
 
     @Override
-    public String getVersion() {
+    public int getVersion() {
         return module.getVersion();
+    }
+
+    @Override
+    public Class<? extends NulsModule> getModuleClass() {
+        if (null != module) {
+            return module.getClass();
+        }
+        return null;
     }
 }

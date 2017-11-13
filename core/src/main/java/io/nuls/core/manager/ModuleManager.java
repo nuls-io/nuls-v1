@@ -28,26 +28,36 @@ public class ModuleManager {
     }
 
     public <T> T getService(Class<T> tclass) {
-        return (T) intfMap.get(tclass);
+            return (T) intfMap.get(tclass);
     }
 
     public void regService(String moduleName, Object service) {
-        Class key = service.getClass().getSuperclass();
-        if (key.equals(Object.class)) {
-            key = service.getClass();
+        Class serviceInterface = null;
+        if (null == service.getClass().getInterfaces() || service.getClass().getInterfaces().length == 0 && !service.getClass().getSuperclass().equals(Object.class)) {
+            serviceInterface = service.getClass().getSuperclass();
+        } else if (null != service.getClass().getInterfaces() && service.getClass().getInterfaces().length == 1) {
+            serviceInterface = service.getClass().getInterfaces()[0];
+        } else if (null == service.getClass().getInterfaces() || service.getClass().getInterfaces().length > 1) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "register service faild:interface is uncertain");
+        } else {
+            serviceInterface = service.getClass();
         }
-        if (null == key || key.equals(Object.class)) {
-            key = service.getClass();
+        this.regService(moduleName, serviceInterface, service);
+    }
+
+    public void regService(String moduleName, Class serviceInterface, Object service) {
+        if (serviceInterface == null) {
+            serviceInterface = service.getClass();
         }
-        if (intfMap.keySet().contains(key)) {
+        if (intfMap.keySet().contains(serviceInterface)) {
             throw new NulsRuntimeException(ErrorCode.INTF_REPETITION);
         }
-        intfMap.put(key, service);
+        intfMap.put(serviceInterface, service);
         Set<Class> set = moduleIntfMap.get(moduleName);
         if (null == set) {
             set = new HashSet<>();
         }
-        set.add(key);
+        set.add(serviceInterface);
         moduleIntfMap.put(moduleName, set);
     }
 
@@ -87,6 +97,26 @@ public class ModuleManager {
 
     public NulsModule getModule(String moduleName) {
         return moduleMap.get(moduleName);
+    }
+
+    public NulsModule getModule(Class moduleClass) {
+        for (NulsModule module : moduleMap.values()) {
+            if (module.getModuleClass().equals(moduleClass)) {
+                return module;
+            } else if (module.getModuleClass().getSuperclass().equals(moduleClass) && !NulsModule.class.equals(module.getModuleClass().getSuperclass())) {
+                return module;
+            }
+        }
+        return null;
+    }
+
+    public NulsModule getModuleById(int id) {
+        for (NulsModule module : moduleMap.values()) {
+            if (module.getModuleId() == id) {
+                return module;
+            }
+        }
+        return null;
     }
 
     public String getInfo() {
@@ -133,9 +163,11 @@ public class ModuleManager {
         }
         return list;
     }
+
     public void remThreadsByModule(String moduleName) {
-        for (NulsThread t : getThreadsByModule(moduleName) ) {
-             threadMap.remove(t.getName());
+        for (NulsThread t : getThreadsByModule(moduleName)) {
+            threadMap.remove(t.getName());
         }
     }
+
 }

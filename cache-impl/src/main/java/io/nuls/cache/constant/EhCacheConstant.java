@@ -5,6 +5,11 @@ package io.nuls.cache.constant;
  * nuls.io
  */
 public interface EhCacheConstant {
+    //todo version
+    int CACHE_MODULE_VERSION = 1111;
+    //Minimum version supported
+    int MINIMUM_VERSION_SUPPORTED = 0;
+
     int DEFAULT_MAX_SIZE = 16;
 
     String KEY_TYPE_FIELD="keyType";

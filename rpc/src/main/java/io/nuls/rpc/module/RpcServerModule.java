@@ -9,6 +9,6 @@ import io.nuls.core.module.NulsModule;
  */
 public abstract class RpcServerModule extends NulsModule {
     protected RpcServerModule(){
-        super(RpcServerModule.class.getSimpleName());
+        super("rpc");
     }
 }

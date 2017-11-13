@@ -1,8 +1,10 @@
 package io.nuls.core.utils.json;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +36,11 @@ public abstract class JSONUtils {
     public static <T> T json2pojo(String jsonStr, Class<T> clazz)
             throws Exception {
         return objectMapper.readValue(jsonStr, clazz);
+    }
+
+    public static <T> T json2pojo(String json, Class<T> entityClass, Class ...itemClass) throws IOException {
+        JavaType javaType =objectMapper.getTypeFactory().constructParametricType(entityClass,itemClass);
+        return objectMapper.readValue(json,javaType);
     }
 
     /**
@@ -80,5 +87,6 @@ public abstract class JSONUtils {
     public static <T> T map2pojo(Map map, Class<T> clazz) {
         return objectMapper.convertValue(map, clazz);
     }
+
 }
 

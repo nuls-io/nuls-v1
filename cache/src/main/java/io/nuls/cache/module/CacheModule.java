@@ -9,6 +9,6 @@ import io.nuls.core.module.NulsModule;
  */
 public abstract class CacheModule extends NulsModule {
     public CacheModule() {
-        super(CacheModule.class.getSimpleName());
+        super("cache");
     }
 }

@@ -81,4 +81,9 @@ public class DBModuleTest {
         Long count = blockDao.getCount();
         System.out.println("count" + count);
     }
+
+    @Test
+    public void testBB() {
+        System.out.println(0xFFFFL);
+    }
 }

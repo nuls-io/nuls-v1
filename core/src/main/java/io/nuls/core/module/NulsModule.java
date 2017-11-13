@@ -1,6 +1,8 @@
 package io.nuls.core.module;
 
 import io.nuls.core.constant.ModuleStatusEnum;
+import io.nuls.core.event.EventManager;
+import io.nuls.core.event.NulsEvent;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.manager.ModuleManager;
 import io.nuls.core.thread.NulsThread;
@@ -15,6 +17,8 @@ import java.util.List;
  */
 public abstract class NulsModule {
 
+    private short moduleId;
+
     private final String moduleName;
 
     private ModuleStatusEnum status;
@@ -22,7 +26,7 @@ public abstract class NulsModule {
     public NulsModule(String moduleName) {
         this.moduleName = moduleName;
         this.status = ModuleStatusEnum.UNSTARTED;
-        ModuleManager.getInstance().regModule(this.moduleName,this);
+        ModuleManager.getInstance().regModule(this.moduleName, this);
     }
 
     /**
@@ -42,26 +46,30 @@ public abstract class NulsModule {
 
     /**
      * get all info of the module
+     *
      * @return
      */
     public abstract String getInfo();
 
     /**
      * get the version of the module
+     *
      * @return
      */
-    public abstract String getVersion();
+    public abstract int getVersion();
 
     /**
      * get all threads of the module
+     *
      * @return
      */
-    protected final List<NulsThread> getThreadList(){
+    protected final List<NulsThread> getThreadList() {
         return ModuleManager.getInstance().getThreadsByModule(this.moduleName);
     }
 
     /**
      * get the status of the module
+     *
      * @return
      */
     public final ModuleStatusEnum getStatus() {
@@ -87,9 +95,34 @@ public abstract class NulsModule {
 
     /**
      * register the service to ModuleManager
+     *
      * @param service
      */
-    protected final void registerService(Object service){
-        ModuleManager.getInstance().regService(this.moduleName,service);
+    protected final void registerService(Object service) {
+        ModuleManager.getInstance().regService(this.moduleName, service);
+    }
+
+    protected final void registerService(Class serviceInterface, Object service) {
+        ModuleManager.getInstance().regService(this.moduleName, serviceInterface, service);
+    }
+
+    protected final void registerEvent(short eventType, Class<? extends NulsEvent> eventClass) {
+        if (this.getModuleId() == 0) {
+            EventManager.putEvent(this, eventType, eventClass);
+        } else {
+            EventManager.putEvent(this.getModuleId(), eventType, eventClass);
+        }
+    }
+
+    public Class<? extends NulsModule> getModuleClass() {
+        return this.getClass();
+    }
+
+    public short getModuleId() {
+        return moduleId;
+    }
+
+    public void setModuleId(short moduleId) {
+        this.moduleId = moduleId;
     }
 }

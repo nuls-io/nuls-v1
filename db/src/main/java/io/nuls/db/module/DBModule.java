@@ -9,7 +9,7 @@ import io.nuls.core.module.NulsModule;
 public abstract class DBModule extends NulsModule {
 
     protected DBModule() {
-        super(DBModule.class.getSimpleName());
+        super("database");
     }
 
 }

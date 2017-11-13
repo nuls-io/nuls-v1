@@ -21,6 +21,10 @@
 			<outputDirectory>/conf</outputDirectory>
 		</fileSet>
 		<fileSet>
+			<directory>src/main/webapp</directory>
+			<outputDirectory>/webapp</outputDirectory>
+		</fileSet>
+		<fileSet>
 			<directory>src/main/script</directory>
 			<outputDirectory>/bin</outputDirectory>
 			<includes>

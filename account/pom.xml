@@ -16,10 +16,14 @@
 
   <dependencies>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.12</version>
-      <scope>test</scope>
+      <groupId>io.nuls</groupId>
+      <artifactId>core</artifactId>
+      <version>1.0-SNAPSHOT</version>
     </dependency>
+      <dependency>
+          <groupId>io.nuls</groupId>
+          <artifactId>event-bus</artifactId>
+          <version>1.0-SNAPSHOT</version>
+      </dependency>
   </dependencies>
 </project>

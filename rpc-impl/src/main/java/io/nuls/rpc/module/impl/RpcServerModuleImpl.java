@@ -54,8 +54,8 @@ public class RpcServerModuleImpl extends RpcServerModule {
     }
 
     @Override
-    public String getVersion() {
-        return "1.0.0";
+    public int getVersion() {
+        return RpcConstant.RPC_MODULE_VERSION;
     }
 
 }

@@ -4,6 +4,7 @@ import com.alibaba.druid.pool.DruidDataSource;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.thread.NulsThread;
 import io.nuls.core.utils.aop.AopUtils;
+import io.nuls.db.constant.DBConstant;
 import io.nuls.db.dao.BlockDao;
 import io.nuls.db.dao.filter.DBMethodFilter;
 import io.nuls.db.dao.impl.mybatis.BlockDaoImpl;
@@ -93,8 +94,8 @@ public class MybatisDBModuleImpl extends DBModule {
     }
 
     @Override
-    public String getVersion() {
-        return null;
+    public int getVersion() {
+        return DBConstant.DB_MODULE_VERSION;
     }
 
     public SqlSessionFactory getSqlSessionFactory() {

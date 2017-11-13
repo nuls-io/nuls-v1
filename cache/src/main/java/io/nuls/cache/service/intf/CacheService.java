@@ -76,35 +76,9 @@ public interface CacheService<T> {
     void putElements(String cacheTitle, Map map);
 
     /**
-     * @param Title
-     */
-    void clearCache(String Title);
-
-    /**
-     * Add an operating listener
-     * add a oprateion
-     *
      * @param title
-     * @param listenner
      */
-    void addCacheListener(String title, CacheEventListener listenner);
-
-    /**
-     * remove an operating listener
-     * add a oprateion
-     *
-     * @param title
-     * @param listenner
-     */
-    void removeCacheListener(String title, CacheEventListener listenner);
-
-    /**
-     * get all listener of the cache named title
-     *
-     * @param title
-     * @return
-     */
-    List<CacheEventListener> getCacheListener(String title);
+    void clearCache(String title);
 
     List<String> getCacheTitleList();
 

@@ -2,7 +2,9 @@ package io.nuls.core.chain.entity;
 
 public class Chain {
     private String chainName = "";
+    private long magicNumber = 12345678L;
 
+    private int addressPrefix = 88;
     public String getChainName() {
         return chainName;
     }

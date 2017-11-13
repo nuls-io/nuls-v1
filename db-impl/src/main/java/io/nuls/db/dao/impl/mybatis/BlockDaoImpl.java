@@ -8,7 +8,7 @@ import io.nuls.db.entity.BlockPo;
 import java.util.List;
 
 /**
- * Created by zhouwei on 2017/9/29.
+ * Created by v.chou on 2017/9/29.
  */
 public class BlockDaoImpl extends BaseDaoImpl implements BlockDao {
 

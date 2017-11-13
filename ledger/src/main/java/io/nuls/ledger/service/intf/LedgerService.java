@@ -1,0 +1,30 @@
+package io.nuls.ledger.service.intf;
+
+import io.nuls.account.entity.Address;
+import io.nuls.core.chain.entity.transaction.Transaction;
+import io.nuls.core.chain.entity.transaction.TransactionOutput;
+import io.nuls.ledger.entity.Balance;
+
+import java.util.List;
+
+/**
+ * Created by Niels on 2017/11/9.
+ * nuls.io
+ */
+public interface LedgerService {
+
+    Balance getBalance(String address);
+
+    boolean varifyTransaction(Transaction tx);
+
+    boolean transfer(Address address, String password, Address toAddress, double amount,String remark);
+
+    boolean saveTransaction(Transaction tx);
+
+    Transaction query(byte[] txid);
+
+    List<Transaction> queryListByAccount(String address,int txType,long beginTime);
+
+    List<TransactionOutput> queryNotSpent(String address,double total);
+
+}

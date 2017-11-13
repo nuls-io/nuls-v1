@@ -1,15 +1,15 @@
 package io.nuls.network.service;
 
+import io.nuls.network.module.NetworkModule;
+
 /**
- * Created by win10 on 2017/10/25.
+ * Created by v.chou on 2017/10/25.
  */
 public abstract class NetworkService {
-    long getBestBlockHeight(){
-        return 0;
-    }
 
-    String getBestBlockHash(){
-        return "";
-    }
+    protected NetworkModule networkModule;
 
+    public abstract void start();
+
+    public abstract void shutdown();
 }

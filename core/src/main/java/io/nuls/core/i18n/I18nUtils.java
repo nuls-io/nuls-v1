@@ -1,6 +1,7 @@
 package io.nuls.core.i18n;
 
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.str.StringUtils;
@@ -18,7 +19,6 @@ import java.util.Properties;
 public class I18nUtils {
 
     private static final Map<String, Properties> AllMapping = new HashMap<>();
-    private static final String DEFAULT_ENCODING = "GBK";
     private static Properties nowMapping;
     //default language is English
     private static String key = "en";
@@ -33,7 +33,7 @@ public class I18nUtils {
             for (File file : folderFile.listFiles()) {
                 InputStream is = new FileInputStream(file);
                 Properties prop = new Properties();
-                prop.load(new InputStreamReader(is, DEFAULT_ENCODING));
+                prop.load(new InputStreamReader(is, NulsConstant.DEFAULT_ENCODING));
                 String key = file.getName().replace(".properties", "");
                 AllMapping.put(key, prop);
             }

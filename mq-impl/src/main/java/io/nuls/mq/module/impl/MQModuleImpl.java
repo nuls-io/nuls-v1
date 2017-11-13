@@ -2,10 +2,10 @@ package io.nuls.mq.module.impl;
 
 
 import io.nuls.core.thread.NulsThread;
+import io.nuls.mq.MqConstant;
 import io.nuls.mq.entity.StatInfo;
 import io.nuls.mq.manager.QueueManager;
 import io.nuls.mq.module.MQModule;
-import io.nuls.mq.service.impl.DisruptorServiceImpl;
 import io.nuls.mq.service.impl.QueueServiceImpl;
 
 import java.util.List;
@@ -38,7 +38,6 @@ public class MQModuleImpl extends MQModule {
         service.scheduleAtFixedRate(t1, 0, QueueManager.getLatelySecond(), TimeUnit.SECONDS);
         this.registerService(service);
         this.registerService(QueueServiceImpl.getInstance());
-        this.registerService(DisruptorServiceImpl.getInstance());
         QueueManager.setRunning(true);
     }
 
@@ -63,7 +62,7 @@ public class MQModuleImpl extends MQModule {
         str.append(",ThreadCount:");
         List<NulsThread> threadList = this.getThreadList();
         str.append(threadList.size());
-        str.append("ThreadInfo:\n");
+        str.append("\nThreadInfo:\n");
         for (NulsThread t : threadList) {
             str.append(t.getInfo());
         }
@@ -76,7 +75,7 @@ public class MQModuleImpl extends MQModule {
     }
 
     @Override
-    public String getVersion() {
-        return null;
+    public int getVersion() {
+        return MqConstant.MQ_MODULE_VERSION;
     }
 }
