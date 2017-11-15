@@ -9,7 +9,7 @@ import java.io.OutputStream;
 
 /**
  * Created by Niels on 2017/11/13.
- * nuls.io
+ *
  */
 public class BlockEvent extends BaseConsensusEvent{
     public BlockEvent(NulsEventHeader header) {

@@ -2,7 +2,7 @@ package io.nuls.cache.constant;
 
 /**
  * Created by Niels on 2017/10/27.
- * nuls.io
+ *
  */
 public interface EhCacheConstant {
     //todo version

@@ -26,7 +26,7 @@ public class AccountKeyValue extends KeyValue {
         try {
             this.value = value.getBytes(CHARSET);
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            Log.error(e);
         }
     }
 

@@ -2,7 +2,7 @@ package io.nuls.core.mesasge.constant;
 
 /**
  * Created by Niels on 2017/11/7.
- * nuls.io
+ *
  */
 public enum MessageTypeEnum {
     NETWORK(1), EVENT(2);

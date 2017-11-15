@@ -10,7 +10,7 @@ import java.io.OutputStream;
 
 /**
  * Created by Niels on 2017/11/8.
- * nuls.io
+ *
  */
 public class TransactionEvent extends BaseLedgerEvent {
     public TransactionEvent(NulsEventHeader header) {

@@ -8,7 +8,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Created by Niels on 2017/10/10.
- * nuls.io
+ *
  */
 public class BlockingQueueImpl<T> extends NulsQueue<T> {
 

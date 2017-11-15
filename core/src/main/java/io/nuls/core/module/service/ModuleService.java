@@ -8,7 +8,7 @@ import io.nuls.core.utils.str.StringUtils;
 
 /**
  * Created by Niels on 2017/10/16.
- * nuls.io
+ *
  */
 public class ModuleService {
 

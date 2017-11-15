@@ -2,7 +2,7 @@ package io.nuls.event.bus.utils.disruptor;
 
 /**
  * Created by Niels on 2017/11/6.
- * nuls.io
+ *
  */
 public class DisruptorEvent<T> {
 

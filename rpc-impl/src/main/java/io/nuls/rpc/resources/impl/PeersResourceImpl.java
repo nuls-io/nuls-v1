@@ -11,7 +11,7 @@ import javax.ws.rs.core.MediaType;
 
 /**
  * Created by Niels on 2017/9/30.
- * nuls.io
+ *
  */
 @Path("/peers")
 public class PeersResourceImpl implements PeersResource {

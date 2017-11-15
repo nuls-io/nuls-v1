@@ -9,7 +9,7 @@ import java.io.OutputStream;
 
 /**
  * Created by Niels on 2017/11/7.
- * nuls.io
+ *
  */
 //todo
 public class ExitConsensusEvent extends BaseConsensusEvent {

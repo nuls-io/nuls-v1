@@ -13,7 +13,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 /**
  * Created by Niels on 2017/10/31.
- * nuls.io
+ *
  */
 public class RestFulUtils {
 

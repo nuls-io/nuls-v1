@@ -1,6 +1,9 @@
 package io.nuls.network.module.impl;
 
 
+import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.utils.cfg.ConfigLoader;
+import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.param.NetworkParam;
 import io.nuls.network.module.NetworkModule;
 import io.nuls.network.service.NetworkService;
@@ -8,29 +11,25 @@ import io.nuls.network.service.impl.ConnectionManager;
 import io.nuls.network.service.impl.NetworkServiceImpl;
 import io.nuls.network.service.impl.PeersManager;
 
+import java.io.IOException;
+import java.util.Properties;
+
 public class NetworkModuleImpl extends NetworkModule {
 
     private NetworkService networkService;
 
-    private NetworkParam network;
-
-    private PeersManager peerManager;
-
-    private ConnectionManager connectionManager;
-
-
-    public NetworkModuleImpl(){
+    public NetworkModuleImpl() throws IOException {
+        ConfigLoader.loadProperties(NetworkConstant.Network_Properties);
 
         networkService = new NetworkServiceImpl(this);
         this.registerService(networkService);
     }
 
 
-
     @Override
     public void start() {
         //TODO start the module
-//        peerManager.start();
+        networkService.start();
     }
 
     @Override
@@ -39,10 +38,11 @@ public class NetworkModuleImpl extends NetworkModule {
     }
 
     @Override
-    public void destroy(){
+    public void destroy() {
         shutdown();
 
     }
+
     @Override
     public String getInfo() {
         StringBuilder str = new StringBuilder();
@@ -57,8 +57,6 @@ public class NetworkModuleImpl extends NetworkModule {
     public int getVersion() {
         return 0;
     }
-
-
 
 
 }

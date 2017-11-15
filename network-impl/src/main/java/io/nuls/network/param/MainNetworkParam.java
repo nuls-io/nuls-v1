@@ -16,10 +16,10 @@ public class MainNetworkParam extends NetworkParam {
     private static MainNetworkParam instance;
 
     private MainNetworkParam() {
-        this.port = ConfigLoader.getCfgValue(NetworkConstant.Network_Section, NetworkConstant.Network_Port_Main, 8001);
-        this.packetMagic = ConfigLoader.getCfgValue(NetworkConstant.Network_Section, NetworkConstant.Network_Magic_Main, 987654321L);
-        this.maxInCount = ConfigLoader.getCfgValue(NetworkConstant.Network_Section, NetworkConstant.Network_Peer_Max_In, 20);
-        this.maxOutCount = ConfigLoader.getCfgValue(NetworkConstant.Network_Section, NetworkConstant.Network_Peer_Max_Out, 10);
+        this.port = ConfigLoader.getCfgValue(NetworkConstant.Network_Section, NetworkConstant.Network_Port, 8632);
+        this.packetMagic = ConfigLoader.getCfgValue(NetworkConstant.Network_Section, NetworkConstant.Network_Magic, 936152748L);
+        this.maxInCount = ConfigLoader.getPropValue(NetworkConstant.Network_Peer_Max_In, 20);
+        this.maxOutCount = ConfigLoader.getPropValue(NetworkConstant.Network_Peer_Max_Out, 10);
 
         InetSocketAddress address1 = new InetSocketAddress("192.168.1.156", port);
         InetSocketAddress address2 = new InetSocketAddress("192.168.1.157", port);

@@ -16,10 +16,10 @@ public class TestNetworkParam extends NetworkParam {
     private static TestNetworkParam instance;
 
     private TestNetworkParam() {
-        this.port = ConfigLoader.getCfgValue(NetworkConstant.Network_Section, NetworkConstant.Network_Port_Test, 8002);
-        this.packetMagic = ConfigLoader.getCfgValue(NetworkConstant.Network_Section, NetworkConstant.Network_Magic_Test, 987654322L);
-        this.maxInCount = ConfigLoader.getCfgValue(NetworkConstant.Network_Section, NetworkConstant.Network_Peer_Max_In, 20);
-        this.maxOutCount = ConfigLoader.getCfgValue(NetworkConstant.Network_Section, NetworkConstant.Network_Peer_Max_Out, 10);
+        this.port = ConfigLoader.getPropValue(NetworkConstant.Network_Port_Test, 8002);
+        this.packetMagic = ConfigLoader.getPropValue(NetworkConstant.Network_Magic_Test, 987654322L);
+        this.maxInCount = ConfigLoader.getPropValue(NetworkConstant.Network_Peer_Max_In, 20);
+        this.maxOutCount = ConfigLoader.getPropValue(NetworkConstant.Network_Peer_Max_Out, 10);
 
         InetSocketAddress address1 = new InetSocketAddress("192.168.1.156", port);
         InetSocketAddress address2 = new InetSocketAddress("192.168.1.157", port);

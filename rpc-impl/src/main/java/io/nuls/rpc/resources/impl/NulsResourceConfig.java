@@ -6,7 +6,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 /**
  * Created by Niels on 2017/9/28.
- * nuls.io
+ *
  */
 public class NulsResourceConfig extends ResourceConfig {
 

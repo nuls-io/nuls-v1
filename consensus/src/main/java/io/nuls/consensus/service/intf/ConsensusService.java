@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * Created by Niels on 2017/11/7.
- * nuls.io
+ *
  */
 public interface ConsensusService {
 

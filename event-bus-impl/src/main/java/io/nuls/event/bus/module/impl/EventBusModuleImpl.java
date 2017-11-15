@@ -1,22 +1,20 @@
 package io.nuls.event.bus.module.impl;
 
-import com.lmax.disruptor.WorkHandler;
-import io.nuls.core.module.NulsModule;
 import io.nuls.event.bus.constant.EventBusConstant;
 import io.nuls.event.bus.module.intf.EventBusModule;
 import io.nuls.event.bus.processor.manager.ProcessorManager;
-import io.nuls.event.bus.processor.service.impl.ProcessorServiceImpl;
-import io.nuls.event.bus.processor.service.intf.ProcessorService;
-import io.nuls.event.bus.utils.disruptor.DisruptorEvent;
-
-import java.util.ArrayList;
-import java.util.List;
+import io.nuls.event.bus.processor.service.impl.LocalProcessorServiceImpl;
+import io.nuls.event.bus.processor.service.impl.NetworkProcessorServiceImpl;
+import io.nuls.event.bus.processor.service.intf.LocalProcessorService;
+import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
 
 /**
  * Created by Niels on 2017/11/6.
- * nuls.io
  */
 public class EventBusModuleImpl extends EventBusModule {
+
+    private LocalProcessorService localService;
+    private NetworkProcessorService networkService;
 
     public EventBusModuleImpl() {
         super();
@@ -24,18 +22,22 @@ public class EventBusModuleImpl extends EventBusModule {
 
     @Override
     public void start() {
-        ProcessorManager.init();
-        this.registerService(ProcessorServiceImpl.getInstance());
+        localService = LocalProcessorServiceImpl.getInstance();
+        networkService = NetworkProcessorServiceImpl.getInstance();
+        this.registerService(localService);
+        this.registerService(networkService);
     }
 
     @Override
     public void shutdown() {
-        ProcessorManager.shutdown();
+        localService.shutdown();
+        networkService.shutdown();
     }
 
     @Override
     public void destroy() {
-        ProcessorManager.shutdown();
+        localService.shutdown();
+        networkService.shutdown();
     }
 
     @Override

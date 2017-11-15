@@ -6,7 +6,7 @@ import java.util.Map;
 
 /**
  * Created by Niels on 2017/9/29.
- * nuls.io
+ *
  */
 public abstract class AssertUtil {
 

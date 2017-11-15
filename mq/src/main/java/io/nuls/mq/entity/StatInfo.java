@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Created by Niels on 2017/9/26.
- * nuls.io
+ *
  */
 public interface StatInfo {
     public void putOne();

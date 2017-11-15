@@ -5,7 +5,7 @@ import io.nuls.core.constant.ErrorCode;
 
 /**
  * Created by Niels on 2017/9/26.
- * nuls.io
+ *
  */
 public class NulsRuntimeException extends RuntimeException {
 

@@ -2,7 +2,7 @@ package io.nuls.ledger.entity;
 
 /**
  * Created by Niels on 2017/11/13.
- * nuls.io
+ *
  */
 public class Balance {
 

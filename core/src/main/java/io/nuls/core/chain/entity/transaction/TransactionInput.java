@@ -1,6 +1,7 @@
 package io.nuls.core.chain.entity.transaction;
 
 import io.nuls.core.chain.entity.NulsData;
+import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.crypto.script.Script;
 import io.nuls.core.exception.NulsException;
@@ -17,8 +18,8 @@ import java.util.List;
  */
 public class TransactionInput extends NulsData {
 
-    private CoinTransaction parent;
-    //上次的输出
+    private Sha256Hash txHash;
+    //the output last time
     private List<TransactionOutput> froms;
 
     private byte[] scriptBytes;
@@ -30,19 +31,19 @@ public class TransactionInput extends NulsData {
         this.froms = new ArrayList<>();
     }
 
-    public TransactionInput(CoinTransaction parent) {
+    public TransactionInput(Sha256Hash txHash) {
         this();
-        this.parent = parent;
+        this.txHash = txHash;
     }
 
-    public TransactionInput(CoinTransaction parent, TransactionOutput output) {
+    public TransactionInput(Sha256Hash txHash, TransactionOutput output) {
         this();
-        this.parent = parent;
+        this.txHash = txHash;
         this.froms.add(output);
     }
 
-    public TransactionInput(CoinTransaction parent, List<TransactionOutput> froms) {
-        this.parent = parent;
+    public TransactionInput(Sha256Hash txHash, List<TransactionOutput> froms) {
+        this.txHash = txHash;
         this.froms = froms;
     }
 
@@ -58,13 +59,13 @@ public class TransactionInput extends NulsData {
         } else {
             stream.write(new VarInt(froms.size()).encode());
             for (TransactionOutput from : froms) {
-                stream.write(from.getParent().getHash().getReversedBytes());
+                stream.write(from.getTxHash().getReversedBytes());
                 Utils.uint32ToByteStreamLE(from.getIndex(), stream);
             }
         }
-        //签名的长度
+        //length of sign
         stream.write(new VarInt(scriptBytes.length).encode());
-        //签名
+        //sign
         stream.write(scriptBytes);
     }
 
@@ -78,13 +79,11 @@ public class TransactionInput extends NulsData {
         int fromSize = (int) byteBuffer.readVarInt();
         for (int i = 0; i < fromSize; i++) {
             TransactionOutput pre = new TransactionOutput();
-            CoinTransaction t = new CoinTransaction();
-            t.setHash(byteBuffer.readHash());
-            pre.setParent(t);
+            pre.setTxHash(byteBuffer.readHash());
             pre.setIndex((int) byteBuffer.readUint32());
             froms.add(pre);
         }
-        //输入签名的长度
+        //length of sign
         int signLength = (int) byteBuffer.readVarInt();
         scriptBytes = byteBuffer.readBytes(signLength);
         scriptSig = new Script(scriptBytes);
@@ -95,12 +94,12 @@ public class TransactionInput extends NulsData {
 
     }
 
-    public CoinTransaction getParent() {
-        return parent;
+    public Sha256Hash getTxHash() {
+        return txHash;
     }
 
-    public void setParent(CoinTransaction parent) {
-        this.parent = parent;
+    public void setTxHash(Sha256Hash txHash) {
+        this.txHash = txHash;
     }
 
     public List<TransactionOutput> getFroms() {

@@ -11,7 +11,7 @@ import java.util.*;
 
 /**
  * Created by Niels on 2017/9/26.
- * nuls.io
+ *
  */
 public class ModuleManager {
 
@@ -28,7 +28,10 @@ public class ModuleManager {
     }
 
     public <T> T getService(Class<T> tclass) {
-            return (T) intfMap.get(tclass);
+        if(intfMap.get(tclass) == null) {
+            return null;
+        }
+        return (T) intfMap.get(tclass);
     }
 
     public void regService(String moduleName, Object service) {

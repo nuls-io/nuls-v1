@@ -2,10 +2,10 @@ package io.nuls.mq;
 
 /**
  * Created by Niels on 2017/11/8.
- * nuls.io
+ *
  */
 public interface MqConstant {
-    //todo version
+    //version
     int MQ_MODULE_VERSION = 1111;
     //Minimum version supported
     int MINIMUM_VERSION_SUPPORTED = 0;

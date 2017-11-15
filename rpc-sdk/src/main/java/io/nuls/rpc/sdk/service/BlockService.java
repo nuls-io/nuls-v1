@@ -6,7 +6,7 @@ import io.nuls.rpc.sdk.utils.RestFulUtils;
 
 /**
  * Created by Niels on 2017/11/1.
- * nuls.io
+ *
  */
 public class BlockService {
     private RestFulUtils restFul = RestFulUtils.getInstance();

@@ -2,6 +2,7 @@ package io.nuls.core.chain.entity.transaction;
 
 import io.nuls.core.chain.entity.NulsData;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.crypto.script.Script;
 import io.nuls.core.exception.NulsException;
@@ -16,9 +17,8 @@ import java.io.OutputStream;
  * Created by win10 on 2017/10/30.
  */
 public class TransactionOutput extends NulsData{
-
     //交易
-    private CoinTransaction parent;
+    private Sha256Hash txHash;
     //下次的花费
     private TransactionInput spentBy;
     //交易金额
@@ -36,8 +36,8 @@ public class TransactionOutput extends NulsData{
 
     }
 
-    public TransactionOutput(CoinTransaction parent) {
-        this.parent = parent;
+    public TransactionOutput(Sha256Hash txHash) {
+        this.txHash = txHash;
     }
 
     @Override
@@ -78,14 +78,12 @@ public class TransactionOutput extends NulsData{
 
     }
 
-
-
-    public CoinTransaction getParent() {
-        return parent;
+    public Sha256Hash getTxHash() {
+        return txHash;
     }
 
-    public void setParent(CoinTransaction parent) {
-        this.parent = parent;
+    public void setTxHash(Sha256Hash txHash) {
+        this.txHash = txHash;
     }
 
     public TransactionInput getSpentBy() {

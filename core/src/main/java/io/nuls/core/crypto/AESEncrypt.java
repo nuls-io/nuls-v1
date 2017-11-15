@@ -2,6 +2,7 @@ package io.nuls.core.crypto;
 
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.crypto.Utils;
+import io.nuls.core.utils.log.Log;
 import org.spongycastle.crypto.BufferedBlockCipher;
 import org.spongycastle.crypto.engines.AESFastEngine;
 import org.spongycastle.crypto.modes.CBCBlockCipher;
@@ -101,9 +102,9 @@ public class AESEncrypt {
         String pw = "sssssfds";
 
         EncryptedData data = encrypt(str.getBytes(), new KeyParameter(Sha256Hash.hash(pw.getBytes())));
-        System.out.println(data);
+        Log.debug(data+"");
 
-        System.out.println(new String(decrypt(data, new KeyParameter(Sha256Hash.hash(pw.getBytes())))));
+        Log.debug(new String(decrypt(data, new KeyParameter(Sha256Hash.hash(pw.getBytes())))));
 
     }
 }

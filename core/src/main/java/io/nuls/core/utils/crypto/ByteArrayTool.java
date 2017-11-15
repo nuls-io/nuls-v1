@@ -1,5 +1,7 @@
 package io.nuls.core.utils.crypto;
 
+import io.nuls.core.utils.log.Log;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
@@ -25,7 +27,7 @@ public class ByteArrayTool {
 		try {
 			array.write(bytes);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Log.error(e);
 		}
 	}
 	
@@ -33,7 +35,7 @@ public class ByteArrayTool {
 		try {
 			array.write(new byte[]{b});
 		} catch (IOException e) {
-			e.printStackTrace();
+			Log.error(e);
 		}
 	}
 	
@@ -45,7 +47,7 @@ public class ByteArrayTool {
 		try {
 			array.write(bytes);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Log.error(e);
 		}
 	}
 	
@@ -53,7 +55,7 @@ public class ByteArrayTool {
 		try {
 			Utils.uint32ToByteStreamLE(val, array);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Log.error(e);
 		}
 	}
 	
@@ -61,7 +63,7 @@ public class ByteArrayTool {
 		try {
 			Utils.int64ToByteStreamLE(val, array);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Log.error(e);
 		}
 	}
 	
@@ -72,7 +74,7 @@ public class ByteArrayTool {
 			try {
 				array.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				Log.error(e);
 			}
 		}
 	}
@@ -81,7 +83,7 @@ public class ByteArrayTool {
 		try {
 			array.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			Log.error(e);
 		}
 	}
 }

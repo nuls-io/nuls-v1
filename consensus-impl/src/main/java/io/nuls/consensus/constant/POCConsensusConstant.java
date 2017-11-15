@@ -2,7 +2,7 @@ package io.nuls.consensus.constant;
 
 /**
  * Created by Niels on 2017/11/8.
- * nuls.io
+ *
  */
 public interface POCConsensusConstant {
     //todo version

@@ -17,7 +17,7 @@ import java.util.Map;
 
 /**
  * Created by Niels on 2017/10/27.
- * nuls.io
+ *
  */
 public class EhCacheManager {
     private static final EhCacheManager manager = new EhCacheManager();

@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * 队列统计信息
  * Created by Niels on 2017/9/21.
- * nuls.io
+ *
  */
 public class StatInfoImpl implements StatInfo {
     private String name;

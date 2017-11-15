@@ -4,7 +4,7 @@ import io.nuls.core.utils.crypto.Base58;
 
 /**
  * Created by Niels on 2017/10/30.
- * nuls.io
+ *
  */
 public class Address{
     //base58 length

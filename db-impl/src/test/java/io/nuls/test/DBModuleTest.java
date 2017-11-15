@@ -1,6 +1,7 @@
 package io.nuls.test;
 
 import io.nuls.core.manager.ModuleManager;
+import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.BlockDao;
 import io.nuls.db.dao.impl.mybatis.BlockDaoImpl;
 import io.nuls.db.entity.BlockPo;
@@ -33,7 +34,7 @@ public class DBModuleTest {
     @Test
     public void testCallback(){
         BlockPo blockPo = blockDao.getByKey("aaa");
-        System.out.println("============="+blockPo.getHeight());
+        Log.debug("============="+blockPo.getHeight());
         blockPo.setHeight(blockPo.getHeight()+2);
 
     }
@@ -46,14 +47,14 @@ public class DBModuleTest {
         blockPo.setHeight(111L);
         blockPo.setScript("dsfasdf".getBytes());
         int result = blockDao.save(blockPo);
-        System.out.println("result" + result);
+        Log.debug("result" + result);
 
     }
 
     @Test
     public void testSelect() {
         BlockPo blockPo = blockDao.getByKey("bbb");
-        System.out.println(blockPo.getCreateTime());
+        Log.debug(blockPo.getCreateTime()+"");
     }
 
 
@@ -67,9 +68,9 @@ public class DBModuleTest {
                 public void run(){
                     try {
                         BlockPo blockPo = blockDao.getByKey("aaa");
-                        System.out.println(blockPo.getCreateTime());
+                        Log.debug(blockPo.getCreateTime()+"");
                     }catch (Exception e) {
-                        e.printStackTrace();
+                        Log.error(e);
                     }
                 }
             }.start();
@@ -79,11 +80,11 @@ public class DBModuleTest {
     @Test
     public void testCount() {
         Long count = blockDao.getCount();
-        System.out.println("count" + count);
+        Log.debug("count" + count);
     }
 
     @Test
     public void testBB() {
-        System.out.println(0xFFFFL);
+        Log.debug(0xFFFFL+"");
     }
 }

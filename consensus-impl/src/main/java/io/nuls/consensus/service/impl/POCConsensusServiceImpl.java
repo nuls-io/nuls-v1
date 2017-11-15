@@ -17,7 +17,7 @@ import java.util.List;
 
 /**
  * Created by Niels on 2017/11/9.
- * nuls.io
+ *
  */
 public class POCConsensusServiceImpl implements ConsensusService {
 

@@ -4,7 +4,7 @@ import io.nuls.account.entity.Address;
 
 /**
  * Created by Niels on 2017/11/7.
- * nuls.io
+ *
  */
 //todo 定义共识相关的字段
 public class ConsensusAccount  {
@@ -20,6 +20,8 @@ public class ConsensusAccount  {
     private Address bailor;
 
     private Address miner;
+
+    private double credit;
 
     public long getStartTime() {
         return startTime;

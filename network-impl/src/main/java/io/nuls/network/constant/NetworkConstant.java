@@ -1,8 +1,13 @@
 package io.nuls.network.constant;
 
+import io.nuls.core.utils.cfg.ConfigLoader;
+
+import java.io.IOException;
+import java.util.Properties;
+
 /**
  * Created by Niels on 2017/11/7.
- * nuls.io
+ *
  */
 public interface NetworkConstant {
     //todo version
@@ -12,10 +17,11 @@ public interface NetworkConstant {
 
 
     /**--------[network] -------*/
+    String Network_Properties = "network.properties";
     String Network_Section = "Network";
     String Network_Type = "net.type";
-    String Network_Port_Main = "main.port";
-    String Network_Magic_Main = "main.magic";
+    String Network_Port = "network.port";
+    String Network_Magic = "network.magic";
     String Network_Port_Test = "test.port";
     String Network_Magic_Test = "test.magic";
     String Network_Port_Dev = "dev.port";
@@ -27,4 +33,5 @@ public interface NetworkConstant {
     String Network_Peer_In_Group = "inPeers";
     String Network_Peer_Out_Group = "outPeers";
     String Network_Peer_Consensus_Group = "consensus_Group";
+
 }

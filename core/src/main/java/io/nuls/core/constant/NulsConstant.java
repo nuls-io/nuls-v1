@@ -2,7 +2,7 @@ package io.nuls.core.constant;
 
 /**
  * Created by Niels on 2017/9/26.
- * nuls.io
+ *
  */
 public interface NulsConstant {
 

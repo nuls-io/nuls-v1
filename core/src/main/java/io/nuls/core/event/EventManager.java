@@ -11,7 +11,7 @@ import java.util.Map;
 
 /**
  * Created by Niels on 2017/11/7.
- * nuls.io
+ *
  */
 public class EventManager {
     private static final Map<String, Class<? extends NulsEvent>> eventMap = new HashMap<>();
@@ -61,12 +61,16 @@ public class EventManager {
 
 
     public static void refreshEvents() {
-        for (Object[] array : tempList) {
+        for (int i = tempList.size() - 1; i >= 0; i--) {
+            Object[] array = tempList.get(i);
             NulsModule module = (NulsModule) array[0];
+            if (0 == module.getModuleId()) {
+                continue;
+            }
             short type = (short) array[1];
             Class<? extends NulsEvent> clazz = (Class<? extends NulsEvent>) array[2];
             putEvent(module.getModuleId(), type, clazz);
+            tempList.remove(i);
         }
-        tempList.clear();
     }
 }

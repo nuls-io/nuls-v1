@@ -13,7 +13,7 @@ import javax.ws.rs.core.MediaType;
 
 /**
  * Created by Niels on 2017/9/30.
- * nuls.io
+ *
  */
 @Path("/sys")
 public class SystemResourceImpl implements SystemResource, ModuleResource {
@@ -23,7 +23,6 @@ public class SystemResourceImpl implements SystemResource, ModuleResource {
     @Path("/version")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getVersion() {
-        //todo
         return null;
     }
 
@@ -31,7 +30,6 @@ public class SystemResourceImpl implements SystemResource, ModuleResource {
     @Path("/version")
     @Produces(MediaType.APPLICATION_JSON)
     public io.nuls.rpc.entity.RpcResult updateVersion() {
-        //todo
         return null;
     }
 

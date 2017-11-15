@@ -2,7 +2,7 @@ package io.nuls.event.bus.constant;
 
 /**
  * Created by Niels on 2017/11/6.
- * nuls.io
+ *
  */
 public interface EventBusConstant {
     //todo version
@@ -11,8 +11,9 @@ public interface EventBusConstant {
     int MINIMUM_VERSION_SUPPORTED = 0;
 
 
-    String DISRUPTOR_NAME = "nuls-processing-center";
+    String DISRUPTOR_NAME_LOCAL = "nuls-processing-local";
+    String DISRUPTOR_NAME_NETWORK = "nuls-processing-network";
     int THREAD_COUNT = Runtime.getRuntime().availableProcessors();
     int DEFAULT_RING_BUFFER_SIZE = 1 << 20;
-    String HANDLER_THREAD_NAME = "processor_handler";
+
 }

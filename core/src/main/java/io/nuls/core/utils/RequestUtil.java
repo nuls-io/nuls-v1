@@ -1,5 +1,6 @@
 package io.nuls.core.utils;
 
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 
 import java.io.*;
@@ -23,7 +24,7 @@ public class RequestUtil {
 				try {
 					is.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					Log.error(e);
 				}
 			}
 		}
@@ -84,28 +85,28 @@ public class RequestUtil {
 				try {
 					is.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					Log.error(e);
 				}
 			}
 			if (os != null) {
 				try {
 					os.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					Log.error(e);
 				}
 			}
 			if (isr != null) {
 				try {
 					isr.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					Log.error(e);
 				}
 			}
 			if (br != null) {
 				try {
 					br.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					Log.error(e);
 				}
 			}
 		}
@@ -143,14 +144,14 @@ public class RequestUtil {
 				try {
 					is.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					Log.error(e);
 				}
 			}
 			if (br != null) {
 				try {
 					br.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					Log.error(e);
 				}
 			}
 		}
@@ -192,28 +193,28 @@ public class RequestUtil {
 				try {
 					is.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					Log.error(e);
 				}
 			}
 			if (os != null) {
 				try {
 					os.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					Log.error(e);
 				}
 			}
 			if (isr != null) {
 				try {
 					isr.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					Log.error(e);
 				}
 			}
 			if (br != null) {
 				try {
 					br.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					Log.error(e);
 				}
 			}
 		}

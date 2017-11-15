@@ -4,6 +4,7 @@ import io.nuls.core.chain.entity.NulsData;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.ByteBuffer;
+import io.nuls.core.utils.log.Log;
 import io.nuls.network.entity.param.NetworkParam;
 import io.nuls.network.message.entity.VersionMessage;
 
@@ -11,26 +12,31 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 
-public class Peer extends NulsData{
+public class Peer extends NulsData {
 
     private String hash;
 
     private String ip;
 
-    private String hostName;
-
     private int port;
 
-    /** 1: inPeer ,  2: outPeer */
+    /**
+     * 1: inPeer ,  2: outPeer
+     */
     private int type;
 
-    /** 0: wait , 1: connecting, 2: close*/
+    /**
+     * 0: wait , 1: connecting, 2: close
+     */
     private int status;
 
 
-    public final static int WAIT = 0;
+    public final static int WAITTING = 0;
     public final static int CONNECTING = 1;
     public final static int CLOSE = 2;
+
+    public final static int IN = 1;
+    public final static int OUT = 2;
 
     public Peer() {
     }
@@ -42,9 +48,8 @@ public class Peer extends NulsData{
 
     public Peer(int type, InetSocketAddress socketAddress) {
         this.type = type;
-        this.ip = socketAddress.getAddress().getHostAddress();
-        this.hostName = socketAddress.getHostName();
         this.port = socketAddress.getPort();
+        this.ip = socketAddress.getAddress().getHostAddress();
     }
 
     public void connect(NetworkParam network) {
@@ -104,14 +109,6 @@ public class Peer extends NulsData{
         this.ip = ip;
     }
 
-    public String getHostName() {
-        return hostName;
-    }
-
-    public void setHostName(String hostName) {
-        this.hostName = hostName;
-    }
-
     public int getPort() {
         return port;
     }
@@ -122,10 +119,10 @@ public class Peer extends NulsData{
 
 
     public static void main(String[] args) {
-        InetSocketAddress address = new InetSocketAddress("www.baidu.com",22);
-        System.out.println(address.getHostName());
-        System.out.println(address.getHostString());
-        System.out.println(address.getAddress().getHostAddress());
+        InetSocketAddress address = new InetSocketAddress("www.baidu.com", 22);
+        Log.debug(address.getHostName());
+        Log.debug(address.getHostString());
+        Log.debug(address.getAddress().getHostAddress());
     }
 
     public int getStatus() {

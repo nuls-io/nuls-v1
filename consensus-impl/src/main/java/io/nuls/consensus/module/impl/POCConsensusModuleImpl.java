@@ -1,24 +1,20 @@
 package io.nuls.consensus.module.impl;
 
 import io.nuls.consensus.constant.POCConsensusConstant;
-import io.nuls.consensus.event.BaseConsensusEvent;
-import io.nuls.consensus.event.ExitConsensusEvent;
-import io.nuls.consensus.event.JoinConsensusEvent;
 import io.nuls.consensus.module.ConsensusModule;
 import io.nuls.consensus.service.impl.POCConsensusServiceImpl;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.thread.NulsThread;
 import io.nuls.core.utils.log.Log;
-import io.nuls.event.bus.processor.service.intf.ProcessorService;
+import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
 
 /**
  * Created by Niels on 2017/11/7.
- * nuls.io
+ *
  */
 //todo
 public class POCConsensusModuleImpl extends ConsensusModule {
 
-    private ProcessorService processorService = NulsContext.getInstance().getService(ProcessorService.class);
+    private NetworkProcessorService processorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
 
     @Override
     public void start() {

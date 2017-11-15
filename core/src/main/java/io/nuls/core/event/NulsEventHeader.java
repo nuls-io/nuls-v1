@@ -10,7 +10,7 @@ import java.io.OutputStream;
 
 /**
  * Created by Niels on 2017/11/7.
- * nuls.io
+ *
  */
 public class NulsEventHeader extends NulsData {
     private short moduleId;

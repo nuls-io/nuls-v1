@@ -7,7 +7,7 @@ import io.nuls.core.utils.log.Log;
 
 /**
  * Created by Niels on 2017/9/27.
- * nuls.io
+ *
  */
 public class RpcResult {
 

@@ -3,6 +3,7 @@ package io.nuls.core.chain.entity;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.utils.crypto.ByteArrayTool;
+import io.nuls.core.utils.log.Log;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
@@ -50,7 +51,7 @@ public class KeyValue {
 			value = Arrays.copyOfRange(content, cursor, (int)(cursor + varInt.value));
 			
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			Log.error(e);
 		}
 	}
 	
@@ -69,7 +70,7 @@ public class KeyValue {
 			byteArray.append(new VarInt(value.length).encode());
 			byteArray.append(value);
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			Log.error(e);
 		}
 		
 		return byteArray.toArray();
@@ -103,7 +104,7 @@ public class KeyValue {
 		try {
 			return new String(value, NulsConstant.DEFAULT_ENCODING);
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			Log.error(e);
 		}
 		return "";
 	}
@@ -119,7 +120,7 @@ public class KeyValue {
 		try {
 			builder.append(new String(value, NulsConstant.DEFAULT_ENCODING));
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			Log.error(e);
 		}
 		builder.append("]");
 		return builder.toString();

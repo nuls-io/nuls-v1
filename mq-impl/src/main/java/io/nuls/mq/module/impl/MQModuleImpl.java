@@ -7,6 +7,7 @@ import io.nuls.mq.entity.StatInfo;
 import io.nuls.mq.manager.QueueManager;
 import io.nuls.mq.module.MQModule;
 import io.nuls.mq.service.impl.QueueServiceImpl;
+import io.nuls.mq.thread.StatusLogThread;
 
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
@@ -15,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Niels on 2017/9/27.
- * nuls.io
+ *
  */
 public class MQModuleImpl extends MQModule {
 
@@ -27,12 +28,7 @@ public class MQModuleImpl extends MQModule {
 
     @Override
     public void start() {
-        NulsThread t1 = new NulsThread(this, "queueStatusLogThread") {
-            @Override
-            public void run() {
-                QueueManager.logQueueStatus();
-            }
-        };
+        NulsThread t1 = new StatusLogThread(this, "queueStatusLogThread");
         //启动速度统计任务
         service = new ScheduledThreadPoolExecutor(1);
         service.scheduleAtFixedRate(t1, 0, QueueManager.getLatelySecond(), TimeUnit.SECONDS);

@@ -4,7 +4,7 @@ import java.util.UUID;
 
 /**
  * Created by Niels on 2017/10/9.
- * nuls.io
+ *
  */
 public class StringUtils {
 

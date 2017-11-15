@@ -2,6 +2,7 @@ package io.nuls.network.service.impl;
 
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.log.Log;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -29,7 +30,7 @@ public class TimeService {
             connection.connect();
             Date date = new Date(connection.getDate());
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            System.out.println(sdf.format(date));
+            Log.debug(sdf.format(date));
         } catch (IOException e) {
             throw new NulsRuntimeException(ErrorCode.NET_SERVER_START_ERROR, e);
         }
@@ -48,7 +49,7 @@ public class TimeService {
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        Log.error(e);
                     }
                 }
             }

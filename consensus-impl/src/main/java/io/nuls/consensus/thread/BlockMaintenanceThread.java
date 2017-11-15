@@ -8,7 +8,7 @@ import io.nuls.core.thread.NulsThread;
 
 /**
  * Created by Niels on 2017/11/10.
- * nuls.io
+ *
  */
 public class BlockMaintenanceThread extends NulsThread {
 

@@ -2,7 +2,7 @@ package io.nuls.core.constant;
 
 /**
  * Created by Niels on 2017/9/27.
- * nuls.io
+ *
  */
 public enum ModuleStatusEnum {
 

@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by win10 on 2017/11/6.
+ * Created by vivi on 2017/11/6.
  */
 public abstract class NetworkParam {
 

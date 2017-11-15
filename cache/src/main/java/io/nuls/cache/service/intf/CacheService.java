@@ -7,9 +7,8 @@ import java.util.Map;
 
 /**
  * Created by Niels on 2017/10/18.
- * nuls.io
  */
-public interface CacheService<T> {
+public interface CacheService<K, V> {
 
     /**
      * create a cache named title
@@ -40,7 +39,7 @@ public interface CacheService<T> {
      * @param key
      * @param value
      */
-    void putElement(String cacheTitle, String key, T value);
+    void putElement(String cacheTitle, K key, V value);
 
     /**
      * put data to a cache
@@ -57,7 +56,9 @@ public interface CacheService<T> {
      * @param key
      * @return
      */
-    T getElementValue(String cacheTitle, String key);
+    V getElementValue(String cacheTitle, K key);
+
+    List<V> getElementValueList(String cacheTitle);
 
     /**
      * remove an element from the cache named cacheTitle
@@ -65,7 +66,7 @@ public interface CacheService<T> {
      * @param cacheTitle
      * @param key
      */
-    void removeElement(String cacheTitle, String key);
+    void removeElement(String cacheTitle, K key);
 
     /**
      * Batch addition
@@ -73,7 +74,7 @@ public interface CacheService<T> {
      * @param cacheTitle
      * @param map
      */
-    void putElements(String cacheTitle, Map map);
+    void putElements(String cacheTitle, Map<K,V> map);
 
     /**
      * @param title
@@ -81,5 +82,6 @@ public interface CacheService<T> {
     void clearCache(String title);
 
     List<String> getCacheTitleList();
+
 
 }

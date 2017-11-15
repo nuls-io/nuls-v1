@@ -2,7 +2,7 @@ package io.nuls.client.constant;
 
 /**
  * Created by Niels on 2017/10/30.
- * nuls.io
+ *
  */
 public interface CommandConstant {
 

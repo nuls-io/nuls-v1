@@ -4,8 +4,14 @@ import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.Sha256Hash;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
+import io.nuls.core.utils.io.ByteBuffer;
+import io.nuls.core.utils.param.AssertUtil;
+import io.nuls.db.entity.AccountPo;
+import io.nuls.db.entity.LocalAccountPo;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,4 +49,34 @@ public final class AccountTool {
         return new BigInteger(1, Sha256Hash.hash(pwPriBytes));
     }
 
+    public static void toBean(AccountPo src, Account desc) {
+        AssertUtil.canNotEmpty(src, "Object type conversion faild!");
+        AssertUtil.canNotEmpty(desc, "Object type conversion faild!");
+        desc.parse(new ByteBuffer(src.getBytes()));
+        desc.setCreateHeight(src.getCreateHeight());
+        desc.setCreateTime(src.getCreateTime());
+        desc.setTxHash(src.getTxHash());
+        if (src instanceof LocalAccountPo) {
+            desc.setPriKey(((LocalAccountPo) src).getPriKey());
+            desc.setPriSeed(((LocalAccountPo) src).getPriSeed());
+        }
+    }
+
+    public static void toPojo(Account src, AccountPo desc) throws IOException, NulsException {
+        AssertUtil.canNotEmpty(src, "Object type conversion faild!");
+        AssertUtil.canNotEmpty(desc, "Object type conversion faild!");
+        desc.setId(src.getId());
+        desc.setAddress(src.getAddress().toString());
+        desc.setAlias(src.getAlias());
+        desc.setCreateHeight(src.getCreateHeight());
+        desc.setCreateTime(src.getCreateTime());
+        desc.setPubKey(src.getPubKey());
+        desc.setTxHash(src.getTxHash());
+        desc.setVersion(src.getVersion());
+        desc.setBytes(src.serialize());
+        if (desc instanceof LocalAccountPo) {
+            ((LocalAccountPo) desc).setPriKey(src.getPriKey());
+            ((LocalAccountPo) desc).setPriSeed(src.getPriSeed());
+        }
+    }
 }

@@ -4,6 +4,7 @@ import com.alibaba.druid.pool.DruidDataSource;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.thread.NulsThread;
 import io.nuls.core.utils.aop.AopUtils;
+import io.nuls.core.utils.log.Log;
 import io.nuls.db.constant.DBConstant;
 import io.nuls.db.dao.BlockDao;
 import io.nuls.db.dao.filter.DBMethodFilter;
@@ -22,7 +23,7 @@ import java.util.List;
 
 /**
  * Created by zhouwei on 2017/9/27.
- * nuls.io
+ *
  */
 public class MybatisDBModuleImpl extends DBModule {
 
@@ -34,7 +35,7 @@ public class MybatisDBModuleImpl extends DBModule {
             initSqlSessionFactory();
             initService();
         }catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
             throw new DBException(ErrorCode.DB_MODULE_START_FAIL);
         }
 

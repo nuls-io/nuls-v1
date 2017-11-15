@@ -7,7 +7,7 @@ import java.nio.MappedByteBuffer;
 
 /**
  * Created by Niels on 2017/9/21.
- * nuls.io
+ *
  */
 public class MappedBufferCleanUtil {
 

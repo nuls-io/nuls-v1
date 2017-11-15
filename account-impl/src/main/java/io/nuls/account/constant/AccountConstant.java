@@ -2,10 +2,10 @@ package io.nuls.account.constant;
 
 /**
  * Created by Niels on 2017/10/30.
- * nuls.io
+ *
  */
 public interface AccountConstant {
-    //todo version
+    //version
     int ACCOUNT_MODULE_VERSION = 1111;
     //Minimum version supported
     int MINIMUM_VERSION_SUPPORTED = 0;

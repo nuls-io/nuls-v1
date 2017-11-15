@@ -10,7 +10,7 @@ import java.io.File;
 
 /**
  * Created by Niels on 2017/9/30.
- * nuls.io
+ *
  */
 @Path("/wallet")
 public class WalletResourceImpl implements WalletResouce {

@@ -5,7 +5,7 @@ import io.nuls.rpc.resources.form.TxForm;
 
 /**
  * Created by Niels on 2017/9/27.
- * nuls.io
+ *
  */
 public interface TransactionResource {
 

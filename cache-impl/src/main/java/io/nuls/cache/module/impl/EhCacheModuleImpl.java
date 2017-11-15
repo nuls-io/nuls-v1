@@ -8,7 +8,7 @@ import io.nuls.cache.service.intf.CacheService;
 
 /**
  * Created by Niels on 2017/10/27.
- * nuls.io
+ *
  */
 public class EhCacheModuleImpl extends CacheModule {
 

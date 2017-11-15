@@ -14,17 +14,31 @@ import java.util.Properties;
 
 /**
  * Created by Niels on 2017/9/26.
- * nuls.io
+ *
  */
 public abstract class ConfigLoader {
 
     private static Ini config = null;
 
+    private static Properties properties = new Properties();
+
     public static Properties loadProperties(String fileName) throws IOException {
         InputStream is = ConfigLoader.class.getClassLoader().getResourceAsStream(fileName);
         Properties prop = new Properties();
         prop.load(is);
+
+        for (String name : prop.stringPropertyNames()) {
+            properties.setProperty(name, prop.getProperty(name));
+        }
         return prop;
+    }
+
+    public static <T> T getPropValue(String name, T defaultValue) {
+        if (properties.getProperty(name) == null) {
+            return defaultValue;
+        }
+        String value = properties.getProperty(name);
+        return getValueByType(value, defaultValue);
     }
 
     public static void loadIni(String fileName) throws IOException {
@@ -36,6 +50,7 @@ public abstract class ConfigLoader {
         ini.load(url);
         config = ini;
     }
+
 
     public static String getCfgValue(String section, String key) throws NulsException {
         Profile.Section ps = config.get(section);
@@ -52,27 +67,29 @@ public abstract class ConfigLoader {
     public static <T> T getCfgValue(String section, String key, T defaultValue) {
         Profile.Section ps = config.get(section);
         if (null == ps) {
-           return defaultValue;
+            return defaultValue;
         }
         String value = ps.get(key);
         if (StringUtils.isBlank(value)) {
             return defaultValue;
         }
-        if(defaultValue instanceof Integer) {
-            return (T)((Integer) Integer.parseInt(value));
-        } else if(defaultValue instanceof Long) {
-            return (T)((Long) Long.parseLong(value));
-        } else if(defaultValue instanceof Float) {
-            return (T)((Float) Float.parseFloat(value));
-        } else if(defaultValue instanceof Double) {
-            return (T)((Double) Double.parseDouble(value));
-        } else if(defaultValue instanceof Boolean) {
-            return (T)((Boolean) Boolean.parseBoolean(value));
-        }
-        return (T)value;
+        return getValueByType(value, defaultValue);
     }
 
-
+    private static <T> T getValueByType(String value, T defaultValue) {
+        if (defaultValue instanceof Integer) {
+            return (T) ((Integer) Integer.parseInt(value));
+        } else if (defaultValue instanceof Long) {
+            return (T) ((Long) Long.parseLong(value));
+        } else if (defaultValue instanceof Float) {
+            return (T) ((Float) Float.parseFloat(value));
+        } else if (defaultValue instanceof Double) {
+            return (T) ((Double) Double.parseDouble(value));
+        } else if (defaultValue instanceof Boolean) {
+            return (T) ((Boolean) Boolean.parseBoolean(value));
+        }
+        return (T) value;
+    }
 
     public static Profile.Section getSection(String section) throws NulsException {
         Profile.Section ps = config.get(section);

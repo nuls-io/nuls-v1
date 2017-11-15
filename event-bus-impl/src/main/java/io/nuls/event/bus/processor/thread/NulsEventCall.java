@@ -1,13 +1,14 @@
 package io.nuls.event.bus.processor.thread;
 
 import io.nuls.core.event.NulsEvent;
-import io.nuls.event.bus.event.handler.NulsEventHandler;
+import io.nuls.core.utils.log.Log;
+import io.nuls.event.bus.event.handler.intf.NulsEventHandler;
 
 import java.util.concurrent.Callable;
 
 /**
  * Created by Niels on 2017/11/6.
- * nuls.io
+ *
  */
 public class NulsEventCall<T extends NulsEvent> implements Callable<T> {
     private final T event;
@@ -23,9 +24,13 @@ public class NulsEventCall<T extends NulsEvent> implements Callable<T> {
         if (null == event || null == handler) {
             return null;
         }
-        boolean ok = handler.getFilterChain().startDoFilter(event);
-        if (ok) {
-            handler.onEvent(event);
+        try {
+            boolean ok = handler.getFilterChain().startDoFilter(event);
+            if (ok) {
+                handler.onEvent(event);
+            }
+        }catch (Exception e){
+            Log.error(e);
         }
         return null;
     }

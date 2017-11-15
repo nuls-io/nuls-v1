@@ -1,13 +1,13 @@
 package io.nuls.consensus;
 
 import io.nuls.consensus.event.JoinConsensusEvent;
-import io.nuls.event.bus.event.handler.NulsEventHandler;
+import io.nuls.event.bus.event.handler.NetworkNulsEventHandler;
 
 /**
  * Created by Niels on 2017/11/13.
- * nuls.io
+ *
  */
-public class VerifyJoinApplyHandler extends NulsEventHandler<JoinConsensusEvent> {
+public class VerifyJoinApplyHandler extends NetworkNulsEventHandler<JoinConsensusEvent> {
     //todo
     @Override
     public void onEvent(JoinConsensusEvent event) {

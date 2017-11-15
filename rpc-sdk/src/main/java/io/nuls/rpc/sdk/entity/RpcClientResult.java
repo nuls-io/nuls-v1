@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Created by Niels on 2017/10/31.
- * nuls.io
+ *
  */
 public class RpcClientResult {
     private String code;

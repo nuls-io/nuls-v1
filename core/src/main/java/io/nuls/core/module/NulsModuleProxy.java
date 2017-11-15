@@ -7,7 +7,7 @@ import io.nuls.core.utils.log.Log;
 
 /**
  * Created by Niels on 2017/10/13.
- * nuls.io
+ *
  */
 public class NulsModuleProxy extends NulsModule {
 

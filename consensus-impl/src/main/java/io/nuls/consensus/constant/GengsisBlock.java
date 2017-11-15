@@ -5,7 +5,7 @@ import io.nuls.core.utils.io.ByteBuffer;
 
 /**
  * Created by Niels on 2017/11/10.
- * nuls.io
+ *
  */
 public final class GengsisBlock extends Block {
     private static final GengsisBlock instance = new GengsisBlock();

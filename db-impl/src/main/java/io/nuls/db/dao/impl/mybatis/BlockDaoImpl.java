@@ -50,6 +50,12 @@ public class BlockDaoImpl extends BaseDaoImpl implements BlockDao {
     }
 
     @Override
+    public List<BlockPo> listAll() {
+        //todo
+        return null;
+    }
+
+    @Override
     public List<BlockPo> getList(Integer pageNum, Integer pageSize) {
         return null;
     }

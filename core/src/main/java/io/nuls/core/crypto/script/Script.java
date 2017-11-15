@@ -5,6 +5,7 @@ import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.UnsafeByteArrayOutputStream;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.date.TimeService;
+import io.nuls.core.utils.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongycastle.crypto.digests.RIPEMD160Digest;
@@ -716,7 +717,7 @@ public class Script {
 			try {
 				bos.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				Log.error(e);
 			}
 		}
     }

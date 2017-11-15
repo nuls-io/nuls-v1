@@ -19,19 +19,17 @@ import java.util.Arrays;
 
 /**
  * Created by Niels on 2017/10/30.
- * nuls.io
  */
 public class Account extends NulsData {
 
     private String id;
 
+    private String alias;
+
     private Address address;
 
-    private byte[] priSeed;
 
     private byte status;
-
-    private double credit;
 
     private byte[] sign;
 
@@ -39,6 +37,12 @@ public class Account extends NulsData {
 
     private byte[] extend;
 
+    private Long createTime;
+    private Long createHeight;
+    private byte[] txHash;
+
+
+    private byte[] priSeed;
     // Decrypted  prikey
     private byte[] priKey;
 
@@ -78,6 +82,7 @@ public class Account extends NulsData {
             return true;
         }
     }
+
     @Override
     public int size() {
         int s = 0;
@@ -89,6 +94,13 @@ public class Account extends NulsData {
                 Log.error(e);
             }
         }
+        if(StringUtils.isNotBlank(alias)){
+            try {
+                s += alias.getBytes(NulsConstant.DEFAULT_ENCODING).length + 1;
+            } catch (UnsupportedEncodingException e) {
+                Log.error(e);
+            }
+        }
         if (null != address) {
             s += address.getHash160().length;
         }
@@ -96,7 +108,6 @@ public class Account extends NulsData {
             s += priSeed.length + 1;
         }
         s += 1;//status
-        s += Utils.double2Bytes(credit).length;
         if (null != sign) {
             s += sign.length + 1;
         }
@@ -108,13 +119,17 @@ public class Account extends NulsData {
     @Override
     public void serializeToStream(OutputStream stream) throws IOException {
         stream.write(new VarInt(version).encode());
-        this.writeBytesWithLength(stream, id.getBytes(NulsConstant.DEFAULT_ENCODING));
-        if (null != address&&null!=address.getHash160()) {
+        if(StringUtils.isNotBlank(id)){
+            this.writeBytesWithLength(stream, id.getBytes(NulsConstant.DEFAULT_ENCODING));
+        }
+        if(StringUtils.isNotBlank(alias)){
+            this.writeBytesWithLength(stream, alias.getBytes(NulsConstant.DEFAULT_ENCODING));
+        }
+        if (null != address && null != address.getHash160()) {
             stream.write(address.getHash160());
         }
         this.writeBytesWithLength(stream, priSeed);
         stream.write(status);
-        this.writeBytesWithLength(stream, Utils.double2Bytes(credit));
         this.writeBytesWithLength(stream, sign);
         this.writeBytesWithLength(stream, pubKey);
         this.writeBytesWithLength(stream, extend);
@@ -125,11 +140,11 @@ public class Account extends NulsData {
     public void parse(ByteBuffer byteBuffer) {
         version = (int) byteBuffer.readUint32();
         id = new String(byteBuffer.readByLengthByte());
+        alias = new String(byteBuffer.readByLengthByte());
         byte[] hash160 = byteBuffer.readBytes(Address.LENGTH);
         this.address = new Address(hash160);
         priSeed = byteBuffer.readByLengthByte();
         status = byteBuffer.readBytes(1)[0];
-        credit = Utils.bytes2Double(byteBuffer.readByLengthByte());
         sign = byteBuffer.readByLengthByte();
         pubKey = byteBuffer.readByLengthByte();
         extend = byteBuffer.readByLengthByte();
@@ -182,10 +197,6 @@ public class Account extends NulsData {
         this.extend = extend;
     }
 
-    public double getCredit() {
-        return credit;
-    }
-
     public byte[] getSign() {
         return sign;
     }
@@ -210,7 +221,35 @@ public class Account extends NulsData {
         this.id = id;
     }
 
-    public void setCredit(double credit) {
-        this.credit = credit;
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+
+    public Long getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Long createTime) {
+        this.createTime = createTime;
+    }
+
+    public Long getCreateHeight() {
+        return createHeight;
+    }
+
+    public void setCreateHeight(Long createHeight) {
+        this.createHeight = createHeight;
+    }
+
+    public byte[] getTxHash() {
+        return txHash;
+    }
+
+    public void setTxHash(byte[] txHash) {
+        this.txHash = txHash;
     }
 }

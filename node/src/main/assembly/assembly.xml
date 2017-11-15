@@ -19,14 +19,20 @@
 		<fileSet>
 			<directory>src/main/resources</directory>
 			<outputDirectory>/conf</outputDirectory>
+            <directoryMode>0744</directoryMode>
+            <fileMode>0644</fileMode>
 		</fileSet>
 		<fileSet>
 			<directory>src/main/webapp</directory>
 			<outputDirectory>/webapp</outputDirectory>
+            <directoryMode>0744</directoryMode>
+            <fileMode>0644</fileMode>
 		</fileSet>
 		<fileSet>
 			<directory>src/main/script</directory>
 			<outputDirectory>/bin</outputDirectory>
+			<directoryMode>0755</directoryMode>
+            <fileMode>0755</fileMode>
 			<includes>
 				<include>*.sh</include>
 			</includes>
@@ -35,6 +41,8 @@
 			<!-- copy project jar self -->
 			<directory>${project.build.directory}</directory>
 			<outputDirectory>/dist_lib</outputDirectory>
+            <directoryMode>0744</directoryMode>
+            <fileMode>0644</fileMode>
 			<includes>
 				<include>*.jar</include>
 			</includes>

@@ -5,7 +5,7 @@ import io.nuls.core.module.NulsModule;
 
 /**
  * Created by Niels on 2017/11/7.
- * nuls.io
+ *
  */
 public abstract class ConsensusModule extends NulsModule {
     public ConsensusModule() {

@@ -14,7 +14,7 @@ import java.util.Properties;
 
 /**
  * Created by Niels on 2017/9/27.
- * nuls.io
+ *
  */
 public class I18nUtils {
 

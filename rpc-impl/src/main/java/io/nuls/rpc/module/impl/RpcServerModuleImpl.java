@@ -8,7 +8,7 @@ import io.nuls.rpc.service.intf.RpcServerService;
 
 /**
  * Created by Niels on 2017/9/27.
- * nuls.io
+ *
  */
 public class RpcServerModuleImpl extends RpcServerModule {
 
@@ -19,9 +19,9 @@ public class RpcServerModuleImpl extends RpcServerModule {
 
     public RpcServerModuleImpl(){
         super();
-        this.ip = getCfgProperty(RpcConstant.CFG_RPC_SERVER_SECTION,RpcConstant.CFG_RPC_SERVER_IP);
-        this.port = getCfgProperty(RpcConstant.CFG_RPC_SERVER_SECTION,RpcConstant.CFG_RPC_SERVER_PORT);
-        this.moduleUrl = getCfgProperty(RpcConstant.CFG_RPC_SERVER_SECTION,RpcConstant.CFG_RPC_SERVER_URL);
+        this.ip = getCfgProperty(RpcConstant.CFG_RPC_SECTION,RpcConstant.CFG_RPC_SERVER_IP);
+        this.port = getCfgProperty(RpcConstant.CFG_RPC_SECTION,RpcConstant.CFG_RPC_SERVER_PORT);
+        this.moduleUrl = getCfgProperty(RpcConstant.CFG_RPC_SECTION,RpcConstant.CFG_RPC_SERVER_URL);
         this.registerService(rpcServerService);
     }
 

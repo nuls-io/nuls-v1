@@ -4,7 +4,7 @@ import io.nuls.core.chain.entity.Block;
 
 /**
  * Created by Niels on 2017/11/10.
- * nuls.io
+ *
  */
 public interface BlockService {
 

@@ -3,6 +3,7 @@ package io.nuls.core.utils.date;
 import io.nuls.core.utils.RequestUtil;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.json.JSONUtils;
+import io.nuls.core.utils.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -234,7 +235,7 @@ public final class TimeService {
 			try {
 				bos.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				Log.error(e);
 			}
 		}
 	}

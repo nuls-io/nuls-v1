@@ -4,7 +4,7 @@ import io.nuls.consensus.constant.ConsensusStatusEnum;
 
 /**
  * Created by Niels on 2017/11/7.
- * nuls.io
+ *
  */
 public class ConsensusInfo {
     private ConsensusStatusEnum status = ConsensusStatusEnum.IN_CONSENSUS;

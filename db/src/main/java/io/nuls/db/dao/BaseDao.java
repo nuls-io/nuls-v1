@@ -49,6 +49,6 @@ public interface BaseDao<T,K> {
      */
     int deleteByKey(K k);
 
-
+    List<T> listAll();
 
 }

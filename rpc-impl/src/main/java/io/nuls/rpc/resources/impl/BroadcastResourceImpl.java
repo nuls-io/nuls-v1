@@ -10,7 +10,7 @@ import javax.ws.rs.core.MediaType;
 
 /**
  * Created by Niels on 2017/10/24.
- * nuls.io
+ *
  */
 @Path("/broadcast")
 public class BroadcastResourceImpl implements BroadcastResource {

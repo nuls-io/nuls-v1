@@ -3,18 +3,23 @@ package io.nuls.account.service.impl;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
+import io.nuls.account.manager.AccountManager;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.account.util.AccountTool;
 import io.nuls.cache.service.intf.CacheService;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.EncryptedData;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
+import io.nuls.db.dao.AccountDao;
+import io.nuls.db.entity.AccountPo;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -26,7 +31,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by Niels on 2017/10/30.
- * nuls.io
  */
 public class AccountServiceImpl implements AccountService {
 
@@ -34,12 +38,11 @@ public class AccountServiceImpl implements AccountService {
 
     private Lock locker = new ReentrantLock();
 
-    private CacheService<Account> cacheService;
+    private AccountCacheService accountCacheService = AccountCacheService.getInstance();
+    private AccountDao accountDao = NulsContext.getInstance().getService(AccountDao.class);
 
 
     private AccountServiceImpl() {
-        NulsContext context = NulsContext.getInstance();
-        this.cacheService = context.getService(CacheService.class);
     }
 
     public static AccountServiceImpl getInstance() {
@@ -58,10 +61,18 @@ public class AccountServiceImpl implements AccountService {
             account.setAddress(address);
             account.setPubKey(key.getPubKey(true));
             signAccount(account);
-            //todo save account to database（local）
+            AccountPo po = new AccountPo();
+            AccountTool.toPojo(account, po);
+            this.accountDao.save(po);
             account.setEcKey(key);
-            this.cacheService.putElement(AccountConstant.ACCOUNT_LIST_CACHE, account.getAddress().toString(), account);
+            this.accountCacheService.putAccount(account);
             return account;
+        } catch (IOException e) {
+            Log.error(e);
+            throw new NulsRuntimeException(ErrorCode.FAILED, "create account faild!");
+        } catch (NulsException e) {
+            Log.error(e);
+            throw new NulsRuntimeException(ErrorCode.FAILED, "create account faild!");
         } finally {
             locker.unlock();
         }
@@ -89,7 +100,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public void resetKey(Account account, String password) {
-        AssertUtil.canNotEmpty(account,"");
+        AssertUtil.canNotEmpty(account, "");
         byte[] pubkey = account.getPubKey();
         if (!account.isEncrypted()) {
             account.setEcKey(ECKey.fromPrivate(new BigInteger(account.getPriSeed())));
@@ -113,39 +124,51 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Account getLocalAccount() {
-        //todo
-        return null;
+        return this.accountCacheService.getAccountById(AccountManager.Locla_acount_id);
     }
 
     @Override
     public List<Account> getLocalAccountList() {
-        //todo
-        return null;
+        List<Account> list = this.accountCacheService.getAccountList();
+        if (null != list && !list.isEmpty()) {
+            return list;
+        }
+        list = new ArrayList<>();
+        List<AccountPo> polist = this.accountDao.listAll();
+        if (null == polist || polist.isEmpty()) {
+            return list;
+        }
+        for (AccountPo po : polist) {
+            Account account = new Account();
+            AccountTool.toBean(po, account);
+            list.add(account);
+        }
+        this.accountCacheService.putAccountList(list);
+        return list;
     }
 
     @Override
     public Account getAccount(String address) {
-        AssertUtil.canNotEmpty(address,"");
-        return cacheService.getElementValue(AccountConstant.ACCOUNT_LIST_CACHE, address);
-    }
-
-    @Override
-    public double getAccountCredit(String address) {
-        AssertUtil.canNotEmpty(address,"");
-        Account account = cacheService.getElementValue(AccountConstant.ACCOUNT_LIST_CACHE, address);
-        return account.getCredit();
+        AssertUtil.canNotEmpty(address, "");
+        return accountCacheService.getAccountByAddress(address);
     }
 
     @Override
     public Address getAddress(String pubKey) {
-        AssertUtil.canNotEmpty(pubKey,"");
+        AssertUtil.canNotEmpty(pubKey, "");
         return AccountTool.newAddress(ECKey.fromPublicOnly(Hex.decode(pubKey)));
     }
 
     @Override
     public byte[] getPriKey(String address) {
-        AssertUtil.canNotEmpty(address,"");
-        Account account = cacheService.getElementValue(AccountConstant.ACCOUNT_LIST_CACHE, address);
+        AssertUtil.canNotEmpty(address, "");
+        Account account = accountCacheService.getAccountByAddress(address);
         return account.getEcKey().getPrivKeyBytes();
+    }
+
+    @Override
+    public void switchAccount(String id) {
+        Account account = accountCacheService.getAccountById(id);
+
     }
 }

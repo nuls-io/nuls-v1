@@ -1,12 +1,17 @@
 package io.nuls.core.event;
 
 import io.nuls.core.chain.entity.NulsData;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.io.ByteBuffer;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Created by Niels on 2017/11/7.
- * nuls.io
+ *
  */
-public abstract class NulsEvent extends NulsData {
+public class NulsEvent extends NulsData {
 
     public NulsEvent(NulsEventHeader header) {
         this.header = header;
@@ -20,5 +25,28 @@ public abstract class NulsEvent extends NulsData {
 
     public void setHeader(NulsEventHeader header) {
         this.header = header;
+    }
+
+    @Override
+    public int size() {
+        return header.size();
+    }
+
+    @Override
+    public void serializeToStream(OutputStream stream) throws IOException {
+        this.header.serializeToStream(stream);
+    }
+
+    @Override
+    public void parse(ByteBuffer byteBuffer) {
+        this.header = new NulsEventHeader();
+        this.header.parse(byteBuffer);
+    }
+
+    @Override
+    public void verify() throws NulsException, IOException {
+        //max size;
+        byte[] content = this.serialize();
+
     }
 }

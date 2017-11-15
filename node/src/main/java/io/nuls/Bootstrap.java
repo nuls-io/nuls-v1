@@ -12,6 +12,7 @@ import io.nuls.core.module.NulsModule;
 import io.nuls.core.module.service.ModuleService;
 import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.log.Log;
+import io.nuls.jettyserver.JettyServer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,8 +28,10 @@ public class Bootstrap {
     public static void main(String[] args) {
         try {
             sysStart();
+            webStart();
         } catch (Exception e) {
             Log.error(e);
+            System.exit(1);
         }
     }
 
@@ -39,7 +42,7 @@ public class Bootstrap {
                 ConfigLoader.loadIni(NulsConstant.USER_CONFIG_FILE);
             } catch (IOException e) {
                 Log.error("Client start faild", e);
-                break;
+                throw new NulsRuntimeException(ErrorCode.FAILED,"Client start faild");
             }
             //set system language
             try {
@@ -53,12 +56,17 @@ public class Bootstrap {
                 initModules(bootstrapClasses);
             } catch (IOException e) {
                 Log.error(e);
+                throw new NulsRuntimeException(ErrorCode.FAILED,"Client start faild");
             }
             Log.info("");
         } while (false);
-        System.out.println("--------------------------------------------");
-        System.out.println(ModuleManager.getInstance().getInfo());
-        System.out.println("--------------------------------------------");
+        Log.debug("--------------------------------------------");
+        Log.debug(ModuleManager.getInstance().getInfo());
+        Log.debug("--------------------------------------------");
+    }
+
+    private static void webStart() {
+        JettyServer.init();
     }
 
     private static void initModules(Properties bootstrapClasses) {
@@ -73,7 +81,6 @@ public class Bootstrap {
                 throw new NulsRuntimeException(e);
             }
         }
-        EventManager.refreshEvents();
     }
 
     private static NulsModule regModule(short id, String moduleClass) {
@@ -83,6 +90,7 @@ public class Bootstrap {
         try {
             NulsModule module = ModuleService.getInstance().loadModule(moduleClass);
             module.setModuleId(id);
+            EventManager.refreshEvents();
             return module;
         } catch (ClassNotFoundException e) {
             Log.error(e);

@@ -17,9 +17,9 @@ public interface AccountService {
 
     Account getAccount(String address);
 
-    double getAccountCredit(String address);
-
     Address getAddress(String pubKey);
 
     byte[] getPriKey(String address);
+
+    void switchAccount(String id);
 }

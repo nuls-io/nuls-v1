@@ -1,8 +1,14 @@
 package io.nuls.rpc.aop;
 
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.log.Log;
+import io.nuls.core.utils.str.StringUtils;
+import io.nuls.rpc.constant.RpcConstant;
 import io.nuls.rpc.entity.RpcResult;
 import org.glassfish.grizzly.http.server.Request;
 
@@ -19,7 +25,6 @@ import java.io.IOException;
 
 /**
  * Created by Niels on 2017/9/28.
- * nuls.io
  */
 public class RpcServerFilter implements ContainerRequestFilter, ContainerResponseFilter, ExceptionMapper<Exception> {
 
@@ -48,11 +53,26 @@ public class RpcServerFilter implements ContainerRequestFilter, ContainerRespons
     }
 
     private boolean whiteSheetVerifier(Request request) {
-        //TODO
-//        System.out.println(request.getRemoteAddr());
-//        System.out.println(request.getRemoteHost());
-//        System.out.println(request.getRemotePort());
-//        System.out.println(request.getRemoteUser());
-        return true;
+        String ips = null;
+        try {
+            ips = ConfigLoader.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_REQUEST_WHITE_SHEET);
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+        if (StringUtils.isBlank(ips)) {
+            return false;
+        }
+        String[] ipArray = ips.split(RpcConstant.WHITE_SHEET_SPLIT);
+        String realIp = request.getRemoteAddr();
+        for (String ip : ipArray) {
+            if (ip.equals(realIp)) {
+                return true;
+            }
+        }
+//        Log.debug(request.getRemoteAddr());
+//        Log.debug(request.getRemoteHost());
+//        Log.debug(request.getRemotePort());
+//        Log.debug(request.getRemoteUser());
+        return false;
     }
 }

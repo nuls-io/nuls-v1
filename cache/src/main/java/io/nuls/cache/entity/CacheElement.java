@@ -2,7 +2,7 @@ package io.nuls.cache.entity;
 
 /**
  * Created by Niels on 2017/10/18.
- * nuls.io
+ *
  */
 public class CacheElement<T> {
     private String cacheTitle;

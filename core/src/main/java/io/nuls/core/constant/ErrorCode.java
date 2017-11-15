@@ -5,7 +5,7 @@ import io.nuls.core.i18n.I18nUtils;
 
 /**
  * Created by Niels on 2017/9/27.
- * nuls.io
+ *
  */
 public enum ErrorCode {
 

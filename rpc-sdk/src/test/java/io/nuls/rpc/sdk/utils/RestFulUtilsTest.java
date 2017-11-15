@@ -6,7 +6,7 @@ import org.junit.Test;
 
 /**
  * Created by Niels on 2017/10/31.
- * nuls.io
+ *
  */
 public class RestFulUtilsTest {
     private RestFulUtils util;

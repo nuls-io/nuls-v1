@@ -10,12 +10,14 @@ import io.nuls.event.bus.utils.disruptor.DisruptorEvent;
 
 /**
  * Created by Niels on 2017/11/6.
- * nuls.io
  */
-public class  EventBusDispatchThread extends NulsThread implements WorkHandler<DisruptorEvent<NulsEvent>> {
+public class EventBusDispatchThread extends NulsThread implements WorkHandler<DisruptorEvent<NulsEvent>> {
 
-    public EventBusDispatchThread(String threadName) {
+    private final ProcessorManager processorManager;
+
+    public EventBusDispatchThread(String threadName, ProcessorManager processorManager) {
         super(NulsContext.getInstance().getModule(EventBusModuleImpl.class), threadName);
+        this.processorManager = processorManager;
     }
 
     @Override
@@ -23,7 +25,7 @@ public class  EventBusDispatchThread extends NulsThread implements WorkHandler<D
         if (null == event) {
             return;
         }
-        ProcessorManager.executeHandlers(event.getData());
+        processorManager.executeHandlers(event.getData());
     }
 
     @Override

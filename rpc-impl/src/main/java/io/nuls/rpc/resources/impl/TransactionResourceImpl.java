@@ -10,7 +10,7 @@ import javax.ws.rs.core.MediaType;
 
 /**
  * Created by Niels on 2017/9/30.
- * nuls.io
+ *
  */
 @Path("/tx")
 public class TransactionResourceImpl implements TransactionResource {

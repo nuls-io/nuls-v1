@@ -15,14 +15,15 @@ public class DevNetworkParam extends NetworkParam {
     private static DevNetworkParam instance;
 
     private DevNetworkParam() {
-        this.port = ConfigLoader.getCfgValue(NetworkConstant.Network_Section, NetworkConstant.Network_Port_Dev, 8003);
-        this.packetMagic = ConfigLoader.getCfgValue(NetworkConstant.Network_Section, NetworkConstant.Network_Magic_Dev, 987654323L);
-        this.maxInCount = ConfigLoader.getCfgValue(NetworkConstant.Network_Section, NetworkConstant.Network_Peer_Max_In, 20);
-        this.maxOutCount = ConfigLoader.getCfgValue(NetworkConstant.Network_Section, NetworkConstant.Network_Peer_Max_Out, 10);
+        this.port = ConfigLoader.getPropValue(NetworkConstant.Network_Port_Dev, 8003);
+        this.packetMagic = ConfigLoader.getPropValue(NetworkConstant.Network_Magic_Dev, 987654323L);
+        this.maxInCount = ConfigLoader.getPropValue(NetworkConstant.Network_Peer_Max_In, 20);
+        this.maxOutCount = ConfigLoader.getPropValue(NetworkConstant.Network_Peer_Max_Out, 10);
 
-        InetSocketAddress address1 = new InetSocketAddress("192.168.1.199", port);
+
         InetSocketAddress address2 = new InetSocketAddress("192.168.1.201", port);
         InetSocketAddress address3 = new InetSocketAddress("192.168.1.202", port);
+        InetSocketAddress address1 = new InetSocketAddress("192.168.1.199", port);
         seedPeers.add(address1);
         seedPeers.add(address2);
         seedPeers.add(address3);

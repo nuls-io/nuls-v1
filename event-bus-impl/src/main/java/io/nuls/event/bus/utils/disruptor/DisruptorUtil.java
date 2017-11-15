@@ -17,7 +17,7 @@ import java.util.concurrent.Executors;
 
 /**
  * Created by Niels on 2017/10/10.
- * nuls.io
+ *
  */
 public class DisruptorUtil<T extends DisruptorEvent> {
     private static final DisruptorUtil service = new DisruptorUtil();

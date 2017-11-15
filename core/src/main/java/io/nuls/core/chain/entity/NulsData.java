@@ -12,7 +12,7 @@ import java.io.Serializable;
 
 /**
  * Created by Niels on 2017/10/30.
- * nuls.io
+ *
  */
 public abstract class NulsData implements Serializable {
 
@@ -57,7 +57,7 @@ public abstract class NulsData implements Serializable {
     /**
      * @throws NulsException
      */
-    public abstract void verify() throws NulsException;
+    public abstract void verify() throws NulsException, IOException;
 
 
     public int getVersion() {

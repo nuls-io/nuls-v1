@@ -5,7 +5,7 @@ import io.nuls.rpc.entity.RpcResult;
 
 /**
  * Created by Niels on 2017/10/16.
- * nuls.io
+ *
  */
 public interface ModuleResource {
 
