@@ -1,8 +1,5 @@
 package io.nuls.ledger.entity;
 
-import io.nuls.core.chain.entity.transaction.NulsTransaction;
-import io.nuls.core.chain.entity.transaction.TransactionInput;
-import io.nuls.core.chain.entity.transaction.TransactionOutput;
 import io.nuls.core.constant.TransactionConstant;
 
 import java.util.List;

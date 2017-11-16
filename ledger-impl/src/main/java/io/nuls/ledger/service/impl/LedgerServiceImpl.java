@@ -1,10 +1,10 @@
 package io.nuls.ledger.service.impl;
 
 import io.nuls.account.entity.Address;
-import io.nuls.core.chain.entity.transaction.Transaction;
-import io.nuls.core.chain.entity.transaction.TransactionOutput;
+import io.nuls.core.chain.entity.Transaction;
 import io.nuls.ledger.Exception.NulsTxVerifyException;
 import io.nuls.ledger.entity.Balance;
+import io.nuls.ledger.entity.TransactionOutput;
 import io.nuls.ledger.service.intf.LedgerService;
 
 import java.util.List;

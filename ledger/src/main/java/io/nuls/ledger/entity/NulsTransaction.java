@@ -1,8 +1,7 @@
-package io.nuls.core.chain.entity.transaction;
+package io.nuls.ledger.entity;
 
-import io.nuls.core.constant.TransactionConstant;
+import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.crypto.VarInt;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.ByteBuffer;
 

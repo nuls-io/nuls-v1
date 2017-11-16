@@ -1,4 +1,4 @@
-package io.nuls.core.chain.entity.transaction;
+package io.nuls.core.chain.entity;
 
 import io.nuls.core.chain.entity.NulsData;
 import io.nuls.core.crypto.Sha256Hash;

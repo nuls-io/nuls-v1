@@ -1,10 +1,9 @@
-package io.nuls.core.chain.entity.transaction;
+package io.nuls.ledger.entity;
 
 import io.nuls.core.chain.entity.NulsData;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.crypto.script.Script;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.ByteBuffer;
 

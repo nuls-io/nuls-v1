@@ -1,6 +1,5 @@
 package io.nuls.ledger.entity;
 
-import io.nuls.core.chain.entity.transaction.NulsTransaction;
 import io.nuls.core.constant.TransactionConstant;
 
 /**

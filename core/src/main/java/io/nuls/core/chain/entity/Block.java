@@ -1,7 +1,5 @@
 package io.nuls.core.chain.entity;
 
-import io.nuls.core.chain.entity.transaction.Transaction;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.ByteBuffer;
 
 import java.util.List;

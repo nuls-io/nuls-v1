@@ -1,15 +1,11 @@
 package io.nuls.ledger.thread;
 
 import io.nuls.account.service.intf.AccountService;
-import io.nuls.core.chain.entity.transaction.TransactionOutput;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.thread.NulsThread;
 import io.nuls.core.utils.log.Log;
-import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.module.impl.LedgerModuleImpl;
 import io.nuls.ledger.service.intf.LedgerService;
-
-import java.util.List;
 
 /**
  * Created by Niels on 2017/11/13.
