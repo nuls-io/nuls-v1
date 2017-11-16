@@ -28,7 +28,6 @@ public class Account extends NulsData {
 
     private Address address;
 
-
     private byte status;
 
     private byte[] sign;

@@ -7,13 +7,13 @@ import io.nuls.consensus.constant.ConsensusStatusEnum;
  *
  */
 public class ConsensusInfo {
-    private ConsensusStatusEnum status = ConsensusStatusEnum.IN_CONSENSUS;
+    private ConsensusStatusEnum status;
     private long startTime;
-    private String bailorAddress;
+    private String entrustAddress;
     private String minerAddress;
-    private int blockCount;
-    private double rewardsNuls;
-    private double marginAmount;
+    private int parkedCount;
+    private double reward;
+    private double deposit;
     private double weight;//%
 
     public ConsensusStatusEnum getStatus() {
@@ -22,14 +22,6 @@ public class ConsensusInfo {
 
     public void setStatus(ConsensusStatusEnum status) {
         this.status = status;
-    }
-
-    public double getMarginAmount() {
-        return marginAmount;
-    }
-
-    public void setMarginAmount(double marginAmount) {
-        this.marginAmount = marginAmount;
     }
 
     public double getWeight() {
@@ -48,14 +40,6 @@ public class ConsensusInfo {
         this.startTime = startTime;
     }
 
-    public String getBailorAddress() {
-        return bailorAddress;
-    }
-
-    public void setBailorAddress(String bailorAddress) {
-        this.bailorAddress = bailorAddress;
-    }
-
     public String getMinerAddress() {
         return minerAddress;
     }
@@ -64,19 +48,35 @@ public class ConsensusInfo {
         this.minerAddress = minerAddress;
     }
 
-    public int getBlockCount() {
-        return blockCount;
+    public int getParkedCount() {
+        return parkedCount;
     }
 
-    public void setBlockCount(int blockCount) {
-        this.blockCount = blockCount;
+    public void setParkedCount(int parkedCount) {
+        this.parkedCount = parkedCount;
     }
 
-    public double getRewardsNuls() {
-        return rewardsNuls;
+    public String getEntrustAddress() {
+        return entrustAddress;
     }
 
-    public void setRewardsNuls(double rewardsNuls) {
-        this.rewardsNuls = rewardsNuls;
+    public void setEntrustAddress(String entrustAddress) {
+        this.entrustAddress = entrustAddress;
+    }
+
+    public double getReward() {
+        return reward;
+    }
+
+    public void setReward(double reward) {
+        this.reward = reward;
+    }
+
+    public double getDeposit() {
+        return deposit;
+    }
+
+    public void setDeposit(double deposit) {
+        this.deposit = deposit;
     }
 }

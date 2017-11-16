@@ -15,7 +15,6 @@ import io.nuls.core.utils.param.AssertUtil;
  */
 public class AccountModuleImpl extends AccountModule {
 
-    private NulsContext context = NulsContext.getInstance();
     private AccountManager manager = AccountManager.getInstance();
 
     @Override
@@ -24,7 +23,6 @@ public class AccountModuleImpl extends AccountModule {
         manager.init();
         AccountService accountService = AccountServiceImpl.getInstance();
         this.registerService(accountService);
-
     }
 
 

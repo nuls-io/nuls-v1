@@ -5,7 +5,7 @@ package io.nuls.cache.constant;
  *
  */
 public interface EhCacheConstant {
-    //todo version
+    //version
     int CACHE_MODULE_VERSION = 1111;
     //Minimum version supported
     int MINIMUM_VERSION_SUPPORTED = 0;

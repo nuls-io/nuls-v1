@@ -95,7 +95,7 @@ public class AccountServiceImpl implements AccountService {
         ECKey.ECDSASignature signature1 = account.getEcKey().sign(hash);
         //sign result
         sign = signature1.encodeToDER();
-        ((Account) account).setSign(sign);
+        account.setSign(sign);
     }
 
     @Override
@@ -169,6 +169,10 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public void switchAccount(String id) {
         Account account = accountCacheService.getAccountById(id);
-
+        if (null != account) {
+            AccountManager.Locla_acount_id = id;
+        } else {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "The account not exist,id:" + id);
+        }
     }
 }
