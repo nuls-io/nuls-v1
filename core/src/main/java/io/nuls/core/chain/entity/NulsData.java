@@ -1,7 +1,10 @@
 package io.nuls.core.chain.entity;
 
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.crypto.UnsafeByteArrayOutputStream;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsIOException;
+import io.nuls.core.exception.NulsVerificationException;
 import io.nuls.core.utils.crypto.ByteStreams;
 import io.nuls.core.utils.io.ByteBuffer;
 
@@ -34,16 +37,25 @@ public abstract class NulsData implements Serializable {
      *
      * @return
      */
-    public byte[] serialize() throws IOException, NulsException {
+    public byte[] serialize() throws NulsVerificationException,NulsIOException{
         this.verify();
         ByteArrayOutputStream bos = null;
         try {
             bos = new UnsafeByteArrayOutputStream(size());
             serializeToStream(bos);
             return bos.toByteArray();
-        } finally {
+        } catch (IOException e){
+            e.fillInStackTrace();
+            throw new NulsIOException(ErrorCode.IO_ERROR);
+        }finally {
             if (bos != null) {
-                bos.close();
+                try{
+                    bos.close();
+                }catch (IOException e){
+                    e.fillInStackTrace();
+                    throw new NulsIOException(ErrorCode.IO_ERROR);
+                }
+
             }
         }
     }
@@ -57,7 +69,7 @@ public abstract class NulsData implements Serializable {
     /**
      * @throws NulsException
      */
-    public abstract void verify() throws NulsException, IOException;
+    public abstract void verify() throws NulsVerificationException;
 
 
     public int getVersion() {

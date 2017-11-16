@@ -1,5 +1,6 @@
 package io.nuls.ledger.event;
 
+import io.nuls.core.chain.entity.transaction.Transaction;
 import io.nuls.core.event.NulsEvent;
 import io.nuls.core.event.NulsEventHeader;
 import io.nuls.core.exception.NulsException;
@@ -13,6 +14,12 @@ import java.io.OutputStream;
  *
  */
 public class TransactionEvent extends BaseLedgerEvent {
+    private Transaction tx;
+
+    public Transaction getTransaction(){
+        return tx;
+    }
+
     public TransactionEvent(NulsEventHeader header) {
         super(header);
     }
@@ -30,6 +37,7 @@ public class TransactionEvent extends BaseLedgerEvent {
 
     @Override
     public void parse(ByteBuffer byteBuffer) {
+        this.tx = null;
         //todo
     }
 
