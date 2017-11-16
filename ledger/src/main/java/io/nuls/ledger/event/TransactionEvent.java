@@ -1,5 +1,6 @@
 package io.nuls.ledger.event;
 
+import io.nuls.core.chain.entity.NulsData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.event.NulsEventHeader;
 import io.nuls.core.utils.io.ByteBuffer;
@@ -23,20 +24,10 @@ public class TransactionEvent extends BaseLedgerEvent {
     }
 
     @Override
-    public int size() {
+    protected NulsData parseEventBody(ByteBuffer byteBuffer) {
         //todo
-        return 0;
+        return null;
     }
 
-    @Override
-    public void serializeToStream(OutputStream stream) throws IOException {
-        //todo
-    }
-
-    @Override
-    public void parse(ByteBuffer byteBuffer) {
-        this.tx = null;
-        //todo
-    }
 
 }

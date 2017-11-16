@@ -1,5 +1,6 @@
 package io.nuls.ledger.event;
 
+import io.nuls.core.chain.entity.NulsData;
 import io.nuls.core.event.NulsEventHeader;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.ByteBuffer;
@@ -17,32 +18,20 @@ public class LockEvent extends BaseLedgerEvent {
         super(header);
     }
 
+    @Override
+    protected NulsData parseEventBody(ByteBuffer byteBuffer) {
+        return null;
+    }
+
 
     private LockTransaction tx;
 
 
-    @Override
-    public int size() {
-        int size = super.size();
-        if(null!=tx){
-            size += tx.size();
-        }
-        return size;
+    public LockTransaction getTx() {
+        return tx;
     }
 
-    @Override
-    public void serializeToStream(OutputStream stream) throws IOException {
-        super.serializeToStream(stream);
-        if(null!=tx){
-            tx.serializeToStream(stream);
-        }
+    public void setTx(LockTransaction tx) {
+        this.tx = tx;
     }
-
-    @Override
-    public void parse(ByteBuffer byteBuffer) {
-        super.parse(byteBuffer);
-        tx = new LockTransaction();
-        tx.parse(byteBuffer);
-    }
-
 }

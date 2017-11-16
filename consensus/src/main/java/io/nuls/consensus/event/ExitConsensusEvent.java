@@ -1,5 +1,6 @@
 package io.nuls.consensus.event;
 
+import io.nuls.core.chain.entity.NulsData;
 import io.nuls.core.event.NulsEventHeader;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.ByteBuffer;
@@ -19,18 +20,10 @@ public class ExitConsensusEvent extends BaseConsensusEvent {
     }
 
     @Override
-    public int size() {
-        return 0;
+    protected NulsData parseEventBody(ByteBuffer byteBuffer) {
+        //todo
+        return null;
     }
 
-    @Override
-    public void serializeToStream(OutputStream stream) throws IOException {
-
-    }
-
-    @Override
-    public void parse(ByteBuffer byteBuffer) {
-
-    }
 
 }

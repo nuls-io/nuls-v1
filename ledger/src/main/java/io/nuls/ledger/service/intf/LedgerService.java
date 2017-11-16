@@ -4,7 +4,6 @@ import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.ledger.Exception.NulsTxVerifyException;
 import io.nuls.ledger.entity.Balance;
-import io.nuls.ledger.entity.TransactionOutput;
 
 import java.util.List;
 
@@ -26,9 +25,4 @@ public interface LedgerService {
 
     List<Transaction> queryListByAccount(String address, int txType, long beginTime);
 
-    List<TransactionOutput> queryNotSpent(String address, double total);
-
-    List<TransactionOutput> queryNotSpent(String address);
-
-    void smallChange(List<TransactionOutput> transactionOutputs);
 }

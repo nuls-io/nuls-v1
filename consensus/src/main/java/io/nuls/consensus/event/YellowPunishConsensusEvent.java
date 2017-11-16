@@ -1,5 +1,6 @@
 package io.nuls.consensus.event;
 
+import io.nuls.core.chain.entity.NulsData;
 import io.nuls.core.event.NulsEventHeader;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.ByteBuffer;
@@ -17,21 +18,10 @@ public class YellowPunishConsensusEvent extends BaseConsensusEvent{
     }
 
     @Override
-    public int size() {
+    protected NulsData parseEventBody(ByteBuffer byteBuffer) {
         //todo
-        return 0;
+        return null;
     }
 
-    @Override
-    public void serializeToStream(OutputStream stream) throws IOException {
-        //todo
-
-    }
-
-    @Override
-    public void parse(ByteBuffer byteBuffer) {
-        //todo
-
-    }
 
 }
