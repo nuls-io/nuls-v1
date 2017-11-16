@@ -1,7 +1,9 @@
 package io.nuls.core.event;
 
 import io.nuls.core.chain.entity.NulsData;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.ByteBuffer;
 
@@ -10,7 +12,6 @@ import java.io.OutputStream;
 
 /**
  * Created by Niels on 2017/11/7.
- *
  */
 public class NulsEventHeader extends NulsData {
     private short moduleId;
@@ -43,13 +44,15 @@ public class NulsEventHeader extends NulsData {
         return moduleId;
     }
 
-    public void parse(ByteBuffer buffer){
+    public void parse(ByteBuffer buffer) {
         this.moduleId = buffer.readShort();
         this.eventType = buffer.readShort();
     }
 
     @Override
     public void verify() throws NulsException {
-        //todo
+        if (0 == moduleId || 0 == eventType) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "Verify faild:event header");
+        }
     }
 }

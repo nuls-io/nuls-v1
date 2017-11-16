@@ -9,6 +9,8 @@ import java.util.List;
  * Created by win10 on 2017/10/30.
  */
 public abstract class Transaction extends NulsData {
+    public Transaction(){
+    }
     //tx type
     protected int type;
     //tx hash

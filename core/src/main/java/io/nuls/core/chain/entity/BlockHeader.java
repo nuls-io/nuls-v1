@@ -55,11 +55,6 @@ public class BlockHeader extends NulsData{
     public void parse(ByteBuffer byteBuffer) {
     }
 
-    @Override
-    public void verify() throws NulsException {
-
-    }
-
     public Sha256Hash getHash() {
         return hash;
     }

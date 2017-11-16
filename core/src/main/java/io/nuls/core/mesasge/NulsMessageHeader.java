@@ -1,8 +1,10 @@
 package io.nuls.core.mesasge;
 
 import io.nuls.core.chain.entity.NulsData;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.mesasge.constant.MessageTypeEnum;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.ByteBuffer;
@@ -25,7 +27,6 @@ public class NulsMessageHeader extends NulsData {
     @Override
     public int size() {
         int size = 0;
-        size += 4;
         size += VarInt.sizeOf(magicNumber);
         return size;
     }
@@ -42,6 +43,8 @@ public class NulsMessageHeader extends NulsData {
 
     @Override
     public void verify() throws NulsException {
-        //todo
+        if (0 == magicNumber) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "Verify faild:message header");
+        }
     }
 }

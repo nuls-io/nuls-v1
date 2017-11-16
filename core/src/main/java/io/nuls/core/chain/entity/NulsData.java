@@ -1,5 +1,8 @@
 package io.nuls.core.chain.entity;
 
+import io.nuls.core.chain.validator.DataValidatorChain;
+import io.nuls.core.chain.validator.NulsDataValidator;
+import io.nuls.core.chain.validator.ValidateResult;
 import io.nuls.core.crypto.UnsafeByteArrayOutputStream;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.ByteStreams;
@@ -12,15 +15,19 @@ import java.io.Serializable;
 
 /**
  * Created by Niels on 2017/10/30.
- *
  */
 public abstract class NulsData implements Serializable {
 
     protected int version;
 
+    private DataValidatorChain validatorChain = new DataValidatorChain();
+
     public NulsData() {
     }
 
+    protected void registerValidator(NulsDataValidator<? extends NulsData> validator) {
+        this.validatorChain.addValidator(validator);
+    }
 
     /**
      * 计算序列化实体时需要的字节长度
@@ -57,8 +64,10 @@ public abstract class NulsData implements Serializable {
     /**
      * @throws NulsException
      */
-    public abstract void verify() throws NulsException, IOException;
+    public final void verify() {
+        ValidateResult result  = this.validatorChain.startDoValidator(this);
 
+    }
 
     public int getVersion() {
         return version;

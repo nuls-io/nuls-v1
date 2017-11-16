@@ -43,10 +43,4 @@ public class NulsEvent extends NulsData {
         this.header.parse(byteBuffer);
     }
 
-    @Override
-    public void verify() throws NulsException, IOException {
-        //max size;
-        byte[] content = this.serialize();
-
-    }
 }

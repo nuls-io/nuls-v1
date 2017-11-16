@@ -5,7 +5,7 @@ package io.nuls.event.bus.constant;
  *
  */
 public interface EventBusConstant {
-    //todo version
+    //version
     int EVENT_BUS_MODULE_VERSION = 1111;
     //Minimum version supported
     int MINIMUM_VERSION_SUPPORTED = 0;

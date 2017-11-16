@@ -10,8 +10,6 @@ public interface NulsConstant {
 
     String USER_CONFIG_FILE = "nuls.ini";
     String SYSTEM_CONFIG_FILE = "sys.properties";
-    //TODO VALUE OF MAIN CHAIN(NULS)
-    long NULS_MAGIC_NUMBER = 8123;
 
     /**----[ System] ----*/
     String CFG_SYSTEM_SECTION = "System";
