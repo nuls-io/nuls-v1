@@ -40,11 +40,4 @@ public class NulsMessageHeader extends NulsData {
     public void parse(ByteBuffer byteBuffer) {
         this.magicNumber = byteBuffer.readVarInt();
     }
-
-    @Override
-    public void verify() throws NulsException {
-        if (0 == magicNumber) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "Verify faild:message header");
-        }
-    }
 }

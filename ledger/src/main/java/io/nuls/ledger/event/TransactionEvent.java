@@ -41,8 +41,4 @@ public class TransactionEvent extends BaseLedgerEvent {
         //todo
     }
 
-    @Override
-    public void verify() throws NulsException {
-        //todo
-    }
 }

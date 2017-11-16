@@ -33,8 +33,4 @@ public class ExitConsensusEvent extends BaseConsensusEvent {
 
     }
 
-    @Override
-    public void verify() throws NulsException {
-
-    }
 }

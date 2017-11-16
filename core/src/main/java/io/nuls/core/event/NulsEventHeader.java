@@ -48,11 +48,4 @@ public class NulsEventHeader extends NulsData {
         this.moduleId = buffer.readShort();
         this.eventType = buffer.readShort();
     }
-
-    @Override
-    public void verify() throws NulsException {
-        if (0 == moduleId || 0 == eventType) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "Verify faild:event header");
-        }
-    }
 }

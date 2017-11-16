@@ -1,12 +1,9 @@
 package io.nuls.core.chain.entity.transaction;
 
 import io.nuls.core.chain.entity.NulsData;
-import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.crypto.script.Script;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.exception.VerificationException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.ByteBuffer;
 
@@ -68,14 +65,6 @@ public class TransactionOutput extends NulsData{
         int signLength = (int)byteBuffer.readVarInt();
         scriptBytes = byteBuffer.readBytes(signLength);
         script = new Script(scriptBytes);
-    }
-
-    @Override
-    public void verify() throws NulsException {
-        if(value <= 0) {
-            throw new VerificationException(ErrorCode.INPUT_VALUE_ERROR);
-        }
-
     }
 
     public Sha256Hash getTxHash() {

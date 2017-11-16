@@ -32,8 +32,4 @@ public class SmallChangeEvent extends BaseLedgerEvent{
         //todo
     }
 
-    @Override
-    public void verify() throws NulsException {
-        //todo
-    }
 }

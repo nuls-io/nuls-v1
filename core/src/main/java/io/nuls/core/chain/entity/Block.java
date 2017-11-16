@@ -32,11 +32,6 @@ public class Block extends BlockHeader {
     public void parse(ByteBuffer byteBuffer) {
     }
 
-    @Override
-    public void verify() throws NulsException {
-
-    }
-
     public BlockHeader getHeader() {
         return header;
     }

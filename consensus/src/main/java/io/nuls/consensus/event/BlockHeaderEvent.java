@@ -34,9 +34,4 @@ public class BlockHeaderEvent  extends BaseConsensusEvent{
 
     }
 
-    @Override
-    public void verify() throws NulsException {
-        //todo
-
-    }
 }

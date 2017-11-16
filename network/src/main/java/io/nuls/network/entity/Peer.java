@@ -80,11 +80,6 @@ public class Peer extends NulsData {
 
     }
 
-    @Override
-    public void verify() throws NulsException {
-
-    }
-
     public int getType() {
         return type;
     }

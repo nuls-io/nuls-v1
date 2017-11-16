@@ -8,7 +8,6 @@ import io.nuls.core.crypto.UnsafeByteArrayOutputStream;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsIOException;
 import io.nuls.core.exception.NulsVerificationException;
-import io.nuls.core.utils.crypto.ByteStreams;
 import io.nuls.core.utils.io.ByteBuffer;
 
 import java.io.ByteArrayOutputStream;
@@ -76,9 +75,11 @@ public abstract class NulsData implements Serializable {
     /**
      * @throws NulsException
      */
-    public final void verify() {
+    public final void verify() throws NulsVerificationException{
         ValidateResult result  = this.validatorChain.startDoValidator(this);
-
+        if(!result.isSeccess()){
+            throw new NulsVerificationException(result.getMessage());
+        }
     }
 
     public int getVersion() {

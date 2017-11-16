@@ -33,8 +33,4 @@ public class JoinConsensusEvent extends BaseConsensusEvent {
 
     }
 
-    @Override
-    public void verify() throws NulsException {
-
-    }
 }

@@ -64,11 +64,6 @@ public abstract class NulsTransaction extends Transaction {
 
     }
 
-    @Override
-    public void verify() throws NulsException {
-
-    }
-
     public long getLockTime() {
         return lockTime;
     }

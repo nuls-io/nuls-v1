@@ -3,11 +3,7 @@ package io.nuls.account.entity;
 import io.nuls.core.chain.entity.NulsData;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.crypto.ECKey;
-import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.VarInt;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.exception.VerificationException;
-import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.ByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
@@ -147,21 +143,6 @@ public class Account extends NulsData {
         sign = byteBuffer.readByLengthByte();
         pubKey = byteBuffer.readByLengthByte();
         extend = byteBuffer.readByLengthByte();
-    }
-
-    @Override
-    public void verify() throws NulsException {
-        ECKey key1 = ECKey.fromPublicOnly(pubKey);
-        byte[] hash;
-        try {
-            hash = Sha256Hash.of(this.serialize()).getBytes();
-        } catch (IOException e) {
-            Log.error(e);
-            throw new VerificationException("account verify fail");
-        }
-        if (!key1.verify(hash, sign)) {
-            throw new VerificationException("account verify fail");
-        }
     }
 
     public Address getAddress() {

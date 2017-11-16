@@ -45,8 +45,4 @@ public class LockEvent extends BaseLedgerEvent {
         tx.parse(byteBuffer);
     }
 
-    @Override
-    public void verify() throws NulsException {
-        //todo
-    }
 }

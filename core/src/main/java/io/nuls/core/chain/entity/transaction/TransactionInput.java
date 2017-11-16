@@ -89,11 +89,6 @@ public class TransactionInput extends NulsData {
         scriptSig = new Script(scriptBytes);
     }
 
-    @Override
-    public void verify() throws NulsException {
-
-    }
-
     public Sha256Hash getTxHash() {
         return txHash;
     }

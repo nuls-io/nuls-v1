@@ -34,9 +34,4 @@ public class RedPunishConsensusEvent extends BaseConsensusEvent{
 
     }
 
-    @Override
-    public void verify() throws NulsException {
-        //todo
-
-    }
 }

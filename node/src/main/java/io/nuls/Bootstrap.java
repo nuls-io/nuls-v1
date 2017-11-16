@@ -28,7 +28,7 @@ public class Bootstrap {
     public static void main(String[] args) {
         try {
             sysStart();
-            webStart();
+//            webStart();
         } catch (Exception e) {
             Log.error(e);
             System.exit(1);

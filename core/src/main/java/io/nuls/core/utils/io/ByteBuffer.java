@@ -5,7 +5,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.exception.VerificationException;
+import io.nuls.core.exception.NulsVerificationException;
 import io.nuls.core.utils.crypto.Utils;
 
 /**
@@ -30,52 +30,52 @@ public class ByteBuffer {
         this.cursor = cursor;
     }
 
-    public long readUint32() throws VerificationException {
+    public long readUint32() throws NulsVerificationException {
         try {
             long u = Utils.readUint32(payload, cursor);
             cursor += 4;
             return u;
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new VerificationException(ErrorCode.DATA_PARSE_ERROR, e);
+            throw new NulsVerificationException(ErrorCode.DATA_PARSE_ERROR, e);
         }
     }
 
 
-    public long readInt64() throws VerificationException {
+    public long readInt64() throws NulsVerificationException {
         try {
             long u = Utils.readInt64(payload, cursor);
             cursor += 8;
             return u;
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new VerificationException(ErrorCode.DATA_PARSE_ERROR, e);
+            throw new NulsVerificationException(ErrorCode.DATA_PARSE_ERROR, e);
         }
     }
-    public int readInt32() throws VerificationException {
+    public int readInt32() throws NulsVerificationException {
         try {
             int u = Utils.readInt32(payload, cursor);
             cursor += 4;
             return u;
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new VerificationException(ErrorCode.DATA_PARSE_ERROR, e);
+            throw new NulsVerificationException(ErrorCode.DATA_PARSE_ERROR, e);
         }
     }
-    public long readVarInt() throws VerificationException {
+    public long readVarInt() throws NulsVerificationException {
         return readVarInt(0);
     }
 
-    public long readVarInt(int offset) throws VerificationException {
+    public long readVarInt(int offset) throws NulsVerificationException {
         try {
             VarInt varint = new VarInt(payload, cursor + offset);
             cursor += offset + varint.getOriginalSizeInBytes();
             return varint.value;
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new VerificationException(ErrorCode.DATA_PARSE_ERROR, e);
+            throw new NulsVerificationException(ErrorCode.DATA_PARSE_ERROR, e);
         }
     }
 
-    public byte[] readBytes(int length) throws VerificationException {
+    public byte[] readBytes(int length) throws NulsVerificationException {
         if (length > Block.MAX_SIZE) {
-            throw new VerificationException(ErrorCode.DATA_OVER_SIZE_ERROR);
+            throw new NulsVerificationException(ErrorCode.DATA_OVER_SIZE_ERROR);
         }
         try {
             byte[] b = new byte[length];
@@ -83,7 +83,7 @@ public class ByteBuffer {
             cursor += length;
             return b;
         } catch (IndexOutOfBoundsException e) {
-            throw new VerificationException(ErrorCode.DATA_PARSE_ERROR, e);
+            throw new NulsVerificationException(ErrorCode.DATA_PARSE_ERROR, e);
         }
     }
 
