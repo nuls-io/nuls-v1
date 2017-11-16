@@ -20,7 +20,6 @@ public class LedgerServiceImpl implements LedgerService {
     }
 
     public static LedgerService getInstance() {
-        //todo
         return instance;
     }
 

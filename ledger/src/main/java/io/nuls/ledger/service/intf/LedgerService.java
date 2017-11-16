@@ -2,7 +2,6 @@ package io.nuls.ledger.service.intf;
 
 import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.exception.NulsVerificationException;
 import io.nuls.ledger.entity.Balance;
 
 import java.util.List;
