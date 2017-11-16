@@ -1,6 +1,7 @@
 package io.nuls.event.bus.event.handler.intf;
 
 import io.nuls.core.event.NulsEvent;
+import io.nuls.core.exception.NulsException;
 import io.nuls.event.bus.event.filter.NulsEventFilter;
 import io.nuls.event.bus.event.filter.NulsEventFilterChain;
 
@@ -13,5 +14,5 @@ public interface NulsEventHandler<T extends NulsEvent> {
 
     NulsEventFilterChain getFilterChain();
 
-    void onEvent(T event);
+    void onEvent(T event)throws NulsException;
 }
