@@ -9,7 +9,7 @@ import java.io.OutputStream;
 /**
  * Created by Niels on 2017/11/14.
  */
-public abstract class UtxoCoinTransaction extends CoinTransaction  {
+public abstract class UtxoCoinTransaction extends CoinTransaction<UtxoData>  {
     private long lockTime;
 
     public UtxoCoinTransaction(){

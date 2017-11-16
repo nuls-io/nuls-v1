@@ -10,10 +10,10 @@ import java.io.OutputStream;
 /**
  * Created by Niels on 2017/11/14.
  */
-public class TransferTransaction extends Transaction {
+public class LockTransaction extends CoinTransaction<UtxoData> {
 
-    public TransferTransaction() {
-        this.type = TransactionConstant.TX_TYPE_TRANSFER;
+    public LockTransaction(){
+        this.type = TransactionConstant.TX_TYPE_LOCK;
     }
 
     @Override

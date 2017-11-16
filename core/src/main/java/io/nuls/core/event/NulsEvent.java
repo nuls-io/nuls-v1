@@ -9,10 +9,10 @@ import java.io.OutputStream;
 /**
  * Created by Niels on 2017/11/7.
  */
-public abstract class NulsEvent extends NulsData {
+public abstract class NulsEvent<T extends NulsData> extends NulsData {
     private NulsEventHeader header;
 
-    private NulsData eventBody;
+    private T eventBody;
 
     public NulsEvent(NulsEventHeader header) {
         this.header = header;
@@ -37,13 +37,13 @@ public abstract class NulsEvent extends NulsData {
         this.eventBody = parseEventBody(byteBuffer);
     }
 
-    protected abstract NulsData parseEventBody(ByteBuffer byteBuffer);
+    protected abstract T parseEventBody(ByteBuffer byteBuffer);
 
-    public NulsData getEventBody() {
+    public T getEventBody() {
         return eventBody;
     }
 
-    public void setEventBody(NulsData eventBody) {
+    public void setEventBody(T eventBody) {
         this.eventBody = eventBody;
     }
     public NulsEventHeader getHeader() {

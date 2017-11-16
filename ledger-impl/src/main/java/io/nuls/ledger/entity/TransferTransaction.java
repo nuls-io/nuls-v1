@@ -10,10 +10,10 @@ import java.io.OutputStream;
 /**
  * Created by Niels on 2017/11/14.
  */
-public class SmallChangeTransaction extends Transaction {
+public class TransferTransaction extends CoinTransaction<UtxoData> {
 
-    public SmallChangeTransaction(){
-        this.type = TransactionConstant.TX_TYPE_SMALL_CHANGE;
+    public TransferTransaction() {
+        this.type = TransactionConstant.TX_TYPE_TRANSFER;
     }
 
     @Override
@@ -30,6 +30,4 @@ public class SmallChangeTransaction extends Transaction {
     public void parse(ByteBuffer byteBuffer) {
 
     }
-
-
 }

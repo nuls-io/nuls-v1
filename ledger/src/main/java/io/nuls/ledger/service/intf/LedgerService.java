@@ -2,7 +2,7 @@ package io.nuls.ledger.service.intf;
 
 import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.Transaction;
-import io.nuls.ledger.Exception.NulsTxVerifyException;
+import io.nuls.core.exception.NulsVerificationException;
 import io.nuls.ledger.entity.Balance;
 
 import java.util.List;
@@ -14,8 +14,6 @@ import java.util.List;
 public interface LedgerService {
 
     Balance getBalance(String address);
-
-    boolean varifyTransaction(Transaction tx) throws NulsTxVerifyException;
 
     boolean transfer(Address address, String password, Address toAddress, double amount, String remark);
 

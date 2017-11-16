@@ -6,15 +6,14 @@ import io.nuls.core.utils.io.ByteBuffer;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.List;
 
 /**
  * Created by Niels on 2017/11/14.
  */
-public class LockTransaction extends Transaction {
+public class SmallChangeTransaction extends CoinTransaction<UtxoData> {
 
-    public LockTransaction(){
-        this.type = TransactionConstant.TX_TYPE_LOCK;
+    public SmallChangeTransaction() {
+        this.type = TransactionConstant.TX_TYPE_SMALL_CHANGE;
     }
 
     @Override
@@ -31,4 +30,6 @@ public class LockTransaction extends Transaction {
     public void parse(ByteBuffer byteBuffer) {
 
     }
+
+
 }
