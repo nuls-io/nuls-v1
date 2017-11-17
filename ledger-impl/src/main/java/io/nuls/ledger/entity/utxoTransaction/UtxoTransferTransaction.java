@@ -9,7 +9,7 @@ import java.io.OutputStream;
 /**
  * Created by Niels on 2017/11/14.
  */
-public class UtxoTransferTransaction extends BaseUtxoTransaction {
+public class UtxoTransferTransaction extends BaseUtxoCoinTransaction {
 
     public UtxoTransferTransaction() {
         this.type = TransactionConstant.TX_TYPE_TRANSFER;
