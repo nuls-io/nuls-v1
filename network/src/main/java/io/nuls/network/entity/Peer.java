@@ -1,8 +1,10 @@
 package io.nuls.network.entity;
 
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.NulsData;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.mesasge.NulsMessage;
 import io.nuls.core.utils.io.ByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.entity.param.NetworkParam;
@@ -12,8 +14,13 @@ import io.nuls.network.service.MessageWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.nio.channels.NotYetConnectedException;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Peer extends NulsData {
+
+    private NetworkParam network;
 
     private String hash;
 
@@ -41,16 +48,20 @@ public class Peer extends NulsData {
 
     private VersionMessage versionMessage;
 
+    private Lock lock = new ReentrantLock();
 
     public Peer() {
+
     }
 
-    public Peer(int type) {
+    public Peer(NetworkParam network, int type) {
+        this.network = network;
         this.type = type;
     }
 
 
-    public Peer(int type, InetSocketAddress socketAddress) {
+    public Peer(NetworkParam network, int type, InetSocketAddress socketAddress) {
+        this.network = network;
         this.type = type;
         this.port = socketAddress.getPort();
         this.ip = socketAddress.getAddress().getHostAddress();
@@ -61,14 +72,26 @@ public class Peer extends NulsData {
 
     }
 
-    public void connectionOpened() {
+    public void connectionOpened() throws IOException {
         Block bestBlock = NulsContext.getInstance().getBestBlock();
-        VersionMessage message = new VersionMessage(bestBlock.getHeight(), bestBlock.getHash().toString(), this);
-
+        VersionMessage message = new VersionMessage(network, bestBlock.getHeight(), bestBlock.getHash().toString(), this);
+        sendMessage(message);
     }
 
 
-    public void sendMessage() {
+    public void sendMessage(NulsMessage message) throws IOException {
+        if (writeTarget == null) {
+            throw new NotYetConnectedException();
+        }
+        if (this.status != Peer.HANDSHAKE && !isHandShakeMessage(message)) {
+            throw new NotYetConnectedException();
+        }
+        lock.lock();
+        try {
+
+        } finally {
+            lock.unlock();
+        }
 
     }
 
@@ -89,6 +112,11 @@ public class Peer extends NulsData {
     @Override
     public void parse(ByteBuffer byteBuffer) {
 
+    }
+
+
+    public boolean isHandShakeMessage(NulsMessage message) {
+        return message instanceof VersionMessage;
     }
 
     public int getType() {

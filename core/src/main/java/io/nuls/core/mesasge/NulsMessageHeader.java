@@ -1,12 +1,7 @@
 package io.nuls.core.mesasge;
 
 import io.nuls.core.chain.entity.NulsData;
-import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.crypto.VarInt;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.mesasge.constant.MessageTypeEnum;
-import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.ByteBuffer;
 
 import java.io.IOException;
@@ -21,10 +16,13 @@ public class NulsMessageHeader extends NulsData {
     // the message length
     private int length;
 
+
+
     //0x01 : networkMessage  //0x02 : eventMessage;
+    private short msgType;
     public static final short NETWORK_MESSAGE = 1;
     public static final short EVENT_MESSAGE = 2;
-    private short msgType;
+
 
     private byte[] extend;
 
