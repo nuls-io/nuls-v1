@@ -4,6 +4,7 @@ package io.nuls.network.service.impl;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.BlockDao;
 import io.nuls.db.dao.PeerDao;
@@ -65,7 +66,10 @@ public class PeersManager {
         if (peers == null) {
             peers = discovery.getSeedPeers();
         }
+
+
         for (Peer peer : peers) {
+            addPeerToGroup(NetworkConstant.Network_Peer_Out_Group, peer);
             connectionManager.openConnection(peer);
         }
 
@@ -83,6 +87,17 @@ public class PeersManager {
             peers.put(peer.getHash(), peer);
         }
     }
+
+
+    public void addPeerToGroup(String groupName, Peer peer) {
+        if (!peerGroups.containsKey(groupName)) {
+            throw new NulsRuntimeException(ErrorCode.PEER_GROUP_NOT_FOUND);
+        }
+
+        addPeer(peer);
+        peerGroups.get(groupName).addPeer(peer);
+    }
+
 
     public void removePeer(String peerHash) {
         if (peers.containsKey(peerHash)) {
@@ -103,7 +118,7 @@ public class PeersManager {
 
     public void addPeerGroup(String groupName, PeerGroup peerGroup) throws NulsException {
         if (peerGroups.containsKey(groupName)) {
-            throw new NulsException(ErrorCode.P2P_GROUP_ALREADY_EXISTS);
+            throw new NulsException(ErrorCode.PRER_GROUP_ALREADY_EXISTS);
         }
         peerGroups.put(groupName, peerGroup);
     }
@@ -151,7 +166,6 @@ public class PeersManager {
         }
         return blockDao;
     }
-
 
 
     public void setConnectionManager(ConnectionManager connectionManager) {

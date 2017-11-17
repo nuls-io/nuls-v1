@@ -45,7 +45,7 @@ public class PeerDiscoverHandler implements Runnable {
     public List<Peer> getSeedPeers() {
         List<Peer> seedPeers = new ArrayList<>();
         for (InetSocketAddress socketAddress : network.getSeedPeers()) {
-            seedPeers.add(new Peer(2, socketAddress));
+            seedPeers.add(new Peer(Peer.OUT, socketAddress));
         }
         return seedPeers;
     }
