@@ -7,12 +7,12 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.entity.Balance;
+import io.nuls.ledger.event.CoinTransactionEvent;
 import io.nuls.ledger.event.LockEvent;
 import io.nuls.ledger.event.SmallChangeEvent;
-import io.nuls.ledger.event.TransactionEvent;
+import io.nuls.ledger.handler.CoinTransactionHandler;
 import io.nuls.ledger.handler.LockHandler;
 import io.nuls.ledger.handler.SmallChangeHandler;
-import io.nuls.ledger.handler.TransactionHandler;
 import io.nuls.ledger.module.LedgerModule;
 import io.nuls.ledger.service.impl.LedgerServiceImpl;
 import io.nuls.ledger.service.intf.LedgerService;
@@ -39,9 +39,13 @@ public class LedgerModuleImpl extends LedgerModule {
         this.registerService(ledgerService);
         SmallChangeThread.getInstance().start();
         //register handler
+//        this.registerEvent((short)1, BaseLedgerEvent.class);
+        this.registerEvent((short)2, LockEvent.class);
+        this.registerEvent((short)3, SmallChangeEvent.class);
+        this.registerEvent((short)4, CoinTransactionEvent.class);
         this.processorService.registerEventHandler(LockEvent.class, new LockHandler());
         this.processorService.registerEventHandler(SmallChangeEvent.class, new SmallChangeHandler());
-        this.processorService.registerEventHandler(TransactionEvent.class, new TransactionHandler());
+        this.processorService.registerEventHandler(CoinTransactionEvent.class, new CoinTransactionHandler());
     }
 
     private void cacheStandingBook() {

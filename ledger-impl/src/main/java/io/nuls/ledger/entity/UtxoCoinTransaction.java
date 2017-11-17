@@ -1,27 +1,19 @@
 package io.nuls.ledger.entity;
 
-import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.crypto.VarInt;
-import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.ByteBuffer;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Niels on 2017/11/14.
  */
-public abstract class NulsTransaction extends Transaction {
+public abstract class UtxoCoinTransaction extends CoinTransaction<UtxoData>  {
     private long lockTime;
-    protected List<TransactionInput> inputs;
-    protected List<TransactionOutput> outputs;
 
-    public NulsTransaction(){
-        this.inputs = new ArrayList<>();
-        this.outputs = new ArrayList<>();
-        this.time = TimeService.currentTimeMillis();
+    public UtxoCoinTransaction(){
+       super();
     }
 
     @Override
@@ -33,11 +25,8 @@ public abstract class NulsTransaction extends Transaction {
         s += VarInt.sizeOf(time);
         s += VarInt.sizeOf(lockTime);
         s += remark.length;
-        for (int i = 0; i < inputs.size(); i++) {
-            s += inputs.get(i).size();
-        }
-        for (int i = 0; i < outputs.size(); i++) {
-            s += outputs.get(i).size();
+        if(null!=getTxData()){
+            s+= getTxData().size();
         }
 
         return s;
@@ -69,21 +58,5 @@ public abstract class NulsTransaction extends Transaction {
 
     public void setLockTime(long lockTime) {
         this.lockTime = lockTime;
-    }
-
-    public List<TransactionInput> getInputs() {
-        return inputs;
-    }
-
-    public void setInputs(List<TransactionInput> inputs) {
-        this.inputs = inputs;
-    }
-
-    public List<TransactionOutput> getOutputs() {
-        return outputs;
-    }
-
-    public void setOutputs(List<TransactionOutput> outputs) {
-        this.outputs = outputs;
     }
 }

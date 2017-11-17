@@ -1,9 +1,6 @@
 package io.nuls.core.chain.entity;
 
-import io.nuls.core.chain.entity.NulsData;
 import io.nuls.core.crypto.Sha256Hash;
-
-import java.util.List;
 
 /**
  * Created by win10 on 2017/10/30.

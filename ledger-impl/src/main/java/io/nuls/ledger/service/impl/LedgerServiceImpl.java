@@ -2,9 +2,8 @@ package io.nuls.ledger.service.impl;
 
 import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.Transaction;
-import io.nuls.ledger.Exception.NulsTxVerifyException;
+import io.nuls.core.exception.NulsVerificationException;
 import io.nuls.ledger.entity.Balance;
-import io.nuls.ledger.entity.TransactionOutput;
 import io.nuls.ledger.service.intf.LedgerService;
 
 import java.util.List;
@@ -21,7 +20,6 @@ public class LedgerServiceImpl implements LedgerService {
     }
 
     public static LedgerService getInstance() {
-        //todo
         return instance;
     }
 
@@ -29,12 +27,6 @@ public class LedgerServiceImpl implements LedgerService {
     public Balance getBalance(String address) {
         //todo
         return null;
-    }
-
-    @Override
-    public boolean varifyTransaction(Transaction tx) throws NulsTxVerifyException{
-        //todo
-        return false;
     }
 
     @Override
@@ -61,21 +53,4 @@ public class LedgerServiceImpl implements LedgerService {
         return null;
     }
 
-    @Override
-    public List<TransactionOutput> queryNotSpent(String address, double total) {
-        //todo
-        return null;
-    }
-
-    @Override
-    public List<TransactionOutput> queryNotSpent(String address) {
-        //todo
-        return null;
-    }
-
-    @Override
-    public void smallChange(List<TransactionOutput> transactionOutputs) {
-        //todo
-
-    }
 }
