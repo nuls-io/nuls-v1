@@ -16,7 +16,7 @@ public class NulsContext {
     }
 
     private static final NulsContext nc = new NulsContext();
-
+    public static String DEFAULT_ENCODING ;
 
     /**
      * get zhe only instance of NulsContext

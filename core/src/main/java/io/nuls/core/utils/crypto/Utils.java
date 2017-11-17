@@ -1,7 +1,7 @@
 package io.nuls.core.utils.crypto;
 
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -17,7 +17,7 @@ import java.util.List;
 
 public class Utils {
 
-    public static final Charset charset = Charset.forName(NulsConstant.DEFAULT_ENCODING);
+    public static final Charset charset = Charset.forName(NulsContext.DEFAULT_ENCODING);
 
     /**
      * The string that prefixes all text messages signed using Bitcoin keys.

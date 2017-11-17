@@ -1,6 +1,6 @@
 package io.nuls.core.chain.entity;
 
-import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.utils.crypto.ByteArrayTool;
 import io.nuls.core.utils.log.Log;
@@ -15,7 +15,7 @@ import java.util.Arrays;
  */
 public class KeyValue {
 	
-	public static final String CHARSET = NulsConstant.DEFAULT_ENCODING;
+	public static final String CHARSET = NulsContext.DEFAULT_ENCODING;
 	
 	protected String code;
 	protected String name;
@@ -102,7 +102,7 @@ public class KeyValue {
 	
 	public String getValueToString() {
 		try {
-			return new String(value, NulsConstant.DEFAULT_ENCODING);
+			return new String(value, NulsContext.DEFAULT_ENCODING);
 		} catch (UnsupportedEncodingException e) {
 			Log.error(e);
 		}
@@ -118,7 +118,7 @@ public class KeyValue {
 		builder.append(name);
 		builder.append(", value=");
 		try {
-			builder.append(new String(value, NulsConstant.DEFAULT_ENCODING));
+			builder.append(new String(value, NulsContext.DEFAULT_ENCODING));
 		} catch (UnsupportedEncodingException e) {
 			Log.error(e);
 		}

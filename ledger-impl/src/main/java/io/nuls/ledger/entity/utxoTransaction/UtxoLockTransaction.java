@@ -1,7 +1,7 @@
-package io.nuls.ledger.entity;
+package io.nuls.ledger.entity.utxoTransaction;
 
-import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.TransactionConstant;
+import io.nuls.core.crypto.VarInt;
 import io.nuls.core.utils.io.ByteBuffer;
 
 import java.io.IOException;
@@ -10,9 +10,11 @@ import java.io.OutputStream;
 /**
  * Created by Niels on 2017/11/14.
  */
-public class LockTransaction extends CoinTransaction<UtxoData> {
+public class UtxoLockTransaction extends BaseUtxoCoinTransaction {
 
-    public LockTransaction(){
+    private long lockTime;
+
+    public UtxoLockTransaction(){
         this.type = TransactionConstant.TX_TYPE_LOCK;
     }
 
@@ -23,7 +25,8 @@ public class LockTransaction extends CoinTransaction<UtxoData> {
 
     @Override
     public void serializeToStream(OutputStream stream) throws IOException {
-
+        super.serializeToStream(stream);
+        stream.write(new VarInt(lockTime).encode());
     }
 
     @Override

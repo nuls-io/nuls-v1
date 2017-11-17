@@ -1,6 +1,10 @@
 package io.nuls.event.bus.processor.service.impl;
 
+import io.nuls.core.event.EventManager;
 import io.nuls.core.event.NulsEvent;
+import io.nuls.core.event.NulsEventHeader;
+import io.nuls.core.utils.io.ByteBuffer;
+import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.constant.EventBusConstant;
 import io.nuls.event.bus.event.handler.NetworkNulsEventHandler;
 import io.nuls.event.bus.processor.manager.ProcessorManager;
@@ -22,8 +26,18 @@ public class NetworkProcessorServiceImpl implements NetworkProcessorService {
         return instance;
     }
 
-    public void send(NulsEvent event) {
-        processorManager.offer(event);
+    public void send(byte[] event) {
+        NulsEventHeader header = new NulsEventHeader();
+        header.parse(new ByteBuffer(event));
+        try {
+            NulsEvent eventObject = EventManager.getInstanceByHeader(header);
+            eventObject.parse(new ByteBuffer(event));
+            processorManager.offer(eventObject);
+        } catch (IllegalAccessException e) {
+            Log.error(e);
+        } catch (InstantiationException e) {
+            Log.error(e);
+        }
     }
 
     @Override

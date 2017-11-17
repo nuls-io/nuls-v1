@@ -1,7 +1,9 @@
-package io.nuls.ledger.entity;
+package io.nuls.ledger.entity.utxoTransaction;
 
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.utils.io.ByteBuffer;
+import io.nuls.ledger.entity.CoinTransaction;
+import io.nuls.ledger.entity.UtxoData;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -9,12 +11,7 @@ import java.io.OutputStream;
 /**
  * Created by Niels on 2017/11/14.
  */
-public abstract class UtxoCoinTransaction extends CoinTransaction<UtxoData>  {
-    private long lockTime;
-
-    public UtxoCoinTransaction(){
-       super();
-    }
+public abstract class BaseUtxoCoinTransaction extends CoinTransaction<UtxoData> {
 
     @Override
     public int size() {
@@ -23,12 +20,10 @@ public abstract class UtxoCoinTransaction extends CoinTransaction<UtxoData>  {
         s += VarInt.sizeOf(type);
         s += getHash().getBytes().length;
         s += VarInt.sizeOf(time);
-        s += VarInt.sizeOf(lockTime);
         s += remark.length;
-        if(null!=getTxData()){
-            s+= getTxData().size();
+        if (null != getTxData()) {
+            s += getTxData().size();
         }
-
         return s;
     }
 
@@ -38,25 +33,18 @@ public abstract class UtxoCoinTransaction extends CoinTransaction<UtxoData>  {
         stream.write(new VarInt(type).encode());
         stream.write(hash.getBytes());
         stream.write(new VarInt(time).encode());
-        stream.write(new VarInt(lockTime).encode());
         stream.write(remark);
     }
 
     @Override
     public void parse(ByteBuffer byteBuffer) {
-        if(byteBuffer == null) {
+        if (byteBuffer == null) {
             return;
         }
-        version = (int)byteBuffer.readUint32();
-        type = (int)byteBuffer.readUint32();
-
-    }
-
-    public long getLockTime() {
-        return lockTime;
-    }
-
-    public void setLockTime(long lockTime) {
-        this.lockTime = lockTime;
+        version = (int) byteBuffer.readUint32();
+        type = (int) byteBuffer.readUint32();
+        hash = byteBuffer.readHash();
+        time = byteBuffer.readInt64();
+        remark = byteBuffer.readByLengthByte();
     }
 }

@@ -1,13 +1,16 @@
 package io.nuls.core.chain.entity;
 
 import io.nuls.core.crypto.Sha256Hash;
+import io.nuls.core.utils.date.TimeService;
 
 /**
  * Created by win10 on 2017/10/30.
  */
 public abstract class Transaction extends NulsData {
-    public Transaction(){
+    public Transaction() {
+        this.time = TimeService.currentTimeMillis();
     }
+
     //tx type
     protected int type;
     //tx hash
