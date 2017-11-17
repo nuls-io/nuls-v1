@@ -5,16 +5,16 @@ import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Peer;
 import io.nuls.network.entity.PeerGroup;
 
-public abstract class Broadcaster {
+public abstract class Broadcaster<T extends NulsMessage> {
 
-    public BroadcastResult boradcast(NulsMessage msg, PeerGroup peerGroup, boolean isSyn){
+    public BroadcastResult boradcast(T msg, PeerGroup peerGroup, boolean isSyn){
         //Log.debug("msg={},peerGroup={},isSyn={}",msg,peerGroup,isSyn);
         BroadcastResult br = doboradcast(msg,peerGroup,true);
         //Log.debug("result={}",br);
         return br;
     }
 
-    public BroadcastResult boradcast(NulsMessage msg, PeerGroup peerGroup){
+    public BroadcastResult boradcast(T msg, PeerGroup peerGroup){
         return boradcast(msg, peerGroup,true);
     }
 

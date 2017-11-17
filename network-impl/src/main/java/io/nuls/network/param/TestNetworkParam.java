@@ -17,7 +17,7 @@ public class TestNetworkParam extends NetworkParam {
 
     private TestNetworkParam() {
         this.port = ConfigLoader.getPropValue(NetworkConstant.Network_Port_Test, 8002);
-        this.packetMagic = ConfigLoader.getPropValue(NetworkConstant.Network_Magic_Test, 987654322L);
+        this.packetMagic = ConfigLoader.getPropValue(NetworkConstant.Network_Magic_Test, 987654322);
         this.maxInCount = ConfigLoader.getPropValue(NetworkConstant.Network_Peer_Max_In, 20);
         this.maxOutCount = ConfigLoader.getPropValue(NetworkConstant.Network_Peer_Max_Out, 10);
 

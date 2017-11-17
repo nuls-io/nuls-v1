@@ -9,7 +9,7 @@ import java.io.OutputStream;
 /**
  * Created by Niels on 2017/11/14.
  */
-public class UtxoSmallChangeTransaction extends BaseUtxoTransaction {
+public class UtxoSmallChangeTransaction extends BaseUtxoCoinTransaction {
 
     public UtxoSmallChangeTransaction() {
         this.type = TransactionConstant.TX_TYPE_SMALL_CHANGE;

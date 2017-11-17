@@ -11,7 +11,7 @@ import java.io.OutputStream;
 /**
  * Created by Niels on 2017/11/14.
  */
-public abstract class BaseUtxoTransaction extends CoinTransaction<UtxoData> {
+public abstract class BaseUtxoCoinTransaction extends CoinTransaction<UtxoData> {
 
     @Override
     public int size() {
