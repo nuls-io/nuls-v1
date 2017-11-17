@@ -8,7 +8,7 @@ import io.nuls.core.mesasge.constant.MessageTypeEnum;
  */
 public class NetworkMessage extends NulsMessage {
 
-    public NetworkMessage(byte[] bytes) {
-        super(MessageTypeEnum.NETWORK, bytes);
+    public NetworkMessage(NulsMessageHeader header, byte[] data) {
+        super(header, data);
     }
 }

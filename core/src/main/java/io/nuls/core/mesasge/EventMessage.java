@@ -8,7 +8,7 @@ import io.nuls.core.mesasge.constant.MessageTypeEnum;
  */
 public class EventMessage extends NulsMessage {
 
-    public EventMessage(byte[] bytes) {
-        super(MessageTypeEnum.EVENT, bytes);
+    public EventMessage(NulsMessageHeader header, byte[] data) {
+        super(header, data);
     }
 }
