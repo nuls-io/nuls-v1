@@ -1,6 +1,5 @@
-package io.nuls.ledger.entity;
+package io.nuls.ledger.entity.utxoTransaction;
 
-import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.utils.io.ByteBuffer;
 
@@ -10,10 +9,10 @@ import java.io.OutputStream;
 /**
  * Created by Niels on 2017/11/14.
  */
-public class SmallChangeTransaction extends CoinTransaction<UtxoData> {
+public class UtxoTransferTransaction extends UtxoCoinTransaction {
 
-    public SmallChangeTransaction() {
-        this.type = TransactionConstant.TX_TYPE_SMALL_CHANGE;
+    public UtxoTransferTransaction() {
+        this.type = TransactionConstant.TX_TYPE_TRANSFER;
     }
 
     @Override
@@ -30,6 +29,4 @@ public class SmallChangeTransaction extends CoinTransaction<UtxoData> {
     public void parse(ByteBuffer byteBuffer) {
 
     }
-
-
 }

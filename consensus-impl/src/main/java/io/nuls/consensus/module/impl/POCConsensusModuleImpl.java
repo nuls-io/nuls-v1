@@ -1,6 +1,8 @@
 package io.nuls.consensus.module.impl;
 
 import io.nuls.consensus.constant.POCConsensusConstant;
+import io.nuls.consensus.event.JoinConsensusEvent;
+import io.nuls.consensus.handler.JoinConsensusHandler;
 import io.nuls.consensus.module.ConsensusModule;
 import io.nuls.consensus.service.impl.POCConsensusServiceImpl;
 import io.nuls.core.context.NulsContext;
@@ -29,7 +31,9 @@ public class POCConsensusModuleImpl extends ConsensusModule {
 
     private void registerHanders() {
         //todo
-//        processorService.registerEventHandler();
+        JoinConsensusHandler joinConsensusHandler = new JoinConsensusHandler();
+        //add filter , add validator
+        processorService.registerEventHandler(JoinConsensusEvent.class,joinConsensusHandler);
     }
 
     private void checkConsensusStatus() {

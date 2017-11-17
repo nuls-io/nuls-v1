@@ -1,16 +1,16 @@
 package io.nuls.ledger.handler;
 
 import io.nuls.event.bus.event.handler.NetworkNulsEventHandler;
-import io.nuls.ledger.event.LockEvent;
+import io.nuls.ledger.event.UtxoLockEvent;
 
 /**
  * Created by Niels on 2017/11/13.
  *
  */
-public class LockHandler extends NetworkNulsEventHandler<LockEvent> {
+public class UtxoLockHandler extends NetworkNulsEventHandler<UtxoLockEvent> {
 
     @Override
-    public void onEvent(LockEvent event) {
+    public void onEvent(UtxoLockEvent event) {
         //todo
 
     }

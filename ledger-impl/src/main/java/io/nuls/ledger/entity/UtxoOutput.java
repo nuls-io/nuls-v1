@@ -13,11 +13,11 @@ import java.io.OutputStream;
 /**
  * Created by win10 on 2017/10/30.
  */
-public class TransactionOutput extends NulsData{
+public class UtxoOutput extends NulsData{
     //交易
     private Sha256Hash txHash;
     //下次的花费
-    private TransactionInput spentBy;
+    private UtxoInput spentBy;
     //交易金额
     private long value;
     //锁定时间
@@ -29,11 +29,11 @@ public class TransactionOutput extends NulsData{
     //交易输出的索引
     private int index;
 
-    public TransactionOutput() {
+    public UtxoOutput() {
 
     }
 
-    public TransactionOutput(Sha256Hash txHash) {
+    public UtxoOutput(Sha256Hash txHash) {
         this.txHash = txHash;
     }
 
@@ -75,11 +75,11 @@ public class TransactionOutput extends NulsData{
         this.txHash = txHash;
     }
 
-    public TransactionInput getSpentBy() {
+    public UtxoInput getSpentBy() {
         return spentBy;
     }
 
-    public void setSpentBy(TransactionInput spentBy) {
+    public void setSpentBy(UtxoInput spentBy) {
         this.spentBy = spentBy;
     }
 

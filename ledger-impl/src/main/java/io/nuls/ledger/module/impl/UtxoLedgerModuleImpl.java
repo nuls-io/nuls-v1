@@ -8,13 +8,13 @@ import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.event.CoinTransactionEvent;
-import io.nuls.ledger.event.LockEvent;
-import io.nuls.ledger.event.SmallChangeEvent;
-import io.nuls.ledger.handler.CoinTransactionHandler;
-import io.nuls.ledger.handler.LockHandler;
-import io.nuls.ledger.handler.SmallChangeHandler;
+import io.nuls.ledger.event.UtxoLockEvent;
+import io.nuls.ledger.event.UtxoSmallChangeEvent;
+import io.nuls.ledger.handler.UtxoCoinTransactionHandler;
+import io.nuls.ledger.handler.UtxoLockHandler;
+import io.nuls.ledger.handler.UtxoSmallChangeHandler;
 import io.nuls.ledger.module.LedgerModule;
-import io.nuls.ledger.service.impl.LedgerServiceImpl;
+import io.nuls.ledger.service.impl.UtxoLedgerServiceImpl;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.ledger.thread.SmallChangeThread;
 
@@ -23,13 +23,13 @@ import java.util.List;
 /**
  * Created by Niels on 2017/11/7.
  */
-public class LedgerModuleImpl extends LedgerModule {
+public class UtxoLedgerModuleImpl extends LedgerModule {
 
     private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
 
     private CacheService<String,Balance> cacheService = NulsContext.getInstance().getService(CacheService.class);
 
-    private LedgerService ledgerService = LedgerServiceImpl.getInstance();
+    private LedgerService ledgerService = UtxoLedgerServiceImpl.getInstance();
 
     private NetworkProcessorService processorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
 
@@ -40,12 +40,12 @@ public class LedgerModuleImpl extends LedgerModule {
         SmallChangeThread.getInstance().start();
         //register handler
 //        this.registerEvent((short)1, BaseLedgerEvent.class);
-        this.registerEvent((short)2, LockEvent.class);
-        this.registerEvent((short)3, SmallChangeEvent.class);
+        this.registerEvent((short)2, UtxoLockEvent.class);
+        this.registerEvent((short)3, UtxoSmallChangeEvent.class);
         this.registerEvent((short)4, CoinTransactionEvent.class);
-        this.processorService.registerEventHandler(LockEvent.class, new LockHandler());
-        this.processorService.registerEventHandler(SmallChangeEvent.class, new SmallChangeHandler());
-        this.processorService.registerEventHandler(CoinTransactionEvent.class, new CoinTransactionHandler());
+        this.processorService.registerEventHandler(UtxoLockEvent.class, new UtxoLockHandler());
+        this.processorService.registerEventHandler(UtxoSmallChangeEvent.class, new UtxoSmallChangeHandler());
+        this.processorService.registerEventHandler(CoinTransactionEvent.class, new UtxoCoinTransactionHandler());
     }
 
     private void cacheStandingBook() {

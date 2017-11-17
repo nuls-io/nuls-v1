@@ -2,7 +2,6 @@ package io.nuls.ledger.service.impl;
 
 import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.exception.NulsVerificationException;
 import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.service.intf.LedgerService;
 
@@ -12,11 +11,11 @@ import java.util.List;
  * Created by Niels on 2017/11/13.
  *
  */
-public class LedgerServiceImpl implements LedgerService {
+public class UtxoLedgerServiceImpl implements LedgerService {
 
-    private static final LedgerService instance = new LedgerServiceImpl();
+    private static final LedgerService instance = new UtxoLedgerServiceImpl();
 
-    private LedgerServiceImpl() {
+    private UtxoLedgerServiceImpl() {
     }
 
     public static LedgerService getInstance() {

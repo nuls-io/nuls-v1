@@ -10,22 +10,22 @@ import java.io.OutputStream;
  * Created by Niels on 2017/11/16.
  */
 public class UtxoData extends NulsData{
-    private TransactionInput inputs;
-    private TransactionOutput outputs;
+    private UtxoInput inputs;
+    private UtxoOutput outputs;
 
-    public TransactionInput getInputs() {
+    public UtxoInput getInputs() {
         return inputs;
     }
 
-    public void setInputs(TransactionInput inputs) {
+    public void setInputs(UtxoInput inputs) {
         this.inputs = inputs;
     }
 
-    public TransactionOutput getOutputs() {
+    public UtxoOutput getOutputs() {
         return outputs;
     }
 
-    public void setOutputs(TransactionOutput outputs) {
+    public void setOutputs(UtxoOutput outputs) {
         this.outputs = outputs;
     }
 

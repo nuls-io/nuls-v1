@@ -4,7 +4,7 @@ import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.thread.NulsThread;
 import io.nuls.core.utils.log.Log;
-import io.nuls.ledger.module.impl.LedgerModuleImpl;
+import io.nuls.ledger.module.impl.UtxoLedgerModuleImpl;
 import io.nuls.ledger.service.intf.LedgerService;
 
 /**
@@ -16,7 +16,7 @@ public class SmallChangeThread extends NulsThread {
     private static final SmallChangeThread instance = new SmallChangeThread(SmallChangeThread.class.getSimpleName());
 
     private SmallChangeThread(String name) {
-        super(NulsContext.getInstance().getModule(LedgerModuleImpl.class), name);
+        super(NulsContext.getInstance().getModule(UtxoLedgerModuleImpl.class), name);
     }
 
     public static SmallChangeThread getInstance() {
