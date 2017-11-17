@@ -10,24 +10,10 @@ import java.io.OutputStream;
 /**
  * Created by Niels on 2017/11/14.
  */
-public class TransferTransaction extends CoinTransaction<UtxoData> {
+public class TransferTransaction extends UtxoCoinTransaction {
 
     public TransferTransaction() {
         this.type = TransactionConstant.TX_TYPE_TRANSFER;
     }
 
-    @Override
-    public int size() {
-        return 0;
-    }
-
-    @Override
-    public void serializeToStream(OutputStream stream) throws IOException {
-
-    }
-
-    @Override
-    public void parse(ByteBuffer byteBuffer) {
-
-    }
 }

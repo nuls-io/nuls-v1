@@ -11,17 +11,17 @@ import java.io.OutputStream;
 
 /**
  * Created by Niels on 2017/11/13.
- *
  */
-public class LockEvent extends BaseLedgerEvent<LockTransaction> {
+public class LockEvent extends CoinTransactionEvent<LockTransaction> {
     public LockEvent(NulsEventHeader header) {
         super(header);
     }
 
     @Override
     protected LockTransaction parseEventBody(ByteBuffer byteBuffer) {
-        //todo
-        return null;
+        LockTransaction lockTx = new LockTransaction();
+        lockTx.parse(byteBuffer);
+        return lockTx;
     }
 
 }

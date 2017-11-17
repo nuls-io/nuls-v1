@@ -11,16 +11,10 @@ import io.nuls.ledger.entity.CoinTransaction;
  * Created by Niels on 2017/11/8.
  *
  */
-public class CoinTransactionEvent extends BaseLedgerEvent<CoinTransaction> {
+public abstract class CoinTransactionEvent<T extends CoinTransaction> extends BaseLedgerEvent<T> {
 
     public CoinTransactionEvent(NulsEventHeader header) {
         super(header);
-    }
-
-    @Override
-    protected CoinTransaction parseEventBody(ByteBuffer byteBuffer) {
-        //todo
-        return null;
     }
 
 }
