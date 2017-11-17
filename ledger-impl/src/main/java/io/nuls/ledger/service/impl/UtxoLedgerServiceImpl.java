@@ -16,11 +16,9 @@ import java.util.List;
 public class UtxoLedgerServiceImpl implements LedgerService {
 
     private static final LedgerService instance = new UtxoLedgerServiceImpl();
-
-    private UtxoLedgerServiceImpl() {
     private LedgerCacheService ledgerCacheService = LedgerCacheService.getInstance();
 
-    private LedgerServiceImpl() {
+    private UtxoLedgerServiceImpl() {
     }
 
     public static LedgerService getInstance() {

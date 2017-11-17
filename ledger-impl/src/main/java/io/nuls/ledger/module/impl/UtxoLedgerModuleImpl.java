@@ -2,11 +2,9 @@ package io.nuls.ledger.module.impl;
 
 import io.nuls.account.entity.Account;
 import io.nuls.account.service.intf.AccountService;
-import io.nuls.cache.service.intf.CacheService;
 import io.nuls.core.context.NulsContext;
 import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
 import io.nuls.ledger.constant.LedgerConstant;
-import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.event.CoinTransactionEvent;
 import io.nuls.ledger.event.UtxoLockEvent;
 import io.nuls.ledger.event.UtxoSmallChangeEvent;
@@ -14,6 +12,7 @@ import io.nuls.ledger.handler.UtxoCoinTransactionHandler;
 import io.nuls.ledger.handler.UtxoLockHandler;
 import io.nuls.ledger.handler.UtxoSmallChangeHandler;
 import io.nuls.ledger.module.LedgerModule;
+import io.nuls.ledger.service.impl.LedgerCacheService;
 import io.nuls.ledger.service.impl.UtxoLedgerServiceImpl;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.ledger.thread.SmallChangeThread;
@@ -27,7 +26,7 @@ public class UtxoLedgerModuleImpl extends LedgerModule {
 
     private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
 
-    private CacheService<String,Balance> cacheService = NulsContext.getInstance().getService(CacheService.class);
+    private LedgerCacheService  cacheService = LedgerCacheService.getInstance();
 
     private LedgerService ledgerService = UtxoLedgerServiceImpl.getInstance();
 
@@ -49,7 +48,6 @@ public class UtxoLedgerModuleImpl extends LedgerModule {
     }
 
     private void cacheStandingBook() {
-        cacheService.createCache(LedgerConstant.STANDING_BOOK);
         //load account
         List<Account> accounts = this.accountService.getLocalAccountList();
         if (null == accounts) {
