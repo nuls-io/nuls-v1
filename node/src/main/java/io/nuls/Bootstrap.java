@@ -3,6 +3,7 @@ package io.nuls;
 
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.event.EventManager;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -46,6 +47,7 @@ public class Bootstrap {
             }
             //set system language
             try {
+                NulsContext.DEFAULT_ENCODING = ConfigLoader.getCfgValue(NulsConstant.CFG_SYSTEM_SECTION, NulsConstant.CFG_SYSTEM_CHARSET);
                 String language = ConfigLoader.getCfgValue(NulsConstant.CFG_SYSTEM_SECTION, NulsConstant.CFG_SYSTEM_LANGUAGE);
                 I18nUtils.setLanguage(language);
             } catch (NulsException e) {

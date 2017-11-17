@@ -2,6 +2,7 @@ package io.nuls.ledger.service.impl;
 
 import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsVerificationException;
 import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.service.intf.LedgerService;
@@ -16,6 +17,8 @@ public class LedgerServiceImpl implements LedgerService {
 
     private static final LedgerService instance = new LedgerServiceImpl();
 
+    private LedgerCacheService ledgerCacheService = LedgerCacheService.getInstance();
+
     private LedgerServiceImpl() {
     }
 
@@ -25,8 +28,18 @@ public class LedgerServiceImpl implements LedgerService {
 
     @Override
     public Balance getBalance(String address) {
-        //todo
-        return null;
+        Balance balance = ledgerCacheService.getBalance(address);
+        if(null==balance){
+            balance = calcBalance(address);
+            ledgerCacheService.putBalance(address,balance);
+        }
+        return balance;
+    }
+
+    private Balance calcBalance(String address) {
+        Balance balance = new Balance();
+        //todo use dao
+        return balance;
     }
 
     @Override
@@ -37,8 +50,19 @@ public class LedgerServiceImpl implements LedgerService {
 
     @Override
     public boolean saveTransaction(Transaction tx) {
-        //todo
-        return false;
+        boolean result = false;
+        do{
+            if(null==tx){
+                break;
+            }
+            try{
+                tx.verify();
+            }catch (NulsVerificationException e){
+                break;
+            }
+            //todo save to db
+        }while(false);
+        return result;
     }
 
     @Override

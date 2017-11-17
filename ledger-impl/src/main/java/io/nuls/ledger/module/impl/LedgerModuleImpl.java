@@ -14,6 +14,7 @@ import io.nuls.ledger.event.TransferEvent;
 import io.nuls.ledger.handler.LockHandler;
 import io.nuls.ledger.handler.SmallChangeHandler;
 import io.nuls.ledger.module.LedgerModule;
+import io.nuls.ledger.service.impl.LedgerCacheService;
 import io.nuls.ledger.service.impl.LedgerServiceImpl;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.ledger.thread.SmallChangeThread;
@@ -27,7 +28,7 @@ public class LedgerModuleImpl extends LedgerModule {
 
     private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
 
-    private CacheService<String,Balance> cacheService = NulsContext.getInstance().getService(CacheService.class);
+    private LedgerCacheService cacheService = LedgerCacheService.getInstance();
 
     private LedgerService ledgerService = LedgerServiceImpl.getInstance();
 
@@ -40,15 +41,14 @@ public class LedgerModuleImpl extends LedgerModule {
         SmallChangeThread.getInstance().start();
         //register handler
 //        this.registerEvent((short)1, BaseLedgerEvent.class);
-        this.registerEvent((short)2, LockEvent.class);
-        this.registerEvent((short)3, SmallChangeEvent.class);
-        this.registerEvent((short)4, CoinTransactionEvent.class);
+        this.registerEvent((short) 2, LockEvent.class);
+        this.registerEvent((short) 3, SmallChangeEvent.class);
+        this.registerEvent((short) 4, CoinTransactionEvent.class);
         this.processorService.registerEventHandler(LockEvent.class, new LockHandler());
         this.processorService.registerEventHandler(SmallChangeEvent.class, new SmallChangeHandler());
     }
 
     private void cacheStandingBook() {
-        cacheService.createCache(LedgerConstant.STANDING_BOOK);
         //load account
         List<Account> accounts = this.accountService.getLocalAccountList();
         if (null == accounts) {
@@ -57,20 +57,19 @@ public class LedgerModuleImpl extends LedgerModule {
         //calc balance
         //put standing book to cache
         for (Account account : accounts) {
-            Balance balance = this.ledgerService.getBalance(account.getAddress().toString());
-            this.cacheService.putElement(LedgerConstant.STANDING_BOOK, account.getAddress().toString(), balance);
+            this.ledgerService.getBalance(account.getAddress().toString());
         }
     }
 
     @Override
     public void shutdown() {
-        this.cacheService.removeCache(LedgerConstant.STANDING_BOOK);
+        cacheService.clear();
         SmallChangeThread.getInstance().stop();
     }
 
     @Override
     public void destroy() {
-        this.cacheService.removeCache(LedgerConstant.STANDING_BOOK);
+        this.cacheService.destroy();
         SmallChangeThread.getInstance().stop();
     }
 

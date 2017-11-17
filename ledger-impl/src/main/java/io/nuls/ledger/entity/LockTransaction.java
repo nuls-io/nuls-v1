@@ -1,6 +1,5 @@
 package io.nuls.ledger.entity;
 
-import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.utils.io.ByteBuffer;

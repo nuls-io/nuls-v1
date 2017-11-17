@@ -2,6 +2,7 @@ package io.nuls.account.entity;
 
 import io.nuls.core.chain.entity.NulsData;
 import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.utils.io.ByteBuffer;
@@ -84,14 +85,14 @@ public class Account extends NulsData {
         s += VarInt.sizeOf(version);
         if (!StringUtils.isBlank(id)) {
             try {
-                s += id.getBytes(NulsConstant.DEFAULT_ENCODING).length + 1;
+                s += id.getBytes(NulsContext.DEFAULT_ENCODING).length + 1;
             } catch (UnsupportedEncodingException e) {
                 Log.error(e);
             }
         }
         if(StringUtils.isNotBlank(alias)){
             try {
-                s += alias.getBytes(NulsConstant.DEFAULT_ENCODING).length + 1;
+                s += alias.getBytes(NulsContext.DEFAULT_ENCODING).length + 1;
             } catch (UnsupportedEncodingException e) {
                 Log.error(e);
             }
@@ -115,10 +116,10 @@ public class Account extends NulsData {
     public void serializeToStream(OutputStream stream) throws IOException {
         stream.write(new VarInt(version).encode());
         if(StringUtils.isNotBlank(id)){
-            this.writeBytesWithLength(stream, id.getBytes(NulsConstant.DEFAULT_ENCODING));
+            this.writeBytesWithLength(stream, id.getBytes(NulsContext.DEFAULT_ENCODING));
         }
         if(StringUtils.isNotBlank(alias)){
-            this.writeBytesWithLength(stream, alias.getBytes(NulsConstant.DEFAULT_ENCODING));
+            this.writeBytesWithLength(stream, alias.getBytes(NulsContext.DEFAULT_ENCODING));
         }
         if (null != address && null != address.getHash160()) {
             stream.write(address.getHash160());

@@ -15,8 +15,6 @@ public interface NulsConstant {
     String CFG_SYSTEM_SECTION = "System";
     String CFG_SYSTEM_LANGUAGE = "language";
     String CFG_SYSTEM_CHARSET = "charset";
-    String DEFAULT_ENCODING = "GBK";
-
 
     /**----[ Bootstrap] ----*/
 //    String CFG_BOOTSTRAP_RPC_SERVER_MODULE = "RPC";
