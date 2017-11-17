@@ -10,7 +10,7 @@ import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.event.CoinTransactionEvent;
 import io.nuls.ledger.event.LockEvent;
 import io.nuls.ledger.event.SmallChangeEvent;
-import io.nuls.ledger.handler.CoinTransactionHandler;
+import io.nuls.ledger.event.TransferEvent;
 import io.nuls.ledger.handler.LockHandler;
 import io.nuls.ledger.handler.SmallChangeHandler;
 import io.nuls.ledger.module.LedgerModule;
@@ -45,7 +45,6 @@ public class LedgerModuleImpl extends LedgerModule {
         this.registerEvent((short)4, CoinTransactionEvent.class);
         this.processorService.registerEventHandler(LockEvent.class, new LockHandler());
         this.processorService.registerEventHandler(SmallChangeEvent.class, new SmallChangeHandler());
-        this.processorService.registerEventHandler(CoinTransactionEvent.class, new CoinTransactionHandler());
     }
 
     private void cacheStandingBook() {
