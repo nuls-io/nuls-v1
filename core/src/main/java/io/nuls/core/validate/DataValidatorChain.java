@@ -1,4 +1,4 @@
-package io.nuls.core.chain.validate;
+package io.nuls.core.validate;
 
 import io.nuls.core.chain.entity.NulsData;
 

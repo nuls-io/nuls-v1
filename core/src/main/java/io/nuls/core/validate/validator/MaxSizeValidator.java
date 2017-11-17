@@ -1,14 +1,14 @@
-package io.nuls.core.chain.validate.validator;
+package io.nuls.core.validate.validator;
 
 import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.chain.validate.NulsDataValidator;
-import io.nuls.core.chain.validate.ValidateResult;
+import io.nuls.core.validate.NulsDataValidator;
+import io.nuls.core.validate.ValidateResult;
 
 /**
  * Created by Niels on 2017/11/17.
  */
-public class MaxSizeTransactionValidator implements NulsDataValidator<Transaction> {
-    private static final int MAX_SIZE = 2 << 21;
+public class MaxSizeValidator implements NulsDataValidator<Transaction> {
+    private static final int MAX_SIZE = 2 << 21;//2M
     private static final String ERROR_MESSAGE = "The transaction is too big!";
 
     @Override

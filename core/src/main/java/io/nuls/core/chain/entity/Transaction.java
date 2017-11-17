@@ -2,6 +2,7 @@ package io.nuls.core.chain.entity;
 
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.utils.date.TimeService;
+import io.nuls.core.validate.validator.MaxSizeValidator;
 
 /**
  * Created by win10 on 2017/10/30.
@@ -9,6 +10,7 @@ import io.nuls.core.utils.date.TimeService;
 public abstract class Transaction extends NulsData {
     public Transaction() {
         this.time = TimeService.currentTimeMillis();
+        this.registerValidator(new MaxSizeValidator());
     }
 
     //tx type

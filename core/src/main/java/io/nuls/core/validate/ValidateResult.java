@@ -1,4 +1,4 @@
-package io.nuls.core.chain.validate;
+package io.nuls.core.validate;
 
 /**
  * Created by Niels on 2017/11/16.
