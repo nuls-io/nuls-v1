@@ -13,10 +13,11 @@ import java.util.List;
  * Created by Niels on 2017/11/13.
  *
  */
-public class LedgerServiceImpl implements LedgerService {
+public class UtxoLedgerServiceImpl implements LedgerService {
 
-    private static final LedgerService instance = new LedgerServiceImpl();
+    private static final LedgerService instance = new UtxoLedgerServiceImpl();
 
+    private UtxoLedgerServiceImpl() {
     private LedgerCacheService ledgerCacheService = LedgerCacheService.getInstance();
 
     private LedgerServiceImpl() {

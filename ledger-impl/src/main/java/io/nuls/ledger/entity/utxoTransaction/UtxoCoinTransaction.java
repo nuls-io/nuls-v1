@@ -1,7 +1,9 @@
-package io.nuls.ledger.entity;
+package io.nuls.ledger.entity.utxoTransaction;
 
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.utils.io.ByteBuffer;
+import io.nuls.ledger.entity.CoinTransaction;
+import io.nuls.ledger.entity.UtxoData;
 
 import java.io.IOException;
 import java.io.OutputStream;

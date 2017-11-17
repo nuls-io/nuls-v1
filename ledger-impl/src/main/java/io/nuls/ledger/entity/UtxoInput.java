@@ -15,33 +15,33 @@ import java.util.List;
 /**
  * Created by win10 on 2017/10/30.
  */
-public class TransactionInput extends NulsData {
+public class UtxoInput extends NulsData {
 
     private Sha256Hash txHash;
     //the output last time
-    private List<TransactionOutput> froms;
+    private List<UtxoOutput> froms;
 
     private byte[] scriptBytes;
 
     private Script scriptSig;
 
 
-    public TransactionInput() {
+    public UtxoInput() {
         this.froms = new ArrayList<>();
     }
 
-    public TransactionInput(Sha256Hash txHash) {
+    public UtxoInput(Sha256Hash txHash) {
         this();
         this.txHash = txHash;
     }
 
-    public TransactionInput(Sha256Hash txHash, TransactionOutput output) {
+    public UtxoInput(Sha256Hash txHash, UtxoOutput output) {
         this();
         this.txHash = txHash;
         this.froms.add(output);
     }
 
-    public TransactionInput(Sha256Hash txHash, List<TransactionOutput> froms) {
+    public UtxoInput(Sha256Hash txHash, List<UtxoOutput> froms) {
         this.txHash = txHash;
         this.froms = froms;
     }
@@ -57,7 +57,7 @@ public class TransactionInput extends NulsData {
             stream.write(new VarInt(0).encode());
         } else {
             stream.write(new VarInt(froms.size()).encode());
-            for (TransactionOutput from : froms) {
+            for (UtxoOutput from : froms) {
                 stream.write(from.getTxHash().getReversedBytes());
                 Utils.uint32ToByteStreamLE(from.getIndex(), stream);
             }
@@ -77,7 +77,7 @@ public class TransactionInput extends NulsData {
 
         int fromSize = (int) byteBuffer.readVarInt();
         for (int i = 0; i < fromSize; i++) {
-            TransactionOutput pre = new TransactionOutput();
+            UtxoOutput pre = new UtxoOutput();
             pre.setTxHash(byteBuffer.readHash());
             pre.setIndex((int) byteBuffer.readUint32());
             froms.add(pre);
@@ -96,11 +96,11 @@ public class TransactionInput extends NulsData {
         this.txHash = txHash;
     }
 
-    public List<TransactionOutput> getFroms() {
+    public List<UtxoOutput> getFroms() {
         return froms;
     }
 
-    public void setFroms(List<TransactionOutput> froms) {
+    public void setFroms(List<UtxoOutput> froms) {
         this.froms = froms;
     }
 

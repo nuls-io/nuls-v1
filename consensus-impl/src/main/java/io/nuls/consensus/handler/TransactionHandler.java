@@ -12,7 +12,5 @@ public class TransactionHandler extends NetworkNulsEventHandler<CoinTransactionE
 
     @Override
     public void onEvent(CoinTransactionEvent<CoinTransaction> event) throws NulsException{
-        CoinTransaction tx = event.getEventBody();
-        tx.verify();
     }
 }
