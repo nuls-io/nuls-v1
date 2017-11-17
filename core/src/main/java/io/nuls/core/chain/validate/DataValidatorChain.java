@@ -1,8 +1,6 @@
-package io.nuls.core.chain.validator;
+package io.nuls.core.chain.validate;
 
 import io.nuls.core.chain.entity.NulsData;
-import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.exception.NulsRuntimeException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,17 +14,28 @@ public class DataValidatorChain {
     private ThreadLocal<Integer> index = new ThreadLocal<>();
 
     public ValidateResult startDoValidator(NulsData data) {
+        if (list.isEmpty()) {
+            return ValidateResult.getSuccessResult();
+        }
         index.set(-1);
-        return doValidate(data);
+        ValidateResult result = doValidate(data);
+        if (index.get() == list.size()) {
+            return result;
+        }
+        return ValidateResult.getFaildResult("The Validators not fully executed`");
     }
 
-    public ValidateResult doValidate(NulsData data) {
+    private ValidateResult doValidate(NulsData data) {
         index.set(1 + index.get());
         if (index.get() == list.size()) {
             return null;
         }
         NulsDataValidator<NulsData> validator = list.get(index.get());
-        return validator.validate(data,this);
+        ValidateResult result = validator.validate(data);
+        if (!result.isSeccess()) {
+            return result;
+        }
+        return this.doValidate(data);
     }
 
     public void addValidator(NulsDataValidator validator) {

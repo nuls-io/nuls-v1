@@ -1,4 +1,4 @@
-package io.nuls.core.chain.validator;
+package io.nuls.core.chain.validate;
 
 /**
  * Created by Niels on 2017/11/16.
@@ -26,5 +26,13 @@ public class ValidateResult {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public static ValidateResult getFaildResult(String msg) {
+        return new ValidateResult(false, msg);
+    }
+
+    public static ValidateResult getSuccessResult() {
+        return new ValidateResult(true, "");
     }
 }

@@ -1,4 +1,4 @@
-package io.nuls.core.chain.validator;
+package io.nuls.core.chain.validate;
 
 import io.nuls.core.chain.entity.NulsData;
 
@@ -7,5 +7,5 @@ import io.nuls.core.chain.entity.NulsData;
  */
 public interface NulsDataValidator<T extends NulsData> {
 
-    ValidateResult validate(T data, DataValidatorChain dataValidatorChain);
+    ValidateResult validate(T data);
 }

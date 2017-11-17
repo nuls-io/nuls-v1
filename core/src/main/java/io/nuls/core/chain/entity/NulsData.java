@@ -1,8 +1,8 @@
 package io.nuls.core.chain.entity;
 
-import io.nuls.core.chain.validator.DataValidatorChain;
-import io.nuls.core.chain.validator.NulsDataValidator;
-import io.nuls.core.chain.validator.ValidateResult;
+import io.nuls.core.chain.validate.DataValidatorChain;
+import io.nuls.core.chain.validate.NulsDataValidator;
+import io.nuls.core.chain.validate.ValidateResult;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.crypto.UnsafeByteArrayOutputStream;
 import io.nuls.core.exception.NulsException;
