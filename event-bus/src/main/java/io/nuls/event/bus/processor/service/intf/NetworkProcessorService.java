@@ -8,7 +8,7 @@ import io.nuls.event.bus.event.handler.NetworkNulsEventHandler;
  */
 public interface NetworkProcessorService {
 
-    public void send(NulsEvent event);
+    public void send(byte[] event);
 
     public String registerEventHandler(Class<? extends NulsEvent> eventClass, NetworkNulsEventHandler<? extends NulsEvent> handler);
 
