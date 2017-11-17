@@ -16,7 +16,7 @@ public class DevNetworkParam extends NetworkParam {
 
     private DevNetworkParam() {
         this.port = ConfigLoader.getPropValue(NetworkConstant.Network_Port_Dev, 8003);
-        this.packetMagic = ConfigLoader.getPropValue(NetworkConstant.Network_Magic_Dev, 987654323L);
+        this.packetMagic = ConfigLoader.getPropValue(NetworkConstant.Network_Magic_Dev, 987654323);
         this.maxInCount = ConfigLoader.getPropValue(NetworkConstant.Network_Peer_Max_In, 20);
         this.maxOutCount = ConfigLoader.getPropValue(NetworkConstant.Network_Peer_Max_Out, 10);
 

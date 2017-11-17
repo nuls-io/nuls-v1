@@ -1,9 +1,12 @@
 package io.nuls.network.entity;
 
+import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.NulsData;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.io.ByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.entity.param.NetworkParam;
+import io.nuls.network.message.entity.VersionMessage;
 import io.nuls.network.service.MessageWriter;
 
 import java.io.IOException;
@@ -34,8 +37,10 @@ public class Peer extends NulsData {
     public final static int CLOSE = 3;
     private int status;
 
-
     private MessageWriter writeTarget;
+
+    private VersionMessage versionMessage;
+
 
     public Peer() {
     }
@@ -52,9 +57,16 @@ public class Peer extends NulsData {
     }
 
     public void connect(NetworkParam network) {
-//        VersionMessage message = new VersionMessage();
+//
 
     }
+
+    public void connectionOpened() {
+        Block bestBlock = NulsContext.getInstance().getBestBlock();
+        VersionMessage message = new VersionMessage(bestBlock.getHeight(), bestBlock.getHash().toString(), this);
+
+    }
+
 
     public void sendMessage() {
 
@@ -133,5 +145,13 @@ public class Peer extends NulsData {
 
     public void setWriteTarget(MessageWriter writeTarget) {
         this.writeTarget = writeTarget;
+    }
+
+    public VersionMessage getVersionMessage() {
+        return versionMessage;
+    }
+
+    public void setVersionMessage(VersionMessage versionMessage) {
+        this.versionMessage = versionMessage;
     }
 }

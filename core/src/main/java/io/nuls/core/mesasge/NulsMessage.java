@@ -1,22 +1,36 @@
 package io.nuls.core.mesasge;
 
-import io.nuls.core.mesasge.constant.MessageTypeEnum;
+import io.nuls.core.chain.entity.Block;
 
 public class NulsMessage {
 
-    public static final int MAX_SIZE = 0x01000000; //16M
+    public static final int MAX_SIZE = NulsMessageHeader.MESSAGE_HEADER_SIZE + Block.MAX_SIZE;
 
     private NulsMessageHeader header;
-    private MessageTypeEnum messageType;
+
     private byte[] data;
 
-    public NulsMessage(NulsMessageHeader header, MessageTypeEnum messageType, byte[] data) {
+    public NulsMessage(NulsMessageHeader header, byte[] data) {
         this.header = header;
         this.data = data;
     }
 
-    public NulsMessage(MessageTypeEnum messageType, byte[] data) {
-        this.messageType = messageType;
+    public NulsMessage(int magicNumber, short msgType) {
+        this.header = new NulsMessageHeader(magicNumber, msgType);
+        this.data = data;
+    }
+
+    public NulsMessage(int magicNumber, short msgType, byte[] data) {
+        this.header = new NulsMessageHeader(magicNumber, msgType);
+        this.data = data;
+    }
+
+    public NulsMessage(int magicNumber, short msgType, byte[] extend, byte[] data) {
+        this.header = new NulsMessageHeader(magicNumber, msgType, extend);
+        this.data = data;
+    }
+
+    public NulsMessage(byte[] data) {
         this.data = data;
     }
 
@@ -26,14 +40,6 @@ public class NulsMessage {
 
     public void setHeader(NulsMessageHeader header) {
         this.header = header;
-    }
-
-    public MessageTypeEnum getMessageType() {
-        return messageType;
-    }
-
-    public void setMessageType(MessageTypeEnum messageType) {
-        this.messageType = messageType;
     }
 
     public byte[] getData() {

@@ -11,7 +11,7 @@ import java.io.OutputStream;
 /**
  * Created by win10 on 2017/10/30.
  */
-public class BlockHeader extends NulsData{
+public class BlockHeader extends NulsData {
 
     //区块hash
     protected Sha256Hash hash;
@@ -35,6 +35,21 @@ public class BlockHeader extends NulsData{
     protected byte[] scriptBytes;
 
     protected Script scriptSig;
+
+    public BlockHeader() {
+
+    }
+
+    public BlockHeader(long height, long time) {
+        this.height = height;
+        this.time = time;
+    }
+
+    public BlockHeader(long height, long time, Sha256Hash preHash) {
+        this.height = height;
+        this.time = time;
+        this.preHash = preHash;
+    }
 
     @Override
     public int size() {

@@ -14,7 +14,7 @@ public abstract class NetworkParam {
 
     protected int port;
 
-    protected long packetMagic;
+    protected int packetMagic;
 
     protected int maxInCount;
 
@@ -32,7 +32,7 @@ public abstract class NetworkParam {
         return port;
     }
 
-    public long packetMagic() {
+    public int packetMagic() {
         return packetMagic;
     }
 
