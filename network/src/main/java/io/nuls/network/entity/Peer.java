@@ -1,12 +1,10 @@
 package io.nuls.network.entity;
 
 import io.nuls.core.chain.entity.NulsData;
-import io.nuls.core.crypto.Sha256Hash;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.ByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.entity.param.NetworkParam;
-import io.nuls.network.message.entity.VersionMessage;
+import io.nuls.network.service.MessageWriter;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -23,20 +21,21 @@ public class Peer extends NulsData {
     /**
      * 1: inPeer ,  2: outPeer
      */
+    public final static int IN = 1;
+    public final static int OUT = 2;
     private int type;
 
     /**
-     * 0: wait , 1: connecting, 2: close
+     * 0: wait , 1: connecting, 2: handshake 3: close
      */
+    public final static int WAIT = 0;
+    public final static int CONNECTING = 1;
+    public final static int HANDSHAKE = 2;
+    public final static int CLOSE = 3;
     private int status;
 
 
-    public final static int WAITTING = 0;
-    public final static int CONNECTING = 1;
-    public final static int CLOSE = 2;
-
-    public final static int IN = 1;
-    public final static int OUT = 2;
+    private MessageWriter writeTarget;
 
     public Peer() {
     }
@@ -126,5 +125,13 @@ public class Peer extends NulsData {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public MessageWriter getWriteTarget() {
+        return writeTarget;
+    }
+
+    public void setWriteTarget(MessageWriter writeTarget) {
+        this.writeTarget = writeTarget;
     }
 }
