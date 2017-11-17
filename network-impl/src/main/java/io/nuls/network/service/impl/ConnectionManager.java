@@ -244,7 +244,7 @@ public class ConnectionManager {
             socketChannel.configureBlocking(false);
             SelectionKey newKey = socketChannel.register(selector, SelectionKey.OP_READ);
 
-            Peer peer = new Peer(Peer.IN, socketAddress);
+            Peer peer = new Peer(network, Peer.IN, socketAddress);
             ConnectionHandler handler = new ConnectionHandler(peer, socketChannel, newKey);
             newKey.attach(handler);
         } else {
