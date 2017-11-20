@@ -14,14 +14,14 @@ public class AccountPo implements Serializable{
     private byte[] txHash;
     private String alias;
     private int version;
-    private byte[] bytes;
+    private byte[] extend;
 
-    public byte[] getBytes() {
-        return bytes;
+    public byte[] getExtend() {
+        return extend;
     }
 
-    public void setBytes(byte[] bytes) {
-        this.bytes = bytes;
+    public void setExtend(byte[] extend) {
+        this.extend = extend;
     }
 
     public String getId() {
