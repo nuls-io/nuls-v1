@@ -6,15 +6,13 @@ import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
-import io.nuls.core.utils.io.ByteBuffer;
+import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.db.entity.AccountPo;
 import io.nuls.db.entity.LocalAccountPo;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author ln
@@ -52,7 +50,7 @@ public final class AccountTool {
     public static void toBean(AccountPo src, Account desc) {
         AssertUtil.canNotEmpty(src, "Object type conversion faild!");
         AssertUtil.canNotEmpty(desc, "Object type conversion faild!");
-        desc.parse(new ByteBuffer(src.getBytes()));
+        desc.parse(new NulsByteBuffer(src.getBytes()));
         desc.setCreateHeight(src.getCreateHeight());
         desc.setCreateTime(src.getCreateTime());
         desc.setTxHash(src.getTxHash());

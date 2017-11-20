@@ -1,7 +1,7 @@
 package io.nuls.core.event;
 
 import io.nuls.core.chain.entity.NulsData;
-import io.nuls.core.utils.io.ByteBuffer;
+import io.nuls.core.utils.io.NulsByteBuffer;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -31,13 +31,13 @@ public abstract class NulsEvent<T extends NulsData> extends NulsData {
     }
 
     @Override
-    public final void parse(ByteBuffer byteBuffer) {
+    public final void parse(NulsByteBuffer byteBuffer) {
         this.header = new NulsEventHeader();
         this.header.parse(byteBuffer);
         this.eventBody = parseEventBody(byteBuffer);
     }
 
-    protected abstract T parseEventBody(ByteBuffer byteBuffer);
+    protected abstract T parseEventBody(NulsByteBuffer byteBuffer);
 
     public T getEventBody() {
         return eventBody;

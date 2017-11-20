@@ -12,6 +12,6 @@ public class UtxoLockHandler<T extends UtxoLockEvent> extends NetworkNulsEventHa
 
     @Override
     public void onEvent(T event) throws NulsException {
-
+        //todo
     }
 }

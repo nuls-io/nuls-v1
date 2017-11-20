@@ -12,6 +12,6 @@ public class UtxoDepositHandler<T extends UtxoDepositEvent> extends NetworkNulsE
 
     @Override
     public void onEvent(T event) throws NulsException {
-
+        //todo
     }
 }

@@ -2,7 +2,7 @@ package io.nuls.ledger.entity.utxoTransaction;
 
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.crypto.VarInt;
-import io.nuls.core.utils.io.ByteBuffer;
+import io.nuls.core.utils.io.NulsByteBuffer;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -30,7 +30,7 @@ public class UtxoLockTransaction extends BaseUtxoCoinTransaction {
     }
 
     @Override
-    public void parse(ByteBuffer byteBuffer) {
+    public void parse(NulsByteBuffer byteBuffer) {
 
     }
 }

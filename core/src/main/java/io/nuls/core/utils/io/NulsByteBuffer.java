@@ -12,17 +12,17 @@ import io.nuls.core.utils.crypto.Utils;
  * Created by Niels on 2017/11/2.
  *
  */
-public class ByteBuffer {
+public class NulsByteBuffer {
 
     private final byte[] payload;
 
     private int cursor;
 
-    public ByteBuffer(byte[] bytes) {
+    public NulsByteBuffer(byte[] bytes) {
         this(bytes, 0);
     }
 
-    public ByteBuffer(byte[] bytes, int cursor) {
+    public NulsByteBuffer(byte[] bytes, int cursor) {
         if (null == bytes || bytes.length == 0 || cursor < 0) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "create byte buffer faild!");
         }

@@ -1,7 +1,7 @@
 package io.nuls.ledger.entity.utxoTransaction;
 
 import io.nuls.core.crypto.VarInt;
-import io.nuls.core.utils.io.ByteBuffer;
+import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.ledger.entity.CoinTransaction;
 import io.nuls.ledger.entity.UtxoData;
 
@@ -37,7 +37,7 @@ public abstract class BaseUtxoCoinTransaction extends CoinTransaction<UtxoData> 
     }
 
     @Override
-    public void parse(ByteBuffer byteBuffer) {
+    public void parse(NulsByteBuffer byteBuffer) {
         if (byteBuffer == null) {
             return;
         }

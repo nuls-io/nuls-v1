@@ -1,11 +1,10 @@
 package io.nuls.network.entity;
 
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.NulsData;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.mesasge.NulsMessage;
-import io.nuls.core.utils.io.ByteBuffer;
+import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.entity.param.NetworkParam;
 import io.nuls.network.message.entity.VersionMessage;
@@ -110,7 +109,7 @@ public class Peer extends NulsData {
     }
 
     @Override
-    public void parse(ByteBuffer byteBuffer) {
+    public void parse(NulsByteBuffer byteBuffer) {
 
     }
 
