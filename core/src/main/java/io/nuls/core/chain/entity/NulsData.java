@@ -20,6 +20,8 @@ import java.io.Serializable;
  */
 public abstract class NulsData implements Serializable {
 
+    protected NulsDataType type;
+
     protected int version;
 
     private DataValidatorChain validatorChain = new DataValidatorChain();
@@ -97,5 +99,13 @@ public abstract class NulsData implements Serializable {
             stream.write(bytes.length);
             stream.write(bytes);
         }
+    }
+
+    public NulsDataType getType() {
+        return type;
+    }
+
+    public void setType(NulsDataType type) {
+        this.type = type;
     }
 }
