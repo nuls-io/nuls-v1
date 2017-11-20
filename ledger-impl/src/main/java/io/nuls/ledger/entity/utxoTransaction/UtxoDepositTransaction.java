@@ -3,6 +3,8 @@ package io.nuls.ledger.entity.utxoTransaction;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.ledger.entity.LockCoinTransaction;
+import io.nuls.ledger.entity.validator.UtxoTxInputsValidator;
+import io.nuls.ledger.entity.validator.UtxoTxOutputsValidator;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -13,6 +15,8 @@ import java.io.OutputStream;
 public class UtxoDepositTransaction extends LockCoinTransaction {
     public UtxoDepositTransaction() {
         this.setCanBeUnlocked(true);
+        this.registerValidator(new UtxoTxInputsValidator());
+        this.registerValidator(new UtxoTxOutputsValidator());
     }
 
     @Override

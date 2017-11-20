@@ -4,7 +4,10 @@ import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.NulsByteBuffer;
-import io.nuls.core.validate.validator.MaxSizeValidator;
+import io.nuls.core.validate.validator.tx.TxMaxSizeValidator;
+import io.nuls.core.validate.validator.tx.TxRemarkValidator;
+import io.nuls.core.validate.validator.tx.TxSignValidator;
+import io.nuls.core.validate.validator.tx.TxTypeValidator;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -15,7 +18,10 @@ import java.io.OutputStream;
 public class Transaction extends NulsData {
     public Transaction() {
         this.time = TimeService.currentTimeMillis();
-        this.registerValidator(new MaxSizeValidator());
+        this.registerValidator(new TxMaxSizeValidator());
+        this.registerValidator(new TxRemarkValidator());
+        this.registerValidator(new TxTypeValidator());
+        this.registerValidator(new TxSignValidator());
     }
 
     //tx type

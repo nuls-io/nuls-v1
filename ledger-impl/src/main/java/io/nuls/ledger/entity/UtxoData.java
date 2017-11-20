@@ -5,42 +5,46 @@ import io.nuls.core.utils.io.NulsByteBuffer;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
 
 /**
  * Created by Niels on 2017/11/16.
  */
 public class UtxoData extends NulsData{
-    private UtxoInput inputs;
-    private UtxoOutput outputs;
+    private List<UtxoInput> inputs;
+    private List<UtxoOutput> outputs;
 
-    public UtxoInput getInputs() {
+    public List<UtxoInput> getInputs() {
         return inputs;
     }
 
-    public void setInputs(UtxoInput inputs) {
+    public void setInputs(List<UtxoInput> inputs) {
         this.inputs = inputs;
     }
 
-    public UtxoOutput getOutputs() {
+    public List<UtxoOutput> getOutputs() {
         return outputs;
     }
 
-    public void setOutputs(UtxoOutput outputs) {
+    public void setOutputs(List<UtxoOutput> outputs) {
         this.outputs = outputs;
     }
 
     @Override
     public int size() {
+        //todo
         return 0;
     }
 
     @Override
     public void serializeToStream(OutputStream stream) throws IOException {
+        //todo
 
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
+        //todo
 
     }
 }

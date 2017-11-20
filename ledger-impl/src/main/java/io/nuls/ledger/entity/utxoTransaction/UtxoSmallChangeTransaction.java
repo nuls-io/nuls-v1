@@ -4,6 +4,8 @@ import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.ledger.entity.CoinTransaction;
 import io.nuls.ledger.entity.UtxoData;
+import io.nuls.ledger.entity.validator.UtxoTxInputsValidator;
+import io.nuls.ledger.entity.validator.UtxoTxOutputsValidator;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -15,6 +17,8 @@ public class UtxoSmallChangeTransaction extends CoinTransaction<UtxoData> {
 
     public UtxoSmallChangeTransaction() {
         this.type = TransactionConstant.TX_TYPE_SMALL_CHANGE;
+        this.registerValidator(new UtxoTxInputsValidator());
+        this.registerValidator(new UtxoTxOutputsValidator());
     }
 
     @Override
