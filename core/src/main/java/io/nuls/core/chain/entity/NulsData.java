@@ -1,14 +1,14 @@
 package io.nuls.core.chain.entity;
 
-import io.nuls.core.chain.validator.DataValidatorChain;
-import io.nuls.core.chain.validator.NulsDataValidator;
-import io.nuls.core.chain.validator.ValidateResult;
+import io.nuls.core.validate.DataValidatorChain;
+import io.nuls.core.validate.NulsDataValidator;
+import io.nuls.core.validate.ValidateResult;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.crypto.UnsafeByteArrayOutputStream;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsIOException;
 import io.nuls.core.exception.NulsVerificationException;
-import io.nuls.core.utils.io.ByteBuffer;
+import io.nuls.core.utils.io.NulsByteBuffer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -68,7 +68,7 @@ public abstract class NulsData implements Serializable {
     public abstract void serializeToStream(OutputStream stream) throws IOException;
 
 
-    public abstract void parse(ByteBuffer byteBuffer);
+    public abstract void parse(NulsByteBuffer byteBuffer);
 
     /**
      * @throws NulsException

@@ -11,6 +11,7 @@ public class UtxoCoinTransactionHandler<T extends CoinTransactionEvent> extends 
 
     @Override
     public void onEvent(T event) throws NulsException {
+        //todo
 
     }
 }

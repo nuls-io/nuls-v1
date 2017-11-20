@@ -4,7 +4,6 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.manager.ModuleManager;
 import io.nuls.core.module.NulsModule;
-import io.nuls.core.utils.io.ByteBuffer;
 
 import java.util.Date;
 

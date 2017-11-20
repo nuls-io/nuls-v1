@@ -5,9 +5,7 @@ import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.context.NulsContext;
 import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
 import io.nuls.ledger.constant.LedgerConstant;
-import io.nuls.ledger.event.CoinTransactionEvent;
-import io.nuls.ledger.event.UtxoLockEvent;
-import io.nuls.ledger.event.UtxoSmallChangeEvent;
+import io.nuls.ledger.event.*;
 import io.nuls.ledger.handler.UtxoCoinTransactionHandler;
 import io.nuls.ledger.handler.UtxoLockHandler;
 import io.nuls.ledger.handler.UtxoSmallChangeHandler;
@@ -26,7 +24,7 @@ public class UtxoLedgerModuleImpl extends LedgerModule {
 
     private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
 
-    private LedgerCacheService  cacheService = LedgerCacheService.getInstance();
+    private LedgerCacheService cacheService = LedgerCacheService.getInstance();
 
     private LedgerService ledgerService = UtxoLedgerServiceImpl.getInstance();
 
@@ -38,11 +36,12 @@ public class UtxoLedgerModuleImpl extends LedgerModule {
         this.registerService(ledgerService);
         SmallChangeThread.getInstance().start();
         //register handler
-//        this.registerEvent((short)1, BaseLedgerEvent.class);
-        this.registerEvent((short)2, UtxoLockEvent.class);
-        this.registerEvent((short)3, UtxoSmallChangeEvent.class);
-        this.registerEvent((short)4, CoinTransactionEvent.class);
-        this.processorService.registerEventHandler(UtxoLockEvent.class, new UtxoLockHandler());
+        this.registerEvent((short) 3, BaseUtxoCoinEvent.class);
+        this.registerEvent((short) 4, UtxoLockCoinEvent.class);
+        this.registerEvent((short) 5, UtxoSmallChangeEvent.class);
+        this.registerEvent((short) 6, CoinTransactionEvent.class);
+        this.registerEvent((short) 7, UtxoDepositCoinEvent.class);
+        this.processorService.registerEventHandler(UtxoLockCoinEvent.class, new UtxoLockHandler());
         this.processorService.registerEventHandler(UtxoSmallChangeEvent.class, new UtxoSmallChangeHandler());
         this.processorService.registerEventHandler(CoinTransactionEvent.class, new UtxoCoinTransactionHandler());
     }

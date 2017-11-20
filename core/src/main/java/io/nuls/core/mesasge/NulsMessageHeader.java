@@ -2,7 +2,7 @@ package io.nuls.core.mesasge;
 
 import io.nuls.core.chain.entity.NulsData;
 import io.nuls.core.crypto.VarInt;
-import io.nuls.core.utils.io.ByteBuffer;
+import io.nuls.core.utils.io.NulsByteBuffer;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -54,7 +54,7 @@ public class NulsMessageHeader extends NulsData {
     }
 
     @Override
-    public void parse(ByteBuffer byteBuffer) {
+    public void parse(NulsByteBuffer byteBuffer) {
         this.magicNumber = byteBuffer.readInt32();
         this.length = byteBuffer.readInt32();
         this.msgType = byteBuffer.readShort();

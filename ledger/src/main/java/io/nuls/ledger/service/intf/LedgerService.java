@@ -14,6 +14,8 @@ public interface LedgerService {
 
     Balance getBalance(String address);
 
+
+
     boolean transfer(Address address, String password, Address toAddress, double amount, String remark);
 
     boolean saveTransaction(Transaction tx);

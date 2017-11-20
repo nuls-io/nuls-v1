@@ -1,14 +1,21 @@
 package io.nuls.core.chain.entity;
 
 import io.nuls.core.crypto.Sha256Hash;
+import io.nuls.core.crypto.VarInt;
 import io.nuls.core.utils.date.TimeService;
+import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.validate.validator.MaxSizeValidator;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Created by win10 on 2017/10/30.
  */
-public abstract class Transaction extends NulsData {
+public class Transaction extends NulsData {
     public Transaction() {
         this.time = TimeService.currentTimeMillis();
+        this.registerValidator(new MaxSizeValidator());
     }
 
     //tx type
@@ -18,6 +25,28 @@ public abstract class Transaction extends NulsData {
     //current time (ms)
     protected long time;
     protected byte[] remark;
+
+    @Override
+    public int size() {
+        int size = 0;
+        size += VarInt.sizeOf(version);
+        size += VarInt.sizeOf(type);
+        //todo
+
+        return size;
+    }
+
+    @Override
+    public void serializeToStream(OutputStream stream) throws IOException {
+        //todo
+
+    }
+
+    @Override
+    public void parse(NulsByteBuffer byteBuffer) {
+        //todo
+
+    }
 
     public Sha256Hash getHash() {
         return hash;
