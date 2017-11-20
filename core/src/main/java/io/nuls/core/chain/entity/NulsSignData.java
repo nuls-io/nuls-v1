@@ -1,6 +1,6 @@
 package io.nuls.core.chain.entity;
 
-import io.nuls.core.utils.io.ByteBuffer;
+import io.nuls.core.utils.io.NulsByteBuffer;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -31,7 +31,7 @@ public class NulsSignData extends NulsData{
     }
 
     @Override
-    public void parse(ByteBuffer byteBuffer) {
+    public void parse(NulsByteBuffer byteBuffer) {
 
     }
 }

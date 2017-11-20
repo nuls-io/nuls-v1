@@ -20,7 +20,7 @@ import java.io.Serializable;
  */
 public abstract class NulsData implements Serializable {
 
-    protected NulsDataType type;
+    protected NulsDataType dataType;
 
     protected int version;
 
@@ -101,11 +101,11 @@ public abstract class NulsData implements Serializable {
         }
     }
 
-    public NulsDataType getType() {
-        return type;
+    public NulsDataType getDataType() {
+        return dataType;
     }
 
-    public void setType(NulsDataType type) {
-        this.type = type;
+    public void setDataType(NulsDataType dataType) {
+        this.dataType = dataType;
     }
 }
