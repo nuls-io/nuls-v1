@@ -1,12 +1,12 @@
 package io.nuls.network.message.messageFilter;
 
-public abstract class NulsMessageFilter {
-    private String name;
-    public String getName(){
-        return name;
-    }
-    public void setName(String name){
-        this.name = name;
-    }
-    abstract boolean doFilter();
+import io.nuls.core.mesasge.NulsMessage;
+import io.nuls.core.mesasge.NulsMessageHeader;
+
+public interface NulsMessageFilter {
+
+    NulsMessageHeader filterHeader(byte[] bytes);
+
+    NulsMessage filterMessage(byte[] bytes);
+
 }

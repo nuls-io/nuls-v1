@@ -43,23 +43,21 @@ public abstract class NulsData implements Serializable {
      *
      * @return
      */
-    public byte[] serialize() throws NulsVerificationException,NulsIOException{
+    public byte[] serialize() throws IOException {
         this.verify();
         ByteArrayOutputStream bos = null;
         try {
             bos = new UnsafeByteArrayOutputStream(size());
             serializeToStream(bos);
             return bos.toByteArray();
-        } catch (IOException e){
-            e.fillInStackTrace();
-            throw new NulsIOException(ErrorCode.IO_ERROR);
-        }finally {
+        } catch (IOException e) {
+            throw e;
+        } finally {
             if (bos != null) {
-                try{
+                try {
                     bos.close();
-                }catch (IOException e){
-                    e.fillInStackTrace();
-                    throw new NulsIOException(ErrorCode.IO_ERROR);
+                } catch (IOException e) {
+                    throw e;
                 }
 
             }
@@ -75,9 +73,9 @@ public abstract class NulsData implements Serializable {
     /**
      * @throws NulsException
      */
-    public final void verify() throws NulsVerificationException{
-        ValidateResult result  = this.validatorChain.startDoValidator(this);
-        if(!result.isSeccess()){
+    public final void verify() throws NulsVerificationException {
+        ValidateResult result = this.validatorChain.startDoValidator(this);
+        if (!result.isSeccess()) {
             throw new NulsVerificationException(result.getMessage());
         }
     }

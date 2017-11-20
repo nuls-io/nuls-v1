@@ -16,11 +16,11 @@ public class NulsMessageFilterChain {
     }
 
     public boolean doFilter(NulsMessage message){
-        for (int i = 0; i< filterList.size(); i++) {
-            if(!filterList.get(i).doFilter()) {
-                return false;
-            }
-        }
+//        for (int i = 0; i< filterList.size(); i++) {
+//            if(!filterList.get(i).filter()) {
+//                return false;
+//            }
+//        }
         return true;
     }
 }

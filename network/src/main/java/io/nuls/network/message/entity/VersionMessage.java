@@ -4,12 +4,13 @@ import io.nuls.core.mesasge.NulsMessage;
 import io.nuls.core.mesasge.NulsMessageHeader;
 import io.nuls.network.entity.Peer;
 import io.nuls.network.entity.param.NetworkParam;
+import io.nuls.network.message.NetworkMessage;
 import io.nuls.network.message.NetworkMessageHeader;
 
 /**
  * Created by win10 on 2017/11/9.
  */
-public class VersionMessage extends NulsMessage {
+public class VersionMessage extends NetworkMessage {
 
 
     private long bestBlockHeight;
@@ -22,7 +23,7 @@ public class VersionMessage extends NulsMessage {
 
     public VersionMessage(NetworkParam network, long height, String hash, Peer peer) {
 
-        super(network.packetMagic(), NulsMessageHeader.NETWORK_MESSAGE);
+        super(network);
         this.bestBlockHash = hash;
         this.bestBlockHeight = height;
         this.port = peer.getPort();

@@ -86,7 +86,7 @@ public class AccountServiceImpl implements AccountService {
         Sha256Hash hash = null;
         try {
             hash = Sha256Hash.of(account.serialize());
-        } catch (NulsException e) {
+        } catch (IOException e) {
             Log.error(e);
         }
         ECKey.ECDSASignature signature1 = account.getEcKey().sign(hash);

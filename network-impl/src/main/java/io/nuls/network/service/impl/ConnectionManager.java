@@ -1,6 +1,7 @@
 package io.nuls.network.service.impl;
 
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.NulsThread;
@@ -8,6 +9,7 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.network.entity.Peer;
 import io.nuls.network.entity.PeerGroup;
 import io.nuls.network.entity.param.NetworkParam;
+import io.nuls.network.message.messageFilter.NulsMessageFilter;
 import io.nuls.network.module.NetworkModule;
 
 import java.io.IOException;

@@ -1,15 +1,19 @@
 package io.nuls.network.entity;
 
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.NulsData;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.mesasge.NetworkMessage;
 import io.nuls.core.mesasge.NulsMessage;
+import io.nuls.core.mesasge.NulsMessageHeader;
 import io.nuls.core.utils.io.ByteBuffer;
-import io.nuls.core.utils.log.Log;
 import io.nuls.network.entity.param.NetworkParam;
 import io.nuls.network.message.entity.VersionMessage;
+import io.nuls.network.message.messageFilter.NulsMessageFilter;
 import io.nuls.network.service.MessageWriter;
+import sun.net.www.MessageHeader;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -50,8 +54,7 @@ public class Peer extends NulsData {
 
     private Lock lock = new ReentrantLock();
 
-    public Peer() {
-
+    public Peer(NetworkParam network) {
     }
 
     public Peer(NetworkParam network, int type) {
@@ -88,11 +91,30 @@ public class Peer extends NulsData {
         }
         lock.lock();
         try {
-
+            this.writeTarget.write(message.serialize());
         } finally {
             lock.unlock();
         }
+    }
 
+    /**
+     * process the receive message
+     *
+     * @throws IOException
+     */
+    public void receiveMessage(java.nio.ByteBuffer buffer) throws IOException {
+        if (buffer.position() != 0 || buffer.capacity() <= NulsMessageHeader.MESSAGE_HEADER_SIZE) {
+            throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
+        }
+
+        //todo there can use NulsMessageFilter
+        byte[] headers = new byte[NulsMessageHeader.MESSAGE_HEADER_SIZE];
+        buffer.get(headers, 0, headers.length);
+        NulsMessageHeader messageHeader = network.getMessageFilter().filterHeader(headers);
+        byte[] data = new byte[buffer.limit() - headers.length];
+        buffer.get(data, 0, data.length);
+
+        NulsMessage message = new NulsMessage(messageHeader, data);
     }
 
     public void destroy() {
@@ -110,7 +132,7 @@ public class Peer extends NulsData {
     }
 
     @Override
-    public void parse(ByteBuffer byteBuffer) {
+    public void parse(ByteBuffer buffer) {
 
     }
 
@@ -149,14 +171,6 @@ public class Peer extends NulsData {
 
     public void setPort(int port) {
         this.port = port;
-    }
-
-
-    public static void main(String[] args) {
-        InetSocketAddress address = new InetSocketAddress("www.baidu.com", 22);
-        Log.debug(address.getHostName());
-        Log.debug(address.getHostString());
-        Log.debug(address.getAddress().getHostAddress());
     }
 
     public int getStatus() {

@@ -9,6 +9,8 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.PeerDao;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.param.NetworkParam;
+import io.nuls.network.filter.impl.DefaultMessageFilter;
+import io.nuls.network.message.messageFilter.NulsMessageFilter;
 import io.nuls.network.module.NetworkModule;
 import io.nuls.network.param.DevNetworkParam;
 import io.nuls.network.param.MainNetworkParam;
@@ -28,10 +30,11 @@ public class NetworkServiceImpl extends NetworkService {
 
     private PeersManager peersManager;
 
-
     public NetworkServiceImpl(NetworkModule module) {
         this.networkModule = module;
         this.network = getNetworkInstance();
+        NulsMessageFilter messageFilter = DefaultMessageFilter.getInstance();
+        network.setMessageFilter(messageFilter);
 
         this.connectionManager = new ConnectionManager(module, network);
         this.peersManager = new PeersManager(module, network, getPeerDao());
@@ -39,13 +42,12 @@ public class NetworkServiceImpl extends NetworkService {
         connectionManager.setPeersManager(peersManager);
     }
 
-
     @Override
     public void start() {
         try {
             connectionManager.start();
             peersManager.start();
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.error(e);
             throw new NulsRuntimeException(ErrorCode.NET_SERVER_START_ERROR);
         }

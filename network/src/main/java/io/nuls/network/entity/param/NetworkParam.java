@@ -2,6 +2,7 @@ package io.nuls.network.entity.param;
 
 import io.nuls.core.chain.entity.Block;
 import io.nuls.network.entity.PeerAddress;
+import io.nuls.network.message.messageFilter.NulsMessageFilter;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -21,6 +22,8 @@ public abstract class NetworkParam {
     protected int maxOutCount;
 
     protected Block bestBlock;
+
+    protected NulsMessageFilter messageFilter;
 
     protected List<InetSocketAddress> seedPeers = new ArrayList<>();
 
@@ -50,5 +53,13 @@ public abstract class NetworkParam {
 
     public Block getBestBlock() {
         return bestBlock;
+    }
+
+    public void setMessageFilter(NulsMessageFilter messageFilter) {
+        this.messageFilter = messageFilter;
+    }
+
+    public NulsMessageFilter getMessageFilter() {
+        return messageFilter;
     }
 }

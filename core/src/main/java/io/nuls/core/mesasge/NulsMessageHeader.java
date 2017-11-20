@@ -17,7 +17,6 @@ public class NulsMessageHeader extends NulsData {
     private int length;
 
 
-
     //0x01 : networkMessage  //0x02 : eventMessage;
     private short msgType;
     public static final short NETWORK_MESSAGE = 1;
@@ -26,6 +25,9 @@ public class NulsMessageHeader extends NulsData {
 
     private byte[] extend;
 
+    public NulsMessageHeader() {
+        super();
+    }
 
     public NulsMessageHeader(int magicNumber, short msgType) {
         this.magicNumber = magicNumber;

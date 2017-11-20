@@ -1,11 +1,10 @@
 package io.nuls.network.message;
 
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.io.ByteBuffer;
+import io.nuls.network.entity.param.NetworkParam;
 
-import java.io.IOException;
-import java.io.OutputStream;
+public class PongMessage extends NetworkMessage {
 
-public class PongMessage extends BaseNetworkMessage{
-
+    public PongMessage(NetworkParam network) {
+        super(network);
+    }
 }
