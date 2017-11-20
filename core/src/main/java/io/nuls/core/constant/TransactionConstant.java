@@ -17,4 +17,5 @@ public interface TransactionConstant {
     int TX_TYPE_CHANGE_ALIAS = 10;
     int TX_TYPE_CREATE_SUBCHAIN = 11;
     int TX_TYPE_DEPOSIT = 12;
+    int TX_TYPE_UNLOCK = 13;
 }

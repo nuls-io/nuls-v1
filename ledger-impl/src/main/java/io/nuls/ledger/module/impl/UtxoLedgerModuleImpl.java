@@ -37,11 +37,11 @@ public class UtxoLedgerModuleImpl extends LedgerModule {
         SmallChangeThread.getInstance().start();
         //register handler
         this.registerEvent((short) 3, BaseUtxoCoinEvent.class);
-        this.registerEvent((short) 4, UtxoLockEvent.class);
+        this.registerEvent((short) 4, UtxoLockCoinEvent.class);
         this.registerEvent((short) 5, UtxoSmallChangeEvent.class);
         this.registerEvent((short) 6, CoinTransactionEvent.class);
-        this.registerEvent((short) 7, UtxoDepositEvent.class);
-        this.processorService.registerEventHandler(UtxoLockEvent.class, new UtxoLockHandler());
+        this.registerEvent((short) 7, UtxoDepositCoinEvent.class);
+        this.processorService.registerEventHandler(UtxoLockCoinEvent.class, new UtxoLockHandler());
         this.processorService.registerEventHandler(UtxoSmallChangeEvent.class, new UtxoSmallChangeHandler());
         this.processorService.registerEventHandler(CoinTransactionEvent.class, new UtxoCoinTransactionHandler());
     }
