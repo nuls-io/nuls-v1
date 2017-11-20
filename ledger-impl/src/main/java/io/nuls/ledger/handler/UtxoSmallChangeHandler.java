@@ -12,6 +12,7 @@ public class UtxoSmallChangeHandler<T extends UtxoSmallChangeEvent> extends Netw
 
     @Override
     public void onEvent(T event) throws NulsException {
+        //todo
 
     }
 }

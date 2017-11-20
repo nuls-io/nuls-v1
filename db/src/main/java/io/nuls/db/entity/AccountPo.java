@@ -1,9 +1,11 @@
 package io.nuls.db.entity;
 
+import java.io.Serializable;
+
 /**
  * Created by Niels on 2017/11/15.
  */
-public class AccountPo {
+public class AccountPo implements Serializable{
     private String id;
     private String address;
     private byte[] pubKey;

@@ -2,8 +2,7 @@ package io.nuls.core.chain.entity;
 
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.script.Script;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.io.ByteBuffer;
+import io.nuls.core.utils.io.NulsByteBuffer;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -67,7 +66,7 @@ public class BlockHeader extends NulsData {
     }
 
     @Override
-    public void parse(ByteBuffer byteBuffer) {
+    public void parse(NulsByteBuffer byteBuffer) {
     }
 
     public Sha256Hash getHash() {

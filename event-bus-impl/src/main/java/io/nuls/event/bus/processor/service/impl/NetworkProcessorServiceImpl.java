@@ -3,7 +3,7 @@ package io.nuls.event.bus.processor.service.impl;
 import io.nuls.core.event.EventManager;
 import io.nuls.core.event.NulsEvent;
 import io.nuls.core.event.NulsEventHeader;
-import io.nuls.core.utils.io.ByteBuffer;
+import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.constant.EventBusConstant;
 import io.nuls.event.bus.event.handler.NetworkNulsEventHandler;
@@ -28,10 +28,10 @@ public class NetworkProcessorServiceImpl implements NetworkProcessorService {
 
     public void send(byte[] event) {
         NulsEventHeader header = new NulsEventHeader();
-        header.parse(new ByteBuffer(event));
+        header.parse(new NulsByteBuffer(event));
         try {
             NulsEvent eventObject = EventManager.getInstanceByHeader(header);
-            eventObject.parse(new ByteBuffer(event));
+            eventObject.parse(new NulsByteBuffer(event));
             processorManager.offer(eventObject);
         } catch (IllegalAccessException e) {
             Log.error(e);

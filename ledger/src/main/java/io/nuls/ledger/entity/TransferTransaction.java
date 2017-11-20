@@ -1,18 +1,18 @@
-package io.nuls.ledger.entity.utxoTransaction;
+package io.nuls.ledger.entity;
 
+import io.nuls.core.chain.entity.NulsData;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.utils.io.NulsByteBuffer;
-import io.nuls.ledger.entity.LockCoinTransaction;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * Created by facjas on 2017/11/17.
+ * Created by Niels on 2017/11/20.
  */
-public class UtxoDepositTransaction extends LockCoinTransaction {
-    public UtxoDepositTransaction() {
-        this.setCanBeUnlocked(true);
+public class TransferTransaction<T extends NulsData> extends CoinTransaction<T> {
+    public TransferTransaction(){
+        this.type = TransactionConstant.TX_TYPE_TRANSFER;
     }
 
     @Override

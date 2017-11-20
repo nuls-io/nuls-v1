@@ -1,11 +1,8 @@
 package io.nuls.core.event;
 
 import io.nuls.core.chain.entity.NulsData;
-import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.crypto.Utils;
-import io.nuls.core.utils.io.ByteBuffer;
+import io.nuls.core.utils.io.NulsByteBuffer;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -44,7 +41,7 @@ public class NulsEventHeader extends NulsData {
         return moduleId;
     }
 
-    public void parse(ByteBuffer buffer) {
+    public void parse(NulsByteBuffer buffer) {
         this.moduleId = buffer.readShort();
         this.eventType = buffer.readShort();
     }

@@ -5,7 +5,7 @@ import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.crypto.script.Script;
 import io.nuls.core.utils.crypto.Utils;
-import io.nuls.core.utils.io.ByteBuffer;
+import io.nuls.core.utils.io.NulsByteBuffer;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -69,7 +69,7 @@ public class UtxoInput extends NulsData {
     }
 
     @Override
-    public void parse(ByteBuffer byteBuffer) {
+    public void parse(NulsByteBuffer byteBuffer) {
         if (byteBuffer == null) {
             return;
         }

@@ -7,9 +7,9 @@ import io.nuls.ledger.entity.utxoTransaction.UtxoLockTransaction;
  * Created by Niels on 2017/11/13.
  *
  */
-public class UtxoLockEvent<T extends UtxoLockTransaction> extends BaseUtxoCoinEvent<T> {
+public class UtxoLockCoinEvent<T extends UtxoLockTransaction> extends LockCoinEvent<T> {
 
-    public UtxoLockEvent(NulsEventHeader header) {
+    public UtxoLockCoinEvent(NulsEventHeader header) {
         super(header);
     }
 }

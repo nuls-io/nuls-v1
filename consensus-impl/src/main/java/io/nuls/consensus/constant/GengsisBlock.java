@@ -1,7 +1,7 @@
 package io.nuls.consensus.constant;
 
 import io.nuls.core.chain.entity.Block;
-import io.nuls.core.utils.io.ByteBuffer;
+import io.nuls.core.utils.io.NulsByteBuffer;
 
 /**
  * Created by Niels on 2017/11/10.
@@ -12,7 +12,7 @@ public final class GengsisBlock extends Block {
 
     private GengsisBlock() {
         //todo create Gengsis Block
-        this.parse(new ByteBuffer(new byte[2]));
+        this.parse(new NulsByteBuffer(new byte[2]));
     }
 
     public static GengsisBlock getInstance() {

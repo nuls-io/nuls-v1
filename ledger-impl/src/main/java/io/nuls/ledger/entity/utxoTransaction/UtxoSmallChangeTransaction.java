@@ -1,7 +1,9 @@
 package io.nuls.ledger.entity.utxoTransaction;
 
 import io.nuls.core.constant.TransactionConstant;
-import io.nuls.core.utils.io.ByteBuffer;
+import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.ledger.entity.CoinTransaction;
+import io.nuls.ledger.entity.UtxoData;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -9,7 +11,7 @@ import java.io.OutputStream;
 /**
  * Created by Niels on 2017/11/14.
  */
-public class UtxoSmallChangeTransaction extends BaseUtxoCoinTransaction {
+public class UtxoSmallChangeTransaction extends CoinTransaction<UtxoData> {
 
     public UtxoSmallChangeTransaction() {
         this.type = TransactionConstant.TX_TYPE_SMALL_CHANGE;
@@ -26,7 +28,7 @@ public class UtxoSmallChangeTransaction extends BaseUtxoCoinTransaction {
     }
 
     @Override
-    public void parse(ByteBuffer byteBuffer) {
+    public void parse(NulsByteBuffer byteBuffer) {
 
     }
 
