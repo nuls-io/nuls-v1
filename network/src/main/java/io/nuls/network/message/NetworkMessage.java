@@ -1,8 +1,6 @@
 package io.nuls.network.message;
 
-import io.nuls.core.chain.entity.NulsData;
 import io.nuls.core.mesasge.NulsMessage;
-import io.nuls.core.mesasge.NulsMessageHeader;
 import io.nuls.network.entity.param.NetworkParam;
 
 public abstract class NetworkMessage extends NulsMessage {

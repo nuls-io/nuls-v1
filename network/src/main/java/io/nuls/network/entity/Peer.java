@@ -5,19 +5,19 @@ import io.nuls.core.chain.entity.NulsData;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.mesasge.NetworkMessage;
 import io.nuls.core.mesasge.NulsMessage;
 import io.nuls.core.mesasge.NulsMessageHeader;
-import io.nuls.core.utils.io.ByteBuffer;
+import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
 import io.nuls.network.entity.param.NetworkParam;
+import io.nuls.network.message.NetworkMessageHeader;
 import io.nuls.network.message.entity.VersionMessage;
-import io.nuls.network.message.messageFilter.NulsMessageFilter;
 import io.nuls.network.service.MessageWriter;
-import sun.net.www.MessageHeader;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.channels.NotYetConnectedException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -54,12 +54,17 @@ public class Peer extends NulsData {
 
     private Lock lock = new ReentrantLock();
 
+    private NetworkProcessorService processorService;
+
     public Peer(NetworkParam network) {
+        this.network = network;
+        processorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
     }
 
     public Peer(NetworkParam network, int type) {
         this.network = network;
         this.type = type;
+        processorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
     }
 
 
@@ -68,6 +73,7 @@ public class Peer extends NulsData {
         this.type = type;
         this.port = socketAddress.getPort();
         this.ip = socketAddress.getAddress().getHostAddress();
+        processorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
     }
 
     public void connect(NetworkParam network) {
@@ -102,7 +108,7 @@ public class Peer extends NulsData {
      *
      * @throws IOException
      */
-    public void receiveMessage(java.nio.ByteBuffer buffer) throws IOException {
+    public void receiveMessage(ByteBuffer buffer) throws IOException {
         if (buffer.position() != 0 || buffer.capacity() <= NulsMessageHeader.MESSAGE_HEADER_SIZE) {
             throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
         }
@@ -115,6 +121,17 @@ public class Peer extends NulsData {
         buffer.get(data, 0, data.length);
 
         NulsMessage message = new NulsMessage(messageHeader, data);
+        processMessage(message);
+    }
+
+
+    public void processMessage(NulsMessage message) {
+        if(message.getHeader() instanceof NetworkMessageHeader) {
+
+        }else {
+            // else
+            processorService.send(message.getData());
+        }
     }
 
     public void destroy() {
@@ -132,7 +149,7 @@ public class Peer extends NulsData {
     }
 
     @Override
-    public void parse(ByteBuffer buffer) {
+    public void parse(NulsByteBuffer buffer) {
 
     }
 

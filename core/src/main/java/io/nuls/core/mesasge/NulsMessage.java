@@ -1,10 +1,9 @@
 package io.nuls.core.mesasge;
 
 import io.nuls.core.chain.entity.Block;
-import io.nuls.core.utils.io.ByteBuffer;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 public class NulsMessage {
 
@@ -63,25 +62,15 @@ public class NulsMessage {
     }
 
     public static void main(String[] args) {
-        java.nio.ByteBuffer buffer = java.nio.ByteBuffer.allocate(200);
-        byte[] b1 = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
-
-        buffer.put(b1);
-
-        byte[] b2 = new byte[6];
-        buffer.flip();
-        buffer.get(b2, 0, b2.length);
-
-        for (byte b : b2) {
-            System.out.println(b);
+        ByteBuffer buffer = java.nio.ByteBuffer.allocate(200);
+        byte[] b1 = new byte[]{10, 11, 12, 13};
+        byte[] b2 = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9};
+        byte[] b3 = new byte[b1.length + b2.length];
+        System.arraycopy(b1, 0, b3, 0, b1.length);
+        System.arraycopy(b2, 0, b3, b1.length, b2.length);
+        for(byte b : b3) {
+            System.out.print(b + ",");
         }
-        System.out.println("------position: " + buffer.position());
-        System.out.println("------limit:" + buffer.limit());
-        byte[] b3 = new byte[buffer.limit() - buffer.position()];
-        buffer.get(b3, 0, b3.length);
-        System.out.println("----------");
-        for (byte b : b3) {
-            System.out.println(b);
-        }
+
     }
 }

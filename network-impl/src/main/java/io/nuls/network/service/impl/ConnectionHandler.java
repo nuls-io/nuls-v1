@@ -135,13 +135,9 @@ public class ConnectionHandler implements MessageWriter {
                 }
                 // "flip" the buffer - setting the limit to the current position and setting position to 0
                 handler.readBuffer.flip();
-                // Use connection.receiveBytes's return value as a check that it stopped reading at the right location
-                //int bytesConsumed = checkNotNull(handler.connection).receiveBytes(handler.readBuff);
-                //checkState(handler.readBuff.position() == bytesConsumed);
-                // Now drop the bytes which were read by compacting readBuff (resetting limit and keeping relative
-                // position)
-                String msg = new String(handler.readBuffer.array(), 0, len);
-                System.out.println("------msg: " + msg);
+                handler.peer.receiveMessage(handler.readBuffer);
+
+                // Now drop the bytes which were read by compacting readBuff (resetting limit and keeping relative position)
                 handler.readBuffer.compact();
             }
             if (key.isWritable())

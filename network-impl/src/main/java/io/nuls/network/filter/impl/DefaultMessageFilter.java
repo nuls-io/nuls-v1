@@ -4,7 +4,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.mesasge.NulsMessage;
 import io.nuls.core.mesasge.NulsMessageHeader;
-import io.nuls.core.utils.io.ByteBuffer;
+import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.network.message.messageFilter.NulsMessageFilter;
 
 import java.util.LinkedHashSet;
@@ -27,7 +27,7 @@ public class DefaultMessageFilter implements NulsMessageFilter {
     @Override
     public NulsMessageHeader filterHeader(byte[] bytes) {
         NulsMessageHeader messageHeader = new NulsMessageHeader();
-        messageHeader.parse(new ByteBuffer(bytes));
+        messageHeader.parse(new NulsByteBuffer(bytes));
         if (!magicSet.contains(messageHeader.getMagicNumber())) {
             throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
         }
