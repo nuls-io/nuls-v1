@@ -47,6 +47,7 @@ public class NulsMessageHeader extends NulsData {
 
     @Override
     public void serializeToStream(OutputStream stream) throws IOException {
+        System.out.println("-----------magicNumber :" + magicNumber);
         stream.write(new VarInt(magicNumber).encode());
         stream.write(new VarInt(length).encode());
         stream.write(new VarInt(msgType).encode());
@@ -55,9 +56,9 @@ public class NulsMessageHeader extends NulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
-        this.magicNumber = byteBuffer.readInt32();
+        this.magicNumber = (int) byteBuffer.readVarInt();
         this.length = byteBuffer.readInt32();
-        this.msgType = byteBuffer.readShort();
+        this.msgType = (short) byteBuffer.readVarInt();
         this.extend = byteBuffer.readBytes(8);
     }
 
@@ -91,5 +92,13 @@ public class NulsMessageHeader extends NulsData {
 
     public void setMagicNumber(int magicNumber) {
         this.magicNumber = magicNumber;
+    }
+
+    public static void main(String[] args) throws IOException {
+       // NulsMessageHeader header = new NulsMessageHeader(12345678, NulsMessageHeader.NETWORK_MESSAGE);
+       // byte[] bytes = header.serialize();
+
+       // header.parse(new NulsByteBuffer(bytes));
+        new VarInt(1234567).encode();
     }
 }

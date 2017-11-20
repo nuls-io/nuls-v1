@@ -1,10 +1,5 @@
 package io.nuls.network.constant;
 
-import io.nuls.core.utils.cfg.ConfigLoader;
-
-import java.io.IOException;
-import java.util.Properties;
-
 /**
  * Created by Niels on 2017/11/7.
  *
@@ -34,4 +29,11 @@ public interface NetworkConstant {
     String Network_Peer_Out_Group = "outPeers";
     String Network_Peer_Consensus_Group = "consensus_Group";
 
+
+    //network message type
+
+    short Network_Version_Message = 01;
+    short Network_Ping_Message = 02;
+    short Network_Pong_Mesaage = 03;
+    short Network_Bye_Message = 04;
 }

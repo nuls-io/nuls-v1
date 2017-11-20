@@ -10,7 +10,6 @@ import io.nuls.core.mesasge.NulsMessageHeader;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
 import io.nuls.network.entity.param.NetworkParam;
-import io.nuls.network.message.NetworkMessageHeader;
 import io.nuls.network.message.entity.VersionMessage;
 import io.nuls.network.service.MessageWriter;
 
@@ -124,13 +123,17 @@ public class Peer extends NulsData {
         processMessage(message);
     }
 
-
+    /**
+     * if message is a eventMessage , put it in processorService ,other module will process it
+     * @param message
+     */
     public void processMessage(NulsMessage message) {
-        if(message.getHeader() instanceof NetworkMessageHeader) {
 
-        }else {
-            // else
+        if(message.getHeader().getMsgType() == NulsMessageHeader.EVENT_MESSAGE) {
             processorService.send(message.getData());
+        }else {
+
+
         }
     }
 

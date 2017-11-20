@@ -91,7 +91,7 @@ public abstract class NulsData implements Serializable {
     }
 
     protected void writeBytesWithLength(OutputStream stream, byte[] bytes) throws IOException {
-        if (null == bytes) {
+        if (null == bytes || bytes.length == 0) {
             stream.write(0);
         } else {
             stream.write(bytes.length);

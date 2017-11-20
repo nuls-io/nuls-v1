@@ -1,6 +1,7 @@
 package io.nuls.core.mesasge;
 
 import io.nuls.core.chain.entity.Block;
+import io.nuls.core.crypto.VarInt;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -9,9 +10,9 @@ public class NulsMessage {
 
     public static final int MAX_SIZE = NulsMessageHeader.MESSAGE_HEADER_SIZE + Block.MAX_SIZE;
 
-    private NulsMessageHeader header;
+    protected NulsMessageHeader header;
 
-    private byte[] data;
+    protected byte[] data;
 
     public NulsMessage(NulsMessageHeader header, byte[] data) {
         this.header = header;
@@ -62,12 +63,19 @@ public class NulsMessage {
     }
 
     public static void main(String[] args) {
-        ByteBuffer buffer = java.nio.ByteBuffer.allocate(200);
         byte[] b1 = new byte[]{10, 11, 12, 13};
         byte[] b2 = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9};
-        byte[] b3 = new byte[b1.length + b2.length];
+        byte[] b3 = new byte[b1.length + b2.length + 2];
+        short i = 2;
+        byte[] ii = new VarInt(i).encode();
+        for(byte b : ii) {
+            System.out.print(b + ",");
+        }
+        System.out.println("-----------");
+
         System.arraycopy(b1, 0, b3, 0, b1.length);
-        System.arraycopy(b2, 0, b3, b1.length, b2.length);
+        System.arraycopy(ii, 0, b3,  b1.length, 2);
+        System.arraycopy(b2, 0, b3, b1.length + ii.length, b2.length);
         for(byte b : b3) {
             System.out.print(b + ",");
         }
