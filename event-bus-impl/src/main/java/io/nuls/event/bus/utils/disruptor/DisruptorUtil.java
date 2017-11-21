@@ -1,9 +1,9 @@
 package io.nuls.event.bus.utils.disruptor;
 
 import com.lmax.disruptor.EventFactory;
+import com.lmax.disruptor.LiteBlockingWaitStrategy;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.WorkHandler;
-import com.lmax.disruptor.YieldingWaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 import io.nuls.core.constant.ErrorCode;
@@ -50,7 +50,7 @@ public class DisruptorUtil<T extends DisruptorEvent> {
 
         Disruptor<DisruptorEvent> disruptor = new Disruptor<DisruptorEvent>(factory,
                 ringBufferSize, Executors.defaultThreadFactory(), ProducerType.SINGLE,
-                new YieldingWaitStrategy());
+                new LiteBlockingWaitStrategy());
 //        disruptor.handleEventsWith(new EventHandler<DisruptorEvent>() {
 //            @Override
 //            public void onEvent(DisruptorEvent disruptorEvent, long l, boolean b) throws Exception {
