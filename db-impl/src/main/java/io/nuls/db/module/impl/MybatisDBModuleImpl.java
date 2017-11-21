@@ -6,10 +6,12 @@ import io.nuls.core.thread.NulsThread;
 import io.nuls.core.utils.aop.AopUtils;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.constant.DBConstant;
+import io.nuls.db.dao.AccountDao;
 import io.nuls.db.dao.BlockDao;
 import io.nuls.db.dao.filter.DBMethodFilter;
 import io.nuls.db.dao.impl.mybatis.BlockDaoImpl;
 import io.nuls.db.dao.impl.mybatis.session.SessionManager;
+import io.nuls.db.dao.impl.mybatis.util.AccountDaoImpl;
 import io.nuls.db.exception.DBException;
 import io.nuls.db.module.DBModule;
 import org.apache.ibatis.io.Resources;
@@ -23,18 +25,17 @@ import java.util.List;
 
 /**
  * Created by zhouwei on 2017/9/27.
- *
  */
 public class MybatisDBModuleImpl extends DBModule {
 
     private SqlSessionFactory sqlSessionFactory;
 
     @Override
-    public void start(){
+    public void start() {
         try {
             initSqlSessionFactory();
             initService();
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.error(e);
             throw new DBException(ErrorCode.DB_MODULE_START_FAIL);
         }
@@ -51,15 +52,18 @@ public class MybatisDBModuleImpl extends DBModule {
 
 
     private void initService() {
-        BlockDao blockDao = AopUtils.createProxy(BlockDaoImpl.class, new DBMethodFilter());
-        this.registerService(blockDao);
+        DBMethodFilter dbMethodFilter = new DBMethodFilter();
+        BlockDao blockDao = AopUtils.createProxy(BlockDaoImpl.class, dbMethodFilter);
+        this.registerService(BlockDao.class,blockDao);
+        AccountDao accountDao = AopUtils.createProxy(AccountDaoImpl.class, dbMethodFilter);
+        this.registerService(AccountDao.class,accountDao);
     }
 
     @Override
     public void shutdown() {
 //        QueueManager.setRunning(false);
 //        dbExecutor.shutdown();
-        if(sqlSessionFactory != null) {
+        if (sqlSessionFactory != null) {
             DruidDataSource druidDataSource = (DruidDataSource) sqlSessionFactory.getConfiguration().getEnvironment().getDataSource();
             druidDataSource.close();
             sqlSessionFactory = null;
@@ -67,7 +71,7 @@ public class MybatisDBModuleImpl extends DBModule {
     }
 
     @Override
-    public void destroy(){
+    public void destroy() {
         shutdown();
 
     }

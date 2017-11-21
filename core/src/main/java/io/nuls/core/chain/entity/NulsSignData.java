@@ -10,6 +10,8 @@ import java.io.OutputStream;
  */
 public class NulsSignData extends NulsData{
     protected int signAlgType;
+    protected int signLength;
+    protected byte[] signBytes;
 
     public int getSignAlgType() {
         return signAlgType;
@@ -33,5 +35,21 @@ public class NulsSignData extends NulsData{
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
 
+    }
+
+    public int getSignLength() {
+        return signLength;
+    }
+
+    public void setSignLength(int signLength) {
+        this.signLength = signLength;
+    }
+
+    public byte[] getSignBytes() {
+        return signBytes;
+    }
+
+    public void setSignBytes(byte[] signBytes) {
+        this.signBytes = signBytes;
     }
 }

@@ -2,6 +2,7 @@ package io.nuls.account.manager;
 
 import io.nuls.account.entity.Account;
 import io.nuls.account.service.impl.AccountCacheService;
+import io.nuls.account.service.impl.AccountServiceImpl;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.context.NulsContext;
 
@@ -26,7 +27,7 @@ public class AccountManager {
     }
 
     public void init() {
-        accountService = NulsContext.getInstance().getService(AccountService.class);
+        accountService = AccountServiceImpl.getInstance();
         //default local account
         List<Account> list = this.accountService.getLocalAccountList();
         if (null != list && !list.isEmpty()) {

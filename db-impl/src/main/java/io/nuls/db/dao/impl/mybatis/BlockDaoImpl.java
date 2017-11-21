@@ -23,6 +23,7 @@ public class BlockDaoImpl extends BaseDaoImpl implements BlockDao {
 
     @Override
     public int saveBatch(List<BlockPo> list) {
+        //todo
         return 0;
     }
 
@@ -35,7 +36,8 @@ public class BlockDaoImpl extends BaseDaoImpl implements BlockDao {
 
     @Override
     public int updateSelective(BlockPo blockPo) {
-        return 0;
+        //todo
+         return 0;
     }
 
     @Override
@@ -46,6 +48,7 @@ public class BlockDaoImpl extends BaseDaoImpl implements BlockDao {
 
     @Override
     public int deleteByKey(String s) {
+        //todo
         return 0;
     }
 
@@ -57,11 +60,13 @@ public class BlockDaoImpl extends BaseDaoImpl implements BlockDao {
 
     @Override
     public List<BlockPo> getList(Integer pageNum, Integer pageSize) {
+        //todo
         return null;
     }
 
     @Override
     public Long getCount() {
+        //todo
         return null;
     }
 

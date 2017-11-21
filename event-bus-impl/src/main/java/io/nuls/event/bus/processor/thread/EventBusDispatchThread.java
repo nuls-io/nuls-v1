@@ -23,6 +23,7 @@ public class EventBusDispatchThread extends NulsThread implements WorkHandler<Di
     @Override
     public void onEvent(DisruptorEvent<NulsEvent> event) throws Exception {
         if (null == event) {
+            System.out.println("did sth ....");
             return;
         }
         processorManager.executeHandlers(event.getData());
@@ -31,6 +32,8 @@ public class EventBusDispatchThread extends NulsThread implements WorkHandler<Di
     @Override
     public void run() {
         //do nothing
+        System.out.println("do sth.....");
+
         return;
     }
 }

@@ -50,14 +50,26 @@ public final class AccountTool {
     public static void toBean(AccountPo src, Account desc) {
         AssertUtil.canNotEmpty(src, "Object type conversion faild!");
         AssertUtil.canNotEmpty(desc, "Object type conversion faild!");
-        desc.parse(new NulsByteBuffer(src.getBytes()));
         desc.setCreateHeight(src.getCreateHeight());
         desc.setCreateTime(src.getCreateTime());
         desc.setTxHash(src.getTxHash());
+        desc.setVersion(src.getVersion());
+        desc.setAddress(newAddress(src.getPubKey()));
+        desc.setAlias(src.getAlias());
+        desc.setExtend(src.getExtend());
+        desc.setId(src.getId());
+        desc.setPubKey(src.getPubKey());
+//        desc.setSign();
+//        desc.setStatus();
         if (src instanceof LocalAccountPo) {
             desc.setPriKey(((LocalAccountPo) src).getPriKey());
             desc.setPriSeed(((LocalAccountPo) src).getPriSeed());
+            desc.setEcKey(ECKey.fromPrivate(new BigInteger(desc.getPriKey())));
         }
+    }
+
+    private static Address newAddress(byte[] pubKey) {
+        return new Address(Utils.sha256hash160(pubKey));
     }
 
     public static void toPojo(Account src, AccountPo desc) throws IOException, NulsException {
@@ -71,7 +83,7 @@ public final class AccountTool {
         desc.setPubKey(src.getPubKey());
         desc.setTxHash(src.getTxHash());
         desc.setVersion(src.getVersion());
-        desc.setBytes(src.serialize());
+        desc.setExtend(src.getExtend());
         if (desc instanceof LocalAccountPo) {
             ((LocalAccountPo) desc).setPriKey(src.getPriKey());
             ((LocalAccountPo) desc).setPriSeed(src.getPriSeed());
