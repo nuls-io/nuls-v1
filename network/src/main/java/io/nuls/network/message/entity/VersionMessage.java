@@ -1,17 +1,22 @@
 package io.nuls.network.message.entity;
 
-import io.nuls.core.mesasge.NulsMessage;
-import io.nuls.core.mesasge.NulsMessageHeader;
+import io.nuls.core.context.NulsContext;
+import io.nuls.core.crypto.VarInt;
+import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.log.Log;
+import io.nuls.core.utils.str.StringUtils;
+import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Peer;
-import io.nuls.network.entity.param.NetworkParam;
 import io.nuls.network.message.NetworkMessage;
-import io.nuls.network.message.NetworkMessageHeader;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 
 /**
  * Created by win10 on 2017/11/9.
  */
 public class VersionMessage extends NetworkMessage {
-
 
     private long bestBlockHeight;
 
@@ -21,13 +26,54 @@ public class VersionMessage extends NetworkMessage {
 
     private String ip;
 
-    public VersionMessage(NetworkParam network, long height, String hash, Peer peer) {
+    public VersionMessage() {
+        this.msgType = NetworkConstant.Network_Version_Message;
+    }
 
-        super(network);
+    public VersionMessage(long height, String hash, Peer peer) {
+
+        this.msgType = NetworkConstant.Network_Version_Message;
         this.bestBlockHash = hash;
         this.bestBlockHeight = height;
         this.port = peer.getPort();
         this.ip = peer.getIp();
+    }
+
+    @Override
+    public int size() {
+        int s = 0;
+        s += VarInt.sizeOf(bestBlockHeight);
+
+        s += 1;  //the bestBlockHash.length
+        if (StringUtils.isBlank(bestBlockHash)) {
+            try {
+                s += bestBlockHash.getBytes(NulsContext.DEFAULT_ENCODING).length;
+            } catch (UnsupportedEncodingException e) {
+                Log.error(e);
+            }
+        }
+        s += VarInt.sizeOf(port);
+
+        s += 1; // the ip.length
+        if (StringUtils.isBlank(ip)) {
+            try {
+                s += ip.getBytes(NulsContext.DEFAULT_ENCODING).length;
+            } catch (UnsupportedEncodingException e) {
+                Log.error(e);
+            }
+        }
+        return s;
+    }
+
+    @Override
+    public void serializeToStream(OutputStream stream) throws IOException {
+        stream.write(new VarInt(bestBlockHeight).encode());
+        this.writeBytesWithLength(stream, bestBlockHash.getBytes(NulsContext.DEFAULT_ENCODING));
+    }
+
+    @Override
+    public void parse(NulsByteBuffer byteBuffer) {
+
     }
 
     public long getBestBlockHeight() {
@@ -61,4 +107,5 @@ public class VersionMessage extends NetworkMessage {
     public void setIp(String ip) {
         this.ip = ip;
     }
+
 }

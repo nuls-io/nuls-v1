@@ -10,7 +10,6 @@ import io.nuls.core.utils.crypto.Utils;
 
 /**
  * Created by Niels on 2017/11/2.
- *
  */
 public class NulsByteBuffer {
 
@@ -50,6 +49,7 @@ public class NulsByteBuffer {
             throw new NulsVerificationException(ErrorCode.DATA_PARSE_ERROR, e);
         }
     }
+
     public int readInt32() throws NulsVerificationException {
         try {
             int u = Utils.readInt32(payload, cursor);
@@ -59,6 +59,7 @@ public class NulsByteBuffer {
             throw new NulsVerificationException(ErrorCode.DATA_PARSE_ERROR, e);
         }
     }
+
     public long readVarInt() throws NulsVerificationException {
         return readVarInt(0);
     }
@@ -69,6 +70,16 @@ public class NulsByteBuffer {
             cursor += offset + varint.getOriginalSizeInBytes();
             return varint.value;
         } catch (ArrayIndexOutOfBoundsException e) {
+            throw new NulsVerificationException(ErrorCode.DATA_PARSE_ERROR, e);
+        }
+    }
+
+    public byte readByte() throws NulsVerificationException {
+        try {
+            byte b = payload[cursor];
+            cursor += 1;
+            return b;
+        } catch (IndexOutOfBoundsException e) {
             throw new NulsVerificationException(ErrorCode.DATA_PARSE_ERROR, e);
         }
     }

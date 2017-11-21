@@ -14,6 +14,18 @@ public class NulsMessage {
 
     protected byte[] data;
 
+    public NulsMessage() {
+
+    }
+
+    public NulsMessage(byte[] data) {
+        this.data = data;
+    }
+
+    public NulsMessage(NulsMessageHeader header) {
+        this.header = header;
+    }
+
     public NulsMessage(NulsMessageHeader header, byte[] data) {
         this.header = header;
         this.data = data;
@@ -34,7 +46,13 @@ public class NulsMessage {
         this.data = data;
     }
 
-    public NulsMessage(byte[] data) {
+    public NulsMessage(int magicNumber, int length, short msgType, byte xor, byte[] data) {
+        this.header = new NulsMessageHeader(magicNumber, msgType, length, xor);
+        this.data = data;
+    }
+
+    public NulsMessage(int magicNumber, int length, short msgType, byte xor, byte[] extend, byte[] data) {
+        this.header = new NulsMessageHeader(magicNumber, msgType, length, xor, extend);
         this.data = data;
     }
 
@@ -62,23 +80,5 @@ public class NulsMessage {
         this.data = data;
     }
 
-    public static void main(String[] args) {
-        byte[] b1 = new byte[]{10, 11, 12, 13};
-        byte[] b2 = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9};
-        byte[] b3 = new byte[b1.length + b2.length + 2];
-        short i = 2;
-        byte[] ii = new VarInt(i).encode();
-        for(byte b : ii) {
-            System.out.print(b + ",");
-        }
-        System.out.println("-----------");
 
-        System.arraycopy(b1, 0, b3, 0, b1.length);
-        System.arraycopy(ii, 0, b3,  b1.length, 2);
-        System.arraycopy(b2, 0, b3, b1.length + ii.length, b2.length);
-        for(byte b : b3) {
-            System.out.print(b + ",");
-        }
-
-    }
 }

@@ -1,32 +1,24 @@
 package io.nuls.network.message;
 
-import io.nuls.core.crypto.VarInt;
-import io.nuls.core.mesasge.NulsMessage;
-import io.nuls.network.entity.param.NetworkParam;
+import io.nuls.core.chain.entity.NulsData;
+import io.nuls.core.crypto.UnsafeByteArrayOutputStream;
+import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.network.constant.NetworkConstant;
+import io.nuls.network.message.entity.VersionMessage;
 
-import java.io.IOException;
-
-public abstract class NetworkMessage extends NulsMessage {
+public abstract class NetworkMessage extends NulsData {
 
     protected short msgType;
 
-    public NetworkMessage(NetworkParam network) {
-        super(new NetworkMessageHeader(network.packetMagic()), null);
-    }
-
-    public NetworkMessage(NetworkParam network, byte[] data) {
-        super(new NetworkMessageHeader(network.packetMagic()), data);
-    }
-
-    @Override
-    public byte[] serialize() throws IOException {
-        byte[] value = new byte[MAX_SIZE + data.length + 2];
-        byte[] headerBytes = header.serialize();
-        System.arraycopy(headerBytes, 0, value, 0, headerBytes.length);
-
-        System.arraycopy(new VarInt(msgType).encode(), 0, value, headerBytes.length, 2);
-        System.arraycopy(data, 0, value, headerBytes.length, data.length);
-        return value;
+    public static NetworkMessage transfer(Short msgType, byte[] data) {
+        NetworkMessage message = null;
+        switch (msgType) {
+            case NetworkConstant.Network_Version_Message:
+                message = new VersionMessage();
+                break;
+        }
+        message.parse(new NulsByteBuffer(data));
+        return message;
     }
 
     public short getMsgType() {

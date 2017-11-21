@@ -15,17 +15,18 @@ public class NulsMessageHeader extends NulsData {
 
     private int magicNumber;
 
-    // the message length
+    // the NulsMessage length
     private int length;
-
 
     //0x01 : networkMessage  //0x02 : eventMessage;
     private short headType;
     public static final short NETWORK_MESSAGE = 1;
     public static final short EVENT_MESSAGE = 2;
 
+    private byte xor;
+
     //the extend length
-    public static final int EXTEND_LENGTH = 8;
+    public static final int EXTEND_LENGTH = 9;
     private byte[] extend;
 
     public NulsMessageHeader() {
@@ -43,6 +44,21 @@ public class NulsMessageHeader extends NulsData {
         this.extend = extend;
     }
 
+    public NulsMessageHeader(int magicNumber, short headType, int length, byte xor) {
+        this.magicNumber = magicNumber;
+        this.headType = headType;
+        this.length = length;
+        this.xor = xor;
+    }
+
+    public NulsMessageHeader(int magicNumber, short headType, int length, byte xor, byte[] extend) {
+        this.magicNumber = magicNumber;
+        this.headType = headType;
+        this.length = length;
+        this.xor = xor;
+        this.extend = extend;
+    }
+
     @Override
     public int size() {
         return 0;
@@ -53,10 +69,11 @@ public class NulsMessageHeader extends NulsData {
         Utils.uint32ToByteStreamLE(magicNumber, stream);
         Utils.uint32ToByteStreamLE(length, stream);
         Utils.uint16ToByteStreamLE(headType, stream);
+        stream.write(xor);
         if (extend == null) {
-            extend = new byte[]{1, 2, 3, 4, 0, 0, 0, 0};
+            extend = new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
         } else {
-            if (extend.length != 8) {
+            if (extend.length != EXTEND_LENGTH) {
                 throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
             }
         }
@@ -68,7 +85,8 @@ public class NulsMessageHeader extends NulsData {
         this.magicNumber = byteBuffer.readInt32();
         this.length = byteBuffer.readInt32();
         this.headType = byteBuffer.readShort();
-        this.extend = byteBuffer.readBytes(8);
+        this.xor = byteBuffer.readByte();
+        this.extend = byteBuffer.readBytes(EXTEND_LENGTH);
     }
 
 
@@ -107,7 +125,7 @@ public class NulsMessageHeader extends NulsData {
     public static void main(String[] args) throws IOException {
         NulsMessageHeader header = new NulsMessageHeader(12345678, NulsMessageHeader.NETWORK_MESSAGE);
         byte[] bytes = header.serialize();
-
+        System.out.println("byte.length:" + bytes.length);
         header.parse(new NulsByteBuffer(bytes));
         System.out.println(header.toString());
 
@@ -121,11 +139,22 @@ public class NulsMessageHeader extends NulsData {
         buffer.append("length:" + length + ",");
         buffer.append("headType:" + headType + ",");
         if (extend != null && extend.length != 0) {
-            buffer.append("extends:" + new String(extend));
+            buffer.append("extends:");
+            for (byte b : extend) {
+                buffer.append(b + " ");
+            }
         } else {
             buffer.append("extends:null");
         }
         buffer.append("}");
         return buffer.toString();
+    }
+
+    public byte getXor() {
+        return xor;
+    }
+
+    public void setXor(byte xor) {
+        this.xor = xor;
     }
 }
