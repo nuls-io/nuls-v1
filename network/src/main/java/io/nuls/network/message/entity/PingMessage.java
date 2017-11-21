@@ -10,7 +10,7 @@ import java.io.OutputStream;
 public class PingMessage extends NetworkMessage {
 
     public PingMessage() {
-        this.msgType = NetworkConstant.Network_Ping_Message;
+        this.type = NetworkConstant.Network_Ping_Message;
     }
 
     @Override

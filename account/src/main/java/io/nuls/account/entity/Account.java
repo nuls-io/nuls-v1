@@ -139,7 +139,7 @@ public class Account extends NulsData {
         byte[] hash160 = byteBuffer.readBytes(Address.LENGTH);
         this.address = new Address(hash160);
         priSeed = byteBuffer.readByLengthByte();
-        status = byteBuffer.readBytes(1)[0];
+        status = byteBuffer.readByte();
         sign = byteBuffer.readByLengthByte();
         pubKey = byteBuffer.readByLengthByte();
         extend = byteBuffer.readByLengthByte();

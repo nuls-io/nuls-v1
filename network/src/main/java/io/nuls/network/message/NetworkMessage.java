@@ -1,14 +1,13 @@
 package io.nuls.network.message;
 
 import io.nuls.core.chain.entity.NulsData;
-import io.nuls.core.crypto.UnsafeByteArrayOutputStream;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.message.entity.VersionMessage;
 
 public abstract class NetworkMessage extends NulsData {
 
-    protected short msgType;
+    protected short type;
 
     public static NetworkMessage transfer(Short msgType, byte[] data) {
         NetworkMessage message = null;
@@ -21,11 +20,11 @@ public abstract class NetworkMessage extends NulsData {
         return message;
     }
 
-    public short getMsgType() {
-        return msgType;
+    public short getType() {
+        return type;
     }
 
-    public void setMsgType(short msgType) {
-        this.msgType = msgType;
+    public void setType(short type) {
+        this.type = type;
     }
 }

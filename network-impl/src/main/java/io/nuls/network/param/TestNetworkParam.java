@@ -4,6 +4,8 @@ import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.PeerAddress;
 import io.nuls.network.entity.param.NetworkParam;
+import io.nuls.network.filter.impl.DefaultMessageFilter;
+import io.nuls.network.message.DefaultNetWorkMessageHandlerFactory;
 
 import java.net.InetSocketAddress;
 import java.util.List;
@@ -27,6 +29,9 @@ public class TestNetworkParam extends NetworkParam {
         seedPeers.add(address1);
         seedPeers.add(address2);
         seedPeers.add(address3);
+
+        this.messageFilter = DefaultMessageFilter.getInstance();
+        this.messageHandlerFactory = DefaultNetWorkMessageHandlerFactory.getInstance();
     }
 
     public static synchronized TestNetworkParam get() {

@@ -10,7 +10,7 @@ import java.io.OutputStream;
 public class PongMessage extends NetworkMessage {
 
     public PongMessage() {
-        this.msgType = NetworkConstant.Network_Pong_Mesaage;
+        this.type = NetworkConstant.Network_Pong_Mesaage;
     }
 
     @Override

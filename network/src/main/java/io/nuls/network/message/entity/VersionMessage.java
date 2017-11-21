@@ -27,12 +27,12 @@ public class VersionMessage extends NetworkMessage {
     private String ip;
 
     public VersionMessage() {
-        this.msgType = NetworkConstant.Network_Version_Message;
+        this.type = NetworkConstant.Network_Version_Message;
     }
 
     public VersionMessage(long height, String hash, Peer peer) {
 
-        this.msgType = NetworkConstant.Network_Version_Message;
+        this.type = NetworkConstant.Network_Version_Message;
         this.bestBlockHash = hash;
         this.bestBlockHeight = height;
         this.port = peer.getPort();
@@ -68,12 +68,17 @@ public class VersionMessage extends NetworkMessage {
     @Override
     public void serializeToStream(OutputStream stream) throws IOException {
         stream.write(new VarInt(bestBlockHeight).encode());
-        this.writeBytesWithLength(stream, bestBlockHash.getBytes(NulsContext.DEFAULT_ENCODING));
+        this.writeBytesWithLength(stream, bestBlockHash);
+        stream.write(new VarInt(port).encode());
+        this.writeBytesWithLength(stream, ip);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
-
+        bestBlockHeight = (int) byteBuffer.readUint32();
+        bestBlockHash = new String(byteBuffer.readByLengthByte());
+        port = (int) byteBuffer.readUint32();
+        ip = new String(byteBuffer.readByLengthByte());
     }
 
     public long getBestBlockHeight() {
