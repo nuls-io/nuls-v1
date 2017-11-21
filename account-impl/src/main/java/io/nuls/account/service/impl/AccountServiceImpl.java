@@ -58,12 +58,14 @@ public class AccountServiceImpl implements AccountService {
             account.setPriSeed(key.getPrivKeyBytes());
             account.setVersion(AccountConstant.ACCOUNT_MODULE_VERSION);
             account.setAddress(address);
+            account.setId(address.toString());
             account.setPubKey(key.getPubKey(true));
+            account.setEcKey(key);
+            account.setPriKey(key.getPrivKeyBytes());
             signAccount(account);
             AccountPo po = new AccountPo();
             AccountTool.toPojo(account, po);
             this.accountDao.save(po);
-            account.setEcKey(key);
             this.accountCacheService.putAccount(account);
             return account;
         } catch (IOException e) {

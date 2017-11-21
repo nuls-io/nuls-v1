@@ -1,10 +1,12 @@
 package io.nuls.ledger.entity;
 
+import java.io.Serializable;
+
 /**
  * Created by Niels on 2017/11/13.
  *
  */
-public class Balance {
+public class Balance implements Serializable{
 
     private double balance;
 

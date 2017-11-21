@@ -4,6 +4,7 @@ import io.nuls.cache.constant.EhCacheConstant;
 import io.nuls.cache.entity.CacheElement;
 import io.nuls.cache.manager.EhCacheManager;
 import io.nuls.cache.service.intf.CacheService;
+import org.ehcache.Cache;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -65,8 +66,8 @@ public class EhCacheServiceImpl<K, T> implements CacheService<K, T> {
         Iterator it = cacheManager.getCache(cacheTitle).iterator();
         List<T> list = new ArrayList<>();
         while (it.hasNext()) {
-            T t = (T) it.next();
-            list.add(t);
+            Cache.Entry<K,T> entry = (Cache.Entry<K,T>) it.next();
+            list.add(entry.getValue());
         }
         return list;
     }

@@ -111,7 +111,9 @@ public class Account extends NulsData {
             s += sign.length + 1;
         }
         s += pubKey.length + 1;
-        s += extend.length + 1;
+        if(null!=extend){
+            s += extend.length + 1;
+        }
         return s;
     }
 

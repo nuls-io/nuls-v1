@@ -77,7 +77,17 @@
     </environments>
 
     <mappers>
+        <mapper resource="mybatis/mapping/AccountMapper.xml" />
         <mapper resource="mybatis/mapping/BlockMapper.xml" />
-        <mapper resource="mybatis/mapping/CommonMapper.xml" />
+        <mapper resource="mybatis/mapping/ConsensusAccountMapper.xml" />
+        <mapper resource="mybatis/mapping/PeerGroupMapper.xml" />
+        <mapper resource="mybatis/mapping/PeerGroupRelationMapper.xml" />
+        <mapper resource="mybatis/mapping/PeerMapper.xml" />
+        <mapper resource="mybatis/mapping/SubChainMapper.xml" />
+        <mapper resource="mybatis/mapping/TransactionLocalMapper.xml" />
+        <mapper resource="mybatis/mapping/TransactionMapper.xml" />
+        <mapper resource="mybatis/mapping/TxAccountRelationMapper.xml" />
+        <mapper resource="mybatis/mapping/UtxoInputMapper.xml" />
+        <mapper resource="mybatis/mapping/UtxoOutputMapper.xml" />
     </mappers>
 </configuration>
