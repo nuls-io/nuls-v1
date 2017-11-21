@@ -9,7 +9,10 @@ import java.io.OutputStream;
  * Created by facjas on 2017/11/20.
  */
 public class NulsDigestData extends NulsData{
+
     protected int digestAlgType;
+    protected int digestLength;
+    protected byte[] digestBytes;
 
     public int getDigestAlgType() {
         return digestAlgType;
@@ -18,7 +21,6 @@ public class NulsDigestData extends NulsData{
     public void setDigestAlgType(int digestAlgType) {
         this.digestAlgType = digestAlgType;
     }
-
 
     @Override
     public int size() {
@@ -33,5 +35,21 @@ public class NulsDigestData extends NulsData{
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
 
+    }
+
+    public int getDigestLength() {
+        return digestLength;
+    }
+
+    public void setDigestLength(int digestLength) {
+        this.digestLength = digestLength;
+    }
+
+    public byte[] getDigestBytes() {
+        return digestBytes;
+    }
+
+    public void setDigestBytes(byte[] digestBytes) {
+        this.digestBytes = digestBytes;
     }
 }
