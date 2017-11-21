@@ -7,7 +7,5 @@ import io.nuls.db.entity.AccountPo;
  */
 public interface AccountDao extends BaseDao<AccountPo, String> {
 
-    public AccountPo getAccount(String id);
-
     boolean setAlias(String id, String alias);
 }

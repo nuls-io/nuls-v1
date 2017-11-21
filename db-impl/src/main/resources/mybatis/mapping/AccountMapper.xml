@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="io.nuls.db.dao.impl.mybatis.mapper.AccountMapper">
     <resultMap id="BaseResultMap" type="io.nuls.db.entity.AccountPo">
         <id column="ID" jdbcType="VARCHAR" property="id"/>
         <result column="ADDRESS" jdbcType="VARCHAR" property="address"/>
-        <result column="PUBKEY" jdbcType="BINARY" property="pubkey"/>
+        <result column="PUB_KEY" jdbcType="BINARY" property="pubKey"/>
         <result column="CREATE_TIME" jdbcType="BIGINT" property="createTime"/>
         <result column="CREATE_HEIGHT" jdbcType="BIGINT" property="createHeight"/>
         <result column="TX_HASH" jdbcType="BINARY" property="txHash"/>
@@ -13,9 +13,9 @@
         <result column="EXTEND" jdbcType="BINARY" property="extend"/>
     </resultMap>
     <sql id="Base_Column_List">
-    ID, ADDRESS, PUBKEY,CREATE_TIME,CREATE_HEIGHT,TX_HASH,ALIAS,VERSION,EXTEND
-  </sql>
-    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="ResultMapWithBLOBs">
+        ID, ADDRESS, PUBKEY,CREATE_TIME,CREATE_HEIGHT,TX_HASH,ALIAS,VERSION,EXTEND
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
         from ACCOUNT
@@ -23,8 +23,8 @@
     </select>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
-    delete from ACCOUNT
-    where ID = #{id,jdbcType=VARCHAR}
+        delete from ACCOUNT
+        where ID = #{id,jdbcType=VARCHAR}
     </delete>
 
     <insert id="insert" parameterType="io.nuls.db.entity.AccountPo">
@@ -38,88 +38,7 @@
 
 
     <insert id="insertSelective" parameterType="io.nuls.db.entity.AccountPo">
-        insert into ACCOUNT
-        <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="id != null">
-                id,
-            </if>
-            <if test="height != null">
-                height,
-            </if>
-            <if test="createTime != null">
-                create_time,
-            </if>
-            <if test="script != null">
-                script,
-            </if>
-        </trim>
-        <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="id != null">
-                #{id,jdbcType=VARCHAR},
-            </if>
-            <if test="height != null">
-                #{height,jdbcType=BIGINT},
-            </if>
-            <if test="createTime != null">
-                #{createTime,jdbcType=BIGINT},
-            </if>
-            <if test="script != null">
-                #{script,jdbcType=BINARY},
-            </if>
-        </trim>
+
     </insert>
-    <update id="updateByPrimaryKeySelective" parameterType="io.nuls.db.entity.AccountPo">
-        update block
-        <set>
-            <if test="height != null">
-                height = #{height,jdbcType=BIGINT},
-            </if>
-            <if test="createTime != null">
-                create_time = #{createTime,jdbcType=BIGINT},
-            </if>
-            <if test="script != null">
-                script = #{script,jdbcType=BINARY},
-            </if>
-        </set>
-        where hash = #{hash,jdbcType=VARCHAR}
-    </update>
-    <update id="updateByPrimaryKeyWithBLOBs" parameterType="io.nuls.db.entity.AccountPo">
-    update block
-    set height = #{height,jdbcType=BIGINT},
-    create_time = #{createTime,jdbcType=BIGINT},
-    script = #{script,jdbcType=BINARY}
-    where hash = #{hash,jdbcType=VARCHAR}
-  </update>
-    <update id="updateByPrimaryKey" parameterType="io.nuls.db.entity.AccountPo">
-    update block
-    set height = #{height,jdbcType=BIGINT},
-    create_time = #{createTime,jdbcType=BIGINT}
-    where hash = #{hash,jdbcType=VARCHAR}
-  </update>
-
-    <delete id="truncate">
-    truncate block;
-  </delete>
-
-    <select id="count" resultType="Long">
-    select count(1) as getCount from block;
-  </select>
-
-    <insert id="insertBatch" parameterType="java.util.List">
-        insert into block (hash, height, createtime)
-        values
-        <foreach collection="list" item="item" index="index" separator=",">
-            (#{hash,jdbcType=VARCHAR}, #{height,jdbcType=BIGINT}, #{createtime,jdbcType=BIGINT})
-        </foreach>
-    </insert>
-
-    <select id="selectList" parameterType="Searchable" resultType="io.nuls.db.entity.AccountPo">
-        select
-        <include refid="Base_Column_List"/>
-        ,
-        <include refid="Blob_Column_List"/>
-        from block
-        <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Serach_Where"/>
-    </select>
 
 </mapper>

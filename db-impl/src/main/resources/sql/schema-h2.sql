@@ -13,13 +13,13 @@ create table IF NOT EXISTS account_local
 (
   id VARCHAR2(40) PRIMARY KEY,
   address VARCHAR2 (40) NOT NULL,
- pubkey BINARY  DEFAULT NULL,
+ pub_key BINARY  DEFAULT NULL,
  create_time BIGINT NOT NULL,
  create_height BIGINT NOT NULL,
  tx_hash BINARY  DEFAULT NULL,
  alias VARCHAR2 (100),
  version INTEGER NOT NULL,
- prikey VARCHAR(100) DEFAULT NULL,
+ pri_key VARCHAR(100) DEFAULT NULL,
  pri_seed BINARY DEFAULT NULL,
  EXTEND BINARY DEFAULT NULL
 );
@@ -28,7 +28,7 @@ create table IF NOT EXISTS account
 (
   id VARCHAR2(40) PRIMARY KEY,
   address VARCHAR2 (40) NOT NULL,
- pubkey BINARY  DEFAULT NULL,
+ pub_key BINARY  DEFAULT NULL,
  create_time BIGINT NOT NULL,
  create_height BIGINT NOT NULL,
  tx_hash BINARY  DEFAULT NULL,
