@@ -33,7 +33,7 @@ public class ProcessorManager<E extends NulsEvent, H extends NulsEventHandler<? 
     }
 
     public final void init() {
-        pool = Executors.newFixedThreadPool(4 * EventBusConstant.THREAD_COUNT);
+        pool = Executors.newFixedThreadPool(EventBusConstant.THREAD_COUNT);
         disruptorService.createDisruptor(disruptorName, EventBusConstant.DEFAULT_RING_BUFFER_SIZE);
         List<EventBusDispatchThread> handlerList = new ArrayList<>();
         for (int i = 0; i < EventBusConstant.THREAD_COUNT; i++) {

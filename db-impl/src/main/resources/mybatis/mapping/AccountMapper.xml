@@ -36,9 +36,133 @@
         #{alias,jdbcType=VARCHAR},#{version,jdbcType=BIGINT},#{extend,jdbcType=BINARY})
     </insert>
 
-
     <insert id="insertSelective" parameterType="io.nuls.db.entity.AccountPo">
-
+    insert into ACCOUNT
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                ID,
+            </if>
+            <if test="address != null">
+                ADDRESS,
+            </if>
+            <if test="pubKey != null">
+                PUB_KEY,
+            </if>
+            <if test="createTime != null">
+                CREATE_TIME,
+            </if>
+            <if test="createHeight != null">
+                CREATE_HEIGHT,
+            </if>
+            <if test="txHash != null">
+                TX_HASH,
+            </if>
+            <if test="alias != null">
+                ALIAS,
+            </if>
+            <if test="version != null">
+                VERSION,
+            </if>
+            <if test="extend != null">
+                EXTEND,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=VARCHAR},
+            </if>
+            <if test="address != null">
+                #{address,jdbcType=BIGINT},
+            </if>
+            <if test="pubKey != null">
+                #{pubKey,jdbcType=BIGINT},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=BIGINT},
+            </if>
+            <if test="createHeight != null">
+                #{createHeight,jdbcType=BIGINT},
+            </if>
+            <if test="txHash != null">
+                #{txHash,jdbcType=BIGINT},
+            </if>
+            <if test="alias != null">
+                #{alias,jdbcType=BIGINT},
+            </if>
+            <if test="version != null">
+                #{version,jdbcType=BIGINT},
+            </if>
+            <if test="extend != null">
+                #{extend,jdbcType=BINARY},
+            </if>
+        </trim>
     </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="io.nuls.db.entity.AccountPo">
+        update ACCOUNT
+        <set>
+            <if test="address != null">
+                ADDRESS = #{address,jdbcType=BIGINT},
+            </if>
+            <if test="pubKey != null">
+               PUB_KEY = #{pubKey,jdbcType=BIGINT},
+            </if>
+            <if test="createTime != null">
+                CREAWTE_TIME = #{createTime,jdbcType=BIGINT},
+            </if>
+            <if test="createHeight != null">
+                CREATE_HEIGHT = #{createHeight,jdbcType=BIGINT},
+            </if>
+            <if test="txHash != null">
+               TX_HASH= #{txHash,jdbcType=BIGINT},
+            </if>
+            <if test="alias != null">
+                ALIAS = #{alias,jdbcType=BIGINT},
+            </if>
+            <if test="version != null">
+                VERSION = #{version,jdbcType=BIGINT},
+            </if>
+            <if test="extend != null">
+               EXTEND = #{extend,jdbcType=BINARY},
+            </if>
+        </set>
+        where ID = #{id,jdbcType=VARCHAR}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="io.nuls.db.entity.AccountPo">
+        update ACCOUNT set
+                ADDRESS = #{address,jdbcType=BIGINT},
+                PUB_KEY = #{pubKey,jdbcType=BIGINT},
+                CREAWTE_TIME = #{createTime,jdbcType=BIGINT},
+                CREATE_HEIGHT = #{createHeight,jdbcType=BIGINT},
+                TX_HASH= #{txHash,jdbcType=BIGINT},
+                ALIAS = #{alias,jdbcType=BIGINT},
+                VERSION = #{version,jdbcType=BIGINT},
+                EXTEND = #{extend,jdbcType=BINARY},
+        where ID = #{id,jdbcType=VARCHAR}
+    </update>
+
+    <delete id="truncate" >
+        truncate ACCOUNT;
+    </delete>
+
+    <select id="count" resultType="Long">
+        select count(1) as getCount from ACCOUNT;
+    </select>
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        insert into ACCOUNT (ID, ADDRESS, PUBKEY,CREATE_TIME,CREATE_HEIGHT,TX_HASH,ALIAS,VERSION,EXTEND)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{id,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR}, #{pubkey,jdbcType=BINARY},
+            #{createTime,jdbcType=BIGINT},#{createHeight,jdbcType=BIGINT},#{txHash,jdbcType=BINARY},
+            #{alias,jdbcType=VARCHAR},#{version,jdbcType=BIGINT},#{extend,jdbcType=BINARY})
+        </foreach>
+    </insert>
+
+    <select id="selectList" parameterType="Searchable" resultType="io.nuls.db.entity.AccountPo">
+        select
+        <include refid="Base_Column_List" />
+        from ACCOUNT
+        <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Serach_Where"/>
+    </select>
 
 </mapper>
