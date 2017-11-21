@@ -1,7 +1,9 @@
 package io.nuls.core.mesasge;
 
 import io.nuls.core.chain.entity.NulsData;
-import io.nuls.core.crypto.VarInt;
+import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
 import java.io.IOException;
@@ -18,25 +20,26 @@ public class NulsMessageHeader extends NulsData {
 
 
     //0x01 : networkMessage  //0x02 : eventMessage;
-    private short msgType;
+    private short headType;
     public static final short NETWORK_MESSAGE = 1;
     public static final short EVENT_MESSAGE = 2;
 
-
+    //the extend length
+    public static final int EXTEND_LENGTH = 8;
     private byte[] extend;
 
     public NulsMessageHeader() {
         super();
     }
 
-    public NulsMessageHeader(int magicNumber, short msgType) {
+    public NulsMessageHeader(int magicNumber, short headType) {
         this.magicNumber = magicNumber;
-        this.msgType = msgType;
+        this.headType = headType;
     }
 
-    public NulsMessageHeader(int magicNumber, short msgType, byte[] extend) {
+    public NulsMessageHeader(int magicNumber, short headType, byte[] extend) {
         this.magicNumber = magicNumber;
-        this.msgType = msgType;
+        this.headType = headType;
         this.extend = extend;
     }
 
@@ -47,28 +50,27 @@ public class NulsMessageHeader extends NulsData {
 
     @Override
     public void serializeToStream(OutputStream stream) throws IOException {
-        System.out.println("-----------magicNumber :" + magicNumber);
-        stream.write(new VarInt(magicNumber).encode());
-        stream.write(new VarInt(length).encode());
-        stream.write(new VarInt(msgType).encode());
+        Utils.uint32ToByteStreamLE(magicNumber, stream);
+        Utils.uint32ToByteStreamLE(length, stream);
+        Utils.uint16ToByteStreamLE(headType, stream);
+        if (extend == null) {
+            extend = new byte[]{1, 2, 3, 4, 0, 0, 0, 0};
+        } else {
+            if (extend.length != 8) {
+                throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
+            }
+        }
         stream.write(extend);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
-        this.magicNumber = (int) byteBuffer.readVarInt();
+        this.magicNumber = byteBuffer.readInt32();
         this.length = byteBuffer.readInt32();
-        this.msgType = (short) byteBuffer.readVarInt();
+        this.headType = byteBuffer.readShort();
         this.extend = byteBuffer.readBytes(8);
     }
 
-    public short getMsgType() {
-        return msgType;
-    }
-
-    public void setMsgType(short msgType) {
-        this.msgType = msgType;
-    }
 
     public int getLength() {
         return length;
@@ -94,11 +96,36 @@ public class NulsMessageHeader extends NulsData {
         this.magicNumber = magicNumber;
     }
 
-    public static void main(String[] args) throws IOException {
-       // NulsMessageHeader header = new NulsMessageHeader(12345678, NulsMessageHeader.NETWORK_MESSAGE);
-       // byte[] bytes = header.serialize();
+    public short getHeadType() {
+        return headType;
+    }
 
-       // header.parse(new NulsByteBuffer(bytes));
-        new VarInt(1234567).encode();
+    public void setHeadType(short headType) {
+        this.headType = headType;
+    }
+
+    public static void main(String[] args) throws IOException {
+        NulsMessageHeader header = new NulsMessageHeader(12345678, NulsMessageHeader.NETWORK_MESSAGE);
+        byte[] bytes = header.serialize();
+
+        header.parse(new NulsByteBuffer(bytes));
+        System.out.println(header.toString());
+
+    }
+
+    @Override
+    public String toString() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("NulsMessageHeader{ ");
+        buffer.append("magicNumber:" + magicNumber + ",");
+        buffer.append("length:" + length + ",");
+        buffer.append("headType:" + headType + ",");
+        if (extend != null && extend.length != 0) {
+            buffer.append("extends:" + new String(extend));
+        } else {
+            buffer.append("extends:null");
+        }
+        buffer.append("}");
+        return buffer.toString();
     }
 }
