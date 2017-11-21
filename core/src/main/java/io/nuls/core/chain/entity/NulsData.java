@@ -1,5 +1,7 @@
 package io.nuls.core.chain.entity;
 
+import io.nuls.core.context.NulsContext;
+import io.nuls.core.utils.str.StringUtils;
 import io.nuls.core.validate.DataValidatorChain;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
@@ -52,8 +54,6 @@ public abstract class NulsData implements Serializable {
             bos = new UnsafeByteArrayOutputStream(size());
             serializeToStream(bos);
             return bos.toByteArray();
-        } catch (IOException e) {
-            throw e;
         } finally {
             if (bos != null) {
                 try {
@@ -88,6 +88,16 @@ public abstract class NulsData implements Serializable {
 
     public void setVersion(int version) {
         this.version = version;
+    }
+
+    protected void writeBytesWithLength(OutputStream stream, String value) throws IOException {
+        if (StringUtils.isNotBlank(value)) {
+            stream.write(0);
+        } else {
+            byte[] bytes = value.getBytes(NulsContext.DEFAULT_ENCODING);
+            stream.write(bytes.length);
+            stream.write(bytes);
+        }
     }
 
     protected void writeBytesWithLength(OutputStream stream, byte[] bytes) throws IOException {

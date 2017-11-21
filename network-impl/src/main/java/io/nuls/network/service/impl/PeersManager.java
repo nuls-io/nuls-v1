@@ -17,7 +17,6 @@ import io.nuls.network.module.NetworkModule;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class PeersManager {
 
@@ -67,7 +66,6 @@ public class PeersManager {
             peers = discovery.getSeedPeers();
         }
 
-
         for (Peer peer : peers) {
             addPeerToGroup(NetworkConstant.Network_Peer_Out_Group, peer);
             connectionManager.openConnection(peer);
@@ -77,6 +75,7 @@ public class PeersManager {
          *
          *
          **/
+
 
 
     }

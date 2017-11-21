@@ -235,6 +235,11 @@ public class Utils {
         out[offset + 3] = (byte) (0xFF & val);
     }
 
+    public static void uint16ToByteArrayLE(short val, byte[] out, int offset) {
+        out[offset] = (byte) (0xFF & val);
+        out[offset + 1] = (byte) (0xFF & (val >> 8));
+    }
+
     public static void uint32ToByteArrayLE(long val, byte[] out, int offset) {
         out[offset] = (byte) (0xFF & val);
         out[offset + 1] = (byte) (0xFF & (val >> 8));
@@ -251,6 +256,11 @@ public class Utils {
         out[offset + 5] = (byte) (0xFF & (val >> 40));
         out[offset + 6] = (byte) (0xFF & (val >> 48));
         out[offset + 7] = (byte) (0xFF & (val >> 56));
+    }
+
+    public static void uint16ToByteStreamLE(short val, OutputStream stream) throws IOException {
+        stream.write((byte) (0xFF & val));
+        stream.write((byte) (0xFF & (val >> 8)));
     }
 
     public static void uint32ToByteStreamLE(long val, OutputStream stream) throws IOException {
@@ -270,6 +280,7 @@ public class Utils {
         stream.write((int) (0xFF & (val >> 48)));
         stream.write((int) (0xFF & (val >> 56)));
     }
+
 
     public static void uint64ToByteStreamLE(BigInteger val, OutputStream stream) throws IOException {
         byte[] bytes = val.toByteArray();

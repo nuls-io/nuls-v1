@@ -7,10 +7,16 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.mesasge.NulsMessage;
 import io.nuls.core.mesasge.NulsMessageHeader;
+import io.nuls.core.thread.NulsThread;
+import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
 import io.nuls.network.entity.param.NetworkParam;
+import io.nuls.network.message.NetWorkMessageHandlerFactory;
+import io.nuls.network.message.NetworkMessage;
+import io.nuls.network.message.NetworkMessageResult;
 import io.nuls.network.message.entity.VersionMessage;
+import io.nuls.network.message.messageHandler.NetWorkMessageHandler;
 import io.nuls.network.service.MessageWriter;
 
 import java.io.IOException;
@@ -18,6 +24,8 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.NotYetConnectedException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -45,7 +53,7 @@ public class Peer extends NulsData {
     public final static int CONNECTING = 1;
     public final static int HANDSHAKE = 2;
     public final static int CLOSE = 3;
-    private int status;
+    private volatile int status;
 
     private MessageWriter writeTarget;
 
@@ -55,13 +63,20 @@ public class Peer extends NulsData {
 
     private NetworkProcessorService processorService;
 
+    private NetWorkMessageHandlerFactory messageHandlerFactory;
+
+    //异步顺序执行所有接收到的消息，以免有处理时间较长的线程阻塞，影响性能
+    private ExecutorService executorService = Executors.newSingleThreadExecutor();
+
     public Peer(NetworkParam network) {
         this.network = network;
+        this.messageHandlerFactory = network.getMessageHandlerFactory();
         processorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
     }
 
     public Peer(NetworkParam network, int type) {
         this.network = network;
+        this.messageHandlerFactory = network.getMessageHandlerFactory();
         this.type = type;
         processorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
     }
@@ -69,6 +84,7 @@ public class Peer extends NulsData {
 
     public Peer(NetworkParam network, int type, InetSocketAddress socketAddress) {
         this.network = network;
+        this.messageHandlerFactory = network.getMessageHandlerFactory();
         this.type = type;
         this.port = socketAddress.getPort();
         this.ip = socketAddress.getAddress().getHostAddress();
@@ -82,24 +98,36 @@ public class Peer extends NulsData {
 
     public void connectionOpened() throws IOException {
         Block bestBlock = NulsContext.getInstance().getBestBlock();
-        VersionMessage message = new VersionMessage(network, bestBlock.getHeight(), bestBlock.getHash().toString(), this);
+        VersionMessage message = new VersionMessage(bestBlock.getHeight(), bestBlock.getHash().toString(), this);
         sendMessage(message);
     }
 
 
     public void sendMessage(NulsMessage message) throws IOException {
-        if (writeTarget == null) {
+        if (writeTarget == null || this.status != Peer.HANDSHAKE) {
             throw new NotYetConnectedException();
         }
-        if (this.status != Peer.HANDSHAKE && !isHandShakeMessage(message)) {
-            throw new NotYetConnectedException();
-        }
+
         lock.lock();
         try {
             this.writeTarget.write(message.serialize());
         } finally {
             lock.unlock();
         }
+    }
+
+    public void sendMessage(NetworkMessage networkMessage) throws IOException {
+        if (writeTarget == null) {
+            throw new NotYetConnectedException();
+        }
+        if (this.status != Peer.HANDSHAKE && !isHandShakeMessage(networkMessage)) {
+            throw new NotYetConnectedException();
+        }
+
+        byte[] data = networkMessage.serialize();
+        byte b = 1;
+        NulsMessage message = new NulsMessage(network.packetMagic(), data.length, NulsMessageHeader.NETWORK_MESSAGE, b, data);
+        sendMessage(message);
     }
 
     /**
@@ -119,22 +147,47 @@ public class Peer extends NulsData {
         byte[] data = new byte[buffer.limit() - headers.length];
         buffer.get(data, 0, data.length);
 
-        NulsMessage message = new NulsMessage(messageHeader, data);
-        processMessage(message);
+        processMessage(messageHeader, data);
     }
 
     /**
      * if message is a eventMessage , put it in processorService ,other module will process it
-     * @param message
+     *
+     * @param messageHeader
+     * @param data
      */
-    public void processMessage(NulsMessage message) {
+    public void processMessage(NulsMessageHeader messageHeader, byte[] data) {
+        if (messageHeader.getHeadType() == NulsMessageHeader.EVENT_MESSAGE) {
+            if (this.status != Peer.HANDSHAKE) {
+                return;
+            }
 
-        if(message.getHeader().getMsgType() == NulsMessageHeader.EVENT_MESSAGE) {
+            NulsMessage message = new NulsMessage(messageHeader, data);
             processorService.send(message.getData());
-        }else {
+        } else {
 
+            byte[] types = new byte[2];
+            System.arraycopy(data, 0, types, 0, 2);
+            short msgType = Utils.bytes2Short(types);
+            NetworkMessage networkMessage = NetworkMessage.transfer(msgType, data);
+            if (this.status != Peer.HANDSHAKE && !isHandShakeMessage(networkMessage)) {
+                return;
+            }
 
+            NetWorkMessageHandler handler = messageHandlerFactory.getHandler(networkMessage);
+            executorService.submit(new Thread() {
+                @Override
+                public void run() {
+                    NetworkMessageResult messageResult = handler.process(networkMessage, Peer.this);
+                    processMessageResult(messageResult);
+                }
+            });
         }
+    }
+
+
+    public void processMessageResult(NetworkMessageResult messageResult) {
+
     }
 
     public void destroy() {
@@ -157,8 +210,8 @@ public class Peer extends NulsData {
     }
 
 
-    public boolean isHandShakeMessage(NulsMessage message) {
-        return message instanceof VersionMessage;
+    public boolean isHandShakeMessage(NetworkMessage networkMessage) {
+        return networkMessage instanceof VersionMessage;
     }
 
     public int getType() {

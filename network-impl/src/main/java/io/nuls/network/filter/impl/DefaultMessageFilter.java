@@ -20,6 +20,10 @@ public class DefaultMessageFilter implements NulsMessageFilter {
 
     private static final DefaultMessageFilter messageFilter = new DefaultMessageFilter();
 
+    private DefaultMessageFilter() {
+
+    }
+
     public static DefaultMessageFilter getInstance() {
         return messageFilter;
     }
