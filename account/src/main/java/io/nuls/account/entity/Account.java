@@ -88,6 +88,8 @@ public class Account extends NulsData {
             } catch (UnsupportedEncodingException e) {
                 Log.error(e);
             }
+        }else{
+            s ++;
         }
         if(StringUtils.isNotBlank(alias)){
             try {
@@ -95,6 +97,8 @@ public class Account extends NulsData {
             } catch (UnsupportedEncodingException e) {
                 Log.error(e);
             }
+        }else{
+            s ++;
         }
         if (null != address) {
             s += address.getHash160().length;
@@ -116,9 +120,13 @@ public class Account extends NulsData {
         stream.write(new VarInt(version).encode());
         if(StringUtils.isNotBlank(id)){
             this.writeBytesWithLength(stream, id.getBytes(NulsContext.DEFAULT_ENCODING));
+        }else {
+            stream.write(0);
         }
         if(StringUtils.isNotBlank(alias)){
             this.writeBytesWithLength(stream, alias.getBytes(NulsContext.DEFAULT_ENCODING));
+        }else {
+            stream.write(0);
         }
         if (null != address && null != address.getHash160()) {
             stream.write(address.getHash160());

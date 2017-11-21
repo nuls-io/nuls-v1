@@ -1,39 +1,130 @@
--- Create table
-create table IF NOT EXISTS block
-(
-  hash       VARCHAR2(100)  PRIMARY KEY,
-  height     BIGINT not null,
-  create_time BIGINT not null,
-  script     binary(255) DEFAULT NULL
-);
- -- block  index
- create unique index IF NOT EXISTS block_height_idx on block(height);
 
-create table IF NOT EXISTS account_local
-(
-  id VARCHAR2(40) PRIMARY KEY,
-  address VARCHAR2 (40) NOT NULL,
- pub_key BINARY  DEFAULT NULL,
- create_time BIGINT NOT NULL,
- create_height BIGINT NOT NULL,
- tx_hash BINARY  DEFAULT NULL,
- alias VARCHAR2 (100),
- version INTEGER NOT NULL,
- pri_key VARCHAR(100) DEFAULT NULL,
- pri_seed BINARY DEFAULT NULL,
- EXTEND BINARY DEFAULT NULL
+CREATE TABLE IF NOT EXISTS `account` (
+  `id` varchar(40) NOT NULL,
+  `address` varchar(40) NOT NULL,
+  `pub_key` varbinary(1) DEFAULT NULL,
+  `create_time` bigint(11) NOT NULL,
+  `create_height` bigint(11) NOT NULL,
+  `tx_hash` varbinary(1) DEFAULT NULL,
+  `alias` varchar(100) DEFAULT NULL,
+  `version` int(11) NOT NULL,
+  `pri_key` varchar(100) DEFAULT NULL,
+  `pri_seed` varbinary(1) DEFAULT NULL,
+  `EXTEND` varbinary(1) DEFAULT NULL,
+  PRIMARY KEY (`id`)
 );
-create unique index IF NOT EXISTS account_local_idx on account_local(id);
-create table IF NOT EXISTS account
-(
-  id VARCHAR2(40) PRIMARY KEY,
-  address VARCHAR2 (40) NOT NULL,
- pub_key BINARY  DEFAULT NULL,
- create_time BIGINT NOT NULL,
- create_height BIGINT NOT NULL,
- tx_hash BINARY  DEFAULT NULL,
- alias VARCHAR2 (100),
- version INTEGER NOT NULL,
- bytes BINARY DEFAULT NULL
+
+CREATE TABLE IF NOT EXISTS `block` (
+  `hash` varchar(70) NOT NULL,
+  `height` bigint(11) NOT NULL,
+  `pre_hash` varchar(70) NOT NULL,
+  `merkle_hash` varchar(70) NOT NULL,
+  `create_time` bigint(11) NOT NULL,
+  `period_start_time` bigint(11) NOT NULL,
+  `time_period` int(5) NOT NULL,
+  `consensus_address` varchar(40) NOT NULL,
+  `varsion` int(5) NOT NULL,
+  `txCount` int(5) NOT NULL,
+  `txs` varbinary(1) NOT NULL,
+  `sign` varbinary(1) NOT NULL,
+  PRIMARY KEY (`hash`)
 );
-create unique index IF NOT EXISTS account_idx on account(id);
+CREATE TABLE IF NOT EXISTS `consensus_account` (
+  `hash` varchar(70) NOT NULL,
+  `address` varchar(40) NOT NULL,
+  `agent_address` varchar(40) NOT NULL,
+  `deposit` decimal(19,8) NOT NULL,
+  `version` int(11) NOT NULL,
+  PRIMARY KEY (`hash`)
+);
+CREATE TABLE IF NOT EXISTS `peer` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ip` varchar(20) NOT NULL,
+  `port` int(6) NOT NULL,
+  `last_time` bigint(20) NOT NULL,
+  `hop_count` bigint(20) DEFAULT NULL,
+  `heart_count` bigint(20) NOT NULL,
+  `heart_faild_count` bigint(20) NOT NULL,
+  `avg_time` bigint(20) NOT NULL,
+  `magic_num` int(11) NOT NULL,
+  `version` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+);
+CREATE TABLE IF NOT EXISTS `peer_group` (
+  `hid` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `version` int(11) NOT NULL,
+  PRIMARY KEY (`hid`)
+);
+CREATE TABLE IF NOT EXISTS `peer_group_relation` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `peer_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+);
+CREATE TABLE IF NOT EXISTS `sub_chain` (
+  `id` varchar(30) NOT NULL,
+  `creator_address` varchar(40) NOT NULL,
+  `tx_hash` varchar(70) NOT NULL,
+  `g_block` varbinary(1) NOT NULL,
+  `g_block_hash` varchar(70) NOT NULL,
+  `g_merkle_hash` varchar(70) NOT NULL,
+  `g_block_header` varbinary(1) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `sign` varbinary(1) NOT NULL,
+  PRIMARY KEY (`id`)
+);
+CREATE TABLE IF NOT EXISTS `transaction` (
+  `hash` varchar(70) NOT NULL,
+  `type` int(5) NOT NULL,
+  `remark` varchar(100) DEFAULT NULL,
+  `create_time` bigint(11) NOT NULL,
+  `fee` decimal(19,8) NOT NULL,
+  `txData` varbinary(1) NOT NULL,
+  `sign` varbinary(1) NOT NULL,
+  `extend` varbinary(1) DEFAULT NULL,
+  `block_height` int(5) NOT NULL,
+  `block_hash` varchar(70) NOT NULL,
+  `related_tx_hash` varchar(70) DEFAULT NULL,
+  `version` int(11) NOT NULL,
+  PRIMARY KEY (`hash`)
+);
+CREATE TABLE IF NOT EXISTS `transaction_local` (
+  `hash` varchar(70) NOT NULL,
+  `type` int(5) NOT NULL,
+  `remark` varchar(100) DEFAULT NULL,
+  `create_time` bigint(11) NOT NULL,
+  `fee` decimal(19,8) NOT NULL,
+  `txData` varbinary(1) NOT NULL,
+  `sign` varbinary(1) NOT NULL,
+  `extend` varbinary(1) DEFAULT NULL,
+  `block_height` int(5) NOT NULL,
+  `block_hash` varchar(70) NOT NULL,
+  `related_tx_hash` varchar(70) DEFAULT NULL,
+  `version` int(11) NOT NULL,
+  PRIMARY KEY (`hash`)
+);
+CREATE TABLE IF NOT EXISTS `tx_account_relation` (
+  `id` varchar(40) NOT NULL,
+  `tx_hash` varchar(70) NOT NULL,
+  `address` varchar(40) NOT NULL,
+  PRIMARY KEY (`id`)
+);
+CREATE TABLE IF NOT EXISTS `utxo_input` (
+  `hash` varchar(70) NOT NULL,
+  `tx_hash` varchar(70) NOT NULL,
+  `from_id` varchar(32) NOT NULL,
+  `script` varbinary(1) NOT NULL,
+  PRIMARY KEY (`hash`)
+);
+CREATE TABLE IF NOT EXISTS `utxo_output` (
+  `hash` varchar(70) NOT NULL,
+  `tx_hash` varchar(70) NOT NULL,
+  `value` decimal(19,8) NOT NULL,
+  `lock_time` bigint(20) DEFAULT NULL,
+  `status` tinyint(4) NOT NULL,
+  `script` varbinary(1) NOT NULL,
+  `out_index` int(5) NOT NULL,
+  `address` varchar(40) NOT NULL,
+  PRIMARY KEY (`hash`)
+);

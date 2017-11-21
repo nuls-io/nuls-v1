@@ -15,9 +15,9 @@ public class ConsensusAccount  {
 
     private byte[] applyTxId;
 
-    private double marginAmount;
+    private double deposit;
 
-    private Address bailor;
+    public Address agent;
 
     private Address miner;
 
@@ -47,24 +47,24 @@ public class ConsensusAccount  {
         this.applyTxId = applyTxId;
     }
 
-    public double getMarginAmount() {
-        return marginAmount;
+    public double getDeposit() {
+        return deposit;
     }
 
-    public void setMarginAmount(double marginAmount) {
-        this.marginAmount = marginAmount;
-    }
-
-    public Address getBailor() {
-        return bailor;
-    }
-
-    public void setBailor(Address bailor) {
-        this.bailor = bailor;
+    public void setDeposit(double deposit) {
+        this.deposit = deposit;
     }
 
     public Address getMiner() {
         return miner;
+    }
+
+    public Address getAgent() {
+        return agent;
+    }
+
+    public void setAgent(Address agent) {
+        this.agent = agent;
     }
 
     public void setMiner(Address miner) {

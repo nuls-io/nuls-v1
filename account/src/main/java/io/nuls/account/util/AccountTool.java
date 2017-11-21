@@ -6,10 +6,8 @@ import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
-import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.db.entity.AccountPo;
-import io.nuls.db.entity.LocalAccountPo;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -61,11 +59,9 @@ public final class AccountTool {
         desc.setPubKey(src.getPubKey());
 //        desc.setSign();
 //        desc.setStatus();
-        if (src instanceof LocalAccountPo) {
-            desc.setPriKey(((LocalAccountPo) src).getPriKey());
-            desc.setPriSeed(((LocalAccountPo) src).getPriSeed());
-            desc.setEcKey(ECKey.fromPrivate(new BigInteger(desc.getPriKey())));
-        }
+        desc.setPriKey(src.getPriKey().getBytes());
+        desc.setPriSeed(src.getPriSeed());
+        desc.setEcKey(ECKey.fromPrivate(new BigInteger(desc.getPriKey())));
     }
 
     private static Address newAddress(byte[] pubKey) {
@@ -84,9 +80,7 @@ public final class AccountTool {
         desc.setTxHash(src.getTxHash());
         desc.setVersion(src.getVersion());
         desc.setExtend(src.getExtend());
-        if (desc instanceof LocalAccountPo) {
-            ((LocalAccountPo) desc).setPriKey(src.getPriKey());
-            ((LocalAccountPo) desc).setPriSeed(src.getPriSeed());
-        }
+        desc.setPriKey(new String(src.getPriKey()));
+        desc.setPriSeed(src.getPriSeed());
     }
 }

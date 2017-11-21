@@ -32,6 +32,8 @@ public class AccountManager {
         List<Account> list = this.accountService.getLocalAccountList();
         if (null != list && !list.isEmpty()) {
             Locla_acount_id = list.get(0).getId();
+        }else{
+            Account account = this.accountService.createAccount();
         }
     }
 

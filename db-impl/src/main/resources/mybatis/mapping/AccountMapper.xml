@@ -1,168 +1,224 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="io.nuls.db.dao.impl.mybatis.mapper.AccountMapper">
-    <resultMap id="BaseResultMap" type="io.nuls.db.entity.AccountPo">
-        <id column="ID" jdbcType="VARCHAR" property="id"/>
-        <result column="ADDRESS" jdbcType="VARCHAR" property="address"/>
-        <result column="PUB_KEY" jdbcType="BINARY" property="pubKey"/>
-        <result column="CREATE_TIME" jdbcType="BIGINT" property="createTime"/>
-        <result column="CREATE_HEIGHT" jdbcType="BIGINT" property="createHeight"/>
-        <result column="TX_HASH" jdbcType="BINARY" property="txHash"/>
-        <result column="ALIAS" jdbcType="VARCHAR" property="alias"/>
-        <result column="VERSION" jdbcType="INTEGER" property="version"/>
-        <result column="EXTEND" jdbcType="BINARY" property="extend"/>
-    </resultMap>
-    <sql id="Base_Column_List">
-        ID, ADDRESS, PUBKEY,CREATE_TIME,CREATE_HEIGHT,TX_HASH,ALIAS,VERSION,EXTEND
-    </sql>
-    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from ACCOUNT
-        where ID = #{id,jdbcType=VARCHAR}
-    </select>
-
-    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
-        delete from ACCOUNT
-        where ID = #{id,jdbcType=VARCHAR}
-    </delete>
-
-    <insert id="insert" parameterType="io.nuls.db.entity.AccountPo">
-        insert into ACCOUNT (
-        <include refid="Base_Column_List"/>
-        )
-        values (#{id,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR}, #{pubkey,jdbcType=BINARY},
-        #{createTime,jdbcType=BIGINT},#{createHeight,jdbcType=BIGINT},#{txHash,jdbcType=BINARY},
-        #{alias,jdbcType=VARCHAR},#{version,jdbcType=BIGINT},#{extend,jdbcType=BINARY})
-    </insert>
-
-    <insert id="insertSelective" parameterType="io.nuls.db.entity.AccountPo">
-    insert into ACCOUNT
-        <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="id != null">
-                ID,
-            </if>
-            <if test="address != null">
-                ADDRESS,
-            </if>
-            <if test="pubKey != null">
-                PUB_KEY,
-            </if>
-            <if test="createTime != null">
-                CREATE_TIME,
-            </if>
-            <if test="createHeight != null">
-                CREATE_HEIGHT,
-            </if>
-            <if test="txHash != null">
-                TX_HASH,
-            </if>
-            <if test="alias != null">
-                ALIAS,
-            </if>
-            <if test="version != null">
-                VERSION,
-            </if>
-            <if test="extend != null">
-                EXTEND,
-            </if>
-        </trim>
-        <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="id != null">
-                #{id,jdbcType=VARCHAR},
-            </if>
-            <if test="address != null">
-                #{address,jdbcType=BIGINT},
-            </if>
-            <if test="pubKey != null">
-                #{pubKey,jdbcType=BIGINT},
-            </if>
-            <if test="createTime != null">
-                #{createTime,jdbcType=BIGINT},
-            </if>
-            <if test="createHeight != null">
-                #{createHeight,jdbcType=BIGINT},
-            </if>
-            <if test="txHash != null">
-                #{txHash,jdbcType=BIGINT},
-            </if>
-            <if test="alias != null">
-                #{alias,jdbcType=BIGINT},
-            </if>
-            <if test="version != null">
-                #{version,jdbcType=BIGINT},
-            </if>
-            <if test="extend != null">
-                #{extend,jdbcType=BINARY},
-            </if>
-        </trim>
-    </insert>
-    <update id="updateByPrimaryKeySelective" parameterType="io.nuls.db.entity.AccountPo">
-        update ACCOUNT
-        <set>
-            <if test="address != null">
-                ADDRESS = #{address,jdbcType=BIGINT},
-            </if>
-            <if test="pubKey != null">
-               PUB_KEY = #{pubKey,jdbcType=BIGINT},
-            </if>
-            <if test="createTime != null">
-                CREAWTE_TIME = #{createTime,jdbcType=BIGINT},
-            </if>
-            <if test="createHeight != null">
-                CREATE_HEIGHT = #{createHeight,jdbcType=BIGINT},
-            </if>
-            <if test="txHash != null">
-               TX_HASH= #{txHash,jdbcType=BIGINT},
-            </if>
-            <if test="alias != null">
-                ALIAS = #{alias,jdbcType=BIGINT},
-            </if>
-            <if test="version != null">
-                VERSION = #{version,jdbcType=BIGINT},
-            </if>
-            <if test="extend != null">
-               EXTEND = #{extend,jdbcType=BINARY},
-            </if>
-        </set>
-        where ID = #{id,jdbcType=VARCHAR}
-    </update>
-    <update id="updateByPrimaryKey" parameterType="io.nuls.db.entity.AccountPo">
-        update ACCOUNT set
-                ADDRESS = #{address,jdbcType=BIGINT},
-                PUB_KEY = #{pubKey,jdbcType=BIGINT},
-                CREAWTE_TIME = #{createTime,jdbcType=BIGINT},
-                CREATE_HEIGHT = #{createHeight,jdbcType=BIGINT},
-                TX_HASH= #{txHash,jdbcType=BIGINT},
-                ALIAS = #{alias,jdbcType=BIGINT},
-                VERSION = #{version,jdbcType=BIGINT},
-                EXTEND = #{extend,jdbcType=BINARY},
-        where ID = #{id,jdbcType=VARCHAR}
-    </update>
-
-    <delete id="truncate" >
-        truncate ACCOUNT;
-    </delete>
-
-    <select id="count" resultType="Long">
-        select count(1) as getCount from ACCOUNT;
-    </select>
-
-    <insert id="insertBatch" parameterType="java.util.List">
-        insert into ACCOUNT (ID, ADDRESS, PUBKEY,CREATE_TIME,CREATE_HEIGHT,TX_HASH,ALIAS,VERSION,EXTEND)
-        values
-        <foreach collection="list" item="item" index="index" separator=",">
-            (#{id,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR}, #{pubkey,jdbcType=BINARY},
-            #{createTime,jdbcType=BIGINT},#{createHeight,jdbcType=BIGINT},#{txHash,jdbcType=BINARY},
-            #{alias,jdbcType=VARCHAR},#{version,jdbcType=BIGINT},#{extend,jdbcType=BINARY})
-        </foreach>
-    </insert>
-
-    <select id="selectList" parameterType="Searchable" resultType="io.nuls.db.entity.AccountPo">
-        select
-        <include refid="Base_Column_List" />
-        from ACCOUNT
-        <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Serach_Where"/>
-    </select>
-
+  <resultMap id="BaseResultMap" type="io.nuls.db.entity.AccountPo">
+    <!--
+      WARNING - @mbg.generated
+      This element is automatically generated by MyBatis Generator, do not modify.
+    -->
+    <id column="id" jdbcType="VARCHAR" property="id" />
+    <result column="address" jdbcType="VARCHAR" property="address" />
+    <result column="create_time" jdbcType="BIGINT" property="createTime" />
+    <result column="create_height" jdbcType="BIGINT" property="createHeight" />
+    <result column="alias" jdbcType="VARCHAR" property="alias" />
+    <result column="version" jdbcType="INTEGER" property="version" />
+    <result column="pri_key" jdbcType="VARCHAR" property="priKey" />
+  </resultMap>
+  <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="io.nuls.db.entity.AccountPo">
+    <!--
+      WARNING - @mbg.generated
+      This element is automatically generated by MyBatis Generator, do not modify.
+    -->
+    <result column="pub_key" jdbcType="VARBINARY" property="pubKey" />
+    <result column="tx_hash" jdbcType="VARBINARY" property="txHash" />
+    <result column="pri_seed" jdbcType="VARBINARY" property="priSeed" />
+    <result column="EXTEND" jdbcType="VARBINARY" property="extend" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--
+      WARNING - @mbg.generated
+      This element is automatically generated by MyBatis Generator, do not modify.
+    -->
+    id, address, create_time, create_height, alias, version, pri_key
+  </sql>
+  <sql id="Blob_Column_List">
+    <!--
+      WARNING - @mbg.generated
+      This element is automatically generated by MyBatis Generator, do not modify.
+    -->
+    pub_key, tx_hash, pri_seed, EXTEND
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="ResultMapWithBLOBs">
+    <!--
+      WARNING - @mbg.generated
+      This element is automatically generated by MyBatis Generator, do not modify.
+    -->
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from account
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    <!--
+      WARNING - @mbg.generated
+      This element is automatically generated by MyBatis Generator, do not modify.
+    -->
+    delete from account
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="io.nuls.db.entity.AccountPo">
+    <!--
+      WARNING - @mbg.generated
+      This element is automatically generated by MyBatis Generator, do not modify.
+    -->
+    insert into account (id, address, create_time, 
+      create_height, alias, version, 
+      pri_key, pub_key, tx_hash, 
+      pri_seed, EXTEND)
+    values (#{id,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR}, #{createTime,jdbcType=BIGINT}, 
+      #{createHeight,jdbcType=BIGINT}, #{alias,jdbcType=VARCHAR}, #{version,jdbcType=INTEGER}, 
+      #{priKey,jdbcType=VARCHAR}, #{pubKey,jdbcType=VARBINARY}, #{txHash,jdbcType=VARBINARY}, 
+      #{priSeed,jdbcType=VARBINARY}, #{extend,jdbcType=VARBINARY})
+  </insert>
+  <insert id="insertSelective" parameterType="io.nuls.db.entity.AccountPo">
+    <!--
+      WARNING - @mbg.generated
+      This element is automatically generated by MyBatis Generator, do not modify.
+    -->
+    insert into account
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="address != null">
+        address,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="createHeight != null">
+        create_height,
+      </if>
+      <if test="alias != null">
+        alias,
+      </if>
+      <if test="version != null">
+        version,
+      </if>
+      <if test="priKey != null">
+        pri_key,
+      </if>
+      <if test="pubKey != null">
+        pub_key,
+      </if>
+      <if test="txHash != null">
+        tx_hash,
+      </if>
+      <if test="priSeed != null">
+        pri_seed,
+      </if>
+      <if test="extend != null">
+        EXTEND,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null">
+        #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=BIGINT},
+      </if>
+      <if test="createHeight != null">
+        #{createHeight,jdbcType=BIGINT},
+      </if>
+      <if test="alias != null">
+        #{alias,jdbcType=VARCHAR},
+      </if>
+      <if test="version != null">
+        #{version,jdbcType=INTEGER},
+      </if>
+      <if test="priKey != null">
+        #{priKey,jdbcType=VARCHAR},
+      </if>
+      <if test="pubKey != null">
+        #{pubKey,jdbcType=VARBINARY},
+      </if>
+      <if test="txHash != null">
+        #{txHash,jdbcType=VARBINARY},
+      </if>
+      <if test="priSeed != null">
+        #{priSeed,jdbcType=VARBINARY},
+      </if>
+      <if test="extend != null">
+        #{extend,jdbcType=VARBINARY},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="io.nuls.db.entity.AccountPo">
+    <!--
+      WARNING - @mbg.generated
+      This element is automatically generated by MyBatis Generator, do not modify.
+    -->
+    update account
+    <set>
+      <if test="address != null">
+        address = #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=BIGINT},
+      </if>
+      <if test="createHeight != null">
+        create_height = #{createHeight,jdbcType=BIGINT},
+      </if>
+      <if test="alias != null">
+        alias = #{alias,jdbcType=VARCHAR},
+      </if>
+      <if test="version != null">
+        version = #{version,jdbcType=INTEGER},
+      </if>
+      <if test="priKey != null">
+        pri_key = #{priKey,jdbcType=VARCHAR},
+      </if>
+      <if test="pubKey != null">
+        pub_key = #{pubKey,jdbcType=VARBINARY},
+      </if>
+      <if test="txHash != null">
+        tx_hash = #{txHash,jdbcType=VARBINARY},
+      </if>
+      <if test="priSeed != null">
+        pri_seed = #{priSeed,jdbcType=VARBINARY},
+      </if>
+      <if test="extend != null">
+        EXTEND = #{extend,jdbcType=VARBINARY},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="io.nuls.db.entity.AccountPo">
+    <!--
+      WARNING - @mbg.generated
+      This element is automatically generated by MyBatis Generator, do not modify.
+    -->
+    update account
+    set address = #{address,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=BIGINT},
+      create_height = #{createHeight,jdbcType=BIGINT},
+      alias = #{alias,jdbcType=VARCHAR},
+      version = #{version,jdbcType=INTEGER},
+      pri_key = #{priKey,jdbcType=VARCHAR},
+      pub_key = #{pubKey,jdbcType=VARBINARY},
+      tx_hash = #{txHash,jdbcType=VARBINARY},
+      pri_seed = #{priSeed,jdbcType=VARBINARY},
+      EXTEND = #{extend,jdbcType=VARBINARY}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="io.nuls.db.entity.AccountPo">
+    <!--
+      WARNING - @mbg.generated
+      This element is automatically generated by MyBatis Generator, do not modify.
+    -->
+    update account
+    set address = #{address,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=BIGINT},
+      create_height = #{createHeight,jdbcType=BIGINT},
+      alias = #{alias,jdbcType=VARCHAR},
+      version = #{version,jdbcType=INTEGER},
+      pri_key = #{priKey,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
 </mapper>

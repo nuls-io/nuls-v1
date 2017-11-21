@@ -5,10 +5,8 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.BlockDao;
 import io.nuls.db.dao.impl.mybatis.BlockDaoImpl;
 import io.nuls.db.entity.BlockPo;
-import io.nuls.db.module.DBModule;
 import io.nuls.db.module.impl.MybatisDBModuleImpl;
 import org.junit.*;
-import sun.applet.Main;
 
 /**
  * Created by zhouwei on 2017/10/24.
@@ -23,7 +21,7 @@ public class DBModuleTest {
     public static void init() {
         dbModule = new MybatisDBModuleImpl();
         dbModule.start();
-        blockDao = ModuleManager.getInstance().getService(BlockDaoImpl.class);
+        blockDao = ModuleManager.getInstance().getService(BlockDao.class);
     }
 
     @AfterClass
@@ -45,7 +43,7 @@ public class DBModuleTest {
         blockPo.setCreateTime(111L);
         blockPo.setHash("aaa");
         blockPo.setHeight(111L);
-        blockPo.setScript("dsfasdf".getBytes());
+//        blockPo.setScript("dsfasdf".getBytes());
         int result = blockDao.save(blockPo);
         Log.debug("result" + result);
 

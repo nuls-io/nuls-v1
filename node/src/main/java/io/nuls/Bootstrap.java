@@ -60,7 +60,6 @@ public class Bootstrap {
                 Log.error(e);
                 throw new NulsRuntimeException(ErrorCode.FAILED,"Client start faild");
             }
-            Log.info("");
         } while (false);
         Log.debug("--------------------------------------------");
         Log.debug(ModuleManager.getInstance().getInfo());
