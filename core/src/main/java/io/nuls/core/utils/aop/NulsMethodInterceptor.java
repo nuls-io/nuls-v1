@@ -6,7 +6,9 @@ import net.sf.cglib.proxy.MethodProxy;
 import java.lang.reflect.Method;
 
 /**
- * Created by Niels on 2017/10/13.
+ *
+ * @author Niels
+ * @date 2017/10/13
  *
  */
 public final class NulsMethodInterceptor implements MethodInterceptor {

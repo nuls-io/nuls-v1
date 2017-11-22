@@ -148,7 +148,6 @@ public class ScriptOpCodes {
     // expansion
     public static final int OP_NOP1 = 0xb0;
     /** Deprecated by BIP 65 */
-    @Deprecated
     public static final int OP_NOP2 = OP_CHECKLOCKTIMEVERIFY;
     public static final int OP_NOP3 = 0xb2;
     public static final int OP_NOP4 = 0xb3;

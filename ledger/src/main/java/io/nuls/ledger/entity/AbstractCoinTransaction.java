@@ -5,7 +5,9 @@ import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.utils.date.TimeService;
 
 /**
- * Created by Niels on 2017/11/14.
+ *
+ * @author Niels
+ * @date 2017/11/14
  */
 public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Transaction {
     protected T txData;

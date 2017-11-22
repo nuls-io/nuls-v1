@@ -5,7 +5,9 @@ import io.nuls.core.event.NulsEventHeader;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
 /**
- * Created by Niels on 2017/11/13.
+ *
+ * @author Niels
+ * @date 2017/11/13
  *
  */
 public class BlockEvent extends BaseConsensusEvent{

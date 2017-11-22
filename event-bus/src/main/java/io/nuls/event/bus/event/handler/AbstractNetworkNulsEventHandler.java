@@ -6,7 +6,9 @@ import io.nuls.event.bus.event.filter.NulsEventFilterChain;
 import io.nuls.event.bus.event.handler.intf.NulsEventHandler;
 
 /**
- * Created by Niels on 2017/11/6.
+ *
+ * @author Niels
+ * @date 2017/11/6
  *
  */
 public abstract class AbstractNetworkNulsEventHandler<T extends BaseNulsEvent>  implements NulsEventHandler<T> {

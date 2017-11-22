@@ -15,7 +15,7 @@ import org.bouncycastle.math.ec.ECFieldElement.Fp;
  * Created by facjas on 2017/11/20.
  */
 public class SM2 {
-    public static final String[] ecc_param = {
+    public static final String[] ECC_PARAM = {
             "8542D69E4C044F18E8B92435BF6FF7DE457283915C45517D722EDB8B08F1DFC3",
             "787968B4FA32C3FD2417842E73BBFEFF2F3C848B6831D7E0EC65228B3937E498",
             "63E4C6D3B23B0C849CF84241484BFE48F61D59A5B16BA06E6E12D1DA27C5249A",
@@ -42,12 +42,12 @@ public class SM2 {
     public final ECFieldElement ecc_gy_fieldelement;
 
     public SM2() {
-        this.ecc_p = new BigInteger(ecc_param[0], 16);
-        this.ecc_a = new BigInteger(ecc_param[1], 16);
-        this.ecc_b = new BigInteger(ecc_param[2], 16);
-        this.ecc_n = new BigInteger(ecc_param[3], 16);
-        this.ecc_gx = new BigInteger(ecc_param[4], 16);
-        this.ecc_gy = new BigInteger(ecc_param[5], 16);
+        this.ecc_p = new BigInteger(ECC_PARAM[0], 16);
+        this.ecc_a = new BigInteger(ECC_PARAM[1], 16);
+        this.ecc_b = new BigInteger(ECC_PARAM[2], 16);
+        this.ecc_n = new BigInteger(ECC_PARAM[3], 16);
+        this.ecc_gx = new BigInteger(ECC_PARAM[4], 16);
+        this.ecc_gy = new BigInteger(ECC_PARAM[5], 16);
 
         this.ecc_gx_fieldelement = new Fp(this.ecc_p, this.ecc_gx);
         this.ecc_gy_fieldelement = new Fp(this.ecc_p, this.ecc_gy);

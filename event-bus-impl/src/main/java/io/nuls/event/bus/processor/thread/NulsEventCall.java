@@ -7,7 +7,9 @@ import io.nuls.event.bus.event.handler.intf.NulsEventHandler;
 import java.util.concurrent.Callable;
 
 /**
- * Created by Niels on 2017/11/6.
+ *
+ * @author Niels
+ * @date 2017/11/6
  *
  */
 public class NulsEventCall<T extends BaseNulsEvent> implements Callable<T> {

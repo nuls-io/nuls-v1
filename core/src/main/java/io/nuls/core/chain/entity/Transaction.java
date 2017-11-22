@@ -13,7 +13,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * Created by win10 on 2017/10/30.
+ *
+ * @author win10
+ * @date 2017/10/30
  */
 public class Transaction extends BaseNulsData {
     public Transaction() {

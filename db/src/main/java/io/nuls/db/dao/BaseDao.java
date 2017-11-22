@@ -3,7 +3,9 @@ package io.nuls.db.dao;
 import java.util.List;
 
 /**
- * Created by zhouwei on 2017/9/29.
+ *
+ * @author zhouwei
+ * @date 2017/9/29
  */
 public interface BaseDao<K,T> {
 

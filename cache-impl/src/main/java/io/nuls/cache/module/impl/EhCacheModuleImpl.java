@@ -7,7 +7,9 @@ import io.nuls.cache.service.impl.EhCacheServiceImpl;
 import io.nuls.cache.service.intf.CacheService;
 
 /**
- * Created by Niels on 2017/10/27.
+ *
+ * @author Niels
+ * @date 2017/10/27
  *
  */
 public class EhCacheModuleImpl extends AbstractCacheModule {

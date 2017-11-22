@@ -1,7 +1,9 @@
 package io.nuls.db.constant;
 
 /**
- * Created by zhouwei on 2017/9/30.
+ *
+ * @author zhouwei
+ * @date 2017/9/30
  */
 public interface DBConstant {
     //version

@@ -4,7 +4,9 @@ package io.nuls.db.module;
 import io.nuls.core.module.BaseNulsModule;
 
 /**
- * Created by zhouwei on 2017/9/26.
+ *
+ * @author zhouwei
+ * @date 2017/9/26
  */
 public abstract class AbstractDBModule extends BaseNulsModule {
 

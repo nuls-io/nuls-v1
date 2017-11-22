@@ -6,7 +6,9 @@ import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
 /**
- * Created by zhouwei on 2017/10/25.
+ *
+ * @author zhouwei
+ * @date 2017/10/25
  */
 public class SessionManager {
 

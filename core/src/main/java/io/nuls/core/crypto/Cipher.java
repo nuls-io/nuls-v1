@@ -24,7 +24,7 @@ public class Cipher {
         this.keyOff = 0;
     }
 
-    private void Reset() {
+    private void reset() {
         this.sm3keybase = new SM3Digest();
         this.sm3c3 = new SM3Digest();
 
@@ -35,10 +35,10 @@ public class Cipher {
         p = Util.byteConvert32Bytes(p2.getY().toBigInteger());
         this.sm3keybase.update(p, 0, p.length);
         this.ct = 1;
-        NextKey();
+        nextkey();
     }
 
-    private void NextKey() {
+    private void nextkey() {
         SM3Digest sm3keycur = new SM3Digest(this.sm3keybase);
         sm3keycur.update((byte) (ct >> 24 & 0xff));
         sm3keycur.update((byte) (ct >> 16 & 0xff));
@@ -49,46 +49,46 @@ public class Cipher {
         this.ct++;
     }
 
-    public ECPoint Init_enc(SM2 sm2, ECPoint userKey) {
+    public ECPoint initEnc(SM2 sm2, ECPoint userKey) {
         AsymmetricCipherKeyPair key = sm2.ecc_key_pair_generator.generateKeyPair();
         ECPrivateKeyParameters ecpriv = (ECPrivateKeyParameters) key.getPrivate();
         ECPublicKeyParameters ecpub = (ECPublicKeyParameters) key.getPublic();
         BigInteger k = ecpriv.getD();
         ECPoint c1 = ecpub.getQ();
         this.p2 = userKey.multiply(k);
-        Reset();
+        reset();
         return c1;
     }
 
-    public void Encrypt(byte data[]) {
+    public void encrypt(byte data[]) {
         this.sm3c3.update(data, 0, data.length);
         for (int i = 0; i < data.length; i++) {
             if (keyOff == key.length) {
-                NextKey();
+                nextkey();
             }
             data[i] ^= key[keyOff++];
         }
     }
 
-    public void Init_dec(BigInteger userD, ECPoint c1) {
+    public void initDec(BigInteger userD, ECPoint c1) {
         this.p2 = c1.multiply(userD);
-        Reset();
+        reset();
     }
 
-    public void Decrypt(byte data[]) {
+    public void decrypt(byte data[]) {
         for (int i = 0; i < data.length; i++) {
             if (keyOff == key.length) {
-                NextKey();
+                nextkey();
             }
             data[i] ^= key[keyOff++];
         }
         this.sm3c3.update(data, 0, data.length);
     }
 
-    public void Dofinal(byte c3[]) {
+    public void dofinal(byte c3[]) {
         byte p[] = Util.byteConvert32Bytes(p2.getY().toBigInteger());
         this.sm3c3.update(p, 0, p.length);
         this.sm3c3.doFinal(c3, 0);
-        Reset();
+        reset();
     }
 }

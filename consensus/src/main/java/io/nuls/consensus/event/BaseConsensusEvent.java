@@ -4,7 +4,9 @@ import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.core.event.NulsEventHeader;
 
 /**
- * Created by Niels on 2017/11/7.
+ *
+ * @author Niels
+ * @date 2017/11/7
  *
  */
 public abstract class BaseConsensusEvent extends BaseNulsEvent{

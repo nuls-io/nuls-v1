@@ -7,8 +7,9 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.thread.BaseNulsThread;
 
 /**
- * Created by Niels on 2017/11/10.
  *
+ * @author Niels
+ * @date 2017/11/10
  */
 public class BlockMaintenanceThread extends BaseNulsThread {
 

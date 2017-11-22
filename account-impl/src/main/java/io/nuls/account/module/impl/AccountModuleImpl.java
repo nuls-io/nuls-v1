@@ -7,7 +7,9 @@ import io.nuls.account.service.impl.AccountServiceImpl;
 import io.nuls.account.service.intf.AccountService;
 
 /**
- * Created by Niels on 2017/10/30.
+ *
+ * @author Niels
+ * @date 2017/10/30
  */
 public class AccountModuleImpl extends AbstractAccountModule {
 

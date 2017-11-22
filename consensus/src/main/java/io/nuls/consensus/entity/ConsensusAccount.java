@@ -3,7 +3,9 @@ package io.nuls.consensus.entity;
 import io.nuls.account.entity.Address;
 
 /**
- * Created by Niels on 2017/11/7.
+ *
+ * @author Niels
+ * @date 2017/11/7
  *
  */
 //todo 定义共识相关的字段

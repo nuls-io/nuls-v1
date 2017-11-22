@@ -13,7 +13,9 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * Created by Niels on 2017/9/27.
+ *
+ * @author Niels
+ * @date 2017/9/27
  *
  */
 public class I18nUtils {

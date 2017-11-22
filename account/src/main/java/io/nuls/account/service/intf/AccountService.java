@@ -6,6 +6,9 @@ import io.nuls.account.entity.Address;
 
 import java.util.List;
 
+/**
+ * @author Niels
+ */
 public interface AccountService {
     Account createAccount();
 

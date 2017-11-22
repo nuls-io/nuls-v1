@@ -1,8 +1,9 @@
 package io.nuls.event.bus.utils.disruptor;
 
 /**
- * Created by Niels on 2017/11/6.
  *
+ * @author Niels
+ * @date 2017/11/6
  */
 public class DisruptorEvent<T> {
 

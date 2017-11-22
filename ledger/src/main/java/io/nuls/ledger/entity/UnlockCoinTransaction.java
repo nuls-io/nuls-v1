@@ -4,7 +4,9 @@ import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.constant.TransactionConstant;
 
 /**
- * Created by Niels on 2017/11/20.
+ *
+ * @author Niels
+ * @date 2017/11/20
  */
 public class UnlockCoinTransaction<T extends BaseNulsData> extends AbstractCoinTransaction<T> {
     public UnlockCoinTransaction(){

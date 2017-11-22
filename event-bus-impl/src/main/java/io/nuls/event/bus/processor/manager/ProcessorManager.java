@@ -17,7 +17,9 @@ import java.util.*;
 import java.util.concurrent.*;
 
 /**
- * Created by Niels on 2017/11/6.
+ *
+ * @author Niels
+ * @date 2017/11/6
  */
 public class ProcessorManager<E extends BaseNulsEvent, H extends NulsEventHandler<? extends BaseNulsEvent>> {
     private final Map<String, H> handlerMap = new HashMap<>();

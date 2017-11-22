@@ -7,6 +7,9 @@ import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 
+/**
+ * @author win10
+ */
 public class RequestUtil {
 
 	public static byte[] get(String url) {

@@ -9,7 +9,9 @@ import io.nuls.event.bus.processor.manager.ProcessorManager;
 import io.nuls.event.bus.utils.disruptor.DisruptorEvent;
 
 /**
- * Created by Niels on 2017/11/6.
+ *
+ * @author Niels
+ * @date 2017/11/6
  */
 public class EventBusDispatchThread extends BaseNulsThread implements WorkHandler<DisruptorEvent<BaseNulsEvent>> {
 

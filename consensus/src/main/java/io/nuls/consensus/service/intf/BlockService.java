@@ -3,7 +3,9 @@ package io.nuls.consensus.service.intf;
 import io.nuls.core.chain.entity.Block;
 
 /**
- * Created by Niels on 2017/11/10.
+ *
+ * @author Niels
+ * @date 2017/11/10
  *
  */
 public interface BlockService {

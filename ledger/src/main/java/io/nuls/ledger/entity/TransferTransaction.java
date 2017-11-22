@@ -8,7 +8,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * Created by Niels on 2017/11/20.
+ *
+ * @author Niels
+ * @date 2017/11/20
  */
 public class TransferTransaction<T extends BaseNulsData> extends AbstractCoinTransaction<T> {
     public TransferTransaction(){

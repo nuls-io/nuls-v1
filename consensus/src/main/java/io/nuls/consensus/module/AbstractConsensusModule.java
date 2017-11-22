@@ -4,7 +4,9 @@ import io.nuls.consensus.event.*;
 import io.nuls.core.module.BaseNulsModule;
 
 /**
- * Created by Niels on 2017/11/7.
+ *
+ * @author Niels
+ * @date 2017/11/7
  *
  */
 public abstract class AbstractConsensusModule extends BaseNulsModule {

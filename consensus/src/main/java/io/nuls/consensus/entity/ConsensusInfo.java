@@ -3,7 +3,9 @@ package io.nuls.consensus.entity;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
 
 /**
- * Created by Niels on 2017/11/7.
+ *
+ * @author Niels
+ * @date 2017/11/7
  *
  */
 public class ConsensusInfo {

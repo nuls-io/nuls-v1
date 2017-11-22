@@ -18,7 +18,9 @@ import java.io.OutputStream;
 import java.io.Serializable;
 
 /**
- * Created by Niels on 2017/10/30.
+ *
+ * @author Niels
+ * @date 2017/10/30
  */
 public abstract class BaseNulsData implements Serializable {
 

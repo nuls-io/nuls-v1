@@ -7,7 +7,9 @@ import io.nuls.event.bus.processor.manager.ProcessorManager;
 import io.nuls.event.bus.processor.service.intf.LocalProcessorService;
 
 /**
- * Created by Niels on 2017/11/3.
+ *
+ * @author Niels
+ * @date 2017/11/3
  */
 public class LocalProcessorServiceImpl implements LocalProcessorService {
 

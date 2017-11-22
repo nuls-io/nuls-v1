@@ -8,7 +8,9 @@ import io.nuls.account.service.intf.AccountService;
 import java.util.List;
 
 /**
- * Created by Niels on 2017/11/15.
+ *
+ * @author Niels
+ * @date 2017/11/15
  */
 public class AccountManager {
 

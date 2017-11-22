@@ -9,7 +9,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 /**
- * Created by Niels on 2017/9/20.
+ *
+ * @author Niels
+ * @date 2017/9/20
  */
 public class SerializeUtils {
 

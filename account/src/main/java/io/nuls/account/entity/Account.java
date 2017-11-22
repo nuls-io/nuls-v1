@@ -14,7 +14,9 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
 /**
- * Created by Niels on 2017/10/30.
+ *
+ * @author Niels
+ * @date 2017/10/30
  */
 public class Account extends BaseNulsData {
 

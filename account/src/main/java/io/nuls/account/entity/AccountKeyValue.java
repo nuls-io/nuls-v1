@@ -6,6 +6,10 @@ import io.nuls.core.utils.log.Log;
 
 import java.io.UnsupportedEncodingException;
 
+/**
+ * @author Niels
+ * @Date 2017/11-01
+ */
 public class AccountKeyValue extends KeyValue {
 
 

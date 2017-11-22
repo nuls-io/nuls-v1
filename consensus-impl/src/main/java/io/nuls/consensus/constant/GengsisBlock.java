@@ -4,7 +4,9 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
 /**
- * Created by Niels on 2017/11/10.
+ *
+ * @author Niels
+ * @date 2017/11/10
  *
  */
 public final class GengsisBlock extends Block {

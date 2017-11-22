@@ -6,7 +6,9 @@ import java.util.List;
 
 
 /**
- * Created by zhouwei on 2017/9/29.
+ *
+ * @author zhouwei
+ * @date 2017/9/29
  */
 public interface BlockDao extends BaseDao<String,BlockPo>{
 

@@ -11,7 +11,9 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import java.util.List;
 
 /**
- * Created by NielsWang on 2017/10/24.
+ *
+ * @author NielsWang
+ * @date 2017/10/24
  * T : the type of Mapper interface
  * K : the type of primary key of Object
  * V : the type of Object

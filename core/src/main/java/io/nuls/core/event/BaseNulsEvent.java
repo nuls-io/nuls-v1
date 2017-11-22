@@ -7,7 +7,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * Created by Niels on 2017/11/7.
+ *
+ * @author Niels
+ * @date 2017/11/7
  */
 public abstract class BaseNulsEvent<T extends BaseNulsData> extends BaseNulsData {
     private NulsEventHeader header;

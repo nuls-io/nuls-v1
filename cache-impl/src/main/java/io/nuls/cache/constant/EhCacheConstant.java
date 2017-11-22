@@ -1,7 +1,9 @@
 package io.nuls.cache.constant;
 
 /**
- * Created by Niels on 2017/10/27.
+ *
+ * @author Niels
+ * @date 2017/10/27
  *
  */
 public interface EhCacheConstant {

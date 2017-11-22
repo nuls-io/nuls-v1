@@ -8,7 +8,9 @@ import io.nuls.event.bus.processor.service.intf.LocalProcessorService;
 import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
 
 /**
- * Created by Niels on 2017/11/6.
+ *
+ * @author Niels
+ * @date 2017/11/6
  */
 public class EventBusModuleImpl extends AbstractEventBusModule {
 

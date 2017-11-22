@@ -1,5 +1,8 @@
 package io.nuls.core.chain.entity;
 
+/**
+ * @author win10
+ */
 public class Chain {
     private String chainName = "";
     private long magicNumber = 12345678L;
