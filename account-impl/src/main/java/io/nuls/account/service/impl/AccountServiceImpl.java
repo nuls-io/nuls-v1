@@ -15,6 +15,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
+import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.db.dao.AccountDao;
@@ -29,7 +30,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- *
  * @author Niels
  * @date 2017/10/30
  */
@@ -41,7 +41,6 @@ public class AccountServiceImpl implements AccountService {
 
     private AccountCacheService accountCacheService = AccountCacheService.getInstance();
     private AccountDao accountDao = NulsContext.getInstance().getService(AccountDao.class);
-
 
     private AccountServiceImpl() {
     }
@@ -64,6 +63,7 @@ public class AccountServiceImpl implements AccountService {
             account.setPubKey(key.getPubKey(true));
             account.setEcKey(key);
             account.setPriKey(key.getPrivKeyBytes());
+            account.setCreateTime(TimeService.currentTimeMillis());
             signAccount(account);
             AccountPo po = new AccountPo();
             AccountTool.toPojo(account, po);

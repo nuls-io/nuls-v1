@@ -35,7 +35,6 @@ public class Account extends BaseNulsData {
     private byte[] extend;
 
     private Long createTime;
-    private Long createHeight;
     private byte[] txHash;
 
 
@@ -227,14 +226,6 @@ public class Account extends BaseNulsData {
 
     public void setCreateTime(Long createTime) {
         this.createTime = createTime;
-    }
-
-    public Long getCreateHeight() {
-        return createHeight;
-    }
-
-    public void setCreateHeight(Long createHeight) {
-        this.createHeight = createHeight;
     }
 
     public byte[] getTxHash() {
