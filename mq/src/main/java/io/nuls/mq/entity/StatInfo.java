@@ -3,7 +3,9 @@ package io.nuls.mq.entity;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Created by Niels on 2017/9/26.
+ *
+ * @author Niels
+ * @date 2017/9/26
  *
  */
 public interface StatInfo {

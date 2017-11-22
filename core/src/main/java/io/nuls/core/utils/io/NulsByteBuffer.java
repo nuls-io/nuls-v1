@@ -9,7 +9,9 @@ import io.nuls.core.exception.NulsVerificationException;
 import io.nuls.core.utils.crypto.Utils;
 
 /**
- * Created by Niels on 2017/11/2.
+ *
+ * @author Niels
+ * @date 2017/11/2
  */
 public class NulsByteBuffer {
 

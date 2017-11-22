@@ -3,7 +3,7 @@ package io.nuls.core.context;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.manager.ModuleManager;
-import io.nuls.core.module.NulsModule;
+import io.nuls.core.module.BaseNulsModule;
 
 import java.util.Date;
 
@@ -41,20 +41,20 @@ public class NulsContext {
     }
 
     /**
-     * get NulsModule Object
+     * get BaseNulsModule Object
      *
      * @param moduleName
      * @return
      */
-    public NulsModule getModule(String moduleName) {
+    public BaseNulsModule getModule(String moduleName) {
         return ModuleManager.getInstance().getModule(moduleName);
     }
 
-    public NulsModule getModule(Class moduleClass) {
+    public BaseNulsModule getModule(Class moduleClass) {
         return ModuleManager.getInstance().getModule(moduleClass);
     }
 
-    public NulsModule getModule(int moduleId) {
+    public BaseNulsModule getModule(int moduleId) {
         return ModuleManager.getInstance().getModuleById(moduleId);
     }
 

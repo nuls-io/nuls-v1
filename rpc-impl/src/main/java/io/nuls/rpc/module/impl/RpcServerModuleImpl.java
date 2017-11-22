@@ -2,7 +2,7 @@ package io.nuls.rpc.module.impl;
 
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.rpc.constant.RpcConstant;
-import io.nuls.rpc.module.RpcServerModule;
+import io.nuls.rpc.module.AbstractRpcServerModule;
 import io.nuls.rpc.service.impl.RpcServerServiceImpl;
 import io.nuls.rpc.service.intf.RpcServerService;
 
@@ -10,7 +10,7 @@ import io.nuls.rpc.service.intf.RpcServerService;
  * Created by Niels on 2017/9/27.
  *
  */
-public class RpcServerModuleImpl extends RpcServerModule {
+public class RpcServerModuleImpl extends AbstractRpcServerModule {
 
     private RpcServerService rpcServerService = RpcServerServiceImpl.getInstance();
     private String ip;

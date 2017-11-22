@@ -1,12 +1,10 @@
 package io.nuls.cache.manager;
 
-import io.nuls.cache.constant.EhCacheConstant;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
 import org.ehcache.config.builders.CacheManagerBuilder;
 import org.ehcache.config.builders.ResourcePoolsBuilder;
-import org.ehcache.config.units.EntryUnit;
 import org.ehcache.config.units.MemoryUnit;
 
 import java.io.Serializable;
@@ -16,20 +14,22 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by Niels on 2017/10/27.
+ *
+ * @author Niels
+ * @date 2017/10/27
  *
  */
 public class EhCacheManager {
-    private static final EhCacheManager manager = new EhCacheManager();
-    private static final Map<String, Class> keyTypeMap = new HashMap<>();
-    private static final Map<String, Class> valueTypeMap = new HashMap<>();
+    private static final EhCacheManager INSTANCE = new EhCacheManager();
+    private static final Map<String, Class> KEY_TYPE_MAP = new HashMap<>();
+    private static final Map<String, Class> VALUE_TYPE_MAP = new HashMap<>();
     private CacheManager cacheManager;
 
     private EhCacheManager() {
     }
 
     public static EhCacheManager getInstance() {
-        return manager;
+        return INSTANCE;
     }
 
     public void init() {
@@ -42,12 +42,12 @@ public class EhCacheManager {
                         .heap(heapMb, MemoryUnit.MB)
         );
         cacheManager.createCache(title, builder);
-        keyTypeMap.put(title, keyType);
-        valueTypeMap.put(title, valueType);
+        KEY_TYPE_MAP.put(title, keyType);
+        VALUE_TYPE_MAP.put(title, valueType);
     }
 
     public Cache getCache(String title) {
-        return cacheManager.getCache(title, keyTypeMap.get(title), valueTypeMap.get(title));
+        return cacheManager.getCache(title, KEY_TYPE_MAP.get(title), VALUE_TYPE_MAP.get(title));
     }
 
     ;
@@ -61,6 +61,6 @@ public class EhCacheManager {
     }
 
     public List<String> getCacheTitleList() {
-        return new ArrayList<String>(keyTypeMap.keySet());
+        return new ArrayList<String>(KEY_TYPE_MAP.keySet());
     }
 }

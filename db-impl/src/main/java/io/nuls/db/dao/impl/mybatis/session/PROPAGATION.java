@@ -1,7 +1,9 @@
 package io.nuls.db.dao.impl.mybatis.session;
 
 /**
- * Created by win10 on 2017/10/26.
+ *
+ * @author win10
+ * @date 2017/10/26
  */
 public enum  PROPAGATION {
 

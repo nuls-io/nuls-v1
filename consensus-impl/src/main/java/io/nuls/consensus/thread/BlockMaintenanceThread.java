@@ -4,13 +4,14 @@ import io.nuls.consensus.module.impl.POCConsensusModuleImpl;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.thread.NulsThread;
+import io.nuls.core.thread.BaseNulsThread;
 
 /**
- * Created by Niels on 2017/11/10.
  *
+ * @author Niels
+ * @date 2017/11/10
  */
-public class BlockMaintenanceThread extends NulsThread {
+public class BlockMaintenanceThread extends BaseNulsThread {
 
     private static BlockMaintenanceThread instance ;
 

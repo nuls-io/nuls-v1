@@ -6,9 +6,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * Created by facjas on 2017/11/20.
+ *
+ * @author facjas
+ * @date 2017/11/20
  */
-public class NulsSignData extends NulsData{
+public class NulsSignData extends BaseNulsData{
     protected int signAlgType;
     protected int signLength;
     protected byte[] signBytes;

@@ -1,6 +1,6 @@
 package io.nuls.mq.entity.impl;
 
-import io.nuls.mq.intf.NulsQueue;
+import io.nuls.mq.intf.AbstractNulsQueue;
 
 import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
@@ -10,7 +10,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Created by Niels on 2017/10/10.
  *
  */
-public class BlockingQueueImpl<T> extends NulsQueue<T> {
+public class BlockingQueueImpl<T> extends AbstractNulsQueue<T> {
 
     private BlockingQueue<T> queue;
 

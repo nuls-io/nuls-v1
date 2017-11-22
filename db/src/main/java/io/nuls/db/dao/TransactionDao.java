@@ -5,7 +5,9 @@ import io.nuls.db.entity.TransactionPo;
 import java.util.List;
 
 /**
- * Created by Niels on 2017/11/20.
+ *
+ * @author Niels
+ * @date 2017/11/20
  */
 public interface TransactionDao extends BaseDao<String, TransactionPo> {
     List<TransactionPo> getTxs(Long blockHeight);

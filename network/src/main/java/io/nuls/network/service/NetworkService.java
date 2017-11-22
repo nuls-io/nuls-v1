@@ -1,15 +1,11 @@
 package io.nuls.network.service;
 
-import io.nuls.network.module.NetworkModule;
-
 /**
  * Created by v.chou on 2017/10/25.
  */
-public abstract class NetworkService {
+public interface NetworkService {
 
-    protected NetworkModule networkModule;
+    void start();
 
-    public abstract void start();
-
-    public abstract void shutdown();
+     void shutdown();
 }

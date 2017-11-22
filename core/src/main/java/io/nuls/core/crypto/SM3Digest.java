@@ -13,7 +13,7 @@ public class SM3Digest {
     private byte[] xBuf = new byte[BUFFER_LENGTH];
     private int xBufOff;
 
-    private byte[] V = SM3.iv.clone();
+    private byte[] V = SM3.IV.clone();
 
     private int cntBlock = 0;
 
@@ -35,7 +35,7 @@ public class SM3Digest {
     public void reset() {
         xBufOff = 0;
         cntBlock = 0;
-        V = SM3.iv.clone();
+        V = SM3.IV.clone();
     }
 
     public void update(byte[] in, int inOff, int len) {
@@ -69,7 +69,7 @@ public class SM3Digest {
     }
 
     private void doHash(byte[] B) {
-        byte[] tmp = SM3.CF(V, B);
+        byte[] tmp = SM3.cf(V, B);
         System.arraycopy(tmp, 0, V, 0, V.length);
         cntBlock++;
     }

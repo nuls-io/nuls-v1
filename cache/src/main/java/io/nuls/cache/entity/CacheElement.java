@@ -1,7 +1,9 @@
 package io.nuls.cache.entity;
 
 /**
- * Created by Niels on 2017/10/18.
+ *
+ * @author Niels
+ * @date 2017/10/18
  *
  */
 public class CacheElement<T> {

@@ -7,7 +7,7 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Peer;
-import io.nuls.network.message.NetworkMessage;
+import io.nuls.network.message.AbstractNetworkMessage;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -16,7 +16,7 @@ import java.io.UnsupportedEncodingException;
 /**
  * Created by win10 on 2017/11/9.
  */
-public class VersionMessage extends NetworkMessage {
+public class VersionMessage extends AbstractNetworkMessage {
 
     private long bestBlockHeight;
 
@@ -27,12 +27,12 @@ public class VersionMessage extends NetworkMessage {
     private String ip;
 
     public VersionMessage() {
-        this.type = NetworkConstant.Network_Version_Message;
+        this.type = NetworkConstant.NETWORK_VERSION_MESSAGE;
     }
 
     public VersionMessage(long height, String hash, Peer peer) {
 
-        this.type = NetworkConstant.Network_Version_Message;
+        this.type = NetworkConstant.NETWORK_VERSION_MESSAGE;
         this.bestBlockHash = hash;
         this.bestBlockHeight = height;
         this.port = peer.getPort();

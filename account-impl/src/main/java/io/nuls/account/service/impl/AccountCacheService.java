@@ -8,10 +8,12 @@ import io.nuls.core.context.NulsContext;
 import java.util.List;
 
 /**
- * Created by Niels on 2017/11/15.
+ *
+ * @author Niels
+ * @date 2017/11/15
  */
 public class AccountCacheService {
-    private static final AccountCacheService instance = new AccountCacheService();
+    private static final AccountCacheService INSTANCE = new AccountCacheService();
 
     private final CacheService<String, Account> cacheService;
 
@@ -21,7 +23,7 @@ public class AccountCacheService {
     }
 
     public static AccountCacheService getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
 

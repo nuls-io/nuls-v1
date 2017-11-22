@@ -3,7 +3,9 @@ package io.nuls.ledger.entity;
 import java.io.Serializable;
 
 /**
- * Created by Niels on 2017/11/13.
+ *
+ * @author Niels
+ * @date 2017/11/13
  *
  */
 public class Balance implements Serializable{

@@ -9,7 +9,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.i18n.I18nUtils;
 import io.nuls.core.manager.ModuleManager;
-import io.nuls.core.module.NulsModule;
+import io.nuls.core.module.BaseNulsModule;
 import io.nuls.core.module.service.ModuleService;
 import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.log.Log;
@@ -76,7 +76,7 @@ public class Bootstrap {
         for (String key : keyList) {
             try {
                 short moduleId = Short.parseShort(key);
-                NulsModule module = regModule(moduleId, bootstrapClasses.getProperty(key));
+                BaseNulsModule module = regModule(moduleId, bootstrapClasses.getProperty(key));
                 module.start();
             } catch (Exception e) {
                 throw new NulsRuntimeException(e);
@@ -84,12 +84,12 @@ public class Bootstrap {
         }
     }
 
-    private static NulsModule regModule(short id, String moduleClass) {
+    private static BaseNulsModule regModule(short id, String moduleClass) {
         if (null == moduleClass) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "module class is null:" + id);
         }
         try {
-            NulsModule module = ModuleService.getInstance().loadModule(moduleClass);
+            BaseNulsModule module = ModuleService.getInstance().loadModule(moduleClass);
             module.setModuleId(id);
             EventManager.refreshEvents();
             return module;

@@ -7,7 +7,7 @@ import com.lmax.disruptor.WorkHandler;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.event.NulsEvent;
+import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.param.AssertUtil;
 
@@ -16,21 +16,23 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 
 /**
- * Created by Niels on 2017/10/10.
+ *
+ * @author Niels
+ * @date 2017/10/10
  *
  */
 public class DisruptorUtil<T extends DisruptorEvent> {
-    private static final DisruptorUtil service = new DisruptorUtil();
-    private static final Map<String, Disruptor<DisruptorEvent>> disruptorMap = new HashMap<>();
+    private static final DisruptorUtil INSTANCE = new DisruptorUtil();
+    private static final Map<String, Disruptor<DisruptorEvent>> DISRUPTOR_MAP = new HashMap<>();
 
     public static DisruptorUtil getInstance() {
-        return service;
+        return INSTANCE;
     }
 
     private DisruptorUtil() {
     }
 
-    private static final EventFactory factory = new EventFactory() {
+    private static final EventFactory EVENT_FACTORY = new EventFactory() {
         @Override
         public Object newInstance() {
             return new DisruptorEvent();
@@ -44,11 +46,11 @@ public class DisruptorUtil<T extends DisruptorEvent> {
      * @param ringBufferSize The size of ringBuffer
      */
     public void createDisruptor(String name, int ringBufferSize) {
-        if (disruptorMap.keySet().contains(name)) {
+        if (DISRUPTOR_MAP.keySet().contains(name)) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "create disruptor faild,the name is repetitive!");
         }
 
-        Disruptor<DisruptorEvent> disruptor = new Disruptor<DisruptorEvent>(factory,
+        Disruptor<DisruptorEvent> disruptor = new Disruptor<DisruptorEvent>(EVENT_FACTORY,
                 ringBufferSize, Executors.defaultThreadFactory(), ProducerType.SINGLE,
                 new LiteBlockingWaitStrategy());
 //        disruptor.handleEventsWith(new EventHandler<DisruptorEvent>() {
@@ -57,7 +59,7 @@ public class DisruptorUtil<T extends DisruptorEvent> {
 //                Log.debug(disruptorEvent.getData() + "");
 //            }
 //        });
-        disruptorMap.put(name, disruptor);
+        DISRUPTOR_MAP.put(name, disruptor);
     }
 
     /**
@@ -66,7 +68,7 @@ public class DisruptorUtil<T extends DisruptorEvent> {
      * @param name
      */
     public void start(String name) {
-        Disruptor<DisruptorEvent> disruptor = disruptorMap.get(name);
+        Disruptor<DisruptorEvent> disruptor = DISRUPTOR_MAP.get(name);
         AssertUtil.canNotEmpty(disruptor, "the disruptor is not exist!name:" + name);
         disruptor.start();
     }
@@ -77,7 +79,7 @@ public class DisruptorUtil<T extends DisruptorEvent> {
      * @param name
      */
     public void shutdown(String name) {
-        Disruptor<DisruptorEvent> disruptor = disruptorMap.get(name);
+        Disruptor<DisruptorEvent> disruptor = DISRUPTOR_MAP.get(name);
         AssertUtil.canNotEmpty(disruptor, "the disruptor is not exist!name:" + name);
         disruptor.shutdown();
     }
@@ -90,7 +92,7 @@ public class DisruptorUtil<T extends DisruptorEvent> {
      * @param obj
      */
     public void offer(String name, Object obj) {
-        Disruptor<DisruptorEvent> disruptor = disruptorMap.get(name);
+        Disruptor<DisruptorEvent> disruptor = DISRUPTOR_MAP.get(name);
         AssertUtil.canNotEmpty(disruptor, "the disruptor is not exist!name:" + name);
         RingBuffer<DisruptorEvent> ringBuffer = disruptor.getRingBuffer();
         long sequence = ringBuffer.next();//请求下一个事件序号；
@@ -108,8 +110,8 @@ public class DisruptorUtil<T extends DisruptorEvent> {
      * @param name
      * @param handler
      */
-    public void handleEventsWithWorkerPool(String name, WorkHandler<DisruptorEvent<NulsEvent>>... handler) {
-        Disruptor disruptor = disruptorMap.get(name);
+    public void handleEventsWithWorkerPool(String name, WorkHandler<DisruptorEvent<BaseNulsEvent>>... handler) {
+        Disruptor disruptor = DISRUPTOR_MAP.get(name);
         AssertUtil.canNotEmpty(disruptor, "the disruptor is not exist!name:" + name);
         disruptor.handleEventsWithWorkerPool(handler);
 

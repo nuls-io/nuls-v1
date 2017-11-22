@@ -8,7 +8,9 @@ import java.io.IOException;
 
 /**
  * 提供给外部使用的接口
- * Created by Niels on 2017/9/20.
+ *
+ * @author Niels
+ * @date 2017/9/20
  */
 public interface QueueService<T> {
     /**

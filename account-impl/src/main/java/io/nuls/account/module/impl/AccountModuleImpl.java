@@ -2,18 +2,16 @@ package io.nuls.account.module.impl;
 
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.manager.AccountManager;
-import io.nuls.account.module.intf.AccountModule;
+import io.nuls.account.module.intf.AbstractAccountModule;
 import io.nuls.account.service.impl.AccountServiceImpl;
 import io.nuls.account.service.intf.AccountService;
-import io.nuls.cache.service.intf.CacheService;
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.utils.log.Log;
-import io.nuls.core.utils.param.AssertUtil;
 
 /**
- * Created by Niels on 2017/10/30.
+ *
+ * @author Niels
+ * @date 2017/10/30
  */
-public class AccountModuleImpl extends AccountModule {
+public class AccountModuleImpl extends AbstractAccountModule {
 
     private AccountManager manager = AccountManager.getInstance();
 

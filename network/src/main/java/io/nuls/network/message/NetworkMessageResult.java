@@ -1,8 +1,10 @@
 package io.nuls.network.message;
 
 /**
- * Created by vivi on 2017/11/21.
+ *
+ * @author vivi
+ * @date 2017/11/21
  */
-public abstract class NetworkMessageResult {
+public abstract class AbstractNetworkMessageResult {
 
 }

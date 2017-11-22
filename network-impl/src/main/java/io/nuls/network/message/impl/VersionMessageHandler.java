@@ -1,29 +1,31 @@
 package io.nuls.network.message.impl;
 
 import io.nuls.network.entity.Peer;
-import io.nuls.network.message.NetworkMessage;
-import io.nuls.network.message.NetworkMessageResult;
+import io.nuls.network.message.AbstractNetworkMessage;
+import io.nuls.network.message.AbstractNetworkMessageResult;
 import io.nuls.network.message.entity.VersionMessage;
 import io.nuls.network.message.messageHandler.NetWorkMessageHandler;
 
 /**
- * Created by vivi on 2017/11/21.
+ *
+ * @author vivi
+ * @date 2017/11/21
  */
 public class VersionMessageHandler implements NetWorkMessageHandler {
 
-    private static final VersionMessageHandler handler = new VersionMessageHandler();
+    private static final VersionMessageHandler INSTANCE = new VersionMessageHandler();
 
     private VersionMessageHandler() {
 
     }
 
     public static VersionMessageHandler getInstance() {
-        return handler;
+        return INSTANCE;
     }
 
 
     @Override
-    public NetworkMessageResult process(NetworkMessage message, Peer peer) {
+    public AbstractNetworkMessageResult process(AbstractNetworkMessage message, Peer peer) {
         VersionMessage versionMessage = (VersionMessage) message;
         peer.setVersionMessage(versionMessage);
 

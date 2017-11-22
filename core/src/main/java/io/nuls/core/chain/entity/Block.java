@@ -5,7 +5,9 @@ import io.nuls.core.utils.io.NulsByteBuffer;
 import java.util.List;
 
 /**
- * Created by win10 on 2017/10/30.
+ *
+ * @author win10
+ * @date 2017/10/30
  */
 public class Block extends BlockHeader {
 

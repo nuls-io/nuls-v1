@@ -1,6 +1,6 @@
 package io.nuls.ledger.entity;
 
-import io.nuls.core.chain.entity.NulsData;
+import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.crypto.script.Script;
@@ -13,7 +13,7 @@ import java.io.OutputStream;
 /**
  * Created by win10 on 2017/10/30.
  */
-public class UtxoOutput extends NulsData{
+public class UtxoOutput extends BaseNulsData{
     //交易
     private Sha256Hash txHash;
     //下次的花费

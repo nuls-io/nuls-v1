@@ -5,7 +5,9 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
 
 /**
- * Created by zhouwei on 2017/9/30.
+ *
+ * @author zhouwei
+ * @date 2017/9/30
  */
 
 public class DBException extends NulsRuntimeException {

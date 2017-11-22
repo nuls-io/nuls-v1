@@ -3,14 +3,14 @@ package io.nuls.core.thread;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.manager.ModuleManager;
-import io.nuls.core.module.NulsModule;
+import io.nuls.core.module.BaseNulsModule;
 import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.log.Log;
 
 import java.util.Date;
 
 
-public abstract class NulsThread implements Runnable{
+public abstract class BaseNulsThread implements Runnable{
 
     public enum STATUS {
         RUNING,
@@ -19,10 +19,10 @@ public abstract class NulsThread implements Runnable{
     private String name;
     private Thread realThread;
     private STATUS status;
-    private NulsModule module = null;
+    private BaseNulsModule module = null;
     private Date starttime;
 
-    public NulsThread(NulsModule module, String name) {
+    public BaseNulsThread(BaseNulsModule module, String name) {
         super();
         if(null==module){
             throw new NulsRuntimeException(ErrorCode.THREAD_MODULE_CANNOT_NULL);
@@ -48,7 +48,7 @@ public abstract class NulsThread implements Runnable{
         return this.status;
     }
 
-    public NulsModule getModule() {
+    public BaseNulsModule getModule() {
         return module;
     }
 

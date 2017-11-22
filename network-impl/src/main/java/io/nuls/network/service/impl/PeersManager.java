@@ -11,8 +11,8 @@ import io.nuls.db.dao.PeerDao;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Peer;
 import io.nuls.network.entity.PeerGroup;
-import io.nuls.network.entity.param.NetworkParam;
-import io.nuls.network.module.NetworkModule;
+import io.nuls.network.entity.param.AbstractNetworkParam;
+import io.nuls.network.module.AbstractNetworkModule;
 
 import java.util.List;
 import java.util.Map;
@@ -20,9 +20,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class PeersManager {
 
-    private NetworkModule networkModule;
+    private AbstractNetworkModule networkModule;
 
-    private NetworkParam network;
+    private AbstractNetworkParam network;
 
     private PeerDiscoverHandler discovery;
 
@@ -36,13 +36,13 @@ public class PeersManager {
 
     private PeerDao peerDao;
 
-    public PeersManager(NetworkModule module, NetworkParam network, PeerDao peerDao) {
+    public PeersManager(AbstractNetworkModule module, AbstractNetworkParam network, PeerDao peerDao) {
         this.networkModule = module;
         this.peerDao = peerDao;
         // the default peerGroups
-        PeerGroup inPeers = new PeerGroup(NetworkConstant.Network_Peer_In_Group);
-        PeerGroup outPeers = new PeerGroup(NetworkConstant.Network_Peer_Out_Group);
-        PeerGroup consensusPeers = new PeerGroup(NetworkConstant.Network_Peer_Consensus_Group);
+        PeerGroup inPeers = new PeerGroup(NetworkConstant.NETWORK_PEER_IN_GROUP);
+        PeerGroup outPeers = new PeerGroup(NetworkConstant.NETWORK_PEER_OUT_GROUP);
+        PeerGroup consensusPeers = new PeerGroup(NetworkConstant.NETWORK_PEER_CONSENSUS_GROUP);
 
         peerGroups.put(inPeers.getName(), inPeers);
         peerGroups.put(outPeers.getName(), outPeers);
@@ -67,7 +67,7 @@ public class PeersManager {
         }
 
         for (Peer peer : peers) {
-            addPeerToGroup(NetworkConstant.Network_Peer_Out_Group, peer);
+            addPeerToGroup(NetworkConstant.NETWORK_PEER_OUT_GROUP, peer);
             connectionManager.openConnection(peer);
         }
 

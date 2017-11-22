@@ -3,7 +3,9 @@ package io.nuls.account.entity;
 import io.nuls.core.utils.crypto.Base58;
 
 /**
- * Created by Niels on 2017/10/30.
+ *
+ * @author Niels
+ * @date 2017/10/30
  *
  */
 public class Address{

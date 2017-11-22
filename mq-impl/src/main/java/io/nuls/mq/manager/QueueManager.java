@@ -6,7 +6,7 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.mq.entity.StatInfo;
 import io.nuls.mq.entity.impl.StatInfoImpl;
 import io.nuls.mq.fqueue.exception.FileFormatException;
-import io.nuls.mq.intf.NulsQueue;
+import io.nuls.mq.intf.AbstractNulsQueue;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,20 +18,22 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 持久化队列管理器
- * Created by Niels on 2017/9/20.
+ *
+ * @author Niels
+ * @date 2017/9/20
  */
-public abstract class QueueManager {
-    private static final Map<String, NulsQueue> queuesMap = new HashMap<>();
-    private static final Map<String, Lock> lockMap = new HashMap<>();
+public final class QueueManager {
+    private static final Map<String, AbstractNulsQueue> QUEUES_MAP = new HashMap<>();
+    private static final Map<String, Lock> LOCK_MAP = new HashMap<>();
     //统计日志时间段
-    private static final int LatelySecond = 10;
+    private static final int LATELY_SECOND = 10;
 
     private static boolean Running = false;
 
     public static void logQueueStatus() {
-        for (Map.Entry<String, NulsQueue> entry : queuesMap.entrySet()) {
+        for (Map.Entry<String, AbstractNulsQueue> entry : QUEUES_MAP.entrySet()) {
             try {
-                NulsQueue queue = entry.getValue();
+                AbstractNulsQueue queue = entry.getValue();
                 long nowIn = queue.getStatInfo().getInCount().get();
                 long nowOut = queue.getStatInfo().getOutCount().get();
                 long latelyInTps = (nowIn - queue.getStatInfo().getLastInCount()) / queue.getStatInfo().getLatelySecond();
@@ -47,7 +49,7 @@ public abstract class QueueManager {
     }
 
     public static final int getLatelySecond() {
-        return LatelySecond;
+        return LATELY_SECOND;
     }
 
     /**
@@ -56,8 +58,8 @@ public abstract class QueueManager {
      * @param queueName 队列名称
      * @param queue     队列实例
      */
-    public static void initQueue(String queueName, NulsQueue queue) {
-        initQueue(queueName, queue, LatelySecond);
+    public static void initQueue(String queueName, AbstractNulsQueue queue) {
+        initQueue(queueName, queue, LATELY_SECOND);
     }
 
     /**
@@ -67,40 +69,42 @@ public abstract class QueueManager {
      * @param queue        队列实例
      * @param latelySecond 统计日志时间段
      */
-    public static void initQueue(String queueName, NulsQueue queue, int latelySecond) {
-        if(!Running){
-            throw new NulsRuntimeException(ErrorCode.FAILED,"The DBModule is not running!");
+    public static void initQueue(String queueName, AbstractNulsQueue queue, int latelySecond) {
+        if (!Running) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "The DBModule is not running!");
         }
-        if (queuesMap.containsKey(queueName)) {
-            throw new NulsRuntimeException(ErrorCode.FAILED,"queue name is allready exist");
+        if (QUEUES_MAP.containsKey(queueName)) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "queue name is allready exist");
         }
         if (latelySecond == 0) {
-            latelySecond = LatelySecond;
+            latelySecond = LATELY_SECOND;
         }
         Log.debug("队列初始化，名称：{}，单个文件最大大小：{}", queue.getQueueName(), queue.getMaxSize());
         queue.setStatInfo(new StatInfoImpl(queue.getQueueName(), queue.size(), latelySecond));
-        queuesMap.put(queueName, queue);
-        lockMap.put(queueName, new ReentrantLock());
+        QUEUES_MAP.put(queueName, queue);
+        LOCK_MAP.put(queueName, new ReentrantLock());
     }
 
-    public static void destroyQueue(String queueName) throws IOException, FileFormatException { if(!Running){
-        throw new NulsRuntimeException(ErrorCode.FAILED,"The DBModule is not running!");
-    }
-        NulsQueue queue = queuesMap.get(queueName);
+    public static void destroyQueue(String queueName) throws IOException, FileFormatException {
+        if (!Running) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "The DBModule is not running!");
+        }
+        AbstractNulsQueue queue = QUEUES_MAP.get(queueName);
         if (null == queue) {
-            throw new NulsRuntimeException(ErrorCode.FAILED,"queue not exist");
+            throw new NulsRuntimeException(ErrorCode.FAILED, "queue not exist");
         }
         queue.distroy();
-        queuesMap.remove(queueName);
+        QUEUES_MAP.remove(queueName);
         Log.debug("队列销毁，名称：{}。", queueName);
     }
 
-    public static Object take(String queueName) throws InterruptedException { if(!Running){
-        throw new NulsRuntimeException(ErrorCode.FAILED,"The DBModule is not running!");
-    }
-        NulsQueue queue = queuesMap.get(queueName);
+    public static Object take(String queueName) throws InterruptedException {
+        if (!Running) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "The DBModule is not running!");
+        }
+        AbstractNulsQueue queue = QUEUES_MAP.get(queueName);
         if (null == queue) {
-            throw new NulsRuntimeException(ErrorCode.FAILED,"queue not exist");
+            throw new NulsRuntimeException(ErrorCode.FAILED, "queue not exist");
         }
         Object value = queue.take();
         queue.getStatInfo().takeOne();
@@ -108,12 +112,13 @@ public abstract class QueueManager {
         return value;
     }
 
-    public static Object poll(String queueName) { if(!Running){
-        throw new NulsRuntimeException(ErrorCode.FAILED,"The DBModule is not running!");
-    }
-        NulsQueue queue = queuesMap.get(queueName);
+    public static Object poll(String queueName) {
+        if (!Running) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "The DBModule is not running!");
+        }
+        AbstractNulsQueue queue = QUEUES_MAP.get(queueName);
         if (null == queue) {
-            throw new NulsRuntimeException(ErrorCode.FAILED,"queue not exist");
+            throw new NulsRuntimeException(ErrorCode.FAILED, "queue not exist");
         }
         Object obj = queue.poll();
         boolean notNull = null != obj;
@@ -124,12 +129,13 @@ public abstract class QueueManager {
         return obj;
     }
 
-    public static void offer(String queueName, Object item) { if(!Running){
-        throw new NulsRuntimeException(ErrorCode.FAILED,"The DBModule is not running!");
-    }
-        NulsQueue queue = queuesMap.get(queueName);
+    public static void offer(String queueName, Object item) {
+        if (!Running) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "The DBModule is not running!");
+        }
+        AbstractNulsQueue queue = QUEUES_MAP.get(queueName);
         if (null == queue) {
-            throw new NulsRuntimeException(ErrorCode.FAILED,"queue not exist");
+            throw new NulsRuntimeException(ErrorCode.FAILED, "queue not exist");
         }
 
         queue.offer(item);
@@ -137,69 +143,75 @@ public abstract class QueueManager {
         Log.debug("向队列中加入数据，名称：{}，当前长度：{}。", queueName, queue.size());
     }
 
-    public static void clear(String queueName) { if(!Running){
-        throw new NulsRuntimeException(ErrorCode.FAILED,"The DBModule is not running!");
-    }
-        NulsQueue queue = queuesMap.get(queueName);
+    public static void clear(String queueName) {
+        if (!Running) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "The DBModule is not running!");
+        }
+        AbstractNulsQueue queue = QUEUES_MAP.get(queueName);
         if (null == queue) {
-            throw new NulsRuntimeException(ErrorCode.FAILED,"queue not exist");
+            throw new NulsRuntimeException(ErrorCode.FAILED, "queue not exist");
         }
         Log.debug("清空队列数据，名称：{}，当前长度：{}。", queueName, queue.size());
         queue.clear();
     }
 
-    public static void close(String queueName) throws NulsRuntimeException { if(!Running){
-        throw new NulsRuntimeException(ErrorCode.FAILED,"The DBModule is not running!");
-    }
-        NulsQueue queue = queuesMap.get(queueName);
-        if (null == queue) {
-            throw new NulsRuntimeException(ErrorCode.FAILED,"queue not exist");
+    public static void close(String queueName) throws NulsRuntimeException {
+        if (!Running) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "The DBModule is not running!");
         }
-        try{
+        AbstractNulsQueue queue = QUEUES_MAP.get(queueName);
+        if (null == queue) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "queue not exist");
+        }
+        try {
             queue.close();
-        }catch(Exception e){
+        } catch (Exception e) {
             throw new NulsRuntimeException(e);
         }
         Log.debug("关闭队列实例，名称：{}，当前长度：{}。", queueName, queue.size());
     }
 
-    public static long size(String queueName) { if(!Running){
-        throw new NulsRuntimeException(ErrorCode.FAILED,"The DBModule is not running!");
-    }
-        NulsQueue queue = queuesMap.get(queueName);
+    public static long size(String queueName) {
+        if (!Running) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "The DBModule is not running!");
+        }
+        AbstractNulsQueue queue = QUEUES_MAP.get(queueName);
         if (null == queue) {
-            throw new NulsRuntimeException(ErrorCode.FAILED,"queue not exist");
+            throw new NulsRuntimeException(ErrorCode.FAILED, "queue not exist");
         }
         return queue.size();
     }
 
-    public static long getMaxSize(String queueName) { if(!Running){
-        throw new NulsRuntimeException(ErrorCode.FAILED,"The DBModule is not running!");
-    }
-        NulsQueue queue = queuesMap.get(queueName);
+    public static long getMaxSize(String queueName) {
+        if (!Running) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "The DBModule is not running!");
+        }
+        AbstractNulsQueue queue = QUEUES_MAP.get(queueName);
         if (null == queue) {
-            throw new NulsRuntimeException(ErrorCode.FAILED,"queue not exist");
+            throw new NulsRuntimeException(ErrorCode.FAILED, "queue not exist");
         }
         return queue.getMaxSize();
     }
 
-    public static StatInfo getStatInfo(String queueName) { if(!Running){
-        throw new NulsRuntimeException(ErrorCode.FAILED,"The DBModule is not running!");
-    }
-        NulsQueue queue = queuesMap.get(queueName);
+    public static StatInfo getStatInfo(String queueName) {
+        if (!Running) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "The DBModule is not running!");
+        }
+        AbstractNulsQueue queue = QUEUES_MAP.get(queueName);
         if (null == queue) {
-            throw new NulsRuntimeException(ErrorCode.FAILED,"queue not exist");
+            throw new NulsRuntimeException(ErrorCode.FAILED, "queue not exist");
         }
         return queue.getStatInfo();
     }
 
-    public static List<StatInfo> getAllStatInfo(){
+    public static List<StatInfo> getAllStatInfo() {
         List<StatInfo> list = new ArrayList<>();
-        for(NulsQueue queue:queuesMap.values()){
+        for (AbstractNulsQueue queue : QUEUES_MAP.values()) {
             list.add(queue.getStatInfo());
         }
         return list;
     }
+
     public static void setRunning(boolean running) {
         Running = running;
     }

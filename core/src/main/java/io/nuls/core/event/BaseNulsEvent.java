@@ -1,20 +1,22 @@
 package io.nuls.core.event;
 
-import io.nuls.core.chain.entity.NulsData;
+import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * Created by Niels on 2017/11/7.
+ *
+ * @author Niels
+ * @date 2017/11/7
  */
-public abstract class NulsEvent<T extends NulsData> extends NulsData {
+public abstract class BaseNulsEvent<T extends BaseNulsData> extends BaseNulsData {
     private NulsEventHeader header;
 
     private T eventBody;
 
-    public NulsEvent(NulsEventHeader header) {
+    public BaseNulsEvent(NulsEventHeader header) {
         this.header = header;
     }
 

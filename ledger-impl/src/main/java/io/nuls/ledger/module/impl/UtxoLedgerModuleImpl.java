@@ -5,11 +5,14 @@ import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.context.NulsContext;
 import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
 import io.nuls.ledger.constant.LedgerConstant;
-import io.nuls.ledger.event.*;
+import io.nuls.ledger.event.AbstractCoinTransactionEvent;
+import io.nuls.ledger.event.UtxoDepositCoinEvent;
+import io.nuls.ledger.event.UtxoLockCoinEvent;
+import io.nuls.ledger.event.UtxoSmallChangeEvent;
 import io.nuls.ledger.handler.UtxoCoinTransactionHandler;
 import io.nuls.ledger.handler.UtxoLockHandler;
 import io.nuls.ledger.handler.UtxoSmallChangeHandler;
-import io.nuls.ledger.module.LedgerModule;
+import io.nuls.ledger.module.AbstractLedgerModule;
 import io.nuls.ledger.service.impl.LedgerCacheService;
 import io.nuls.ledger.service.impl.UtxoLedgerServiceImpl;
 import io.nuls.ledger.service.intf.LedgerService;
@@ -20,7 +23,7 @@ import java.util.List;
 /**
  * Created by Niels on 2017/11/7.
  */
-public class UtxoLedgerModuleImpl extends LedgerModule {
+public class UtxoLedgerModuleImpl extends AbstractLedgerModule {
 
     private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
 
@@ -39,11 +42,11 @@ public class UtxoLedgerModuleImpl extends LedgerModule {
 //        this.registerEvent((short) 3, BaseUtxoCoinEvent.class);
         this.registerEvent((short) 4, UtxoLockCoinEvent.class);
         this.registerEvent((short) 5, UtxoSmallChangeEvent.class);
-        this.registerEvent((short) 6, CoinTransactionEvent.class);
+        this.registerEvent((short) 6, AbstractCoinTransactionEvent.class);
         this.registerEvent((short) 7, UtxoDepositCoinEvent.class);
         this.processorService.registerEventHandler(UtxoLockCoinEvent.class, new UtxoLockHandler());
         this.processorService.registerEventHandler(UtxoSmallChangeEvent.class, new UtxoSmallChangeHandler());
-        this.processorService.registerEventHandler(CoinTransactionEvent.class, new UtxoCoinTransactionHandler());
+        this.processorService.registerEventHandler(AbstractCoinTransactionEvent.class, new UtxoCoinTransactionHandler());
     }
 
     private void cacheStandingBook() {

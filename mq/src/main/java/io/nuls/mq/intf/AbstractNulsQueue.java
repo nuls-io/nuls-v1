@@ -6,9 +6,11 @@ import java.io.IOException;
 
 /**
  * 持久化队列定义
- * Created by Niels on 2017/9/20.
+ *
+ * @author Niels
+ * @date 2017/9/20
  */
-public abstract class NulsQueue<T> {
+public abstract class AbstractNulsQueue<T> {
 
     protected String queueName;
     protected long maxSize;

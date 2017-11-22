@@ -2,26 +2,24 @@ package io.nuls.network.param;
 
 import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.network.constant.NetworkConstant;
-import io.nuls.network.entity.PeerAddress;
-import io.nuls.network.entity.param.NetworkParam;
+import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.filter.impl.DefaultMessageFilter;
 import io.nuls.network.message.DefaultNetWorkMessageHandlerFactory;
 
 import java.net.InetSocketAddress;
-import java.util.List;
 
 /**
  * Created by win10 on 2017/11/6.
  */
-public class TestNetworkParam extends NetworkParam {
+public class TestNetworkParam extends AbstractNetworkParam {
 
     private static TestNetworkParam instance;
 
     private TestNetworkParam() {
-        this.port = ConfigLoader.getPropValue(NetworkConstant.Network_Port_Test, 8002);
-        this.packetMagic = ConfigLoader.getPropValue(NetworkConstant.Network_Magic_Test, 987654322);
-        this.maxInCount = ConfigLoader.getPropValue(NetworkConstant.Network_Peer_Max_In, 20);
-        this.maxOutCount = ConfigLoader.getPropValue(NetworkConstant.Network_Peer_Max_Out, 10);
+        this.port = ConfigLoader.getPropValue(NetworkConstant.NETWORK_PORT_TEST, 8002);
+        this.packetMagic = ConfigLoader.getPropValue(NetworkConstant.NETWORK_MAGIC_TEST, 987654322);
+        this.maxInCount = ConfigLoader.getPropValue(NetworkConstant.NETWORK_PEER_MAX_IN, 20);
+        this.maxOutCount = ConfigLoader.getPropValue(NetworkConstant.NETWORK_PEER_MAX_OUT, 10);
 
         InetSocketAddress address1 = new InetSocketAddress("192.168.1.156", port);
         InetSocketAddress address2 = new InetSocketAddress("192.168.1.157", port);

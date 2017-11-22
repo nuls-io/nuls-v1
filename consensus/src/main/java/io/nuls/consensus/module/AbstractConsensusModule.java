@@ -1,14 +1,16 @@
 package io.nuls.consensus.module;
 
 import io.nuls.consensus.event.*;
-import io.nuls.core.module.NulsModule;
+import io.nuls.core.module.BaseNulsModule;
 
 /**
- * Created by Niels on 2017/11/7.
+ *
+ * @author Niels
+ * @date 2017/11/7
  *
  */
-public abstract class ConsensusModule extends NulsModule {
-    public ConsensusModule() {
+public abstract class AbstractConsensusModule extends BaseNulsModule {
+    public AbstractConsensusModule() {
         super("consensus");
         this.registerEvent((short) 1, BaseConsensusEvent.class);
         this.registerEvent((short) 2, JoinConsensusEvent.class);

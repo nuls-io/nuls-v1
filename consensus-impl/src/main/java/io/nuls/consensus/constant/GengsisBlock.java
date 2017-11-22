@@ -4,11 +4,13 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
 /**
- * Created by Niels on 2017/11/10.
+ *
+ * @author Niels
+ * @date 2017/11/10
  *
  */
 public final class GengsisBlock extends Block {
-    private static final GengsisBlock instance = new GengsisBlock();
+    private static final GengsisBlock INSTANCE = new GengsisBlock();
 
     private GengsisBlock() {
         //todo create Gengsis Block
@@ -16,7 +18,7 @@ public final class GengsisBlock extends Block {
     }
 
     public static GengsisBlock getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
 }

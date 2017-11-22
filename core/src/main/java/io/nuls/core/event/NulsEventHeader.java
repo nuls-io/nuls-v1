@@ -1,6 +1,6 @@
 package io.nuls.core.event;
 
-import io.nuls.core.chain.entity.NulsData;
+import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
@@ -8,9 +8,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * Created by Niels on 2017/11/7.
+ *
+ * @author Niels
+ * @date 2017/11/7
  */
-public class NulsEventHeader extends NulsData {
+public class NulsEventHeader extends BaseNulsData {
     private short moduleId;
     private short eventType;
 

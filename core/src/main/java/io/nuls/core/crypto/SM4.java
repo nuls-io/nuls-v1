@@ -38,7 +38,7 @@ public class SM4 {
         sk[(31 - i)] = t;
     }
 
-    public static final byte[] SboxTable = {
+    public static final byte[] SBOX_TABLE = {
             (byte) 0xd6, (byte) 0x90, (byte) 0xe9, (byte) 0xfe,
             (byte) 0xcc, (byte) 0xe1, 0x3d, (byte) 0xb7, 0x16, (byte) 0xb6,
             0x14, (byte) 0xc2, 0x28, (byte) 0xfb, 0x2c, 0x05, 0x2b, 0x67,
@@ -93,7 +93,7 @@ public class SM4 {
 
     private byte sm4Sbox(byte inch) {
         int i = inch & 0xFF;
-        byte retVal = SboxTable[i];
+        byte retVal = SBOX_TABLE[i];
         return retVal;
     }
 

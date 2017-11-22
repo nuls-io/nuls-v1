@@ -13,7 +13,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by Niels on 2017/10/27.
+ *
+ * @author Niels
+ * @date 2017/10/27
  */
 public class EhCacheServiceImpl<K, T> implements CacheService<K, T> {
     private final EhCacheManager cacheManager = EhCacheManager.getInstance();

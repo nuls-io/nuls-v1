@@ -8,7 +8,9 @@ import io.nuls.db.entity.BlockPo;
 import java.util.List;
 
 /**
- * Created by v.chou on 2017/9/29.
+ *
+ * @author v.chou
+ * @date 2017/9/29
  */
 public class BlockDaoImpl extends BaseDaoImpl<BlockMapper,String,BlockPo> implements BlockDao {
 

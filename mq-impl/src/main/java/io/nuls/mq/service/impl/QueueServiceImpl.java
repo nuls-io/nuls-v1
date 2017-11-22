@@ -5,7 +5,7 @@ import io.nuls.mq.entity.StatInfo;
 import io.nuls.mq.entity.impl.BlockingQueueImpl;
 import io.nuls.mq.entity.impl.PersistentQueue;
 import io.nuls.mq.intf.QueueService;
-import io.nuls.mq.intf.NulsQueue;
+import io.nuls.mq.intf.AbstractNulsQueue;
 import io.nuls.mq.manager.QueueManager;
 
 /**
@@ -14,13 +14,13 @@ import io.nuls.mq.manager.QueueManager;
  */
 public class QueueServiceImpl<T> implements QueueService<T> {
 
-    private static final QueueServiceImpl service = new QueueServiceImpl();
+    private static final QueueServiceImpl INSTANCE = new QueueServiceImpl();
 
     private QueueServiceImpl() {
     }
 
     public static QueueService getInstance() {
-        return service;
+        return INSTANCE;
     }
 
 
@@ -47,7 +47,7 @@ public class QueueServiceImpl<T> implements QueueService<T> {
     @Override
     public boolean createQueue(String queueName, Long maxSize, boolean persist, int latelySecond) {
         try {
-            NulsQueue queue = null;
+            AbstractNulsQueue queue = null;
             if (persist) {
                 queue = new PersistentQueue(queueName, maxSize);
             } else {

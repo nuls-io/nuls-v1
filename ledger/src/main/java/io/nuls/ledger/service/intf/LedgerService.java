@@ -7,7 +7,9 @@ import io.nuls.ledger.entity.Balance;
 import java.util.List;
 
 /**
- * Created by Niels on 2017/11/9.
+ *
+ * @author Niels
+ * @date 2017/11/9
  *
  */
 public interface LedgerService {

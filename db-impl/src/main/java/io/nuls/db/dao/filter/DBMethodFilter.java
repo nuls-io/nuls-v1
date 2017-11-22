@@ -11,7 +11,9 @@ import org.apache.ibatis.session.SqlSession;
 import java.lang.reflect.Method;
 
 /**
- * Created by zhouwei on 2017/10/13.
+ *
+ * @author zhouwei
+ * @date 2017/10/13
  */
 public class DBMethodFilter implements MethodInterceptor {
 

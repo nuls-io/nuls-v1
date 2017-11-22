@@ -1,7 +1,9 @@
 package io.nuls.consensus.constant;
 
 /**
- * Created by Niels on 2017/11/8.
+ *
+ * @author Niels
+ * @date 2017/11/8
  *
  */
 public interface POCConsensusConstant {

@@ -1,7 +1,9 @@
 package io.nuls.account.constant;
 
 /**
- * Created by Niels on 2017/10/30.
+ *
+ * @author Niels
+ * @date 2017/10/30
  *
  */
 public interface AccountConstant {

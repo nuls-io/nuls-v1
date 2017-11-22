@@ -1,6 +1,5 @@
 package io.nuls.network.message;
 
-import io.nuls.core.mesasge.NulsMessage;
 import io.nuls.network.message.entity.VersionMessage;
 import io.nuls.network.message.impl.VersionMessageHandler;
 import io.nuls.network.message.messageHandler.NetWorkMessageHandler;
@@ -11,7 +10,7 @@ import java.util.Map;
 /**
  * Created by vivi on 2017/11/21.
  */
-public class DefaultNetWorkMessageHandlerFactory extends NetWorkMessageHandlerFactory {
+public class DefaultNetWorkMessageHandlerFactory extends AbstractNetWorkMessageHandlerFactory {
 
     private static final DefaultNetWorkMessageHandlerFactory INSTANCE = new DefaultNetWorkMessageHandlerFactory();
 
@@ -27,7 +26,7 @@ public class DefaultNetWorkMessageHandlerFactory extends NetWorkMessageHandlerFa
     }
 
     @Override
-    public NetWorkMessageHandler getHandler(NetworkMessage message) {
+    public NetWorkMessageHandler getHandler(AbstractNetworkMessage message) {
         return handlerMap.get(message.getClass().getName());
     }
 }

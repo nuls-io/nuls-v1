@@ -1,7 +1,7 @@
 package io.nuls.rpc.resources.impl;
 
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.module.NulsModule;
+import io.nuls.core.module.BaseNulsModule;
 import io.nuls.core.module.service.ModuleService;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.rpc.entity.RpcResult;
@@ -44,7 +44,7 @@ public class SystemResourceImpl implements SystemResource, ModuleResource {
         do {
             ModuleService service = context.getService(ModuleService.class);
             AssertUtil.canNotEmpty(service, "System module service error!");
-            NulsModule module = service.loadModule(moduleClass);
+            BaseNulsModule module = service.loadModule(moduleClass);
             if (null != module) {
                 result = RpcResult.getSuccess();
             }
@@ -58,7 +58,7 @@ public class SystemResourceImpl implements SystemResource, ModuleResource {
     @Override
     public RpcResult startModule(String moduleName) {
         AssertUtil.canNotEmpty(moduleName, "ModuleName can not empty");
-        NulsModule module = context.getModule(moduleName);
+        BaseNulsModule module = context.getModule(moduleName);
         AssertUtil.canNotEmpty(module, "The module of " + moduleName + " is not exist!");
         module.start();
         return RpcResult.getSuccess();
@@ -70,7 +70,7 @@ public class SystemResourceImpl implements SystemResource, ModuleResource {
     @Override
     public RpcResult shutdownModule(String moduleName) {
         AssertUtil.canNotEmpty(moduleName, "ModuleName can not empty");
-        NulsModule module = context.getModule(moduleName);
+        BaseNulsModule module = context.getModule(moduleName);
         AssertUtil.canNotEmpty(module, "The module of " + moduleName + " is not exist!");
         module.shutdown();
         return RpcResult.getSuccess();
@@ -82,7 +82,7 @@ public class SystemResourceImpl implements SystemResource, ModuleResource {
     @Override
     public RpcResult distroyModule(String moduleName) {
         AssertUtil.canNotEmpty(moduleName, "ModuleName can not empty");
-        NulsModule module = context.getModule(moduleName);
+        BaseNulsModule module = context.getModule(moduleName);
         AssertUtil.canNotEmpty(module, "The module of " + moduleName + " is not exist!");
         module.destroy();
         return RpcResult.getSuccess();
@@ -94,7 +94,7 @@ public class SystemResourceImpl implements SystemResource, ModuleResource {
     @Override
     public RpcResult restartModule(String moduleName) {
         AssertUtil.canNotEmpty(moduleName, "ModuleName can not empty");
-        NulsModule module = context.getModule(moduleName);
+        BaseNulsModule module = context.getModule(moduleName);
         AssertUtil.canNotEmpty(module, "The module of " + moduleName + " is not exist!");
         module.shutdown();
         module.start();

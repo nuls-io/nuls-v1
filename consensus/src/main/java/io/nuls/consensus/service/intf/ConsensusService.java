@@ -8,7 +8,9 @@ import io.nuls.consensus.entity.ConsensusInfo;
 import java.util.List;
 
 /**
- * Created by Niels on 2017/11/7.
+ *
+ * @author Niels
+ * @date 2017/11/7
  *
  */
 public interface ConsensusService {

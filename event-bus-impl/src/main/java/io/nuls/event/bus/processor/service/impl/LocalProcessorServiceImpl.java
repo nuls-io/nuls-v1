@@ -1,17 +1,19 @@
 package io.nuls.event.bus.processor.service.impl;
 
-import io.nuls.core.event.NulsEvent;
+import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.event.bus.constant.EventBusConstant;
-import io.nuls.event.bus.event.handler.LocalNulsEventHandler;
+import io.nuls.event.bus.event.handler.AbstractLocalNulsEventHandler;
 import io.nuls.event.bus.processor.manager.ProcessorManager;
 import io.nuls.event.bus.processor.service.intf.LocalProcessorService;
 
 /**
- * Created by Niels on 2017/11/3.
+ *
+ * @author Niels
+ * @date 2017/11/3
  */
 public class LocalProcessorServiceImpl implements LocalProcessorService {
 
-    private static final LocalProcessorServiceImpl instance = new LocalProcessorServiceImpl();
+    private static final LocalProcessorServiceImpl INSTANCE = new LocalProcessorServiceImpl();
     private final ProcessorManager processorManager;
 
     private LocalProcessorServiceImpl() {
@@ -19,16 +21,16 @@ public class LocalProcessorServiceImpl implements LocalProcessorService {
     }
 
     public static LocalProcessorService getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
     @Override
-    public void send(NulsEvent event) {
+    public void send(BaseNulsEvent event) {
         processorManager.offer(event);
     }
 
     @Override
-    public String registerEventHandler(Class<? extends NulsEvent> eventClass, LocalNulsEventHandler<? extends NulsEvent> handler) {
+    public String registerEventHandler(Class<? extends BaseNulsEvent> eventClass, AbstractLocalNulsEventHandler<? extends BaseNulsEvent> handler) {
         return processorManager.registerEventHandler(eventClass, handler);
     }
 
