@@ -7,7 +7,6 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.mesasge.NulsMessage;
 import io.nuls.core.mesasge.NulsMessageHeader;
-import io.nuls.core.thread.NulsThread;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
@@ -191,7 +190,14 @@ public class Peer extends NulsData {
     }
 
     public void destroy() {
-
+        lock.lock();
+        try {
+            this.status = 2;
+            this.writeTarget.closeConnection();
+            this.writeTarget = null;
+        }finally {
+            lock.unlock();
+        }
     }
 
     @Override

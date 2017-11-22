@@ -38,6 +38,7 @@ public class PeerDiscoverHandler implements Runnable {
 
     // get peers from local database
     public CopyOnWriteArrayList<Peer> getLocalPeers() {
+        //todo find from database
         return new CopyOnWriteArrayList<>();
     }
 
