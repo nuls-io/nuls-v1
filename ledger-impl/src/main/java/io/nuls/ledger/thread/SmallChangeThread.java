@@ -35,7 +35,7 @@ public class SmallChangeThread extends NulsThread {
                 Log.error(e);
             }
             try {
-                Thread.sleep(3600000l);
+                Thread.sleep(3600000L);
             } catch (InterruptedException e) {
                 Log.error(e);
             }

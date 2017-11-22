@@ -10,14 +10,18 @@ import java.util.List;
 /**
  * Created by v.chou on 2017/9/29.
  */
-public class BlockDaoImpl extends BaseDaoImpl implements BlockDao {
+public class BlockDaoImpl extends BaseDaoImpl<BlockMapper,String,BlockPo> implements BlockDao {
+
+    public BlockDaoImpl() {
+        super(BlockMapper.class);
+    }
 
     private BlockMapper blockMapper;
 
     @Override
     @SessionAnnotation
     public int save(BlockPo blockPo) {
-        blockMapper = getMapper(BlockMapper.class);
+        blockMapper = getMapper();
         return blockMapper.insert(blockPo);
     }
 
@@ -30,19 +34,19 @@ public class BlockDaoImpl extends BaseDaoImpl implements BlockDao {
     @Override
     @SessionAnnotation
     public int update(BlockPo blockPo) {
-        blockMapper = getMapper(BlockMapper.class);
+        blockMapper = getMapper();
         return blockMapper.updateByPrimaryKey(blockPo);
     }
 
     @Override
     public int updateSelective(BlockPo blockPo) {
         //todo
-         return 0;
+        return 0;
     }
 
     @Override
     public BlockPo getByKey(String key) {
-        blockMapper = getMapper(BlockMapper.class);
+        blockMapper = getMapper();
         return blockMapper.selectByPrimaryKey(key);
     }
 

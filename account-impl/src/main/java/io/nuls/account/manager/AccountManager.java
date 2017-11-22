@@ -34,6 +34,7 @@ public class AccountManager {
             Locla_acount_id = list.get(0).getId();
         }else{
             Account account = this.accountService.createAccount();
+            Locla_acount_id = account.getId();
         }
     }
 

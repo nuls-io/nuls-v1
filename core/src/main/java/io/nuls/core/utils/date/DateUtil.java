@@ -333,25 +333,25 @@ public class DateUtil {
 				remark = String.format("%s小时%s分", tempTime / 3600,
 						(tempTime / 60) % 60);
 			}
-		} else if (tempTime / (3600 * 24l) < 30) {
+		} else if (tempTime / (3600 * 24L) < 30) {
 			if (showFull) {
 				remark = String.format("%s天%s小时%s分%s秒",
-						tempTime / (3600 * 24l), (tempTime / 3600) % 24,
+						tempTime / (3600 * 24L), (tempTime / 3600) % 24,
 						(tempTime / 60) % 60, tempTime % 60);
 			} else {
-				remark = String.format("%s天%s小时", tempTime / (3600 * 24l),
+				remark = String.format("%s天%s小时", tempTime / (3600 * 24L),
 						(tempTime / 3600) % 24);
 			}
-		} else if (tempTime / (3600 * 24 * 30l) <= 12) {
+		} else if (tempTime / (3600 * 24 * 30L) <= 12) {
 			if (showFull) {
 				remark = String.format("%个月%s天%s小时", tempTime
-						/ (3600 * 24 * 30l), tempTime / (3600 * 24l),
+						/ (3600 * 24 * 30L), tempTime / (3600 * 24L),
 						(tempTime / 3600) % 24);
 			} else {
-				remark = tempTime / (3600 * 24 * 30l) + "个月" + tempTime
-						/ (3600 * 24l) % 30 + "天";
+				remark = tempTime / (3600 * 24 * 30L) + "个月" + tempTime
+						/ (3600 * 24L) % 30 + "天";
 			}
-		} else if (tempTime / (3600 * 24 * 30l) < 12) {
+		} else if (tempTime / (3600 * 24 * 30L) < 12) {
 
 		}
 		return remark;
@@ -378,7 +378,7 @@ public class DateUtil {
 	    long to = startTime.getTime();
 	    long from = endTime.getTime();
 	    
-		return (int) ((from - to) / (1000l * 60 * 60 * 24));
+		return (int) ((from - to) / (1000L * 60 * 60 * 24));
 	}
 
 	public static Date getTomorrow() {

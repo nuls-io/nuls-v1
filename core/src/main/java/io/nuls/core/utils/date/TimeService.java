@@ -23,12 +23,12 @@ public final class TimeService {
 	private static final Logger log = LoggerFactory.getLogger(TimeService.class);
 	
 	/** 时间偏移差距触发点，超过该值会导致本地时间重设，单位毫秒 **/
-	public static final long TIME_OFFSET_BOUNDARY = 1000l;
+	public static final long TIME_OFFSET_BOUNDARY = 1000L;
 	
 	/*
 	 * 网络时间刷新间隔
 	 */
-	private static final long TIME_REFRESH_TIME = 600000l;
+	private static final long TIME_REFRESH_TIME = 600000L;
 
 	/*
 	 * 模拟网络时钟 
@@ -105,7 +105,7 @@ public final class TimeService {
 	
 	private void initError() {
 		//1分钟后重试
-		lastInitTime = System.currentTimeMillis() - 60000l;
+		lastInitTime = System.currentTimeMillis() - 60000L;
 		
 		log.info("---------------本地时间调整出错---------------");
 	}
@@ -143,7 +143,7 @@ public final class TimeService {
 			}
 			lastTime = newTime;
 			try {
-				Thread.sleep(500l);
+				Thread.sleep(500L);
 			} catch (InterruptedException e) {
 			}
 		}
@@ -160,8 +160,9 @@ public final class TimeService {
      * 以给定的毫秒数推进（或倒退）网络时间
      */
     public static Date rollMockClockMillis(long millis) {
-        if (mockTime == null)
-            throw new IllegalStateException("You need to use setMockClock() first.");
+        if (mockTime == null){
+        	throw new IllegalStateException("You need to use setMockClock() first.");
+		}
         mockTime = new Date(mockTime.getTime() + millis);
         return mockTime;
     }

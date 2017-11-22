@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Created by zhouwei on 2017/9/29.
  */
-public interface BaseDao<T,K> {
+public interface BaseDao<K,T> {
 
     /**
      * 单个数据存储

@@ -13,7 +13,6 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * 队列统计信息
  * Created by Niels on 2017/9/21.
- *
  */
 public class StatInfoImpl implements StatInfo {
     private String name;
@@ -25,8 +24,8 @@ public class StatInfoImpl implements StatInfo {
     //    总取出数量
     private AtomicLong outCount = new AtomicLong();
     private int latelySecond = 10;
-    private long lastInCount = 0l;
-    private long lastOutCount = 0l;
+    private long lastInCount = 0L;
+    private long lastOutCount = 0L;
     //    最近添加速度
     private long latelyInTps;
     //    最近取出速度
@@ -39,7 +38,7 @@ public class StatInfoImpl implements StatInfo {
      * @param latelySecond 速度统计的时间段（秒）
      */
     public StatInfoImpl(String queueName, long lastSize, int latelySecond) {
-        if (queueName==null||queueName.trim().isEmpty()) {
+        if (queueName == null || queueName.trim().isEmpty()) {
             throw new NulsRuntimeException(ErrorCode.QUEUE_NAME_ERROR);
         }
         this.name = queueName.substring(6);
@@ -48,10 +47,12 @@ public class StatInfoImpl implements StatInfo {
         this.startTime = System.currentTimeMillis();
     }
 
+    @Override
     public void putOne() {
         inCount.addAndGet(1);
     }
 
+    @Override
     public void takeOne() {
         outCount.addAndGet(1);
     }
@@ -62,6 +63,7 @@ public class StatInfoImpl implements StatInfo {
         return sdf.format(new Date(time));
     }
 
+    @Override
     public String toString() {
         StringBuilder log = new StringBuilder();
         log.append("队列监控：");
@@ -92,6 +94,7 @@ public class StatInfoImpl implements StatInfo {
     /**
      * @return 本次启动后总写入条数
      */
+    @Override
     public AtomicLong getInCount() {
         return inCount;
     }
@@ -99,6 +102,7 @@ public class StatInfoImpl implements StatInfo {
     /**
      * @return 本次启动后总读出条数
      */
+    @Override
     public AtomicLong getOutCount() {
         return outCount;
     }
@@ -106,6 +110,7 @@ public class StatInfoImpl implements StatInfo {
     /**
      * @return 队列名称
      */
+    @Override
     public String getName() {
         return name;
     }
@@ -113,6 +118,7 @@ public class StatInfoImpl implements StatInfo {
     /**
      * @return 本次启动时间点
      */
+    @Override
     public long getStartTime() {
         return startTime;
     }
@@ -120,6 +126,7 @@ public class StatInfoImpl implements StatInfo {
     /**
      * @return 启动前文件中积压的未读取条数
      */
+    @Override
     public long getLastSize() {
         return lastSize;
     }
@@ -127,14 +134,17 @@ public class StatInfoImpl implements StatInfo {
     /**
      * @return 获取速度计算的统计时间（秒）
      */
+    @Override
     public int getLatelySecond() {
         return latelySecond;
     }
 
+    @Override
     public long getLastInCount() {
         return lastInCount;
     }
 
+    @Override
     public long getLastOutCount() {
         return lastOutCount;
     }
@@ -142,6 +152,7 @@ public class StatInfoImpl implements StatInfo {
     /**
      * @return 最近写入速度（条/秒）
      */
+    @Override
     public long getLatelyInTps() {
         return latelyInTps;
     }
@@ -149,22 +160,27 @@ public class StatInfoImpl implements StatInfo {
     /**
      * @return 最近读出速度（条/秒）
      */
+    @Override
     public long getLatelyOutTps() {
         return latelyOutTps;
     }
 
+    @Override
     public void setLastInCount(long lastInCount) {
         this.lastInCount = lastInCount;
     }
 
+    @Override
     public void setLastOutCount(long lastOutCount) {
         this.lastOutCount = lastOutCount;
     }
 
+    @Override
     public void setLatelyInTps(long latelyInTps) {
         this.latelyInTps = latelyInTps;
     }
 
+    @Override
     public void setLatelyOutTps(long latelyOutTps) {
         this.latelyOutTps = latelyOutTps;
     }

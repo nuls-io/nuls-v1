@@ -11,7 +11,7 @@ import io.nuls.db.dao.BlockDao;
 import io.nuls.db.dao.filter.DBMethodFilter;
 import io.nuls.db.dao.impl.mybatis.BlockDaoImpl;
 import io.nuls.db.dao.impl.mybatis.session.SessionManager;
-import io.nuls.db.dao.impl.mybatis.util.AccountDaoImpl;
+import io.nuls.db.dao.impl.mybatis.AccountDaoImpl;
 import io.nuls.db.exception.DBException;
 import io.nuls.db.module.DBModule;
 import org.apache.ibatis.io.Resources;

@@ -87,8 +87,9 @@ public final class Log {
         if (LOG.isDebugEnabled()) {
             String logContent = isStringBlank(getId()) ? (getLogTrace() + ":" + msg)
                     : (getLogTrace() + "[" + getId() + "]" + ":" + msg);
-            if (!(throwable instanceof NulsException) || !(throwable instanceof NulsRuntimeException))
+            if (!(throwable instanceof NulsException) || !(throwable instanceof NulsRuntimeException)){
                 throwable = new NulsException(ErrorCode.FAILED, throwable);
+            }
             LOG.debug(logContent, throwable);
         }
     }
@@ -119,8 +120,9 @@ public final class Log {
     public static void info(String msg, Throwable throwable) {
         String logContent = isStringBlank(getId()) ? (getLogTrace() + ":" + msg)
                 : (getLogTrace() + "[" + getId() + "]" + ":" + msg);
-        if (!(throwable instanceof NulsException) || !(throwable instanceof NulsRuntimeException))
+        if (!(throwable instanceof NulsException) || !(throwable instanceof NulsRuntimeException)){
             throwable = new NulsException(ErrorCode.FAILED, throwable);
+        }
         LOG.info(logContent, throwable);
     }
 
@@ -150,8 +152,9 @@ public final class Log {
     public static void warn(String msg, Throwable throwable) {
         String logContent = isStringBlank(getId()) ? (getLogTrace() + ":" + msg)
                 : (getLogTrace() + "[" + getId() + "]" + ":" + msg);
-        if (!(throwable instanceof NulsException) || !(throwable instanceof NulsRuntimeException))
+        if (!(throwable instanceof NulsException) || !(throwable instanceof NulsRuntimeException)){
             throwable = new NulsException(ErrorCode.FAILED, throwable);
+        }
         LOG.warn(logContent, throwable);
     }
 
@@ -182,16 +185,18 @@ public final class Log {
     public static void error(String msg, Throwable throwable) {
         String logContent = isStringBlank(getId()) ? (getLogTrace() + ":" + msg)
                 : (getLogTrace() + "[" + getId() + "]" + ":" + msg);
-        if (!(throwable instanceof NulsException) || !(throwable instanceof NulsRuntimeException))
+        if (!(throwable instanceof NulsException) || !(throwable instanceof NulsRuntimeException)){
             throwable = new NulsException(ErrorCode.FAILED, throwable);
+        }
         LOG.error(logContent, throwable);
     }
 
     public static void error(Throwable throwable) {
         String logContent = isStringBlank(getId()) ? (getLogTrace() + ":")
                 : (getLogTrace() + "[" + getId() + "]" + ":");
-        if (!(throwable instanceof NulsException) || !(throwable instanceof NulsRuntimeException))
+        if (!(throwable instanceof NulsException) || !(throwable instanceof NulsRuntimeException)){
             throwable = new NulsException(ErrorCode.FAILED, throwable);
+        }
         LOG.error(logContent, throwable);
     }
 
@@ -215,8 +220,9 @@ public final class Log {
     public static void trace(String msg, Throwable throwable) {
         String logContent = isStringBlank(getId()) ? (getLogTrace() + ":" + msg)
                 : (getLogTrace() + "[" + getId() + "]" + ":" + msg);
-        if (!(throwable instanceof NulsException) || !(throwable instanceof NulsRuntimeException))
+        if (!(throwable instanceof NulsException) || !(throwable instanceof NulsRuntimeException)){
             throwable = new NulsException(ErrorCode.FAILED, throwable);
+        }
         LOG.trace(logContent, throwable);
     }
 

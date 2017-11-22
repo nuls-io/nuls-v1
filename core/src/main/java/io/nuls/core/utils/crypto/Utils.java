@@ -15,15 +15,21 @@ import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.util.List;
 
+/**
+ * @author somebody
+ */
 public class Utils {
-
-    public static final Charset charset = Charset.forName(NulsContext.DEFAULT_ENCODING);
-
+    /**
+     * @auther somebody
+     */
+    public static final Charset CHARSET = Charset.forName(NulsContext.DEFAULT_ENCODING);
+    private static final int MAGIC_8 = 8;
+    private static final int MAGIC_0X80 = 0x80;
     /**
      * The string that prefixes all text messages signed using Bitcoin keys.
      */
     public static final String SIGNED_MESSAGE_HEADER = "RiceChain Signed Message:\n";
-    public static final byte[] SIGNED_MESSAGE_HEADER_BYTES = SIGNED_MESSAGE_HEADER.getBytes(charset);
+    public static final byte[] SIGNED_MESSAGE_HEADER_BYTES = SIGNED_MESSAGE_HEADER.getBytes(CHARSET);
 
     /**
      * MPI encoded numbers are produced by the OpenSSL BN_bn2mpi function. They consist of
@@ -38,13 +44,16 @@ public class Utils {
             int length = (int) readUint32BE(mpi, 0);
             buf = new byte[length];
             System.arraycopy(mpi, 4, buf, 0, length);
-        } else
+        } else {
             buf = mpi;
-        if (buf.length == 0)
+        }
+        if (buf.length == 0) {
             return BigInteger.ZERO;
-        boolean isNegative = (buf[0] & 0x80) == 0x80;
-        if (isNegative)
+        }
+        boolean isNegative = (buf[0] & MAGIC_0X80) == MAGIC_0X80;
+        if (isNegative) {
             buf[0] &= 0x7f;
+        }
         BigInteger result = new BigInteger(buf);
         return isNegative ? result.negate() : result;
     }
@@ -58,34 +67,40 @@ public class Utils {
      */
     public static byte[] encodeMPI(BigInteger value, boolean includeLength) {
         if (value.equals(BigInteger.ZERO)) {
-            if (!includeLength)
+            if (!includeLength) {
                 return new byte[]{};
-            else
+            } else {
                 return new byte[]{0x00, 0x00, 0x00, 0x00};
+            }
         }
         boolean isNegative = value.signum() < 0;
-        if (isNegative)
+        if (isNegative) {
             value = value.negate();
+        }
         byte[] array = value.toByteArray();
         int length = array.length;
-        if ((array[0] & 0x80) == 0x80)
+        if ((array[0] & MAGIC_0X80) == MAGIC_0X80) {
             length++;
+        }
         if (includeLength) {
             byte[] result = new byte[length + 4];
             System.arraycopy(array, 0, result, length - array.length + 3, array.length);
             uint32ToByteArrayBE(length, result, 0);
-            if (isNegative)
-                result[4] |= 0x80;
+            if (isNegative) {
+                result[4] |= MAGIC_0X80;
+            }
             return result;
         } else {
             byte[] result;
             if (length != array.length) {
                 result = new byte[length];
                 System.arraycopy(array, 0, result, 1, array.length);
-            } else
+            } else {
                 result = array;
-            if (isNegative)
-                result[0] |= 0x80;
+            }
+            if (isNegative) {
+                result[0] |= MAGIC_0X80;
+            }
             return result;
         }
     }
@@ -100,13 +115,14 @@ public class Utils {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             bos.write(SIGNED_MESSAGE_HEADER_BYTES.length);
             bos.write(SIGNED_MESSAGE_HEADER_BYTES);
-            byte[] messageBytes = message.getBytes(charset);
+            byte[] messageBytes = message.getBytes(CHARSET);
             VarInt size = new VarInt(messageBytes.length);
             bos.write(size.encode());
             bos.write(messageBytes);
             return bos.toByteArray();
         } catch (IOException e) {
-            throw new RuntimeException(e);  // Cannot happen.
+            // Cannot happen.
+            throw new RuntimeException(e);
         }
     }
 
@@ -115,7 +131,7 @@ public class Utils {
     public static boolean isAndroidRuntime() {
         if (isAndroid == -1) {
             final String runtime = System.getProperty("java.runtime.name");
-            isAndroid = (runtime != null && runtime.equals("Android Runtime")) ? 1 : 0;
+            isAndroid = (runtime != null && "Android Runtime".equals(runtime)) ? 1 : 0;
         }
         return isAndroid == 1;
     }
@@ -143,8 +159,9 @@ public class Utils {
         // We could use the XOR trick here but it's easier to understand if we don't. If we find this is really a
         // performance issue the matter can be revisited.
         byte[] buf = new byte[bytes.length];
-        for (int i = 0; i < bytes.length; i++)
+        for (int i = 0; i < bytes.length; i++) {
             buf[i] = bytes[bytes.length - 1 - i];
+        }
         return buf;
     }
 
@@ -152,34 +169,34 @@ public class Utils {
      * Parse 4 bytes from the byte array (starting at the offset) as unsigned 32-bit integer in little endian format.
      */
     public static long readUint32(byte[] bytes, int offset) {
-        return (bytes[offset] & 0xffl) |
-                ((bytes[offset + 1] & 0xffl) << 8) |
-                ((bytes[offset + 2] & 0xffl) << 16) |
-                ((bytes[offset + 3] & 0xffl) << 24);
+        return (bytes[offset] & 0xffL) |
+                ((bytes[offset + 1] & 0xffL) << 8) |
+                ((bytes[offset + 2] & 0xffL) << 16) |
+                ((bytes[offset + 3] & 0xffL) << 24);
     }
 
     /**
      * Parse 8 bytes from the byte array (starting at the offset) as signed 64-bit integer in little endian format.
      */
     public static long readInt64(byte[] bytes, int offset) {
-        return (bytes[offset] & 0xffl) |
-                ((bytes[offset + 1] & 0xffl) << 8) |
-                ((bytes[offset + 2] & 0xffl) << 16) |
-                ((bytes[offset + 3] & 0xffl) << 24) |
-                ((bytes[offset + 4] & 0xffl) << 32) |
-                ((bytes[offset + 5] & 0xffl) << 40) |
-                ((bytes[offset + 6] & 0xffl) << 48) |
-                ((bytes[offset + 7] & 0xffl) << 56);
+        return (bytes[offset] & 0xffL) |
+                ((bytes[offset + 1] & 0xffL) << 8) |
+                ((bytes[offset + 2] & 0xffL) << 16) |
+                ((bytes[offset + 3] & 0xffL) << 24) |
+                ((bytes[offset + 4] & 0xffL) << 32) |
+                ((bytes[offset + 5] & 0xffL) << 40) |
+                ((bytes[offset + 6] & 0xffL) << 48) |
+                ((bytes[offset + 7] & 0xffL) << 56);
     }
 
     /**
      * Parse 4 bytes from the byte array (starting at the offset) as unsigned 32-bit integer in big endian format.
      */
     public static long readUint32BE(byte[] bytes, int offset) {
-        return ((bytes[offset] & 0xffl) << 24) |
-                ((bytes[offset + 1] & 0xffl) << 16) |
-                ((bytes[offset + 2] & 0xffl) << 8) |
-                (bytes[offset + 3] & 0xffl);
+        return ((bytes[offset] & 0xffL) << 24) |
+                ((bytes[offset + 1] & 0xffL) << 16) |
+                ((bytes[offset + 2] & 0xffL) << 8) |
+                (bytes[offset + 3] & 0xffL);
     }
 
     /**
@@ -284,14 +301,15 @@ public class Utils {
 
     public static void uint64ToByteStreamLE(BigInteger val, OutputStream stream) throws IOException {
         byte[] bytes = val.toByteArray();
-        if (bytes.length > 8) {
+        if (bytes.length > MAGIC_8) {
             throw new RuntimeException("Input too large to encode into a uint64");
         }
         bytes = reverseBytes(bytes);
         stream.write(bytes);
-        if (bytes.length < 8) {
-            for (int i = 0; i < 8 - bytes.length; i++)
+        if (bytes.length < MAGIC_8) {
+            for (int i = 0; i < MAGIC_8 - bytes.length; i++) {
                 stream.write(0);
+            }
         }
     }
 
@@ -307,8 +325,8 @@ public class Utils {
      */
     public static byte[] double2Bytes(double d) {
         long value = Double.doubleToRawLongBits(d);
-        byte[] byteRet = new byte[8];
-        for (int i = 0; i < 8; i++) {
+        byte[] byteRet = new byte[MAGIC_8];
+        for (int i = 0; i < MAGIC_8; i++) {
             byteRet[i] = (byte) ((value >> 8 * i) & 0xff);
         }
         return byteRet;
@@ -322,8 +340,8 @@ public class Utils {
      */
     public static double bytes2Double(byte[] arr) {
         long value = 0;
-        for (int i = 0; i < 8; i++) {
-            value |= ((long) (arr[i] & 0xff)) << (8 * i);
+        for (int i = 0; i < MAGIC_8; i++) {
+            value |= ((long) (arr[i] & 0xff)) << (MAGIC_8 * i);
         }
         return Double.longBitsToDouble(value);
     }
