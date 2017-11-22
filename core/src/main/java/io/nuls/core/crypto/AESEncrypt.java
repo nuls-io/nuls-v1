@@ -15,12 +15,11 @@ import java.util.Arrays;
 
 /**
  * AES加密
- *
  * @author ln
  */
 public class AESEncrypt {
 
-    private static final SecureRandom secureRandom = new SecureRandom();
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     /**
      * 加密
@@ -48,7 +47,7 @@ public class AESEncrypt {
         try {
             if (iv == null) {
                 iv = new byte[16];
-                secureRandom.nextBytes(iv);
+                SECURE_RANDOM.nextBytes(iv);
             }
 
             ParametersWithIV keyWithIv = new ParametersWithIV(aesKey, iv);

@@ -10,7 +10,7 @@ import java.io.OutputStream;
 public class ByeMessage extends AbstractNetworkMessage {
 
     public ByeMessage() {
-        this.type = NetworkConstant.Network_Bye_Message;
+        this.type = NetworkConstant.NETWORK_BYE_MESSAGE;
     }
 
     @Override

@@ -2,22 +2,23 @@ package io.nuls.rpc.aop;
 
 import org.glassfish.grizzly.http.server.Request;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 /**
- * Created by Niels on 2017/9/28.
- *
+ * @author Niels
+ * @date 2017/9/28
  */
 public class HttpContextHelper {
 
-    private static final ThreadLocal<Request> map = new ThreadLocal<>();
+    private static final ThreadLocal<Request> LOCAL = new ThreadLocal<>();
 
     public static void put(Request request) {
-        map.set(request);
+        LOCAL.set(request);
     }
 
     public static Request getRequest() {
-        return map.get();
+        return LOCAL.get();
+    }
+
+    public static void removeRequest() {
+        LOCAL.remove();
     }
 }

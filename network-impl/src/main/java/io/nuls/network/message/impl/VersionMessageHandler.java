@@ -13,14 +13,14 @@ import io.nuls.network.message.messageHandler.NetWorkMessageHandler;
  */
 public class VersionMessageHandler implements NetWorkMessageHandler {
 
-    private static final VersionMessageHandler handler = new VersionMessageHandler();
+    private static final VersionMessageHandler INSTANCE = new VersionMessageHandler();
 
     private VersionMessageHandler() {
 
     }
 
     public static VersionMessageHandler getInstance() {
-        return handler;
+        return INSTANCE;
     }
 
 

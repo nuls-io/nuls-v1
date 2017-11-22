@@ -18,14 +18,14 @@ public class DefaultMessageFilter implements NulsMessageFilter {
 
     private Set<Long> magicSet = new LinkedHashSet<>();
 
-    private static final DefaultMessageFilter messageFilter = new DefaultMessageFilter();
+    private static final DefaultMessageFilter MESSAGE_FILTER = new DefaultMessageFilter();
 
     private DefaultMessageFilter() {
 
     }
 
     public static DefaultMessageFilter getInstance() {
-        return messageFilter;
+        return MESSAGE_FILTER;
     }
 
     @Override

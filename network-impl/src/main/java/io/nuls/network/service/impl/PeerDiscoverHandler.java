@@ -60,7 +60,7 @@ public class PeerDiscoverHandler implements Runnable {
     @Override
     public void run() {
         while (running) {
-            PeerGroup outPeers = peersManager.getPeerGroup(NetworkConstant.Network_Peer_Out_Group);
+            PeerGroup outPeers = peersManager.getPeerGroup(NetworkConstant.NETWORK_PEER_OUT_GROUP);
             for (Peer peer : outPeers.getPeers()) {
                 if (peer.getStatus() == Peer.CLOSE) {
                     peersManager.removePeer(peer.getHash());

@@ -12,28 +12,28 @@ public interface NetworkConstant {
 
 
     /**--------[network] -------*/
-    String Network_Properties = "network.properties";
-    String Network_Section = "Network";
-    String Network_Type = "net.type";
-    String Network_Port = "network.port";
-    String Network_Magic = "network.magic";
-    String Network_Port_Test = "test.port";
-    String Network_Magic_Test = "test.magic";
-    String Network_Port_Dev = "dev.port";
-    String Network_Magic_Dev = "dev.magic";
+    String NETWORK_PROPERTIES = "network.properties";
+    String NETWORK_SECTION = "Network";
+    String NETWORK_TYPE = "net.type";
+    String NETWORK_PORT = "network.port";
+    String NETWORK_MAGIC = "network.magic";
+    String NETWORK_PORT_TEST = "test.port";
+    String NETWORK_MAGIC_TEST = "test.magic";
+    String NETWORK_PORT_DEV = "dev.port";
+    String NETWORK_MAGIC_DEV = "dev.magic";
 
-    String Network_Peer_Max_In = "net.peer.max.in";
-    String Network_Peer_Max_Out = "net.peer.max.out";
+    String NETWORK_PEER_MAX_IN = "net.peer.max.in";
+    String NETWORK_PEER_MAX_OUT = "net.peer.max.out";
 
-    String Network_Peer_In_Group = "inPeers";
-    String Network_Peer_Out_Group = "outPeers";
-    String Network_Peer_Consensus_Group = "consensus_Group";
+    String NETWORK_PEER_IN_GROUP = "inPeers";
+    String NETWORK_PEER_OUT_GROUP = "outPeers";
+    String NETWORK_PEER_CONSENSUS_GROUP = "consensus_Group";
 
 
     //network message type
 
-    short Network_Version_Message = 01;
-    short Network_Ping_Message = 02;
-    short Network_Pong_Mesaage = 03;
-    short Network_Bye_Message = 04;
+    short NETWORK_VERSION_MESSAGE = 01;
+    short NETWORK_PING_MESSAGE = 02;
+    short NETWORK_PONG_MESAAGE = 03;
+    short NETWORK_BYE_MESSAGE = 04;
 }

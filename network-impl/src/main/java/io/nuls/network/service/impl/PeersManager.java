@@ -40,9 +40,9 @@ public class PeersManager {
         this.networkModule = module;
         this.peerDao = peerDao;
         // the default peerGroups
-        PeerGroup inPeers = new PeerGroup(NetworkConstant.Network_Peer_In_Group);
-        PeerGroup outPeers = new PeerGroup(NetworkConstant.Network_Peer_Out_Group);
-        PeerGroup consensusPeers = new PeerGroup(NetworkConstant.Network_Peer_Consensus_Group);
+        PeerGroup inPeers = new PeerGroup(NetworkConstant.NETWORK_PEER_IN_GROUP);
+        PeerGroup outPeers = new PeerGroup(NetworkConstant.NETWORK_PEER_OUT_GROUP);
+        PeerGroup consensusPeers = new PeerGroup(NetworkConstant.NETWORK_PEER_CONSENSUS_GROUP);
 
         peerGroups.put(inPeers.getName(), inPeers);
         peerGroups.put(outPeers.getName(), outPeers);
@@ -67,7 +67,7 @@ public class PeersManager {
         }
 
         for (Peer peer : peers) {
-            addPeerToGroup(NetworkConstant.Network_Peer_Out_Group, peer);
+            addPeerToGroup(NetworkConstant.NETWORK_PEER_OUT_GROUP, peer);
             connectionManager.openConnection(peer);
         }
 

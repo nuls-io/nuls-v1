@@ -10,28 +10,30 @@ import io.nuls.core.thread.BaseNulsThread;
 import java.util.*;
 
 /**
- * Created by Niels on 2017/9/26.
+ *
+ * @author Niels
+ * @date 2017/9/26
  *
  */
 public class ModuleManager {
 
-    private static final Map<String, BaseNulsThread> threadMap = new HashMap<>();
+    private static final Map<String, BaseNulsThread> THREAD_MAP = new HashMap<>();
 
-    private static final Map<String, NulsModuleProxy> moduleMap = new HashMap<>();
+    private static final Map<String, NulsModuleProxy> MODULE_MAP = new HashMap<>();
 
-    private static final ModuleManager manager = new ModuleManager();
+    private static final ModuleManager MANAGER = new ModuleManager();
 
-    private static final Map<Class, Object> intfMap = new HashMap<>();
-    private static final Map<String, Set<Class>> moduleIntfMap = new HashMap<>();
+    private static final Map<Class, Object> INTF_MAP = new HashMap<>();
+    private static final Map<String, Set<Class>> MODULE_INTF_MAP = new HashMap<>();
 
     private ModuleManager() {
     }
 
     public <T> T getService(Class<T> tclass) {
-        if(intfMap.get(tclass) == null) {
+        if(INTF_MAP.get(tclass) == null) {
             return null;
         }
-        return (T) intfMap.get(tclass);
+        return (T) INTF_MAP.get(tclass);
     }
 
     public void regService(String moduleName, Object service) {
@@ -52,16 +54,16 @@ public class ModuleManager {
         if (serviceInterface == null) {
             serviceInterface = service.getClass();
         }
-        if (intfMap.keySet().contains(serviceInterface)) {
+        if (INTF_MAP.keySet().contains(serviceInterface)) {
             throw new NulsRuntimeException(ErrorCode.INTF_REPETITION);
         }
-        intfMap.put(serviceInterface, service);
-        Set<Class> set = moduleIntfMap.get(moduleName);
+        INTF_MAP.put(serviceInterface, service);
+        Set<Class> set = MODULE_INTF_MAP.get(moduleName);
         if (null == set) {
             set = new HashSet<>();
         }
         set.add(serviceInterface);
-        moduleIntfMap.put(moduleName, set);
+        MODULE_INTF_MAP.put(moduleName, set);
     }
 
     public void removeService(String moduleName, Object service) {
@@ -76,16 +78,16 @@ public class ModuleManager {
     }
 
     public void removeService(String moduleName, Class clazz) {
-        intfMap.remove(clazz);
-        Set<Class> set = moduleIntfMap.get(moduleName);
+        INTF_MAP.remove(clazz);
+        Set<Class> set = MODULE_INTF_MAP.get(moduleName);
         if (null != set) {
             set.remove(clazz);
-            moduleIntfMap.put(moduleName, set);
+            MODULE_INTF_MAP.put(moduleName, set);
         }
     }
 
     public void removeService(String moduleName) {
-        Set<Class> set = moduleIntfMap.get(moduleName);
+        Set<Class> set = MODULE_INTF_MAP.get(moduleName);
         if (null == set) {
             return;
         }
@@ -95,15 +97,15 @@ public class ModuleManager {
     }
 
     public static ModuleManager getInstance() {
-        return manager;
+        return MANAGER;
     }
 
     public BaseNulsModule getModule(String moduleName) {
-        return moduleMap.get(moduleName);
+        return MODULE_MAP.get(moduleName);
     }
 
     public BaseNulsModule getModule(Class moduleClass) {
-        for (BaseNulsModule module : moduleMap.values()) {
+        for (BaseNulsModule module : MODULE_MAP.values()) {
             if (module.getModuleClass().equals(moduleClass)) {
                 return module;
             } else if (module.getModuleClass().getSuperclass().equals(moduleClass) && !BaseNulsModule.class.equals(module.getModuleClass().getSuperclass())) {
@@ -114,7 +116,7 @@ public class ModuleManager {
     }
 
     public BaseNulsModule getModuleById(int id) {
-        for (BaseNulsModule module : moduleMap.values()) {
+        for (BaseNulsModule module : MODULE_MAP.values()) {
             if (module.getModuleId() == id) {
                 return module;
             }
@@ -124,42 +126,42 @@ public class ModuleManager {
 
     public String getInfo() {
         StringBuilder str = new StringBuilder();
-        for (BaseNulsModule module : moduleMap.values()) {
+        for (BaseNulsModule module : MODULE_MAP.values()) {
             str.append(module.getInfo());
         }
         return str.toString();
     }
 
     public void regThread(String threadName, BaseNulsThread thread) {
-        if (threadMap.keySet().contains(threadName)) {
+        if (THREAD_MAP.keySet().contains(threadName)) {
             throw new NulsRuntimeException(ErrorCode.THREAD_REPETITION, "the name of thread is already exist(" + threadName + ")");
         }
-        threadMap.put(threadName, thread);
+        THREAD_MAP.put(threadName, thread);
     }
 
     private void cancelThread(String threadName) {
-        threadMap.remove(threadName);
+        THREAD_MAP.remove(threadName);
     }
 
     public void regModule(String moduleName, BaseNulsModule module) {
-        if (moduleMap.keySet().contains(moduleName)) {
+        if (MODULE_MAP.keySet().contains(moduleName)) {
             throw new NulsRuntimeException(ErrorCode.THREAD_REPETITION, "the name of Module is already exist(" + moduleName + ")");
         }
         if (module instanceof NulsModuleProxy) {
-            moduleMap.put(moduleName, (NulsModuleProxy) module);
+            MODULE_MAP.put(moduleName, (NulsModuleProxy) module);
         } else {
-            moduleMap.put(moduleName, new NulsModuleProxy(module));
+            MODULE_MAP.put(moduleName, new NulsModuleProxy(module));
         }
     }
 
     public void remModule(String moduleName) {
-        moduleMap.remove(moduleName);
+        MODULE_MAP.remove(moduleName);
     }
 
 
     public List<BaseNulsThread> getThreadsByModule(String moduleName) {
         List<BaseNulsThread> list = new ArrayList<>();
-        for (BaseNulsThread t : threadMap.values()) {
+        for (BaseNulsThread t : THREAD_MAP.values()) {
             if (t.getModule().getModuleName().equals(moduleName)) {
                 list.add(t);
             }
@@ -169,7 +171,7 @@ public class ModuleManager {
 
     public void remThreadsByModule(String moduleName) {
         for (BaseNulsThread t : getThreadsByModule(moduleName)) {
-            threadMap.remove(t.getName());
+            THREAD_MAP.remove(t.getName());
         }
     }
 

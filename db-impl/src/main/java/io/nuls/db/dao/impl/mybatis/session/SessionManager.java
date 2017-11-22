@@ -24,4 +24,8 @@ public class SessionManager {
     public static void setConnection(SqlSession session) {
         sessionHolder.set(session);
     }
+
+    public static void removeSession() {
+        sessionHolder.remove();
+    }
 }

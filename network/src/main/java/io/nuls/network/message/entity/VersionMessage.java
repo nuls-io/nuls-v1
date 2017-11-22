@@ -27,12 +27,12 @@ public class VersionMessage extends AbstractNetworkMessage {
     private String ip;
 
     public VersionMessage() {
-        this.type = NetworkConstant.Network_Version_Message;
+        this.type = NetworkConstant.NETWORK_VERSION_MESSAGE;
     }
 
     public VersionMessage(long height, String hash, Peer peer) {
 
-        this.type = NetworkConstant.Network_Version_Message;
+        this.type = NetworkConstant.NETWORK_VERSION_MESSAGE;
         this.bestBlockHash = hash;
         this.bestBlockHeight = height;
         this.port = peer.getPort();

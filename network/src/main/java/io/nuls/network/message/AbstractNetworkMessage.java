@@ -12,7 +12,7 @@ public abstract class AbstractNetworkMessage extends BaseNulsData {
     public static AbstractNetworkMessage transfer(Short msgType, byte[] data) {
         AbstractNetworkMessage message = null;
         switch (msgType) {
-            case NetworkConstant.Network_Version_Message:
+            case NetworkConstant.NETWORK_VERSION_MESSAGE:
                 message = new VersionMessage();
                 break;
             default:

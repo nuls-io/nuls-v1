@@ -16,10 +16,10 @@ public class DevNetworkParam extends AbstractNetworkParam {
     private static DevNetworkParam instance;
 
     private DevNetworkParam() {
-        this.port = ConfigLoader.getPropValue(NetworkConstant.Network_Port_Dev, 8003);
-        this.packetMagic = ConfigLoader.getPropValue(NetworkConstant.Network_Magic_Dev, 987654323);
-        this.maxInCount = ConfigLoader.getPropValue(NetworkConstant.Network_Peer_Max_In, 20);
-        this.maxOutCount = ConfigLoader.getPropValue(NetworkConstant.Network_Peer_Max_Out, 10);
+        this.port = ConfigLoader.getPropValue(NetworkConstant.NETWORK_PORT_DEV, 8003);
+        this.packetMagic = ConfigLoader.getPropValue(NetworkConstant.NETWORK_MAGIC_DEV, 987654323);
+        this.maxInCount = ConfigLoader.getPropValue(NetworkConstant.NETWORK_PEER_MAX_IN, 20);
+        this.maxOutCount = ConfigLoader.getPropValue(NetworkConstant.NETWORK_PEER_MAX_OUT, 10);
 
 
         InetSocketAddress address2 = new InetSocketAddress("192.168.1.201", port);

@@ -40,7 +40,7 @@ public class ECKey {
     public static final ECDomainParameters CURVE;
     public static final BigInteger HALF_CURVE_ORDER;
 
-    private static final SecureRandom secureRandom;    //随机种子
+    private static final SecureRandom SECURE_RANDOM;    //随机种子
 
     static {
         if (Utils.isAndroidRuntime()) {
@@ -51,7 +51,7 @@ public class ECKey {
         CURVE = new ECDomainParameters(CURVE_PARAMS.getCurve(), CURVE_PARAMS.getG(), CURVE_PARAMS.getN(),
                 CURVE_PARAMS.getH());
         HALF_CURVE_ORDER = CURVE_PARAMS.getN().shiftRight(1);
-        secureRandom = new SecureRandom();
+        SECURE_RANDOM = new SecureRandom();
     }
 
     protected final BigInteger priv;    // 私匙
@@ -62,12 +62,12 @@ public class ECKey {
     protected long creationTimeSeconds;
 
     public ECKey() {
-        this(secureRandom);
+        this(SECURE_RANDOM);
     }
 
-    public ECKey(SecureRandom secureRandom) {
+    public ECKey(SecureRandom SECURE_RANDOM) {
         ECKeyPairGenerator generator = new ECKeyPairGenerator();
-        ECKeyGenerationParameters keygenParams = new ECKeyGenerationParameters(CURVE, secureRandom);
+        ECKeyGenerationParameters keygenParams = new ECKeyGenerationParameters(CURVE, SECURE_RANDOM);
         generator.init(keygenParams);
         AsymmetricCipherKeyPair keypair = generator.generateKeyPair();
         ECPrivateKeyParameters privParams = (ECPrivateKeyParameters) keypair.getPrivate();

@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Niels on 2017/11/16.
+ *
+ * @author Niels
+ * @date 2017/11/16
  */
 public class DataValidatorChain {
 
@@ -19,10 +21,13 @@ public class DataValidatorChain {
         }
         index.set(-1);
         ValidateResult result = doValidate(data);
-        if (index.get() == list.size()) {
+        boolean b = index.get() == list.size();
+        index.remove();
+        if (b) {
             return result;
+        } else {
+            return ValidateResult.getFaildResult("The Validators not fully executed`");
         }
-        return ValidateResult.getFaildResult("The Validators not fully executed`");
     }
 
     private ValidateResult doValidate(BaseNulsData data) {

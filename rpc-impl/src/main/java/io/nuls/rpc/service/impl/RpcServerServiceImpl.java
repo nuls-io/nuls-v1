@@ -18,10 +18,10 @@ import java.util.Map;
  */
 public class RpcServerServiceImpl implements RpcServerService {
 
-    private static final RpcServerServiceImpl service = new RpcServerServiceImpl();
+    private static final RpcServerServiceImpl INSTANCE = new RpcServerServiceImpl();
 
     public static RpcServerService getInstance() {
-        return service;
+        return INSTANCE;
     }
 
     private

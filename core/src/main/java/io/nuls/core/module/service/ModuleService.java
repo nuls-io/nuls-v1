@@ -12,14 +12,14 @@ import io.nuls.core.utils.str.StringUtils;
  */
 public class ModuleService {
 
-    private static final ModuleService service = new ModuleService();
+    private static final ModuleService INSTANCE = new ModuleService();
 
     private ModuleService() {
         ModuleManager.getInstance().regService("system",null, this);
     }
 
     public static ModuleService getInstance() {
-        return service;
+        return INSTANCE;
     }
 
     public BaseNulsModule loadModule(String moduleClass) throws ClassNotFoundException, IllegalAccessException, InstantiationException {

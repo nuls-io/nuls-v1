@@ -17,7 +17,9 @@ public class NulsEventFilterChain {
     public boolean startDoFilter(BaseNulsEvent event) {
         index.set(-1);
         doFilter(event);
-        return index.get() == list.size();
+        boolean result =  index.get() == list.size();
+        index.remove();
+        return result;
     }
 
     public void doFilter(BaseNulsEvent event) {

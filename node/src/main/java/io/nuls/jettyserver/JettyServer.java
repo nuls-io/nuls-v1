@@ -13,7 +13,7 @@ import java.net.URISyntaxException;
  */
 public class JettyServer {
 
-    private static final String DescriptorPath = "/WEB-INF/web.xml";
+    private static final String DESCRIPTOR_PATH = "/WEB-INF/web.xml";
 
     public static void init() {
 
@@ -46,7 +46,7 @@ public class JettyServer {
 
         // for security reason,block network request
         context.setVirtualHosts(new String[]{"127.0.0.1"});
-        context.setDescriptor(DescriptorPath);
+        context.setDescriptor(DESCRIPTOR_PATH);
         context.setParentLoaderPriority(true);
         context.setConfigurationDiscovered(true);
         server.setHandler(context);

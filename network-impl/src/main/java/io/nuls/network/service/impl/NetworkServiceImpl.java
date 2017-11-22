@@ -56,7 +56,7 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     private AbstractNetworkParam getNetworkInstance() {
-        String networkType = ConfigLoader.getPropValue(NetworkConstant.Network_Type, "dev");
+        String networkType = ConfigLoader.getPropValue(NetworkConstant.NETWORK_TYPE, "dev");
         if ("dev".equals(networkType)) {
             return DevNetworkParam.get();
         }
