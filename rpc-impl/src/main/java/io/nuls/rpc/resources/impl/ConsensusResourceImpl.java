@@ -15,12 +15,14 @@ import javax.ws.rs.core.MediaType;
 public class ConsensusResourceImpl implements ConsensusResource {
     private NulsContext context = NulsContext.getInstance();
 
+    @Override
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getInfo() {
         return RpcResult.getSuccess();
     }
 
+    @Override
     @GET
     @Path("/condition")
     @Produces(MediaType.APPLICATION_JSON)
@@ -28,6 +30,7 @@ public class ConsensusResourceImpl implements ConsensusResource {
         return RpcResult.getSuccess();
     }
 
+    @Override
     @POST
     @Path("/in")
     @Produces(MediaType.APPLICATION_JSON)
@@ -35,6 +38,7 @@ public class ConsensusResourceImpl implements ConsensusResource {
         return RpcResult.getSuccess();
     }
 
+    @Override
     @POST
     @Path("/out")
     @Produces(MediaType.APPLICATION_JSON)

@@ -49,8 +49,9 @@ public class PersistentQueue<T> extends NulsQueue<T> {
         }
         byte[] obj = SerializeUtils.ObjectToByte(t);
         this.queue.offer(obj);
-        if (size() > 0)
+        if (size() > 0) {
             signalNotEmpty();
+        }
     }
 
     @Override
@@ -68,12 +69,14 @@ public class PersistentQueue<T> extends NulsQueue<T> {
         try {
             return (T) value;
         } finally {
-            if (size() > 0)
+            if (size() > 0) {
                 signalNotEmpty();
+            }
         }
 
     }
 
+    @Override
     public T take() throws InterruptedException {
         T x;
         final ReentrantLock takeLock = this.takeLock;
@@ -86,8 +89,9 @@ public class PersistentQueue<T> extends NulsQueue<T> {
             if (null == x) {
                 return take();
             }
-            if (size() > 0)
+            if (size() > 0) {
                 notEmpty.signal();
+            }
         } finally {
             takeLock.unlock();
         }
@@ -109,10 +113,12 @@ public class PersistentQueue<T> extends NulsQueue<T> {
         return this.queue.size();
     }
 
+    @Override
     public void close() throws IOException {
         this.queue.close();
     }
 
+    @Override
     public void clear() {
         this.queue.clear();
     }

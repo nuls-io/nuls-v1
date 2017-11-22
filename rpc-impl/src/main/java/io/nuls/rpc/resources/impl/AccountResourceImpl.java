@@ -21,6 +21,7 @@ public class AccountResourceImpl implements AccountResource {
     public RpcResult create(@QueryParam("count") Integer count ) {
         return null;
     }
+    @Override
     @GET
     @Path("/{address}")
     @Produces(MediaType.APPLICATION_JSON)

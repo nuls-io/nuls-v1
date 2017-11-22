@@ -26,6 +26,7 @@ public class NetworkProcessorServiceImpl implements NetworkProcessorService {
         return instance;
     }
 
+    @Override
     public void send(byte[] event) {
         NulsEventHeader header = new NulsEventHeader();
         header.parse(new NulsByteBuffer(event));
@@ -45,6 +46,7 @@ public class NetworkProcessorServiceImpl implements NetworkProcessorService {
         return processorManager.registerEventHandler(eventClass, handler);
     }
 
+    @Override
     public void removeEventHandler(String handlerId) {
         processorManager.removeEventHandler(handlerId);
     }

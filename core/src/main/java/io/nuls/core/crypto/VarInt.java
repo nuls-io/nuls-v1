@@ -81,10 +81,18 @@ public class VarInt {
      */
     public static int sizeOf(long value) {
         // if negative, it's actually a very large unsigned long value
-        if (value < 0) return 9; // 1 marker + 8 data bytes
-        if (value < 253) return 1; // 1 data byte
-        if (value <= 0xFFFFL) return 3; // 1 marker + 2 data bytes
-        if (value <= 0xFFFFFFFFL) return 5; // 1 marker + 4 data bytes
+        if (value < 0) {
+            return 9; // 1 marker + 8 data bytes
+        }
+        if (value < 253) {
+            return 1; // 1 data byte
+        }
+        if (value <= 0xFFFFL) {
+            return 3; // 1 marker + 2 data bytes
+        }
+        if (value <= 0xFFFFFFFFL) {
+            return 5; // 1 marker + 4 data bytes
+        }
         return 9; // 1 marker + 8 data bytes
     }
 

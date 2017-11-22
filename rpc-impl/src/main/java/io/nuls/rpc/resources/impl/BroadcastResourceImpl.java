@@ -15,6 +15,7 @@ import javax.ws.rs.core.MediaType;
 @Path("/broadcast")
 public class BroadcastResourceImpl implements BroadcastResource {
 
+    @Override
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult broadcast(String message) {

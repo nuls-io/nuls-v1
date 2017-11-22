@@ -49,10 +49,11 @@ public class ScriptBuilder {
 
     /** Adds a copy of the given byte array as a data element (i.e. PUSHDATA) at the end of the program. */
     public ScriptBuilder data(byte[] data) {
-        if (data.length == 0)
+        if (data.length == 0) {
             return smallNum(0);
-        else
+        } else {
             return data(chunks.size(), data);
+        }
     }
 
     /** Adds a copy of the given byte array as a data element (i.e. PUSHDATA) at the given index in the program. */
@@ -64,10 +65,11 @@ public class ScriptBuilder {
             opcode = OP_0;
         } else if (data.length == 1) {
             byte b = data[0];
-            if (b >= 1 && b <= 16)
+            if (b >= 1 && b <= 16) {
                 opcode = Script.encodeToOpN(b);
-            else
+            } else {
                 opcode = 1;
+            }
         } else if (data.length < OP_PUSHDATA1) {
             opcode = data.length;
         } else if (data.length < 256) {
@@ -270,8 +272,9 @@ public class ScriptBuilder {
         if (signatures == null) {
             // create correct number of empty signatures
             int numSigs = multisigProgram.getNumberOfSignaturesRequiredToSpend();
-            for (int i = 0; i < numSigs; i++)
+            for (int i = 0; i < numSigs; i++) {
                 sigs.add(new byte[]{});
+            }
         } else {
             for (TransactionSignature signature : signatures) {
                 sigs.add(signature.encode());
@@ -288,10 +291,12 @@ public class ScriptBuilder {
         Utils.checkState(signatures.size() <= 16);
         ScriptBuilder builder = new ScriptBuilder();
         builder.smallNum(0);  // Work around a bug in CHECKMULTISIG that is now a required part of the protocol.
-        for (byte[] signature : signatures)
+        for (byte[] signature : signatures) {
             builder.data(signature);
-        if (multisigProgramBytes!= null)
-        	builder.data(multisigProgramBytes);
+        }
+        if (multisigProgramBytes!= null) {
+            builder.data(multisigProgramBytes);
+        }
         return builder.build();
     }
 
@@ -318,8 +323,9 @@ public class ScriptBuilder {
         Utils.checkState(hasMissingSigs, "ScriptSig is already filled with signatures");
 
         // copy the prefix
-        for (ScriptChunk chunk: inputChunks.subList(0, sigsPrefixCount))
+        for (ScriptChunk chunk: inputChunks.subList(0, sigsPrefixCount)) {
             builder.addChunk(chunk);
+        }
 
         // copy the sigs
         int pos = 0;
@@ -349,8 +355,9 @@ public class ScriptBuilder {
         }
 
         // copy the suffix
-        for (ScriptChunk chunk: inputChunks.subList(totalChunks - sigsSuffixCount, totalChunks))
+        for (ScriptChunk chunk: inputChunks.subList(totalChunks - sigsSuffixCount, totalChunks)) {
             builder.addChunk(chunk);
+        }
 
         Utils.checkState(inserted);
         return builder.build();

@@ -17,12 +17,14 @@ import javax.ws.rs.core.MediaType;
 public class PeersResourceImpl implements PeersResource {
     private NulsContext context = NulsContext.getInstance();
 
+    @Override
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getList() {
         return RpcResult.getSuccess();
     }
 
+    @Override
     @GET
     @Path("/count")
     @Produces(MediaType.APPLICATION_JSON)
@@ -30,6 +32,7 @@ public class PeersResourceImpl implements PeersResource {
         return RpcResult.getSuccess();
     }
 
+    @Override
     @GET
     @Path("/consensus")
     @Produces(MediaType.APPLICATION_JSON)
@@ -38,6 +41,7 @@ public class PeersResourceImpl implements PeersResource {
     }
 
 
+    @Override
     @GET
     @Path("/count/consensus")
     @Produces(MediaType.APPLICATION_JSON)
@@ -45,6 +49,7 @@ public class PeersResourceImpl implements PeersResource {
         return RpcResult.getSuccess();
     }
 
+    @Override
     @GET
     @Path("/groups")
     @Produces(MediaType.APPLICATION_JSON)

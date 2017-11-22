@@ -64,16 +64,17 @@ public class ConnectionHandler implements MessageWriter {
             while (bytesIterator.hasNext()) {
                 ByteBuffer buff = bytesIterator.next();
                 channel.write(buff);
-                if (!buff.hasRemaining())
+                if (!buff.hasRemaining()) {
                     bytesIterator.remove();
-                else {
+                } else {
                     setWriteOps();
                     break;
                 }
             }
             // If we are done writing, clear the OP_WRITE interestOps
-            if (bytesToWrite.isEmpty())
+            if (bytesToWrite.isEmpty()) {
                 key.interestOps(key.interestOps() & ~SelectionKey.OP_WRITE);
+            }
             // Don't bother waking up the selector here, since we're just removing an op, not adding
         } finally {
             lock.unlock();
@@ -98,8 +99,9 @@ public class ConnectionHandler implements MessageWriter {
             closeConnection();
             throw e;
         } finally {
-            if (shouldUnlock)
+            if (shouldUnlock) {
                 lock.unlock();
+            }
         }
     }
 
@@ -140,8 +142,9 @@ public class ConnectionHandler implements MessageWriter {
                 // Now drop the bytes which were read by compacting readBuff (resetting limit and keeping relative position)
                 handler.readBuffer.compact();
             }
-            if (key.isWritable())
+            if (key.isWritable()) {
                 handler.writeBytes();
+            }
         } catch (Exception e) {
             // This can happen eg if the channel closes while the thread is about to get killed
             // (ClosedByInterruptException), or if handler.connection.receiveBytes throws something

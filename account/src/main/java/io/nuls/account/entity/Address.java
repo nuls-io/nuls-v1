@@ -22,6 +22,7 @@ public class Address{
         return hash160;
     }
 
+    @Override
     public String toString(){
         return Base58.encode(hash160);
     }

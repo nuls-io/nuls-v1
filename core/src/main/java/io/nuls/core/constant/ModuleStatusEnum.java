@@ -9,6 +9,7 @@ public enum ModuleStatusEnum {
     //UNINITED,INITED,
     UNSTARTED, STARTING, RUNNING, STOPED, STOPPING, DESTROYED, DESTROYING, EXCEPTION;
 
+    @Override
     public String toString() {
         return name();
     }

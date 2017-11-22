@@ -41,6 +41,7 @@ public class NulsEventHeader extends NulsData {
         return moduleId;
     }
 
+    @Override
     public void parse(NulsByteBuffer buffer) {
         this.moduleId = buffer.readShort();
         this.eventType = buffer.readShort();

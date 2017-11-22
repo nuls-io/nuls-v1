@@ -68,23 +68,30 @@ public class ScriptChunk {
      */
     public boolean isShortestPossiblePushData() {
         Utils.checkState(isPushData());
-        if (data == null)
+        if (data == null) {
             return true;   // OP_N
-        if (data.length == 0)
+        }
+        if (data.length == 0) {
             return opcode == OP_0;
+        }
         if (data.length == 1) {
             byte b = data[0];
-            if (b >= 0x01 && b <= 0x10)
+            if (b >= 0x01 && b <= 0x10) {
                 return opcode == OP_1 + b - 1;
-            if ((b & 0xFF) == 0x81)
+            }
+            if ((b & 0xFF) == 0x81) {
                 return opcode == OP_1NEGATE;
+            }
         }
-        if (data.length < OP_PUSHDATA1)
+        if (data.length < OP_PUSHDATA1) {
             return opcode == data.length;
-        if (data.length < 256)
+        }
+        if (data.length < 256) {
             return opcode == OP_PUSHDATA1;
-        if (data.length < 65536)
+        }
+        if (data.length < 65536) {
             return opcode == OP_PUSHDATA2;
+        }
 
         // can never be used, but implemented for completeness
         return opcode == OP_PUSHDATA4;
@@ -137,8 +144,12 @@ public class ScriptChunk {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         ScriptChunk other = (ScriptChunk) o;
         return opcode == other.opcode && startLocationInProgram == other.startLocationInProgram
             && Arrays.equals(data, other.data);

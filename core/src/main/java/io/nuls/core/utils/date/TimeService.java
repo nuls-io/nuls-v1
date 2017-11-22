@@ -210,7 +210,7 @@ public final class TimeService {
 	 * @return long
 	 */
 	public static long getSystemRuningTimeMillis() {
-		return new Date().getTime() - systemStartTime.getTime();
+		return System.currentTimeMillis() - systemStartTime.getTime();
 	}
 	
 	/**

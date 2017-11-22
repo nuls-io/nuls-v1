@@ -43,8 +43,9 @@ public class ECKey {
     private static final SecureRandom secureRandom;    //随机种子
 
     static {
-        if (Utils.isAndroidRuntime())
+        if (Utils.isAndroidRuntime()) {
             new LinuxSecureRandom();
+        }
 
         FixedPointUtil.precompute(CURVE_PARAMS.getG(), 12);
         CURVE = new ECDomainParameters(CURVE_PARAMS.getCurve(), CURVE_PARAMS.getG(), CURVE_PARAMS.getN(),
@@ -187,8 +188,9 @@ public class ECKey {
      * @return BigInteger
      */
     public BigInteger getPrivKey() {
-        if (priv == null)
+        if (priv == null) {
             throw new MissingPrivateKeyException();
+        }
         return priv;
     }
 
@@ -234,8 +236,9 @@ public class ECKey {
      */
     @SuppressWarnings("deprecation")
     private static ECPoint getPointWithCompression(ECPoint point, boolean compressed) {
-        if (point.isCompressed() == compressed)
+        if (point.isCompressed() == compressed) {
             return point;
+        }
         point = point.normalize();
         BigInteger x = point.getAffineXCoord().toBigInteger();
         BigInteger y = point.getAffineYCoord().toBigInteger();
@@ -296,8 +299,9 @@ public class ECKey {
             try {
                 decoder = new ASN1InputStream(bytes);
                 DLSequence seq = (DLSequence) decoder.readObject();
-                if (seq == null)
+                if (seq == null) {
                     throw new RuntimeException("Reached past end of ASN.1 stream.");
+                }
                 ASN1Integer r, s;
                 try {
                     r = (ASN1Integer) seq.getObjectAt(0);
@@ -312,11 +316,12 @@ public class ECKey {
                 Log.error(e);
                 throw new RuntimeException(e);
             } finally {
-                if (decoder != null)
+                if (decoder != null) {
                     try {
                         decoder.close();
                     } catch (IOException x) {
                     }
+                }
             }
         }
 

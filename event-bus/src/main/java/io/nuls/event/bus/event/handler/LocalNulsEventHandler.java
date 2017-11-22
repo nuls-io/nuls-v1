@@ -12,10 +12,12 @@ public abstract class LocalNulsEventHandler<T extends NulsEvent> implements Nuls
 
     private NulsEventFilterChain filterChain = new NulsEventFilterChain();
 
+    @Override
     public void addFilter(NulsEventFilter<T> filter) {
         filterChain.addFilter(filter);
     }
 
+    @Override
     public NulsEventFilterChain getFilterChain() {
         return filterChain;
     }

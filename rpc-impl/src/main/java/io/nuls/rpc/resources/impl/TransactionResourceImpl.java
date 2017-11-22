@@ -16,6 +16,7 @@ import javax.ws.rs.core.MediaType;
 public class TransactionResourceImpl implements TransactionResource {
     private NulsContext nulsContext = NulsContext.getInstance();
 
+    @Override
     @GET
     @Path("/{hash}")
     @Produces(MediaType.APPLICATION_JSON)

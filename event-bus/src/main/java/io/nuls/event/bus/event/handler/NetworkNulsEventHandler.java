@@ -13,10 +13,12 @@ public abstract class NetworkNulsEventHandler<T extends NulsEvent>  implements N
 
     private NulsEventFilterChain filterChain = new NulsEventFilterChain();
 
+    @Override
     public void addFilter(NulsEventFilter<T> filter) {
         filterChain.addFilter(filter);
     }
 
+    @Override
     public NulsEventFilterChain getFilterChain() {
         return filterChain;
     }

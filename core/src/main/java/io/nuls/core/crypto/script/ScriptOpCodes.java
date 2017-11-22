@@ -411,8 +411,9 @@ public class ScriptOpCodes {
      * Converts the given OpCode into a string (eg "0", "PUSHDATA", or "NON_OP(10)")
      */
     public static String getOpCodeName(int opcode) {
-        if (opCodeMap.containsKey(opcode))
+        if (opCodeMap.containsKey(opcode)) {
             return opCodeMap.get(opcode);
+        }
 
         return "NON_OP(" + opcode + ")";
     }
@@ -421,8 +422,9 @@ public class ScriptOpCodes {
      * Converts the given pushdata OpCode into a string (eg "PUSHDATA2", or "PUSHDATA(23)")
      */
     public static String getPushDataName(int opcode) {
-        if (opCodeMap.containsKey(opcode))
+        if (opCodeMap.containsKey(opcode)) {
             return opCodeMap.get(opcode);
+        }
 
         return "PUSHDATA(" + opcode + ")";
     }
@@ -431,8 +433,9 @@ public class ScriptOpCodes {
      * Converts the given OpCodeName into an int
      */
     public static int getOpCode(String opCodeName) {
-        if (opCodeNameMap.containsKey(opCodeName))
+        if (opCodeNameMap.containsKey(opCodeName)) {
             return opCodeNameMap.get(opCodeName);
+        }
 
         return OP_INVALIDOPCODE;
     }

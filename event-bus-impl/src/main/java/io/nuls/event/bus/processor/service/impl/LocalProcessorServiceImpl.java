@@ -22,6 +22,7 @@ public class LocalProcessorServiceImpl implements LocalProcessorService {
         return instance;
     }
 
+    @Override
     public void send(NulsEvent event) {
         processorManager.offer(event);
     }
@@ -31,6 +32,7 @@ public class LocalProcessorServiceImpl implements LocalProcessorService {
         return processorManager.registerEventHandler(eventClass, handler);
     }
 
+    @Override
     public void removeEventHandler(String handlerId) {
         processorManager.removeEventHandler(handlerId);
     }

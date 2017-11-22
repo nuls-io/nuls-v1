@@ -35,15 +35,17 @@ public class LinuxSecureRandom extends SecureRandomSpi {
             File file = new File("/dev/urandom");
             // This stream is deliberately leaked.
             urandom = new FileInputStream(file);
-            if (urandom.read() == -1)
+            if (urandom.read() == -1) {
                 throw new RuntimeException("/dev/urandom not readable?");
+            }
             // Now override the default SecureRandom implementation with this one.
             int position = Security.insertProviderAt(new LinuxSecureRandomProvider(), 1);
 
-            if (position != -1)
+            if (position != -1) {
                 log.info("Secure randomness will be read from {} only.", file);
-            else
+            } else {
                 log.info("Randomness is already secure.");
+            }
         } catch (FileNotFoundException e) {
             // Should never happen.
             log.error("/dev/urandom does not appear to exist or is not openable");

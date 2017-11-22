@@ -36,6 +36,7 @@ public class RpcClientResult {
         this.data = data;
     }
 
+    @Override
     public String toString() {
         try {
             return new ObjectMapper().writeValueAsString(this);

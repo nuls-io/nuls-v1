@@ -39,6 +39,7 @@ public class RpcServerModuleImpl extends RpcServerModule {
         rpcServerService.shutdown();
     }
 
+    @Override
     public void destroy(){
         shutdown();
     }

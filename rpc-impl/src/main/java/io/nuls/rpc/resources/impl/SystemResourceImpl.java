@@ -19,6 +19,7 @@ import javax.ws.rs.core.MediaType;
 public class SystemResourceImpl implements SystemResource, ModuleResource {
     private NulsContext context = NulsContext.getInstance();
 
+    @Override
     @GET
     @Path("/version")
     @Produces(MediaType.APPLICATION_JSON)
@@ -26,6 +27,7 @@ public class SystemResourceImpl implements SystemResource, ModuleResource {
         return null;
     }
 
+    @Override
     @PUT
     @Path("/version")
     @Produces(MediaType.APPLICATION_JSON)

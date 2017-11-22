@@ -15,8 +15,9 @@ public class Hex {
 		int i;
 
 		for (i = 0; i < src.length; i++) {
-			if (((int) src[i] & 0xff) < 0x10)
-				strbuf.append("0");
+			if (((int) src[i] & 0xff) < 0x10) {
+                strbuf.append("0");
+            }
 
 			strbuf.append(Long.toString((int) src[i] & 0xff, 16));
 		}

@@ -7,14 +7,15 @@ import io.nuls.core.module.NulsModule;
 
 import java.util.Date;
 
+/**
+ * @author Niels
+ */
 public class NulsContext {
 
     private NulsContext() {
-
-
     }
 
-    private static final NulsContext nc = new NulsContext();
+    private static final NulsContext NC = new NulsContext();
     public static String DEFAULT_ENCODING = "UTF-8";
 
     /**
@@ -23,15 +24,17 @@ public class NulsContext {
      * @return
      */
     public static final NulsContext getInstance() {
-        return nc;
+        return NC;
     }
 
-    //cache the best block
+    /**
+     * cache the best block
+     */
     private Block bestBlock;
 
     public Block getGenesisBlock() {
         Block block = new Block();
-        BlockHeader header = new BlockHeader(1, new Date().getTime());
+        BlockHeader header = new BlockHeader(1, System.currentTimeMillis());
         block.setHeader(header);
 
         return block;
@@ -77,7 +80,9 @@ public class NulsContext {
     public Block getBestBlock() {
         if (bestBlock == null) {
             // find the best from database
+
             //bestBlock = blockDao().getBestBlock();
+
             //when database not found create GenesisBlock
             if (bestBlock == null) {
                 bestBlock = getGenesisBlock();

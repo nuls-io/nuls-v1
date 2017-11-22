@@ -31,6 +31,7 @@ public class QueueServiceImpl<T> implements QueueService<T> {
      * @param maxSize   单个文件最大大小fileLimitLength/非持久化时是队列的最大长度
      * @return 是否创建成功
      */
+    @Override
     public boolean createQueue(String queueName, Long maxSize, boolean persist) {
         return createQueue(queueName, maxSize, persist, 0);
     }
@@ -43,6 +44,7 @@ public class QueueServiceImpl<T> implements QueueService<T> {
      * @param latelySecond 统计日志打印时间段
      * @return 是否创建成功
      */
+    @Override
     public boolean createQueue(String queueName, Long maxSize, boolean persist, int latelySecond) {
         try {
             NulsQueue queue = null;

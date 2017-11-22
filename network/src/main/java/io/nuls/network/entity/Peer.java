@@ -23,11 +23,13 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.NotYetConnectedException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * @author vivi
+ */
 public class Peer extends NulsData {
 
     private NetworkParam network;
@@ -64,8 +66,13 @@ public class Peer extends NulsData {
 
     private NetWorkMessageHandlerFactory messageHandlerFactory;
 
-    //异步顺序执行所有接收到的消息，以免有处理时间较长的线程阻塞，影响性能
-    private ExecutorService executorService = Executors.newSingleThreadExecutor();
+    /**
+     * 异步顺序执行所有接收到的消息，以免有处理时间较长的线程阻塞，影响性能
+     */
+    //todo 要使用带有ThreadFactory参数的ThreadPoolExecutor构造方法哦，这样你就可以方便的设置线程名字啦。
+    private ExecutorService executorService = new ThreadPoolExecutor(1, 1,
+            0L, TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<Runnable>());
 
     public Peer(NetworkParam network) {
         this.network = network;
@@ -175,6 +182,7 @@ public class Peer extends NulsData {
 
             NetWorkMessageHandler handler = messageHandlerFactory.getHandler(networkMessage);
             executorService.submit(new Thread() {
+                //todo 不要显示创建线程，请使用线程池。
                 @Override
                 public void run() {
                     NetworkMessageResult messageResult = handler.process(networkMessage, Peer.this);
@@ -195,7 +203,7 @@ public class Peer extends NulsData {
             this.status = 2;
             this.writeTarget.closeConnection();
             this.writeTarget = null;
-        }finally {
+        } finally {
             lock.unlock();
         }
     }

@@ -12,6 +12,7 @@ public class BroadcastResult{
         this.msg = msg;
     }
 
+    @Override
     public String toString(){
         return "";
     }

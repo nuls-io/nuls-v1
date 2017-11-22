@@ -11,6 +11,9 @@ import sun.misc.BASE64Encoder;
  */
 
 public class SM4Utils {
+
+    private static final Pattern PATTERN_1 = Pattern.compile("\\s*|\t|\r|\n");
+
     private String secretKey = "";
     private String iv = "";
     private boolean hexString = false;
@@ -36,8 +39,8 @@ public class SM4Utils {
             byte[] encrypted = sm4.sm4_crypt_ecb(ctx, plainText.getBytes("GBK"));
             String cipherText = new BASE64Encoder().encode(encrypted);
             if (cipherText != null && cipherText.trim().length() > 0) {
-                Pattern p = Pattern.compile("\\s*|\t|\r|\n");
-                Matcher m = p.matcher(cipherText);
+
+                Matcher m = PATTERN_1.matcher(cipherText);
                 cipherText = m.replaceAll("");
             }
             return cipherText;
@@ -91,8 +94,7 @@ public class SM4Utils {
             byte[] encrypted = sm4.sm4_crypt_cbc(ctx, ivBytes, plainText.getBytes("UTF-8"));
             String cipherText = new BASE64Encoder().encode(encrypted);
             if (cipherText != null && cipherText.trim().length() > 0) {
-                Pattern p = Pattern.compile("\\s*|\t|\r|\n");
-                Matcher m = p.matcher(cipherText);
+                Matcher m = PATTERN_1.matcher(cipherText);
                 cipherText = m.replaceAll("");
             }
             return cipherText;

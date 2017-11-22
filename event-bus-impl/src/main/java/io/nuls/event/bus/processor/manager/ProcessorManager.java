@@ -14,8 +14,7 @@ import io.nuls.event.bus.utils.disruptor.DisruptorEvent;
 import io.nuls.event.bus.utils.disruptor.DisruptorUtil;
 
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 /**
  * Created by Niels on 2017/11/6.
@@ -33,11 +32,13 @@ public class ProcessorManager<E extends NulsEvent, H extends NulsEventHandler<? 
     }
 
     public final void init() {
-        pool = Executors.newFixedThreadPool(EventBusConstant.THREAD_COUNT);
+        pool = new ThreadPoolExecutor(EventBusConstant.THREAD_COUNT, EventBusConstant.THREAD_COUNT,
+                0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<Runnable>());
         disruptorService.createDisruptor(disruptorName, EventBusConstant.DEFAULT_RING_BUFFER_SIZE);
         List<EventBusDispatchThread> handlerList = new ArrayList<>();
         for (int i = 0; i < EventBusConstant.THREAD_COUNT; i++) {
-            EventBusDispatchThread handler = new EventBusDispatchThread(this.disruptorName+"_thread" + i,this);
+            EventBusDispatchThread handler = new EventBusDispatchThread(this.disruptorName + "_thread" + i, this);
             handlerList.add(handler);
         }
         disruptorService.handleEventsWithWorkerPool(disruptorName, handlerList.toArray(new EventBusDispatchThread[handlerList.size()]));

@@ -111,13 +111,15 @@ public class Base58 {
      */
     public static byte[] decodeChecked(String input) throws NulsException {
         byte[] decoded  = decode(input);
-        if (decoded.length < 4)
-            throw new NulsException(ErrorCode.FAILED,"Input too short");
+        if (decoded.length < 4) {
+            throw new NulsException(ErrorCode.FAILED, "Input too short");
+        }
         byte[] data = Arrays.copyOfRange(decoded, 0, decoded.length - 4);
         byte[] checksum = Arrays.copyOfRange(decoded, decoded.length - 4, decoded.length);
         byte[] actualChecksum = Arrays.copyOfRange(Sha256Hash.hashTwice(data), 0, 4);
-        if (!Arrays.equals(checksum, actualChecksum))
-            throw new NulsException(ErrorCode.FAILED,"Checksum does not validate");
+        if (!Arrays.equals(checksum, actualChecksum)) {
+            throw new NulsException(ErrorCode.FAILED, "Checksum does not validate");
+        }
         return data;
     }
 

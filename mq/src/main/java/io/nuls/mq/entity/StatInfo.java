@@ -13,6 +13,7 @@ public interface StatInfo {
 
 
 
+    @Override
     public String toString();
 
     /**

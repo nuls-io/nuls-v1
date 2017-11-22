@@ -69,6 +69,7 @@ public class RpcResult {
     public static RpcResult getFailed(ErrorCode errorCode){
         return new RpcResult(errorCode);
     }
+    @Override
     public String toString(){
         try {
             return JSONUtils.obj2json(this);

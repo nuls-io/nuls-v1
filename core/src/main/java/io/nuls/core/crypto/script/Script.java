@@ -120,8 +120,9 @@ public class Script {
     public byte[] getProgram() {
         try {
             // Don't round-trip as Bitcoin Core doesn't and it would introduce a mismatch.
-            if (program != null)
+            if (program != null) {
                 return Arrays.copyOf(program, program.length);
+            }
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             for (ScriptChunk chunk : chunks) {
                 chunk.write(bos);
@@ -167,16 +168,22 @@ public class Script {
                 // Read some bytes of data, where how many is the opcode value itself.
                 dataToRead = opcode;
             } else if (opcode == OP_PUSHDATA1) {
-                if (bis.available() < 1) throw new ScriptException("Unexpected end of script");
+                if (bis.available() < 1) {
+                    throw new ScriptException("Unexpected end of script");
+                }
                 dataToRead = bis.read();
             } else if (opcode == OP_PUSHDATA2) {
                 // Read a short, then read that many bytes of data.
-                if (bis.available() < 2) throw new ScriptException("Unexpected end of script");
+                if (bis.available() < 2) {
+                    throw new ScriptException("Unexpected end of script");
+                }
                 dataToRead = bis.read() | (bis.read() << 8);
             } else if (opcode == OP_PUSHDATA4) {
                 // Read a uint32, then read that many bytes of data.
                 // Though this is allowed, because its value cannot be > 520, it should never actually be used
-                if (bis.available() < 4) throw new ScriptException("Unexpected end of script");
+                if (bis.available() < 4) {
+                    throw new ScriptException("Unexpected end of script");
+                }
                 dataToRead = ((long)bis.read()) | (((long)bis.read()) << 8) | (((long)bis.read()) << 16) | (((long)bis.read()) << 24);
             }
 
@@ -184,15 +191,18 @@ public class Script {
             if (dataToRead == -1) {
                 chunk = new ScriptChunk(opcode, null, startLocationInProgram);
             } else {
-                if (dataToRead > bis.available())
+                if (dataToRead > bis.available()) {
                     throw new ScriptException("Push of data element that is larger than remaining data");
+                }
                 byte[] data = new byte[(int)dataToRead];
                 Utils.checkState(dataToRead == 0 || bis.read(data, 0, (int)dataToRead) == dataToRead);
                 chunk = new ScriptChunk(opcode, data, startLocationInProgram);
             }
             // Save some memory by eliminating redundant copies of the same chunk objects.
             for (ScriptChunk c : STANDARD_TRANSACTION_SCRIPT_CHUNKS) {
-                if (c.equals(chunk)) chunk = c;
+                if (c.equals(chunk)) {
+                    chunk = c;
+                }
             }
             chunks.add(chunk);
         }
@@ -466,13 +476,15 @@ public class Script {
      * @throws ScriptException if the script type is not understood or is pay to address or is P2SH (run this method on the "Redeem script" instead).
      */
     public List<ECKey> getPubKeys() {
-        if (!isSentToMultiSig())
+        if (!isSentToMultiSig()) {
             throw new ScriptException("Only usable for multisig scripts.");
+        }
 
         ArrayList<ECKey> result = new ArrayList<ECKey>();
         int numKeys = Script.decodeFromOpN(chunks.get(chunks.size() - 2).opcode);
-        for (int i = 0 ; i < numKeys ; i++)
+        for (int i = 0 ; i < numKeys ; i++) {
             result.add(ECKey.fromPublicOnly(chunks.get(1 + i).data));
+        }
         return result;
     }
 
@@ -491,10 +503,11 @@ public class Script {
                     break;
                 case OP_CHECKMULTISIG:
                 case OP_CHECKMULTISIGVERIFY:
-                    if (accurate && lastOpCode >= OP_1 && lastOpCode <= OP_16)
+                    if (accurate && lastOpCode >= OP_1 && lastOpCode <= OP_16) {
                         sigOps += decodeFromOpN(lastOpCode);
-                    else
+                    } else {
                         sigOps += 20;
+                    }
                     break;
                 default:
                     break;
@@ -507,22 +520,24 @@ public class Script {
 
     static int decodeFromOpN(int opcode) {
         Utils.checkState((opcode == OP_0 || opcode == OP_1NEGATE) || (opcode >= OP_1 && opcode <= OP_16), "decodeFromOpN called on non OP_N opcode");
-        if (opcode == OP_0)
+        if (opcode == OP_0) {
             return 0;
-        else if (opcode == OP_1NEGATE)
+        } else if (opcode == OP_1NEGATE) {
             return -1;
-        else
+        } else {
             return opcode + 1 - OP_1;
+        }
     }
 
     static int encodeToOpN(int value) {
         Utils.checkState(value >= -1 && value <= 16, "encodeToOpN called for " + value + " which we cannot encode in an opcode.");
-        if (value == 0)
+        if (value == 0) {
             return OP_0;
-        else if (value == -1)
+        } else if (value == -1) {
             return OP_1NEGATE;
-        else
+        } else {
             return value - 1 + OP_1;
+        }
     }
 
     /**
@@ -548,12 +563,13 @@ public class Script {
         } catch (ScriptException e) {
             // Ignore errors and count up to the parse-able length
         }
-        for (int i = script.chunks.size() - 1; i >= 0; i--)
+        for (int i = script.chunks.size() - 1; i >= 0; i--) {
             if (!script.chunks.get(i).isOpCode()) {
-                Script subScript =  new Script();
+                Script subScript = new Script();
                 subScript.parse(script.chunks.get(i).data);
                 return getSigOpCount(subScript.chunks, true);
             }
+        }
         return 0;
     }
 
@@ -629,22 +645,36 @@ public class Script {
      * Returns whether this script matches the format used for multisig outputs: [n] [keys...] [m] CHECKMULTISIG
      */
     public boolean isSentToMultiSig() {
-        if (chunks.size() < 4) return false;
+        if (chunks.size() < 4) {
+            return false;
+        }
         ScriptChunk chunk = chunks.get(chunks.size() - 1);
         // Must end in OP_CHECKMULTISIG[VERIFY].
-        if (!chunk.isOpCode()) return false;
-        if (!(chunk.equalsOpCode(OP_CHECKMULTISIG) || chunk.equalsOpCode(OP_CHECKMULTISIGVERIFY))) return false;
+        if (!chunk.isOpCode()) {
+            return false;
+        }
+        if (!(chunk.equalsOpCode(OP_CHECKMULTISIG) || chunk.equalsOpCode(OP_CHECKMULTISIGVERIFY))) {
+            return false;
+        }
         try {
             // Second to last chunk must be an OP_N opcode and there should be that many data chunks (keys).
             ScriptChunk m = chunks.get(chunks.size() - 2);
-            if (!m.isOpCode()) return false;
+            if (!m.isOpCode()) {
+                return false;
+            }
             int numKeys = decodeFromOpN(m.opcode);
-            if (numKeys < 1 || chunks.size() != 3 + numKeys) return false;
+            if (numKeys < 1 || chunks.size() != 3 + numKeys) {
+                return false;
+            }
             for (int i = 1; i < chunks.size() - 2; i++) {
-                if (chunks.get(i).isOpCode()) return false;
+                if (chunks.get(i).isOpCode()) {
+                    return false;
+                }
             }
             // First chunk must be an OP_N opcode too.
-            if (decodeFromOpN(chunks.get(0).opcode) < 1) return false;
+            if (decodeFromOpN(chunks.get(0).opcode) < 1) {
+                return false;
+            }
         } catch (IllegalStateException e) {
             return false;   // Not an OP_N opcode.
         }
@@ -652,27 +682,46 @@ public class Script {
     }
 
     public boolean isSentToCLTVPaymentChannel() {
-        if (chunks.size() != 10) return false;
+        if (chunks.size() != 10) {
+            return false;
+        }
         // Check that opcodes match the pre-determined format.
-        if (!chunks.get(0).equalsOpCode(OP_IF)) return false;
+        if (!chunks.get(0).equalsOpCode(OP_IF)) {
+            return false;
+        }
         // chunk[1] = recipient pubkey
-        if (!chunks.get(2).equalsOpCode(OP_CHECKSIGVERIFY)) return false;
-        if (!chunks.get(3).equalsOpCode(OP_ELSE)) return false;
+        if (!chunks.get(2).equalsOpCode(OP_CHECKSIGVERIFY)) {
+            return false;
+        }
+        if (!chunks.get(3).equalsOpCode(OP_ELSE)) {
+            return false;
+        }
         // chunk[4] = locktime
-        if (!chunks.get(5).equalsOpCode(OP_CHECKLOCKTIMEVERIFY)) return false;
-        if (!chunks.get(6).equalsOpCode(OP_DROP)) return false;
-        if (!chunks.get(7).equalsOpCode(OP_ENDIF)) return false;
+        if (!chunks.get(5).equalsOpCode(OP_CHECKLOCKTIMEVERIFY)) {
+            return false;
+        }
+        if (!chunks.get(6).equalsOpCode(OP_DROP)) {
+            return false;
+        }
+        if (!chunks.get(7).equalsOpCode(OP_ENDIF)) {
+            return false;
+        }
         // chunk[8] = sender pubkey
-        if (!chunks.get(9).equalsOpCode(OP_CHECKSIG)) return false;
+        if (!chunks.get(9).equalsOpCode(OP_CHECKSIG)) {
+            return false;
+        }
         return true;
     }
 
     private static boolean equalsRange(byte[] a, int start, byte[] b) {
-        if (start + b.length > a.length)
+        if (start + b.length > a.length) {
             return false;
-        for (int i = 0; i < b.length; i++)
-            if (a[i + start] != b[i])
+        }
+        for (int i = 0; i < b.length; i++) {
+            if (a[i + start] != b[i]) {
                 return false;
+            }
+        }
         return true;
     }
     
@@ -735,7 +784,9 @@ public class Script {
         for (int i = 0; i < data.length; i++) {
             if (data[i] != 0)
             	//除了byte[]{0}之外都为true
+            {
                 return !(i == data.length - 1 && (data[i] & 0xFF) == 0x80);
+            }
         }
         return false;
     }
@@ -748,8 +799,9 @@ public class Script {
      * @throws ScriptException if the chunk is longer than 4 bytes.
      */
     private static BigInteger castToBigInteger(byte[] chunk) throws ScriptException {
-        if (chunk.length > 4)
+        if (chunk.length > 4) {
             throw new ScriptException("Script attempted to use an integer larger than 4 bytes");
+        }
         return Utils.decodeMPI(Utils.reverseBytes(chunk), false);
     }
 
@@ -762,9 +814,10 @@ public class Script {
      * @throws ScriptException if the chunk is longer than the specified maximum.
      */
     private static BigInteger castToBigInteger(final byte[] chunk, final int maxLength) throws ScriptException {
-        if (chunk.length > maxLength)
+        if (chunk.length > maxLength) {
             throw new ScriptException("Script attempted to use an integer larger than "
-                + maxLength + " bytes");
+                    + maxLength + " bytes");
+        }
         return Utils.decodeMPI(Utils.reverseBytes(chunk), false);
     }
 
@@ -775,8 +828,9 @@ public class Script {
 
     // Utility that doesn't copy for internal use
     private byte[] getQuickProgram() {
-        if (program != null)
+        if (program != null) {
             return program;
+        }
         return getProgram();
     }
 
@@ -797,8 +851,12 @@ public class Script {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         return Arrays.equals(getQuickProgram(), ((Script)o).getQuickProgram());
     }
 
