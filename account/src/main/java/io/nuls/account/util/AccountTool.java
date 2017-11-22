@@ -5,6 +5,7 @@ import io.nuls.account.entity.Address;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.db.entity.AccountPo;
@@ -48,7 +49,6 @@ public final class AccountTool {
     public static void toBean(AccountPo src, Account desc) {
         AssertUtil.canNotEmpty(src, "Object type conversion faild!");
         AssertUtil.canNotEmpty(desc, "Object type conversion faild!");
-        desc.setCreateHeight(src.getCreateHeight());
         desc.setCreateTime(src.getCreateTime());
         desc.setTxHash(src.getTxHash());
         desc.setVersion(src.getVersion());
@@ -74,13 +74,12 @@ public final class AccountTool {
         desc.setId(src.getId());
         desc.setAddress(src.getAddress().toString());
         desc.setAlias(src.getAlias());
-        desc.setCreateHeight(src.getCreateHeight());
         desc.setCreateTime(src.getCreateTime());
         desc.setPubKey(src.getPubKey());
         desc.setTxHash(src.getTxHash());
         desc.setVersion(src.getVersion());
         desc.setExtend(src.getExtend());
-        desc.setPriKey(new String(src.getPriKey()));
+        desc.setPriKey(Hex.encode(src.getPriKey()));
         desc.setPriSeed(src.getPriSeed());
     }
 }

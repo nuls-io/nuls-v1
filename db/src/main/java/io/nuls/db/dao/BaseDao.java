@@ -53,4 +53,6 @@ public interface BaseDao<K,T> {
 
     List<T> listAll();
 
+    Long count();
+
 }

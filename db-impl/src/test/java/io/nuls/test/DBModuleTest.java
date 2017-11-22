@@ -43,6 +43,12 @@ public class DBModuleTest {
         blockPo.setCreateTime(111L);
         blockPo.setHash("aaa");
         blockPo.setHeight(111L);
+        blockPo.setMerkleHash("aaab");
+        blockPo.setPreHash("xxx");
+        blockPo.setTxcount(10);
+        blockPo.setTxs(new byte[10]);
+        blockPo.setVarsion(1);
+        blockPo.setSign(new byte[2]);
 //        blockPo.setScript("dsfasdf".getBytes());
         int result = blockDao.save(blockPo);
         Log.debug("result" + result);
@@ -77,8 +83,8 @@ public class DBModuleTest {
 
     @Test
     public void testCount() {
-        Long count = blockDao.getCount();
-        Log.debug("count" + count);
+        Long count = blockDao.count();
+        Log.info("count===" + count);
     }
 
     @Test

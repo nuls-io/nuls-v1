@@ -13,7 +13,4 @@ import java.util.List;
 public interface BlockDao extends BaseDao<String,BlockPo>{
 
     List<BlockPo> getList(Integer pageNum, Integer pageSize);
-
-    Long getCount();
-
 }
