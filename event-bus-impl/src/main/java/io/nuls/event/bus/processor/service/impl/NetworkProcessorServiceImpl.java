@@ -1,12 +1,12 @@
 package io.nuls.event.bus.processor.service.impl;
 
 import io.nuls.core.event.EventManager;
-import io.nuls.core.event.NulsEvent;
+import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.core.event.NulsEventHeader;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.constant.EventBusConstant;
-import io.nuls.event.bus.event.handler.NetworkNulsEventHandler;
+import io.nuls.event.bus.event.handler.AbstractNetworkNulsEventHandler;
 import io.nuls.event.bus.processor.manager.ProcessorManager;
 import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
 
@@ -15,7 +15,7 @@ import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
  */
 public class NetworkProcessorServiceImpl implements NetworkProcessorService {
 
-    private static final NetworkProcessorServiceImpl instance = new NetworkProcessorServiceImpl();
+    private static final NetworkProcessorServiceImpl INSTANCE = new NetworkProcessorServiceImpl();
     private final ProcessorManager processorManager;
 
     private NetworkProcessorServiceImpl() {
@@ -23,7 +23,7 @@ public class NetworkProcessorServiceImpl implements NetworkProcessorService {
     }
 
     public static NetworkProcessorServiceImpl getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
     @Override
@@ -31,7 +31,7 @@ public class NetworkProcessorServiceImpl implements NetworkProcessorService {
         NulsEventHeader header = new NulsEventHeader();
         header.parse(new NulsByteBuffer(event));
         try {
-            NulsEvent eventObject = EventManager.getInstanceByHeader(header);
+            BaseNulsEvent eventObject = EventManager.getInstanceByHeader(header);
             eventObject.parse(new NulsByteBuffer(event));
             processorManager.offer(eventObject);
         } catch (IllegalAccessException e) {
@@ -42,7 +42,7 @@ public class NetworkProcessorServiceImpl implements NetworkProcessorService {
     }
 
     @Override
-    public String registerEventHandler(Class<? extends NulsEvent> eventClass, NetworkNulsEventHandler<? extends NulsEvent> handler) {
+    public String registerEventHandler(Class<? extends BaseNulsEvent> eventClass, AbstractNetworkNulsEventHandler<? extends BaseNulsEvent> handler) {
         return processorManager.registerEventHandler(eventClass, handler);
     }
 

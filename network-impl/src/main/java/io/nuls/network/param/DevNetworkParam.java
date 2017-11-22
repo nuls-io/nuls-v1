@@ -2,8 +2,7 @@ package io.nuls.network.param;
 
 import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.network.constant.NetworkConstant;
-import io.nuls.network.entity.PeerAddress;
-import io.nuls.network.entity.param.NetworkParam;
+import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.filter.impl.DefaultMessageFilter;
 import io.nuls.network.message.DefaultNetWorkMessageHandlerFactory;
 
@@ -12,7 +11,7 @@ import java.net.InetSocketAddress;
 /**
  * Created by win10 on 2017/11/6.
  */
-public class DevNetworkParam extends NetworkParam {
+public class DevNetworkParam extends AbstractNetworkParam {
 
     private static DevNetworkParam instance;
 

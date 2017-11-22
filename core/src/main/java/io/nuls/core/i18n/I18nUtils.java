@@ -1,7 +1,6 @@
 package io.nuls.core.i18n;
 
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -19,41 +18,41 @@ import java.util.Properties;
  */
 public class I18nUtils {
 
-    private static final Map<String, Properties> AllMapping = new HashMap<>();
+    private static final Map<String, Properties> ALL_MAPPING = new HashMap<>();
     private static Properties nowMapping;
     //default language is English
     private static String key = "en";
     //default properties file folder
-    private static final String folder = "languages";
+    private static final String FOLDER = "languages";
 
     static {
         //load all language properties
         try {
-            URL furl = I18nUtils.class.getClassLoader().getResource(folder);
+            URL furl = I18nUtils.class.getClassLoader().getResource(FOLDER);
             File folderFile = new File(furl.getPath());
             for (File file : folderFile.listFiles()) {
                 InputStream is = new FileInputStream(file);
                 Properties prop = new Properties();
                 prop.load(new InputStreamReader(is, NulsContext.DEFAULT_ENCODING));
                 String key = file.getName().replace(".properties", "");
-                AllMapping.put(key, prop);
+                ALL_MAPPING.put(key, prop);
             }
         } catch (IOException e) {
             throw new NulsRuntimeException(e);
         }
     }
 
-    public static void setLanguage(String _key) throws NulsException {
-        if (StringUtils.isBlank(_key)) {
+    public static void setLanguage(String lang) throws NulsException {
+        if (StringUtils.isBlank(lang)) {
             throw new NulsException(ErrorCode.LANGUAGE_CANNOT_SET_NULL);
         }
-        key = _key;
-        nowMapping = AllMapping.get(_key);
+        key = lang;
+        nowMapping = ALL_MAPPING.get(lang);
     }
 
     public static String get(int id) {
         if (nowMapping == null) {
-            nowMapping = AllMapping.get(key);
+            nowMapping = ALL_MAPPING.get(key);
         }
         return nowMapping.getProperty(id + "");
     }

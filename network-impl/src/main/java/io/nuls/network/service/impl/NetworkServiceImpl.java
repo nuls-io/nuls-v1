@@ -1,36 +1,33 @@
 package io.nuls.network.service.impl;
 
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.thread.NulsThread;
 import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.PeerDao;
 import io.nuls.network.constant.NetworkConstant;
-import io.nuls.network.entity.param.NetworkParam;
+import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.filter.impl.DefaultMessageFilter;
 import io.nuls.network.message.messageFilter.NulsMessageFilter;
-import io.nuls.network.module.NetworkModule;
+import io.nuls.network.module.AbstractNetworkModule;
 import io.nuls.network.param.DevNetworkParam;
 import io.nuls.network.param.MainNetworkParam;
 import io.nuls.network.param.TestNetworkParam;
 import io.nuls.network.service.NetworkService;
 
-import java.util.Properties;
-
 /**
  * Created by win10 on 2017/11/10.
  */
-public class NetworkServiceImpl extends NetworkService {
+public class NetworkServiceImpl implements NetworkService {
 
-    private NetworkParam network;
+    private AbstractNetworkModule networkModule;
+    private AbstractNetworkParam network;
 
     private ConnectionManager connectionManager;
 
     private PeersManager peersManager;
 
-    public NetworkServiceImpl(NetworkModule module) {
+    public NetworkServiceImpl(AbstractNetworkModule module) {
         this.networkModule = module;
         this.network = getNetworkInstance();
         NulsMessageFilter messageFilter = DefaultMessageFilter.getInstance();
@@ -58,12 +55,12 @@ public class NetworkServiceImpl extends NetworkService {
 
     }
 
-    private NetworkParam getNetworkInstance() {
+    private AbstractNetworkParam getNetworkInstance() {
         String networkType = ConfigLoader.getPropValue(NetworkConstant.Network_Type, "dev");
-        if (networkType.equals("dev")) {
+        if ("dev".equals(networkType)) {
             return DevNetworkParam.get();
         }
-        if (networkType.equals("test")) {
+        if ("test".equals(networkType)) {
             return TestNetworkParam.get();
         }
         return MainNetworkParam.get();

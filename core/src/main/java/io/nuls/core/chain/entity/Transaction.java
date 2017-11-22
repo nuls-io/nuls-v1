@@ -15,7 +15,7 @@ import java.io.OutputStream;
 /**
  * Created by win10 on 2017/10/30.
  */
-public class Transaction extends NulsData {
+public class Transaction extends BaseNulsData {
     public Transaction() {
         this.time = TimeService.currentTimeMillis();
         this.registerValidator(new TxMaxSizeValidator());

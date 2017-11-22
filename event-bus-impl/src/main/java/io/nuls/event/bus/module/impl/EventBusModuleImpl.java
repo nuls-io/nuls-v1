@@ -1,8 +1,7 @@
 package io.nuls.event.bus.module.impl;
 
 import io.nuls.event.bus.constant.EventBusConstant;
-import io.nuls.event.bus.module.intf.EventBusModule;
-import io.nuls.event.bus.processor.manager.ProcessorManager;
+import io.nuls.event.bus.module.intf.AbstractEventBusModule;
 import io.nuls.event.bus.processor.service.impl.LocalProcessorServiceImpl;
 import io.nuls.event.bus.processor.service.impl.NetworkProcessorServiceImpl;
 import io.nuls.event.bus.processor.service.intf.LocalProcessorService;
@@ -11,7 +10,7 @@ import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
 /**
  * Created by Niels on 2017/11/6.
  */
-public class EventBusModuleImpl extends EventBusModule {
+public class EventBusModuleImpl extends AbstractEventBusModule {
 
     private LocalProcessorService localService;
     private NetworkProcessorService networkService;

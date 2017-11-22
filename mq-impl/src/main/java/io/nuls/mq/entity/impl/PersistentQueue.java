@@ -3,7 +3,7 @@ package io.nuls.mq.entity.impl;
 import io.nuls.mq.entity.StatInfo;
 import io.nuls.mq.fqueue.entity.FQueue;
 import io.nuls.mq.fqueue.exception.FileFormatException;
-import io.nuls.mq.intf.NulsQueue;
+import io.nuls.mq.intf.AbstractNulsQueue;
 import io.nuls.mq.util.SerializeUtils;
 
 import java.io.File;
@@ -15,7 +15,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * 用Fqueue实现的持久化队列
  * Created by Niels on 2017/9/20.
  */
-public class PersistentQueue<T> extends NulsQueue<T> {
+public class PersistentQueue<T> extends AbstractNulsQueue<T> {
 
     private FQueue queue = null;
     /**
@@ -47,7 +47,7 @@ public class PersistentQueue<T> extends NulsQueue<T> {
         if (null == t || this.queue == null) {
             return;
         }
-        byte[] obj = SerializeUtils.ObjectToByte(t);
+        byte[] obj = SerializeUtils.objectToByte(t);
         this.queue.offer(obj);
         if (size() > 0) {
             signalNotEmpty();
@@ -65,7 +65,7 @@ public class PersistentQueue<T> extends NulsQueue<T> {
         if (null == obj) {
             return null;
         }
-        Object value = SerializeUtils.ByteToObject(obj);
+        Object value = SerializeUtils.byteToObject(obj);
         try {
             return (T) value;
         } finally {

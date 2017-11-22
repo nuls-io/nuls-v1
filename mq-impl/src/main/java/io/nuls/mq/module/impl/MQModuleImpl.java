@@ -1,11 +1,11 @@
 package io.nuls.mq.module.impl;
 
 
-import io.nuls.core.thread.NulsThread;
+import io.nuls.core.thread.BaseNulsThread;
 import io.nuls.mq.MqConstant;
 import io.nuls.mq.entity.StatInfo;
 import io.nuls.mq.manager.QueueManager;
-import io.nuls.mq.module.MQModule;
+import io.nuls.mq.module.AbstractMQModule;
 import io.nuls.mq.service.impl.QueueServiceImpl;
 import io.nuls.mq.thread.StatusLogThread;
 
@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
  * Created by Niels on 2017/9/27.
  *
  */
-public class MQModuleImpl extends MQModule {
+public class MQModuleImpl extends AbstractMQModule {
 
     private ScheduledExecutorService service;
 
@@ -28,7 +28,7 @@ public class MQModuleImpl extends MQModule {
 
     @Override
     public void start() {
-        NulsThread t1 = new StatusLogThread(this, "queueStatusLogThread");
+        BaseNulsThread t1 = new StatusLogThread(this, "queueStatusLogThread");
         //启动速度统计任务
         service = new ScheduledThreadPoolExecutor(1);
         service.scheduleAtFixedRate(t1, 0, QueueManager.getLatelySecond(), TimeUnit.SECONDS);
@@ -56,10 +56,10 @@ public class MQModuleImpl extends MQModule {
         str.append(",moduleStatus:");
         str.append(getStatus());
         str.append(",ThreadCount:");
-        List<NulsThread> threadList = this.getThreadList();
+        List<BaseNulsThread> threadList = this.getThreadList();
         str.append(threadList.size());
         str.append("\nThreadInfo:\n");
-        for (NulsThread t : threadList) {
+        for (BaseNulsThread t : threadList) {
             str.append(t.getInfo());
         }
         str.append("QueueInfo:\n");

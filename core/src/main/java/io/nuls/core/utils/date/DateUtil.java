@@ -17,8 +17,7 @@ public class DateUtil {
 
 	public final static String EMPTY_SRING = "";
 	public final static String DEFAULT_PATTERN = "yyyy-MM-dd HH:mm:ss";
-	public final static SimpleDateFormat DEFAULT_SDF = new SimpleDateFormat(DEFAULT_PATTERN);
-	
+
 	public static String toGMTString(Date date) {
         SimpleDateFormat df = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss z", Locale.UK);
         df.setTimeZone(new SimpleTimeZone(0, "GMT"));
@@ -35,7 +34,7 @@ public class DateUtil {
 		if (date == null) {
 			return EMPTY_SRING;
 		}
-		return DEFAULT_SDF.format(date);
+		return new SimpleDateFormat(DEFAULT_PATTERN).format(date);
 	}
 
 	/**
@@ -58,7 +57,7 @@ public class DateUtil {
 	 */
 	public static Date convertStringToDate(String date) {
 		try {
-			return DEFAULT_SDF.parse(date);
+			return new SimpleDateFormat(DEFAULT_PATTERN).parse(date);
 		} catch (ParseException e) {
 		}
 		return new Date();

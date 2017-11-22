@@ -1,6 +1,6 @@
 package io.nuls.core.validate;
 
-import io.nuls.core.chain.entity.NulsData;
+import io.nuls.core.chain.entity.BaseNulsData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,10 +10,10 @@ import java.util.List;
  */
 public class DataValidatorChain {
 
-    private List<NulsDataValidator<NulsData>> list = new ArrayList<>();
+    private List<NulsDataValidator<BaseNulsData>> list = new ArrayList<>();
     private ThreadLocal<Integer> index = new ThreadLocal<>();
 
-    public ValidateResult startDoValidator(NulsData data) {
+    public ValidateResult startDoValidator(BaseNulsData data) {
         if (list.isEmpty()) {
             return ValidateResult.getSuccessResult();
         }
@@ -25,12 +25,12 @@ public class DataValidatorChain {
         return ValidateResult.getFaildResult("The Validators not fully executed`");
     }
 
-    private ValidateResult doValidate(NulsData data) {
+    private ValidateResult doValidate(BaseNulsData data) {
         index.set(1 + index.get());
         if (index.get() == list.size()) {
             return null;
         }
-        NulsDataValidator<NulsData> validator = list.get(index.get());
+        NulsDataValidator<BaseNulsData> validator = list.get(index.get());
         ValidateResult result = validator.validate(data);
         if (!result.isSeccess()) {
             return result;

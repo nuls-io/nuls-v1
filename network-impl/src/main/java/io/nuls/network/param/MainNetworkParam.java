@@ -3,7 +3,7 @@ package io.nuls.network.param;
 import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.PeerAddress;
-import io.nuls.network.entity.param.NetworkParam;
+import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.filter.impl.DefaultMessageFilter;
 import io.nuls.network.message.DefaultNetWorkMessageHandlerFactory;
 
@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * Created by win10 on 2017/11/6.
  */
-public class MainNetworkParam extends NetworkParam {
+public class MainNetworkParam extends AbstractNetworkParam {
 
     private static MainNetworkParam instance;
 

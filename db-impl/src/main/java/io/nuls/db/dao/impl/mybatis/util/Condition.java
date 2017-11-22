@@ -60,10 +60,10 @@ public class Condition {
 		if(value == null) {
 			value = "";
 		}
-		if (value.equals("true")) {
+		if ("true".equals(value)) {
             value = true;
         }
-        if (value.equals("false")) {
+        if ("false".equals(value)) {
             value = false;
         }
         
@@ -143,7 +143,7 @@ public class Condition {
 		}
 		
 		String keyStr = this.sqlSeparator + " " + this.prefix + this.key;
-		if(this.operator.getSymbol().equals("in") || this.operator.getSymbol().equals("not in")) {
+		if("in".equals(this.operator.getSymbol()) || "not in".equals(this.operator.getSymbol())) {
 			return keyStr + " " + this.operator.getSymbol() + " (" + this.value + ")" + endfix; 
 		}else {
 			return keyStr + " " + this.operator.getSymbol() + " " + this.value + endfix;

@@ -20,7 +20,7 @@ import java.io.Serializable;
 /**
  * Created by Niels on 2017/10/30.
  */
-public abstract class NulsData implements Serializable {
+public abstract class BaseNulsData implements Serializable {
 
     protected NulsDataType dataType;
 
@@ -28,10 +28,10 @@ public abstract class NulsData implements Serializable {
 
     private DataValidatorChain validatorChain = new DataValidatorChain();
 
-    public NulsData() {
+    public BaseNulsData() {
     }
 
-    protected void registerValidator(NulsDataValidator<? extends NulsData> validator) {
+    protected void registerValidator(NulsDataValidator<? extends BaseNulsData> validator) {
         this.validatorChain.addValidator(validator);
     }
 

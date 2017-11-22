@@ -2,7 +2,7 @@ package io.nuls.event.bus.processor.manager;
 
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.event.EventManager;
-import io.nuls.core.event.NulsEvent;
+import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
@@ -19,7 +19,7 @@ import java.util.concurrent.*;
 /**
  * Created by Niels on 2017/11/6.
  */
-public class ProcessorManager<E extends NulsEvent, H extends NulsEventHandler<? extends NulsEvent>> {
+public class ProcessorManager<E extends BaseNulsEvent, H extends NulsEventHandler<? extends BaseNulsEvent>> {
     private final Map<String, H> handlerMap = new HashMap<>();
     private final Map<Class, Set<String>> eventHandlerMapping = new HashMap<>();
     private DisruptorUtil<DisruptorEvent<E>> disruptorService = DisruptorUtil.getInstance();
@@ -66,7 +66,7 @@ public class ProcessorManager<E extends NulsEvent, H extends NulsEventHandler<? 
     }
 
     private void cacheHandlerMapping(Class<E> eventClass, String handlerId) {
-        if (eventClass.equals(NulsEvent.class)) {
+        if (eventClass.equals(BaseNulsEvent.class)) {
             return;
         }
         Set<String> ids = eventHandlerMapping.get(eventClass);
@@ -87,7 +87,7 @@ public class ProcessorManager<E extends NulsEvent, H extends NulsEventHandler<? 
     }
 
     private Set<NulsEventHandler> getHandlerList(Class<E> clazz) {
-        if (clazz.equals(NulsEvent.class)) {
+        if (clazz.equals(BaseNulsEvent.class)) {
             return null;
         }
         Set<String> ids = eventHandlerMapping.get(clazz);
@@ -107,7 +107,7 @@ public class ProcessorManager<E extends NulsEvent, H extends NulsEventHandler<? 
                 set.add(handler);
             }
         } while (false);
-        while (!clazz.getSuperclass().equals(NulsEvent.class)) {
+        while (!clazz.getSuperclass().equals(BaseNulsEvent.class)) {
             set.addAll(getHandlerList((Class<E>) clazz.getSuperclass()));
         }
         return set;
@@ -119,7 +119,7 @@ public class ProcessorManager<E extends NulsEvent, H extends NulsEventHandler<? 
             throw new NulsRuntimeException(ErrorCode.FAILED, "execute event handler faild,the event is null!");
         }
         Set<NulsEventHandler> handlerSet = this.getHandlerList((Class<E>) data.getClass());
-        List<NulsEventCall<NulsEvent>> callList = new ArrayList<>();
+        List<NulsEventCall<BaseNulsEvent>> callList = new ArrayList<>();
         for (NulsEventHandler handler : handlerSet) {
             callList.add(new NulsEventCall(data, handler));
         }

@@ -1,6 +1,6 @@
 package io.nuls.ledger.entity;
 
-import io.nuls.core.chain.entity.NulsData;
+import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.crypto.script.Script;
@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * Created by win10 on 2017/10/30.
  */
-public class UtxoInput extends NulsData {
+public class UtxoInput extends BaseNulsData {
 
     private Sha256Hash txHash;
     //the output last time

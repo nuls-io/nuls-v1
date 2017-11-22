@@ -8,7 +8,7 @@ import java.io.OutputStream;
 /**
  * Created by facjas on 2017/11/20.
  */
-public class NulsNodeInfoData extends NulsData {
+public class NulsNodeInfoData extends BaseNulsData {
 
     @Override
     public int size() {

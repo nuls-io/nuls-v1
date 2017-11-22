@@ -1,16 +1,13 @@
 package io.nuls.network.service.impl;
 
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.thread.NulsThread;
+import io.nuls.core.thread.BaseNulsThread;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.entity.Peer;
 import io.nuls.network.entity.PeerGroup;
-import io.nuls.network.entity.param.NetworkParam;
-import io.nuls.network.message.messageFilter.NulsMessageFilter;
-import io.nuls.network.module.NetworkModule;
+import io.nuls.network.entity.param.AbstractNetworkParam;
+import io.nuls.network.module.AbstractNetworkModule;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -26,9 +23,9 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class ConnectionManager {
 
-    private NetworkParam network;
+    private AbstractNetworkParam network;
 
-    private NetworkModule networkModule;
+    private AbstractNetworkModule networkModule;
 
     private PeersManager peersManager;
 
@@ -42,7 +39,7 @@ public class ConnectionManager {
     //The storage will be connected
     final Queue<PendingConnect> newConnectionChannels = new LinkedBlockingQueue<>();
 
-    public ConnectionManager(NetworkModule module, NetworkParam network) {
+    public ConnectionManager(AbstractNetworkModule module, AbstractNetworkParam network) {
         this.network = network;
         this.networkModule = module;
         lock = new ReentrantLock();
@@ -73,7 +70,7 @@ public class ConnectionManager {
     }
 
     public void start() {
-        new NulsThread(networkModule, "networkConnManagerThread") {
+        new BaseNulsThread(networkModule, "networkConnManagerThread") {
             @Override
             public void run() {
                 ConnectionManager.this.run();

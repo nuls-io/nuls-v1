@@ -1,6 +1,6 @@
 package io.nuls.core.mesasge;
 
-import io.nuls.core.chain.entity.NulsData;
+import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.crypto.Utils;
@@ -9,7 +9,7 @@ import io.nuls.core.utils.io.NulsByteBuffer;
 import java.io.IOException;
 import java.io.OutputStream;
 
-public class NulsMessageHeader extends NulsData {
+public class NulsMessageHeader extends BaseNulsData {
 
     public static final int MESSAGE_HEADER_SIZE = 20;
 

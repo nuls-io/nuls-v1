@@ -1,6 +1,6 @@
 package io.nuls.ledger.entity;
 
-import io.nuls.core.chain.entity.NulsData;
+import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
 import java.io.IOException;
@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Created by Niels on 2017/11/16.
  */
-public class UtxoData extends NulsData{
+public class UtxoData extends BaseNulsData{
     private List<UtxoInput> inputs;
     private List<UtxoOutput> outputs;
 

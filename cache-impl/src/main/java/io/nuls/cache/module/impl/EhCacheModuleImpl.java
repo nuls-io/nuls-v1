@@ -2,7 +2,7 @@ package io.nuls.cache.module.impl;
 
 import io.nuls.cache.constant.EhCacheConstant;
 import io.nuls.cache.manager.EhCacheManager;
-import io.nuls.cache.module.CacheModule;
+import io.nuls.cache.module.AbstractCacheModule;
 import io.nuls.cache.service.impl.EhCacheServiceImpl;
 import io.nuls.cache.service.intf.CacheService;
 
@@ -10,7 +10,7 @@ import io.nuls.cache.service.intf.CacheService;
  * Created by Niels on 2017/10/27.
  *
  */
-public class EhCacheModuleImpl extends CacheModule {
+public class EhCacheModuleImpl extends AbstractCacheModule {
 
     private EhCacheManager cacheManager = EhCacheManager.getInstance();
 

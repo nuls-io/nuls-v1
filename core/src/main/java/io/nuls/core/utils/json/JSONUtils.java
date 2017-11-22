@@ -11,23 +11,23 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by Niels on 2017/9/29.
- *
+ * @author Niels
+ * @date 2017/9/29
  */
-public abstract class JSONUtils {
+public final class JSONUtils {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
 
     public static ObjectMapper getInstance() {
-        return objectMapper;
+        return OBJECT_MAPPER;
     }
 
     /**
      * javaBean,list,array convert to json string
      */
     public static String obj2json(Object obj) throws Exception {
-        return objectMapper.writeValueAsString(obj);
+        return OBJECT_MAPPER.writeValueAsString(obj);
     }
 
     /**
@@ -35,12 +35,12 @@ public abstract class JSONUtils {
      */
     public static <T> T json2pojo(String jsonStr, Class<T> clazz)
             throws Exception {
-        return objectMapper.readValue(jsonStr, clazz);
+        return OBJECT_MAPPER.readValue(jsonStr, clazz);
     }
 
     public static <T> T json2pojo(String json, Class<T> entityClass, Class ...itemClass) throws IOException {
-        JavaType javaType =objectMapper.getTypeFactory().constructParametricType(entityClass,itemClass);
-        return objectMapper.readValue(json,javaType);
+        JavaType javaType = OBJECT_MAPPER.getTypeFactory().constructParametricType(entityClass,itemClass);
+        return OBJECT_MAPPER.readValue(json,javaType);
     }
 
     /**
@@ -48,7 +48,7 @@ public abstract class JSONUtils {
      */
     public static <T> Map<String, Object> json2map(String jsonStr)
             throws Exception {
-        return objectMapper.readValue(jsonStr, Map.class);
+        return OBJECT_MAPPER.readValue(jsonStr, Map.class);
     }
 
     /**
@@ -56,7 +56,7 @@ public abstract class JSONUtils {
      */
     public static <T> Map<String, T> json2map(String jsonStr, Class<T> clazz)
             throws Exception {
-        Map<String, Map<String, Object>> map = objectMapper.readValue(jsonStr,
+        Map<String, Map<String, Object>> map = OBJECT_MAPPER.readValue(jsonStr,
                 new TypeReference<Map<String, T>>() {
                 });
         Map<String, T> result = new HashMap<String, T>();
@@ -71,7 +71,7 @@ public abstract class JSONUtils {
      */
     public static <T> List<T> json2list(String jsonArrayStr, Class<T> clazz)
             throws Exception {
-        List<Map<String, Object>> list = objectMapper.readValue(jsonArrayStr,
+        List<Map<String, Object>> list = OBJECT_MAPPER.readValue(jsonArrayStr,
                 new TypeReference<List<T>>() {
                 });
         List<T> result = new ArrayList<T>();
@@ -85,7 +85,7 @@ public abstract class JSONUtils {
      * map convert to javaBean
      */
     public static <T> T map2pojo(Map map, Class<T> clazz) {
-        return objectMapper.convertValue(map, clazz);
+        return OBJECT_MAPPER.convertValue(map, clazz);
     }
 
 }

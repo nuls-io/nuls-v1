@@ -13,7 +13,7 @@ public class StringUtils {
     }
 
     public static boolean isNull(String str) {
-        return null == str || str.trim().length() == 0 || str.trim().equalsIgnoreCase("null");
+        return null == str || str.trim().length() == 0 || "null".equalsIgnoreCase(str.trim());
     }
 
     public static boolean isNotBlank(String str) {

@@ -12,7 +12,7 @@ import java.util.Map;
  * Created by Niels on 2017/9/29.
  *
  */
-public abstract class AssertUtil {
+public final class AssertUtil {
 
     public static void isEquals(Object val1,Object val2,String msg){
         if(val1==val2||(val1!=null&&val1.equals(val2))){

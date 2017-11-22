@@ -2,7 +2,7 @@ package io.nuls.db.module.impl;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.thread.NulsThread;
+import io.nuls.core.thread.BaseNulsThread;
 import io.nuls.core.utils.aop.AopUtils;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.constant.DBConstant;
@@ -13,7 +13,7 @@ import io.nuls.db.dao.impl.mybatis.BlockDaoImpl;
 import io.nuls.db.dao.impl.mybatis.session.SessionManager;
 import io.nuls.db.dao.impl.mybatis.AccountDaoImpl;
 import io.nuls.db.exception.DBException;
-import io.nuls.db.module.DBModule;
+import io.nuls.db.module.AbstractDBModule;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
@@ -26,7 +26,7 @@ import java.util.List;
 /**
  * Created by zhouwei on 2017/9/27.
  */
-public class MybatisDBModuleImpl extends DBModule {
+public class MybatisDBModuleImpl extends AbstractDBModule {
 
     private SqlSessionFactory sqlSessionFactory;
 
@@ -84,10 +84,10 @@ public class MybatisDBModuleImpl extends DBModule {
         str.append(",moduleStatus:");
         str.append(getStatus());
         str.append(",ThreadCount:");
-        List<NulsThread> threadList = this.getThreadList();
+        List<BaseNulsThread> threadList = this.getThreadList();
         str.append(threadList.size());
         str.append("ThreadInfo:\n");
-        for (NulsThread t : threadList) {
+        for (BaseNulsThread t : threadList) {
             str.append(t.getInfo());
         }
 //        str.append("QueueInfo:\n");

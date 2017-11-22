@@ -1,6 +1,6 @@
 package io.nuls.account.entity;
 
-import io.nuls.core.chain.entity.NulsData;
+import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.VarInt;
@@ -16,7 +16,7 @@ import java.util.Arrays;
 /**
  * Created by Niels on 2017/10/30.
  */
-public class Account extends NulsData {
+public class Account extends BaseNulsData {
 
     private String id;
 

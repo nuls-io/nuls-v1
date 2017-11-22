@@ -10,7 +10,7 @@ import java.io.OutputStream;
 /**
  * Created by win10 on 2017/10/30.
  */
-public class BlockHeader extends NulsData {
+public class BlockHeader extends BaseNulsData {
 
     //区块hash
     protected Sha256Hash hash;

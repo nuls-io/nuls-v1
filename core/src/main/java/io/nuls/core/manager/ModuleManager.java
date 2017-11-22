@@ -3,9 +3,9 @@ package io.nuls.core.manager;
 
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.module.NulsModule;
+import io.nuls.core.module.BaseNulsModule;
 import io.nuls.core.module.NulsModuleProxy;
-import io.nuls.core.thread.NulsThread;
+import io.nuls.core.thread.BaseNulsThread;
 
 import java.util.*;
 
@@ -15,7 +15,7 @@ import java.util.*;
  */
 public class ModuleManager {
 
-    private static final Map<String, NulsThread> threadMap = new HashMap<>();
+    private static final Map<String, BaseNulsThread> threadMap = new HashMap<>();
 
     private static final Map<String, NulsModuleProxy> moduleMap = new HashMap<>();
 
@@ -98,23 +98,23 @@ public class ModuleManager {
         return manager;
     }
 
-    public NulsModule getModule(String moduleName) {
+    public BaseNulsModule getModule(String moduleName) {
         return moduleMap.get(moduleName);
     }
 
-    public NulsModule getModule(Class moduleClass) {
-        for (NulsModule module : moduleMap.values()) {
+    public BaseNulsModule getModule(Class moduleClass) {
+        for (BaseNulsModule module : moduleMap.values()) {
             if (module.getModuleClass().equals(moduleClass)) {
                 return module;
-            } else if (module.getModuleClass().getSuperclass().equals(moduleClass) && !NulsModule.class.equals(module.getModuleClass().getSuperclass())) {
+            } else if (module.getModuleClass().getSuperclass().equals(moduleClass) && !BaseNulsModule.class.equals(module.getModuleClass().getSuperclass())) {
                 return module;
             }
         }
         return null;
     }
 
-    public NulsModule getModuleById(int id) {
-        for (NulsModule module : moduleMap.values()) {
+    public BaseNulsModule getModuleById(int id) {
+        for (BaseNulsModule module : moduleMap.values()) {
             if (module.getModuleId() == id) {
                 return module;
             }
@@ -124,13 +124,13 @@ public class ModuleManager {
 
     public String getInfo() {
         StringBuilder str = new StringBuilder();
-        for (NulsModule module : moduleMap.values()) {
+        for (BaseNulsModule module : moduleMap.values()) {
             str.append(module.getInfo());
         }
         return str.toString();
     }
 
-    public void regThread(String threadName, NulsThread thread) {
+    public void regThread(String threadName, BaseNulsThread thread) {
         if (threadMap.keySet().contains(threadName)) {
             throw new NulsRuntimeException(ErrorCode.THREAD_REPETITION, "the name of thread is already exist(" + threadName + ")");
         }
@@ -141,7 +141,7 @@ public class ModuleManager {
         threadMap.remove(threadName);
     }
 
-    public void regModule(String moduleName, NulsModule module) {
+    public void regModule(String moduleName, BaseNulsModule module) {
         if (moduleMap.keySet().contains(moduleName)) {
             throw new NulsRuntimeException(ErrorCode.THREAD_REPETITION, "the name of Module is already exist(" + moduleName + ")");
         }
@@ -157,9 +157,9 @@ public class ModuleManager {
     }
 
 
-    public List<NulsThread> getThreadsByModule(String moduleName) {
-        List<NulsThread> list = new ArrayList<>();
-        for (NulsThread t : threadMap.values()) {
+    public List<BaseNulsThread> getThreadsByModule(String moduleName) {
+        List<BaseNulsThread> list = new ArrayList<>();
+        for (BaseNulsThread t : threadMap.values()) {
             if (t.getModule().getModuleName().equals(moduleName)) {
                 list.add(t);
             }
@@ -168,7 +168,7 @@ public class ModuleManager {
     }
 
     public void remThreadsByModule(String moduleName) {
-        for (NulsThread t : getThreadsByModule(moduleName)) {
+        for (BaseNulsThread t : getThreadsByModule(moduleName)) {
             threadMap.remove(t.getName());
         }
     }

@@ -1,6 +1,6 @@
 package io.nuls.consensus.event;
 
-import io.nuls.core.chain.entity.NulsData;
+import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.event.NulsEventHeader;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
@@ -14,7 +14,7 @@ public class RedPunishConsensusEvent extends BaseConsensusEvent{
     }
 
     @Override
-    protected NulsData parseEventBody(NulsByteBuffer byteBuffer) {
+    protected BaseNulsData parseEventBody(NulsByteBuffer byteBuffer) {
         return null;
     }
 

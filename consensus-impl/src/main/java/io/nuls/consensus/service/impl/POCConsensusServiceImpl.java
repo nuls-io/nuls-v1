@@ -14,19 +14,21 @@ import io.nuls.core.exception.NulsRuntimeException;
 import java.util.List;
 
 /**
- * Created by Niels on 2017/11/9.
+ *
+ * @author Niels
+ * @date 2017/11/9
  *
  */
 public class POCConsensusServiceImpl implements ConsensusService {
 
-    private static final ConsensusService instance = new POCConsensusServiceImpl();
+    private static final ConsensusService INSTANCE = new POCConsensusServiceImpl();
     private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
 
     private POCConsensusServiceImpl() {
     }
 
     public static ConsensusService getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
     @Override

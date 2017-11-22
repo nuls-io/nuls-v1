@@ -1,27 +1,23 @@
 package io.nuls.network.service.impl;
 
 import io.nuls.core.context.NulsContext;
-import io.nuls.db.dao.BlockDao;
 import io.nuls.db.dao.PeerDao;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Peer;
 import io.nuls.network.entity.PeerGroup;
-import io.nuls.network.entity.param.NetworkParam;
-import io.nuls.network.module.impl.NetworkModuleImpl;
-import io.nuls.network.param.DevNetworkParam;
+import io.nuls.network.entity.param.AbstractNetworkParam;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by win10 on 2017/11/10.
  */
 public class PeerDiscoverHandler implements Runnable {
 
-    private NetworkParam network;
+    private AbstractNetworkParam network;
 
     private PeersManager peersManager;
 
@@ -30,7 +26,7 @@ public class PeerDiscoverHandler implements Runnable {
     private boolean running;
 
 
-    public PeerDiscoverHandler(PeersManager peersManager, NetworkParam network) {
+    public PeerDiscoverHandler(PeersManager peersManager, AbstractNetworkParam network) {
         this.peersManager = peersManager;
         this.network = network;
         this.running = true;

@@ -2,7 +2,7 @@ package io.nuls.core.module.service;
 
 
 import io.nuls.core.manager.ModuleManager;
-import io.nuls.core.module.NulsModule;
+import io.nuls.core.module.BaseNulsModule;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 
@@ -22,15 +22,15 @@ public class ModuleService {
         return service;
     }
 
-    public NulsModule loadModule(String moduleClass) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-        NulsModule module = null;
+    public BaseNulsModule loadModule(String moduleClass) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+        BaseNulsModule module = null;
         do {
             if (StringUtils.isBlank(moduleClass)) {
                 Log.warn("module cannot start:" + moduleClass);
                 break;
             }
             Class clazz = Class.forName(moduleClass);
-            module = (NulsModule) clazz.newInstance();
+            module = (BaseNulsModule) clazz.newInstance();
             Log.info("load module:" + module.getInfo());
         } while (false);
         return module;

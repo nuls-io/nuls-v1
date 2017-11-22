@@ -9,7 +9,6 @@ import java.util.Scanner;
 
 /**
  * Created by Niels on 2017/10/26.
- *
  */
 public class CommandHandle {
     public static void main(String[] args) throws IOException {
@@ -23,16 +22,24 @@ public class CommandHandle {
     }
 
     private static void doCommand(String read) {
-        if(StringUtils.isBlank(read)){
+        if (StringUtils.isBlank(read)) {
             return;
         }
         read = read.trim();
-        switch (read){
+        switch (read) {
             case CommandConstant.CMD_EXIT:
                 doStop();
+                break;
             case CommandConstant.CMD_HELP:
+                printHelp();
+                break;
+            default:
                 break;
         }
+    }
+
+    private static void printHelp() {
+        //todo
     }
 
     private static void doStop() {

@@ -1,6 +1,6 @@
 package io.nuls.ledger.entity;
 
-import io.nuls.core.chain.entity.NulsData;
+import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.event.NulsEventHeader;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -11,7 +11,7 @@ import java.io.OutputStream;
 /**
  * Created by Niels on 2017/11/20.
  */
-public class LockCoinTransaction<T extends NulsData> extends CoinTransaction<T> {
+public class LockCoinTransaction<T extends BaseNulsData> extends AbstractCoinTransaction<T> {
 
     private long unlockTime;
 

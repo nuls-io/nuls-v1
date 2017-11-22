@@ -13,7 +13,7 @@ import java.io.ObjectOutputStream;
  */
 public class SerializeUtils {
 
-    public static Object ByteToObject(byte[] bytes) {
+    public static Object byteToObject(byte[] bytes) {
         Object obj = null;
         try {
             // bytearray to object
@@ -29,7 +29,7 @@ public class SerializeUtils {
         return obj;
     }
 
-    public static byte[] ObjectToByte(Object obj) {
+    public static byte[] objectToByte(Object obj) {
         byte[] bytes = null;
         try {
             // object to bytearray

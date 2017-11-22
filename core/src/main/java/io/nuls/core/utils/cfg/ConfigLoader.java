@@ -13,10 +13,10 @@ import java.net.URL;
 import java.util.Properties;
 
 /**
- * Created by Niels on 2017/9/26.
- *
+ * @author Niels
+ * @date 2017/9/26
  */
-public abstract class ConfigLoader {
+public class ConfigLoader {
 
     private static Ini config = null;
 

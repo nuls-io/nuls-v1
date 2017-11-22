@@ -9,11 +9,11 @@ import io.nuls.core.utils.log.Log;
  * Created by Niels on 2017/10/13.
  *
  */
-public class NulsModuleProxy extends NulsModule {
+public class NulsModuleProxy extends BaseNulsModule {
 
-    private final NulsModule module;
+    private final BaseNulsModule module;
 
-    public NulsModuleProxy(NulsModule module) {
+    public NulsModuleProxy(BaseNulsModule module) {
         super(module.getModuleName());
         this.module = module;
     }
@@ -79,7 +79,7 @@ public class NulsModuleProxy extends NulsModule {
     }
 
     @Override
-    public Class<? extends NulsModule> getModuleClass() {
+    public Class<? extends BaseNulsModule> getModuleClass() {
         if (null != module) {
             return module.getClass();
         }

@@ -2,10 +2,10 @@ package io.nuls.core.module;
 
 import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.event.EventManager;
-import io.nuls.core.event.NulsEvent;
+import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.manager.ModuleManager;
-import io.nuls.core.thread.NulsThread;
+import io.nuls.core.thread.BaseNulsThread;
 import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.log.Log;
 
@@ -15,7 +15,7 @@ import java.util.List;
  * Created by Niels on 2017/9/26.
  *
  */
-public abstract class NulsModule {
+public abstract class BaseNulsModule {
 
     private short moduleId;
 
@@ -23,7 +23,7 @@ public abstract class NulsModule {
 
     private ModuleStatusEnum status;
 
-    public NulsModule(String moduleName) {
+    public BaseNulsModule(String moduleName) {
         this.moduleName = moduleName;
         this.status = ModuleStatusEnum.UNSTARTED;
         ModuleManager.getInstance().regModule(this.moduleName, this);
@@ -63,7 +63,7 @@ public abstract class NulsModule {
      *
      * @return
      */
-    protected final List<NulsThread> getThreadList() {
+    protected final List<BaseNulsThread> getThreadList() {
         return ModuleManager.getInstance().getThreadsByModule(this.moduleName);
     }
 
@@ -106,7 +106,7 @@ public abstract class NulsModule {
         ModuleManager.getInstance().regService(this.moduleName, serviceInterface, service);
     }
 
-    protected final void registerEvent(short eventType, Class<? extends NulsEvent> eventClass) {
+    protected final void registerEvent(short eventType, Class<? extends BaseNulsEvent> eventClass) {
         if (this.getModuleId() == 0) {
             EventManager.putEvent(this, eventType, eventClass);
         } else {
@@ -114,7 +114,7 @@ public abstract class NulsModule {
         }
     }
 
-    public Class<? extends NulsModule> getModuleClass() {
+    public Class<? extends BaseNulsModule> getModuleClass() {
         return this.getClass();
     }
 

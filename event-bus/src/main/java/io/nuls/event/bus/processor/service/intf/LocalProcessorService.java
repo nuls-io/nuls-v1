@@ -1,16 +1,16 @@
 package io.nuls.event.bus.processor.service.intf;
 
-import io.nuls.core.event.NulsEvent;
-import io.nuls.event.bus.event.handler.LocalNulsEventHandler;
+import io.nuls.core.event.BaseNulsEvent;
+import io.nuls.event.bus.event.handler.AbstractLocalNulsEventHandler;
 
 /**
  * Created by Niels on 2017/11/6.
  */
 public interface LocalProcessorService {
 
-    public void send(NulsEvent event);
+    public void send(BaseNulsEvent event);
 
-    public String registerEventHandler(Class<? extends NulsEvent> eventClass, LocalNulsEventHandler<? extends NulsEvent> handler);
+    public String registerEventHandler(Class<? extends BaseNulsEvent> eventClass, AbstractLocalNulsEventHandler<? extends BaseNulsEvent> handler);
 
     public void removeEventHandler(String handlerId);
 

@@ -44,7 +44,7 @@ public final class TimeService {
 	/*
 	 * 系统启动时间
 	 */
-	private final static Date systemStartTime = new Date();
+	private final static Date SYSTEM_START_TIME = new Date();
 	
 	private long lastInitTime;
 	private boolean running;
@@ -210,7 +210,7 @@ public final class TimeService {
 	 * @return long
 	 */
 	public static long getSystemRuningTimeMillis() {
-		return System.currentTimeMillis() - systemStartTime.getTime();
+		return System.currentTimeMillis() - SYSTEM_START_TIME.getTime();
 	}
 	
 	/**

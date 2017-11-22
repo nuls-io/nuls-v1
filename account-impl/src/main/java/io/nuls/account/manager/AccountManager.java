@@ -4,7 +4,6 @@ import io.nuls.account.entity.Account;
 import io.nuls.account.service.impl.AccountCacheService;
 import io.nuls.account.service.impl.AccountServiceImpl;
 import io.nuls.account.service.intf.AccountService;
-import io.nuls.core.context.NulsContext;
 
 import java.util.List;
 
@@ -13,7 +12,7 @@ import java.util.List;
  */
 public class AccountManager {
 
-    private static final AccountManager instance = new AccountManager();
+    private static final AccountManager INSTANCE = new AccountManager();
 
     public static String Locla_acount_id = null;
     private AccountCacheService cacheService = AccountCacheService.getInstance();
@@ -23,7 +22,7 @@ public class AccountManager {
     }
 
     public static AccountManager getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
     public void init() {

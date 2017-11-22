@@ -1,20 +1,15 @@
 package io.nuls.network.module.impl;
 
 
-import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.network.constant.NetworkConstant;
-import io.nuls.network.entity.param.NetworkParam;
-import io.nuls.network.module.NetworkModule;
+import io.nuls.network.module.AbstractNetworkModule;
 import io.nuls.network.service.NetworkService;
-import io.nuls.network.service.impl.ConnectionManager;
 import io.nuls.network.service.impl.NetworkServiceImpl;
-import io.nuls.network.service.impl.PeersManager;
 
 import java.io.IOException;
-import java.util.Properties;
 
-public class NetworkModuleImpl extends NetworkModule {
+public class NetworkModuleImpl extends AbstractNetworkModule {
 
     private NetworkService networkService;
 

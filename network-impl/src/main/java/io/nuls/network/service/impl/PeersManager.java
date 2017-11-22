@@ -11,8 +11,8 @@ import io.nuls.db.dao.PeerDao;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Peer;
 import io.nuls.network.entity.PeerGroup;
-import io.nuls.network.entity.param.NetworkParam;
-import io.nuls.network.module.NetworkModule;
+import io.nuls.network.entity.param.AbstractNetworkParam;
+import io.nuls.network.module.AbstractNetworkModule;
 
 import java.util.List;
 import java.util.Map;
@@ -20,9 +20,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class PeersManager {
 
-    private NetworkModule networkModule;
+    private AbstractNetworkModule networkModule;
 
-    private NetworkParam network;
+    private AbstractNetworkParam network;
 
     private PeerDiscoverHandler discovery;
 
@@ -36,7 +36,7 @@ public class PeersManager {
 
     private PeerDao peerDao;
 
-    public PeersManager(NetworkModule module, NetworkParam network, PeerDao peerDao) {
+    public PeersManager(AbstractNetworkModule module, AbstractNetworkParam network, PeerDao peerDao) {
         this.networkModule = module;
         this.peerDao = peerDao;
         // the default peerGroups
