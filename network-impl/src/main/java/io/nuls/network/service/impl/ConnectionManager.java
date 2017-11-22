@@ -1,15 +1,13 @@
 package io.nuls.network.service.impl;
 
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.NulsThread;
 import io.nuls.core.utils.log.Log;
+import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Peer;
 import io.nuls.network.entity.PeerGroup;
 import io.nuls.network.entity.param.NetworkParam;
-import io.nuls.network.message.messageFilter.NulsMessageFilter;
 import io.nuls.network.module.NetworkModule;
 
 import java.io.IOException;
@@ -22,7 +20,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Created by win10 on 2017/11/6.
+ * @author vivi
+ * @date 2017-11-10
  */
 public class ConnectionManager {
 
@@ -65,8 +64,8 @@ public class ConnectionManager {
                 inited = true;
             }
         } catch (IOException e) {
-            e.printStackTrace();
-            throw new NulsRuntimeException(ErrorCode.NET_SERVER_START_ERROR);
+            serverClose();
+            throw new NulsRuntimeException(ErrorCode.NET_SERVER_START_ERROR, e);
         } finally {
             lock.unlock();
         }
@@ -86,21 +85,22 @@ public class ConnectionManager {
         Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
         try {
             while (inited) {
-                //Processing wait connections
-                PendingConnect conn;
-                while ((conn = newConnectionChannels.poll()) != null) {
+                //Processing waiting for connections
+                PendingConnect connect;
+                while ((connect = newConnectionChannels.poll()) != null) {
                     try {
                         //  Only connection events are registered here
-                        SelectionKey key = conn.channel.register(selector, SelectionKey.OP_CONNECT);
-                        key.attach(conn);
+                        SelectionKey key = connect.channel.register(selector, SelectionKey.OP_CONNECT);
+                        key.attach(connect);
                     } catch (ClosedChannelException e) {
                         e.printStackTrace();
                         Log.warn("SocketChannel was closed before it could be registered");
-                        peersManager.deletePeer(conn.peer);
+                        connect.peer.destroy();
+                        //peersManager.deletePeer(conn.peer);
                     }
                 }
 
-                //
+
                 if (selector.select() > 0) {
                     Iterator<SelectionKey> keyIterator = selector.selectedKeys().iterator();
                     while (keyIterator.hasNext()) {
@@ -129,19 +129,19 @@ public class ConnectionManager {
             try {
                 key.channel().close();
             } catch (IOException e) {
-                e.printStackTrace();
-                // log.warn("Error closing channel", e);
+                Log.warn("Error closing channel", e);
             }
             key.cancel();
-//            if (key.attachment() instanceof ConnectionHandler)
-//                ConnectionHandler.handleKey(key); // Close connection if relevant
+            if (key.attachment() instanceof ConnectionHandler) {
+                // Close connection if relevant
+                ConnectionHandler.handleKey(key);
+            }
         }
         try {
             selector.close();
             selector = null;
         } catch (IOException e) {
-            e.printStackTrace();
-            //log.warn("Error closing client manager selector", e);
+            Log.warn("Error closing client manager selector", e);
         }
 
         try {
@@ -151,10 +151,15 @@ public class ConnectionManager {
             e.printStackTrace();
         }
         System.out.println("----------------server close");
+
+        //todo sent a event to other module
     }
 
-
-    //when catch exception that should delete this peers from database
+    /**
+     * out peer try to connect
+     *
+     * @param peer
+     */
     public void openConnection(Peer peer) {
         InetSocketAddress socketAddress = new InetSocketAddress(peer.getIp(), peer.getPort());
         SocketChannel channel = null;
@@ -175,7 +180,8 @@ public class ConnectionManager {
                     e1.printStackTrace();
                 }
             }
-            //todo
+            peer.destroy();
+
             //peersManager.deletePeer(peer);
         }
     }
@@ -196,7 +202,10 @@ public class ConnectionManager {
         if (!inAble && !outAble) {
             return false;
         }
-
+        //check myself
+        if (network.getLocalIps().contains(socketAddress.getAddress().getHostAddress())) {
+            return false;
+        }
         //check it already connected
         for (Peer peer : inPeers.getPeers()) {
             if (peer.getIp().equals(socketAddress.getAddress().getHostAddress()) &&
@@ -215,8 +224,10 @@ public class ConnectionManager {
     }
 
 
-    public void handleKey(SelectionKey key) throws IOException {
+    public void handleKey(SelectionKey key) {
+
         if (key.isValid() && key.isConnectable()) {
+            //out peer
             PendingConnect data = (PendingConnect) key.attachment();
             Peer peer = data.peer;
             System.out.println("---------------peer hash:" + peer.getHash());
@@ -227,29 +238,51 @@ public class ConnectionManager {
                 if (channel.finishConnect()) {
                     key.interestOps((key.interestOps() | SelectionKey.OP_READ) & ~SelectionKey.OP_CONNECT);
                     key.attach(handler);
-                    // connection.connectionOpened();
+                    peer.connectionOpened();
                 } else {
-                    handler.closeConnection(); // Failed to connect for some reason
+                    // Failed to connect for some reason
+                    peer.destroy();
                 }
             } catch (Exception e) {
-                Log.warn("Failed to connect to {}", channel.socket().getRemoteSocketAddress());
-                handler.closeConnection(); // Failed to connect for some reason
+                Log.warn("out peer Failed to connect to {}", channel.socket().getRemoteSocketAddress());
+                // Failed to connect for some reason
+                peer.destroy();
             }
 
         } else if (key.isValid() && key.isAcceptable()) {
-            SocketChannel socketChannel = serverSocketChannel.accept();
-            InetSocketAddress socketAddress = (InetSocketAddress) socketChannel.getRemoteAddress();
-            if (!allowConnection(socketAddress)) {
-                socketChannel.close();
-                return;
-            }
-            socketChannel.configureBlocking(false);
-            SelectionKey newKey = socketChannel.register(selector, SelectionKey.OP_READ);
+            // in Peer
+            SocketChannel socketChannel = null;
+            Peer peer = null;
+            try {
+                socketChannel = serverSocketChannel.accept();
+                InetSocketAddress socketAddress = (InetSocketAddress) socketChannel.getRemoteAddress();
+                if (!allowConnection(socketAddress)) {
+                    socketChannel.close();
+                    return;
+                }
+                socketChannel.configureBlocking(false);
+                SelectionKey newKey = socketChannel.register(selector, SelectionKey.OP_READ);
 
-            Peer peer = new Peer(network, Peer.IN, socketAddress);
-            ConnectionHandler handler = new ConnectionHandler(peer, socketChannel, newKey);
-            newKey.attach(handler);
+                new Peer(network, Peer.IN, socketAddress);
+                peersManager.addPeerToGroup(NetworkConstant.Network_Peer_In_Group, peer);
+                ConnectionHandler handler = new ConnectionHandler(peer, socketChannel, newKey);
+                newKey.attach(handler);
+                peer.connectionOpened();
+            } catch (Exception e) {
+                if (socketChannel != null) {
+                    Log.warn("in peer Failed to connect to {}", socketChannel.socket().getRemoteSocketAddress());
+                    try {
+                        socketChannel.close();
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
+                }
+                if (peer != null) {
+                    peer.destroy();
+                }
+            }
         } else {
+            // read or write
             ConnectionHandler handler = (ConnectionHandler) key.attachment();
             if (handler != null) {
                 ConnectionHandler.handleKey(key);
@@ -270,4 +303,5 @@ public class ConnectionManager {
             this.peer = peer;
         }
     }
+
 }

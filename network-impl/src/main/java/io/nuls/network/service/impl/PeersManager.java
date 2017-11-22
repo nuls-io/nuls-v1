@@ -137,7 +137,10 @@ public class PeersManager {
         peerGroups.remove(groupName);
     }
 
-
+    /**
+     * remove from database
+     * @param peer
+     */
     public void deletePeer(Peer peer) {
         peerDao.deleteByKey(peer.getHash());
     }

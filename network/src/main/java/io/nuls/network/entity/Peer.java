@@ -40,6 +40,10 @@ public class Peer extends NulsData {
 
     private int port;
 
+    private long lastTime;
+
+    private int failCount;
+
     /**
      * 1: inPeer ,  2: outPeer
      */
@@ -106,6 +110,8 @@ public class Peer extends NulsData {
         Block bestBlock = NulsContext.getInstance().getBestBlock();
         VersionMessage message = new VersionMessage(bestBlock.getHeight(), bestBlock.getHash().toString(), this);
         sendMessage(message);
+
+        this.status = Peer.CONNECTING;
     }
 
 
@@ -146,7 +152,6 @@ public class Peer extends NulsData {
             throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
         }
 
-        //todo there can use NulsMessageFilter
         byte[] headers = new byte[NulsMessageHeader.MESSAGE_HEADER_SIZE];
         buffer.get(headers, 0, headers.length);
         NulsMessageHeader messageHeader = network.getMessageFilter().filterHeader(headers);
@@ -200,12 +205,17 @@ public class Peer extends NulsData {
     public void destroy() {
         lock.lock();
         try {
-            this.status = 2;
-            this.writeTarget.closeConnection();
-            this.writeTarget = null;
+            this.status = Peer.CLOSE;
+            if (this.writeTarget != null) {
+                this.writeTarget.closeConnection();
+                this.writeTarget = null;
+            }
         } finally {
             lock.unlock();
         }
+        //todo check failCount and save or remove from database
+        //this.failCount ++;
+
     }
 
     @Override
@@ -282,5 +292,21 @@ public class Peer extends NulsData {
 
     public void setVersionMessage(VersionMessage versionMessage) {
         this.versionMessage = versionMessage;
+    }
+
+    public long getLastTime() {
+        return lastTime;
+    }
+
+    public void setLastTime(long lastTime) {
+        this.lastTime = lastTime;
+    }
+
+    public int getFailCount() {
+        return failCount;
+    }
+
+    public void setFailCount(int failCount) {
+        this.failCount = failCount;
     }
 }

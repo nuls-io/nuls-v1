@@ -37,15 +37,19 @@ public class PeerDiscoverHandler implements Runnable {
     }
 
     // get peers from local database
-    public CopyOnWriteArrayList<Peer> getLocalPeers() {
+    public List<Peer> getLocalPeers() {
         //todo find from database
-        return new CopyOnWriteArrayList<>();
+        return null;
     }
 
 
     public List<Peer> getSeedPeers() {
         List<Peer> seedPeers = new ArrayList<>();
         for (InetSocketAddress socketAddress : network.getSeedPeers()) {
+            // remove myself
+            if(network.getLocalIps().contains(socketAddress.getAddress().getHostAddress())) {
+                continue;
+            }
             seedPeers.add(new Peer(network, Peer.OUT, socketAddress));
         }
         return seedPeers;

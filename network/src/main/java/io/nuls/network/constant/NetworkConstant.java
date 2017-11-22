@@ -1,8 +1,8 @@
 package io.nuls.network.constant;
 
 /**
- * Created by Niels on 2017/11/7.
- *
+ * @author vivi
+ * @date 2017.11.10
  */
 public interface NetworkConstant {
     //todo version

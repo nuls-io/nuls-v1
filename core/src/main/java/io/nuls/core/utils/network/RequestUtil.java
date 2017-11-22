@@ -1,4 +1,4 @@
-package io.nuls.core.utils;
+package io.nuls.core.utils.network;
 
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
