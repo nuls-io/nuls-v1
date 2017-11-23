@@ -15,35 +15,50 @@ public class NulsMessage {
     protected byte[] data;
 
     public NulsMessage() {
-
+        this.header = new NulsMessageHeader();
+        this.data = new byte[0];
     }
 
     public NulsMessage(byte[] data) {
+        this();
         this.data = data;
+        byte xor = 0x00;
+        for(int i=0;i<data.length;i++){
+            xor ^= data[i];
+        }
+        this.header.setXor(xor);
     }
 
     public NulsMessage(NulsMessageHeader header) {
         this.header = header;
+        this.data = new byte[0];
     }
 
     public NulsMessage(NulsMessageHeader header, byte[] data) {
         this.header = header;
         this.data = data;
+        byte xor = 0x00;
+        for(int i=0;i<data.length;i++){
+            xor ^= data[i];
+        }
+        header.setXor(xor);
     }
 
     public NulsMessage(int magicNumber, short msgType) {
-        this.header = new NulsMessageHeader(magicNumber, msgType);
-        this.data = data;
+        this();
+        this.header.setMagicNumber(magicNumber);
+        this.header.setHeadType(msgType);
     }
 
     public NulsMessage(int magicNumber, short msgType, byte[] data) {
-        this.header = new NulsMessageHeader(magicNumber, msgType);
-        this.data = data;
+        this(data);
+        this.header.setMagicNumber(magicNumber);
+        this.header.setHeadType(msgType);
     }
 
     public NulsMessage(int magicNumber, short msgType, byte[] extend, byte[] data) {
-        this.header = new NulsMessageHeader(magicNumber, msgType, extend);
-        this.data = data;
+        this(magicNumber,msgType,data);
+        this.header.setExtend(extend);
     }
 
     public NulsMessage(int magicNumber, int length, short msgType, byte xor, byte[] data) {

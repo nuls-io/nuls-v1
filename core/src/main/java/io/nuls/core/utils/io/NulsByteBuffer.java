@@ -31,9 +31,29 @@ public class NulsByteBuffer {
         this.cursor = cursor;
     }
 
+    public long readUint32LE() throws NulsVerificationException {
+        try {
+            long u = Utils.readUint32LE(payload, cursor);
+            cursor += 4;
+            return u;
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new NulsVerificationException(ErrorCode.DATA_PARSE_ERROR, e);
+        }
+    }
+
+    public int readInt32LE() throws NulsVerificationException {
+        try {
+            int u = Utils.readInt32LE(payload, cursor);
+            cursor += 4;
+            return u;
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new NulsVerificationException(ErrorCode.DATA_PARSE_ERROR, e);
+        }
+    }
+
     public long readUint32() throws NulsVerificationException {
         try {
-            long u = Utils.readUint32(payload, cursor);
+            long u = Utils.readUint32LE(payload, cursor);
             cursor += 4;
             return u;
         } catch (ArrayIndexOutOfBoundsException e) {
@@ -44,7 +64,7 @@ public class NulsByteBuffer {
 
     public long readInt64() throws NulsVerificationException {
         try {
-            long u = Utils.readInt64(payload, cursor);
+            long u = Utils.readInt64LE(payload, cursor);
             cursor += 8;
             return u;
         } catch (ArrayIndexOutOfBoundsException e) {
@@ -54,7 +74,7 @@ public class NulsByteBuffer {
 
     public int readInt32() throws NulsVerificationException {
         try {
-            int u = Utils.readInt32(payload, cursor);
+            int u = Utils.readInt32LE(payload, cursor);
             cursor += 4;
             return u;
         } catch (ArrayIndexOutOfBoundsException e) {

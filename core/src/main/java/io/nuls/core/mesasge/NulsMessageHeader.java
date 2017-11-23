@@ -1,15 +1,14 @@
 package io.nuls.core.mesasge;
 
-import io.nuls.core.chain.entity.BaseNulsData;
-import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Serializable;
 
-public class NulsMessageHeader extends BaseNulsData {
+public class NulsMessageHeader implements Serializable {
 
     public static final int MESSAGE_HEADER_SIZE = 20;
 
@@ -30,60 +29,56 @@ public class NulsMessageHeader extends BaseNulsData {
     private byte[] extend;
 
     public NulsMessageHeader() {
-        super();
+        this.magicNumber = 0;
+        this.length = 0;
+        this.headType = 0;
+        this.xor = Hex.decode("00")[0];
+        this.extend = new byte[9];
     }
 
     public NulsMessageHeader(int magicNumber, short headType) {
+        this();
         this.magicNumber = magicNumber;
         this.headType = headType;
     }
 
     public NulsMessageHeader(int magicNumber, short headType, byte[] extend) {
-        this.magicNumber = magicNumber;
-        this.headType = headType;
+        this(magicNumber,headType);
         this.extend = extend;
     }
 
     public NulsMessageHeader(int magicNumber, short headType, int length, byte xor) {
-        this.magicNumber = magicNumber;
-        this.headType = headType;
+        this(magicNumber,headType);
         this.length = length;
         this.xor = xor;
     }
 
     public NulsMessageHeader(int magicNumber, short headType, int length, byte xor, byte[] extend) {
-        this.magicNumber = magicNumber;
-        this.headType = headType;
-        this.length = length;
-        this.xor = xor;
+        this(magicNumber,headType,length,xor);
         this.extend = extend;
     }
 
-    @Override
     public int size() {
-        return 0;
+        return MESSAGE_HEADER_SIZE;
     }
 
-    @Override
+    public byte[] serialize(){
+        byte[] header = new byte[20];
+        Utils.int32ToByteArrayLE(magicNumber,header,0);
+        Utils.int32ToByteArrayLE(length,header,4);
+        Utils.uint16ToByteArrayLE(headType,header,4);
+        header[8] = xor;
+        System.arraycopy(extend,0,header,11,9);
+        return header;
+    }
+
     public void serializeToStream(OutputStream stream) throws IOException {
-        Utils.uint32ToByteStreamLE(magicNumber, stream);
-        Utils.uint32ToByteStreamLE(length, stream);
-        Utils.uint16ToByteStreamLE(headType, stream);
-        stream.write(xor);
-        if (extend == null) {
-            extend = new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
-        } else {
-            if (extend.length != EXTEND_LENGTH) {
-                throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
-            }
-        }
-        stream.write(extend);
+        stream.write(serialize());
     }
 
-    @Override
     public void parse(NulsByteBuffer byteBuffer) {
-        this.magicNumber = byteBuffer.readInt32();
-        this.length = byteBuffer.readInt32();
+        this.magicNumber = byteBuffer.readInt32LE();
+        this.length = byteBuffer.readInt32LE();
         this.headType = byteBuffer.readShort();
         this.xor = byteBuffer.readByte();
         this.extend = byteBuffer.readBytes(EXTEND_LENGTH);
@@ -124,21 +119,7 @@ public class NulsMessageHeader extends BaseNulsData {
 
     @Override
     public String toString() {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("NulsMessageHeader{ ");
-        buffer.append("magicNumber:" + magicNumber + ",");
-        buffer.append("length:" + length + ",");
-        buffer.append("headType:" + headType + ",");
-        if (extend != null && extend.length != 0) {
-            buffer.append("extends:");
-            for (byte b : extend) {
-                buffer.append(b + " ");
-            }
-        } else {
-            buffer.append("extends:null");
-        }
-        buffer.append("}");
-        return buffer.toString();
+        return Hex.encode(serialize());
     }
 
     public byte getXor() {
