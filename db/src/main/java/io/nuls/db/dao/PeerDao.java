@@ -4,8 +4,8 @@ import io.nuls.db.entity.PeerPo;
 
 /**
  *
- * @author vivi
- * @date 2017/11/10
+ * @author Niels
+ * @date 2017/11/20
  */
 public interface PeerDao extends BaseDao< String,PeerPo> {
 

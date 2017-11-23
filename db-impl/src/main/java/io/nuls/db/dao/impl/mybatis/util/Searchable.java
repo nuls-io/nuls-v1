@@ -32,7 +32,7 @@ public class Searchable {
     }
 
 
-    public void addCondition(String key , SearchOperator operator, String value) {
+    public void addCondition(String key , SearchOperator operator, Object value) {
     	this.addCondition(new Condition(key,operator,value));
 	}
 

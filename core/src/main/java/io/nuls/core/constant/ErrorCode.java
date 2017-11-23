@@ -4,8 +4,7 @@ package io.nuls.core.constant;
 import io.nuls.core.i18n.I18nUtils;
 
 /**
- * @author Niels
- * @date 2017/9/27.
+ * Created by Niels on 2017/9/27.
  */
 public enum ErrorCode {
 
@@ -36,7 +35,6 @@ public enum ErrorCode {
      * ----------  Network code   ---------
      */
     NET_SERVER_START_ERROR("NET001", 40001),
-    NET_MESSAGE_ERROR("NET002", 40002),
     /**
      * ----------  p2p Network code   ---------
      */
@@ -60,8 +58,9 @@ public enum ErrorCode {
     DB_MODULE_START_FAIL("DB000", 20000),
     DB_UNKOWN_EXCEPTION("DB010", 20001),
     DB_SESSION_MISS_INIT("DB011", 20002),
-    DB_SAVE_CANNOT_NULL("DB011", 20003),
-    DB_SAVE_BATCH_LIMIT_OVER("DB012", 20004),
+    DB_SAVE_CANNOT_NULL("DB012", 20003),
+    DB_SAVE_BATCH_LIMIT_OVER("DB013", 20004),
+    DB_DATA_ERROR("DB014", 20005),
 
     /**
      * ----------  MQ Exception code   ---------

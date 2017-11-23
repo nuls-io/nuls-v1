@@ -2,6 +2,7 @@ package io.nuls.core.chain.entity;
 
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.core.validate.DataValidatorChain;
@@ -105,19 +106,19 @@ public abstract class BaseNulsData implements Serializable {
 
     protected void writeBytesWithLength(OutputStream stream, String value) throws IOException {
         if (StringUtils.isNotBlank(value)) {
-            stream.write(0);
+            stream.write(new VarInt(0).encode());
         } else {
             byte[] bytes = value.getBytes(NulsContext.DEFAULT_ENCODING);
-            stream.write(bytes.length);
+            stream.write(new VarInt(bytes.length).encode());
             stream.write(bytes);
         }
     }
 
     protected void writeBytesWithLength(OutputStream stream, byte[] bytes) throws IOException {
         if (null == bytes || bytes.length == 0) {
-            stream.write(0);
+            stream.write(new VarInt(0).encode());
         } else {
-            stream.write(bytes.length);
+            stream.write(new VarInt(bytes.length).encode());
             stream.write(bytes);
         }
     }

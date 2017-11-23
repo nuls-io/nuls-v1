@@ -10,4 +10,7 @@ import io.nuls.db.entity.AccountPo;
 public interface AccountDao extends BaseDao<String, AccountPo> {
 
     boolean setAlias(String id, String alias);
+
+    AccountPo loadByAddress(String address);
+
 }
