@@ -2,6 +2,9 @@ package io.nuls.core.chain.entity;
 
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.crypto.Utils;
+
+import static org.spongycastle.asn1.x500.style.RFC4519Style.c;
 
 /**
  * @author vivi
@@ -18,7 +21,7 @@ public class NulsVersion {
 
     public static final short MAX_MAIN_VERSION = 15;
 
-    public static final short MAX_SUB_VERSION = 2047;
+    public static final short MAX_SUB_VERSION = 4095;
 
     public NulsVersion(short version) {
         setVersion(version);
@@ -52,24 +55,19 @@ public class NulsVersion {
         if (main <= 0 || sub > MAX_SUB_VERSION) {
             throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
         }
-        main = (short) (main << 11);
-        version = (short) (main + sub);
+        version = (short) (main << 12 | sub);
     }
 
     public short getMainVersion() {
-        String str = Integer.toBinaryString(version);
-        String mainStr = str.substring(0, str.length() - 11);
-        return Short.valueOf(mainStr, 2);
-
+        return (short) ((version >> 12) & 0xF);
     }
 
     public short getSubVersion() {
-        String str = Integer.toBinaryString(version);
-        String subStr = str.substring(str.length() - 11);
-        return Short.valueOf(subStr, 2);
+        return (short) (version & 0xFFF);
     }
 
     public String getStringVersion() {
         return getMainVersion() + "." + getSubVersion();
     }
+
 }

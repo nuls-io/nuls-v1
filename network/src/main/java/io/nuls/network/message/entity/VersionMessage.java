@@ -47,6 +47,7 @@ public class VersionMessage extends AbstractNetworkMessage {
     @Override
     public int size() {
         int s = 0;
+        s += VarInt.sizeOf(type);
         s += VarInt.sizeOf(version.getVersion());
         s += VarInt.sizeOf(bestBlockHeight);
         // put the bestBlockHash.length
@@ -58,21 +59,33 @@ public class VersionMessage extends AbstractNetworkMessage {
                 Log.error(e);
             }
         }
+        s += 1;
+        if (StringUtils.isBlank(nulsVersion)) {
+            try {
+                s += nulsVersion.getBytes(NulsContext.DEFAULT_ENCODING).length;
+            } catch (UnsupportedEncodingException e) {
+                Log.error(e);
+            }
+        }
         return s;
     }
 
     @Override
     public void serializeToStream(OutputStream stream) throws IOException {
+        stream.write(new VarInt(type).encode());
         stream.write(new VarInt(version.getVersion()).encode());
         stream.write(new VarInt(bestBlockHeight).encode());
         this.writeBytesWithLength(stream, bestBlockHash);
+        this.writeBytesWithLength(stream, nulsVersion);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
+        type = (short) byteBuffer.readVarInt();
         version = new NulsVersion((short) byteBuffer.readVarInt());
         bestBlockHeight = byteBuffer.readVarInt();
         bestBlockHash = new String(byteBuffer.readByLengthByte());
+        nulsVersion = new String(byteBuffer.readByLengthByte());
     }
 
     public long getBestBlockHeight() {
