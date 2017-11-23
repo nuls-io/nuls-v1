@@ -57,7 +57,7 @@ public class AccountServiceImpl implements AccountService {
             Address address = new Address(Utils.sha256hash160(key.getPubKey(false)));
             Account account = new Account();
             account.setPriSeed(key.getPrivKeyBytes());
-            account.setVersion(AccountConstant.ACCOUNT_MODULE_VERSION);
+       //     account.setVersion(AccountConstant.ACCOUNT_MODULE_VERSION);
             account.setAddress(address);
             account.setId(address.toString());
             account.setPubKey(key.getPubKey(true));

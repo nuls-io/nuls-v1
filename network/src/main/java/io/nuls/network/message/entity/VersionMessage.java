@@ -7,7 +7,6 @@ import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.network.constant.NetworkConstant;
-import io.nuls.network.entity.Peer;
 import io.nuls.network.message.AbstractNetworkMessage;
 
 import java.io.IOException;
@@ -28,22 +27,21 @@ public class VersionMessage extends AbstractNetworkMessage {
 
     private String bestBlockHash;
 
-    private int port;
+    private String nulsVersion;
 
-    private String ip;
 
     public VersionMessage() {
         super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.type = NetworkConstant.NETWORK_VERSION_MESSAGE;
+        this.nulsVersion = NulsContext.nulsVersion;
     }
 
-    public VersionMessage(long height, String hash, Peer peer) {
+    public VersionMessage(long height, String hash) {
         super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.type = NetworkConstant.NETWORK_VERSION_MESSAGE;
         this.bestBlockHash = hash;
         this.bestBlockHeight = height;
-        this.port = peer.getPort();
-        this.ip = peer.getIp();
+        this.nulsVersion = NulsContext.nulsVersion;
     }
 
     @Override
@@ -60,16 +58,6 @@ public class VersionMessage extends AbstractNetworkMessage {
                 Log.error(e);
             }
         }
-        s += VarInt.sizeOf(port);
-        // the ip.length
-        s += 1;
-        if (StringUtils.isBlank(ip)) {
-            try {
-                s += ip.getBytes(NulsContext.DEFAULT_ENCODING).length;
-            } catch (UnsupportedEncodingException e) {
-                Log.error(e);
-            }
-        }
         return s;
     }
 
@@ -78,8 +66,6 @@ public class VersionMessage extends AbstractNetworkMessage {
         stream.write(new VarInt(version.getVersion()).encode());
         stream.write(new VarInt(bestBlockHeight).encode());
         this.writeBytesWithLength(stream, bestBlockHash);
-        stream.write(new VarInt(port).encode());
-        this.writeBytesWithLength(stream, ip);
     }
 
     @Override
@@ -87,8 +73,6 @@ public class VersionMessage extends AbstractNetworkMessage {
         version = new NulsVersion((short) byteBuffer.readVarInt());
         bestBlockHeight = byteBuffer.readVarInt();
         bestBlockHash = new String(byteBuffer.readByLengthByte());
-        port = (int) byteBuffer.readVarInt();
-        ip = new String(byteBuffer.readByLengthByte());
     }
 
     public long getBestBlockHeight() {
@@ -107,20 +91,12 @@ public class VersionMessage extends AbstractNetworkMessage {
         this.bestBlockHash = bestBlockHash;
     }
 
-    public int getPort() {
-        return port;
+
+    public String getNulsVersion() {
+        return nulsVersion;
     }
 
-    public void setPort(int port) {
-        this.port = port;
+    public void setNulsVersion(String nulsVersion) {
+        this.nulsVersion = nulsVersion;
     }
-
-    public String getIp() {
-        return ip;
-    }
-
-    public void setIp(String ip) {
-        this.ip = ip;
-    }
-
 }

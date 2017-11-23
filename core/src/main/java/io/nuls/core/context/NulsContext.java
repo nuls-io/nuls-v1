@@ -2,6 +2,7 @@ package io.nuls.core.context;
 
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.manager.ModuleManager;
 import io.nuls.core.module.BaseNulsModule;
 
@@ -32,11 +33,10 @@ public class NulsContext {
      */
     private Block bestBlock;
 
-    public Block getGenesisBlock() {
-        Block block = new Block();
-        BlockHeader header = new BlockHeader(1, System.currentTimeMillis());
-        block.setHeader(header);
+    public static String nulsVersion;
 
+    public Block getGenesisBlock() {
+        Block block = new Block(1,1, Sha256Hash.twiceOf("0000".getBytes()));
         return block;
     }
 
@@ -69,9 +69,6 @@ public class NulsContext {
         return ModuleManager.getInstance().getService(tClass);
     }
 
-    public int getVersion() {
-        return 0;
-    }
 
     public String getModuleVersion(String module) {
         return "";
@@ -91,8 +88,8 @@ public class NulsContext {
         return bestBlock;
     }
 
-
     public void setBestBlock(Block bestBlock) {
         this.bestBlock = bestBlock;
     }
+
 }
