@@ -1,5 +1,6 @@
 package io.nuls.network.message.entity;
 
+import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -19,7 +20,9 @@ import java.io.UnsupportedEncodingException;
  */
 public class VersionMessage extends AbstractNetworkMessage {
 
-    private String nulsVersion;
+    public static final short OWN_MAIN_VERSION = 1;
+
+    public static final short OWN_SUB_VERSION = 0001;
 
     private long bestBlockHeight;
 
@@ -30,11 +33,12 @@ public class VersionMessage extends AbstractNetworkMessage {
     private String ip;
 
     public VersionMessage() {
+        super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.type = NetworkConstant.NETWORK_VERSION_MESSAGE;
     }
 
     public VersionMessage(long height, String hash, Peer peer) {
-
+        super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.type = NetworkConstant.NETWORK_VERSION_MESSAGE;
         this.bestBlockHash = hash;
         this.bestBlockHeight = height;
@@ -45,9 +49,10 @@ public class VersionMessage extends AbstractNetworkMessage {
     @Override
     public int size() {
         int s = 0;
+        s += VarInt.sizeOf(version.getVersion());
         s += VarInt.sizeOf(bestBlockHeight);
-
-        s += 1;  //the bestBlockHash.length
+        // put the bestBlockHash.length
+        s += 1;
         if (StringUtils.isBlank(bestBlockHash)) {
             try {
                 s += bestBlockHash.getBytes(NulsContext.DEFAULT_ENCODING).length;
@@ -56,8 +61,8 @@ public class VersionMessage extends AbstractNetworkMessage {
             }
         }
         s += VarInt.sizeOf(port);
-
-        s += 1; // the ip.length
+        // the ip.length
+        s += 1;
         if (StringUtils.isBlank(ip)) {
             try {
                 s += ip.getBytes(NulsContext.DEFAULT_ENCODING).length;
@@ -70,6 +75,7 @@ public class VersionMessage extends AbstractNetworkMessage {
 
     @Override
     public void serializeToStream(OutputStream stream) throws IOException {
+        stream.write(new VarInt(version.getVersion()).encode());
         stream.write(new VarInt(bestBlockHeight).encode());
         this.writeBytesWithLength(stream, bestBlockHash);
         stream.write(new VarInt(port).encode());
@@ -78,9 +84,10 @@ public class VersionMessage extends AbstractNetworkMessage {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
-        bestBlockHeight = (int) byteBuffer.readUint32();
+        version = new NulsVersion((short) byteBuffer.readVarInt());
+        bestBlockHeight = byteBuffer.readVarInt();
         bestBlockHash = new String(byteBuffer.readByLengthByte());
-        port = (int) byteBuffer.readUint32();
+        port = (int) byteBuffer.readVarInt();
         ip = new String(byteBuffer.readByLengthByte());
     }
 
@@ -116,11 +123,4 @@ public class VersionMessage extends AbstractNetworkMessage {
         this.ip = ip;
     }
 
-    public String getNulsVersion() {
-        return nulsVersion;
-    }
-
-    public void setNulsVersion(String nulsVersion) {
-        this.nulsVersion = nulsVersion;
-    }
 }

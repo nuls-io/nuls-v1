@@ -13,7 +13,11 @@ import java.io.OutputStream;
  */
 public class PongMessage extends AbstractNetworkMessage {
 
+    public static final short OWN_MAIN_VERSION = 1;
+    public static final short OWN_SUB_VERSION = 0001;
+
     public PongMessage() {
+        super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.type = NetworkConstant.NETWORK_PONG_MESAAGE;
     }
 

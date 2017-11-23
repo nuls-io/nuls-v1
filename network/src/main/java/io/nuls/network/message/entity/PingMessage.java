@@ -12,8 +12,11 @@ import java.io.OutputStream;
  * @Date 2017.11.01
  */
 public class PingMessage extends AbstractNetworkMessage {
+    public static final short OWN_MAIN_VERSION = 1;
+    public static final short OWN_SUB_VERSION = 0001;
 
     public PingMessage() {
+        super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.type = NetworkConstant.NETWORK_PING_MESSAGE;
     }
 
