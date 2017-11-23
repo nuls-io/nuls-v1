@@ -1,7 +1,9 @@
 package io.nuls.core.chain.entity;
 
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.core.validate.DataValidatorChain;
 import io.nuls.core.validate.NulsDataValidator;
