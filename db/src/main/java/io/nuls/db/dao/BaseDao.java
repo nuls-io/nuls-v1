@@ -1,16 +1,17 @@
 package io.nuls.db.dao;
 
 import java.util.List;
+import java.util.Map;
 
 /**
- *
  * @author zhouwei
  * @date 2017/9/29
  */
-public interface BaseDao<K,T> {
+public interface BaseDao<K, T> {
 
     /**
      * 单个数据存储
+     *
      * @param t 持久化数据
      * @return
      */
@@ -18,6 +19,7 @@ public interface BaseDao<K,T> {
 
     /**
      * 批量存储
+     *
      * @param list 持久化数据集合
      * @return
      */
@@ -25,6 +27,7 @@ public interface BaseDao<K,T> {
 
     /**
      * 修改数据
+     *
      * @param t 修改后持久化数据
      * @return
      */
@@ -32,6 +35,7 @@ public interface BaseDao<K,T> {
 
     /**
      * 修改数据，为Null值的字段不做修改
+     *
      * @param t 修改后持久化数据
      * @return
      */
@@ -39,6 +43,7 @@ public interface BaseDao<K,T> {
 
     /**
      * 通过键值获取数据
+     *
      * @param k 数据的键值
      * @return
      */
@@ -46,13 +51,26 @@ public interface BaseDao<K,T> {
 
     /**
      * 删除持久化数据
+     *
      * @param k 数据的键值
      * @return
      */
     int deleteByKey(K k);
 
-    List<T> listAll();
+    /**
+     * @return all
+     */
+    List<T> queryAll();
 
-    Long count();
+    /**
+     * @param params
+     * @return
+     */
+    List<T> searchList(Map<String, Object> params);
+
+    /**
+     * @return
+     */
+    Long getCount();
 
 }

@@ -83,7 +83,7 @@ public class DBModuleTest {
 
     @Test
     public void testCount() {
-        Long count = blockDao.count();
+        Long count = blockDao.getCount();
         Log.info("count===" + count);
     }
 
