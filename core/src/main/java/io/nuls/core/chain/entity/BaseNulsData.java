@@ -39,6 +39,17 @@ public abstract class BaseNulsData implements Serializable {
     private DataValidatorChain validatorChain = new DataValidatorChain();
 
     public BaseNulsData() {
+
+    }
+
+    /**
+     * version = mainVersion << 11 + subVersion
+     *
+     * @param mainVersion
+     * @param subVersion
+     */
+    public BaseNulsData(short mainVersion, short subVersion) {
+        setVersionBy(mainVersion, subVersion);
     }
 
     protected void registerValidator(NulsDataValidator<? extends BaseNulsData> validator) {
@@ -130,13 +141,14 @@ public abstract class BaseNulsData implements Serializable {
         this.version = version;
     }
 
-    public void setVersionBy(int main, int sub) {
+    public void setVersionBy(short main, short sub) {
         if (main <= 0 || main > MAX_MAIN_VERSION) {
             throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
         }
         if (main <= 0 || sub > MAX_SUB_VERSION) {
             throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
         }
+        main = (short) (main << 11);
         version = (short) (main + sub);
     }
 

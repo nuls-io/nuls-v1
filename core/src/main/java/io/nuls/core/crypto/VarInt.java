@@ -39,23 +39,27 @@ public class VarInt {
     /**
      * Constructs a new VarInt with the value parsed from the specified offset of the given buffer.
      *
-     * @param buf the buffer containing the value
+     * @param buf    the buffer containing the value
      * @param offset the offset of the value
      */
     public VarInt(byte[] buf, int offset) {
         int first = 0xFF & buf[offset];
         if (first < 253) {
             value = first;
-            originallyEncodedSize = 1; // 1 data byte (8 bits)
+            // 1 data byte (8 bits)
+            originallyEncodedSize = 1;
         } else if (first == 253) {
             value = (0xFF & buf[offset + 1]) | ((0xFF & buf[offset + 2]) << 8);
-            originallyEncodedSize = 3; // 1 marker + 2 data bytes (16 bits)
+            // 1 marker + 2 data bytes (16 bits)
+            originallyEncodedSize = 3;
         } else if (first == 254) {
             value = Utils.readUint32(buf, offset + 1);
-            originallyEncodedSize = 5; // 1 marker + 4 data bytes (32 bits)
+            // 1 marker + 4 data bytes (32 bits)
+            originallyEncodedSize = 5;
         } else {
             value = Utils.readInt64(buf, offset + 1);
-            originallyEncodedSize = 9; // 1 marker + 8 data bytes (64 bits)
+            // 1 marker + 8 data bytes (64 bits)
+            originallyEncodedSize = 9;
         }
     }
 
@@ -82,18 +86,23 @@ public class VarInt {
     public static int sizeOf(long value) {
         // if negative, it's actually a very large unsigned long value
         if (value < 0) {
-            return 9; // 1 marker + 8 data bytes
+            // 1 marker + 8 data bytes
+            return 9;
         }
         if (value < 253) {
-            return 1; // 1 data byte
+            // 1 data byte
+            return 1;
         }
         if (value <= 0xFFFFL) {
-            return 3; // 1 marker + 2 data bytes
+            // 1 marker + 2 data bytes
+            return 3;
         }
         if (value <= 0xFFFFFFFFL) {
-            return 5; // 1 marker + 4 data bytes
+            // 1 marker + 4 data bytes
+            return 5;
         }
-        return 9; // 1 marker + 8 data bytes
+        // 1 marker + 8 data bytes
+        return 9;
     }
 
     /**

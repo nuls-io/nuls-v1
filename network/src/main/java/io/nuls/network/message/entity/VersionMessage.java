@@ -19,7 +19,9 @@ import java.io.UnsupportedEncodingException;
  */
 public class VersionMessage extends AbstractNetworkMessage {
 
-    private String nulsVersion;
+    public static final short OWN_MAIN_VERSION = 1;
+
+    public static final short OWN_SUB_VERSION = 0001;
 
     private long bestBlockHeight;
 
@@ -30,11 +32,12 @@ public class VersionMessage extends AbstractNetworkMessage {
     private String ip;
 
     public VersionMessage() {
+        super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.type = NetworkConstant.NETWORK_VERSION_MESSAGE;
     }
 
     public VersionMessage(long height, String hash, Peer peer) {
-
+        super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.type = NetworkConstant.NETWORK_VERSION_MESSAGE;
         this.bestBlockHash = hash;
         this.bestBlockHeight = height;
@@ -45,9 +48,10 @@ public class VersionMessage extends AbstractNetworkMessage {
     @Override
     public int size() {
         int s = 0;
+        s += VarInt.sizeOf(version);
         s += VarInt.sizeOf(bestBlockHeight);
-
-        s += 1;  //the bestBlockHash.length
+        // put the bestBlockHash.length
+        s += 1;
         if (StringUtils.isBlank(bestBlockHash)) {
             try {
                 s += bestBlockHash.getBytes(NulsContext.DEFAULT_ENCODING).length;
@@ -56,8 +60,8 @@ public class VersionMessage extends AbstractNetworkMessage {
             }
         }
         s += VarInt.sizeOf(port);
-
-        s += 1; // the ip.length
+        // the ip.length
+        s += 1;
         if (StringUtils.isBlank(ip)) {
             try {
                 s += ip.getBytes(NulsContext.DEFAULT_ENCODING).length;
@@ -116,11 +120,4 @@ public class VersionMessage extends AbstractNetworkMessage {
         this.ip = ip;
     }
 
-    public String getNulsVersion() {
-        return nulsVersion;
-    }
-
-    public void setNulsVersion(String nulsVersion) {
-        this.nulsVersion = nulsVersion;
-    }
 }
