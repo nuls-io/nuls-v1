@@ -1,5 +1,6 @@
 package io.nuls.network.message.entity;
 
+import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -74,6 +75,7 @@ public class VersionMessage extends AbstractNetworkMessage {
 
     @Override
     public void serializeToStream(OutputStream stream) throws IOException {
+        stream.write(new VarInt(version.getVersion()).encode());
         stream.write(new VarInt(bestBlockHeight).encode());
         this.writeBytesWithLength(stream, bestBlockHash);
         stream.write(new VarInt(port).encode());
@@ -82,9 +84,10 @@ public class VersionMessage extends AbstractNetworkMessage {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
-        bestBlockHeight = (int) byteBuffer.readUint32();
+        version = new NulsVersion((short) byteBuffer.readVarInt());
+        bestBlockHeight = byteBuffer.readVarInt();
         bestBlockHash = new String(byteBuffer.readByLengthByte());
-        port = (int) byteBuffer.readUint32();
+        port = (int) byteBuffer.readVarInt();
         ip = new String(byteBuffer.readByLengthByte());
     }
 
