@@ -144,7 +144,7 @@ public class Account extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
-        version = (int) byteBuffer.readUint32();
+        version = (short) byteBuffer.readUint32();
         id = new String(byteBuffer.readByLengthByte());
         alias = new String(byteBuffer.readByLengthByte());
         byte[] hash160 = byteBuffer.readBytes(Address.LENGTH);

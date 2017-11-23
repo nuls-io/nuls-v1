@@ -1,6 +1,7 @@
 package io.nuls.network.entity.param;
 
 import io.nuls.core.chain.entity.Block;
+import io.nuls.core.utils.network.IPUtil;
 import io.nuls.network.message.AbstractNetWorkMessageHandlerFactory;
 import io.nuls.network.message.messageFilter.NulsMessageFilter;
 
@@ -13,7 +14,7 @@ import java.util.Set;
  * @author vivi
  * @date 2017/11/6
  */
-public abstract class NetworkParam {
+public abstract class AbstractNetworkParam {
 
     protected int port;
 

@@ -5,6 +5,10 @@ import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Peer;
 import io.nuls.network.entity.PeerGroup;
 
+/**
+ * @author vivi
+ * @date 2017/11/21
+ */
 public abstract class BaseBroadcaster<T extends NulsMessage> {
 
     public BroadcastResult boradcast(T msg, PeerGroup peerGroup, boolean isSyn){

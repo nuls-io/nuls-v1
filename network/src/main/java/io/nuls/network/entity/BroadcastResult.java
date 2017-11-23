@@ -1,5 +1,9 @@
 package io.nuls.network.entity;
 
+/**
+ * @author vivi
+ * @Date 2017.11.01
+ */
 public class BroadcastResult {
     public boolean isSuccess = false;
     private String msg = "";

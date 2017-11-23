@@ -5,6 +5,11 @@ import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.message.entity.VersionMessage;
 
+/**
+ *
+ * @author vivi
+ * @date 2017/11/21
+ */
 public abstract class AbstractNetworkMessage extends BaseNulsData {
 
     protected short type;

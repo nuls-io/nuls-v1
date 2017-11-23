@@ -9,7 +9,8 @@ import io.nuls.network.message.DefaultNetWorkMessageHandlerFactory;
 import java.net.InetSocketAddress;
 
 /**
- * Created by win10 on 2017/11/6.
+ * @author vivi
+ * @date 2017/11/21
  */
 public class DevNetworkParam extends AbstractNetworkParam {
 

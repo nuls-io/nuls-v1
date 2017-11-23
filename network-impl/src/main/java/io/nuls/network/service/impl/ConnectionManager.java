@@ -2,13 +2,13 @@ package io.nuls.network.service.impl;
 
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.thread.NulsThread;
+import io.nuls.core.thread.BaseNulsThread;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Peer;
 import io.nuls.network.entity.PeerGroup;
-import io.nuls.network.entity.param.NetworkParam;
-import io.nuls.network.module.NetworkModule;
+import io.nuls.network.entity.param.AbstractNetworkParam;
+import io.nuls.network.module.AbstractNetworkModule;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -25,9 +25,9 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class ConnectionManager {
 
-    private NetworkParam network;
+    private AbstractNetworkParam network;
 
-    private NetworkModule networkModule;
+    private AbstractNetworkModule networkModule;
 
     private PeersManager peersManager;
 
@@ -41,7 +41,7 @@ public class ConnectionManager {
     //The storage will be connected
     final Queue<PendingConnect> newConnectionChannels = new LinkedBlockingQueue<>();
 
-    public ConnectionManager(NetworkModule module, NetworkParam network) {
+    public ConnectionManager(AbstractNetworkModule module, AbstractNetworkParam network) {
         this.network = network;
         this.networkModule = module;
         lock = new ReentrantLock();
@@ -72,7 +72,7 @@ public class ConnectionManager {
     }
 
     public void start() {
-        new NulsThread(networkModule, "networkConnManagerThread") {
+        new BaseNulsThread(networkModule, "networkConnManagerThread") {
             @Override
             public void run() {
                 ConnectionManager.this.run();
@@ -264,7 +264,7 @@ public class ConnectionManager {
                 SelectionKey newKey = socketChannel.register(selector, SelectionKey.OP_READ);
 
                 new Peer(network, Peer.IN, socketAddress);
-                peersManager.addPeerToGroup(NetworkConstant.Network_Peer_In_Group, peer);
+                peersManager.addPeerToGroup(NetworkConstant.NETWORK_PEER_IN_GROUP, peer);
                 ConnectionHandler handler = new ConnectionHandler(peer, socketChannel, newKey);
                 newKey.attach(handler);
                 peer.connectionOpened();

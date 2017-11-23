@@ -13,7 +13,8 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * Created by win10 on 2017/11/10.
+ * @author vivi
+ * @date 2017/11/21
  */
 public class PeerDiscoverHandler implements Runnable {
 

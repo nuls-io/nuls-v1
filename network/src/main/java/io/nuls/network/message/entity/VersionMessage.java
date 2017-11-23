@@ -14,9 +14,12 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 
 /**
- * Created by win10 on 2017/11/9.
+ * @author vivi
+ * @Date 2017.11.01
  */
 public class VersionMessage extends AbstractNetworkMessage {
+
+    private String nulsVersion;
 
     private long bestBlockHeight;
 
@@ -113,4 +116,11 @@ public class VersionMessage extends AbstractNetworkMessage {
         this.ip = ip;
     }
 
+    public String getNulsVersion() {
+        return nulsVersion;
+    }
+
+    public void setNulsVersion(String nulsVersion) {
+        this.nulsVersion = nulsVersion;
+    }
 }
