@@ -35,8 +35,9 @@ public class PeerDiscoverHandler implements Runnable {
 
     // get peers from local database
     public List<Peer> getLocalPeers() {
-        //todo find from database
-        return null;
+        //todo
+        List<Peer> peers = new ArrayList<>();
+        return peers;
     }
 
 
