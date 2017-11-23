@@ -73,8 +73,9 @@ public interface BaseMapper<K extends Serializable, V> {
     int batchInsert(List<V> records);
 
     List<V> selectAll();
-
     Long countAll();
+    List<V> selectList(Searchable searchable);
+    long selectCount(Searchable searchable);
 
     int existsByKey(K id);
 
@@ -84,9 +85,6 @@ public interface BaseMapper<K extends Serializable, V> {
 
     V selectBySearchable(Searchable searchable);
 
-    long count(Searchable searchable);
-
-    List<V> selectList(Searchable searchable);
 
     long existsBySearchable(Searchable searchable);
 

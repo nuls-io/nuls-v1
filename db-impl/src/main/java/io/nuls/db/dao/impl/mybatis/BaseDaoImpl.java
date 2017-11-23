@@ -4,6 +4,7 @@ import io.nuls.db.dao.BaseDao;
 import io.nuls.db.dao.impl.mybatis.common.BaseMapper;
 import io.nuls.db.dao.impl.mybatis.session.SessionAnnotation;
 import io.nuls.db.dao.impl.mybatis.session.SessionManager;
+import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import org.apache.ibatis.session.SqlSession;
 
 import java.io.Serializable;
@@ -17,7 +18,7 @@ import java.util.Map;
  * K : the type of primary key of Object
  * V : the type of Object
  */
-public class BaseDaoImpl<T extends BaseMapper<K, V>, K extends Serializable, V> implements BaseDao<K, V> {
+public abstract class BaseDaoImpl<T extends BaseMapper<K, V>, K extends Serializable, V> implements BaseDao<K, V> {
     private Class<T> mapperClass;
 
     public BaseDaoImpl(Class<T> mapperClass) {
@@ -74,10 +75,14 @@ public class BaseDaoImpl<T extends BaseMapper<K, V>, K extends Serializable, V> 
     }
 
     @Override
-    public List<V> searchList(Map<String, Object> params) {
-        //todo
-        return null;
+    public final List<V> searchList(Map<String, Object> params) {
+        if (null == params || params.isEmpty()) {
+            return queryAll();
+        }
+        return this.getMapper().selectList(getSearchable(params));
     }
+
+    protected abstract Searchable getSearchable(Map<String, Object> params);
 
     @Override
     public Long getCount() {

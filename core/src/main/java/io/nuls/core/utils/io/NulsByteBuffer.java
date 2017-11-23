@@ -101,8 +101,8 @@ public class NulsByteBuffer {
     }
 
     public byte[] readByLengthByte() {
-        int length = this.readBytes(1)[0] & 0xff;
-        return readBytes(length);
+        long length = this.readVarInt();
+        return readBytes((int)length);
     }
 
     public Sha256Hash readHash() {

@@ -17,6 +17,7 @@
 package io.nuls.core.crypto;
 
 
+import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
 
 /**
@@ -119,5 +120,11 @@ public class VarInt {
                 Utils.uint64ToByteArrayLE(value, bytes, 1);
                 return bytes;
         }
+    }
+
+    public static void main(String[] args) {
+        byte[] arr = new VarInt(252).encode();
+
+        System.out.println(Hex.encode(arr));
     }
 }
