@@ -6,12 +6,10 @@ import io.nuls.core.thread.BaseNulsThread;
 import io.nuls.core.utils.aop.AopUtils;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.constant.DBConstant;
-import io.nuls.db.dao.AccountDao;
-import io.nuls.db.dao.BlockDao;
+import io.nuls.db.dao.*;
 import io.nuls.db.dao.filter.DBMethodFilter;
-import io.nuls.db.dao.impl.mybatis.BlockDaoImpl;
+import io.nuls.db.dao.impl.mybatis.*;
 import io.nuls.db.dao.impl.mybatis.session.SessionManager;
-import io.nuls.db.dao.impl.mybatis.AccountDaoImpl;
 import io.nuls.db.exception.DBException;
 import io.nuls.db.module.AbstractDBModule;
 import org.apache.ibatis.io.Resources;
@@ -59,6 +57,16 @@ public class MybatisDBModuleImpl extends AbstractDBModule {
         this.registerService(BlockDao.class,blockDao);
         AccountDao accountDao = AopUtils.createProxy(AccountDaoImpl.class, dbMethodFilter);
         this.registerService(AccountDao.class,accountDao);
+        this.registerService(ConsensusAccountDao.class, AopUtils.createProxy(ConsensusAccountDaoImpl.class, dbMethodFilter));
+        this.registerService(PeerDao.class, AopUtils.createProxy(PeerDaoImpl.class, dbMethodFilter));
+        this.registerService(PeerGroupDao.class, AopUtils.createProxy(PeerGroupDaoImpl.class, dbMethodFilter));
+        this.registerService(PeerGroupRelationDao.class, AopUtils.createProxy(PeerGroupRelationDaoImpl.class, dbMethodFilter));
+        this.registerService(TransactionDao.class, AopUtils.createProxy(TransactionDaoImpl.class, dbMethodFilter));
+        this.registerService(TransactionLocalDao.class, AopUtils.createProxy(TransactionLocalDaoImpl.class, dbMethodFilter));
+        this.registerService(TxAccountRelationDao.class, AopUtils.createProxy(TxAccountRelationDaoImpl.class, dbMethodFilter));
+        this.registerService(UtxoOutputDao.class, AopUtils.createProxy(UtxoOutputDaoImpl.class, dbMethodFilter));
+        this.registerService(UtxoInputDao.class, AopUtils.createProxy(UtxoInputDaoImpl.class, dbMethodFilter));
+        this.registerService(SubChainDao.class, AopUtils.createProxy(SubChainDaoImpl.class, dbMethodFilter));
     }
 
     @Override
