@@ -12,8 +12,11 @@ import java.io.OutputStream;
  * @Date 2017.11.01
  */
 public class ByeMessage extends AbstractNetworkMessage {
+    public static final short OWN_MAIN_VERSION = 1;
+    public static final short OWN_SUB_VERSION = 0001;
 
     public ByeMessage() {
+        super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.type = NetworkConstant.NETWORK_BYE_MESSAGE;
     }
 

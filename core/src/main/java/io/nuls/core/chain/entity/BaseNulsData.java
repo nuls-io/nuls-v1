@@ -1,9 +1,7 @@
 package io.nuls.core.chain.entity;
 
-import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
-import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.core.validate.DataValidatorChain;
 import io.nuls.core.validate.NulsDataValidator;
@@ -26,16 +24,7 @@ public abstract class BaseNulsData implements Serializable {
 
     protected NulsDataType dataType;
 
-    /**
-     * The version number is 2 bytes
-     */
-    protected short version;
-
-    public static final short MAX_VERSION = 32767;
-
-    public static final short MAX_MAIN_VERSION = 15;
-
-    public static final short MAX_SUB_VERSION = 2047;
+    protected NulsVersion version;
 
     private DataValidatorChain validatorChain = new DataValidatorChain();
 
@@ -43,14 +32,9 @@ public abstract class BaseNulsData implements Serializable {
 
     }
 
-    /**
-     * version = mainVersion << 11 + subVersion
-     *
-     * @param mainVersion
-     * @param subVersion
-     */
+
     public BaseNulsData(short mainVersion, short subVersion) {
-        setVersionBy(mainVersion, subVersion);
+        this.version = new NulsVersion(mainVersion, subVersion);
     }
 
     protected void registerValidator(NulsDataValidator<? extends BaseNulsData> validator) {
@@ -131,43 +115,12 @@ public abstract class BaseNulsData implements Serializable {
         this.dataType = dataType;
     }
 
-    public short getVersion() {
+
+    public NulsVersion getVersion() {
         return version;
     }
 
-    public void setVersion(short version) {
-        if (version > MAX_VERSION) {
-            throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
-        }
+    public void setVersion(NulsVersion version) {
         this.version = version;
     }
-
-    public void setVersionBy(short main, short sub) {
-        if (main <= 0 || main > MAX_MAIN_VERSION) {
-            throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
-        }
-        if (main <= 0 || sub > MAX_SUB_VERSION) {
-            throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
-        }
-        main = (short) (main << 11);
-        version = (short) (main + sub);
-    }
-
-    public short getMainVersion() {
-        String str = Integer.toBinaryString(version);
-        String mainStr = str.substring(0, str.length() - 11);
-        return Short.valueOf(mainStr, 2);
-
-    }
-
-    public short getSubVersion() {
-        String str = Integer.toBinaryString(version);
-        String subStr = str.substring(str.length() - 11);
-        return Short.valueOf(subStr, 2);
-    }
-
-    public String getStringVersion() {
-        return getMainVersion() + "." + getSubVersion();
-    }
-
 }

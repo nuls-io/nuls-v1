@@ -48,7 +48,7 @@ public class VersionMessage extends AbstractNetworkMessage {
     @Override
     public int size() {
         int s = 0;
-        s += VarInt.sizeOf(version);
+        s += VarInt.sizeOf(version.getVersion());
         s += VarInt.sizeOf(bestBlockHeight);
         // put the bestBlockHash.length
         s += 1;
