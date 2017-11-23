@@ -51,7 +51,7 @@ public final class AccountTool {
         AssertUtil.canNotEmpty(desc, "Object type conversion faild!");
         desc.setCreateTime(src.getCreateTime());
         desc.setTxHash(src.getTxHash());
-        desc.setVersion(src.getVersion());
+       // desc.setVersion(src.getVersion());
         desc.setAddress(newAddress(src.getPubKey()));
         desc.setAlias(src.getAlias());
         desc.setExtend(src.getExtend());
@@ -77,7 +77,7 @@ public final class AccountTool {
         desc.setCreateTime(src.getCreateTime());
         desc.setPubKey(src.getPubKey());
         desc.setTxHash(src.getTxHash());
-        desc.setVersion(src.getVersion());
+      //  desc.setVersion(src.getVersion());
         desc.setExtend(src.getExtend());
         desc.setPriKey(Hex.encode(src.getPriKey()));
         desc.setPriSeed(src.getPriSeed());

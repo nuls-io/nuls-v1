@@ -35,6 +35,7 @@ public enum ErrorCode {
      * ----------  Network code   ---------
      */
     NET_SERVER_START_ERROR("NET001", 40001),
+    NET_MESSAGE_ERROR("NET002", 40002),
     /**
      * ----------  p2p Network code   ---------
      */

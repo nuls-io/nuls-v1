@@ -82,7 +82,7 @@ public class Account extends BaseNulsData {
     @Override
     public int size() {
         int s = 0;
-        s += VarInt.sizeOf(version);
+        //s += VarInt.sizeOf(version);
         if (!StringUtils.isBlank(id)) {
             try {
                 s += id.getBytes(NulsContext.DEFAULT_ENCODING).length + 1;
@@ -120,7 +120,7 @@ public class Account extends BaseNulsData {
 
     @Override
     public void serializeToStream(OutputStream stream) throws IOException {
-        stream.write(new VarInt(version).encode());
+       // stream.write(new VarInt(version).encode());
         if(StringUtils.isNotBlank(id)){
             this.writeBytesWithLength(stream, id.getBytes(NulsContext.DEFAULT_ENCODING));
         }else {
@@ -144,7 +144,7 @@ public class Account extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
-        version = (short) byteBuffer.readUint32();
+     //   version = (short) byteBuffer.readUint32();
         id = new String(byteBuffer.readByLengthByte());
         alias = new String(byteBuffer.readByLengthByte());
         byte[] hash160 = byteBuffer.readBytes(Address.LENGTH);

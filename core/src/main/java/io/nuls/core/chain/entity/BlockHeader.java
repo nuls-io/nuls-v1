@@ -1,18 +1,24 @@
 package io.nuls.core.chain.entity;
 
 import io.nuls.core.crypto.Sha256Hash;
+import io.nuls.core.crypto.VarInt;
 import io.nuls.core.crypto.script.Script;
+import io.nuls.core.utils.crypto.Hex;
+import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- *
- * @author win10
+ * @author vivi
  * @date 2017/10/30
  */
 public class BlockHeader extends BaseNulsData {
+
+    public static final short OWN_MAIN_VERSION = 1;
+    public static final short OWN_SUB_VERSION = 0001;
 
     //区块hash
     protected Sha256Hash hash;
@@ -38,15 +44,17 @@ public class BlockHeader extends BaseNulsData {
     protected Script scriptSig;
 
     public BlockHeader() {
-
+        super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
     }
 
     public BlockHeader(long height, long time) {
+        super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.height = height;
         this.time = time;
     }
 
     public BlockHeader(long height, long time, Sha256Hash preHash) {
+        super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.height = height;
         this.time = time;
         this.preHash = preHash;
@@ -71,8 +79,31 @@ public class BlockHeader extends BaseNulsData {
     public void parse(NulsByteBuffer byteBuffer) {
     }
 
-    public Sha256Hash getHash() {
+    public Sha256Hash getHash() throws IOException {
+        if (hash == null) {
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            try {
+                Utils.uint32ToByteStreamLE(version.getVersion(), stream);
+                stream.write(preHash.getBytes());
+//                stream.write(merkleHash.getBytes());
+                Utils.int64ToByteStreamLE(time, stream);
+                Utils.uint32ToByteStreamLE(height, stream);
+                stream.write(new VarInt(periodCount).encode());
+                stream.write(new VarInt(timePeriod).encode());
+                Utils.uint32ToByteStreamLE(periodStartTime, stream);
+                //交易数量
+                stream.write(new VarInt(txCount).encode());
+                hash = Sha256Hash.twiceOf(stream.toByteArray());
+            } finally {
+                stream.close();
+            }
+        }
         return hash;
+    }
+
+    public static void main(String[] args) throws IOException {
+        Block block = new Block(1,1,Sha256Hash.twiceOf("0000".getBytes()));
+        System.out.println(Hex.encode(block.getHash().getBytes()).length() );;
     }
 
     public void setHash(Sha256Hash hash) {

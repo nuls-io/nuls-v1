@@ -104,7 +104,7 @@ public class Peer extends BaseNulsData {
 
     public void connectionOpened() throws IOException {
         Block bestBlock = NulsContext.getInstance().getBestBlock();
-        VersionMessage message = new VersionMessage(bestBlock.getHeight(), bestBlock.getHash().toString(), this);
+        VersionMessage message = new VersionMessage(bestBlock.getHeight(), bestBlock.getHash().toString());
         sendMessage(message);
 
         this.status = Peer.CONNECTING;

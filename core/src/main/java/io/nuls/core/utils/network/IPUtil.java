@@ -31,6 +31,7 @@ public class IPUtil extends IPAddressUtil {
                 Enumeration<InetAddress> address = ni.getInetAddresses();
                 while (address.hasMoreElements()) {
                     ip = address.nextElement();
+                    System.out.println("---------" + ip.getHostAddress());
                     if (!ip.isSiteLocalAddress() && !ip.isLoopbackAddress()
                             && ip.getHostAddress().indexOf(":") == -1) {
                         // 外网IP

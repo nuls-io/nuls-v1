@@ -36,7 +36,7 @@ public class Transaction extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += version;
+        //size += version;
         size += VarInt.sizeOf(type);
         //todo
 
