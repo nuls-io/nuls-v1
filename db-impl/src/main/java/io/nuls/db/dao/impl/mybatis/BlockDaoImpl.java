@@ -23,8 +23,4 @@ public class BlockDaoImpl extends BaseDaoImpl<BlockMapper,String,BlockPo> implem
         return null;
     }
 
-    @Override
-    public Long count() {
-        return this.getMapper().countAll();
-    }
 }

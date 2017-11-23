@@ -135,7 +135,7 @@ public class AccountServiceImpl implements AccountService {
             return list;
         }
         list = new ArrayList<>();
-        List<AccountPo> polist = this.accountDao.listAll();
+        List<AccountPo> polist = this.accountDao.queryAll();
         if (null == polist || polist.isEmpty()) {
             return list;
         }

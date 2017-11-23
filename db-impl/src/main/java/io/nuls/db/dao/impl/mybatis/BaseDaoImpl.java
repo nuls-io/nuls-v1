@@ -8,6 +8,7 @@ import org.apache.ibatis.session.SqlSession;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author NielsWang
@@ -68,12 +69,18 @@ public class BaseDaoImpl<T extends BaseMapper<K, V>, K extends Serializable, V> 
     }
 
     @Override
-    public List<V> listAll() {
+    public List<V> queryAll() {
         return this.getMapper().selectAll();
     }
 
     @Override
-    public Long count() {
+    public List<V> searchList(Map<String, Object> params) {
+        //todo
+        return null;
+    }
+
+    @Override
+    public Long getCount() {
         return this.getMapper().countAll();
     }
 }
