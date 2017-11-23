@@ -5,6 +5,10 @@ import io.nuls.core.mesasge.NulsMessage;
 
 import java.util.List;
 
+/**
+ * @author vivi
+ * @Date 2017.11.01
+ */
 public class NulsMessageFilterChain {
 
     protected List<NulsMessageFilter> filterList;

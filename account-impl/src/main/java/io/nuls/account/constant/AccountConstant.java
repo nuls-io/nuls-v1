@@ -8,7 +8,7 @@ package io.nuls.account.constant;
  */
 public interface AccountConstant {
     //version
-    int ACCOUNT_MODULE_VERSION = 1111;
+    short ACCOUNT_MODULE_VERSION = 1111;
     //Minimum version supported
     int MINIMUM_VERSION_SUPPORTED = 0;
 

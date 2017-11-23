@@ -6,10 +6,8 @@ import io.nuls.core.utils.str.StringUtils;
 import io.nuls.core.validate.DataValidatorChain;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
-import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.crypto.UnsafeByteArrayOutputStream;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.exception.NulsIOException;
 import io.nuls.core.exception.NulsVerificationException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
@@ -19,7 +17,6 @@ import java.io.OutputStream;
 import java.io.Serializable;
 
 /**
- *
  * @author Niels
  * @date 2017/10/30
  */
@@ -27,7 +24,16 @@ public abstract class BaseNulsData implements Serializable {
 
     protected NulsDataType dataType;
 
-    protected int version;
+    /**
+     * The version number is 2 bytes
+     */
+    protected short version;
+
+    public static final short MAX_VERSION = 32767;
+
+    public static final short MAX_MAIN_VERSION = 15;
+
+    public static final short MAX_SUB_VERSION = 2047;
 
     private DataValidatorChain validatorChain = new DataValidatorChain();
 
@@ -85,14 +91,6 @@ public abstract class BaseNulsData implements Serializable {
         }
     }
 
-    public int getVersion() {
-        return version;
-    }
-
-    public void setVersion(int version) {
-        this.version = version;
-    }
-
     protected void writeBytesWithLength(OutputStream stream, String value) throws IOException {
         if (StringUtils.isNotBlank(value)) {
             stream.write(new VarInt(0).encode());
@@ -119,4 +117,43 @@ public abstract class BaseNulsData implements Serializable {
     public void setDataType(NulsDataType dataType) {
         this.dataType = dataType;
     }
+
+    public short getVersion() {
+        return version;
+    }
+
+    public void setVersion(short version) {
+        if (version > MAX_VERSION) {
+            throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
+        }
+        this.version = version;
+    }
+
+    public void setVersionBy(int main, int sub) {
+        if (main <= 0 || main > MAX_MAIN_VERSION) {
+            throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
+        }
+        if (main <= 0 || sub > MAX_SUB_VERSION) {
+            throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
+        }
+        version = (short) (main + sub);
+    }
+
+    public short getMainVersion() {
+        String str = Integer.toBinaryString(version);
+        String mainStr = str.substring(0, str.length() - 11);
+        return Short.valueOf(mainStr, 2);
+
+    }
+
+    public short getSubVersion() {
+        String str = Integer.toBinaryString(version);
+        String subStr = str.substring(str.length() - 11);
+        return Short.valueOf(subStr, 2);
+    }
+
+    public String getStringVersion() {
+        return getMainVersion() + "." + getSubVersion();
+    }
+
 }

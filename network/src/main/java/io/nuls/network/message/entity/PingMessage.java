@@ -7,6 +7,10 @@ import io.nuls.network.message.AbstractNetworkMessage;
 import java.io.IOException;
 import java.io.OutputStream;
 
+/**
+ * @author vivi
+ * @Date 2017.11.01
+ */
 public class PingMessage extends AbstractNetworkMessage {
 
     public PingMessage() {

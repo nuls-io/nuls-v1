@@ -13,7 +13,7 @@ import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.message.AbstractNetWorkMessageHandlerFactory;
 import io.nuls.network.message.AbstractNetworkMessage;
-import io.nuls.network.message.AbstractNetworkMessageResult;
+import io.nuls.network.message.NetworkMessageResult;
 import io.nuls.network.message.entity.VersionMessage;
 import io.nuls.network.message.messageHandler.NetWorkMessageHandler;
 import io.nuls.network.service.MessageWriter;
@@ -29,6 +29,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author vivi
+ * @Date 2017.11.01
  */
 public class Peer extends BaseNulsData {
 
@@ -99,11 +100,6 @@ public class Peer extends BaseNulsData {
         this.port = socketAddress.getPort();
         this.ip = socketAddress.getAddress().getHostAddress();
         processorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
-    }
-
-    public void connect(AbstractNetworkParam network) {
-//
-
     }
 
     public void connectionOpened() throws IOException {
@@ -190,7 +186,7 @@ public class Peer extends BaseNulsData {
                 //todo 不要显示创建线程，请使用线程池。
                 @Override
                 public void run() {
-                    AbstractNetworkMessageResult messageResult = handler.process(networkMessage, Peer.this);
+                    NetworkMessageResult messageResult = handler.process(networkMessage, Peer.this);
                     processMessageResult(messageResult);
                 }
             });
@@ -198,7 +194,7 @@ public class Peer extends BaseNulsData {
     }
 
 
-    public void processMessageResult(AbstractNetworkMessageResult messageResult) {
+    public void processMessageResult(NetworkMessageResult messageResult) {
 
     }
 

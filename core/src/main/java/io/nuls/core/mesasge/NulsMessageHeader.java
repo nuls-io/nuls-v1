@@ -122,15 +122,6 @@ public class NulsMessageHeader extends BaseNulsData {
         this.headType = headType;
     }
 
-    public static void main(String[] args) throws IOException {
-        NulsMessageHeader header = new NulsMessageHeader(12345678, NulsMessageHeader.NETWORK_MESSAGE);
-        byte[] bytes = header.serialize();
-        System.out.println("byte.length:" + bytes.length);
-        header.parse(new NulsByteBuffer(bytes));
-        System.out.println(header.toString());
-
-    }
-
     @Override
     public String toString() {
         StringBuffer buffer = new StringBuffer();

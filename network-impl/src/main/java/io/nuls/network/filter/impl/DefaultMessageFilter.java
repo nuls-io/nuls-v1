@@ -11,7 +11,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
- * Created by vivi on 2017/11/20.
+ * @author vivi
+ * @date 2017/11/21
  */
 public class DefaultMessageFilter implements NulsMessageFilter {
 

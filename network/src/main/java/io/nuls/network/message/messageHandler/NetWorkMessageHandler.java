@@ -2,13 +2,15 @@ package io.nuls.network.message.messageHandler;
 
 import io.nuls.network.entity.Peer;
 import io.nuls.network.message.AbstractNetworkMessage;
-import io.nuls.network.message.AbstractNetworkMessageResult;
+import io.nuls.network.message.NetworkMessageResult;
 
 /**
- * Created by vivi on 2017/11/21.
+ *
+ * @author vivi
+ * @date 2017/11/21
  */
 public interface NetWorkMessageHandler {
 
 
-    AbstractNetworkMessageResult process(AbstractNetworkMessage message , Peer peer);
+    NetworkMessageResult process(AbstractNetworkMessage message , Peer peer);
 }

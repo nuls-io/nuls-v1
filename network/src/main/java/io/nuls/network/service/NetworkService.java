@@ -1,7 +1,8 @@
 package io.nuls.network.service;
 
 /**
- * Created by v.chou on 2017/10/25.
+ * @author vivi
+ * @date 2017/11/21
  */
 public interface NetworkService {
 

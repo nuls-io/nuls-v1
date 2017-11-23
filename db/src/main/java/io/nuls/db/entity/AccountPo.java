@@ -44,7 +44,7 @@ public class AccountPo {
      *
      * @mbg.generated
      */
-    private Integer version;
+    private Short version;
 
     /**
      *
@@ -195,7 +195,7 @@ public class AccountPo {
      *
      * @mbg.generated
      */
-    public Integer getVersion() {
+    public Short getVersion() {
         return version;
     }
 
@@ -207,7 +207,7 @@ public class AccountPo {
      *
      * @mbg.generated
      */
-    public void setVersion(Integer version) {
+    public void setVersion(Short version) {
         this.version = version;
     }
 

@@ -2,6 +2,10 @@ package io.nuls.network.entity;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
+/**
+ * @author vivi
+ * @Date 2017.11.01
+ */
 public class PeerGroup {
     private String groupName;
     private CopyOnWriteArrayList<Peer> peers;

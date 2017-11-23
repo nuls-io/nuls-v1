@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- *
  * @author win10
  * @date 2017/10/30
  */
@@ -37,7 +36,7 @@ public class Transaction extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += VarInt.sizeOf(version);
+        size += version;
         size += VarInt.sizeOf(type);
         //todo
 

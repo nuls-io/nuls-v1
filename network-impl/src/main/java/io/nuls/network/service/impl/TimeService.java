@@ -12,7 +12,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * Created by win10 on 2017/11/7.
+ * @author vivi
+ * @date 2017/11/21
  */
 public class TimeService {
 

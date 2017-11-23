@@ -3,7 +3,8 @@ package io.nuls.network.service;
 import java.io.IOException;
 
 /**
- * Created by vivi on 2017/11/16.
+ * @author vivi
+ * @date 2017/11/21
  */
 public interface MessageWriter {
 

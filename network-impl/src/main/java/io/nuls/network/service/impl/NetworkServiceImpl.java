@@ -16,7 +16,8 @@ import io.nuls.network.param.TestNetworkParam;
 import io.nuls.network.service.NetworkService;
 
 /**
- * Created by win10 on 2017/11/10.
+ * @author vivi
+ * @date 2017/11/21
  */
 public class NetworkServiceImpl implements NetworkService {
 

@@ -9,6 +9,10 @@ import io.nuls.network.service.impl.NetworkServiceImpl;
 
 import java.io.IOException;
 
+/**
+ * @author vivi
+ * @date 2017/11/21
+ */
 public class NetworkModuleImpl extends AbstractNetworkModule {
 
     private NetworkService networkService;
