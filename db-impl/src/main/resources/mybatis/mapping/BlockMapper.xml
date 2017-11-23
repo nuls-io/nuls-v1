@@ -282,11 +282,11 @@
         <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Serach_Where"/>
     </select>
 
-    <select id="countAll" resultType="Long">
+    <select id="countAll" resultType="java.lang.Long">
     select count(hash) from block
   </select>
 
-    <select id="selectCount" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultType="Long">
+    <select id="selectCount" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultType="java.lang.Long">
         select count(hash) from block
         <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Serach_Where"/>
     </select>
