@@ -168,17 +168,26 @@ public class Utils {
     /**
      * Parse 4 bytes from the byte array (starting at the offset) as unsigned 32-bit integer in little endian format.
      */
-    public static long readUint32(byte[] bytes, int offset) {
+    public static long readUint32LE(byte[] bytes, int offset) {
         return (bytes[offset] & 0xffL) |
                 ((bytes[offset + 1] & 0xffL) << 8) |
                 ((bytes[offset + 2] & 0xffL) << 16) |
                 ((bytes[offset + 3] & 0xffL) << 24);
     }
 
+    public static int readInt32LE(byte[] bytes, int offset) {
+        return (bytes[offset] & 0xff) |
+                ((bytes[offset + 1] & 0xff) << 8) |
+                ((bytes[offset + 2] & 0xff) << 16) |
+                ((bytes[offset + 3] & 0xff) << 24);
+    }
+
+
+
     /**
      * Parse 8 bytes from the byte array (starting at the offset) as signed 64-bit integer in little endian format.
      */
-    public static long readInt64(byte[] bytes, int offset) {
+    public static long readInt64LE(byte[] bytes, int offset) {
         return (bytes[offset] & 0xffL) |
                 ((bytes[offset + 1] & 0xffL) << 8) |
                 ((bytes[offset + 2] & 0xffL) << 16) |
@@ -258,6 +267,13 @@ public class Utils {
     }
 
     public static void uint32ToByteArrayLE(long val, byte[] out, int offset) {
+        out[offset] = (byte) (0xFF & val);
+        out[offset + 1] = (byte) (0xFF & (val >> 8));
+        out[offset + 2] = (byte) (0xFF & (val >> 16));
+        out[offset + 3] = (byte) (0xFF & (val >> 24));
+    }
+
+    public static void int32ToByteArrayLE(int val, byte[] out, int offset) {
         out[offset] = (byte) (0xFF & val);
         out[offset + 1] = (byte) (0xFF & (val >> 8));
         out[offset + 2] = (byte) (0xFF & (val >> 16));
@@ -398,12 +414,6 @@ public class Utils {
         bytes[1] = (byte) (0xFF & val >> 8);
         bytes[0] = (byte) (0xFF & val >> 0);
         return bytes;
-    }
-
-    public static int readInt32(byte[] payload, int offset) {
-        Long value = readUint32(payload, offset);
-        return value.intValue();
-
     }
 
     public static byte[] int32ToBytes(int x) {

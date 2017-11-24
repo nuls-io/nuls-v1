@@ -1,7 +1,9 @@
 package io.nuls.core.mesasge;
 
 import io.nuls.core.chain.entity.Block;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.crypto.VarInt;
+import io.nuls.core.exception.NulsVerificationException;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -15,35 +17,49 @@ public class NulsMessage {
     protected byte[] data;
 
     public NulsMessage() {
-
-    }
-
-    public NulsMessage(byte[] data) {
-        this.data = data;
-    }
-
-    public NulsMessage(NulsMessageHeader header) {
-        this.header = header;
+        this.header = new NulsMessageHeader();
+        this.data = new byte[0];
     }
 
     public NulsMessage(NulsMessageHeader header, byte[] data) {
+        if(header == null){
+            header = new NulsMessageHeader();
+        }
+        if(data == null){
+            data = new byte[0];
+        }
         this.header = header;
         this.data = data;
+        caculateXor();
+        header.setLength(data.length);
+    }
+
+    public NulsMessage(byte[] data) {
+        this(null,data);
+    }
+
+    public NulsMessage(NulsMessageHeader header) {
+        this(header,null);
     }
 
     public NulsMessage(int magicNumber, short msgType) {
-        this.header = new NulsMessageHeader(magicNumber, msgType);
-        this.data = data;
+        this();
+        this.header.setMagicNumber(magicNumber);
+        this.header.setHeadType(msgType);
     }
 
     public NulsMessage(int magicNumber, short msgType, byte[] data) {
-        this.header = new NulsMessageHeader(magicNumber, msgType);
-        this.data = data;
+        this(data);
+        this.header.setMagicNumber(magicNumber);
+        this.header.setHeadType(msgType);
     }
 
     public NulsMessage(int magicNumber, short msgType, byte[] extend, byte[] data) {
-        this.header = new NulsMessageHeader(magicNumber, msgType, extend);
-        this.data = data;
+        this(magicNumber,msgType,data);
+        if(extend == null){
+            extend = new byte[9];
+        }
+        this.header.setExtend(extend);
     }
 
     public NulsMessage(int magicNumber, int length, short msgType, byte xor, byte[] data) {
@@ -58,6 +74,18 @@ public class NulsMessage {
 
     public NulsMessageHeader getHeader() {
         return header;
+    }
+
+    public byte caculateXor(){
+        if(header == null || data == null || data.length == 0){
+            return 0x00;
+        }
+        byte xor = 0x00;
+        for(int i=0;i<data.length;i++){
+            xor ^= data[i];
+        }
+        header.setXor(xor);
+        return xor;
     }
 
     public byte[] serialize() throws IOException {
@@ -80,5 +108,18 @@ public class NulsMessage {
         this.data = data;
     }
 
+    void verify() throws NulsVerificationException{
+        if(this.header == null || this.data == null){
+            throw new NulsVerificationException(ErrorCode.NET_MESSAGE_ERROR);
+        }
+
+        if(header.getLength()!= data.length){
+            throw new NulsVerificationException(ErrorCode.NET_MESSAGE_LENGTH_ERROR);
+        }
+
+        if(header.getXor() != caculateXor()){
+            throw new NulsVerificationException(ErrorCode.NET_MESSAGE_XOR_ERROR);
+        }
+    }
 
 }
