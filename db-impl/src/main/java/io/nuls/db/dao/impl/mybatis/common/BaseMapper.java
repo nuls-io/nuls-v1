@@ -71,21 +71,19 @@ public interface BaseMapper<K extends Serializable, V> {
     int updateByPrimaryKey(V record);
 
     int batchInsert(List<V> records);
-
-    List<V> selectAll();
     Long countAll();
     List<V> selectList(Searchable searchable);
     long selectCount(Searchable searchable);
 
-    int existsByKey(K id);
-
-    int updateBySearchable(Searchable searchable);
-
-    int deleteBySearchable(Searchable searchable);
-
-    V selectBySearchable(Searchable searchable);
-
-
-    long existsBySearchable(Searchable searchable);
+//    int existsByKey(K id);
+//
+//    int updateBySearchable(Searchable searchable);
+//
+//    int deleteBySearchable(Searchable searchable);
+//
+//    V selectBySearchable(Searchable searchable);
+//
+//
+//    long existsBySearchable(Searchable searchable);
 
 }

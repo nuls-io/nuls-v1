@@ -71,7 +71,7 @@ public abstract class BaseDaoImpl<T extends BaseMapper<K, V>, K extends Serializ
 
     @Override
     public List<V> queryAll() {
-        return this.getMapper().selectAll();
+        return this.getMapper().selectList(null);
     }
 
     @Override
@@ -82,6 +82,11 @@ public abstract class BaseDaoImpl<T extends BaseMapper<K, V>, K extends Serializ
         return this.getMapper().selectList(getSearchable(params));
     }
 
+    /**
+     * change params to searchable object
+     * @param params
+     * @return
+     */
     protected abstract Searchable getSearchable(Map<String, Object> params);
 
     @Override
