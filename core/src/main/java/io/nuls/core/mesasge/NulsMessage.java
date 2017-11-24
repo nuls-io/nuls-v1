@@ -3,7 +3,9 @@ package io.nuls.core.mesasge;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.crypto.VarInt;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsVerificationException;
+import io.nuls.core.utils.crypto.Hex;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -89,7 +91,7 @@ public class NulsMessage {
     }
 
     public byte[] serialize() throws IOException {
-        byte[] value = new byte[MAX_SIZE + data.length];
+        byte[] value = new byte[NulsMessageHeader.MESSAGE_HEADER_SIZE + data.length];
         byte[] headerBytes = header.serialize();
         System.arraycopy(headerBytes, 0, value, 0, headerBytes.length);
         System.arraycopy(data, 0, value, headerBytes.length, data.length);
@@ -122,4 +124,14 @@ public class NulsMessage {
         }
     }
 
+    public static void main(String[] args){
+        NulsMessage msg = new NulsMessage(null,"Nuls test message".getBytes());
+        System.out.println(msg.getHeader().toString());
+        try {
+            System.out.println(Hex.encode(msg.serialize()));
+        }catch (Exception e){
+            System.out.println(e);
+        }
+        msg.verify();
+    }
 }
