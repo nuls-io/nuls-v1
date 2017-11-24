@@ -66,8 +66,8 @@ public class NulsMessageHeader implements Serializable {
         byte[] header = new byte[20];
         Utils.int32ToByteArrayLE(magicNumber,header,0);
         Utils.int32ToByteArrayLE(length,header,4);
-        Utils.uint16ToByteArrayLE(headType,header,4);
-        header[8] = xor;
+        Utils.uint16ToByteArrayLE(headType,header,8);
+        header[10] = xor;
         System.arraycopy(extend,0,header,11,9);
         return header;
     }
