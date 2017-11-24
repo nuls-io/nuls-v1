@@ -36,11 +36,11 @@ public class VersionMessage extends AbstractNetworkMessage {
         this.nulsVersion = NulsContext.nulsVersion;
     }
 
-    public VersionMessage(long height, String hash) {
+    public VersionMessage(long bestBlockHeight, String bestBlockHash) {
         super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.type = NetworkConstant.NETWORK_VERSION_MESSAGE;
-        this.bestBlockHash = hash;
-        this.bestBlockHeight = height;
+        this.bestBlockHash = bestBlockHash;
+        this.bestBlockHeight = bestBlockHeight;
         this.nulsVersion = NulsContext.nulsVersion;
     }
 
@@ -112,4 +112,6 @@ public class VersionMessage extends AbstractNetworkMessage {
     public void setNulsVersion(String nulsVersion) {
         this.nulsVersion = nulsVersion;
     }
+
+
 }

@@ -33,7 +33,8 @@ public interface NetworkConstant {
     //network message type
 
     short NETWORK_VERSION_MESSAGE = 01;
-    short NETWORK_PING_MESSAGE = 02;
-    short NETWORK_PONG_MESAAGE = 03;
-    short NETWORK_BYE_MESSAGE = 04;
+    short NETWORK_VERSION_ACK_MESSAGE = 02;
+    short NETWORK_PING_MESSAGE = 03;
+    short NETWORK_PONG_MESAAGE = 04;
+    short NETWORK_BYE_MESSAGE = 05;
 }

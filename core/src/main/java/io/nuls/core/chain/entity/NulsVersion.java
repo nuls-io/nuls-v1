@@ -2,9 +2,7 @@ package io.nuls.core.chain.entity;
 
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.utils.crypto.Utils;
 
-import static org.spongycastle.asn1.x500.style.RFC4519Style.c;
 
 /**
  * @author vivi
