@@ -43,7 +43,7 @@ public class NulsVersion {
     }
 
     /**
-     * version = mainVersion << 11 + subVersion
+     * version = mainVersion << 12 + subVersion
      *
      * @param main
      * @param sub
