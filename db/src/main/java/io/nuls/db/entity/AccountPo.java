@@ -44,7 +44,7 @@ public class AccountPo {
      *
      * @mbg.generated
      */
-    private Short version;
+    private Short version = 0;
 
     /**
      *
