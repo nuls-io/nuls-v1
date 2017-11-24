@@ -29,19 +29,16 @@ public class VersionMessage extends AbstractNetworkMessage {
 
     private String nulsVersion;
 
-
     public VersionMessage() {
         super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.type = NetworkConstant.NETWORK_VERSION_MESSAGE;
         this.nulsVersion = NulsContext.nulsVersion;
     }
 
-    public VersionMessage(long height, String hash) {
-        super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
-        this.type = NetworkConstant.NETWORK_VERSION_MESSAGE;
-        this.bestBlockHash = hash;
-        this.bestBlockHeight = height;
-        this.nulsVersion = NulsContext.nulsVersion;
+    public VersionMessage(long bestBlockHeight, String bestBlockHash) {
+        this();
+        this.bestBlockHash = bestBlockHash;
+        this.bestBlockHeight = bestBlockHeight;
     }
 
     @Override
@@ -112,4 +109,6 @@ public class VersionMessage extends AbstractNetworkMessage {
     public void setNulsVersion(String nulsVersion) {
         this.nulsVersion = nulsVersion;
     }
+
+
 }

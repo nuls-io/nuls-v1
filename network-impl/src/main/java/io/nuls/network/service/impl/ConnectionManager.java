@@ -39,7 +39,6 @@ public class ConnectionManager {
 
     private volatile boolean inited;
     //The storage will be connected
-    final Queue<PendingConnect> newConnectionChannels = new LinkedBlockingQueue<>();
 
     public ConnectionManager(AbstractNetworkModule module, AbstractNetworkParam network) {
         this.network = network;
@@ -86,33 +85,13 @@ public class ConnectionManager {
         try {
             while (inited) {
                 //Processing waiting for connections
-                PendingConnect connect;
-                while ((connect = newConnectionChannels.poll()) != null) {
-                    try {
-                        //  Only connection events are registered here
-                        SelectionKey key = connect.channel.register(selector, SelectionKey.OP_CONNECT);
-                        key.attach(connect);
-                    } catch (ClosedChannelException e) {
-                        e.printStackTrace();
-                        Log.warn("SocketChannel was closed before it could be registered");
-                        connect.peer.destroy();
-                        //peersManager.deletePeer(conn.peer);
-                    }
-                }
 
-
-                if (selector.select() > 0) {
+                if (selector.select(1000) > 0) {
                     Iterator<SelectionKey> keyIterator = selector.selectedKeys().iterator();
                     while (keyIterator.hasNext()) {
                         SelectionKey key = keyIterator.next();
                         keyIterator.remove();
                         handleKey(key);
-                    }
-                } else {
-                    try {
-                        Thread.sleep(10);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
                     }
                 }
             }
@@ -161,15 +140,17 @@ public class ConnectionManager {
      * @param peer
      */
     public void openConnection(Peer peer) {
-        InetSocketAddress socketAddress = new InetSocketAddress(peer.getIp(), peer.getPort());
+
         SocketChannel channel = null;
         try {
             channel = SocketChannel.open();
             channel.configureBlocking(false);
             channel.socket().setReuseAddress(true);
+            InetSocketAddress socketAddress = new InetSocketAddress(peer.getIp(), peer.getPort());
             channel.connect(socketAddress);
             PendingConnect data = new PendingConnect(channel, peer);
-            newConnectionChannels.offer(data);
+            SelectionKey key = channel.register(selector, SelectionKey.OP_CONNECT);
+            key.attach(data);
             selector.wakeup();
         } catch (IOException e) {
             e.printStackTrace();
@@ -180,6 +161,7 @@ public class ConnectionManager {
                     e1.printStackTrace();
                 }
             }
+            System.out.println("-sdf-sdfsd-fsd");
             peer.destroy();
 
             //peersManager.deletePeer(peer);
@@ -230,7 +212,6 @@ public class ConnectionManager {
             //out peer
             PendingConnect data = (PendingConnect) key.attachment();
             Peer peer = data.peer;
-            System.out.println("---------------peer hash:" + peer.getHash());
             SocketChannel channel = (SocketChannel) key.channel();
             ConnectionHandler handler = new ConnectionHandler(peer, channel, key);
             //Must be connected after the completion of registration to other events

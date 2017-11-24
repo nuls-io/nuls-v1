@@ -89,7 +89,7 @@ public abstract class BaseNulsData implements Serializable {
     }
 
     protected void writeBytesWithLength(OutputStream stream, String value) throws IOException {
-        if (StringUtils.isNotBlank(value)) {
+        if (StringUtils.isBlank(value)) {
             stream.write(new VarInt(0).encode());
         } else {
             byte[] bytes = value.getBytes(NulsContext.DEFAULT_ENCODING);
@@ -122,5 +122,9 @@ public abstract class BaseNulsData implements Serializable {
 
     public void setVersion(NulsVersion version) {
         this.version = version;
+    }
+
+    public void setVersionBy(short main, short sub) {
+        version.setVersionBy(main, sub);
     }
 }

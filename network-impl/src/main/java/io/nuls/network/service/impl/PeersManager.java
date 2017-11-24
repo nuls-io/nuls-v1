@@ -5,6 +5,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.thread.BaseNulsThread;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.BlockDao;
 import io.nuls.db.dao.PeerDao;
@@ -66,7 +67,7 @@ public class PeersManager {
     public void start() {
         List<Peer> peers = discovery.getLocalPeers();
 
-        if (peers == null) {
+        if (peers == null || peers.size() == 0) {
             peers = discovery.getSeedPeers();
         }
 
@@ -79,14 +80,18 @@ public class PeersManager {
          *
          *
          **/
-
-
-
+        new BaseNulsThread(networkModule, "peerDiscovery") {
+            @Override
+            public void run() {
+                PeersManager.this.discovery.run();
+            }
+        }.start();
     }
 
 
     public void addPeer(Peer peer) {
-        if (!peers.containsKey(peer.getHash())) {
+
+        if (!peers.containsKey(peer.getHash().toString())) {
             peers.put(peer.getHash(), peer);
         }
     }
@@ -112,9 +117,7 @@ public class PeersManager {
                     }
                 }
             }
-
-            Peer peer = peers.get(peerHash);
-            peer.destroy();
+            peers.remove(peerHash);
         }
     }
 
@@ -143,6 +146,7 @@ public class PeersManager {
 
     /**
      * remove from database
+     *
      * @param peer
      */
     public void deletePeer(Peer peer) {
@@ -176,5 +180,9 @@ public class PeersManager {
 
     public void setConnectionManager(ConnectionManager connectionManager) {
         this.connectionManager = connectionManager;
+    }
+
+    public ConnectionManager getConnectionManager() {
+        return connectionManager;
     }
 }

@@ -1,7 +1,6 @@
 package io.nuls.network.message;
 
 /**
- *
  * @author vivi
  * @date 2017/11/21
  */
@@ -14,5 +13,13 @@ public class NetworkMessageResult {
     public NetworkMessageResult(boolean success, AbstractNetworkMessage replyMessage) {
         this.success = success;
         this.replyMessage = replyMessage;
+    }
+
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public AbstractNetworkMessage getReplyMessage() {
+        return replyMessage;
     }
 }

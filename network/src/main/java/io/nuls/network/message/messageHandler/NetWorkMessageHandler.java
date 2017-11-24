@@ -4,6 +4,8 @@ import io.nuls.network.entity.Peer;
 import io.nuls.network.message.AbstractNetworkMessage;
 import io.nuls.network.message.NetworkMessageResult;
 
+import java.io.IOException;
+
 /**
  *
  * @author vivi
