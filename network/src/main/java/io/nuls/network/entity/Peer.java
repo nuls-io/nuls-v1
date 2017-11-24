@@ -103,7 +103,7 @@ public class Peer extends BaseNulsData {
         processorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
 
 
-        this.hash = Sha256Hash.hashTwice((this.ip + this.port).getBytes()).toString();
+        this.hash = this.ip + this.port;
     }
 
     public void connectionOpened() throws IOException {
@@ -221,6 +221,7 @@ public class Peer extends BaseNulsData {
     }
 
     public void destroy() {
+        System.out.println("---------peer destory");
         lock.lock();
         try {
             this.status = Peer.CLOSE;

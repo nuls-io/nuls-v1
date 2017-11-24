@@ -67,7 +67,7 @@ public class PeersManager {
     public void start() {
         List<Peer> peers = discovery.getLocalPeers();
 
-        if (peers == null) {
+        if (peers == null || peers.size() == 0) {
             peers = discovery.getSeedPeers();
         }
 
@@ -90,7 +90,8 @@ public class PeersManager {
 
 
     public void addPeer(Peer peer) {
-        if (!peers.containsKey(peer.getHash())) {
+
+        if (!peers.containsKey(peer.getHash().toString())) {
             peers.put(peer.getHash(), peer);
         }
     }

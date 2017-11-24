@@ -73,6 +73,7 @@ public class PeerDiscoverHandler {
                     peersManager.removePeer(peer.getHash());
                 }
             }
+            outPeers = peersManager.getPeerGroup(NetworkConstant.NETWORK_PEER_OUT_GROUP);
             if (outPeers.size() < network.maxOutCount()) {
                 // find other peer and try to connect
                 List<Peer> peers = getSeedPeers();
@@ -83,7 +84,7 @@ public class PeerDiscoverHandler {
             }
 
             for (Peer peer : outPeers.getPeers()) {
-                System.out.println("peer: " + peer.getIp() + ", status" + peer.getStatus());
+                System.out.println("peer: " + peer.getIp() + ", status:" + peer.getStatus());
             }
 
             try {

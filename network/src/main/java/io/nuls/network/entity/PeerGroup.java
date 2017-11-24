@@ -20,17 +20,16 @@ public class PeerGroup {
     }
 
     public void addPeer(Peer p) {
-        this.peers.add(p);
-        //TODO, 去重复
-    }
-
-    public void addGroup(PeerGroup peerGroup) {
-        for (Peer p : peerGroup.getPeers()) {
-            addPeer(p);
+        for (Peer peer : peers) {
+            if (peer.getHash().toString().equals(p.getHash().toString())) {
+                return;
+            }
         }
+        this.peers.add(p);
     }
 
     public void removePeer(Peer p) {
+        this.peers.remove(p);
         //TODO ,delete peer
     }
 
