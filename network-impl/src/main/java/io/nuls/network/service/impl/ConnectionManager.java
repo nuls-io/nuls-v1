@@ -167,7 +167,8 @@ public class ConnectionManager {
             channel = SocketChannel.open();
             channel.configureBlocking(false);
             channel.socket().setReuseAddress(true);
-            channel.connect(socketAddress);
+            boolean b = channel.connect(socketAddress);
+            System.out.println("--------b;" + b);
             PendingConnect data = new PendingConnect(channel, peer);
             newConnectionChannels.offer(data);
             selector.wakeup();

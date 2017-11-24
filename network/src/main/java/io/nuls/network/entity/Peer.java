@@ -1,10 +1,10 @@
 package io.nuls.network.entity;
 
-import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.crypto.Sha256Hash;
+import io.nuls.core.exception.NulsVerificationException;
 import io.nuls.core.mesasge.NulsMessage;
 import io.nuls.core.mesasge.NulsMessageHeader;
 import io.nuls.core.utils.crypto.Utils;
@@ -14,6 +14,7 @@ import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.message.AbstractNetWorkMessageHandlerFactory;
 import io.nuls.network.message.AbstractNetworkMessage;
 import io.nuls.network.message.NetworkMessageResult;
+import io.nuls.network.message.entity.GetVersionMessage;
 import io.nuls.network.message.entity.VersionMessage;
 import io.nuls.network.message.messageHandler.NetWorkMessageHandler;
 import io.nuls.network.service.MessageWriter;
@@ -100,18 +101,22 @@ public class Peer extends BaseNulsData {
         this.port = socketAddress.getPort();
         this.ip = socketAddress.getAddress().getHostAddress();
         processorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
+
+
+        this.hash = Sha256Hash.hashTwice((this.ip + this.port).getBytes()).toString();
     }
 
     public void connectionOpened() throws IOException {
-        Block bestBlock = NulsContext.getInstance().getBestBlock();
-        VersionMessage message = new VersionMessage(bestBlock.getHeight(), bestBlock.getHash().toString());
+        GetVersionMessage message = new GetVersionMessage();
         sendMessage(message);
-
         this.status = Peer.CONNECTING;
     }
 
 
     public void sendMessage(NulsMessage message) throws IOException {
+        if (this.getStatus() == Peer.CLOSE) {
+            return;
+        }
         if (writeTarget == null || this.status != Peer.HANDSHAKE) {
             throw new NotYetConnectedException();
         }
@@ -125,6 +130,9 @@ public class Peer extends BaseNulsData {
     }
 
     public void sendMessage(AbstractNetworkMessage networkMessage) throws IOException {
+        if (this.getStatus() == Peer.CLOSE) {
+            return;
+        }
         if (writeTarget == null) {
             throw new NotYetConnectedException();
         }
@@ -133,8 +141,7 @@ public class Peer extends BaseNulsData {
         }
 
         byte[] data = networkMessage.serialize();
-        byte b = 1;
-        NulsMessage message = new NulsMessage(network.packetMagic(), data.length, NulsMessageHeader.NETWORK_MESSAGE, b, data);
+        NulsMessage message = new NulsMessage(network.packetMagic(), NulsMessageHeader.NETWORK_MESSAGE, data);
         sendMessage(message);
     }
 
@@ -144,8 +151,11 @@ public class Peer extends BaseNulsData {
      * @throws IOException
      */
     public void receiveMessage(ByteBuffer buffer) throws IOException {
+        if (this.getStatus() == Peer.CLOSE) {
+            return;
+        }
         if (buffer.position() != 0 || buffer.capacity() <= NulsMessageHeader.MESSAGE_HEADER_SIZE) {
-            throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
+            throw new NulsVerificationException(ErrorCode.NET_MESSAGE_ERROR);
         }
 
         byte[] headers = new byte[NulsMessageHeader.MESSAGE_HEADER_SIZE];
@@ -186,16 +196,28 @@ public class Peer extends BaseNulsData {
                 //todo 不要显示创建线程，请使用线程池。
                 @Override
                 public void run() {
-                    NetworkMessageResult messageResult = handler.process(networkMessage, Peer.this);
-                    processMessageResult(messageResult);
+                    try {
+                        NetworkMessageResult messageResult = handler.process(networkMessage, Peer.this);
+                        processMessageResult(messageResult);
+                    } catch (Exception e) {
+                        Peer.this.destroy();
+                    }
                 }
             });
         }
     }
 
 
-    public void processMessageResult(NetworkMessageResult messageResult) {
-
+    public void processMessageResult(NetworkMessageResult messageResult) throws IOException {
+        if (this.getStatus() == Peer.CLOSE) {
+            return;
+        }
+        if (messageResult == null) {
+            return;
+        }
+        if (messageResult.getReplyMessage() != null) {
+            sendMessage(messageResult.getReplyMessage());
+        }
     }
 
     public void destroy() {

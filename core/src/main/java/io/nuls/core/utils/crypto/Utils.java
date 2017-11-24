@@ -183,7 +183,6 @@ public class Utils {
     }
 
 
-
     /**
      * Parse 8 bytes from the byte array (starting at the offset) as signed 64-bit integer in little endian format.
      */
@@ -424,4 +423,9 @@ public class Utils {
         bb[0] = (byte) (0xFF & x >> 0);
         return bb;
     }
+
+    public static long randomLong() {
+        return (long) (Math.random() * Long.MAX_VALUE);
+    }
+
 }

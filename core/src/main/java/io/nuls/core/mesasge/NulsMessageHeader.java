@@ -8,6 +8,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
 
+/**
+ * @author vivi
+ * @date 2017-11-10
+ */
 public class NulsMessageHeader implements Serializable {
 
     public static final int MESSAGE_HEADER_SIZE = 20;
@@ -42,19 +46,26 @@ public class NulsMessageHeader implements Serializable {
         this.headType = headType;
     }
 
+    public NulsMessageHeader(int magicNumber, short headType, int length) {
+        this();
+        this.magicNumber = magicNumber;
+        this.headType = headType;
+        this.length = length;
+    }
+
     public NulsMessageHeader(int magicNumber, short headType, byte[] extend) {
-        this(magicNumber,headType);
+        this(magicNumber, headType);
         this.extend = extend;
     }
 
     public NulsMessageHeader(int magicNumber, short headType, int length, byte xor) {
-        this(magicNumber,headType);
+        this(magicNumber, headType);
         this.length = length;
         this.xor = xor;
     }
 
     public NulsMessageHeader(int magicNumber, short headType, int length, byte xor, byte[] extend) {
-        this(magicNumber,headType,length,xor);
+        this(magicNumber, headType, length, xor);
         this.extend = extend;
     }
 
@@ -62,13 +73,13 @@ public class NulsMessageHeader implements Serializable {
         return MESSAGE_HEADER_SIZE;
     }
 
-    public byte[] serialize(){
-        byte[] header = new byte[20];
-        Utils.int32ToByteArrayLE(magicNumber,header,0);
-        Utils.int32ToByteArrayLE(length,header,4);
-        Utils.uint16ToByteArrayLE(headType,header,8);
+    public byte[] serialize() {
+        byte[] header = new byte[MESSAGE_HEADER_SIZE];
+        Utils.int32ToByteArrayLE(magicNumber, header, 0);
+        Utils.int32ToByteArrayLE(length, header, 4);
+        Utils.uint16ToByteArrayLE(headType, header, 8);
         header[10] = xor;
-        System.arraycopy(extend,0,header,11,9);
+        System.arraycopy(extend, 0, header, 11, 9);
         return header;
     }
 

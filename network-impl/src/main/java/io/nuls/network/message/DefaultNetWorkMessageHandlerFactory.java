@@ -1,6 +1,8 @@
 package io.nuls.network.message;
 
+import io.nuls.network.message.entity.GetVersionMessage;
 import io.nuls.network.message.entity.VersionMessage;
+import io.nuls.network.message.impl.GetVersionMessageHandler;
 import io.nuls.network.message.impl.VersionMessageHandler;
 import io.nuls.network.message.messageHandler.NetWorkMessageHandler;
 
@@ -19,6 +21,7 @@ public class DefaultNetWorkMessageHandlerFactory extends AbstractNetWorkMessageH
 
     private DefaultNetWorkMessageHandlerFactory() {
         handlerMap.put(VersionMessage.class.getName(), VersionMessageHandler.getInstance());
+        handlerMap.put(GetVersionMessage.class.getName(), GetVersionMessageHandler.getInstance());
         //handlerMap.put(PingMessage.class.getName(),)
     }
 
