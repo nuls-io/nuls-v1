@@ -11,6 +11,7 @@ import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.module.AbstractNetworkModule;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.nio.channels.*;
 import java.nio.channels.spi.SelectorProvider;
@@ -161,7 +162,6 @@ public class ConnectionManager {
                     e1.printStackTrace();
                 }
             }
-            System.out.println("-sdf-sdfsd-fsd");
             peer.destroy();
 
             //peersManager.deletePeer(peer);
@@ -223,12 +223,15 @@ public class ConnectionManager {
                     peer.connectionOpened();
                 } else {
                     // Failed to connect for some reason
+                    System.out.println("--------------------destory 4" + peer.getIp());
                     peer.destroy();
                 }
-            } catch (Exception e) {
-                   e.printStackTrace();
+            } catch (ConnectException ne) {
                 Log.warn("out peer Failed to connect to {}", channel.socket().getRemoteSocketAddress());
-                // Failed to connect for some reason
+                peer.destroy();
+            } catch (Exception e) {
+                System.out.println("--------------------destory 5" + peer.getIp());
+                e.printStackTrace();
                 peer.destroy();
             }
 
@@ -263,6 +266,7 @@ public class ConnectionManager {
                     }
                 }
                 if (peer != null) {
+                    System.out.println("--------------------destory 6" + peer.getIp());
                     peer.destroy();
                 }
             }

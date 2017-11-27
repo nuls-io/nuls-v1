@@ -205,6 +205,8 @@ public class Peer extends BaseNulsData {
                         NetworkMessageResult messageResult = handler.process(networkMessage, Peer.this);
                         processMessageResult(messageResult);
                     } catch (Exception e) {
+                        e.printStackTrace();
+                        System.out.println("--------------------destory 7" + Peer.this.getIp());
                         Peer.this.destroy();
                     }
                 }
