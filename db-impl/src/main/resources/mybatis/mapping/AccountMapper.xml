@@ -232,7 +232,7 @@
     select count(id) from account
   </select>
 
-  <select id="selectList" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultType="io.nuls.db.entity.AccountPo">
+  <select id="selectList" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultMap="ResultMapWithBLOBs">
     select
     <include refid="Base_Column_List" />
     ,

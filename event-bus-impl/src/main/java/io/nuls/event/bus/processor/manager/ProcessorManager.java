@@ -5,6 +5,7 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.event.EventManager;
 import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.module.BaseNulsModule;
 import io.nuls.core.thread.manager.NulsDefaultThreadFactory;
 import io.nuls.core.thread.manager.ThreadManager;
 import io.nuls.core.utils.param.AssertUtil;
@@ -38,7 +39,7 @@ public class ProcessorManager<E extends BaseNulsEvent, H extends NulsEventHandle
     }
 
     public final void init() {
-        AbstractEventBusModule module = NulsContext.getInstance().getModule(AbstractEventBusModule.class);
+        BaseNulsModule module = NulsContext.getInstance().getModule(AbstractEventBusModule.class);
         pool = ThreadManager.createThreadPool(EventBusConstant.THREAD_COUNT, EventBusConstant.THREAD_COUNT,
                 new NulsDefaultThreadFactory(module.getModuleId(), EventBusConstant.THREAD_POOL_NAME));
 
