@@ -140,10 +140,14 @@ public class Peer extends BaseNulsData {
         if (this.status != Peer.HANDSHAKE && !isHandShakeMessage(networkMessage)) {
             throw new NotYetConnectedException();
         }
-
-        byte[] data = networkMessage.serialize();
-        NulsMessage message = new NulsMessage(network.packetMagic(), NulsMessageHeader.NETWORK_MESSAGE, data);
-        sendMessage(message);
+        lock.lock();
+        try {
+            byte[] data = networkMessage.serialize();
+            NulsMessage message = new NulsMessage(network.packetMagic(), NulsMessageHeader.NETWORK_MESSAGE, data);
+            this.writeTarget.write(message.serialize());
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
