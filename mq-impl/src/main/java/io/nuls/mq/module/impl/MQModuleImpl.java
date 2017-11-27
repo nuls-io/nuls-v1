@@ -1,7 +1,7 @@
 package io.nuls.mq.module.impl;
 
 
-import io.nuls.core.thread.manager.NulsDefaultThreadFactory;
+import io.nuls.core.thread.manager.NulsThreadFactory;
 import io.nuls.core.thread.manager.ThreadManager;
 import io.nuls.mq.MqConstant;
 import io.nuls.mq.entity.StatInfo;
@@ -26,7 +26,7 @@ public class MQModuleImpl extends AbstractMQModule {
 
     @Override
     public void start() {
-        ScheduledExecutorService service =ThreadManager.createScheduledThreadPool(new NulsDefaultThreadFactory(this.getModuleId(),"queueStatusLogPool"));
+        ScheduledExecutorService service =ThreadManager.createScheduledThreadPool(new NulsThreadFactory(this.getModuleId(),"queueStatusLogPool"));
         service.scheduleAtFixedRate(new StatusLogThread(), 0, QueueManager.getLatelySecond(), TimeUnit.SECONDS);
         this.registerService(service);
         this.registerService(QueueServiceImpl.getInstance());

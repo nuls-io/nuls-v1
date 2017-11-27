@@ -1,6 +1,8 @@
 package io.nuls.core.thread;
 
 public  class BaseThread extends Thread{
+    private short moduleId;
+    private String poolName;
 
     public BaseThread() {
         super();
@@ -82,4 +84,19 @@ public  class BaseThread extends Thread{
         System.out.println("beforeInterrupt");
     }
 
+    public short getModuleId() {
+        return moduleId;
+    }
+
+    public void setModuleId(short moduleId) {
+        this.moduleId = moduleId;
+    }
+
+    public String getPoolName() {
+        return poolName;
+    }
+
+    public void setPoolName(String poolName) {
+        this.poolName = poolName;
+    }
 }

@@ -77,11 +77,17 @@ public class Bootstrap {
             try {
                 short moduleId = Short.parseShort(key);
                 BaseNulsModule module = regModule(moduleId, bootstrapClasses.getProperty(key));
-                module.start();
+                startModule(module);
             } catch (Exception e) {
                 throw new NulsRuntimeException(e);
             }
         }
+    }
+
+    private static void startModule(BaseNulsModule module) {
+        //todo importent
+
+
     }
 
     private static BaseNulsModule regModule(short id, String moduleClass) {
