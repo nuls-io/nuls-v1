@@ -13,4 +13,8 @@ public interface NulsMessageFilter {
 
     NulsMessage filterMessage(byte[] bytes);
 
+    public void addMagicNum(Integer magicNum);
+
+    public void removeMagicNum(Integer magicNum);
+
 }

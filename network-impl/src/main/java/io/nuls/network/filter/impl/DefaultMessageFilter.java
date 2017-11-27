@@ -7,6 +7,7 @@ import io.nuls.core.mesasge.NulsMessageHeader;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.network.message.messageFilter.NulsMessageFilter;
 
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -17,7 +18,7 @@ import java.util.Set;
 public class DefaultMessageFilter implements NulsMessageFilter {
 
 
-    private Set<Long> magicSet = new LinkedHashSet<>();
+    private Set<Integer> magicSet = new LinkedHashSet<>();
 
     private static final DefaultMessageFilter MESSAGE_FILTER = new DefaultMessageFilter();
 
@@ -33,6 +34,7 @@ public class DefaultMessageFilter implements NulsMessageFilter {
     public NulsMessageHeader filterHeader(byte[] bytes) {
         NulsMessageHeader messageHeader = new NulsMessageHeader();
         messageHeader.parse(new NulsByteBuffer(bytes));
+
         if (!magicSet.contains(messageHeader.getMagicNumber())) {
             throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
         }
@@ -44,11 +46,13 @@ public class DefaultMessageFilter implements NulsMessageFilter {
         return null;
     }
 
-    public void addMagicNum(long magicNum) {
+    @Override
+    public void addMagicNum(Integer magicNum) {
         magicSet.add(magicNum);
     }
 
-    public void removeMagicNum(long magicNum) {
+    @Override
+    public void removeMagicNum(Integer magicNum) {
         magicSet.remove(magicNum);
     }
 

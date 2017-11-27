@@ -166,6 +166,8 @@ public class Peer extends BaseNulsData {
         byte[] headers = new byte[NulsMessageHeader.MESSAGE_HEADER_SIZE];
         buffer.get(headers, 0, headers.length);
         NulsMessageHeader messageHeader = network.getMessageFilter().filterHeader(headers);
+
+        System.out.println(messageHeader.toString());
         byte[] data = new byte[buffer.limit() - headers.length];
         buffer.get(data, 0, data.length);
 
