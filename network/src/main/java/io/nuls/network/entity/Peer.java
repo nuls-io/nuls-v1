@@ -267,6 +267,12 @@ public class Peer extends BaseNulsData {
 
     }
 
+    @Override
+    public boolean equals(Object o) {
+        Peer other = (Peer) o;
+        return this.getHash().equals(other.getHash());
+    }
+
     public int getType() {
         return type;
     }

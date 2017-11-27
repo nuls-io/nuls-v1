@@ -77,7 +77,12 @@ public class PeerDiscoverHandler {
             if (outPeers.size() < network.maxOutCount()) {
                 // find other peer and try to connect
                 List<Peer> peers = getSeedPeers();
+
+
                 for (Peer newPeer : peers) {
+                    if(outPeers.getPeers().contains(newPeer)) {
+                        continue;
+                    }
                     peersManager.addPeerToGroup(NetworkConstant.NETWORK_PEER_OUT_GROUP, newPeer);
                     peersManager.getConnectionManager().openConnection(newPeer);
                 }
