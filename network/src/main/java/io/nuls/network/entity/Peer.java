@@ -221,7 +221,7 @@ public class Peer extends BaseNulsData {
     }
 
     public void destroy() {
-        System.out.println("---------peer destory");
+        System.out.println("---------peer destory:" + this.getIp());
         lock.lock();
         try {
             this.status = Peer.CLOSE;

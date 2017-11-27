@@ -219,13 +219,15 @@ public class ConnectionManager {
                 if (channel.finishConnect()) {
                     key.interestOps((key.interestOps() | SelectionKey.OP_READ) & ~SelectionKey.OP_CONNECT);
                     key.attach(handler);
+                    peer.setWriteTarget(handler);
                     peer.connectionOpened();
                 } else {
                     // Failed to connect for some reason
                     peer.destroy();
                 }
             } catch (Exception e) {
-                Log.warn("out peer Failed to connect to {}", channel.socket().getRemoteSocketAddress(),e);
+             //   e.printStackTrace();
+                Log.warn("out peer Failed to connect to {}", channel.socket().getRemoteSocketAddress());
                 // Failed to connect for some reason
                 peer.destroy();
             }
@@ -247,9 +249,11 @@ public class ConnectionManager {
                 new Peer(network, Peer.IN, socketAddress);
                 peersManager.addPeerToGroup(NetworkConstant.NETWORK_PEER_IN_GROUP, peer);
                 ConnectionHandler handler = new ConnectionHandler(peer, socketChannel, newKey);
+                peer.setWriteTarget(handler);
                 newKey.attach(handler);
                 peer.connectionOpened();
             } catch (Exception e) {
+                e.printStackTrace();
                 if (socketChannel != null) {
                     Log.warn("in peer Failed to connect to {}", socketChannel.socket().getRemoteSocketAddress());
                     try {
