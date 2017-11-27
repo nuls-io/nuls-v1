@@ -190,9 +190,7 @@ public class Peer extends BaseNulsData {
             processorService.send(message.getData());
         } else {
 
-            byte[] types = new byte[2];
-            System.arraycopy(data, 0, types, 0, 2);
-            short msgType = Utils.bytes2Short(types);
+            short msgType = (short) new NulsByteBuffer(data).readVarInt();
             AbstractNetworkMessage networkMessage = AbstractNetworkMessage.transfer(msgType, data);
             if (this.status != Peer.HANDSHAKE && !isHandShakeMessage(networkMessage)) {
                 return;
@@ -228,7 +226,7 @@ public class Peer extends BaseNulsData {
     }
 
     public void destroy() {
-        System.out.println("---------peer destory:" + this.getIp());
+
         lock.lock();
         try {
             this.status = Peer.CLOSE;
