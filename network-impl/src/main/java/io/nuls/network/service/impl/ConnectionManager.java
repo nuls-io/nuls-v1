@@ -226,7 +226,7 @@ public class ConnectionManager {
                     peer.destroy();
                 }
             } catch (Exception e) {
-             //   e.printStackTrace();
+                //   e.printStackTrace();
                 Log.warn("out peer Failed to connect to {}", channel.socket().getRemoteSocketAddress());
                 // Failed to connect for some reason
                 peer.destroy();
@@ -246,7 +246,7 @@ public class ConnectionManager {
                 socketChannel.configureBlocking(false);
                 SelectionKey newKey = socketChannel.register(selector, SelectionKey.OP_READ);
 
-                new Peer(network, Peer.IN, socketAddress);
+                peer = new Peer(network, Peer.IN, socketAddress);
                 peersManager.addPeerToGroup(NetworkConstant.NETWORK_PEER_IN_GROUP, peer);
                 ConnectionHandler handler = new ConnectionHandler(peer, socketChannel, newKey);
                 peer.setWriteTarget(handler);

@@ -10,6 +10,7 @@ import io.nuls.core.mesasge.NulsMessageHeader;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
+import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.message.AbstractNetWorkMessageHandlerFactory;
 import io.nuls.network.message.AbstractNetworkMessage;
@@ -254,7 +255,10 @@ public class Peer extends BaseNulsData {
 
 
     public boolean isHandShakeMessage(AbstractNetworkMessage networkMessage) {
-        return networkMessage instanceof VersionMessage;
+//        return networkMessage instanceof VersionMessage;
+        return (networkMessage.getType() == NetworkConstant.NETWORK_GET_VERSION_MESSAGE
+                || networkMessage.getType() == NetworkConstant.NETWORK_VERSION_MESSAGE);
+
     }
 
     public int getType() {
