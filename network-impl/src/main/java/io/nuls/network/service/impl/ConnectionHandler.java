@@ -137,6 +137,7 @@ public class ConnectionHandler implements MessageWriter {
                     handler.peer.destroy();
                     return;
                 }
+                System.out.println("--------len : " + len);
                 // "flip" the buffer - setting the limit to the current position and setting position to 0
                 handler.readBuffer.flip();
                 handler.peer.receiveMessage(handler.readBuffer);

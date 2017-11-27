@@ -128,16 +128,39 @@ public class NulsMessageHeader implements Serializable {
         this.headType = headType;
     }
 
-    @Override
-    public String toString() {
-        return Hex.encode(serialize());
-    }
-
     public byte getXor() {
         return xor;
     }
 
     public void setXor(byte xor) {
         this.xor = xor;
+    }
+
+    @Override
+    public String toString() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("messageHeader:{");
+        buffer.append("magicNumber:" + magicNumber + ", ");
+        buffer.append("headerType:" + headType + ", ");
+        buffer.append("length:" + length + ", ");
+        buffer.append("xor:" + xor + ", ");
+        buffer.append("extend:[");
+        if (extend != null && extend.length > 0) {
+            for (byte b : extend) {
+                buffer.append(b + " ");
+            }
+        }
+        buffer.append("]}");
+        return buffer.toString();
+    }
+
+    public static void main(String[] args) {
+        NulsMessageHeader header = new NulsMessageHeader(12345678, (short) 1, 500, (byte) 3);
+        byte[] bytes = header.serialize();
+
+        NulsMessageHeader header2 = new NulsMessageHeader();
+        header2.parse(new NulsByteBuffer(bytes));
+
+        System.out.println(header2.toString());
     }
 }

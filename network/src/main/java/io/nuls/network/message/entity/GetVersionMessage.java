@@ -1,7 +1,10 @@
 package io.nuls.network.message.entity;
 
+import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
+import io.nuls.core.mesasge.NulsMessage;
+import io.nuls.core.mesasge.NulsMessageHeader;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.network.constant.NetworkConstant;
@@ -9,6 +12,7 @@ import io.nuls.network.message.AbstractNetworkMessage;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 
 /**
  * @author vivi
@@ -18,7 +22,7 @@ public class GetVersionMessage extends AbstractNetworkMessage {
 
     public static final short OWN_MAIN_VERSION = 1;
 
-    public static final short OWN_SUB_VERSION = 0001;
+    public static final short OWN_SUB_VERSION = 1001;
 
     private long nonce;
 
@@ -31,6 +35,7 @@ public class GetVersionMessage extends AbstractNetworkMessage {
     @Override
     public int size() {
         int s = 0;
+        s += VarInt.sizeOf(this.version.getVersion());
         s += VarInt.sizeOf(type);
         s += VarInt.sizeOf(nonce);
         return s;
@@ -38,14 +43,17 @@ public class GetVersionMessage extends AbstractNetworkMessage {
 
     @Override
     public void serializeToStream(OutputStream stream) throws IOException {
+        stream.write(new VarInt(version.getVersion()).encode());
         stream.write(new VarInt(type).encode());
         stream.write(new VarInt(nonce).encode());
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
+        short version = (short) byteBuffer.readVarInt();
+        this.setVersion(new NulsVersion(version));
         type = (short) byteBuffer.readVarInt();
-        nonce = byteBuffer.readByte();
+        nonce = byteBuffer.readVarInt();
     }
 
     public long getNonce() {
@@ -54,5 +62,42 @@ public class GetVersionMessage extends AbstractNetworkMessage {
 
     public void setNonce(long nonce) {
         this.nonce = nonce;
+    }
+
+
+    public static void main(String[] args) throws IOException {
+        ByteBuffer readBuffer = ByteBuffer.allocate(NulsMessage.MAX_SIZE);
+
+
+        NulsMessageHeader header = new NulsMessageHeader(12345678, (short) 1, 500, (byte) 3);
+        GetVersionMessage versionMessage = new GetVersionMessage();
+        System.out.println("version:" + versionMessage.getVersion().getStringVersion());
+        System.out.println("nonce" + versionMessage.getNonce());
+
+        NulsMessage nulsMessage = new NulsMessage(header, versionMessage.serialize());
+
+        byte[] messages = nulsMessage.serialize();
+        readBuffer.put(messages);
+        System.out.println(header.toString());
+        System.out.println("---------");
+
+        readBuffer.flip();
+
+        byte[] headers = new byte[NulsMessageHeader.MESSAGE_HEADER_SIZE];
+        readBuffer.get(headers, 0, headers.length);
+
+        header = new NulsMessageHeader();
+        header.parse(new NulsByteBuffer(headers));
+        System.out.println(header.toString());
+
+
+        byte[] data = new byte[readBuffer.limit() - headers.length];
+        readBuffer.get(data, 0, data.length);
+        versionMessage = new GetVersionMessage();
+
+        versionMessage.parse(new NulsByteBuffer(data));
+        System.out.println("version:" + versionMessage.getVersion().getStringVersion());
+        System.out.println("type:" + versionMessage.getType());
+        System.out.println("nonce" + versionMessage.getNonce());
     }
 }
