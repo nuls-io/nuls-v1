@@ -36,8 +36,8 @@ public class NulsContext {
     public static String nulsVersion;
 
     public Block getGenesisBlock() {
-        Block block = new Block(1,1, Sha256Hash.twiceOf("0000".getBytes()));
-        return block;
+        //todo
+        return null;
     }
 
     /**

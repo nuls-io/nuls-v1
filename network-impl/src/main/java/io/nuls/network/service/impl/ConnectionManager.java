@@ -225,7 +225,7 @@ public class ConnectionManager {
                     peer.destroy();
                 }
             } catch (Exception e) {
-                Log.warn("out peer Failed to connect to {}", channel.socket().getRemoteSocketAddress());
+                Log.warn("out peer Failed to connect to {}", channel.socket().getRemoteSocketAddress(),e);
                 // Failed to connect for some reason
                 peer.destroy();
             }
