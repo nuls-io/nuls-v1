@@ -4,15 +4,13 @@ import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.event.handler.intf.NulsEventHandler;
 
-import java.util.concurrent.Callable;
-
 /**
  *
  * @author Niels
  * @date 2017/11/6
  *
  */
-public class NulsEventCall<T extends BaseNulsEvent> implements Callable<T> {
+public class NulsEventCall<T extends BaseNulsEvent> implements Runnable {
     private final T event;
     private final NulsEventHandler<T> handler;
 
@@ -22,9 +20,9 @@ public class NulsEventCall<T extends BaseNulsEvent> implements Callable<T> {
     }
 
     @Override
-    public T call() throws Exception {
+    public void run() {
         if (null == event || null == handler) {
-            return null;
+            return ;
         }
         try {
             boolean ok = handler.getFilterChain().startDoFilter(event);
@@ -34,6 +32,6 @@ public class NulsEventCall<T extends BaseNulsEvent> implements Callable<T> {
         }catch (Exception e){
             Log.error(e);
         }
-        return null;
+        return ;
     }
 }

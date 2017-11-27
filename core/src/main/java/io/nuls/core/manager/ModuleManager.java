@@ -5,9 +5,11 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.module.BaseNulsModule;
 import io.nuls.core.module.NulsModuleProxy;
-import io.nuls.core.thread.BaseNulsThread;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -16,8 +18,6 @@ import java.util.*;
  *
  */
 public class ModuleManager {
-
-    private static final Map<String, BaseNulsThread> THREAD_MAP = new HashMap<>();
 
     private static final Map<String, NulsModuleProxy> MODULE_MAP = new HashMap<>();
 
@@ -132,17 +132,6 @@ public class ModuleManager {
         return str.toString();
     }
 
-    public void regThread(String threadName, BaseNulsThread thread) {
-        if (THREAD_MAP.keySet().contains(threadName)) {
-            throw new NulsRuntimeException(ErrorCode.THREAD_REPETITION, "the name of thread is already exist(" + threadName + ")");
-        }
-        THREAD_MAP.put(threadName, thread);
-    }
-
-    private void cancelThread(String threadName) {
-        THREAD_MAP.remove(threadName);
-    }
-
     public void regModule(String moduleName, BaseNulsModule module) {
         if (MODULE_MAP.keySet().contains(moduleName)) {
             throw new NulsRuntimeException(ErrorCode.THREAD_REPETITION, "the name of Module is already exist(" + moduleName + ")");
@@ -158,21 +147,5 @@ public class ModuleManager {
         MODULE_MAP.remove(moduleName);
     }
 
-
-    public List<BaseNulsThread> getThreadsByModule(String moduleName) {
-        List<BaseNulsThread> list = new ArrayList<>();
-        for (BaseNulsThread t : THREAD_MAP.values()) {
-            if (t.getModule().getModuleName().equals(moduleName)) {
-                list.add(t);
-            }
-        }
-        return list;
-    }
-
-    public void remThreadsByModule(String moduleName) {
-        for (BaseNulsThread t : getThreadsByModule(moduleName)) {
-            THREAD_MAP.remove(t.getName());
-        }
-    }
 
 }

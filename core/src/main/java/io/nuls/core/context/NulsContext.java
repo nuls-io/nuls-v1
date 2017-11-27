@@ -50,8 +50,8 @@ public class NulsContext {
         return ModuleManager.getInstance().getModule(moduleName);
     }
 
-    public BaseNulsModule getModule(Class moduleClass) {
-        return ModuleManager.getInstance().getModule(moduleClass);
+    public <T extends BaseNulsModule> T getModule(Class<T> moduleClass) {
+        return (T) ModuleManager.getInstance().getModule(moduleClass);
     }
 
     public BaseNulsModule getModule(int moduleId) {

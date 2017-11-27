@@ -1,13 +1,18 @@
 package io.nuls.event.bus.processor.manager;
 
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.event.EventManager;
 import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.thread.manager.NulsDefaultThreadFactory;
+import io.nuls.core.thread.manager.ThreadManager;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.event.bus.constant.EventBusConstant;
 import io.nuls.event.bus.event.handler.intf.NulsEventHandler;
+import io.nuls.event.bus.module.impl.EventBusModuleImpl;
+import io.nuls.event.bus.module.intf.AbstractEventBusModule;
 import io.nuls.event.bus.processor.thread.EventBusDispatchThread;
 import io.nuls.event.bus.processor.thread.NulsEventCall;
 import io.nuls.event.bus.utils.disruptor.DisruptorEvent;
@@ -17,7 +22,6 @@ import java.util.*;
 import java.util.concurrent.*;
 
 /**
- *
  * @author Niels
  * @date 2017/11/6
  */
@@ -34,13 +38,14 @@ public class ProcessorManager<E extends BaseNulsEvent, H extends NulsEventHandle
     }
 
     public final void init() {
-        pool = new ThreadPoolExecutor(EventBusConstant.THREAD_COUNT, EventBusConstant.THREAD_COUNT,
-                0L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<Runnable>());
+        AbstractEventBusModule module = NulsContext.getInstance().getModule(AbstractEventBusModule.class);
+        pool = ThreadManager.createThreadPool(EventBusConstant.THREAD_COUNT, EventBusConstant.THREAD_COUNT,
+                new NulsDefaultThreadFactory(module.getModuleId(), EventBusConstant.THREAD_POOL_NAME));
+
         disruptorService.createDisruptor(disruptorName, EventBusConstant.DEFAULT_RING_BUFFER_SIZE);
         List<EventBusDispatchThread> handlerList = new ArrayList<>();
         for (int i = 0; i < EventBusConstant.THREAD_COUNT; i++) {
-            EventBusDispatchThread handler = new EventBusDispatchThread(this.disruptorName + "_thread" + i, this);
+            EventBusDispatchThread handler = new EventBusDispatchThread(this);
             handlerList.add(handler);
         }
         disruptorService.handleEventsWithWorkerPool(disruptorName, handlerList.toArray(new EventBusDispatchThread[handlerList.size()]));
@@ -121,10 +126,8 @@ public class ProcessorManager<E extends BaseNulsEvent, H extends NulsEventHandle
             throw new NulsRuntimeException(ErrorCode.FAILED, "execute event handler faild,the event is null!");
         }
         Set<NulsEventHandler> handlerSet = this.getHandlerList((Class<E>) data.getClass());
-        List<NulsEventCall<BaseNulsEvent>> callList = new ArrayList<>();
         for (NulsEventHandler handler : handlerSet) {
-            callList.add(new NulsEventCall(data, handler));
+            pool.execute(new NulsEventCall(data, handler));
         }
-        pool.invokeAll(callList);
     }
 }

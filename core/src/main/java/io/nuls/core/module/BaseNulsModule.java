@@ -5,7 +5,7 @@ import io.nuls.core.event.EventManager;
 import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.manager.ModuleManager;
-import io.nuls.core.thread.BaseNulsThread;
+import io.nuls.core.thread.BaseThread;
 import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.log.Log;
 
@@ -57,15 +57,6 @@ public abstract class BaseNulsModule {
      * @return
      */
     public abstract int getVersion();
-
-    /**
-     * get all threads of the module
-     *
-     * @return
-     */
-    protected final List<BaseNulsThread> getThreadList() {
-        return ModuleManager.getInstance().getThreadsByModule(this.moduleName);
-    }
 
     /**
      * get the status of the module

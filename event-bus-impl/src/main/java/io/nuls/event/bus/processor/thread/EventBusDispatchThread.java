@@ -1,10 +1,8 @@
 package io.nuls.event.bus.processor.thread;
 
 import com.lmax.disruptor.WorkHandler;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.event.BaseNulsEvent;
-import io.nuls.core.thread.BaseNulsThread;
-import io.nuls.event.bus.module.impl.EventBusModuleImpl;
+import io.nuls.core.thread.BaseThread;
 import io.nuls.event.bus.processor.manager.ProcessorManager;
 import io.nuls.event.bus.utils.disruptor.DisruptorEvent;
 
@@ -13,12 +11,11 @@ import io.nuls.event.bus.utils.disruptor.DisruptorEvent;
  * @author Niels
  * @date 2017/11/6
  */
-public class EventBusDispatchThread extends BaseNulsThread implements WorkHandler<DisruptorEvent<BaseNulsEvent>> {
+public class EventBusDispatchThread extends BaseThread implements WorkHandler<DisruptorEvent<BaseNulsEvent>> {
 
     private final ProcessorManager processorManager;
 
-    public EventBusDispatchThread(String threadName, ProcessorManager processorManager) {
-        super(NulsContext.getInstance().getModule(EventBusModuleImpl.class), threadName);
+    public EventBusDispatchThread( ProcessorManager processorManager) {
         this.processorManager = processorManager;
     }
 
@@ -29,13 +26,5 @@ public class EventBusDispatchThread extends BaseNulsThread implements WorkHandle
             return;
         }
         processorManager.executeHandlers(event.getData());
-    }
-
-    @Override
-    public void run() {
-        //do nothing
-        System.out.println("do sth.....");
-
-        return;
     }
 }

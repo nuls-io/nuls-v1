@@ -1,7 +1,8 @@
 package io.nuls.mq.module.impl;
 
 
-import io.nuls.core.thread.BaseNulsThread;
+import io.nuls.core.thread.manager.NulsDefaultThreadFactory;
+import io.nuls.core.thread.manager.ThreadManager;
 import io.nuls.mq.MqConstant;
 import io.nuls.mq.entity.StatInfo;
 import io.nuls.mq.manager.QueueManager;
@@ -11,7 +12,6 @@ import io.nuls.mq.thread.StatusLogThread;
 
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -20,18 +20,14 @@ import java.util.concurrent.TimeUnit;
  */
 public class MQModuleImpl extends AbstractMQModule {
 
-    private ScheduledExecutorService service;
-
     public MQModuleImpl() {
         super();
     }
 
     @Override
     public void start() {
-        BaseNulsThread t1 = new StatusLogThread(this, "queueStatusLogThread");
-        //启动速度统计任务
-        service = new ScheduledThreadPoolExecutor(1);
-        service.scheduleAtFixedRate(t1, 0, QueueManager.getLatelySecond(), TimeUnit.SECONDS);
+        ScheduledExecutorService service =ThreadManager.createScheduledThreadPool(new NulsDefaultThreadFactory(this.getModuleId(),"queueStatusLogPool"));
+        service.scheduleAtFixedRate(new StatusLogThread(), 0, QueueManager.getLatelySecond(), TimeUnit.SECONDS);
         this.registerService(service);
         this.registerService(QueueServiceImpl.getInstance());
         QueueManager.setRunning(true);
@@ -40,7 +36,6 @@ public class MQModuleImpl extends AbstractMQModule {
     @Override
     public void shutdown() {
         QueueManager.setRunning(false);
-        service.shutdown();
     }
 
     @Override
@@ -56,12 +51,12 @@ public class MQModuleImpl extends AbstractMQModule {
         str.append(",moduleStatus:");
         str.append(getStatus());
         str.append(",ThreadCount:");
-        List<BaseNulsThread> threadList = this.getThreadList();
-        str.append(threadList.size());
-        str.append("\nThreadInfo:\n");
-        for (BaseNulsThread t : threadList) {
-            str.append(t.getInfo());
-        }
+//        List<BaseNulsThread> threadList = this.getThreadList();
+//        str.append(threadList.size());
+//        str.append("\nThreadInfo:\n");
+//        for (BaseNulsThread t : threadList) {
+//            str.append(t.getInfo());
+//        }
         str.append("QueueInfo:\n");
         List<StatInfo> list = QueueManager.getAllStatInfo();
         for (StatInfo si : list) {

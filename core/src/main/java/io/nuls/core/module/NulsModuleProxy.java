@@ -3,6 +3,7 @@ package io.nuls.core.module;
 
 import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.manager.ModuleManager;
+import io.nuls.core.thread.manager.ThreadManager;
 import io.nuls.core.utils.log.Log;
 
 /**
@@ -46,6 +47,7 @@ public class NulsModuleProxy extends BaseNulsModule {
             module.setStatus(ModuleStatusEnum.EXCEPTION);
             Log.error(e);
         }
+        ThreadManager.shutdownByModuleId(this.getModuleId());
         module.setStatus(ModuleStatusEnum.STOPED);
     }
 
@@ -63,9 +65,8 @@ public class NulsModuleProxy extends BaseNulsModule {
         }
         ModuleManager.getInstance().removeService(this.getModuleName());
         ModuleManager.getInstance().remModule(this.getModuleName());
-        ModuleManager.getInstance().remThreadsByModule(this.getModuleName());
+        ThreadManager.shutdownByModuleId(this.getModuleId());
         module.setStatus(ModuleStatusEnum.DESTROYED);
-
     }
 
     @Override
