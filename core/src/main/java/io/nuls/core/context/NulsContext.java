@@ -33,7 +33,7 @@ public class NulsContext {
      */
     private Block bestBlock;
 
-    public static String nulsVersion;
+    public static String nulsVersion = "1.0";
 
     public Block getGenesisBlock() {
         Block block = new Block(1,1, Sha256Hash.twiceOf("0000".getBytes()));

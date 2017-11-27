@@ -70,10 +70,8 @@ public class GetVersionMessage extends AbstractNetworkMessage {
 
 
         NulsMessageHeader header = new NulsMessageHeader(12345678, (short) 1, 500, (byte) 3);
-        GetVersionMessage versionMessage = new GetVersionMessage();
-        System.out.println("version:" + versionMessage.getVersion().getStringVersion());
-        System.out.println("nonce" + versionMessage.getNonce());
-
+        VersionMessage versionMessage = new VersionMessage(50000, "abcdefghij");
+        System.out.println(versionMessage.toString());
         NulsMessage nulsMessage = new NulsMessage(header, versionMessage.serialize());
 
         byte[] messages = nulsMessage.serialize();
@@ -93,11 +91,10 @@ public class GetVersionMessage extends AbstractNetworkMessage {
 
         byte[] data = new byte[readBuffer.limit() - headers.length];
         readBuffer.get(data, 0, data.length);
-        versionMessage = new GetVersionMessage();
+        versionMessage = new VersionMessage();
 
         versionMessage.parse(new NulsByteBuffer(data));
-        System.out.println("version:" + versionMessage.getVersion().getStringVersion());
-        System.out.println("type:" + versionMessage.getType());
-        System.out.println("nonce" + versionMessage.getNonce());
+        System.out.println(versionMessage.toString());
+
     }
 }
