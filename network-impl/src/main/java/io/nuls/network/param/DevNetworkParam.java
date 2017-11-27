@@ -23,11 +23,11 @@ public class DevNetworkParam extends AbstractNetworkParam {
         this.maxOutCount = ConfigLoader.getPropValue(NetworkConstant.NETWORK_PEER_MAX_OUT, 10);
 
 
-        InetSocketAddress address2 = new InetSocketAddress("192.168.1.102", port);
+        //InetSocketAddress address2 = new InetSocketAddress("192.168.1.102", port);
         InetSocketAddress address3 = new InetSocketAddress("192.168.1.248", port);
         InetSocketAddress address1 = new InetSocketAddress("192.168.1.199", port);
         seedPeers.add(address1);
-        seedPeers.add(address2);
+        //seedPeers.add(address2);
         seedPeers.add(address3);
 
         this.messageFilter = DefaultMessageFilter.getInstance();

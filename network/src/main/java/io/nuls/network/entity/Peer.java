@@ -205,6 +205,8 @@ public class Peer extends BaseNulsData {
                         NetworkMessageResult messageResult = handler.process(networkMessage, Peer.this);
                         processMessageResult(messageResult);
                     } catch (Exception e) {
+                        e.printStackTrace();
+                        System.out.println("--------------------destory 7" + Peer.this.getIp());
                         Peer.this.destroy();
                     }
                 }
@@ -263,6 +265,12 @@ public class Peer extends BaseNulsData {
         return (networkMessage.getType() == NetworkConstant.NETWORK_GET_VERSION_MESSAGE
                 || networkMessage.getType() == NetworkConstant.NETWORK_VERSION_MESSAGE);
 
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        Peer other = (Peer) o;
+        return this.getHash().equals(other.getHash());
     }
 
     public int getType() {
