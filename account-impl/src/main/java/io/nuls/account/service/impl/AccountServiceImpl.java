@@ -6,6 +6,7 @@ import io.nuls.account.entity.Address;
 import io.nuls.account.manager.AccountManager;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.account.util.AccountTool;
+import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.ECKey;
@@ -57,7 +58,7 @@ public class AccountServiceImpl implements AccountService {
             Address address = new Address(Utils.sha256hash160(key.getPubKey(false)));
             Account account = new Account();
             account.setPriSeed(key.getPrivKeyBytes());
-       //     account.setVersion(AccountConstant.ACCOUNT_MODULE_VERSION);
+            account.setVersion(new NulsVersion((short) 0));
             account.setAddress(address);
             account.setId(address.toString());
             account.setPubKey(key.getPubKey(true));
