@@ -21,7 +21,7 @@ public class VersionMessage extends AbstractNetworkMessage {
 
     public static final short OWN_MAIN_VERSION = 1;
 
-    public static final short OWN_SUB_VERSION = 0001;
+    public static final short OWN_SUB_VERSION = 1001;
 
     private long bestBlockHeight;
 
@@ -49,7 +49,7 @@ public class VersionMessage extends AbstractNetworkMessage {
         s += VarInt.sizeOf(bestBlockHeight);
         // put the bestBlockHash.length
         s += 1;
-        if (StringUtils.isBlank(bestBlockHash)) {
+        if (!StringUtils.isBlank(bestBlockHash)) {
             try {
                 s += bestBlockHash.getBytes(NulsContext.DEFAULT_ENCODING).length;
             } catch (UnsupportedEncodingException e) {
@@ -57,7 +57,7 @@ public class VersionMessage extends AbstractNetworkMessage {
             }
         }
         s += 1;
-        if (StringUtils.isBlank(nulsVersion)) {
+        if (!StringUtils.isBlank(nulsVersion)) {
             try {
                 s += nulsVersion.getBytes(NulsContext.DEFAULT_ENCODING).length;
             } catch (UnsupportedEncodingException e) {
@@ -83,6 +83,19 @@ public class VersionMessage extends AbstractNetworkMessage {
         bestBlockHeight = byteBuffer.readVarInt();
         bestBlockHash = new String(byteBuffer.readByLengthByte());
         nulsVersion = new String(byteBuffer.readByLengthByte());
+    }
+
+    @Override
+    public String toString() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("versionMessage:{");
+        buffer.append("type:" + type + ", ");
+        buffer.append("version:" + version.getStringVersion() + ", ");
+        buffer.append("bestBlockHeight:" + bestBlockHeight + ", ");
+        buffer.append("bestBlockHash:" + bestBlockHash + ", ");
+        buffer.append("nulsVersion:" + nulsVersion + "}");
+
+        return buffer.toString();
     }
 
     public long getBestBlockHeight() {

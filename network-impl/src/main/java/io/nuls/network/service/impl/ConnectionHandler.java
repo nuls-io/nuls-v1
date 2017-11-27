@@ -122,6 +122,7 @@ public class ConnectionHandler implements MessageWriter {
         try {
             if (!key.isValid()) {
                 // Key has been cancelled, make sure the socket gets closed
+                System.out.println("--------------------destory 1");
                 handler.peer.destroy();
                 return;
             }
@@ -134,9 +135,11 @@ public class ConnectionHandler implements MessageWriter {
                 } else if (len == -1) {
                     // Socket was closed
                     key.cancel();
+                    System.out.println("--------------------destory 2");
                     handler.peer.destroy();
                     return;
                 }
+                System.out.println("--------len : " + len);
                 // "flip" the buffer - setting the limit to the current position and setting position to 0
                 handler.readBuffer.flip();
                 handler.peer.receiveMessage(handler.readBuffer);
@@ -150,8 +153,10 @@ public class ConnectionHandler implements MessageWriter {
         } catch (Exception e) {
             // This can happen eg if the channel closes while the thread is about to get killed
             // (ClosedByInterruptException), or if handler.connection.receiveBytes throws something
+            e.printStackTrace();
             Throwable t = e;
             Log.warn("Error handling SelectionKey: {}", t.getMessage() != null ? t.getMessage() : t.getClass().getName());
+            System.out.println("--------------------destory 3");
             handler.peer.destroy();
         }
     }

@@ -30,6 +30,7 @@ public class MainNetworkParam extends AbstractNetworkParam {
         seedPeers.add(address3);
 
         this.messageFilter = DefaultMessageFilter.getInstance();
+        this.messageFilter.addMagicNum(this.packetMagic);
         this.messageHandlerFactory = DefaultNetWorkMessageHandlerFactory.getInstance();
     }
 

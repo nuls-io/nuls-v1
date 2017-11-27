@@ -159,13 +159,15 @@ public class Peer extends BaseNulsData {
         if (this.getStatus() == Peer.CLOSE) {
             return;
         }
-        if (buffer.position() != 0 || buffer.capacity() <= NulsMessageHeader.MESSAGE_HEADER_SIZE) {
+        if (buffer.position() != 0 || buffer.limit() <= NulsMessageHeader.MESSAGE_HEADER_SIZE) {
             throw new NulsVerificationException(ErrorCode.NET_MESSAGE_ERROR);
         }
 
         byte[] headers = new byte[NulsMessageHeader.MESSAGE_HEADER_SIZE];
         buffer.get(headers, 0, headers.length);
         NulsMessageHeader messageHeader = network.getMessageFilter().filterHeader(headers);
+
+        System.out.println(messageHeader.toString());
         byte[] data = new byte[buffer.limit() - headers.length];
         buffer.get(data, 0, data.length);
 
@@ -188,9 +190,7 @@ public class Peer extends BaseNulsData {
             processorService.send(message.getData());
         } else {
 
-            byte[] types = new byte[2];
-            System.arraycopy(data, 0, types, 0, 2);
-            short msgType = Utils.bytes2Short(types);
+            short msgType = (short) new NulsByteBuffer(data).readVarInt();
             AbstractNetworkMessage networkMessage = AbstractNetworkMessage.transfer(msgType, data);
             if (this.status != Peer.HANDSHAKE && !isHandShakeMessage(networkMessage)) {
                 return;
@@ -226,7 +226,7 @@ public class Peer extends BaseNulsData {
     }
 
     public void destroy() {
-        System.out.println("---------peer destory:" + this.getIp());
+
         lock.lock();
         try {
             this.status = Peer.CLOSE;
