@@ -17,7 +17,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @author vivi
  * @date 2017/11/21
  */
-public class PeerDiscoverHandler {
+public class PeerDiscoverHandler implements Runnable{
 
     private AbstractNetworkParam network;
 

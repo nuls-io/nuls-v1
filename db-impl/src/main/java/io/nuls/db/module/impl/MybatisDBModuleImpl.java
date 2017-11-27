@@ -2,7 +2,6 @@ package io.nuls.db.module.impl;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.thread.BaseNulsThread;
 import io.nuls.core.utils.aop.AopUtils;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.constant.DBConstant;
@@ -19,7 +18,6 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
-import java.util.List;
 
 /**
  *
@@ -94,12 +92,12 @@ public class MybatisDBModuleImpl extends AbstractDBModule {
         str.append(",moduleStatus:");
         str.append(getStatus());
         str.append(",ThreadCount:");
-        List<BaseNulsThread> threadList = this.getThreadList();
-        str.append(threadList.size());
-        str.append("ThreadInfo:\n");
-        for (BaseNulsThread t : threadList) {
-            str.append(t.getInfo());
-        }
+//        List<BaseNulsThread> threadList = this.getThreadList();
+//        str.append(threadList.size());
+//        str.append("ThreadInfo:\n");
+//        for (BaseNulsThread t : threadList) {
+//            str.append(t.getInfo());
+//        }
 //        str.append("QueueInfo:\n");
 //        List<StatInfo> list = QueueManager.getAllStatInfo();
 //        for(StatInfo si :list){

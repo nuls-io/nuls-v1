@@ -5,7 +5,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.thread.BaseNulsThread;
+import io.nuls.core.thread.manager.ThreadManager;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.BlockDao;
 import io.nuls.db.dao.PeerDao;
@@ -80,12 +80,7 @@ public class PeersManager {
          *
          *
          **/
-        new BaseNulsThread(networkModule, "peerDiscovery") {
-            @Override
-            public void run() {
-                PeersManager.this.discovery.run();
-            }
-        }.start();
+        ThreadManager.asynExecuteRunnable(this.discovery);
     }
 
 

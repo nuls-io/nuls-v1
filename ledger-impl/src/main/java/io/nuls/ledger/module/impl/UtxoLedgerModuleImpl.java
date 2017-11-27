@@ -3,6 +3,7 @@ package io.nuls.ledger.module.impl;
 import io.nuls.account.entity.Account;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.thread.manager.ThreadManager;
 import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.event.AbstractCoinTransactionEvent;
@@ -21,7 +22,8 @@ import io.nuls.ledger.thread.SmallChangeThread;
 import java.util.List;
 
 /**
- * Created by Niels on 2017/11/7.
+ * @author Niels
+ * @date 2017/11/7
  */
 public class UtxoLedgerModuleImpl extends AbstractLedgerModule {
 
@@ -37,9 +39,8 @@ public class UtxoLedgerModuleImpl extends AbstractLedgerModule {
     public void start() {
         cacheStandingBook();
         this.registerService(ledgerService);
-        SmallChangeThread.getInstance().start();
-        //register handler
-//        this.registerEvent((short) 3, BaseUtxoCoinEvent.class);
+        SmallChangeThread scthread = SmallChangeThread.getInstance();
+        ThreadManager.createSingleThreadAndRun(this.getModuleId(), SmallChangeThread.class.getSimpleName(), scthread);
         this.registerEvent((short) 4, UtxoLockCoinEvent.class);
         this.registerEvent((short) 5, UtxoSmallChangeEvent.class);
         this.registerEvent((short) 6, AbstractCoinTransactionEvent.class);
@@ -65,13 +66,11 @@ public class UtxoLedgerModuleImpl extends AbstractLedgerModule {
     @Override
     public void shutdown() {
         cacheService.clear();
-        SmallChangeThread.getInstance().stop();
     }
 
     @Override
     public void destroy() {
         this.cacheService.destroy();
-        SmallChangeThread.getInstance().stop();
     }
 
     @Override

@@ -2,7 +2,7 @@ package io.nuls.network.service.impl;
 
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.thread.BaseNulsThread;
+import io.nuls.core.thread.manager.ThreadManager;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Peer;
@@ -12,18 +12,19 @@ import io.nuls.network.module.AbstractNetworkModule;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.channels.*;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.SelectorProvider;
 import java.util.Iterator;
-import java.util.Queue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author vivi
  * @date 2017-11-10
  */
-public class ConnectionManager {
+public class ConnectionManager implements Runnable{
 
     private AbstractNetworkParam network;
 
@@ -71,15 +72,11 @@ public class ConnectionManager {
     }
 
     public void start() {
-        new BaseNulsThread(networkModule, "networkConnManagerThread") {
-            @Override
-            public void run() {
-                ConnectionManager.this.run();
-            }
-        }.start();
+        ThreadManager.asynExecuteRunnable(this);
     }
 
 
+    @Override
     public void run() {
         Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
         try {

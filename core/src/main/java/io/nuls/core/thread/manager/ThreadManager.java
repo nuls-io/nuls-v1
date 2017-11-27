@@ -69,6 +69,19 @@ public class ThreadManager {
         pool.execute(runnable);
     }
 
+    public static final void createSingleThreadAndRun(short moduleId,String threadName,Runnable runnable){
+        NulsDefaultThreadFactory factory = new NulsDefaultThreadFactory(moduleId,threadName);
+        Thread thread = factory.newThread(runnable);
+        thread.start();
+    }
+
+    public static final void createSingleThreadAndRun(short moduleId,String threadName,Runnable runnable,boolean deamon){
+        NulsDefaultThreadFactory factory = new NulsDefaultThreadFactory(moduleId,threadName);
+        Thread thread = factory.newThread(runnable);
+        thread.setDaemon(deamon);
+        thread.start();
+    }
+
     public static final List<BaseThread> getThreadList(short moduleId){
         //todo
         return null;

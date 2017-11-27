@@ -2,21 +2,19 @@ package io.nuls.ledger.thread;
 
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.thread.BaseNulsThread;
 import io.nuls.core.utils.log.Log;
-import io.nuls.ledger.module.impl.UtxoLedgerModuleImpl;
 import io.nuls.ledger.service.intf.LedgerService;
 
 /**
- * Created by Niels on 2017/11/13.
+ * @author Niels
+ * @date 2017/11/13
  */
-public class SmallChangeThread extends BaseNulsThread {
+public class SmallChangeThread implements Runnable {
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
     private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
-    private static final SmallChangeThread INSTANCE = new SmallChangeThread(SmallChangeThread.class.getSimpleName());
+    private static final SmallChangeThread INSTANCE = new SmallChangeThread();
 
-    private SmallChangeThread(String name) {
-        super(NulsContext.getInstance().getModule(UtxoLedgerModuleImpl.class), name);
+    private SmallChangeThread( ) {
     }
 
     public static SmallChangeThread getInstance() {
