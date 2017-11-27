@@ -135,6 +135,7 @@ public class ConnectionHandler implements MessageWriter {
                 } else if (len == -1) {
                     // Socket was closed
                     key.cancel();
+                    System.out.println(handler.peer.getIp());
                     System.out.println("--------------------destory 2");
                     handler.peer.destroy();
                     return;

@@ -3,6 +3,7 @@ package io.nuls.network.message;
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.network.constant.NetworkConstant;
+import io.nuls.network.message.entity.GetVersionMessage;
 import io.nuls.network.message.entity.VersionMessage;
 
 /**
@@ -20,9 +21,13 @@ public abstract class AbstractNetworkMessage extends BaseNulsData {
     public static AbstractNetworkMessage transfer(Short msgType, byte[] data) {
         AbstractNetworkMessage message = null;
         switch (msgType) {
+            case NetworkConstant.NETWORK_GET_VERSION_MESSAGE:
+                message = new GetVersionMessage();
+                break;
             case NetworkConstant.NETWORK_VERSION_MESSAGE:
                 message = new VersionMessage();
                 break;
+
             default:
         }
         message.parse(new NulsByteBuffer(data));
