@@ -35,24 +35,23 @@ public class GetVersionMessage extends AbstractNetworkMessage {
     @Override
     public int size() {
         int s = 0;
-        s += VarInt.sizeOf(this.version.getVersion());
         s += VarInt.sizeOf(type);
+        s += VarInt.sizeOf(this.version.getVersion());
         s += VarInt.sizeOf(nonce);
         return s;
     }
 
     @Override
     public void serializeToStream(OutputStream stream) throws IOException {
-        stream.write(new VarInt(version.getVersion()).encode());
         stream.write(new VarInt(type).encode());
+        stream.write(new VarInt(version.getVersion()).encode());
         stream.write(new VarInt(nonce).encode());
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
-        short version = (short) byteBuffer.readVarInt();
-        this.setVersion(new NulsVersion(version));
         type = (short) byteBuffer.readVarInt();
+        version = new NulsVersion((short) byteBuffer.readVarInt());
         nonce = byteBuffer.readVarInt();
     }
 

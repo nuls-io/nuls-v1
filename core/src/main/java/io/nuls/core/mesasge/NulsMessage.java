@@ -125,23 +125,5 @@ public class NulsMessage {
         }
     }
 
-    public static void main(String[] args) throws IOException {
-        NulsMessageHeader header = new NulsMessageHeader(12345678, (short) 1, 500, (byte) 3);
-        NulsMessage msg = new NulsMessage(header, "Nuls test message".getBytes());
 
-
-        byte[] messges = msg.serialize();
-
-
-
-
-
-
-//        try {
-//            System.out.println(Hex.encode(msg.serialize()));
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        msg.verify();
-    }
 }
