@@ -6,13 +6,13 @@ import io.nuls.core.event.EventManager;
 import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.module.BaseNulsModule;
-import io.nuls.core.thread.manager.NulsDefaultThreadFactory;
+import io.nuls.core.module.service.ModuleService;
+import io.nuls.core.thread.manager.NulsThreadFactory;
 import io.nuls.core.thread.manager.ThreadManager;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.event.bus.constant.EventBusConstant;
 import io.nuls.event.bus.event.handler.intf.NulsEventHandler;
-import io.nuls.event.bus.module.impl.EventBusModuleImpl;
 import io.nuls.event.bus.module.intf.AbstractEventBusModule;
 import io.nuls.event.bus.processor.thread.EventBusDispatchThread;
 import io.nuls.event.bus.processor.thread.NulsEventCall;
@@ -39,10 +39,9 @@ public class ProcessorManager<E extends BaseNulsEvent, H extends NulsEventHandle
     }
 
     public final void init() {
-        BaseNulsModule module = NulsContext.getInstance().getModule(AbstractEventBusModule.class);
+        Short moduleId = ModuleService.getInstance().getModuleId(AbstractEventBusModule.class);
         pool = ThreadManager.createThreadPool(EventBusConstant.THREAD_COUNT, EventBusConstant.THREAD_COUNT,
-                new NulsDefaultThreadFactory(module.getModuleId(), EventBusConstant.THREAD_POOL_NAME));
-
+                new NulsThreadFactory(moduleId, EventBusConstant.THREAD_POOL_NAME));
         disruptorService.createDisruptor(disruptorName, EventBusConstant.DEFAULT_RING_BUFFER_SIZE);
         List<EventBusDispatchThread> handlerList = new ArrayList<>();
         for (int i = 0; i < EventBusConstant.THREAD_COUNT; i++) {

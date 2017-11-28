@@ -1,7 +1,6 @@
 package io.nuls.rpc.resources.impl;
 
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.module.BaseNulsModule;
 import io.nuls.core.module.service.ModuleService;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.rpc.entity.RpcResult;
@@ -12,8 +11,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
 /**
- * Created by Niels on 2017/9/30.
- *
+ * @author Niels
+ * @date 2017/9/30
  */
 @Path("/sys")
 public class SystemResourceImpl implements SystemResource, ModuleResource {
@@ -39,40 +38,24 @@ public class SystemResourceImpl implements SystemResource, ModuleResource {
     @Path("/module/load")
     @Produces(MediaType.APPLICATION_JSON)
     @Override
-    public RpcResult loadModule(String moduleClass) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
+    public RpcResult startModule(Short moduleId, String moduleClass) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
         RpcResult result = null;
         do {
             ModuleService service = context.getService(ModuleService.class);
             AssertUtil.canNotEmpty(service, "System module service error!");
-            BaseNulsModule module = service.loadModule(moduleClass);
-            if (null != module) {
-                result = RpcResult.getSuccess();
-            }
+            service.startModule(moduleId, moduleClass);
+            result = RpcResult.getSuccess();
         } while (false);
         return result;
-    }
-
-    @POST
-    @Path("/module/start")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Override
-    public RpcResult startModule(String moduleName) {
-        AssertUtil.canNotEmpty(moduleName, "ModuleName can not empty");
-        BaseNulsModule module = context.getModule(moduleName);
-        AssertUtil.canNotEmpty(module, "The module of " + moduleName + " is not exist!");
-        module.start();
-        return RpcResult.getSuccess();
     }
 
     @POST
     @Path("/module/stop")
     @Produces(MediaType.APPLICATION_JSON)
     @Override
-    public RpcResult shutdownModule(String moduleName) {
-        AssertUtil.canNotEmpty(moduleName, "ModuleName can not empty");
-        BaseNulsModule module = context.getModule(moduleName);
-        AssertUtil.canNotEmpty(module, "The module of " + moduleName + " is not exist!");
-        module.shutdown();
+    public RpcResult shutdownModule(Short moduleId) {
+        AssertUtil.canNotEmpty(moduleId, "ModuleName can not empty");
+
         return RpcResult.getSuccess();
     }
 
@@ -80,11 +63,11 @@ public class SystemResourceImpl implements SystemResource, ModuleResource {
     @Path("/module/distroy")
     @Produces(MediaType.APPLICATION_JSON)
     @Override
-    public RpcResult distroyModule(String moduleName) {
-        AssertUtil.canNotEmpty(moduleName, "ModuleName can not empty");
-        BaseNulsModule module = context.getModule(moduleName);
-        AssertUtil.canNotEmpty(module, "The module of " + moduleName + " is not exist!");
-        module.destroy();
+    public RpcResult distroyModule(Short moduleId) {
+//        AssertUtil.canNotEmpty(moduleName, "ModuleName can not empty");
+//        BaseNulsModule module = context.getModule(moduleName);
+//        AssertUtil.canNotEmpty(module, "The module of " + moduleName + " is not exist!");
+//        module.destroy();
         return RpcResult.getSuccess();
     }
 
@@ -92,12 +75,12 @@ public class SystemResourceImpl implements SystemResource, ModuleResource {
     @Path("/module/restart")
     @Produces(MediaType.APPLICATION_JSON)
     @Override
-    public RpcResult restartModule(String moduleName) {
-        AssertUtil.canNotEmpty(moduleName, "ModuleName can not empty");
-        BaseNulsModule module = context.getModule(moduleName);
-        AssertUtil.canNotEmpty(module, "The module of " + moduleName + " is not exist!");
-        module.shutdown();
-        module.start();
+    public RpcResult restartModule(Short moduleId) {
+//        AssertUtil.canNotEmpty(moduleName, "ModuleName can not empty");
+//        BaseNulsModule module = context.getModule(moduleName);
+//        AssertUtil.canNotEmpty(module, "The module of " + moduleName + " is not exist!");
+//        module.shutdown();
+//        module.start();
         return RpcResult.getSuccess();
     }
 }

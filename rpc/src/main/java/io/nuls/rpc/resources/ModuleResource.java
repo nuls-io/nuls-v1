@@ -9,13 +9,11 @@ import io.nuls.rpc.entity.RpcResult;
  */
 public interface ModuleResource {
 
-    RpcResult loadModule(String moduleClass) throws IllegalAccessException, InstantiationException, ClassNotFoundException;
+    RpcResult startModule(Short moduleId,String moduleClass) throws IllegalAccessException, InstantiationException, ClassNotFoundException;
 
-    RpcResult startModule(String moduleName);
+    RpcResult shutdownModule(Short moduleId);
 
-    RpcResult shutdownModule(String moduleName);
+    RpcResult distroyModule(Short moduleId);
 
-    RpcResult distroyModule(String moduleName);
-
-    RpcResult restartModule(String moduleName);
+    RpcResult restartModule(Short moduleId);
 }

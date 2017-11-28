@@ -1,19 +1,16 @@
 package io.nuls.core.module;
 
 import io.nuls.core.constant.ModuleStatusEnum;
-import io.nuls.core.event.EventManager;
 import io.nuls.core.event.BaseNulsEvent;
+import io.nuls.core.event.EventManager;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.manager.ModuleManager;
-import io.nuls.core.thread.BaseThread;
+import io.nuls.core.module.manager.ServiceManager;
 import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.log.Log;
 
-import java.util.List;
-
 /**
- * Created by Niels on 2017/9/26.
- *
+ * @author Niels
+ * @date 2017/9/26
  */
 public abstract class BaseNulsModule {
 
@@ -26,7 +23,6 @@ public abstract class BaseNulsModule {
     public BaseNulsModule(String moduleName) {
         this.moduleName = moduleName;
         this.status = ModuleStatusEnum.UNSTARTED;
-        ModuleManager.getInstance().regModule(this.moduleName, this);
     }
 
     /**
@@ -90,11 +86,11 @@ public abstract class BaseNulsModule {
      * @param service
      */
     protected final void registerService(Object service) {
-        ModuleManager.getInstance().regService(this.moduleName, service);
+        ServiceManager.getInstance().regService(this.moduleId,service);
     }
 
     protected final void registerService(Class serviceInterface, Object service) {
-        ModuleManager.getInstance().regService(this.moduleName, serviceInterface, service);
+        ServiceManager.getInstance().regService(this.moduleId, serviceInterface, service);
     }
 
     protected final void registerEvent(short eventType, Class<? extends BaseNulsEvent> eventClass) {

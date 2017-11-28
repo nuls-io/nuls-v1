@@ -1,6 +1,8 @@
 package io.nuls.core.thread;
 
 public  class BaseThread extends Thread{
+    private short moduleId;
+    private String poolName;
 
     public BaseThread() {
         super();
@@ -36,8 +38,12 @@ public  class BaseThread extends Thread{
 
     @Override
     public synchronized final void start() {
+        this.beforeStart();
         super.start();
         this.afterStart();
+    }
+
+    protected void beforeStart() {
     }
 
     @Override
@@ -57,29 +63,44 @@ public  class BaseThread extends Thread{
         this.afterInterrupt();
     }
 
-    private void afterStart() {
+    protected void afterStart() {
         //todo
         System.out.println("afterStart");
     }
 
-    private void afterRun() {
+    protected void afterRun() {
         //todo
         System.out.println("afterRun");
     }
 
-    private void beforeRun() {
+    protected void beforeRun() {
         //todo
         System.out.println("beforeRun");
     }
 
-    private void afterInterrupt() {
+    protected void afterInterrupt() {
         //todo
         System.out.println("afterInterrupt");
     }
 
-    private void beforeInterrupt() {
+    protected void beforeInterrupt() {
         //todo
         System.out.println("beforeInterrupt");
     }
 
+    public short getModuleId() {
+        return moduleId;
+    }
+
+    public void setModuleId(short moduleId) {
+        this.moduleId = moduleId;
+    }
+
+    public String getPoolName() {
+        return poolName;
+    }
+
+    public void setPoolName(String poolName) {
+        this.poolName = poolName;
+    }
 }
