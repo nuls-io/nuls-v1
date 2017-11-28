@@ -3,6 +3,8 @@ package io.nuls.ledger.event;
 import io.nuls.core.event.NulsEventHeader;
 import io.nuls.ledger.entity.LockCoinTransaction;
 
+import javax.swing.event.DocumentEvent;
+
 /**
  *
  * @author Niels
@@ -10,8 +12,8 @@ import io.nuls.ledger.entity.LockCoinTransaction;
  */
 public class LockCoinEvent<T extends LockCoinTransaction> extends AbstractCoinTransactionEvent<T> {
 
-    public LockCoinEvent(NulsEventHeader header) {
-        super(header);
+    public LockCoinEvent() {
+        super((short) 1);
     }
 
 }

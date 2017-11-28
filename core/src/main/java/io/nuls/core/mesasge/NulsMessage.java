@@ -111,7 +111,7 @@ public class NulsMessage {
         this.data = data;
     }
 
-    void verify() throws NulsVerificationException {
+    public void verify() throws NulsVerificationException {
         if (this.header == null || this.data == null) {
             throw new NulsVerificationException(ErrorCode.NET_MESSAGE_ERROR);
         }

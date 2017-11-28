@@ -15,6 +15,7 @@ import java.io.Serializable;
 public class NulsMessageHeader implements Serializable {
 
     public static final int MESSAGE_HEADER_SIZE = 20;
+    public static final int MESSAGE_HEADER_EXTEND_SIZE = 9;
 
     private int magicNumber;
 
@@ -28,8 +29,6 @@ public class NulsMessageHeader implements Serializable {
 
     private byte xor;
 
-    //the extend length
-    public static final int EXTEND_LENGTH = 9;
     private byte[] extend;
 
     public NulsMessageHeader() {
@@ -37,7 +36,7 @@ public class NulsMessageHeader implements Serializable {
         this.length = 0;
         this.headType = 0;
         this.xor = Hex.decode("00")[0];
-        this.extend = new byte[EXTEND_LENGTH];
+        this.extend = new byte[MESSAGE_HEADER_EXTEND_SIZE];
     }
 
     public NulsMessageHeader(int magicNumber, short headType) {
@@ -79,7 +78,7 @@ public class NulsMessageHeader implements Serializable {
         Utils.int32ToByteArrayLE(length, header, 4);
         Utils.uint16ToByteArrayLE(headType, header, 8);
         header[10] = xor;
-        System.arraycopy(extend, 0, header, 11, 9);
+        System.arraycopy(extend, 0, header, 11, MESSAGE_HEADER_EXTEND_SIZE);
         return header;
     }
 
@@ -92,7 +91,7 @@ public class NulsMessageHeader implements Serializable {
         this.length = byteBuffer.readInt32LE();
         this.headType = byteBuffer.readShort();
         this.xor = byteBuffer.readByte();
-        this.extend = byteBuffer.readBytes(EXTEND_LENGTH);
+        this.extend = byteBuffer.readBytes(MESSAGE_HEADER_EXTEND_SIZE);
     }
 
 

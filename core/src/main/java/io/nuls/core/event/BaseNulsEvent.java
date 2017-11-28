@@ -16,6 +16,10 @@ public abstract class BaseNulsEvent<T extends BaseNulsData> extends BaseNulsData
 
     private T eventBody;
 
+    public BaseNulsEvent(){
+
+    }
+
     public BaseNulsEvent(NulsEventHeader header) {
         this.header = header;
     }

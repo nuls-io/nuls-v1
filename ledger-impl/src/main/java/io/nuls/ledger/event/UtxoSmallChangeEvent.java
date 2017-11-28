@@ -9,7 +9,7 @@ import io.nuls.ledger.entity.utxoTransaction.UtxoSmallChangeTransaction;
  */
 public class UtxoSmallChangeEvent<T extends UtxoSmallChangeTransaction> extends AbstractCoinTransactionEvent<T> {
 
-    public UtxoSmallChangeEvent(NulsEventHeader header) {
-        super(header);
+    public UtxoSmallChangeEvent(short eventType) {
+        super((short) 3);
     }
 }

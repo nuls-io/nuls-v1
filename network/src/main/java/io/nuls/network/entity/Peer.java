@@ -6,6 +6,7 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsVerificationException;
 import io.nuls.core.mesasge.NulsMessage;
 import io.nuls.core.mesasge.NulsMessageHeader;
+import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
@@ -45,7 +46,6 @@ public class Peer extends BaseNulsData {
     private long lastTime;
 
     private int failCount;
-
 
     /**
      * 1: inPeer ,  2: outPeer
@@ -144,6 +144,7 @@ public class Peer extends BaseNulsData {
         try {
             byte[] data = networkData.serialize();
             NulsMessage message = new NulsMessage(network.packetMagic(), NulsMessageHeader.NETWORK_MESSAGE, data);
+            System.out.println("send: "+Hex.encode(message.serialize()));
             this.writeTarget.write(message.serialize());
         } finally {
             lock.unlock();
@@ -169,7 +170,10 @@ public class Peer extends BaseNulsData {
 
         byte[] data = new byte[buffer.limit() - headers.length];
         buffer.get(data, 0, data.length);
+        NulsMessage msg = new NulsMessage(messageHeader,data);
 
+        System.out.println("get: "+Hex.encode(msg.serialize()));
+        msg.verify();
         processMessage(messageHeader, data);
     }
 
