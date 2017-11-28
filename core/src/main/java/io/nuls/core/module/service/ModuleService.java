@@ -1,28 +1,34 @@
 package io.nuls.core.module.service;
 
 
-import io.nuls.core.manager.ModuleManager;
+import io.nuls.core.event.EventManager;
 import io.nuls.core.module.BaseNulsModule;
+import io.nuls.core.module.manager.ModuleManager;
+import io.nuls.core.module.manager.ServiceManager;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 
 /**
- * Created by Niels on 2017/10/16.
- *
+ * @author Niels
+ * @date 2017/10/16
  */
 public class ModuleService {
-
+    private final ModuleManager moduleManager = ModuleManager.getInstance();
     private static final ModuleService INSTANCE = new ModuleService();
 
     private ModuleService() {
-        ModuleManager.getInstance().regService("system",null, this);
+        ServiceManager.getInstance().regService((short) 0, ModuleService.class, this);
     }
 
     public static ModuleService getInstance() {
         return INSTANCE;
     }
 
-    public BaseNulsModule loadModule(String moduleClass) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+    public Short getModuleId(Class<? extends BaseNulsModule> clazz){
+        return moduleManager.getModuleId(clazz);
+    }
+
+    private BaseNulsModule loadModule(short moduleId,String moduleClass) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
         BaseNulsModule module = null;
         do {
             if (StringUtils.isBlank(moduleClass)) {
@@ -31,8 +37,28 @@ public class ModuleService {
             }
             Class clazz = Class.forName(moduleClass);
             module = (BaseNulsModule) clazz.newInstance();
+            module.setModuleId(moduleId);
+            EventManager.refreshEvents();
             Log.info("load module:" + module.getInfo());
         } while (false);
+        moduleManager.regModule(module);
         return module;
+    }
+
+    public void startModule(short moduleId,String moduleClass) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
+        BaseNulsModule module = this.loadModule(moduleId,moduleClass);
+        moduleManager.startModule(module);
+    }
+
+    public Thread.State getModuleState(short moduleId){
+        return moduleManager.getModuleState(moduleId);
+    }
+
+    public void shutdown(short moduleId){
+        moduleManager.stopModule(moduleId);
+    }
+
+    public void destroy(short moduleId){
+        moduleManager.destoryModule(moduleId);
     }
 }

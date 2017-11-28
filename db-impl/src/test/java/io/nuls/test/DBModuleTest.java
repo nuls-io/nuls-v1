@@ -1,6 +1,7 @@
 package io.nuls.test;
 
-import io.nuls.core.manager.ModuleManager;
+import io.nuls.core.module.manager.ModuleManager;
+import io.nuls.core.module.manager.ServiceManager;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.BlockDao;
 import io.nuls.db.dao.impl.mybatis.BlockDaoImpl;
@@ -21,7 +22,7 @@ public class DBModuleTest {
     public static void init() {
         dbModule = new MybatisDBModuleImpl();
         dbModule.start();
-        blockDao = ModuleManager.getInstance().getService(BlockDao.class);
+        blockDao = ServiceManager.getInstance().getService(BlockDao.class);
     }
 
     @AfterClass
@@ -65,7 +66,7 @@ public class DBModuleTest {
     public static void main(String[] args) {
         MybatisDBModuleImpl dbModule = new MybatisDBModuleImpl();
         dbModule.start();
-        BlockDao blockDao = ModuleManager.getInstance().getService(BlockDaoImpl.class);
+        BlockDao blockDao = ServiceManager.getInstance().getService(BlockDaoImpl.class);
 
         for(int i = 0 ; i < 10 ;i++) {
             new Thread(){

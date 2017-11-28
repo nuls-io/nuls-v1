@@ -8,7 +8,7 @@ import io.nuls.core.event.EventManager;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.i18n.I18nUtils;
-import io.nuls.core.manager.ModuleManager;
+import io.nuls.core.module.manager.ModuleManager;
 import io.nuls.core.module.BaseNulsModule;
 import io.nuls.core.module.service.ModuleService;
 import io.nuls.core.utils.cfg.ConfigLoader;
@@ -25,7 +25,7 @@ import java.util.Properties;
  * System start class
  */
 public class Bootstrap {
-
+    private static final ModuleService moduleService = ModuleService.getInstance();
     public static void main(String[] args) {
         try {
             sysStart();
@@ -43,7 +43,7 @@ public class Bootstrap {
                 ConfigLoader.loadIni(NulsConstant.USER_CONFIG_FILE);
             } catch (IOException e) {
                 Log.error("Client start faild", e);
-                throw new NulsRuntimeException(ErrorCode.FAILED,"Client start faild");
+                throw new NulsRuntimeException(ErrorCode.FAILED, "Client start faild");
             }
             //set system language
             try {
@@ -58,7 +58,7 @@ public class Bootstrap {
                 initModules(bootstrapClasses);
             } catch (IOException e) {
                 Log.error(e);
-                throw new NulsRuntimeException(ErrorCode.FAILED,"Client start faild");
+                throw new NulsRuntimeException(ErrorCode.FAILED, "Client start faild");
             }
         } while (false);
         Log.debug("--------------------------------------------");
@@ -76,37 +76,12 @@ public class Bootstrap {
         for (String key : keyList) {
             try {
                 short moduleId = Short.parseShort(key);
-                BaseNulsModule module = regModule(moduleId, bootstrapClasses.getProperty(key));
-                startModule(module);
+                moduleService.startModule(moduleId,bootstrapClasses.getProperty(key));
             } catch (Exception e) {
                 throw new NulsRuntimeException(e);
             }
         }
     }
 
-    private static void startModule(BaseNulsModule module) {
-        //todo importent
-
-
-    }
-
-    private static BaseNulsModule regModule(short id, String moduleClass) {
-        if (null == moduleClass) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "module class is null:" + id);
-        }
-        try {
-            BaseNulsModule module = ModuleService.getInstance().loadModule(moduleClass);
-            module.setModuleId(id);
-            EventManager.refreshEvents();
-            return module;
-        } catch (ClassNotFoundException e) {
-            Log.error(e);
-        } catch (IllegalAccessException e) {
-            Log.error(e);
-        } catch (InstantiationException e) {
-            Log.error(e);
-        }
-        return null;
-    }
 
 }

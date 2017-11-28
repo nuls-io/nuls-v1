@@ -1,12 +1,9 @@
 package io.nuls.core.context;
 
 import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.BlockHeader;
-import io.nuls.core.crypto.Sha256Hash;
-import io.nuls.core.manager.ModuleManager;
+import io.nuls.core.module.manager.ModuleManager;
 import io.nuls.core.module.BaseNulsModule;
-
-import java.util.Date;
+import io.nuls.core.module.manager.ServiceManager;
 
 /**
  * @author Niels
@@ -41,24 +38,6 @@ public class NulsContext {
     }
 
     /**
-     * get BaseNulsModule Object
-     *
-     * @param moduleName
-     * @return
-     */
-    public BaseNulsModule getModule(String moduleName) {
-        return ModuleManager.getInstance().getModule(moduleName);
-    }
-
-    public BaseNulsModule getModule(Class moduleClass) {
-        return ModuleManager.getInstance().getModule(moduleClass);
-    }
-
-    public BaseNulsModule getModule(int moduleId) {
-        return ModuleManager.getInstance().getModuleById(moduleId);
-    }
-
-    /**
      * get Service by interface
      *
      * @param tClass
@@ -66,7 +45,7 @@ public class NulsContext {
      * @return
      */
     public <T> T getService(Class<T> tClass) {
-        return ModuleManager.getInstance().getService(tClass);
+        return ServiceManager.getInstance().getService(tClass);
     }
 
 

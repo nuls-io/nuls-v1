@@ -2,19 +2,21 @@ package io.nuls.core.module;
 
 
 import io.nuls.core.constant.ModuleStatusEnum;
-import io.nuls.core.manager.ModuleManager;
+import io.nuls.core.module.manager.ModuleManager;
+import io.nuls.core.module.manager.ServiceManager;
+import io.nuls.core.module.thread.ModuleThreadPoolExecuter;
 import io.nuls.core.thread.manager.ThreadManager;
 import io.nuls.core.utils.log.Log;
 
 /**
- * Created by Niels on 2017/10/13.
- *
+ * @author Niels
+ * @date 2017/10/13
  */
-public class NulsModuleProxy extends BaseNulsModule {
+public class NulsModuleProxy1 extends BaseNulsModule {
 
     private final BaseNulsModule module;
 
-    public NulsModuleProxy(BaseNulsModule module) {
+    public NulsModuleProxy1(BaseNulsModule module) {
         super(module.getModuleName());
         this.module = module;
     }
@@ -49,6 +51,7 @@ public class NulsModuleProxy extends BaseNulsModule {
         }
         ThreadManager.shutdownByModuleId(this.getModuleId());
         module.setStatus(ModuleStatusEnum.STOPED);
+        ModuleThreadPoolExecuter.getInstance().stopModule(this);
     }
 
     @Override
@@ -63,8 +66,8 @@ public class NulsModuleProxy extends BaseNulsModule {
             module.setStatus(ModuleStatusEnum.EXCEPTION);
             Log.error(e);
         }
-        ModuleManager.getInstance().removeService(this.getModuleName());
-        ModuleManager.getInstance().remModule(this.getModuleName());
+        ServiceManager.getInstance().removeService(this.getModuleId());
+        ModuleManager.getInstance().remModule(this.getModuleId());
         ThreadManager.shutdownByModuleId(this.getModuleId());
         module.setStatus(ModuleStatusEnum.DESTROYED);
     }
