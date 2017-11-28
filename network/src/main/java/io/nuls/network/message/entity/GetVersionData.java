@@ -37,14 +37,13 @@ public class GetVersionData extends BaseNetworkData {
     public int size() {
         int s = 0;
         s += NetworkDataHeader.NETWORK_HEADER_SIZE;
-        s += 2;
+        s += 2;    //version.length
         s += VarInt.sizeOf(nonce);
         return s;
     }
 
     @Override
     public void serializeToStream(OutputStream stream) throws IOException {
-//        stream.write(new VarInt(type).encode());
         networkHeader.serializeToStream(stream);
         Utils.uint16ToByteStreamLE(version.getVersion(), stream);
         stream.write(new VarInt(nonce).encode());
@@ -56,7 +55,6 @@ public class GetVersionData extends BaseNetworkData {
         version = new NulsVersion(byteBuffer.readShort());
         nonce = byteBuffer.readVarInt();
     }
-
 
     @Override
     public String toString() {

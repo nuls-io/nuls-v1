@@ -13,6 +13,7 @@ import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.message.AbstractNetWorkDataHandlerFactory;
 import io.nuls.network.message.BaseNetworkData;
+import io.nuls.network.message.NetworkDataHeader;
 import io.nuls.network.message.NetworkDataResult;
 import io.nuls.network.message.entity.GetVersionData;
 import io.nuls.network.message.entity.VersionData;
@@ -156,41 +157,36 @@ public class Peer extends BaseNulsData {
      * @throws IOException
      */
     public void receiveMessage(ByteBuffer buffer) throws IOException {
+        buffer.flip();
         if (this.getStatus() == Peer.CLOSE) {
             return;
         }
-        if (buffer.position() != 0 || buffer.limit() <= NulsMessageHeader.MESSAGE_HEADER_SIZE) {
-            throw new NulsVerificationException(ErrorCode.NET_MESSAGE_ERROR);
+        if (buffer.position() != 0 || buffer.limit() <= NulsMessageHeader.MESSAGE_HEADER_SIZE || buffer.limit() > NulsMessage.MAX_SIZE) {
+            throw new NulsVerificationException(ErrorCode.DATA_ERROR);
         }
 
-        byte[] headers = new byte[NulsMessageHeader.MESSAGE_HEADER_SIZE];
-        buffer.get(headers, 0, headers.length);
-        NulsMessageHeader messageHeader = network.getMessageFilter().filterHeader(headers);
-
-        byte[] data = new byte[buffer.limit() - headers.length];
-        buffer.get(data, 0, data.length);
-
-        processMessage(messageHeader, data);
+        NulsMessage message = new NulsMessage(buffer);
+        processMessage(message);
+        buffer.compact();
     }
 
     /**
      * if message is a eventMessage , put it in processorService ,other module will process it
      *
-     * @param messageHeader
-     * @param data
+     * @param message
      */
-    public void processMessage(NulsMessageHeader messageHeader, byte[] data) {
-        if (messageHeader.getHeadType() == NulsMessageHeader.EVENT_MESSAGE) {
+    public void processMessage(NulsMessage message) {
+        if (message.getHeader().getHeadType() == NulsMessageHeader.EVENT_MESSAGE) {
             if (this.status != Peer.HANDSHAKE) {
                 return;
             }
-
-            NulsMessage message = new NulsMessage(messageHeader, data);
             processorService.send(message.getData());
         } else {
+            byte[] networkHeader = new byte[NetworkDataHeader.NETWORK_HEADER_SIZE];
+            System.arraycopy(message.getData(), 0, networkHeader, 0, NetworkDataHeader.NETWORK_HEADER_SIZE);
+            NetworkDataHeader header = new NetworkDataHeader(new NulsByteBuffer(networkHeader));
 
-            short msgType = (short) new NulsByteBuffer(data).readVarInt();
-            BaseNetworkData networkMessage = BaseNetworkData.transfer(msgType, data);
+            BaseNetworkData networkMessage = BaseNetworkData.transfer(header.getType(), message.getData());
             if (this.status != Peer.HANDSHAKE && !isHandShakeMessage(networkMessage)) {
                 return;
             }

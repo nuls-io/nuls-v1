@@ -1,6 +1,5 @@
 package io.nuls.core.mesasge;
 
-import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
@@ -36,7 +35,7 @@ public class NulsMessageHeader implements Serializable {
         this.magicNumber = 0;
         this.length = 0;
         this.headType = 0;
-        this.xor = Hex.decode("00")[0];
+        this.xor = 0;
         this.extend = new byte[EXTEND_LENGTH];
     }
 
@@ -69,6 +68,10 @@ public class NulsMessageHeader implements Serializable {
         this.extend = extend;
     }
 
+    public NulsMessageHeader(NulsByteBuffer buffer) {
+        parse(buffer);
+    }
+
     public int size() {
         return MESSAGE_HEADER_SIZE;
     }
@@ -79,7 +82,7 @@ public class NulsMessageHeader implements Serializable {
         Utils.int32ToByteArrayLE(length, header, 4);
         Utils.uint16ToByteArrayLE(headType, header, 8);
         header[10] = xor;
-        System.arraycopy(extend, 0, header, 11, 9);
+        System.arraycopy(extend, 0, header, 11, EXTEND_LENGTH);
         return header;
     }
 
@@ -95,6 +98,23 @@ public class NulsMessageHeader implements Serializable {
         this.extend = byteBuffer.readBytes(EXTEND_LENGTH);
     }
 
+    @Override
+    public String toString() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("messageHeader:{");
+        buffer.append("magicNumber:" + magicNumber + ", ");
+        buffer.append("headerType:" + headType + ", ");
+        buffer.append("length:" + length + ", ");
+        buffer.append("xor:" + xor + ", ");
+        buffer.append("extend:[");
+        if (extend != null && extend.length > 0) {
+            for (byte b : extend) {
+                buffer.append(b + " ");
+            }
+        }
+        buffer.append("]}");
+        return buffer.toString();
+    }
 
     public int getLength() {
         return length;
@@ -134,24 +154,6 @@ public class NulsMessageHeader implements Serializable {
 
     public void setXor(byte xor) {
         this.xor = xor;
-    }
-
-    @Override
-    public String toString() {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("messageHeader:{");
-        buffer.append("magicNumber:" + magicNumber + ", ");
-        buffer.append("headerType:" + headType + ", ");
-        buffer.append("length:" + length + ", ");
-        buffer.append("xor:" + xor + ", ");
-        buffer.append("extend:[");
-        if (extend != null && extend.length > 0) {
-            for (byte b : extend) {
-                buffer.append(b + " ");
-            }
-        }
-        buffer.append("]}");
-        return buffer.toString();
     }
 
 }
