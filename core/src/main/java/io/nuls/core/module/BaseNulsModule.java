@@ -12,7 +12,7 @@ import io.nuls.core.utils.log.Log;
  * @author Niels
  * @date 2017/9/26
  */
-public abstract class BaseNulsModule {
+public abstract class BaseNulsModule{
 
     private final short moduleId;
 

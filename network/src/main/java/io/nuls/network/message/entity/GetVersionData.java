@@ -45,7 +45,7 @@ public class GetVersionData extends BaseNetworkData {
     @Override
     public void serializeToStream(OutputStream stream) throws IOException {
         networkHeader.serializeToStream(stream);
-        Utils.uint16ToByteStreamLE(version.getVersion(), stream);
+        Utils.int16ToByteStreamLE(version.getVersion(), stream);
         stream.write(new VarInt(nonce).encode());
     }
 
