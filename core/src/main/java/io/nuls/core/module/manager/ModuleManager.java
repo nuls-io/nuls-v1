@@ -70,8 +70,8 @@ public class ModuleManager {
     }
 
 
-    public void startModule(BaseNulsModule module) {
-        POOL.startModule(module);
+    public void startModule(short moduleId, String moduleClass) {
+        POOL.startModule(moduleId,moduleClass);
     }
 
     public void stopModule(short moduleId) {
@@ -126,4 +126,5 @@ public class ModuleManager {
         }
         return module.getStatus();
     }
+
 }

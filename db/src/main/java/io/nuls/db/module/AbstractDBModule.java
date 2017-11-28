@@ -11,7 +11,7 @@ import io.nuls.core.module.BaseNulsModule;
 public abstract class AbstractDBModule extends BaseNulsModule {
 
     protected AbstractDBModule() {
-        super("database");
+        super((short) 2,"database");
     }
 
 }

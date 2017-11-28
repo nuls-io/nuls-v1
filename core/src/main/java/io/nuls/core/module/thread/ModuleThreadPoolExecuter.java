@@ -1,6 +1,7 @@
 package io.nuls.core.module.thread;
 
 import io.nuls.core.module.BaseNulsModule;
+import io.nuls.core.utils.log.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,13 +27,17 @@ public class ModuleThreadPoolExecuter {
         return POOL;
     }
 
-    public void startModule(BaseNulsModule module) {
-        if(null==module){
+    public void startModule(short moduleId, String moduleClass) {
+        if(null==moduleClass){
             return;
         }
-        ModuleRunner runner = new ModuleRunner(module);
-        ModuleProcess moduleProcess = factory.newThread(runner);
-        moduleProcess.start();
+        try {
+            ModuleRunner runner = new ModuleRunner(moduleId, moduleClass);
+            ModuleProcess moduleProcess = factory.newThread(runner);
+            moduleProcess.start();
+        }catch (Exception e){
+            Log.error(e);
+        }
     }
 
     public void stopModule(short moduleId) {

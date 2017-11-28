@@ -21,8 +21,8 @@ public class ModuleThreadFactory implements ThreadFactory {
             throw new NulsRuntimeException(ErrorCode.FAILED, "unkown runnable!");
         }
         ModuleProcess process = new ModuleProcess((ModuleRunner) r);
-        process.setModuleId(((ModuleRunner) r).getModule().getModuleId());
-        process.setName(POOL_NAME+"-"+((ModuleRunner) r).getModule().getModuleName());
+        process.setModuleId(((ModuleRunner) r).getModuleId());
+        process.setName(POOL_NAME+"-"+((ModuleRunner) r).getModuleId());
         process.setPoolName(POOL_NAME);
         process.setDaemon(false);
         return process;

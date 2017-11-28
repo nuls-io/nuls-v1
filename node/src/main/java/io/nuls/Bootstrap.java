@@ -62,7 +62,7 @@ public class Bootstrap {
             }
         } while (false);
         Log.debug("--------------------------------------------");
-        Log.debug(ModuleManager.getInstance().getInfo());
+        Log.info(ModuleManager.getInstance().getInfo());
         Log.debug("--------------------------------------------");
     }
 
@@ -72,7 +72,7 @@ public class Bootstrap {
 
     private static void initModules(Properties bootstrapClasses) {
         List<String> keyList = new ArrayList<>(bootstrapClasses.stringPropertyNames());
-        Collections.sort(keyList);
+//        Collections.sort(keyList);
         for (String key : keyList) {
             try {
                 short moduleId = Short.parseShort(key);
