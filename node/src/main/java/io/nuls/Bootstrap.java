@@ -72,7 +72,6 @@ public class Bootstrap {
 
     private static void initModules(Properties bootstrapClasses) {
         List<String> keyList = new ArrayList<>(bootstrapClasses.stringPropertyNames());
-//        Collections.sort(keyList);
         for (String key : keyList) {
             try {
                 short moduleId = Short.parseShort(key);

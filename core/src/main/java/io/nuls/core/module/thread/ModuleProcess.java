@@ -17,31 +17,26 @@ public class ModuleProcess extends BaseThread {
     public ModuleProcess(ModuleRunner target) {
         super(target);
         this.runner = target;
-        Log.info("============init");
     }
 
     @Override
     public void beforeStart() {
         this.startTime = TimeService.currentTimeMillis();
-        Log.info("============beforestart");
     }
 
     @Override
     protected void afterStart() {
-        Log.info("============afterStart");
 
     }
 
     @Override
     protected void runException(Exception e) {
-        Log.info("============runException");
         runner.getModule().setStatus(ModuleStatusEnum.EXCEPTION);
         running = false;
     }
 
     @Override
     protected void afterRun() {runner.getModule().setStatus(ModuleStatusEnum.RUNNING);
-        Log.info("============afterRun");
         while (running) {
             try {
                 Thread.sleep(1000L);
@@ -53,13 +48,11 @@ public class ModuleProcess extends BaseThread {
 
     @Override
     protected void beforeRun() {
-        Log.info("============beforeRun");
     }
 
     @Override
     protected void afterInterrupt() {
         runner.getModule().setStatus(ModuleStatusEnum.STOPED);
-        Log.info("============afterInterrupt");
 
     }
 
@@ -67,7 +60,6 @@ public class ModuleProcess extends BaseThread {
     protected void beforeInterrupt() {
         runner.getModule().setStatus(ModuleStatusEnum.STOPPING);
         running = false;
-        Log.info("============beforeInterrupt");
     }
 
     public long getStartTime() {
