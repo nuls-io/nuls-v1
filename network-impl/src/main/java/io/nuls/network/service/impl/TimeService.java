@@ -2,59 +2,93 @@ package io.nuls.network.service.impl;
 
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.thread.manager.ThreadManager;
 import io.nuls.core.utils.log.Log;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**
  * @author vivi
  * @date 2017/11/21
  */
-public class TimeService {
+public class TimeService implements Runnable {
 
     private String webTimeUrl;
 
+    /**
+     * 时间偏移差距触发点，超过该值会导致本地时间重设，单位毫秒
+     **/
+    public static final long TIME_OFFSET_BOUNDARY = 1000L;
+
+    private static final long NET_REFRESH_TIME = 600000L;
+
+
+    /**
+     * 网络时间偏移值
+     */
+    private static long netTimeOffset;
+
+    private static long lastSyncTime;
 
     private TimeService() {
         webTimeUrl = "http://www.baidu.com";
+        start();
+    }
+
+
+    private void start() {
+        syncWebTime();
+        ThreadManager.createSingleThreadAndRun((short) 1, "TimeService", this, true);
+
     }
 
     private void syncWebTime() {
         try {
+            long localBeforeTime = System.currentTimeMillis();
             URL url = new URL(webTimeUrl);
             URLConnection connection = url.openConnection();
             connection.connect();
-            Date date = new Date(connection.getDate());
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            Log.debug(sdf.format(date));
+            long netTime = connection.getDate();
+
+            long localEndTime = System.currentTimeMillis();
+
+            netTimeOffset = (netTime + (localEndTime - localBeforeTime) / 2) - localEndTime;
+
+            lastSyncTime = localEndTime;
         } catch (IOException e) {
             throw new NulsRuntimeException(ErrorCode.NET_SERVER_START_ERROR, e);
         }
-
     }
 
-    public static void main(String[] args) {
-        TimeService timeService = new TimeService();
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                for (int i = 0; i < 10; i++) {
-                    timeService.syncWebTime();
-
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        Log.error(e);
-                    }
-                }
+    @Override
+    public void run() {
+        long lastTime = System.currentTimeMillis();
+        while (true) {
+            long newTime = System.currentTimeMillis();
+            if (Math.abs(newTime - lastTime) > TIME_OFFSET_BOUNDARY) {
+                Log.info("local time changed ：{}", newTime - lastTime);
+                syncWebTime();
+            } else if (currentTimeMillis() - lastSyncTime > NET_REFRESH_TIME) {
+                //每隔一段时间更新网络时间
+                syncWebTime();
             }
-        }).start();
+            lastTime = newTime;
+            try {
+                Thread.sleep(500L);
+            } catch (InterruptedException e) {
+            }
+        }
+    }
 
+
+    public static long currentTimeMillis() {
+        return System.currentTimeMillis() + netTimeOffset;
+    }
+
+    public static long currentTimeSeconds() {
+        return currentTimeMillis() / 1000;
     }
 }

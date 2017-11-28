@@ -23,7 +23,7 @@ public class ThreadManager {
      * Initializing a temporary thread pool
      */
     static {
-        createThreadPool(TEMPORARY_THREAD_POOL_COUNT, TEMPORARY_THREAD_POOL_QUEUE_SIZE, new NulsDefaultThreadFactory((short) 0,TEMPORARY_THREAD_POOL_NAME));
+        createThreadPool(TEMPORARY_THREAD_POOL_COUNT, TEMPORARY_THREAD_POOL_QUEUE_SIZE, new NulsDefaultThreadFactory((short) 0, TEMPORARY_THREAD_POOL_NAME));
     }
 
     public static final ThreadPoolExecutor createThreadPool(int threadCount, int queueSize, NulsDefaultThreadFactory factory) {
@@ -59,7 +59,7 @@ public class ThreadManager {
     }
 
     public static final void asynExecuteRunnable(Runnable runnable) {
-        if(null==runnable){
+        if (null == runnable) {
             throw new RuntimeException("runnable is null");
         }
         ThreadPoolExecutor pool = POOL_EXECUTOR_MAP.get(TEMPORARY_THREAD_POOL_NAME);
@@ -69,35 +69,35 @@ public class ThreadManager {
         pool.execute(runnable);
     }
 
-    public static final void createSingleThreadAndRun(short moduleId,String threadName,Runnable runnable){
-        NulsDefaultThreadFactory factory = new NulsDefaultThreadFactory(moduleId,threadName);
+    public static final void createSingleThreadAndRun(short moduleId, String threadName, Runnable runnable) {
+        NulsDefaultThreadFactory factory = new NulsDefaultThreadFactory(moduleId, threadName);
         Thread thread = factory.newThread(runnable);
         thread.start();
     }
 
-    public static final void createSingleThreadAndRun(short moduleId,String threadName,Runnable runnable,boolean deamon){
-        NulsDefaultThreadFactory factory = new NulsDefaultThreadFactory(moduleId,threadName);
+    public static final void createSingleThreadAndRun(short moduleId, String threadName, Runnable runnable, boolean deamon) {
+        NulsDefaultThreadFactory factory = new NulsDefaultThreadFactory(moduleId, threadName);
         Thread thread = factory.newThread(runnable);
         thread.setDaemon(deamon);
         thread.start();
     }
 
-    public static final List<BaseThread> getThreadList(short moduleId){
+    public static final List<BaseThread> getThreadList(short moduleId) {
         //todo
         return null;
     }
 
-    public static final String getThreadPoolsInfoString(short moduleId){
+    public static final String getThreadPoolsInfoString(short moduleId) {
         //todo
         return null;
     }
 
-    public static final Thread.State getThreadStateByName(String name){
+    public static final Thread.State getThreadStateByName(String name) {
         //todo
         return null;
     }
 
-    public static void shutdownByModuleId(short moduleId){
+    public static void shutdownByModuleId(short moduleId) {
         //todo 判断当前状态、停止、清除
     }
 }

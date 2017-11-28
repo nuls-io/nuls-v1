@@ -63,37 +63,4 @@ public class GetVersionMessage extends AbstractNetworkMessage {
         this.nonce = nonce;
     }
 
-
-    public static void main(String[] args) throws IOException {
-        ByteBuffer readBuffer = ByteBuffer.allocate(NulsMessage.MAX_SIZE);
-
-
-        NulsMessageHeader header = new NulsMessageHeader(12345678, (short) 1, 500, (byte) 3);
-        VersionMessage versionMessage = new VersionMessage(50000, "abcdefghij");
-        System.out.println(versionMessage.toString());
-        NulsMessage nulsMessage = new NulsMessage(header, versionMessage.serialize());
-
-        byte[] messages = nulsMessage.serialize();
-        readBuffer.put(messages);
-        System.out.println(header.toString());
-        System.out.println("---------");
-
-        readBuffer.flip();
-
-        byte[] headers = new byte[NulsMessageHeader.MESSAGE_HEADER_SIZE];
-        readBuffer.get(headers, 0, headers.length);
-
-        header = new NulsMessageHeader();
-        header.parse(new NulsByteBuffer(headers));
-        System.out.println(header.toString());
-
-
-        byte[] data = new byte[readBuffer.limit() - headers.length];
-        readBuffer.get(data, 0, data.length);
-        versionMessage = new VersionMessage();
-
-        versionMessage.parse(new NulsByteBuffer(data));
-        System.out.println(versionMessage.toString());
-
-    }
 }
