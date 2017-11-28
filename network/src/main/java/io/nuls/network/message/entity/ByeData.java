@@ -2,7 +2,7 @@ package io.nuls.network.message.entity;
 
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.network.constant.NetworkConstant;
-import io.nuls.network.message.AbstractNetworkMessage;
+import io.nuls.network.message.BaseNetworkData;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -11,11 +11,11 @@ import java.io.OutputStream;
  * @author vivi
  * @Date 2017.11.01
  */
-public class ByeMessage extends AbstractNetworkMessage {
+public class ByeData extends BaseNetworkData {
     public static final short OWN_MAIN_VERSION = 1;
     public static final short OWN_SUB_VERSION = 0001;
 
-    public ByeMessage() {
+    public ByeData() {
         super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.type = NetworkConstant.NETWORK_BYE_MESSAGE;
     }

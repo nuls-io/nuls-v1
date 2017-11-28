@@ -7,7 +7,7 @@ import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.network.constant.NetworkConstant;
-import io.nuls.network.message.AbstractNetworkMessage;
+import io.nuls.network.message.BaseNetworkData;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -17,7 +17,7 @@ import java.io.UnsupportedEncodingException;
  * @author vivi
  * @Date 2017.11.01
  */
-public class VersionMessage extends AbstractNetworkMessage {
+public class VersionData extends BaseNetworkData {
 
     public static final short OWN_MAIN_VERSION = 1;
 
@@ -29,13 +29,13 @@ public class VersionMessage extends AbstractNetworkMessage {
 
     private String nulsVersion;
 
-    public VersionMessage() {
+    public VersionData() {
         super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.type = NetworkConstant.NETWORK_VERSION_MESSAGE;
         this.nulsVersion = NulsContext.nulsVersion;
     }
 
-    public VersionMessage(long bestBlockHeight, String bestBlockHash) {
+    public VersionData(long bestBlockHeight, String bestBlockHash) {
         this();
         this.bestBlockHash = bestBlockHash;
         this.bestBlockHeight = bestBlockHeight;

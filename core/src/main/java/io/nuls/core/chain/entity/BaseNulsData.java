@@ -32,6 +32,9 @@ public abstract class BaseNulsData implements Serializable {
 
     }
 
+    public BaseNulsData(NulsByteBuffer buffer) {
+        this.parse(buffer);
+    }
 
     public BaseNulsData(short mainVersion, short subVersion) {
         this.version = new NulsVersion(mainVersion, subVersion);

@@ -37,7 +37,7 @@ public class NulsMessageHeader implements Serializable {
         this.length = 0;
         this.headType = 0;
         this.xor = Hex.decode("00")[0];
-        this.extend = new byte[9];
+        this.extend = new byte[EXTEND_LENGTH];
     }
 
     public NulsMessageHeader(int magicNumber, short headType) {
