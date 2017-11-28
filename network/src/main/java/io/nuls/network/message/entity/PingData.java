@@ -16,8 +16,7 @@ public class PingData extends BaseNetworkData {
     public static final short OWN_SUB_VERSION = 0001;
 
     public PingData() {
-        super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
-        this.type = NetworkConstant.NETWORK_PING_MESSAGE;
+        super(OWN_MAIN_VERSION, OWN_SUB_VERSION, NetworkConstant.NETWORK_PING_MESSAGE);
     }
 
     @Override

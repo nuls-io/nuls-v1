@@ -16,8 +16,7 @@ public class ByeData extends BaseNetworkData {
     public static final short OWN_SUB_VERSION = 0001;
 
     public ByeData() {
-        super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
-        this.type = NetworkConstant.NETWORK_BYE_MESSAGE;
+        super(OWN_MAIN_VERSION, OWN_SUB_VERSION, NetworkConstant.NETWORK_BYE_MESSAGE);
     }
 
     @Override

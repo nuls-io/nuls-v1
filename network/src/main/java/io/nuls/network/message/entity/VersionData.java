@@ -8,6 +8,7 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.message.BaseNetworkData;
+import io.nuls.network.message.NetworkDataHeader;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -30,8 +31,7 @@ public class VersionData extends BaseNetworkData {
     private String nulsVersion;
 
     public VersionData() {
-        super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
-        this.type = NetworkConstant.NETWORK_VERSION_MESSAGE;
+        super(OWN_MAIN_VERSION, OWN_SUB_VERSION, NetworkConstant.NETWORK_VERSION_MESSAGE);
         this.nulsVersion = NulsContext.nulsVersion;
     }
 
@@ -44,7 +44,7 @@ public class VersionData extends BaseNetworkData {
     @Override
     public int size() {
         int s = 0;
-        s += VarInt.sizeOf(type);
+        s += NetworkDataHeader.NETWORK_HEADER_SIZE;
         s += VarInt.sizeOf(version.getVersion());
         s += VarInt.sizeOf(bestBlockHeight);
         // put the bestBlockHash.length
@@ -69,7 +69,7 @@ public class VersionData extends BaseNetworkData {
 
     @Override
     public void serializeToStream(OutputStream stream) throws IOException {
-        stream.write(new VarInt(type).encode());
+//        stream.write(new VarInt(type).encode());
         stream.write(new VarInt(version.getVersion()).encode());
         stream.write(new VarInt(bestBlockHeight).encode());
         this.writeBytesWithLength(stream, bestBlockHash);
@@ -78,7 +78,7 @@ public class VersionData extends BaseNetworkData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
-        type = (short) byteBuffer.readVarInt();
+//        type = (short) byteBuffer.readVarInt();
         version = new NulsVersion((short) byteBuffer.readVarInt());
         bestBlockHeight = byteBuffer.readVarInt();
         bestBlockHash = new String(byteBuffer.readByLengthByte());
@@ -89,7 +89,7 @@ public class VersionData extends BaseNetworkData {
     public String toString() {
         StringBuffer buffer = new StringBuffer();
         buffer.append("versionMessage:{");
-        buffer.append("type:" + type + ", ");
+//        buffer.append("type:" + type + ", ");
         buffer.append("version:" + version.getStringVersion() + ", ");
         buffer.append("bestBlockHeight:" + bestBlockHeight + ", ");
         buffer.append("bestBlockHash:" + bestBlockHash + ", ");
