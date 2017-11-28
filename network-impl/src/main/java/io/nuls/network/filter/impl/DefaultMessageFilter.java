@@ -43,7 +43,6 @@ public class DefaultMessageFilter implements NulsMessageFilter {
 
     @Override
     public NulsMessage filterMessage(byte[] bytes) {
-        if(bytes.length)
         return null;
     }
 
