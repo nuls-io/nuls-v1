@@ -1,6 +1,7 @@
 package io.nuls.core.module.service;
 
 
+import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.event.EventManager;
 import io.nuls.core.module.BaseNulsModule;
 import io.nuls.core.module.manager.ModuleManager;
@@ -50,7 +51,7 @@ public class ModuleService {
         moduleManager.startModule(module);
     }
 
-    public Thread.State getModuleState(short moduleId){
+    public ModuleStatusEnum getModuleState(short moduleId){
         return moduleManager.getModuleState(moduleId);
     }
 

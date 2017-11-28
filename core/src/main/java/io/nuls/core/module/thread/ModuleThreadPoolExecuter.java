@@ -35,12 +35,8 @@ public class ModuleThreadPoolExecuter {
         moduleProcess.start();
     }
 
-    public void stopModule(BaseNulsModule module) {
-        if(null==module){
-            return;
-        }
-        module.shutdown();
-        ModuleProcess process = PROCCESS_MAP.get(module.getModuleId());
+    public void stopModule(short moduleId) {
+        ModuleProcess process = PROCCESS_MAP.get(moduleId);
         if (null != process && !process.isInterrupted()) {
             process.interrupt();
         }

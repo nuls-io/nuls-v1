@@ -10,28 +10,14 @@ public class ModuleRunner implements Runnable {
 
     private final BaseNulsModule module;
 
-//    private boolean running = false;
-
     public ModuleRunner(BaseNulsModule t) {
         this.module = t;
     }
 
     @Override
     public void run() {
-//        running = true;
         module.start();
-//        while (running) {
-//            try {
-//                Thread.sleep(5000L);
-//            } catch (InterruptedException e) {
-//                Log.error(e);
-//            }
-//        }
     }
-
-//    public void stop() {
-//        running = false;
-//    }
 
     public BaseNulsModule getModule() {
         return module;

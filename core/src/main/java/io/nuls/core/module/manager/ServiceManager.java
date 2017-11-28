@@ -1,8 +1,11 @@
 package io.nuls.core.module.manager;
 
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.module.BaseNulsModule;
+import io.nuls.core.module.service.ModuleService;
+import io.nuls.core.utils.log.Log;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,6 +21,8 @@ public class ServiceManager {
     private static final Map<Class, Object> INTF_MAP = new HashMap<>();
     private static final Map<Short, Set<Class>> MODULE_INTF_MAP = new HashMap<>();
     private static final Map<Class, Short> MODULE_ID_MAP = new HashMap<>();
+    private final ModuleService moduleService = ModuleService.getInstance();
+    private static final int WAIT_TIMES = 10;
 
     private ServiceManager() {
     }
@@ -31,13 +36,31 @@ public class ServiceManager {
         if(null==moduleId){
             return null;
         }
-
         if (INTF_MAP.get(tclass) == null) {
             return null;
         }
+        dependencyCheck(moduleId);
         return (T) INTF_MAP.get(tclass);
     }
 
+    private void dependencyCheck(short moduleId) {
+        this.dependencyCheck(moduleId,0);
+    }
+    private void dependencyCheck(short moduleId,int index) {
+        if(index>=WAIT_TIMES){
+            throw new NulsRuntimeException(ErrorCode.FAILED,"dependency module is not ready!");
+        }
+        ModuleStatusEnum status = moduleService.getModuleState(moduleId);
+        if(status==ModuleStatusEnum.RUNNING){
+            return;
+        }
+        try {
+            Thread.sleep(1000L);
+            this.dependencyCheck(moduleId,index+1);
+        } catch (InterruptedException e) {
+            Log.error(e);
+        }
+    }
     public void regService(short moduleId, Object service) {
         Class serviceInterface = null;
         boolean useSuperClass = null == service.getClass().getInterfaces() || service.getClass().getInterfaces().length == 0 && !service.getClass().getSuperclass().equals(Object.class);
