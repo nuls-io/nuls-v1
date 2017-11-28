@@ -17,8 +17,7 @@ public class PongData extends BaseNetworkData {
     public static final short OWN_SUB_VERSION = 0001;
 
     public PongData() {
-        super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
-        this.type = NetworkConstant.NETWORK_PONG_MESAAGE;
+        super(OWN_MAIN_VERSION, OWN_SUB_VERSION, NetworkConstant.NETWORK_PONG_MESAAGE);
     }
 
     @Override
