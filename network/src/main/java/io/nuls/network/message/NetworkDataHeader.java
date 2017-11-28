@@ -26,6 +26,10 @@ public class NetworkDataHeader {
 
     }
 
+    public NetworkDataHeader(NulsByteBuffer buffer) {
+        this.parse(buffer);
+    }
+
     public NetworkDataHeader(short moduleId, short type) {
         this.moduleId = moduleId;
         this.type = type;
@@ -57,6 +61,21 @@ public class NetworkDataHeader {
         this.extend = byteBuffer.readBytes(EXTEND_LENGTH);
     }
 
+    @Override
+    public String toString() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("networkHeader:{");
+        buffer.append("moduleId:" + moduleId + ", ");
+        buffer.append("type:" + type + ", ");
+        buffer.append("extend:[");
+        if (extend != null && extend.length > 0) {
+            for (byte b : extend) {
+                buffer.append(b + " ");
+            }
+        }
+        buffer.append("]}");
+        return buffer.toString();
+    }
 
     public short getModuleId() {
         return moduleId;

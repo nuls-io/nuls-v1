@@ -5,6 +5,7 @@ import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.message.entity.GetVersionData;
 import io.nuls.network.message.entity.VersionData;
+import io.nuls.network.module.AbstractNetworkModule;
 
 /**
  * @author vivi
@@ -14,8 +15,13 @@ public abstract class BaseNetworkData extends BaseNulsData {
 
     protected NetworkDataHeader networkHeader;
 
-    public BaseNetworkData(short mainVersion, short subVersion) {
+    public BaseNetworkData(NulsByteBuffer buffer) {
+        super(buffer);
+    }
+
+    public BaseNetworkData(short mainVersion, short subVersion, short type) {
         super(mainVersion, subVersion);
+        this.networkHeader = new NetworkDataHeader(AbstractNetworkModule.networkModuleId, type);
     }
 
     public BaseNetworkData(short mainVersion, short subVersion, NetworkDataHeader networkHeader) {
@@ -23,20 +29,20 @@ public abstract class BaseNetworkData extends BaseNulsData {
         this.networkHeader = networkHeader;
     }
 
-    public static BaseNetworkData transfer(Short msgType, byte[] data) {
-        BaseNetworkData message = null;
-        switch (msgType) {
+    public static BaseNetworkData transfer(Short type, byte[] data) {
+        BaseNetworkData networkData = null;
+        switch (type) {
             case NetworkConstant.NETWORK_GET_VERSION_MESSAGE:
-                message = new GetVersionData();
+                networkData = new GetVersionData();
                 break;
             case NetworkConstant.NETWORK_VERSION_MESSAGE:
-                message = new VersionData();
+                networkData = new VersionData();
                 break;
 
             default:
         }
-        message.parse(new NulsByteBuffer(data));
-        return message;
+        networkData.parse(new NulsByteBuffer(data));
+        return networkData;
     }
 
     public NetworkDataHeader getNetworkHeader() {

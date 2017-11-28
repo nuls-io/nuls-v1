@@ -46,6 +46,7 @@ public class Peer extends BaseNulsData {
 
     private int failCount;
 
+
     /**
      * 1: inPeer ,  2: outPeer
      */
@@ -260,8 +261,8 @@ public class Peer extends BaseNulsData {
 
     public boolean isHandShakeMessage(BaseNetworkData networkMessage) {
 //        return networkMessage instanceof VersionData;
-        return (networkMessage.getType() == NetworkConstant.NETWORK_GET_VERSION_MESSAGE
-                || networkMessage.getType() == NetworkConstant.NETWORK_VERSION_MESSAGE);
+        return (networkMessage.getNetworkHeader().getType() == NetworkConstant.NETWORK_GET_VERSION_MESSAGE
+                || networkMessage.getNetworkHeader().getType() == NetworkConstant.NETWORK_VERSION_MESSAGE);
 
     }
 
