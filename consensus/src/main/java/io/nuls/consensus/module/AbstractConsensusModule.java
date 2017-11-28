@@ -11,7 +11,7 @@ import io.nuls.core.module.BaseNulsModule;
  */
 public abstract class AbstractConsensusModule extends BaseNulsModule {
     public AbstractConsensusModule() {
-        super("consensus");
+        super((short) 7,"consensus");
         this.registerEvent((short) 1, BaseConsensusEvent.class);
         this.registerEvent((short) 2, JoinConsensusEvent.class);
         this.registerEvent((short) 3, ExitConsensusEvent.class);

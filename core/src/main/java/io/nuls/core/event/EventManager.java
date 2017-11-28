@@ -10,14 +10,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
  * @author Niels
  * @date 2017/11/7
- *
  */
 public class EventManager {
     private static final Map<String, Class<? extends BaseNulsEvent>> EVENT_MAP = new HashMap<>();
-    private static final List<Object[]> TEMP_LIST = new ArrayList<>();
 
     public static void isLegal(Class<? extends BaseNulsEvent> eventClass) {
         boolean b = EVENT_MAP.values().contains(eventClass);
@@ -40,15 +37,7 @@ public class EventManager {
         if (type == 0) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "the event type cannot be 0!");
         }
-        if (module.getModuleId() != 0) {
-            putEvent(module.getModuleId(), type, clazz);
-            return;
-        }
-        Object[] array = new Object[3];
-        array[0] = module;
-        array[1] = type;
-        array[2] = clazz;
-        TEMP_LIST.add(array);
+        putEvent(module.getModuleId(), type, clazz);
     }
 
     public static BaseNulsEvent getInstanceByHeader(NulsEventHeader eventHeader) throws IllegalAccessException, InstantiationException {
@@ -59,20 +48,5 @@ public class EventManager {
         BaseNulsEvent event = clazz.newInstance();
         event.setHeader(eventHeader);
         return event;
-    }
-
-
-    public static void refreshEvents() {
-        for (int i = TEMP_LIST.size() - 1; i >= 0; i--) {
-            Object[] array = TEMP_LIST.get(i);
-            BaseNulsModule module = (BaseNulsModule) array[0];
-            if (0 == module.getModuleId()) {
-                continue;
-            }
-            short type = (short) array[1];
-            Class<? extends BaseNulsEvent> clazz = (Class<? extends BaseNulsEvent>) array[2];
-            putEvent(module.getModuleId(), type, clazz);
-            TEMP_LIST.remove(i);
-        }
     }
 }

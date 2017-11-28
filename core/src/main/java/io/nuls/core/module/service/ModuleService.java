@@ -2,7 +2,6 @@ package io.nuls.core.module.service;
 
 
 import io.nuls.core.constant.ModuleStatusEnum;
-import io.nuls.core.event.EventManager;
 import io.nuls.core.module.BaseNulsModule;
 import io.nuls.core.module.manager.ModuleManager;
 import io.nuls.core.module.manager.ServiceManager;
@@ -28,26 +27,10 @@ public class ModuleService {
         return ModuleManager.getInstance().getModuleId(clazz);
     }
 
-    private BaseNulsModule loadModule(short moduleId, String moduleClass) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-        BaseNulsModule module = null;
-        do {
-            if (StringUtils.isBlank(moduleClass)) {
-                Log.warn("module cannot start:" + moduleClass);
-                break;
-            }
-            Class clazz = Class.forName(moduleClass);
-            module = (BaseNulsModule) clazz.newInstance();
-            module.setModuleId(moduleId);
-            EventManager.refreshEvents();
-            Log.info("load module:" + module.getInfo());
-        } while (false);
-        ModuleManager.getInstance().regModule(module);
-        return module;
-    }
+
 
     public void startModule(short moduleId, String moduleClass) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
-        BaseNulsModule module = this.loadModule(moduleId, moduleClass);
-        ModuleManager.getInstance().startModule(module);
+        ModuleManager.getInstance().startModule(moduleId, moduleClass);
     }
 
     public ModuleStatusEnum getModuleState(short moduleId) {

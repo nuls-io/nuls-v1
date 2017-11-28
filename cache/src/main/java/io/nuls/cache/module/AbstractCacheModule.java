@@ -10,6 +10,6 @@ import io.nuls.core.module.BaseNulsModule;
  */
 public abstract class AbstractCacheModule extends BaseNulsModule {
     public AbstractCacheModule() {
-        super("cache");
+        super((short) 3,"cache");
     }
 }

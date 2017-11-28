@@ -48,7 +48,6 @@ public class ModuleProcess extends BaseThread {
 
     @Override
     protected void beforeRun() {
-        runner.getModule().setStatus(ModuleStatusEnum.STARTING);
     }
 
     @Override

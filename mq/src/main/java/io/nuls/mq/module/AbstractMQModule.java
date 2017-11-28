@@ -9,6 +9,6 @@ import io.nuls.core.module.BaseNulsModule;
 public abstract class AbstractMQModule extends BaseNulsModule {
 
     protected AbstractMQModule() {
-        super("mq");
+        super((short) 1,"mq");
     }
 }

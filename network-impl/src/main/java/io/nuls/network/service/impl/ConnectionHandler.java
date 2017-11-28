@@ -138,11 +138,10 @@ public class ConnectionHandler implements MessageWriter {
                     return;
                 }
                 // "flip" the buffer - setting the limit to the current position and setting position to 0
-                handler.readBuffer.flip();
                 handler.peer.receiveMessage(handler.readBuffer);
 
                 // Now drop the bytes which were read by compacting readBuff (resetting limit and keeping relative position)
-                handler.readBuffer.compact();
+
             }
             if (key.isWritable()) {
                 handler.writeBytes();

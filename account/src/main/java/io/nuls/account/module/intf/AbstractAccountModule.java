@@ -10,6 +10,6 @@ import io.nuls.core.module.BaseNulsModule;
  */
 public abstract class AbstractAccountModule extends BaseNulsModule {
     public AbstractAccountModule() {
-        super("account");
+        super((short) 5,"account");
     }
 }

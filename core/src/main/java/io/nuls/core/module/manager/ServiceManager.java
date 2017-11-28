@@ -31,37 +31,32 @@ public class ServiceManager {
     }
 
     public <T> T getService(Class<T> tclass) {
-        Short moduleId = MODULE_ID_MAP.get(tclass);
-        if(null==moduleId){
-            return null;
-        }
-        if (INTF_MAP.get(tclass) == null) {
-            return null;
-        }
-        dependencyCheck(moduleId);
+        dependencyCheck(tclass, 0);
         return (T) INTF_MAP.get(tclass);
     }
 
-    private void dependencyCheck(short moduleId) {
-        this.dependencyCheck(moduleId,0);
-    }
-    private void dependencyCheck(short moduleId,int index) {
-        if(index>=WAIT_TIMES){
-            throw new NulsRuntimeException(ErrorCode.FAILED,"dependency module is not ready!"+moduleId);
-        }
-        ModuleStatusEnum status = ModuleService.getInstance().getModuleState(moduleId);
-        if(status==ModuleStatusEnum.RUNNING){
+    private void dependencyCheck(Class tclass, int index) {
+        Object service = INTF_MAP.get(tclass);
+        if(service!=null){
             return;
         }
+        if (index >= WAIT_TIMES) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "dependency module is not ready!" + tclass);
+        }
+        sleepAndIncrement(tclass,index);
+    }
+
+    private void sleepAndIncrement(Class tclass, int index){
         try {
             Thread.sleep(1000L);
-            this.dependencyCheck(moduleId,index+1);
+            this.dependencyCheck(tclass, index + 1);
         } catch (InterruptedException e) {
             Log.error(e);
         }
     }
+
     public void regService(short moduleId, Object service) {
-        Class serviceInterface = null;
+        Class serviceInterface =  null;
         boolean useSuperClass = null == service.getClass().getInterfaces() || service.getClass().getInterfaces().length == 0 && !service.getClass().getSuperclass().equals(Object.class);
         if (useSuperClass) {
             serviceInterface = service.getClass().getSuperclass();
@@ -89,7 +84,7 @@ public class ServiceManager {
         }
         set.add(serviceInterface);
         MODULE_INTF_MAP.put(moduleId, set);
-        MODULE_ID_MAP.put(serviceInterface,moduleId);
+        MODULE_ID_MAP.put(serviceInterface, moduleId);
     }
 
     public void removeService(short moduleId, Object service) {

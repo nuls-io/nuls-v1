@@ -68,6 +68,10 @@ public class NulsMessageHeader implements Serializable {
         this.extend = extend;
     }
 
+    public NulsMessageHeader(NulsByteBuffer buffer) {
+        parse(buffer);
+    }
+
     public int size() {
         return MESSAGE_HEADER_SIZE;
     }
@@ -94,6 +98,23 @@ public class NulsMessageHeader implements Serializable {
         this.extend = byteBuffer.readBytes(MESSAGE_HEADER_EXTEND_SIZE);
     }
 
+    @Override
+    public String toString() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("messageHeader:{");
+        buffer.append("magicNumber:" + magicNumber + ", ");
+        buffer.append("headerType:" + headType + ", ");
+        buffer.append("length:" + length + ", ");
+        buffer.append("xor:" + xor + ", ");
+        buffer.append("extend:[");
+        if (extend != null && extend.length > 0) {
+            for (byte b : extend) {
+                buffer.append(b + " ");
+            }
+        }
+        buffer.append("]}");
+        return buffer.toString();
+    }
 
     public int getLength() {
         return length;
@@ -133,24 +154,6 @@ public class NulsMessageHeader implements Serializable {
 
     public void setXor(byte xor) {
         this.xor = xor;
-    }
-
-    @Override
-    public String toString() {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("messageHeader:{");
-        buffer.append("magicNumber:" + magicNumber + ", ");
-        buffer.append("headerType:" + headType + ", ");
-        buffer.append("length:" + length + ", ");
-        buffer.append("xor:" + xor + ", ");
-        buffer.append("extend:[");
-        if (extend != null && extend.length > 0) {
-            for (byte b : extend) {
-                buffer.append(b + " ");
-            }
-        }
-        buffer.append("]}");
-        return buffer.toString();
     }
 
 }

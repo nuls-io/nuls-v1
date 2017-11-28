@@ -7,14 +7,15 @@ import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.entity.Balance;
 
 /**
- * Created by Niels on 2017/11/17.
+ * @author Niels
+ * @date 2017/11/17
  */
 public class LedgerCacheService {
     private static LedgerCacheService instance = new LedgerCacheService();
-    private CacheService<String, Balance> cacheService = NulsContext.getInstance().getService(CacheService.class);
+    private final CacheService<String, Balance> cacheService;
 
     private LedgerCacheService() {
-        cacheService.createCache(LedgerConstant.STANDING_BOOK);
+        cacheService = NulsContext.getInstance().getService(CacheService.class);
     }
 
     public static LedgerCacheService getInstance() {
