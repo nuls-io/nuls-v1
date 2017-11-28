@@ -17,7 +17,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @author vivi
  * @date 2017/11/21
  */
-public class PeerDiscoverHandler implements Runnable{
+public class PeerDiscoverHandler implements Runnable {
 
     private AbstractNetworkParam network;
 
@@ -64,6 +64,7 @@ public class PeerDiscoverHandler implements Runnable{
     /**
      * check the peers when closed try to connect other one
      */
+    @Override
     public void run() {
         while (running) {
             Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
@@ -78,9 +79,8 @@ public class PeerDiscoverHandler implements Runnable{
                 // find other peer and try to connect
                 List<Peer> peers = getSeedPeers();
 
-
                 for (Peer newPeer : peers) {
-                    if(outPeers.getPeers().contains(newPeer)) {
+                    if (outPeers.getPeers().contains(newPeer)) {
                         continue;
                     }
                     peersManager.addPeerToGroup(NetworkConstant.NETWORK_PEER_OUT_GROUP, newPeer);
@@ -88,12 +88,12 @@ public class PeerDiscoverHandler implements Runnable{
                 }
             }
 
-            for (Peer peer : outPeers.getPeers()) {
-                System.out.println("peer: " + peer.getIp() + ", status:" + peer.getStatus());
+            for(Peer peer : outPeers.getPeers()) {
+                System.out.println("--------ip:" + peer.getIp() + ",port:" + peer.getPort() + ",status:" + peer.getStatus());
             }
 
             try {
-                Thread.sleep(2000);
+                Thread.sleep(3000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

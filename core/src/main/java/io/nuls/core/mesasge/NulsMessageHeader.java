@@ -154,13 +154,4 @@ public class NulsMessageHeader implements Serializable {
         return buffer.toString();
     }
 
-    public static void main(String[] args) {
-        NulsMessageHeader header = new NulsMessageHeader(12345678, (short) 1, 500, (byte) 3);
-        byte[] bytes = header.serialize();
-
-        NulsMessageHeader header2 = new NulsMessageHeader();
-        header2.parse(new NulsByteBuffer(bytes));
-
-        System.out.println(header2.toString());
-    }
 }

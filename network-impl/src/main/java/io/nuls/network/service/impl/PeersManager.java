@@ -75,11 +75,13 @@ public class PeersManager {
             addPeerToGroup(NetworkConstant.NETWORK_PEER_OUT_GROUP, peer);
             connectionManager.openConnection(peer);
         }
+        System.out.println("-----------peerManager start");
 
         /** start  heart beat thread
          *
          *
          **/
+
         ThreadManager.asynExecuteRunnable(this.discovery);
     }
 

@@ -25,7 +25,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author vivi
  * @date 2017-11-10
  */
-public class ConnectionManager implements Runnable{
+public class ConnectionManager implements Runnable {
 
     private AbstractNetworkParam network;
 
@@ -73,12 +73,14 @@ public class ConnectionManager implements Runnable{
     }
 
     public void start() {
+        System.out.println("-----connectManager start ----");
         ThreadManager.asynExecuteRunnable(this);
     }
 
 
     @Override
     public void run() {
+        System.out.println("-----connectManager run ----");
         Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
         try {
             while (inited) {
@@ -127,7 +129,7 @@ public class ConnectionManager implements Runnable{
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println("----------------server close");
+        Log.info("Network closing connectManager");
 
         //todo sent a event to other module
     }
@@ -220,15 +222,10 @@ public class ConnectionManager implements Runnable{
                     peer.connectionOpened();
                 } else {
                     // Failed to connect for some reason
-                    System.out.println("--------------------destory 4" + peer.getIp());
                     peer.destroy();
                 }
-            } catch (ConnectException ne) {
-                Log.warn("out peer Failed to connect to {}", channel.socket().getRemoteSocketAddress());
-                peer.destroy();
             } catch (Exception e) {
-                System.out.println("--------------------destory 5" + peer.getIp());
-                e.printStackTrace();
+                Log.warn("out peer Failed to connect", e);
                 peer.destroy();
             }
 
@@ -253,9 +250,8 @@ public class ConnectionManager implements Runnable{
                 newKey.attach(handler);
                 peer.connectionOpened();
             } catch (Exception e) {
-                e.printStackTrace();
                 if (socketChannel != null) {
-                    Log.warn("in peer Failed to connect to {}", socketChannel.socket().getRemoteSocketAddress());
+                    Log.warn("in peer Failed to connect", e);
                     try {
                         socketChannel.close();
                     } catch (IOException e1) {
@@ -263,7 +259,6 @@ public class ConnectionManager implements Runnable{
                     }
                 }
                 if (peer != null) {
-                    System.out.println("--------------------destory 6" + peer.getIp());
                     peer.destroy();
                 }
             }

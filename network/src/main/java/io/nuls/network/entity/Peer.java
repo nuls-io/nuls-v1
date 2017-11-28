@@ -3,12 +3,11 @@ package io.nuls.network.entity;
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.exception.NulsVerificationException;
 import io.nuls.core.mesasge.NulsMessage;
 import io.nuls.core.mesasge.NulsMessageHeader;
-import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.param.AbstractNetworkParam;
@@ -167,7 +166,6 @@ public class Peer extends BaseNulsData {
         buffer.get(headers, 0, headers.length);
         NulsMessageHeader messageHeader = network.getMessageFilter().filterHeader(headers);
 
-        System.out.println(messageHeader.toString());
         byte[] data = new byte[buffer.limit() - headers.length];
         buffer.get(data, 0, data.length);
 
@@ -205,8 +203,8 @@ public class Peer extends BaseNulsData {
                         NetworkMessageResult messageResult = handler.process(networkMessage, Peer.this);
                         processMessageResult(messageResult);
                     } catch (Exception e) {
-                        e.printStackTrace();
-                        System.out.println("--------------------destory 7" + Peer.this.getIp());
+                        Log.error("process message error", e);
+                        //e.printStackTrace();
                         Peer.this.destroy();
                     }
                 }

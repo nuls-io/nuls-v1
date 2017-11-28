@@ -27,7 +27,6 @@ public class NetworkModuleImpl extends AbstractNetworkModule {
 
     @Override
     public void start() {
-        //TODO start the module
         networkService.start();
     }
 

@@ -56,6 +56,16 @@ public class NetworkServiceImpl implements NetworkService {
 
     }
 
+    @Override
+    public long currentTimeMillis() {
+        return 0;
+    }
+
+    @Override
+    public long currentTimeSeconds() {
+        return 0;
+    }
+
     private AbstractNetworkParam getNetworkInstance() {
         String networkType = ConfigLoader.getPropValue(NetworkConstant.NETWORK_TYPE, "dev");
         if ("dev".equals(networkType)) {

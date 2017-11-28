@@ -9,4 +9,8 @@ public interface NetworkService {
     void start();
 
      void shutdown();
+
+     long currentTimeMillis();
+
+     long currentTimeSeconds();
 }

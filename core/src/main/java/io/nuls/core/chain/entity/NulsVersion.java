@@ -70,12 +70,4 @@ public class NulsVersion {
         return getMainVersion() + "." + getSubVersion();
     }
 
-    public static void main(String[] args) {
-        NulsVersion v1 = new NulsVersion((short) 1, (short) 0004);
-        System.out.println(v1.getVersion());
-        byte[] bytes = new VarInt(v1.getVersion()).encode();
-        short b = (short) new NulsByteBuffer(bytes).readVarInt();
-        System.out.println(b);
-    }
-
 }

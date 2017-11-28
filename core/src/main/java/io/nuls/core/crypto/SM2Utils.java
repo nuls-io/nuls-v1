@@ -102,8 +102,7 @@ public class SM2Utils {
 
         SM2 sm2 = SM2.Instance();
         BigInteger userD = new BigInteger(privateKey);
-        System.out.println("userD: " + userD.toString(16));
-        System.out.println("");
+
 
         ECPoint userKey = sm2.ecc_point_g.multiply(userD);
 
