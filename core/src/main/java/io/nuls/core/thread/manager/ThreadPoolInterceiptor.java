@@ -13,6 +13,6 @@ public class ThreadPoolInterceiptor implements MethodInterceptor {
     @Override
     public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
         //todo
-        return null;
+        return proxy.invokeSuper(obj,args);
     }
 }
