@@ -7,7 +7,7 @@ package io.nuls.core.constant;
 public enum ModuleStatusEnum {
 
     //UNINITED,INITED,
-    UNSTARTED, STARTING, RUNNING, STOPED, STOPPING, DESTROYED, DESTROYING, EXCEPTION;
+    NOT_FOUND,UNSTARTED, STARTING, RUNNING, STOPED, STOPPING, DESTROYED, DESTROYING, EXCEPTION;
 
     @Override
     public String toString() {

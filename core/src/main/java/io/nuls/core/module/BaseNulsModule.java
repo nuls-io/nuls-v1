@@ -14,13 +14,14 @@ import io.nuls.core.utils.log.Log;
  */
 public abstract class BaseNulsModule {
 
-    private short moduleId;
+    private final short moduleId;
 
     private final String moduleName;
 
     private ModuleStatusEnum status;
 
-    public BaseNulsModule(String moduleName) {
+    public BaseNulsModule(short moduleId, String moduleName) {
+        this.moduleId = moduleId;
         this.moduleName = moduleName;
         this.status = ModuleStatusEnum.UNSTARTED;
     }
@@ -86,7 +87,7 @@ public abstract class BaseNulsModule {
      * @param service
      */
     protected final void registerService(Object service) {
-        ServiceManager.getInstance().regService(this.moduleId,service);
+        ServiceManager.getInstance().regService(this.moduleId, service);
     }
 
     protected final void registerService(Class serviceInterface, Object service) {
@@ -107,9 +108,5 @@ public abstract class BaseNulsModule {
 
     public short getModuleId() {
         return moduleId;
-    }
-
-    public void setModuleId(short moduleId) {
-        this.moduleId = moduleId;
     }
 }

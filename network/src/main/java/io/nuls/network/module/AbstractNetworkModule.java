@@ -12,6 +12,6 @@ public abstract class AbstractNetworkModule extends BaseNulsModule {
 
     public static final short networkModuleId = 4;
     protected AbstractNetworkModule(){
-        super("network");
+        super((short) 4,"network");
     }
 }

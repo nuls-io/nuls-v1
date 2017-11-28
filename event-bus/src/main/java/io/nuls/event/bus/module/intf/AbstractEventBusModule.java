@@ -8,6 +8,6 @@ import io.nuls.core.module.BaseNulsModule;
  */
 public abstract class AbstractEventBusModule extends BaseNulsModule {
     public AbstractEventBusModule() {
-        super("event-bus");
+        super((short) 6,"event-bus");
     }
 }

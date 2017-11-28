@@ -1,6 +1,11 @@
 package io.nuls.core.thread;
 
-public  class BaseThread extends Thread{
+import io.nuls.core.utils.log.Log;
+
+/**
+ * @author Niels
+ */
+public class BaseThread extends Thread {
     private short moduleId;
     private String poolName;
 
@@ -44,16 +49,27 @@ public  class BaseThread extends Thread{
     }
 
     protected void beforeStart() {
+        //default do nothing
     }
 
     @Override
     public final void run() {
         this.beforeRun();
-        try{
+        boolean ok = true;
+        try {
             super.run();
-        }finally {
+        } catch (Exception e) {
+            ok = false;
+            runException(e);
+        }
+        if(ok){
             this.afterRun();
         }
+
+    }
+
+    protected void runException(Exception e) {
+        Log.error(e);
     }
 
     @Override
@@ -64,28 +80,23 @@ public  class BaseThread extends Thread{
     }
 
     protected void afterStart() {
-        //todo
-        System.out.println("afterStart");
+        //default do nothing
     }
 
     protected void afterRun() {
-        //todo
-        System.out.println("afterRun");
+        //default do nothing
     }
 
     protected void beforeRun() {
-        //todo
-        System.out.println("beforeRun");
+        //default do nothing
     }
 
     protected void afterInterrupt() {
-        //todo
-        System.out.println("afterInterrupt");
+        //default do nothing
     }
 
     protected void beforeInterrupt() {
-        //todo
-        System.out.println("beforeInterrupt");
+        //default do nothing
     }
 
     public short getModuleId() {

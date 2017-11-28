@@ -2,6 +2,7 @@ package io.nuls.rpc.resources.impl;
 
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.module.service.ModuleService;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.rpc.entity.RpcResult;
 import io.nuls.rpc.resources.ModuleResource;
@@ -15,7 +16,7 @@ import javax.ws.rs.core.MediaType;
  * @date 2017/9/30
  */
 @Path("/sys")
-public class SystemResourceImpl implements SystemResource, ModuleResource {
+public class SystemResourceImpl implements ModuleResource {
     private NulsContext context = NulsContext.getInstance();
 
     @Override
@@ -38,12 +39,23 @@ public class SystemResourceImpl implements SystemResource, ModuleResource {
     @Path("/module/load")
     @Produces(MediaType.APPLICATION_JSON)
     @Override
-    public RpcResult startModule(Short moduleId, String moduleClass) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
+    public RpcResult startModule(@FormParam("moduleId") Short moduleId, @FormParam("moduleClass") String moduleClass) {
         RpcResult result = null;
         do {
             ModuleService service = context.getService(ModuleService.class);
             AssertUtil.canNotEmpty(service, "System module service error!");
-            service.startModule(moduleId, moduleClass);
+            try {
+                service.startModule(moduleId, moduleClass);
+            } catch (IllegalAccessException e) {
+                Log.error(e);
+                break;
+            } catch (InstantiationException e) {
+                Log.error(e);
+                break;
+            } catch (ClassNotFoundException e) {
+                Log.error(e);
+                break;
+            }
             result = RpcResult.getSuccess();
         } while (false);
         return result;
