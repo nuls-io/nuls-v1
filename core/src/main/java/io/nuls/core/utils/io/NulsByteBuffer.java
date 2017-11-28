@@ -9,7 +9,6 @@ import io.nuls.core.exception.NulsVerificationException;
 import io.nuls.core.utils.crypto.Utils;
 
 /**
- *
  * @author Niels
  * @date 2017/11/2
  */
@@ -52,15 +51,8 @@ public class NulsByteBuffer {
     }
 
     public long readUint32() throws NulsVerificationException {
-        try {
-            long u = Utils.readUint32LE(payload, cursor);
-            cursor += 4;
-            return u;
-        } catch (ArrayIndexOutOfBoundsException e) {
-            throw new NulsVerificationException(ErrorCode.DATA_PARSE_ERROR, e);
-        }
+        return (long) readInt32LE();
     }
-
 
     public long readInt64() throws NulsVerificationException {
         try {
@@ -72,15 +64,6 @@ public class NulsByteBuffer {
         }
     }
 
-    public int readInt32() throws NulsVerificationException {
-        try {
-            int u = Utils.readInt32LE(payload, cursor);
-            cursor += 4;
-            return u;
-        } catch (ArrayIndexOutOfBoundsException e) {
-            throw new NulsVerificationException(ErrorCode.DATA_PARSE_ERROR, e);
-        }
-    }
 
     public long readVarInt() throws NulsVerificationException {
         return readVarInt(0);
@@ -122,7 +105,7 @@ public class NulsByteBuffer {
 
     public byte[] readByLengthByte() {
         long length = this.readVarInt();
-        return readBytes((int)length);
+        return readBytes((int) length);
     }
 
     public Sha256Hash readHash() {

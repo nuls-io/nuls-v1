@@ -4,13 +4,13 @@ package io.nuls.network.message;
  * @author vivi
  * @date 2017/11/21
  */
-public class NetworkMessageResult {
+public class NetworkDataResult {
 
     private final boolean success;
 
-    private final AbstractNetworkMessage replyMessage;
+    private final BaseNetworkData replyMessage;
 
-    public NetworkMessageResult(boolean success, AbstractNetworkMessage replyMessage) {
+    public NetworkDataResult(boolean success, BaseNetworkData replyMessage) {
         this.success = success;
         this.replyMessage = replyMessage;
     }
@@ -19,7 +19,7 @@ public class NetworkMessageResult {
         return success;
     }
 
-    public AbstractNetworkMessage getReplyMessage() {
+    public BaseNetworkData getReplyMessage() {
         return replyMessage;
     }
 }

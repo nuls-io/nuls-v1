@@ -1,6 +1,7 @@
 package io.nuls.network.service.impl;
 
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.ThreadManager;
 import io.nuls.core.utils.log.Log;
@@ -11,7 +12,6 @@ import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.module.AbstractNetworkModule;
 
 import java.io.IOException;
-import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -39,7 +39,7 @@ public class ConnectionManager implements Runnable {
 
     private ReentrantLock lock;
 
-    private volatile boolean inited;
+    private volatile boolean running;
     //The storage will be connected
 
     public ConnectionManager(AbstractNetworkModule module, AbstractNetworkParam network) {
@@ -55,14 +55,14 @@ public class ConnectionManager implements Runnable {
     private void init() {
         lock.lock();
         try {
-            if (!inited) {
+            if (!running) {
                 selector = SelectorProvider.provider().openSelector();
                 serverSocketChannel = ServerSocketChannel.open();
                 serverSocketChannel.configureBlocking(false);
                 serverSocketChannel.bind(new InetSocketAddress(network.port()));
                 serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
 
-                inited = true;
+                running = true;
             }
         } catch (IOException e) {
             serverClose();
@@ -73,19 +73,16 @@ public class ConnectionManager implements Runnable {
     }
 
     public void start() {
-        System.out.println("-----connectManager start ----");
+        Log.info("----------- network connectionManager start -------------");
         ThreadManager.asynExecuteRunnable(this);
     }
 
 
     @Override
     public void run() {
-        System.out.println("-----connectManager run ----");
         Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
         try {
-            while (inited) {
-                //Processing waiting for connections
-
+            while (running) {
                 if (selector.select(1000) > 0) {
                     Iterator<SelectionKey> keyIterator = selector.selectedKeys().iterator();
                     while (keyIterator.hasNext()) {
@@ -103,35 +100,41 @@ public class ConnectionManager implements Runnable {
     }
 
     private void serverClose() {
-        inited = false;
-        for (SelectionKey key : selector.keys()) {
+        lock.lock();
+        try {
+            running = false;
+            for (SelectionKey key : selector.keys()) {
+                try {
+                    key.channel().close();
+                } catch (IOException e) {
+                    Log.warn("Error closing channel", e);
+                }
+                key.cancel();
+                if (key.attachment() instanceof ConnectionHandler) {
+                    // Close connection if relevant
+                    ConnectionHandler.handleKey(key);
+                }
+            }
             try {
-                key.channel().close();
+                selector.close();
+                selector = null;
             } catch (IOException e) {
-                Log.warn("Error closing channel", e);
+                Log.warn("Error closing client manager selector", e);
             }
-            key.cancel();
-            if (key.attachment() instanceof ConnectionHandler) {
-                // Close connection if relevant
-                ConnectionHandler.handleKey(key);
+
+            try {
+                serverSocketChannel.close();
+                serverSocketChannel = null;
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        }
-        try {
-            selector.close();
-            selector = null;
-        } catch (IOException e) {
-            Log.warn("Error closing client manager selector", e);
-        }
+            Log.info("Network closing connectManager");
 
-        try {
-            serverSocketChannel.close();
-            serverSocketChannel = null;
-        } catch (IOException e) {
-            e.printStackTrace();
+            //todo sent a event to other module
+            networkModule.setStatus(ModuleStatusEnum.DESTROYED);
+        } finally {
+            lock.unlock();
         }
-        Log.info("Network closing connectManager");
-
-        //todo sent a event to other module
     }
 
     /**

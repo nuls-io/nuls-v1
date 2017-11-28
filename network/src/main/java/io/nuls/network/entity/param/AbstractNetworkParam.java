@@ -2,7 +2,7 @@ package io.nuls.network.entity.param;
 
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.utils.network.IPUtil;
-import io.nuls.network.message.AbstractNetWorkMessageHandlerFactory;
+import io.nuls.network.message.AbstractNetWorkDataHandlerFactory;
 import io.nuls.network.message.messageFilter.NulsMessageFilter;
 
 import java.net.InetSocketAddress;
@@ -28,7 +28,7 @@ public abstract class AbstractNetworkParam {
 
     protected NulsMessageFilter messageFilter;
 
-    protected AbstractNetWorkMessageHandlerFactory messageHandlerFactory;
+    protected AbstractNetWorkDataHandlerFactory messageHandlerFactory;
 
     protected List<InetSocketAddress> seedPeers = new ArrayList<>();
 
@@ -70,7 +70,7 @@ public abstract class AbstractNetworkParam {
         return messageFilter;
     }
 
-    public AbstractNetWorkMessageHandlerFactory getMessageHandlerFactory() {
+    public AbstractNetWorkDataHandlerFactory getMessageHandlerFactory() {
         return messageHandlerFactory;
     }
 
