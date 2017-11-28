@@ -26,7 +26,7 @@ public class ModuleProcess extends BaseThread {
 
     @Override
     protected void afterStart() {
-        runner.getModule().setStatus(ModuleStatusEnum.RUNNING);
+
     }
 
     @Override
@@ -36,7 +36,7 @@ public class ModuleProcess extends BaseThread {
     }
 
     @Override
-    protected void afterRun() {
+    protected void afterRun() {runner.getModule().setStatus(ModuleStatusEnum.RUNNING);
         while (running) {
             try {
                 Thread.sleep(1000L);

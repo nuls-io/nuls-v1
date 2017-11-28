@@ -53,4 +53,8 @@ public class ModuleThreadPoolExecuter {
     public List<ModuleProcess> getProcessList() {
         return new ArrayList<>(PROCCESS_MAP.values());
     }
+
+    public void removeProcess(short moduleId) {
+
+    }
 }

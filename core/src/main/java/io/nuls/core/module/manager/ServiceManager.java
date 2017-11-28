@@ -21,7 +21,6 @@ public class ServiceManager {
     private static final Map<Class, Object> INTF_MAP = new HashMap<>();
     private static final Map<Short, Set<Class>> MODULE_INTF_MAP = new HashMap<>();
     private static final Map<Class, Short> MODULE_ID_MAP = new HashMap<>();
-    private final ModuleService moduleService = ModuleService.getInstance();
     private static final int WAIT_TIMES = 10;
 
     private ServiceManager() {
@@ -48,9 +47,9 @@ public class ServiceManager {
     }
     private void dependencyCheck(short moduleId,int index) {
         if(index>=WAIT_TIMES){
-            throw new NulsRuntimeException(ErrorCode.FAILED,"dependency module is not ready!");
+            throw new NulsRuntimeException(ErrorCode.FAILED,"dependency module is not ready!"+moduleId);
         }
-        ModuleStatusEnum status = moduleService.getModuleState(moduleId);
+        ModuleStatusEnum status = ModuleService.getInstance().getModuleState(moduleId);
         if(status==ModuleStatusEnum.RUNNING){
             return;
         }

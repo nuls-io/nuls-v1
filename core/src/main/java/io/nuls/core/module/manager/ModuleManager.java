@@ -5,7 +5,6 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.module.BaseNulsModule;
-import io.nuls.core.module.service.ModuleService;
 import io.nuls.core.module.thread.ModuleThreadPoolExecuter;
 
 import java.util.HashMap;
@@ -38,12 +37,24 @@ public class ModuleManager {
         if (null == moduleClass) {
             return null;
         }
+
         for (BaseNulsModule module : MODULE_MAP.values()) {
-            if (moduleClass.equals(module.getClass())) {
+            if (moduleClass.equals(module.getClass()) || isImplements(module.getClass().getSuperclass(), moduleClass)) {
                 return module.getModuleId();
             }
         }
         return null;
+    }
+
+    private boolean isImplements(Class superClass, Class<? extends BaseNulsModule> moduleClass) {
+        boolean result = moduleClass.equals(superClass);
+        if (result) {
+            return true;
+        }
+        if (Object.class.equals(superClass.getSuperclass())) {
+            return false;
+        }
+        return isImplements(superClass.getSuperclass(), moduleClass);
     }
 
     public void regModule(BaseNulsModule module) {
@@ -81,6 +92,8 @@ public class ModuleManager {
         } catch (Exception e) {
             module.setStatus(ModuleStatusEnum.EXCEPTION);
         }
+        remModule(module.getModuleId());
+        POOL.removeProcess(module.getModuleId());
     }
 
     public String getInfo() {
