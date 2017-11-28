@@ -5,8 +5,8 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.module.BaseNulsModule;
+import io.nuls.core.module.service.ModuleService;
 import io.nuls.core.module.thread.ModuleThreadPoolExecuter;
-import io.nuls.core.utils.log.Log;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -84,7 +84,6 @@ public class ModuleManager {
     }
 
     public String getInfo() {
-        //todo
         StringBuilder str = new StringBuilder("Message:");
         for (BaseNulsModule module : MODULE_MAP.values()) {
             str.append("\nModule:");

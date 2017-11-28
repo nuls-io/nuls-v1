@@ -14,7 +14,6 @@ import io.nuls.core.utils.str.StringUtils;
  * @date 2017/10/16
  */
 public class ModuleService {
-    private final ModuleManager moduleManager = ModuleManager.getInstance();
     private static final ModuleService INSTANCE = new ModuleService();
 
     private ModuleService() {
@@ -25,11 +24,11 @@ public class ModuleService {
         return INSTANCE;
     }
 
-    public Short getModuleId(Class<? extends BaseNulsModule> clazz){
-        return moduleManager.getModuleId(clazz);
+    public Short getModuleId(Class<? extends BaseNulsModule> clazz) {
+        return ModuleManager.getInstance().getModuleId(clazz);
     }
 
-    private BaseNulsModule loadModule(short moduleId,String moduleClass) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+    private BaseNulsModule loadModule(short moduleId, String moduleClass) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
         BaseNulsModule module = null;
         do {
             if (StringUtils.isBlank(moduleClass)) {
@@ -42,24 +41,25 @@ public class ModuleService {
             EventManager.refreshEvents();
             Log.info("load module:" + module.getInfo());
         } while (false);
-        moduleManager.regModule(module);
+        ModuleManager.getInstance().regModule(module);
         return module;
     }
 
-    public void startModule(short moduleId,String moduleClass) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
-        BaseNulsModule module = this.loadModule(moduleId,moduleClass);
-        moduleManager.startModule(module);
+    public void startModule(short moduleId, String moduleClass) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
+        BaseNulsModule module = this.loadModule(moduleId, moduleClass);
+        ModuleManager.getInstance().startModule(module);
     }
 
-    public ModuleStatusEnum getModuleState(short moduleId){
-        return moduleManager.getModuleState(moduleId);
+    public ModuleStatusEnum getModuleState(short moduleId) {
+        return ModuleManager.getInstance().getModuleState(moduleId);
     }
 
-    public void shutdown(short moduleId){
-        moduleManager.stopModule(moduleId);
+    public void shutdown(short moduleId) {
+        ModuleManager.getInstance().stopModule(moduleId);
     }
 
-    public void destroy(short moduleId){
-        moduleManager.destoryModule(moduleId);
+    public void destroy(short moduleId) {
+        ModuleManager.getInstance().destoryModule(moduleId);
     }
+
 }
