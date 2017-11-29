@@ -1,5 +1,6 @@
 package io.nuls.event.bus.module.intf;
 
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.module.BaseNulsModule;
 
 /**
@@ -8,6 +9,6 @@ import io.nuls.core.module.BaseNulsModule;
  */
 public abstract class AbstractEventBusModule extends BaseNulsModule {
     public AbstractEventBusModule() {
-        super((short) 6,"event-bus");
+        super(NulsConstant.MODULE_ID_EVENT_BUS);
     }
 }

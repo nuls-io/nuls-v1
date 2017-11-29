@@ -1,5 +1,6 @@
 package io.nuls.mq.module;
 
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.module.BaseNulsModule;
 
 /**
@@ -9,6 +10,6 @@ import io.nuls.core.module.BaseNulsModule;
 public abstract class AbstractMQModule extends BaseNulsModule {
 
     protected AbstractMQModule() {
-        super((short) 1,"mq");
+        super(NulsConstant.MODULE_ID_MQ);
     }
 }

@@ -16,13 +16,12 @@ public abstract class BaseNulsModule{
 
     private final short moduleId;
 
-    private final String moduleName;
+    private String moduleName;
 
     private ModuleStatusEnum status;
 
-    public BaseNulsModule(short moduleId, String moduleName) {
+    public BaseNulsModule(short moduleId) {
         this.moduleId = moduleId;
-        this.moduleName = moduleName;
         this.status = ModuleStatusEnum.UNSTARTED;
     }
 
@@ -109,5 +108,9 @@ public abstract class BaseNulsModule{
 
     public short getModuleId() {
         return moduleId;
+    }
+
+    public void setModuleName(String moduleName) {
+        this.moduleName = moduleName;
     }
 }

@@ -1,6 +1,7 @@
 package io.nuls.cache.module;
 
 
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.module.BaseNulsModule;
 
 /**
@@ -10,6 +11,6 @@ import io.nuls.core.module.BaseNulsModule;
  */
 public abstract class AbstractCacheModule extends BaseNulsModule {
     public AbstractCacheModule() {
-        super((short) 3,"cache");
+        super(NulsConstant.MODULE_ID_CACHE);
     }
 }
