@@ -14,12 +14,12 @@ import io.nuls.core.utils.str.StringUtils;
  */
 public class ModuleRunner implements Runnable {
 
-    private final short moduleId;
+    private final String moduleKey;
     private final String moduleClass;
     private  BaseNulsModule module;
 
-    public ModuleRunner(short moduleId, String moduleClass) {
-        this.moduleId = moduleId;
+    public ModuleRunner(String key, String moduleClass) {
+        this.moduleKey = key;
         this.moduleClass = moduleClass;
     }
 
@@ -56,8 +56,8 @@ public class ModuleRunner implements Runnable {
         return module;
     }
 
-    public short getModuleId() {
-        return moduleId;
+    public String getModuleKey() {
+        return moduleKey;
     }
 
     public BaseNulsModule getModule() {

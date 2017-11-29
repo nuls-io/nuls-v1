@@ -39,13 +39,13 @@ public class SystemResourceImpl implements ModuleResource {
     @Path("/module/load")
     @Produces(MediaType.APPLICATION_JSON)
     @Override
-    public RpcResult startModule(@FormParam("moduleId") Short moduleId, @FormParam("moduleClass") String moduleClass) {
+    public RpcResult startModule(@FormParam("moduleName") String moduleName, @FormParam("moduleClass") String moduleClass) {
         RpcResult result = null;
         do {
             ModuleService service = context.getService(ModuleService.class);
             AssertUtil.canNotEmpty(service, "System module service error!");
             try {
-                service.startModule(moduleId, moduleClass);
+                service.startModule(moduleName, moduleClass);
             } catch (IllegalAccessException e) {
                 Log.error(e);
                 break;

@@ -27,12 +27,12 @@ public class ModuleThreadPoolExecuter {
         return POOL;
     }
 
-    public void startModule(short moduleId, String moduleClass) {
+    public void startModule(String key, String moduleClass) {
         if(null==moduleClass){
             return;
         }
         try {
-            ModuleRunner runner = new ModuleRunner(moduleId, moduleClass);
+            ModuleRunner runner = new ModuleRunner(key, moduleClass);
             ModuleProcess moduleProcess = factory.newThread(runner);
             moduleProcess.start();
         }catch (Exception e){

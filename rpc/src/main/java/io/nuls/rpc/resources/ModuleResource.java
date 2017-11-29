@@ -9,7 +9,13 @@ import io.nuls.rpc.entity.RpcResult;
  */
 public interface ModuleResource extends SystemResource{
 
-    RpcResult startModule(Short moduleId,String moduleClass) ;
+    /**
+     * start a new module
+     * @param moduleName
+     * @param moduleClass
+     * @return
+     */
+    RpcResult startModule(String moduleName,String moduleClass) ;
 
     RpcResult shutdownModule(Short moduleId);
 

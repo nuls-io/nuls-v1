@@ -29,8 +29,8 @@ public class ModuleService {
 
 
 
-    public void startModule(short moduleId, String moduleClass) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
-        ModuleManager.getInstance().startModule(moduleId, moduleClass);
+    public void startModule(String key, String moduleClass) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
+        ModuleManager.getInstance().startModule(key, moduleClass);
     }
 
     public ModuleStatusEnum getModuleState(short moduleId) {

@@ -11,7 +11,7 @@ import java.util.concurrent.ThreadFactory;
  */
 public class ModuleThreadFactory implements ThreadFactory {
 
-    private static final String POOL_NAME = "Module-Process";
+    private static final String POOL_NAME = "Process";
     @Override
     public ModuleProcess newThread(Runnable r) {
         if (null == r) {
@@ -21,8 +21,8 @@ public class ModuleThreadFactory implements ThreadFactory {
             throw new NulsRuntimeException(ErrorCode.FAILED, "unkown runnable!");
         }
         ModuleProcess process = new ModuleProcess((ModuleRunner) r);
-        process.setModuleId(((ModuleRunner) r).getModuleId());
-        process.setName(POOL_NAME+"-"+((ModuleRunner) r).getModuleId());
+        process.setModuleId((short) 0);
+        process.setName(POOL_NAME+"-"+((ModuleRunner) r).getModuleKey());
         process.setPoolName(POOL_NAME);
         process.setDaemon(false);
         return process;

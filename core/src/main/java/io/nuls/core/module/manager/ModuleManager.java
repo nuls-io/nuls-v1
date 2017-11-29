@@ -70,8 +70,8 @@ public class ModuleManager {
     }
 
 
-    public void startModule(short moduleId, String moduleClass) {
-        POOL.startModule(moduleId,moduleClass);
+    public void startModule(String key, String moduleClass) {
+        POOL.startModule(key,moduleClass);
     }
 
     public void stopModule(short moduleId) {

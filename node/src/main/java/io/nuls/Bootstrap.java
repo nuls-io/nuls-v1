@@ -74,8 +74,7 @@ public class Bootstrap {
         List<String> keyList = new ArrayList<>(bootstrapClasses.stringPropertyNames());
         for (String key : keyList) {
             try {
-                short moduleId = Short.parseShort(key);
-                moduleService.startModule(moduleId,bootstrapClasses.getProperty(key));
+                moduleService.startModule(key,bootstrapClasses.getProperty(key));
             } catch (Exception e) {
                 throw new NulsRuntimeException(e);
             }
