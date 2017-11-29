@@ -4,6 +4,8 @@ import io.nuls.cache.constant.EhCacheConstant;
 import io.nuls.cache.entity.CacheElement;
 import io.nuls.cache.manager.EhCacheManager;
 import io.nuls.cache.service.intf.CacheService;
+import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.exception.NulsRuntimeException;
 import org.ehcache.Cache;
 
 import java.io.Serializable;
@@ -13,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
  * @author Niels
  * @date 2017/10/27
  */
@@ -50,17 +51,26 @@ public class EhCacheServiceImpl<K, T> implements CacheService<K, T> {
 
     @Override
     public void putElement(String cacheTitle, K key, T value) {
+        if (null == cacheManager.getCache(cacheTitle)) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "Cache not exist!");
+        }
         cacheManager.getCache(cacheTitle).put(key, value);
     }
 
     @Override
     public void putElement(String cacheTitle, CacheElement element) {
+        if (null == cacheManager.getCache(cacheTitle)) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "Cache not exist!");
+        }
         cacheManager.getCache(cacheTitle).put(element.getKey(), element.getValue());
     }
 
     @Override
     public T getElementValue(String cacheTitle, K key) {
-        return (T) cacheManager.getCache(cacheTitle).get(cacheTitle);
+        if (null == cacheManager.getCache(cacheTitle)) {
+            return null;
+        }
+        return (T) cacheManager.getCache(cacheTitle).get(key);
     }
 
     @Override
@@ -68,7 +78,7 @@ public class EhCacheServiceImpl<K, T> implements CacheService<K, T> {
         Iterator it = cacheManager.getCache(cacheTitle).iterator();
         List<T> list = new ArrayList<>();
         while (it.hasNext()) {
-            Cache.Entry<K,T> entry = (Cache.Entry<K,T>) it.next();
+            Cache.Entry<K, T> entry = (Cache.Entry<K, T>) it.next();
             list.add(entry.getValue());
         }
         return list;
@@ -76,11 +86,17 @@ public class EhCacheServiceImpl<K, T> implements CacheService<K, T> {
 
     @Override
     public void removeElement(String cacheTitle, K key) {
+        if (null == cacheManager.getCache(cacheTitle)) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "Cache not exist!");
+        }
         cacheManager.getCache(cacheTitle).remove(key);
     }
 
     @Override
     public void clearCache(String title) {
+        if (null == cacheManager.getCache(title)) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "Cache not exist!");
+        }
         cacheManager.getCache(title).clear();
     }
 
@@ -91,6 +107,9 @@ public class EhCacheServiceImpl<K, T> implements CacheService<K, T> {
 
     @Override
     public void putElements(String cacheTitle, Map<K, T> map) {
+        if (null == cacheManager.getCache(cacheTitle)) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "Cache not exist!");
+        }
         cacheManager.getCache(cacheTitle).putAll(map);
     }
 

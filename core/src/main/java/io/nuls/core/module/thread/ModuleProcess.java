@@ -31,6 +31,7 @@ public class ModuleProcess extends BaseThread {
 
     @Override
     protected void runException(Exception e) {
+        Log.error(e);
         runner.getModule().setStatus(ModuleStatusEnum.EXCEPTION);
         running = false;
     }

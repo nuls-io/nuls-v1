@@ -16,6 +16,7 @@ public class LedgerCacheService {
 
     private LedgerCacheService() {
         cacheService = NulsContext.getInstance().getService(CacheService.class);
+        cacheService.createCache(LedgerConstant.STANDING_BOOK);
     }
 
     public static LedgerCacheService getInstance() {
