@@ -175,6 +175,11 @@ public class Utils {
                 ((bytes[offset + 3] & 0xffL) << 24);
     }
 
+    public static short readInt16LE(byte[] bytes, int offset) {
+        return (short) ((bytes[offset] & 0xff) |
+                ((bytes[offset + 1] & 0xff) << 8));
+    }
+
     public static int readInt32LE(byte[] bytes, int offset) {
         return (bytes[offset] & 0xff) |
                 ((bytes[offset + 1] & 0xff) << 8) |
@@ -265,6 +270,11 @@ public class Utils {
         out[offset + 1] = (byte) (0xFF & (val >> 8));
     }
 
+    public static void int16ToByteArrayLE(short val, byte[] out, int offset) {
+        out[offset] = (byte) (0xFF & val);
+        out[offset + 1] = (byte) (0xFF & (val >> 8));
+    }
+
     public static void uint32ToByteArrayLE(long val, byte[] out, int offset) {
         out[offset] = (byte) (0xFF & val);
         out[offset + 1] = (byte) (0xFF & (val >> 8));
@@ -290,7 +300,7 @@ public class Utils {
         out[offset + 7] = (byte) (0xFF & (val >> 56));
     }
 
-    public static void uint16ToByteStreamLE(short val, OutputStream stream) throws IOException {
+    public static void int16ToByteStreamLE(short val, OutputStream stream) throws IOException {
         stream.write((byte) (0xFF & val));
         stream.write((byte) (0xFF & (val >> 8)));
     }

@@ -8,7 +8,7 @@ import io.nuls.ledger.entity.utxoTransaction.UtxoTransferTransaction;
  */
 public class UtxoTransferEvent<T extends UtxoTransferTransaction> extends TransferEvent<T> {
 
-    public UtxoTransferEvent(NulsEventHeader header) {
-        super(header);
+    public UtxoTransferEvent() {
+        super();
     }
 }

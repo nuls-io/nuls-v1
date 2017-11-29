@@ -21,7 +21,6 @@ public final class AccountTool {
 
     /**
      * create a new address
-     *
      * @return Address
      */
     public static Address newAddress(ECKey key) {

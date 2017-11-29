@@ -11,8 +11,8 @@ import io.nuls.ledger.entity.AbstractCoinTransaction;
  */
 public abstract class AbstractCoinTransactionEvent<T extends AbstractCoinTransaction> extends BaseLedgerEvent<T> {
 
-    public AbstractCoinTransactionEvent(NulsEventHeader header) {
-        super(header);
+    public AbstractCoinTransactionEvent(short eventType) {
+        super(eventType);
     }
 
 }

@@ -9,7 +9,7 @@ import io.nuls.ledger.entity.TransferTransaction;
  * @date 2017/11/20
  */
 public class TransferEvent<T extends TransferTransaction> extends AbstractCoinTransactionEvent<T> {
-    public TransferEvent(NulsEventHeader header) {
-        super(header);
+    public TransferEvent() {
+        super((short) 2);
     }
 }

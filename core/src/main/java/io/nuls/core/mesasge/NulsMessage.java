@@ -2,10 +2,7 @@ package io.nuls.core.mesasge;
 
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.crypto.VarInt;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsVerificationException;
-import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
 import java.io.IOException;
@@ -24,13 +21,11 @@ public class NulsMessage {
         this.data = new byte[0];
     }
 
+    public NulsMessage(ByteBuffer buffer) {
+        parse(buffer);
+    }
+
     public NulsMessage(NulsMessageHeader header, byte[] data) {
-        if (header == null) {
-            header = new NulsMessageHeader();
-        }
-        if (data == null) {
-            data = new byte[0];
-        }
         this.header = header;
         this.data = data;
         caculateXor();
@@ -99,6 +94,19 @@ public class NulsMessage {
         return value;
     }
 
+    public void parse(ByteBuffer byteBuffer) {
+        byte[] headers = new byte[NulsMessageHeader.MESSAGE_HEADER_SIZE];
+        byteBuffer.get(headers, 0, headers.length);
+        NulsMessageHeader header = new NulsMessageHeader(new NulsByteBuffer(headers));
+        byte[] data = new byte[byteBuffer.limit() - headers.length];
+        byteBuffer.get(data, 0, data.length);
+
+        this.header = header;
+        this.data = data;
+
+        verify();
+    }
+
     public void setHeader(NulsMessageHeader header) {
         this.header = header;
     }
@@ -111,7 +119,7 @@ public class NulsMessage {
         this.data = data;
     }
 
-    void verify() throws NulsVerificationException {
+    public void verify() throws NulsVerificationException {
         if (this.header == null || this.data == null) {
             throw new NulsVerificationException(ErrorCode.NET_MESSAGE_ERROR);
         }
@@ -124,6 +132,5 @@ public class NulsMessage {
             throw new NulsVerificationException(ErrorCode.NET_MESSAGE_XOR_ERROR);
         }
     }
-
 
 }

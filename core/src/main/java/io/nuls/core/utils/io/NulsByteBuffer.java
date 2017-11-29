@@ -40,6 +40,16 @@ public class NulsByteBuffer {
         }
     }
 
+    public short readInt16LE() throws NulsVerificationException {
+        try {
+            short s = Utils.readInt16LE(payload, cursor);
+            cursor += 2;
+            return s;
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new NulsVerificationException(ErrorCode.DATA_PARSE_ERROR, e);
+        }
+    }
+
     public int readInt32LE() throws NulsVerificationException {
         try {
             int u = Utils.readInt32LE(payload, cursor);

@@ -3,6 +3,7 @@ package io.nuls.network.message.entity;
 import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
+import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
@@ -35,6 +36,10 @@ public class VersionData extends BaseNetworkData {
         this.nulsVersion = NulsContext.nulsVersion;
     }
 
+    public VersionData(NulsByteBuffer buffer) {
+        super(buffer);
+    }
+
     public VersionData(long bestBlockHeight, String bestBlockHash) {
         this();
         this.bestBlockHash = bestBlockHash;
@@ -45,7 +50,8 @@ public class VersionData extends BaseNetworkData {
     public int size() {
         int s = 0;
         s += NetworkDataHeader.NETWORK_HEADER_SIZE;
-        s += VarInt.sizeOf(version.getVersion());
+
+        s += 2;    // version.length
         s += VarInt.sizeOf(bestBlockHeight);
         // put the bestBlockHash.length
         s += 1;
@@ -69,8 +75,8 @@ public class VersionData extends BaseNetworkData {
 
     @Override
     public void serializeToStream(OutputStream stream) throws IOException {
-//        stream.write(new VarInt(type).encode());
-        stream.write(new VarInt(version.getVersion()).encode());
+        networkHeader.serializeToStream(stream);
+        Utils.int16ToByteStreamLE(version.getVersion(), stream);
         stream.write(new VarInt(bestBlockHeight).encode());
         this.writeBytesWithLength(stream, bestBlockHash);
         this.writeBytesWithLength(stream, nulsVersion);
@@ -78,8 +84,8 @@ public class VersionData extends BaseNetworkData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
-//        type = (short) byteBuffer.readVarInt();
-        version = new NulsVersion((short) byteBuffer.readVarInt());
+        this.networkHeader = new NetworkDataHeader(byteBuffer);
+        version = new NulsVersion(byteBuffer.readShort());
         bestBlockHeight = byteBuffer.readVarInt();
         bestBlockHash = new String(byteBuffer.readByLengthByte());
         nulsVersion = new String(byteBuffer.readByLengthByte());
@@ -88,8 +94,8 @@ public class VersionData extends BaseNetworkData {
     @Override
     public String toString() {
         StringBuffer buffer = new StringBuffer();
-        buffer.append("versionMessage:{");
-//        buffer.append("type:" + type + ", ");
+        buffer.append("versionData:{");
+        buffer.append(networkHeader.toString());
         buffer.append("version:" + version.getStringVersion() + ", ");
         buffer.append("bestBlockHeight:" + bestBlockHeight + ", ");
         buffer.append("bestBlockHash:" + bestBlockHash + ", ");

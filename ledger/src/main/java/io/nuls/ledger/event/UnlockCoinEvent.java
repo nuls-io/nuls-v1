@@ -10,7 +10,7 @@ import io.nuls.ledger.entity.UnlockCoinTransaction;
  */
 public class UnlockCoinEvent<T extends UnlockCoinTransaction> extends AbstractCoinTransactionEvent<T> {
 
-    public UnlockCoinEvent(NulsEventHeader header) {
-        super(header);
+    public UnlockCoinEvent() {
+        super((short) 5);
     }
 }
