@@ -228,7 +228,7 @@ public class ConnectionManager implements Runnable {
                     peer.destroy();
                 }
             } catch (Exception e) {
-                Log.warn("out peer Failed to connect:"+peer.getIp(), e);
+                Log.warn("out peer Failed to connect:"+peer.getIp());
                 peer.destroy();
             }
 
@@ -254,7 +254,7 @@ public class ConnectionManager implements Runnable {
                 peer.connectionOpened();
             } catch (Exception e) {
                 if (socketChannel != null) {
-                    Log.warn("in peer Failed to connect", e);
+                    Log.warn("in peer Failed to connect"+peer.getIp());
                     try {
                         socketChannel.close();
                     } catch (IOException e1) {

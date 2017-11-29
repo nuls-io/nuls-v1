@@ -69,6 +69,7 @@ public abstract class BaseNulsModule {
     }
 
     public void setStatus(ModuleStatusEnum status) {
+        Log.info("Status change("+this.moduleName+"):"+this.status+"-->"+status);
         this.status = status;
     }
 
