@@ -33,11 +33,14 @@ public class NulsMessage {
     }
 
     public NulsMessage(byte[] data) {
-        this(null, data);
+        this.header = new NulsMessageHeader();
+        this.data = data;
+        caculateXor();
+        header.setLength(data.length);
     }
 
     public NulsMessage(NulsMessageHeader header) {
-        this(header, null);
+        this.header = new NulsMessageHeader();
     }
 
     public NulsMessage(int magicNumber, short msgType) {
@@ -59,16 +62,16 @@ public class NulsMessage {
         }
         this.header.setExtend(extend);
     }
-
-    public NulsMessage(int magicNumber, int length, short msgType, byte xor, byte[] data) {
-        this.header = new NulsMessageHeader(magicNumber, msgType, length, xor);
-        this.data = data;
-    }
-
-    public NulsMessage(int magicNumber, int length, short msgType, byte xor, byte[] extend, byte[] data) {
-        this.header = new NulsMessageHeader(magicNumber, msgType, length, xor, extend);
-        this.data = data;
-    }
+//
+//    public NulsMessage(int magicNumber, int length, short msgType, byte xor, byte[] data) {
+//        this.header = new NulsMessageHeader(magicNumber, msgType, length, xor);
+//        this.data = data;
+//    }
+//
+//    public NulsMessage(int magicNumber, int length, short msgType, byte xor, byte[] extend, byte[] data) {
+//        this.header = new NulsMessageHeader(magicNumber, msgType, length, xor, extend);
+//        this.data = data;
+//    }
 
     public NulsMessageHeader getHeader() {
         return header;
