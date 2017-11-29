@@ -1,7 +1,7 @@
 package io.nuls.core.thread.manager;
 
 import io.nuls.core.thread.BaseThread;
-//import io.nuls.core.thread.data.ThreadData;
+import io.nuls.core.thread.data.ThreadData;
 import io.nuls.core.utils.aop.AopUtils;
 
 import java.util.List;
@@ -14,7 +14,7 @@ public class ThreadManager {
     private static final int DEFAULT_QUEUE_MAX_SIZE = Integer.MAX_VALUE;
 
 
-//    private static final ThreadData THREAD_DATA_CACHE = ThreadData.getInstance();
+    private static final ThreadData THREAD_DATA_CACHE = ThreadData.getInstance();
 
     private static final String TEMPORARY_THREAD_POOL_NAME = "temporary";
     private static final int TEMPORARY_THREAD_POOL_COUNT = 10;
@@ -43,7 +43,7 @@ public class ThreadManager {
         Object[] paramArgs = new Object[]{threadCount, threadCount, 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(queueSize), factory};
         ThreadPoolExecutor pool = AopUtils.createProxy(ThreadPoolExecutor.class, paramClasses, paramArgs, new ThreadPoolInterceiptor());
-//        THREAD_DATA_CACHE.putPool(factory.getModuleId(), factory.getPoolName(), pool);
+        THREAD_DATA_CACHE.putPool(factory.getModuleId(), factory.getPoolName(), pool);
         return pool;
     }
 
@@ -52,7 +52,7 @@ public class ThreadManager {
             throw new RuntimeException("thread factory cannot be null!");
         }
         ScheduledThreadPoolExecutor pool = AopUtils.createProxy(ScheduledThreadPoolExecutor.class, new Class[]{int.class, ThreadFactory.class}, new Object[]{threadCount, factory}, new ThreadPoolInterceiptor());
-//        THREAD_DATA_CACHE.putPool(factory.getModuleId(), factory.getPoolName(), pool);
+        THREAD_DATA_CACHE.putPool(factory.getModuleId(), factory.getPoolName(), pool);
         return pool;
     }
 
@@ -84,8 +84,7 @@ public class ThreadManager {
     }
 
     public static final List<BaseThread> getThreadList(short moduleId) {
-//        return THREAD_DATA_CACHE.getThreadList(moduleId);
-        return null;
+        return THREAD_DATA_CACHE.getThreadList(moduleId);
     }
 
     public static final String getThreadPoolsInfoString(short moduleId) {
@@ -99,20 +98,20 @@ public class ThreadManager {
     }
 
     public static void shutdownByModuleId(short moduleId) {
-//        List<ThreadPoolExecutor> poolList = THREAD_DATA_CACHE.getPoolList(moduleId);
-//        if (null != poolList) {
-//            for (ThreadPoolExecutor pool : poolList) {
-//                pool.shutdown();
-//            }
-//        }
-//        List<BaseThread> threadList = THREAD_DATA_CACHE.getThreadList(moduleId);
-//        if (null != threadList) {
-//            for (Thread thread : threadList) {
-//                if (thread.getState() == Thread.State.RUNNABLE) {
-//                    thread.interrupt();
-//                }
-//            }
-//        }
-//        THREAD_DATA_CACHE.remove(moduleId);
+        List<ThreadPoolExecutor> poolList = THREAD_DATA_CACHE.getPoolList(moduleId);
+        if (null != poolList) {
+            for (ThreadPoolExecutor pool : poolList) {
+                pool.shutdown();
+            }
+        }
+        List<BaseThread> threadList = THREAD_DATA_CACHE.getThreadList(moduleId);
+        if (null != threadList) {
+            for (Thread thread : threadList) {
+                if (thread.getState() == Thread.State.RUNNABLE) {
+                    thread.interrupt();
+                }
+            }
+        }
+        THREAD_DATA_CACHE.remove(moduleId);
     }
 }

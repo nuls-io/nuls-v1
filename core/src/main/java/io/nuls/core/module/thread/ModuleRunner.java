@@ -27,18 +27,22 @@ public class ModuleRunner implements Runnable {
     public void run() {
         try {
             module = this.loadModule();
+            module.setStatus(ModuleStatusEnum.STARTING);
+            module.start();
+            module.setStatus(ModuleStatusEnum.RUNNING);
         } catch (ClassNotFoundException e) {
+            module.setStatus(ModuleStatusEnum.EXCEPTION);
             Log.error(e);
             throw new NulsRuntimeException(ErrorCode.FAILED,e);
         } catch (IllegalAccessException e) {
+            module.setStatus(ModuleStatusEnum.EXCEPTION);
             Log.error(e);
             throw new NulsRuntimeException(ErrorCode.FAILED,e);
         } catch (InstantiationException e) {
+            module.setStatus(ModuleStatusEnum.EXCEPTION);
             Log.error(e);
             throw new NulsRuntimeException(ErrorCode.FAILED,e);
         }
-        module.setStatus(ModuleStatusEnum.STARTING);
-        module.start();
     }
 
     private BaseNulsModule loadModule() throws ClassNotFoundException, IllegalAccessException, InstantiationException {

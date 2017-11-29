@@ -5,8 +5,6 @@ import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.module.BaseNulsModule;
 import io.nuls.core.module.manager.ModuleManager;
 import io.nuls.core.module.manager.ServiceManager;
-import io.nuls.core.utils.log.Log;
-import io.nuls.core.utils.str.StringUtils;
 
 /**
  * @author Niels
@@ -26,8 +24,6 @@ public class ModuleService {
     public Short getModuleId(Class<? extends BaseNulsModule> clazz) {
         return ModuleManager.getInstance().getModuleId(clazz);
     }
-
-
 
     public void startModule(String key, String moduleClass) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
         ModuleManager.getInstance().startModule(key, moduleClass);
