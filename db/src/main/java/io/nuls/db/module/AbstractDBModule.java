@@ -1,6 +1,7 @@
 package io.nuls.db.module;
 
 
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.module.BaseNulsModule;
 
 /**
@@ -11,7 +12,7 @@ import io.nuls.core.module.BaseNulsModule;
 public abstract class AbstractDBModule extends BaseNulsModule {
 
     protected AbstractDBModule() {
-        super((short) 2,"database");
+        super(NulsConstant.MODULE_ID_DB);
     }
 
 }

@@ -1,6 +1,7 @@
 package io.nuls.network.module;
 
 
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.module.BaseNulsModule;
 
 /**
@@ -12,6 +13,6 @@ public abstract class AbstractNetworkModule extends BaseNulsModule {
 
     public static final short networkModuleId = 4;
     protected AbstractNetworkModule(){
-        super((short) 4,"network");
+        super(NulsConstant.MODULE_ID_NETWORK);
     }
 }
