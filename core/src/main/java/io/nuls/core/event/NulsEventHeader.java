@@ -22,8 +22,9 @@ public class NulsEventHeader extends BaseNulsData {
     public NulsEventHeader(short moduleId, short eventType,byte[] extend) {
         this.moduleId = moduleId;
         this.eventType = eventType;
-        checkExtend();
         this.extend = extend;
+        checkExtend();
+
     }
 
     protected void checkExtend(){

@@ -17,7 +17,7 @@ public abstract class BaseNulsEvent<T extends BaseNulsData> extends BaseNulsData
     private T eventBody;
 
     public BaseNulsEvent(){
-
+        this.header = new NulsEventHeader();
     }
 
     public BaseNulsEvent(NulsEventHeader header) {
@@ -27,13 +27,19 @@ public abstract class BaseNulsEvent<T extends BaseNulsData> extends BaseNulsData
 
     @Override
     public final int size() {
-        return header.size() + eventBody.size();
+        if(eventBody != null) {
+            return header.size() + eventBody.size();
+        }else {
+            return header.size();
+        }
     }
 
     @Override
     public final void serializeToStream(OutputStream stream) throws IOException {
         this.header.serializeToStream(stream);
-        this.eventBody.serializeToStream(stream);
+        if(eventBody != null) {
+            this.eventBody.serializeToStream(stream);
+        }
     }
 
     @Override

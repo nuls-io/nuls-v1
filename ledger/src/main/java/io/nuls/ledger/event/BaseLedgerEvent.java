@@ -17,7 +17,9 @@ public class BaseLedgerEvent<T extends BaseNulsData> extends BaseNulsEvent<T>{
 
 
     public BaseLedgerEvent(short eventType) {
-        this.setHeader(new NulsEventHeader(ModuleService.getInstance().getModuleId(AbstractLedgerModule.class),eventType ));
+        super();
+        this.setHeader(new NulsEventHeader((short) 8,eventType ));
+        //this.setHeader(new NulsEventHeader(ModuleService.getInstance().getModuleId(AbstractLedgerModule.class),eventType ));
     }
 
     @Override
