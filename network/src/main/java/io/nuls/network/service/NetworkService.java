@@ -1,5 +1,6 @@
 package io.nuls.network.service;
 
+import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.core.mesasge.NulsMessage;
 import io.nuls.network.entity.BroadcastResult;
 
@@ -16,9 +17,13 @@ public interface NetworkService {
     long currentTimeMillis();
 
     long currentTimeSeconds();
+//
+//    BroadcastResult broadcast(NulsMessage message);
+//
+//    BroadcastResult broadcastToGroup(NulsMessage message, String groupName);
 
-    BroadcastResult broadcast(NulsMessage message);
+    BroadcastResult broadcast(BaseNulsEvent event);
 
-    BroadcastResult broadcastToGroup(NulsMessage message, String groupName);
+    BroadcastResult broadcastToGroup(byte[] data, String groupName);
 
 }

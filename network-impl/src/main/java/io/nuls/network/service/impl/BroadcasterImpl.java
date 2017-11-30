@@ -1,9 +1,12 @@
 package io.nuls.network.service.impl;
 
+import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.core.mesasge.NulsMessage;
+import io.nuls.core.mesasge.NulsMessageHeader;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Peer;
+import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.service.Broadcaster;
 
 import java.io.IOException;
@@ -18,13 +21,14 @@ public class BroadcasterImpl implements Broadcaster {
 
     private PeersManager peersManager;
 
+    private AbstractNetworkParam network;
 
-    public BroadcasterImpl(PeersManager peersManager) {
+    public BroadcasterImpl(PeersManager peersManager, AbstractNetworkParam network) {
         this.peersManager = peersManager;
+        this.network = network;
     }
 
-    @Override
-    public BroadcastResult broadcast(NulsMessage message) {
+    private BroadcastResult broadcast(NulsMessage message) {
         List<Peer> broadPeers = peersManager.getAvailablePeers();
 
         if (broadPeers.size() == 0) {
@@ -48,8 +52,7 @@ public class BroadcasterImpl implements Broadcaster {
         return new BroadcastResult(true, "OK");
     }
 
-    @Override
-    public BroadcastResult broadcastToGroup(NulsMessage message, String groupName) {
+    private BroadcastResult broadcastToGroup(NulsMessage message, String groupName) {
         if (!peersManager.hasPeerGroup(groupName)) {
             return new BroadcastResult(false, "There is no such group");
         }
@@ -74,6 +77,41 @@ public class BroadcasterImpl implements Broadcaster {
         }
         Log.debug("成功广播给{}个节点，消息{}", successCount, message);
         return new BroadcastResult(true, "OK");
+    }
+
+    @Override
+    public BroadcastResult broadcast(BaseNulsEvent event) {
+        NulsMessage message = null;
+        try {
+            message = new NulsMessage(network.packetMagic(), NulsMessageHeader.EVENT_MESSAGE, event.serialize());
+        } catch (IOException e) {
+            return new BroadcastResult(false, "event.serialize() error");
+        }
+
+        return broadcast(message);
+    }
+
+    @Override
+    public BroadcastResult broadcast(byte[] data) {
+        NulsMessage message = new NulsMessage(network.packetMagic(), NulsMessageHeader.EVENT_MESSAGE, data);
+        return broadcast(message);
+    }
+
+    @Override
+    public BroadcastResult broadcastToGroup(BaseNulsEvent event, String groupName) {
+        NulsMessage message = null;
+        try {
+            message = new NulsMessage(network.packetMagic(), NulsMessageHeader.EVENT_MESSAGE, event.serialize());
+        } catch (IOException e) {
+            return new BroadcastResult(false, "event.serialize() error");
+        }
+        return broadcastToGroup(message, groupName);
+    }
+
+    @Override
+    public BroadcastResult broadcastToGroup(byte[] data, String groupName) {
+        NulsMessage message = new NulsMessage(network.packetMagic(), NulsMessageHeader.EVENT_MESSAGE, data);
+        return broadcastToGroup(message, groupName);
     }
 
 }

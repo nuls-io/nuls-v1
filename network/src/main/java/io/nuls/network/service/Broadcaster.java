@@ -1,9 +1,8 @@
 package io.nuls.network.service;
 
+import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.core.mesasge.NulsMessage;
 import io.nuls.network.entity.BroadcastResult;
-import io.nuls.network.entity.Peer;
-import io.nuls.network.entity.PeerGroup;
 
 /**
  * @author vivi
@@ -11,10 +10,15 @@ import io.nuls.network.entity.PeerGroup;
  */
 public interface Broadcaster{
 
-    BroadcastResult broadcast(NulsMessage message);
+//    BroadcastResult broadcast(NulsMessage message);
+//
+//    BroadcastResult broadcastToGroup(NulsMessage message, String groupName);
 
-    BroadcastResult broadcastToGroup(NulsMessage message, String groupName);
+    BroadcastResult broadcast(BaseNulsEvent event);
 
+    BroadcastResult broadcast(byte[] data);
 
+    BroadcastResult broadcastToGroup(BaseNulsEvent event, String groupName);
 
+    BroadcastResult broadcastToGroup(byte[] data, String groupName);
 }

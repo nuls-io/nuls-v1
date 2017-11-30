@@ -2,6 +2,7 @@ package io.nuls.network.service.impl;
 
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.ModuleStatusEnum;
+import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.mesasge.NulsMessage;
 import io.nuls.core.utils.cfg.ConfigLoader;
@@ -46,7 +47,7 @@ public class NetworkServiceImpl implements NetworkService {
 
         this.connectionManager = new ConnectionManager(module, network);
         this.peersManager = new PeersManager(module, network, getPeerDao());
-        this.broadcaster = new BroadcasterImpl(peersManager);
+        this.broadcaster = new BroadcasterImpl(peersManager, network);
 
         peersManager.setConnectionManager(connectionManager);
         connectionManager.setPeersManager(peersManager);
@@ -83,16 +84,27 @@ public class NetworkServiceImpl implements NetworkService {
     public long currentTimeSeconds() {
         return TimeService.currentTimeSeconds();
     }
+//
+//    @Override
+//    public BroadcastResult broadcast(NulsMessage message) {
+//        return broadcaster.broadcast(message);
+//    }
+//
+//    @Override
+//    public BroadcastResult broadcastToGroup(NulsMessage message, String groupName) {
+//        return broadcaster.broadcastToGroup(message, groupName);
+//    }
 
     @Override
-    public BroadcastResult broadcast(NulsMessage message) {
-        return broadcaster.broadcast(message);
+    public BroadcastResult broadcast(BaseNulsEvent event) {
+        return broadcaster.broadcast(event);
     }
 
     @Override
-    public BroadcastResult broadcastToGroup(NulsMessage message, String groupName) {
-        return broadcaster.broadcastToGroup(message, groupName);
+    public BroadcastResult broadcastToGroup(byte[] data, String groupName) {
+        return broadcaster.broadcastToGroup(data, groupName);
     }
+
 
     private AbstractNetworkParam getNetworkInstance() {
         String networkType = ConfigLoader.getPropValue(NetworkConstant.NETWORK_TYPE, "dev");
