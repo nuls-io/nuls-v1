@@ -1,6 +1,7 @@
 package io.nuls.consensus.event;
 
 import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.event.NulsEventHeader;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
@@ -13,8 +14,8 @@ import io.nuls.core.utils.io.NulsByteBuffer;
 //todo
 public class JoinConsensusEvent extends BaseConsensusEvent {
 
-    public JoinConsensusEvent(NulsEventHeader header) {
-        super(header);
+    public JoinConsensusEvent() {
+        super(new NulsEventHeader(NulsConstant.MODULE_ID_CONSENSUS, (short) 2));
     }
 
     @Override

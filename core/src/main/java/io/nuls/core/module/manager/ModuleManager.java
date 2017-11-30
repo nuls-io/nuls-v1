@@ -6,6 +6,7 @@ import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.module.BaseNulsModule;
 import io.nuls.core.module.thread.ModuleThreadPoolExecuter;
+import io.nuls.core.utils.log.Log;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,7 +45,13 @@ ModuleManager {
                 return module.getModuleId();
             }
         }
-        return null;
+        try {
+            Thread.sleep(100L);
+            Log.warn("wait for the module init:"+moduleClass);
+        } catch (InterruptedException e) {
+            Log.error(e);
+        }
+        return this.getModuleId(moduleClass);
     }
 
     private boolean isImplements(Class superClass, Class<? extends BaseNulsModule> moduleClass) {

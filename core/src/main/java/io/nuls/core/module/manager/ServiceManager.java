@@ -18,7 +18,7 @@ public class ServiceManager {
     private static final Map<Class, Object> INTF_MAP = new HashMap<>();
     private static final Map<Short, Set<Class>> MODULE_INTF_MAP = new HashMap<>();
     private static final Map<Class, Short> MODULE_ID_MAP = new HashMap<>();
-    private static final int WAIT_TIMES = 10;
+    private static final int WAIT_TIMES = 100;
 
     private ServiceManager() {
     }
@@ -45,7 +45,7 @@ public class ServiceManager {
 
     private void sleepAndIncrement(Class tclass, int index){
         try {
-            Thread.sleep(1000L);
+            Thread.sleep(100L);
             this.dependencyCheck(tclass, index + 1);
         } catch (InterruptedException e) {
             Log.error(e);
