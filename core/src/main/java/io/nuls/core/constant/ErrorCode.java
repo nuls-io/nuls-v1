@@ -36,8 +36,9 @@ public enum ErrorCode {
      */
     NET_SERVER_START_ERROR("NET001", 40001),
     NET_MESSAGE_ERROR("NET002", 40002),
-    NET_MESSAGE_XOR_ERROR("NET003", 40002),
-    NET_MESSAGE_LENGTH_ERROR("NET004", 40002),
+    NET_MESSAGE_XOR_ERROR("NET003", 40003),
+    NET_MESSAGE_LENGTH_ERROR("NET004", 40004),
+
     /**
      * ----------  p2p Network code   ---------
      */

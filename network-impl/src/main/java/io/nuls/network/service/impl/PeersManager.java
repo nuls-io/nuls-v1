@@ -15,8 +15,7 @@ import io.nuls.network.entity.PeerGroup;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.module.AbstractNetworkModule;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -118,6 +117,9 @@ public class PeersManager {
         }
     }
 
+    public boolean hasPeerGroup(String groupName) {
+        return peerGroups.containsKey(groupName);
+    }
 
     public void addPeerGroup(String groupName, PeerGroup peerGroup) throws NulsException {
         if (peerGroups.containsKey(groupName)) {
@@ -154,6 +156,45 @@ public class PeersManager {
         return peerGroups.get(groupName);
     }
 
+
+    public List<Peer> getAvailablePeersByGroup(String groupName) {
+        List<Peer> availablePeers = new ArrayList<>();
+        if (hasPeerGroup(groupName)) {
+            for (Peer peer : getPeerGroup(groupName).getPeers()) {
+                if (peer.getStatus() == Peer.HANDSHAKE) {
+                    availablePeers.add(peer);
+                }
+            }
+        }
+        return availablePeers;
+    }
+
+
+    public List<Peer> getAvailablePeers() {
+        List<Peer> availablePeers = new ArrayList<>();
+        Collection<Peer> collection = peers.values();
+        for (Peer peer : collection) {
+            if (peer.getStatus() == Peer.HANDSHAKE) {
+                availablePeers.add(peer);
+            }
+        }
+        return availablePeers;
+    }
+
+    public int getBroadcasterMinConnectionCount() {
+        int count = 0;
+        Collection<Peer> collection = peers.values();
+        for (Peer peer : collection) {
+            if (peer.getStatus() == Peer.HANDSHAKE) {
+                count++;
+            }
+        }
+        if (count <= 1) {
+            return count;
+        } else {
+            return Math.max(1, (int) (count * 0.8));
+        }
+    }
 
     public String info() {
         return "";

@@ -21,7 +21,7 @@ import java.sql.SQLException;
 
 /**
  *
- * @author zhouwei
+ * @author vivi
  * @date 2017/9/27
  */
 public class MybatisDBModuleImpl extends AbstractDBModule {

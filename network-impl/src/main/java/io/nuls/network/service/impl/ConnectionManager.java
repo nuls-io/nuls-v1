@@ -61,8 +61,6 @@ public class ConnectionManager implements Runnable {
                 serverSocketChannel.configureBlocking(false);
                 serverSocketChannel.bind(new InetSocketAddress(network.port()));
                 serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
-
-                running = true;
             }
         } catch (IOException e) {
             serverClose();
@@ -74,9 +72,14 @@ public class ConnectionManager implements Runnable {
 
     public void start() {
         Log.info("----------- network connectionManager start -------------");
-        ThreadManager.asynExecuteRunnable(this);
+        running = true;
+        ThreadManager.createSingleThreadAndRun((short) 1, "connectionManager", this, true);
     }
 
+    public void restart() {
+        init();
+        start();
+    }
 
     @Override
     public void run() {
@@ -99,7 +102,7 @@ public class ConnectionManager implements Runnable {
         }
     }
 
-    private void serverClose() {
+    public void serverClose() {
         lock.lock();
         try {
             running = false;
@@ -212,65 +215,72 @@ public class ConnectionManager implements Runnable {
 
         if (key.isValid() && key.isConnectable()) {
             //out peer
-            PendingConnect data = (PendingConnect) key.attachment();
-            Peer peer = data.peer;
-            SocketChannel channel = (SocketChannel) key.channel();
-            ConnectionHandler handler = new ConnectionHandler(peer, channel, key);
-            //Must be connected after the completion of registration to other events
-            try {
-                if (channel.finishConnect()) {
-                    key.interestOps((key.interestOps() | SelectionKey.OP_READ) & ~SelectionKey.OP_CONNECT);
-                    key.attach(handler);
-                    peer.setWriteTarget(handler);
-                    peer.connectionOpened();
-                } else {
-                    // Failed to connect for some reason
-                    peer.destroy();
-                }
-            } catch (Exception e) {
-//                e.printStackTrace();
-                Log.warn("out peer Failed to connect:"+peer.getIp());
-                peer.destroy();
-            }
-
+            addOutPeer(key);
         } else if (key.isValid() && key.isAcceptable()) {
             // in Peer
-            SocketChannel socketChannel = null;
-            Peer peer = null;
-            try {
-                socketChannel = serverSocketChannel.accept();
-                InetSocketAddress socketAddress = (InetSocketAddress) socketChannel.getRemoteAddress();
-                if (!allowConnection(socketAddress)) {
-                    socketChannel.close();
-                    return;
-                }
-                socketChannel.configureBlocking(false);
-                SelectionKey newKey = socketChannel.register(selector, SelectionKey.OP_READ);
-
-                peer = new Peer(network, Peer.IN, socketAddress);
-                peersManager.addPeerToGroup(NetworkConstant.NETWORK_PEER_IN_GROUP, peer);
-                ConnectionHandler handler = new ConnectionHandler(peer, socketChannel, newKey);
-                peer.setWriteTarget(handler);
-                newKey.attach(handler);
-                peer.connectionOpened();
-            } catch (Exception e) {
-                if (socketChannel != null) {
-                    Log.warn("in peer Failed to connect"+peer.getIp());
-                    try {
-                        socketChannel.close();
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
-                    }
-                }
-                if (peer != null) {
-                    peer.destroy();
-                }
-            }
+            addInPeer(key);
         } else {
             // read or write
             ConnectionHandler handler = (ConnectionHandler) key.attachment();
             if (handler != null) {
                 ConnectionHandler.handleKey(key);
+            }
+        }
+    }
+
+    private void addOutPeer(SelectionKey key) {
+        PendingConnect data = (PendingConnect) key.attachment();
+        Peer peer = data.peer;
+        SocketChannel channel = (SocketChannel) key.channel();
+        ConnectionHandler handler = new ConnectionHandler(peer, channel, key);
+        //Must be connected after the completion of registration to other events
+        try {
+            if (channel.finishConnect()) {
+                key.interestOps((key.interestOps() | SelectionKey.OP_READ) & ~SelectionKey.OP_CONNECT);
+                key.attach(handler);
+                peer.setWriteTarget(handler);
+                peer.connectionOpened();
+            } else {
+                // Failed to connect for some reason
+                peer.destroy();
+            }
+        } catch (Exception e) {
+//                e.printStackTrace();
+            Log.warn("out peer Failed to connect:" + peer.getIp());
+            peer.destroy();
+        }
+    }
+
+    private void addInPeer(SelectionKey key) {
+        SocketChannel socketChannel = null;
+        Peer peer = null;
+        try {
+            socketChannel = serverSocketChannel.accept();
+            InetSocketAddress socketAddress = (InetSocketAddress) socketChannel.getRemoteAddress();
+            if (!allowConnection(socketAddress)) {
+                socketChannel.close();
+                return;
+            }
+            socketChannel.configureBlocking(false);
+            SelectionKey newKey = socketChannel.register(selector, SelectionKey.OP_READ);
+
+            peer = new Peer(network, Peer.IN, socketAddress);
+            peersManager.addPeerToGroup(NetworkConstant.NETWORK_PEER_IN_GROUP, peer);
+            ConnectionHandler handler = new ConnectionHandler(peer, socketChannel, newKey);
+            peer.setWriteTarget(handler);
+            newKey.attach(handler);
+            peer.connectionOpened();
+        } catch (Exception e) {
+            if (socketChannel != null) {
+                Log.warn("in peer Failed to connect" + peer.getIp());
+                try {
+                    socketChannel.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+            if (peer != null) {
+                peer.destroy();
             }
         }
     }

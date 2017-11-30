@@ -5,15 +5,15 @@ package io.nuls.network.entity;
  * @Date 2017.11.01
  */
 public class BroadcastResult {
-    public boolean isSuccess = false;
+    public boolean success = false;
     private String msg = "";
 
     public boolean isSuccess() {
-        return isSuccess;
+        return success;
     }
 
-    public BroadcastResult(boolean isSuccess, String msg) {
-        this.isSuccess = isSuccess;
+    public BroadcastResult(boolean success, String msg) {
+        this.success = success;
         this.msg = msg;
     }
 

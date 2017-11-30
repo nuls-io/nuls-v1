@@ -2,7 +2,7 @@ package io.nuls.db.dao.impl.mybatis.session;
 
 /**
  *
- * @author win10
+ * @author zhouwei
  * @date 2017/10/26
  */
 public enum  PROPAGATION {

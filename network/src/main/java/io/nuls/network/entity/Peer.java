@@ -145,7 +145,6 @@ public class Peer extends BaseNulsData {
         try {
             byte[] data = networkData.serialize();
             NulsMessage message = new NulsMessage(network.packetMagic(), NulsMessageHeader.NETWORK_MESSAGE, data);
-            System.out.println("send: "+Hex.encode(message.serialize()));
             this.writeTarget.write(message.serialize());
         } finally {
             lock.unlock();
