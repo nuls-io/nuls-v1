@@ -1,7 +1,7 @@
 package io.nuls.core.thread.manager;
 
 import io.nuls.core.thread.BaseThread;
-import io.nuls.core.thread.data.ThreadData;
+import io.nuls.core.thread.cache.ThreadData;
 import io.nuls.core.utils.aop.AopUtils;
 
 import java.util.List;

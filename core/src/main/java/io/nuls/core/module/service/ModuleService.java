@@ -11,6 +11,9 @@ import io.nuls.core.module.manager.ServiceManager;
  * @date 2017/10/16
  */
 public class ModuleService {
+
+    private ModuleManager moduleManager = ModuleManager.getInstance();
+
     private static final ModuleService INSTANCE = new ModuleService();
 
     private ModuleService() {
@@ -22,23 +25,23 @@ public class ModuleService {
     }
 
     public Short getModuleId(Class<? extends BaseNulsModule> clazz) {
-        return ModuleManager.getInstance().getModuleId(clazz);
+        return moduleManager.getModuleId(clazz);
     }
 
     public void startModule(String key, String moduleClass) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
-        ModuleManager.getInstance().startModule(key, moduleClass);
+        moduleManager.startModule(key, moduleClass);
     }
 
     public ModuleStatusEnum getModuleState(short moduleId) {
-        return ModuleManager.getInstance().getModuleState(moduleId);
+        return moduleManager.getModuleState(moduleId);
     }
 
     public void shutdown(short moduleId) {
-        ModuleManager.getInstance().stopModule(moduleId);
+        moduleManager.stopModule(moduleId);
     }
 
     public void destroy(short moduleId) {
-        ModuleManager.getInstance().destoryModule(moduleId);
+        moduleManager.destoryModule(moduleId);
     }
 
 }
