@@ -158,12 +158,14 @@ public class Peer extends BaseNulsData {
             return;
         }
         if (buffer.position() != 0 || buffer.limit() <= NulsMessageHeader.MESSAGE_HEADER_SIZE || buffer.limit() > NulsMessage.MAX_SIZE) {
+            buffer.clear();
             throw new NulsVerificationException(ErrorCode.DATA_ERROR);
         }
 
         NulsMessage message = new NulsMessage(buffer);
-        buffer.compact();
 
+//        buffer.compact();
+        buffer.clear();
         processMessage(message);
 
     }
@@ -187,7 +189,7 @@ public class Peer extends BaseNulsData {
                 return;
             }
             message.verify();
-            processorService.send(message.getData());
+           // processorService.send(message.getData());
         } else {
             byte[] networkHeader = new byte[NetworkDataHeader.NETWORK_HEADER_SIZE];
             System.arraycopy(message.getData(), 0, networkHeader, 0, NetworkDataHeader.NETWORK_HEADER_SIZE);
