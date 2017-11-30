@@ -2,9 +2,9 @@ package io.nuls.network.service.impl;
 
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.ModuleStatusEnum;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.mesasge.NulsMessage;
 import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.PeerDao;
@@ -84,16 +84,6 @@ public class NetworkServiceImpl implements NetworkService {
     public long currentTimeSeconds() {
         return TimeService.currentTimeSeconds();
     }
-//
-//    @Override
-//    public BroadcastResult broadcast(NulsMessage message) {
-//        return broadcaster.broadcast(message);
-//    }
-//
-//    @Override
-//    public BroadcastResult broadcastToGroup(NulsMessage message, String groupName) {
-//        return broadcaster.broadcastToGroup(message, groupName);
-//    }
 
     @Override
     public BroadcastResult broadcast(BaseNulsEvent event) {
@@ -104,7 +94,6 @@ public class NetworkServiceImpl implements NetworkService {
     public BroadcastResult broadcastToGroup(byte[] data, String groupName) {
         return broadcaster.broadcastToGroup(data, groupName);
     }
-
 
     private AbstractNetworkParam getNetworkInstance() {
         String networkType = ConfigLoader.getPropValue(NetworkConstant.NETWORK_TYPE, "dev");
@@ -119,16 +108,14 @@ public class NetworkServiceImpl implements NetworkService {
 
 
     private PeerDao getPeerDao() {
-        return null;
+        while (NulsContext.getInstance().getService(PeerDao.class) == null) {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                Log.error(e);
+            }
+        }
+        return NulsContext.getInstance().getService(PeerDao.class);
     }
-//        while (NulsContext.getInstance().getService(PeerDao.class) == null) {
-//            try {
-//                Thread.sleep(500);
-//            } catch (InterruptedException e) {
-//                Log.error(e);
-//            }
-//        }
-//        return NulsContext.getInstance().getService(PeerDao.class);
-//    }
 }
 

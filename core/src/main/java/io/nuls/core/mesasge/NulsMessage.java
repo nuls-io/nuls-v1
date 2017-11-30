@@ -106,8 +106,6 @@ public class NulsMessage {
 
         this.header = header;
         this.data = data;
-
-        verify();
     }
 
     public void setHeader(NulsMessageHeader header) {

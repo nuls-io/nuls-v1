@@ -17,10 +17,6 @@ public interface NetworkService {
     long currentTimeMillis();
 
     long currentTimeSeconds();
-//
-//    BroadcastResult broadcast(NulsMessage message);
-//
-//    BroadcastResult broadcastToGroup(NulsMessage message, String groupName);
 
     BroadcastResult broadcast(BaseNulsEvent event);
 

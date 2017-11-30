@@ -85,7 +85,7 @@ public class Peer extends BaseNulsData {
     public Peer(AbstractNetworkParam network) {
         this.network = network;
         this.messageHandlerFactory = network.getMessageHandlerFactory();
-        processorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
+        processorService = getProcessorService();
     }
 
     public Peer(AbstractNetworkParam network, int type) {
@@ -125,6 +125,8 @@ public class Peer extends BaseNulsData {
 
         lock.lock();
         try {
+
+            System.out.println("---send message:" + Hex.encode(message.serialize()));
             this.writeTarget.write(message.serialize());
         } finally {
             lock.unlock();
@@ -166,8 +168,10 @@ public class Peer extends BaseNulsData {
         }
 
         NulsMessage message = new NulsMessage(buffer);
-        processMessage(message);
         buffer.compact();
+
+        processMessage(message);
+
     }
 
     /**
@@ -176,10 +180,19 @@ public class Peer extends BaseNulsData {
      * @param message
      */
     public void processMessage(NulsMessage message) {
+
+
         if (message.getHeader().getHeadType() == NulsMessageHeader.EVENT_MESSAGE) {
+            try {
+                System.out.println("---receive message:" + Hex.encode(message.serialize()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             if (this.status != Peer.HANDSHAKE) {
                 return;
             }
+            message.verify();
             processorService.send(message.getData());
         } else {
             byte[] networkHeader = new byte[NetworkDataHeader.NETWORK_HEADER_SIZE];
@@ -266,6 +279,19 @@ public class Peer extends BaseNulsData {
     public boolean equals(Object o) {
         Peer other = (Peer) o;
         return this.getHash().equals(other.getHash());
+    }
+
+
+    private NetworkProcessorService getProcessorService() {
+
+        while (NulsContext.getInstance().getService(NetworkProcessorService.class) == null) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        return NulsContext.getInstance().getService(NetworkProcessorService.class);
     }
 
     public int getType() {
