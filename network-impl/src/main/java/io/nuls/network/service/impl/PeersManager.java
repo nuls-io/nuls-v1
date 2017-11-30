@@ -81,7 +81,7 @@ public class PeersManager {
          *
          **/
 
-        ThreadManager.asynExecuteRunnable(this.discovery);
+        ThreadManager.createSingleThreadAndRun(AbstractNetworkModule.networkModuleId, "peerDiscovery", this.discovery);
     }
 
 

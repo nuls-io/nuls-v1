@@ -6,6 +6,7 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsVerificationException;
 import io.nuls.core.mesasge.NulsMessage;
 import io.nuls.core.mesasge.NulsMessageHeader;
+import io.nuls.core.thread.manager.ThreadManager;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
@@ -74,13 +75,6 @@ public class Peer extends BaseNulsData {
 
     private AbstractNetWorkDataHandlerFactory messageHandlerFactory;
 
-    /**
-     * 异步顺序执行所有接收到的消息，以免有处理时间较长的线程阻塞，影响性能
-     */
-    //todo 要使用带有ThreadFactory参数的ThreadPoolExecutor构造方法哦，这样你就可以方便的设置线程名字啦。
-    private ExecutorService executorService = new ThreadPoolExecutor(1, 1,
-            0L, TimeUnit.MILLISECONDS,
-            new LinkedBlockingQueue<Runnable>());
 
     public Peer(AbstractNetworkParam network) {
         this.network = network;
@@ -205,8 +199,7 @@ public class Peer extends BaseNulsData {
             }
 
             NetWorkDataHandler handler = messageHandlerFactory.getHandler(networkMessage);
-            executorService.submit(new Thread() {
-                //todo 不要显示创建线程，请使用线程池。
+            ThreadManager.asynExecuteRunnable(new Runnable() {
                 @Override
                 public void run() {
                     try {
