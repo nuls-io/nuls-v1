@@ -8,7 +8,6 @@ import io.nuls.event.bus.processor.service.intf.LocalProcessorService;
 import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
 
 /**
- *
  * @author Niels
  * @date 2017/11/6
  */

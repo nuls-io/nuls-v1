@@ -33,7 +33,7 @@ public class Bootstrap {
         }
     }
 
-    private static void sysStart() {
+    private static void  sysStart() {
         do {
             //load nuls.ini
             try {
