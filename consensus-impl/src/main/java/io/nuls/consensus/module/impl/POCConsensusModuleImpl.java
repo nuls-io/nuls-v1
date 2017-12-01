@@ -39,26 +39,26 @@ public class POCConsensusModuleImpl extends AbstractConsensusModule {
         this.registerService(POCConsensusServiceImpl.getInstance());
         Log.info("the POC consensus module is started!");
 //        todo test network broadcast
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                while(true) {
-                    try {
-                        Thread.sleep(5000L);
-                    } catch (InterruptedException e) {
-                        Log.error(e);
-                    }
-                    try {
-                        JoinConsensusEvent event = new JoinConsensusEvent();
-                        event.setEventBody(new TransferTransaction<>());
-                        NulsContext.getInstance().getService(NetworkService.class).broadcast(event);
-                    } catch (Exception e) {
-                        Log.error(e);
-                    }
-                }
-            }
-        };
-        ThreadManager.asynExecuteRunnable(r);
+//        Runnable r = new Runnable() {
+//            @Override
+//            public void run() {
+//                while(true) {
+//                    try {
+//                        Thread.sleep(5000L);
+//                    } catch (InterruptedException e) {
+//                        Log.error(e);
+//                    }
+//                    try {
+//                        JoinConsensusEvent event = new JoinConsensusEvent();
+//                        event.setEventBody(new TransferTransaction<>());
+//                        NulsContext.getInstance().getService(NetworkService.class).broadcast(event);
+//                    } catch (Exception e) {
+//                        Log.error(e);
+//                    }
+//                }
+//            }
+//        };
+//        ThreadManager.asynExecuteRunnable(r);
     }
 
     private void registerHanders() {
