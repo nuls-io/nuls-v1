@@ -16,7 +16,7 @@ public class ConsensusInfo {
     private int parkedCount;
     private double reward;
     private double deposit;
-    private double weight;//%
+    private double weight;
 
     public ConsensusStatusEnum getStatus() {
         return status;

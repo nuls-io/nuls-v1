@@ -4,10 +4,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.module.BaseNulsModule;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Niels
@@ -15,9 +12,10 @@ import java.util.Map;
  */
 public class EventManager {
     private static final Map<String, Class<? extends BaseNulsEvent>> EVENT_MAP = new HashMap<>();
+    private static final Set<Class<? extends BaseNulsEvent>> EVENT_CLASSES = new HashSet<>();
 
     public static void isLegal(Class<? extends BaseNulsEvent> eventClass) {
-        boolean b = EVENT_MAP.values().contains(eventClass);
+        boolean b = EVENT_CLASSES.contains(eventClass);
         if (!b) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "EventClass is not legal:" + eventClass.getName());
         }
@@ -31,6 +29,14 @@ public class EventManager {
             throw new NulsRuntimeException(ErrorCode.FAILED, "the event type is repeated");
         }
         EVENT_MAP.put(moduleId + "_" + type, clazz);
+        cacheEventClass(clazz);
+    }
+
+    private static void cacheEventClass(Class<? extends BaseNulsEvent> clazz) {
+        EVENT_CLASSES.add(clazz);
+        if(!clazz.getSuperclass().equals(BaseNulsEvent.class)){
+            cacheEventClass((Class<? extends BaseNulsEvent>) clazz.getSuperclass());
+        }
     }
 
     public static void putEvent(BaseNulsModule module, short type, Class<? extends BaseNulsEvent> clazz) {

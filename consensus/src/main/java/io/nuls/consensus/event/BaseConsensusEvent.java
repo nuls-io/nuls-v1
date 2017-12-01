@@ -1,5 +1,6 @@
 package io.nuls.consensus.event;
 
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.core.event.NulsEventHeader;
 
@@ -10,7 +11,7 @@ import io.nuls.core.event.NulsEventHeader;
  *
  */
 public abstract class BaseConsensusEvent extends BaseNulsEvent{
-    public BaseConsensusEvent(NulsEventHeader header) {
-        super(header);
+    public BaseConsensusEvent(short eventType) {
+        super(NulsConstant.MODULE_ID_CONSENSUS,eventType);
     }
 }
