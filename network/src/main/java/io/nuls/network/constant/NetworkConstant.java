@@ -5,13 +5,10 @@ package io.nuls.network.constant;
  * @date 2017.11.10
  */
 public interface NetworkConstant {
-    //todo version
-    int NETWORK_MODULE_VERSION = 1111;
-    //Minimum version supported
-    int MINIMUM_VERSION_SUPPORTED = 0;
 
-
-    /**--------[network] -------*/
+    /**
+     * --------[network] -------
+     */
     String NETWORK_PROPERTIES = "network.properties";
     String NETWORK_SECTION = "Network";
     String NETWORK_TYPE = "net.type";
@@ -37,4 +34,6 @@ public interface NetworkConstant {
     short NETWORK_PING_MESSAGE = 03;
     short NETWORK_PONG_MESAAGE = 04;
     short NETWORK_BYE_MESSAGE = 05;
+    short NETWORK_GET_PEER_MESSAGE = 06;
+    short NETWORK_PEER_MESSAGE = 07;
 }

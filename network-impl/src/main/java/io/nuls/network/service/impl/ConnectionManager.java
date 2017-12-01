@@ -169,7 +169,6 @@ public class ConnectionManager implements Runnable {
             }
             peer.destroy();
 
-            //peersManager.deletePeer(peer);
         }
     }
 

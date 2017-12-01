@@ -5,4 +5,7 @@ import io.nuls.db.entity.PeerPo;
 
 public interface PeerMapper  extends BaseMapper<String,PeerPo> {
 
+    int updateByIp(PeerPo po);
+
+    int deleteByIp(PeerPo po);
 }

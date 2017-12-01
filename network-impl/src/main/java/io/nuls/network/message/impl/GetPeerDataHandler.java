@@ -8,39 +8,48 @@ import io.nuls.network.entity.PeerTransfer;
 import io.nuls.network.exception.NetworkMessageException;
 import io.nuls.network.message.BaseNetworkData;
 import io.nuls.network.message.NetworkDataResult;
+import io.nuls.network.message.entity.GetPeerData;
 import io.nuls.network.message.entity.VersionData;
 import io.nuls.network.message.messageHandler.NetWorkDataHandler;
+import io.nuls.network.service.impl.ConnectionManager;
+import io.nuls.network.service.impl.PeersManager;
 import io.nuls.network.service.impl.TimeService;
+
+import java.util.List;
 
 /**
  * @author vivi
  * @date 2017/11/21
  */
-public class VersionDataHandler implements NetWorkDataHandler {
+public class GetPeerDataHandler implements NetWorkDataHandler {
 
-    private static final VersionDataHandler INSTANCE = new VersionDataHandler();
+    private static final GetPeerDataHandler INSTANCE = new GetPeerDataHandler();
 
     private PeerDao peerDao;
 
-    private VersionDataHandler() {
+    private ConnectionManager connectionManager;
+
+    private PeersManager peersManager;
+
+    private GetPeerDataHandler() {
 
     }
 
-    public static VersionDataHandler getInstance() {
+    public static GetPeerDataHandler getInstance() {
         return INSTANCE;
     }
 
     @Override
     public NetworkDataResult process(BaseNetworkData message, Peer peer) {
-        VersionData versionMessage = (VersionData) message;
-        if (versionMessage.getBestBlockHeight() < 0) {
-            throw new NetworkMessageException(ErrorCode.NET_MESSAGE_ERROR);
-        }
-        peer.setVersionMessage(versionMessage);
-        peer.setStatus(Peer.HANDSHAKE);
-        peer.setLastTime(TimeService.currentTimeMillis());
+        GetPeerData peerData = (GetPeerData) message;
 
-        getPeerDao().saveChange(PeerTransfer.transferToPeerPo(peer));
+
+//        List<Peer> list = peersManager.
+//        peer.setVersionMessage(versionMessage);
+//        peer.setStatus(Peer.HANDSHAKE);
+//        peer.setLastTime(TimeService.currentTimeMillis());
+
+//        getPeerDao().saveChange(PeerTransfer.transferToPeerPo(peer));
         return null;
     }
 
@@ -56,5 +65,13 @@ public class VersionDataHandler implements NetWorkDataHandler {
             peerDao = NulsContext.getInstance().getService(PeerDao.class);
         }
         return peerDao;
+    }
+
+    public void setConnectionManager(ConnectionManager connectionManager) {
+        this.connectionManager = connectionManager;
+    }
+
+    public void setPeersManager(PeersManager peersManager) {
+        this.peersManager = peersManager;
     }
 }

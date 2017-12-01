@@ -12,6 +12,7 @@ import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.filter.impl.DefaultMessageFilter;
+import io.nuls.network.message.impl.GetPeerDataHandler;
 import io.nuls.network.message.messageFilter.NulsMessageFilter;
 import io.nuls.network.module.AbstractNetworkModule;
 import io.nuls.network.param.DevNetworkParam;
@@ -51,6 +52,9 @@ public class NetworkServiceImpl implements NetworkService {
 
         peersManager.setConnectionManager(connectionManager);
         connectionManager.setPeersManager(peersManager);
+
+        GetPeerDataHandler.getInstance().setConnectionManager(connectionManager);
+        GetPeerDataHandler.getInstance().setPeersManager(peersManager);
     }
 
     @Override

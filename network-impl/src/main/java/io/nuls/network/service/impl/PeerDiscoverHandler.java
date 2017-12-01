@@ -1,17 +1,19 @@
 package io.nuls.network.service.impl;
 
-import io.nuls.core.context.NulsContext;
+import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.PeerDao;
+import io.nuls.db.entity.PeerPo;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Peer;
 import io.nuls.network.entity.PeerGroup;
+import io.nuls.network.entity.PeerTransfer;
 import io.nuls.network.entity.param.AbstractNetworkParam;
+import io.nuls.network.message.entity.GetPeerData;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author vivi
@@ -28,16 +30,28 @@ public class PeerDiscoverHandler implements Runnable {
     private boolean running;
 
 
-    public PeerDiscoverHandler(PeersManager peersManager, AbstractNetworkParam network) {
+    public PeerDiscoverHandler(PeersManager peersManager, AbstractNetworkParam network, PeerDao peerDao) {
         this.peersManager = peersManager;
         this.network = network;
         this.running = true;
+        this.peerDao = peerDao;
     }
 
     // get peers from local database
-    public List<Peer> getLocalPeers() {
-        //todo
-        List<Peer> peers = new ArrayList<>();
+    public List<Peer> getLocalPeers(int size) {
+
+        List<Peer> peers = null;
+
+        List<PeerPo> peerPos = peerDao.getRandomPeerPoList(size);
+        if (peerPos == null || peerPos.size() == 0) {
+            return peers;
+        }
+        for (PeerPo po : peerPos) {
+            Peer peer = new Peer(network);
+            PeerTransfer.transferToPeer(peer, po);
+            peers.add(peer);
+        }
+
         return peers;
     }
 
@@ -54,13 +68,6 @@ public class PeerDiscoverHandler implements Runnable {
         return seedPeers;
     }
 
-    private PeerDao getPeerDao() {
-        if (peerDao == null) {
-            peerDao = NulsContext.getInstance().getService(PeerDao.class);
-        }
-        return peerDao;
-    }
-
     /**
      * check the peers when closed try to connect other one
      */
@@ -75,8 +82,8 @@ public class PeerDiscoverHandler implements Runnable {
                 }
             }
             outPeers = peersManager.getPeerGroup(NetworkConstant.NETWORK_PEER_OUT_GROUP);
-            if (outPeers.size() < network.maxOutCount()) {
-                // find other peer and try to connect
+            if (outPeers.size() == 0) {
+                //  The seedPeers should be connected immediately
                 List<Peer> peers = getSeedPeers();
 
                 for (Peer newPeer : peers) {
@@ -86,9 +93,15 @@ public class PeerDiscoverHandler implements Runnable {
                     peersManager.addPeerToGroup(NetworkConstant.NETWORK_PEER_OUT_GROUP, newPeer);
                     peersManager.getConnectionManager().openConnection(newPeer);
                 }
+            } else if (outPeers.size() < network.maxOutCount()) {
+                List<Peer> peers = getLocalPeers(network.maxOutCount() - outPeers.size());
+                if (peers == null || peers.size() == 0) {
+                    // find other peer from connected peers
+
+                }
             }
 
-            for(Peer peer : outPeers.getPeers()) {
+            for (Peer peer : outPeers.getPeers()) {
                 System.out.println("--------ip:" + peer.getIp() + ",port:" + peer.getPort() + ",status:" + peer.getStatus());
             }
 
@@ -99,4 +112,29 @@ public class PeerDiscoverHandler implements Runnable {
             }
         }
     }
+
+    private void findOtherPeer(int size) {
+        PeerGroup group = peersManager.getPeerGroup(NetworkConstant.NETWORK_PEER_IN_GROUP);
+        if (group.getPeers().size() > 0) {
+            Peer peer = group.getPeers().get(0);
+            GetPeerData data = new GetPeerData(size);
+            try {
+                peer.sendNetworkData(data);
+            } catch (IOException e) {
+                Log.warn("send getPeerData error", e);
+            }
+        }
+
+        group = peersManager.getPeerGroup(NetworkConstant.NETWORK_PEER_OUT_GROUP);
+        if (group.getPeers().size() > 0) {
+            Peer peer = group.getPeers().get(0);
+            GetPeerData data = new GetPeerData(size);
+            try {
+                peer.sendNetworkData(data);
+            } catch (IOException e) {
+                Log.warn("send getPeerData error", e);
+            }
+        }
+    }
+
 }
