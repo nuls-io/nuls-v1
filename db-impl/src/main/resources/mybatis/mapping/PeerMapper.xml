@@ -40,7 +40,7 @@
         where id = #{id,jdbcType=INTEGER}
     </delete>
 
-    <delete id="deleteByIp" parameterType="o.nuls.db.entity.PeerPo">
+    <delete id="deleteByIp" parameterType="io.nuls.db.entity.PeerPo">
         delte from peer
         where ip = #{ip,jdbcType=VARCHAR} and port = #{port,jdbcType=INTEGER}
     </delete>

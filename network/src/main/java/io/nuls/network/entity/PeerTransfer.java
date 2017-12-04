@@ -1,6 +1,7 @@
 package io.nuls.network.entity;
 
 import io.nuls.core.chain.entity.NulsVersion;
+import io.nuls.core.utils.date.TimeService;
 import io.nuls.db.entity.PeerPo;
 
 /**
@@ -11,11 +12,13 @@ public class PeerTransfer {
 
 
     public static void transferToPeer(Peer peer, PeerPo po) {
-        peer.setFailCount(po.getFailCount());
+        peer.setFailCount(null);
         peer.setIp(po.getIp());
         peer.setPort(po.getPort());
         peer.setLastTime(po.getLastTime());
         peer.setVersion(new NulsVersion(po.getVersion()));
+        peer.setHash(peer.getIp() + peer.getPort());
+        peer.setFailCount(po.getFailCount());
     }
 
 
@@ -27,6 +30,9 @@ public class PeerTransfer {
         po.setLastTime(peer.getLastTime());
         po.setMagicNum(peer.getNetwork().packetMagic());
         po.setVersion(peer.getVersion().getVersion());
+        if (po.getLastTime() == null) {
+            po.setLastTime(TimeService.currentTimeMillis());
+        }
         return po;
     }
 }

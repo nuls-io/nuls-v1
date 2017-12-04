@@ -38,7 +38,7 @@ public class ModuleProcess extends BaseThread {
 
     @Override
     protected void afterRun() {
-        while (running&&ModuleStatusEnum.RUNNING.equals(runner.getModule().getStatus())) {
+        while (running && ModuleStatusEnum.RUNNING.equals(runner.getModule().getStatus())) {
             try {
                 Thread.sleep(1000L);
             } catch (InterruptedException e) {

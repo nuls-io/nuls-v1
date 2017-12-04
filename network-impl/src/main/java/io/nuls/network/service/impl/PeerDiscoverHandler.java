@@ -40,7 +40,7 @@ public class PeerDiscoverHandler implements Runnable {
     // get peers from local database
     public List<Peer> getLocalPeers(int size) {
 
-        List<Peer> peers = null;
+        List<Peer> peers = new ArrayList<>();
 
         List<PeerPo> peerPos = peerDao.getRandomPeerPoList(size);
         if (peerPos == null || peerPos.size() == 0) {

@@ -37,17 +37,21 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class Peer extends BaseNulsData {
 
+    public static final short OWN_MAIN_VERSION = 1;
+
+    public static final short OWN_SUB_VERSION = 1001;
+
     private AbstractNetworkParam network;
 
     private String hash;
 
     private String ip;
 
-    private int port;
+    private Integer port;
 
-    private long lastTime;
+    private Long lastTime;
 
-    private int failCount;
+    private Integer failCount;
 
     /**
      * 1: inPeer ,  2: outPeer
@@ -79,6 +83,7 @@ public class Peer extends BaseNulsData {
 
 
     public Peer(AbstractNetworkParam network) {
+        super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.network = network;
         this.messageHandlerFactory = network.getMessageHandlerFactory();
         processorService = getProcessorService();
@@ -86,22 +91,25 @@ public class Peer extends BaseNulsData {
     }
 
     public Peer(AbstractNetworkParam network, int type) {
+        super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.network = network;
         this.messageHandlerFactory = network.getMessageHandlerFactory();
         this.type = type;
         processorService = getProcessorService();
         peerDao = getPeerDao();
+
     }
 
 
     public Peer(AbstractNetworkParam network, int type, InetSocketAddress socketAddress) {
+        super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.network = network;
         this.messageHandlerFactory = network.getMessageHandlerFactory();
         this.type = type;
         this.port = socketAddress.getPort();
         this.ip = socketAddress.getAddress().getHostAddress();
         processorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
-
+        peerDao = getPeerDao();
 
         this.hash = this.ip + this.port;
     }
@@ -180,8 +188,6 @@ public class Peer extends BaseNulsData {
      * @param message
      */
     public void processMessage(NulsMessage message) {
-
-
         if (message.getHeader().getHeadType() == NulsMessageHeader.EVENT_MESSAGE) {
             try {
                 System.out.println("------receive message:" + Hex.encode(message.serialize()));
@@ -245,6 +251,9 @@ public class Peer extends BaseNulsData {
             }
 
             //check failCount and save or remove from database
+            if (this.failCount == null) {
+                this.failCount = 0;
+            }
             this.failCount++;
 
             peerDao.saveChange(PeerTransfer.transferToPeerPo(this));
@@ -331,14 +340,6 @@ public class Peer extends BaseNulsData {
         this.ip = ip;
     }
 
-    public int getPort() {
-        return port;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
-    }
-
     public int getStatus() {
         return status;
     }
@@ -363,23 +364,31 @@ public class Peer extends BaseNulsData {
         this.versionMessage = versionMessage;
     }
 
-    public long getLastTime() {
+    public AbstractNetworkParam getNetwork() {
+        return network;
+    }
+
+    public Long getLastTime() {
         return lastTime;
     }
 
-    public void setLastTime(long lastTime) {
+    public void setLastTime(Long lastTime) {
         this.lastTime = lastTime;
     }
 
-    public int getFailCount() {
+    public Integer getFailCount() {
         return failCount;
     }
 
-    public void setFailCount(int failCount) {
+    public void setFailCount(Integer failCount) {
         this.failCount = failCount;
     }
 
-    public AbstractNetworkParam getNetwork() {
-        return network;
+    public Integer getPort() {
+        return port;
+    }
+
+    public void setPort(Integer port) {
+        this.port = port;
     }
 }
