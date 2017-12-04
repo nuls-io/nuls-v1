@@ -19,6 +19,7 @@ import java.io.OutputStream;
  */
 public class Transaction extends BaseNulsData {
     public Transaction(int type) {
+        this.dataType = NulsDataType.TRANSACTION;
         this.time = TimeService.currentTimeMillis();
         this.registerValidator(new TxMaxSizeValidator());
         this.registerValidator(new TxRemarkValidator());
@@ -27,10 +28,13 @@ public class Transaction extends BaseNulsData {
         this.type = type;
     }
 
-    //tx type
-    protected final int type;
-    //todo tx hash
-    protected Sha256Hash hash;
+    /**
+     * tx type
+     */
+    private int type;
+
+    private NulsDigestData hash;
+    private NulsSignData sign;
     /**
      * current time (ms)
      *
@@ -44,7 +48,8 @@ public class Transaction extends BaseNulsData {
         int size = 0;
         size += VarInt.sizeOf(type);
         size += VarInt.sizeOf(time);
-        //todo the length of hash may change
+        size += hash.size();
+        size += sign.size();
         size += Sha256Hash.LENGTH;
         if (null != remark) {
             size += remark.length;
@@ -54,25 +59,25 @@ public class Transaction extends BaseNulsData {
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        //todo  hash may change
-        stream.write(new VarInt(type).encode());
-        stream.write(new VarInt(time).encode());
-        stream.write(remark);
-
+        stream.writeVarInt(type);
+        stream.writeVarInt(time);
+        stream.write(hash.serialize());
+        stream.write(sign.serialize());
+        stream.writeBytesWithLength(remark);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
-        //todo
+        type = (int) byteBuffer.readVarInt();
+        time = byteBuffer.readVarInt();
 
-    }
+        hash = new NulsDigestData();
+        hash.parse(byteBuffer);
 
-    public Sha256Hash getHash() {
-        return hash;
-    }
+        sign = new NulsSignData();
+        sign.parse(byteBuffer);
 
-    public void setHash(Sha256Hash hash) {
-        this.hash = hash;
+        this.remark = byteBuffer.readByLengthByte();
     }
 
     public long getTime() {
