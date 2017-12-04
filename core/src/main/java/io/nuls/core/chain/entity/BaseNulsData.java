@@ -2,6 +2,7 @@ package io.nuls.core.chain.entity;
 
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
+import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.core.validate.DataValidatorChain;
 import io.nuls.core.validate.NulsDataValidator;
@@ -43,13 +44,17 @@ public abstract class BaseNulsData implements Serializable {
     protected void registerValidator(NulsDataValidator<? extends BaseNulsData> validator) {
         this.validatorChain.addValidator(validator);
     }
-
+    public int dataSize(){
+        int size = 0;
+        size += version.size();
+        size += this.size();
+        return size;
+    }
     /**
-     * 计算序列化实体时需要的字节长度
-     *
+     * the length of the object itself
      * @return
      */
-    public abstract int size();
+    protected abstract int size();
 
     /**
      * First, serialize the version field
@@ -61,7 +66,7 @@ public abstract class BaseNulsData implements Serializable {
         ByteArrayOutputStream bos = null;
         try {
             bos = new UnsafeByteArrayOutputStream(size());
-            serializeToStream(bos);
+            serializeToStream(new NulsOutputStreamBuffer(bos));
             return bos.toByteArray();
         } finally {
             if (bos != null) {
@@ -75,8 +80,7 @@ public abstract class BaseNulsData implements Serializable {
         }
     }
 
-
-    public abstract void serializeToStream(OutputStream stream) throws IOException;
+    public abstract void serializeToStream(NulsOutputStreamBuffer stream) throws IOException;
 
 
     public abstract void parse(NulsByteBuffer byteBuffer);
@@ -88,25 +92,6 @@ public abstract class BaseNulsData implements Serializable {
         ValidateResult result = this.validatorChain.startDoValidator(this);
         if (!result.isSeccess()) {
             throw new NulsVerificationException(result.getMessage());
-        }
-    }
-
-    protected void writeBytesWithLength(OutputStream stream, String value) throws IOException {
-        if (StringUtils.isBlank(value)) {
-            stream.write(new VarInt(0).encode());
-        } else {
-            byte[] bytes = value.getBytes(NulsContext.DEFAULT_ENCODING);
-            stream.write(new VarInt(bytes.length).encode());
-            stream.write(bytes);
-        }
-    }
-
-    protected void writeBytesWithLength(OutputStream stream, byte[] bytes) throws IOException {
-        if (null == bytes || bytes.length == 0) {
-            stream.write(new VarInt(0).encode());
-        } else {
-            stream.write(new VarInt(bytes.length).encode());
-            stream.write(bytes);
         }
     }
 

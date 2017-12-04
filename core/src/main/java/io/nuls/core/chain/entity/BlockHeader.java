@@ -6,6 +6,7 @@ import io.nuls.core.crypto.script.Script;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -62,21 +63,25 @@ public class BlockHeader extends BaseNulsData {
 
     @Override
     public int size() {
+        //todo
         return 0;
     }
 
     @Override
     public byte[] serialize() {
+        //todo
         return new byte[0];
     }
 
     @Override
-    public void serializeToStream(OutputStream stream) throws IOException {
+    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        //todo
 
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
+        //todo
     }
 
     public Sha256Hash getHash() throws IOException {

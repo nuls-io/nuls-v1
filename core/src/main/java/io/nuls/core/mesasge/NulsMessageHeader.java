@@ -3,6 +3,7 @@ package io.nuls.core.mesasge;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -86,7 +87,7 @@ public class NulsMessageHeader implements Serializable {
         return header;
     }
 
-    public void serializeToStream(OutputStream stream) throws IOException {
+    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.write(serialize());
     }
 

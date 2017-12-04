@@ -16,7 +16,7 @@ import java.io.OutputStream;
 public class UtxoTransferTransaction extends TransferTransaction<UtxoData> {
 
     public UtxoTransferTransaction() {
-        this.type = TransactionConstant.TX_TYPE_TRANSFER;
+        super(TransactionConstant.TX_TYPE_TRANSFER);
         this.registerValidator(new UtxoTxInputsValidator());
         this.registerValidator(new UtxoTxOutputsValidator());
     }

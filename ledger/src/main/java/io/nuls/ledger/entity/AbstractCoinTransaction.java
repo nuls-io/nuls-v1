@@ -12,8 +12,8 @@ import io.nuls.core.utils.date.TimeService;
 public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Transaction {
     protected T txData;
 
-    public AbstractCoinTransaction(){
-        this.time = TimeService.currentTimeMillis();
+    public AbstractCoinTransaction(int type){
+        super(type);
     }
 
     public T getTxData() {

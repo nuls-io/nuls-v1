@@ -1,7 +1,8 @@
 package io.nuls.core.validate;
 
 /**
- * Created by Niels on 2017/11/16.
+ * @author Niels
+ * @date 2017/11/16
  */
 public class ValidateResult {
     private boolean seccess;

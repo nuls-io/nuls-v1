@@ -118,6 +118,11 @@ public class NulsByteBuffer {
         return readBytes((int) length);
     }
 
+    public boolean readBoolean() {
+        byte b = readByte();
+        return 1 == b;
+    }
+
     public Sha256Hash readHash() {
         return Sha256Hash.wrapReversed(readBytes(32));
     }

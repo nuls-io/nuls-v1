@@ -9,6 +9,7 @@ import io.nuls.core.mesasge.NulsMessageHeader;
 import io.nuls.core.thread.manager.ThreadManager;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
 import io.nuls.network.constant.NetworkConstant;
@@ -253,7 +254,7 @@ public class Peer extends BaseNulsData {
     }
 
     @Override
-    public void serializeToStream(OutputStream stream) throws IOException {
+    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
 
     }
 

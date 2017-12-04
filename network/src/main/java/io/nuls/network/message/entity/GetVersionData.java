@@ -4,6 +4,7 @@ import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.message.BaseNetworkData;
 import io.nuls.network.message.NetworkDataHeader;
@@ -43,9 +44,9 @@ public class GetVersionData extends BaseNetworkData {
     }
 
     @Override
-    public void serializeToStream(OutputStream stream) throws IOException {
+    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         networkHeader.serializeToStream(stream);
-        Utils.int16ToByteStreamLE(version.getVersion(), stream);
+        stream.writeShort(version.getVersion());
         stream.write(new VarInt(nonce).encode());
     }
 

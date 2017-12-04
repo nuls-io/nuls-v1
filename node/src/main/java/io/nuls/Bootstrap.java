@@ -44,7 +44,7 @@ public class Bootstrap {
             }
             //set system language
             try {
-                NulsContext.DEFAULT_ENCODING = ConfigLoader.getCfgValue(NulsConstant.CFG_SYSTEM_SECTION, NulsConstant.CFG_SYSTEM_CHARSET);
+                NulsContext.DEFAULT_ENCODING = ConfigLoader.getCfgValue(NulsConstant.CFG_SYSTEM_SECTION, NulsConstant.CFG_SYSTEM_DEFAULT_ENCODING);
                 String language = ConfigLoader.getCfgValue(NulsConstant.CFG_SYSTEM_SECTION, NulsConstant.CFG_SYSTEM_LANGUAGE);
                 I18nUtils.setLanguage(language);
             } catch (NulsException e) {

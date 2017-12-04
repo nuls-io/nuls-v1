@@ -2,6 +2,7 @@ package io.nuls.network.message;
 
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -51,7 +52,7 @@ public class NetworkDataHeader {
         return header;
     }
 
-    public void serializeToStream(OutputStream stream) throws IOException {
+    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.write(serialize());
     }
 

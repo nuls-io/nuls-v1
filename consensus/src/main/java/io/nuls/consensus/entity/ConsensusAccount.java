@@ -8,7 +8,6 @@ import io.nuls.account.entity.Address;
  * @date 2017/11/7
  *
  */
-//todo 定义共识相关的字段
 public class ConsensusAccount  {
 
     private long startTime;
@@ -19,11 +18,11 @@ public class ConsensusAccount  {
 
     private double deposit;
 
-    public Address agent;
+    public Address delegate;
 
-    private Address miner;
+    private Address delegatePeer;
 
-    private double credit;
+    private Address address;
 
     public long getStartTime() {
         return startTime;
@@ -57,19 +56,27 @@ public class ConsensusAccount  {
         this.deposit = deposit;
     }
 
-    public Address getMiner() {
-        return miner;
+    public Address getDelegate() {
+        return delegate;
     }
 
-    public Address getAgent() {
-        return agent;
+    public void setDelegate(Address delegate) {
+        this.delegate = delegate;
     }
 
-    public void setAgent(Address agent) {
-        this.agent = agent;
+    public Address getDelegatePeer() {
+        return delegatePeer;
     }
 
-    public void setMiner(Address miner) {
-        miner = miner;
+    public void setDelegatePeer(Address delegatePeer) {
+        this.delegatePeer = delegatePeer;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
     }
 }

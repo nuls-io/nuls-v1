@@ -1,5 +1,6 @@
 package io.nuls.core.chain.entity;
 
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.utils.crypto.ByteArrayTool;

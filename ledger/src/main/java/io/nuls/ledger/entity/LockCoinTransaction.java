@@ -4,6 +4,7 @@ import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.event.NulsEventHeader;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -22,21 +23,24 @@ public class LockCoinTransaction<T extends BaseNulsData> extends AbstractCoinTra
     private boolean canBeUnlocked;
 
     public LockCoinTransaction() {
-        this.type = TransactionConstant.TX_TYPE_LOCK;
+        super(TransactionConstant.TX_TYPE_LOCK);
     }
 
     @Override
     public int size() {
+        //todo
         return 0;
     }
 
     @Override
-    public void serializeToStream(OutputStream stream) throws IOException {
+    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        //todo
 
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
+        //todo
 
     }
 

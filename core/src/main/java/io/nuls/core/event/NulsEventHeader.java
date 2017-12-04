@@ -3,6 +3,7 @@ package io.nuls.core.event;
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -51,7 +52,7 @@ public class NulsEventHeader extends BaseNulsData {
     }
 
     @Override
-    public void serializeToStream(OutputStream stream) throws IOException {
+    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         byte[] header = serialize();
         stream.write(header);
     }
