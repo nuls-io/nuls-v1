@@ -48,18 +48,22 @@ public class PeerDaoImpl extends BaseDaoImpl<PeerMapper, String, PeerPo> impleme
 
     @Override
     public void saveChange(PeerPo po) {
-        Searchable searchable = new Searchable();
-        searchable.addCondition("ip", SearchOperator.eq, po.getIp());
-        searchable.addCondition("port", SearchOperator.eq, po.getPort());
-        if (getMapper().selectCount(searchable) > 0) {
-            if(po.getFailCount() >= 10) {
+        try {
+            Searchable searchable = new Searchable();
+            searchable.addCondition("ip", SearchOperator.eq, po.getIp());
+            searchable.addCondition("port", SearchOperator.eq, po.getPort());
+            if (getMapper().selectCount(searchable) > 0) {
+                if (po.getFailCount() >= 10) {
 
-            }else {
-                getMapper().updateByIp(po);
+                } else {
+                    getMapper().updateByIp(po);
+                }
+            } else {
+                getMapper().insert(po);
             }
-
-        } else {
-            getMapper().insert(po);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
     }
 }

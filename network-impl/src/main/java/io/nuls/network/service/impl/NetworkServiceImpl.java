@@ -38,12 +38,10 @@ public class NetworkServiceImpl implements NetworkService {
 
     private Broadcaster broadcaster;
 
-    private TimeService timeService;
 
     public NetworkServiceImpl(AbstractNetworkModule module) {
         this.networkModule = module;
         this.network = getNetworkInstance();
-        timeService = TimeService.getInstance();
         NulsMessageFilter messageFilter = DefaultMessageFilter.getInstance();
         network.setMessageFilter(messageFilter);
 
@@ -63,7 +61,6 @@ public class NetworkServiceImpl implements NetworkService {
         try {
             connectionManager.start();
             peersManager.start();
-            timeService.start();
 
             networkModule.setStatus(ModuleStatusEnum.RUNNING);
         } catch (Exception e) {
@@ -76,7 +73,6 @@ public class NetworkServiceImpl implements NetworkService {
     @Override
     public void shutdown() {
         connectionManager.serverClose();
-        timeService.shutdown();
 //        peersManager.
     }
 

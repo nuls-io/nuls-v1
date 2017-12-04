@@ -53,7 +53,7 @@
         -->
         insert into peer (id, ip, port, last_time, fail_count, magic_num, version)
         values (#{id,jdbcType=INTEGER}, #{ip,jdbcType=VARCHAR}, #{port,jdbcType=INTEGER},
-        #{lastTime,jdbcType=BIGINT}, #{failCount,jdbcType=BIGINT}, #{magicNum,jdbcType=INTEGER},
+        #{lastTime,jdbcType=BIGINT}, #{failCount,jdbcType=INTEGER}, #{magicNum,jdbcType=INTEGER},
         #{version,jdbcType=INTEGER})
     </insert>
     <insert id="insertSelective" parameterType="io.nuls.db.entity.PeerPo">
@@ -99,7 +99,7 @@
                 #{lastTime,jdbcType=BIGINT},
             </if>
             <if test="failCount != null">
-                #{failCount,jdbcType=BIGINT},
+                #{failCount,jdbcType=INTEGER},
             </if>
             <if test="magicNum != null">
                 #{magicNum,jdbcType=INTEGER},
@@ -126,7 +126,7 @@
                 last_time = #{lastTime,jdbcType=BIGINT},
             </if>
             <if test="failCount != null">
-                fail_count = #{failCount,jdbcType=BIGINT},
+                fail_count = #{failCount,jdbcType=INTEGER},
             </if>
             <if test="magicNum != null">
                 magic_num = #{magicNum,jdbcType=INTEGER},
@@ -151,7 +151,7 @@
                 last_time = #{lastTime,jdbcType=BIGINT},
             </if>
             <if test="failCount != null">
-                fail_count = #{failCount,jdbcType=BIGINT},
+                fail_count = #{failCount,jdbcType=INTEGER},
             </if>
             <if test="magicNum != null">
                 magic_num = #{magicNum,jdbcType=INTEGER},
@@ -173,7 +173,7 @@
         set ip = #{ip,jdbcType=VARCHAR},
         port = #{port,jdbcType=INTEGER},
         last_time = #{lastTime,jdbcType=BIGINT},
-        fail_count = #{failCount,jdbcType=BIGINT},
+        fail_count = #{failCount,jdbcType=INTEGER},
         magic_num = #{magicNum,jdbcType=INTEGER},
         version = #{version,jdbcType=INTEGER}
         where id = #{id,jdbcType=INTEGER}
@@ -186,7 +186,7 @@
         values
         <foreach collection="list" item="item" index="index" separator=",">
             (#{id,jdbcType=INTEGER}, #{ip,jdbcType=VARCHAR}, #{port,jdbcType=INTEGER},
-            #{lastTime,jdbcType=BIGINT},#{failCount,jdbcType=BIGINT}, #{magicNum,jdbcType=INTEGER},
+            #{lastTime,jdbcType=BIGINT},#{failCount,jdbcType=INTEGER}, #{magicNum,jdbcType=INTEGER},
             #{version,jdbcType=INTEGER})
         </foreach>
     </insert>
@@ -197,8 +197,7 @@
         -->
         select count(id) from peer
     </select>
-    <select id="selectList" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable"
-            resultType="io.nuls.db.entity.PeerPo">
+    <select id="selectList" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
         from peer
