@@ -4,6 +4,7 @@ import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
+import io.nuls.consensus.entity.Agent;
 import io.nuls.consensus.entity.ConsensusAccount;
 import io.nuls.consensus.entity.ConsensusInfo;
 import io.nuls.consensus.service.intf.ConsensusService;
@@ -14,10 +15,8 @@ import io.nuls.core.exception.NulsRuntimeException;
 import java.util.List;
 
 /**
- *
  * @author Niels
  * @date 2017/11/9
- *
  */
 public class POCConsensusServiceImpl implements ConsensusService {
 
@@ -31,12 +30,14 @@ public class POCConsensusServiceImpl implements ConsensusService {
         return INSTANCE;
     }
 
-    @Override
+    public void registerAgent(Agent agent, String password){
+        //todo e
+    }
+
     public void joinTheConsensus(String address, String password, double amount) {
         this.joinTheConsensus(address, password, amount, null);
     }
 
-    @Override
     public void joinTheConsensus(String password, double amount) {
         Account localAccount = this.accountService.getLocalAccount();
         if (null == localAccount) {
@@ -54,7 +55,6 @@ public class POCConsensusServiceImpl implements ConsensusService {
         this.joinTheConsensus(account, password, amount, agent);
     }
 
-    @Override
     public void joinTheConsensus(String password, double amount, String agent) {
         Account localAccount = this.accountService.getLocalAccount();
         if (null == localAccount) {
@@ -88,21 +88,19 @@ public class POCConsensusServiceImpl implements ConsensusService {
 
     @Override
     public List<ConsensusAccount> getConsensusAccountList() {
+        //todo
         return null;
     }
 
     @Override
     public ConsensusStatusEnum getConsensusStatus() {
+        //todo
         return null;
     }
 
     @Override
     public ConsensusInfo getConsensusInfo() {
-        return null;
-    }
-
-    @Override
-    public Double getMarginAmount() {
+        //todo
         return null;
     }
 }
