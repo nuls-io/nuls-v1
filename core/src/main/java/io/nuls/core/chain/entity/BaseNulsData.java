@@ -1,20 +1,16 @@
 package io.nuls.core.chain.entity;
 
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.crypto.VarInt;
-import io.nuls.core.utils.io.NulsOutputStreamBuffer;
-import io.nuls.core.utils.str.StringUtils;
-import io.nuls.core.validate.DataValidatorChain;
-import io.nuls.core.validate.NulsDataValidator;
-import io.nuls.core.validate.ValidateResult;
 import io.nuls.core.crypto.UnsafeByteArrayOutputStream;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsVerificationException;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.io.NulsOutputStreamBuffer;
+import io.nuls.core.validate.DataValidatorChain;
+import io.nuls.core.validate.NulsDataValidator;
+import io.nuls.core.validate.ValidateResult;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.Serializable;
 
 /**
@@ -80,9 +76,18 @@ public abstract class BaseNulsData implements Serializable {
         }
     }
 
+    /**
+     * serialize important field
+     * @param stream
+     * @throws IOException
+     */
     public abstract void serializeToStream(NulsOutputStreamBuffer stream) throws IOException;
 
 
+    /**
+     * bytes to object
+     * @param byteBuffer
+     */
     public abstract void parse(NulsByteBuffer byteBuffer);
 
     /**

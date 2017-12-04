@@ -2,11 +2,15 @@ package io.nuls.core.utils.io;
 
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.exception.NulsVerificationException;
 import io.nuls.core.utils.crypto.Utils;
+import io.nuls.core.utils.log.Log;
+
+import java.io.UnsupportedEncodingException;
 
 /**
  * @author Niels
@@ -141,5 +145,14 @@ public class NulsByteBuffer {
 
     public short readShort() {
         return Utils.bytes2Short(readBytes(2));
+    }
+
+    public String readString(NulsByteBuffer byteBuffer) {
+        try {
+            return new String(this.readByLengthByte(), NulsContext.DEFAULT_ENCODING);
+        } catch (UnsupportedEncodingException e) {
+            Log.error(e);
+        }
+        return null;
     }
 }
