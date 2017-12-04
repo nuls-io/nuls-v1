@@ -21,28 +21,24 @@ public class BlockHeader extends BaseNulsData {
     public static final short OWN_MAIN_VERSION = 1;
     public static final short OWN_SUB_VERSION = 0001;
 
-    //区块hash
-    protected Sha256Hash hash;
-    //上一区块hash
-    protected Sha256Hash preHash;
-    //梅克尔树根节点hash
-    protected Sha256Hash merkleHash;
-    //时间戳，单位（秒）
-    protected long time;
-    //区块高度
-    protected long height;
-    //交易数
-    protected long txCount;
-    //该时段共识人数
-    protected int periodCount;
-    //本轮开始的时间点，单位（秒）
-    protected long periodStartTime;
-    //时段，一轮共识中的第几个时间段，可验证对应的共识人
-    protected int timePeriod;
-    //签名脚本，包含共识打包人信息和签名，签名是对以上信息的签名
-    protected byte[] scriptBytes;
+    protected NulsDigestData hash;
+    protected NulsDigestData preHash;
 
-    protected Script scriptSig;
+    protected NulsDigestData merkleHash;
+
+    protected long time;
+
+    protected long height;
+
+    protected long txCount;
+    /**
+     * the count of the agents the current round
+     */
+    protected int countOfRound;
+    protected long roundStartTime;
+    protected int orderInRound;
+
+    private NulsSignData sign;
 
     public BlockHeader() {
         super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
@@ -54,7 +50,7 @@ public class BlockHeader extends BaseNulsData {
         this.time = time;
     }
 
-    public BlockHeader(long height, long time, Sha256Hash preHash) {
+    public BlockHeader(long height, long time, NulsDigestData preHash) {
         super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.height = height;
         this.time = time;
@@ -78,50 +74,46 @@ public class BlockHeader extends BaseNulsData {
         //todo
     }
 
-    public Sha256Hash getHash() throws IOException {
+    public NulsDigestData getHash() throws IOException {
         if (hash == null) {
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            try {
-                Utils.uint32ToByteStreamLE(version.getVersion(), stream);
-                stream.write(preHash.getBytes());
-//                stream.write(merkleHash.getBytes());
-                Utils.int64ToByteStreamLE(time, stream);
-                Utils.uint32ToByteStreamLE(height, stream);
-                stream.write(new VarInt(periodCount).encode());
-                stream.write(new VarInt(timePeriod).encode());
-                Utils.uint32ToByteStreamLE(periodStartTime, stream);
-                //交易数量
-                stream.write(new VarInt(txCount).encode());
-                hash = Sha256Hash.twiceOf(stream.toByteArray());
-            } finally {
-                stream.close();
-            }
+            //todo
+//            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+//            try {
+//                Utils.uint32ToByteStreamLE(version.getVersion(), stream);
+//                stream.write(preHash.getBytes());
+////                stream.write(merkleHash.getBytes());
+//                Utils.int64ToByteStreamLE(time, stream);
+//                Utils.uint32ToByteStreamLE(height, stream);
+//                stream.write(new VarInt(periodCount).encode());
+//                stream.write(new VarInt(timePeriod).encode());
+//                Utils.uint32ToByteStreamLE(periodStartTime, stream);
+//                //交易数量
+//                stream.write(new VarInt(txCount).encode());
+//                hash = Sha256Hash.twiceOf(stream.toByteArray());
+//            } finally {
+//                stream.close();
+//            }
         }
         return hash;
     }
 
-    public static void main(String[] args) throws IOException {
-        Block block = new Block(1,1,Sha256Hash.twiceOf("0000".getBytes()));
-        System.out.println(Hex.encode(block.getHash().getBytes()).length() );;
-    }
-
-    public void setHash(Sha256Hash hash) {
+    public void setHash(NulsDigestData hash) {
         this.hash = hash;
     }
 
-    public Sha256Hash getPreHash() {
+    public NulsDigestData getPreHash() {
         return preHash;
     }
 
-    public void setPreHash(Sha256Hash preHash) {
+    public void setPreHash(NulsDigestData preHash) {
         this.preHash = preHash;
     }
 
-    public Sha256Hash getMerkleHash() {
+    public NulsDigestData getMerkleHash() {
         return merkleHash;
     }
 
-    public void setMerkleHash(Sha256Hash merkleHash) {
+    public void setMerkleHash(NulsDigestData merkleHash) {
         this.merkleHash = merkleHash;
     }
 
@@ -149,44 +141,35 @@ public class BlockHeader extends BaseNulsData {
         this.txCount = txCount;
     }
 
-    public int getPeriodCount() {
-        return periodCount;
+    public int getCountOfRound() {
+        return countOfRound;
     }
 
-    public void setPeriodCount(int periodCount) {
-        this.periodCount = periodCount;
+    public void setCountOfRound(int countOfRound) {
+        this.countOfRound = countOfRound;
     }
 
-    public long getPeriodStartTime() {
-        return periodStartTime;
+    public long getRoundStartTime() {
+        return roundStartTime;
     }
 
-    public void setPeriodStartTime(long periodStartTime) {
-        this.periodStartTime = periodStartTime;
+    public void setRoundStartTime(long roundStartTime) {
+        this.roundStartTime = roundStartTime;
     }
 
-    public int getTimePeriod() {
-        return timePeriod;
+    public int getOrderInRound() {
+        return orderInRound;
     }
 
-    public void setTimePeriod(int timePeriod) {
-        this.timePeriod = timePeriod;
+    public void setOrderInRound(int orderInRound) {
+        this.orderInRound = orderInRound;
     }
 
-    public byte[] getScriptBytes() {
-        return scriptBytes;
+    public NulsSignData getSign() {
+        return sign;
     }
 
-    public void setScriptBytes(byte[] scriptBytes) {
-        this.scriptBytes = scriptBytes;
+    public void setSign(NulsSignData sign) {
+        this.sign = sign;
     }
-
-    public Script getScriptSig() {
-        return scriptSig;
-    }
-
-    public void setScriptSig(Script scriptSig) {
-        this.scriptSig = scriptSig;
-    }
-
 }

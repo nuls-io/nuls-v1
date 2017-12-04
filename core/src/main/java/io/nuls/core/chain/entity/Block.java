@@ -1,8 +1,9 @@
 package io.nuls.core.chain.entity;
 
-import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -10,9 +11,12 @@ import java.util.List;
  * @date 2017/10/30
  */
 public class Block extends BlockHeader {
+    /**
+     * 2M
+     */
+    public static int MAX_SIZE = 2 * 1024 * 2014;
 
-    public static int MAX_SIZE = 2 * 1024 * 2014;   //2M
-
+    private List<Transaction> txs;
 
     public Block(long height, long time) {
         super(height, time);
@@ -20,23 +24,34 @@ public class Block extends BlockHeader {
         this.time = time;
     }
 
-    public Block(long height, long time, Sha256Hash preHash) {
+    public Block(long height, long time, NulsDigestData preHash) {
         super(height, time, preHash);
         this.height = height;
         this.time = time;
         this.preHash = preHash;
     }
 
-    //交易列表
-    private List<Transaction> txs;
 
     @Override
     protected int dataSize() {
-        return 0;
+        int size = super.dataSize();
+        for (Transaction tx : txs) {
+            size += tx.size();
+        }
+        return size;
+    }
+
+    @Override
+    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        super.serializeToStream(stream);
+        for (Transaction tx : txs) {
+            stream.write(tx.serialize());
+        }
     }
 
     @Override
     protected void parseObject(NulsByteBuffer byteBuffer) {
+        //todo
     }
 
     public List<Transaction> getTxs() {

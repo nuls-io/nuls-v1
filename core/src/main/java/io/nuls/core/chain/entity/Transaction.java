@@ -32,7 +32,6 @@ public class Transaction extends BaseNulsData {
      * tx type
      */
     private int type;
-
     private NulsDigestData hash;
     private NulsSignData sign;
     /**
