@@ -1,6 +1,5 @@
 package io.nuls.account.service.impl;
 
-import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.account.manager.AccountManager;

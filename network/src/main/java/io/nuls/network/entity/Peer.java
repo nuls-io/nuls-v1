@@ -11,6 +11,7 @@ import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
+import io.nuls.db.dao.PeerDao;
 import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.param.AbstractNetworkParam;
@@ -28,7 +29,6 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.NotYetConnectedException;
-import java.util.concurrent.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -38,17 +38,21 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class Peer extends BaseNulsData {
 
+    public static final short OWN_MAIN_VERSION = 1;
+
+    public static final short OWN_SUB_VERSION = 1001;
+
     private AbstractNetworkParam network;
 
     private String hash;
 
     private String ip;
 
-    private int port;
+    private Integer port;
 
-    private long lastTime;
+    private Long lastTime;
 
-    private int failCount;
+    private Integer failCount;
 
     /**
      * 1: inPeer ,  2: outPeer
@@ -76,29 +80,37 @@ public class Peer extends BaseNulsData {
 
     private AbstractNetWorkDataHandlerFactory messageHandlerFactory;
 
+    private PeerDao peerDao;
+
 
     public Peer(AbstractNetworkParam network) {
+        super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.network = network;
         this.messageHandlerFactory = network.getMessageHandlerFactory();
         processorService = getProcessorService();
+        peerDao = getPeerDao();
     }
 
     public Peer(AbstractNetworkParam network, int type) {
+        super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.network = network;
         this.messageHandlerFactory = network.getMessageHandlerFactory();
         this.type = type;
-        processorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
+        processorService = getProcessorService();
+        peerDao = getPeerDao();
+
     }
 
 
     public Peer(AbstractNetworkParam network, int type, InetSocketAddress socketAddress) {
+        super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.network = network;
         this.messageHandlerFactory = network.getMessageHandlerFactory();
         this.type = type;
         this.port = socketAddress.getPort();
         this.ip = socketAddress.getAddress().getHostAddress();
         processorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
-
+        peerDao = getPeerDao();
 
         this.hash = this.ip + this.port;
     }
@@ -177,11 +189,9 @@ public class Peer extends BaseNulsData {
      * @param message
      */
     public void processMessage(NulsMessage message) {
-
-
         if (message.getHeader().getHeadType() == NulsMessageHeader.EVENT_MESSAGE) {
             try {
-                System.out.println("---receive message:" + Hex.encode(message.serialize()));
+                System.out.println("------receive message:" + Hex.encode(message.serialize()));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -240,12 +250,17 @@ public class Peer extends BaseNulsData {
                 this.writeTarget.closeConnection();
                 this.writeTarget = null;
             }
+
+            //check failCount and save or remove from database
+            if (this.failCount == null) {
+                this.failCount = 0;
+            }
+            this.failCount++;
+
+            peerDao.saveChange(PeerTransfer.transferToPeerPo(this));
         } finally {
             lock.unlock();
         }
-        //todo check failCount and save or remove from database
-        //this.failCount ++;
-
     }
 
     @Override
@@ -290,6 +305,18 @@ public class Peer extends BaseNulsData {
         return NulsContext.getInstance().getService(NetworkProcessorService.class);
     }
 
+
+    private PeerDao getPeerDao() {
+        while (NulsContext.getInstance().getService(PeerDao.class) == null) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        return NulsContext.getInstance().getService(PeerDao.class);
+    }
+
     public int getType() {
         return type;
     }
@@ -312,14 +339,6 @@ public class Peer extends BaseNulsData {
 
     public void setIp(String ip) {
         this.ip = ip;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
     }
 
     public int getStatus() {
@@ -346,19 +365,31 @@ public class Peer extends BaseNulsData {
         this.versionMessage = versionMessage;
     }
 
-    public long getLastTime() {
+    public AbstractNetworkParam getNetwork() {
+        return network;
+    }
+
+    public Long getLastTime() {
         return lastTime;
     }
 
-    public void setLastTime(long lastTime) {
+    public void setLastTime(Long lastTime) {
         this.lastTime = lastTime;
     }
 
-    public int getFailCount() {
+    public Integer getFailCount() {
         return failCount;
     }
 
-    public void setFailCount(int failCount) {
+    public void setFailCount(Integer failCount) {
         this.failCount = failCount;
+    }
+
+    public Integer getPort() {
+        return port;
+    }
+
+    public void setPort(Integer port) {
+        this.port = port;
     }
 }

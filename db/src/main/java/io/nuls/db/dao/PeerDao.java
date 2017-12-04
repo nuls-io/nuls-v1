@@ -2,6 +2,8 @@ package io.nuls.db.dao;
 
 import io.nuls.db.entity.PeerPo;
 
+import java.util.List;
+
 /**
  *
  * @author Niels
@@ -10,4 +12,7 @@ import io.nuls.db.entity.PeerPo;
 public interface PeerDao extends BaseDao< String,PeerPo> {
 
 
+    public List<PeerPo> getRandomPeerPoList(int size);
+
+    public void saveChange(PeerPo po);
 }

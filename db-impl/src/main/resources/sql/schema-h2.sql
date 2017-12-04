@@ -41,10 +41,7 @@ CREATE TABLE IF NOT EXISTS `peer` (
   `ip` varchar(20) NOT NULL,
   `port` int(6) NOT NULL,
   `last_time` bigint(20) NOT NULL,
-  `hop_count` bigint(20) DEFAULT NULL,
-  `heart_count` bigint(20) NOT NULL,
-  `heart_faild_count` bigint(20) NOT NULL,
-  `avg_time` bigint(20) NOT NULL,
+  `fail_count` bigint(20) NOT NULL,
   `magic_num` int(11) NOT NULL,
   `version` int(11) NOT NULL,
   PRIMARY KEY (`id`)

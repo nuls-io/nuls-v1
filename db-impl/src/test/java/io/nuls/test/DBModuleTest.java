@@ -4,10 +4,14 @@ import io.nuls.core.module.manager.ModuleManager;
 import io.nuls.core.module.manager.ServiceManager;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.BlockDao;
+import io.nuls.db.dao.PeerDao;
 import io.nuls.db.dao.impl.mybatis.BlockDaoImpl;
 import io.nuls.db.entity.BlockPo;
+import io.nuls.db.entity.PeerPo;
 import io.nuls.db.module.impl.MybatisDBModuleImpl;
 import org.junit.*;
+
+import java.util.List;
 
 /**
  * Created by zhouwei on 2017/10/24.
@@ -18,11 +22,14 @@ public class DBModuleTest {
 
     private static BlockDao blockDao;
 
+    private static PeerDao peerDao;
+
     @BeforeClass
     public static void init() {
         dbModule = new MybatisDBModuleImpl();
         dbModule.start();
         blockDao = ServiceManager.getInstance().getService(BlockDao.class);
+        peerDao = ServiceManager.getInstance().getService(PeerDao.class);
     }
 
     @AfterClass
@@ -91,5 +98,23 @@ public class DBModuleTest {
     @Test
     public void testBB() {
         Log.debug(0xFFFFL+"");
+    }
+
+    @Test
+    public void testPeer() {
+
+
+        PeerPo po = new PeerPo();
+        po.setIp("192.168.1.166");
+        po.setPort(1234);
+        po.setMagicNum(123456789);
+        po.setVersion((short) 1001);
+        po.setFailCount(1);
+        po.setLastTime(System.currentTimeMillis());
+
+        peerDao.saveChange(po);
+
+        List<PeerPo> list = peerDao.getRandomPeerPoList(10);
+        System.out.println(list.size());
     }
 }

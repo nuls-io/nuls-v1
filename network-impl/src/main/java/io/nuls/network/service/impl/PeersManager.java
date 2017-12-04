@@ -52,7 +52,7 @@ public class PeersManager {
         peerGroups.put(outPeers.getName(), outPeers);
         peerGroups.put(consensusPeers.getName(), consensusPeers);
 
-        this.discovery = new PeerDiscoverHandler(this, network);
+        this.discovery = new PeerDiscoverHandler(this, network, peerDao);
     }
 
     /**
@@ -64,7 +64,7 @@ public class PeersManager {
      * find peers from connetcted peers
      */
     public void start() {
-        List<Peer> peers = discovery.getLocalPeers();
+        List<Peer> peers = discovery.getLocalPeers(10);
 
         if (peers == null || peers.size() == 0) {
             peers = discovery.getSeedPeers();
@@ -76,11 +76,7 @@ public class PeersManager {
         }
         System.out.println("-----------peerManager start");
 
-        /** start  heart beat thread
-         *
-         *
-         **/
-
+        //start  heart beat thread
         ThreadManager.createSingleThreadAndRun(AbstractNetworkModule.networkModuleId, "peerDiscovery", this.discovery);
     }
 
@@ -179,6 +175,19 @@ public class PeersManager {
             }
         }
         return availablePeers;
+    }
+
+    public List<Peer> getAvailablePeers(int size, Peer excludePeer) {
+        List<Peer> availablePeers = getAvailablePeers();
+        Collections.shuffle(availablePeers);
+
+        for (Peer peer : availablePeers) {
+            if (peer.getStatus() == Peer.HANDSHAKE && peer.getIp().equals(excludePeer)) {
+                availablePeers.remove(peer);
+                break;
+            }
+        }
+        return availablePeers.subList(0, size);
     }
 
     public int getBroadcasterMinConnectionCount() {

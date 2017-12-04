@@ -1,40 +1,38 @@
 package io.nuls.core.crypto.script;
 
 import io.nuls.core.crypto.ECKey;
-import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.UnsafeByteArrayOutputStream;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spongycastle.crypto.digests.RIPEMD160Digest;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 import static io.nuls.core.crypto.script.ScriptOpCodes.*;
 
 /**
  * <p>Programs embedded inside transactions that control redemption of payments.</p>
- *
+ * <p>
  * <p>Bitcoin transactions don't specify what they do directly. Instead <a href="https://en.bitcoin.it/wiki/Script">a
  * small binary stack language</a> is used to define programs that when evaluated return whether the transaction
  * "accepts" or rejects the other transactions connected to it.</p>
- *
+ * <p>
  * <p>In SPV mode, scripts are not run, because that would require all transactions to be available and lightweight
  * clients don't have that data. In full mode, this class is used to run the interpreted language. It also has
  * static methods for building scripts.</p>
  */
 public class Script {
 
-    /** Enumeration to encapsulate the type of this script. */
+    /**
+     * Enumeration to encapsulate the type of this script.
+     */
     public enum ScriptType {
         // Do NOT change the ordering of the following definitions because their ordinals are stored in databases.
         NO_TYPE,
@@ -55,12 +53,15 @@ public class Script {
         CLEANSTACK, // Require that only a single stack element remains after evaluation.
         CHECKLOCKTIMEVERIFY // Enable CHECKLOCKTIMEVERIFY operation
     }
+
     public static final EnumSet<VerifyFlag> ALL_VERIFY_FLAGS = EnumSet.allOf(VerifyFlag.class);
 
     private static final Logger log = LoggerFactory.getLogger(Script.class);
     public static final long MAX_SCRIPT_ELEMENT_SIZE = 520;  // bytes
     public static final int SIG_SIZE = 75;
-    /** Max number of sigops allowed in a standard p2sh redeem script */
+    /**
+     * Max number of sigops allowed in a standard p2sh redeem script
+     */
     public static final int MAX_P2SH_SIGOPS = 15;
 
     // The program is a set of chunks where each element is either [opcode] or [data, data, data ...]
@@ -72,7 +73,9 @@ public class Script {
     // Creation time of the associated keys in seconds since the epoch.
     private long creationTimeSeconds;
 
-    /** Creates an empty script that serializes to nothing. */
+    /**
+     * Creates an empty script that serializes to nothing.
+     */
     private Script() {
         chunks = new ArrayList<ScriptChunk>();
     }
@@ -86,6 +89,7 @@ public class Script {
     /**
      * Construct a Script that copies and wraps the programBytes array. The array is parsed and checked for syntactic
      * validity.
+     *
      * @param programBytes Array of program bytes from a transaction.
      */
     public Script(byte[] programBytes) throws ScriptException {
@@ -116,7 +120,9 @@ public class Script {
         return Utils.join(chunks);
     }
 
-    /** Returns the serialized program as a newly created byte array. */
+    /**
+     * Returns the serialized program as a newly created byte array.
+     */
     public byte[] getProgram() {
         try {
             // Don't round-trip as Bitcoin Core doesn't and it would introduce a mismatch.
@@ -134,22 +140,24 @@ public class Script {
         }
     }
 
-    /** Returns an immutable list of the scripts parsed form. Each chunk is either an opcode or data element. */
+    /**
+     * Returns an immutable list of the scripts parsed form. Each chunk is either an opcode or data element.
+     */
     public List<ScriptChunk> getChunks() {
         return Collections.unmodifiableList(chunks);
     }
 
     private static final ScriptChunk[] STANDARD_TRANSACTION_SCRIPT_CHUNKS = {
-        new ScriptChunk(ScriptOpCodes.OP_DUP, null, 0),
-        new ScriptChunk(ScriptOpCodes.OP_HASH160, null, 1),
-        new ScriptChunk(ScriptOpCodes.OP_EQUALVERIFY, null, 23),
-        new ScriptChunk(ScriptOpCodes.OP_CHECKSIG, null, 24),
+            new ScriptChunk(ScriptOpCodes.OP_DUP, null, 0),
+            new ScriptChunk(ScriptOpCodes.OP_HASH160, null, 1),
+            new ScriptChunk(ScriptOpCodes.OP_EQUALVERIFY, null, 23),
+            new ScriptChunk(ScriptOpCodes.OP_CHECKSIG, null, 24),
     };
 
     /**
      * <p>To run a script, first we parse it which breaks it up into chunks representing pushes of data or logical
      * opcodes. Then we can run the parsed chunks.</p>
-     *
+     * <p>
      * <p>The reason for this split, instead of just interpreting directly, is to make it easier
      * to reach into a programs structure and pull out bits of data without having to run it.
      * This is necessary to render the to/from addresses of transactions in a user interface.
@@ -184,7 +192,7 @@ public class Script {
                 if (bis.available() < 4) {
                     throw new ScriptException("Unexpected end of script");
                 }
-                dataToRead = ((long)bis.read()) | (((long)bis.read()) << 8) | (((long)bis.read()) << 16) | (((long)bis.read()) << 24);
+                dataToRead = ((long) bis.read()) | (((long) bis.read()) << 8) | (((long) bis.read()) << 16) | (((long) bis.read()) << 24);
             }
 
             ScriptChunk chunk;
@@ -194,8 +202,8 @@ public class Script {
                 if (dataToRead > bis.available()) {
                     throw new ScriptException("Push of data element that is larger than remaining data");
                 }
-                byte[] data = new byte[(int)dataToRead];
-                Utils.checkState(dataToRead == 0 || bis.read(data, 0, (int)dataToRead) == dataToRead);
+                byte[] data = new byte[(int) dataToRead];
+                Utils.checkState(dataToRead == 0 || bis.read(data, 0, (int) dataToRead) == dataToRead);
                 chunk = new ScriptChunk(opcode, data, startLocationInProgram);
             }
             // Save some memory by eliminating redundant copies of the same chunk objects.
@@ -216,7 +224,7 @@ public class Script {
      */
     public boolean isSentToRawPubKey() {
         return chunks.size() == 2 && chunks.get(1).equalsOpCode(OP_CHECKSIG) &&
-               !chunks.get(0).isOpCode() && chunks.get(0).data.length > 1;
+                !chunks.get(0).isOpCode() && chunks.get(0).data.length > 1;
     }
 
     /**
@@ -278,11 +286,11 @@ public class Script {
      * <p>If a program matches the standard template DUP HASH160 &lt;pubkey hash&gt; EQUALVERIFY CHECKSIG
      * then this function retrieves the third element.
      * In this case, this is useful for fetching the destination address of a transaction.</p>
-     * 
+     *
      * <p>If a program matches the standard template HASH160 &lt;script hash&gt; EQUAL
      * then this function retrieves the second element.
      * In this case, this is useful for fetching the hash of the redeem script of a transaction.</p>
-     * 
+     *
      * <p>Otherwise it throws a ScriptException.</p>
      *
      */
@@ -325,6 +333,7 @@ public class Script {
 
     /**
      * Retrieves the sender public key from a LOCKTIMEVERIFY transaction
+     *
      * @return byte[]
      * @throws ScriptException
      */
@@ -337,6 +346,7 @@ public class Script {
 
     /**
      * Retrieves the recipient public key from a LOCKTIMEVERIFY transaction
+     *
      * @return byte[]
      * @throws ScriptException
      */
@@ -388,7 +398,9 @@ public class Script {
         }
     }
 
-    /** Creates a program that requires at least N of the given keys to sign, using OP_CHECKMULTISIG. */
+    /**
+     * Creates a program that requires at least N of the given keys to sign, using OP_CHECKMULTISIG.
+     */
     public static byte[] createMultiSigOutputScript(int threshold, List<ECKey> pubkeys) {
         Utils.checkState(threshold > 0);
         Utils.checkState(threshold <= pubkeys.size());
@@ -482,7 +494,7 @@ public class Script {
 
         ArrayList<ECKey> result = new ArrayList<ECKey>();
         int numKeys = Script.decodeFromOpN(chunks.get(chunks.size() - 2).opcode);
-        for (int i = 0 ; i < numKeys ; i++) {
+        for (int i = 0; i < numKeys; i++) {
             result.add(ECKey.fromPublicOnly(chunks.get(1 + i).data));
         }
         return result;
@@ -497,20 +509,20 @@ public class Script {
         for (ScriptChunk chunk : chunks) {
             if (chunk.isOpCode()) {
                 switch (chunk.opcode) {
-                case OP_CHECKSIG:
-                case OP_CHECKSIGVERIFY:
-                    sigOps++;
-                    break;
-                case OP_CHECKMULTISIG:
-                case OP_CHECKMULTISIGVERIFY:
-                    if (accurate && lastOpCode >= OP_1 && lastOpCode <= OP_16) {
-                        sigOps += decodeFromOpN(lastOpCode);
-                    } else {
-                        sigOps += 20;
-                    }
-                    break;
-                default:
-                    break;
+                    case OP_CHECKSIG:
+                    case OP_CHECKSIGVERIFY:
+                        sigOps++;
+                        break;
+                    case OP_CHECKMULTISIG:
+                    case OP_CHECKMULTISIGVERIFY:
+                        if (accurate && lastOpCode >= OP_1 && lastOpCode <= OP_16) {
+                            sigOps += decodeFromOpN(lastOpCode);
+                        } else {
+                            sigOps += 20;
+                        }
+                        break;
+                    default:
+                        break;
                 }
                 lastOpCode = chunk.opcode;
             }
@@ -552,7 +564,7 @@ public class Script {
         }
         return getSigOpCount(script.chunks, false);
     }
-    
+
     /**
      * Gets the count of P2SH Sig Ops in the Script scriptSig
      */
@@ -582,7 +594,7 @@ public class Script {
             ScriptChunk nChunk = chunks.get(0);
             return Script.decodeFromOpN(nChunk.opcode);
         } else if (
-                //isSentToAddress() ||
+            //isSentToAddress() ||
                 isSentToRawPubKey()) {
             // pay-to-address and pay-to-pubkey require single sig
             return 1;
@@ -624,7 +636,7 @@ public class Script {
      * not exist in Bitcoin Core. It means blocks containing P2SH transactions that don't match
      * correctly are considered valid, but won't be mined upon, so they'll be rapidly re-orgd out of the chain. This
      * logic is defined by <a href="https://github.com/bitcoin/bips/blob/master/bip-0016.mediawiki">BIP 16</a>.</p>
-     *
+     * <p>
      * <p>bitcoinj does not support creation of P2SH transactions today. The goal of P2SH is to allow short addresses
      * even for complex scripts (eg, multi-sig outputs) so they are convenient to work with in things like QRcodes or
      * with copy/paste, and also to minimize the size of the unspent output set (which improves performance of the
@@ -636,9 +648,9 @@ public class Script {
         // printed out but one is a P2SH script and the other isn't! :(
         byte[] program = getProgram();
         return program.length == 23 &&
-               (program[0] & 0xff) == OP_HASH160 &&
-               (program[1] & 0xff) == 0x14 &&
-               (program[22] & 0xff) == OP_EQUAL;
+                (program[0] & 0xff) == OP_HASH160 &&
+                (program[1] & 0xff) == 0x14 &&
+                (program[22] & 0xff) == OP_EQUAL;
     }
 
     /**
@@ -724,7 +736,7 @@ public class Script {
         }
         return true;
     }
-    
+
     /**
      * Returns the script bytes of inputScript with all instances of the specified script object removed
      */
@@ -732,71 +744,71 @@ public class Script {
         // We usually don't end up removing anything
         UnsafeByteArrayOutputStream bos = new UnsafeByteArrayOutputStream(inputScript.length);
         try {
-	        int cursor = 0;
-	        while (cursor < inputScript.length) {
-	            boolean skip = equalsRange(inputScript, cursor, chunkToRemove);
-	            
-	            int opcode = inputScript[cursor++] & 0xFF;
-	            int additionalBytes = 0;
-	            if (opcode >= 0 && opcode < OP_PUSHDATA1) {
-	                additionalBytes = opcode;
-	            } else if (opcode == OP_PUSHDATA1) {
-	                additionalBytes = (0xFF & inputScript[cursor]) + 1;
-	            } else if (opcode == OP_PUSHDATA2) {
-	                additionalBytes = ((0xFF & inputScript[cursor]) |
-	                                  ((0xFF & inputScript[cursor+1]) << 8)) + 2;
-	            } else if (opcode == OP_PUSHDATA4) {
-	                additionalBytes = ((0xFF & inputScript[cursor]) |
-	                                  ((0xFF & inputScript[cursor+1]) << 8) |
-	                                  ((0xFF & inputScript[cursor+1]) << 16) |
-	                                  ((0xFF & inputScript[cursor+1]) << 24)) + 4;
-	            }
-	            if (!skip) {
-	                try {
-	                    bos.write(opcode);
-	                    bos.write(Arrays.copyOfRange(inputScript, cursor, cursor + additionalBytes));
-	                } catch (IOException e) {
-	                    throw new RuntimeException(e);
-	                }
-	            }
-	            cursor += additionalBytes;
-	        }
-	        return bos.toByteArray();
+            int cursor = 0;
+            while (cursor < inputScript.length) {
+                boolean skip = equalsRange(inputScript, cursor, chunkToRemove);
+
+                int opcode = inputScript[cursor++] & 0xFF;
+                int additionalBytes = 0;
+                if (opcode >= 0 && opcode < OP_PUSHDATA1) {
+                    additionalBytes = opcode;
+                } else if (opcode == OP_PUSHDATA1) {
+                    additionalBytes = (0xFF & inputScript[cursor]) + 1;
+                } else if (opcode == OP_PUSHDATA2) {
+                    additionalBytes = ((0xFF & inputScript[cursor]) |
+                            ((0xFF & inputScript[cursor + 1]) << 8)) + 2;
+                } else if (opcode == OP_PUSHDATA4) {
+                    additionalBytes = ((0xFF & inputScript[cursor]) |
+                            ((0xFF & inputScript[cursor + 1]) << 8) |
+                            ((0xFF & inputScript[cursor + 1]) << 16) |
+                            ((0xFF & inputScript[cursor + 1]) << 24)) + 4;
+                }
+                if (!skip) {
+                    try {
+                        bos.write(opcode);
+                        bos.write(Arrays.copyOfRange(inputScript, cursor, cursor + additionalBytes));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                cursor += additionalBytes;
+            }
+            return bos.toByteArray();
         } finally {
-			try {
-				bos.close();
-			} catch (IOException e) {
-				Log.error(e);
-			}
-		}
+            try {
+                bos.close();
+            } catch (IOException e) {
+                Log.error(e);
+            }
+        }
     }
-    
+
     /**
      * Returns the script bytes of inputScript with all instances of the given op code removed
      */
     public static byte[] removeAllInstancesOfOp(byte[] inputScript, int opCode) {
-        return removeAllInstancesOf(inputScript, new byte[] {(byte)opCode});
+        return removeAllInstancesOf(inputScript, new byte[]{(byte) opCode});
     }
-    
+
     ////////////////////// Script verification and helpers ////////////////////////////////
-    
+
     private static boolean castToBool(byte[] data) {
         for (int i = 0; i < data.length; i++) {
             if (data[i] != 0)
-            	//除了byte[]{0}之外都为true
+            //除了byte[]{0}之外都为true
             {
                 return !(i == data.length - 1 && (data[i] & 0xFF) == 0x80);
             }
         }
         return false;
     }
-    
+
     /**
      * Cast a script chunk to a BigInteger.
      *
+     * @throws ScriptException if the chunk is longer than 4 bytes.
      * @see #castToBigInteger(byte[], int) for values with different maximum
      * sizes.
-     * @throws ScriptException if the chunk is longer than 4 bytes.
      */
     private static BigInteger castToBigInteger(byte[] chunk) throws ScriptException {
         if (chunk.length > 4) {
@@ -848,7 +860,6 @@ public class Script {
 //        }
 //        return type;
 //    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -857,14 +868,14 @@ public class Script {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        return Arrays.equals(getQuickProgram(), ((Script)o).getQuickProgram());
+        return Arrays.equals(getQuickProgram(), ((Script) o).getQuickProgram());
     }
 
     @Override
     public int hashCode() {
         return Arrays.hashCode(getQuickProgram());
     }
-    
+
 //    /**
 //     * 运行脚本
 //     */
@@ -885,7 +896,7 @@ public class Script {
 //        if (!castToBool(stack.pollLast()))
 //            throw new ScriptException("Script resulted in a non-true stack: " + stack);
 //    }
-    
+
 //    public static void executeScript(Transaction tx, int index, Script script, LinkedList<byte[]> stack) {
 //    	//操作码数量，最多允许501个
 //    	int opCount = 0;
@@ -1181,11 +1192,11 @@ public class Script {
 //
 //		executeScript(this, stack);
 //	}
-	
-	/**
-	 * hash为验证的内容，先把内容压入栈内，再执行脚步
-	 * @param script
-	 */
+
+    /**
+     * hash为验证的内容，先把内容压入栈内，再执行脚步
+     * @param script
+     */
 //	public void execute(Script script) {
 //		LinkedList<byte[]> stack = new LinkedList<byte[]>();
 //		executeScript(this, stack);
@@ -1196,7 +1207,7 @@ public class Script {
 //        if (!castToBool(stack.pollLast()))
 //            throw new ScriptException("Script resulted in a non-true stack: " + stack);
 //	}
-    
+
 //    public static void executeScript(Script script, LinkedList<byte[]> stack) {
 //    	//操作码数量，最多允许501个
 //    	int opCount = 0;
@@ -1676,11 +1687,11 @@ public class Script {
 //                chunks.get(4).equalsOpCode(OP_EQUALVERIFY) &&
 //                chunks.get(6).equalsOpCode(OP_CHECKSIG));    // 认证用户交易密钥只有一对 ，facjas
 //	}
-	
-	/**
-	 * 获取认证账户的账户信息对应的交易
-	 * @return Sha256Hash
-	 */
+
+    /**
+     * 获取认证账户的账户信息对应的交易
+     * @return Sha256Hash
+     */
 //	public Sha256Hash getCertAccountTxHash() {
 //		if(isCertAccount()) {
 //			return Sha256Hash.of(chunks.get(1).data);
@@ -1688,18 +1699,19 @@ public class Script {
 //			return null;
 //		}
 //	}
-	
-	/**
+
+    /**
      * 是否是防伪验证输入脚本
+     *
      * @return boolean
      */
-	public boolean isAntifakeInputScript() {
-		if(chunks == null || chunks.size() != 1 || chunks.get(0).data.length != 32) {
-			return false;
-		}
+    public boolean isAntifakeInputScript() {
+        if (chunks == null || chunks.size() != 1 || chunks.get(0).data.length != 32) {
+            return false;
+        }
         return true;
-	}
-	
+    }
+
 //	/**
 //	 * 是否是参与共识保证金赎回脚本
 //	 * @return boolean
