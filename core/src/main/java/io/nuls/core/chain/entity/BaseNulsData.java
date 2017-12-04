@@ -43,7 +43,7 @@ public abstract class BaseNulsData implements Serializable {
     public final int size(){
         int size = 0;
         size += version.size();
-        size += this.size();
+        size += this.dataSize();
         return size;
     }
     /**

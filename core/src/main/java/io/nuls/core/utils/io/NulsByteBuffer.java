@@ -147,12 +147,16 @@ public class NulsByteBuffer {
         return Utils.bytes2Short(readBytes(2));
     }
 
-    public String readString(NulsByteBuffer byteBuffer) {
+    public String readString() {
         try {
             return new String(this.readByLengthByte(), NulsContext.DEFAULT_ENCODING);
         } catch (UnsupportedEncodingException e) {
             Log.error(e);
         }
         return null;
+    }
+
+    public double readDouble() {
+        return Utils.bytes2Double(this.readByLengthByte());
     }
 }

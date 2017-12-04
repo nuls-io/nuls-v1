@@ -68,4 +68,8 @@ public class NulsOutputStreamBuffer {
     public void writeInt64(long val) throws IOException {
         Utils.int64ToByteStreamLE(val, out);
     }
+
+    public void writeDouble(double val) throws IOException {
+        this.writeBytesWithLength(Utils.double2Bytes(val));
+    }
 }
