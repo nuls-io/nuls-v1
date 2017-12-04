@@ -31,17 +31,12 @@ public class Block extends BlockHeader {
     private List<Transaction> txs;
 
     @Override
-    public int size() {
+    protected int dataSize() {
         return 0;
     }
 
     @Override
-    public byte[] serialize() {
-        return new byte[0];
-    }
-
-    @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    protected void parseObject(NulsByteBuffer byteBuffer) {
     }
 
     public List<Transaction> getTxs() {

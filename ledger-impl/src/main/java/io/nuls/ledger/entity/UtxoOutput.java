@@ -39,7 +39,7 @@ public class UtxoOutput extends BaseNulsData{
     }
 
     @Override
-    public int size() {
+    protected int dataSize() {
         int s = 0;
         s += VarInt.sizeOf(value);
         s += VarInt.sizeOf(lockTime);
@@ -56,7 +56,7 @@ public class UtxoOutput extends BaseNulsData{
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    protected void parseObject(NulsByteBuffer byteBuffer) {
         if(byteBuffer == null ) {
             return;
         }

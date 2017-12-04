@@ -21,7 +21,7 @@ public class UtxoDepositTransaction extends LockCoinTransaction {
     }
 
     @Override
-    public int size() {
+    protected int dataSize() {
         //todo
         return 0;
     }
@@ -33,7 +33,7 @@ public class UtxoDepositTransaction extends LockCoinTransaction {
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    protected void parseObject(NulsByteBuffer byteBuffer) {
 
         //todo
     }

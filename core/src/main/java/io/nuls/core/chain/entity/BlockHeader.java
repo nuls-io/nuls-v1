@@ -62,15 +62,9 @@ public class BlockHeader extends BaseNulsData {
     }
 
     @Override
-    public int size() {
+    protected int dataSize() {
         //todo
         return 0;
-    }
-
-    @Override
-    public byte[] serialize() {
-        //todo
-        return new byte[0];
     }
 
     @Override
@@ -80,7 +74,7 @@ public class BlockHeader extends BaseNulsData {
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    protected void parseObject(NulsByteBuffer byteBuffer) {
         //todo
     }
 

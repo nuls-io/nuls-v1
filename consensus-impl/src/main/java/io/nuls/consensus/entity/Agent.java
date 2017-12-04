@@ -58,7 +58,7 @@ public class Agent extends BaseNulsData {
     }
 
     @Override
-    protected int size() {
+    protected int dataSize() {
         return 0;
     }
 
@@ -68,7 +68,7 @@ public class Agent extends BaseNulsData {
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    protected void parseObject(NulsByteBuffer byteBuffer) {
 
     }
 }

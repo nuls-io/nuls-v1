@@ -26,9 +26,9 @@ public abstract class BaseNulsEvent<T extends BaseNulsData> extends BaseNulsData
 
 
     @Override
-    public final int size() {
+    public final int dataSize() {
         if (eventBody != null) {
-            return header.size() + eventBody.dataSize();
+            return header.size() + eventBody.size();
         } else {
             return header.size();
         }
@@ -43,7 +43,7 @@ public abstract class BaseNulsEvent<T extends BaseNulsData> extends BaseNulsData
     }
 
     @Override
-    public final void parse(NulsByteBuffer byteBuffer) {
+    public final void parseObject(NulsByteBuffer byteBuffer) {
         this.header = new NulsEventHeader();
         this.header.parse(byteBuffer);
         this.eventBody = parseEventBody(byteBuffer);

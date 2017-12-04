@@ -24,7 +24,7 @@ public class UtxoSmallChangeTransaction extends AbstractCoinTransaction<UtxoData
     }
 
     @Override
-    public int size() {
+    protected int dataSize() {
         //todo
         return 0;
     }
@@ -35,7 +35,7 @@ public class UtxoSmallChangeTransaction extends AbstractCoinTransaction<UtxoData
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    protected void parseObject(NulsByteBuffer byteBuffer) {
         //todo
 
     }

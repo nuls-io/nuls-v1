@@ -81,7 +81,7 @@ public class Account extends BaseNulsData {
     }
 
     @Override
-    public int size() {
+    protected int dataSize() {
         int s = 0;
         //s += VarInt.sizeOf(version);
         if (!StringUtils.isBlank(id)) {
@@ -144,8 +144,7 @@ public class Account extends BaseNulsData {
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
-     //   version = (short) byteBuffer.readUint32();
+    protected void parseObject(NulsByteBuffer byteBuffer) {
         id = new String(byteBuffer.readByLengthByte());
         alias = new String(byteBuffer.readByLengthByte());
         byte[] hash160 = byteBuffer.readBytes(Address.LENGTH);

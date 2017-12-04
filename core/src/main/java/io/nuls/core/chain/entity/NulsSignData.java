@@ -26,7 +26,7 @@ public class NulsSignData extends BaseNulsData{
 
 
     @Override
-    public int size() {
+    protected int dataSize() {
         return 0;
     }
 
@@ -36,7 +36,7 @@ public class NulsSignData extends BaseNulsData{
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    protected void parseObject(NulsByteBuffer byteBuffer) {
 
     }
 

@@ -46,7 +46,7 @@ public class VersionData extends BaseNetworkData {
     }
 
     @Override
-    public int size() {
+    protected int dataSize() {
         int s = 0;
         s += NetworkDataHeader.NETWORK_HEADER_SIZE;
 
@@ -82,7 +82,7 @@ public class VersionData extends BaseNetworkData {
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    protected void parseObject(NulsByteBuffer byteBuffer) {
         this.networkHeader = new NetworkDataHeader(byteBuffer);
         version = new NulsVersion(byteBuffer.readShort());
         bestBlockHeight = byteBuffer.readVarInt();

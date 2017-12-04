@@ -48,7 +48,7 @@ public class UtxoInput extends BaseNulsData {
     }
 
     @Override
-    public int size() {
+    protected int dataSize() {
         return 0;
     }
 
@@ -70,7 +70,7 @@ public class UtxoInput extends BaseNulsData {
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    protected void parseObject(NulsByteBuffer byteBuffer) {
         if (byteBuffer == null) {
             return;
         }

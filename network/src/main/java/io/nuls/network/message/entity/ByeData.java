@@ -21,7 +21,7 @@ public class ByeData extends BaseNetworkData {
     }
 
     @Override
-    public int size() {
+    protected int dataSize() {
         //todo
         return 0;
     }
@@ -32,7 +32,7 @@ public class ByeData extends BaseNetworkData {
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    protected void parseObject(NulsByteBuffer byteBuffer) {
         //todo
 
     }

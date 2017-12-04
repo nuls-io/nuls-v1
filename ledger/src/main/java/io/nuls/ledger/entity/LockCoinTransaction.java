@@ -27,7 +27,7 @@ public class LockCoinTransaction<T extends BaseNulsData> extends AbstractCoinTra
     }
 
     @Override
-    public int size() {
+    protected int dataSize() {
         //todo
         return 0;
     }
@@ -39,7 +39,7 @@ public class LockCoinTransaction<T extends BaseNulsData> extends AbstractCoinTra
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    protected void parseObject(NulsByteBuffer byteBuffer) {
         //todo
 
     }

@@ -1,14 +1,17 @@
 package io.nuls.core.mesasge;
 
+import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsVerificationException;
+import io.nuls.core.mesasge.validator.NulsMessageValidator;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-public class NulsMessage {
+public class NulsMessage extends BaseNulsData{
 
     public static final int MAX_SIZE = NulsMessageHeader.MESSAGE_HEADER_SIZE + Block.MAX_SIZE;
 
@@ -19,11 +22,13 @@ public class NulsMessage {
     public NulsMessage() {
         this.header = new NulsMessageHeader();
         this.data = new byte[0];
+        this.registerValidator(new NulsMessageValidator());
     }
 
     public NulsMessage(ByteBuffer buffer) {
-        parse(buffer);
+        parse(new NulsByteBuffer(buffer.array()));
     }
+
 
     public NulsMessage(NulsMessageHeader header, byte[] data) {
         this.header = header;
@@ -89,21 +94,28 @@ public class NulsMessage {
         return xor;
     }
 
-    public byte[] serialize() throws IOException {
-        byte[] value = new byte[NulsMessageHeader.MESSAGE_HEADER_SIZE + data.length];
-        byte[] headerBytes = header.serialize();
-        System.arraycopy(headerBytes, 0, value, 0, headerBytes.length);
-        System.arraycopy(data, 0, value, headerBytes.length, data.length);
-        return value;
+    @Override
+    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.write(header.serialize());
+        stream.write(data);
     }
 
-    public void parse(ByteBuffer byteBuffer) {
+    @Override
+    protected int dataSize() {
+        return 0;
+    }
+
+    @Override
+    protected void parseObject(NulsByteBuffer byteBuffer) {
+
+    }
+
+    protected void parseObject(ByteBuffer byteBuffer) {
         byte[] headers = new byte[NulsMessageHeader.MESSAGE_HEADER_SIZE];
         byteBuffer.get(headers, 0, headers.length);
         NulsMessageHeader header = new NulsMessageHeader(new NulsByteBuffer(headers));
         byte[] data = new byte[byteBuffer.limit() - headers.length];
         byteBuffer.get(data, 0, data.length);
-
         this.header = header;
         this.data = data;
     }
@@ -118,20 +130,6 @@ public class NulsMessage {
 
     public void setData(byte[] data) {
         this.data = data;
-    }
-
-    public void verify() throws NulsVerificationException {
-        if (this.header == null || this.data == null) {
-            throw new NulsVerificationException(ErrorCode.NET_MESSAGE_ERROR);
-        }
-
-        if (header.getLength() != data.length) {
-            throw new NulsVerificationException(ErrorCode.NET_MESSAGE_LENGTH_ERROR);
-        }
-
-        if (header.getXor() != caculateXor()) {
-            throw new NulsVerificationException(ErrorCode.NET_MESSAGE_XOR_ERROR);
-        }
     }
 
 }
