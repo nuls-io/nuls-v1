@@ -12,7 +12,7 @@ import io.nuls.core.utils.log.Log;
  * @author Niels
  * @date 2017/9/26
  */
-public abstract class BaseNulsModule{
+public abstract class BaseNulsModule {
 
     private final short moduleId;
 
@@ -68,7 +68,7 @@ public abstract class BaseNulsModule{
     }
 
     public void setStatus(ModuleStatusEnum status) {
-        Log.info("Status change("+this.moduleName+"):"+this.status+"-->"+status);
+        Log.info("Status change(" + this.moduleName + "):" + this.status + "-->" + status);
         this.status = status;
     }
 
@@ -95,11 +95,7 @@ public abstract class BaseNulsModule{
     }
 
     protected final void registerEvent(short eventType, Class<? extends BaseNulsEvent> eventClass) {
-        if (this.getModuleId() == 0) {
-            EventManager.putEvent(this, eventType, eventClass);
-        } else {
-            EventManager.putEvent(this.getModuleId(), eventType, eventClass);
-        }
+        EventManager.putEvent(this.getModuleId(), eventType, eventClass);
     }
 
     public Class<? extends BaseNulsModule> getModuleClass() {

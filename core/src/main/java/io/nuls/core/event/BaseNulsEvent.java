@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- *
  * @author Niels
  * @date 2017/11/7
  */
@@ -16,20 +15,20 @@ public abstract class BaseNulsEvent<T extends BaseNulsData> extends BaseNulsData
 
     private T eventBody;
 
-    public BaseNulsEvent(){
-        this.header = new NulsEventHeader();
+    public BaseNulsEvent(short moduleId, short eventType, byte[] extend) {
+        this.header = new NulsEventHeader(moduleId, eventType, extend);
     }
 
-    public BaseNulsEvent(NulsEventHeader header) {
-        this.header = header;
+    public BaseNulsEvent(short moduleId, short eventType) {
+        this.header = new NulsEventHeader(moduleId, eventType, null);
     }
 
 
     @Override
     public final int size() {
-        if(eventBody != null) {
+        if (eventBody != null) {
             return header.size() + eventBody.size();
-        }else {
+        } else {
             return header.size();
         }
     }
@@ -37,7 +36,7 @@ public abstract class BaseNulsEvent<T extends BaseNulsData> extends BaseNulsData
     @Override
     public final void serializeToStream(OutputStream stream) throws IOException {
         this.header.serializeToStream(stream);
-        if(eventBody != null) {
+        if (eventBody != null) {
             this.eventBody.serializeToStream(stream);
         }
     }
@@ -58,6 +57,7 @@ public abstract class BaseNulsEvent<T extends BaseNulsData> extends BaseNulsData
     public void setEventBody(T eventBody) {
         this.eventBody = eventBody;
     }
+
     public NulsEventHeader getHeader() {
         return header;
     }

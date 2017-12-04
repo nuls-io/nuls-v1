@@ -15,4 +15,8 @@ public interface POCConsensusConstant {
 
     String CFG_CONSENSUS_SECTION = "Consensus";
     String CFG_CONSENSUS_MINING_AGENT = "mining.agent";
+
+
+    short EVENT_TYPE_RED_PUNISH = 6;
+    short EVENT_TYPE_YELLOW_PUNISH = 7;
 }

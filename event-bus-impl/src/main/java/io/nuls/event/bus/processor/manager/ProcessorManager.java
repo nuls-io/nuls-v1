@@ -114,7 +114,7 @@ public class ProcessorManager<E extends BaseNulsEvent, H extends NulsEventHandle
                 set.add(handler);
             }
         } while (false);
-        while (!clazz.getSuperclass().equals(BaseNulsEvent.class)) {
+        if (!clazz.getSuperclass().equals(BaseNulsEvent.class)) {
             set.addAll(getHandlerList((Class<E>) clazz.getSuperclass()));
         }
         return set;

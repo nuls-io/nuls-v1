@@ -2,14 +2,18 @@ package io.nuls.consensus.module.impl;
 
 import io.nuls.consensus.constant.POCConsensusConstant;
 import io.nuls.consensus.event.JoinConsensusEvent;
+import io.nuls.consensus.event.RedPunishConsensusEvent;
+import io.nuls.consensus.event.YellowPunishConsensusEvent;
 import io.nuls.consensus.handler.JoinConsensusHandler;
 import io.nuls.consensus.module.AbstractConsensusModule;
 import io.nuls.consensus.service.impl.POCConsensusServiceImpl;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.event.NulsEventHeader;
 import io.nuls.core.mesasge.NulsMessage;
 import io.nuls.core.thread.manager.ThreadManager;
 import io.nuls.core.utils.log.Log;
+import io.nuls.event.bus.processor.service.intf.LocalProcessorService;
 import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
 import io.nuls.ledger.entity.TransferTransaction;
 import io.nuls.network.service.NetworkService;
@@ -17,12 +21,9 @@ import io.nuls.network.service.NetworkService;
 import java.io.IOException;
 
 /**
- *
  * @author Niels
  * @date 2017/11/7
- *
  */
-//todo
 public class POCConsensusModuleImpl extends AbstractConsensusModule {
 
     private NetworkProcessorService processorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
@@ -35,6 +36,8 @@ public class POCConsensusModuleImpl extends AbstractConsensusModule {
         this.startBlockMaintenanceThread();
         this.registerHanders();
         this.registerService(POCConsensusServiceImpl.getInstance());
+        this.registerEvent(POCConsensusConstant.EVENT_TYPE_RED_PUNISH, RedPunishConsensusEvent.class);
+        this.registerEvent(POCConsensusConstant.EVENT_TYPE_YELLOW_PUNISH, YellowPunishConsensusEvent.class);
         Log.info("the POC consensus module is started!");
 //        todo test network broadcast
 //        Runnable r = new Runnable() {

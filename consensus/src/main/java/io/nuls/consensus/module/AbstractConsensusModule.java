@@ -1,26 +1,22 @@
 package io.nuls.consensus.module;
 
+import io.nuls.consensus.constant.ConsensusEventType;
 import io.nuls.consensus.event.*;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.module.BaseNulsModule;
 
 /**
- *
  * @author Niels
  * @date 2017/11/7
- *
  */
 public abstract class AbstractConsensusModule extends BaseNulsModule {
     public AbstractConsensusModule() {
         super(NulsConstant.MODULE_ID_CONSENSUS);
-        this.registerEvent((short) 1, BaseConsensusEvent.class);
-        this.registerEvent((short) 2, JoinConsensusEvent.class);
-        this.registerEvent((short) 3, ExitConsensusEvent.class);
-        this.registerEvent((short) 4, BlockEvent.class);
-        this.registerEvent((short) 5, BlockHeaderEvent.class);
-        this.registerEvent((short) 6, GetBlockEvent.class);
-        this.registerEvent((short) 7, RedPunishConsensusEvent.class);
-        this.registerEvent((short) 8, YellowPunishConsensusEvent.class);
+        this.registerEvent(ConsensusEventType.JOIN, JoinConsensusEvent.class);
+        this.registerEvent(ConsensusEventType.EXIT, ExitConsensusEvent.class);
+        this.registerEvent(ConsensusEventType.BLOCK, BlockEvent.class);
+        this.registerEvent(ConsensusEventType.BLOCK_HEADER, BlockHeaderEvent.class);
+        this.registerEvent(ConsensusEventType.GET_BLOCK, GetBlockEvent.class);
     }
 
 }

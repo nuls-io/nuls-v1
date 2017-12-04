@@ -1,25 +1,23 @@
 package io.nuls.event.bus.utils.disruptor;
 
-import com.lmax.disruptor.EventFactory;
-import com.lmax.disruptor.LiteBlockingWaitStrategy;
-import com.lmax.disruptor.RingBuffer;
-import com.lmax.disruptor.WorkHandler;
+import com.lmax.disruptor.*;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.module.service.ModuleService;
+import io.nuls.core.thread.manager.NulsThreadFactory;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
+import io.nuls.event.bus.module.impl.EventBusModuleImpl;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Executors;
 
 /**
- *
  * @author Niels
  * @date 2017/10/10
- *
  */
 public class DisruptorUtil<T extends DisruptorEvent> {
     private static final DisruptorUtil INSTANCE = new DisruptorUtil();
@@ -51,14 +49,14 @@ public class DisruptorUtil<T extends DisruptorEvent> {
         }
 
         Disruptor<DisruptorEvent> disruptor = new Disruptor<DisruptorEvent>(EVENT_FACTORY,
-                ringBufferSize, Executors.defaultThreadFactory(), ProducerType.SINGLE,
-                new LiteBlockingWaitStrategy());
-//        disruptor.handleEventsWith(new EventHandler<DisruptorEvent>() {
-//            @Override
-//            public void onEvent(DisruptorEvent disruptorEvent, long l, boolean b) throws Exception {
-//                Log.debug(disruptorEvent.getData() + "");
-//            }
-//        });
+                ringBufferSize, new NulsThreadFactory(ModuleService.getInstance().getModuleId(EventBusModuleImpl.class),name), ProducerType.SINGLE,
+                new SleepingWaitStrategy());
+        disruptor.handleEventsWith(new EventHandler<DisruptorEvent>() {
+            @Override
+            public void onEvent(DisruptorEvent disruptorEvent, long l, boolean b) throws Exception {
+                Log.debug(disruptorEvent.getData() + "");
+            }
+        });
         DISRUPTOR_MAP.put(name, disruptor);
     }
 
@@ -95,12 +93,15 @@ public class DisruptorUtil<T extends DisruptorEvent> {
         Disruptor<DisruptorEvent> disruptor = DISRUPTOR_MAP.get(name);
         AssertUtil.canNotEmpty(disruptor, "the disruptor is not exist!name:" + name);
         RingBuffer<DisruptorEvent> ringBuffer = disruptor.getRingBuffer();
-        long sequence = ringBuffer.next();//请求下一个事件序号；
+        //请求下一个事件序号；
+        long sequence = ringBuffer.next();
         try {
-            DisruptorEvent event = ringBuffer.get(sequence);//获取该序号对应的事件对象；
+            //获取该序号对应的事件对象；
+            DisruptorEvent event = ringBuffer.get(sequence);
             event.setData(obj);
         } finally {
-            ringBuffer.publish(sequence);//发布事件；
+            //发布事件；
+            ringBuffer.publish(sequence);
         }
     }
 
