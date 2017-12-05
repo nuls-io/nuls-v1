@@ -77,8 +77,8 @@ public class VersionData extends BaseNetworkData {
         networkHeader.serializeToStream(stream);
         stream.writeShort(version.getVersion());
         stream.write(new VarInt(bestBlockHeight).encode());
-//        this.writeBytesWithLength(stream, bestBlockHash);
-//        this.writeBytesWithLength(stream, nulsVersion);
+        stream.writeBytesWithLength( bestBlockHash);
+        stream.writeBytesWithLength( nulsVersion);
     }
 
     @Override
