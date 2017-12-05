@@ -52,7 +52,10 @@ public class Block extends BlockHeader {
 
     @Override
     protected void parseObject(NulsByteBuffer byteBuffer) {
-        //todo
+        super.parseObject(byteBuffer);
+        while(byteBuffer.isFinished()){
+            //todo
+        }
     }
 
     public List<Transaction> getTxs() {
