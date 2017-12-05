@@ -24,6 +24,7 @@ public class PeerTransfer {
 
 
     public static PeerPo transferToPeerPo(Peer peer) {
+
         PeerPo po = new PeerPo();
         po.setFailCount(peer.getFailCount());
         po.setIp(peer.getIp());
@@ -33,6 +34,9 @@ public class PeerTransfer {
         po.setVersion(peer.getVersion().getVersion());
         if (po.getLastTime() == null) {
             po.setLastTime(TimeService.currentTimeMillis());
+        }
+        if(po.getFailCount() == null) {
+            po.setFailCount(0);
         }
         return po;
     }
