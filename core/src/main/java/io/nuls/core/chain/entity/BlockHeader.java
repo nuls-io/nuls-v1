@@ -1,25 +1,15 @@
 package io.nuls.core.chain.entity;
 
-import io.nuls.core.crypto.Sha256Hash;
-import io.nuls.core.crypto.VarInt;
-import io.nuls.core.crypto.script.Script;
-import io.nuls.core.utils.crypto.Hex;
-import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 
 /**
  * @author vivi
  * @date 2017/10/30
  */
 public class BlockHeader extends BaseNulsData {
-
-    public static final short OWN_MAIN_VERSION = 1;
-    public static final short OWN_SUB_VERSION = 0001;
 
     protected NulsDigestData hash;
     protected NulsDigestData preHash;
@@ -40,18 +30,13 @@ public class BlockHeader extends BaseNulsData {
 
     private NulsSignData sign;
 
-    public BlockHeader() {
-        super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
-    }
 
     public BlockHeader(long height, long time) {
-        super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.height = height;
         this.time = time;
     }
 
     public BlockHeader(long height, long time, NulsDigestData preHash) {
-        super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.height = height;
         this.time = time;
         this.preHash = preHash;

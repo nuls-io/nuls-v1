@@ -1,5 +1,6 @@
 package io.nuls.core.chain.entity;
 
+import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
@@ -51,7 +52,10 @@ public class Block extends BlockHeader {
 
     @Override
     protected void parseObject(NulsByteBuffer byteBuffer) {
-        //todo
+        super.parseObject(byteBuffer);
+        while(byteBuffer.isFinished()){
+            //todo
+        }
     }
 
     public List<Transaction> getTxs() {

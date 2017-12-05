@@ -24,6 +24,7 @@ import java.util.Properties;
 public class Bootstrap {
     private static final ModuleService moduleService = ModuleService.getInstance();
     public static void main(String[] args) {
+        Thread.currentThread().setName("Nuls");
         try {
             sysStart();
 //            webStart();

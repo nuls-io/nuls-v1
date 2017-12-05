@@ -7,7 +7,9 @@ import io.nuls.consensus.event.YellowPunishConsensusEvent;
 import io.nuls.consensus.handler.JoinConsensusHandler;
 import io.nuls.consensus.module.AbstractConsensusModule;
 import io.nuls.consensus.service.impl.POCConsensusServiceImpl;
+import io.nuls.consensus.thread.BlockMaintenanceThread;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.thread.manager.ThreadManager;
 import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
@@ -52,7 +54,8 @@ public class POCConsensusModuleImpl extends AbstractConsensusModule {
     }
 
     private void startBlockMaintenanceThread() {
-        //todo
+        ThreadManager.createSingleThreadAndRun(this.getModuleId(),
+                "BlockMaintenance", BlockMaintenanceThread.getInstance());
     }
 
 

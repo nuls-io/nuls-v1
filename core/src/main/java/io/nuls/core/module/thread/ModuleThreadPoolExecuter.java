@@ -1,6 +1,5 @@
 package io.nuls.core.module.thread;
 
-import io.nuls.core.module.BaseNulsModule;
 import io.nuls.core.utils.log.Log;
 
 import java.util.ArrayList;

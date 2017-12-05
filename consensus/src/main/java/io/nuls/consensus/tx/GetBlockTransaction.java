@@ -1,7 +1,6 @@
-package io.nuls.consensus.entity;
+package io.nuls.consensus.tx;
 
 import io.nuls.consensus.constant.ConsensusConstant;
-import io.nuls.core.chain.entity.Block;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;

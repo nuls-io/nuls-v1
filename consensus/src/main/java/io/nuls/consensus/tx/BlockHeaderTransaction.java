@@ -1,4 +1,4 @@
-package io.nuls.consensus.entity;
+package io.nuls.consensus.tx;
 
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.core.chain.entity.BlockHeader;

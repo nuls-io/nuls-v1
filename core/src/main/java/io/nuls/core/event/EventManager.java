@@ -3,6 +3,8 @@ package io.nuls.core.event;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.module.BaseNulsModule;
+import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.log.Log;
 
 import java.util.*;
 
@@ -34,7 +36,7 @@ public class EventManager {
 
     private static void cacheEventClass(Class<? extends BaseNulsEvent> clazz) {
         EVENT_CLASSES.add(clazz);
-        if(!clazz.getSuperclass().equals(BaseNulsEvent.class)){
+        if (!clazz.getSuperclass().equals(BaseNulsEvent.class)) {
             cacheEventClass((Class<? extends BaseNulsEvent>) clazz.getSuperclass());
         }
     }
@@ -46,13 +48,12 @@ public class EventManager {
         putEvent(module.getModuleId(), type, clazz);
     }
 
-    public static BaseNulsEvent getInstanceByHeader(NulsEventHeader eventHeader) throws IllegalAccessException, InstantiationException {
-        if (null == eventHeader || eventHeader.getEventType() == 0) {
-            return null;
-        }
-        Class<? extends BaseNulsEvent> clazz = EVENT_MAP.get(eventHeader.getModuleId() + "_" + eventHeader.getEventType());
+    public static BaseNulsEvent getInstance(byte[] bytes) throws IllegalAccessException, InstantiationException {
+        NulsEventHeader header = new NulsEventHeader();
+        header.parse(new NulsByteBuffer(bytes));
+        Class<? extends BaseNulsEvent> clazz = EVENT_MAP.get(header.getModuleId() + "_" + header.getEventType());
         BaseNulsEvent event = clazz.newInstance();
-        event.setHeader(eventHeader);
+        event.parse(new NulsByteBuffer(bytes));
         return event;
     }
 }

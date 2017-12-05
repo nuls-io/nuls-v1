@@ -8,7 +8,7 @@ package io.nuls.db.dao.impl.mybatis.session;
 public enum  PROPAGATION {
 
     REQUIRED("required"),
-    NEW("new");
+    INDEPENDENT("independent");
 
 
     private PROPAGATION(String value) {
