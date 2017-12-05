@@ -24,9 +24,9 @@ public class DBMethodFilter implements MethodInterceptor {
         if (isFilterMethod(method)) {
             return methodProxy.invokeSuper(obj, args);
         }
-
         // defult = new
         boolean newSession = true;
+
         if (method.isAnnotationPresent(SessionAnnotation.class)) {
             SessionAnnotation annotation = method.getAnnotation(SessionAnnotation.class);
             if (annotation.value() == PROPAGATION.REQUIRED) {

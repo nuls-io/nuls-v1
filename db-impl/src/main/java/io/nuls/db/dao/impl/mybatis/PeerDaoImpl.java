@@ -35,12 +35,13 @@ public class PeerDaoImpl extends BaseDaoImpl<PeerMapper, String, PeerPo> impleme
             peerPos = searchList(null);
         } else {
             Random random = new Random();
-            List<Integer> rowList = new ArrayList<>();
-            for (int i = 0; i < count; i++) {
-                rowList.add(random.nextInt((int) count));
+            Set<Integer> set = new HashSet<>();
+            while (set.size() < size) {
+                set.add(random.nextInt((int) count));
             }
-            Map<String, Object> map = new HashMap();
-            map.put(PeerSearchParams.SEARCH_RANDOM, rowList);
+
+            Map<String, Object> map = new HashMap<>();
+            map.put(PeerSearchParams.SEARCH_RANDOM, set);
             peerPos = searchList(map);
         }
         return peerPos;
