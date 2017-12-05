@@ -46,7 +46,7 @@ public class NulsEventHeader extends BaseNulsData {
     }
 
     @Override
-    protected int dataSize() {
+    public int size() {
         return EVENT_HEADER_LENGHT;
     }
 
@@ -77,7 +77,7 @@ public class NulsEventHeader extends BaseNulsData {
     }
 
     @Override
-    protected void parseObject(NulsByteBuffer buffer) {
+    public void parse(NulsByteBuffer buffer) {
         this.moduleId = buffer.readInt16LE();
         this.eventType = buffer.readInt16LE();
         this.extend = buffer.readBytes(EVENT_HEADER_EXTEND_LENGHT);

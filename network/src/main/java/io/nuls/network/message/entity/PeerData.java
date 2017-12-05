@@ -30,7 +30,7 @@ public class PeerData extends BaseNetworkData {
     }
 
     @Override
-    protected int dataSize() {
+    public int size() {
         return 0;
     }
 
@@ -40,7 +40,7 @@ public class PeerData extends BaseNetworkData {
     }
 
     @Override
-    protected void parseObject(NulsByteBuffer byteBuffer) {
+    public void parse(NulsByteBuffer byteBuffer) {
 
     }
 

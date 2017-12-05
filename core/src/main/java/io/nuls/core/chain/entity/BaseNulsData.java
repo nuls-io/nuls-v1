@@ -40,17 +40,7 @@ public abstract class BaseNulsData implements Serializable {
     protected void registerValidator(NulsDataValidator<? extends BaseNulsData> validator) {
         this.validatorChain.addValidator(validator);
     }
-    public final int size(){
-        int size = 0;
-        size += version.size();
-        size += this.dataSize();
-        return size;
-    }
-    /**
-     * the length of the object itself
-     * @return
-     */
-    protected abstract int dataSize();
+    public abstract int size();
 
     /**
      * First, serialize the version field
@@ -63,7 +53,6 @@ public abstract class BaseNulsData implements Serializable {
         try {
             bos = new UnsafeByteArrayOutputStream(size());
             NulsOutputStreamBuffer buffer = new NulsOutputStreamBuffer(bos);
-            buffer.writeShort(version.getVersion());
             serializeToStream(buffer);
             return bos.toByteArray();
         } finally {
@@ -84,15 +73,7 @@ public abstract class BaseNulsData implements Serializable {
      */
     public abstract void serializeToStream(NulsOutputStreamBuffer stream) throws IOException;
 
-    public final void parse(NulsByteBuffer byteBuffer){
-        this.version = new NulsVersion(byteBuffer.readShort());
-        this.parse(byteBuffer);
-    }
-    /**
-     * bytes to object
-     * @param byteBuffer
-     */
-    protected abstract void parseObject(NulsByteBuffer byteBuffer);
+    public abstract void parse(NulsByteBuffer byteBuffer);
 
     /**
      * @throws NulsException

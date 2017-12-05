@@ -18,7 +18,7 @@ public class ConsensusAccount extends BaseNulsData {
     private byte[] extend;
 
     @Override
-    protected int dataSize() {
+    public int size() {
         int size = 0;
         size += address.getHash160().length;
         size++;
@@ -34,7 +34,7 @@ public class ConsensusAccount extends BaseNulsData {
     }
 
     @Override
-    protected void parseObject(NulsByteBuffer byteBuffer) {
+    public void parse(NulsByteBuffer byteBuffer) {
         this.address = new Address(byteBuffer.readByLengthByte());
     }
 

@@ -43,7 +43,7 @@ public class Transaction extends BaseNulsData {
     protected byte[] remark;
 
     @Override
-    protected int dataSize() {
+    public int size() {
         int size = 0;
         size += VarInt.sizeOf(type);
         size += VarInt.sizeOf(time);
@@ -66,7 +66,7 @@ public class Transaction extends BaseNulsData {
     }
 
     @Override
-    protected void parseObject(NulsByteBuffer byteBuffer) {
+    public void parse(NulsByteBuffer byteBuffer) {
         type = (int) byteBuffer.readVarInt();
         time = byteBuffer.readVarInt();
 

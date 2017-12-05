@@ -19,8 +19,8 @@ public class GetBlockTransaction extends AbstractConsensusTransaction {
     }
 
     @Override
-    protected int dataSize() {
-        int size = super.dataSize();
+    public int size() {
+        int size = super.size();
         size += VarInt.sizeOf(height);
         return size;
     }
@@ -32,8 +32,8 @@ public class GetBlockTransaction extends AbstractConsensusTransaction {
     }
 
     @Override
-    protected void parseObject(NulsByteBuffer byteBuffer) {
-        super.parseObject(byteBuffer);
+    public void parse(NulsByteBuffer byteBuffer) {
+        super.parse(byteBuffer);
         this.height = byteBuffer.readVarInt();
     }
 

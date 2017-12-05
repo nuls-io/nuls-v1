@@ -34,8 +34,8 @@ public class Block extends BlockHeader {
 
 
     @Override
-    protected int dataSize() {
-        int size = super.dataSize();
+    public int size() {
+        int size = super.size();
         for (Transaction tx : txs) {
             size += tx.size();
         }
@@ -51,8 +51,8 @@ public class Block extends BlockHeader {
     }
 
     @Override
-    protected void parseObject(NulsByteBuffer byteBuffer) {
-        super.parseObject(byteBuffer);
+    public void parse(NulsByteBuffer byteBuffer) {
+        super.parse(byteBuffer);
         while(byteBuffer.isFinished()){
             //todo
         }

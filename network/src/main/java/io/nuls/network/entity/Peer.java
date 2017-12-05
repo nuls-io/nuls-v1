@@ -262,7 +262,7 @@ public class Peer extends BaseNulsData {
     }
 
     @Override
-    protected int dataSize() {
+    public int size() {
         return 0;
     }
 
@@ -272,7 +272,7 @@ public class Peer extends BaseNulsData {
     }
 
     @Override
-    protected void parseObject(NulsByteBuffer buffer) {
+    public void parse(NulsByteBuffer buffer) {
 
     }
 

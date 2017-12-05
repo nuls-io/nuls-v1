@@ -14,7 +14,7 @@ import java.io.IOException;
  * @author vivi
  * @date 2017-11-10
  */
-public class NulsMessageHeader {
+public class NulsMessageHeader extends BaseNulsData{
 
     public static final int MESSAGE_HEADER_SIZE = 20;
     public static final int MESSAGE_HEADER_EXTEND_SIZE = 9;
@@ -74,28 +74,12 @@ public class NulsMessageHeader {
         parse(buffer);
     }
 
-    protected int size() {
+    @Override
+    public int size() {
         return MESSAGE_HEADER_SIZE;
     }
 
-    public final byte[] serialize() throws IOException {
-        ByteArrayOutputStream bos = null;
-        try {
-            bos = new UnsafeByteArrayOutputStream(size());
-            NulsOutputStreamBuffer buffer = new NulsOutputStreamBuffer(bos);
-            serializeToStream(buffer);
-            return bos.toByteArray();
-        } finally {
-            if (bos != null) {
-                try {
-                    bos.close();
-                } catch (IOException e) {
-                    throw e;
-                }
-            }
-        }
-    }
-
+    @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         byte[] header = new byte[MESSAGE_HEADER_SIZE];
         Utils.int32ToByteArrayLE(magicNumber, header, 0);
@@ -106,6 +90,7 @@ public class NulsMessageHeader {
         stream.write(header);
     }
 
+    @Override
     public void parse(NulsByteBuffer byteBuffer) {
         this.magicNumber = byteBuffer.readInt32LE();
         this.length = byteBuffer.readInt32LE();

@@ -32,7 +32,7 @@ public class UtxoData extends BaseNulsData{
     }
 
     @Override
-    protected int dataSize() {
+    public int size() {
         //todo
         return 0;
     }
@@ -44,7 +44,7 @@ public class UtxoData extends BaseNulsData{
     }
 
     @Override
-    protected void parseObject(NulsByteBuffer byteBuffer) {
+    public void parse(NulsByteBuffer byteBuffer) {
         //todo
 
     }

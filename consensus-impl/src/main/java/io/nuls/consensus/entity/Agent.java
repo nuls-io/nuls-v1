@@ -64,7 +64,7 @@ public class Agent extends BaseNulsData {
     }
 
     @Override
-    protected int dataSize() {
+    public int size() {
         int size = 0;
         try {
             size += address.getBytes(NulsContext.DEFAULT_ENCODING).length;
@@ -93,7 +93,7 @@ public class Agent extends BaseNulsData {
     }
 
     @Override
-    protected void parseObject(NulsByteBuffer byteBuffer) {
+    public void parse(NulsByteBuffer byteBuffer) {
         this.address = byteBuffer.readString();
         this.deposit = byteBuffer.readDouble();
         this.delegateAddress = byteBuffer.readString();

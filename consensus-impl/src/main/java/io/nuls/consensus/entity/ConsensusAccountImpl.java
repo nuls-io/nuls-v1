@@ -26,8 +26,8 @@ public class ConsensusAccountImpl extends ConsensusAccount {
 
 
     @Override
-    protected int dataSize() {
-        int size = super.dataSize();
+    public int size() {
+        int size = super.size();
         size += VarInt.sizeOf(time);
         size += Utils.double2Bytes(deposit).length;
         size += agentAddress.getHash160().length;
@@ -43,8 +43,8 @@ public class ConsensusAccountImpl extends ConsensusAccount {
     }
 
     @Override
-    protected void parseObject(NulsByteBuffer byteBuffer) {
-        super.parseObject(byteBuffer);
+    public void parse(NulsByteBuffer byteBuffer) {
+        super.parse(byteBuffer);
         this.time = byteBuffer.readVarInt();
         this.deposit = byteBuffer.readDouble();
         this.agentAddress = new Address(byteBuffer.readByLengthByte());

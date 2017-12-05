@@ -14,7 +14,7 @@ import java.io.OutputStream;
 public class NulsNodeInfoData extends BaseNulsData {
 
     @Override
-    protected int dataSize() {
+    public int size() {
         //todo
         return 1;
     }
@@ -25,7 +25,7 @@ public class NulsNodeInfoData extends BaseNulsData {
     }
 
     @Override
-    protected void parseObject(NulsByteBuffer byteBuffer) {
+    public void parse(NulsByteBuffer byteBuffer) {
         //todo
         return;
     }
