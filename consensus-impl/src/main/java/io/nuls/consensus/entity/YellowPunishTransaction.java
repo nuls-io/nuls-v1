@@ -1,6 +1,7 @@
 package io.nuls.consensus.entity;
 
 import io.nuls.consensus.constant.POCConsensusConstant;
+import io.nuls.consensus.tx.AbstractConsensusTransaction;
 
 /**
  * @author Niels

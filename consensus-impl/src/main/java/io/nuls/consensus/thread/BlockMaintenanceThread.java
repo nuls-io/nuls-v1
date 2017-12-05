@@ -2,6 +2,7 @@ package io.nuls.consensus.thread;
 
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
+import io.nuls.core.utils.log.Log;
 
 /**
  *
@@ -31,11 +32,22 @@ public class BlockMaintenanceThread implements Runnable {
     }
 
     private void syncBlock() {
+        while(true){
+            try {
+                Thread.sleep(Integer.MAX_VALUE);
+                //todo impontant
+
+
+
+            } catch (Exception e) {
+                Log.error(e);
+            }
+        }
     }
 
     private void checkGenesisBlock() {
         Block genesisBlock = this.blockService.getGengsisBlock();
-
+        //todo
 
     }
 }

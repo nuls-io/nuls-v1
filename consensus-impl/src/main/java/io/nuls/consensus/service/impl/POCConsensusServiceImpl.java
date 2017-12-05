@@ -3,10 +3,9 @@ package io.nuls.consensus.service.impl;
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
-import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.entity.Agent;
 import io.nuls.consensus.entity.ConsensusAccount;
-import io.nuls.consensus.entity.ConsensusInfo;
+import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.consensus.service.intf.ConsensusService;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
@@ -34,35 +33,6 @@ public class POCConsensusServiceImpl implements ConsensusService {
         //todo e
     }
 
-    public void joinTheConsensus(String address, String password, double amount) {
-        this.joinTheConsensus(address, password, amount, null);
-    }
-
-    public void joinTheConsensus(String password, double amount) {
-        Account localAccount = this.accountService.getLocalAccount();
-        if (null == localAccount) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "Please specify the account address");
-        }
-        this.joinTheConsensus(localAccount, password, amount, null);
-    }
-
-    @Override
-    public void joinTheConsensus(String address, String password, double amount, String agent) {
-        Account account = this.accountService.getAccount(address);
-        if (null == account) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "The account is not exist,address:" + address);
-        }
-        this.joinTheConsensus(account, password, amount, agent);
-    }
-
-    public void joinTheConsensus(String password, double amount, String agent) {
-        Account localAccount = this.accountService.getLocalAccount();
-        if (null == localAccount) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "Please specify the account address");
-        }
-        this.joinTheConsensus(localAccount, password, amount, agent);
-    }
-
     private void joinTheConsensus(Account account, String password, double amount, String agent) {
         //todo
         //check password
@@ -76,6 +46,7 @@ public class POCConsensusServiceImpl implements ConsensusService {
         //broadcast
         //change consensus status in cache
     }
+
 
     @Override
     public void exitTheConsensus(Address address, String password) {
@@ -93,14 +64,43 @@ public class POCConsensusServiceImpl implements ConsensusService {
     }
 
     @Override
-    public ConsensusStatusEnum getConsensusStatus() {
+    public ConsensusStatusInfo getConsensusInfo() {
         //todo
         return null;
     }
 
     @Override
-    public ConsensusInfo getConsensusInfo() {
-        //todo
-        return null;
+    public void joinTheConsensus(String address, String password,Object... params) {
+        final int paramsLength = 3;
+        Account account = this.accountService.getAccount(address);
+        if (null == account) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "The account is not exist,address:" + address);
+        }
+        if(params ==null||params.length<2){
+            throw new NulsRuntimeException(ErrorCode.NULL_PARAMETER );
+        }
+        double deposit = (double) params[0];
+        String agentAddress = (String) params[1];
+        if(params.length>=paramsLength){
+            Agent agent = new Agent();
+            agent.setAddress(address);
+            agent.setDelegateAddress(agentAddress);
+            agent.setDeposit(deposit);
+            agent.setCommissionRate((Double) params[2]);
+            if(params.length>paramsLength){
+                agent.setIntroduction((String) params[3]);
+            }
+            this.registerAgent(agent,password);
+            return;
+        }
+        this.joinTheConsensus(account, password, deposit, agentAddress);
+    }
+
+    public void joinTheConsensus(String password, double amount, String agent) {
+        Account localAccount = this.accountService.getLocalAccount();
+        if (null == localAccount) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "Please specify the account address");
+        }
+        this.joinTheConsensus(localAccount, password, amount, agent);
     }
 }

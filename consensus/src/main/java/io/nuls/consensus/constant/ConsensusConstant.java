@@ -5,9 +5,6 @@ package io.nuls.consensus.constant;
  * @date 2017/12/4
  */
 public interface ConsensusConstant {
-
-
-
     int TX_TYPE_BLOCK = 1;
     int TX_TYPE_BLOCK_HEADER = 2;
     int TX_TYPE_GET_BLOCK = 3;
