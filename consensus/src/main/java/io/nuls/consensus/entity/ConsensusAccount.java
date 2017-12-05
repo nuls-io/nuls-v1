@@ -6,7 +6,6 @@ import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * @author Niels
@@ -16,13 +15,16 @@ public class ConsensusAccount extends BaseNulsData {
 
     private Address address;
 
-    private Map<String,Object> extend;
-
+    private byte[] extend;
 
     @Override
     protected int dataSize() {
         int size = 0;
         size += address.getHash160().length;
+        size++;
+        if (null != extend) {
+            size += extend.length + 1;
+        }
         return size;
     }
 
