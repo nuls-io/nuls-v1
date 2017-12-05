@@ -1,7 +1,6 @@
 package io.nuls.consensus.service.intf;
 
 import io.nuls.account.entity.Address;
-import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.entity.ConsensusAccount;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
 
