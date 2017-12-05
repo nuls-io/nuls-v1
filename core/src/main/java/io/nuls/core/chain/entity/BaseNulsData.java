@@ -73,7 +73,6 @@ public abstract class BaseNulsData implements Serializable {
                 } catch (IOException e) {
                     throw e;
                 }
-
             }
         }
     }

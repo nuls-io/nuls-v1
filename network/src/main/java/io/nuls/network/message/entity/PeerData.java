@@ -1,6 +1,7 @@
 package io.nuls.network.message.entity;
 
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Peer;
 import io.nuls.network.message.BaseNetworkData;
@@ -29,25 +30,20 @@ public class PeerData extends BaseNetworkData {
     }
 
     @Override
-    public int size() {
-        int s = 0;
-        s += NetworkDataHeader.NETWORK_HEADER_SIZE;
-        s += 2;    //version.length
-
-        s += 1;    //peers.size();
-
+    protected int dataSize() {
         return 0;
     }
 
     @Override
-    public void serializeToStream(OutputStream stream) throws IOException {
+    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
 
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    protected void parseObject(NulsByteBuffer byteBuffer) {
 
     }
+
 
     public List<Peer> getPeers() {
         return peers;
