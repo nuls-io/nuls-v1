@@ -78,6 +78,7 @@ public class PeerDiscoverHandler implements Runnable {
             PeerGroup outPeers = peersManager.getPeerGroup(NetworkConstant.NETWORK_PEER_OUT_GROUP);
             for (Peer peer : outPeers.getPeers()) {
                 if (peer.getStatus() == Peer.CLOSE) {
+                    System.out.println("------------remove peer:" + peer.getIp() + ", port:" + peer.getPort());
                     peersManager.removePeer(peer.getHash());
                 }
             }

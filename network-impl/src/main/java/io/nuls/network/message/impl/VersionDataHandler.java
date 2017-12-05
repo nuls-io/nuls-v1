@@ -40,7 +40,7 @@ public class VersionDataHandler implements NetWorkDataHandler {
         peer.setStatus(Peer.HANDSHAKE);
         peer.setLastTime(TimeService.currentTimeMillis());
 
-        getPeerDao().saveChange(PeerTransfer.transferToPeerPo(peer));
+      //  getPeerDao().saveChange(PeerTransfer.transferToPeerPo(peer));
         return null;
     }
 

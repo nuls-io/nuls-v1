@@ -17,6 +17,7 @@ import io.nuls.network.module.AbstractNetworkModule;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author vivi
@@ -40,9 +41,12 @@ public class PeersManager {
 
     private PeerDao peerDao;
 
+    private ReentrantLock lock;
+
     public PeersManager(AbstractNetworkModule module, AbstractNetworkParam network, PeerDao peerDao) {
         this.networkModule = module;
         this.peerDao = peerDao;
+        lock = new ReentrantLock();
         // the default peerGroups
         PeerGroup inPeers = new PeerGroup(NetworkConstant.NETWORK_PEER_IN_GROUP);
         PeerGroup outPeers = new PeerGroup(NetworkConstant.NETWORK_PEER_OUT_GROUP);
@@ -64,7 +68,7 @@ public class PeersManager {
      * find peers from connetcted peers
      */
     public void start() {
-        List<Peer> peers =  peers = discovery.getSeedPeers();
+        List<Peer> peers = peers = discovery.getSeedPeers();
 
         if (peers == null || peers.size() == 0) {
             peers = discovery.getSeedPeers();
@@ -79,36 +83,53 @@ public class PeersManager {
         ThreadManager.createSingleThreadAndRun(AbstractNetworkModule.networkModuleId, "peerDiscovery", this.discovery);
     }
 
-
     public void addPeer(Peer peer) {
-        if (!peers.containsKey(peer.getHash().toString())) {
-            peers.put(peer.getHash(), peer);
-            connectionManager.openConnection(peer);
+        lock.lock();
+        try {
+            if (!peers.containsKey(peer.getHash().toString())) {
+                peers.put(peer.getHash(), peer);
+                if (!peer.isHandShake() && peer.getType() == Peer.OUT) {
+                    connectionManager.openConnection(peer);
+                }
+            }
+        } finally {
+            lock.unlock();
         }
+
     }
 
 
     public void addPeerToGroup(String groupName, Peer peer) {
-        if (!peerGroups.containsKey(groupName)) {
-            throw new NulsRuntimeException(ErrorCode.PEER_GROUP_NOT_FOUND);
-        }
+        lock.lock();
+        try {
+            if (!peerGroups.containsKey(groupName)) {
+                throw new NulsRuntimeException(ErrorCode.PEER_GROUP_NOT_FOUND);
+            }
 
-        addPeer(peer);
-        peerGroups.get(groupName).addPeer(peer);
+            addPeer(peer);
+            peerGroups.get(groupName).addPeer(peer);
+        } finally {
+            lock.unlock();
+        }
     }
 
 
     public void removePeer(String peerHash) {
-        if (peers.containsKey(peerHash)) {
-            for (PeerGroup group : peerGroups.values()) {
-                for (Peer peer : group.getPeers()) {
-                    if (peer.getHash().equals(peerHash)) {
-                        group.removePeer(peer);
-                        break;
+        lock.lock();
+        try {
+            if (peers.containsKey(peerHash)) {
+                for (PeerGroup group : peerGroups.values()) {
+                    for (Peer peer : group.getPeers()) {
+                        if (peer.getHash().equals(peerHash)) {
+                            group.removePeer(peer);
+                            break;
+                        }
                     }
                 }
+                peers.remove(peerHash);
             }
-            peers.remove(peerHash);
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -124,18 +145,21 @@ public class PeersManager {
     }
 
     public void destroyPeerGroup(String groupName) {
+        lock.lock();
+        try {
+            if (!peerGroups.containsKey(groupName)) {
+                return;
+            }
 
-        if (!peerGroups.containsKey(groupName)) {
-            return;
+            PeerGroup group = peerGroups.get(groupName);
+            for (Peer p : group.getPeers()) {
+                p.destroy();
+                group.removePeer(p);
+            }
+            peerGroups.remove(groupName);
+        } finally {
+            lock.unlock();
         }
-
-        PeerGroup group = peerGroups.get(groupName);
-        for (Peer p : group.getPeers()) {
-            p.destroy();
-            group.removePeer(p);
-        }
-
-        peerGroups.remove(groupName);
     }
 
     /**
