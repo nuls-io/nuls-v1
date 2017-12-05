@@ -1,20 +1,20 @@
 package io.nuls.core.mesasge;
 
 import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.crypto.UnsafeByteArrayOutputStream;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Serializable;
 
 /**
  * @author vivi
  * @date 2017-11-10
  */
-public class NulsMessageHeader extends BaseNulsData {
+public class NulsMessageHeader {
 
     public static final int MESSAGE_HEADER_SIZE = 20;
     public static final int MESSAGE_HEADER_EXTEND_SIZE = 9;
@@ -74,12 +74,28 @@ public class NulsMessageHeader extends BaseNulsData {
         parse(buffer);
     }
 
-    @Override
-    protected int dataSize() {
+    protected int size() {
         return MESSAGE_HEADER_SIZE;
     }
 
-    @Override
+    public final byte[] serialize() throws IOException {
+        ByteArrayOutputStream bos = null;
+        try {
+            bos = new UnsafeByteArrayOutputStream(size());
+            NulsOutputStreamBuffer buffer = new NulsOutputStreamBuffer(bos);
+            serializeToStream(buffer);
+            return bos.toByteArray();
+        } finally {
+            if (bos != null) {
+                try {
+                    bos.close();
+                } catch (IOException e) {
+                    throw e;
+                }
+            }
+        }
+    }
+
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         byte[] header = new byte[MESSAGE_HEADER_SIZE];
         Utils.int32ToByteArrayLE(magicNumber, header, 0);
@@ -90,8 +106,7 @@ public class NulsMessageHeader extends BaseNulsData {
         stream.write(header);
     }
 
-    @Override
-    protected void parseObject(NulsByteBuffer byteBuffer) {
+    public void parse(NulsByteBuffer byteBuffer) {
         this.magicNumber = byteBuffer.readInt32LE();
         this.length = byteBuffer.readInt32LE();
         this.headType = byteBuffer.readShort();

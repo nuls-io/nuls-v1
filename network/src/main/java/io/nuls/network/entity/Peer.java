@@ -284,6 +284,10 @@ public class Peer extends BaseNulsData {
 
     }
 
+    public boolean isHandShake() {
+        return this.status == Peer.HANDSHAKE;
+    }
+
     @Override
     public boolean equals(Object o) {
         Peer other = (Peer) o;
