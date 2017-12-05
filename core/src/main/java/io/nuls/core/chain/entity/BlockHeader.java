@@ -11,9 +11,6 @@ import java.io.IOException;
  */
 public class BlockHeader extends BaseNulsData {
 
-    public static final short OWN_MAIN_VERSION = 1;
-    public static final short OWN_SUB_VERSION = 0001;
-
     protected NulsDigestData hash;
     protected NulsDigestData preHash;
 
@@ -33,18 +30,13 @@ public class BlockHeader extends BaseNulsData {
 
     private NulsSignData sign;
 
-    public BlockHeader() {
-        super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
-    }
 
     public BlockHeader(long height, long time) {
-        super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.height = height;
         this.time = time;
     }
 
     public BlockHeader(long height, long time, NulsDigestData preHash) {
-        super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.height = height;
         this.time = time;
         this.preHash = preHash;

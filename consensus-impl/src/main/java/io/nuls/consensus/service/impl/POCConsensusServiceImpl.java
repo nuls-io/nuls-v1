@@ -29,7 +29,7 @@ public class POCConsensusServiceImpl implements ConsensusService {
         return INSTANCE;
     }
 
-    public void registerAgent(Agent agent, String password){
+    private void registerAgent(Agent agent, String password){
         //todo e
     }
 
