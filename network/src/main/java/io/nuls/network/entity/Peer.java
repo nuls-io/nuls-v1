@@ -201,6 +201,7 @@ public class Peer extends BaseNulsData {
             message.verify();
             processorService.send(message.getData());
         } else {
+            System.out.println("------------reciecegdsagadg ");
             byte[] networkHeader = new byte[NetworkDataHeader.NETWORK_HEADER_SIZE];
             System.arraycopy(message.getData(), 0, networkHeader, 0, NetworkDataHeader.NETWORK_HEADER_SIZE);
             NetworkDataHeader header = new NetworkDataHeader(new NulsByteBuffer(networkHeader));
@@ -255,7 +256,7 @@ public class Peer extends BaseNulsData {
                 this.failCount = 0;
             }
             this.failCount++;
-            peerDao.saveChange(PeerTransfer.transferToPeerPo(this));
+        //    peerDao.saveChange(PeerTransfer.transferToPeerPo(this));
         } finally {
             lock.unlock();
         }

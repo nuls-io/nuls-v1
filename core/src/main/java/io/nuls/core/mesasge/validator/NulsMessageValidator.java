@@ -11,10 +11,9 @@ import io.nuls.core.validate.ValidateResult;
  * @author Niels
  * @date 2017/12/4
  */
-public class NulsMessageValidator implements NulsDataValidator<NulsMessage> {
-    @Override
+public class NulsMessageValidator {
     public ValidateResult validate(NulsMessage data) {
-        if (data.getHeader() == null ||data.getData() == null) {
+        if (data.getHeader() == null || data.getData() == null) {
             return ValidateResult.getFaildResult(ErrorCode.NET_MESSAGE_ERROR);
         }
 

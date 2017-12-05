@@ -64,7 +64,7 @@ public class PeersManager {
      * find peers from connetcted peers
      */
     public void start() {
-        List<Peer> peers = discovery.getLocalPeers(10);
+        List<Peer> peers =  peers = discovery.getSeedPeers();
 
         if (peers == null || peers.size() == 0) {
             peers = discovery.getSeedPeers();

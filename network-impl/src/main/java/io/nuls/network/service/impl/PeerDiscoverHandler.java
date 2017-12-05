@@ -92,22 +92,29 @@ public class PeerDiscoverHandler implements Runnable {
                     peersManager.addPeerToGroup(NetworkConstant.NETWORK_PEER_OUT_GROUP, newPeer);
                 }
             } else if (outPeers.size() < network.maxOutCount()) {
-                List<Peer> peers = getLocalPeers(network.maxOutCount() - outPeers.size());
-                if (peers == null || peers.size() == 0) {
-                    // find other peer from connected peers
-                    //findOtherPeer(network.maxOutCount() - outPeers.size());
-                } else {
-                    for (Peer newPeer : peers) {
-                        if (outPeers.getPeers().contains(newPeer)) {
-                            continue;
-                        }
-                        peersManager.addPeerToGroup(NetworkConstant.NETWORK_PEER_OUT_GROUP, newPeer);
-                    }
-                }
+//                List<Peer> peers = getLocalPeers(network.maxOutCount() - outPeers.size());
+//                if (peers == null || peers.size() == 0) {
+//                    // find other peer from connected peers
+//                    //findOtherPeer(network.maxOutCount() - outPeers.size());
+//                } else {
+//                    for (Peer newPeer : peers) {
+//                        if (outPeers.getPeers().contains(newPeer)) {
+//                            continue;
+//                        }
+//                        peersManager.addPeerToGroup(NetworkConstant.NETWORK_PEER_OUT_GROUP, newPeer);
+//                    }
+//                }
             }
 
             for (Peer peer : outPeers.getPeers()) {
-                System.out.println("--------ip:" + peer.getIp() + ",port:" + peer.getPort() + ",status:" + peer.getStatus());
+                System.out.println("------out--ip:" + peer.getIp() + ",port:" + peer.getPort() + ",status:" + peer.getStatus());
+            }
+
+            PeerGroup inPeers = peersManager.getPeerGroup(NetworkConstant.NETWORK_PEER_IN_GROUP);
+            if(inPeers != null) {
+                for (Peer peer : outPeers.getPeers()) {
+                    System.out.println("-----in---ip:" + peer.getIp() + ",port:" + peer.getPort() + ",status:" + peer.getStatus());
+                }
             }
 
             try {
