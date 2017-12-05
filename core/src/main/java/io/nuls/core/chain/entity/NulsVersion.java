@@ -70,4 +70,7 @@ public class NulsVersion {
         return getMainVersion() + "." + getSubVersion();
     }
 
+    public int size() {
+        return 2;
+    }
 }

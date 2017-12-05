@@ -4,6 +4,7 @@ import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.validate.validator.tx.TxMaxSizeValidator;
 import io.nuls.core.validate.validator.tx.TxRemarkValidator;
 import io.nuls.core.validate.validator.tx.TxSignValidator;
@@ -13,54 +14,69 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * @author win10
+ * @author Niels
  * @date 2017/10/30
  */
 public class Transaction extends BaseNulsData {
-    public Transaction() {
+    public Transaction(int type) {
+        this.dataType = NulsDataType.TRANSACTION;
         this.time = TimeService.currentTimeMillis();
         this.registerValidator(new TxMaxSizeValidator());
         this.registerValidator(new TxRemarkValidator());
         this.registerValidator(new TxTypeValidator());
         this.registerValidator(new TxSignValidator());
+        this.type = type;
     }
 
-    //tx type
-    protected int type;
-    //tx hash
-    protected Sha256Hash hash;
-    //current time (ms)
+    /**
+     * tx type
+     */
+    private int type;
+    private NulsDigestData hash;
+    private NulsSignData sign;
+    /**
+     * current time (ms)
+     *
+     * @return
+     */
     protected long time;
     protected byte[] remark;
 
     @Override
-    public int size() {
+    protected int dataSize() {
         int size = 0;
-        //size += version;
         size += VarInt.sizeOf(type);
-        //todo
-
+        size += VarInt.sizeOf(time);
+        size += hash.size();
+        size += sign.size();
+        size += Sha256Hash.LENGTH;
+        if (null != remark) {
+            size += remark.length;
+        }
         return size;
     }
 
     @Override
-    public void serializeToStream(OutputStream stream) throws IOException {
-        //todo
-
+    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeVarInt(type);
+        stream.writeVarInt(time);
+        stream.write(hash.serialize());
+        stream.write(sign.serialize());
+        stream.writeBytesWithLength(remark);
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
-        //todo
+    protected void parseObject(NulsByteBuffer byteBuffer) {
+        type = (int) byteBuffer.readVarInt();
+        time = byteBuffer.readVarInt();
 
-    }
+        hash = new NulsDigestData();
+        hash.parse(byteBuffer);
 
-    public Sha256Hash getHash() {
-        return hash;
-    }
+        sign = new NulsSignData();
+        sign.parse(byteBuffer);
 
-    public void setHash(Sha256Hash hash) {
-        this.hash = hash;
+        this.remark = byteBuffer.readByLengthByte();
     }
 
     public long getTime() {
@@ -73,10 +89,6 @@ public class Transaction extends BaseNulsData {
 
     public int getType() {
         return type;
-    }
-
-    public void setType(int type) {
-        this.type = type;
     }
 
     public byte[] getRemark() {

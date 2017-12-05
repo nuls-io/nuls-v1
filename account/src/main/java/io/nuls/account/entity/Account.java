@@ -1,10 +1,11 @@
 package io.nuls.account.entity;
 
 import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.ECKey;
-import io.nuls.core.crypto.VarInt;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 
@@ -80,7 +81,7 @@ public class Account extends BaseNulsData {
     }
 
     @Override
-    public int size() {
+    protected int dataSize() {
         int s = 0;
         //s += VarInt.sizeOf(version);
         if (!StringUtils.isBlank(id)) {
@@ -119,32 +120,31 @@ public class Account extends BaseNulsData {
     }
 
     @Override
-    public void serializeToStream(OutputStream stream) throws IOException {
+    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
        // stream.write(new VarInt(version).encode());
-        if(StringUtils.isNotBlank(id)){
-            this.writeBytesWithLength(stream, id.getBytes(NulsContext.DEFAULT_ENCODING));
-        }else {
-            stream.write(0);
-        }
-        if(StringUtils.isNotBlank(alias)){
-            this.writeBytesWithLength(stream, alias.getBytes(NulsContext.DEFAULT_ENCODING));
-        }else {
-            stream.write(0);
-        }
-        if (null != address && null != address.getHash160()) {
-            stream.write(address.getHash160());
-        }
-        this.writeBytesWithLength(stream, priSeed);
-        stream.write(status);
-        this.writeBytesWithLength(stream, sign);
-        this.writeBytesWithLength(stream, pubKey);
-        this.writeBytesWithLength(stream, extend);
+//        if(StringUtils.isNotBlank(id)){
+//            this.writeBytesWithLength(stream, id.getBytes(NulsContext.DEFAULT_ENCODING));
+//        }else {
+//            stream.write(0);
+//        }
+//        if(StringUtils.isNotBlank(alias)){
+//            this.writeBytesWithLength(stream, alias.getBytes(NulsContext.DEFAULT_ENCODING));
+//        }else {
+//            stream.write(0);
+//        }
+//        if (null != address && null != address.getHash160()) {
+//            stream.write(address.getHash160());
+//        }
+//        this.writeBytesWithLength(stream, priSeed);
+//        stream.write(status);
+//        this.writeBytesWithLength(stream, sign);
+//        this.writeBytesWithLength(stream, pubKey);
+//        this.writeBytesWithLength(stream, extend);
 
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
-     //   version = (short) byteBuffer.readUint32();
+    protected void parseObject(NulsByteBuffer byteBuffer) {
         id = new String(byteBuffer.readByLengthByte());
         alias = new String(byteBuffer.readByLengthByte());
         byte[] hash160 = byteBuffer.readBytes(Address.LENGTH);

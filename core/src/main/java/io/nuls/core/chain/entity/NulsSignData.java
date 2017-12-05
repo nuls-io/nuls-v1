@@ -1,6 +1,7 @@
 package io.nuls.core.chain.entity;
 
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -25,17 +26,17 @@ public class NulsSignData extends BaseNulsData{
 
 
     @Override
-    public int size() {
+    protected int dataSize() {
         return 0;
     }
 
     @Override
-    public void serializeToStream(OutputStream stream) throws IOException {
+    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
 
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    protected void parseObject(NulsByteBuffer byteBuffer) {
 
     }
 

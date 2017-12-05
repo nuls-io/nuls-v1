@@ -2,6 +2,7 @@ package io.nuls.core.event;
 
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -25,7 +26,7 @@ public abstract class BaseNulsEvent<T extends BaseNulsData> extends BaseNulsData
 
 
     @Override
-    public final int size() {
+    public final int dataSize() {
         if (eventBody != null) {
             return header.size() + eventBody.size();
         } else {
@@ -34,7 +35,7 @@ public abstract class BaseNulsEvent<T extends BaseNulsData> extends BaseNulsData
     }
 
     @Override
-    public final void serializeToStream(OutputStream stream) throws IOException {
+    public final void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         this.header.serializeToStream(stream);
         if (eventBody != null) {
             this.eventBody.serializeToStream(stream);
@@ -42,7 +43,7 @@ public abstract class BaseNulsEvent<T extends BaseNulsData> extends BaseNulsData
     }
 
     @Override
-    public final void parse(NulsByteBuffer byteBuffer) {
+    public final void parseObject(NulsByteBuffer byteBuffer) {
         this.header = new NulsEventHeader();
         this.header.parse(byteBuffer);
         this.eventBody = parseEventBody(byteBuffer);

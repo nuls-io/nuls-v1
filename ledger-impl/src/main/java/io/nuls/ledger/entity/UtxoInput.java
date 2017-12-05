@@ -6,6 +6,7 @@ import io.nuls.core.crypto.VarInt;
 import io.nuls.core.crypto.script.Script;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -47,19 +48,19 @@ public class UtxoInput extends BaseNulsData {
     }
 
     @Override
-    public int size() {
+    protected int dataSize() {
         return 0;
     }
 
     @Override
-    public void serializeToStream(OutputStream stream) throws IOException {
+    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         if (froms == null || froms.size() == 0) {
             stream.write(new VarInt(0).encode());
         } else {
             stream.write(new VarInt(froms.size()).encode());
             for (UtxoOutput from : froms) {
                 stream.write(from.getTxHash().getReversedBytes());
-                Utils.uint32ToByteStreamLE(from.getIndex(), stream);
+                stream.writeShort((short) from.getIndex());
             }
         }
         //length of sign
@@ -69,7 +70,7 @@ public class UtxoInput extends BaseNulsData {
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    protected void parseObject(NulsByteBuffer byteBuffer) {
         if (byteBuffer == null) {
             return;
         }

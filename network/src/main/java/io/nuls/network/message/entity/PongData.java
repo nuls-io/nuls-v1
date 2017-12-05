@@ -1,6 +1,7 @@
 package io.nuls.network.message.entity;
 
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.message.BaseNetworkData;
 
@@ -21,17 +22,20 @@ public class PongData extends BaseNetworkData {
     }
 
     @Override
-    public int size() {
+    protected int dataSize() {
+        //todo
         return 0;
     }
 
     @Override
-    public void serializeToStream(OutputStream stream) throws IOException {
+    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        //todo
 
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    protected void parseObject(NulsByteBuffer byteBuffer) {
+        //todo
 
     }
 

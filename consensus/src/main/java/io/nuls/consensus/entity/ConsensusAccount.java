@@ -1,6 +1,13 @@
 package io.nuls.consensus.entity;
 
 import io.nuls.account.entity.Address;
+import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.crypto.VarInt;
+import io.nuls.core.utils.crypto.Utils;
+import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.io.NulsOutputStreamBuffer;
+
+import java.io.IOException;
 
 /**
  *
@@ -8,45 +15,47 @@ import io.nuls.account.entity.Address;
  * @date 2017/11/7
  *
  */
-//todo 定义共识相关的字段
-public class ConsensusAccount  {
-
-    private long startTime;
-
-    private int startBlockHeight;
-
-    private byte[] applyTxId;
+public class ConsensusAccount extends BaseNulsData {
+    private long time;
 
     private double deposit;
 
-    public Address agent;
+    public Address agentAddress;
 
-    private Address miner;
+    private Address address;
 
-    private double credit;
-
-    public long getStartTime() {
-        return startTime;
+    @Override
+    protected int dataSize() {
+        int size = 0;
+        size += VarInt.sizeOf(time);
+        size += Utils.double2Bytes(deposit).length;
+        size += address.getHash160().length;
+        size += agentAddress.getHash160().length;
+        return size;
     }
 
-    public void setStartTime(long startTime) {
-        this.startTime = startTime;
+    @Override
+    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeVarInt(time);
+        stream.writeDouble(deposit);
+        stream.writeBytesWithLength(address.getHash160());
+        stream.writeBytesWithLength(agentAddress.getHash160());
     }
 
-    public int getStartBlockHeight() {
-        return startBlockHeight;
+    @Override
+    protected void parseObject(NulsByteBuffer byteBuffer) {
+        this.time = byteBuffer.readVarInt();
+        this.deposit = byteBuffer.readDouble();
+        this.address = new Address(byteBuffer.readByLengthByte());
+        this.agentAddress = new Address(byteBuffer.readByLengthByte());
     }
 
-    public void setStartBlockHeight(int startBlockHeight) {
-        this.startBlockHeight = startBlockHeight;
+    public long getTime() {
+        return time;
     }
 
-    public byte[] getApplyTxId() {
-        return applyTxId;
-    }
-
-    public void setApplyTxId(byte[] applyTxId) {
-        this.applyTxId = applyTxId;
+    public void setTime(long time) {
+        this.time = time;
     }
 
     public double getDeposit() {
@@ -57,19 +66,19 @@ public class ConsensusAccount  {
         this.deposit = deposit;
     }
 
-    public Address getMiner() {
-        return miner;
+    public Address getAgentAddress() {
+        return agentAddress;
     }
 
-    public Address getAgent() {
-        return agent;
+    public void setAgentAddress(Address agentAddress) {
+        this.agentAddress = agentAddress;
     }
 
-    public void setAgent(Address agent) {
-        this.agent = agent;
+    public Address getAddress() {
+        return address;
     }
 
-    public void setMiner(Address miner) {
-        miner = miner;
+    public void setAddress(Address address) {
+        this.address = address;
     }
 }

@@ -6,6 +6,7 @@ import io.nuls.core.crypto.VarInt;
 import io.nuls.core.crypto.script.Script;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -38,7 +39,7 @@ public class UtxoOutput extends BaseNulsData{
     }
 
     @Override
-    public int size() {
+    protected int dataSize() {
         int s = 0;
         s += VarInt.sizeOf(value);
         s += VarInt.sizeOf(lockTime);
@@ -47,15 +48,15 @@ public class UtxoOutput extends BaseNulsData{
     }
 
     @Override
-    public void serializeToStream(OutputStream stream) throws IOException {
-        Utils.int64ToByteStreamLE(value, stream);
-        Utils.uint32ToByteStreamLE(lockTime, stream);
+    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeInt64(value);
+        stream.writeInt32((int) lockTime);
         stream.write(new VarInt(scriptBytes.length).encode());
         stream.write(scriptBytes);
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    protected void parseObject(NulsByteBuffer byteBuffer) {
         if(byteBuffer == null ) {
             return;
         }

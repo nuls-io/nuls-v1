@@ -7,4 +7,5 @@ package io.nuls.core.chain.entity;
  */
 public enum NulsDataType {
 
+    TRANSACTION,
 }

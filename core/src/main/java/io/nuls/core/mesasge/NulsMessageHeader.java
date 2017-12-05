@@ -1,8 +1,10 @@
 package io.nuls.core.mesasge;
 
+import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -12,7 +14,7 @@ import java.io.Serializable;
  * @author vivi
  * @date 2017-11-10
  */
-public class NulsMessageHeader implements Serializable {
+public class NulsMessageHeader extends BaseNulsData {
 
     public static final int MESSAGE_HEADER_SIZE = 20;
     public static final int MESSAGE_HEADER_EXTEND_SIZE = 9;
@@ -72,25 +74,24 @@ public class NulsMessageHeader implements Serializable {
         parse(buffer);
     }
 
-    public int size() {
+    @Override
+    protected int dataSize() {
         return MESSAGE_HEADER_SIZE;
     }
 
-    public byte[] serialize() {
+    @Override
+    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         byte[] header = new byte[MESSAGE_HEADER_SIZE];
         Utils.int32ToByteArrayLE(magicNumber, header, 0);
         Utils.int32ToByteArrayLE(length, header, 4);
         Utils.uint16ToByteArrayLE(headType, header, 8);
         header[10] = xor;
         System.arraycopy(extend, 0, header, 11, MESSAGE_HEADER_EXTEND_SIZE);
-        return header;
+        stream.write(header);
     }
 
-    public void serializeToStream(OutputStream stream) throws IOException {
-        stream.write(serialize());
-    }
-
-    public void parse(NulsByteBuffer byteBuffer) {
+    @Override
+    protected void parseObject(NulsByteBuffer byteBuffer) {
         this.magicNumber = byteBuffer.readInt32LE();
         this.length = byteBuffer.readInt32LE();
         this.headType = byteBuffer.readShort();

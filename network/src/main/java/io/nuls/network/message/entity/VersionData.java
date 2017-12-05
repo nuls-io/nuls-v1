@@ -3,8 +3,8 @@ package io.nuls.network.message.entity;
 import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
-import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.network.constant.NetworkConstant;
@@ -12,7 +12,6 @@ import io.nuls.network.message.BaseNetworkData;
 import io.nuls.network.message.NetworkDataHeader;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 
 /**
@@ -47,7 +46,7 @@ public class VersionData extends BaseNetworkData {
     }
 
     @Override
-    public int size() {
+    protected int dataSize() {
         int s = 0;
         s += NetworkDataHeader.NETWORK_HEADER_SIZE;
 
@@ -74,16 +73,16 @@ public class VersionData extends BaseNetworkData {
     }
 
     @Override
-    public void serializeToStream(OutputStream stream) throws IOException {
+    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         networkHeader.serializeToStream(stream);
-        Utils.int16ToByteStreamLE(version.getVersion(), stream);
+        stream.writeShort(version.getVersion());
         stream.write(new VarInt(bestBlockHeight).encode());
-        this.writeBytesWithLength(stream, bestBlockHash);
-        this.writeBytesWithLength(stream, nulsVersion);
+//        this.writeBytesWithLength(stream, bestBlockHash);
+//        this.writeBytesWithLength(stream, nulsVersion);
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    protected void parseObject(NulsByteBuffer byteBuffer) {
         this.networkHeader = new NetworkDataHeader(byteBuffer);
         version = new NulsVersion(byteBuffer.readShort());
         bestBlockHeight = byteBuffer.readVarInt();

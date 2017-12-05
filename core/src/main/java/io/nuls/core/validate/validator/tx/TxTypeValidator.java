@@ -5,7 +5,8 @@ import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 
 /**
- * Created by Niels on 2017/11/17.
+ * @author Niels
+ * @date 2017/11/17
  */
 public class TxTypeValidator implements NulsDataValidator<Transaction> {
     private static final String ERROR_MESSAGE = "The transaction type cannot null!";

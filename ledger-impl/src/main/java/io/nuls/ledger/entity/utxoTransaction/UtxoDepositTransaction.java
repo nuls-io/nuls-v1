@@ -2,6 +2,7 @@ package io.nuls.ledger.entity.utxoTransaction;
 
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.ledger.entity.LockCoinTransaction;
 import io.nuls.ledger.entity.validator.UtxoTxInputsValidator;
 import io.nuls.ledger.entity.validator.UtxoTxOutputsValidator;
@@ -20,17 +21,20 @@ public class UtxoDepositTransaction extends LockCoinTransaction {
     }
 
     @Override
-    public int size() {
+    protected int dataSize() {
+        //todo
         return 0;
     }
 
     @Override
-    public void serializeToStream(OutputStream stream) throws IOException {
+    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        //todo
 
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    protected void parseObject(NulsByteBuffer byteBuffer) {
 
+        //todo
     }
 }

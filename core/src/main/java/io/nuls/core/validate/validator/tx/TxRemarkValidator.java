@@ -8,7 +8,11 @@ import io.nuls.core.validate.ValidateResult;
  * Created by Niels on 2017/11/20.
  */
 public class TxRemarkValidator implements NulsDataValidator<Transaction> {
-    private static final int MAX_SIZE = 100;//100 byte
+    /**
+     * default : 100 byte
+     */
+    private static final int MAX_SIZE = 100;
+
     private static final String ERROR_MESSAGE = "The remark of The transaction is too big!";
 
     @Override

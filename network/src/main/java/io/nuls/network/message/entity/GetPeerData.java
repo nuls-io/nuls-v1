@@ -1,15 +1,13 @@
 package io.nuls.network.message.entity;
 
-import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.crypto.VarInt;
-import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.message.BaseNetworkData;
 import io.nuls.network.message.NetworkDataHeader;
 
 import java.io.IOException;
-import java.io.OutputStream;
 
 /**
  * @author vivi
@@ -37,25 +35,22 @@ public class GetPeerData extends BaseNetworkData {
     }
 
     @Override
-    public int size() {
+    protected int dataSize() {
         int s = 0;
         s += NetworkDataHeader.NETWORK_HEADER_SIZE;
-        s += 2;    //version.length
         s += VarInt.sizeOf(size);
         return s;
     }
 
     @Override
-    public void serializeToStream(OutputStream stream) throws IOException {
+    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         networkHeader.serializeToStream(stream);
-        Utils.int16ToByteStreamLE(version.getVersion(), stream);
         stream.write(new VarInt(size).encode());
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    protected void parseObject(NulsByteBuffer byteBuffer) {
         this.networkHeader = new NetworkDataHeader(byteBuffer);
-        version = new NulsVersion(byteBuffer.readShort());
         size = (int) byteBuffer.readVarInt();
     }
 

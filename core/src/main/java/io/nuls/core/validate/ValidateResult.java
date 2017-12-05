@@ -1,7 +1,11 @@
 package io.nuls.core.validate;
 
+import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.utils.log.Log;
+
 /**
- * Created by Niels on 2017/11/16.
+ * @author Niels
+ * @date 2017/11/16
  */
 public class ValidateResult {
     private boolean seccess;
@@ -34,5 +38,9 @@ public class ValidateResult {
 
     public static ValidateResult getSuccessResult() {
         return new ValidateResult(true, "");
+    }
+
+    public static ValidateResult getFaildResult(ErrorCode errorCode) {
+        return new ValidateResult(false,errorCode.getMsg());
     }
 }
