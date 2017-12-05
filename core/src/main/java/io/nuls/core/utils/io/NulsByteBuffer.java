@@ -159,4 +159,8 @@ public class NulsByteBuffer {
     public double readDouble() {
         return Utils.bytes2Double(this.readByLengthByte());
     }
+
+    public boolean isFinished(){
+        return this.payload.length==cursor;
+    }
 }
