@@ -41,7 +41,7 @@
     </delete>
 
     <delete id="deleteByIp" parameterType="io.nuls.db.entity.PeerPo">
-        delte from peer
+        delete from peer
         where ip = #{ip,jdbcType=VARCHAR} and port = #{port,jdbcType=INTEGER}
     </delete>
 

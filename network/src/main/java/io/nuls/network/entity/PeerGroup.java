@@ -30,7 +30,6 @@ public class PeerGroup {
 
     public void removePeer(Peer p) {
         this.peers.remove(p);
-        //TODO ,delete peer
     }
 
     public int size() {

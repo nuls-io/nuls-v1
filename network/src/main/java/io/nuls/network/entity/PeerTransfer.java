@@ -16,9 +16,10 @@ public class PeerTransfer {
         peer.setIp(po.getIp());
         peer.setPort(po.getPort());
         peer.setLastTime(po.getLastTime());
+        peer.setMagicNumber(po.getMagicNum());
+        peer.setFailCount(po.getFailCount());
         peer.setVersion(new NulsVersion(po.getVersion()));
         peer.setHash(peer.getIp() + peer.getPort());
-        peer.setFailCount(po.getFailCount());
     }
 
 
@@ -28,7 +29,7 @@ public class PeerTransfer {
         po.setIp(peer.getIp());
         po.setPort(peer.getPort());
         po.setLastTime(peer.getLastTime());
-        po.setMagicNum(peer.getNetwork().packetMagic());
+        po.setMagicNum(peer.getMagicNumber());
         po.setVersion(peer.getVersion().getVersion());
         if (po.getLastTime() == null) {
             po.setLastTime(TimeService.currentTimeMillis());

@@ -117,4 +117,16 @@ public class DBModuleTest {
         List<PeerPo> list = peerDao.getRandomPeerPoList(10);
         System.out.println(list.size());
     }
+
+    @Test
+    public void testDeletePeer() {
+        PeerPo po = new PeerPo();
+        po.setIp("192.168.1.166");
+        po.setPort(1234);
+        po.setMagicNum(123456789);
+        po.setVersion((short) 1001);
+        po.setFailCount(10);
+        peerDao.saveChange(po);
+
+    }
 }
