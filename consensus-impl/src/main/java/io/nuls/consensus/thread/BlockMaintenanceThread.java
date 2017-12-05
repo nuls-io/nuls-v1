@@ -46,7 +46,7 @@ public class BlockMaintenanceThread implements Runnable {
     }
 
     private void checkGenesisBlock() {
-        Block genesisBlock = this.blockService.getGengsisBlock();
+//        Block genesisBlock = this.blockService.getGengsisBlock();
         //todo
 
     }

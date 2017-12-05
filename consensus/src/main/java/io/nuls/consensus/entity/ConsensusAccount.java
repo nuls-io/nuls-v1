@@ -13,8 +13,9 @@ import java.io.IOException;
  */
 public class ConsensusAccount extends BaseNulsData {
 
-
     private Address address;
+
+
 
     @Override
     protected int dataSize() {

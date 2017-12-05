@@ -163,4 +163,8 @@ public class NulsByteBuffer {
     public boolean isFinished(){
         return this.payload.length==cursor;
     }
+
+    public byte[] getPayload() {
+        return payload;
+    }
 }

@@ -1,6 +1,7 @@
 package io.nuls.db.dao.filter;
 
 
+import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.impl.mybatis.session.PROPAGATION;
 import io.nuls.db.dao.impl.mybatis.session.SessionAnnotation;
 import io.nuls.db.dao.impl.mybatis.session.SessionManager;
@@ -11,7 +12,6 @@ import org.apache.ibatis.session.SqlSession;
 import java.lang.reflect.Method;
 
 /**
- *
  * @author zhouwei
  * @date 2017/10/13
  */
@@ -19,64 +19,50 @@ public class DBMethodFilter implements MethodInterceptor {
 
     @Override
     public Object intercept(Object obj, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
+        String lastId = SessionManager.getId();
+        String id = lastId;
         Object result;
-        //not use session
-        if (isFilterMethod(method)) {
-            return methodProxy.invokeSuper(obj, args);
-        }
-
-        // defult = new
-        boolean newSession = true;
+        boolean isSessionBeginning = false;
+        boolean required = false;
         if (method.isAnnotationPresent(SessionAnnotation.class)) {
             SessionAnnotation annotation = method.getAnnotation(SessionAnnotation.class);
-            if (annotation.value() == PROPAGATION.REQUIRED) {
-                newSession = false;
+            if (annotation.value() == PROPAGATION.REQUIRED && !SessionManager.getTxState(id)) {
+                required = true;
+            } else if (annotation.value() == PROPAGATION.INDEPENDENT) {
+                id = StringUtils.getNewUUID();
             }
         }
 
-        if (newSession) {
-            SqlSession session = SessionManager.sqlSessionFactory.openSession(false);
-            SessionManager.setConnection(session);
-            try {
-                result = methodProxy.invokeSuper(obj, args);
+        SqlSession session = SessionManager.getSession(id);
+        if (session == null) {
+            isSessionBeginning = true;
+            session = SessionManager.sqlSessionFactory.openSession(false);
+            SessionManager.setConnection(id, session);
+            SessionManager.setId(id);
+        } else {
+            isSessionBeginning = false;
+        }
+        try {
+            SessionManager.startTransaction(id);
+            result = methodProxy.invokeSuper(obj, args);
+            if (required) {
                 session.commit();
-            } catch (Exception e) {
-                session.rollback();
-                throw e;
-            } finally {
-                SessionManager.setConnection(null);
+                SessionManager.endTransaction(id);
+            }
+        } catch (Exception e) {
+            session.rollback();
+            SessionManager.endTransaction(id);
+            throw e;
+        } finally {
+            if (isSessionBeginning) {
+                SessionManager.setConnection(id, null);
+                SessionManager.setId(lastId);
                 session.close();
             }
-            return result;
-        } else {
-            //required
-            boolean isSessionBeginning = false;
-            SqlSession session = SessionManager.getSession();
-            if (session == null) {
-                isSessionBeginning = true;
-                session = SessionManager.sqlSessionFactory.openSession(false);
-                SessionManager.setConnection(session);
-            }
-            try {
-                result = methodProxy.invokeSuper(obj, args);
-                if (isSessionBeginning) {
-                    session.commit();
-                }
-            } catch (Exception e) {
-                if(isSessionBeginning) {
-                    session.rollback();
-                }
-                throw e;
-
-            } finally {
-                if (isSessionBeginning) {
-                    session.close();
-                    SessionManager.setConnection(null);
-                }
-            }
-            return result;
         }
+        return result;
     }
+
 
     private boolean isFilterMethod(Method method) {
         return false;

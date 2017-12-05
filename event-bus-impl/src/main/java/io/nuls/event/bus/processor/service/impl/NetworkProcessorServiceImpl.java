@@ -30,10 +30,8 @@ public class NetworkProcessorServiceImpl implements NetworkProcessorService {
 
     @Override
     public void send(byte[] event) {
-        NulsEventHeader header = new NulsEventHeader();
-        header.parse(new NulsByteBuffer(event));
         try {
-            BaseNulsEvent eventObject = EventManager.getInstanceByHeader(header);
+            BaseNulsEvent eventObject = EventManager.getInstance(event);
             eventObject.parse(new NulsByteBuffer(event));
             processorManager.offer(eventObject);
         } catch (IllegalAccessException e) {

@@ -29,7 +29,6 @@ public abstract class BaseDaoImpl<T extends BaseMapper<K, V>, K extends Serializ
         return SessionManager.getSession();
     }
 
-    @SessionAnnotation
     protected T getMapper() {
         return getSession().getMapper(mapperClass);
     }
