@@ -72,7 +72,6 @@ public class PeersManager {
 
         for (Peer peer : peers) {
             addPeerToGroup(NetworkConstant.NETWORK_PEER_OUT_GROUP, peer);
-            connectionManager.openConnection(peer);
         }
         System.out.println("-----------peerManager start");
 
@@ -82,9 +81,9 @@ public class PeersManager {
 
 
     public void addPeer(Peer peer) {
-
         if (!peers.containsKey(peer.getHash().toString())) {
             peers.put(peer.getHash(), peer);
+            connectionManager.openConnection(peer);
         }
     }
 

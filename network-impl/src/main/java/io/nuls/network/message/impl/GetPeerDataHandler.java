@@ -10,6 +10,8 @@ import io.nuls.network.message.messageHandler.NetWorkDataHandler;
 import io.nuls.network.service.impl.ConnectionManager;
 import io.nuls.network.service.impl.PeersManager;
 
+import java.util.List;
+
 /**
  * @author vivi
  * @date 2017/11/21
@@ -37,7 +39,10 @@ public class GetPeerDataHandler implements NetWorkDataHandler {
         GetPeerData peerData = (GetPeerData) message;
 
 
-//        List<Peer> list = peersManager.
+        List<Peer> list = peersManager.getAvailablePeers(peerData.getSize(), peer);
+
+
+
 //        peer.setVersionMessage(versionMessage);
 //        peer.setStatus(Peer.HANDSHAKE);
 //        peer.setLastTime(TimeService.currentTimeMillis());

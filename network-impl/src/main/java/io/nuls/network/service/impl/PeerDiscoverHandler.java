@@ -81,7 +81,6 @@ public class PeerDiscoverHandler implements Runnable {
                     peersManager.removePeer(peer.getHash());
                 }
             }
-            outPeers = peersManager.getPeerGroup(NetworkConstant.NETWORK_PEER_OUT_GROUP);
             if (outPeers.size() == 0) {
                 //  The seedPeers should be connected immediately
                 List<Peer> peers = getSeedPeers();
@@ -91,13 +90,19 @@ public class PeerDiscoverHandler implements Runnable {
                         continue;
                     }
                     peersManager.addPeerToGroup(NetworkConstant.NETWORK_PEER_OUT_GROUP, newPeer);
-                    peersManager.getConnectionManager().openConnection(newPeer);
                 }
             } else if (outPeers.size() < network.maxOutCount()) {
                 List<Peer> peers = getLocalPeers(network.maxOutCount() - outPeers.size());
                 if (peers == null || peers.size() == 0) {
                     // find other peer from connected peers
-
+                    findOtherPeer(network.maxOutCount() - outPeers.size());
+                } else {
+                    for (Peer newPeer : peers) {
+                        if (outPeers.getPeers().contains(newPeer)) {
+                            continue;
+                        }
+                        peersManager.addPeerToGroup(NetworkConstant.NETWORK_PEER_OUT_GROUP, newPeer);
+                    }
                 }
             }
 
@@ -136,5 +141,4 @@ public class PeerDiscoverHandler implements Runnable {
             }
         }
     }
-
 }

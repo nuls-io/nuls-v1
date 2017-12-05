@@ -42,7 +42,7 @@ public class Peer extends BaseNulsData {
 
     public static final short OWN_SUB_VERSION = 1001;
 
-    private AbstractNetworkParam network;
+    private int magicNumber;
 
     private String hash;
 
@@ -85,7 +85,7 @@ public class Peer extends BaseNulsData {
 
     public Peer(AbstractNetworkParam network) {
         super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
-        this.network = network;
+        this.magicNumber = network.packetMagic();
         this.messageHandlerFactory = network.getMessageHandlerFactory();
         processorService = getProcessorService();
         peerDao = getPeerDao();
@@ -93,7 +93,7 @@ public class Peer extends BaseNulsData {
 
     public Peer(AbstractNetworkParam network, int type) {
         super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
-        this.network = network;
+        this.magicNumber = network.packetMagic();
         this.messageHandlerFactory = network.getMessageHandlerFactory();
         this.type = type;
         processorService = getProcessorService();
@@ -104,7 +104,7 @@ public class Peer extends BaseNulsData {
 
     public Peer(AbstractNetworkParam network, int type, InetSocketAddress socketAddress) {
         super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
-        this.network = network;
+        this.magicNumber = network.packetMagic();
         this.messageHandlerFactory = network.getMessageHandlerFactory();
         this.type = type;
         this.port = socketAddress.getPort();
@@ -120,7 +120,6 @@ public class Peer extends BaseNulsData {
         sendNetworkData(data);
         this.status = Peer.CONNECTING;
     }
-
 
     public void sendMessage(NulsMessage message) throws IOException {
         if (this.getStatus() == Peer.CLOSE) {
@@ -153,7 +152,7 @@ public class Peer extends BaseNulsData {
         lock.lock();
         try {
             byte[] data = networkData.serialize();
-            NulsMessage message = new NulsMessage(network.packetMagic(), NulsMessageHeader.NETWORK_MESSAGE, data);
+            NulsMessage message = new NulsMessage(magicNumber, NulsMessageHeader.NETWORK_MESSAGE, data);
             this.writeTarget.write(message.serialize());
         } finally {
             lock.unlock();
@@ -256,7 +255,6 @@ public class Peer extends BaseNulsData {
                 this.failCount = 0;
             }
             this.failCount++;
-
             peerDao.saveChange(PeerTransfer.transferToPeerPo(this));
         } finally {
             lock.unlock();
@@ -365,9 +363,6 @@ public class Peer extends BaseNulsData {
         this.versionMessage = versionMessage;
     }
 
-    public AbstractNetworkParam getNetwork() {
-        return network;
-    }
 
     public Long getLastTime() {
         return lastTime;
@@ -391,5 +386,13 @@ public class Peer extends BaseNulsData {
 
     public void setPort(Integer port) {
         this.port = port;
+    }
+
+    public int getMagicNumber() {
+        return magicNumber;
+    }
+
+    public void setMagicNumber(int magicNumber) {
+        this.magicNumber = magicNumber;
     }
 }
