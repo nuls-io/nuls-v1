@@ -6,12 +6,14 @@ import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.entity.Agent;
 import io.nuls.consensus.entity.ConsensusAccount;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
+import io.nuls.consensus.params.JoinConsensusParam;
 import io.nuls.consensus.service.intf.ConsensusService;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Niels
@@ -29,7 +31,7 @@ public class POCConsensusServiceImpl implements ConsensusService {
         return INSTANCE;
     }
 
-    private void registerAgent(Agent agent, String password){
+    private void registerAgent(Agent agent, String password) {
         //todo e
     }
 
@@ -70,30 +72,26 @@ public class POCConsensusServiceImpl implements ConsensusService {
     }
 
     @Override
-    public void joinTheConsensus(String address, String password,Object... params) {
-        final int paramsLength = 3;
+    public void joinTheConsensus(String address, String password, Map<String, Object> paramsMap) {
         Account account = this.accountService.getAccount(address);
         if (null == account) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "The account is not exist,address:" + address);
         }
-        if(params ==null||params.length<2){
-            throw new NulsRuntimeException(ErrorCode.NULL_PARAMETER );
+        if (paramsMap == null || paramsMap.size() < 2) {
+            throw new NulsRuntimeException(ErrorCode.NULL_PARAMETER);
         }
-        double deposit = (double) params[0];
-        String agentAddress = (String) params[1];
-        if(params.length>=paramsLength){
+        JoinConsensusParam params = new JoinConsensusParam(paramsMap);
+        if (params.getCommissionRate() != null) {
             Agent agent = new Agent();
             agent.setAddress(address);
-            agent.setDelegateAddress(agentAddress);
-            agent.setDeposit(deposit);
-            agent.setCommissionRate((Double) params[2]);
-            if(params.length>paramsLength){
-                agent.setIntroduction((String) params[3]);
-            }
-            this.registerAgent(agent,password);
+            agent.setDelegateAddress(params.getAgentAddress());
+            agent.setDeposit(params.getDeposit());
+            agent.setCommissionRate(params.getCommissionRate());
+            agent.setIntroduction(params.getIntroduction());
+            this.registerAgent(agent, password);
             return;
         }
-        this.joinTheConsensus(account, password, deposit, agentAddress);
+        this.joinTheConsensus(account, password, params.getDeposit(), params.getAgentAddress());
     }
 
     public void joinTheConsensus(String password, double amount, String agent) {

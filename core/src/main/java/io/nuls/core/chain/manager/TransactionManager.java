@@ -1,0 +1,50 @@
+package io.nuls.core.chain.manager;
+
+import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.io.NulsByteBuffer;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * @author Niels
+ * @date 2017/12/6
+ */
+public class TransactionManager {
+
+    private static final Map<Integer, Class<? extends Transaction>> TX_MAP = new HashMap<>();
+
+    public static final void putTx(int txType, Class<? extends Transaction> txClass) {
+        if (TX_MAP.containsKey(txType)) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "Transaction type repeating!");
+        }
+        TX_MAP.put(txType, txClass);
+    }
+
+    public static final Class<? extends Transaction> getTxClass(int txType) {
+        return TX_MAP.get(txType);
+    }
+
+    public static List<Transaction> getInstances(NulsByteBuffer byteBuffer) throws InstantiationException, IllegalAccessException {
+        List<Transaction> list = new ArrayList<>();
+        while (!byteBuffer.isFinished()) {
+            list.add(getInstance(byteBuffer));
+        }
+        return list;
+    }
+
+    public static Transaction getInstance(NulsByteBuffer byteBuffer) throws IllegalAccessException, InstantiationException {
+        int txType = (int) new NulsByteBuffer(byteBuffer.getPayloadByCursor()).readVarInt();
+        Class<? extends Transaction> txClass = getTxClass(txType);
+        if (null == txClass) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "transaction type not exist!");
+        }
+        Transaction tx = txClass.newInstance();
+        tx.parse(byteBuffer);
+        return tx;
+    }
+}

@@ -7,7 +7,6 @@ package io.nuls.consensus.constant;
 public interface ConsensusConstant {
     int TX_TYPE_BLOCK = 1;
     int TX_TYPE_BLOCK_HEADER = 2;
-    int TX_TYPE_GET_BLOCK = 3;
-    int TX_TYPE_JOIN_CONSENSUS = 4;
-    int TX_TYPE_EXIT_CONSENSUS = 5;
+    int TX_TYPE_JOIN_CONSENSUS = 3;
+    int TX_TYPE_EXIT_CONSENSUS = 4;
 }

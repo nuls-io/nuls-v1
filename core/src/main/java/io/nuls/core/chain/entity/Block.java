@@ -1,8 +1,13 @@
 package io.nuls.core.chain.entity;
 
+import io.nuls.core.chain.manager.TransactionManager;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.crypto.Sha256Hash;
+import io.nuls.core.event.EventManager;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
+import io.nuls.core.utils.log.Log;
 
 import java.io.IOException;
 import java.util.List;
@@ -53,8 +58,10 @@ public class Block extends BlockHeader {
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
         super.parse(byteBuffer);
-        while(byteBuffer.isFinished()){
-            //todo
+        try {
+            txs = TransactionManager.getInstances(byteBuffer);
+        } catch (Exception e) {
+            throw new NulsRuntimeException(ErrorCode.PARSE_OBJECT_ERROR);
         }
     }
 

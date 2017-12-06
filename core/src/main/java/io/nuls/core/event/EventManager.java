@@ -4,7 +4,6 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.module.BaseNulsModule;
 import io.nuls.core.utils.io.NulsByteBuffer;
-import io.nuls.core.utils.log.Log;
 
 import java.util.*;
 
@@ -55,5 +54,18 @@ public class EventManager {
         BaseNulsEvent event = clazz.newInstance();
         event.parse(new NulsByteBuffer(bytes));
         return event;
+    }
+
+    public static List<BaseNulsEvent> getInstances(NulsByteBuffer buffer) throws IllegalAccessException, InstantiationException {
+        List<BaseNulsEvent> list = new ArrayList<>();
+        while(!buffer.isFinished()) {
+            NulsEventHeader header = new NulsEventHeader();
+            header.parse(new NulsByteBuffer(buffer.getPayloadByCursor()));
+            Class<? extends BaseNulsEvent> clazz = EVENT_MAP.get(header.getModuleId() + "_" + header.getEventType());
+            BaseNulsEvent event = clazz.newInstance();
+            event.parse(buffer);
+            list.add(event);
+        }
+        return list;
     }
 }

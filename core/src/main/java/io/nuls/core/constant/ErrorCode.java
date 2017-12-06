@@ -14,7 +14,6 @@ public enum ErrorCode {
     SUCCESS("SYS000", 10000),
     FAILED("SYS001", 10001),
     SYS_UNKOWN_EXCEPTION("SYS999", 10999),
-
     FILE_NOT_FOUND("SYS002", 10002),
     NULL_PARAMETER("SYS003", 10003),
     INTF_REPETITION("SYS004", 10004),
@@ -25,7 +24,7 @@ public enum ErrorCode {
     CONFIGURATION_ITEM_DOES_NOT_EXIST("SYS009", 10009),
     LANGUAGE_CANNOT_SET_NULL("SYS010", 10010),
     IO_ERROR("SYS011", 10011),
-
+    PARSE_OBJECT_ERROR("SYS012",10012),
 
     /**
      * ----------  Consensus Network code   ---------
