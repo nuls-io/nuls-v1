@@ -5,6 +5,7 @@ import io.nuls.consensus.entity.ConsensusAccount;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Niels
@@ -12,7 +13,7 @@ import java.util.List;
  */
 public interface ConsensusService {
 
-    void joinTheConsensus(String address, String password, Object... params);
+    void joinTheConsensus(String address, String password, Map<String,Object> paramsMap);
 
     void exitTheConsensus(Address address, String password);
 

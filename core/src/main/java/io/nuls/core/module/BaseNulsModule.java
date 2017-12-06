@@ -1,5 +1,7 @@
 package io.nuls.core.module;
 
+import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.core.event.EventManager;
@@ -96,6 +98,10 @@ public abstract class BaseNulsModule {
 
     protected final void registerEvent(short eventType, Class<? extends BaseNulsEvent> eventClass) {
         EventManager.putEvent(this.getModuleId(), eventType, eventClass);
+    }
+
+    protected final void registerTransaction(int txType, Class<? extends Transaction> txClass){
+        TransactionManager.putTx(txType,txClass);
     }
 
     public Class<? extends BaseNulsModule> getModuleClass() {

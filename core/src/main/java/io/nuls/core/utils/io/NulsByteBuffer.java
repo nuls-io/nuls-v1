@@ -160,8 +160,14 @@ public class NulsByteBuffer {
         return Utils.bytes2Double(this.readByLengthByte());
     }
 
-    public boolean isFinished(){
-        return this.payload.length==cursor;
+    public boolean isFinished() {
+        return this.payload.length == cursor;
+    }
+
+    public byte[] getPayloadByCursor() {
+        byte[] bytes = new byte[payload.length - cursor];
+        System.arraycopy(this.payload, cursor, bytes, 0, bytes.length);
+        return bytes;
     }
 
     public byte[] getPayload() {

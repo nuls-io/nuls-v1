@@ -1,6 +1,9 @@
 package io.nuls.consensus.module.impl;
 
 import io.nuls.consensus.constant.POCConsensusConstant;
+import io.nuls.consensus.entity.RedPunishTransaction;
+import io.nuls.consensus.entity.RegisterAgentTransaction;
+import io.nuls.consensus.entity.YellowPunishTransaction;
 import io.nuls.consensus.event.JoinConsensusEvent;
 import io.nuls.consensus.event.RedPunishConsensusEvent;
 import io.nuls.consensus.event.YellowPunishConsensusEvent;
@@ -34,6 +37,9 @@ public class POCConsensusModuleImpl extends AbstractConsensusModule {
         this.registerService(POCConsensusServiceImpl.getInstance());
         this.registerEvent(POCConsensusConstant.EVENT_TYPE_RED_PUNISH, RedPunishConsensusEvent.class);
         this.registerEvent(POCConsensusConstant.EVENT_TYPE_YELLOW_PUNISH, YellowPunishConsensusEvent.class);
+        this.registerTransaction(POCConsensusConstant.TX_TYPE_REGISTER_AGENT, RegisterAgentTransaction.class);
+        this.registerTransaction(POCConsensusConstant.TX_TYPE_RED_PUNISH, RedPunishTransaction.class);
+        this.registerTransaction(POCConsensusConstant.TX_TYPE_YELLOW_PUNISH, YellowPunishTransaction.class);
         Log.info("the POC consensus module is started!");
 
     }

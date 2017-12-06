@@ -123,37 +123,37 @@ public class Account extends BaseNulsData {
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
        // stream.write(new VarInt(version).encode());
 //        if(StringUtils.isNotBlank(id)){
-//            this.writeBytesWithLength(stream, id.getBytes(NulsContext.DEFAULT_ENCODING));
+//            stream.writeBytesWithLength(stream, id.getBytes(NulsContext.DEFAULT_ENCODING));
 //        }else {
 //            stream.write(0);
 //        }
 //        if(StringUtils.isNotBlank(alias)){
-//            this.writeBytesWithLength(stream, alias.getBytes(NulsContext.DEFAULT_ENCODING));
+//            stream.writeBytesWithLength(stream, alias.getBytes(NulsContext.DEFAULT_ENCODING));
 //        }else {
 //            stream.write(0);
 //        }
 //        if (null != address && null != address.getHash160()) {
 //            stream.write(address.getHash160());
 //        }
-//        this.writeBytesWithLength(stream, priSeed);
+//        stream.writeBytesWithLength(stream, priSeed);
 //        stream.write(status);
-//        this.writeBytesWithLength(stream, sign);
-//        this.writeBytesWithLength(stream, pubKey);
-//        this.writeBytesWithLength(stream, extend);
+//        stream.writeBytesWithLength(stream, sign);
+//        stream.writeBytesWithLength(stream, pubKey);
+//        stream.writeBytesWithLength(stream, extend);
 
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
-        id = new String(byteBuffer.readByLengthByte());
-        alias = new String(byteBuffer.readByLengthByte());
-        byte[] hash160 = byteBuffer.readBytes(Address.LENGTH);
-        this.address = new Address(hash160);
-        priSeed = byteBuffer.readByLengthByte();
-        status = byteBuffer.readByte();
-        sign = byteBuffer.readByLengthByte();
-        pubKey = byteBuffer.readByLengthByte();
-        extend = byteBuffer.readByLengthByte();
+//        id = new String(byteBuffer.readByLengthByte());
+//        alias = new String(byteBuffer.readByLengthByte());
+//        byte[] hash160 = byteBuffer.readBytes(Address.LENGTH);
+//        this.address = new Address(hash160);
+//        priSeed = byteBuffer.readByLengthByte();
+//        status = byteBuffer.readByte();
+//        sign = byteBuffer.readByLengthByte();
+//        pubKey = byteBuffer.readByLengthByte();
+//        extend = byteBuffer.readByLengthByte();
     }
 
     public Address getAddress() {

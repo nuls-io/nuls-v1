@@ -31,11 +31,13 @@ public class ConsensusAccount extends BaseNulsData {
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeBytesWithLength(address.getHash160());
+        stream.writeBytesWithLength(extend);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
         this.address = new Address(byteBuffer.readByLengthByte());
+        this.extend = byteBuffer.readByLengthByte();
     }
 
     public Address getAddress() {
