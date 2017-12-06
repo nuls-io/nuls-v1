@@ -153,7 +153,6 @@ public class ConnectionManager implements Runnable {
             channel.configureBlocking(false);
             channel.socket().setReuseAddress(true);
             InetSocketAddress socketAddress = new InetSocketAddress(peer.getIp(), peer.getPort());
-            System.out.println("-----sddsdsdsdsd peer:" + peer.getIp() + peer.getPort());
             channel.connect(socketAddress);
             PendingConnect data = new PendingConnect(channel, peer);
             SelectionKey key = channel.register(selector, SelectionKey.OP_CONNECT);
@@ -169,7 +168,6 @@ public class ConnectionManager implements Runnable {
                 }
             }
             peer.destroy();
-
         }
     }
 
@@ -231,6 +229,7 @@ public class ConnectionManager implements Runnable {
     private void addOutPeer(SelectionKey key) {
         PendingConnect data = (PendingConnect) key.attachment();
         Peer peer = data.peer;
+        peer.setType(Peer.OUT);
         SocketChannel channel = (SocketChannel) key.channel();
         ConnectionHandler handler = new ConnectionHandler(peer, channel, key);
         //Must be connected after the completion of registration to other events
@@ -245,7 +244,7 @@ public class ConnectionManager implements Runnable {
                 peer.destroy();
             }
         } catch (Exception e) {
-               e.printStackTrace();
+            e.printStackTrace();
             Log.warn("out peer Failed to connect:" + peer.getIp() + ":" + peer.getPort());
             peer.destroy();
         }

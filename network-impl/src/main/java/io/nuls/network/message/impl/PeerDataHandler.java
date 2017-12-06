@@ -2,6 +2,7 @@ package io.nuls.network.message.impl;
 
 import io.nuls.core.context.NulsContext;
 import io.nuls.db.dao.PeerDao;
+import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Peer;
 import io.nuls.network.message.BaseNetworkData;
 import io.nuls.network.message.NetworkDataResult;
@@ -16,28 +17,29 @@ import java.util.List;
  * @author vivi
  * @date 2017/11/21
  */
-public class GetPeerDataHandler implements NetWorkDataHandler {
+public class PeerDataHandler implements NetWorkDataHandler {
 
-    private static final GetPeerDataHandler INSTANCE = new GetPeerDataHandler();
+    private static final PeerDataHandler INSTANCE = new PeerDataHandler();
 
     private PeersManager peersManager;
 
-    private GetPeerDataHandler() {
+    private PeerDataHandler() {
 
     }
 
-    public static GetPeerDataHandler getInstance() {
+    public static PeerDataHandler getInstance() {
         return INSTANCE;
     }
 
     @Override
     public NetworkDataResult process(BaseNetworkData message, Peer peer) {
-        GetPeerData getPeerData = (GetPeerData) message;
-
-        List<Peer> list = peersManager.getAvailablePeers(getPeerData.getLength(), peer);
-        PeerData replyData = new PeerData();
-        replyData.setPeers(list);
-        return new NetworkDataResult(true, replyData);
+        PeerData peerData = (PeerData) message;
+        for (Peer newPeer : peerData.getPeers()) {
+            newPeer.setType(Peer.OUT);
+            newPeer.setMessageHandlerFactory(peer.getMessageHandlerFactory());
+            peersManager.addPeerToGroup(NetworkConstant.NETWORK_PEER_OUT_GROUP, peer);
+        }
+        return null;
     }
 
     public void setPeersManager(PeersManager peersManager) {

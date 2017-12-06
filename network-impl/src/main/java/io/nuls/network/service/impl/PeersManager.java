@@ -68,13 +68,16 @@ public class PeersManager {
      * find peers from connetcted peers
      */
     public void start() {
-        List<Peer> peers = peers = discovery.getSeedPeers();
+
+//        List<Peer> peers = discovery.getLocalPeers(10);
+        List<Peer> peers = discovery.getSeedPeers();
 
         if (peers == null || peers.size() == 0) {
             peers = discovery.getSeedPeers();
         }
 
         for (Peer peer : peers) {
+            peer.setType(Peer.OUT);
             addPeerToGroup(NetworkConstant.NETWORK_PEER_OUT_GROUP, peer);
         }
         System.out.println("-----------peerManager start");
@@ -82,6 +85,7 @@ public class PeersManager {
         //start  heart beat thread
         ThreadManager.createSingleThreadAndRun(AbstractNetworkModule.networkModuleId, "peerDiscovery", this.discovery);
     }
+
 
     public void addPeer(Peer peer) {
         lock.lock();
@@ -95,7 +99,6 @@ public class PeersManager {
         } finally {
             lock.unlock();
         }
-
     }
 
 
@@ -104,6 +107,15 @@ public class PeersManager {
         try {
             if (!peerGroups.containsKey(groupName)) {
                 throw new NulsRuntimeException(ErrorCode.PEER_GROUP_NOT_FOUND);
+            }
+            if (groupName.equals(NetworkConstant.NETWORK_PEER_OUT_GROUP) &&
+                    peerGroups.get(groupName).size() >= network.maxOutCount()) {
+                return;
+            }
+
+            if (groupName.equals(NetworkConstant.NETWORK_PEER_IN_GROUP) &&
+                    peerGroups.get(groupName).size() >= network.maxInCount()) {
+                return;
             }
 
             addPeer(peer);
@@ -209,6 +221,9 @@ public class PeersManager {
                 availablePeers.remove(peer);
                 break;
             }
+        }
+        if (availablePeers.size() <= size) {
+            return availablePeers;
         }
         return availablePeers.subList(0, size);
     }

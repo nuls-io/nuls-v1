@@ -1,13 +1,16 @@
 package io.nuls.network.entity;
 
 import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsVerificationException;
 import io.nuls.core.mesasge.NulsMessage;
 import io.nuls.core.mesasge.NulsMessageHeader;
 import io.nuls.core.thread.manager.ThreadManager;
 import io.nuls.core.utils.crypto.Hex;
+import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
@@ -15,20 +18,18 @@ import io.nuls.db.dao.PeerDao;
 import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.param.AbstractNetworkParam;
-import io.nuls.network.message.AbstractNetWorkDataHandlerFactory;
-import io.nuls.network.message.BaseNetworkData;
-import io.nuls.network.message.NetworkDataHeader;
-import io.nuls.network.message.NetworkDataResult;
+import io.nuls.network.message.*;
 import io.nuls.network.message.entity.GetVersionData;
 import io.nuls.network.message.entity.VersionData;
 import io.nuls.network.message.messageHandler.NetWorkDataHandler;
 import io.nuls.network.service.MessageWriter;
 
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.NotYetConnectedException;
+import java.util.Date;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -82,6 +83,13 @@ public class Peer extends BaseNulsData {
 
     private PeerDao peerDao;
 
+    public Peer() {
+        super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
+    }
+
+    public Peer(NulsByteBuffer buffer) {
+        parse(buffer);
+    }
 
     public Peer(AbstractNetworkParam network) {
         super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
@@ -94,8 +102,8 @@ public class Peer extends BaseNulsData {
     public Peer(AbstractNetworkParam network, int type) {
         super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.magicNumber = network.packetMagic();
-        this.messageHandlerFactory = network.getMessageHandlerFactory();
         this.type = type;
+        this.messageHandlerFactory = network.getMessageHandlerFactory();
         processorService = getProcessorService();
         peerDao = getPeerDao();
 
@@ -105,13 +113,12 @@ public class Peer extends BaseNulsData {
     public Peer(AbstractNetworkParam network, int type, InetSocketAddress socketAddress) {
         super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.magicNumber = network.packetMagic();
-        this.messageHandlerFactory = network.getMessageHandlerFactory();
         this.type = type;
         this.port = socketAddress.getPort();
         this.ip = socketAddress.getAddress().getHostAddress();
-        processorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
+        this.messageHandlerFactory = network.getMessageHandlerFactory();
+        processorService = getProcessorService();
         peerDao = getPeerDao();
-
         this.hash = this.ip + this.port;
     }
 
@@ -255,7 +262,7 @@ public class Peer extends BaseNulsData {
                 this.failCount = 0;
             }
             this.failCount++;
-        //    peerDao.saveChange(PeerTransfer.transferToPeerPo(this));
+            peerDao.saveChange(PeerTransfer.transferToPeerPo(this));
         } finally {
             lock.unlock();
         }
@@ -263,25 +270,41 @@ public class Peer extends BaseNulsData {
 
     @Override
     public int size() {
-        return 0;
+        int s = 0;
+        s += 2;   //version size;
+        s += VarInt.sizeOf(magicNumber);
+        s += VarInt.sizeOf(port);
+        s += 1;
+        try {
+            s += ip.getBytes(NulsContext.DEFAULT_ENCODING).length;
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return s;
     }
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-
+        stream.writeShort(version.getVersion());
+        stream.write(new VarInt(magicNumber).encode());
+        stream.write(new VarInt(port).encode());
+        stream.writeBytesWithLength(ip);
     }
 
     @Override
     public void parse(NulsByteBuffer buffer) {
-
+        version = new NulsVersion(buffer.readShort());
+        magicNumber = (int) buffer.readVarInt();
+        port = (int) buffer.readVarInt();
+        ip = new String(buffer.readByLengthByte());
+        processorService = getProcessorService();
+        peerDao = getPeerDao();
     }
 
 
     public boolean isHandShakeMessage(BaseNetworkData networkMessage) {
-//        return networkMessage instanceof VersionData;
         return (networkMessage.getNetworkHeader().getType() == NetworkConstant.NETWORK_GET_VERSION_MESSAGE
                 || networkMessage.getNetworkHeader().getType() == NetworkConstant.NETWORK_VERSION_MESSAGE);
-
     }
 
     public boolean isHandShake() {
@@ -307,7 +330,6 @@ public class Peer extends BaseNulsData {
         return NulsContext.getInstance().getService(NetworkProcessorService.class);
     }
 
-
     private PeerDao getPeerDao() {
         while (NulsContext.getInstance().getService(PeerDao.class) == null) {
             try {
@@ -317,6 +339,21 @@ public class Peer extends BaseNulsData {
             }
         }
         return NulsContext.getInstance().getService(PeerDao.class);
+    }
+
+    @Override
+    public String toString() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("peer:{");
+        buffer.append("ip: " + getIp() + ",");
+        buffer.append("port: " + getPort() + ",");
+        if (lastTime == null) {
+            lastTime = System.currentTimeMillis();
+        }
+
+        buffer.append("lastTime: " + DateUtil.convertDate(new Date(lastTime)) + ",");
+        buffer.append("magicNumber: " + magicNumber + "}");
+        return buffer.toString();
     }
 
     public int getType() {
@@ -398,5 +435,13 @@ public class Peer extends BaseNulsData {
 
     public void setMagicNumber(int magicNumber) {
         this.magicNumber = magicNumber;
+    }
+
+    public void setMessageHandlerFactory(AbstractNetWorkDataHandlerFactory factory) {
+        this.messageHandlerFactory = factory;
+    }
+
+    public AbstractNetWorkDataHandlerFactory getMessageHandlerFactory() {
+        return this.messageHandlerFactory;
     }
 }
