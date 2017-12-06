@@ -23,4 +23,53 @@ public interface POCConsensusConstant {
     int TX_TYPE_RED_PUNISH = 11;
     int TX_TYPE_YELLOW_PUNISH = 12;
 
+    /**
+     * TODO THE PARAMETERS OF CONSENSUS,bellow
+     */
+    /**
+     * Set temporarily as a fixed value,unit:nuls
+     */
+    double TRANSACTION_FEE = 0.01;
+    /**
+     * unit:second
+     */
+    int BLOCK_TIME_INTERVAL = 10;
+
+    /**
+     * default:2M
+     */
+    long MAX_BLOCK_SIZE = 2<<21;
+
+
+    double AGENT_DEPOSIT_LOWER_LIMIT = 20000;
+    double ENTRUSTER_DEPOSIT_LOWER_LIMIT = 1000;
+
+    double SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT = 50000;
+    double SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT = 200000;
+    /**
+     * unit: %
+     */
+    double AGENT_FORCED_EXITED_RATE=70;
+    /**
+     * commission rate,UNIT:%
+     */
+    double MAX_COMMISSION_RATE = 20;
+    double MIN_COMMISSION_RATE = 0;
+    /**
+     * unit:day
+     */
+    long RED_PUNISH_DEPOSIT_LOCKED_TIME = 90;
+    long YELLOW_PUNISH_DEPOSIT_LOCKED_TIME = 3;
+
+    /**
+     * credit parameters
+     */
+    /**
+     * unit:round of consensus
+     */
+    int RANGE_OF_CAPACITY_COEFFICIENT = 20;
+    /**
+     * Penalty coefficient,greater than 4.
+     */
+    int CREDIT_MAGIC_NUM = 4;
 }

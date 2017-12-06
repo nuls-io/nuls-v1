@@ -5,13 +5,8 @@ import io.nuls.core.crypto.VarInt;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
-import io.nuls.core.validate.validator.tx.TxMaxSizeValidator;
-import io.nuls.core.validate.validator.tx.TxRemarkValidator;
-import io.nuls.core.validate.validator.tx.TxSignValidator;
-import io.nuls.core.validate.validator.tx.TxTypeValidator;
 
 import java.io.IOException;
-import java.io.OutputStream;
 
 /**
  * @author Niels
@@ -21,10 +16,6 @@ public class Transaction extends BaseNulsData {
     public Transaction(int type) {
         this.dataType = NulsDataType.TRANSACTION;
         this.time = TimeService.currentTimeMillis();
-        this.registerValidator(new TxMaxSizeValidator());
-        this.registerValidator(new TxRemarkValidator());
-        this.registerValidator(new TxTypeValidator());
-        this.registerValidator(new TxSignValidator());
         this.type = type;
     }
 
