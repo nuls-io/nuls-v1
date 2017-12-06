@@ -1,5 +1,7 @@
 package io.nuls.network.message.entity;
 
+import io.nuls.core.chain.entity.NulsVersion;
+import io.nuls.core.crypto.VarInt;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.network.constant.NetworkConstant;
@@ -8,7 +10,6 @@ import io.nuls.network.message.BaseNetworkData;
 import io.nuls.network.message.NetworkDataHeader;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,22 +27,47 @@ public class PeerData extends BaseNetworkData {
 
     public PeerData() {
         super(OWN_MAIN_VERSION, OWN_SUB_VERSION, NetworkConstant.NETWORK_PEER_MESSAGE);
-        peers = new ArrayList<>();
+    }
+
+    public PeerData(NulsByteBuffer buffer) {
+        super(buffer);
     }
 
     @Override
     public int size() {
-        return 0;
+        int s = 0;
+        s += NetworkDataHeader.NETWORK_HEADER_SIZE;
+
+        s += 2;    // version.length
+        s += 1;    // peers.size
+        for (int i = 0; i < peers.size(); i++) {
+            s += peers.get(i).size();
+        }
+
+        return s;
     }
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-
+        networkHeader.serializeToStream(stream);
+        stream.writeShort(version.getVersion());
+        stream.write(new VarInt(peers.size()).encode());
+        for (Peer peer : peers) {
+            peer.serializeToStream(stream);
+        }
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
-
+        this.networkHeader = new NetworkDataHeader(byteBuffer);
+        version = new NulsVersion(byteBuffer.readShort());
+        int size = (int) byteBuffer.readVarInt();
+        List<Peer> peers = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            Peer peer = new Peer(byteBuffer);
+            peers.add(peer);
+        }
+        this.peers = peers;
     }
 
 
@@ -52,4 +78,5 @@ public class PeerData extends BaseNetworkData {
     public void setPeers(List<Peer> peers) {
         this.peers = peers;
     }
+
 }

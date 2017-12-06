@@ -54,7 +54,7 @@ public class PeerDaoImpl extends BaseDaoImpl<PeerMapper, String, PeerPo> impleme
             searchable.addCondition("ip", SearchOperator.eq, po.getIp());
             searchable.addCondition("port", SearchOperator.eq, po.getPort());
             if (getMapper().selectCount(searchable) > 0) {
-                if (po.getFailCount() >= 10) {
+                if (po.getFailCount() >= 5) {
                     getMapper().deleteByIp(po);
                 } else {
                     getMapper().updateByIp(po);

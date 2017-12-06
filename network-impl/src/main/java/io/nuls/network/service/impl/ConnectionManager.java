@@ -168,7 +168,6 @@ public class ConnectionManager implements Runnable {
                 }
             }
             peer.destroy();
-
         }
     }
 
@@ -230,6 +229,7 @@ public class ConnectionManager implements Runnable {
     private void addOutPeer(SelectionKey key) {
         PendingConnect data = (PendingConnect) key.attachment();
         Peer peer = data.peer;
+        peer.setType(Peer.OUT);
         SocketChannel channel = (SocketChannel) key.channel();
         ConnectionHandler handler = new ConnectionHandler(peer, channel, key);
         //Must be connected after the completion of registration to other events

@@ -78,7 +78,6 @@ public class PeerDiscoverHandler implements Runnable {
             PeerGroup outPeers = peersManager.getPeerGroup(NetworkConstant.NETWORK_PEER_OUT_GROUP);
             for (Peer peer : outPeers.getPeers()) {
                 if (peer.getStatus() == Peer.CLOSE) {
-                    System.out.println("------------remove peer:" + peer.getIp() + ", port:" + peer.getPort());
                     peersManager.removePeer(peer.getHash());
                 }
             }
@@ -96,7 +95,7 @@ public class PeerDiscoverHandler implements Runnable {
 //                List<Peer> peers = getLocalPeers(network.maxOutCount() - outPeers.size());
 //                if (peers == null || peers.size() == 0) {
 //                    // find other peer from connected peers
-//                    //findOtherPeer(network.maxOutCount() - outPeers.size());
+                    findOtherPeer(network.maxOutCount() - outPeers.size());
 //                } else {
 //                    for (Peer newPeer : peers) {
 //                        if (outPeers.getPeers().contains(newPeer)) {
@@ -107,16 +106,16 @@ public class PeerDiscoverHandler implements Runnable {
 //                }
             }
 
-            for (Peer peer : outPeers.getPeers()) {
-                System.out.println("------out--ip:" + peer.getIp() + ",port:" + peer.getPort() + ",status:" + peer.getStatus());
-            }
-
-            PeerGroup inPeers = peersManager.getPeerGroup(NetworkConstant.NETWORK_PEER_IN_GROUP);
-            if(inPeers != null) {
-                for (Peer peer : outPeers.getPeers()) {
-                    System.out.println("-----in---ip:" + peer.getIp() + ",port:" + peer.getPort() + ",status:" + peer.getStatus());
-                }
-            }
+//            for (Peer peer : outPeers.getPeers()) {
+//                System.out.println("------out--ip:" + peer.getIp() + ",port:" + peer.getPort() + ",status:" + peer.getStatus());
+//            }
+//
+//            PeerGroup inPeers = peersManager.getPeerGroup(NetworkConstant.NETWORK_PEER_IN_GROUP);
+//            if(inPeers != null) {
+//                for (Peer peer : outPeers.getPeers()) {
+//                    System.out.println("-----in---ip:" + peer.getIp() + ",port:" + peer.getPort() + ",status:" + peer.getStatus());
+//                }
+//            }
 
             try {
                 Thread.sleep(3000);
@@ -126,6 +125,10 @@ public class PeerDiscoverHandler implements Runnable {
         }
     }
 
+    /**
+     * Inquire more of the other peers to the connected peers
+     * @param size
+     */
     private void findOtherPeer(int size) {
         PeerGroup group = peersManager.getPeerGroup(NetworkConstant.NETWORK_PEER_IN_GROUP);
         if (group.getPeers().size() > 0) {

@@ -19,15 +19,16 @@ public class GetPeerData extends BaseNetworkData {
 
     public static final short OWN_SUB_VERSION = 1001;
 
-    private int size;
+    private int length;
+
 
     public GetPeerData() {
         super(OWN_MAIN_VERSION, OWN_SUB_VERSION, NetworkConstant.NETWORK_GET_PEER_MESSAGE);
     }
 
-    public GetPeerData(int size) {
+    public GetPeerData(int length) {
         super(OWN_MAIN_VERSION, OWN_SUB_VERSION, NetworkConstant.NETWORK_GET_PEER_MESSAGE);
-        this.size = size;
+        this.length = length;
     }
 
     public GetPeerData(NulsByteBuffer buffer) {
@@ -38,34 +39,28 @@ public class GetPeerData extends BaseNetworkData {
     public int size() {
         int s = 0;
         s += NetworkDataHeader.NETWORK_HEADER_SIZE;
-        s += VarInt.sizeOf(size);
+        s += VarInt.sizeOf(length);
         return s;
     }
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         networkHeader.serializeToStream(stream);
-        stream.write(new VarInt(size).encode());
+        stream.write(new VarInt(length).encode());
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
         this.networkHeader = new NetworkDataHeader(byteBuffer);
-        size = (int) byteBuffer.readVarInt();
+        length = (int) byteBuffer.readVarInt();
     }
 
-    public int getSize() {
-        return size;
+
+    public void setLength(int length) {
+        this.length = length;
     }
 
-    public void setSize(int size) {
-        this.size = size;
-    }
-
-    public static void main(String[] args) throws IOException {
-        GetPeerData data = new GetPeerData(40);
-        byte[] bytes = data.serialize();
-        data = new GetPeerData(new NulsByteBuffer(bytes));
-        System.out.println(data.getSize());
+    public int getLength() {
+        return length;
     }
 }
