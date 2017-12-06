@@ -4,10 +4,9 @@ import io.nuls.consensus.constant.POCConsensusConstant;
 import io.nuls.consensus.entity.RedPunishTransaction;
 import io.nuls.consensus.entity.RegisterAgentTransaction;
 import io.nuls.consensus.entity.YellowPunishTransaction;
-import io.nuls.consensus.event.JoinConsensusEvent;
-import io.nuls.consensus.event.RedPunishConsensusEvent;
-import io.nuls.consensus.event.YellowPunishConsensusEvent;
-import io.nuls.consensus.handler.JoinConsensusHandler;
+import io.nuls.consensus.event.*;
+import io.nuls.consensus.handler.*;
+import io.nuls.consensus.handler.filter.*;
 import io.nuls.consensus.module.AbstractConsensusModule;
 import io.nuls.consensus.service.impl.POCConsensusServiceImpl;
 import io.nuls.consensus.thread.BlockMaintenanceThread;
@@ -45,10 +44,37 @@ public class POCConsensusModuleImpl extends AbstractConsensusModule {
     }
 
     private void registerHanders() {
-        //todo
+        BlockEventHandler blockEventHandler = new BlockEventHandler();
+        blockEventHandler.addFilter(new BlockEventFilter());
+        processorService.registerEventHandler(BlockEvent.class, blockEventHandler);
+
+        BlockHeaderHandler blockHeaderHandler = new BlockHeaderHandler();
+        blockHeaderHandler.addFilter(new BlockHeaderEventFilter());
+        processorService.registerEventHandler(BlockHeaderEvent.class, blockHeaderHandler);
+
+        GetBlockHandler getBlockHandler = new GetBlockHandler();
+        getBlockHandler.addFilter(new GetBlockEventFilter());
+        processorService.registerEventHandler(GetBlockEvent.class, getBlockHandler);
+
+        RegisterAgentHandler registerAgentHandler = new RegisterAgentHandler();
+        registerAgentHandler.addFilter(new RegisterAgentEventFilter());
+        processorService.registerEventHandler(RegisterAgentEvent.class, registerAgentHandler);
+
         JoinConsensusHandler joinConsensusHandler = new JoinConsensusHandler();
-        //add filter , add validator
+        joinConsensusHandler.addFilter(new JoinConsensusEventFilter());
         processorService.registerEventHandler(JoinConsensusEvent.class, joinConsensusHandler);
+
+        ExitConsensusHandler exitConsensusHandler = new ExitConsensusHandler();
+        exitConsensusHandler.addFilter(new ExitConsensusEventFilter());
+        processorService.registerEventHandler(ExitConsensusEvent.class, exitConsensusHandler);
+
+        RedPunishHandler redPunishHandler = new RedPunishHandler();
+        redPunishHandler.addFilter(new RedPunishEventFilter());
+        processorService.registerEventHandler(RedPunishConsensusEvent.class, redPunishHandler);
+
+        YellowPunishHandler yellowPunishHandler = new YellowPunishHandler();
+        yellowPunishHandler.addFilter(new YellowPunishEventFilter());
+        processorService.registerEventHandler(YellowPunishConsensusEvent.class, yellowPunishHandler);
     }
 
     private void checkConsensusStatus() {
