@@ -40,6 +40,7 @@ public abstract class BaseNulsData implements Serializable {
     protected void registerValidator(NulsDataValidator<? extends BaseNulsData> validator) {
         this.validatorChain.addValidator(validator);
     }
+
     public abstract int size();
 
     /**
@@ -68,12 +69,17 @@ public abstract class BaseNulsData implements Serializable {
 
     /**
      * serialize important field
+     *
      * @param stream
      * @throws IOException
      */
     public abstract void serializeToStream(NulsOutputStreamBuffer stream) throws IOException;
 
     public abstract void parse(NulsByteBuffer byteBuffer);
+
+    public final void parse(byte[] bytes) {
+        this.parse(new NulsByteBuffer(bytes));
+    }
 
     /**
      * @throws NulsException

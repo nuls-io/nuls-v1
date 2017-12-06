@@ -2,12 +2,14 @@ package io.nuls.account.util;
 
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
+import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
+import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.db.entity.AccountPo;
 
@@ -50,7 +52,9 @@ public final class AccountTool {
         AssertUtil.canNotEmpty(src, "Object type conversion faild!");
         AssertUtil.canNotEmpty(desc, "Object type conversion faild!");
         desc.setCreateTime(src.getCreateTime());
-        desc.setTxHash(src.getTxHash());
+        NulsDigestData txHash = new NulsDigestData();
+        txHash.parse(src.getTxHash());
+        desc.setTxHash(txHash);
         desc.setVersion(new NulsVersion(src.getVersion()));
         desc.setAddress(newAddress(src.getPubKey()));
         desc.setAlias(src.getAlias());
@@ -76,7 +80,7 @@ public final class AccountTool {
         desc.setAlias(src.getAlias());
         desc.setCreateTime(src.getCreateTime());
         desc.setPubKey(src.getPubKey());
-        desc.setTxHash(src.getTxHash());
+        desc.setTxHash(src.getTxHash().serialize());
         desc.setVersion(src.getVersion().getVersion());
         desc.setExtend(src.getExtend());
         desc.setPriKey(Hex.encode(src.getPriKey()));
