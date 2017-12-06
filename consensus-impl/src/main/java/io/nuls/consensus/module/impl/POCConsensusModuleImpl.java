@@ -32,13 +32,14 @@ public class POCConsensusModuleImpl extends AbstractConsensusModule {
         this.checkBlockHeight();
         this.checkConsensusStatus();
         this.startBlockMaintenanceThread();
-        this.registerHanders();
-        this.registerService(POCConsensusServiceImpl.getInstance());
         this.registerEvent(POCConsensusConstant.EVENT_TYPE_RED_PUNISH, RedPunishConsensusEvent.class);
         this.registerEvent(POCConsensusConstant.EVENT_TYPE_YELLOW_PUNISH, YellowPunishConsensusEvent.class);
+        this.registerEvent(POCConsensusConstant.EVENT_TYPE_REGISTER_AGENT, RegisterAgentEvent.class);
         this.registerTransaction(POCConsensusConstant.TX_TYPE_REGISTER_AGENT, RegisterAgentTransaction.class);
         this.registerTransaction(POCConsensusConstant.TX_TYPE_RED_PUNISH, RedPunishTransaction.class);
         this.registerTransaction(POCConsensusConstant.TX_TYPE_YELLOW_PUNISH, YellowPunishTransaction.class);
+        this.registerHanders();
+        this.registerService(POCConsensusServiceImpl.getInstance());
         Log.info("the POC consensus module is started!");
 
     }
