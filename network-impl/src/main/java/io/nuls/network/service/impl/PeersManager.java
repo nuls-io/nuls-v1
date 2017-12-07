@@ -45,6 +45,7 @@ public class PeersManager {
 
     public PeersManager(AbstractNetworkModule module, AbstractNetworkParam network, PeerDao peerDao) {
         this.networkModule = module;
+        this.network = network;
         this.peerDao = peerDao;
         lock = new ReentrantLock();
         // the default peerGroups
@@ -65,7 +66,7 @@ public class PeersManager {
      * start a peers server
      * query config find original peers
      * query database find cached peers
-     * find peers from connetcted peers
+     * find other peers from connetcted peers
      */
     public void start() {
 
@@ -109,6 +110,7 @@ public class PeersManager {
                 throw new NulsRuntimeException(ErrorCode.PEER_GROUP_NOT_FOUND);
             }
             if (groupName.equals(NetworkConstant.NETWORK_PEER_OUT_GROUP) &&
+
                     peerGroups.get(groupName).size() >= network.maxOutCount()) {
                 return;
             }

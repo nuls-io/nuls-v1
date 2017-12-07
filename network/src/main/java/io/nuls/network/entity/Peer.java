@@ -262,7 +262,7 @@ public class Peer extends BaseNulsData {
                 this.failCount = 0;
             }
             this.failCount++;
-            peerDao.saveChange(PeerTransfer.transferToPeerPo(this));
+    //        peerDao.saveChange(PeerTransfer.transferToPeerPo(this));
         } finally {
             lock.unlock();
         }
