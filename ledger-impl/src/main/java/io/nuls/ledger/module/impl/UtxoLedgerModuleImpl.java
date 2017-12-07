@@ -41,8 +41,8 @@ public class UtxoLedgerModuleImpl extends AbstractLedgerModule {
         CommonTxValidatorManager.initTxValidators();
         cacheStandingBook();
         this.registerService(ledgerService);
-        SmallChangeThread scthread = SmallChangeThread.getInstance();
-        ThreadManager.createSingleThreadAndRun(this.getModuleId(), SmallChangeThread.class.getSimpleName(), scthread);
+        SmallChangeThread smallChangeThread = SmallChangeThread.getInstance();
+        ThreadManager.createSingleThreadAndRun(this.getModuleId(), SmallChangeThread.class.getSimpleName(), smallChangeThread);
         this.registerEvent((short) 4, UtxoLockCoinEvent.class);
         this.registerEvent((short) 5, UtxoSmallChangeEvent.class);
         this.registerEvent((short) 6, AbstractCoinTransactionEvent.class);
