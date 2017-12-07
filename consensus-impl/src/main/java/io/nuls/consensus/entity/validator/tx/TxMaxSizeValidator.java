@@ -1,4 +1,4 @@
-package io.nuls.core.validate.validator.tx;
+package io.nuls.consensus.entity.validator.tx;
 
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.validate.NulsDataValidator;

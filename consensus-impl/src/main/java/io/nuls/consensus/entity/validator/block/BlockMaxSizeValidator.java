@@ -1,7 +1,6 @@
-package io.nuls.core.validate.validator.block;
+package io.nuls.consensus.entity.validator.block;
 
 import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 

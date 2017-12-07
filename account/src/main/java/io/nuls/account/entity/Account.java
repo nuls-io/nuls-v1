@@ -1,6 +1,8 @@
 package io.nuls.account.entity;
 
 import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.chain.entity.NulsDigestData;
+import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.ECKey;
@@ -29,14 +31,14 @@ public class Account extends BaseNulsData {
 
     private byte status;
 
-    private byte[] sign;
+    private NulsSignData sign;
 
     private byte[] pubKey;
 
     private byte[] extend;
 
     private Long createTime;
-    private byte[] txHash;
+    private NulsDigestData txHash;
 
 
     private byte[] priSeed;
@@ -45,6 +47,7 @@ public class Account extends BaseNulsData {
 
     //local field
     private ECKey ecKey;
+
 
     public ECKey getEcKey() {
         return ecKey;
@@ -110,7 +113,7 @@ public class Account extends BaseNulsData {
         }
         s += 1;//status
         if (null != sign) {
-            s += sign.length + 1;
+            s += sign.size() + 1;
         }
         s += pubKey.length + 1;
         if(null!=extend){
@@ -188,11 +191,11 @@ public class Account extends BaseNulsData {
         this.extend = extend;
     }
 
-    public byte[] getSign() {
+    public NulsSignData getSign() {
         return sign;
     }
 
-    public void setSign(byte[] sign) {
+    public void setSign(NulsSignData sign) {
         this.sign = sign;
     }
 
@@ -228,11 +231,11 @@ public class Account extends BaseNulsData {
         this.createTime = createTime;
     }
 
-    public byte[] getTxHash() {
+    public NulsDigestData getTxHash() {
         return txHash;
     }
 
-    public void setTxHash(byte[] txHash) {
+    public void setTxHash(NulsDigestData txHash) {
         this.txHash = txHash;
     }
 }

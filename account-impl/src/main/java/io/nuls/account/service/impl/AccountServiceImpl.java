@@ -85,18 +85,19 @@ public class AccountServiceImpl implements AccountService {
         if (null == account || account.getEcKey() == null) {
             return;
         }
-        byte[] sign = null;
-        //sign by mgprikey
-        Sha256Hash hash = null;
-        try {
-            hash = Sha256Hash.of(account.serialize());
-        } catch (IOException e) {
-            Log.error(e);
-        }
-        ECKey.ECDSASignature signature1 = account.getEcKey().sign(hash);
-        //sign result
-        sign = signature1.encodeToDER();
-        account.setSign(sign);
+        //todo
+//        byte[] sign = null;
+//        //sign by mgprikey
+//        Sha256Hash hash = null;
+//        try {
+//            hash = Sha256Hash.of(account.serialize());
+//        } catch (IOException e) {
+//            Log.error(e);
+//        }
+//        ECKey.ECDSASignature signature1 = account.getEcKey().sign(hash);
+//        //sign result
+//        sign = signature1.encodeToDER();
+//        account.setSign(sign);
     }
 
     @Override

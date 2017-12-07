@@ -3,11 +3,13 @@ package io.nuls.consensus.service.impl;
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
+import io.nuls.consensus.constant.GengsisBlock;
 import io.nuls.consensus.entity.Agent;
 import io.nuls.consensus.entity.ConsensusAccount;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.consensus.params.JoinConsensusParam;
 import io.nuls.consensus.service.intf.ConsensusService;
+import io.nuls.core.chain.entity.Block;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -38,6 +40,7 @@ public class POCConsensusServiceImpl implements ConsensusService {
     private void joinTheConsensus(Account account, String password, double amount, String agent) {
         //todo
         //check password
+
         //check block height
         //check consensus state
         //check credit
@@ -72,6 +75,11 @@ public class POCConsensusServiceImpl implements ConsensusService {
     }
 
     @Override
+    public Block getGengsisBlock() {
+        return GengsisBlock.getInstance();
+    }
+
+    @Override
     public void joinTheConsensus(String address, String password, Map<String, Object> paramsMap) {
         Account account = this.accountService.getAccount(address);
         if (null == account) {
@@ -94,11 +102,4 @@ public class POCConsensusServiceImpl implements ConsensusService {
         this.joinTheConsensus(account, password, params.getDeposit(), params.getAgentAddress());
     }
 
-    public void joinTheConsensus(String password, double amount, String agent) {
-        Account localAccount = this.accountService.getLocalAccount();
-        if (null == localAccount) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "Please specify the account address");
-        }
-        this.joinTheConsensus(localAccount, password, amount, agent);
-    }
 }
