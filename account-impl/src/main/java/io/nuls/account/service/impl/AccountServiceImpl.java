@@ -5,6 +5,7 @@ import io.nuls.account.entity.Address;
 import io.nuls.account.manager.AccountManager;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.account.util.AccountTool;
+import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
@@ -64,6 +65,7 @@ public class AccountServiceImpl implements AccountService {
             account.setEcKey(key);
             account.setPriKey(key.getPrivKeyBytes());
             account.setCreateTime(TimeService.currentTimeMillis());
+            account.setTxHash(new NulsDigestData());
             signAccount(account);
             AccountPo po = new AccountPo();
             AccountTool.toPojo(account, po);
