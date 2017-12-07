@@ -4,6 +4,7 @@ import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.core.mesasge.NulsMessage;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Peer;
+import io.nuls.network.entity.PeerGroup;
 
 /**
  * @author vivi
@@ -24,4 +25,8 @@ public interface NetworkService {
     BroadcastResult broadcastToGroup(byte[] data, String groupName);
 
     void addPeer(Peer peer);
+
+    void addPeerToGroup(String groupName, Peer peer);
+
+    void addPeerGroup(PeerGroup peerGroup);
 }

@@ -35,9 +35,10 @@ public class PeerDataHandler implements NetWorkDataHandler {
     public NetworkDataResult process(BaseNetworkData message, Peer peer) {
         PeerData peerData = (PeerData) message;
         for (Peer newPeer : peerData.getPeers()) {
+            System.out.println(newPeer);
             newPeer.setType(Peer.OUT);
             newPeer.setMessageHandlerFactory(peer.getMessageHandlerFactory());
-            peersManager.addPeerToGroup(NetworkConstant.NETWORK_PEER_OUT_GROUP, peer);
+            peersManager.addPeerToGroup(NetworkConstant.NETWORK_PEER_OUT_GROUP, newPeer);
         }
         return null;
     }

@@ -149,11 +149,11 @@ public class PeersManager {
         return peerGroups.containsKey(groupName);
     }
 
-    public void addPeerGroup(String groupName, PeerGroup peerGroup) throws NulsException {
-        if (peerGroups.containsKey(groupName)) {
-            throw new NulsException(ErrorCode.PRER_GROUP_ALREADY_EXISTS);
+    public void addPeerGroup(PeerGroup peerGroup) {
+        if (peerGroups.containsKey(peerGroup.getName())) {
+            throw new NulsRuntimeException(ErrorCode.PRER_GROUP_ALREADY_EXISTS);
         }
-        peerGroups.put(groupName, peerGroup);
+        peerGroups.put(peerGroup.getName(), peerGroup);
     }
 
     public void destroyPeerGroup(String groupName) {

@@ -11,6 +11,7 @@ import io.nuls.db.dao.PeerDao;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Peer;
+import io.nuls.network.entity.PeerGroup;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.filter.impl.DefaultMessageFilter;
 import io.nuls.network.message.impl.GetPeerDataHandler;
@@ -99,7 +100,18 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public void addPeer(Peer peer) {
+        peersManager.addPeer(peer);
+    }
 
+    @Override
+    public void addPeerToGroup(String groupName, Peer peer) {
+        peersManager.addPeerToGroup(groupName, peer);
+
+    }
+
+    @Override
+    public void addPeerGroup(PeerGroup peerGroup){
+        peersManager.addPeerGroup(peerGroup);
     }
 
     private AbstractNetworkParam getNetworkInstance() {
