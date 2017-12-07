@@ -1,10 +1,14 @@
 package io.nuls.network.constant;
 
+import io.nuls.core.mesasge.NulsMessageHeader;
+
 /**
  * @author vivi
  * @date 2017.11.10
  */
 public interface NetworkConstant {
+
+    int MESSAGE_MAX_SIZE = NulsMessageHeader.MESSAGE_HEADER_SIZE + 2<<21;
 
     /**
      * --------[network] -------

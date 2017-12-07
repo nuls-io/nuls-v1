@@ -4,6 +4,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.mesasge.NulsMessage;
 import io.nuls.core.utils.log.Log;
+import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Peer;
 import io.nuls.network.service.MessageWriter;
 
@@ -37,14 +38,14 @@ public class ConnectionHandler implements MessageWriter {
         this.key = key;
         this.channel = (SocketChannel) key.channel();
         this.peer = peer;
-        readBuffer = ByteBuffer.allocate(NulsMessage.MAX_SIZE);
+        readBuffer = ByteBuffer.allocate(NetworkConstant.MESSAGE_MAX_SIZE);
     }
 
     public ConnectionHandler(Peer peer, SocketChannel channel, SelectionKey key) {
         this.key = key;
         this.channel = channel;
         this.peer = peer;
-        readBuffer = ByteBuffer.allocate(NulsMessage.MAX_SIZE);
+        readBuffer = ByteBuffer.allocate(NetworkConstant.MESSAGE_MAX_SIZE);
     }
 
     private void setWriteOps() {
@@ -86,7 +87,7 @@ public class ConnectionHandler implements MessageWriter {
 
     @Override
     public void write(byte[] message) {
-        if (message.length > NulsMessage.MAX_SIZE) {
+        if (message.length > NetworkConstant.MESSAGE_MAX_SIZE) {
             throw new NulsRuntimeException(ErrorCode.DATA_OVER_SIZE_ERROR);
         }
         lock.lock();

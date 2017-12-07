@@ -178,7 +178,7 @@ public class Peer extends BaseNulsData {
         if (this.getStatus() == Peer.CLOSE) {
             return;
         }
-        if (buffer.position() != 0 || buffer.limit() <= NulsMessageHeader.MESSAGE_HEADER_SIZE || buffer.limit() > NulsMessage.MAX_SIZE) {
+        if (buffer.position() != 0 || buffer.limit() <= NulsMessageHeader.MESSAGE_HEADER_SIZE || buffer.limit() > NetworkConstant.MESSAGE_MAX_SIZE) {
             buffer.clear();
             throw new NulsVerificationException(ErrorCode.DATA_ERROR);
         }

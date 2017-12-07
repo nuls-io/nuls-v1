@@ -10,7 +10,6 @@ import java.nio.ByteBuffer;
 
 public class NulsMessage {
 
-    public static final int MAX_SIZE = NulsMessageHeader.MESSAGE_HEADER_SIZE + Block.MAX_SIZE;
 
     protected NulsMessageHeader header;
 

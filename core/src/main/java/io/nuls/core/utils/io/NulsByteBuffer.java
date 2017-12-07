@@ -104,9 +104,6 @@ public class NulsByteBuffer {
     }
 
     public byte[] readBytes(int length) throws NulsVerificationException {
-        if (length > Block.MAX_SIZE) {
-            throw new NulsVerificationException(ErrorCode.DATA_OVER_SIZE_ERROR);
-        }
         try {
             byte[] b = new byte[length];
             System.arraycopy(payload, cursor, b, 0, length);

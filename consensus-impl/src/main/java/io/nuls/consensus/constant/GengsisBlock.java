@@ -14,7 +14,7 @@ public final class GengsisBlock extends Block {
     private static final GengsisBlock INSTANCE = new GengsisBlock();
 
     private GengsisBlock() {
-        super(0, TimeService.currentTimeMillis());
+//        super(0, TimeService.currentTimeMillis());
         //todo create Gengsis Block
         this.parse(new NulsByteBuffer(new byte[2]));
     }
