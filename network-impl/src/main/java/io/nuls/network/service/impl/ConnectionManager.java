@@ -13,6 +13,7 @@ import io.nuls.network.module.AbstractNetworkModule;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -153,6 +154,7 @@ public class ConnectionManager implements Runnable {
             channel.configureBlocking(false);
             channel.socket().setReuseAddress(true);
             InetSocketAddress socketAddress = new InetSocketAddress(peer.getIp(), peer.getPort());
+            channel.bind(new InetSocketAddress(9999));
             channel.connect(socketAddress);
             PendingConnect data = new PendingConnect(channel, peer);
             SelectionKey key = channel.register(selector, SelectionKey.OP_CONNECT);

@@ -14,6 +14,7 @@ import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
+import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.PeerDao;
 import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
 import io.nuls.network.constant.NetworkConstant;
@@ -365,6 +366,9 @@ public class Peer extends BaseNulsData {
     }
 
     public String getHash() {
+        if(StringUtils.isBlank(hash)) {
+            hash = ip + port;
+        }
         return hash;
     }
 

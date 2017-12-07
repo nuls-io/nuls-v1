@@ -95,7 +95,7 @@ public class PeerDiscoverHandler implements Runnable {
 //                List<Peer> peers = getLocalPeers(network.maxOutCount() - outPeers.size());
 //                if (peers == null || peers.size() == 0) {
 //                    // find other peer from connected peers
-                    findOtherPeer(network.maxOutCount() - outPeers.size());
+                findOtherPeer(network.maxOutCount() - outPeers.size());
 //                } else {
 //                    for (Peer newPeer : peers) {
 //                        if (outPeers.getPeers().contains(newPeer)) {
@@ -127,30 +127,35 @@ public class PeerDiscoverHandler implements Runnable {
 
     /**
      * Inquire more of the other peers to the connected peers
+     *
      * @param size
      */
     private void findOtherPeer(int size) {
         PeerGroup group = peersManager.getPeerGroup(NetworkConstant.NETWORK_PEER_IN_GROUP);
         if (group.getPeers().size() > 0) {
             Peer peer = group.getPeers().get(0);
-            GetPeerData data = new GetPeerData(size);
-            try {
-                peer.sendNetworkData(data);
-            } catch (IOException e) {
-                Log.warn("send getPeerData error", e);
+            if (peer.isHandShake()) {
+                try {
+                    GetPeerData data = new GetPeerData(size);
+                    peer.sendNetworkData(data);
+                } catch (IOException e) {
+                    Log.warn("send getPeerData error", e);
+                }
             }
         }
 
         group = peersManager.getPeerGroup(NetworkConstant.NETWORK_PEER_OUT_GROUP);
         if (group.getPeers().size() > 0) {
             Peer peer = group.getPeers().get(0);
-            GetPeerData data = new GetPeerData(size);
-            try {
-                if (peer.isHandShake()) {
+            if (peer.isHandShake()) {
+                try {
+
+                    GetPeerData data = new GetPeerData(size);
                     peer.sendNetworkData(data);
+
+                } catch (IOException e) {
+                    Log.warn("send getPeerData error", e);
                 }
-            } catch (IOException e) {
-                Log.warn("send getPeerData error", e);
             }
         }
     }
