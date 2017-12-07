@@ -26,7 +26,7 @@ public class GetVersionDataHandler implements NetWorkDataHandler {
     @Override
     public NetworkDataResult process(BaseNetworkData message, Peer peer) {
         GetVersionData data = (GetVersionData) message;
-        VersionData replyMessage = new VersionData(1111, "ABCDEFGHTK");
+        VersionData replyMessage = new VersionData(1111, "ABCDEFGHTK", peer.getIp());
         peer.setPort(data.getExternalPort());
         return new NetworkDataResult(true, replyMessage);
     }

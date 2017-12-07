@@ -12,6 +12,8 @@ import io.nuls.network.constant.NetworkConstant;
  */
 public abstract class AbstractNetworkModule extends BaseNulsModule {
 
+    public static String ExternalIp;
+
     public static int ExternalPort;
 
     protected AbstractNetworkModule() {
