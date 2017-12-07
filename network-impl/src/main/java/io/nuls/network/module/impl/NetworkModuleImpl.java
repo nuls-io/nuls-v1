@@ -18,6 +18,7 @@ public class NetworkModuleImpl extends AbstractNetworkModule {
     private NetworkService networkService;
 
     public NetworkModuleImpl() throws IOException {
+        super();
         ConfigLoader.loadProperties(NetworkConstant.NETWORK_PROPERTIES);
 
         networkService = new NetworkServiceImpl(this);

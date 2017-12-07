@@ -1,6 +1,7 @@
 package io.nuls.network.message;
 
 import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.message.entity.GetPeerData;
@@ -23,7 +24,7 @@ public abstract class BaseNetworkData extends BaseNulsData {
 
     public BaseNetworkData(short mainVersion, short subVersion, short type) {
         super(mainVersion, subVersion);
-        this.networkHeader = new NetworkDataHeader(AbstractNetworkModule.networkModuleId, type);
+        this.networkHeader = new NetworkDataHeader(NulsConstant.MODULE_ID_NETWORK, type);
     }
 
     public BaseNetworkData(short mainVersion, short subVersion, NetworkDataHeader networkHeader) {

@@ -23,6 +23,7 @@ import io.nuls.network.message.*;
 import io.nuls.network.message.entity.GetVersionData;
 import io.nuls.network.message.entity.VersionData;
 import io.nuls.network.message.messageHandler.NetWorkDataHandler;
+import io.nuls.network.module.AbstractNetworkModule;
 import io.nuls.network.service.MessageWriter;
 
 import java.io.IOException;
@@ -124,7 +125,7 @@ public class Peer extends BaseNulsData {
     }
 
     public void connectionOpened() throws IOException {
-        GetVersionData data = new GetVersionData();
+        GetVersionData data = new GetVersionData(AbstractNetworkModule.ExternalPort);
         sendNetworkData(data);
         this.status = Peer.CONNECTING;
     }
@@ -228,7 +229,7 @@ public class Peer extends BaseNulsData {
                     } catch (Exception e) {
                         Log.error("process message error", e);
                         //e.printStackTrace();
-                        Peer.this.destroy();
+                        Peer.this.destroy(true);
                     }
                 }
             });
@@ -248,7 +249,7 @@ public class Peer extends BaseNulsData {
         }
     }
 
-    public void destroy() {
+    public void destroy(boolean save) {
 
         lock.lock();
         try {
@@ -257,13 +258,14 @@ public class Peer extends BaseNulsData {
                 this.writeTarget.closeConnection();
                 this.writeTarget = null;
             }
-
-            //check failCount and save or remove from database
-            if (this.failCount == null) {
-                this.failCount = 0;
+            if (save) {
+                //check failCount and save or remove from database
+                if (this.failCount == null) {
+                    this.failCount = 0;
+                }
+                this.failCount++;
+                peerDao.saveChange(PeerTransfer.transferToPeerPo(this));
             }
-            this.failCount++;
-    //        peerDao.saveChange(PeerTransfer.transferToPeerPo(this));
         } finally {
             lock.unlock();
         }
@@ -366,7 +368,7 @@ public class Peer extends BaseNulsData {
     }
 
     public String getHash() {
-        if(StringUtils.isBlank(hash)) {
+        if (StringUtils.isBlank(hash)) {
             hash = ip + port;
         }
         return hash;

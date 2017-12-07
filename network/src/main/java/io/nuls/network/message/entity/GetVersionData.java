@@ -2,7 +2,6 @@ package io.nuls.network.message.entity;
 
 import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.crypto.VarInt;
-import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.network.constant.NetworkConstant;
@@ -10,7 +9,6 @@ import io.nuls.network.message.BaseNetworkData;
 import io.nuls.network.message.NetworkDataHeader;
 
 import java.io.IOException;
-import java.io.OutputStream;
 
 /**
  * @author vivi
@@ -22,11 +20,11 @@ public class GetVersionData extends BaseNetworkData {
 
     public static final short OWN_SUB_VERSION = 1001;
 
-    private long nonce;
+    private int externalPort;
 
-    public GetVersionData() {
+    public GetVersionData(int externalPort) {
         super(OWN_MAIN_VERSION, OWN_SUB_VERSION, NetworkConstant.NETWORK_GET_VERSION_MESSAGE);
-        nonce = Utils.randomLong();
+        this.externalPort = externalPort;
     }
 
     public GetVersionData(NulsByteBuffer buffer) {
@@ -39,7 +37,7 @@ public class GetVersionData extends BaseNetworkData {
         int s = 0;
         s += NetworkDataHeader.NETWORK_HEADER_SIZE;
         s += 2;    //version.length
-        s += VarInt.sizeOf(nonce);
+        s += VarInt.sizeOf(externalPort);
         return s;
     }
 
@@ -47,14 +45,14 @@ public class GetVersionData extends BaseNetworkData {
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         networkHeader.serializeToStream(stream);
         stream.writeShort(version.getVersion());
-        stream.write(new VarInt(nonce).encode());
+        stream.write(new VarInt(externalPort).encode());
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
         this.networkHeader = new NetworkDataHeader(byteBuffer);
         version = new NulsVersion(byteBuffer.readShort());
-        nonce = byteBuffer.readVarInt();
+        externalPort = (int) byteBuffer.readVarInt();
     }
 
     @Override
@@ -63,17 +61,16 @@ public class GetVersionData extends BaseNetworkData {
         buffer.append("getVersionData:{");
         buffer.append(networkHeader.toString() + ", ");
         buffer.append("version:" + version.getVersion() + ", ");
-        buffer.append("nonce:" + nonce + "}");
+        buffer.append("externalPort:" + externalPort + "}");
 
         return buffer.toString();
     }
 
-    public long getNonce() {
-        return nonce;
+    public int getExternalPort() {
+        return externalPort;
     }
 
-    public void setNonce(long nonce) {
-        this.nonce = nonce;
+    public void setExternalPort(int externalPort) {
+        this.externalPort = externalPort;
     }
-
 }

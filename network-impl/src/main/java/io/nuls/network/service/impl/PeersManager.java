@@ -2,6 +2,7 @@ package io.nuls.network.service.impl;
 
 
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -84,7 +85,7 @@ public class PeersManager {
         System.out.println("-----------peerManager start");
 
         //start  heart beat thread
-        ThreadManager.createSingleThreadAndRun(AbstractNetworkModule.networkModuleId, "peerDiscovery", this.discovery);
+        ThreadManager.createSingleThreadAndRun(NulsConstant.MODULE_ID_NETWORK, "peerDiscovery", this.discovery);
     }
 
 
@@ -167,7 +168,7 @@ public class PeersManager {
 
             PeerGroup group = peerGroups.get(groupName);
             for (Peer p : group.getPeers()) {
-                p.destroy();
+                p.destroy(false);
                 group.removePeer(p);
             }
             peerGroups.remove(groupName);

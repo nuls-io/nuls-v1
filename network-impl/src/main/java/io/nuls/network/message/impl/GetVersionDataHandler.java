@@ -3,6 +3,7 @@ package io.nuls.network.message.impl;
 import io.nuls.network.entity.Peer;
 import io.nuls.network.message.BaseNetworkData;
 import io.nuls.network.message.NetworkDataResult;
+import io.nuls.network.message.entity.GetVersionData;
 import io.nuls.network.message.entity.VersionData;
 import io.nuls.network.message.messageHandler.NetWorkDataHandler;
 
@@ -24,7 +25,9 @@ public class GetVersionDataHandler implements NetWorkDataHandler {
 
     @Override
     public NetworkDataResult process(BaseNetworkData message, Peer peer) {
-        VersionData replyMessage = new VersionData(1111,"ABCDEFGHTK");
+        GetVersionData data = (GetVersionData) message;
+        VersionData replyMessage = new VersionData(1111, "ABCDEFGHTK");
+        peer.setPort(data.getExternalPort());
         return new NetworkDataResult(true, replyMessage);
     }
 }

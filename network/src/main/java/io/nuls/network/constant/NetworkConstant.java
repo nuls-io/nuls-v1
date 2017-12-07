@@ -12,7 +12,8 @@ public interface NetworkConstant {
     String NETWORK_PROPERTIES = "network.properties";
     String NETWORK_SECTION = "Network";
     String NETWORK_TYPE = "net.type";
-    String NETWORK_PORT = "network.port";
+    String NETWORK_SERVER_PORT = "network.server.port";
+    String NETWORK_EXTER_PORT = "network.external.port";
     String NETWORK_MAGIC = "network.magic";
     String NETWORK_PORT_TEST = "test.port";
     String NETWORK_MAGIC_TEST = "test.magic";

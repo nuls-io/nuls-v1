@@ -2,6 +2,7 @@ package io.nuls.network.service.impl;
 
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.ModuleStatusEnum;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.ThreadManager;
 import io.nuls.core.utils.log.Log;
@@ -74,7 +75,7 @@ public class ConnectionManager implements Runnable {
     public void start() {
         Log.info("----------- network connectionManager start -------------");
         running = true;
-        ThreadManager.createSingleThreadAndRun(AbstractNetworkModule.networkModuleId, "connectionManager", this, true);
+        ThreadManager.createSingleThreadAndRun(NulsConstant.MODULE_ID_NETWORK, "connectionManager", this, true);
     }
 
     public void restart() {
@@ -154,7 +155,6 @@ public class ConnectionManager implements Runnable {
             channel.configureBlocking(false);
             channel.socket().setReuseAddress(true);
             InetSocketAddress socketAddress = new InetSocketAddress(peer.getIp(), peer.getPort());
-            channel.bind(new InetSocketAddress(9999));
             channel.connect(socketAddress);
             PendingConnect data = new PendingConnect(channel, peer);
             SelectionKey key = channel.register(selector, SelectionKey.OP_CONNECT);
@@ -169,7 +169,7 @@ public class ConnectionManager implements Runnable {
                     e1.printStackTrace();
                 }
             }
-            peer.destroy();
+            peer.destroy(true);
         }
     }
 
@@ -243,11 +243,11 @@ public class ConnectionManager implements Runnable {
                 peer.connectionOpened();
             } else {
                 // Failed to connect for some reason
-                peer.destroy();
+                peer.destroy(true);
             }
         } catch (Exception e) {
-            Log.warn("out peer Failed to connect:" + peer.getIp() + ":" + peer.getPort()+",message:"+e.getMessage());
-            peer.destroy();
+            Log.warn("out peer Failed to connect:" + peer.getIp() + ":" + peer.getPort() + ",message:" + e.getMessage());
+            peer.destroy(true);
         }
     }
 
@@ -280,7 +280,7 @@ public class ConnectionManager implements Runnable {
                 }
             }
             if (peer != null) {
-                peer.destroy();
+                peer.destroy(false);
             }
         }
     }
