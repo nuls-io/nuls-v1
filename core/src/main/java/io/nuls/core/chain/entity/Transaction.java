@@ -1,12 +1,15 @@
 package io.nuls.core.chain.entity;
 
+import io.nuls.core.chain.manager.TransactionValidatorManager;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
+import io.nuls.core.validate.NulsDataValidator;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * @author Niels
@@ -17,6 +20,14 @@ public class Transaction extends BaseNulsData {
         this.dataType = NulsDataType.TRANSACTION;
         this.time = TimeService.currentTimeMillis();
         this.type = type;
+        this.initValidators();
+    }
+
+    private void initValidators() {
+        List<NulsDataValidator> list = TransactionValidatorManager.getValidators();
+        for (NulsDataValidator<Transaction> validator : list) {
+            this.registerValidator(validator);
+        }
     }
 
     /**

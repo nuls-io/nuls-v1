@@ -4,6 +4,7 @@ import io.nuls.consensus.constant.POCConsensusConstant;
 import io.nuls.consensus.entity.RedPunishTransaction;
 import io.nuls.consensus.entity.RegisterAgentTransaction;
 import io.nuls.consensus.entity.YellowPunishTransaction;
+import io.nuls.consensus.entity.validator.block.PocBlockValidatorManager;
 import io.nuls.consensus.event.*;
 import io.nuls.consensus.handler.*;
 import io.nuls.consensus.handler.filter.*;
@@ -28,6 +29,7 @@ public class POCConsensusModuleImpl extends AbstractConsensusModule {
     @Override
     public void start() {
         delegatePeer = ConfigLoader.getCfgValue(POCConsensusConstant.CFG_CONSENSUS_SECTION, POCConsensusConstant.PROPERTY_DELEGATE_PEER, false);
+        PocBlockValidatorManager.initBlockValidators();
         this.checkGenesisBlock();
         this.checkBlockHeight();
         this.checkConsensusStatus();
