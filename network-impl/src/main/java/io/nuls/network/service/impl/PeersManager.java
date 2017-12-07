@@ -106,21 +106,13 @@ public class PeersManager {
 
     public void addPeerToGroup(String groupName, Peer peer) {
         lock.lock();
+        if (!connectionManager.allowConnection(peer)) {
+            return;
+        }
         try {
             if (!peerGroups.containsKey(groupName)) {
                 throw new NulsRuntimeException(ErrorCode.PEER_GROUP_NOT_FOUND);
             }
-            if (groupName.equals(NetworkConstant.NETWORK_PEER_OUT_GROUP) &&
-
-                    peerGroups.get(groupName).size() >= network.maxOutCount()) {
-                return;
-            }
-
-            if (groupName.equals(NetworkConstant.NETWORK_PEER_IN_GROUP) &&
-                    peerGroups.get(groupName).size() >= network.maxInCount()) {
-                return;
-            }
-
             addPeer(peer);
             peerGroups.get(groupName).addPeer(peer);
         } finally {
@@ -218,9 +210,9 @@ public class PeersManager {
     public List<Peer> getAvailablePeers(int size, Peer excludePeer) {
         List<Peer> availablePeers = getAvailablePeers();
         Collections.shuffle(availablePeers);
-
+        System.out.println("---excludePeer:" + excludePeer.getIp() + ",port:" + excludePeer.getPort());
         for (Peer peer : availablePeers) {
-            if (peer.getStatus() == Peer.HANDSHAKE && peer.getIp().equals(excludePeer)) {
+            if (peer.getPort().equals(excludePeer.getPort()) && peer.getIp().equals(excludePeer)) {
                 availablePeers.remove(peer);
                 break;
             }
