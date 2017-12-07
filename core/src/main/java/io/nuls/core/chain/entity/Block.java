@@ -4,6 +4,7 @@ import io.nuls.core.chain.manager.BlockValidatorManager;
 import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.crypto.Sha256Hash;
+import io.nuls.core.crypto.VarInt;
 import io.nuls.core.event.EventManager;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -21,6 +22,12 @@ import java.util.List;
 public class Block extends BaseNulsData {
 
     private BlockHeader header;
+    /**
+     * the count of the agents the current round
+     */
+    private int countOfRound;
+    private long roundStartTime;
+    private int orderInRound;
 
     private List<Transaction> txs;
 
@@ -38,6 +45,9 @@ public class Block extends BaseNulsData {
     @Override
     public int size() {
         int size = header.size();
+        size += VarInt.sizeOf(countOfRound);
+        size += VarInt.sizeOf(roundStartTime);
+        size += VarInt.sizeOf(orderInRound);
         for (Transaction tx : txs) {
             size += tx.size();
         }
@@ -47,6 +57,9 @@ public class Block extends BaseNulsData {
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         header.serializeToStream(stream);
+        stream.writeVarInt(countOfRound);
+        stream.writeVarInt(roundStartTime);
+        stream.writeVarInt(orderInRound);
         for (Transaction tx : txs) {
             stream.write(tx.serialize());
         }
@@ -56,6 +69,9 @@ public class Block extends BaseNulsData {
     public void parse(NulsByteBuffer byteBuffer) {
         header = new BlockHeader();
         header.parse(byteBuffer);
+        countOfRound = (int) byteBuffer.readVarInt();
+        roundStartTime = byteBuffer.readVarInt();
+        orderInRound = (int) byteBuffer.readVarInt();
         try {
             txs = TransactionManager.getInstances(byteBuffer);
         } catch (Exception e) {
@@ -69,5 +85,37 @@ public class Block extends BaseNulsData {
 
     public void setTxs(List<Transaction> txs) {
         this.txs = txs;
+    }
+
+    public BlockHeader getHeader() {
+        return header;
+    }
+
+    public void setHeader(BlockHeader header) {
+        this.header = header;
+    }
+
+    public int getCountOfRound() {
+        return countOfRound;
+    }
+
+    public void setCountOfRound(int countOfRound) {
+        this.countOfRound = countOfRound;
+    }
+
+    public long getRoundStartTime() {
+        return roundStartTime;
+    }
+
+    public void setRoundStartTime(long roundStartTime) {
+        this.roundStartTime = roundStartTime;
+    }
+
+    public int getOrderInRound() {
+        return orderInRound;
+    }
+
+    public void setOrderInRound(int orderInRound) {
+        this.orderInRound = orderInRound;
     }
 }
