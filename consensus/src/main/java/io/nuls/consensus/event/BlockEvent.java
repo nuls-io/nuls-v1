@@ -15,7 +15,7 @@ public class BlockEvent extends BaseConsensusEvent<Block>{
 
     @Override
     protected Block parseEventBody(NulsByteBuffer byteBuffer) {
-        Block block = new Block(0L,0L);
+        Block block = new Block();
         block.parse(byteBuffer);
         return block;
     }

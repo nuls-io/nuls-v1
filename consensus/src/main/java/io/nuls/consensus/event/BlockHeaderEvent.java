@@ -17,7 +17,7 @@ public class BlockHeaderEvent extends BaseConsensusEvent<BlockHeader> {
 
     @Override
     protected BlockHeader parseEventBody(NulsByteBuffer byteBuffer) {
-        BlockHeader blockHeader = new BlockHeader(0L, 0L);
+        BlockHeader blockHeader = new BlockHeader();
         blockHeader.parse(byteBuffer);
         return blockHeader;
     }
