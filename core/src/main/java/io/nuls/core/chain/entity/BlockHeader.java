@@ -1,12 +1,9 @@
 package io.nuls.core.chain.entity;
 
-import io.nuls.core.chain.manager.BlockValidatorManager;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
-import io.nuls.core.validate.NulsDataValidator;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
  * @author vivi
@@ -34,23 +31,11 @@ public class BlockHeader extends BaseNulsData {
     private NulsSignData sign;
 
 
-    public BlockHeader(long height, long time) {
-        this.height = height;
-        this.time = time;
-        initValidators();
+    public BlockHeader( ) {
+
     }
 
-    private void initValidators() {
-        List<NulsDataValidator> list = BlockValidatorManager.getValidators();
-        for (NulsDataValidator<Block> validator : list) {
-            this.registerValidator(validator);
-        }
-    }
 
-    public BlockHeader(long height, long time, NulsDigestData preHash) {
-        this(height, time);
-        this.preHash = preHash;
-    }
 
     @Override
     public int size() {

@@ -1,14 +1,15 @@
 package io.nuls.consensus.entity.validator.block;
 
+import io.nuls.consensus.constant.POCConsensusConstant;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 
 /**
- * Created by Niels on 2017/11/17.
+ * @author Niels
+ * @date 2017/11/17
  */
 public class BlockMaxSizeValidator implements NulsDataValidator<Block> {
-    private static final int MAX_SIZE = 2 << 21;//2M
     private static final String ERROR_MESSAGE = "The block is too big!";
 
     @Override
@@ -17,7 +18,7 @@ public class BlockMaxSizeValidator implements NulsDataValidator<Block> {
             return new ValidateResult(false, "Data is null!");
         }
         int length = data.size();
-        if (length >= MAX_SIZE) {
+        if (length >= POCConsensusConstant.MAX_BLOCK_SIZE) {
             return ValidateResult.getFaildResult(ERROR_MESSAGE);
         }
         return ValidateResult.getSuccessResult();
