@@ -110,12 +110,12 @@ public class PeerDiscoverHandler implements Runnable {
 //                System.out.println("------out--ip:" + peer.getIp() + ",port:" + peer.getPort() + ",status:" + peer.getStatus());
 //            }
 //
-//            PeerGroup inPeers = peersManager.getPeerGroup(NetworkConstant.NETWORK_PEER_IN_GROUP);
-//            if(inPeers != null) {
-//                for (Peer peer : outPeers.getPeers()) {
-//                    System.out.println("-----in---ip:" + peer.getIp() + ",port:" + peer.getPort() + ",status:" + peer.getStatus());
-//                }
-//            }
+            PeerGroup inPeers = peersManager.getPeerGroup(NetworkConstant.NETWORK_PEER_IN_GROUP);
+            if(inPeers != null) {
+                for (Peer peer : outPeers.getPeers()) {
+                    System.out.println("-----in---ip:" + peer.getIp() + ",port:" + peer.getPort() + ",status:" + peer.getStatus());
+                }
+            }
 
             try {
                 Thread.sleep(3000);
