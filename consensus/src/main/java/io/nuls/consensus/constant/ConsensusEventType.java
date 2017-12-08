@@ -5,7 +5,6 @@ package io.nuls.consensus.constant;
  * @date 2017/12/1
  */
 public interface ConsensusEventType {
-
     short JOIN = 1;
     short EXIT = 2;
     short BLOCK = 3;

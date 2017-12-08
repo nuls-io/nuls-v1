@@ -16,10 +16,5 @@ public abstract class BaseConsensusEvent<T extends BaseNulsData> extends BaseNul
     public BaseConsensusEvent(short eventType) {
         super(NulsConstant.MODULE_ID_CONSENSUS, eventType);
     }
-
-    @Override
-    protected T parseEventBody(NulsByteBuffer byteBuffer) {
-        //todo
-        return null;
-    }
+ 
 }

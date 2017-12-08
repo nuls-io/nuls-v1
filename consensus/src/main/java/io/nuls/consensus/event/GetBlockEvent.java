@@ -7,6 +7,7 @@ import io.nuls.core.event.NulsEventHeader;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
 /**
+ * get block by height.
  * @author Niels
  * @date 2017/11/13
  */
