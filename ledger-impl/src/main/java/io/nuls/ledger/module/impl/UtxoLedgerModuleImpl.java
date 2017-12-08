@@ -16,7 +16,7 @@ import io.nuls.ledger.handler.UtxoCoinTransactionHandler;
 import io.nuls.ledger.handler.UtxoLockHandler;
 import io.nuls.ledger.handler.UtxoSmallChangeHandler;
 import io.nuls.ledger.module.AbstractLedgerModule;
-import io.nuls.ledger.service.impl.LedgerCacheService;
+import io.nuls.ledger.service.impl.LedgerCacheServiceImpl;
 import io.nuls.ledger.service.impl.UtxoLedgerServiceImpl;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.ledger.thread.SmallChangeThread;
@@ -31,7 +31,7 @@ public class UtxoLedgerModuleImpl extends AbstractLedgerModule {
 
     private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
 
-    private LedgerCacheService cacheService = LedgerCacheService.getInstance();
+    private LedgerCacheServiceImpl cacheService = LedgerCacheServiceImpl.getInstance();
 
     private LedgerService ledgerService = UtxoLedgerServiceImpl.getInstance();
 
