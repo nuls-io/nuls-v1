@@ -11,7 +11,9 @@ import io.nuls.network.service.Broadcaster;
 
 import java.io.IOException;
 import java.nio.channels.NotYetConnectedException;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 /**
  * @author vivi
@@ -22,6 +24,8 @@ public class BroadcasterImpl implements Broadcaster {
     private PeersManager peersManager;
 
     private AbstractNetworkParam network;
+
+    private static Random random = new Random();
 
     public BroadcasterImpl(PeersManager peersManager, AbstractNetworkParam network) {
         this.peersManager = peersManager;
@@ -50,6 +54,44 @@ public class BroadcasterImpl implements Broadcaster {
         }
         Log.debug("成功广播给{}个节点，消息{}", successCount, message);
         return new BroadcastResult(true, "OK");
+    }
+
+    /**
+     * Broadcast half of the peers, waiting for the other half to reply
+     *
+     * @param message
+     * @return
+     */
+    private BroadcastResult broadcastSync(NulsMessage message) {
+        List<Peer> broadPeers = peersManager.getAvailablePeers();
+
+        if (broadPeers.size() == 0) {
+            return new BroadcastResult(false, "no peer can be broadcast");
+        }
+        int numConnected = broadPeers.size();
+        int numToBroadcastTo = (int) Math.max(1, Math.round(Math.ceil(broadPeers.size() / 2.0)));
+        Collections.shuffle(broadPeers, random);
+        broadPeers = broadPeers.subList(0, numToBroadcastTo);
+
+
+        int successCount = 0;
+        for (Peer peer : broadPeers) {
+            try {
+                peer.sendMessage(message);
+                successCount++;
+            } catch (NotYetConnectedException | IOException e) {
+                Log.warn("broadcast message error ， maybe the peer closed ! peer ip :{}, {}", peer.getIp(), e.getMessage());
+            }
+        }
+        if (successCount == 0) {
+            new BroadcastResult(false, "broadcast fail");
+        }
+
+        BroadcastResult result = new BroadcastResult(true, "OK");
+        result.setBroadcastPeers(broadPeers);
+        result.setWaitReplyCount(numConnected - numToBroadcastTo);
+
+        return result;
     }
 
     private BroadcastResult broadcastToGroup(NulsMessage message, String groupName) {
@@ -95,6 +137,19 @@ public class BroadcasterImpl implements Broadcaster {
     public BroadcastResult broadcast(byte[] data) {
         NulsMessage message = new NulsMessage(network.packetMagic(), NulsMessageHeader.EVENT_MESSAGE, data);
         return broadcast(message);
+    }
+
+    @Override
+    public BroadcastResult broadcastSync(BaseNulsEvent event) {
+
+        return null;
+    }
+
+    @Override
+    public BroadcastResult broadcastSync(byte[] data) {
+        NulsMessage message = new NulsMessage(network.packetMagic(), NulsMessageHeader.EVENT_MESSAGE, data);
+
+        return null;
     }
 
     @Override
