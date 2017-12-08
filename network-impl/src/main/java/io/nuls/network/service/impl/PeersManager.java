@@ -246,8 +246,18 @@ public class PeersManager {
         }
     }
 
-    public String info() {
-        return "";
+    public List<Peer> getGroupAvailablePeers(String groupName) {
+        if (!peerGroups.containsKey(groupName)) {
+            throw new NulsRuntimeException(ErrorCode.PEER_GROUP_NOT_FOUND);
+        }
+        List<Peer> availablePeers = new ArrayList<>();
+        PeerGroup group = peerGroups.get(groupName);
+        for (Peer peer : group.getPeers()) {
+            if (peer.getStatus() == Peer.HANDSHAKE) {
+                availablePeers.add(peer);
+            }
+        }
+        return availablePeers;
     }
 
 
