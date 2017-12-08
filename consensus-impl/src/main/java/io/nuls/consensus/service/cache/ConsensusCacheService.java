@@ -1,7 +1,7 @@
 package io.nuls.consensus.service.cache;
 
 import io.nuls.cache.service.intf.CacheService;
-import io.nuls.consensus.entity.ConsensusAccount;
+import io.nuls.consensus.entity.ConsensusMember;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
@@ -49,36 +49,36 @@ public class ConsensusCacheService {
         this.cacheService.putElement(CACHE_CONSENSUS_STATUS_INFO, CACHE_CONSENSUS_STATUS_INFO, info);
     }
 
-    public void addConsensusAccount(ConsensusAccount ca) {
+    public void addConsensusMember(ConsensusMember ca) {
        cacheService.putElement(CACHE_CONSENSUS_ACCOUNT_LIST,ca.getAddress(),ca);
     }
 
-    public ConsensusAccount getConsensusAccount(String address){
-        return (ConsensusAccount)this.cacheService.getElementValue(CACHE_CONSENSUS_ACCOUNT_LIST,address);
+    public ConsensusMember getConsensusMember(String address){
+        return (ConsensusMember)this.cacheService.getElementValue(CACHE_CONSENSUS_ACCOUNT_LIST,address);
     }
 
-    public void delConsensusAccount(String address) {
+    public void delConsensusMember(String address) {
         this.cacheService.removeElement(CACHE_CONSENSUS_ACCOUNT_LIST,address);
     }
 
-    public void addTempConsensusAccount(ConsensusAccount ca) {
+    public void addTempConsensusMember(ConsensusMember ca) {
         cacheService.putElement(CACHE_CONSENSUS_ACCOUNT_LIST_TEMP,ca.getAddress(),ca);
     }
 
-    public ConsensusAccount getTempConsensusAccount(String address){
-        return (ConsensusAccount)this.cacheService.getElementValue(CACHE_CONSENSUS_ACCOUNT_LIST_TEMP,address);
+    public ConsensusMember getTempConsensusMember(String address){
+        return (ConsensusMember)this.cacheService.getElementValue(CACHE_CONSENSUS_ACCOUNT_LIST_TEMP,address);
     }
-    public void delTempConsensusAccount(String address) {
+    public void delTempConsensusMember(String address) {
         this.cacheService.removeElement(CACHE_CONSENSUS_ACCOUNT_LIST_TEMP,address);
     }
 
     public void moveAccountFromTemp(String address){
-        ConsensusAccount ca = getTempConsensusAccount(address);
+        ConsensusMember ca = getTempConsensusMember(address);
         if(null==ca){
             throw new NulsRuntimeException(ErrorCode.FAILED,"temporary consensus account not exist!");
         }
-        delTempConsensusAccount(address);
-        addConsensusAccount(ca);
+        delTempConsensusMember(address);
+        addConsensusMember(ca);
     }
 
 

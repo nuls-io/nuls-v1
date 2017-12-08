@@ -11,6 +11,7 @@ import io.nuls.core.thread.manager.NulsThreadFactory;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.event.bus.module.impl.EventBusModuleImpl;
+import io.nuls.event.bus.processor.manager.ProcessData;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -111,7 +112,7 @@ public class DisruptorUtil<T extends DisruptorEvent> {
      * @param name
      * @param handler
      */
-    public void handleEventsWithWorkerPool(String name, WorkHandler<DisruptorEvent<BaseNulsEvent>>... handler) {
+    public void handleEventsWithWorkerPool(String name, WorkHandler<DisruptorEvent<ProcessData>>... handler) {
         Disruptor disruptor = DISRUPTOR_MAP.get(name);
         AssertUtil.canNotEmpty(disruptor, "the disruptor is not exist!name:" + name);
         disruptor.handleEventsWithWorkerPool(handler);

@@ -13,7 +13,7 @@ import io.nuls.event.bus.event.handler.AbstractNetworkNulsEventHandler;
 public class BlockEventHandler extends AbstractNetworkNulsEventHandler<BlockEvent> {
 
     @Override
-    public void onEvent(BlockEvent event) throws NulsException {
+    public void onEvent(BlockEvent event,String formId) throws NulsException {
         //todo
 
     }

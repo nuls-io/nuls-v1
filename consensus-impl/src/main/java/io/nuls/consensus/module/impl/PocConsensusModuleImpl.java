@@ -9,7 +9,7 @@ import io.nuls.consensus.event.*;
 import io.nuls.consensus.handler.*;
 import io.nuls.consensus.handler.filter.*;
 import io.nuls.consensus.module.AbstractConsensusModule;
-import io.nuls.consensus.service.impl.POCConsensusServiceImpl;
+import io.nuls.consensus.service.impl.PocConsensusServiceImpl;
 import io.nuls.consensus.thread.BlockMaintenanceThread;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.thread.manager.ThreadManager;
@@ -21,7 +21,7 @@ import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
  * @author Niels
  * @date 2017/11/7
  */
-public class POCConsensusModuleImpl extends AbstractConsensusModule {
+public class PocConsensusModuleImpl extends AbstractConsensusModule {
 
     private NetworkProcessorService processorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
     private boolean delegatePeer = false;
@@ -41,7 +41,7 @@ public class POCConsensusModuleImpl extends AbstractConsensusModule {
         this.registerTransaction(POCConsensusConstant.TX_TYPE_RED_PUNISH, RedPunishTransaction.class);
         this.registerTransaction(POCConsensusConstant.TX_TYPE_YELLOW_PUNISH, YellowPunishTransaction.class);
         this.registerHanders();
-        this.registerService(POCConsensusServiceImpl.getInstance());
+        this.registerService(PocConsensusServiceImpl.getInstance());
         Log.info("the POC consensus module is started!");
 
     }
@@ -82,6 +82,7 @@ public class POCConsensusModuleImpl extends AbstractConsensusModule {
 
     private void checkConsensusStatus() {
         //todo
+
     }
 
     private void checkBlockHeight() {

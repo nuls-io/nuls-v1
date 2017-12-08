@@ -3,6 +3,7 @@ package io.nuls.event.bus.processor.service.impl;
 import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.event.bus.constant.EventBusConstant;
 import io.nuls.event.bus.event.handler.AbstractLocalNulsEventHandler;
+import io.nuls.event.bus.processor.manager.ProcessData;
 import io.nuls.event.bus.processor.manager.ProcessorManager;
 import io.nuls.event.bus.processor.service.intf.LocalProcessorService;
 
@@ -26,7 +27,7 @@ public class LocalProcessorServiceImpl implements LocalProcessorService {
 
     @Override
     public void send(BaseNulsEvent event) {
-        processorManager.offer(event);
+        processorManager.offer(new ProcessData(event));
     }
 
     @Override

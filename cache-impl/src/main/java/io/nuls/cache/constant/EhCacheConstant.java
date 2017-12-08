@@ -19,4 +19,6 @@ public interface EhCacheConstant {
     String POOL_HEAP_FIELD = "heap";
     String POOL_OFF_HEAP_FIELD = "offheap";
     String POOL_DISK_FIELD = "disk";
+    String POOL_TIME_OF_LIVE_SECONDS = "timeToLiveSeconds";
+    String POOL_TIME_OF_IDLE_SECONDS = "timeToIdleSeconds";
 }

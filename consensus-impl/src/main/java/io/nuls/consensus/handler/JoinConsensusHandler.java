@@ -13,7 +13,7 @@ import io.nuls.event.bus.event.handler.AbstractNetworkNulsEventHandler;
 public class JoinConsensusHandler extends AbstractNetworkNulsEventHandler<JoinConsensusEvent> {
 
     @Override
-    public void onEvent(JoinConsensusEvent event) throws NulsException {
+    public void onEvent(JoinConsensusEvent event,String formId) throws NulsException {
         //todo
     }
 }

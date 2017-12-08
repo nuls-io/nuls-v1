@@ -23,6 +23,5 @@ public interface BlockService {
     Block getLocalHighestBlock();
 
     Block getBestBlock();
-    
-    
+
 }

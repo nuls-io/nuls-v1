@@ -11,7 +11,7 @@ import io.nuls.ledger.event.UtxoSmallChangeEvent;
 public class UtxoSmallChangeHandler<T extends UtxoSmallChangeEvent> extends AbstractNetworkNulsEventHandler<T> {
 
     @Override
-    public void onEvent(T event) throws NulsException {
+    public void onEvent(T event,String formId) throws NulsException {
         //todo
 
     }

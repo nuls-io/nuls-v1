@@ -29,7 +29,7 @@ import java.util.concurrent.*;
 public class ProcessorManager<E extends BaseNulsEvent, H extends NulsEventHandler<? extends BaseNulsEvent>> {
     private final Map<String, H> handlerMap = new HashMap<>();
     private final Map<Class, Set<String>> eventHandlerMapping = new HashMap<>();
-    private DisruptorUtil<DisruptorEvent<E>> disruptorService = DisruptorUtil.getInstance();
+    private DisruptorUtil<DisruptorEvent<ProcessData<E>>> disruptorService = DisruptorUtil.getInstance();
     private ExecutorService pool;
     private String disruptorName;
 
@@ -57,9 +57,9 @@ public class ProcessorManager<E extends BaseNulsEvent, H extends NulsEventHandle
         disruptorService.shutdown(disruptorName);
     }
 
-    public void offer(E event) {
-        EventManager.isLegal(event.getClass());
-        disruptorService.offer(disruptorName, event);
+    public void offer(ProcessData<E> data) {
+        EventManager.isLegal(data.getEvent().getClass());
+        disruptorService.offer(disruptorName, data);
     }
 
     public String registerEventHandler(Class<E> eventClass, H handler) {
@@ -121,11 +121,11 @@ public class ProcessorManager<E extends BaseNulsEvent, H extends NulsEventHandle
     }
 
 
-    public void executeHandlers(E data) throws InterruptedException {
+    public void executeHandlers(ProcessData<E> data) throws InterruptedException {
         if (null == data) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "execute event handler faild,the event is null!");
         }
-        Set<NulsEventHandler> handlerSet = this.getHandlerList((Class<E>) data.getClass());
+        Set<NulsEventHandler> handlerSet = this.getHandlerList((Class<E>) data.getEvent().getClass());
         for (NulsEventHandler handler : handlerSet) {
             pool.execute(new NulsEventCall(data, handler));
         }

@@ -7,6 +7,7 @@ import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.constant.EventBusConstant;
 import io.nuls.event.bus.event.handler.AbstractNetworkNulsEventHandler;
+import io.nuls.event.bus.processor.manager.ProcessData;
 import io.nuls.event.bus.processor.manager.ProcessorManager;
 import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
 
@@ -29,11 +30,11 @@ public class NetworkProcessorServiceImpl implements NetworkProcessorService {
     }
 
     @Override
-    public void send(byte[] event) {
+    public void send(byte[] event,String peerId) {
         try {
             BaseNulsEvent eventObject = EventManager.getInstance(event);
             eventObject.parse(new NulsByteBuffer(event));
-            processorManager.offer(eventObject);
+            processorManager.offer(new ProcessData(eventObject,peerId));
         } catch (IllegalAccessException e) {
             Log.error(e);
         } catch (InstantiationException e) {

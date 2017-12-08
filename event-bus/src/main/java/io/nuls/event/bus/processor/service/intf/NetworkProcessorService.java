@@ -4,11 +4,12 @@ import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.event.bus.event.handler.AbstractNetworkNulsEventHandler;
 
 /**
- * Created by Niels on 2017/11/6.
+ * @author Niels
+ * @date 2017/11/6
  */
 public interface NetworkProcessorService {
 
-    void send(byte[] event);
+    void send(byte[] event,String peerHash);
 
     String registerEventHandler(Class<? extends BaseNulsEvent> eventClass, AbstractNetworkNulsEventHandler<? extends BaseNulsEvent> handler);
 

@@ -2,6 +2,7 @@ package io.nuls.core.chain.entity;
 
 
 import io.nuls.core.crypto.Sha256Hash;
+import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
@@ -54,11 +55,23 @@ public class NulsDigestData extends BaseNulsData{
         this.digestLength = digestLength;
     }
 
-    public byte[] getDigestBytes() {
-        return digestBytes;
+    public byte[] getDigestBytes(){
+        return this.digestBytes;
     }
 
-    public void setDigestBytes(byte[] digestBytes) {
+    public byte[] toBytes() {
+        byte[] bytes = new byte[digestLength+2];
+        bytes[0] = (byte)digestAlgType;
+        bytes[1] = (byte)digestLength;
+        System.arraycopy(digestBytes,0,bytes,2,digestLength);
+        return bytes;
+    }
+
+    public String getDigestHex(){
+        return Hex.encode(toBytes());
+    }
+
+    private void setDigestBytes(byte[] digestBytes) {
         this.digestBytes = digestBytes;
     }
 
@@ -85,5 +98,12 @@ public class NulsDigestData extends BaseNulsData{
         digestData.setDigestLength(content.length);
         digestData.setDigestBytes(content);
         return digestData;
+    }
+
+    public static void main(String[] args){
+        NulsTextData textData = new NulsTextData();
+        textData.setText("this is a text");
+        NulsDigestData nulsDigestData = NulsDigestData.calcDigestData(textData);
+        System.out.println(nulsDigestData.getDigestHex());
     }
 }

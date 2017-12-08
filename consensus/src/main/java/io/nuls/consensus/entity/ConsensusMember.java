@@ -11,7 +11,7 @@ import java.io.IOException;
  * @author Niels
  * @date 2017/11/7
  */
-public class ConsensusAccount extends BaseNulsData {
+public class ConsensusMember extends BaseNulsData {
 
     private Address address;
 

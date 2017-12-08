@@ -14,7 +14,7 @@ import java.io.IOException;
  * @author Niels
  * @date 2017/11/7
  */
-public class ConsensusAccountImpl extends ConsensusAccount {
+public class ConsensusMemberImpl extends ConsensusMember {
 
     private ConsensusRole role;
 
