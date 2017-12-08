@@ -18,6 +18,10 @@ public interface Broadcaster{
 
     BroadcastResult broadcast(byte[] data);
 
+    BroadcastResult broadcastSync(BaseNulsEvent event);
+
+    BroadcastResult broadcastSync(byte[] data);
+
     BroadcastResult broadcastToGroup(BaseNulsEvent event, String groupName);
 
     BroadcastResult broadcastToGroup(byte[] data, String groupName);
