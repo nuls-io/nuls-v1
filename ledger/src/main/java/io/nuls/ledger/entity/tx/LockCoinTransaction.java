@@ -1,13 +1,11 @@
-package io.nuls.ledger.entity;
+package io.nuls.ledger.entity.tx;
 
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.constant.TransactionConstant;
-import io.nuls.core.event.NulsEventHeader;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
 import java.io.IOException;
-import java.io.OutputStream;
 
 /**
  *

@@ -28,8 +28,6 @@ public class VersionData extends BaseNetworkData {
 
     private String bestBlockHash;
 
-    private String externalIp;
-
     private String nulsVersion;
 
     public VersionData() {
@@ -41,11 +39,10 @@ public class VersionData extends BaseNetworkData {
         super(buffer);
     }
 
-    public VersionData(long bestBlockHeight, String bestBlockHash, String ip) {
+    public VersionData(long bestBlockHeight, String bestBlockHash) {
         this();
         this.bestBlockHash = bestBlockHash;
         this.bestBlockHeight = bestBlockHeight;
-        this.externalIp = ip;
     }
 
     @Override
@@ -64,16 +61,6 @@ public class VersionData extends BaseNetworkData {
                 Log.error(e);
             }
         }
-
-        s += 1;
-        if (!StringUtils.isBlank(externalIp)) {
-            try {
-                s += externalIp.getBytes(NulsContext.DEFAULT_ENCODING).length;
-            } catch (UnsupportedEncodingException e) {
-                Log.error(e);
-            }
-        }
-
         s += 1;
         if (!StringUtils.isBlank(nulsVersion)) {
             try {
@@ -90,9 +77,8 @@ public class VersionData extends BaseNetworkData {
         networkHeader.serializeToStream(stream);
         stream.writeShort(version.getVersion());
         stream.write(new VarInt(bestBlockHeight).encode());
-        stream.writeBytesWithLength(bestBlockHash);
-        stream.writeBytesWithLength(externalIp);
-        stream.writeBytesWithLength(nulsVersion);
+        stream.writeBytesWithLength( bestBlockHash);
+        stream.writeBytesWithLength( nulsVersion);
     }
 
     @Override
@@ -101,7 +87,6 @@ public class VersionData extends BaseNetworkData {
         version = new NulsVersion(byteBuffer.readShort());
         bestBlockHeight = byteBuffer.readVarInt();
         bestBlockHash = new String(byteBuffer.readByLengthByte());
-        externalIp = new String(byteBuffer.readByLengthByte());
         nulsVersion = new String(byteBuffer.readByLengthByte());
     }
 
@@ -113,7 +98,6 @@ public class VersionData extends BaseNetworkData {
         buffer.append("version:" + version.getStringVersion() + ", ");
         buffer.append("bestBlockHeight:" + bestBlockHeight + ", ");
         buffer.append("bestBlockHash:" + bestBlockHash + ", ");
-        buffer.append("externalIp:" + externalIp + ", ");
         buffer.append("nulsVersion:" + nulsVersion + "}");
 
         return buffer.toString();
@@ -145,20 +129,4 @@ public class VersionData extends BaseNetworkData {
     }
 
 
-    public String getExternalIp() {
-        return externalIp;
-    }
-
-    public void setExternalIp(String externalIp) {
-        this.externalIp = externalIp;
-    }
-
-
-    public static void main(String[] args) throws IOException {
-        VersionData versionData = new VersionData(1111,"abcdefg", "192.168.1.3199");
-        byte[] bytes = versionData.serialize();
-        System.out.println(versionData.toString());
-        VersionData v1 = new VersionData(new NulsByteBuffer(bytes));
-        System.out.println(v1.toString());
-    }
 }

@@ -1,9 +1,9 @@
 package io.nuls.consensus.module.impl;
 
 import io.nuls.consensus.constant.POCConsensusConstant;
-import io.nuls.consensus.entity.RedPunishTransaction;
-import io.nuls.consensus.entity.RegisterAgentTransaction;
-import io.nuls.consensus.entity.YellowPunishTransaction;
+import io.nuls.consensus.entity.tx.RedPunishTransaction;
+import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
+import io.nuls.consensus.entity.tx.YellowPunishTransaction;
 import io.nuls.consensus.entity.validator.block.PocBlockValidatorManager;
 import io.nuls.consensus.event.*;
 import io.nuls.consensus.handler.*;

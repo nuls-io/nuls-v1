@@ -100,18 +100,17 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public void addPeer(Peer peer) {
-        if (connectionManager.allowConnection(peer)) {
-            peersManager.addPeer(peer);
-        }
+        peersManager.addPeer(peer);
     }
 
     @Override
     public void addPeerToGroup(String groupName, Peer peer) {
         peersManager.addPeerToGroup(groupName, peer);
+
     }
 
     @Override
-    public void addPeerGroup(PeerGroup peerGroup) {
+    public void addPeerGroup(PeerGroup peerGroup){
         peersManager.addPeerGroup(peerGroup);
     }
 

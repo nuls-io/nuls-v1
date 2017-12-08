@@ -17,7 +17,7 @@ import java.io.Serializable;
  * @author Niels
  * @date 2017/10/30
  */
-public abstract class BaseNulsData implements Serializable {
+public abstract class BaseNulsData  implements Serializable {
 
     protected NulsDataType dataType;
 

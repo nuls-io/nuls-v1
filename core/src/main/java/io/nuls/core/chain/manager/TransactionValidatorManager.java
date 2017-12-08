@@ -1,7 +1,5 @@
 package io.nuls.core.chain.manager;
 
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.validate.NulsDataValidator;
 
 import java.util.ArrayList;

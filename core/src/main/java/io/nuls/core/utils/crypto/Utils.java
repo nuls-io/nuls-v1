@@ -6,6 +6,7 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.log.Log;
 import org.spongycastle.crypto.digests.RIPEMD160Digest;
 
 import java.io.ByteArrayOutputStream;
@@ -437,6 +438,22 @@ public class Utils {
 
     public static long randomLong() {
         return (long) (Math.random() * Long.MAX_VALUE);
+    }
+
+    public static int sizeOfDouble(Double val) {
+        byte[] bytes = Utils.double2Bytes(val);
+        return VarInt.sizeOf(bytes.length) + bytes.length;
+    }
+
+    public static int sizeOfString(String val) {
+        byte[] bytes;
+        try {
+            bytes = val.getBytes(NulsContext.DEFAULT_ENCODING);
+        } catch (UnsupportedEncodingException e) {
+            Log.error(e);
+            throw new NulsRuntimeException(e);
+        }
+        return VarInt.sizeOf(bytes.length) + bytes.length;
     }
 
 }

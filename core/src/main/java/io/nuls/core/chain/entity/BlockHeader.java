@@ -1,9 +1,12 @@
 package io.nuls.core.chain.entity;
 
+import io.nuls.core.chain.manager.BlockHeaderValidatorManager;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
+import io.nuls.core.validate.NulsDataValidator;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * @author vivi
@@ -11,31 +14,28 @@ import java.io.IOException;
  */
 public class BlockHeader extends BaseNulsData {
 
-    protected NulsDigestData hash;
-    protected NulsDigestData preHash;
+    private NulsDigestData hash;
+    private NulsDigestData preHash;
+    private NulsDigestData merkleHash;
 
-    protected NulsDigestData merkleHash;
+    private long time;
 
-    protected long time;
+    private long height;
 
-    protected long height;
-
-    protected long txCount;
-    /**
-     * the count of the agents the current round
-     */
-    protected int countOfRound;
-    protected long roundStartTime;
-    protected int orderInRound;
+    private long txCount;
 
     private NulsSignData sign;
 
-
-    public BlockHeader( ) {
-
+    public BlockHeader() {
+        initValidators();
     }
 
-
+    private void initValidators() {
+        List<NulsDataValidator> list = BlockHeaderValidatorManager.getValidators();
+        for (NulsDataValidator validator : list) {
+            this.registerValidator(validator);
+        }
+    }
 
     @Override
     public int size() {
@@ -52,29 +52,6 @@ public class BlockHeader extends BaseNulsData {
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
         //todo
-    }
-
-    public NulsDigestData getHash() throws IOException {
-        if (hash == null) {
-            //todo
-//            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-//            try {
-//                Utils.uint32ToByteStreamLE(version.getVersion(), stream);
-//                stream.write(preHash.getBytes());
-////                stream.write(merkleHash.getBytes());
-//                Utils.int64ToByteStreamLE(time, stream);
-//                Utils.uint32ToByteStreamLE(height, stream);
-//                stream.write(new VarInt(periodCount).encode());
-//                stream.write(new VarInt(timePeriod).encode());
-//                Utils.uint32ToByteStreamLE(periodStartTime, stream);
-//                //交易数量
-//                stream.write(new VarInt(txCount).encode());
-//                hash = Sha256Hash.twiceOf(stream.toByteArray());
-//            } finally {
-//                stream.close();
-//            }
-        }
-        return hash;
     }
 
     public void setHash(NulsDigestData hash) {
@@ -119,30 +96,6 @@ public class BlockHeader extends BaseNulsData {
 
     public void setTxCount(long txCount) {
         this.txCount = txCount;
-    }
-
-    public int getCountOfRound() {
-        return countOfRound;
-    }
-
-    public void setCountOfRound(int countOfRound) {
-        this.countOfRound = countOfRound;
-    }
-
-    public long getRoundStartTime() {
-        return roundStartTime;
-    }
-
-    public void setRoundStartTime(long roundStartTime) {
-        this.roundStartTime = roundStartTime;
-    }
-
-    public int getOrderInRound() {
-        return orderInRound;
-    }
-
-    public void setOrderInRound(int orderInRound) {
-        this.orderInRound = orderInRound;
     }
 
     public NulsSignData getSign() {

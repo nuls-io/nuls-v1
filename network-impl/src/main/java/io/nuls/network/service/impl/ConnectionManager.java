@@ -6,7 +6,6 @@ import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.ThreadManager;
 import io.nuls.core.utils.log.Log;
-import io.nuls.core.utils.str.StringUtils;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Peer;
 import io.nuls.network.entity.PeerGroup;
@@ -175,52 +174,36 @@ public class ConnectionManager implements Runnable {
     }
 
 
-    public boolean allowConnection(Peer peer) {
-        lock.lock();
-        try {
-            //check the connecting peers count
-
-            if (peer.getType() == Peer.IN) {
-                PeerGroup inPeers = peersManager.getPeerGroup(NetworkConstant.NETWORK_PEER_IN_GROUP);
-                if (inPeers.size() >= network.maxInCount()) {
-                    return false;
-                }
-                for (Peer inPeer : inPeers.getPeers()) {
-                    if (peer.getIp().equals(inPeer.getIp()) && peer.getPort().equals(inPeer.getPort())) {
-                        return false;
-                    }
-                }
-            }
-
-            if (peer.getType() == Peer.OUT) {
-                PeerGroup outPeers = peersManager.getPeerGroup(NetworkConstant.NETWORK_PEER_OUT_GROUP);
-                if (outPeers.size() >= network.maxOutCount()) {
-                    return false;
-                }
-                for (Peer inPeer : outPeers.getPeers()) {
-                    if (peer.getIp().equals(inPeer.getIp()) && peer.getPort().equals(inPeer.getPort())) {
-                        return false;
-                    }
-                }
-            }
-
-            //check myself
-            if (!checkSelf(peer)) {
-                return false;
-            }
-            return true;
-        } finally {
-            lock.unlock();
+    public boolean allowConnection(InetSocketAddress socketAddress) {
+        //check the connecting peers count
+        boolean inAble = true;
+        boolean outAble = true;
+        PeerGroup inPeers = peersManager.getPeerGroup("inPeers");
+        if (inPeers.size() >= network.maxInCount()) {
+            inAble = false;
         }
-    }
-
-    private boolean checkSelf(Peer peer) {
-        if (network.getLocalIps().contains(peer.getIp())) {
+        PeerGroup outPeers = peersManager.getPeerGroup("inPeers");
+        if (outPeers.size() >= network.maxOutCount()) {
+            outAble = false;
+        }
+        if (!inAble && !outAble) {
             return false;
         }
-        if (!StringUtils.isBlank(AbstractNetworkModule.ExternalIp)) {
-            if (peer.getIp().equals(AbstractNetworkModule.ExternalIp) &&
-                    peer.getPort() == AbstractNetworkModule.ExternalPort) {
+        //check myself
+        if (network.getLocalIps().contains(socketAddress.getAddress().getHostAddress())) {
+            return false;
+        }
+        //check it already connected
+        for (Peer peer : inPeers.getPeers()) {
+            if (peer.getIp().equals(socketAddress.getAddress().getHostAddress()) &&
+                    peer.getPort() == socketAddress.getPort()) {
+                return false;
+            }
+        }
+
+        for (Peer peer : outPeers.getPeers()) {
+            if (peer.getIp().equals(socketAddress.getAddress().getHostAddress()) &&
+                    peer.getPort() == socketAddress.getPort()) {
                 return false;
             }
         }
@@ -274,14 +257,14 @@ public class ConnectionManager implements Runnable {
         try {
             socketChannel = serverSocketChannel.accept();
             InetSocketAddress socketAddress = (InetSocketAddress) socketChannel.getRemoteAddress();
-            peer = new Peer(network, Peer.IN, socketAddress);
-            if (!allowConnection(peer)) {
+            if (!allowConnection(socketAddress)) {
                 socketChannel.close();
                 return;
             }
             socketChannel.configureBlocking(false);
             SelectionKey newKey = socketChannel.register(selector, SelectionKey.OP_READ);
 
+            peer = new Peer(network, Peer.IN, socketAddress);
             peersManager.addPeerToGroup(NetworkConstant.NETWORK_PEER_IN_GROUP, peer);
             ConnectionHandler handler = new ConnectionHandler(peer, socketChannel, newKey);
             peer.setWriteTarget(handler);

@@ -20,6 +20,7 @@ import java.util.Properties;
 
 /**
  * System start class
+ * @author Niels
  */
 public class Bootstrap {
     private static final ModuleService moduleService = ModuleService.getInstance();
