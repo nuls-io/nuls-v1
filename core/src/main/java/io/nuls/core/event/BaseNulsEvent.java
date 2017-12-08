@@ -16,6 +16,8 @@ public abstract class BaseNulsEvent<T extends BaseNulsData> extends BaseNulsData
 
     private T eventBody;
 
+
+
     public BaseNulsEvent(short moduleId, short eventType, byte[] extend) {
         this.header = new NulsEventHeader(moduleId, eventType, extend);
     }

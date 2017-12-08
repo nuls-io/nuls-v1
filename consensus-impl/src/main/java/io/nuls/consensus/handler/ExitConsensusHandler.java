@@ -12,7 +12,7 @@ import io.nuls.event.bus.event.handler.AbstractNetworkNulsEventHandler;
 public class ExitConsensusHandler extends AbstractNetworkNulsEventHandler<ExitConsensusEvent> {
 
     @Override
-    public void onEvent(ExitConsensusEvent event) throws NulsException {
+    public void onEvent(ExitConsensusEvent event,String formId) throws NulsException {
         //todo
     }
 }

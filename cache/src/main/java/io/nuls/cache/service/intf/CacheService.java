@@ -27,6 +27,8 @@ public interface CacheService<K, V> {
      */
     void createCache(String title, Map<String, Object> initParams);
 
+    void createCache(String title, int timeToLiveSeconds, int timeToIdleSeconds);
+
     /**
      * remove a cache by title
      *

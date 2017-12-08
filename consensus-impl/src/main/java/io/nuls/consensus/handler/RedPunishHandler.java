@@ -13,7 +13,7 @@ import io.nuls.event.bus.event.handler.AbstractNetworkNulsEventHandler;
 public class RedPunishHandler extends AbstractNetworkNulsEventHandler<RedPunishConsensusEvent> {
 
     @Override
-    public void onEvent(RedPunishConsensusEvent event) throws NulsException {
+    public void onEvent(RedPunishConsensusEvent event,String formId) throws NulsException {
         //todo
 
     }

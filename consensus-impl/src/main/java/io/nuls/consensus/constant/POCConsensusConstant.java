@@ -26,6 +26,7 @@ public interface POCConsensusConstant {
     /**
      * TODO THE PARAMETERS OF CONSENSUS,bellow
      */
+    int CONFIRM_BLOCK_COUNT = 7;
     /**
      * Set temporarily as a fixed value,unit:nuls
      */
@@ -38,7 +39,7 @@ public interface POCConsensusConstant {
     /**
      * default:2M
      */
-    long MAX_BLOCK_SIZE = 2<<21;
+    long MAX_BLOCK_SIZE = 2 << 21;
 
 
     double AGENT_DEPOSIT_LOWER_LIMIT = 20000;
@@ -49,7 +50,7 @@ public interface POCConsensusConstant {
     /**
      * unit: %
      */
-    double AGENT_FORCED_EXITED_RATE=70;
+    double AGENT_FORCED_EXITED_RATE = 70;
     /**
      * commission rate,UNIT:%
      */

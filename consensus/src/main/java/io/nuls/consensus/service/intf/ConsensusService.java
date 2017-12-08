@@ -17,7 +17,7 @@ public interface ConsensusService {
 
     void exitTheConsensus(Address address, String password);
 
-    List<ConsensusMember> getConsensusAgentList(Map<String, Object> params);
+    List<ConsensusMember> getConsensusMemberList(Map<String, Object> params);
 
     ConsensusStatusInfo getConsensusInfo(String address);
 

@@ -4,11 +4,10 @@ import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.entity.Agent;
-import io.nuls.consensus.entity.ConsensusAccount;
+import io.nuls.consensus.entity.ConsensusMember;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.consensus.params.JoinConsensusParam;
 import io.nuls.consensus.service.intf.ConsensusService;
-import io.nuls.core.chain.entity.Block;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -20,12 +19,12 @@ import java.util.Map;
  * @author Niels
  * @date 2017/11/9
  */
-public class POCConsensusServiceImpl implements ConsensusService {
+public class PocConsensusServiceImpl implements ConsensusService {
 
-    private static final ConsensusService INSTANCE = new POCConsensusServiceImpl();
+    private static final ConsensusService INSTANCE = new PocConsensusServiceImpl();
     private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
 
-    private POCConsensusServiceImpl() {
+    private PocConsensusServiceImpl() {
     }
 
     public static ConsensusService getInstance() {
@@ -62,14 +61,12 @@ public class POCConsensusServiceImpl implements ConsensusService {
     }
 
     @Override
-    public List<ConsensusAccount> getConsensusAccountList() {
-        //todo
+    public List<ConsensusMember> getConsensusMemberList(Map<String, Object> params) {
         return null;
     }
 
     @Override
-    public ConsensusStatusInfo getConsensusInfo() {
-        //todo
+    public ConsensusStatusInfo getConsensusInfo(String address) {
         return null;
     }
 

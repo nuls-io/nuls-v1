@@ -35,12 +35,24 @@ public class EhCacheServiceImpl<K, T> implements CacheService<K, T> {
         if (initParams.get(EhCacheConstant.POOL_HEAP_FIELD) != null) {
             heap = (Integer) initParams.get(EhCacheConstant.POOL_HEAP_FIELD);
         }
-        cacheManager.createCache(title, keyType, valueType, heap);
+        int timeToLiveSeconds = 0;
+        if (initParams.get(EhCacheConstant.POOL_TIME_OF_LIVE_SECONDS) != null) {
+            timeToLiveSeconds = (Integer) initParams.get(EhCacheConstant.POOL_TIME_OF_LIVE_SECONDS);
+        }
+        int timeToIdleSeconds =0;
+        if (initParams.get(EhCacheConstant.POOL_TIME_OF_IDLE_SECONDS) != null) {
+            timeToIdleSeconds = (Integer) initParams.get(EhCacheConstant.POOL_TIME_OF_IDLE_SECONDS);
+        }
+        cacheManager.createCache(title, keyType, valueType, heap,timeToLiveSeconds,timeToIdleSeconds);
     }
 
     @Override
     public void createCache(String title) {
-        cacheManager.createCache(title, String.class, Serializable.class, EhCacheConstant.DEFAULT_MAX_SIZE);
+        cacheManager.createCache(title, String.class, Serializable.class, EhCacheConstant.DEFAULT_MAX_SIZE,0,0);
+    }
+    @Override
+    public void createCache(String title,int timeToLiveSeconds,int timeToIdleSeconds) {
+        cacheManager.createCache(title, String.class, Serializable.class, EhCacheConstant.DEFAULT_MAX_SIZE,timeToLiveSeconds,timeToIdleSeconds);
     }
 
 
