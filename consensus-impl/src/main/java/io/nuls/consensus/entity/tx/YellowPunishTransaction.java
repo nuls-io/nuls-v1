@@ -1,4 +1,4 @@
-package io.nuls.consensus.entity;
+package io.nuls.consensus.entity.tx;
 
 import io.nuls.consensus.constant.POCConsensusConstant;
 import io.nuls.consensus.tx.AbstractConsensusTransaction;

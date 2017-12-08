@@ -5,7 +5,7 @@ package io.nuls.core.constant;
  */
 public interface TransactionConstant {
 
-    int TX_TYPE_COINBASE = 1;
+    int TX_TYPE_COIN_BASE = 1;
     int TX_TYPE_TRANSFER = 2;
     int TX_TYPE_LOCK = 3;
     int TX_TYPE_SMALL_CHANGE = 4;

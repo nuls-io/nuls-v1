@@ -11,7 +11,6 @@ import io.nuls.network.message.BaseNetworkData;
 import io.nuls.network.message.NetworkDataResult;
 import io.nuls.network.message.entity.VersionData;
 import io.nuls.network.message.messageHandler.NetWorkDataHandler;
-import io.nuls.network.module.AbstractNetworkModule;
 
 /**
  * @author vivi
@@ -40,7 +39,7 @@ public class VersionDataHandler implements NetWorkDataHandler {
         peer.setVersionMessage(versionMessage);
         peer.setStatus(Peer.HANDSHAKE);
         peer.setLastTime(TimeService.currentTimeMillis());
-        AbstractNetworkModule.ExternalIp = versionMessage.getExternalIp();
+
       //  getPeerDao().saveChange(PeerTransfer.transferToPeerPo(peer));
         return null;
     }

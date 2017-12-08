@@ -6,6 +6,7 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.thread.manager.ThreadManager;
 import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
 import io.nuls.ledger.constant.LedgerConstant;
+import io.nuls.ledger.entity.block.DevGenesisBlock;
 import io.nuls.ledger.entity.validator.CommonTxValidatorManager;
 import io.nuls.ledger.event.AbstractCoinTransactionEvent;
 import io.nuls.ledger.event.UtxoDepositCoinEvent;
@@ -38,6 +39,8 @@ public class UtxoLedgerModuleImpl extends AbstractLedgerModule {
 
     @Override
     public void start() {
+        //todo 判断启动模式，选择创世块
+        NulsContext.getInstance().setGenesisBlock(DevGenesisBlock.getInstance());
         CommonTxValidatorManager.initTxValidators();
         cacheStandingBook();
         this.registerService(ledgerService);

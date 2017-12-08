@@ -3,7 +3,6 @@ package io.nuls.consensus.service.impl;
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
-import io.nuls.consensus.constant.GengsisBlock;
 import io.nuls.consensus.entity.Agent;
 import io.nuls.consensus.entity.ConsensusAccount;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
@@ -72,11 +71,6 @@ public class POCConsensusServiceImpl implements ConsensusService {
     public ConsensusStatusInfo getConsensusInfo() {
         //todo
         return null;
-    }
-
-    @Override
-    public Block getGengsisBlock() {
-        return GengsisBlock.getInstance();
     }
 
     @Override

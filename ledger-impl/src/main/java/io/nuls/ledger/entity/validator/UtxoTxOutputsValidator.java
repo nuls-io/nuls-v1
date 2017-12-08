@@ -2,7 +2,7 @@ package io.nuls.ledger.entity.validator;
 
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
-import io.nuls.ledger.entity.AbstractCoinTransaction;
+import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.UtxoOutput;
 

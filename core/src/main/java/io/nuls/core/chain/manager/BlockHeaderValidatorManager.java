@@ -9,13 +9,12 @@ import java.util.List;
  * @author Niels
  * @date 2017/12/7
  */
-public class BlockValidatorManager {
+public class BlockHeaderValidatorManager {
 
-    private static final List<NulsDataValidator> ALL_LIST = new ArrayList<>();
+    private static final List<NulsDataValidator > ALL_LIST = new ArrayList<>();
 
     /**
      * the validator fit Block instance
-     *
      * @param validator
      */
     public static void addBlockDefValitor(NulsDataValidator validator) {

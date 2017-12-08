@@ -2,7 +2,7 @@ package io.nuls.consensus.handler;
 
 import io.nuls.core.exception.NulsException;
 import io.nuls.event.bus.event.handler.AbstractNetworkNulsEventHandler;
-import io.nuls.ledger.entity.AbstractCoinTransaction;
+import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.ledger.event.AbstractCoinTransactionEvent;
 
 /**

@@ -1,9 +1,6 @@
 package io.nuls.ledger.event;
 
-import io.nuls.core.event.NulsEventHeader;
-import io.nuls.ledger.entity.LockCoinTransaction;
-
-import javax.swing.event.DocumentEvent;
+import io.nuls.ledger.entity.tx.LockCoinTransaction;
 
 /**
  *

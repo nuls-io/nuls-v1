@@ -1,7 +1,7 @@
 package io.nuls.consensus.event;
 
 import io.nuls.consensus.constant.POCConsensusConstant;
-import io.nuls.consensus.entity.RegisterAgentTransaction;
+import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
 /**

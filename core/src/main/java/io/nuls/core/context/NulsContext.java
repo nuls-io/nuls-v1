@@ -1,8 +1,6 @@
 package io.nuls.core.context;
 
 import io.nuls.core.chain.entity.Block;
-import io.nuls.core.module.manager.ModuleManager;
-import io.nuls.core.module.BaseNulsModule;
 import io.nuls.core.module.manager.ServiceManager;
 
 /**
@@ -29,12 +27,16 @@ public class NulsContext {
      * cache the best block
      */
     private Block bestBlock;
+    private Block genesisBlock;
 
     public static String nulsVersion = "1.0";
 
     public Block getGenesisBlock() {
-        //todo
-        return null;
+        return genesisBlock;
+    }
+
+    public void setGenesisBlock(Block block){
+        this.genesisBlock = block;
     }
 
     /**

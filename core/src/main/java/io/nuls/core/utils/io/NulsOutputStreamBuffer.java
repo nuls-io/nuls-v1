@@ -24,6 +24,10 @@ public class NulsOutputStreamBuffer {
         out.write(bytes);
     }
 
+    public void write(int val) throws IOException {
+        out.write(val);
+    }
+
     public void writeInt(int val) throws IOException {
         out.write(val);
     }

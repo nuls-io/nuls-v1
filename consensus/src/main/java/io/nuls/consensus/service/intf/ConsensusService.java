@@ -22,5 +22,4 @@ public interface ConsensusService {
 
     ConsensusStatusInfo getConsensusInfo();
 
-    Block getGengsisBlock();
 }
