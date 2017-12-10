@@ -58,7 +58,7 @@ public class EventManager {
 
     public static List<BaseNulsEvent> getInstances(NulsByteBuffer buffer) throws IllegalAccessException, InstantiationException {
         List<BaseNulsEvent> list = new ArrayList<>();
-        while(!buffer.isFinished()) {
+        while (!buffer.isFinished()) {
             NulsEventHeader header = new NulsEventHeader();
             header.parse(new NulsByteBuffer(buffer.getPayloadByCursor()));
             Class<? extends BaseNulsEvent> clazz = EVENT_MAP.get(header.getModuleId() + "_" + header.getEventType());

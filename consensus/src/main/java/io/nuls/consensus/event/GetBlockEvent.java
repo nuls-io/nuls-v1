@@ -18,7 +18,7 @@ public class GetBlockEvent extends BaseConsensusEvent<BasicTypeData<Integer>>{
 
     @Override
     protected BasicTypeData<Integer> parseEventBody(NulsByteBuffer byteBuffer) {
-       return new BasicTypeData<Integer>(byteBuffer);
+       return new BasicTypeData<>(byteBuffer);
     }
 
 
