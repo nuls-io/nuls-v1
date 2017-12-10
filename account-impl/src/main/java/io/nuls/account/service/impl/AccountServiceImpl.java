@@ -6,6 +6,7 @@ import io.nuls.account.manager.AccountManager;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.account.util.AccountTool;
 import io.nuls.core.chain.entity.NulsDigestData;
+import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
@@ -55,7 +56,7 @@ public class AccountServiceImpl implements AccountService {
         locker.lock();
         try {
             ECKey key = new ECKey();
-            Address address = new Address(Utils.sha256hash160(key.getPubKey(false)));
+            Address address = new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID),Utils.sha256hash160(key.getPubKey(false)));
             Account account = new Account();
             account.setPriSeed(key.getPrivKeyBytes());
             account.setVersion(new NulsVersion((short) 0));
@@ -179,4 +180,35 @@ public class AccountServiceImpl implements AccountService {
             throw new NulsRuntimeException(ErrorCode.FAILED, "The account not exist,id:" + id);
         }
     }
+
+    @Override
+    public String getDefaultAccount() {
+        return AccountManager.Locla_acount_id;
+    }
+
+    @Override
+    public boolean changePassword(String oldpw, String newpw) {
+        return false;
+    }
+
+    @Override
+    public boolean setPassword(String passwd) {
+        return false;
+    }
+
+    @Override
+    public boolean lockAccounts() {
+        return false;
+    }
+
+    @Override
+    public boolean unlockAccounts(String passwd) {
+        return false;
+    }
+
+    @Override
+    public NulsSignData signData(byte[] bytes) {
+        return null;
+    }
+
 }

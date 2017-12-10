@@ -204,7 +204,7 @@
         <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Serach_Where"/>
     </select>
     <select id="selectCount" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultType="java.lang.Long">
-        select count(id) from peer
+        select count(1) from peer
         <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Serach_Where"/>
     </select>
 </mapper>
