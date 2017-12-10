@@ -88,4 +88,5 @@ public interface CacheService<K, V> {
     List<String> getCacheTitleList();
 
 
+    boolean containsKey(String cacheTitle, String key);
 }
