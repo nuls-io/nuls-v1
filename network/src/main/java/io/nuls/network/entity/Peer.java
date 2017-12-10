@@ -4,6 +4,7 @@ import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsVerificationException;
 import io.nuls.core.mesasge.NulsMessage;
@@ -207,8 +208,12 @@ public class Peer extends BaseNulsData {
             if (this.status != Peer.HANDSHAKE) {
                 return;
             }
+            if (checkBroadcastExist(message.getData())) {
+                return;
+            }
+
             message.verify();
-            processorService.send(message.getData(),this.getHash());
+            processorService.send(message.getData(), this.getHash());
         } else {
             byte[] networkHeader = new byte[NetworkDataHeader.NETWORK_HEADER_SIZE];
             System.arraycopy(message.getData(), 0, networkHeader, 0, NetworkDataHeader.NETWORK_HEADER_SIZE);
@@ -234,6 +239,24 @@ public class Peer extends BaseNulsData {
                 }
             });
         }
+    }
+
+
+    public boolean checkBroadcastExist(byte[] data) {
+        String hash = Sha256Hash.twiceOf(data).toString();
+        BroadcastResult result = NetworkCacheService.getInstance().getBroadCastResult(hash);
+        if (result == null) {
+            return false;
+        }
+
+        result.setRepliedCount(result.getRepliedCount() + 1);
+        if (result.getRepliedCount() < result.getWaitReplyCount()) {
+            NetworkCacheService.getInstance().addBroadCastResult(result);
+        } else {
+            ReplyEvent event = new ReplyEvent();
+
+        }
+        return true;
     }
 
 

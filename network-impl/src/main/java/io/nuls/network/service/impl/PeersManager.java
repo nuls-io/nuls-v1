@@ -186,6 +186,13 @@ public class PeersManager {
         peerDao.deleteByKey(peer.getHash());
     }
 
+    public Peer getPeer(String peerId) {
+//        if (!peers.containsKey(peerId)) {
+//            throw new NulsRuntimeException(ErrorCode.PEER_NOT_FOUND);
+//        }
+        return peers.get(peerId);
+    }
+
     public PeerGroup getPeerGroup(String groupName) {
         return peerGroups.get(groupName);
     }
@@ -204,11 +211,11 @@ public class PeersManager {
     }
 
 
-    public List<Peer> getAvailablePeers() {
+    public List<Peer> getAvailablePeers(String excludePeerId) {
         List<Peer> availablePeers = new ArrayList<>();
         Collection<Peer> collection = peers.values();
         for (Peer peer : collection) {
-            if (peer.getStatus() == Peer.HANDSHAKE) {
+            if (peer.getStatus() == Peer.HANDSHAKE && !peer.getIp().equals(excludePeerId)) {
                 availablePeers.add(peer);
             }
         }
@@ -216,18 +223,11 @@ public class PeersManager {
     }
 
     public List<Peer> getAvailablePeers(int size, Peer excludePeer) {
-        List<Peer> availablePeers = getAvailablePeers();
-        Collections.shuffle(availablePeers);
-
-        for (Peer peer : availablePeers) {
-            if (peer.getStatus() == Peer.HANDSHAKE && peer.getIp().equals(excludePeer)) {
-                availablePeers.remove(peer);
-                break;
-            }
-        }
+        List<Peer> availablePeers = getAvailablePeers(excludePeer.getHash());
         if (availablePeers.size() <= size) {
             return availablePeers;
         }
+        Collections.shuffle(availablePeers);
         return availablePeers.subList(0, size);
     }
 
@@ -246,14 +246,14 @@ public class PeersManager {
         }
     }
 
-    public List<Peer> getGroupAvailablePeers(String groupName) {
+    public List<Peer> getGroupAvailablePeers(String groupName, String excludePeerId) {
         if (!peerGroups.containsKey(groupName)) {
             throw new NulsRuntimeException(ErrorCode.PEER_GROUP_NOT_FOUND);
         }
         List<Peer> availablePeers = new ArrayList<>();
         PeerGroup group = peerGroups.get(groupName);
         for (Peer peer : group.getPeers()) {
-            if (peer.getStatus() == Peer.HANDSHAKE) {
+            if (peer.getStatus() == Peer.HANDSHAKE && !peer.getIp().equals(excludePeerId)) {
                 availablePeers.add(peer);
             }
         }
