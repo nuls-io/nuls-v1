@@ -6,6 +6,7 @@ import io.nuls.account.manager.AccountManager;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.account.util.AccountTool;
 import io.nuls.core.chain.entity.NulsDigestData;
+import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
@@ -179,4 +180,35 @@ public class AccountServiceImpl implements AccountService {
             throw new NulsRuntimeException(ErrorCode.FAILED, "The account not exist,id:" + id);
         }
     }
+
+    @Override
+    public String getDefaultAccount() {
+        return AccountManager.Locla_acount_id;
+    }
+
+    @Override
+    public boolean changePassword(String oldpw, String newpw) {
+        return false;
+    }
+
+    @Override
+    public boolean setPassword(String passwd) {
+        return false;
+    }
+
+    @Override
+    public boolean lockAccounts() {
+        return false;
+    }
+
+    @Override
+    public boolean unlockAccounts(String passwd) {
+        return false;
+    }
+
+    @Override
+    public NulsSignData signData(byte[] bytes) {
+        return null;
+    }
+
 }

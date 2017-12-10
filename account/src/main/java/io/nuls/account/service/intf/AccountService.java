@@ -3,6 +3,7 @@ package io.nuls.account.service.intf;
 
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
+import io.nuls.core.chain.entity.NulsSignData;
 
 import java.util.List;
 
@@ -25,4 +26,16 @@ public interface AccountService {
     byte[] getPriKey(String address);
 
     void switchAccount(String id);
+
+    String getDefaultAccount();
+
+    boolean changePassword(String oldpw,String newpw);
+
+    boolean setPassword(String passwd);
+
+    boolean lockAccounts();
+
+    boolean unlockAccounts(String passwd);
+
+    NulsSignData signData(byte[] bytes);
 }
