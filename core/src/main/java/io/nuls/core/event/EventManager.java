@@ -4,6 +4,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.module.BaseNulsModule;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.param.AssertUtil;
 
 import java.util.*;
 
@@ -24,10 +25,10 @@ public class EventManager {
 
     public static void putEvent(short moduleId, short type, Class<? extends BaseNulsEvent> clazz) {
         if (type == 0) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "the event type cannot be 0!");
+            throw new NulsRuntimeException(ErrorCode.FAILED, "the event type cannot be 0!,module:" + moduleId + ",eventType:" + type);
         }
         if (EVENT_MAP.containsKey(moduleId + "_" + type)) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "the event type is repeated");
+            throw new NulsRuntimeException(ErrorCode.FAILED, "the event type is repeated,module:" + moduleId + ",eventType:" + type);
         }
         EVENT_MAP.put(moduleId + "_" + type, clazz);
         cacheEventClass(clazz);
@@ -41,8 +42,10 @@ public class EventManager {
     }
 
     public static void putEvent(BaseNulsModule module, short type, Class<? extends BaseNulsEvent> clazz) {
+        AssertUtil.canNotEmpty(clazz, "event class is null!");
+        AssertUtil.canNotEmpty(module, "module is null,message" + clazz.getName());
         if (type == 0) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "the event type cannot be 0!");
+            throw new NulsRuntimeException(ErrorCode.FAILED, "the event type cannot be 0!,module:" + module.getModuleId() + ",eventType:" + type);
         }
         putEvent(module.getModuleId(), type, clazz);
     }
