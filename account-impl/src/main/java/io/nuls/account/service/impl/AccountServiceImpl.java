@@ -65,7 +65,7 @@ public class AccountServiceImpl implements AccountService {
             account.setEcKey(key);
             account.setPriKey(key.getPrivKeyBytes());
             account.setCreateTime(TimeService.currentTimeMillis());
-            account.setTxHash(new NulsDigestData());
+            account.setTxHash(new NulsDigestData(new byte[]{0}));
             signAccount(account);
             AccountPo po = new AccountPo();
             AccountTool.toPojo(account, po);
