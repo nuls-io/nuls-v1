@@ -5,7 +5,6 @@ import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.core.mesasge.NulsMessage;
 import io.nuls.core.mesasge.NulsMessageHeader;
 import io.nuls.core.utils.log.Log;
-import io.nuls.core.utils.str.StringUtils;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Peer;
 import io.nuls.network.entity.param.AbstractNetworkParam;
@@ -35,19 +34,17 @@ public class BroadcasterImpl implements Broadcaster {
         this.network = network;
     }
 
-    private BroadcastResult broadcast(NulsMessage message, String exculdePeerId) {
-        List<Peer> broadPeers = peersManager.getAvailablePeers();
 
-        if (broadPeers.size() == 0) {
+    private BroadcastResult broadcast(NulsMessage message, String excludePeerId) {
+        List<Peer> broadPeers = peersManager.getAvailablePeers(excludePeerId);
+        //only one peer connected can't send message
+        if (broadPeers.size() <= 1) {
             return new BroadcastResult(false, "no peer can be broadcast");
         }
 
         int successCount = 0;
         for (Peer peer : broadPeers) {
             try {
-                if (StringUtils.isNotBlank(exculdePeerId) && peer.getHash().equals(exculdePeerId)) {
-                    continue;
-                }
                 peer.sendMessage(message);
                 successCount++;
             } catch (NotYetConnectedException | IOException e) {
@@ -69,24 +66,21 @@ public class BroadcasterImpl implements Broadcaster {
      * @param message
      * @return
      */
-    private BroadcastResult broadcastSync(NulsMessage message, String exculdePeerId) {
-        List<Peer> broadPeers = peersManager.getAvailablePeers();
+    private BroadcastResult broadcastSync(NulsMessage message, String excludePeerId) {
+        List<Peer> broadPeers = peersManager.getAvailablePeers(excludePeerId);
 
-        if (broadPeers.size() == 0) {
+        if (broadPeers.size() <= 1) {
             return new BroadcastResult(false, "no peer can be broadcast");
         }
+
         int numConnected = broadPeers.size();
         int numToBroadcastTo = (int) Math.max(1, Math.round(Math.ceil(broadPeers.size() / 2.0)));
         Collections.shuffle(broadPeers, random);
         broadPeers = broadPeers.subList(0, numToBroadcastTo);
 
-
         int successCount = 0;
         for (Peer peer : broadPeers) {
             try {
-                if (StringUtils.isNotBlank(exculdePeerId) && peer.getHash().equals(exculdePeerId)) {
-                    continue;
-                }
                 peer.sendMessage(message);
                 successCount++;
             } catch (NotYetConnectedException | IOException e) {
@@ -105,18 +99,15 @@ public class BroadcasterImpl implements Broadcaster {
         return result;
     }
 
-    private BroadcastResult broadcastToGroup(NulsMessage message, String groupName, String exculdePeerId) {
-        List<Peer> broadPeers = peersManager.getGroupAvailablePeers(groupName);
-        if (broadPeers.size() == 0) {
+    private BroadcastResult broadcastToGroup(NulsMessage message, String groupName, String excludePeerId) {
+        List<Peer> broadPeers = peersManager.getGroupAvailablePeers(groupName, excludePeerId);
+        if (broadPeers.size() <= 1) {
             return new BroadcastResult(false, "no peer can be broadcast");
         }
 
         int successCount = 0;
         for (Peer peer : broadPeers) {
             try {
-                if (StringUtils.isNotBlank(exculdePeerId) && peer.getHash().equals(exculdePeerId)) {
-                    continue;
-                }
                 peer.sendMessage(message);
                 successCount++;
             } catch (NotYetConnectedException | IOException e) {
@@ -131,13 +122,46 @@ public class BroadcasterImpl implements Broadcaster {
         return new BroadcastResult(true, "OK");
     }
 
+    private BroadcastResult broadcastToGroupSync(NulsMessage message, String groupName, String excludePeerId) {
+        List<Peer> broadPeers = peersManager.getGroupAvailablePeers(groupName, excludePeerId);
+        if (broadPeers.size() <= 1) {
+            return new BroadcastResult(false, "no peer can be broadcast");
+        }
+
+        int numConnected = broadPeers.size();
+        int numToBroadcastTo = (int) Math.max(1, Math.round(Math.ceil(broadPeers.size() / 2.0)));
+        Collections.shuffle(broadPeers, random);
+        broadPeers = broadPeers.subList(0, numToBroadcastTo);
+
+        int successCount = 0;
+        for (Peer peer : broadPeers) {
+            try {
+                peer.sendMessage(message);
+                successCount++;
+            } catch (NotYetConnectedException | IOException e) {
+                Log.warn("broadcast message error ， maybe the peer closed ! peer ip :{}, {}", peer.getIp(), e.getMessage());
+            }
+        }
+        if (successCount == 0) {
+            new BroadcastResult(false, "broadcast fail");
+        }
+
+        BroadcastResult result = new BroadcastResult(true, "OK");
+        result.setHash(Sha256Hash.twiceOf(message.getData()).toString());
+        result.setBroadcastPeers(broadPeers);
+        result.setWaitReplyCount(numConnected - numToBroadcastTo);
+        BroadcastContext.get().add(result.getHash(), result);
+        return result;
+    }
+
+
     @Override
     public BroadcastResult broadcast(BaseNulsEvent event) {
         return broadcast(event, null);
     }
 
     @Override
-    public BroadcastResult broadcast(BaseNulsEvent event, String exculdePeerId) {
+    public BroadcastResult broadcast(BaseNulsEvent event, String excludePeerId) {
         NulsMessage message = null;
         try {
             message = new NulsMessage(network.packetMagic(), NulsMessageHeader.EVENT_MESSAGE, event.serialize());
@@ -145,7 +169,7 @@ public class BroadcasterImpl implements Broadcaster {
             return new BroadcastResult(false, "event.serialize() error");
         }
 
-        return broadcast(message, exculdePeerId);
+        return broadcast(message, excludePeerId);
     }
 
     @Override
@@ -154,9 +178,9 @@ public class BroadcasterImpl implements Broadcaster {
     }
 
     @Override
-    public BroadcastResult broadcast(byte[] data, String exculdePeerId) {
+    public BroadcastResult broadcast(byte[] data, String excludePeerId) {
         NulsMessage message = new NulsMessage(network.packetMagic(), NulsMessageHeader.EVENT_MESSAGE, data);
-        return broadcast(message, exculdePeerId);
+        return broadcast(message, excludePeerId);
     }
 
     @Override
@@ -165,7 +189,7 @@ public class BroadcasterImpl implements Broadcaster {
     }
 
     @Override
-    public BroadcastResult broadcastSync(BaseNulsEvent event, String exculdePeerId) {
+    public BroadcastResult broadcastSync(BaseNulsEvent event, String excludePeerId) {
         NulsMessage message = null;
         try {
             message = new NulsMessage(network.packetMagic(), NulsMessageHeader.EVENT_MESSAGE, event.serialize());
@@ -173,7 +197,7 @@ public class BroadcasterImpl implements Broadcaster {
             return new BroadcastResult(false, "event.serialize() error");
         }
 
-        return broadcastSync(message, exculdePeerId);
+        return broadcastSync(message, excludePeerId);
     }
 
     @Override
@@ -182,9 +206,9 @@ public class BroadcasterImpl implements Broadcaster {
     }
 
     @Override
-    public BroadcastResult broadcastSync(byte[] data, String exculdePeerId) {
+    public BroadcastResult broadcastSync(byte[] data, String excludePeerId) {
         NulsMessage message = new NulsMessage(network.packetMagic(), NulsMessageHeader.EVENT_MESSAGE, data);
-        return broadcastSync(message, exculdePeerId);
+        return broadcastSync(message, excludePeerId);
     }
 
     @Override
@@ -193,14 +217,14 @@ public class BroadcasterImpl implements Broadcaster {
     }
 
     @Override
-    public BroadcastResult broadcastToGroup(BaseNulsEvent event, String groupName, String exculdePeerId) {
+    public BroadcastResult broadcastToGroup(BaseNulsEvent event, String groupName, String excludePeerId) {
         NulsMessage message = null;
         try {
             message = new NulsMessage(network.packetMagic(), NulsMessageHeader.EVENT_MESSAGE, event.serialize());
         } catch (IOException e) {
             return new BroadcastResult(false, "event.serialize() error");
         }
-        return broadcastToGroup(message, groupName, exculdePeerId);
+        return broadcastToGroup(message, groupName, excludePeerId);
     }
 
     @Override
@@ -209,9 +233,36 @@ public class BroadcasterImpl implements Broadcaster {
     }
 
     @Override
-    public BroadcastResult broadcastToGroup(byte[] data, String groupName, String exculdePeerId) {
+    public BroadcastResult broadcastToGroup(byte[] data, String groupName, String excludePeerId) {
         NulsMessage message = new NulsMessage(network.packetMagic(), NulsMessageHeader.EVENT_MESSAGE, data);
-        return broadcastToGroup(message, groupName, exculdePeerId);
+        return broadcastToGroup(message, groupName, excludePeerId);
+    }
+
+    @Override
+    public BroadcastResult broadcastToGroupSync(BaseNulsEvent event, String groupName) {
+        return broadcastToGroupSync(event, groupName, null);
+    }
+
+    @Override
+    public BroadcastResult broadcastToGroupSync(BaseNulsEvent event, String groupName, String excludePeerId) {
+        NulsMessage message = null;
+        try {
+            message = new NulsMessage(network.packetMagic(), NulsMessageHeader.EVENT_MESSAGE, event.serialize());
+        } catch (IOException e) {
+            return new BroadcastResult(false, "event.serialize() error");
+        }
+        return broadcastToGroupSync(message, groupName, excludePeerId);
+    }
+
+    @Override
+    public BroadcastResult broadcastToGroupSync(byte[] data, String groupName) {
+        return broadcastToGroupSync(data, groupName, null);
+    }
+
+    @Override
+    public BroadcastResult broadcastToGroupSync(byte[] data, String groupName, String excludePeerId) {
+        NulsMessage message = new NulsMessage(network.packetMagic(), NulsMessageHeader.EVENT_MESSAGE, data);
+        return broadcastToGroupSync(message, groupName, excludePeerId);
     }
 
 }

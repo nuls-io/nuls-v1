@@ -1,6 +1,5 @@
 package io.nuls.core.mesasge;
 
-import io.nuls.core.chain.entity.Block;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsVerificationException;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -105,8 +104,6 @@ public class NulsMessage {
 
         this.header = header;
         this.data = data;
-
-        verify();
     }
 
     public void setHeader(NulsMessageHeader header) {
