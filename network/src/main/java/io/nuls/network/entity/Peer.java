@@ -1,6 +1,7 @@
 package io.nuls.network.entity;
 
 import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.chain.entity.BasicTypeData;
 import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
@@ -17,6 +18,7 @@ import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.PeerDao;
+import io.nuls.event.bus.processor.service.intf.LocalProcessorService;
 import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.param.AbstractNetworkParam;
@@ -80,7 +82,9 @@ public class Peer extends BaseNulsData {
 
     private Lock lock = new ReentrantLock();
 
-    private NetworkProcessorService processorService;
+    private NetworkProcessorService networkProcessorService;
+
+    private LocalProcessorService localProcessorService;
 
     private AbstractNetWorkDataHandlerFactory messageHandlerFactory;
 
@@ -98,8 +102,9 @@ public class Peer extends BaseNulsData {
         super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.magicNumber = network.packetMagic();
         this.messageHandlerFactory = network.getMessageHandlerFactory();
-        processorService = getProcessorService();
-        peerDao = getPeerDao();
+        networkProcessorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
+        localProcessorService = NulsContext.getInstance().getService(LocalProcessorService.class);
+        peerDao = NulsContext.getInstance().getService(PeerDao.class);
     }
 
     public Peer(AbstractNetworkParam network, int type) {
@@ -107,9 +112,9 @@ public class Peer extends BaseNulsData {
         this.magicNumber = network.packetMagic();
         this.type = type;
         this.messageHandlerFactory = network.getMessageHandlerFactory();
-        processorService = getProcessorService();
-        peerDao = getPeerDao();
-
+        networkProcessorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
+        localProcessorService = NulsContext.getInstance().getService(LocalProcessorService.class);
+        peerDao = NulsContext.getInstance().getService(PeerDao.class);
     }
 
 
@@ -120,8 +125,9 @@ public class Peer extends BaseNulsData {
         this.port = socketAddress.getPort();
         this.ip = socketAddress.getAddress().getHostAddress();
         this.messageHandlerFactory = network.getMessageHandlerFactory();
-        processorService = getProcessorService();
-        peerDao = getPeerDao();
+        networkProcessorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
+        localProcessorService = NulsContext.getInstance().getService(LocalProcessorService.class);
+        peerDao = NulsContext.getInstance().getService(PeerDao.class);
         this.hash = this.ip + this.port;
     }
 
@@ -197,7 +203,7 @@ public class Peer extends BaseNulsData {
      *
      * @param message
      */
-    public void processMessage(NulsMessage message) {
+    public void processMessage(NulsMessage message) throws IOException {
         if (message.getHeader().getHeadType() == NulsMessageHeader.EVENT_MESSAGE) {
             try {
                 System.out.println("------receive message:" + Hex.encode(message.serialize()));
@@ -213,7 +219,7 @@ public class Peer extends BaseNulsData {
             }
 
             message.verify();
-            processorService.send(message.getData(), this.getHash());
+            networkProcessorService.send(message.getData(), this.getHash());
         } else {
             byte[] networkHeader = new byte[NetworkDataHeader.NETWORK_HEADER_SIZE];
             System.arraycopy(message.getData(), 0, networkHeader, 0, NetworkDataHeader.NETWORK_HEADER_SIZE);
@@ -242,7 +248,7 @@ public class Peer extends BaseNulsData {
     }
 
 
-    public boolean checkBroadcastExist(byte[] data) {
+    public boolean checkBroadcastExist(byte[] data) throws IOException {
         String hash = Sha256Hash.twiceOf(data).toString();
         BroadcastResult result = NetworkCacheService.getInstance().getBroadCastResult(hash);
         if (result == null) {
@@ -254,7 +260,8 @@ public class Peer extends BaseNulsData {
             NetworkCacheService.getInstance().addBroadCastResult(result);
         } else {
             ReplyEvent event = new ReplyEvent();
-
+            event.setEventBody(new BasicTypeData<>(data));
+            localProcessorService.send(event);
         }
         return true;
     }
@@ -323,8 +330,9 @@ public class Peer extends BaseNulsData {
         magicNumber = (int) buffer.readVarInt();
         port = (int) buffer.readVarInt();
         ip = new String(buffer.readByLengthByte());
-        processorService = getProcessorService();
-        peerDao = getPeerDao();
+        networkProcessorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
+        localProcessorService = NulsContext.getInstance().getService(LocalProcessorService.class);
+        peerDao = NulsContext.getInstance().getService(PeerDao.class);
     }
 
 
@@ -343,29 +351,6 @@ public class Peer extends BaseNulsData {
         return this.getHash().equals(other.getHash());
     }
 
-
-    private NetworkProcessorService getProcessorService() {
-
-        while (NulsContext.getInstance().getService(NetworkProcessorService.class) == null) {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        return NulsContext.getInstance().getService(NetworkProcessorService.class);
-    }
-
-    private PeerDao getPeerDao() {
-        while (NulsContext.getInstance().getService(PeerDao.class) == null) {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        return NulsContext.getInstance().getService(PeerDao.class);
-    }
 
     @Override
     public String toString() {

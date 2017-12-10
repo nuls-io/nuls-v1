@@ -3,6 +3,7 @@ package io.nuls.network.module.impl;
 
 import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.network.constant.NetworkConstant;
+import io.nuls.network.message.ReplyEvent;
 import io.nuls.network.module.AbstractNetworkModule;
 import io.nuls.network.service.NetworkService;
 import io.nuls.network.service.impl.NetworkServiceImpl;
@@ -20,9 +21,9 @@ public class NetworkModuleImpl extends AbstractNetworkModule {
     public NetworkModuleImpl() throws IOException {
         super();
         ConfigLoader.loadProperties(NetworkConstant.NETWORK_PROPERTIES);
-
         networkService = new NetworkServiceImpl(this);
         this.registerService(networkService);
+        this.registerEvent((short) 1, ReplyEvent.class);
     }
 
 
