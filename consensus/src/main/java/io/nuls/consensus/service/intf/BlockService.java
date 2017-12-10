@@ -24,4 +24,8 @@ public interface BlockService {
 
     Block getBestBlock();
 
+    Block getBlockByHash(String hash);
+
+    Block getBlockByHeight(int height);
+
 }

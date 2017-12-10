@@ -124,5 +124,8 @@ public class EhCacheServiceImpl<K, T> implements CacheService<K, T> {
         }
         cacheManager.getCache(cacheTitle).putAll(map);
     }
-
+    @Override
+    public boolean containsKey(String cacheTitle,String key){
+        return this.cacheManager.getCache(cacheTitle).containsKey(key);
+    }
 }

@@ -440,12 +440,12 @@ public class Utils {
         return (long) (Math.random() * Long.MAX_VALUE);
     }
 
-    public static int sizeOfDouble(Double val) {
+    private static int sizeOfDouble(Double val) {
         byte[] bytes = Utils.double2Bytes(val);
         return VarInt.sizeOf(bytes.length) + bytes.length;
     }
 
-    public static int sizeOfString(String val) {
+    private static int sizeOfString(String val) {
         byte[] bytes;
         try {
             bytes = val.getBytes(NulsContext.DEFAULT_ENCODING);
@@ -454,6 +454,28 @@ public class Utils {
             throw new NulsRuntimeException(e);
         }
         return VarInt.sizeOf(bytes.length) + bytes.length;
+    }
+
+    public static int sizeOfSerialize(Object val) {
+        if (null == val) {
+            return 1;
+        }
+        if (val instanceof String) {
+            sizeOfString((String) val);
+        } else if (val instanceof Long) {
+            return VarInt.sizeOf((Long) val);
+        } else if (val instanceof Integer) {
+            return VarInt.sizeOf((Integer) val);
+        } else if (val instanceof Double) {
+            return sizeOfDouble((Double) val);
+        } else if (val instanceof Short) {
+            return 2;
+        } else if (val instanceof Boolean) {
+            return 1;
+        } else if (val instanceof byte[]) {
+            return VarInt.sizeOf(((byte[]) val).length) + ((byte[]) val).length;
+        }
+        throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "instance of unkown");
     }
 
 }

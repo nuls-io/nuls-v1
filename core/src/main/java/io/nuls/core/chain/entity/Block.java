@@ -7,6 +7,7 @@ import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.event.EventManager;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
@@ -22,14 +23,10 @@ import java.util.List;
 public class Block extends BaseNulsData {
 
     private BlockHeader header;
-    /**
-     * the count of the agents the current round
-     */
-    private int countOfRound;
-    private long roundStartTime;
-    private int orderInRound;
 
     private List<Transaction> txs;
+
+    private byte[] extend;
 
     public Block() {
         initValidators();
@@ -45,9 +42,7 @@ public class Block extends BaseNulsData {
     @Override
     public int size() {
         int size = header.size();
-        size += VarInt.sizeOf(countOfRound);
-        size += VarInt.sizeOf(roundStartTime);
-        size += VarInt.sizeOf(orderInRound);
+        size += Utils.sizeOfSerialize(extend);
         for (Transaction tx : txs) {
             size += tx.size();
         }
@@ -57,9 +52,7 @@ public class Block extends BaseNulsData {
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         header.serializeToStream(stream);
-        stream.writeVarInt(countOfRound);
-        stream.writeVarInt(roundStartTime);
-        stream.writeVarInt(orderInRound);
+        stream.writeBytesWithLength(extend);
         for (Transaction tx : txs) {
             stream.write(tx.serialize());
         }
@@ -69,9 +62,7 @@ public class Block extends BaseNulsData {
     public void parse(NulsByteBuffer byteBuffer) {
         header = new BlockHeader();
         header.parse(byteBuffer);
-        countOfRound = (int) byteBuffer.readVarInt();
-        roundStartTime = byteBuffer.readVarInt();
-        orderInRound = (int) byteBuffer.readVarInt();
+        extend = byteBuffer.readByLengthByte();
         try {
             txs = TransactionManager.getInstances(byteBuffer);
         } catch (Exception e) {
@@ -95,27 +86,11 @@ public class Block extends BaseNulsData {
         this.header = header;
     }
 
-    public int getCountOfRound() {
-        return countOfRound;
+    public byte[] getExtend() {
+        return extend;
     }
 
-    public void setCountOfRound(int countOfRound) {
-        this.countOfRound = countOfRound;
-    }
-
-    public long getRoundStartTime() {
-        return roundStartTime;
-    }
-
-    public void setRoundStartTime(long roundStartTime) {
-        this.roundStartTime = roundStartTime;
-    }
-
-    public int getOrderInRound() {
-        return orderInRound;
-    }
-
-    public void setOrderInRound(int orderInRound) {
-        this.orderInRound = orderInRound;
+    public void setExtend(byte[] extend) {
+        this.extend = extend;
     }
 }

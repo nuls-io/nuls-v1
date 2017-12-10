@@ -21,38 +21,15 @@ public class BasicTypeData<T> extends BaseNulsData {
         this.val = data;
         this.type = getType();
     }
+
     public BasicTypeData(NulsByteBuffer buffer) {
         this.parse(buffer);
     }
+
     @Override
     public int size() {
         int size = 1;
-        switch (type) {
-            case 1:
-                size += Utils.sizeOfString((String) val);
-                break;
-            case 2:
-                size += VarInt.sizeOf((Long) val);
-                break;
-            case 3:
-                size += VarInt.sizeOf((Integer) val);
-                break;
-            case 4:
-                size += Utils.sizeOfDouble((Double) val);
-                break;
-            case 5:
-                size += VarInt.sizeOf((Short) val);
-                break;
-            case 6:
-                size++;
-                break;
-            case 7:
-                int length = ((byte[]) val).length;
-                size += VarInt.sizeOf(length) + length;
-                break;
-            default:
-                break;
-        }
+        size += Utils.sizeOfSerialize(val);
         return size;
     }
 
