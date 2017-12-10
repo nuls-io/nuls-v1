@@ -3,6 +3,7 @@ package io.nuls.db.dao.impl.mybatis;
 import io.nuls.db.dao.PeerDao;
 import io.nuls.db.dao.impl.mybatis.mapper.PeerMapper;
 import io.nuls.db.dao.impl.mybatis.params.PeerSearchParams;
+import io.nuls.db.dao.impl.mybatis.session.SessionAnnotation;
 import io.nuls.db.dao.impl.mybatis.util.SearchOperator;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import io.nuls.db.entity.PeerPo;
@@ -48,6 +49,7 @@ public class PeerDaoImpl extends BaseDaoImpl<PeerMapper, String, PeerPo> impleme
     }
 
     @Override
+    @SessionAnnotation
     public void saveChange(PeerPo po) {
         try {
             Searchable searchable = new Searchable();
@@ -65,6 +67,5 @@ public class PeerDaoImpl extends BaseDaoImpl<PeerMapper, String, PeerPo> impleme
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 }

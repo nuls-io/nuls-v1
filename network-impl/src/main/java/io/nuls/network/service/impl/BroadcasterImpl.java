@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.nio.channels.NotYetConnectedException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
 /**
  * @author vivi
@@ -26,8 +25,6 @@ public class BroadcasterImpl implements Broadcaster {
     private PeersManager peersManager;
 
     private AbstractNetworkParam network;
-
-    private static Random random = new Random();
 
     public BroadcasterImpl(PeersManager peersManager, AbstractNetworkParam network) {
         this.peersManager = peersManager;
@@ -73,7 +70,7 @@ public class BroadcasterImpl implements Broadcaster {
 
         int numConnected = broadPeers.size();
         int numToBroadcastTo = (int) Math.max(1, Math.round(Math.ceil(broadPeers.size() / 2.0)));
-        Collections.shuffle(broadPeers, random);
+        Collections.shuffle(broadPeers);
         broadPeers = broadPeers.subList(0, numToBroadcastTo);
 
         int successCount = 0;
@@ -144,7 +141,7 @@ public class BroadcasterImpl implements Broadcaster {
 
         int numConnected = broadPeers.size();
         int numToBroadcastTo = (int) Math.max(1, Math.round(Math.ceil(broadPeers.size() / 2.0)));
-        Collections.shuffle(broadPeers, random);
+        Collections.shuffle(broadPeers);
         broadPeers = broadPeers.subList(0, numToBroadcastTo);
 
         int successCount = 0;

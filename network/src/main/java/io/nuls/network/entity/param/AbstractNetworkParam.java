@@ -24,8 +24,6 @@ public abstract class AbstractNetworkParam {
 
     protected int maxOutCount;
 
-    protected Block bestBlock;
-
     protected NulsMessageFilter messageFilter;
 
     protected AbstractNetWorkDataHandlerFactory messageHandlerFactory;
@@ -52,14 +50,6 @@ public abstract class AbstractNetworkParam {
 
     public int maxOutCount() {
         return maxOutCount;
-    }
-
-    public void setBestBlock(Block bestBlock) {
-        this.bestBlock = bestBlock;
-    }
-
-    public Block getBestBlock() {
-        return bestBlock;
     }
 
     public void setMessageFilter(NulsMessageFilter messageFilter) {
