@@ -66,7 +66,7 @@ public interface PocConsensusConstant {
     /**
      * unit:round of consensus
      */
-    int RANGE_OF_CAPACITY_COEFFICIENT = 20;
+    int RANGE_OF_CAPACITY_COEFFICIENT = 100;
     /**
      * Penalty coefficient,greater than 4.
      */
