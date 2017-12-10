@@ -55,7 +55,7 @@ public class AccountServiceImpl implements AccountService {
         locker.lock();
         try {
             ECKey key = new ECKey();
-            Address address = new Address(Utils.sha256hash160(key.getPubKey(false)));
+            Address address = new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID),Utils.sha256hash160(key.getPubKey(false)));
             Account account = new Account();
             account.setPriSeed(key.getPrivKeyBytes());
             account.setVersion(new NulsVersion((short) 0));

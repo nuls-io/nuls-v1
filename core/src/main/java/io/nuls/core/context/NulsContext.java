@@ -3,16 +3,21 @@ package io.nuls.core.context;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.module.manager.ServiceManager;
 
+import java.util.HashMap;
+
 /**
  * @author Niels
  */
 public class NulsContext {
 
     private NulsContext() {
+        CHAIN_ID = "NULS";
     }
 
     private static final NulsContext NC = new NulsContext();
     public static String DEFAULT_ENCODING = "UTF-8";
+    public static String CHAIN_ID = "NULS";
+    private static HashMap<String,Integer> chain_id_map= new HashMap<String,Integer>();
 
     /**
      * get zhe only instance of NulsContext
@@ -71,6 +76,14 @@ public class NulsContext {
 
     public void setBestBlock(Block bestBlock) {
         this.bestBlock = bestBlock;
+    }
+
+    public int getChainId(String chainName){
+        return chain_id_map.get(chainName);
+    }
+
+    public void addChainId(String chainName,Integer id){
+        chain_id_map.put(chainName,id);
     }
 
 }
