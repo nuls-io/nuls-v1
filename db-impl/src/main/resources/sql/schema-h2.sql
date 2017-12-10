@@ -68,6 +68,7 @@ CREATE TABLE IF NOT EXISTS `sub_chain` (
   `g_block_header` varbinary(1024) NOT NULL,
   `title` varchar(255) NOT NULL,
   `sign` varbinary(1024) NOT NULL,
+  `address_prefix` int(5) NOT NULL,
   PRIMARY KEY (`id`)
 );
 CREATE TABLE IF NOT EXISTS `transaction` (

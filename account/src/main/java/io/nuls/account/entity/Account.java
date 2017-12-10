@@ -6,6 +6,8 @@ import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.ECKey;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
@@ -237,5 +239,9 @@ public class Account extends BaseNulsData {
 
     public void setTxHash(NulsDigestData txHash) {
         this.txHash = txHash;
+    }
+
+    public int getAccountChainId(){
+        return this.getAddress().getChainId();
     }
 }
