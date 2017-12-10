@@ -8,7 +8,7 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Peer;
 import io.nuls.network.entity.param.AbstractNetworkParam;
-import io.nuls.network.message.BroadcastContext;
+import io.nuls.network.message.NetworkCacheService;
 import io.nuls.network.service.Broadcaster;
 
 import java.io.IOException;
@@ -34,7 +34,6 @@ public class BroadcasterImpl implements Broadcaster {
         this.network = network;
     }
 
-
     private BroadcastResult broadcast(NulsMessage message, String excludePeerId) {
         List<Peer> broadPeers = peersManager.getAvailablePeers(excludePeerId);
         //only one peer connected can't send message
@@ -53,11 +52,10 @@ public class BroadcasterImpl implements Broadcaster {
         }
 
         if (successCount == 0) {
-            new BroadcastResult(false, "broadcast fail");
+            return new BroadcastResult(false, "broadcast fail");
         }
         Log.debug("成功广播给{}个节点，消息{}", successCount, message);
         return new BroadcastResult(true, "OK");
-
     }
 
     /**
@@ -88,15 +86,31 @@ public class BroadcasterImpl implements Broadcaster {
             }
         }
         if (successCount == 0) {
-            new BroadcastResult(false, "broadcast fail");
+            return new BroadcastResult(false, "broadcast fail");
         }
 
         BroadcastResult result = new BroadcastResult(true, "OK");
         result.setHash(Sha256Hash.twiceOf(message.getData()).toString());
         result.setBroadcastPeers(broadPeers);
         result.setWaitReplyCount(numConnected - numToBroadcastTo);
-        BroadcastContext.get().add(result.getHash(), result);
+        NetworkCacheService.getInstance().addBroadCastResult(result);
+
         return result;
+    }
+
+
+    private BroadcastResult broadcastToPeer(NulsMessage message, String peerId) {
+        Peer peer = peersManager.getPeer(peerId);
+        if (peer == null || peer.getStatus() != Peer.HANDSHAKE) {
+            return new BroadcastResult(false, "no peer can be broadcast");
+        }
+        try {
+            peer.sendMessage(message);
+        } catch (NotYetConnectedException | IOException e) {
+            Log.warn("broadcast message error ， maybe the peer closed ! peer ip :{}, {}", peer.getIp(), e.getMessage());
+            return new BroadcastResult(false, "broadcast fail");
+        }
+        return new BroadcastResult(true, "OK");
     }
 
     private BroadcastResult broadcastToGroup(NulsMessage message, String groupName, String excludePeerId) {
@@ -150,7 +164,7 @@ public class BroadcasterImpl implements Broadcaster {
         result.setHash(Sha256Hash.twiceOf(message.getData()).toString());
         result.setBroadcastPeers(broadPeers);
         result.setWaitReplyCount(numConnected - numToBroadcastTo);
-        BroadcastContext.get().add(result.getHash(), result);
+        NetworkCacheService.getInstance().addBroadCastResult(result);
         return result;
     }
 
@@ -209,6 +223,23 @@ public class BroadcasterImpl implements Broadcaster {
     public BroadcastResult broadcastSync(byte[] data, String excludePeerId) {
         NulsMessage message = new NulsMessage(network.packetMagic(), NulsMessageHeader.EVENT_MESSAGE, data);
         return broadcastSync(message, excludePeerId);
+    }
+
+    @Override
+    public BroadcastResult broadcastToPeer(BaseNulsEvent event, String peerId) {
+        NulsMessage message = null;
+        try {
+            message = new NulsMessage(network.packetMagic(), NulsMessageHeader.EVENT_MESSAGE, event.serialize());
+        } catch (IOException e) {
+            return new BroadcastResult(false, "event.serialize() error");
+        }
+        return broadcastToPeer(message, peerId);
+    }
+
+    @Override
+    public BroadcastResult broadcastToPeer(byte[] data, String peerId) {
+        NulsMessage message = new NulsMessage(network.packetMagic(), NulsMessageHeader.EVENT_MESSAGE, data);
+        return broadcastToPeer(message, peerId);
     }
 
     @Override

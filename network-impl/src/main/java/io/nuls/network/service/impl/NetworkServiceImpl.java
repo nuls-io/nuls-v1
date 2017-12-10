@@ -48,7 +48,7 @@ public class NetworkServiceImpl implements NetworkService {
         network.setMessageFilter(messageFilter);
 
         this.connectionManager = new ConnectionManager(module, network);
-        this.peersManager = new PeersManager(module, network, getPeerDao());
+        this.peersManager = new PeersManager(module, network,NulsContext.getInstance().getService(PeerDao.class));
         this.broadcaster = new BroadcasterImpl(peersManager, network);
 
         peersManager.setConnectionManager(connectionManager);
@@ -79,26 +79,6 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
-    public BroadcastResult broadcast(BaseNulsEvent event) {
-        return broadcaster.broadcast(event);
-    }
-
-    @Override
-    public BroadcastResult broadcast(byte[] data) {
-        return broadcaster.broadcast(data);
-    }
-
-    @Override
-    public BroadcastResult broadcastToGroup(BaseNulsEvent event, String groupName) {
-        return broadcaster.broadcastToGroup(event, groupName);
-    }
-
-    @Override
-    public BroadcastResult broadcastToGroup(byte[] data, String groupName) {
-        return broadcaster.broadcastToGroup(data, groupName);
-    }
-
-    @Override
     public void addPeer(Peer peer) {
         peersManager.addPeer(peer);
     }
@@ -110,7 +90,7 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
-    public void addPeerGroup(PeerGroup peerGroup){
+    public void addPeerGroup(PeerGroup peerGroup) {
         peersManager.addPeerGroup(peerGroup);
     }
 
@@ -126,15 +106,95 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
 
-    private PeerDao getPeerDao() {
-        while (NulsContext.getInstance().getService(PeerDao.class) == null) {
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                Log.error(e);
-            }
-        }
-        return NulsContext.getInstance().getService(PeerDao.class);
+    @Override
+    public BroadcastResult broadcast(BaseNulsEvent event) {
+        return broadcaster.broadcast(event);
     }
+
+    @Override
+    public BroadcastResult broadcast(BaseNulsEvent event, String excludePeerId) {
+        return broadcaster.broadcast(event, excludePeerId);
+    }
+
+    @Override
+    public BroadcastResult broadcast(byte[] data) {
+        return broadcaster.broadcast(data);
+    }
+
+    @Override
+    public BroadcastResult broadcast(byte[] data, String excludePeerId) {
+        return broadcaster.broadcast(data, excludePeerId);
+    }
+
+    @Override
+    public BroadcastResult broadcastSync(BaseNulsEvent event) {
+        return broadcaster.broadcast(event);
+    }
+
+    @Override
+    public BroadcastResult broadcastSync(BaseNulsEvent event, String excludePeerId) {
+        return broadcaster.broadcastSync(event, excludePeerId);
+    }
+
+    @Override
+    public BroadcastResult broadcastSync(byte[] data) {
+        return broadcaster.broadcastSync(data);
+    }
+
+    @Override
+    public BroadcastResult broadcastSync(byte[] data, String excludePeerId) {
+        return broadcaster.broadcastSync(data, excludePeerId);
+    }
+
+    @Override
+    public BroadcastResult broadcastToPeer(BaseNulsEvent event, String peerId) {
+        return broadcaster.broadcastToPeer(event, peerId);
+    }
+
+    @Override
+    public BroadcastResult broadcastToPeer(byte[] data, String peerId) {
+        return broadcaster.broadcastToPeer(data, peerId);
+    }
+
+    @Override
+    public BroadcastResult broadcastToGroup(BaseNulsEvent event, String groupName) {
+        return broadcaster.broadcastToGroup(event, groupName);
+    }
+
+    @Override
+    public BroadcastResult broadcastToGroup(BaseNulsEvent event, String groupName, String excludePeerId) {
+        return broadcaster.broadcastToGroup(event, groupName, excludePeerId);
+    }
+
+    @Override
+    public BroadcastResult broadcastToGroup(byte[] data, String groupName) {
+        return broadcaster.broadcastToGroup(data, groupName);
+    }
+
+    @Override
+    public BroadcastResult broadcastToGroup(byte[] data, String groupName, String excludePeerId) {
+        return broadcaster.broadcastToGroup(data, groupName, excludePeerId);
+    }
+
+    @Override
+    public BroadcastResult broadcastToGroupSync(BaseNulsEvent event, String groupName) {
+        return broadcaster.broadcastToGroup(event, groupName);
+    }
+
+    @Override
+    public BroadcastResult broadcastToGroupSync(BaseNulsEvent event, String groupName, String excludePeerId) {
+        return broadcaster.broadcastToGroup(event, groupName, excludePeerId);
+    }
+
+    @Override
+    public BroadcastResult broadcastToGroupSync(byte[] data, String groupName) {
+        return broadcaster.broadcastToGroupSync(data, groupName);
+    }
+
+    @Override
+    public BroadcastResult broadcastToGroupSync(byte[] data, String groupName, String excludePeerId) {
+        return broadcaster.broadcastToGroupSync(data, groupName, excludePeerId);
+    }
+
 }
 

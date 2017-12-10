@@ -186,6 +186,13 @@ public class PeersManager {
         peerDao.deleteByKey(peer.getHash());
     }
 
+    public Peer getPeer(String peerId) {
+//        if (!peers.containsKey(peerId)) {
+//            throw new NulsRuntimeException(ErrorCode.PEER_NOT_FOUND);
+//        }
+        return peers.get(peerId);
+    }
+
     public PeerGroup getPeerGroup(String groupName) {
         return peerGroups.get(groupName);
     }

@@ -44,7 +44,7 @@ public enum ErrorCode {
     P2P_UNKOWN_EXCEPTION("P2P000", 30000),
     PRER_GROUP_ALREADY_EXISTS("P2P001", 30001),
     PEER_GROUP_NOT_FOUND("P2P002", 30002),
-
+    PEER_NOT_FOUND("P2P003", 30003),
     /**
      * ---- direct ---
      **/

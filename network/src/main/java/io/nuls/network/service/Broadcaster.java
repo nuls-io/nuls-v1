@@ -27,6 +27,10 @@ public interface Broadcaster {
 
     BroadcastResult broadcastSync(byte[] data, String excludePeerId);
 
+    BroadcastResult broadcastToPeer(BaseNulsEvent event, String peerId);
+
+    BroadcastResult broadcastToPeer(byte[] data, String peerId);
+
     BroadcastResult broadcastToGroup(BaseNulsEvent event, String groupName);
 
     BroadcastResult broadcastToGroup(BaseNulsEvent event, String groupName, String excludePeerId);
