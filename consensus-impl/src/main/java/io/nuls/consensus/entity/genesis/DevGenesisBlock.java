@@ -33,7 +33,7 @@ public final class DevGenesisBlock extends NulsBlock {
     }
 
     private void initGengsisTxs() {
-        //todo
+        //todo 总nuls量及每个地址的nuls量
     }
 
 }

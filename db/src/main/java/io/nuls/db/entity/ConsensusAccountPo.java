@@ -9,6 +9,9 @@ public class ConsensusAccountPo {
      * @mbg.generated
      */
     private String hash;
+    private int role;
+    private int status;
+    private long startTime;
 
     /**
      *
@@ -164,5 +167,29 @@ public class ConsensusAccountPo {
      */
     public void setVersion(Integer version) {
         this.version = version;
+    }
+
+    public int getRole() {
+        return role;
+    }
+
+    public void setRole(int role) {
+        this.role = role;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public long getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
     }
 }

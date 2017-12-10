@@ -2,10 +2,17 @@ package io.nuls.consensus.service.cache;
 
 import io.nuls.cache.service.intf.CacheService;
 import io.nuls.consensus.entity.ConsensusMember;
+import io.nuls.consensus.entity.member.ConsensusMemberImpl;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
+import io.nuls.consensus.utils.ConsensusBeanUtils;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.db.dao.ConsensusAccountDao;
+import io.nuls.db.entity.ConsensusAccountPo;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Niels
@@ -22,6 +29,8 @@ public class ConsensusCacheService {
 
     private static final ConsensusCacheService INSTANCE = new ConsensusCacheService();
 
+    private ConsensusAccountDao consensusAccountDao = NulsContext.getInstance().getService(ConsensusAccountDao.class);
+
     private CacheService cacheService = NulsContext.getInstance().getService(CacheService.class);
 
     private ConsensusCacheService() {
@@ -36,7 +45,11 @@ public class ConsensusCacheService {
         this.cacheService.createCache(CACHE_CONSENSUS_STATUS_INFO);
         this.cacheService.createCache(CACHE_CONSENSUS_ACCOUNT_LIST);
         this.cacheService.createCache(CACHE_CONSENSUS_ACCOUNT_LIST_TEMP);
-        //todo
+        List<ConsensusAccountPo> polist = this.consensusAccountDao.queryAll();
+        List<ConsensusMemberImpl> list = new ArrayList<>();
+        for(ConsensusAccountPo po:polist){
+            list.add(ConsensusBeanUtils.fromPojo(po));
+        }
     }
 
     public ConsensusStatusInfo getConsensusStatusInfo() {

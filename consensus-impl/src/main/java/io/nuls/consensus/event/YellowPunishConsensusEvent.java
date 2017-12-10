@@ -1,8 +1,7 @@
 package io.nuls.consensus.event;
 
-import io.nuls.consensus.constant.POCConsensusConstant;
+import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.core.chain.entity.BaseNulsData;
-import io.nuls.core.event.NulsEventHeader;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
 /**
@@ -11,7 +10,7 @@ import io.nuls.core.utils.io.NulsByteBuffer;
  */
 public class YellowPunishConsensusEvent extends BaseConsensusEvent {
     public YellowPunishConsensusEvent() {
-        super(POCConsensusConstant.EVENT_TYPE_YELLOW_PUNISH);
+        super(PocConsensusConstant.EVENT_TYPE_YELLOW_PUNISH);
     }
 
     @Override
