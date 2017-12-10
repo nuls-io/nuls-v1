@@ -1,6 +1,7 @@
 package io.nuls.consensus.module.impl;
 
 import io.nuls.consensus.constant.POCConsensusConstant;
+import io.nuls.consensus.entity.genesis.DevGenesisBlock;
 import io.nuls.consensus.entity.tx.RedPunishTransaction;
 import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
 import io.nuls.consensus.entity.tx.YellowPunishTransaction;
@@ -28,6 +29,8 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
 
     @Override
     public void start() {
+        //todo 判断启动模式，选择创世块
+        NulsContext.getInstance().setGenesisBlock(DevGenesisBlock.getInstance());
         delegatePeer = ConfigLoader.getCfgValue(POCConsensusConstant.CFG_CONSENSUS_SECTION, POCConsensusConstant.PROPERTY_DELEGATE_PEER, false);
         PocBlockValidatorManager.initBlockValidators();
         this.checkGenesisBlock();

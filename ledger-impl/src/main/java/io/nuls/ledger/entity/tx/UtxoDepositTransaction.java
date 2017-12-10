@@ -1,23 +1,19 @@
-package io.nuls.ledger.entity.utxoTransaction;
+package io.nuls.ledger.entity.tx;
 
-import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
-import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
-import io.nuls.ledger.entity.UtxoData;
+import io.nuls.ledger.entity.tx.LockCoinTransaction;
 import io.nuls.ledger.entity.validator.UtxoTxInputsValidator;
 import io.nuls.ledger.entity.validator.UtxoTxOutputsValidator;
 
 import java.io.IOException;
 
 /**
- * @author Niels
- * @date 2017/11/14
+ * Created by facjas on 2017/11/17.
  */
-public class UtxoSmallChangeTransaction extends AbstractCoinTransaction<UtxoData> {
-
-    public UtxoSmallChangeTransaction() {
-        super(TransactionConstant.TX_TYPE_SMALL_CHANGE);
+public class UtxoDepositTransaction extends LockCoinTransaction {
+    public UtxoDepositTransaction() {
+        this.setCanBeUnlocked(true);
         this.registerValidator(new UtxoTxInputsValidator());
         this.registerValidator(new UtxoTxOutputsValidator());
     }
@@ -31,13 +27,12 @@ public class UtxoSmallChangeTransaction extends AbstractCoinTransaction<UtxoData
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         //todo
+
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
+
         //todo
-
     }
-
-
 }
