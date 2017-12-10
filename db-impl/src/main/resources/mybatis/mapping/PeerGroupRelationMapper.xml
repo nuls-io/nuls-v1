@@ -116,7 +116,7 @@
         select count(id) from peer_group_relation
     </select>
     <select id="selectList" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable"
-            resultType="io.nuls.db.entity.PeerGroupRelationPo">
+            resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
         from peer_group_relation

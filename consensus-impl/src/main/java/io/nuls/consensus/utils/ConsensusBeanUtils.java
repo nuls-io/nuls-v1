@@ -35,7 +35,6 @@ public class ConsensusBeanUtils {
         po.setAgentAddress(member.getExtend().getAgentAddress().toString());
         po.setDeposit(member.getExtend().getDeposit());
         po.setHash(member.getHash());
-        po.setVersion((int) member.getVersion().getVersion());
         po.setRole(member.getExtend().getRole().getCode());
         po.setStartTime(member.getStartTime());
         po.setStatus(member.getStatus());

@@ -260,7 +260,7 @@
         select count(hash) from transaction_local
     </select>
     <select id="selectList" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable"
-            resultType="io.nuls.db.entity.TransactionLocalPo">
+            resultMap="ResultMapWithBLOBs">
         select
         <include refid="Base_Column_List"/>
         ,

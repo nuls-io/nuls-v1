@@ -116,7 +116,7 @@
     -->
     select count(id) from tx_account_relation
   </select>
-  <select id="selectList" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultType="io.nuls.db.entity.TxAccountRelationPo">
+  <select id="selectList" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
     from tx_account_relation

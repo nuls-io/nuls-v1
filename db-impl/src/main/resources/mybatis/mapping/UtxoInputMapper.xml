@@ -154,7 +154,7 @@
     -->
     select count(hash) from utxo_input
   </select>
-  <select id="selectList" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultType="io.nuls.db.entity.UtxoInputPo">
+  <select id="selectList" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultMap="ResultMapWithBLOBs">
     select
     <include refid="Base_Column_List" />
     ,

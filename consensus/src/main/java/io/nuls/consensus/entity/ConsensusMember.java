@@ -2,6 +2,7 @@ package io.nuls.consensus.entity;
 
 import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.crypto.VarInt;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
@@ -27,6 +28,7 @@ public class ConsensusMember<T extends BaseNulsData> extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
+        size += VarInt.sizeOf(startTime);
         size += address.getHash160().length;
         if(null!=extend){
             size += extend.size();
@@ -37,6 +39,7 @@ public class ConsensusMember<T extends BaseNulsData> extends BaseNulsData {
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeBytesWithLength(address.getHash160());
+        stream.writeVarInt(startTime);
         if(null!=extend){
             stream.writeBytesWithLength(extend.serialize());
         }
@@ -45,6 +48,7 @@ public class ConsensusMember<T extends BaseNulsData> extends BaseNulsData {
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
         this.address = new Address(byteBuffer.readByLengthByte());
+        this.startTime = byteBuffer.readVarInt();
         if(!byteBuffer.isFinished()){
             this.extend = this.parseExtend(byteBuffer);
         }

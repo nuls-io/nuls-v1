@@ -33,7 +33,9 @@ CREATE TABLE IF NOT EXISTS `consensus_account` (
   `address` varchar(40) NOT NULL,
   `agent_address` varchar(40) NOT NULL,
   `deposit` decimal(19,8) NOT NULL,
-  `version` int(11) NOT NULL,
+  `role` int(1) ,
+  `status` int(1)  ,
+  `startTime` bigint(14) ,
   PRIMARY KEY (`hash`)
 );
 CREATE TABLE IF NOT EXISTS `peer` (

@@ -219,7 +219,7 @@
         select count(id) from sub_chain
     </select>
     <select id="selectList" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable"
-            resultType="io.nuls.db.entity.SubChainPo">
+            resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
         ,

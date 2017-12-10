@@ -273,7 +273,7 @@
     </update>
 
     <select id="selectList" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable"
-            resultType="io.nuls.db.entity.BlockPo">
+            resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
         ,
