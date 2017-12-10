@@ -6,5 +6,5 @@ package io.nuls.event.bus.constant;
  */
 public interface EventConstant {
     short EVENT_TYPE_COMMON_EVENT_HASH_EVENT = 1;
-    short EVENT_TYPE_GET_EVENT_BODY_EVENT = 1;
+    short EVENT_TYPE_GET_EVENT_BODY_EVENT = 2;
 }

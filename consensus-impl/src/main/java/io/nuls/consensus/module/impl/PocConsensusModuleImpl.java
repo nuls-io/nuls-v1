@@ -1,6 +1,7 @@
 package io.nuls.consensus.module.impl;
 
-import io.nuls.consensus.constant.POCConsensusConstant;
+import io.nuls.consensus.constant.PocConsensusConstant;
+import io.nuls.consensus.entity.genesis.DevGenesisBlock;
 import io.nuls.consensus.entity.tx.RedPunishTransaction;
 import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
 import io.nuls.consensus.entity.tx.YellowPunishTransaction;
@@ -28,18 +29,20 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
 
     @Override
     public void start() {
-        delegatePeer = ConfigLoader.getCfgValue(POCConsensusConstant.CFG_CONSENSUS_SECTION, POCConsensusConstant.PROPERTY_DELEGATE_PEER, false);
+        //todo 判断启动模式，选择创世块
+        NulsContext.getInstance().setGenesisBlock(DevGenesisBlock.getInstance());
+        delegatePeer = ConfigLoader.getCfgValue(PocConsensusConstant.CFG_CONSENSUS_SECTION, PocConsensusConstant.PROPERTY_DELEGATE_PEER, false);
         PocBlockValidatorManager.initBlockValidators();
         this.checkGenesisBlock();
         this.checkBlockHeight();
         this.checkConsensusStatus();
         this.startBlockMaintenanceThread();
-        this.registerEvent(POCConsensusConstant.EVENT_TYPE_RED_PUNISH, RedPunishConsensusEvent.class);
-        this.registerEvent(POCConsensusConstant.EVENT_TYPE_YELLOW_PUNISH, YellowPunishConsensusEvent.class);
-        this.registerEvent(POCConsensusConstant.EVENT_TYPE_REGISTER_AGENT, RegisterAgentEvent.class);
-        this.registerTransaction(POCConsensusConstant.TX_TYPE_REGISTER_AGENT, RegisterAgentTransaction.class);
-        this.registerTransaction(POCConsensusConstant.TX_TYPE_RED_PUNISH, RedPunishTransaction.class);
-        this.registerTransaction(POCConsensusConstant.TX_TYPE_YELLOW_PUNISH, YellowPunishTransaction.class);
+        this.registerEvent(PocConsensusConstant.EVENT_TYPE_RED_PUNISH, RedPunishConsensusEvent.class);
+        this.registerEvent(PocConsensusConstant.EVENT_TYPE_YELLOW_PUNISH, YellowPunishConsensusEvent.class);
+        this.registerEvent(PocConsensusConstant.EVENT_TYPE_REGISTER_AGENT, RegisterAgentEvent.class);
+        this.registerTransaction(PocConsensusConstant.TX_TYPE_REGISTER_AGENT, RegisterAgentTransaction.class);
+        this.registerTransaction(PocConsensusConstant.TX_TYPE_RED_PUNISH, RedPunishTransaction.class);
+        this.registerTransaction(PocConsensusConstant.TX_TYPE_YELLOW_PUNISH, YellowPunishTransaction.class);
         this.registerHanders();
         this.registerService(PocConsensusServiceImpl.getInstance());
         Log.info("the POC consensus module is started!");
@@ -82,7 +85,9 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
 
     private void checkConsensusStatus() {
         //todo
+//        cache consensus member
 
+//        Judge own state
     }
 
     private void checkBlockHeight() {
@@ -123,7 +128,7 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
 
     @Override
     public int getVersion() {
-        return POCConsensusConstant.POC_CONSENSUS_MODULE_VERSION;
+        return PocConsensusConstant.POC_CONSENSUS_MODULE_VERSION;
     }
 
     public boolean isDelegatePeer() {

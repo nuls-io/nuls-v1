@@ -1,4 +1,4 @@
-package io.nuls.ledger.entity.utxoTransaction;
+package io.nuls.ledger.entity.tx;
 
 import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.tx.CoinbaseTransaction;

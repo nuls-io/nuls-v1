@@ -1,4 +1,4 @@
-package io.nuls.consensus.entity;
+package io.nuls.consensus.entity.member;
 
 import io.nuls.account.entity.Address;
 import io.nuls.consensus.constant.ConsensusRole;
@@ -12,9 +12,9 @@ import java.io.IOException;
 
 /**
  * @author Niels
- * @date 2017/11/7
+ * @date 2017/12/10
  */
-public class ConsensusMemberImpl extends ConsensusMember {
+public class ConsensusMemberData extends BaseNulsData {
 
     private ConsensusRole role;
 
@@ -24,10 +24,10 @@ public class ConsensusMemberImpl extends ConsensusMember {
 
     public Address agentAddress;
 
-
     @Override
     public int size() {
-        int size = super.size();
+        int size = 0;
+        size ++;
         size += VarInt.sizeOf(time);
         size += Utils.double2Bytes(deposit).length;
         size += agentAddress.getHash160().length;
@@ -36,7 +36,7 @@ public class ConsensusMemberImpl extends ConsensusMember {
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        super.serializeToStream(stream);
+        stream.write(role.getCode());
         stream.writeVarInt(time);
         stream.writeDouble(deposit);
         stream.writeBytesWithLength(agentAddress.getHash160());
@@ -44,12 +44,11 @@ public class ConsensusMemberImpl extends ConsensusMember {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
-        super.parse(byteBuffer);
+        role = ConsensusRole.getConsensusRoleByCode(byteBuffer.readByte());
         this.time = byteBuffer.readVarInt();
         this.deposit = byteBuffer.readDouble();
         this.agentAddress = new Address(byteBuffer.readByLengthByte());
     }
-
     public long getTime() {
         return time;
     }

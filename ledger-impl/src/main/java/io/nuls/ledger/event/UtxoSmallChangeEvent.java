@@ -1,7 +1,6 @@
 package io.nuls.ledger.event;
 
-import io.nuls.core.event.NulsEventHeader;
-import io.nuls.ledger.entity.utxoTransaction.UtxoSmallChangeTransaction;
+import io.nuls.ledger.entity.tx.UtxoSmallChangeTransaction;
 
 /**
  * Created by Niels on 2017/11/13.

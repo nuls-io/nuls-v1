@@ -1,14 +1,14 @@
 package io.nuls.account.entity;
 
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Base58;
+import io.nuls.core.utils.log.Log;
 
 /**
- *
  * @author Niels
  * @date 2017/10/30
- *
  */
-public class Address{
+public class Address {
     //base58 length
     public static final int HASH_LENGTH = 25;
     // RIPEMD160 length
@@ -20,12 +20,21 @@ public class Address{
         this.hash160 = hash160;
     }
 
+    public Address(String address) {
+        try {
+            this.hash160 = Base58.decode(address);
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+    }
+
+
     public byte[] getHash160() {
         return hash160;
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return Base58.encode(hash160);
     }
 }

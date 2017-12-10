@@ -10,15 +10,22 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- *
  * @author facjas
  * @date 2017/11/20
  */
-public class NulsDigestData extends BaseNulsData{
+public class NulsDigestData extends BaseNulsData {
 
     protected int digestAlgType;
     protected int digestLength;
     protected byte[] digestBytes;
+
+    public NulsDigestData() {
+    }
+
+    public NulsDigestData(byte[] bytes) {
+        this();
+        this.digestBytes = bytes;
+    }
 
     public int getDigestAlgType() {
         return digestAlgType;
@@ -30,7 +37,7 @@ public class NulsDigestData extends BaseNulsData{
 
     @Override
     public int size() {
-        return digestBytes.length+2;
+        return digestBytes.length + 2;
     }
 
     @Override
@@ -55,19 +62,19 @@ public class NulsDigestData extends BaseNulsData{
         this.digestLength = digestLength;
     }
 
-    public byte[] getDigestBytes(){
+    public byte[] getDigestBytes() {
         return this.digestBytes;
     }
 
     public byte[] toBytes() {
-        byte[] bytes = new byte[digestLength+2];
-        bytes[0] = (byte)digestAlgType;
-        bytes[1] = (byte)digestLength;
-        System.arraycopy(digestBytes,0,bytes,2,digestLength);
+        byte[] bytes = new byte[digestLength + 2];
+        bytes[0] = (byte) digestAlgType;
+        bytes[1] = (byte) digestLength;
+        System.arraycopy(digestBytes, 0, bytes, 2, digestLength);
         return bytes;
     }
 
-    public String getDigestHex(){
+    public String getDigestHex() {
         return Hex.encode(toBytes());
     }
 
@@ -75,23 +82,23 @@ public class NulsDigestData extends BaseNulsData{
         this.digestBytes = digestBytes;
     }
 
-    public static NulsDigestData calcDigestData(BaseNulsData data){
-        return calcDigestData(data,0);
+    public static NulsDigestData calcDigestData(BaseNulsData data) {
+        return calcDigestData(data, 0);
     }
 
-    public static NulsDigestData calcDigestData(BaseNulsData data,int digestAlgType){
+    public static NulsDigestData calcDigestData(BaseNulsData data, int digestAlgType) {
         try {
-            return calcDigestData(data.serialize(),digestAlgType);
-        }catch (Exception e){
+            return calcDigestData(data.serialize(), digestAlgType);
+        } catch (Exception e) {
             return null;
         }
     }
 
-    public static NulsDigestData calcDigestData(byte[] data){
-        return calcDigestData(data,0);
+    public static NulsDigestData calcDigestData(byte[] data) {
+        return calcDigestData(data, 0);
     }
 
-    public static NulsDigestData calcDigestData(byte[] data,int digestAlgType){
+    public static NulsDigestData calcDigestData(byte[] data, int digestAlgType) {
         NulsDigestData digestData = new NulsDigestData();
         digestData.setDigestAlgType(digestAlgType);
         byte[] content = Sha256Hash.hashTwice(data);
@@ -100,7 +107,7 @@ public class NulsDigestData extends BaseNulsData{
         return digestData;
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         NulsTextData textData = new NulsTextData();
         textData.setText("this is a text");
         NulsDigestData nulsDigestData = NulsDigestData.calcDigestData(textData);

@@ -1,6 +1,6 @@
 package io.nuls.consensus.entity.tx;
 
-import io.nuls.consensus.constant.POCConsensusConstant;
+import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.tx.AbstractConsensusTransaction;
 
 /**
@@ -9,6 +9,6 @@ import io.nuls.consensus.tx.AbstractConsensusTransaction;
  */
 public class YellowPunishTransaction extends AbstractConsensusTransaction {
     public YellowPunishTransaction( ) {
-        super(POCConsensusConstant.EVENT_TYPE_YELLOW_PUNISH);
+        super(PocConsensusConstant.EVENT_TYPE_YELLOW_PUNISH);
     }
 }
