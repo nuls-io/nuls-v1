@@ -12,12 +12,13 @@ public class NulsContext {
 
     private NulsContext() {
         CHAIN_ID = "NULS";
+        chain_id_map.put(CHAIN_ID,1);
     }
 
+    private static HashMap<String,Integer> chain_id_map= new HashMap<String,Integer>();
     private static final NulsContext NC = new NulsContext();
     public static String DEFAULT_ENCODING = "UTF-8";
     public static String CHAIN_ID = "NULS";
-    private static HashMap<String,Integer> chain_id_map= new HashMap<String,Integer>();
 
     /**
      * get zhe only instance of NulsContext
