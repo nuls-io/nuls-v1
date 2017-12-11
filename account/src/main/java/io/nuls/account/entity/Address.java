@@ -53,7 +53,7 @@ public class Address {
 
     @Override
     public String toString() {
-        return Base58.encode(hash160);
+        return Base58.encode(getHash());
     }
 
     public int getChainId(){
