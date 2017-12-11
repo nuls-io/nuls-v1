@@ -3,9 +3,11 @@ package io.nuls.consensus.entity;
 import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.crypto.VarInt;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
+import io.nuls.core.utils.log.Log;
 
 import java.io.IOException;
 
@@ -47,7 +49,11 @@ public class ConsensusMember<T extends BaseNulsData> extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
-        this.address = new Address(byteBuffer.readByLengthByte());
+        try {
+            this.address = Address.fromHashs(byteBuffer.readByLengthByte());
+        } catch (NulsException e) {
+            Log.error(e);
+        }
         this.startTime = byteBuffer.readVarInt();
         if(!byteBuffer.isFinished()){
             this.extend = this.parseExtend(byteBuffer);

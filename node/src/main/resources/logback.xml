@@ -34,9 +34,9 @@
         <appender-ref ref="FILE"/>
     </root>
     <!--<logger name="org.mybatis" level="info" additivity="false"/>-->
-    <logger name="org.apache.ibatis" level="info" additivity="false"/>
-    <logger name="org.ehcache" level="info" additivity="false"/>
-    <!--<logger name="java.sql" level="info" additivity="false"/>-->
+    <logger name="org.apache.ibatis" level="info" additivity="true"/>
+    <logger name="org.ehcache" level="info" additivity="true"/>
+    <logger name="java.sql" level="info" additivity="true"/>
 
     <!--    日志异步到数据库
         <appender name="DB" class="ch.qos.logback.classic.db.DBAppender">

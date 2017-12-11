@@ -161,7 +161,12 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Address getAddress(String pubKey) {
         AssertUtil.canNotEmpty(pubKey, "");
-        return AccountTool.newAddress(ECKey.fromPublicOnly(Hex.decode(pubKey)));
+        try {
+            return AccountTool.newAddress(ECKey.fromPublicOnly(Hex.decode(pubKey)));
+        } catch (NulsException e) {
+            Log.error(e);
+            return null;
+        }
     }
 
     @Override

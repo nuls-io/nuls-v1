@@ -9,7 +9,7 @@ import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
-import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.db.entity.AccountPo;
 
@@ -25,8 +25,8 @@ public final class AccountTool {
      * create a new address
      * @return Address
      */
-    public static Address newAddress(ECKey key) {
-        return new Address(Utils.sha256hash160(key.getPubKey(false)));
+    public static Address newAddress(ECKey key) throws NulsException {
+        return Address.fromHashs(Utils.sha256hash160(key.getPubKey(false)));
     }
 
 
@@ -56,7 +56,11 @@ public final class AccountTool {
         txHash.parse(src.getTxHash());
         desc.setTxHash(txHash);
         desc.setVersion(new NulsVersion(src.getVersion()));
-        desc.setAddress(newAddress(src.getPubKey()));
+        try {
+            desc.setAddress(newAddress(src.getPubKey()));
+        } catch (NulsException e) {
+            Log.error(e);
+        }
         desc.setAlias(src.getAlias());
         desc.setExtend(src.getExtend());
         desc.setId(src.getId());
@@ -68,8 +72,8 @@ public final class AccountTool {
         desc.setEcKey(ECKey.fromPrivate(new BigInteger(desc.getPriKey())));
     }
 
-    private static Address newAddress(byte[] pubKey) {
-        return new Address(Utils.sha256hash160(pubKey));
+    private static Address newAddress(byte[] pubKey) throws NulsException {
+        return Address.fromHashs(Utils.sha256hash160(pubKey));
     }
 
     public static void toPojo(Account src, AccountPo desc) throws IOException, NulsException {

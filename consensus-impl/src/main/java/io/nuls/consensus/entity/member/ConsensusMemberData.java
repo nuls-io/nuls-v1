@@ -4,9 +4,11 @@ import io.nuls.account.entity.Address;
 import io.nuls.consensus.constant.ConsensusRole;
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.crypto.VarInt;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
+import io.nuls.core.utils.log.Log;
 
 import java.io.IOException;
 
@@ -47,7 +49,11 @@ public class ConsensusMemberData extends BaseNulsData {
         role = ConsensusRole.getConsensusRoleByCode(byteBuffer.readByte());
         this.time = byteBuffer.readVarInt();
         this.deposit = byteBuffer.readDouble();
-        this.agentAddress = new Address(byteBuffer.readByLengthByte());
+        try {
+            this.agentAddress = Address.fromHashs(byteBuffer.readByLengthByte());
+        } catch (NulsException e) {
+            Log.error(e);
+        }
     }
     public long getTime() {
         return time;
