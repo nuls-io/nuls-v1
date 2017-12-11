@@ -15,7 +15,7 @@ public interface EventService {
      * @param event
      * @return
      */
-    String broadcastWillPassNeedConfirmation(BaseNulsEvent event);
+    boolean broadcastSyncNeedConfirmation(BaseNulsEvent event);
 
     /**
      * broadcast a message that need to be passed
@@ -23,7 +23,9 @@ public interface EventService {
      * @param event
      * @return
      */
-    String broadcastWillPass(BaseNulsEvent event);
+    boolean broadcastHashAndCache(BaseNulsEvent event);
+
+    void broadcast(BaseNulsEvent event, String excludePeerId);
 
     /**
      * broadcast msg ,no need to pass the message

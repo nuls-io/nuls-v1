@@ -1,6 +1,5 @@
 package io.nuls.event.bus.handler;
 
-import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.core.exception.NulsException;
 import io.nuls.event.bus.event.CommonHashEvent;
 import io.nuls.event.bus.event.GetBodyEvent;

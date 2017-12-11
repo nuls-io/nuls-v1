@@ -17,20 +17,29 @@ import java.io.IOException;
  * @date 2017/12/10
  */
 public class ConsensusMemberData extends BaseNulsData {
+    private String id;
+
+    private int status;
+
+    private long consensusStartTime;
 
     private ConsensusRole role;
-
-    private long time;
 
     private double deposit;
 
     public Address agentAddress;
+    /**
+     * the following fields is for The account self(delegate Account)
+     */
+    private long roundIndex;
+    private long roundStartTime;
+    private long roundEndTime;
 
     @Override
     public int size() {
         int size = 0;
         size ++;
-        size += VarInt.sizeOf(time);
+        size += VarInt.sizeOf(consensusStartTime);
         size += Utils.double2Bytes(deposit).length;
         size += agentAddress.getHash160().length;
         return size;
@@ -39,7 +48,7 @@ public class ConsensusMemberData extends BaseNulsData {
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.write(role.getCode());
-        stream.writeVarInt(time);
+        stream.writeVarInt(consensusStartTime);
         stream.writeDouble(deposit);
         stream.writeBytesWithLength(agentAddress.getHash160());
     }
@@ -47,7 +56,7 @@ public class ConsensusMemberData extends BaseNulsData {
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
         role = ConsensusRole.getConsensusRoleByCode(byteBuffer.readByte());
-        this.time = byteBuffer.readVarInt();
+        this.consensusStartTime = byteBuffer.readVarInt();
         this.deposit = byteBuffer.readDouble();
         try {
             this.agentAddress = Address.fromHashs(byteBuffer.readByLengthByte());
@@ -55,14 +64,6 @@ public class ConsensusMemberData extends BaseNulsData {
             Log.error(e);
         }
     }
-    public long getTime() {
-        return time;
-    }
-
-    public void setTime(long time) {
-        this.time = time;
-    }
-
     public double getDeposit() {
         return deposit;
     }
@@ -85,5 +86,53 @@ public class ConsensusMemberData extends BaseNulsData {
 
     public void setRole(ConsensusRole role) {
         this.role = role;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public long getConsensusStartTime() {
+        return consensusStartTime;
+    }
+
+    public void setConsensusStartTime(long consensusStartTime) {
+        this.consensusStartTime = consensusStartTime;
+    }
+
+    public long getRoundIndex() {
+        return roundIndex;
+    }
+
+    public void setRoundIndex(long roundIndex) {
+        this.roundIndex = roundIndex;
+    }
+
+    public long getRoundStartTime() {
+        return roundStartTime;
+    }
+
+    public void setRoundStartTime(long roundStartTime) {
+        this.roundStartTime = roundStartTime;
+    }
+
+    public long getRoundEndTime() {
+        return roundEndTime;
+    }
+
+    public void setRoundEndTime(long roundEndTime) {
+        this.roundEndTime = roundEndTime;
     }
 }

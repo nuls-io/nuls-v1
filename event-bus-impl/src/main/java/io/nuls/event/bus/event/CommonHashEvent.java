@@ -12,8 +12,9 @@ import io.nuls.event.bus.constant.EventConstant;
  */
 public class CommonHashEvent extends BaseNulsEvent<NulsDigestData> {
 
-    public CommonHashEvent() {
+    public CommonHashEvent(NulsDigestData hash) {
         super(NulsConstant.MODULE_ID_EVENT_BUS, EventConstant.EVENT_TYPE_COMMON_EVENT_HASH_EVENT);
+        this.setEventBody(hash);
     }
 
     @Override

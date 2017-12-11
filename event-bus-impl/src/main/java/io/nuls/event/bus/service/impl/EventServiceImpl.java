@@ -2,7 +2,9 @@ package io.nuls.event.bus.service.impl;
 
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.event.BaseNulsEvent;
+import io.nuls.event.bus.event.CommonHashEvent;
 import io.nuls.event.bus.event.service.intf.EventService;
+import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.service.NetworkService;
 
 /**
@@ -13,6 +15,7 @@ public class EventServiceImpl implements EventService {
     private static EventServiceImpl INSTANCE = new EventServiceImpl();
 
     private NetworkService networkService;
+    private EventCacheService eventCacheService = EventCacheService.getInstance();
 
     private EventServiceImpl() {
     }
@@ -22,29 +25,41 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public String broadcastWillPassNeedConfirmation(BaseNulsEvent event) {
+    public boolean broadcastSyncNeedConfirmation(BaseNulsEvent event) {
         initNetworkService();
-        //todo
-        return null;
+        BroadcastResult result = this.networkService.broadcastSync(new CommonHashEvent(event.getHash()));
+        if (result.isSuccess()) {
+            eventCacheService.cacheSendedEvent(event);
+        }
+        return result.isSuccess();
     }
 
     @Override
-    public String broadcastWillPass(BaseNulsEvent event) {
+    public boolean broadcastHashAndCache(BaseNulsEvent event) {
         initNetworkService();
-        //todo
-        return null;
+        BroadcastResult result = this.networkService.broadcast(new CommonHashEvent(event.getHash()));
+        if (result.isSuccess()) {
+            eventCacheService.cacheSendedEvent(event);
+        }
+        return result.isSuccess();
+    }
+
+    @Override
+    public void broadcast(BaseNulsEvent event, String excludePeerId) {
+        initNetworkService();
+        networkService.broadcast(event, excludePeerId);
     }
 
     @Override
     public void broadcast(BaseNulsEvent event) {
         initNetworkService();
-        //todo
+        networkService.broadcast(event);
     }
 
     @Override
     public void sendToPeer(BaseNulsEvent event, String peerId) {
         initNetworkService();
-        //todo
+        networkService.broadcastToPeer(event, peerId);
     }
 
     private void initNetworkService() {
