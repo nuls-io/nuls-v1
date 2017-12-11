@@ -5,7 +5,11 @@ import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.event.bus.event.CommonHashEvent;
 import io.nuls.event.bus.event.service.intf.EventService;
 import io.nuls.network.entity.BroadcastResult;
+import io.nuls.network.entity.Peer;
 import io.nuls.network.service.NetworkService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Niels
@@ -14,7 +18,7 @@ import io.nuls.network.service.NetworkService;
 public class EventServiceImpl implements EventService {
     private static EventServiceImpl INSTANCE = new EventServiceImpl();
 
-    private NetworkService networkService;
+    private NetworkService networkService = NulsContext.getInstance().getService(NetworkService.class);
     private EventCacheService eventCacheService = EventCacheService.getInstance();
 
     private EventServiceImpl() {
@@ -25,46 +29,49 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public boolean broadcastSyncNeedConfirmation(BaseNulsEvent event) {
-        initNetworkService();
+    public List<String> broadcastSyncNeedConfirmation(BaseNulsEvent event) {
         BroadcastResult result = this.networkService.broadcastSync(new CommonHashEvent(event.getHash()));
         if (result.isSuccess()) {
             eventCacheService.cacheSendedEvent(event);
         }
-        return result.isSuccess();
+        return getPeerIdList(result);
     }
 
     @Override
-    public boolean broadcastHashAndCache(BaseNulsEvent event) {
-        initNetworkService();
+    public List<String> broadcastHashAndCache(BaseNulsEvent event) {
         BroadcastResult result = this.networkService.broadcast(new CommonHashEvent(event.getHash()));
         if (result.isSuccess()) {
             eventCacheService.cacheSendedEvent(event);
         }
-        return result.isSuccess();
+        return getPeerIdList(result);
     }
 
-    @Override
-    public void broadcast(BaseNulsEvent event, String excludePeerId) {
-        initNetworkService();
-        networkService.broadcast(event, excludePeerId);
-    }
-
-    @Override
-    public void broadcast(BaseNulsEvent event) {
-        initNetworkService();
-        networkService.broadcast(event);
-    }
-
-    @Override
-    public void sendToPeer(BaseNulsEvent event, String peerId) {
-        initNetworkService();
-        networkService.broadcastToPeer(event, peerId);
-    }
-
-    private void initNetworkService() {
-        if (networkService == null) {
-            networkService = NulsContext.getInstance().getService(NetworkService.class);
+    private List<String> getPeerIdList(BroadcastResult result) {
+        List<String> list = new ArrayList<>();
+        if (!result.isSuccess() || result.getBroadcastPeers() == null || result.getBroadcastPeers().isEmpty()) {
+            return list;
         }
+        for (Peer peer : result.getBroadcastPeers()) {
+            list.add(peer.getHash());
+        }
+        return list;
+    }
+
+    @Override
+    public List<String> broadcast(BaseNulsEvent event, String excludePeerId) {
+        BroadcastResult result = networkService.broadcast(event, excludePeerId);
+        return getPeerIdList(result);
+    }
+
+    @Override
+    public List<String> broadcast(BaseNulsEvent event) {
+        BroadcastResult result = networkService.broadcast(event);
+        return getPeerIdList(result);
+    }
+
+    @Override
+    public boolean sendToPeer(BaseNulsEvent event, String peerId) {
+        BroadcastResult result = networkService.broadcastToPeer(event, peerId);
+        return result.isSuccess();
     }
 }
