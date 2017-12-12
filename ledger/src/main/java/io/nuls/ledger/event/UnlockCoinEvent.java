@@ -12,4 +12,10 @@ public class UnlockCoinEvent<T extends UnlockCoinTransaction> extends AbstractCo
     public UnlockCoinEvent() {
         super((short) 5);
     }
+
+    @Override
+    public Object copy() {
+        // todo auto-generated method stub(niels)
+        return null;
+    }
 }

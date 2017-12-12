@@ -11,4 +11,10 @@ public class TransferEvent<T extends TransferTransaction> extends AbstractCoinTr
     public TransferEvent() {
         super((short) 2);
     }
+
+    @Override
+    public Object copy() {
+        // todo auto-generated method stub(niels)
+        return null;
+    }
 }
