@@ -1,12 +1,14 @@
 package io.nuls.network.entity;
 
+import io.nuls.core.chain.intf.NulsCloneable;
+
 import java.util.List;
 
 /**
  * @author vivi
  * @Date 2017.11.01
  */
-public class BroadcastResult {
+public class BroadcastResult implements NulsCloneable {
 
     private boolean success;
 
@@ -80,5 +82,17 @@ public class BroadcastResult {
 
     public void setRepliedCount(int repliedCount) {
         this.repliedCount = repliedCount;
+    }
+
+    @Override
+    public Object copy() {
+        BroadcastResult result = new BroadcastResult();
+        result.setHash(this.hash);
+        result.setSuccess(this.success);
+        result.setWaitReplyCount(this.waitReplyCount);
+        result.setRepliedCount(this.repliedCount);
+        result.setBroadcastPeers(this.broadcastPeers);
+        result.setMessage(this.getMessage());
+        return result;
     }
 }
