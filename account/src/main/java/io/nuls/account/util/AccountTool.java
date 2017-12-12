@@ -4,11 +4,13 @@ import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.NulsVersion;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
+import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.db.entity.AccountPo;
@@ -23,10 +25,28 @@ public final class AccountTool {
 
     /**
      * create a new address
+     *
      * @return Address
      */
     public static Address newAddress(ECKey key) throws NulsException {
         return Address.fromHashs(Utils.sha256hash160(key.getPubKey(false)));
+    }
+
+
+    public static Account createAccount() {
+        ECKey key = new ECKey();
+        Address address = new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), Utils.sha256hash160(key.getPubKey(false)));
+        Account account = new Account();
+        account.setPriSeed(key.getPrivKeyBytes());
+        account.setVersion(new NulsVersion((short) 0));
+        account.setAddress(address);
+        account.setId(address.toString());
+        account.setPubKey(key.getPubKey(true));
+        account.setEcKey(key);
+        account.setPriKey(key.getPrivKeyBytes());
+        account.setCreateTime(TimeService.currentTimeMillis());
+
+        return account;
     }
 
 
@@ -49,12 +69,9 @@ public final class AccountTool {
     }
 
     public static void toBean(AccountPo src, Account desc) {
-        AssertUtil.canNotEmpty(src, "Object type conversion faild!");
-        AssertUtil.canNotEmpty(desc, "Object type conversion faild!");
+        AssertUtil.canNotEmpty(src, "Object type conversion failed!");
+        AssertUtil.canNotEmpty(desc, "Object type conversion failed!");
         desc.setCreateTime(src.getCreateTime());
-        NulsDigestData txHash = new NulsDigestData();
-        txHash.parse(src.getTxHash());
-        desc.setTxHash(txHash);
         desc.setVersion(new NulsVersion(src.getVersion()));
         try {
             desc.setAddress(newAddress(src.getPubKey()));
@@ -65,11 +82,10 @@ public final class AccountTool {
         desc.setExtend(src.getExtend());
         desc.setId(src.getId());
         desc.setPubKey(src.getPubKey());
-//        desc.setSign();
-//        desc.setStatus();
         desc.setPriKey(src.getPriKey().getBytes());
         desc.setPriSeed(src.getPriSeed());
         desc.setEcKey(ECKey.fromPrivate(new BigInteger(desc.getPriKey())));
+        desc.setStatus(src.getStatus());
     }
 
     private static Address newAddress(byte[] pubKey) throws NulsException {
@@ -77,17 +93,24 @@ public final class AccountTool {
     }
 
     public static void toPojo(Account src, AccountPo desc) throws IOException, NulsException {
-        AssertUtil.canNotEmpty(src, "Object type conversion faild!");
-        AssertUtil.canNotEmpty(desc, "Object type conversion faild!");
+        AssertUtil.canNotEmpty(src, "Object type conversion failed!");
+        AssertUtil.canNotEmpty(desc, "Object type conversion failed!");
         desc.setId(src.getId());
         desc.setAddress(src.getAddress().toString());
         desc.setAlias(src.getAlias());
         desc.setCreateTime(src.getCreateTime());
         desc.setPubKey(src.getPubKey());
-        desc.setTxHash(src.getTxHash().serialize());
         desc.setVersion(src.getVersion().getVersion());
         desc.setExtend(src.getExtend());
         desc.setPriKey(Hex.encode(src.getPriKey()));
         desc.setPriSeed(src.getPriSeed());
+        desc.setStatus(src.getStatus());
+    }
+
+    public static void main(String[] args) {
+        ECKey key = new ECKey();
+
+        System.out.println(key.getPrivKeyBytes().length);
+
     }
 }
