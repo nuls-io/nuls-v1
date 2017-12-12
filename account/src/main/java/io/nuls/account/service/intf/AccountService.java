@@ -4,6 +4,7 @@ package io.nuls.account.service.intf;
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.NulsSignData;
+import io.nuls.core.chain.entity.Result;
 
 import java.util.List;
 
@@ -29,13 +30,13 @@ public interface AccountService {
 
     String getDefaultAccount();
 
-    boolean changePassword(String oldpw,String newpw);
+    Result changePassword(String oldpw, String newpw);
 
-    boolean setPassword(String passwd);
+    Result setPassword(String password);
 
-    boolean lockAccounts();
+    Result lockAccounts();
 
-    boolean unlockAccounts(String passwd);
+    Result unlockAccounts(String passwd);
 
     NulsSignData signData(byte[] bytes);
 }

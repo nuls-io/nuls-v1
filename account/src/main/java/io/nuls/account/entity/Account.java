@@ -1,25 +1,22 @@
 package io.nuls.account.entity;
 
+import io.nuls.account.util.AccountTool;
 import io.nuls.core.chain.entity.BaseNulsData;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.NulsSignData;
-import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.ECKey;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.crypto.Utils;
+import io.nuls.core.crypto.EncryptedData;
+import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.util.Arrays;
 
 /**
- *
  * @author Niels
  * @date 2017/10/30
  */
@@ -31,22 +28,18 @@ public class Account extends BaseNulsData {
 
     private Address address;
 
-    private byte status;
-
-    private NulsSignData sign;
+    // is default acct
+    private int status;
 
     private byte[] pubKey;
 
     private byte[] extend;
 
     private Long createTime;
-    private NulsDigestData txHash;
-
 
     private byte[] priSeed;
     // Decrypted  prikey
     private byte[] priKey;
-
     //local field
     private ECKey ecKey;
 
@@ -70,7 +63,7 @@ public class Account extends BaseNulsData {
     public boolean isEncrypted() {
         //it's encrypted when eckey is null
         if (ecKey == null) {
-            return false;
+            return true;
         }
         try {
             ecKey.getPrivKey();
@@ -85,6 +78,31 @@ public class Account extends BaseNulsData {
         }
     }
 
+
+    public void resetKey() {
+        resetKey(null);
+    }
+
+    public void resetKey(String password) {
+        if (!isEncrypted()) {
+            setEcKey(ECKey.fromPrivate(new BigInteger(getPriSeed())));
+        } else {
+
+        }
+    }
+
+    /**
+     *
+     * @param password
+     */
+    public void encrypt(String password) {
+
+    }
+
+    public boolean decrypt(String password) {
+        return false;
+    }
+
     @Override
     public int size() {
         int s = 0;
@@ -95,17 +113,17 @@ public class Account extends BaseNulsData {
             } catch (UnsupportedEncodingException e) {
                 Log.error(e);
             }
-        }else{
-            s ++;
+        } else {
+            s++;
         }
-        if(StringUtils.isNotBlank(alias)){
+        if (StringUtils.isNotBlank(alias)) {
             try {
                 s += alias.getBytes(NulsContext.DEFAULT_ENCODING).length + 1;
             } catch (UnsupportedEncodingException e) {
                 Log.error(e);
             }
-        }else{
-            s ++;
+        } else {
+            s++;
         }
         if (null != address) {
             s += address.getHash160().length;
@@ -114,11 +132,9 @@ public class Account extends BaseNulsData {
             s += priSeed.length + 1;
         }
         s += 1;//status
-        if (null != sign) {
-            s += sign.size() + 1;
-        }
+
         s += pubKey.length + 1;
-        if(null!=extend){
+        if (null != extend) {
             s += extend.length + 1;
         }
         return s;
@@ -126,7 +142,7 @@ public class Account extends BaseNulsData {
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-       // stream.write(new VarInt(version).encode());
+        // stream.write(new VarInt(version).encode());
 //        if(StringUtils.isNotBlank(id)){
 //            stream.writeBytesWithLength(stream, id.getBytes(NulsContext.DEFAULT_ENCODING));
 //        }else {
@@ -177,28 +193,12 @@ public class Account extends BaseNulsData {
         this.priSeed = priSeed;
     }
 
-    public byte getStatus() {
-        return status;
-    }
-
-    public void setStatus(byte status) {
-        this.status = status;
-    }
-
     public byte[] getExtend() {
         return extend;
     }
 
     public void setExtend(byte[] extend) {
         this.extend = extend;
-    }
-
-    public NulsSignData getSign() {
-        return sign;
-    }
-
-    public void setSign(NulsSignData sign) {
-        this.sign = sign;
     }
 
     public byte[] getPubKey() {
@@ -233,15 +233,15 @@ public class Account extends BaseNulsData {
         this.createTime = createTime;
     }
 
-    public NulsDigestData getTxHash() {
-        return txHash;
-    }
-
-    public void setTxHash(NulsDigestData txHash) {
-        this.txHash = txHash;
-    }
-
-    public int getAccountChainId(){
+    public int getAccountChainId() {
         return this.getAddress().getChainId();
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 }

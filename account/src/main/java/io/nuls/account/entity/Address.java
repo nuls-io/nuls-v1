@@ -3,11 +3,8 @@ package io.nuls.account.entity;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.crypto.Util;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Base58;
 import io.nuls.core.utils.log.Log;
-import io.nuls.core.utils.crypto.Utils;
 
 import java.util.Arrays;
 
@@ -29,9 +26,7 @@ public class Address {
     public Address(String address) {
         try {
             byte[] bytes = Base58.decode(address);
-            if(bytes.length != 25){
-                throw new NulsException(ErrorCode.DATA_ERROR);
-            }
+
             Address addressTmp = Address.fromHashs(bytes);
             this.chainId = addressTmp.getChainId();
             this.hash160 = addressTmp.getHash160();
@@ -65,7 +60,6 @@ public class Address {
     }
 
     public static Address fromHashs(byte[] hashs) throws NulsException {
-
         if(hashs == null || hashs.length != HASH_LENGTH) {
             throw new NulsException(ErrorCode.DATA_ERROR);
         }
@@ -86,14 +80,14 @@ public class Address {
         byte[] versionAndHash160 = new byte[21];
         versionAndHash160[0] = (byte) chainId;
         System.arraycopy(hash160, 0, versionAndHash160, 1, hash160.length);
-        byte[] checkSin = getCheckSin(versionAndHash160);
+        byte[] checkSin = getCheckSign(versionAndHash160);
         byte[] base58bytes = new byte[25];
         System.arraycopy(versionAndHash160, 0, base58bytes, 0, versionAndHash160.length);
         System.arraycopy(checkSin, 0, base58bytes, versionAndHash160.length, checkSin.length);
         return base58bytes;
     }
 
-    protected byte[] getCheckSin(byte[] versionAndHash160) {
+    protected byte[] getCheckSign(byte[] versionAndHash160) {
         byte[] checkSin = new byte[4];
         System.arraycopy(Sha256Hash.hashTwice(versionAndHash160), 0, checkSin, 0, 4);
         return checkSin;

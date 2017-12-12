@@ -8,6 +8,7 @@ import io.nuls.account.util.AccountTool;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.chain.entity.NulsVersion;
+import io.nuls.core.chain.entity.Result;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.ECKey;
@@ -20,6 +21,7 @@ import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
+import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.AccountDao;
 import io.nuls.db.entity.AccountPo;
 
@@ -55,18 +57,7 @@ public class AccountServiceImpl implements AccountService {
     public Account createAccount() {
         locker.lock();
         try {
-            ECKey key = new ECKey();
-            Address address = new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID),Utils.sha256hash160(key.getPubKey(false)));
-            Account account = new Account();
-            account.setPriSeed(key.getPrivKeyBytes());
-            account.setVersion(new NulsVersion((short) 0));
-            account.setAddress(address);
-            account.setId(address.toString());
-            account.setPubKey(key.getPubKey(true));
-            account.setEcKey(key);
-            account.setPriKey(key.getPrivKeyBytes());
-            account.setCreateTime(TimeService.currentTimeMillis());
-            account.setTxHash(new NulsDigestData(new byte[]{0}));
+            Account account = AccountTool.createAccount();
             signAccount(account);
             AccountPo po = new AccountPo();
             AccountTool.toPojo(account, po);
@@ -75,10 +66,10 @@ public class AccountServiceImpl implements AccountService {
             return account;
         } catch (IOException e) {
             Log.error(e);
-            throw new NulsRuntimeException(ErrorCode.FAILED, "create account faild!");
+            throw new NulsRuntimeException(ErrorCode.FAILED, "create account failed!");
         } catch (NulsException e) {
             Log.error(e);
-            throw new NulsRuntimeException(ErrorCode.FAILED, "create account faild!");
+            throw new NulsRuntimeException(ErrorCode.FAILED, "create account failed!");
         } finally {
             locker.unlock();
         }
@@ -129,7 +120,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Account getLocalAccount() {
-        return this.accountCacheService.getAccountById(AccountManager.Locla_acount_id);
+        return this.accountCacheService.getAccountById(AccountManager.Local_acount_id);
     }
 
     @Override
@@ -173,6 +164,9 @@ public class AccountServiceImpl implements AccountService {
     public byte[] getPriKey(String address) {
         AssertUtil.canNotEmpty(address, "");
         Account account = accountCacheService.getAccountByAddress(address);
+        if (account == null) {
+            return null;
+        }
         return account.getEcKey().getPrivKeyBytes();
     }
 
@@ -180,7 +174,7 @@ public class AccountServiceImpl implements AccountService {
     public void switchAccount(String id) {
         Account account = accountCacheService.getAccountById(id);
         if (null != account) {
-            AccountManager.Locla_acount_id = id;
+            AccountManager.Local_acount_id = id;
         } else {
             throw new NulsRuntimeException(ErrorCode.FAILED, "The account not exist,id:" + id);
         }
@@ -188,27 +182,56 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public String getDefaultAccount() {
-        return AccountManager.Locla_acount_id;
+        return AccountManager.Local_acount_id;
     }
 
     @Override
-    public boolean changePassword(String oldpw, String newpw) {
-        return false;
+    public Result changePassword(String oldpw, String newpw) {
+        return null;
     }
 
     @Override
-    public boolean setPassword(String passwd) {
-        return false;
+    public Result setPassword(String password) {
+        if (!StringUtils.validPassword(password)) {
+            return new Result(false, "Length between 8 and 20, the combination of characters and numbers");
+        }
+
+        List<Account> accounts = this.getLocalAccountList();
+        if (accounts == null || accounts.size() == 0) {
+            return new Result(false, "No account was found");
+        }
+
+        for (Account account : accounts) {
+            if (account.isEncrypted()) {
+                if (!account.decrypt(password)) {
+                    return new Result(false, "password error");
+                }
+            } else {
+                account.encrypt(password);
+                AccountPo po = new AccountPo();
+                try {
+                    AccountTool.toPojo(account, po);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (NulsException e) {
+                    e.printStackTrace();
+                }
+                accountDao.update(po);
+            }
+        }
+
+
+        return new Result(true, "OK");
     }
 
     @Override
-    public boolean lockAccounts() {
-        return false;
+    public Result lockAccounts() {
+        return null;
     }
 
     @Override
-    public boolean unlockAccounts(String passwd) {
-        return false;
+    public Result unlockAccounts(String password) {
+        return null;
     }
 
     @Override

@@ -8,7 +8,6 @@ import io.nuls.account.service.intf.AccountService;
 import java.util.List;
 
 /**
- *
  * @author Niels
  * @date 2017/11/15
  */
@@ -16,7 +15,7 @@ public class AccountManager {
 
     private static final AccountManager INSTANCE = new AccountManager();
 
-    public static String Locla_acount_id = null;
+    public static String Local_acount_id = null;
     private AccountCacheService cacheService = AccountCacheService.getInstance();
     private AccountService accountService;
 
@@ -32,10 +31,12 @@ public class AccountManager {
         //default local account
         List<Account> list = this.accountService.getLocalAccountList();
         if (null != list && !list.isEmpty()) {
-            Locla_acount_id = list.get(0).getId();
-        }else{
-            Account account = this.accountService.createAccount();
-            Locla_acount_id = account.getId();
+            Local_acount_id = list.get(0).getId();
+        } else {
+            //todo should sent local event to other module?
+
+//            Account account = this.accountService.createAccount();
+//            Local_acount_id = account.getId();
         }
     }
 

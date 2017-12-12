@@ -229,6 +229,9 @@ public class ConnectionManager implements Runnable {
 
     private void addOutPeer(SelectionKey key) {
         PendingConnect data = (PendingConnect) key.attachment();
+        if(data == null || data.peer == null) {
+            return;
+        }
         Peer peer = data.peer;
         peer.setType(Peer.OUT);
         SocketChannel channel = (SocketChannel) key.channel();
