@@ -20,4 +20,12 @@ public class ReplyEvent extends BaseNulsEvent<BasicTypeData<byte[]>> {
         BasicTypeData<byte[]> typeData = new BasicTypeData(byteBuffer);
         return typeData;
     }
+
+    @Override
+    public Object copy() {
+        ReplyEvent event = new ReplyEvent();
+        BasicTypeData<byte[]> typeData = new BasicTypeData(this.getEventBody().getVal());
+        event.setEventBody(typeData);
+        return event;
+    }
 }

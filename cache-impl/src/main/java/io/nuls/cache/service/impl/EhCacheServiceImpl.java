@@ -64,7 +64,7 @@ public class EhCacheServiceImpl<K, T extends NulsCloneable> implements CacheServ
 
     @Override
     public void putElement(String cacheTitle, K key, T value) {
-        this.putElementWithOutClone(cacheTitle,key,value.clone());
+        this.putElementWithOutClone(cacheTitle,key,value.copy());
     }
 
     @Override
@@ -80,12 +80,12 @@ public class EhCacheServiceImpl<K, T extends NulsCloneable> implements CacheServ
         if (null == cacheManager.getCache(cacheTitle)) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "Cache not exist!");
         }
-        cacheManager.getCache(cacheTitle).put(element.getKey(), element.getValue().clone());
+        cacheManager.getCache(cacheTitle).put(element.getKey(), element.getValue().copy());
     }
 
     @Override
     public T getElementValue(String cacheTitle, K key) {
-        return (T) this.getElementValueWithOutClone(cacheTitle,key).clone();
+        return (T) this.getElementValueWithOutClone(cacheTitle,key).copy();
     }
 
     @Override
@@ -102,7 +102,7 @@ public class EhCacheServiceImpl<K, T extends NulsCloneable> implements CacheServ
         List<T> list = new ArrayList<>();
         while (it.hasNext()) {
             Cache.Entry<K, T> entry = (Cache.Entry<K, T>) it.next();
-            list.add((T) entry.getValue().clone());
+            list.add((T) entry.getValue().copy());
         }
         return list;
     }
