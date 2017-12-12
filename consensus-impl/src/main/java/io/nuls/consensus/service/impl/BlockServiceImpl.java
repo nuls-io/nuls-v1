@@ -9,7 +9,7 @@ import io.nuls.core.chain.entity.Block;
  */
 public class BlockServiceImpl implements BlockService {
     @Override
-    public Block getGengsisBlock() {
+    public Block getGengsisBlockFromDb() {
         // todo auto-generated method stub(niels)
         return null;
     }
@@ -60,5 +60,17 @@ public class BlockServiceImpl implements BlockService {
     public Block getBlockByHeight(int height) {
         // todo auto-generated method stub(niels)
         return null;
+    }
+
+    @Override
+    public void save(Block block) {
+        // todo auto-generated method stub(niels)
+
+    }
+
+    @Override
+    public void clearLocalBlocks() {
+        // todo auto-generated method stub(niels)
+
     }
 }

@@ -2,9 +2,9 @@ package io.nuls.cache.service.impl;
 
 import io.nuls.cache.constant.EhCacheConstant;
 import io.nuls.cache.entity.CacheElement;
-import io.nuls.cache.entity.NulsCloneable;
 import io.nuls.cache.manager.EhCacheManager;
 import io.nuls.cache.service.intf.CacheService;
+import io.nuls.core.chain.intf.NulsCloneable;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
 import org.ehcache.Cache;
@@ -64,10 +64,15 @@ public class EhCacheServiceImpl<K, T extends NulsCloneable> implements CacheServ
 
     @Override
     public void putElement(String cacheTitle, K key, T value) {
+        this.putElementWithOutClone(cacheTitle,key,value.clone());
+    }
+
+    @Override
+    public void putElementWithOutClone(String cacheTitle, K key, Object value) {
         if (null == cacheManager.getCache(cacheTitle)) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "Cache not exist!");
         }
-        cacheManager.getCache(cacheTitle).put(key, value.clone());
+        cacheManager.getCache(cacheTitle).put(key, value );
     }
 
     @Override
@@ -80,10 +85,15 @@ public class EhCacheServiceImpl<K, T extends NulsCloneable> implements CacheServ
 
     @Override
     public T getElementValue(String cacheTitle, K key) {
+        return (T) this.getElementValueWithOutClone(cacheTitle,key).clone();
+    }
+
+    @Override
+    public T getElementValueWithOutClone(String cacheTitle, K key) {
         if (null == cacheManager.getCache(cacheTitle)) {
             return null;
         }
-        return (T) ((T) cacheManager.getCache(cacheTitle).get(key)).clone();
+        return  ((T) cacheManager.getCache(cacheTitle).get(key));
     }
 
     @Override

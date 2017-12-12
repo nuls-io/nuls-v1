@@ -11,13 +11,13 @@ import io.nuls.core.utils.io.NulsByteBuffer;
  * @author Niels
  * @date 2017/11/13
  */
-public class GetBlockEvent extends BaseConsensusEvent<BasicTypeData<Integer>>{
+public class GetBlockEvent extends BaseConsensusEvent<BasicTypeData<Long>>{
     public GetBlockEvent( ) {
         super(ConsensusEventType.GET_BLOCK);
     }
 
     @Override
-    protected BasicTypeData<Integer> parseEventBody(NulsByteBuffer byteBuffer) {
+    protected BasicTypeData<Long> parseEventBody(NulsByteBuffer byteBuffer) {
        return new BasicTypeData<>(byteBuffer);
     }
 
