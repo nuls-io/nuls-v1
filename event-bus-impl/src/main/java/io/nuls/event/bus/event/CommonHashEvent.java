@@ -23,4 +23,11 @@ public class CommonHashEvent extends BaseNulsEvent<NulsDigestData> {
         data.parse(byteBuffer);
         return data;
     }
+
+    @Override
+    public Object copy() {
+        NulsDigestData data = new NulsDigestData(this.getEventBody().getDigestBytes());
+        CommonHashEvent event = new CommonHashEvent(data);
+        return event;
+    }
 }
