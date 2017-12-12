@@ -54,6 +54,10 @@ public class BlockHeader extends BaseNulsData {
         //todo
     }
 
+    public NulsDigestData getHash() {
+        return hash;
+    }
+
     public void setHash(NulsDigestData hash) {
         this.hash = hash;
     }

@@ -1,17 +1,13 @@
 package io.nuls.consensus.thread;
 
 import io.nuls.consensus.constant.PocConsensusConstant;
-import io.nuls.consensus.event.AskBestBlockEvent;
 import io.nuls.consensus.service.intf.BlockService;
-import io.nuls.consensus.utils.DistributedBestHeightCalcCache;
+import io.nuls.consensus.utils.DistributedBestHeightRequestUtils;
 import io.nuls.core.chain.entity.Block;
-import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.event.service.intf.EventService;
-import org.spongycastle.util.Times;
 
 import java.util.List;
 
@@ -21,7 +17,7 @@ import java.util.List;
  */
 public class BlockMaintenanceThread implements Runnable {
 
-    public static DistributedBestHeightCalcCache BEST_HEIGHT_FROM_NET;
+    public static DistributedBestHeightRequestUtils BEST_HEIGHT_FROM_NET;
 
     public static final String THREAD_NAME = "block-maintenance";
 
@@ -54,7 +50,6 @@ public class BlockMaintenanceThread implements Runnable {
     }
 
     public synchronized void syncBlock() {
-        BEST_HEIGHT_FROM_NET = new DistributedBestHeightCalcCache();
         boolean doit = false;
         do {
             Block localBestBlock = blockService.getLocalHighestBlock();
@@ -67,7 +62,7 @@ public class BlockMaintenanceThread implements Runnable {
                 doit = false;
                 break;
             }
-            int netBestHeight = this.getBestHeightFromNet();
+            long netBestHeight = this.getBestHeightFromNet();
             if (netBestHeight > localBestBlock.getHeader().getHeight()) {
                 doit = true;
                 break;
@@ -79,14 +74,10 @@ public class BlockMaintenanceThread implements Runnable {
 
     }
 
-    private synchronized int getBestHeightFromNet() {
-        AskBestBlockEvent askBestBlockEvent = new AskBestBlockEvent();
-        List<String> peerIdList = this.eventService.broadcast(askBestBlockEvent);
-        if(peerIdList.isEmpty()){
-            Log.error("get best height from net faild!");
-            return 0;
-        }
-        BEST_HEIGHT_FROM_NET.setPeerIdList(peerIdList);
+    private synchronized long getBestHeightFromNet() {
+
+        BEST_HEIGHT_FROM_NET = new DistributedBestHeightRequestUtils();
+        BEST_HEIGHT_FROM_NET.request();
         return BEST_HEIGHT_FROM_NET.getHeight();
     }
 
