@@ -2,6 +2,7 @@ package io.nuls.cache.service.impl;
 
 import io.nuls.cache.constant.EhCacheConstant;
 import io.nuls.cache.entity.CacheElement;
+import io.nuls.cache.entity.NulsCloneable;
 import io.nuls.cache.manager.EhCacheManager;
 import io.nuls.cache.service.intf.CacheService;
 import io.nuls.core.constant.ErrorCode;
@@ -18,7 +19,7 @@ import java.util.Map;
  * @author Niels
  * @date 2017/10/27
  */
-public class EhCacheServiceImpl<K, T> implements CacheService<K, T> {
+public class EhCacheServiceImpl<K, T extends NulsCloneable> implements CacheService<K, T> {
     private final EhCacheManager cacheManager = EhCacheManager.getInstance();
 
     @Override
@@ -66,7 +67,7 @@ public class EhCacheServiceImpl<K, T> implements CacheService<K, T> {
         if (null == cacheManager.getCache(cacheTitle)) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "Cache not exist!");
         }
-        cacheManager.getCache(cacheTitle).put(key, value);
+        cacheManager.getCache(cacheTitle).put(key, value.clone());
     }
 
     @Override
@@ -74,7 +75,7 @@ public class EhCacheServiceImpl<K, T> implements CacheService<K, T> {
         if (null == cacheManager.getCache(cacheTitle)) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "Cache not exist!");
         }
-        cacheManager.getCache(cacheTitle).put(element.getKey(), element.getValue());
+        cacheManager.getCache(cacheTitle).put(element.getKey(), element.getValue().clone());
     }
 
     @Override
@@ -82,7 +83,7 @@ public class EhCacheServiceImpl<K, T> implements CacheService<K, T> {
         if (null == cacheManager.getCache(cacheTitle)) {
             return null;
         }
-        return (T) cacheManager.getCache(cacheTitle).get(key);
+        return (T) ((T) cacheManager.getCache(cacheTitle).get(key)).clone();
     }
 
     @Override
@@ -91,7 +92,7 @@ public class EhCacheServiceImpl<K, T> implements CacheService<K, T> {
         List<T> list = new ArrayList<>();
         while (it.hasNext()) {
             Cache.Entry<K, T> entry = (Cache.Entry<K, T>) it.next();
-            list.add(entry.getValue());
+            list.add((T) entry.getValue().clone());
         }
         return list;
     }
@@ -117,13 +118,6 @@ public class EhCacheServiceImpl<K, T> implements CacheService<K, T> {
         return cacheManager.getCacheTitleList();
     }
 
-    @Override
-    public void putElements(String cacheTitle, Map<K, T> map) {
-        if (null == cacheManager.getCache(cacheTitle)) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "Cache not exist!");
-        }
-        cacheManager.getCache(cacheTitle).putAll(map);
-    }
     @Override
     public boolean containsKey(String cacheTitle,String key){
         return this.cacheManager.getCache(cacheTitle).containsKey(key);

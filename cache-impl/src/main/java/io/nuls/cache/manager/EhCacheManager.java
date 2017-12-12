@@ -1,5 +1,6 @@
 package io.nuls.cache.manager;
 
+import io.nuls.core.chain.entity.Block;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.ehcache.config.CacheConfiguration;

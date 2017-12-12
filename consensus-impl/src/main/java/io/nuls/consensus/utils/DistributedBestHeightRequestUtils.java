@@ -46,6 +46,9 @@ public class DistributedBestHeightRequestUtils {
     }
 
     public void addBlockHeader(String peerId, BlockHeader header) {
+        if(!headerMap.containsKey(peerId)){
+            return;
+        }
         headerMap.put(peerId, header);
         Set<String> peers = calcMap.get(header.getHash().getDigestHex());
         if (null == peers) {

@@ -6,7 +6,7 @@ package io.nuls.cache.entity;
  * @date 2017/10/18
  *
  */
-public class CacheElement<T> {
+public class CacheElement<T extends NulsCloneable> {
     private String cacheTitle;
     private String key;
     private T value;
