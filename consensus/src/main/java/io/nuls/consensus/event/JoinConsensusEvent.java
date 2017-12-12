@@ -7,6 +7,7 @@ import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.event.NulsEventHeader;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.log.Log;
 
 /**
  * @author Niels
@@ -24,6 +25,5 @@ public class JoinConsensusEvent extends BaseConsensusEvent<JoinConsensusTransact
         tx.parse(byteBuffer);
         return tx;
     }
-
 
 }

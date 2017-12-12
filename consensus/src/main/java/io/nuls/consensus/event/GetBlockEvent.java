@@ -5,6 +5,7 @@ import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.BasicTypeData;
 import io.nuls.core.event.NulsEventHeader;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.log.Log;
 
 /**
  * get block by height.
@@ -20,6 +21,5 @@ public class GetBlockEvent extends BaseConsensusEvent<BasicTypeData<Long>>{
     protected BasicTypeData<Long> parseEventBody(NulsByteBuffer byteBuffer) {
        return new BasicTypeData<>(byteBuffer);
     }
-
 
 }

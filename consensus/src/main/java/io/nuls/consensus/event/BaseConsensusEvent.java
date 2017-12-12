@@ -5,6 +5,7 @@ import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.core.event.NulsEventHeader;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.log.Log;
 
 /**
  * @author Niels
@@ -16,5 +17,14 @@ public abstract class BaseConsensusEvent<T extends BaseNulsData> extends BaseNul
     public BaseConsensusEvent(short eventType) {
         super(NulsConstant.MODULE_ID_CONSENSUS, eventType);
     }
- 
+
+    @Override
+    public Object copy() {
+        try {
+            return this.clone();
+        } catch (CloneNotSupportedException e) {
+            Log.error(e);
+            return null;
+        }
+    }
 }
