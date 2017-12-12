@@ -31,6 +31,12 @@ public class BroadcastResult implements NulsCloneable {
         this.message = message;
     }
 
+    public BroadcastResult(boolean success, String message, List<Peer> broadcastPeers) {
+        this.success = success;
+        this.message = message;
+        this.broadcastPeers = broadcastPeers;
+    }
+
     @Override
     public String toString() {
         return "";

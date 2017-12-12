@@ -84,6 +84,15 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
+    public void removePeer(String peerId) {
+        Peer peer = peersManager.getPeer(peerId);
+        if(peer == null) {
+            throw new NulsRuntimeException(ErrorCode.PEER_NOT_FOUND);
+        }
+        peersManager.deletePeer(peer);
+    }
+
+    @Override
     public void addPeerToGroup(String groupName, Peer peer) {
         peersManager.addPeerToGroup(groupName, peer);
 

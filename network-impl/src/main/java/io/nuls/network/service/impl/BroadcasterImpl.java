@@ -13,6 +13,7 @@ import io.nuls.network.service.Broadcaster;
 
 import java.io.IOException;
 import java.nio.channels.NotYetConnectedException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -39,9 +40,13 @@ public class BroadcasterImpl implements Broadcaster {
         }
 
         int successCount = 0;
+
+        BroadcastResult result = new BroadcastResult(true, "OK");
+        List<Peer> successPeers = new ArrayList<>();
         for (Peer peer : broadPeers) {
             try {
                 peer.sendMessage(message);
+                successPeers.add(peer);
                 successCount++;
             } catch (NotYetConnectedException | IOException e) {
                 Log.warn("broadcast message error ， maybe the peer closed ! peer ip :{}, {}", peer.getIp(), e.getMessage());
@@ -52,7 +57,8 @@ public class BroadcasterImpl implements Broadcaster {
             return new BroadcastResult(false, "broadcast fail");
         }
         Log.debug("成功广播给{}个节点，消息{}", successCount, message);
-        return new BroadcastResult(true, "OK");
+        result.setBroadcastPeers(successPeers);
+        return result;
     }
 
     /**
@@ -79,6 +85,7 @@ public class BroadcasterImpl implements Broadcaster {
                 peer.sendMessage(message);
                 successCount++;
             } catch (NotYetConnectedException | IOException e) {
+                broadPeers.remove(peer);
                 Log.warn("broadcast message error ， maybe the peer closed ! peer ip :{}, {}", peer.getIp(), e.getMessage());
             }
         }
@@ -107,7 +114,9 @@ public class BroadcasterImpl implements Broadcaster {
             Log.warn("broadcast message error ， maybe the peer closed ! peer ip :{}, {}", peer.getIp(), e.getMessage());
             return new BroadcastResult(false, "broadcast fail");
         }
-        return new BroadcastResult(true, "OK");
+        List<Peer> broadPeers = new ArrayList<>();
+        broadPeers.add(peer);
+        return new BroadcastResult(true, "OK", broadPeers);
     }
 
     private BroadcastResult broadcastToGroup(NulsMessage message, String groupName, String excludePeerId) {
@@ -127,7 +136,7 @@ public class BroadcasterImpl implements Broadcaster {
         }
 
         if (successCount == 0) {
-            new BroadcastResult(false, "broadcast fail");
+            new BroadcastResult(false, "broadcast fail", broadPeers);
         }
         Log.debug("成功广播给{}个节点，消息{}", successCount, message);
         return new BroadcastResult(true, "OK");

@@ -18,6 +18,8 @@ public interface NetworkService {
 
     void addPeer(Peer peer);
 
+    void removePeer(String peerId);
+
     void addPeerToGroup(String groupName, Peer peer);
 
     void addPeerGroup(PeerGroup peerGroup);

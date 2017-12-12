@@ -14,7 +14,13 @@ import java.util.List;
 public interface AccountService {
     Account createAccount();
 
+    void resetKey(Account account);
+
     void resetKey(Account account,String password);
+
+    void resetKeys();
+
+    void resetKeys(String password);
 
     Account getLocalAccount();
 
@@ -34,9 +40,11 @@ public interface AccountService {
 
     Result setPassword(String password);
 
+    boolean isEncrypted();
+
     Result lockAccounts();
 
-    Result unlockAccounts(String passwd);
+    Result unlockAccounts(String password, int secends);
 
     NulsSignData signData(byte[] bytes);
 }

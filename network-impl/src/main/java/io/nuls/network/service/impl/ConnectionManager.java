@@ -74,7 +74,7 @@ public class ConnectionManager implements Runnable {
     public void start() {
         Log.info("----------- network connectionManager start -------------");
         running = true;
-        ThreadManager.createSingleThreadAndRun(NulsConstant.MODULE_ID_NETWORK, "connectionManager", this, true);
+        ThreadManager.createSingleThreadAndRun(NulsConstant.MODULE_ID_NETWORK, "connectionManager", this);
     }
 
     public void restart() {

@@ -136,6 +136,7 @@ public class PeersManager {
                 for (PeerGroup group : peerGroups.values()) {
                     for (Peer peer : group.getPeers()) {
                         if (peer.getHash().equals(peerHash)) {
+
                             group.removePeer(peer);
                             break;
                         }
@@ -147,6 +148,7 @@ public class PeersManager {
             lock.unlock();
         }
     }
+
 
     public boolean hasPeerGroup(String groupName) {
         return peerGroups.containsKey(groupName);
@@ -183,13 +185,11 @@ public class PeersManager {
      * @param peer
      */
     public void deletePeer(Peer peer) {
+        peer.destroy(false);
         peerDao.deleteByKey(peer.getHash());
     }
 
     public Peer getPeer(String peerId) {
-//        if (!peers.containsKey(peerId)) {
-//            throw new NulsRuntimeException(ErrorCode.PEER_NOT_FOUND);
-//        }
         return peers.get(peerId);
     }
 
