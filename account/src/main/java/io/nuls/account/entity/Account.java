@@ -2,6 +2,7 @@ package io.nuls.account.entity;
 
 import io.nuls.account.util.AccountTool;
 import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.chain.intf.NulsCloneable;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.EncryptedData;
@@ -20,7 +21,7 @@ import java.util.Arrays;
  * @author Niels
  * @date 2017/10/30
  */
-public class Account extends BaseNulsData {
+public class Account extends BaseNulsData implements NulsCloneable{
 
     private String id;
 
@@ -243,5 +244,16 @@ public class Account extends BaseNulsData {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    @Override
+    public Object copy() {
+        // todo auto-generated method stub(niels)
+        try {
+            return this.clone();
+        } catch (CloneNotSupportedException e) {
+            Log.error(e);
+            return this;
+        }
     }
 }

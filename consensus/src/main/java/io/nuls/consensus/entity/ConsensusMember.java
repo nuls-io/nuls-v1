@@ -2,6 +2,7 @@ package io.nuls.consensus.entity;
 
 import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.chain.intf.NulsCloneable;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
@@ -15,7 +16,7 @@ import java.io.IOException;
  * @author Niels
  * @date 2017/11/7
  */
-public class ConsensusMember<T extends BaseNulsData> extends BaseNulsData {
+public class ConsensusMember<T extends BaseNulsData> extends BaseNulsData implements NulsCloneable{
 
     private Address address;
 
@@ -76,4 +77,8 @@ public class ConsensusMember<T extends BaseNulsData> extends BaseNulsData {
         this.extend = extend;
     }
 
+    @Override
+    public Object copy() {
+        return this;
+    }
 }

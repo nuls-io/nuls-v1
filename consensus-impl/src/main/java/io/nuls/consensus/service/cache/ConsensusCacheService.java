@@ -74,12 +74,12 @@ public class ConsensusCacheService {
 
     public ConsensusStatusInfo getConsensusStatusInfo() {
         ConsensusStatusInfo info =
-                (ConsensusStatusInfo) this.cacheService.getElementValue(CACHE_CONSENSUS_STATUS_INFO, CACHE_CONSENSUS_STATUS_INFO);
+                (ConsensusStatusInfo) this.cacheService.getElementValueWithOutClone(CACHE_CONSENSUS_STATUS_INFO, CACHE_CONSENSUS_STATUS_INFO);
         return info;
     }
 
     public void updateConsensusStatusInfo(ConsensusStatusInfo info) {
-        this.cacheService.putElement(CACHE_CONSENSUS_STATUS_INFO, CACHE_CONSENSUS_STATUS_INFO, info);
+        this.cacheService.putElementWithOutClone(CACHE_CONSENSUS_STATUS_INFO, CACHE_CONSENSUS_STATUS_INFO, info);
     }
 
     public void addConsensusMember(ConsensusMember ca) {

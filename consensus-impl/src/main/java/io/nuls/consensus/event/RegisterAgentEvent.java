@@ -3,6 +3,7 @@ package io.nuls.consensus.event;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.log.Log;
 
 /**
  * @author Niels
@@ -19,4 +20,5 @@ public class RegisterAgentEvent extends BaseConsensusEvent<RegisterAgentTransact
         tx.parse(byteBuffer);
         return tx;
     }
+
 }
