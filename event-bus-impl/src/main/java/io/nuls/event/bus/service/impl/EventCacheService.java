@@ -30,7 +30,7 @@ public class EventCacheService {
     }
 
     public void cacheRecievedEventHash(String hashHex) {
-        this.cacheService.putElement(CACHE_OF_SENDED, hashHex, 1);
+        this.cacheService.putElementWithOutClone(CACHE_OF_SENDED, hashHex, 1);
     }
 
     public boolean isKnown(String hashHex) {
