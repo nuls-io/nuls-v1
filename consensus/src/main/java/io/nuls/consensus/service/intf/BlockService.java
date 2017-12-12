@@ -10,7 +10,7 @@ import io.nuls.core.chain.entity.Block;
  */
 public interface BlockService {
 
-    Block getGengsisBlock();
+    Block getGengsisBlockFromDb();
 
     int getLocalHeight();
 
@@ -28,4 +28,7 @@ public interface BlockService {
 
     Block getBlockByHeight(int height);
 
+    void save(Block block);
+
+    void clearLocalBlocks();
 }

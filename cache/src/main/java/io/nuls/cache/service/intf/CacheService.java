@@ -1,7 +1,7 @@
 package io.nuls.cache.service.intf;
 
 import io.nuls.cache.entity.CacheElement;
-import io.nuls.cache.entity.NulsCloneable;
+import io.nuls.core.chain.intf.NulsCloneable;
 
 import java.util.List;
 import java.util.Map;
@@ -45,6 +45,8 @@ public interface CacheService<K, V extends NulsCloneable> {
      * @param value
      */
     void putElement(String cacheTitle, K key, V value);
+    void putElementWithOutClone(String cacheTitle, K key, Object value);
+
 
     /**
      * put data to a cache
@@ -62,7 +64,7 @@ public interface CacheService<K, V extends NulsCloneable> {
      * @return
      */
     V getElementValue(String cacheTitle, K key);
-
+    V getElementValueWithOutClone(String cacheTitle, K key);
     List<V> getElementValueList(String cacheTitle);
 
     /**

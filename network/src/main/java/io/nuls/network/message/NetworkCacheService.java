@@ -27,7 +27,7 @@ public class NetworkCacheService {
     }
 
     public void addBroadCastResult(BroadcastResult result) {
-        cacheService.putElement(BROADCAST_CACHE, result.getHash(), result);
+//        cacheService.putElement(BROADCAST_CACHE, result.getHash(), result);
     }
 
     public BroadcastResult getBroadCastResult(String hash) {

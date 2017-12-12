@@ -16,11 +16,22 @@ import java.util.*;
  * @date 2017/12/11
  */
 public class DistributedBestHeightRequestUtils {
+    private static final DistributedBestHeightRequestUtils INSTANCE = new DistributedBestHeightRequestUtils();
     private EventService eventService = NulsContext.getInstance().getService(EventService.class);
     private List<String> peerIdList;
     private Map<String, BlockHeader> headerMap = new HashMap<>();
-    private Map<String, Set<String>> calcMap = new HashMap<>();
+    /**
+     * list order by answered time
+     */
+    private Map<String, List<String>> calcMap = new HashMap<>();
     private BestBlockInfo bestBlockInfo;
+
+    private DistributedBestHeightRequestUtils(){
+    }
+
+    public static DistributedBestHeightRequestUtils getInstance(){
+        return INSTANCE;
+    }
 
     public List<String> getPeerIdList() {
         return peerIdList;
@@ -50,11 +61,13 @@ public class DistributedBestHeightRequestUtils {
             return;
         }
         headerMap.put(peerId, header);
-        Set<String> peers = calcMap.get(header.getHash().getDigestHex());
+        List<String> peers = calcMap.get(header.getHash().getDigestHex());
         if (null == peers) {
-            peers = new HashSet<>();
+            peers = new ArrayList<>();
         }
-        peers.add(peerId);
+        if(!peers.contains(peerId)){
+            peers.add(peerId);
+        }
         calcMap.put(header.getHash().getDigestHex(), peers);
         calc();
     }
@@ -71,7 +84,7 @@ public class DistributedBestHeightRequestUtils {
         }
         BestBlockInfo result = null;
         for (String hash : calcMap.keySet()) {
-            Set<String> peers = calcMap.get(hash);
+            List<String> peers = calcMap.get(hash);
             if (peers.size() > halfSize) {
                 result = new BestBlockInfo();
                 BlockHeader header = headerMap.get(result.getPeerIdList().get(0));
