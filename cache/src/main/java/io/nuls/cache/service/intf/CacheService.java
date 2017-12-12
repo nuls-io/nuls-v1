@@ -1,6 +1,7 @@
 package io.nuls.cache.service.intf;
 
 import io.nuls.cache.entity.CacheElement;
+import io.nuls.cache.entity.NulsCloneable;
 
 import java.util.List;
 import java.util.Map;
@@ -10,7 +11,7 @@ import java.util.Map;
  * @author Niels
  * @date 2017/10/18
  */
-public interface CacheService<K, V> {
+public interface CacheService<K, V extends NulsCloneable> {
 
     /**
      * create a cache named title
@@ -71,14 +72,6 @@ public interface CacheService<K, V> {
      * @param key
      */
     void removeElement(String cacheTitle, K key);
-
-    /**
-     * Batch addition
-     *
-     * @param cacheTitle
-     * @param map
-     */
-    void putElements(String cacheTitle, Map<K,V> map);
 
     /**
      * @param title
