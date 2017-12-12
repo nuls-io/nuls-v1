@@ -3,6 +3,7 @@ package io.nuls.core.event;
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.NulsSignData;
+import io.nuls.core.chain.intf.NulsCloneable;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
@@ -13,7 +14,7 @@ import java.io.OutputStream;
  * @author Niels
  * @date 2017/11/7
  */
-public abstract class BaseNulsEvent<T extends BaseNulsData> extends BaseNulsData {
+public abstract class BaseNulsEvent<T extends BaseNulsData> extends BaseNulsData implements NulsCloneable{
     private NulsEventHeader header;
     private NulsDigestData hash;
     private NulsSignData sign;
