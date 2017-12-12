@@ -17,21 +17,14 @@ import java.io.IOException;
  */
 public class ConsensusMember<T extends BaseNulsData> extends BaseNulsData {
 
-    private String hash;
-
     private Address address;
-
-    private int status;
-
-    private long startTime;
 
     private T extend;
 
     @Override
     public int size() {
         int size = 0;
-        size += VarInt.sizeOf(startTime);
-        size += address.getHash160().length;
+        size += Address.HASH_LENGTH;
         if(null!=extend){
             size += extend.size();
         }
@@ -41,7 +34,6 @@ public class ConsensusMember<T extends BaseNulsData> extends BaseNulsData {
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeBytesWithLength(address.getHash160());
-        stream.writeVarInt(startTime);
         if(null!=extend){
             stream.writeBytesWithLength(extend.serialize());
         }
@@ -54,7 +46,6 @@ public class ConsensusMember<T extends BaseNulsData> extends BaseNulsData {
         } catch (NulsException e) {
             Log.error(e);
         }
-        this.startTime = byteBuffer.readVarInt();
         if(!byteBuffer.isFinished()){
             this.extend = this.parseExtend(byteBuffer);
         }
@@ -85,27 +76,4 @@ public class ConsensusMember<T extends BaseNulsData> extends BaseNulsData {
         this.extend = extend;
     }
 
-    public int getStatus() {
-        return status;
-    }
-
-    public void setStatus(int status) {
-        this.status = status;
-    }
-
-    public String getHash() {
-        return hash;
-    }
-
-    public void setHash(String hash) {
-        this.hash = hash;
-    }
-
-    public long getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(long startTime) {
-        this.startTime = startTime;
-    }
 }

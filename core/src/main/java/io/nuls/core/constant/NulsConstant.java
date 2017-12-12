@@ -14,6 +14,11 @@ public interface NulsConstant {
     String CFG_SYSTEM_SECTION = "System";
     String CFG_SYSTEM_LANGUAGE = "language";
     String CFG_SYSTEM_DEFAULT_ENCODING = "encoding";
+    String CFG_SYSTEM_RUN_MODE = "run.mode";
+
+    String RUN_MODE_MAIN = "1";
+    String RUN_MODE_TEST = "2";
+    String RUN_MODE_DEV = "3";
 
     /**----[ Bootstrap] ----*/
 //    String CFG_BOOTSTRAP_RPC_SERVER_MODULE = "RPC";

@@ -1,7 +1,15 @@
 package io.nuls.consensus.module.impl;
 
+import io.nuls.account.entity.Account;
+import io.nuls.account.service.intf.AccountService;
+import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.constant.PocConsensusConstant;
+import io.nuls.consensus.entity.ConsensusMember;
 import io.nuls.consensus.entity.genesis.DevGenesisBlock;
+import io.nuls.consensus.entity.genesis.MainGenesisBlock;
+import io.nuls.consensus.entity.genesis.TestGenesisBlock;
+import io.nuls.consensus.entity.member.ConsensusMemberData;
+import io.nuls.consensus.entity.member.ConsensusMemberImpl;
 import io.nuls.consensus.entity.tx.RedPunishTransaction;
 import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
 import io.nuls.consensus.entity.tx.YellowPunishTransaction;
@@ -10,9 +18,14 @@ import io.nuls.consensus.event.*;
 import io.nuls.consensus.handler.*;
 import io.nuls.consensus.handler.filter.*;
 import io.nuls.consensus.module.AbstractConsensusModule;
+import io.nuls.consensus.service.cache.ConsensusCacheService;
 import io.nuls.consensus.service.impl.PocConsensusServiceImpl;
 import io.nuls.consensus.thread.BlockMaintenanceThread;
+import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.ThreadManager;
 import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.log.Log;
@@ -26,17 +39,29 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
 
     private NetworkProcessorService processorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
     private boolean delegatePeer = false;
+    private ConsensusCacheService consensusCacheService = ConsensusCacheService.getInstance();
+    private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
 
     @Override
     public void start() {
-        //todo 判断启动模式，选择创世块
-        NulsContext.getInstance().setGenesisBlock(DevGenesisBlock.getInstance());
+        try {
+            String mode = ConfigLoader.getCfgValue(NulsConstant.CFG_SYSTEM_SECTION, NulsConstant.CFG_SYSTEM_RUN_MODE);
+            if (NulsConstant.RUN_MODE_MAIN.equals(mode)) {
+                NulsContext.getInstance().setGenesisBlock(MainGenesisBlock.getInstance());
+            } else if (NulsConstant.RUN_MODE_TEST.equals(mode)) {
+                NulsContext.getInstance().setGenesisBlock(TestGenesisBlock.getInstance());
+            } else {
+                NulsContext.getInstance().setGenesisBlock(DevGenesisBlock.getInstance());
+            }
+        } catch (NulsException e) {
+            Log.error(e);
+            throw new NulsRuntimeException(e);
+        }
         delegatePeer = ConfigLoader.getCfgValue(PocConsensusConstant.CFG_CONSENSUS_SECTION, PocConsensusConstant.PROPERTY_DELEGATE_PEER, false);
         PocBlockValidatorManager.initBlockValidators();
-        this.checkGenesisBlock();
-        this.checkBlockHeight();
-        this.checkConsensusStatus();
         this.startBlockMaintenanceThread();
+        this.checkGenesisBlock();
+        this.checkConsensusStatus();
         this.registerEvent(PocConsensusConstant.EVENT_TYPE_RED_PUNISH, RedPunishConsensusEvent.class);
         this.registerEvent(PocConsensusConstant.EVENT_TYPE_YELLOW_PUNISH, YellowPunishConsensusEvent.class);
         this.registerEvent(PocConsensusConstant.EVENT_TYPE_REGISTER_AGENT, RegisterAgentEvent.class);
@@ -85,20 +110,33 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
 
     private void checkConsensusStatus() {
         //todo
-//        cache consensus member
+        do {
+            Account localAccount = accountService.getLocalAccount();
+            if (null == localAccount) {
+                Log.warn("local account is null!");
+                break;
+            }
+            ConsensusMember<ConsensusMemberData> memberSelf = consensusCacheService.getConsensusMember(localAccount.getAddress().toString());
+            if (null == memberSelf) {
+                break;
+            }
+            if (memberSelf.getExtend().getStatus() == ConsensusStatusEnum.NOT_IN.getCode()) {
+                break;
+            }
+
+        } while (false);
+
 
 //        Judge own state
     }
 
-    private void checkBlockHeight() {
-        //todo
-    }
 
     private void startBlockMaintenanceThread() {
+        BlockMaintenanceThread blockMaintenanceThread = BlockMaintenanceThread.getInstance();
+        blockMaintenanceThread.syncBlock();
         ThreadManager.createSingleThreadAndRun(this.getModuleId(),
-                "BlockMaintenance", BlockMaintenanceThread.getInstance());
+                BlockMaintenanceThread.THREAD_NAME, blockMaintenanceThread);
     }
-
 
     /**
      * check genesis block
@@ -112,6 +150,7 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
     @Override
     public void shutdown() {
         //todo
+        ThreadManager.shutdownByModuleId(this.getModuleId());
 
     }
 

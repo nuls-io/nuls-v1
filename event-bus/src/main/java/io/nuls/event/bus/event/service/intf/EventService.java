@@ -2,6 +2,8 @@ package io.nuls.event.bus.event.service.intf;
 
 import io.nuls.core.event.BaseNulsEvent;
 
+import java.util.List;
+
 /**
  * @author Niels
  * @date 2017/12/8
@@ -15,7 +17,7 @@ public interface EventService {
      * @param event
      * @return
      */
-    String broadcastWillPassNeedConfirmation(BaseNulsEvent event);
+    List<String> broadcastSyncNeedConfirmation(BaseNulsEvent event);
 
     /**
      * broadcast a message that need to be passed
@@ -23,14 +25,16 @@ public interface EventService {
      * @param event
      * @return
      */
-    String broadcastWillPass(BaseNulsEvent event);
+    List<String> broadcastHashAndCache(BaseNulsEvent event);
+
+    List<String> broadcast(BaseNulsEvent event, String excludePeerId);
 
     /**
      * broadcast msg ,no need to pass the message
      *
      * @param event
      */
-    void broadcast(BaseNulsEvent event);
+    List<String> broadcast(BaseNulsEvent event);
 
     /**
      * send msg to one peer
@@ -38,6 +42,6 @@ public interface EventService {
      * @param event
      * @param peerId
      */
-    void sendToPeer(BaseNulsEvent event, String peerId);
+    boolean sendToPeer(BaseNulsEvent event, String peerId);
 
 }

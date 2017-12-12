@@ -16,6 +16,9 @@ public interface PocConsensusConstant {
     short EVENT_TYPE_RED_PUNISH = 6;
     short EVENT_TYPE_YELLOW_PUNISH = 7;
     short EVENT_TYPE_REGISTER_AGENT = 8;
+    short EVENT_TYPE_ASK_BEST_BLOCK = 9;
+    short EVENT_TYPE_BEST_BLOCK = 10;
+
 
     int TX_TYPE_REGISTER_AGENT = 10;
     int TX_TYPE_RED_PUNISH = 11;
