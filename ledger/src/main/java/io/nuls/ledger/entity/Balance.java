@@ -1,5 +1,7 @@
 package io.nuls.ledger.entity;
 
+import io.nuls.core.chain.intf.NulsCloneable;
+
 import java.io.Serializable;
 
 /**
@@ -8,7 +10,7 @@ import java.io.Serializable;
  * @date 2017/11/13
  *
  */
-public class Balance implements Serializable{
+public class Balance implements Serializable,NulsCloneable{
 
     private double balance;
 
@@ -38,5 +40,14 @@ public class Balance implements Serializable{
 
     public void setUseable(double useable) {
         this.useable = useable;
+    }
+
+    @Override
+    public Object copy() {
+        Balance obj = new Balance();
+        obj.setBalance(balance);
+        obj.setLocked(locked);
+        obj.setUseable(this.useable);
+        return obj;
     }
 }

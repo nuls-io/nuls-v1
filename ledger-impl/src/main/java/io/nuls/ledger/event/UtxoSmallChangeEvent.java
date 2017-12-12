@@ -11,4 +11,10 @@ public class UtxoSmallChangeEvent<T extends UtxoSmallChangeTransaction> extends 
     public UtxoSmallChangeEvent(short eventType) {
         super((short) 3);
     }
+
+    @Override
+    public Object copy() {
+        // todo auto-generated method stub(niels)
+        return null;
+    }
 }

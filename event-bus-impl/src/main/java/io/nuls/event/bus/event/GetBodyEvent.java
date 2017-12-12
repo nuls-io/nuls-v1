@@ -22,4 +22,12 @@ public class GetBodyEvent extends BaseNulsEvent<NulsDigestData> {
         data.parse(byteBuffer);
         return data;
     }
+
+    @Override
+    public Object copy() {
+        GetBodyEvent event = new GetBodyEvent();
+        NulsDigestData data = new NulsDigestData(this.getEventBody().getDigestBytes());
+        event.setEventBody(data);
+        return event;
+    }
 }

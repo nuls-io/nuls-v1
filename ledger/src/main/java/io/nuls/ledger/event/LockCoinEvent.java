@@ -13,4 +13,9 @@ public class LockCoinEvent<T extends LockCoinTransaction> extends AbstractCoinTr
         super((short) 1);
     }
 
+    @Override
+    public Object copy() {
+        // todo auto-generated method stub(niels)
+        return null;
+    }
 }

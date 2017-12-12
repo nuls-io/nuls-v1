@@ -13,7 +13,7 @@ import io.nuls.ledger.module.AbstractLedgerModule;
  * @author Niels
  * @date 2017/11/16
  */
-public class BaseLedgerEvent<T extends BaseNulsData> extends BaseNulsEvent<T> {
+public abstract class BaseLedgerEvent<T extends BaseNulsData> extends BaseNulsEvent<T> {
 
 
     public BaseLedgerEvent(short eventType) {
@@ -24,4 +24,6 @@ public class BaseLedgerEvent<T extends BaseNulsData> extends BaseNulsEvent<T> {
     protected T parseEventBody(NulsByteBuffer byteBuffer) {
         return null;
     }
+
+
 }
