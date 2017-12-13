@@ -28,6 +28,9 @@ public final class AccountTool {
      *
      * @return Address
      */
+
+    public static final int CREATE_MAX_SIZE = 100;
+
     public static Address newAddress(ECKey key) throws NulsException {
         return Address.fromHashs(Utils.sha256hash160(key.getPubKey(false)));
     }

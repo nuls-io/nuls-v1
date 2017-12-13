@@ -1,9 +1,7 @@
 package io.nuls.network.service;
 
 import io.nuls.core.event.BaseNulsEvent;
-import io.nuls.core.mesasge.NulsMessage;
 import io.nuls.network.entity.BroadcastResult;
-import io.nuls.network.entity.Peer;
 
 /**
  * @author vivi

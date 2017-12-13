@@ -6,13 +6,15 @@ import io.nuls.core.constant.ErrorCode;
  * @author vivi
  * @date 2017/12/12.
  */
-public class Result {
+public class Result<T> {
 
     private boolean success;
 
     private String message;
 
     private ErrorCode errorCode;
+
+    private T object;
 
     public Result() {
 
@@ -27,6 +29,12 @@ public class Result {
         this.success = success;
         this.message = message;
         this.errorCode = errorCode;
+    }
+
+    public Result(boolean success, String message, T t) {
+        this.success = success;
+        this.message = message;
+        this.object = t;
     }
 
     public boolean isSuccess() {
@@ -66,5 +74,13 @@ public class Result {
         }
         buffer.append("}");
         return buffer.toString();
+    }
+
+    public T getObject() {
+        return object;
+    }
+
+    public void setObject(T object) {
+        this.object = object;
     }
 }

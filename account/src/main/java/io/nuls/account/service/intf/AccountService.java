@@ -12,7 +12,10 @@ import java.util.List;
  * @author Niels
  */
 public interface AccountService {
+
     Account createAccount();
+
+    Result<List<String>> createAccount(int count);
 
     void resetKey(Account account);
 
@@ -44,7 +47,9 @@ public interface AccountService {
 
     Result lockAccounts();
 
-    Result unlockAccounts(String password, int secends);
+    Result unlockAccounts(String password, int seconds);
 
     NulsSignData signData(byte[] bytes);
+
+    
 }

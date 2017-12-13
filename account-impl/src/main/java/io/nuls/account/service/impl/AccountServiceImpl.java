@@ -69,6 +69,40 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
+    @Override
+    public Result<List<String>> createAccount(int count) {
+        if (count <= 0 || count > AccountTool.CREATE_MAX_SIZE) {
+            return new Result<>(false, "Only 0 to 100 can be created at once");
+        }
+
+        locker.lock();
+        try {
+            List<Account> accounts = new ArrayList<>();
+            List<AccountPo> accountPos = new ArrayList<>();
+            List<String> resultList = new ArrayList<>();
+            for (int i = 0; i < count; i++) {
+                Account account = AccountTool.createAccount();
+                signAccount(account);
+                AccountPo po = new AccountPo();
+                AccountTool.toPojo(account, po);
+
+                accounts.add(account);
+                accountPos.add(po);
+                resultList.add(account.getId());
+            }
+
+            accountDao.saveBatch(accountPos);
+            accountCacheService.putAccountList(accounts);
+
+            return new Result<>(true, "OK", resultList);
+        } catch (Exception e) {
+            Log.error(e);
+            throw new NulsRuntimeException(ErrorCode.FAILED, "create account failed!");
+        } finally {
+            locker.unlock();
+        }
+    }
+
     private void signAccount(Account account) {
         if (null == account || account.getEcKey() == null) {
             return;
@@ -258,7 +292,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public boolean isEncrypted() {
-        if(!isLockNow) {
+        if (!isLockNow) {
             return false;
         }
         List<Account> accounts = this.getLocalAccountList();
