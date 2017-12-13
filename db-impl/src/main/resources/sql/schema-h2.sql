@@ -28,16 +28,28 @@ CREATE TABLE IF NOT EXISTS `block` (
   `sign` varbinary(1024) NOT NULL,
   PRIMARY KEY (`hash`)
 );
-CREATE TABLE IF NOT EXISTS `consensus_account` (
-  `hash` varchar(70) NOT NULL,
+CREATE TABLE `delegate_account` (
+  `id` varchar(32) NOT NULL,
+  `address` varchar(40) NOT NULL,
+  `peer_address` varchar(40) NOT NULL,
+  `deposit` decimal(19,8) NOT NULL,
+  `remark` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+);
+CREATE TABLE `delegate` (
+  `id` varchar(32) NOT NULL,
   `address` varchar(40) NOT NULL,
   `agent_address` varchar(40) NOT NULL,
   `deposit` decimal(19,8) NOT NULL,
-  `role` int(1) ,
-  `status` int(1)  ,
-  `startTime` bigint(14) ,
-  PRIMARY KEY (`hash`)
+  `status` int(1) DEFAULT NULL,
+  `time` bigint(14) DEFAULT NULL,
+  `block_height` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`)
 );
+
+
+
+
 CREATE TABLE IF NOT EXISTS `peer` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `ip` varchar(20) NOT NULL,

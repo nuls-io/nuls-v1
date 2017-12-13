@@ -1,5 +1,9 @@
 package io.nuls.db.entity;
 
+/**
+ * @author Niels
+ * @date 2017/11/20
+ */
 public class UtxoInputPo {
     /**
      *

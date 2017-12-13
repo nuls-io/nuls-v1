@@ -55,7 +55,8 @@ public class MybatisDBModuleImpl extends AbstractDBModule {
         this.registerService(BlockDao.class,blockDao);
         AccountDao accountDao = AopUtils.createProxy(AccountDaoImpl.class, dbMethodFilter);
         this.registerService(AccountDao.class,accountDao);
-        this.registerService(ConsensusAccountDao.class, AopUtils.createProxy(ConsensusAccountDaoImpl.class, dbMethodFilter));
+        this.registerService(DelegateDao.class, AopUtils.createProxy(DelegateDaoImpl.class, dbMethodFilter));
+        this.registerService(DelegateAccountDao.class, AopUtils.createProxy(DelegateAccountDaoImpl.class, dbMethodFilter));
         this.registerService(PeerDao.class, AopUtils.createProxy(PeerDaoImpl.class, dbMethodFilter));
         this.registerService(PeerGroupDao.class, AopUtils.createProxy(PeerGroupDaoImpl.class, dbMethodFilter));
         this.registerService(PeerGroupRelationDao.class, AopUtils.createProxy(PeerGroupRelationDaoImpl.class, dbMethodFilter));
