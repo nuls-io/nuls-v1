@@ -15,7 +15,7 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public int getLocalHeight() {
+    public long getLocalHeight() {
         // todo auto-generated method stub(niels)
         return 0;
     }
@@ -27,7 +27,7 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public int getBestHeight() {
+    public long getBestHeight() {
         // todo auto-generated method stub(niels)
         return 0;
     }
@@ -57,10 +57,11 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public Block getBlockByHeight(int height) {
+    public Block getBlockByHeight(long height) {
         // todo auto-generated method stub(niels)
         return null;
     }
+
 
     @Override
     public void save(Block block) {

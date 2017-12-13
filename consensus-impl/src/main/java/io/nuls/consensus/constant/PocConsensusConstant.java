@@ -5,7 +5,7 @@ package io.nuls.consensus.constant;
  * @date 2017/11/8
  */
 public interface PocConsensusConstant {
-    //todo version
+    //version
     int POC_CONSENSUS_MODULE_VERSION = 0;
     int MINIMUM_VERSION_SUPPORTED = 0;
 

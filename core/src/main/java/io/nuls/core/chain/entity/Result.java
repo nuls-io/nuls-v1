@@ -1,6 +1,7 @@
 package io.nuls.core.chain.entity;
 
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.validate.ValidateResult;
 
 /**
  * @author vivi
@@ -31,6 +32,10 @@ public class Result {
 
     public boolean isSuccess() {
         return success;
+    }
+
+    public boolean isFaild() {
+        return !success;
     }
 
     public void setSuccess(boolean success) {
@@ -66,5 +71,17 @@ public class Result {
         }
         buffer.append("}");
         return buffer.toString();
+    }
+
+    public static Result getFaildResult(String msg) {
+        return new Result(false, msg);
+    }
+
+    public static Result getSuccessResult() {
+        return new Result(true, "");
+    }
+
+    public static Result getFaildResult(ErrorCode errorCode) {
+        return new Result(false,errorCode.getMsg());
     }
 }

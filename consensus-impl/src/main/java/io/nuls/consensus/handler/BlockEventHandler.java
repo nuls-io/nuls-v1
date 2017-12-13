@@ -20,9 +20,9 @@ public class BlockEventHandler extends AbstractNetworkNulsEventHandler<BlockEven
     private BlockCacheService blockCacheService = BlockCacheService.getInstance();
 
     @Override
-    public void onEvent(BlockEvent event, String formId) throws NulsException {
+    public void onEvent(BlockEvent event, String fromId) throws NulsException {
         Block block = event.getEventBody();
-        if (DistributedBlockDownloadUtils.getInstance().recieveBlock(formId, block)) {
+        if (DistributedBlockDownloadUtils.getInstance().recieveBlock(fromId, block)) {
             return;
         }
         try {
