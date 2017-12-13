@@ -33,6 +33,8 @@ public interface BaseDao<K, T> {
      */
     int update(T t);
 
+    int updateBatch(List<T> list);
+
     /**
      * 修改数据，为Null值的字段不做修改
      *

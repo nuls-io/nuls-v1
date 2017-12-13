@@ -248,12 +248,17 @@ public class Account extends BaseNulsData implements NulsCloneable{
 
     @Override
     public Object copy() {
-        // todo auto-generated method stub(niels)
-        try {
-            return this.clone();
-        } catch (CloneNotSupportedException e) {
-            Log.error(e);
-            return this;
-        }
+        Account account = new Account();
+        account.setId(id);
+        account.setAlias(alias);
+        account.setAddress(address);
+        account.setStatus(status);
+        account.setPubKey(pubKey);
+        account.setExtend(extend);
+        account.setCreateTime(createTime);
+        account.setPriSeed(priSeed);
+        account.setPriKey(priKey);
+        account.setEcKey(ecKey);
+        return account;
     }
 }

@@ -5,19 +5,16 @@ import io.nuls.account.entity.Address;
 import io.nuls.account.manager.AccountManager;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.account.util.AccountTool;
-import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.NulsSignData;
-import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.chain.entity.Result;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.ECKey;
-import io.nuls.core.crypto.EncryptedData;
-import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.thread.manager.ThreadManager;
 import io.nuls.core.utils.crypto.Hex;
-import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
@@ -25,10 +22,7 @@ import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.AccountDao;
 import io.nuls.db.entity.AccountPo;
 
-import java.io.IOException;
-import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -44,7 +38,10 @@ public class AccountServiceImpl implements AccountService {
     private Lock locker = new ReentrantLock();
 
     private AccountCacheService accountCacheService = AccountCacheService.getInstance();
+
     private AccountDao accountDao = NulsContext.getInstance().getService(AccountDao.class);
+
+    private boolean isLockNow = true;
 
     private AccountServiceImpl() {
     }
@@ -64,10 +61,41 @@ public class AccountServiceImpl implements AccountService {
             this.accountDao.save(po);
             this.accountCacheService.putAccount(account);
             return account;
-        } catch (IOException e) {
+        } catch (Exception e) {
             Log.error(e);
             throw new NulsRuntimeException(ErrorCode.FAILED, "create account failed!");
-        } catch (NulsException e) {
+        } finally {
+            locker.unlock();
+        }
+    }
+
+    @Override
+    public Result<List<String>> createAccount(int count) {
+        if (count <= 0 || count > AccountTool.CREATE_MAX_SIZE) {
+            return new Result<>(false, "Only 0 to 100 can be created at once");
+        }
+
+        locker.lock();
+        try {
+            List<Account> accounts = new ArrayList<>();
+            List<AccountPo> accountPos = new ArrayList<>();
+            List<String> resultList = new ArrayList<>();
+            for (int i = 0; i < count; i++) {
+                Account account = AccountTool.createAccount();
+                signAccount(account);
+                AccountPo po = new AccountPo();
+                AccountTool.toPojo(account, po);
+
+                accounts.add(account);
+                accountPos.add(po);
+                resultList.add(account.getId());
+            }
+
+            accountDao.saveBatch(accountPos);
+            accountCacheService.putAccountList(accounts);
+
+            return new Result<>(true, "OK", resultList);
+        } catch (Exception e) {
             Log.error(e);
             throw new NulsRuntimeException(ErrorCode.FAILED, "create account failed!");
         } finally {
@@ -95,25 +123,27 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public void resetKey(Account account) {
+        resetKey(account, null);
+    }
+
+    @Override
     public void resetKey(Account account, String password) {
         AssertUtil.canNotEmpty(account, "");
-        byte[] pubkey = account.getPubKey();
-        if (!account.isEncrypted()) {
-            account.setEcKey(ECKey.fromPrivate(new BigInteger(account.getPriSeed())));
-        } else {
-            byte[] iv = null;
-            if (password == null) {
-                iv = Arrays.copyOf(Sha256Hash.hash(pubkey), 16);
-            } else {
-                iv = Arrays.copyOf(AccountTool.genPrivKey(pubkey, password.getBytes()).toByteArray(), 16);
-            }
-            //encrypt
-            if (account.getEcKey() == null || account.getEcKey().getEncryptedPrivateKey() == null) {
-                account.setEcKey(ECKey.fromEncrypted(new EncryptedData(iv, account.getPriSeed()), pubkey));
-            } else {
-                EncryptedData encryptData = account.getEcKey().getEncryptedPrivateKey();
-                encryptData.setInitialisationVector(iv);
-                account.setEcKey(ECKey.fromEncrypted(encryptData, pubkey));
+        account.resetKey(password);
+    }
+
+    @Override
+    public void resetKeys() {
+        resetKeys(null);
+    }
+
+    @Override
+    public void resetKeys(String password) {
+        List<Account> accounts = this.accountCacheService.getAccountList();
+        if (accounts != null && !accounts.isEmpty()) {
+            for (Account account : accounts) {
+                account.resetKey(password);
             }
         }
     }
@@ -187,7 +217,42 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result changePassword(String oldpw, String newpw) {
-        return null;
+        if (!StringUtils.validPassword(oldpw)) {
+            return new Result(false, "Length between 8 and 20, the combination of characters and numbers");
+        }
+        if (!StringUtils.validPassword(newpw)) {
+            return new Result(false, "Length between 8 and 20, the combination of characters and numbers");
+        }
+        List<Account> accounts = this.getLocalAccountList();
+        if (accounts == null || accounts.size() == 0) {
+            return new Result(false, "No account was found");
+        }
+
+        try {
+            Account acct = accounts.get(0);
+            if (!acct.isEncrypted()) {
+                return new Result(false, "No password has been set up yet");
+            }
+
+            List<AccountPo> accountPoList = new ArrayList<>();
+            for (Account account : accounts) {
+                if (!account.decrypt(oldpw)) {
+                    return new Result(false, "old password error");
+                }
+                account.encrypt(newpw);
+
+                AccountPo po = new AccountPo();
+                AccountTool.toPojo(account, po);
+                accountPoList.add(po);
+            }
+            accountDao.updateBatch(accountPoList);
+            accountCacheService.putAccountList(accounts);
+        } catch (Exception e) {
+            Log.error(e);
+            return new Result(false, "change password failed");
+        }
+
+        return new Result(true, "OK");
     }
 
     @Override
@@ -200,28 +265,42 @@ public class AccountServiceImpl implements AccountService {
         if (accounts == null || accounts.size() == 0) {
             return new Result(false, "No account was found");
         }
-
-        for (Account account : accounts) {
-            if (account.isEncrypted()) {
-                if (!account.decrypt(password)) {
-                    return new Result(false, "password error");
-                }
-            } else {
-                account.encrypt(password);
-                AccountPo po = new AccountPo();
-                try {
+        try {
+            List<AccountPo> accountPoList = new ArrayList<>();
+            for (Account account : accounts) {
+                if (account.isEncrypted()) {
+                    return new Result(false, "password has been set up");
+                } else {
+                    account.encrypt(password);
+                    AccountPo po = new AccountPo();
                     AccountTool.toPojo(account, po);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (NulsException e) {
-                    e.printStackTrace();
+                    accountDao.update(po);
                 }
-                accountDao.update(po);
             }
+            if (accountPoList.size() > 0) {
+                accountDao.updateBatch(accountPoList);
+            }
+
+            accountCacheService.putAccountList(accounts);
+        } catch (Exception e) {
+            Log.error(e);
+            return new Result(false, "set password failed");
         }
 
-
         return new Result(true, "OK");
+    }
+
+    @Override
+    public boolean isEncrypted() {
+        if (!isLockNow) {
+            return false;
+        }
+        List<Account> accounts = this.getLocalAccountList();
+        if (accounts == null || accounts.size() == 0) {
+            return false;
+        }
+        Account account = accounts.get(0);
+        return account.isEncrypted();
     }
 
     @Override
@@ -230,8 +309,48 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Result unlockAccounts(String password) {
-        return null;
+    public Result unlockAccounts(String password, int seconds) {
+        List<Account> accounts = this.getLocalAccountList();
+        if (accounts == null || accounts.isEmpty()) {
+            return new Result(false, "No account was found");
+        }
+        Account acct = accounts.get(0);
+        if (!acct.isEncrypted()) {
+            return new Result(false, "No password has been set up yet");
+        }
+
+        if (!StringUtils.validPassword(password)) {
+            return new Result(false, "Length between 8 and 20, the combination of characters and numbers");
+        }
+
+        for (Account account : accounts) {
+            if (!account.decrypt(password)) {
+                return new Result(false, "password error");
+            }
+        }
+
+        isLockNow = false;
+        long unlockTime = TimeService.currentTimeSeconds() + seconds;
+        ThreadManager.createSingleThreadAndRun(NulsConstant.MODULE_ID_ACCOUNT, "unlockAccountThread", new Runnable() {
+            @Override
+            public void run() {
+                while (!isLockNow) {
+                    if (TimeService.currentTimeSeconds() > unlockTime) {
+                        isLockNow = true;
+                        break;
+                    } else {
+                        try {
+                            Thread.sleep(1000L);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                resetKeys(password);
+            }
+        });
+
+        return new Result(true, "OK");
     }
 
     @Override

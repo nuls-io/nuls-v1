@@ -8,7 +8,6 @@ import io.nuls.core.context.NulsContext;
 import java.util.List;
 
 /**
- *
  * @author Niels
  * @date 2017/11/15
  */
@@ -58,8 +57,8 @@ public class AccountCacheService {
     }
 
     public void putAccountList(List<Account> list) {
-        if(null!=list){
-            for(Account account:list){
+        if (null != list) {
+            for (Account account : list) {
                 this.putAccount(account);
             }
         }

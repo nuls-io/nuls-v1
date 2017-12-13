@@ -28,6 +28,9 @@ public final class AccountTool {
      *
      * @return Address
      */
+
+    public static final int CREATE_MAX_SIZE = 100;
+
     public static Address newAddress(ECKey key) throws NulsException {
         return Address.fromHashs(Utils.sha256hash160(key.getPubKey(false)));
     }
@@ -92,7 +95,7 @@ public final class AccountTool {
         return Address.fromHashs(Utils.sha256hash160(pubKey));
     }
 
-    public static void toPojo(Account src, AccountPo desc) throws IOException, NulsException {
+    public static void toPojo(Account src, AccountPo desc) {
         AssertUtil.canNotEmpty(src, "Object type conversion failed!");
         AssertUtil.canNotEmpty(desc, "Object type conversion failed!");
         desc.setId(src.getId());

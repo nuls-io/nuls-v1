@@ -58,6 +58,16 @@ public abstract class BaseDaoImpl<T extends BaseMapper<K, V>, K extends Serializ
     }
 
     @Override
+    @SessionAnnotation
+    public int updateBatch(List<V> list) {
+        int result = 0;
+        for (int i = 0; i < list.size(); i++) {
+            result += update(list.get(i));
+        }
+        return result;
+    }
+
+    @Override
     public V getByKey(K key) {
         return this.getMapper().selectByPrimaryKey(key);
     }
@@ -83,6 +93,7 @@ public abstract class BaseDaoImpl<T extends BaseMapper<K, V>, K extends Serializ
 
     /**
      * change params to searchable object
+     *
      * @param params
      * @return
      */

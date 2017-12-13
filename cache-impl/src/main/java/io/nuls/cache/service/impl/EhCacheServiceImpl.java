@@ -40,20 +40,21 @@ public class EhCacheServiceImpl<K, T extends NulsCloneable> implements CacheServ
         if (initParams.get(EhCacheConstant.POOL_TIME_OF_LIVE_SECONDS) != null) {
             timeToLiveSeconds = (Integer) initParams.get(EhCacheConstant.POOL_TIME_OF_LIVE_SECONDS);
         }
-        int timeToIdleSeconds =0;
+        int timeToIdleSeconds = 0;
         if (initParams.get(EhCacheConstant.POOL_TIME_OF_IDLE_SECONDS) != null) {
             timeToIdleSeconds = (Integer) initParams.get(EhCacheConstant.POOL_TIME_OF_IDLE_SECONDS);
         }
-        cacheManager.createCache(title, keyType, valueType, heap,timeToLiveSeconds,timeToIdleSeconds);
+        cacheManager.createCache(title, keyType, valueType, heap, timeToLiveSeconds, timeToIdleSeconds);
     }
 
     @Override
     public void createCache(String title) {
-        cacheManager.createCache(title, String.class, Serializable.class, EhCacheConstant.DEFAULT_MAX_SIZE,0,0);
+        cacheManager.createCache(title, String.class, Serializable.class, EhCacheConstant.DEFAULT_MAX_SIZE, 0, 0);
     }
+
     @Override
-    public void createCache(String title,int timeToLiveSeconds,int timeToIdleSeconds) {
-        cacheManager.createCache(title, String.class, Serializable.class, EhCacheConstant.DEFAULT_MAX_SIZE,timeToLiveSeconds,timeToIdleSeconds);
+    public void createCache(String title, int timeToLiveSeconds, int timeToIdleSeconds) {
+        cacheManager.createCache(title, String.class, Serializable.class, EhCacheConstant.DEFAULT_MAX_SIZE, timeToLiveSeconds, timeToIdleSeconds);
     }
 
 
@@ -64,7 +65,7 @@ public class EhCacheServiceImpl<K, T extends NulsCloneable> implements CacheServ
 
     @Override
     public void putElement(String cacheTitle, K key, T value) {
-        this.putElementWithOutClone(cacheTitle,key,value.copy());
+        this.putElementWithOutClone(cacheTitle, key, value.copy());
     }
 
     @Override
@@ -72,7 +73,7 @@ public class EhCacheServiceImpl<K, T extends NulsCloneable> implements CacheServ
         if (null == cacheManager.getCache(cacheTitle)) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "Cache not exist!");
         }
-        cacheManager.getCache(cacheTitle).put(key, value );
+        cacheManager.getCache(cacheTitle).put(key, value);
     }
 
     @Override
@@ -85,7 +86,7 @@ public class EhCacheServiceImpl<K, T extends NulsCloneable> implements CacheServ
 
     @Override
     public T getElementValue(String cacheTitle, K key) {
-        return (T) this.getElementValueWithOutClone(cacheTitle,key).copy();
+        return (T) this.getElementValueWithOutClone(cacheTitle, key).copy();
     }
 
     @Override
@@ -93,7 +94,7 @@ public class EhCacheServiceImpl<K, T extends NulsCloneable> implements CacheServ
         if (null == cacheManager.getCache(cacheTitle)) {
             return null;
         }
-        return  ((T) cacheManager.getCache(cacheTitle).get(key));
+        return ((T) cacheManager.getCache(cacheTitle).get(key));
     }
 
     @Override
@@ -129,7 +130,7 @@ public class EhCacheServiceImpl<K, T extends NulsCloneable> implements CacheServ
     }
 
     @Override
-    public boolean containsKey(String cacheTitle,String key){
+    public boolean containsKey(String cacheTitle, String key) {
         return this.cacheManager.getCache(cacheTitle).containsKey(key);
     }
 }
