@@ -41,10 +41,9 @@ public class BlockMaintenanceThread implements Runnable {
     @Override
     public void run() {
         checkGenesisBlock();
-        Block localBestBlock = getLocalBestCorrectBlock();
         while (true) {
             try {
-                syncBlock(localBestBlock);
+                syncBlock();
             } catch (Exception e) {
                 Log.error(e);
             }
@@ -52,10 +51,8 @@ public class BlockMaintenanceThread implements Runnable {
     }
 
 
-    public synchronized void syncBlock(Block localBestBlock) {
-        if (null == localBestBlock) {
-            localBestBlock = this.blockService.getLocalHighestBlock();
-        }
+    public synchronized void syncBlock() {
+        Block localBestBlock = getLocalBestCorrectBlock();
         boolean doit = false;
         long startHeight = 0;
         BlockInfo blockInfo = null;

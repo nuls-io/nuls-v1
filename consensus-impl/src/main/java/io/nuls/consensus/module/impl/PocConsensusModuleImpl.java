@@ -57,8 +57,8 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
         }
         delegatePeer = ConfigLoader.getCfgValue(PocConsensusConstant.CFG_CONSENSUS_SECTION, PocConsensusConstant.PROPERTY_DELEGATE_PEER, false);
         PocBlockValidatorManager.initBlockValidators();
-        this.startBlockMaintenanceThread();
         this.checkGenesisBlock();
+        this.startBlockMaintenanceThread();
         this.checkConsensusStatus();
         this.registerEvent(PocConsensusConstant.EVENT_TYPE_RED_PUNISH, RedPunishConsensusEvent.class);
         this.registerEvent(PocConsensusConstant.EVENT_TYPE_YELLOW_PUNISH, YellowPunishConsensusEvent.class);
@@ -131,7 +131,7 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
 
     private void startBlockMaintenanceThread() {
         BlockMaintenanceThread blockMaintenanceThread = BlockMaintenanceThread.getInstance();
-        blockMaintenanceThread.syncBlock(null);
+        blockMaintenanceThread.syncBlock();
         ThreadManager.createSingleThreadAndRun(this.getModuleId(),
                 BlockMaintenanceThread.THREAD_NAME, blockMaintenanceThread);
     }
