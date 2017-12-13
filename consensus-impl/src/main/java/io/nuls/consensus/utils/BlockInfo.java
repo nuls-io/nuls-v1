@@ -10,7 +10,7 @@ import java.util.Set;
  * @author Niels
  * @date 2017/12/11
  */
-public class BestBlockInfo {
+public class BlockInfo {
 
     private long height;
     private NulsDigestData hash;

@@ -11,7 +11,7 @@ import io.nuls.ledger.event.UtxoLockCoinEvent;
 public class UtxoLockHandler<T extends UtxoLockCoinEvent> extends AbstractNetworkNulsEventHandler<T> {
 
     @Override
-    public void onEvent(T event,String formId) throws NulsException {
+    public void onEvent(T event,String fromId) throws NulsException {
         //todo
     }
 }

@@ -86,7 +86,7 @@ public abstract class BaseNulsData  implements Serializable {
      */
     public final void verify() throws NulsVerificationException {
         ValidateResult result = this.validatorChain.startDoValidator(this);
-        if (!result.isSeccess()) {
+        if (!result.isSuccess()) {
             throw new NulsVerificationException(result.getMessage());
         }
     }

@@ -41,6 +41,10 @@ public class Result<T> {
         return success;
     }
 
+    public boolean isFaild() {
+        return !success;
+    }
+
     public void setSuccess(boolean success) {
         this.success = success;
     }
@@ -74,6 +78,18 @@ public class Result<T> {
         }
         buffer.append("}");
         return buffer.toString();
+    }
+
+    public static Result getFaildResult(String msg) {
+        return new Result(false, msg);
+    }
+
+    public static Result getSuccessResult() {
+        return new Result(true, "");
+    }
+
+    public static Result getFaildResult(ErrorCode errorCode) {
+        return new Result(false,errorCode.getMsg());
     }
 
     public T getObject() {

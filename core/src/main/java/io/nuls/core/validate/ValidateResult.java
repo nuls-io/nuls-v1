@@ -1,5 +1,6 @@
 package io.nuls.core.validate;
 
+import io.nuls.core.chain.entity.Result;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.utils.log.Log;
 
@@ -7,40 +8,26 @@ import io.nuls.core.utils.log.Log;
  * @author Niels
  * @date 2017/11/16
  */
-public class ValidateResult {
-    private boolean seccess;
-    private String message;
-
-    public ValidateResult(boolean seccess, String message) {
-        this.seccess = seccess;
-        this.message = message;
-    }
-
-    public boolean isSeccess() {
-        return seccess;
-    }
-
-    public void setSeccess(boolean seccess) {
-        this.seccess = seccess;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
+public class ValidateResult extends Result{
 
     public static ValidateResult getFaildResult(String msg) {
-        return new ValidateResult(false, msg);
+        ValidateResult result= new ValidateResult();
+        result.setSuccess(false);
+        result.setMessage(msg);
+        return result;
     }
 
     public static ValidateResult getSuccessResult() {
-        return new ValidateResult(true, "");
+        ValidateResult result= new ValidateResult();
+        result.setSuccess(true);
+        result.setMessage("");
+        return result;
     }
 
     public static ValidateResult getFaildResult(ErrorCode errorCode) {
-        return new ValidateResult(false,errorCode.getMsg());
+        ValidateResult result= new ValidateResult();
+        result.setSuccess(false);
+        result.setErrorCode(errorCode);
+        return result;
     }
 }

@@ -13,7 +13,6 @@ import io.nuls.core.utils.log.Log;
  */
 public abstract class BaseConsensusEvent<T extends BaseNulsData> extends BaseNulsEvent<T> {
 
-
     public BaseConsensusEvent(short eventType) {
         super(NulsConstant.MODULE_ID_CONSENSUS, eventType);
     }

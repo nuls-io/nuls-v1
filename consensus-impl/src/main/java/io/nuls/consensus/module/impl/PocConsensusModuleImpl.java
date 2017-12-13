@@ -9,7 +9,6 @@ import io.nuls.consensus.entity.genesis.DevGenesisBlock;
 import io.nuls.consensus.entity.genesis.MainGenesisBlock;
 import io.nuls.consensus.entity.genesis.TestGenesisBlock;
 import io.nuls.consensus.entity.member.ConsensusMemberData;
-import io.nuls.consensus.entity.member.ConsensusMemberImpl;
 import io.nuls.consensus.entity.tx.RedPunishTransaction;
 import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
 import io.nuls.consensus.entity.tx.YellowPunishTransaction;
@@ -21,7 +20,6 @@ import io.nuls.consensus.module.AbstractConsensusModule;
 import io.nuls.consensus.service.cache.ConsensusCacheService;
 import io.nuls.consensus.service.impl.PocConsensusServiceImpl;
 import io.nuls.consensus.thread.BlockMaintenanceThread;
-import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
@@ -59,8 +57,8 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
         }
         delegatePeer = ConfigLoader.getCfgValue(PocConsensusConstant.CFG_CONSENSUS_SECTION, PocConsensusConstant.PROPERTY_DELEGATE_PEER, false);
         PocBlockValidatorManager.initBlockValidators();
-        this.startBlockMaintenanceThread();
         this.checkGenesisBlock();
+        this.startBlockMaintenanceThread();
         this.checkConsensusStatus();
         this.registerEvent(PocConsensusConstant.EVENT_TYPE_RED_PUNISH, RedPunishConsensusEvent.class);
         this.registerEvent(PocConsensusConstant.EVENT_TYPE_YELLOW_PUNISH, YellowPunishConsensusEvent.class);

@@ -1,6 +1,7 @@
 package io.nuls.consensus.service.cache;
 
 import io.nuls.core.chain.entity.Block;
+import io.nuls.core.chain.entity.Transaction;
 
 /**
  * @author Niels
@@ -14,6 +15,11 @@ public class BlockCacheService {
     }
 
     public void cacheBlock(Block block){
+        //todo
+    }
+
+
+    private void cacheTransaction(Transaction tx){
         //todo
     }
 }

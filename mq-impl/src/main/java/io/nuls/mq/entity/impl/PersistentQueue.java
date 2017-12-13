@@ -60,6 +60,11 @@ public class PersistentQueue<T> extends AbstractNulsQueue<T> {
     }
 
     @Override
+    public void remove(T item) {
+        this.queue.remove(item);
+    }
+
+    @Override
     public T poll() {
         byte[] obj = this.queue.poll();
         if (null == obj) {

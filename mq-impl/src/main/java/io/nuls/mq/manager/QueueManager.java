@@ -215,4 +215,18 @@ public final class QueueManager {
     public static void setRunning(boolean running) {
         Running = running;
     }
+
+    public static <T> void remove(String queueName, T item) {
+        if (!Running) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "The DBModule is not running!");
+        }
+        AbstractNulsQueue queue = QUEUES_MAP.get(queueName);
+        if (null == queue) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "queue not exist");
+        }
+
+        queue.remove(item);
+        queue.getStatInfo().putOne();
+        Log.debug("从队列中删除数据，名称：{}，当前长度：{}。", queueName, queue.size());
+    }
 }

@@ -1,22 +1,26 @@
 package io.nuls.consensus.utils;
 
-import io.nuls.consensus.event.AskBestBlockEvent;
+import io.nuls.consensus.event.AskBlockInfoEvent;
 import io.nuls.core.chain.entity.BlockHeader;
-import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.event.service.intf.EventService;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Niels
  * @date 2017/12/11
  */
-public class DistributedBestHeightRequestUtils {
-    private static final DistributedBestHeightRequestUtils INSTANCE = new DistributedBestHeightRequestUtils();
+public class DistributedBlockInfoRequestUtils {
+    private static final DistributedBlockInfoRequestUtils INSTANCE = new DistributedBlockInfoRequestUtils();
     private EventService eventService = NulsContext.getInstance().getService(EventService.class);
     private List<String> peerIdList;
     private Map<String, BlockHeader> headerMap = new HashMap<>();
@@ -24,52 +28,63 @@ public class DistributedBestHeightRequestUtils {
      * list order by answered time
      */
     private Map<String, List<String>> calcMap = new HashMap<>();
-    private BestBlockInfo bestBlockInfo;
+    private BlockInfo bestBlockInfo;
+    private long askHeight;
+    private Lock lock = new ReentrantLock();
+    private boolean requesting;
 
-    private DistributedBestHeightRequestUtils(){
+    private DistributedBlockInfoRequestUtils() {
     }
 
-    public static DistributedBestHeightRequestUtils getInstance(){
+    public static DistributedBlockInfoRequestUtils getInstance() {
         return INSTANCE;
     }
 
-    public List<String> getPeerIdList() {
-        return peerIdList;
-    }
-
-    public void request() {
+    /**
+     * default:0,get best height;
+     *
+     * @param height
+     */
+    public BlockInfo request(long height) {
+        lock.lock();
+        requesting = true;
         headerMap.clear();
         calcMap.clear();
-        AskBestBlockEvent askBestBlockEvent = new AskBestBlockEvent();
-        peerIdList = this.eventService.broadcast(askBestBlockEvent);
+        askHeight = height;
+        AskBlockInfoEvent askBlockInfoEvent;
+        if (0 == height) {
+            askBlockInfoEvent = new AskBlockInfoEvent();
+        } else {
+            askBlockInfoEvent = new AskBlockInfoEvent(height);
+        }
+        peerIdList = this.eventService.broadcast(askBlockInfoEvent);
         if (peerIdList.isEmpty()) {
             Log.error("get best height from net faild!");
             throw new NulsRuntimeException(ErrorCode.NET_MESSAGE_ERROR, "get best height from net faild!");
         }
+        return this.getBlockInfo();
     }
 
-    public long getHeight() {
-        return getBestBlockInfo().getHeight();
-    }
 
-    public NulsDigestData getHash() {
-        return getBestBlockInfo().getHash();
-    }
-
-    public void addBlockHeader(String peerId, BlockHeader header) {
-        if(!headerMap.containsKey(peerId)){
-            return;
+    public boolean addBlockHeader(String peerId, BlockHeader header) {
+        if (!headerMap.containsKey(peerId)) {
+            return false;
+        }
+        if (!requesting) {
+            return false;
         }
         headerMap.put(peerId, header);
-        List<String> peers = calcMap.get(header.getHash().getDigestHex());
+        String key = header.getHeight()+""+header.getHash();
+        List<String> peers = calcMap.get(key);
         if (null == peers) {
             peers = new ArrayList<>();
         }
-        if(!peers.contains(peerId)){
+        if (!peers.contains(peerId)) {
             peers.add(peerId);
         }
-        calcMap.put(header.getHash().getDigestHex(), peers);
+        calcMap.put(key, peers);
         calc();
+        return true;
     }
 
     private void calc() {
@@ -82,11 +97,11 @@ public class DistributedBestHeightRequestUtils {
         if (headerMap.size() < halfSize) {
             return;
         }
-        BestBlockInfo result = null;
-        for (String hash : calcMap.keySet()) {
-            List<String> peers = calcMap.get(hash);
+        BlockInfo result = null;
+        for (String key : calcMap.keySet()) {
+            List<String> peers = calcMap.get(key);
             if (peers.size() > halfSize) {
-                result = new BestBlockInfo();
+                result = new BlockInfo();
                 BlockHeader header = headerMap.get(result.getPeerIdList().get(0));
                 result.setHash(header.getHash());
                 result.setHeight(header.getHeight());
@@ -103,12 +118,12 @@ public class DistributedBestHeightRequestUtils {
             } catch (InterruptedException e) {
                 Log.error(e);
             }
-            this.request();
+            this.request(askHeight);
         }
 
     }
 
-    public BestBlockInfo getBestBlockInfo() {
+    private BlockInfo getBlockInfo() {
         while (true) {
             if (null != bestBlockInfo && bestBlockInfo.isFinished()) {
                 break;
@@ -119,6 +134,10 @@ public class DistributedBestHeightRequestUtils {
                 Log.error(e);
             }
         }
-        return bestBlockInfo;
+        BlockInfo info = bestBlockInfo;
+        bestBlockInfo = null;
+        requesting = false;
+        lock.unlock();
+        return info;
     }
 }

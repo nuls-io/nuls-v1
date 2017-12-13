@@ -8,16 +8,15 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Created by Niels on 2017/10/10.
- *
  */
 public class BlockingQueueImpl<T> extends AbstractNulsQueue<T> {
 
     private BlockingQueue<T> queue;
 
-    public BlockingQueueImpl(String queueName,int maxSize){
+    public BlockingQueueImpl(String queueName, int maxSize) {
         this.queueName = queueName;
         this.maxSize = maxSize;
-        this.queue = new LinkedBlockingQueue<T>( maxSize);
+        this.queue = new LinkedBlockingQueue<T>(maxSize);
     }
 
     @Override
@@ -53,5 +52,10 @@ public class BlockingQueueImpl<T> extends AbstractNulsQueue<T> {
     @Override
     public void clear() {
         this.queue.clear();
+    }
+
+    @Override
+    public void remove(T t) {
+        this.queue.remove(t);
     }
 }

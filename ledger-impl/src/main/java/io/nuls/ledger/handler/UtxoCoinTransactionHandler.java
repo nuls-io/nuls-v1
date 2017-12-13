@@ -10,7 +10,7 @@ import io.nuls.ledger.event.AbstractCoinTransactionEvent;
 public class UtxoCoinTransactionHandler<T extends AbstractCoinTransactionEvent> extends AbstractNetworkNulsEventHandler<T> {
 
     @Override
-    public void onEvent(T event,String formId) throws NulsException {
+    public void onEvent(T event,String fromId) throws NulsException {
         //todo
 
     }

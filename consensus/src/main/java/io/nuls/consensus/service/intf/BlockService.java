@@ -12,11 +12,11 @@ public interface BlockService {
 
     Block getGengsisBlockFromDb();
 
-    int getLocalHeight();
+    long getLocalHeight();
 
     byte[] getLocalHighestHash();
 
-    int getBestHeight();
+    long getBestHeight();
 
     byte[] getBestHash();
 
@@ -26,9 +26,11 @@ public interface BlockService {
 
     Block getBlockByHash(String hash);
 
-    Block getBlockByHeight(int height);
+    Block getBlockByHeight(long height);
 
     void save(Block block);
 
     void clearLocalBlocks();
+
+    void rollback(long height);
 }

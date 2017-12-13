@@ -2,8 +2,12 @@ package io.nuls.consensus.handler;
 
 import io.nuls.consensus.event.BlockEvent;
 import io.nuls.consensus.event.GetBlockEvent;
+import io.nuls.consensus.service.intf.BlockService;
+import io.nuls.core.chain.entity.Block;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.event.bus.event.handler.AbstractNetworkNulsEventHandler;
+import io.nuls.event.bus.event.service.intf.EventService;
 
 /**
  *
@@ -12,9 +16,13 @@ import io.nuls.event.bus.event.handler.AbstractNetworkNulsEventHandler;
  */
 public class GetBlockHandler extends AbstractNetworkNulsEventHandler<GetBlockEvent> {
 
+    private BlockService blockService = NulsContext.getInstance().getService(BlockService.class);
+    private EventService eventService = NulsContext.getInstance().getService(EventService.class);
     @Override
-    public void onEvent(GetBlockEvent event,String formId) throws NulsException {
-        //todo
-
+    public void onEvent(GetBlockEvent event,String fromId) throws NulsException {
+        Block block = blockService.getBlockByHeight(event.getEventBody().getVal());
+        BlockEvent blockEvent = new BlockEvent();
+        blockEvent.setEventBody(block);
+        eventService.sendToPeer(blockEvent,fromId);
     }
 }
