@@ -1,6 +1,12 @@
 package io.nuls.core.utils.str;
 
+import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.context.NulsContext;
+
+import java.io.UnsupportedEncodingException;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by Niels on 2017/10/9.
@@ -30,6 +36,7 @@ public class StringUtils {
     /**
      * Check the difficulty of the password
      * length between 8 and 20, the combination of characters and numbers
+     *
      * @param password
      * @return boolean
      */
@@ -46,4 +53,23 @@ public class StringUtils {
             return false;
         }
     }
+
+
+    public static boolean validAlias(String alias) {
+        try {
+            if (isBlank(alias)) {
+                return false;
+            }
+            alias = alias.trim();
+            byte[] aliasBytes = alias.getBytes(NulsContext.DEFAULT_ENCODING);
+            if (aliasBytes.length < 3 || aliasBytes.length > 20) {
+                return false;
+            }
+        } catch (UnsupportedEncodingException e) {
+            return false;
+        }
+        return true;
+    }
+
+
 }

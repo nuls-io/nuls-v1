@@ -127,3 +127,12 @@ CREATE TABLE IF NOT EXISTS `utxo_output` (
   `address` varchar(40) NOT NULL,
   PRIMARY KEY (`hash`)
 );
+
+
+CREATE TABLE IF NOT EXISTS `alias` (
+  `alias` VARCHAR(20) NOT NULL,
+  `address` varchar(30) NOT NULL,
+  PRIMARY KEY (`alias`)
+);
+ -- alias index
+ create unique index IF NOT EXISTS alias_address_idx on alias(address);

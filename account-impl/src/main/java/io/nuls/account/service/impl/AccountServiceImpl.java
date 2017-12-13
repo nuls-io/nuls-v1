@@ -358,4 +358,21 @@ public class AccountServiceImpl implements AccountService {
         return null;
     }
 
+    @Override
+    public void setAlias(String address, String alias) {
+        Account account = getAccount(address);
+        if (account == null) {
+            return;
+        }
+
+        if (StringUtils.isNotBlank(account.getAlias())) {
+            return;
+        }
+        if (!StringUtils.validAlias(alias)) {
+            return;
+        }
+
+
+    }
+
 }

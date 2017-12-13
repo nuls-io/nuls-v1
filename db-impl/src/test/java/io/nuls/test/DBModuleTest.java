@@ -3,9 +3,11 @@ package io.nuls.test;
 import io.nuls.core.module.manager.ModuleManager;
 import io.nuls.core.module.manager.ServiceManager;
 import io.nuls.core.utils.log.Log;
+import io.nuls.db.dao.AccountDao;
 import io.nuls.db.dao.BlockDao;
 import io.nuls.db.dao.PeerDao;
 import io.nuls.db.dao.impl.mybatis.BlockDaoImpl;
+import io.nuls.db.entity.AccountPo;
 import io.nuls.db.entity.BlockPo;
 import io.nuls.db.entity.PeerPo;
 import io.nuls.db.module.impl.MybatisDBModuleImpl;
@@ -24,12 +26,15 @@ public class DBModuleTest {
 
     private static PeerDao peerDao;
 
+    private static AccountDao accountDao;
+
     @BeforeClass
     public static void init() {
         dbModule = new MybatisDBModuleImpl();
         dbModule.start();
         blockDao = ServiceManager.getInstance().getService(BlockDao.class);
         peerDao = ServiceManager.getInstance().getService(PeerDao.class);
+        accountDao = ServiceManager.getInstance().getService(AccountDao.class);
     }
 
     @AfterClass
@@ -38,10 +43,10 @@ public class DBModuleTest {
     }
 
     @Test
-    public void testCallback(){
+    public void testCallback() {
         BlockPo blockPo = blockDao.getByKey("aaa");
-        Log.debug("============="+blockPo.getHeight());
-        blockPo.setHeight(blockPo.getHeight()+2);
+        Log.debug("=============" + blockPo.getHeight());
+        blockPo.setHeight(blockPo.getHeight() + 2);
 
     }
 
@@ -66,7 +71,7 @@ public class DBModuleTest {
     @Test
     public void testSelect() {
         BlockPo blockPo = blockDao.getByKey("bbb");
-        Log.debug(blockPo.getCreateTime()+"");
+        Log.debug(blockPo.getCreateTime() + "");
     }
 
 
@@ -75,13 +80,13 @@ public class DBModuleTest {
         dbModule.start();
         BlockDao blockDao = ServiceManager.getInstance().getService(BlockDaoImpl.class);
 
-        for(int i = 0 ; i < 10 ;i++) {
-            new Thread(){
-                public void run(){
+        for (int i = 0; i < 10; i++) {
+            new Thread() {
+                public void run() {
                     try {
                         BlockPo blockPo = blockDao.getByKey("aaa");
-                        Log.debug(blockPo.getCreateTime()+"");
-                    }catch (Exception e) {
+                        Log.debug(blockPo.getCreateTime() + "");
+                    } catch (Exception e) {
                         Log.error(e);
                     }
                 }
@@ -97,7 +102,7 @@ public class DBModuleTest {
 
     @Test
     public void testBB() {
-        Log.debug(0xFFFFL+"");
+        Log.debug(0xFFFFL + "");
     }
 
     @Test
@@ -118,6 +123,18 @@ public class DBModuleTest {
         po.setVersion((short) 1001);
         po.setFailCount(10);
         peerDao.saveChange(po);
+
+    }
+
+    @Test
+    public void testAccount() {
+        AccountPo accountPo = new AccountPo();
+        accountPo.setId("abcd");
+        accountPo.setAddress("abcd");
+        accountPo.setCreateTime(System.currentTimeMillis());
+        accountPo.setVersion((short) 11);
+
+        accountDao.save(accountPo);
 
     }
 }

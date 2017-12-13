@@ -1,13 +1,20 @@
 package io.nuls.db.dao.impl.mybatis;
 
+import io.nuls.core.chain.entity.Result;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.module.manager.ServiceManager;
+import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.AccountDao;
-import io.nuls.db.dao.impl.mybatis.BaseDaoImpl;
+import io.nuls.db.dao.AliasDao;
 import io.nuls.db.dao.impl.mybatis.mapper.AccountMapper;
 import io.nuls.db.dao.impl.mybatis.params.AccountSearchParams;
+import io.nuls.db.dao.impl.mybatis.session.SessionAnnotation;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import io.nuls.db.entity.AccountPo;
+import io.nuls.db.entity.AliasPo;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,25 +30,43 @@ public class AccountDaoImpl extends BaseDaoImpl<AccountMapper, String, AccountPo
         super(AccountMapper.class);
     }
 
+    private AliasDao aliasDao = ServiceManager.getInstance().getService(AliasDao.class);
+
     @Override
-    public boolean setAlias(String id, String alias) {
-        AccountPo po = new AccountPo();
-        po.setId(id);
-        po.setAlias(alias);
-        int count = this.getMapper().updateByPrimaryKeySelective(po);
-        return 1 == count;
+    @SessionAnnotation
+    public Result setAlias(String id, String alias) {
+        AliasPo aliasPo = aliasDao.getByKey(alias);
+        if (aliasPo != null) {
+            return new Result(false, "alias exist");
+        }
+        try {
+            aliasPo = new AliasPo();
+            aliasPo.setAlias(alias);
+            aliasPo.setAddress(id);
+            aliasDao.save(aliasPo);
+
+            AccountPo po = new AccountPo();
+            po.setId(id);
+            po.setAlias(alias);
+            this.getMapper().updateByPrimaryKeySelective(po);
+        } catch (Exception e) {
+            Log.error(e);
+            return new Result(false, "set alias error");
+        }
+
+        return new Result(true, "OK");
     }
 
     @Override
     public AccountPo loadByAddress(String address) {
-        Map<String,Object> params = new HashMap<>();
-        params.put(AccountSearchParams.SEARCH_FIELD_ADDRESS,address);
+        Map<String, Object> params = new HashMap<>();
+        params.put(AccountSearchParams.SEARCH_FIELD_ADDRESS, address);
         List<AccountPo> list = this.searchList(params);
-        if(list==null||list.isEmpty()){
+        if (list == null || list.isEmpty()) {
             return null;
         }
-        if(list.size()>1){
-            throw new NulsRuntimeException(ErrorCode.DB_DATA_ERROR,"data error");
+        if (list.size() > 1) {
+            throw new NulsRuntimeException(ErrorCode.DB_DATA_ERROR, "data error");
         }
         return list.get(0);
     }

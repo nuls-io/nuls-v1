@@ -1,5 +1,6 @@
 package io.nuls.db.dao;
 
+import io.nuls.core.chain.entity.Result;
 import io.nuls.db.entity.AccountPo;
 
 /**
@@ -9,7 +10,7 @@ import io.nuls.db.entity.AccountPo;
  */
 public interface AccountDao extends BaseDao<String, AccountPo> {
 
-    boolean setAlias(String id, String alias);
+    Result setAlias(String id, String alias);
 
     AccountPo loadByAddress(String address);
 

@@ -51,5 +51,6 @@ public interface AccountService {
 
     NulsSignData signData(byte[] bytes);
 
-    
+    void setAlias(String address, String alias);
+
 }

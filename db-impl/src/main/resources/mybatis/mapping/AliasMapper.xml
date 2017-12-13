@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.nuls.db.dao.impl.mybatis.mapper.AliasMapper" >
+  <resultMap id="BaseResultMap" type="io.nuls.db.entity.AliasPo" >
+
+    <id column="alias" property="alias" jdbcType="VARCHAR" />
+    <result column="address" property="address" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    alias, address
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from alias
+    where alias = #{alias,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from alias
+    where alias = #{alias,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="io.nuls.db.entity.AliasPo" >
+    insert into alias (alias, address)
+    values (#{alias,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="io.nuls.db.entity.AliasPo" >
+    insert into alias
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="alias != null" >
+        alias,
+      </if>
+      <if test="address != null" >
+        address,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="alias != null" >
+        #{alias,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null" >
+        #{address,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="io.nuls.db.entity.AliasPo" >
+    update alias
+    <set >
+      <if test="address != null" >
+        address = #{address,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where alias = #{alias,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="io.nuls.db.entity.AliasPo" >
+
+    update alias
+    set address = #{address,jdbcType=VARCHAR}
+    where alias = #{alias,jdbcType=VARCHAR}
+  </update>
+</mapper>
