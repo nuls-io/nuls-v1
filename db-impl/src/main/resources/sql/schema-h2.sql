@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS `block` (
   `sign` varbinary(1024) NOT NULL,
   PRIMARY KEY (`hash`)
 );
-CREATE TABLE `delegate_account` (
+CREATE TABLE IF NOT EXISTS `delegate_account` (
   `id` varchar(32) NOT NULL,
   `address` varchar(40) NOT NULL,
   `peer_address` varchar(40) NOT NULL,
@@ -36,7 +36,7 @@ CREATE TABLE `delegate_account` (
   `remark` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
 );
-CREATE TABLE `delegate` (
+CREATE TABLE IF NOT EXISTS `delegate` (
   `id` varchar(32) NOT NULL,
   `address` varchar(40) NOT NULL,
   `agent_address` varchar(40) NOT NULL,

@@ -80,7 +80,8 @@
         <mapper resource="mybatis/mapping/CommonMapper.xml"/>
         <mapper resource="mybatis/mapping/AccountMapper.xml" />
         <mapper resource="mybatis/mapping/BlockMapper.xml" />
-        <mapper resource="mybatis/mapping/ConsensusAccountMapper.xml" />
+        <mapper resource="mybatis/mapping/DelegateMapper.xml" />
+        <mapper resource="mybatis/mapping/DelegateAccountMapper.xml" />
         <mapper resource="mybatis/mapping/PeerGroupMapper.xml" />
         <mapper resource="mybatis/mapping/PeerGroupRelationMapper.xml" />
         <mapper resource="mybatis/mapping/PeerMapper.xml" />

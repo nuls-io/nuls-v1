@@ -61,8 +61,6 @@ public class EhCacheManager {
         return cacheManager.getCache(title, KEY_TYPE_MAP.get(title), VALUE_TYPE_MAP.get(title));
     }
 
-    ;
-
     public void close() {
         cacheManager.close();
     }

@@ -4,19 +4,17 @@ import io.nuls.account.entity.Account;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.cache.service.intf.CacheService;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
-import io.nuls.consensus.entity.ConsensusMember;
-import io.nuls.consensus.entity.member.ConsensusMemberData;
-import io.nuls.consensus.entity.member.ConsensusMemberImpl;
+import io.nuls.consensus.entity.ConsensusAccount;
+import io.nuls.consensus.entity.member.ConsensusAccountData;
+import io.nuls.consensus.entity.member.ConsensusAccountImpl;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.consensus.utils.ConsensusBeanUtils;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.db.dao.ConsensusAccountDao;
-import io.nuls.db.entity.BlockPo;
-import io.nuls.db.entity.ConsensusAccountPo;
+import io.nuls.db.dao.DelegateAccountDao;
+import io.nuls.db.dao.DelegateDao;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -35,7 +33,8 @@ public class ConsensusCacheService {
 
     private static final ConsensusCacheService INSTANCE = new ConsensusCacheService();
 
-    private ConsensusAccountDao consensusAccountDao = NulsContext.getInstance().getService(ConsensusAccountDao.class);
+    private DelegateDao delegateDao = NulsContext.getInstance().getService(DelegateDao.class);
+    private DelegateAccountDao delegateAccountDao = NulsContext.getInstance().getService(DelegateAccountDao.class);
     private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
 
     private CacheService cacheService = NulsContext.getInstance().getService(CacheService.class);
@@ -55,21 +54,8 @@ public class ConsensusCacheService {
         this.cacheService.createCache(CACHE_BLOCK_HEADER_LIST);
         this.cacheService.createCache(CACHE_BLOCK_HEIGHT_HASH_MAPPING);
 
-
+//todo 代理节点与委托单
         Account self = accountService.getLocalAccount();
-        List<ConsensusAccountPo> polist = this.consensusAccountDao.queryAll();
-        for (ConsensusAccountPo po : polist) {
-            ConsensusMemberImpl member = ConsensusBeanUtils.fromPojo(po);
-            cacheService.putElement(CACHE_CONSENSUS_ACCOUNT_LIST, member.getExtend().getId() , member);
-            if (member.getAddress().toString().equals(self.getAddress().toString())) {
-                ConsensusStatusInfo info = new ConsensusStatusInfo();
-                info.setAccumulativeReward(0);
-                info.setParkedCount(0);
-                info.setStartTime(0);
-//                if(member.getStatus()==)
-                //todo
-            }
-        }
     }
 
     public ConsensusStatusInfo getConsensusStatusInfo() {
@@ -82,20 +68,20 @@ public class ConsensusCacheService {
         this.cacheService.putElementWithOutClone(CACHE_CONSENSUS_STATUS_INFO, CACHE_CONSENSUS_STATUS_INFO, info);
     }
 
-    public void addConsensusMember(ConsensusMember ca) {
+    public void addConsensusAccount(ConsensusAccount ca) {
         cacheService.putElement(CACHE_CONSENSUS_ACCOUNT_LIST, ca.getAddress(), ca);
     }
 
-    public ConsensusMember<ConsensusMemberData> getConsensusMember(String address) {
-        return (ConsensusMember) this.cacheService.getElementValue(CACHE_CONSENSUS_ACCOUNT_LIST, address);
+    public ConsensusAccount<ConsensusAccountData> getConsensusAccount(String address) {
+        return (ConsensusAccount) this.cacheService.getElementValue(CACHE_CONSENSUS_ACCOUNT_LIST, address);
     }
 
-    public void delConsensusMember(String address) {
+    public void delConsensusAccount(String address) {
         this.cacheService.removeElement(CACHE_CONSENSUS_ACCOUNT_LIST, address);
     }
 
     public void changeStatus(String address, ConsensusStatusEnum statusEnum) {
-        ConsensusMember<ConsensusMemberData> ca = getConsensusMember(address);
+        ConsensusAccount<ConsensusAccountData> ca = getConsensusAccount(address);
         if (null == ca) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "temporary consensus account not exist!");
         }
