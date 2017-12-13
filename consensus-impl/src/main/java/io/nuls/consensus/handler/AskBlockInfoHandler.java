@@ -3,6 +3,7 @@ package io.nuls.consensus.handler;
 import io.nuls.consensus.event.AskBlockInfoEvent;
 import io.nuls.consensus.event.BlockHeaderEvent;
 import io.nuls.consensus.service.intf.BlockService;
+import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
@@ -23,7 +24,13 @@ public class AskBlockInfoHandler extends AbstractNetworkNulsEventHandler<AskBloc
         if(event.getEventBody().getVal()==0){
             header = blockService.getLocalHighestBlock().getHeader();
         }else{
-            header = blockService.getBlockByHeight(event.getEventBody().getVal()).getHeader();
+            Block block = blockService.getBlockByHeight(event.getEventBody().getVal());
+            if(null==block){
+                header = new BlockHeader();
+                header.setHeight(event.getEventBody().getVal());
+            }else{
+                header = block.getHeader();
+            }
         }
         this.eventService.sendToPeer(new BlockHeaderEvent(header),fromId);
     }

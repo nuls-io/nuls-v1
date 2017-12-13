@@ -90,4 +90,6 @@ public interface QueueService<T> {
      * @return 状态描述对象
      */
     StatInfo getStatInfo(String queueName);
+
+    void remove(String queueName, T item);
 }

@@ -15,7 +15,7 @@ public class BlockMaxSizeValidator implements NulsDataValidator<Block> {
     @Override
     public ValidateResult validate(Block data) {
         if (data == null) {
-            return new ValidateResult(false, "Data is null!");
+            return ValidateResult.getFaildResult("Data is null!");
         }
         int length = data.size();
         if (length >= PocConsensusConstant.MAX_BLOCK_SIZE) {

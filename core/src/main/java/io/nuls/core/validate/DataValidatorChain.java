@@ -37,7 +37,7 @@ public class DataValidatorChain {
         }
         NulsDataValidator<BaseNulsData> validator = list.get(index.get());
         ValidateResult result = validator.validate(data);
-        if (!result.isSeccess()) {
+        if (!result.isSuccess()) {
             return result;
         }
         return this.doValidate(data);

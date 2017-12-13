@@ -9,13 +9,13 @@ import io.nuls.core.validate.ValidateResult;
  */
 public class TxMaxSizeValidator implements NulsDataValidator<Transaction> {
     //100k
-    private static final int MAX_SIZE = 100*1024;
+    private static final int MAX_SIZE = 100 * 1024;
     private static final String ERROR_MESSAGE = "The transaction is too big!";
 
     @Override
     public ValidateResult validate(Transaction data) {
         if (data == null) {
-            return new ValidateResult(false, "Data is null!");
+            return ValidateResult.getFaildResult("Data is null!");
         }
         int length = data.size();
         if (length >= MAX_SIZE) {

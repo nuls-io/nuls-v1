@@ -14,9 +14,9 @@ public class TxTypeValidator implements NulsDataValidator<Transaction> {
     @Override
     public ValidateResult validate(Transaction data) {
         if (data == null) {
-            return new ValidateResult(false, "Data is null!");
+            return ValidateResult.getFaildResult("Data is null!");
         }
-        if (data.getType()==0) {
+        if (data.getType() == 0) {
             return ValidateResult.getFaildResult(ERROR_MESSAGE);
         }
         return ValidateResult.getSuccessResult();

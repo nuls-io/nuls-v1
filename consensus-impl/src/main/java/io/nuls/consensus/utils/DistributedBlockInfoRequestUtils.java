@@ -74,14 +74,15 @@ public class DistributedBlockInfoRequestUtils {
             return false;
         }
         headerMap.put(peerId, header);
-        List<String> peers = calcMap.get(header.getHash().getDigestHex());
+        String key = header.getHeight()+""+header.getHash();
+        List<String> peers = calcMap.get(key);
         if (null == peers) {
             peers = new ArrayList<>();
         }
         if (!peers.contains(peerId)) {
             peers.add(peerId);
         }
-        calcMap.put(header.getHash().getDigestHex(), peers);
+        calcMap.put(key, peers);
         calc();
         return true;
     }
@@ -97,8 +98,8 @@ public class DistributedBlockInfoRequestUtils {
             return;
         }
         BlockInfo result = null;
-        for (String hash : calcMap.keySet()) {
-            List<String> peers = calcMap.get(hash);
+        for (String key : calcMap.keySet()) {
+            List<String> peers = calcMap.get(key);
             if (peers.size() > halfSize) {
                 result = new BlockInfo();
                 BlockHeader header = headerMap.get(result.getPeerIdList().get(0));
@@ -137,6 +138,6 @@ public class DistributedBlockInfoRequestUtils {
         bestBlockInfo = null;
         requesting = false;
         lock.unlock();
-        return bestBlockInfo;
+        return info;
     }
 }

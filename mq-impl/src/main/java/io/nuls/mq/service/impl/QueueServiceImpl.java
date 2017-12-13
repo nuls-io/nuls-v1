@@ -113,4 +113,10 @@ public class QueueServiceImpl<T> implements QueueService<T> {
     public StatInfo getStatInfo(String queueName) {
         return QueueManager.getStatInfo(queueName);
     }
+
+    @Override
+    public void remove(String queueName, T item) {
+        QueueManager.remove(queueName,item);
+
+    }
 }

@@ -41,10 +41,10 @@ public class BlockMaintenanceThread implements Runnable {
     @Override
     public void run() {
         checkGenesisBlock();
-        checkLocalBlocks();
+        Block localBestBlock = getLocalBestCorrectBlock();
         while (true) {
             try {
-                syncBlock();
+                syncBlock(localBestBlock);
             } catch (Exception e) {
                 Log.error(e);
             }
@@ -52,12 +52,14 @@ public class BlockMaintenanceThread implements Runnable {
     }
 
 
-    public synchronized void syncBlock() {
+    public synchronized void syncBlock(Block localBestBlock) {
+        if (null == localBestBlock) {
+            localBestBlock = this.blockService.getLocalHighestBlock();
+        }
         boolean doit = false;
         long startHeight = 0;
         BlockInfo blockInfo = null;
         do {
-            Block localBestBlock = blockService.getLocalHighestBlock();
             if (null == localBestBlock) {
                 doit = true;
                 blockInfo = BEST_HEIGHT_FROM_NET.request(0);
@@ -108,8 +110,46 @@ public class BlockMaintenanceThread implements Runnable {
             this.blockService.save(genesisBlock);
         }
     }
-    private void checkLocalBlocks() {
-        //todo 本地最新快是否正确、若不正确则恢复到正确的位置
 
+    private Block getLocalBestCorrectBlock() {
+        Block localBestBlock = this.blockService.getLocalHighestBlock();
+        do {
+            if (null == localBestBlock || localBestBlock.getHeader().getHeight() <= 1) {
+                break;
+            }
+            BlockInfo blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(localBestBlock.getHeader().getHeight());
+            if (null == blockInfo || blockInfo.getHash() == null) {
+                //本地高度最高，查询网络最新高度，并回退
+                rollbackBlock(localBestBlock.getHeader().getHeight());
+                localBestBlock = this.blockService.getLocalHighestBlock();
+                break;
+            }
+            if (!blockInfo.getHash().equals(localBestBlock.getHeader().getHash())) {
+                //本地分叉，回退
+                rollbackBlock(blockInfo.getHeight());
+                localBestBlock = this.blockService.getLocalHighestBlock();
+                break;
+            }
+        } while (false);
+        return localBestBlock;
+    }
+
+    private void rollbackBlock(long startHeight) {
+        this.blockService.rollback(startHeight);
+        long height = startHeight - 1;
+        if (height < 1) {
+            throw new NulsRuntimeException(ErrorCode.NET_MESSAGE_ERROR, "Block data error!");
+        }
+        BlockInfo blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(height);
+        Block localBlock = this.blockService.getBlockByHeight(height);
+        boolean previousRb = false;
+        if (null == blockInfo || blockInfo.getHash() == null || localBlock == null || localBlock.getHeader().getHash() == null) {
+            previousRb = true;
+        } else if (!blockInfo.getHash().getDigestHex().equals(localBlock.getHeader().getHash().getDigestHex())) {
+            previousRb = true;
+        }
+        if (previousRb) {
+            rollbackBlock(height);
+        }
     }
 }

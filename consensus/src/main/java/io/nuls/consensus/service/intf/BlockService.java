@@ -31,4 +31,6 @@ public interface BlockService {
     void save(Block block);
 
     void clearLocalBlocks();
+
+    void rollback(long height);
 }

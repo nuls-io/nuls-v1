@@ -5,7 +5,7 @@ import io.nuls.mq.entity.StatInfo;
 import java.io.IOException;
 
 /**
- * 持久化队列定义
+ * 队列定义
  *
  * @author Niels
  * @date 2017/9/20
@@ -73,4 +73,6 @@ public abstract class AbstractNulsQueue<T> {
     public StatInfo getStatInfo() {
         return statInfo;
     }
+
+    public abstract void remove(T item) ;
 }

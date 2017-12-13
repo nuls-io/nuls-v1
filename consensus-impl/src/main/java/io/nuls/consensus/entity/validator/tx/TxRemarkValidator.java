@@ -18,7 +18,7 @@ public class TxRemarkValidator implements NulsDataValidator<Transaction> {
     @Override
     public ValidateResult validate(Transaction data) {
         if (data == null) {
-            return new ValidateResult(false, "Data is null!");
+            return ValidateResult.getFaildResult( "Data is null!");
         }
         if(null==data.getRemark()){
             return ValidateResult.getSuccessResult();

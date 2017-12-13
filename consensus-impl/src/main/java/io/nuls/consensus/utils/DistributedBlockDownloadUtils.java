@@ -4,12 +4,15 @@ import io.nuls.consensus.event.GetBlockEvent;
 import io.nuls.consensus.service.cache.BlockCacheService;
 import io.nuls.core.chain.entity.BasicTypeData;
 import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.Result;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.event.bus.event.service.intf.EventService;
 import io.nuls.mq.intf.QueueService;
+import io.nuls.network.service.NetworkService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -29,12 +32,13 @@ public class DistributedBlockDownloadUtils {
     private BlockCacheService blockCacheService = NulsContext.getInstance().getService(BlockCacheService.class);
     private Map<Long, String> heightPeerMap = new HashMap<>();
     private Map<Long, Block> blockMap = new HashMap<>();
+    private NetworkService networkService = NulsContext.getInstance().getService(NetworkService.class);
 
     private boolean finished = true;
     private List<String> peerIdList;
     private long startHeight;
     private long endHeight;
-    private String heightestHash;
+    private String highestHash;
 
     private Lock lock = new ReentrantLock();
 
@@ -55,12 +59,12 @@ public class DistributedBlockDownloadUtils {
         blockMap.clear();
     }
 
-    public void request(List<String> peerIdList, long startHeight, long endHeight, String heightestHash) throws InterruptedException {
+    public void request(List<String> peerIdList, long startHeight, long endHeight, String highestHash) throws InterruptedException {
         lock.lock();
         this.init(peerIdList);
         this.startHeight = startHeight;
         this.endHeight = endHeight;
-        this.heightestHash = heightestHash;
+        this.highestHash = highestHash;
         finished = false;
         for (long i = 0; i <= (endHeight - startHeight); i++) {
             sendRequest(i + startHeight, this.queueService.take(queueId));
@@ -102,16 +106,25 @@ public class DistributedBlockDownloadUtils {
     }
 
     private Result checkHash() {
-        String hash = heightestHash;
-        for(long i=endHeight;i>=startHeight;i--){
-            Block  block = blockMap.get(i);
-            if(block.getHeader().getHash().getDigestHex().equals(hash)){
+        String hash = highestHash;
+        for (long i = endHeight; i >= startHeight; i--) {
+            Block block = blockMap.get(i);
+            if (block.getHeader().getHash().getDigestHex().equals(hash)) {
                 hash = block.getHeader().getPreHash().getDigestHex();
                 continue;
             }
-
-
-            return Re
+            String peerId = heightPeerMap.get(i);
+            networkService.removePeer(peerId);
+            this.queueService.remove(queueId, peerId);
+            if (this.queueService.size(queueId) == 0) {
+                throw new NulsRuntimeException(ErrorCode.NET_MESSAGE_ERROR, "download block faild!");
+            }
+            try {
+                this.sendRequest(i, this.queueService.take(queueId));
+            } catch (InterruptedException e) {
+                Log.error(e);
+            }
+            return Result.getFaildResult("");
         }
         return Result.getSuccessResult();
     }

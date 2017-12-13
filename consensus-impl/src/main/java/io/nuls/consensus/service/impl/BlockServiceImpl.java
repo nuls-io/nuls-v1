@@ -74,4 +74,10 @@ public class BlockServiceImpl implements BlockService {
         // todo auto-generated method stub(niels)
 
     }
+
+    @Override
+    public void rollback(long height) {
+        // todo auto-generated method stub(niels)
+        //删除关联数据及区块数据
+    }
 }
