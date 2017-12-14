@@ -48,6 +48,11 @@ public class BlockMaintenanceThread implements Runnable {
             } catch (Exception e) {
                 Log.error(e);
             }
+            try {
+                Thread.sleep(10000L);
+            } catch (InterruptedException e) {
+                Log.error(e);
+            }
         }
     }
 
@@ -81,7 +86,6 @@ public class BlockMaintenanceThread implements Runnable {
         if (doit) {
             downloadBlocks(blockInfo.getPeerIdList(), startHeight, blockInfo.getHeight(), blockInfo.getHash().getDigestHex());
         }
-
     }
 
 

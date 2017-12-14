@@ -78,7 +78,7 @@ public enum ErrorCode {
     /**
      * ----------  Consensus Network code   ---------
      */
-    CS_UNKOWN_EXCEPTION("CS000", 60000),;
+    CS_UNKOWN_EXCEPTION("CS000", 60000), TIME_OUT("CS001", 60001);
 
     private final int msg;
     private final String code;

@@ -56,6 +56,13 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
             Log.error(e);
             throw new NulsRuntimeException(e);
         }
+        this.registerEvent(PocConsensusConstant.EVENT_TYPE_RED_PUNISH, RedPunishConsensusEvent.class);
+        this.registerEvent(PocConsensusConstant.EVENT_TYPE_YELLOW_PUNISH, YellowPunishConsensusEvent.class);
+        this.registerEvent(PocConsensusConstant.EVENT_TYPE_REGISTER_AGENT, RegisterAgentEvent.class);
+        this.registerEvent(PocConsensusConstant.EVENT_TYPE_ASK_BLOCK,AskBlockInfoEvent.class);
+        this.registerTransaction(PocConsensusConstant.TX_TYPE_REGISTER_AGENT, RegisterAgentTransaction.class);
+        this.registerTransaction(PocConsensusConstant.TX_TYPE_RED_PUNISH, RedPunishTransaction.class);
+        this.registerTransaction(PocConsensusConstant.TX_TYPE_YELLOW_PUNISH, YellowPunishTransaction.class);
         delegatePeer = ConfigLoader.getCfgValue(PocConsensusConstant.CFG_CONSENSUS_SECTION, PocConsensusConstant.PROPERTY_DELEGATE_PEER, false);
         PocBlockValidatorManager.initBlockValidators();
         this.registerService(BlockServiceImpl.getInstance());
@@ -63,12 +70,7 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
         this.checkGenesisBlock();
         this.startBlockMaintenanceThread();
         this.checkConsensusStatus();
-        this.registerEvent(PocConsensusConstant.EVENT_TYPE_RED_PUNISH, RedPunishConsensusEvent.class);
-        this.registerEvent(PocConsensusConstant.EVENT_TYPE_YELLOW_PUNISH, YellowPunishConsensusEvent.class);
-        this.registerEvent(PocConsensusConstant.EVENT_TYPE_REGISTER_AGENT, RegisterAgentEvent.class);
-        this.registerTransaction(PocConsensusConstant.TX_TYPE_REGISTER_AGENT, RegisterAgentTransaction.class);
-        this.registerTransaction(PocConsensusConstant.TX_TYPE_RED_PUNISH, RedPunishTransaction.class);
-        this.registerTransaction(PocConsensusConstant.TX_TYPE_YELLOW_PUNISH, YellowPunishTransaction.class);
+
         this.registerHanders();
         Log.info("the POC consensus module is started!");
 
@@ -133,9 +135,14 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
 
     private void startBlockMaintenanceThread() {
         BlockMaintenanceThread blockMaintenanceThread = BlockMaintenanceThread.getInstance();
-        blockMaintenanceThread.syncBlock();
-        ThreadManager.createSingleThreadAndRun(this.getModuleId(),
-                BlockMaintenanceThread.THREAD_NAME, blockMaintenanceThread);
+        try {
+            blockMaintenanceThread.syncBlock();
+        } catch (Exception e) {
+            Log.error(e);
+        } finally {
+            ThreadManager.createSingleThreadAndRun(this.getModuleId(),
+                    BlockMaintenanceThread.THREAD_NAME, blockMaintenanceThread);
+        }
     }
 
     /**

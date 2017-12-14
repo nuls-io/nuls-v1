@@ -35,7 +35,7 @@ public class BroadcasterImpl implements Broadcaster {
     private BroadcastResult broadcast(NulsMessage message, String excludePeerId) {
         List<Peer> broadPeers = peersManager.getAvailablePeers(excludePeerId);
         //only one peer connected can't send message
-        if (broadPeers.size() <= 1) {
+        if (broadPeers.size() <= 0) {
             return new BroadcastResult(false, "no peer can be broadcast");
         }
 
