@@ -7,4 +7,6 @@ import io.nuls.db.entity.AliasPo;
  * @date 2017/12/13.
  */
 public interface AliasDao extends BaseDao<String, AliasPo> {
+
+    AliasPo getByAddress(String address);
 }

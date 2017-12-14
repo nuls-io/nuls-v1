@@ -2,8 +2,6 @@ package io.nuls.db.dao.impl.mybatis;
 
 import io.nuls.core.chain.entity.Result;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.module.manager.ServiceManager;
 import io.nuls.core.utils.log.Log;
@@ -38,6 +36,11 @@ public class AccountDaoImpl extends BaseDaoImpl<AccountMapper, String, AccountPo
         AliasPo aliasPo = aliasDao.getByKey(alias);
         if (aliasPo != null) {
             return new Result(false, "alias exist");
+        }
+
+        AccountPo accountPo = getByKey(id);
+        if (accountPo == null) {
+            return new Result(false, "account not exist");
         }
         try {
             aliasPo = new AliasPo();

@@ -79,6 +79,7 @@
     <mappers>
         <mapper resource="mybatis/mapping/CommonMapper.xml"/>
         <mapper resource="mybatis/mapping/AccountMapper.xml" />
+        <mapper resource="mybatis/mapping/AliasMapper.xml" />
         <mapper resource="mybatis/mapping/BlockMapper.xml" />
         <mapper resource="mybatis/mapping/ConsensusAccountMapper.xml" />
         <mapper resource="mybatis/mapping/PeerGroupMapper.xml" />

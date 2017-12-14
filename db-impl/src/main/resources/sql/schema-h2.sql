@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS `account` (
   `alias` varchar(100) DEFAULT NULL,
   `version` int(11) NOT NULL,
   `pri_key` varchar(100) DEFAULT NULL,
-  `pri_seed` varbinary(1024) DEFAULT NULL,
+  `pri_seed` varbinary(100) DEFAULT NULL,
   `EXTEND` varbinary(1024) DEFAULT NULL,
   `status` INT DEFAULT 0,
   PRIMARY KEY (`id`)

@@ -1,5 +1,6 @@
 package io.nuls.test;
 
+import io.nuls.core.chain.entity.Result;
 import io.nuls.core.module.manager.ModuleManager;
 import io.nuls.core.module.manager.ServiceManager;
 import io.nuls.core.utils.log.Log;
@@ -135,6 +136,14 @@ public class DBModuleTest {
         accountPo.setVersion((short) 11);
 
         accountDao.save(accountPo);
+    }
 
+    @Test
+    public void testAlias() {
+        String alias = "zoro";
+        String id = "abcd";
+
+        Result result = accountDao.setAlias(id, alias);
+        System.out.println(result.getMessage());
     }
 }
