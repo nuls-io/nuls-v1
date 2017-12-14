@@ -375,4 +375,8 @@ public class AccountServiceImpl implements AccountService {
 
     }
 
+    @Override
+    public Result verifySign(byte[] bytes,NulsSignData data){
+        return new Result(true,null);
+    }
 }

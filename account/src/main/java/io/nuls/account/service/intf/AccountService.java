@@ -53,4 +53,5 @@ public interface AccountService {
 
     void setAlias(String address, String alias);
 
+    Result verifySign(byte[] bytes,NulsSignData data);
 }
