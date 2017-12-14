@@ -108,6 +108,10 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
         YellowPunishHandler yellowPunishHandler = new YellowPunishHandler();
         yellowPunishHandler.addFilter(new YellowPunishEventFilter());
         processorService.registerEventHandler(YellowPunishConsensusEvent.class, yellowPunishHandler);
+
+        AskBlockInfoHandler askBlockInfoHandler = new AskBlockInfoHandler();
+        processorService.registerEventHandler(AskBlockInfoEvent.class,askBlockInfoHandler);
+
     }
 
     private void checkConsensusStatus() {

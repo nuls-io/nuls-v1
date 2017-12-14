@@ -70,7 +70,7 @@ public class BroadcasterImpl implements Broadcaster {
     private BroadcastResult broadcastSync(NulsMessage message, String excludePeerId) {
         List<Peer> broadPeers = peersManager.getAvailablePeers(excludePeerId);
 
-        if (broadPeers.size() <= 1) {
+        if (broadPeers.size() <= 0) {
             return new BroadcastResult(false, "no peer can be broadcast");
         }
 

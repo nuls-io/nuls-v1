@@ -21,7 +21,7 @@ public class AskBlockInfoHandler extends AbstractNetworkNulsEventHandler<AskBloc
     @Override
     public void onEvent(AskBlockInfoEvent event, String fromId) throws NulsException {
         BlockHeader header ;
-        if(event.getEventBody().getVal()==0){
+        if(null==event.getEventBody()||event.getEventBody().getVal()==0){
             header = blockService.getLocalHighestBlock().getHeader();
         }else{
             Block block = blockService.getBlockByHeight(event.getEventBody().getVal());

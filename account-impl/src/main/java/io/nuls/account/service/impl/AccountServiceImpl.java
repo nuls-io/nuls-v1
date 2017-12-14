@@ -5,6 +5,7 @@ import io.nuls.account.entity.Address;
 import io.nuls.account.manager.AccountManager;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.account.util.AccountTool;
+import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.chain.entity.Result;
 import io.nuls.core.constant.ErrorCode;
@@ -355,7 +356,21 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public NulsSignData signData(byte[] bytes) {
-        return null;
+        //todo
+        if(null==bytes||bytes.length==0){
+            return null;
+        }
+        NulsSignData data = new NulsSignData();
+        data.setSignBytes(new byte[]{1});
+        return data;
+    }
+
+    @Override
+    public NulsSignData signData(NulsDigestData digestData) {
+        if(null==digestData){
+            return null;
+        }
+        return this.signData(digestData.getDigestBytes());
     }
 
     @Override

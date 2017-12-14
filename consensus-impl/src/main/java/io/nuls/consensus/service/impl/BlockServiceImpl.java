@@ -1,7 +1,10 @@
 package io.nuls.consensus.service.impl;
 
 import io.nuls.consensus.service.intf.BlockService;
+import io.nuls.consensus.utils.ConsensusBeanUtils;
 import io.nuls.core.chain.entity.Block;
+import io.nuls.core.context.NulsContext;
+import io.nuls.db.dao.BlockDao;
 
 /**
  * @author Niels
@@ -9,6 +12,8 @@ import io.nuls.core.chain.entity.Block;
  */
 public class BlockServiceImpl implements BlockService {
     private static final BlockServiceImpl INSTANCE = new BlockServiceImpl();
+
+    private BlockDao blockDao = NulsContext.getInstance().getService(BlockDao.class);
 
     private BlockServiceImpl() {
     }
@@ -75,7 +80,8 @@ public class BlockServiceImpl implements BlockService {
     @Override
     public void save(Block block) {
         // todo auto-generated method stub(niels)
-
+//        保存交易信息
+        blockDao.save(ConsensusBeanUtils.toPojo(block));
     }
 
     @Override

@@ -3,6 +3,7 @@ package io.nuls.account.service.intf;
 
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
+import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.chain.entity.Result;
 
@@ -50,6 +51,7 @@ public interface AccountService {
     Result unlockAccounts(String password, int seconds);
 
     NulsSignData signData(byte[] bytes);
+    NulsSignData signData(NulsDigestData digestData);
 
     void setAlias(String address, String alias);
 

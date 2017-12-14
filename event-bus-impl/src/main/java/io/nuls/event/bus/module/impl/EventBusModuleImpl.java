@@ -5,7 +5,7 @@ import io.nuls.event.bus.constant.EventConstant;
 import io.nuls.event.bus.event.CommonHashEvent;
 import io.nuls.event.bus.event.GetBodyEvent;
 import io.nuls.event.bus.handler.EventHashHandler;
-import io.nuls.event.bus.handler.GetEventHandler;
+import io.nuls.event.bus.handler.GetEventBodyHandler;
 import io.nuls.event.bus.module.intf.AbstractEventBusModule;
 import io.nuls.event.bus.processor.service.impl.LocalProcessorServiceImpl;
 import io.nuls.event.bus.processor.service.impl.NetworkProcessorServiceImpl;
@@ -26,18 +26,17 @@ public class EventBusModuleImpl extends AbstractEventBusModule {
         super();
         this.registerEvent(EventConstant.EVENT_TYPE_COMMON_EVENT_HASH_EVENT, CommonHashEvent.class);
         this.registerEvent(EventConstant.EVENT_TYPE_GET_EVENT_BODY_EVENT, GetBodyEvent.class);
-
     }
 
     @Override
     public void start() {
         localService = LocalProcessorServiceImpl.getInstance();
         networkService = NetworkProcessorServiceImpl.getInstance();
+        networkService.registerEventHandler(CommonHashEvent.class, new EventHashHandler());
+        networkService.registerEventHandler(GetBodyEvent.class, new GetEventBodyHandler());
         this.registerService(localService);
         this.registerService(networkService);
         this.registerService(EventServiceImpl.getInstance());
-        NetworkProcessorServiceImpl.getInstance().registerEventHandler(CommonHashEvent.class, new EventHashHandler());
-        NetworkProcessorServiceImpl.getInstance().registerEventHandler(GetBodyEvent.class, new GetEventHandler());
     }
 
     @Override
