@@ -1,7 +1,7 @@
 package io.nuls.consensus.service.intf;
 
 import io.nuls.account.entity.Address;
-import io.nuls.consensus.entity.ConsensusMember;
+import io.nuls.consensus.entity.ConsensusAccount;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
 
 import java.util.List;
@@ -17,7 +17,7 @@ public interface ConsensusService {
 
     void exitTheConsensus(Address address, String password);
 
-    List<ConsensusMember> getConsensusMemberList(Map<String, Object> params);
+    List<ConsensusAccount> getConsensusAccountList(Map<String, Object> params);
 
     ConsensusStatusInfo getConsensusInfo(String address);
 

@@ -4,7 +4,7 @@ import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.entity.Agent;
-import io.nuls.consensus.entity.ConsensusMember;
+import io.nuls.consensus.entity.ConsensusAccount;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.consensus.params.JoinConsensusParam;
 import io.nuls.consensus.service.intf.ConsensusService;
@@ -61,7 +61,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
     }
 
     @Override
-    public List<ConsensusMember> getConsensusMemberList(Map<String, Object> params) {
+    public List<ConsensusAccount> getConsensusAccountList(Map<String, Object> params) {
         return null;
     }
 

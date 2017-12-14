@@ -1,7 +1,7 @@
 package io.nuls.consensus.event;
 
 import io.nuls.consensus.constant.ConsensusEventType;
-import io.nuls.consensus.entity.ConsensusMember;
+import io.nuls.consensus.entity.ConsensusAccount;
 import io.nuls.consensus.tx.JoinConsensusTransaction;
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.constant.NulsConstant;

@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.sql.SQLException;
 
 /**
+ *
  * @author vivi
  * @date 2017/9/27
  */
@@ -50,11 +51,12 @@ public class MybatisDBModuleImpl extends AbstractDBModule {
 
     private void initService() {
         DBMethodFilter dbMethodFilter = new DBMethodFilter();
-
-        this.registerService(BlockDao.class, AopUtils.createProxy(BlockDaoImpl.class, dbMethodFilter));
-        this.registerService(AliasDao.class, AopUtils.createProxy(AliasDaoImpl.class, dbMethodFilter));
-        this.registerService(AccountDao.class, AopUtils.createProxy(AccountDaoImpl.class, dbMethodFilter));
-        this.registerService(ConsensusAccountDao.class, AopUtils.createProxy(ConsensusAccountDaoImpl.class, dbMethodFilter));
+        BlockDao blockDao = AopUtils.createProxy(BlockDaoImpl.class, dbMethodFilter);
+        this.registerService(BlockDao.class,blockDao);
+        AccountDao accountDao = AopUtils.createProxy(AccountDaoImpl.class, dbMethodFilter);
+        this.registerService(AccountDao.class,accountDao);
+        this.registerService(DelegateDao.class, AopUtils.createProxy(DelegateDaoImpl.class, dbMethodFilter));
+        this.registerService(DelegateAccountDao.class, AopUtils.createProxy(DelegateAccountDaoImpl.class, dbMethodFilter));
         this.registerService(PeerDao.class, AopUtils.createProxy(PeerDaoImpl.class, dbMethodFilter));
         this.registerService(PeerGroupDao.class, AopUtils.createProxy(PeerGroupDaoImpl.class, dbMethodFilter));
         this.registerService(PeerGroupRelationDao.class, AopUtils.createProxy(PeerGroupRelationDaoImpl.class, dbMethodFilter));

@@ -8,6 +8,15 @@ import io.nuls.core.chain.entity.Block;
  * @date 2017/12/11
  */
 public class BlockServiceImpl implements BlockService {
+    private static final BlockServiceImpl INSTANCE = new BlockServiceImpl();
+
+    private BlockServiceImpl() {
+    }
+
+    public static BlockServiceImpl getInstance() {
+        return INSTANCE;
+    }
+
     @Override
     public Block getGengsisBlockFromDb() {
         // todo auto-generated method stub(niels)

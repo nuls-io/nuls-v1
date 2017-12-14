@@ -4,11 +4,11 @@ import io.nuls.account.entity.Account;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.constant.PocConsensusConstant;
-import io.nuls.consensus.entity.ConsensusMember;
+import io.nuls.consensus.entity.ConsensusAccount;
 import io.nuls.consensus.entity.genesis.DevGenesisBlock;
 import io.nuls.consensus.entity.genesis.MainGenesisBlock;
 import io.nuls.consensus.entity.genesis.TestGenesisBlock;
-import io.nuls.consensus.entity.member.ConsensusMemberData;
+import io.nuls.consensus.entity.member.ConsensusAccountData;
 import io.nuls.consensus.entity.tx.RedPunishTransaction;
 import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
 import io.nuls.consensus.entity.tx.YellowPunishTransaction;
@@ -18,6 +18,7 @@ import io.nuls.consensus.handler.*;
 import io.nuls.consensus.handler.filter.*;
 import io.nuls.consensus.module.AbstractConsensusModule;
 import io.nuls.consensus.service.cache.ConsensusCacheService;
+import io.nuls.consensus.service.impl.BlockServiceImpl;
 import io.nuls.consensus.service.impl.PocConsensusServiceImpl;
 import io.nuls.consensus.thread.BlockMaintenanceThread;
 import io.nuls.core.constant.NulsConstant;
@@ -57,6 +58,8 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
         }
         delegatePeer = ConfigLoader.getCfgValue(PocConsensusConstant.CFG_CONSENSUS_SECTION, PocConsensusConstant.PROPERTY_DELEGATE_PEER, false);
         PocBlockValidatorManager.initBlockValidators();
+        this.registerService(BlockServiceImpl.getInstance());
+        this.registerService(PocConsensusServiceImpl.getInstance());
         this.checkGenesisBlock();
         this.startBlockMaintenanceThread();
         this.checkConsensusStatus();
@@ -67,7 +70,6 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
         this.registerTransaction(PocConsensusConstant.TX_TYPE_RED_PUNISH, RedPunishTransaction.class);
         this.registerTransaction(PocConsensusConstant.TX_TYPE_YELLOW_PUNISH, YellowPunishTransaction.class);
         this.registerHanders();
-        this.registerService(PocConsensusServiceImpl.getInstance());
         Log.info("the POC consensus module is started!");
 
     }
@@ -114,7 +116,7 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
                 Log.warn("local account is null!");
                 break;
             }
-            ConsensusMember<ConsensusMemberData> memberSelf = consensusCacheService.getConsensusMember(localAccount.getAddress().toString());
+            ConsensusAccount<ConsensusAccountData> memberSelf = consensusCacheService.getConsensusAccount(localAccount.getAddress().toString());
             if (null == memberSelf) {
                 break;
             }

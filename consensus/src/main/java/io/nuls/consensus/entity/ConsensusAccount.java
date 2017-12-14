@@ -16,7 +16,7 @@ import java.io.IOException;
  * @author Niels
  * @date 2017/11/7
  */
-public class ConsensusMember<T extends BaseNulsData> extends BaseNulsData implements NulsCloneable{
+public class ConsensusAccount<T extends BaseNulsData> extends BaseNulsData implements NulsCloneable{
 
     private Address address;
 

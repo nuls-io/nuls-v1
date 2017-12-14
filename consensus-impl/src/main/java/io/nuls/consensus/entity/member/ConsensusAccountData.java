@@ -16,7 +16,7 @@ import java.io.IOException;
  * @author Niels
  * @date 2017/12/10
  */
-public class ConsensusMemberData extends BaseNulsData {
+public class ConsensusAccountData extends BaseNulsData {
     private String id;
 
     private int status;
@@ -31,6 +31,7 @@ public class ConsensusMemberData extends BaseNulsData {
     /**
      * the following fields is for The account self(delegate Account)
      */
+    private long roundNo;
     private long roundIndex;
     private long roundStartTime;
     private long roundEndTime;
@@ -134,5 +135,13 @@ public class ConsensusMemberData extends BaseNulsData {
 
     public void setRoundEndTime(long roundEndTime) {
         this.roundEndTime = roundEndTime;
+    }
+
+    public long getRoundNo() {
+        return roundNo;
+    }
+
+    public void setRoundNo(long roundNo) {
+        this.roundNo = roundNo;
     }
 }

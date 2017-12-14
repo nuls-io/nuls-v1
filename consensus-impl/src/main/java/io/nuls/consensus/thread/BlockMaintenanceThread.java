@@ -1,6 +1,7 @@
 package io.nuls.consensus.thread;
 
 import io.nuls.consensus.constant.PocConsensusConstant;
+import io.nuls.consensus.service.impl.BlockServiceImpl;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.utils.BlockInfo;
 import io.nuls.consensus.utils.DistributedBlockInfoRequestUtils;
@@ -27,7 +28,7 @@ public class BlockMaintenanceThread implements Runnable {
 
     private static BlockMaintenanceThread instance;
 
-    private final BlockService blockService = NulsContext.getInstance().getService(BlockService.class);
+    private final BlockService blockService = BlockServiceImpl.getInstance();
 
     private final EventService eventService = NulsContext.getInstance().getService(EventService.class);
 
