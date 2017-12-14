@@ -14,6 +14,8 @@ import java.util.List;
  */
 public interface LedgerService {
 
+    double getTxFee(long blockHeight);
+
     Balance getBalance(String address);
 
     boolean transfer(Address address, String password, Address toAddress, double amount, String remark);

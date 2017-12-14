@@ -48,11 +48,7 @@ public class BlockMaintenanceThread implements Runnable {
             } catch (Exception e) {
                 Log.error(e.getMessage());
             }
-            try {
-                Thread.sleep(10000L);
-            } catch (InterruptedException e) {
-                Log.error(e);
-            }
+
         }
     }
 
@@ -72,6 +68,11 @@ public class BlockMaintenanceThread implements Runnable {
             long interval = TimeService.currentTimeMillis() - localBestBlock.getHeader().getTime();
             if (interval < (PocConsensusConstant.BLOCK_TIME_INTERVAL * 2)) {
                 doit = false;
+                try {
+                    Thread.sleep(10000L);
+                } catch (InterruptedException e) {
+                    Log.error(e);
+                }
                 break;
             }
             blockInfo = BEST_HEIGHT_FROM_NET.request(0);

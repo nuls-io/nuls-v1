@@ -26,6 +26,12 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
+    public double getTxFee(long blockHeight) {
+        // todo auto-generated method stub(niels)
+        return 0.01;
+    }
+
+    @Override
     public Balance getBalance(String address) {
         Balance balance = ledgerCacheService.getBalance(address);
         if(null==balance){
