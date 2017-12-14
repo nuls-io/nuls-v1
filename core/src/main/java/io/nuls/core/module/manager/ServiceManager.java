@@ -45,7 +45,7 @@ public class ServiceManager {
 
     private void sleepAndIncrement(Class tclass, int index){
         try {
-            Thread.sleep(100L);
+            Thread.sleep(1000L);
             this.dependencyCheck(tclass, index + 1);
         } catch (InterruptedException e) {
             Log.error(e);

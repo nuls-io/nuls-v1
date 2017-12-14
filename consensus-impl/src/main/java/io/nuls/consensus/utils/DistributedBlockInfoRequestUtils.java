@@ -60,7 +60,7 @@ public class DistributedBlockInfoRequestUtils {
         peerIdList = this.eventService.broadcast(askBlockInfoEvent);
         if (peerIdList.isEmpty()) {
             Log.error("get best height from net faild!");
-            throw new NulsRuntimeException(ErrorCode.NET_MESSAGE_ERROR, "get best height from net faild!");
+            throw new NulsRuntimeException(ErrorCode.NET_MESSAGE_ERROR, "broadcast faild!");
         }
         return this.getBlockInfo();
     }

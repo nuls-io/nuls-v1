@@ -53,6 +53,7 @@ public class MybatisDBModuleImpl extends AbstractDBModule {
         DBMethodFilter dbMethodFilter = new DBMethodFilter();
         BlockDao blockDao = AopUtils.createProxy(BlockDaoImpl.class, dbMethodFilter);
         this.registerService(BlockDao.class,blockDao);
+        this.registerService(AliasDao.class,AopUtils.createProxy(AliasDaoImpl.class,dbMethodFilter));
         AccountDao accountDao = AopUtils.createProxy(AccountDaoImpl.class, dbMethodFilter);
         this.registerService(AccountDao.class,accountDao);
         this.registerService(DelegateDao.class, AopUtils.createProxy(DelegateDaoImpl.class, dbMethodFilter));
