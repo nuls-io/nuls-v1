@@ -1,6 +1,7 @@
 package io.nuls.db.dao.impl.mybatis.session;
 
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.exception.DBException;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -75,6 +76,9 @@ public class SessionManager {
     }
 
     public static boolean getTxState(String id) {
+        if(StringUtils.isBlank(id)) {
+            return false;
+        }
         Map<String, Boolean> map = txHolder.get();
         if (null == map || !map.containsKey(id)) {
             return false;

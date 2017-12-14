@@ -25,6 +25,6 @@ public class AliasDaoImpl extends BaseDaoImpl<AliasMapper, String, AliasPo> impl
     @Override
     public AliasPo getByAddress(String address) {
 
-        return null;
+        return getMapper().getByAddress(address);
     }
 }

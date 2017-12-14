@@ -19,6 +19,10 @@ public class DBMethodFilter implements MethodInterceptor {
 
     @Override
     public Object intercept(Object obj, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
+        if (!method.getName().equals("hashCode") && !method.getName().equals("toString")) {
+            System.out.println("----------" + method.getName());
+        }
+
         String lastId = SessionManager.getId();
         String id = lastId;
         Object result;
@@ -28,6 +32,7 @@ public class DBMethodFilter implements MethodInterceptor {
             SessionAnnotation annotation = method.getAnnotation(SessionAnnotation.class);
             if (annotation.value() == PROPAGATION.REQUIRED && !SessionManager.getTxState(id)) {
                 required = true;
+                id = StringUtils.getNewUUID();
             } else if (annotation.value() == PROPAGATION.INDEPENDENT) {
                 id = StringUtils.getNewUUID();
             }
@@ -37,6 +42,7 @@ public class DBMethodFilter implements MethodInterceptor {
         if (session == null) {
             isSessionBeginning = true;
             session = SessionManager.sqlSessionFactory.openSession(false);
+
             SessionManager.setConnection(id, session);
             SessionManager.setId(id);
         } else {

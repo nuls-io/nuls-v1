@@ -57,4 +57,11 @@
     set address = #{address,jdbcType=VARCHAR}
     where alias = #{alias,jdbcType=VARCHAR}
   </update>
+
+  <select id="getByAddress" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from alias
+    where address = #{address,jdbcType=VARCHAR}
+  </select>
 </mapper>

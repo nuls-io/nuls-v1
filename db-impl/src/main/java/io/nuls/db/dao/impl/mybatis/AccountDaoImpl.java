@@ -33,17 +33,19 @@ public class AccountDaoImpl extends BaseDaoImpl<AccountMapper, String, AccountPo
     @Override
     @SessionAnnotation
     public Result setAlias(String id, String alias) {
-        AliasPo aliasPo = aliasDao.getByKey(alias);
-        if (aliasPo != null) {
-            return new Result(false, "alias exist");
-        }
+//        AliasPo aliasPo = aliasDao.getByKey(alias);
+//        if (aliasPo != null) {
+//            return new Result(false, "alias exist");
+//        }
+//
+//        AccountPo accountPo = getByKey(id);
+//        if (accountPo == null) {
+//            return new Result(false, "account not exist");
+//        }
 
-        AccountPo accountPo = getByKey(id);
-        if (accountPo == null) {
-            return new Result(false, "account not exist");
-        }
+
         try {
-            aliasPo = new AliasPo();
+            AliasPo aliasPo = new AliasPo();
             aliasPo.setAlias(alias);
             aliasPo.setAddress(id);
             aliasDao.save(aliasPo);
@@ -51,6 +53,7 @@ public class AccountDaoImpl extends BaseDaoImpl<AccountMapper, String, AccountPo
             AccountPo po = new AccountPo();
             po.setId(id);
             po.setAlias(alias);
+            Integer.parseInt("s");
             this.getMapper().updateByPrimaryKeySelective(po);
         } catch (Exception e) {
             Log.error(e);
