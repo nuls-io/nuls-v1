@@ -6,6 +6,7 @@ import io.nuls.db.dao.impl.mybatis.params.BlockSearchParams;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import io.nuls.db.entity.BlockPo;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,5 +23,17 @@ public class BlockDaoImpl extends BaseDaoImpl<BlockMapper, String, BlockPo> impl
     @Override
     protected Searchable getSearchable(Map<String, Object> params) {
         return new BlockSearchParams(params);
+    }
+
+    @Override
+    public BlockPo getBlockByHeight(int height) {
+        // todo auto-generated method stub(niels)
+        Map<String, Object> params = new HashMap<>();
+        params.put(BlockSearchParams.SEARCH_FIELD_HEIGHT,height);
+        List<BlockPo> list = this.searchList(params);
+        if(null==list||list.isEmpty()){
+            return null;
+        }
+        return list.get(0);
     }
 }

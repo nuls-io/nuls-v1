@@ -1,10 +1,12 @@
 package io.nuls.consensus.service.impl;
 
+import io.nuls.consensus.entity.genesis.DevGenesisBlock;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.utils.ConsensusBeanUtils;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.context.NulsContext;
 import io.nuls.db.dao.BlockDao;
+import io.nuls.db.entity.BlockPo;
 
 /**
  * @author Niels
@@ -24,8 +26,8 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public Block getGengsisBlockFromDb() {
-        // todo auto-generated method stub(niels)
-        return null;
+        BlockPo po = this.blockDao.getBlockByHeight(0);
+        return ConsensusBeanUtils.fromPojo(po);
     }
 
     @Override
@@ -55,7 +57,7 @@ public class BlockServiceImpl implements BlockService {
     @Override
     public Block getLocalHighestBlock() {
         // todo auto-generated method stub(niels)
-        return null;
+        return DevGenesisBlock.getInstance();
     }
 
     @Override
