@@ -10,6 +10,7 @@ import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.entity.tx.UtxoDepositTransaction;
+import io.nuls.ledger.entity.tx.UtxoLockTransaction;
 import io.nuls.ledger.service.intf.LedgerCacheService;
 import io.nuls.ledger.service.intf.LedgerService;
 
@@ -88,4 +89,18 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         return false;
     }
 
+    @Override
+    public UtxoLockTransaction createLockNulsTx(String address, String password, Na na) {
+        UtxoLockTransaction tx = new UtxoLockTransaction();
+        UtxoData data =  this.getUtxoData(na);
+        //
+
+
+        return tx;
+    }
+
+    private UtxoData getUtxoData(Na na){
+        //todo
+        return null;
+    }
 }

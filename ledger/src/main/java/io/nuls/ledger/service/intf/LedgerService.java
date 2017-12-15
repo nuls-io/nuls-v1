@@ -27,4 +27,6 @@ public interface LedgerService {
     List<Transaction> queryListByAccount(String address, int txType, long beginTime);
 
     boolean lockNuls(String address, String password, Na na);
+
+    LockNulsTransaction createLockNulsTx(String address, String password, Na na);
 }

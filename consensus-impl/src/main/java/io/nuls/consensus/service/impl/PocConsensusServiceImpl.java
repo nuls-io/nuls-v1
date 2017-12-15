@@ -19,6 +19,7 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.event.service.intf.EventService;
+import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.service.intf.LedgerCacheService;
 import io.nuls.ledger.service.intf.LedgerService;
 
@@ -51,8 +52,10 @@ public class PocConsensusServiceImpl implements ConsensusService {
         RegisterAgentEvent event = new RegisterAgentEvent();
         RegisterAgentTransaction tx = new RegisterAgentTransaction();
         tx.setTxData(agent);
+        LockNulsTransaction lockNulsTransaction = ledgerService.createLockNulsTx(agent.getAddress(), password, agent.getDeposit());
+        tx.setLockNulsTransaction(lockNulsTransaction);
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
-        tx.setSign(accountService.signData(tx.getHash(),account,password));
+        tx.setSign(accountService.signData(tx.getHash(), account, password));
         tx.verify();
         event.setEventBody(tx);
         eventService.broadcastHashAndCache(event);
@@ -115,7 +118,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
             Agent agent = new Agent();
             agent.setAddress(address);
             agent.setDelegateAddress(params.getAgentAddress());
-            agent.setDeposit(params.getDeposit());
+            agent.setDeposit(Na.parseNa(params.getDeposit()));
             agent.setCommissionRate(params.getCommissionRate());
             agent.setIntroduction(params.getIntroduction());
             try {

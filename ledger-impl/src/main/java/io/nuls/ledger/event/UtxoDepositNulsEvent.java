@@ -3,7 +3,8 @@ package io.nuls.ledger.event;
 import io.nuls.ledger.entity.tx.UtxoDepositTransaction;
 
 /**
- * Created by Niels on 2017/11/17.
+ * @author Niels
+ * @date 2017/11/17
  */
 public class UtxoDepositNulsEvent<T extends UtxoDepositTransaction> extends LockNulsEvent<T> {
 

@@ -1,7 +1,9 @@
 package io.nuls.consensus.entity;
 
 import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.chain.entity.Na;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -18,7 +20,7 @@ import java.io.UnsupportedEncodingException;
  */
 public class Agent extends BaseNulsData {
     private String address;
-    private double deposit;
+    private Na deposit;
     private String delegateAddress;
     private double commissionRate;
     private String introduction;
@@ -31,11 +33,11 @@ public class Agent extends BaseNulsData {
         this.address = address;
     }
 
-    public double getDeposit() {
+    public Na getDeposit() {
         return deposit;
     }
 
-    public void setDeposit(double deposit) {
+    public void setDeposit(Na deposit) {
         this.deposit = deposit;
     }
 
@@ -68,7 +70,7 @@ public class Agent extends BaseNulsData {
         int size = 0;
         try {
             size += address.getBytes(NulsContext.DEFAULT_ENCODING).length;
-            size += Utils.double2Bytes(deposit).length;
+            size += VarInt.sizeOf(deposit.getValue());
             size += delegateAddress.getBytes(NulsContext.DEFAULT_ENCODING).length;
             size += Utils.double2Bytes(commissionRate).length;
             if (StringUtils.isNotBlank(this.introduction)) {
@@ -86,7 +88,7 @@ public class Agent extends BaseNulsData {
     @Override
     public void serializeToStream(NulsOutputStreamBuffer buffer) throws IOException {
         buffer.writeBytesWithLength(address);
-        buffer.writeDouble(deposit);
+        buffer.writeVarInt(deposit.getValue());
         buffer.writeBytesWithLength(delegateAddress);
         buffer.writeDouble(commissionRate);
         buffer.writeBytesWithLength(introduction);
@@ -95,7 +97,7 @@ public class Agent extends BaseNulsData {
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
         this.address = byteBuffer.readString();
-        this.deposit = byteBuffer.readDouble();
+        this.deposit = Na.valueOf(byteBuffer.readVarInt());
         this.delegateAddress = byteBuffer.readString();
         this.commissionRate = byteBuffer.readDouble();
         this.introduction = byteBuffer.readString();

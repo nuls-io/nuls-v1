@@ -51,7 +51,7 @@ public final class Na implements Comparable<Na>, Serializable {
     /**
      * amount
      */
-    public final long value;
+    private final long value;
 
     private Na(final long na) {
         this.value = na;
