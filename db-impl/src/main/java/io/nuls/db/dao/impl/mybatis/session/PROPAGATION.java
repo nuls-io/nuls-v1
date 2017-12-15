@@ -11,7 +11,7 @@ public enum  PROPAGATION {
     INDEPENDENT("independent");
 
 
-    private PROPAGATION(String value) {
+    PROPAGATION(String value) {
         this.value = value;
     }
 
