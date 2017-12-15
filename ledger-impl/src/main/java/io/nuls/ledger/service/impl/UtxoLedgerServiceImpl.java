@@ -10,8 +10,9 @@ import io.nuls.ledger.service.intf.LedgerService;
 import java.util.List;
 
 /**
- * Created by Niels on 2017/11/13.
  *
+ * @author Niels
+ * @date 2017/11/13
  */
 public class UtxoLedgerServiceImpl implements LedgerService {
 
@@ -23,12 +24,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     public static LedgerService getInstance() {
         return INSTANCE;
-    }
-
-    @Override
-    public double getTxFee(long blockHeight) {
-        // todo auto-generated method stub(niels)
-        return 0.01;
     }
 
     @Override

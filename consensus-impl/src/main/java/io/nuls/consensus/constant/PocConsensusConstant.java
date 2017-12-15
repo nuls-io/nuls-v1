@@ -1,5 +1,7 @@
 package io.nuls.consensus.constant;
 
+import io.nuls.core.chain.entity.Na;
+
 /**
  * @author Niels
  * @date 2017/11/8
@@ -30,7 +32,9 @@ public interface PocConsensusConstant {
     /**
      * Set temporarily as a fixed value,unit:nuls
      */
-    double TRANSACTION_FEE = 0.01;
+    int BLOCK_COUNT_OF_YEAR = 3154600;
+    double BLOCK_REWARD = 1.5855;
+    Na TRANSACTION_FEE = Na.CENT;
     /**
      * unit:second
      */

@@ -3,15 +3,20 @@ package io.nuls.consensus.service.impl;
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
+import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Agent;
 import io.nuls.consensus.entity.ConsensusAccount;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.consensus.params.JoinConsensusParam;
 import io.nuls.consensus.service.intf.ConsensusService;
+import io.nuls.core.chain.entity.Na;
+import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 
@@ -68,6 +73,12 @@ public class PocConsensusServiceImpl implements ConsensusService {
     @Override
     public ConsensusStatusInfo getConsensusInfo(String address) {
         return null;
+    }
+
+    @Override
+    public Na getTxFee(long blockHeight, Transaction tx) {
+        long x = blockHeight/PocConsensusConstant.BLOCK_COUNT_OF_YEAR+1;
+        return PocConsensusConstant.TRANSACTION_FEE.div(x);
     }
 
     @Override
