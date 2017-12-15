@@ -12,7 +12,7 @@ import java.io.IOException;
  * @author Niels
  * @date 2017/11/20
  */
-public class LockCoinTransaction<T extends BaseNulsData> extends AbstractCoinTransaction<T> {
+public class LockNulsTransaction<T extends BaseNulsData> extends AbstractCoinTransaction<T> {
 
     private long unlockTime;
 
@@ -20,7 +20,7 @@ public class LockCoinTransaction<T extends BaseNulsData> extends AbstractCoinTra
 
     private boolean canBeUnlocked;
 
-    public LockCoinTransaction() {
+    public LockNulsTransaction() {
         super(TransactionConstant.TX_TYPE_LOCK);
     }
 

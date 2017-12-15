@@ -1,8 +1,10 @@
 package io.nuls.ledger.service.intf;
 
 import io.nuls.account.entity.Address;
+import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.ledger.entity.Balance;
+import io.nuls.ledger.entity.tx.LockNulsTransaction;
 
 import java.util.List;
 
@@ -24,4 +26,5 @@ public interface LedgerService {
 
     List<Transaction> queryListByAccount(String address, int txType, long beginTime);
 
+    boolean lockNuls(String address, String password, Na na);
 }

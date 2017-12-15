@@ -5,9 +5,9 @@ import io.nuls.ledger.entity.tx.UtxoDepositTransaction;
 /**
  * Created by Niels on 2017/11/17.
  */
-public class UtxoDepositCoinEvent<T extends UtxoDepositTransaction> extends LockCoinEvent<T> {
+public class UtxoDepositNulsEvent<T extends UtxoDepositTransaction> extends LockNulsEvent<T> {
 
-    public UtxoDepositCoinEvent() {
+    public UtxoDepositNulsEvent() {
         super();
     }
 }

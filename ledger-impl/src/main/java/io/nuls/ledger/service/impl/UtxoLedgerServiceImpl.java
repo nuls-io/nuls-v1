@@ -1,16 +1,21 @@
 package io.nuls.ledger.service.impl;
 
 import io.nuls.account.entity.Address;
+import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.exception.NulsVerificationException;
 import io.nuls.ledger.entity.Balance;
+import io.nuls.ledger.entity.UtxoData;
+import io.nuls.ledger.entity.UtxoOutput;
+import io.nuls.ledger.entity.tx.LockNulsTransaction;
+import io.nuls.ledger.entity.tx.UtxoDepositTransaction;
 import io.nuls.ledger.service.intf.LedgerCacheService;
 import io.nuls.ledger.service.intf.LedgerService;
 
 import java.util.List;
 
 /**
- *
  * @author Niels
  * @date 2017/11/13
  */
@@ -29,9 +34,9 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     public Balance getBalance(String address) {
         Balance balance = ledgerCacheService.getBalance(address);
-        if(null==balance){
+        if (null == balance) {
             balance = calcBalance(address);
-            ledgerCacheService.putBalance(address,balance);
+            ledgerCacheService.putBalance(address, balance);
         }
         return balance;
     }
@@ -51,17 +56,17 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     public boolean saveTransaction(Transaction tx) {
         boolean result = false;
-        do{
-            if(null==tx){
+        do {
+            if (null == tx) {
                 break;
             }
-            try{
+            try {
                 tx.verify();
-            }catch (NulsVerificationException e){
+            } catch (NulsVerificationException e) {
                 break;
             }
             //todo save to db
-        }while(false);
+        } while (false);
         return result;
     }
 
@@ -75,6 +80,12 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     public List<Transaction> queryListByAccount(String address, int txType, long beginTime) {
         //todo
         return null;
+    }
+
+    @Override
+    public boolean lockNuls(String address, String password, Na na) {
+        // todo auto-generated method stub(niels)
+        return false;
     }
 
 }
