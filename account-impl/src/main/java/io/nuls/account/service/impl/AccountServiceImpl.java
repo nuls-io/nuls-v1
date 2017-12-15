@@ -356,8 +356,28 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public NulsSignData signData(byte[] bytes) {
+        return this.signData(bytes, this.getLocalAccount(), null);
+    }
+
+    @Override
+    public NulsSignData signData(NulsDigestData digestData) {
+        return this.signData(digestData, this.getLocalAccount(), null);
+    }
+
+    @Override
+    public NulsSignData signData(byte[] bytes, String password) {
+        return this.signData(bytes, this.getLocalAccount(), password);
+    }
+
+    @Override
+    public NulsSignData signData(NulsDigestData digestData, String password) {
+        return this.signData(digestData, this.getLocalAccount(), password);
+    }
+
+    @Override
+    public NulsSignData signData(byte[] bytes, Account account, String password) {
         //todo
-        if(null==bytes||bytes.length==0){
+        if (null == bytes || bytes.length == 0) {
             return null;
         }
         NulsSignData data = new NulsSignData();
@@ -366,11 +386,11 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public NulsSignData signData(NulsDigestData digestData) {
-        if(null==digestData){
+    public NulsSignData signData(NulsDigestData digestData, Account account, String password) {
+        if (null == digestData) {
             return null;
         }
-        return this.signData(digestData.getDigestBytes());
+        return this.signData(digestData.getDigestBytes(), account, password);
     }
 
     @Override
@@ -391,7 +411,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Result verifySign(byte[] bytes,NulsSignData data){
-        return new Result(true,null);
+    public Result verifySign(byte[] bytes, NulsSignData data) {
+        return new Result(true, null);
     }
 }

@@ -165,11 +165,11 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
         ConsensusCacheService.getInstance().clear();
         BlockCacheService.getInstance().clear();
         ThreadManager.shutdownByModuleId(this.getModuleId());
-
     }
 
     @Override
     public void destroy() {
+
     }
 
     @Override

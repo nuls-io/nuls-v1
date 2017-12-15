@@ -5,6 +5,7 @@ import io.nuls.consensus.entity.Agent;
 import io.nuls.consensus.entity.validator.consensus.AccountCreditValidator;
 import io.nuls.consensus.entity.validator.consensus.AgentDepositLimitValidator;
 import io.nuls.consensus.tx.AbstractConsensusTransaction;
+import io.nuls.core.utils.io.NulsByteBuffer;
 
 /**
  * @author Niels
@@ -21,4 +22,10 @@ public class RegisterAgentTransaction extends AbstractConsensusTransaction<Agent
     }
 
 
+    @Override
+    protected Agent parseBody(NulsByteBuffer byteBuffer) {
+        Agent agent = new Agent();
+        agent.parse(byteBuffer);
+        return agent;
+    }
 }

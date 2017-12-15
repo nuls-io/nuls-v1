@@ -3,8 +3,6 @@ package io.nuls.consensus.module;
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.constant.ConsensusEventType;
 import io.nuls.consensus.event.*;
-import io.nuls.consensus.tx.BlockHeaderTransaction;
-import io.nuls.consensus.tx.BlockTransaction;
 import io.nuls.consensus.tx.ExitConsensusTransaction;
 import io.nuls.consensus.tx.JoinConsensusTransaction;
 import io.nuls.core.constant.NulsConstant;
@@ -23,8 +21,6 @@ public abstract class AbstractConsensusModule extends BaseNulsModule {
         this.registerEvent(ConsensusEventType.BLOCK_HEADER, BlockHeaderEvent.class);
         this.registerEvent(ConsensusEventType.GET_BLOCK, GetBlockEvent.class);
         
-        this.registerTransaction(ConsensusConstant.TX_TYPE_BLOCK, BlockTransaction.class);
-        this.registerTransaction(ConsensusConstant.TX_TYPE_BLOCK_HEADER, BlockHeaderTransaction.class);
         this.registerTransaction(ConsensusConstant.TX_TYPE_JOIN_CONSENSUS, JoinConsensusTransaction.class);
         this.registerTransaction(ConsensusConstant.TX_TYPE_EXIT_CONSENSUS, ExitConsensusTransaction.class);
     }

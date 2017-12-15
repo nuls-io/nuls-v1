@@ -117,4 +117,20 @@ public class Transaction extends BaseNulsData {
     public void setRemark(byte[] remark) {
         this.remark = remark;
     }
+
+    public NulsDigestData getHash() {
+        return hash;
+    }
+
+    public void setHash(NulsDigestData hash) {
+        this.hash = hash;
+    }
+
+    public NulsSignData getSign() {
+        return sign;
+    }
+
+    public void setSign(NulsSignData sign) {
+        this.sign = sign;
+    }
 }

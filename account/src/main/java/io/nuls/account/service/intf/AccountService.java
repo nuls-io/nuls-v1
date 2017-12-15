@@ -52,6 +52,10 @@ public interface AccountService {
 
     NulsSignData signData(byte[] bytes);
     NulsSignData signData(NulsDigestData digestData);
+    NulsSignData signData(byte[] bytes,String password);
+    NulsSignData signData(NulsDigestData digestData,String password);
+    NulsSignData signData(byte[] bytes,Account account,String password);
+    NulsSignData signData(NulsDigestData digestData,Account account,String password);
 
     void setAlias(String address, String alias);
 

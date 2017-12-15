@@ -24,6 +24,8 @@ public class BlockHeader extends BaseNulsData {
 
     private long txCount;
 
+    private List<byte[]> txHashList;
+
     private NulsSignData sign;
 
     public BlockHeader() {
@@ -108,5 +110,13 @@ public class BlockHeader extends BaseNulsData {
 
     public void setSign(NulsSignData sign) {
         this.sign = sign;
+    }
+
+    public List<byte[]> getTxHashList() {
+        return txHashList;
+    }
+
+    public void setTxHashList(List<byte[]> txHashList) {
+        this.txHashList = txHashList;
     }
 }

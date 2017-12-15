@@ -13,6 +13,7 @@ public class ValidateResult extends Result{
     public static ValidateResult getFaildResult(String msg) {
         ValidateResult result= new ValidateResult();
         result.setSuccess(false);
+        result.setErrorCode(ErrorCode.VERIFICATION_FAILD);
         result.setMessage(msg);
         return result;
     }

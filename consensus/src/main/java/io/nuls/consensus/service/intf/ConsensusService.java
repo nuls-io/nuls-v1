@@ -5,6 +5,7 @@ import io.nuls.consensus.entity.ConsensusAccount;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.context.NulsContext;
 
 import java.util.List;
 import java.util.Map;
