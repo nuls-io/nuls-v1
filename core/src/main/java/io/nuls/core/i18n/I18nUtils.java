@@ -23,9 +23,14 @@ public class I18nUtils {
 
     private static final Map<String, Properties> ALL_MAPPING = new HashMap<>();
     private static Properties nowMapping;
-    //default language is English
+    /**
+     * default language is English
+     */
+
     private static String key = "en";
-    //default properties file folder
+    /**
+     * default properties file folder
+     */
     private static final String FOLDER = "languages";
 
     static {

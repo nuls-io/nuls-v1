@@ -53,8 +53,8 @@ public final class Na implements Comparable<Na>, Serializable {
      */
     public final long value;
 
-    private Na(final long coin) {
-        this.value = coin;
+    private Na(final long na) {
+        this.value = na;
     }
 
     public static Na valueOf(final long na) {
@@ -69,17 +69,26 @@ public final class Na implements Comparable<Na>, Serializable {
         return value;
     }
 
-    public static Na valueOf(final int coins, final int cents) {
+    public static Na valueOf(final int nas, final int cents) {
         Utils.checkState(cents < 100);
         Utils.checkState(cents >= 0);
-        Utils.checkState(coins >= 0);
-        final Na coin = NA.multiply(coins).add(CENT.multiply(cents));
+        Utils.checkState(nas >= 0);
+        final Na coin = NA.multiply(nas).add(CENT.multiply(cents));
         return coin;
     }
 
     public static Na parseNa(final String str) {
         try {
             long value = new BigDecimal(str).movePointRight(SMALLEST_UNIT_EXPONENT).toBigIntegerExact().longValue();
+            return Na.valueOf(value);
+        } catch (ArithmeticException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    public static Na parseNa(final double nuls) {
+        try {
+            long value = new BigDecimal(nuls).movePointRight(SMALLEST_UNIT_EXPONENT).toBigIntegerExact().longValue();
             return Na.valueOf(value);
         } catch (ArithmeticException e) {
             throw new IllegalArgumentException(e);

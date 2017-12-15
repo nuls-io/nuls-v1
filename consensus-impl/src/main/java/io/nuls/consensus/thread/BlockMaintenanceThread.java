@@ -99,7 +99,7 @@ public class BlockMaintenanceThread implements Runnable {
         }
     }
 
-    private void checkGenesisBlock() {
+    public void checkGenesisBlock() {
         Block genesisBlock = NulsContext.getInstance().getGenesisBlock();
         genesisBlock.verify();
         Block localGenesisBlock = this.blockService.getGengsisBlockFromDb();

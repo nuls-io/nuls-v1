@@ -28,12 +28,15 @@ public interface PocConsensusConstant {
     /**
      * TODO THE PARAMETERS OF CONSENSUS,bellow
      */
-    int CONFIRM_BLOCK_COUNT = 7;
+    int CONFIRM_BLOCK_COUNT = 6;
     /**
      * Set temporarily as a fixed value,unit:nuls
      */
     int BLOCK_COUNT_OF_YEAR = 3154600;
-    double BLOCK_REWARD = 1.5855;
+    /**
+     * value = 5000000/3154600
+     */
+    double BLOCK_REWARD = 1.585;
     Na TRANSACTION_FEE = Na.CENT;
     /**
      * unit:second

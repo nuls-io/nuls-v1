@@ -1,21 +1,28 @@
 package io.nuls.consensus.constant;
 
+import io.nuls.core.i18n.I18nUtils;
+
 /**
  * @author Niels
  * @date 2017/11/7
  */
 public enum ConsensusStatusEnum {
-    NOT_IN(0),
-    IN(1),
-    WAITING(2);
+    NOT_IN(0,69999),
+    IN(1,69998),
+    WAITING(2,69997);
     private final int code;
+    private final int textCode;
 
-    private ConsensusStatusEnum(int code) {
-        this.code = code;
+    private ConsensusStatusEnum(int code,int textCode) {
+        this.code = code;this.textCode = textCode;
     }
 
     public int getCode() {
         return code;
+    }
+
+    public String getText(){
+        return I18nUtils.get(textCode);
     }
 
     public static ConsensusStatusEnum getConsensusStatusByCode(int code) {

@@ -90,4 +90,8 @@ public class ConsensusCacheService {
     }
 
 
+    public void clear() {
+        // todo auto-generated method stub(niels)
+
+    }
 }
