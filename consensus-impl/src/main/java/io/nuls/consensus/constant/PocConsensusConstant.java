@@ -29,6 +29,11 @@ public interface PocConsensusConstant {
      * TODO THE PARAMETERS OF CONSENSUS,bellow
      */
     int CONFIRM_BLOCK_COUNT = 6;
+
+    /**
+     * Minimum safe quantity of consensus agents
+     */
+    int SAFELY_CONSENSUS_COUNT = 40;
     /**
      * Set temporarily as a fixed value,unit:nuls
      */

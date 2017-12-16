@@ -1,10 +1,9 @@
 package io.nuls.consensus.service.impl;
 
 import io.nuls.account.entity.Account;
-import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.constant.PocConsensusConstant;
-import io.nuls.consensus.entity.Delegate;
+import io.nuls.consensus.entity.member.Delegate;
 import io.nuls.consensus.entity.ConsensusAccount;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.consensus.entity.params.QueryConsensusAccountParam;
@@ -14,7 +13,7 @@ import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
 import io.nuls.consensus.event.ExitConsensusEvent;
 import io.nuls.consensus.event.JoinConsensusEvent;
 import io.nuls.consensus.event.RegisterAgentEvent;
-import io.nuls.consensus.params.JoinConsensusParam;
+import io.nuls.consensus.entity.params.JoinConsensusParam;
 import io.nuls.consensus.service.cache.ConsensusCacheService;
 import io.nuls.consensus.service.intf.ConsensusService;
 import io.nuls.core.chain.entity.Na;

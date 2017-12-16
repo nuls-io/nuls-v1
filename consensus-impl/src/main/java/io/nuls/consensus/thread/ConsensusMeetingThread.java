@@ -14,6 +14,10 @@ public class ConsensusMeetingThread implements Runnable {
     }
     @Override
     public void run() {
+        if(running){
+           return;
+        }
+        this.running = true;
         // todo auto-generated method stub(niels)
 
     }

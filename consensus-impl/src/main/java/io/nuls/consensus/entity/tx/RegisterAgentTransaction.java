@@ -1,7 +1,7 @@
 package io.nuls.consensus.entity.tx;
 
 import io.nuls.consensus.constant.PocConsensusConstant;
-import io.nuls.consensus.entity.Delegate;
+import io.nuls.consensus.entity.member.Delegate;
 import io.nuls.consensus.entity.validator.consensus.AccountCreditValidator;
 import io.nuls.consensus.entity.validator.consensus.AgentDepositValidator;
 import io.nuls.consensus.tx.AbstractConsensusTransaction;

@@ -9,7 +9,7 @@ import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.consensus.entity.genesis.DevGenesisBlock;
 import io.nuls.consensus.entity.genesis.MainGenesisBlock;
 import io.nuls.consensus.entity.genesis.TestGenesisBlock;
-import io.nuls.consensus.entity.member.ConsensusAccountData;
+import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.tx.RedPunishTransaction;
 import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
 import io.nuls.consensus.entity.tx.YellowPunishTransaction;
@@ -22,6 +22,7 @@ import io.nuls.consensus.service.cache.BlockCacheService;
 import io.nuls.consensus.service.cache.ConsensusCacheService;
 import io.nuls.consensus.service.impl.BlockServiceImpl;
 import io.nuls.consensus.service.impl.PocConsensusServiceImpl;
+import io.nuls.consensus.service.intf.ConsensusService;
 import io.nuls.consensus.thread.BlockMaintenanceThread;
 import io.nuls.consensus.thread.ConsensusMeetingThread;
 import io.nuls.core.constant.NulsConstant;
@@ -35,7 +36,9 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
 import io.nuls.network.service.NetworkService;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Niels
@@ -47,6 +50,7 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
     private boolean delegatePeer = false;
     private ConsensusCacheService consensusCacheService = ConsensusCacheService.getInstance();
     private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
+    private ConsensusService pocConsensusService = PocConsensusServiceImpl.getInstance();
 
     @Override
     public void start() {
@@ -131,7 +135,7 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
             Log.warn("local account is null!");
             return;
         }
-        ConsensusAccount<ConsensusAccountData> memberSelf =
+        ConsensusAccount<Agent> memberSelf =
                 consensusCacheService.getConsensusAccount(localAccount.getAddress().toString());
         if (null == memberSelf) {
             return;
@@ -141,9 +145,23 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
         }
         startMining();
     }
+
     private void checkPeerType() {
-        //todo
-        NulsContext.getInstance().getService(NetworkService.class);
+        boolean isSeed = NulsContext.getInstance().getService(NetworkService.class).isSeedPeer();
+        if (!isSeed) {
+            return;
+        }
+        Account localAccount = accountService.getLocalAccount();
+        if (null == localAccount) {
+            Log.warn("local account is null!");
+            return;
+        }
+        int i = consensusCacheService.getDelegateAccountCount();
+        if (i <= PocConsensusConstant.SAFELY_CONSENSUS_COUNT) {
+            Map<String, Object> paramsMap = new HashMap<>();
+            paramsMap.put("isSeed", "true");
+            this.pocConsensusService.joinTheConsensus(localAccount.getAddress().toString(), null, paramsMap);
+        }
     }
 
     private void startMining() {
