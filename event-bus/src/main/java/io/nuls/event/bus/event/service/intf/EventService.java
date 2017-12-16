@@ -11,15 +11,6 @@ import java.util.List;
 public interface EventService {
 
     /**
-     * broadcast a message that need to be passed to half peers
-     * and get confirmation from another half peers
-     *
-     * @param event
-     * @return
-     */
-    List<String> broadcastSyncNeedConfirmation(BaseNulsEvent event);
-
-    /**
      * broadcast a message that need to be passed
      *
      * @param event
@@ -27,18 +18,22 @@ public interface EventService {
      */
     List<String> broadcastHashAndCache(BaseNulsEvent event);
 
+    /**
+     * broadcast to peers except "excludePeerId"
+     * @param event
+     * @param excludePeerId
+     * @return
+     */
     List<String> broadcast(BaseNulsEvent event, String excludePeerId);
 
     /**
      * broadcast msg ,no need to pass the message
-     *
      * @param event
      */
     List<String> broadcast(BaseNulsEvent event);
 
     /**
      * send msg to one peer
-     *
      * @param event
      * @param peerId
      */

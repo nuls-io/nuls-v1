@@ -4,12 +4,18 @@ import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.constant.PocConsensusConstant;
-import io.nuls.consensus.entity.Agent;
+import io.nuls.consensus.entity.Delegate;
 import io.nuls.consensus.entity.ConsensusAccount;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
+import io.nuls.consensus.entity.params.QueryConsensusAccountParam;
+import io.nuls.consensus.entity.tx.PocExitConsensusTransaction;
+import io.nuls.consensus.entity.tx.PocJoinConsensusTransaction;
 import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
+import io.nuls.consensus.event.ExitConsensusEvent;
+import io.nuls.consensus.event.JoinConsensusEvent;
 import io.nuls.consensus.event.RegisterAgentEvent;
 import io.nuls.consensus.params.JoinConsensusParam;
+import io.nuls.consensus.service.cache.ConsensusCacheService;
 import io.nuls.consensus.service.intf.ConsensusService;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
@@ -20,12 +26,10 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.event.service.intf.EventService;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
-import io.nuls.ledger.service.intf.LedgerCacheService;
+import io.nuls.ledger.entity.tx.UnlockNulsTransaction;
 import io.nuls.ledger.service.intf.LedgerService;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 
@@ -38,8 +42,8 @@ public class PocConsensusServiceImpl implements ConsensusService {
     private static final ConsensusService INSTANCE = new PocConsensusServiceImpl();
     private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
     private EventService eventService = NulsContext.getInstance().getService(EventService.class);
-    private LedgerCacheService ledgerCacheService = NulsContext.getInstance().getService(LedgerCacheService.class);
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
+    private ConsensusCacheService consensusCacheService = ConsensusCacheService.getInstance();
 
     private PocConsensusServiceImpl() {
     }
@@ -48,60 +52,92 @@ public class PocConsensusServiceImpl implements ConsensusService {
         return INSTANCE;
     }
 
-    private void registerAgent(Agent agent, Account account, String password) throws IOException {
+    private void registerAgent(Delegate delegate, Account account, String password) throws IOException {
         RegisterAgentEvent event = new RegisterAgentEvent();
         RegisterAgentTransaction tx = new RegisterAgentTransaction();
-        tx.setTxData(agent);
-        LockNulsTransaction lockNulsTransaction = ledgerService.createLockNulsTx(agent.getAddress(), password, agent.getDeposit());
+        tx.setTxData(delegate);
+        LockNulsTransaction lockNulsTransaction = ledgerService.createLockNulsTx(account.getAddress().toString(), password, delegate.getDeposit());
         tx.setLockNulsTransaction(lockNulsTransaction);
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
         tx.setSign(accountService.signData(tx.getHash(), account, password));
-        tx.verify();
+        ledgerService.cacheTx(tx);
         event.setEventBody(tx);
         eventService.broadcastHashAndCache(event);
-        ledgerCacheService.putTx(tx);
     }
 
-    private void joinTheConsensus(Account account, String password, double amount, String agent) {
-        //todo
-        //check password
-        //check block height
-        //check consensus state
-        //check credit
-        //check balance
-
-//        Transaction tx = createTransaction(address,agentMiner,inputs,sign);
-//        JoinConsensusEvent event = createJoinEvent( tx);
-        //broadcast
-        //change consensus status in cache
-    }
-
-
-    @Override
-    public void exitTheConsensus(Address address, String password) {
-        //todo 验证密码
-
-        //组装申请
-
-        //广播
+    private void joinTheConsensus(Account account, String password, double amount, String agentAddress) throws IOException {
+        JoinConsensusEvent event = new JoinConsensusEvent();
+        PocJoinConsensusTransaction tx = new PocJoinConsensusTransaction();
+        ConsensusAccount<Delegate> ca = new ConsensusAccount<>();
+        ca.setAddress(account.getAddress());
+        Delegate delegate = new Delegate();
+        delegate.setDelegateAddress(agentAddress);
+        delegate.setDeposit(Na.parseNa(amount));
+        ca.setExtend(delegate);
+        tx.setTxData(ca);
+        LockNulsTransaction lockNulsTransaction = ledgerService.createLockNulsTx(account.getAddress().toString(), password, delegate.getDeposit());
+        tx.setLockNulsTransaction(lockNulsTransaction);
+        tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
+        tx.setSign(accountService.signData(tx.getHash(), account, password));
+        ledgerService.cacheTx(tx);
+        event.setEventBody(tx);
+        eventService.broadcastHashAndCache(event);
     }
 
     @Override
-    public List<ConsensusAccount> getConsensusAccountList(Map<String, Object> params) {
-        //todo
-        return null;
+    public void exitTheConsensus(NulsDigestData joinTxHash, String password) {
+        PocJoinConsensusTransaction joinTx = (PocJoinConsensusTransaction) ledgerService.getTransaction(joinTxHash);
+        if(null==joinTx){
+            throw new NulsRuntimeException(ErrorCode.ACCOUNT_NOT_EXIST,"address:"+joinTx.getTxData().getAddress().toString());
+        }
+        Account account = this.accountService.getAccount(joinTx.getTxData().getAddress().toString());
+        if (null == account) {
+            throw new NulsRuntimeException(ErrorCode.ACCOUNT_NOT_EXIST,"address:"+joinTx.getTxData().getAddress().toString());
+        }
+        if (!account.validatePassword(password)) {
+            throw new NulsRuntimeException(ErrorCode.PASSWORD_IS_WRONG);
+        }
+        ExitConsensusEvent event = new ExitConsensusEvent();
+        PocExitConsensusTransaction tx = new PocExitConsensusTransaction();
+        tx.setTxData(joinTxHash);
+        UnlockNulsTransaction unlockNulsTransaction = this.ledgerService.createUnlockTx(joinTx.getLockNulsTransaction());
+        tx.setUnlockNulsTransaction(unlockNulsTransaction);
+        try {
+            tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
+        } catch (IOException e) {
+            Log.error(e);
+            throw new NulsRuntimeException(ErrorCode.HASH_ERROR,e);
+        }
+        tx.setSign(accountService.signData(tx.getHash(), account, password));
+        event.setEventBody(tx);
+        eventService.broadcastHashAndCache(event);
+    }
+
+    @Override
+    public List<ConsensusAccount> getConsensusAccountList(String address,String agentAddress) {
+        QueryConsensusAccountParam param = new QueryConsensusAccountParam();
+        param.setAddress(address);
+        param.setAgentAddress(agentAddress);
+        List<ConsensusAccount> list = consensusCacheService.getConsensusAccountList(param);
+        return list;
     }
 
     @Override
     public ConsensusStatusInfo getConsensusInfo(String address) {
-        //todo
-        return null;
+        return consensusCacheService.getConsensusStatusInfo(address);
     }
 
     @Override
     public Na getTxFee(long blockHeight, Transaction tx) {
         long x = blockHeight / PocConsensusConstant.BLOCK_COUNT_OF_YEAR + 1;
         return PocConsensusConstant.TRANSACTION_FEE.div(x);
+    }
+
+
+    public double getDelegateFee(long blockHeight, Transaction tx) {
+//        long x = blockHeight / PocConsensusConstant.BLOCK_COUNT_OF_YEAR + 1;
+        //todo Dynamic adjustment of commission
+        return PocConsensusConstant.DEFAULT_COMMISSION_RATE;
     }
 
     @Override
@@ -113,22 +149,28 @@ public class PocConsensusServiceImpl implements ConsensusService {
         if (paramsMap == null || paramsMap.size() < 2) {
             throw new NulsRuntimeException(ErrorCode.NULL_PARAMETER);
         }
+        if (!account.validatePassword(password)) {
+            throw new NulsRuntimeException(ErrorCode.PASSWORD_IS_WRONG);
+        }
         JoinConsensusParam params = new JoinConsensusParam(paramsMap);
         if (params.getCommissionRate() != null) {
-            Agent agent = new Agent();
-            agent.setAddress(address);
-            agent.setDelegateAddress(params.getAgentAddress());
-            agent.setDeposit(Na.parseNa(params.getDeposit()));
-            agent.setCommissionRate(params.getCommissionRate());
-            agent.setIntroduction(params.getIntroduction());
+            Delegate delegate = new Delegate();
+            delegate.setDelegateAddress(params.getAgentAddress());
+            delegate.setDeposit(Na.parseNa(params.getDeposit()));
+            delegate.setCommissionRate(params.getCommissionRate());
+            delegate.setIntroduction(params.getIntroduction());
             try {
-                this.registerAgent(agent, account, password);
+                this.registerAgent(delegate, account, password);
             } catch (IOException e) {
                 throw new NulsRuntimeException(e);
             }
             return;
         }
-        this.joinTheConsensus(account, password, params.getDeposit(), params.getAgentAddress());
+        try {
+            this.joinTheConsensus(account, password, params.getDeposit(), params.getAgentAddress());
+        } catch (IOException e) {
+            throw new NulsRuntimeException(e);
+        }
     }
 
 }

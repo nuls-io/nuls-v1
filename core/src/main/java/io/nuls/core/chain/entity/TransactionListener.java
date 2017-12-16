@@ -9,4 +9,6 @@ public interface TransactionListener<T extends Transaction> {
     void onRollback(T tx);
 
     void onCommit(T tx);
+
+    void onApproval(T tx);
 }

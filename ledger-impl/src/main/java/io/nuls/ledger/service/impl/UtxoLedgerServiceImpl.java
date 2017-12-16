@@ -1,17 +1,15 @@
 package io.nuls.ledger.service.impl;
 
 import io.nuls.account.entity.Address;
-import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.Na;
+import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.exception.NulsVerificationException;
 import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.entity.UtxoData;
-import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
-import io.nuls.ledger.entity.tx.UtxoDepositTransaction;
+import io.nuls.ledger.entity.tx.UnlockNulsTransaction;
 import io.nuls.ledger.entity.tx.UtxoLockTransaction;
-import io.nuls.ledger.service.intf.LedgerCacheService;
 import io.nuls.ledger.service.intf.LedgerService;
 
 import java.util.List;
@@ -30,6 +28,13 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     public static LedgerService getInstance() {
         return INSTANCE;
+    }
+
+    @Override
+    public void cacheTx(Transaction tx) {
+        tx.verify();
+        tx.onApproval();
+        ledgerCacheService.putTx(tx);
     }
 
     @Override
@@ -97,6 +102,18 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
 
         return tx;
+    }
+
+    @Override
+    public Transaction getTransaction(NulsDigestData txHash) {
+        // todo auto-generated method stub(niels)
+        return null;
+    }
+
+    @Override
+    public UnlockNulsTransaction createUnlockTx(LockNulsTransaction lockNulsTransaction) {
+        // todo auto-generated method stub(niels)
+        return null;
     }
 
     private UtxoData getUtxoData(Na na){

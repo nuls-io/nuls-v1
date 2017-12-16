@@ -1,9 +1,9 @@
 package io.nuls.consensus.entity.tx;
 
 import io.nuls.consensus.constant.PocConsensusConstant;
-import io.nuls.consensus.entity.Agent;
+import io.nuls.consensus.entity.Delegate;
 import io.nuls.consensus.entity.validator.consensus.AccountCreditValidator;
-import io.nuls.consensus.entity.validator.consensus.AgentDepositLimitValidator;
+import io.nuls.consensus.entity.validator.consensus.AgentDepositValidator;
 import io.nuls.consensus.tx.AbstractConsensusTransaction;
 import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ErrorCode;
@@ -19,21 +19,21 @@ import java.io.IOException;
  * @author Niels
  * @date 2017/12/4
  */
-public class RegisterAgentTransaction extends AbstractConsensusTransaction<Agent> {
+public class RegisterAgentTransaction extends AbstractConsensusTransaction<Delegate> {
 
     private LockNulsTransaction lockNulsTransaction;
 
     public RegisterAgentTransaction() {
         super(PocConsensusConstant.TX_TYPE_REGISTER_AGENT);
         this.registerValidator(new AccountCreditValidator());
-        this.registerValidator(new AgentDepositLimitValidator());
+        this.registerValidator(new AgentDepositValidator());
     }
 
     @Override
-    protected Agent parseBody(NulsByteBuffer byteBuffer) {
-        Agent agent = new Agent();
-        agent.parse(byteBuffer);
-        return agent;
+    protected Delegate parseBody(NulsByteBuffer byteBuffer) {
+        Delegate delegate = new Delegate();
+        delegate.parse(byteBuffer);
+        return delegate;
     }
 
     @Override

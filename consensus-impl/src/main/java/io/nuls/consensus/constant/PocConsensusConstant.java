@@ -32,11 +32,11 @@ public interface PocConsensusConstant {
     /**
      * Set temporarily as a fixed value,unit:nuls
      */
-    int BLOCK_COUNT_OF_YEAR = 3154600;
+    int BLOCK_COUNT_OF_YEAR = 3153600;
     /**
      * value = 5000000/3154600
      */
-    double BLOCK_REWARD = 1.585;
+    double BLOCK_REWARD = 1.5855;
     Na TRANSACTION_FEE = Na.CENT;
     /**
      * unit:second
@@ -48,12 +48,11 @@ public interface PocConsensusConstant {
      */
     long MAX_BLOCK_SIZE = 2 << 21;
 
+    Na AGENT_DEPOSIT_LOWER_LIMIT = Na.parseNa(20000);
+    Na ENTRUSTER_DEPOSIT_LOWER_LIMIT = Na.parseNa(2000);
 
-    double AGENT_DEPOSIT_LOWER_LIMIT = 20000;
-    double ENTRUSTER_DEPOSIT_LOWER_LIMIT = 1000;
-
-    double SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT = 50000;
-    double SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT = 200000;
+    Na SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT = Na.parseNa(200000);
+    Na SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT = Na.parseNa(500000);
     /**
      * unit: %
      */
@@ -61,8 +60,7 @@ public interface PocConsensusConstant {
     /**
      * commission rate,UNIT:%
      */
-    double MAX_COMMISSION_RATE = 20;
-    double MIN_COMMISSION_RATE = 0;
+    double DEFAULT_COMMISSION_RATE = 20;
     /**
      * unit:day
      */

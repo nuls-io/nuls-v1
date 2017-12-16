@@ -1,6 +1,7 @@
 package io.nuls.ledger.entity.tx;
 
 import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.chain.entity.Na;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
@@ -13,6 +14,8 @@ import java.io.IOException;
  * @date 2017/11/20
  */
 public class LockNulsTransaction<T extends BaseNulsData> extends AbstractCoinTransaction<T> {
+
+    private Na na;
 
     private long unlockTime;
 
@@ -64,5 +67,13 @@ public class LockNulsTransaction<T extends BaseNulsData> extends AbstractCoinTra
 
     public void setCanBeUnlocked(boolean canBeUnlocked) {
         this.canBeUnlocked = canBeUnlocked;
+    }
+
+    public Na getNa() {
+        return na;
+    }
+
+    public void setNa(Na na) {
+        this.na = na;
     }
 }

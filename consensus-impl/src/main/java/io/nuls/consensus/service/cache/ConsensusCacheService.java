@@ -5,9 +5,11 @@ import io.nuls.account.service.intf.AccountService;
 import io.nuls.cache.service.intf.CacheService;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.entity.ConsensusAccount;
+import io.nuls.consensus.entity.Delegate;
 import io.nuls.consensus.entity.member.ConsensusAccountData;
 import io.nuls.consensus.entity.member.ConsensusAccountImpl;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
+import io.nuls.consensus.entity.params.QueryConsensusAccountParam;
 import io.nuls.consensus.utils.ConsensusBeanUtils;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
@@ -15,6 +17,7 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.db.dao.DelegateAccountDao;
 import io.nuls.db.dao.DelegateDao;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -54,8 +57,9 @@ public class ConsensusCacheService {
         this.cacheService.createCache(CACHE_BLOCK_HEADER_LIST);
         this.cacheService.createCache(CACHE_BLOCK_HEIGHT_HASH_MAPPING);
 
-//todo 代理节点与委托单
+        //todo 代理节点与委托单
         Account self = accountService.getLocalAccount();
+        this.delegateDao.queryAll();
     }
 
     public ConsensusStatusInfo getConsensusStatusInfo() {
@@ -93,5 +97,18 @@ public class ConsensusCacheService {
     public void clear() {
         // todo auto-generated method stub(niels)
 
+    }
+
+    public List<ConsensusAccount> getConsensusAccountList(QueryConsensusAccountParam param) {
+        List<ConsensusAccount> list = new ArrayList<>();
+        ConsensusAccount<Delegate> consensusAccount = new
+                ConsensusAccount<>();
+        // todo auto-generated method stub(niels)
+        return null;
+    }
+
+    public ConsensusStatusInfo getConsensusStatusInfo(String address) {
+        // todo auto-generated method stub(niels)
+        return null;
     }
 }

@@ -32,15 +32,21 @@ public class Transaction extends BaseNulsData {
     protected long time;
     protected byte[] remark;
 
-    public void onRollback(){
-        if(null!=listener){
+    public void onRollback() {
+        if (null != listener) {
             listener.onRollback(this);
         }
     }
 
-    public void onCommit(){
-        if(null!=listener){
+    public void onCommit() {
+        if (null != listener) {
             listener.onCommit(this);
+        }
+    }
+
+    public void onApproval() {
+        if (null != listener) {
+            listener.onApproval(this);
         }
     }
 
@@ -57,6 +63,7 @@ public class Transaction extends BaseNulsData {
             this.registerValidator(validator);
         }
     }
+
     @Override
     public int size() {
         int size = 0;

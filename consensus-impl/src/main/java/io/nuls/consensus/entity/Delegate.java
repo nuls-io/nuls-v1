@@ -2,6 +2,7 @@ package io.nuls.consensus.entity;
 
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.Na;
+import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -18,20 +19,11 @@ import java.io.UnsupportedEncodingException;
  * @author Niels
  * @date 2017/12/4
  */
-public class Agent extends BaseNulsData {
-    private String address;
+public class Delegate extends BaseNulsData {
     private Na deposit;
     private String delegateAddress;
     private double commissionRate;
     private String introduction;
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
 
     public Na getDeposit() {
         return deposit;
@@ -69,7 +61,6 @@ public class Agent extends BaseNulsData {
     public int size() {
         int size = 0;
         try {
-            size += address.getBytes(NulsContext.DEFAULT_ENCODING).length;
             size += VarInt.sizeOf(deposit.getValue());
             size += delegateAddress.getBytes(NulsContext.DEFAULT_ENCODING).length;
             size += Utils.double2Bytes(commissionRate).length;
@@ -87,7 +78,6 @@ public class Agent extends BaseNulsData {
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer buffer) throws IOException {
-        buffer.writeBytesWithLength(address);
         buffer.writeVarInt(deposit.getValue());
         buffer.writeBytesWithLength(delegateAddress);
         buffer.writeDouble(commissionRate);
@@ -96,7 +86,6 @@ public class Agent extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
-        this.address = byteBuffer.readString();
         this.deposit = Na.valueOf(byteBuffer.readVarInt());
         this.delegateAddress = byteBuffer.readString();
         this.commissionRate = byteBuffer.readDouble();

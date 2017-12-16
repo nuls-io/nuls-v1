@@ -33,6 +33,7 @@ import io.nuls.core.thread.manager.ThreadManager;
 import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
+import io.nuls.network.service.NetworkService;
 
 import java.util.List;
 
@@ -75,11 +76,13 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
         this.registerService(PocConsensusServiceImpl.getInstance());
         this.startBlockMaintenanceThread();
         this.checkConsensusStatus();
+        this.checkPeerType();
 
         this.registerHanders();
         Log.info("the POC consensus module is started!");
 
     }
+
 
     private void registerHanders() {
         BlockEventHandler blockEventHandler = new BlockEventHandler();
@@ -137,6 +140,10 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
             return;
         }
         startMining();
+    }
+    private void checkPeerType() {
+        //todo
+        NulsContext.getInstance().getService(NetworkService.class);
     }
 
     private void startMining() {
