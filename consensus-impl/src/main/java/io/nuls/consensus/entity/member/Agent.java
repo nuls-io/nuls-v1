@@ -3,6 +3,7 @@ package io.nuls.consensus.entity.member;
 import io.nuls.account.entity.Address;
 import io.nuls.consensus.constant.ConsensusRole;
 import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.chain.entity.Na;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
@@ -20,9 +21,9 @@ import java.io.IOException;
  */
 public class Agent extends BaseNulsData {
 
-    private double deposit;
+    private Na deposit;
 
-    public Address agentAddress;
+    public String delegateAddress;
 
     private double commissionRate;
 
@@ -40,8 +41,8 @@ public class Agent extends BaseNulsData {
     public int size() {
         int size = 0;
         size++;
-        size += Utils.double2Bytes(deposit).length;
-        size += agentAddress.getHash160().length;
+        size += VarInt.sizeOf(deposit.getValue());
+        size += Utils.sizeOfSerialize(this.delegateAddress);
         size += Utils.double2Bytes(commissionRate).length;
         size += Utils.sizeOfSerialize(this.introduction);
         return size;
@@ -49,38 +50,34 @@ public class Agent extends BaseNulsData {
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeDouble(deposit);
-        stream.writeBytesWithLength(agentAddress.getHash160());
+        stream.writeVarInt(deposit.getValue());
+        stream.writeBytesWithLength(delegateAddress);
         stream.writeDouble(this.commissionRate);
         stream.writeBytesWithLength(this.introduction);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
-        this.deposit = byteBuffer.readDouble();
-        try {
-            this.agentAddress = Address.fromHashs(byteBuffer.readByLengthByte());
-        } catch (NulsException e) {
-            Log.error(e);
-        }
+        this.deposit = Na.valueOf(byteBuffer.readVarInt());
+        this.delegateAddress = byteBuffer.readString();
         this.commissionRate = byteBuffer.readDouble();
         this.introduction = byteBuffer.readString();
     }
 
-    public double getDeposit() {
+    public Na getDeposit() {
         return deposit;
     }
 
-    public void setDeposit(double deposit) {
+    public void setDeposit(Na deposit) {
         this.deposit = deposit;
     }
 
-    public Address getAgentAddress() {
-        return agentAddress;
+    public String getDelegateAddress() {
+        return delegateAddress;
     }
 
-    public void setAgentAddress(Address agentAddress) {
-        this.agentAddress = agentAddress;
+    public void setDelegateAddress(String delegateAddress) {
+        this.delegateAddress = delegateAddress;
     }
 
     public int getStatus() {

@@ -1,6 +1,7 @@
 package io.nuls.consensus.entity.tx;
 
 import io.nuls.consensus.constant.PocConsensusConstant;
+import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.member.Delegate;
 import io.nuls.consensus.entity.validator.consensus.AccountCreditValidator;
 import io.nuls.consensus.entity.validator.consensus.AgentDepositValidator;
@@ -19,7 +20,7 @@ import java.io.IOException;
  * @author Niels
  * @date 2017/12/4
  */
-public class RegisterAgentTransaction extends AbstractConsensusTransaction<Delegate> {
+public class RegisterAgentTransaction extends AbstractConsensusTransaction<Agent> {
 
     private LockNulsTransaction lockNulsTransaction;
 
@@ -30,8 +31,8 @@ public class RegisterAgentTransaction extends AbstractConsensusTransaction<Deleg
     }
 
     @Override
-    protected Delegate parseBody(NulsByteBuffer byteBuffer) {
-        Delegate delegate = new Delegate();
+    protected Agent parseBody(NulsByteBuffer byteBuffer) {
+        Agent delegate = new Agent();
         delegate.parse(byteBuffer);
         return delegate;
     }

@@ -3,6 +3,7 @@ package io.nuls.consensus.service.impl;
 import io.nuls.account.entity.Account;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.constant.PocConsensusConstant;
+import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.member.Delegate;
 import io.nuls.consensus.entity.ConsensusAccount;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
@@ -51,7 +52,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
         return INSTANCE;
     }
 
-    private void registerAgent(Delegate delegate, Account account, String password) throws IOException {
+    private void registerAgent(Agent delegate, Account account, String password) throws IOException {
         RegisterAgentEvent event = new RegisterAgentEvent();
         RegisterAgentTransaction tx = new RegisterAgentTransaction();
         tx.setTxData(delegate);
@@ -86,12 +87,12 @@ public class PocConsensusServiceImpl implements ConsensusService {
     @Override
     public void exitTheConsensus(NulsDigestData joinTxHash, String password) {
         PocJoinConsensusTransaction joinTx = (PocJoinConsensusTransaction) ledgerService.getTransaction(joinTxHash);
-        if(null==joinTx){
-            throw new NulsRuntimeException(ErrorCode.ACCOUNT_NOT_EXIST,"address:"+joinTx.getTxData().getAddress().toString());
+        if (null == joinTx) {
+            throw new NulsRuntimeException(ErrorCode.ACCOUNT_NOT_EXIST, "address:" + joinTx.getTxData().getAddress().toString());
         }
         Account account = this.accountService.getAccount(joinTx.getTxData().getAddress().toString());
         if (null == account) {
-            throw new NulsRuntimeException(ErrorCode.ACCOUNT_NOT_EXIST,"address:"+joinTx.getTxData().getAddress().toString());
+            throw new NulsRuntimeException(ErrorCode.ACCOUNT_NOT_EXIST, "address:" + joinTx.getTxData().getAddress().toString());
         }
         if (!account.validatePassword(password)) {
             throw new NulsRuntimeException(ErrorCode.PASSWORD_IS_WRONG);
@@ -105,7 +106,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
             tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
         } catch (IOException e) {
             Log.error(e);
-            throw new NulsRuntimeException(ErrorCode.HASH_ERROR,e);
+            throw new NulsRuntimeException(ErrorCode.HASH_ERROR, e);
         }
         tx.setSign(accountService.signData(tx.getHash(), account, password));
         event.setEventBody(tx);
@@ -113,7 +114,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
     }
 
     @Override
-    public List<ConsensusAccount> getConsensusAccountList(String address,String agentAddress) {
+    public List<ConsensusAccount> getConsensusAccountList(String address, String agentAddress) {
         QueryConsensusAccountParam param = new QueryConsensusAccountParam();
         param.setAddress(address);
         param.setAgentAddress(agentAddress);
@@ -153,7 +154,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
         }
         JoinConsensusParam params = new JoinConsensusParam(paramsMap);
         if (params.getCommissionRate() != null) {
-            Delegate delegate = new Delegate();
+            Agent delegate = new Agent();
             delegate.setDelegateAddress(params.getAgentAddress());
             delegate.setDeposit(Na.parseNa(params.getDeposit()));
             delegate.setCommissionRate(params.getCommissionRate());
