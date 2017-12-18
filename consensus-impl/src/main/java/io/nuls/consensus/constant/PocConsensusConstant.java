@@ -15,7 +15,6 @@ public interface PocConsensusConstant {
     String CFG_CONSENSUS_SECTION = "Consensus";
     String PROPERTY_DELEGATE_PEER = "delegate-peer";
 
-    short EVENT_TYPE_YELLOW_PUNISH = 7;
     short EVENT_TYPE_REGISTER_AGENT = 8;
     short EVENT_TYPE_ASK_BLOCK = 9;
     short EVENT_TYPE_RED_PUNISH = 10;
@@ -24,6 +23,7 @@ public interface PocConsensusConstant {
     int TX_TYPE_REGISTER_AGENT = 10;
     int TX_TYPE_RED_PUNISH = 11;
     int TX_TYPE_YELLOW_PUNISH = 12;
+    short EVENT_TYPE_YELLOW_PUNISH = 13;
 
     /**
      * TODO THE PARAMETERS OF CONSENSUS,bellow

@@ -63,14 +63,13 @@ public class DBModuleTest {
         blockPo.setHeight(111L);
         blockPo.setMerkleHash("aaab");
         blockPo.setPreHash("xxx");
-        blockPo.setTxcount(10);
+        blockPo.setTxcount(10L);
         blockPo.setBytes(new byte[10]);
         blockPo.setVarsion(1);
         blockPo.setSign(new byte[2]);
 //        blockPo.setScript("dsfasdf".getBytes());
         int result = blockDao.save(blockPo);
         Log.debug("result" + result);
-
     }
 
     @Test
