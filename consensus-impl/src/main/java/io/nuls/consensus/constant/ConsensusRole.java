@@ -1,22 +1,34 @@
 package io.nuls.consensus.constant;
 
+import io.nuls.core.i18n.I18nUtils;
+
 /**
  * @author Niels
  * @date 2017/12/5
  */
 public enum ConsensusRole {
 
-    AGENT(1),
+    AGENT(1,69994),
 
-    DELEGATE_PEER(2),
+    DELEGATE_PEER(2,69995),
 
-    ENTRUSTER(3);
+    ENTRUSTER(3,69996);
     private final int code;
+    private final int textCode;
 
-    private ConsensusRole(int code) {
+    ConsensusRole(int code,int textCode) {
         this.code = code;
+        this.textCode = textCode;
     }
 
+    /**
+     * the text to show of the role
+     *
+     * @return
+     */
+    public String getText() {
+        return I18nUtils.get(textCode);
+    }
     public int getCode() {
         return code;
     }

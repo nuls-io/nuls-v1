@@ -11,7 +11,7 @@ import io.nuls.core.utils.io.NulsByteBuffer;
  */
 public class AskBlockInfoEvent extends BaseConsensusEvent<BasicTypeData<Long>> {
     public AskBlockInfoEvent() {
-        super(PocConsensusConstant.EVENT_TYPE_ASK_BEST_BLOCK);
+        super(PocConsensusConstant.EVENT_TYPE_ASK_BLOCK);
     }
 
     public AskBlockInfoEvent(long height) {

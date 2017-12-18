@@ -113,4 +113,21 @@ public class NulsDigestData extends BaseNulsData {
         NulsDigestData nulsDigestData = NulsDigestData.calcDigestData(textData);
         System.out.println(nulsDigestData.getDigestHex());
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj==null){
+            return false;
+        }
+        if(!(obj instanceof NulsDigestData)){
+            return false;
+        }
+        if(this.getDigestBytes()==null||((NulsDigestData) obj).getDigestBytes()==null){
+            return false;
+        }
+        if(this.getDigestBytes().length!=((NulsDigestData) obj).getDigestBytes().length){
+            return false;
+        }
+        return this.getDigestHex().equals(((NulsDigestData) obj).getDigestHex());
+    }
 }

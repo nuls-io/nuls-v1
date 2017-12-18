@@ -22,13 +22,14 @@ public class DevNetworkParam extends AbstractNetworkParam {
         this.maxInCount = ConfigLoader.getPropValue(NetworkConstant.NETWORK_PEER_MAX_IN, 20);
         this.maxOutCount = ConfigLoader.getPropValue(NetworkConstant.NETWORK_PEER_MAX_OUT, 10);
 
-
-        InetSocketAddress address2 = new InetSocketAddress("192.168.1.197", port);
+        InetSocketAddress address2 = new InetSocketAddress("127.0.0.1", 8013);
         InetSocketAddress address3 = new InetSocketAddress("192.168.1.248", port);
         InetSocketAddress address1 = new InetSocketAddress("192.168.1.199", port);
+        InetSocketAddress address0 = new InetSocketAddress("192.168.1.249", port);
         seedPeers.add(address1);
         seedPeers.add(address2);
         seedPeers.add(address3);
+        seedPeers.add(address0);
 
         this.messageFilter = DefaultMessageFilter.getInstance();
         this.messageFilter.addMagicNum(this.packetMagic);

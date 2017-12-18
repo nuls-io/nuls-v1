@@ -5,6 +5,7 @@ import io.nuls.account.entity.Address;
 import io.nuls.account.manager.AccountManager;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.account.util.AccountTool;
+import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.chain.entity.Result;
 import io.nuls.core.constant.ErrorCode;
@@ -355,7 +356,41 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public NulsSignData signData(byte[] bytes) {
-        return null;
+        return this.signData(bytes, this.getLocalAccount(), null);
+    }
+
+    @Override
+    public NulsSignData signData(NulsDigestData digestData) {
+        return this.signData(digestData, this.getLocalAccount(), null);
+    }
+
+    @Override
+    public NulsSignData signData(byte[] bytes, String password) {
+        return this.signData(bytes, this.getLocalAccount(), password);
+    }
+
+    @Override
+    public NulsSignData signData(NulsDigestData digestData, String password) {
+        return this.signData(digestData, this.getLocalAccount(), password);
+    }
+
+    @Override
+    public NulsSignData signData(byte[] bytes, Account account, String password) {
+        //todo
+        if (null == bytes || bytes.length == 0) {
+            return null;
+        }
+        NulsSignData data = new NulsSignData();
+        data.setSignBytes(new byte[]{1});
+        return data;
+    }
+
+    @Override
+    public NulsSignData signData(NulsDigestData digestData, Account account, String password) {
+        if (null == digestData) {
+            return null;
+        }
+        return this.signData(digestData.getDigestBytes(), account, password);
     }
 
     @Override
@@ -376,7 +411,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Result verifySign(byte[] bytes,NulsSignData data){
-        return new Result(true,null);
+    public Result verifySign(byte[] bytes, NulsSignData data) {
+        return new Result(true, null);
     }
 }

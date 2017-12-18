@@ -1,14 +1,14 @@
 package io.nuls.core.mesasge.constant;
 
 /**
- * Created by Niels on 2017/11/7.
- *
+ * @author Niels
+ * @date 2017/11/7
  */
 public enum MessageTypeEnum {
     NETWORK(1), EVENT(2);
     private int code;
 
-    private MessageTypeEnum(int code) {
+     MessageTypeEnum(int code) {
         this.code = code;
     }
 

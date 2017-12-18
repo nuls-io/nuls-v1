@@ -16,20 +16,8 @@ import java.util.List;
  * @date 2017/10/30
  */
 public class Transaction extends BaseNulsData {
-    public Transaction(int type) {
-        this.dataType = NulsDataType.TRANSACTION;
-        this.time = TimeService.currentTimeMillis();
-        this.type = type;
-        this.initValidators();
-    }
 
-    private void initValidators() {
-        List<NulsDataValidator> list = TransactionValidatorManager.getValidators();
-        for (NulsDataValidator<Transaction> validator : list) {
-            this.registerValidator(validator);
-        }
-    }
-
+    private TransactionListener listener;
     /**
      * tx type
      */
@@ -43,6 +31,38 @@ public class Transaction extends BaseNulsData {
      */
     protected long time;
     protected byte[] remark;
+
+    public void onRollback() {
+        if (null != listener) {
+            listener.onRollback(this);
+        }
+    }
+
+    public void onCommit() {
+        if (null != listener) {
+            listener.onCommit(this);
+        }
+    }
+
+    public void onApproval() {
+        if (null != listener) {
+            listener.onApproval(this);
+        }
+    }
+
+    public Transaction(int type) {
+        this.dataType = NulsDataType.TRANSACTION;
+        this.time = TimeService.currentTimeMillis();
+        this.type = type;
+        this.initValidators();
+    }
+
+    private void initValidators() {
+        List<NulsDataValidator> list = TransactionValidatorManager.getValidators();
+        for (NulsDataValidator<Transaction> validator : list) {
+            this.registerValidator(validator);
+        }
+    }
 
     @Override
     public int size() {
@@ -81,6 +101,10 @@ public class Transaction extends BaseNulsData {
         this.remark = byteBuffer.readByLengthByte();
     }
 
+    public void registerListener(TransactionListener listener) {
+        this.listener = listener;
+    }
+
     public long getTime() {
         return time;
     }
@@ -99,5 +123,21 @@ public class Transaction extends BaseNulsData {
 
     public void setRemark(byte[] remark) {
         this.remark = remark;
+    }
+
+    public NulsDigestData getHash() {
+        return hash;
+    }
+
+    public void setHash(NulsDigestData hash) {
+        this.hash = hash;
+    }
+
+    public NulsSignData getSign() {
+        return sign;
+    }
+
+    public void setSign(NulsSignData sign) {
+        this.sign = sign;
     }
 }

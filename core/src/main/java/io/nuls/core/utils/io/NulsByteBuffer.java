@@ -1,6 +1,7 @@
 package io.nuls.core.utils.io;
 
 import io.nuls.core.chain.entity.Block;
+import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.Sha256Hash;
@@ -124,8 +125,10 @@ public class NulsByteBuffer {
         return 1 == b;
     }
 
-    public Sha256Hash readHash() {
-        return Sha256Hash.wrapReversed(readBytes(32));
+    public NulsDigestData readHash() {
+        NulsDigestData data = new NulsDigestData();
+        data.parse(this);
+        return data;
     }
 
     public int getCursor() {

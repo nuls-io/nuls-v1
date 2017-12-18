@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS `account` (
 CREATE TABLE IF NOT EXISTS `block` (
   `hash` varchar(70) NOT NULL,
   `height` bigint(14) NOT NULL,
-  `pre_hash` varchar(70) NOT NULL,
+  `pre_hash` varchar(70) ,
   `merkle_hash` varchar(70) NOT NULL,
   `create_time` bigint(14) NOT NULL,
   `period_start_time` bigint(14) DEFAULT NULL,

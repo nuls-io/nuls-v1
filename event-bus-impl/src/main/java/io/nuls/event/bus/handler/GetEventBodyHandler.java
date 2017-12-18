@@ -13,7 +13,7 @@ import io.nuls.event.bus.service.impl.EventServiceImpl;
  * @author Niels
  * @date 2017/12/8
  */
-public class GetEventHandler extends AbstractNetworkNulsEventHandler<GetBodyEvent> {
+public class GetEventBodyHandler extends AbstractNetworkNulsEventHandler<GetBodyEvent> {
 
     private EventCacheService eventCacheService = EventCacheService.getInstance();
     private EventService eventService = EventServiceImpl.getInstance();

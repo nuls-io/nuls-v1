@@ -3,12 +3,15 @@ package io.nuls.consensus.entity.member;
 import io.nuls.account.entity.Address;
 import io.nuls.consensus.constant.ConsensusRole;
 import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.chain.entity.Na;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
+import io.nuls.core.utils.str.StringUtils;
 
 import java.io.IOException;
 
@@ -16,21 +19,19 @@ import java.io.IOException;
  * @author Niels
  * @date 2017/12/10
  */
-public class ConsensusAccountData extends BaseNulsData {
-    private String id;
+public class Agent extends BaseNulsData {
 
-    private int status;
+    private Na deposit;
 
-    private long consensusStartTime;
+    public String delegateAddress;
 
-    private ConsensusRole role;
+    private double commissionRate;
 
-    private double deposit;
-
-    public Address agentAddress;
+    private String introduction;
     /**
      * the following fields is for The account self(delegate Account)
      */
+    private int status;
     private long roundNo;
     private long roundIndex;
     private long roundStartTime;
@@ -39,62 +40,44 @@ public class ConsensusAccountData extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size ++;
-        size += VarInt.sizeOf(consensusStartTime);
-        size += Utils.double2Bytes(deposit).length;
-        size += agentAddress.getHash160().length;
+        size++;
+        size += VarInt.sizeOf(deposit.getValue());
+        size += Utils.sizeOfSerialize(this.delegateAddress);
+        size += Utils.double2Bytes(commissionRate).length;
+        size += Utils.sizeOfSerialize(this.introduction);
         return size;
     }
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write(role.getCode());
-        stream.writeVarInt(consensusStartTime);
-        stream.writeDouble(deposit);
-        stream.writeBytesWithLength(agentAddress.getHash160());
+        stream.writeVarInt(deposit.getValue());
+        stream.writeBytesWithLength(delegateAddress);
+        stream.writeDouble(this.commissionRate);
+        stream.writeBytesWithLength(this.introduction);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
-        role = ConsensusRole.getConsensusRoleByCode(byteBuffer.readByte());
-        this.consensusStartTime = byteBuffer.readVarInt();
-        this.deposit = byteBuffer.readDouble();
-        try {
-            this.agentAddress = Address.fromHashs(byteBuffer.readByLengthByte());
-        } catch (NulsException e) {
-            Log.error(e);
-        }
+        this.deposit = Na.valueOf(byteBuffer.readVarInt());
+        this.delegateAddress = byteBuffer.readString();
+        this.commissionRate = byteBuffer.readDouble();
+        this.introduction = byteBuffer.readString();
     }
-    public double getDeposit() {
+
+    public Na getDeposit() {
         return deposit;
     }
 
-    public void setDeposit(double deposit) {
+    public void setDeposit(Na deposit) {
         this.deposit = deposit;
     }
 
-    public Address getAgentAddress() {
-        return agentAddress;
+    public String getDelegateAddress() {
+        return delegateAddress;
     }
 
-    public void setAgentAddress(Address agentAddress) {
-        this.agentAddress = agentAddress;
-    }
-
-    public ConsensusRole getRole() {
-        return role;
-    }
-
-    public void setRole(ConsensusRole role) {
-        this.role = role;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
+    public void setDelegateAddress(String delegateAddress) {
+        this.delegateAddress = delegateAddress;
     }
 
     public int getStatus() {
@@ -103,14 +86,6 @@ public class ConsensusAccountData extends BaseNulsData {
 
     public void setStatus(int status) {
         this.status = status;
-    }
-
-    public long getConsensusStartTime() {
-        return consensusStartTime;
-    }
-
-    public void setConsensusStartTime(long consensusStartTime) {
-        this.consensusStartTime = consensusStartTime;
     }
 
     public long getRoundIndex() {
@@ -143,5 +118,21 @@ public class ConsensusAccountData extends BaseNulsData {
 
     public void setRoundNo(long roundNo) {
         this.roundNo = roundNo;
+    }
+
+    public double getCommissionRate() {
+        return commissionRate;
+    }
+
+    public void setCommissionRate(double commissionRate) {
+        this.commissionRate = commissionRate;
+    }
+
+    public String getIntroduction() {
+        return introduction;
+    }
+
+    public void setIntroduction(String introduction) {
+        this.introduction = introduction;
     }
 }

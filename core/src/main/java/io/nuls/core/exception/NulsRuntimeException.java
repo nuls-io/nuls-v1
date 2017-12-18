@@ -4,8 +4,8 @@ package io.nuls.core.exception;
 import io.nuls.core.constant.ErrorCode;
 
 /**
- * Created by Niels on 2017/9/26.
- *
+ * @author Niels
+ * @date 2017/9/26
  */
 public class NulsRuntimeException extends RuntimeException {
 
@@ -90,6 +90,6 @@ public class NulsRuntimeException extends RuntimeException {
     public NulsRuntimeException(ErrorCode errorCode, String msg) {
         super(msg);
         this.code = errorCode.getCode();
-        this.message = msg;
+        this.message = errorCode.getMsg()+":"+msg;
     }
 }

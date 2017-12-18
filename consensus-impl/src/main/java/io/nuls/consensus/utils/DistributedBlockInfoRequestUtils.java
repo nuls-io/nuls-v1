@@ -5,6 +5,7 @@ import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.event.service.intf.EventService;
 
@@ -32,6 +33,7 @@ public class DistributedBlockInfoRequestUtils {
     private long askHeight;
     private Lock lock = new ReentrantLock();
     private boolean requesting;
+    private long startTime;
 
     private DistributedBlockInfoRequestUtils() {
     }
@@ -47,6 +49,7 @@ public class DistributedBlockInfoRequestUtils {
      */
     public BlockInfo request(long height) {
         lock.lock();
+        this.startTime = TimeService.currentTimeMillis();
         requesting = true;
         headerMap.clear();
         calcMap.clear();
@@ -60,6 +63,7 @@ public class DistributedBlockInfoRequestUtils {
         peerIdList = this.eventService.broadcast(askBlockInfoEvent);
         if (peerIdList.isEmpty()) {
             Log.error("get best height from net faild!");
+            lock.unlock();
             throw new NulsRuntimeException(ErrorCode.NET_MESSAGE_ERROR, "broadcast faild!");
         }
         return this.getBlockInfo();
@@ -132,6 +136,10 @@ public class DistributedBlockInfoRequestUtils {
                 Thread.sleep(100L);
             } catch (InterruptedException e) {
                 Log.error(e);
+            }
+            if((TimeService.currentTimeMillis()-startTime)>10000L){
+                lock.unlock();
+              throw new NulsRuntimeException(ErrorCode.TIME_OUT);
             }
         }
         BlockInfo info = bestBlockInfo;

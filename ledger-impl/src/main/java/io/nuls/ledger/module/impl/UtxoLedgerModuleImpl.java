@@ -8,8 +8,8 @@ import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.entity.validator.CommonTxValidatorManager;
 import io.nuls.ledger.event.AbstractCoinTransactionEvent;
-import io.nuls.ledger.event.UtxoDepositCoinEvent;
-import io.nuls.ledger.event.UtxoLockCoinEvent;
+import io.nuls.ledger.event.UtxoDepositNulsEvent;
+import io.nuls.ledger.event.UtxoLockNulsEvent;
 import io.nuls.ledger.event.UtxoSmallChangeEvent;
 import io.nuls.ledger.handler.UtxoCoinTransactionHandler;
 import io.nuls.ledger.handler.UtxoLockHandler;
@@ -43,11 +43,11 @@ public class UtxoLedgerModuleImpl extends AbstractLedgerModule {
         this.registerService(ledgerService);
         SmallChangeThread smallChangeThread = SmallChangeThread.getInstance();
         ThreadManager.createSingleThreadAndRun(this.getModuleId(), SmallChangeThread.class.getSimpleName(), smallChangeThread);
-        this.registerEvent((short) 4, UtxoLockCoinEvent.class);
+        this.registerEvent((short) 4, UtxoLockNulsEvent.class);
         this.registerEvent((short) 5, UtxoSmallChangeEvent.class);
         this.registerEvent((short) 6, AbstractCoinTransactionEvent.class);
-        this.registerEvent((short) 7, UtxoDepositCoinEvent.class);
-        this.processorService.registerEventHandler(UtxoLockCoinEvent.class, new UtxoLockHandler());
+        this.registerEvent((short) 7, UtxoDepositNulsEvent.class);
+        this.processorService.registerEventHandler(UtxoLockNulsEvent.class, new UtxoLockHandler());
         this.processorService.registerEventHandler(UtxoSmallChangeEvent.class, new UtxoSmallChangeHandler());
         this.processorService.registerEventHandler(AbstractCoinTransactionEvent.class, new UtxoCoinTransactionHandler());
     }

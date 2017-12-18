@@ -86,15 +86,19 @@ public class EhCacheServiceImpl<K, T extends NulsCloneable> implements CacheServ
 
     @Override
     public T getElementValue(String cacheTitle, K key) {
-        if (null == cacheManager.getCache(cacheTitle)||null==key) {
+        if (null == cacheManager.getCache(cacheTitle) || null == key) {
             return null;
         }
-        return (T) this.getElementValueWithOutClone(cacheTitle, key).copy();
+        T t = this.getElementValueWithOutClone(cacheTitle, key);
+        if (null == t) {
+            return t;
+        }
+        return (T) t.copy();
     }
 
     @Override
     public T getElementValueWithOutClone(String cacheTitle, K key) {
-        if (null == cacheManager.getCache(cacheTitle)||null==key) {
+        if (null == cacheManager.getCache(cacheTitle) || null == key) {
             return null;
         }
         return ((T) cacheManager.getCache(cacheTitle).get(key));

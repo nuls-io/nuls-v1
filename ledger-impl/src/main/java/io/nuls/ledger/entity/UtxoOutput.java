@@ -1,22 +1,20 @@
 package io.nuls.ledger.entity;
 
 import io.nuls.core.chain.entity.BaseNulsData;
-import io.nuls.core.crypto.Sha256Hash;
+import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.crypto.script.Script;
-import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
 import java.io.IOException;
-import java.io.OutputStream;
 
 /**
  * Created by win10 on 2017/10/30.
  */
 public class UtxoOutput extends BaseNulsData{
     //交易
-    private Sha256Hash txHash;
+    private NulsDigestData txHash;
     //下次的花费
     private UtxoInput spentBy;
     //交易金额
@@ -34,7 +32,7 @@ public class UtxoOutput extends BaseNulsData{
 
     }
 
-    public UtxoOutput(Sha256Hash txHash) {
+    public UtxoOutput(NulsDigestData txHash) {
         this.txHash = txHash;
     }
 
@@ -68,11 +66,11 @@ public class UtxoOutput extends BaseNulsData{
         script = new Script(scriptBytes);
     }
 
-    public Sha256Hash getTxHash() {
+    public NulsDigestData getTxHash() {
         return txHash;
     }
 
-    public void setTxHash(Sha256Hash txHash) {
+    public void setTxHash(NulsDigestData txHash) {
         this.txHash = txHash;
     }
 

@@ -1,7 +1,12 @@
 package io.nuls.consensus.service.impl;
 
+import io.nuls.consensus.entity.genesis.DevGenesisBlock;
 import io.nuls.consensus.service.intf.BlockService;
+import io.nuls.consensus.utils.ConsensusBeanUtils;
 import io.nuls.core.chain.entity.Block;
+import io.nuls.core.context.NulsContext;
+import io.nuls.db.dao.BlockDao;
+import io.nuls.db.entity.BlockPo;
 
 /**
  * @author Niels
@@ -9,6 +14,8 @@ import io.nuls.core.chain.entity.Block;
  */
 public class BlockServiceImpl implements BlockService {
     private static final BlockServiceImpl INSTANCE = new BlockServiceImpl();
+
+    private BlockDao blockDao = NulsContext.getInstance().getService(BlockDao.class);
 
     private BlockServiceImpl() {
     }
@@ -19,8 +26,8 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public Block getGengsisBlockFromDb() {
-        // todo auto-generated method stub(niels)
-        return null;
+        BlockPo po = this.blockDao.getBlockByHeight(0);
+        return ConsensusBeanUtils.fromPojo(po);
     }
 
     @Override
@@ -50,7 +57,7 @@ public class BlockServiceImpl implements BlockService {
     @Override
     public Block getLocalHighestBlock() {
         // todo auto-generated method stub(niels)
-        return null;
+        return DevGenesisBlock.getInstance();
     }
 
     @Override
@@ -75,7 +82,8 @@ public class BlockServiceImpl implements BlockService {
     @Override
     public void save(Block block) {
         // todo auto-generated method stub(niels)
-
+//        保存交易信息
+        blockDao.save(ConsensusBeanUtils.toPojo(block));
     }
 
     @Override

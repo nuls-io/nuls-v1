@@ -1,13 +1,14 @@
 package io.nuls.consensus.utils;
 
-import io.nuls.account.entity.Address;
-import io.nuls.consensus.constant.ConsensusRole;
-import io.nuls.consensus.entity.member.ConsensusAccountData;
-import io.nuls.consensus.entity.member.ConsensusAccountImpl;
+import io.nuls.consensus.entity.NulsBlock;
+import io.nuls.consensus.entity.genesis.DevGenesisBlock;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.utils.log.Log;
 import io.nuls.db.entity.BlockPo;
 import io.nuls.db.entity.TransactionPo;
+
+import java.io.IOException;
 
 /**
  * @author Niels
@@ -16,8 +17,26 @@ import io.nuls.db.entity.TransactionPo;
 public class ConsensusBeanUtils {
 
     public static final BlockPo toPojo(Block block) {
+        //todo 重新设计表结构
         BlockPo po = new BlockPo();
-        //todo
+        po.setVarsion(0);
+        try {
+            po.setTxs(block.serialize());
+        } catch (IOException e) {
+            Log.error(e);
+        }
+        po.setTxcount(1);
+        if(block.getHeader().getHeight()>1){
+            po.setPreHash(block.getHeader().getPreHash().getDigestHex());
+        }
+        po.setMerkleHash(block.getHeader().getMerkleHash().getDigestHex());
+        po.setHeight(block.getHeader().getHeight());
+        po.setCreateTime(block.getHeader().getTime());
+        po.setHash(block.getHeader().getHash().getDigestHex());
+        po.setSign(block.getHeader().getSign().getSignBytes());
+        po.setConsensusAddress("localhost");
+        po.setPeriodStartTime(block.getHeader().getTime());
+        po.setTimePeriod(1);
         return po;
     }
 
@@ -29,7 +48,7 @@ public class ConsensusBeanUtils {
 
     public static final Block fromPojo(BlockPo po) {
         //todo
-        return null;
+        return DevGenesisBlock.getInstance();
     }
 
     public static final Transaction fromPojo(TransactionPo po) {

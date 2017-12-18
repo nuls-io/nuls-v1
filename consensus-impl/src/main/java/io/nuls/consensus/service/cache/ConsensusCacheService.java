@@ -5,16 +5,15 @@ import io.nuls.account.service.intf.AccountService;
 import io.nuls.cache.service.intf.CacheService;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.entity.ConsensusAccount;
-import io.nuls.consensus.entity.member.ConsensusAccountData;
-import io.nuls.consensus.entity.member.ConsensusAccountImpl;
+import io.nuls.consensus.entity.member.Agent;
+import io.nuls.consensus.entity.member.Delegate;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
-import io.nuls.consensus.utils.ConsensusBeanUtils;
-import io.nuls.core.constant.ErrorCode;
+import io.nuls.consensus.entity.params.QueryConsensusAccountParam;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.db.dao.DelegateAccountDao;
 import io.nuls.db.dao.DelegateDao;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -27,9 +26,9 @@ public class ConsensusCacheService {
      * the title of the cache(ConsensusStatusInfo,single)
      */
     private static final String CACHE_CONSENSUS_STATUS_INFO = "consensus-status-info";
-    private static final String CACHE_CONSENSUS_ACCOUNT_LIST = "consensus-account-list";
-    private static final String CACHE_BLOCK_HEADER_LIST = "block-header-list";
-    private static final String CACHE_BLOCK_HEIGHT_HASH_MAPPING = "block-height-hash-mapping";
+    private static final String IN_AGENT_LIST = "agent-list-in";
+    private static final String WAIT_AGENT_LIST = "agent-list-in";
+    private static final String CACHE_DELEGATE_LIST = "delegate-list";
 
     private static final ConsensusCacheService INSTANCE = new ConsensusCacheService();
 
@@ -49,13 +48,13 @@ public class ConsensusCacheService {
 
     private void initCache() {
         this.cacheService.createCache(CACHE_CONSENSUS_STATUS_INFO);
-        this.cacheService.createCache(CACHE_CONSENSUS_ACCOUNT_LIST);
+        this.cacheService.createCache(IN_AGENT_LIST);
+        this.cacheService.createCache(WAIT_AGENT_LIST);
+        this.cacheService.createCache(CACHE_DELEGATE_LIST);
 
-        this.cacheService.createCache(CACHE_BLOCK_HEADER_LIST);
-        this.cacheService.createCache(CACHE_BLOCK_HEIGHT_HASH_MAPPING);
-
-//todo 代理节点与委托单
+        //todo 代理节点与委托单
         Account self = accountService.getLocalAccount();
+        this.delegateDao.queryAll();
     }
 
     public ConsensusStatusInfo getConsensusStatusInfo() {
@@ -68,26 +67,58 @@ public class ConsensusCacheService {
         this.cacheService.putElementWithOutClone(CACHE_CONSENSUS_STATUS_INFO, CACHE_CONSENSUS_STATUS_INFO, info);
     }
 
-    public void addConsensusAccount(ConsensusAccount ca) {
-        cacheService.putElement(CACHE_CONSENSUS_ACCOUNT_LIST, ca.getAddress(), ca);
+    public void addAgent(ConsensusAccount<Agent> ca) {
+        if (ca.getExtend().getStatus() == ConsensusStatusEnum.IN.getCode()) {
+            cacheService.putElement(IN_AGENT_LIST, ca.getAddress(), ca);
+        } else if (ca.getExtend().getStatus() == ConsensusStatusEnum.WAITING.getCode()) {
+            cacheService.putElement(WAIT_AGENT_LIST, ca.getAddress(), ca);
+        }
     }
 
-    public ConsensusAccount<ConsensusAccountData> getConsensusAccount(String address) {
-        return (ConsensusAccount) this.cacheService.getElementValue(CACHE_CONSENSUS_ACCOUNT_LIST, address);
+    public ConsensusAccount<Agent> getConsensusAccount(String address) {
+        ConsensusAccount<Agent> ca = (ConsensusAccount<Agent>) this.cacheService.getElementValue(IN_AGENT_LIST, address);
+        if (ca == null) {
+            ca = (ConsensusAccount<Agent>) this.cacheService.getElementValue(WAIT_AGENT_LIST, address);
+        }
+        return ca;
     }
 
     public void delConsensusAccount(String address) {
-        this.cacheService.removeElement(CACHE_CONSENSUS_ACCOUNT_LIST, address);
+        this.cacheService.removeElement(IN_AGENT_LIST,address);
+        this.cacheService.removeElement(WAIT_AGENT_LIST,address);
     }
 
     public void changeStatus(String address, ConsensusStatusEnum statusEnum) {
-        ConsensusAccount<ConsensusAccountData> ca = getConsensusAccount(address);
-        if (null == ca) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "temporary consensus account not exist!");
+        ConsensusAccount<Agent> ca =getConsensusAccount(address);
+        if (statusEnum.getCode() == ca.getExtend().getStatus()) {
+            return;
         }
+        this.delConsensusAccount(address);
         ca.getExtend().setStatus(statusEnum.getCode());
-        this.cacheService.putElement(CACHE_CONSENSUS_ACCOUNT_LIST, address, ca);
+        this.addAgent(ca);
     }
 
 
+    public void clear() {
+        // todo auto-generated method stub(niels)
+
+    }
+
+    public List<ConsensusAccount> getConsensusAccountList(QueryConsensusAccountParam param) {
+        List<ConsensusAccount> list = new ArrayList<>();
+        ConsensusAccount<Delegate> consensusAccount = new
+                ConsensusAccount<>();
+        // todo auto-generated method stub(niels)
+        return null;
+    }
+
+    public ConsensusStatusInfo getConsensusStatusInfo(String address) {
+        // todo auto-generated method stub(niels)
+        return null;
+    }
+
+    public int getDelegateAccountCount() {
+        // todo auto-generated method stub(niels)
+        return 0;
+    }
 }

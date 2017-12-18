@@ -1,6 +1,8 @@
 package io.nuls.ledger.entity;
 
 import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.chain.entity.NulsDigestData;
+import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.crypto.script.Script;
@@ -14,35 +16,34 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by win10 on 2017/10/30.
+ * @author win10
+ * @date 2017/10/30
  */
 public class UtxoInput extends BaseNulsData {
 
-    private Sha256Hash txHash;
-    //the output last time
+    private NulsDigestData txHash;
+    /**
+     * the output last time
+     */
     private List<UtxoOutput> froms;
-
-    private byte[] scriptBytes;
-
-    private Script scriptSig;
-
+    private NulsSignData sign;
 
     public UtxoInput() {
         this.froms = new ArrayList<>();
     }
 
-    public UtxoInput(Sha256Hash txHash) {
+    public UtxoInput(NulsDigestData txHash) {
         this();
         this.txHash = txHash;
     }
 
-    public UtxoInput(Sha256Hash txHash, UtxoOutput output) {
+    public UtxoInput(NulsDigestData txHash, UtxoOutput output) {
         this();
         this.txHash = txHash;
         this.froms.add(output);
     }
 
-    public UtxoInput(Sha256Hash txHash, List<UtxoOutput> froms) {
+    public UtxoInput(NulsDigestData txHash, List<UtxoOutput> froms) {
         this.txHash = txHash;
         this.froms = froms;
     }
@@ -59,14 +60,12 @@ public class UtxoInput extends BaseNulsData {
         } else {
             stream.write(new VarInt(froms.size()).encode());
             for (UtxoOutput from : froms) {
-                stream.write(from.getTxHash().getReversedBytes());
+                stream.write(from.getTxHash().getDigestBytes());
                 stream.writeShort((short) from.getIndex());
             }
         }
-        //length of sign
-        stream.write(new VarInt(scriptBytes.length).encode());
         //sign
-        stream.write(scriptBytes);
+        stream.write(sign.serialize());
     }
 
     @Override
@@ -84,17 +83,24 @@ public class UtxoInput extends BaseNulsData {
             froms.add(pre);
         }
         //length of sign
-        int signLength = (int) byteBuffer.readVarInt();
-        scriptBytes = byteBuffer.readBytes(signLength);
-        scriptSig = new Script(scriptBytes);
+        sign = new NulsSignData();
+        sign.parse(byteBuffer);
     }
 
-    public Sha256Hash getTxHash() {
+    public NulsDigestData getTxHash() {
         return txHash;
     }
 
-    public void setTxHash(Sha256Hash txHash) {
+    public void setTxHash(NulsDigestData txHash) {
         this.txHash = txHash;
+    }
+
+    public NulsSignData getSign() {
+        return sign;
+    }
+
+    public void setSign(NulsSignData sign) {
+        this.sign = sign;
     }
 
     public List<UtxoOutput> getFroms() {
@@ -105,19 +111,4 @@ public class UtxoInput extends BaseNulsData {
         this.froms = froms;
     }
 
-    public byte[] getScriptBytes() {
-        return scriptBytes;
-    }
-
-    public void setScriptBytes(byte[] scriptBytes) {
-        this.scriptBytes = scriptBytes;
-    }
-
-    public Script getScriptSig() {
-        return scriptSig;
-    }
-
-    public void setScriptSig(Script scriptSig) {
-        this.scriptSig = scriptSig;
-    }
 }

@@ -1,5 +1,7 @@
 package io.nuls.consensus.constant;
 
+import io.nuls.core.chain.entity.Na;
+
 /**
  * @author Niels
  * @date 2017/11/8
@@ -16,8 +18,7 @@ public interface PocConsensusConstant {
     short EVENT_TYPE_RED_PUNISH = 6;
     short EVENT_TYPE_YELLOW_PUNISH = 7;
     short EVENT_TYPE_REGISTER_AGENT = 8;
-    short EVENT_TYPE_ASK_BEST_BLOCK = 9;
-    short EVENT_TYPE_BEST_BLOCK = 10;
+    short EVENT_TYPE_ASK_BLOCK = 9;
 
 
     int TX_TYPE_REGISTER_AGENT = 10;
@@ -27,11 +28,21 @@ public interface PocConsensusConstant {
     /**
      * TODO THE PARAMETERS OF CONSENSUS,bellow
      */
-    int CONFIRM_BLOCK_COUNT = 7;
+    int CONFIRM_BLOCK_COUNT = 6;
+
+    /**
+     * Minimum safe quantity of consensus agents
+     */
+    int SAFELY_CONSENSUS_COUNT = 40;
     /**
      * Set temporarily as a fixed value,unit:nuls
      */
-    double TRANSACTION_FEE = 0.01;
+    int BLOCK_COUNT_OF_YEAR = 3153600;
+    /**
+     * value = 5000000/3154600
+     */
+    double BLOCK_REWARD = 1.5855;
+    Na TRANSACTION_FEE = Na.CENT;
     /**
      * unit:second
      */
@@ -42,12 +53,11 @@ public interface PocConsensusConstant {
      */
     long MAX_BLOCK_SIZE = 2 << 21;
 
+    Na AGENT_DEPOSIT_LOWER_LIMIT = Na.parseNa(20000);
+    Na ENTRUSTER_DEPOSIT_LOWER_LIMIT = Na.parseNa(2000);
 
-    double AGENT_DEPOSIT_LOWER_LIMIT = 20000;
-    double ENTRUSTER_DEPOSIT_LOWER_LIMIT = 1000;
-
-    double SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT = 50000;
-    double SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT = 200000;
+    Na SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT = Na.parseNa(200000);
+    Na SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT = Na.parseNa(500000);
     /**
      * unit: %
      */
@@ -55,8 +65,7 @@ public interface PocConsensusConstant {
     /**
      * commission rate,UNIT:%
      */
-    double MAX_COMMISSION_RATE = 20;
-    double MIN_COMMISSION_RATE = 0;
+    double DEFAULT_COMMISSION_RATE = 20;
     /**
      * unit:day
      */

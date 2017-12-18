@@ -59,4 +59,6 @@ public interface NetworkService {
     BroadcastResult broadcastToGroupSync(byte[] data, String groupName);
 
     BroadcastResult broadcastToGroupSync(byte[] data, String groupName, String excludePeerId);
+
+    boolean isSeedPeer();
 }

@@ -46,8 +46,9 @@ public class BlockMaintenanceThread implements Runnable {
             try {
                 syncBlock();
             } catch (Exception e) {
-                Log.error(e);
+                Log.error(e.getMessage());
             }
+
         }
     }
 
@@ -67,6 +68,11 @@ public class BlockMaintenanceThread implements Runnable {
             long interval = TimeService.currentTimeMillis() - localBestBlock.getHeader().getTime();
             if (interval < (PocConsensusConstant.BLOCK_TIME_INTERVAL * 2)) {
                 doit = false;
+                try {
+                    Thread.sleep(10000L);
+                } catch (InterruptedException e) {
+                    Log.error(e);
+                }
                 break;
             }
             blockInfo = BEST_HEIGHT_FROM_NET.request(0);
@@ -81,7 +87,6 @@ public class BlockMaintenanceThread implements Runnable {
         if (doit) {
             downloadBlocks(blockInfo.getPeerIdList(), startHeight, blockInfo.getHeight(), blockInfo.getHash().getDigestHex());
         }
-
     }
 
 
@@ -94,7 +99,7 @@ public class BlockMaintenanceThread implements Runnable {
         }
     }
 
-    private void checkGenesisBlock() {
+    public void checkGenesisBlock() {
         Block genesisBlock = NulsContext.getInstance().getGenesisBlock();
         genesisBlock.verify();
         Block localGenesisBlock = this.blockService.getGengsisBlockFromDb();

@@ -71,9 +71,7 @@ public class ThreadManager {
     }
 
     public static final void createSingleThreadAndRun(short moduleId, String threadName, Runnable runnable) {
-        NulsThreadFactory factory = new NulsThreadFactory(moduleId, threadName);
-        Thread thread = factory.newThread(runnable);
-        thread.start();
+        createSingleThreadAndRun(moduleId,threadName,runnable,true);
     }
 
     public static final void createSingleThreadAndRun(short moduleId, String threadName, Runnable runnable, boolean deamon) {

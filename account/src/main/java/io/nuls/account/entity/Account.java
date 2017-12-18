@@ -92,15 +92,21 @@ public class Account extends BaseNulsData implements NulsCloneable{
         }
     }
 
+    public boolean validatePassword(String password){
+        //todo
+        return true;
+    }
+
     /**
      *
      * @param password
      */
     public void encrypt(String password) {
-
+        //todo
     }
 
     public boolean decrypt(String password) {
+        //todo
         return false;
     }
 

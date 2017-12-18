@@ -7,7 +7,6 @@ import io.nuls.core.utils.str.StringUtils;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.constant.TxBroadCastStatusEnum;
 import io.nuls.ledger.entity.Balance;
-import io.nuls.ledger.service.intf.LedgerCacheService;
 
 import java.util.List;
 
@@ -15,7 +14,7 @@ import java.util.List;
  * @author Niels
  * @date 2017/11/17
  */
-public class LedgerCacheServiceImpl implements LedgerCacheService {
+public class LedgerCacheServiceImpl {
     private static LedgerCacheServiceImpl instance = new LedgerCacheServiceImpl();
     private final CacheService<String, Balance> cacheService;
 
@@ -43,40 +42,35 @@ public class LedgerCacheServiceImpl implements LedgerCacheService {
         this.cacheService.removeCache(LedgerConstant.STANDING_BOOK);
     }
 
-    @Override
+     
     public Balance getBalance(String address) {
         return cacheService.getElementValue(LedgerConstant.STANDING_BOOK, address);
     }
 
-    @Override
+    
     public void putTx(Transaction transaction) {
         //todo
     }
 
-    @Override
     public Transaction getTx(String hashHex) {
         //todo
         return null;
     }
 
-    @Override
     public List<Transaction> getTxList() {
         //todo
         return null;
     }
 
-    @Override
     public List<Transaction> getTxList(long startTime, long endTime) {
         //todo
         return null;
     }
 
-    @Override
     public void removeTx(String hashHex) {
         //todo
     }
 
-    @Override
     public TxBroadCastStatusEnum getTxBroadCastStatus(String hashHex) {
         //todo
         return null;

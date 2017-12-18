@@ -29,15 +29,6 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<String> broadcastSyncNeedConfirmation(BaseNulsEvent event) {
-        BroadcastResult result = this.networkService.broadcastSync(new CommonHashEvent(event.getHash()));
-        if (result.isSuccess()) {
-            eventCacheService.cacheSendedEvent(event);
-        }
-        return getPeerIdList(result);
-    }
-
-    @Override
     public List<String> broadcastHashAndCache(BaseNulsEvent event) {
         BroadcastResult result = this.networkService.broadcast(new CommonHashEvent(event.getHash()));
         if (result.isSuccess()) {

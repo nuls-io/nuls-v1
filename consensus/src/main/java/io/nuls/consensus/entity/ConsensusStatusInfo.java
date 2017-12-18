@@ -8,7 +8,7 @@ import java.util.Map;
  * @date 2017/11/7
  */
 public class ConsensusStatusInfo {
-    private String status;
+    private int status;
     private long startTime;
     private int parkedCount;
     private double accumulativeReward;
@@ -34,11 +34,11 @@ public class ConsensusStatusInfo {
         return extend;
     }
 
-    public String getStatus() {
+    public int getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(int status) {
         this.status = status;
     }
 

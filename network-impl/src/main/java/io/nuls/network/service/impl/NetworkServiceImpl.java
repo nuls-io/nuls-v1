@@ -205,5 +205,11 @@ public class NetworkServiceImpl implements NetworkService {
         return broadcaster.broadcastToGroupSync(data, groupName, excludePeerId);
     }
 
+    @Override
+    public boolean isSeedPeer() {
+        // todo auto-generated method stub(niels)
+        return true;
+    }
+
 }
 

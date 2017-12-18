@@ -86,7 +86,7 @@ public class ProcessorManager<E extends BaseNulsEvent, H extends NulsEventHandle
 //        if (!b) {
 //            throw new NulsRuntimeException(ErrorCode.FAILED, "registerEventHandler faild");
 //        }
-        cacheHandlerMapping((Class<E>) eventClass.getSuperclass(), handlerId);
+//        cacheHandlerMapping((Class<E>) eventClass.getSuperclass(), handlerId);
     }
 
     public void removeEventHandler(String handlerId) {
