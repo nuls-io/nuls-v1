@@ -147,7 +147,7 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
     }
 
     private void checkPeerType() {
-        boolean isSeed = NulsContext.getInstance().getService(NetworkService.class).isSeedPeer();
+        boolean isSeed = NulsContext.getInstance().getService(NetworkService.class).isSeedPeer(null);
         if (!isSeed) {
             return;
         }
