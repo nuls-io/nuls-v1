@@ -1,5 +1,7 @@
 package io.nuls.network.service.impl;
 
+import io.nuls.consensus.constant.PocConsensusConstant;
+import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.PeerDao;
 import io.nuls.db.entity.PeerPo;
@@ -108,6 +110,7 @@ public class PeerDiscoverHandler implements Runnable {
                     }
                 }
             }
+
             try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {

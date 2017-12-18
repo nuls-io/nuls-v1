@@ -5,6 +5,7 @@ import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.core.mesasge.NulsMessage;
 import io.nuls.core.mesasge.NulsMessageHeader;
 import io.nuls.core.utils.log.Log;
+import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Peer;
 import io.nuls.network.entity.param.AbstractNetworkParam;
@@ -34,6 +35,7 @@ public class BroadcasterImpl implements Broadcaster {
 
     /**
      * At least maxOutCount() Peers should be broadcast success
+     *
      * @param message
      * @param excludePeerId
      * @return
@@ -41,30 +43,39 @@ public class BroadcasterImpl implements Broadcaster {
     private BroadcastResult broadcast(NulsMessage message, String excludePeerId) {
         List<Peer> broadPeers = peersManager.getAvailablePeers(excludePeerId);
         //only one peer connected can't send message
-        if (broadPeers.size() <= 0) {
+        if (broadPeers.size() <= NetworkConstant.NETWORK_PEER_OUT_MIN_COUNT) {
             return new BroadcastResult(false, "no peer can be broadcast");
         }
 
-
-
-
         int successCount = 0;
-
+        int count = 0;
         BroadcastResult result = new BroadcastResult(true, "OK");
         List<Peer> successPeers = new ArrayList<>();
-        for (Peer peer : broadPeers) {
-            try {
-                peer.sendMessage(message);
-                successPeers.add(peer);
-                successCount++;
-            } catch (NotYetConnectedException | IOException e) {
-                Log.warn("broadcast message error ， maybe the peer closed ! peer ip :{}, {}", peer.getIp(), e.getMessage());
+
+        while (successCount < network.maxOutCount() && count < NetworkConstant.NETWORK_BROAD_MAX_TRY_COUNT) {
+            for (Peer peer : broadPeers) {
+                if (successPeers.contains(peer)) {
+                    continue;
+                }
+                try {
+                    peer.sendMessage(message);
+                    successPeers.add(peer);
+                    successCount++;
+                } catch (NotYetConnectedException | IOException e) {
+                    Log.warn("broadcast message error ， maybe the peer closed ! peer ip :{}, {}", peer.getIp(), e.getMessage());
+                }
             }
+            if (successCount < network.maxOutCount()) {
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                broadPeers = peersManager.getAvailablePeers(excludePeerId);
+            }
+            count++;
         }
 
-        if (successCount == 0) {
-            return new BroadcastResult(false, "broadcast fail");
-        }
         Log.debug("成功广播给{}个节点，消息{}", successCount, message);
         result.setBroadcastPeers(successPeers);
         return result;

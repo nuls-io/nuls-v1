@@ -1,11 +1,13 @@
 package io.nuls.network.service.impl;
 
 
+import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.ThreadManager;
+import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.network.IPUtil;
 import io.nuls.core.utils.str.StringUtils;
@@ -80,8 +82,14 @@ public class PeersManager {
             peer.setType(Peer.OUT);
             addPeerToGroup(NetworkConstant.NETWORK_PEER_OUT_GROUP, peer);
         }
-        System.out.println("-----------peerManager start");
 
+        boolean isConsensus = ConfigLoader.getCfgValue(PocConsensusConstant.CFG_CONSENSUS_SECTION, PocConsensusConstant.PROPERTY_DELEGATE_PEER, false);
+        if (isConsensus) {
+            network.maxOutCount(network.maxOutCount() * 5);
+            network.maxInCount(network.maxInCount() * 5);
+        }
+
+        System.out.println("-----------peerManager start");
         //start  heart beat thread
         ThreadManager.createSingleThreadAndRun(NulsConstant.MODULE_ID_NETWORK, "peerDiscovery", this.discovery);
     }

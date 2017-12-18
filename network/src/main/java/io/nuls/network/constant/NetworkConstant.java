@@ -30,7 +30,8 @@ public interface NetworkConstant {
     String NETWORK_PEER_IN_GROUP = "inPeers";
     String NETWORK_PEER_OUT_GROUP = "outPeers";
     String NETWORK_PEER_CONSENSUS_GROUP = "consensus_Group";
-
+    int NETWORK_PEER_OUT_MIN_COUNT = 1;
+    int NETWORK_BROAD_MAX_TRY_COUNT = 3;
 
     //network message type
 

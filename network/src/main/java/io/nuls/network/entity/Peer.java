@@ -331,13 +331,6 @@ public class Peer extends BaseNulsData {
     }
 
     @Override
-    public boolean equals(Object o) {
-        Peer other = (Peer) o;
-        return this.getHash().equals(other.getHash());
-    }
-
-
-    @Override
     public String toString() {
         StringBuffer buffer = new StringBuffer();
         buffer.append("peer:{");
@@ -442,5 +435,14 @@ public class Peer extends BaseNulsData {
 
     public AbstractNetWorkDataHandlerFactory getMessageHandlerFactory() {
         return this.messageHandlerFactory;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        Peer other = (Peer) obj;
+        if (StringUtils.isBlank(other.getHash())) {
+            return false;
+        }
+        return other.getHash().equals(this.hash);
     }
 }
