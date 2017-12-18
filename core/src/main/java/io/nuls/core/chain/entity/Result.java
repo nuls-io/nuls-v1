@@ -16,25 +16,23 @@ public class Result<T> {
 
     private T object;
 
-    public Result() {
-
-    }
-
-    public Result(boolean success, String message) {
-        this.success = success;
-        this.message = message;
-    }
-
-    public Result(boolean success, String message, ErrorCode errorCode) {
+    public Result(boolean success, String message, ErrorCode errorCode,T object) {
         this.success = success;
         this.message = message;
         this.errorCode = errorCode;
+        this.object = object;
+    }
+
+    public Result() {
+        this(false,"",ErrorCode.SUCCESS,null);
+    }
+
+    public Result(boolean success, String message) {
+        this(success,message,ErrorCode.SUCCESS,null);
     }
 
     public Result(boolean success, String message, T t) {
-        this.success = success;
-        this.message = message;
-        this.object = t;
+        this(success,message,ErrorCode.SUCCESS,t);
     }
 
     public boolean isSuccess() {
