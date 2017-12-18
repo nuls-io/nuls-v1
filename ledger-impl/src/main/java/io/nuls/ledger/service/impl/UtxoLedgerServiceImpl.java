@@ -38,6 +38,18 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
+    public Transaction getTxFromCache(String hash) {
+        // todo auto-generated method stub(niels)
+        return null;
+    }
+
+    @Override
+    public boolean txExist(String hash) {
+        // todo auto-generated method stub(niels)
+        return false;
+    }
+
+    @Override
     public Balance getBalance(String address) {
         Balance balance = ledgerCacheService.getBalance(address);
         if (null == balance) {
@@ -112,6 +124,12 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     public UnlockNulsTransaction createUnlockTx(LockNulsTransaction lockNulsTransaction) {
+        // todo auto-generated method stub(niels)
+        return null;
+    }
+
+    @Override
+    public List<Transaction> queryListByHashs(List<NulsDigestData> txHashList) {
         // todo auto-generated method stub(niels)
         return null;
     }

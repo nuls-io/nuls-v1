@@ -20,6 +20,10 @@ public interface LedgerService {
 
     void cacheTx(Transaction tx);
 
+    Transaction getTxFromCache(String hash);
+
+    boolean txExist(String hash);
+
     Balance getBalance(String address);
 
     boolean transfer(Address address, String password, Address toAddress, double amount, String remark);
@@ -37,4 +41,6 @@ public interface LedgerService {
     Transaction getTransaction(NulsDigestData txHash);
 
     UnlockNulsTransaction createUnlockTx(LockNulsTransaction lockNulsTransaction);
+
+    List<Transaction> queryListByHashs(List<NulsDigestData> txHashList);
 }

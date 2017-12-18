@@ -7,6 +7,7 @@ import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -17,29 +18,36 @@ public class AskSmallBlockData extends BaseNulsData {
 
     private long height;
 
-    private long txCount;
-
     private List<NulsDigestData> txHashList;
 
     @Override
     public int size() {
         int size = 0;
         size += VarInt.sizeOf(height);
-        size += VarInt.sizeOf(txCount);
+        size += VarInt.sizeOf(txHashList.size());
         size += this.getTxHashBytesLength();
         return size;
     }
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        // todo auto-generated method stub(niels)
-
+        stream.writeVarInt(height);
+        stream.writeVarInt(txHashList.size());
+        for(NulsDigestData data:txHashList){
+            data.serializeToStream(stream);
+        }
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
-        // todo auto-generated method stub(niels)
-
+       this.height = byteBuffer.readVarInt();
+       long txCount = byteBuffer.readVarInt();
+       this.txHashList = new ArrayList<>();
+       for(int i=0;i<txCount;i++){
+           NulsDigestData data = new NulsDigestData();
+           data.parse(byteBuffer);
+           this.txHashList.add(data);
+       }
     }
 
     private byte[] getTxHashListBytes() throws IOException {
@@ -70,14 +78,6 @@ public class AskSmallBlockData extends BaseNulsData {
 
     public void setHeight(long height) {
         this.height = height;
-    }
-
-    public long getTxCount() {
-        return txCount;
-    }
-
-    public void setTxCount(long txCount) {
-        this.txCount = txCount;
     }
 
     public List<NulsDigestData> getTxHashList() {

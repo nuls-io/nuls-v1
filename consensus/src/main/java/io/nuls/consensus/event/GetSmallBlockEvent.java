@@ -24,7 +24,6 @@ import java.util.List;
 public class GetSmallBlockEvent extends BaseConsensusEvent<AskSmallBlockData> {
 
 
-
     public GetSmallBlockEvent() {
         super(ConsensusEventType.GET_SMALL_BLOCK);
     }
@@ -33,10 +32,7 @@ public class GetSmallBlockEvent extends BaseConsensusEvent<AskSmallBlockData> {
     @Override
     protected AskSmallBlockData parseEventBody(NulsByteBuffer byteBuffer) {
         AskSmallBlockData data = new AskSmallBlockData();
-         //todo
-
-
-
+        data.parse(byteBuffer);
         return data;
     }
 

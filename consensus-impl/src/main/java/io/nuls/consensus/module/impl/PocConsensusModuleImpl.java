@@ -99,7 +99,11 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
 
         GetBlockHandler getBlockHandler = new GetBlockHandler();
         getBlockHandler.addFilter(new GetBlockEventFilter());
-        processorService.registerEventHandler(GetBlockEvent.class, getBlockHandler);
+        processorService.registerEventHandler(GetSmallBlockEvent.class, getBlockHandler);
+
+        GetSmallBlockHandler getSmallBlockHandler = new GetSmallBlockHandler();
+        getSmallBlockHandler.addFilter(new GetSmallBlockEventFilter());
+        processorService.registerEventHandler(GetSmallBlockEvent.class, getSmallBlockHandler);
 
         RegisterAgentHandler registerAgentHandler = new RegisterAgentHandler();
         registerAgentHandler.addFilter(new RegisterAgentEventFilter());
