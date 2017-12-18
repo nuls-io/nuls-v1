@@ -17,6 +17,8 @@ public interface NetworkService {
 
     boolean isSeedPeer(String peerId);
 
+    boolean isSeedPeer();
+
     void addPeer(Peer peer);
 
     void removePeer(String peerId);

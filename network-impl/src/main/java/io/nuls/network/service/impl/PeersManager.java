@@ -7,6 +7,8 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.ThreadManager;
 import io.nuls.core.utils.log.Log;
+import io.nuls.core.utils.network.IPUtil;
+import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.BlockDao;
 import io.nuls.db.dao.PeerDao;
 import io.nuls.network.constant.NetworkConstant;
@@ -91,10 +93,27 @@ public class PeersManager {
         return seedPeers;
     }
 
+    /**
+     * when peerId is null, check myself
+     *
+     * @param peerId
+     * @return
+     */
     public boolean isSeedPeers(String peerId) {
-        for (Peer peer : getSeedPeers()) {
-            if (peer.getHash().equals(peerId)) {
-                return true;
+        if (StringUtils.isBlank(peerId)) {
+            Set<String> ips = IPUtil.getIps();
+            for (String self : ips) {
+                for (Peer peer : getSeedPeers()) {
+                    if (peer.getHash().equals(self)) {
+                        return true;
+                    }
+                }
+            }
+        } else {
+            for (Peer peer : getSeedPeers()) {
+                if (peer.getHash().equals(peerId)) {
+                    return true;
+                }
             }
         }
         return false;

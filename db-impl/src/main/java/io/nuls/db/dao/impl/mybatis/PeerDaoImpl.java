@@ -32,7 +32,9 @@ public class PeerDaoImpl extends BaseDaoImpl<PeerMapper, String, PeerPo> impleme
         Searchable searchable = new Searchable();
         PageHelper.startPage(1, 100);
         PageHelper.orderBy("last_fail_time asc");
-        searchable.addCondition("id", SearchOperator.notIn, keys);
+        if (!keys.isEmpty()) {
+            searchable.addCondition("id", SearchOperator.notIn, keys);
+        }
         searchable.addCondition("last_fail_time", SearchOperator.lt, TimeService.currentTimeMillis() - TimeService.ONE_HOUR);
         List<PeerPo> list = getMapper().selectList(searchable);
         if (list.size() <= size) {

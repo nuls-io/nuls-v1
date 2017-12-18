@@ -84,6 +84,11 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
+    public boolean isSeedPeer() {
+        return peersManager.isSeedPeers(null);
+    }
+
+    @Override
     public void addPeer(Peer peer) {
         peersManager.addPeer(peer);
     }
