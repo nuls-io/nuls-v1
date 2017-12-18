@@ -2,6 +2,8 @@ package io.nuls.account.service.impl;
 
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
+import io.nuls.account.entity.event.AliasEvent;
+import io.nuls.account.entity.tx.AliasTransaction;
 import io.nuls.account.manager.AccountManager;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.account.util.AccountTool;
@@ -24,6 +26,8 @@ import io.nuls.db.dao.AccountDao;
 import io.nuls.db.dao.AliasDao;
 import io.nuls.db.entity.AccountPo;
 import io.nuls.db.entity.AliasPo;
+import io.nuls.ledger.entity.tx.LockNulsTransaction;
+import io.nuls.ledger.service.intf.LedgerService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +49,8 @@ public class AccountServiceImpl implements AccountService {
     private AccountDao accountDao = NulsContext.getInstance().getService(AccountDao.class);
 
     private AliasDao aliasDao = NulsContext.getInstance().getService(AliasDao.class);
+
+    private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
 
     private boolean isLockNow = true;
 
@@ -433,6 +439,19 @@ public class AccountServiceImpl implements AccountService {
         } catch (Exception e) {
             return new Result(false, e.getMessage());
         }
+    }
+
+    @Override
+    public Result sendAliasTx(String address, String password, String alias) {
+        Result result = canSetAlias(address, alias);
+        if (result.isFaild()) {
+            return result;
+        }
+
+        Account account = getAccount(address);
+        AliasEvent aliasEvent = new AliasEvent();
+        AliasTransaction aliasTransaction = new AliasTransaction(address, password);
+        LockNulsTransaction lockNulsTransaction = ledgerService.createLockNulsTx(account.getAddress().toString(), password,  );
     }
 
     @Override

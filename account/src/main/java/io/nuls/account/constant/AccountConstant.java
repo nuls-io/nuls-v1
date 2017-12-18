@@ -1,5 +1,7 @@
 package io.nuls.account.constant;
 
+import io.nuls.core.chain.entity.Na;
+
 /**
  *
  * @author Niels
@@ -15,4 +17,8 @@ public interface AccountConstant {
     int MAX_REMARK_LEN = 128;
 
     String ACCOUNT_LIST_CACHE = "ACCOUNT_LIST";
+
+    int TX_TYPE_ALIAS = 14;
+
+    Na aliasNa = Na.ZERO;
 }

@@ -1,13 +1,14 @@
 package io.nuls.account.module.impl;
 
 import io.nuls.account.constant.AccountConstant;
+import io.nuls.account.entity.tx.AliasTransaction;
+import io.nuls.account.entity.validator.AliasValidator;
 import io.nuls.account.manager.AccountManager;
 import io.nuls.account.module.intf.AbstractAccountModule;
 import io.nuls.account.service.impl.AccountServiceImpl;
 import io.nuls.account.service.intf.AccountService;
 
 /**
- *
  * @author Niels
  * @date 2017/10/30
  */
@@ -21,8 +22,9 @@ public class AccountModuleImpl extends AbstractAccountModule {
         manager.init();
         AccountService accountService = AccountServiceImpl.getInstance();
         this.registerService(accountService);
+        this.registerTransaction(AccountConstant.TX_TYPE_ALIAS, AliasTransaction.class);
+        AliasValidator.getInstance().setAccountService(accountService);
     }
-
 
     @Override
     public void shutdown() {

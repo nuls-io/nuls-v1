@@ -20,7 +20,7 @@ public interface AccountService {
 
     void resetKey(Account account);
 
-    void resetKey(Account account,String password);
+    void resetKey(Account account, String password);
 
     void resetKeys();
 
@@ -51,17 +51,22 @@ public interface AccountService {
     Result unlockAccounts(String password, int seconds);
 
     NulsSignData signData(byte[] bytes);
+
     NulsSignData signData(NulsDigestData digestData);
-    NulsSignData signData(byte[] bytes,String password);
-    NulsSignData signData(NulsDigestData digestData,String password);
-    NulsSignData signData(byte[] bytes,Account account,String password);
-    NulsSignData signData(NulsDigestData digestData,Account account,String password);
+
+    NulsSignData signData(byte[] bytes, String password);
+
+    NulsSignData signData(NulsDigestData digestData, String password);
+
+    NulsSignData signData(byte[] bytes, Account account, String password);
+
+    NulsSignData signData(NulsDigestData digestData, Account account, String password);
 
     Result canSetAlias(String address, String alias);
 
     Result setAlias(String address, String alias);
 
-//    void sendAliasTx
+    Result sendAliasTx(String address, String password, String alias);
 
-    Result verifySign(byte[] bytes,NulsSignData data);
+    Result verifySign(byte[] bytes, NulsSignData data);
 }
