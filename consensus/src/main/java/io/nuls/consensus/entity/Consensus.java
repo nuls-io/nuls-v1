@@ -1,14 +1,10 @@
 package io.nuls.consensus.entity;
 
-import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.intf.NulsCloneable;
-import io.nuls.core.crypto.VarInt;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
-import io.nuls.core.utils.log.Log;
 
 import java.io.IOException;
 
@@ -16,17 +12,17 @@ import java.io.IOException;
  * @author Niels
  * @date 2017/11/7
  */
-public class ConsensusAccount<T extends BaseNulsData> extends BaseNulsData implements NulsCloneable{
+public class Consensus<T extends BaseNulsData> extends BaseNulsData implements NulsCloneable {
 
-    private Address address;
+    private String address;
 
     private T extend;
 
     @Override
     public int size() {
         int size = 0;
-        size += Address.HASH_LENGTH;
-        if(null!=extend){
+        size += Utils.sizeOfSerialize(address);
+        if (null != extend) {
             size += extend.size();
         }
         return size;
@@ -34,38 +30,35 @@ public class ConsensusAccount<T extends BaseNulsData> extends BaseNulsData imple
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeBytesWithLength(address.getHash160());
-        if(null!=extend){
+        stream.writeString(address);
+        if (null != extend) {
             stream.writeBytesWithLength(extend.serialize());
         }
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
-        try {
-            this.address = Address.fromHashs(byteBuffer.readByLengthByte());
-        } catch (NulsException e) {
-            Log.error(e);
-        }
-        if(!byteBuffer.isFinished()){
+        this.address = byteBuffer.readString();
+        if (!byteBuffer.isFinished()) {
             this.extend = this.parseExtend(byteBuffer);
         }
     }
 
     /**
      * Extended use method
+     *
      * @param byteBuffer
      * @return
      */
-    protected T parseExtend(NulsByteBuffer byteBuffer){
+    protected T parseExtend(NulsByteBuffer byteBuffer) {
         return null;
     }
 
-    public Address getAddress() {
+    public String getAddress() {
         return address;
     }
 
-    public void setAddress(Address address) {
+    public void setAddress(String address) {
         this.address = address;
     }
 

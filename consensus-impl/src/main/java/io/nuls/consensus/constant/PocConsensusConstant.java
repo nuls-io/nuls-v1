@@ -19,6 +19,7 @@ public interface PocConsensusConstant {
     short EVENT_TYPE_YELLOW_PUNISH = 7;
     short EVENT_TYPE_REGISTER_AGENT = 8;
     short EVENT_TYPE_ASK_BLOCK = 9;
+    short EVENT_TYPE_ASK_CONSENSUS = 10;
 
 
     int TX_TYPE_REGISTER_AGENT = 10;
@@ -53,11 +54,11 @@ public interface PocConsensusConstant {
      */
     long MAX_BLOCK_SIZE = 2 << 21;
 
-    Na AGENT_DEPOSIT_LOWER_LIMIT = Na.parseNa(20000);
-    Na ENTRUSTER_DEPOSIT_LOWER_LIMIT = Na.parseNa(2000);
+    Na AGENT_DEPOSIT_LOWER_LIMIT = Na.parseNuls(20000);
+    Na ENTRUSTER_DEPOSIT_LOWER_LIMIT = Na.parseNuls(2000);
 
-    Na SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT = Na.parseNa(200000);
-    Na SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT = Na.parseNa(500000);
+    Na SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT = Na.parseNuls(200000);
+    Na SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT = Na.parseNuls(500000);
     /**
      * unit: %
      */

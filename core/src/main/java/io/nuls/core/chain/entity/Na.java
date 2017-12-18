@@ -69,15 +69,7 @@ public final class Na implements Comparable<Na>, Serializable {
         return value;
     }
 
-    public static Na valueOf(final int nas, final int cents) {
-        Utils.checkState(cents < 100);
-        Utils.checkState(cents >= 0);
-        Utils.checkState(nas >= 0);
-        final Na coin = NA.multiply(nas).add(CENT.multiply(cents));
-        return coin;
-    }
-
-    public static Na parseNa(final String str) {
+    public static Na parseNuls(final String str) {
         try {
             long value = new BigDecimal(str).movePointRight(SMALLEST_UNIT_EXPONENT).toBigIntegerExact().longValue();
             return Na.valueOf(value);
@@ -86,7 +78,7 @@ public final class Na implements Comparable<Na>, Serializable {
         }
     }
 
-    public static Na parseNa(final double nuls) {
+    public static Na parseNuls(final double nuls) {
         try {
             long value = new BigDecimal(nuls).movePointRight(SMALLEST_UNIT_EXPONENT).toBigIntegerExact().longValue();
             return Na.valueOf(value);
@@ -218,14 +210,6 @@ public final class Na implements Comparable<Na>, Serializable {
 
     public Na negate() {
         return new Na(-this.value);
-    }
-
-    /**
-     * Returns the number of satoshis of this monetary value. It's deprecated in favour of accessing {@link #value}
-     * directly.
-     */
-    public long longValue() {
-        return this.value;
     }
 
     public String toText() {

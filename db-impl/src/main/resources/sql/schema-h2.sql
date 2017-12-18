@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS `block` (
   `consensus_address` varchar(40) DEFAULT NULL,
   `varsion` int(5) NOT NULL,
   `txCount` int(5) NOT NULL,
-  `txs` varbinary(1024) NOT NULL,
+  `bates` varbinary(1024) NOT NULL,
   `sign` varbinary(1024) NOT NULL,
   PRIMARY KEY (`hash`)
 );
@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS `delegate_account` (
   `peer_address` varchar(40) NOT NULL,
   `deposit` decimal(19,8) NOT NULL,
   `remark` varchar(255) NOT NULL,
+  `start_time` bigint(14) NOT NULL,
   PRIMARY KEY (`id`)
 );
 CREATE TABLE IF NOT EXISTS `delegate` (

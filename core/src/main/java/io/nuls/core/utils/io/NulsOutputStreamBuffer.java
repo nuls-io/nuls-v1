@@ -2,7 +2,9 @@ package io.nuls.core.utils.io;
 
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.crypto.Utils;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 
 import java.io.IOException;
@@ -36,13 +38,6 @@ public class NulsOutputStreamBuffer {
         out.write(new VarInt(val).encode());
     }
 
-    public void writeBytesWithLength(String value) throws IOException {
-        if (StringUtils.isBlank(value)) {
-            out.write(new VarInt(0).encode());
-            return;
-        }
-        this.writeBytesWithLength(value.getBytes(NulsContext.DEFAULT_ENCODING));
-    }
 
     public void writeBytesWithLength(byte[] bytes) throws IOException {
         if (null == bytes || bytes.length == 0) {
@@ -71,5 +66,23 @@ public class NulsOutputStreamBuffer {
 
     public void writeDouble(double val) throws IOException {
         this.writeBytesWithLength(Utils.double2Bytes(val));
+    }
+
+    public void writeString(String val) {
+        if (StringUtils.isBlank(val)) {
+            try {
+                out.write(new VarInt(0).encode());
+            } catch (IOException e) {
+                Log.error(e);
+                throw new NulsRuntimeException(e);
+            }
+            return;
+        }
+        try {
+            this.writeBytesWithLength(val.getBytes(NulsContext.DEFAULT_ENCODING));
+        } catch (IOException e) {
+            Log.error(e);
+            throw new NulsRuntimeException(e);
+        }
     }
 }

@@ -5,7 +5,7 @@ import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.member.Delegate;
-import io.nuls.consensus.entity.ConsensusAccount;
+import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.consensus.entity.params.QueryConsensusAccountParam;
 import io.nuls.consensus.entity.tx.PocExitConsensusTransaction;
@@ -68,11 +68,11 @@ public class PocConsensusServiceImpl implements ConsensusService {
     private void joinTheConsensus(Account account, String password, double amount, String agentAddress) throws IOException {
         JoinConsensusEvent event = new JoinConsensusEvent();
         PocJoinConsensusTransaction tx = new PocJoinConsensusTransaction();
-        ConsensusAccount<Delegate> ca = new ConsensusAccount<>();
-        ca.setAddress(account.getAddress());
+        Consensus<Delegate> ca = new Consensus<>();
+        ca.setAddress(account.getAddress().toString());
         Delegate delegate = new Delegate();
         delegate.setDelegateAddress(agentAddress);
-        delegate.setDeposit(Na.parseNa(amount));
+        delegate.setDeposit(Na.parseNuls(amount));
         ca.setExtend(delegate);
         tx.setTxData(ca);
         LockNulsTransaction lockNulsTransaction = ledgerService.createLockNulsTx(account.getAddress().toString(), password, delegate.getDeposit());
@@ -114,11 +114,11 @@ public class PocConsensusServiceImpl implements ConsensusService {
     }
 
     @Override
-    public List<ConsensusAccount> getConsensusAccountList(String address, String agentAddress) {
+    public List<Consensus> getConsensusAccountList(String address, String agentAddress) {
         QueryConsensusAccountParam param = new QueryConsensusAccountParam();
         param.setAddress(address);
         param.setAgentAddress(agentAddress);
-        List<ConsensusAccount> list = consensusCacheService.getConsensusAccountList(param);
+        List<Consensus> list = consensusCacheService.getConsensusAccountList(param);
         return list;
     }
 
@@ -131,13 +131,6 @@ public class PocConsensusServiceImpl implements ConsensusService {
     public Na getTxFee(long blockHeight, Transaction tx) {
         long x = blockHeight / PocConsensusConstant.BLOCK_COUNT_OF_YEAR + 1;
         return PocConsensusConstant.TRANSACTION_FEE.div(x);
-    }
-
-
-    public double getDelegateFee(long blockHeight, Transaction tx) {
-//        long x = blockHeight / PocConsensusConstant.BLOCK_COUNT_OF_YEAR + 1;
-        //todo Dynamic adjustment of commission
-        return PocConsensusConstant.DEFAULT_COMMISSION_RATE;
     }
 
     @Override
@@ -156,7 +149,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
         if (params.getCommissionRate() != null) {
             Agent delegate = new Agent();
             delegate.setDelegateAddress(params.getAgentAddress());
-            delegate.setDeposit(Na.parseNa(params.getDeposit()));
+            delegate.setDeposit(Na.parseNuls(params.getDeposit()));
             delegate.setCommissionRate(params.getCommissionRate());
             delegate.setIntroduction(params.getIntroduction());
             try {
