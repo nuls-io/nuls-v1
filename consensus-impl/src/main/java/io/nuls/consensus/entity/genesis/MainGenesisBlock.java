@@ -1,6 +1,6 @@
 package io.nuls.consensus.entity.genesis;
 
-import io.nuls.consensus.entity.NulsBlock;
+import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.utils.date.DateUtil;
@@ -9,7 +9,7 @@ import io.nuls.core.utils.date.DateUtil;
  * @author Niels
  * @date 2017/11/10
  */
-public final class MainGenesisBlock extends NulsBlock {
+public final class MainGenesisBlock extends Block {
 
     private static final MainGenesisBlock INSTANCE = new MainGenesisBlock();
 
@@ -19,9 +19,6 @@ public final class MainGenesisBlock extends NulsBlock {
 
     private MainGenesisBlock() {
         this.setHeader(new BlockHeader());
-        this.setCountOfRound(1);
-        this.setOrderInRound(1);
-        this.setRoundStartTime(DateUtil.convertStringToDate("2017-12-10 00:00:00").getTime());
         initGengsisTxs();
         fillHeader();
     }

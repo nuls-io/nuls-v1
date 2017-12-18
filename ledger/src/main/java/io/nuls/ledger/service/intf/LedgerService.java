@@ -22,6 +22,8 @@ public interface LedgerService {
 
     Transaction getTxFromCache(String hash);
 
+    boolean txExist(String hash);
+
     Balance getBalance(String address);
 
     boolean transfer(Address address, String password, Address toAddress, double amount, String remark);

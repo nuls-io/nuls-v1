@@ -1,6 +1,7 @@
 package io.nuls.core.chain.entity;
 
 import io.nuls.core.chain.manager.BlockHeaderValidatorManager;
+import io.nuls.core.crypto.VarInt;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
@@ -28,7 +29,7 @@ public class BlockHeader extends BaseNulsData {
 
     private String packingAddress;
 
-    private List<byte[]> txHashList;
+    private List<NulsDigestData> txHashList;
 
     private NulsSignData sign;
 
@@ -55,8 +56,8 @@ public class BlockHeader extends BaseNulsData {
         size += Utils.sizeOfSerialize(txCount);
         size += Utils.sizeOfSerialize(packingAddress);
         size += sign.size();
-        for (byte[] txHash : txHashList) {
-            size += Utils.sizeOfSerialize(txHash);
+        for (NulsDigestData txHash : txHashList) {
+            size += txHash.size();
         }
         return size;
     }
@@ -73,7 +74,7 @@ public class BlockHeader extends BaseNulsData {
         stream.writeString(packingAddress);
         this.sign.serializeToStream(stream);
         for (int i = 0; i < txHashList.size(); i++) {
-            stream.writeBytesWithLength(txHashList.get(i));
+            txHashList.get(i).serializeToStream(stream);
         }
     }
 
@@ -82,9 +83,9 @@ public class BlockHeader extends BaseNulsData {
         this.version = new NulsVersion(byteBuffer.readShort());
         this.hash = new NulsDigestData();
         this.hash.parse(byteBuffer);
-        this.preHash  = new NulsDigestData();
+        this.preHash = new NulsDigestData();
         this.preHash.parse(byteBuffer);
-        this.merkleHash =    new NulsDigestData();
+        this.merkleHash = new NulsDigestData();
         this.merkleHash.parse(byteBuffer);
         this.time = byteBuffer.readVarInt();
         this.height = byteBuffer.readVarInt();
@@ -94,7 +95,9 @@ public class BlockHeader extends BaseNulsData {
         this.sign.parse(byteBuffer);
         txHashList = new ArrayList<>();
         for (int i = 0; i < txCount; i++) {
-            txHashList.add(byteBuffer.readByLengthByte());
+            NulsDigestData hash = new NulsDigestData();
+            hash.parse(byteBuffer);
+            txHashList.add(hash);
         }
     }
 
@@ -154,11 +157,11 @@ public class BlockHeader extends BaseNulsData {
         this.sign = sign;
     }
 
-    public List<byte[]> getTxHashList() {
+    public List<NulsDigestData> getTxHashList() {
         return txHashList;
     }
 
-    public void setTxHashList(List<byte[]> txHashList) {
+    public void setTxHashList(List<NulsDigestData> txHashList) {
         this.txHashList = txHashList;
     }
 

@@ -18,11 +18,6 @@ public class BlockCacheService {
         //todo
     }
 
-
-    private void cacheTransaction(Transaction tx){
-        //todo
-    }
-
     public void clear() {
         // todo auto-generated method stub(niels)
 

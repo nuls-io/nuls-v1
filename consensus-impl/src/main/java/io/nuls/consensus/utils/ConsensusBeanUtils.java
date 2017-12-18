@@ -3,7 +3,6 @@ package io.nuls.consensus.utils;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
-import io.nuls.consensus.entity.NulsBlock;
 import io.nuls.consensus.entity.genesis.DevGenesisBlock;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.member.Delegate;
@@ -58,7 +57,7 @@ public class ConsensusBeanUtils {
         if(null==po){
             return null;
         }
-        NulsBlock block = new NulsBlock();
+        Block block = new Block();
         //todo
         return DevGenesisBlock.getInstance();
     }

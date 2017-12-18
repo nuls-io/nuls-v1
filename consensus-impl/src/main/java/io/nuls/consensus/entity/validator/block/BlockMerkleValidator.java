@@ -2,7 +2,6 @@ package io.nuls.consensus.entity.validator.block;
 
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 
@@ -33,7 +32,7 @@ public class BlockMerkleValidator implements NulsDataValidator<Block> {
 
     private NulsDigestData buildMerkleHash(Block data) {
         //todo
-        List<byte[]> txHashList = data.getHeader().getTxHashList();
+        List<NulsDigestData> txHashList = data.getHeader().getTxHashList();
         //todo temp
         return data.getHeader().getMerkleHash();
     }

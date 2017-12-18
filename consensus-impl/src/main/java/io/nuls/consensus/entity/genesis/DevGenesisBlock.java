@@ -1,7 +1,6 @@
 package io.nuls.consensus.entity.genesis;
 
 import io.nuls.account.service.intf.AccountService;
-import io.nuls.consensus.entity.NulsBlock;
 import io.nuls.core.chain.entity.*;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.date.DateUtil;
@@ -15,7 +14,7 @@ import java.util.List;
  * @date 2017/11/10
  */
 //todo temp
-public final class DevGenesisBlock extends NulsBlock {
+public final class DevGenesisBlock extends Block {
 
     private static final DevGenesisBlock INSTANCE = new DevGenesisBlock();
 
@@ -24,9 +23,6 @@ public final class DevGenesisBlock extends NulsBlock {
     }
 
     private DevGenesisBlock() {
-        this.setCountOfRound(1);
-        this.setOrderInRound(1);
-        this.setRoundStartTime(DateUtil.convertStringToDate("2017-12-10 00:00:00").getTime());
         initGengsisTxs();
         fillHeader();
     }
