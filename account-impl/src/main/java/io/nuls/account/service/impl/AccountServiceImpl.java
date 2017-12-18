@@ -1,5 +1,6 @@
 package io.nuls.account.service.impl;
 
+import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.account.entity.event.AliasEvent;
@@ -7,6 +8,7 @@ import io.nuls.account.entity.tx.AliasTransaction;
 import io.nuls.account.manager.AccountManager;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.account.util.AccountTool;
+import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.chain.entity.Result;
@@ -26,6 +28,7 @@ import io.nuls.db.dao.AccountDao;
 import io.nuls.db.dao.AliasDao;
 import io.nuls.db.entity.AccountPo;
 import io.nuls.db.entity.AliasPo;
+import io.nuls.event.bus.event.service.intf.EventService;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.service.intf.LedgerService;
 
@@ -51,6 +54,8 @@ public class AccountServiceImpl implements AccountService {
     private AliasDao aliasDao = NulsContext.getInstance().getService(AliasDao.class);
 
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
+
+    private EventService eventService = NulsContext.getInstance().getService(EventService.class);
 
     private boolean isLockNow = true;
 
@@ -448,10 +453,22 @@ public class AccountServiceImpl implements AccountService {
             return result;
         }
 
-        Account account = getAccount(address);
-        AliasEvent aliasEvent = new AliasEvent();
-        AliasTransaction aliasTransaction = new AliasTransaction(address, password);
-        LockNulsTransaction lockNulsTransaction = ledgerService.createLockNulsTx(account.getAddress().toString(), password,  );
+        try {
+            Account account = getAccount(address);
+            AliasEvent event = new AliasEvent();
+            AliasTransaction aliasTx = new AliasTransaction(address, password);
+            LockNulsTransaction nulsTx = ledgerService.createLockNulsTx(account.getAddress().toString(), password, AccountConstant.ALIAS_Na);
+            aliasTx.setNulsTx(nulsTx);
+            aliasTx.setHash(NulsDigestData.calcDigestData(aliasTx.serialize()));
+            aliasTx.setSign(signData(aliasTx.getHash(), account, password));
+            ledgerService.cacheTx(aliasTx);
+            event.setEventBody(aliasTx);
+            eventService.broadcastHashAndCache(event);
+        } catch (Exception e) {
+            Log.error(e);
+            return new Result(false, e.getMessage());
+        }
+        return new Result(true, "OK");
     }
 
     @Override

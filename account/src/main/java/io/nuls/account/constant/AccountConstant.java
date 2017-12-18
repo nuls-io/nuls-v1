@@ -20,5 +20,7 @@ public interface AccountConstant {
 
     int TX_TYPE_ALIAS = 14;
 
-    Na aliasNa = Na.ZERO;
+    short EVENT_TYPE_ALIAS = 14;
+
+    Na ALIAS_Na = Na.parseNuls(1);
 }

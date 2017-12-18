@@ -1,12 +1,17 @@
 package io.nuls.account.module.impl;
 
 import io.nuls.account.constant.AccountConstant;
+import io.nuls.account.entity.event.AliasEvent;
 import io.nuls.account.entity.tx.AliasTransaction;
 import io.nuls.account.entity.validator.AliasValidator;
+import io.nuls.account.event.filter.AliasEventFilter;
+import io.nuls.account.event.handler.AliasEventHandler;
 import io.nuls.account.manager.AccountManager;
 import io.nuls.account.module.intf.AbstractAccountModule;
 import io.nuls.account.service.impl.AccountServiceImpl;
 import io.nuls.account.service.intf.AccountService;
+import io.nuls.core.context.NulsContext;
+import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
 
 /**
  * @author Niels
@@ -15,6 +20,7 @@ import io.nuls.account.service.intf.AccountService;
 public class AccountModuleImpl extends AbstractAccountModule {
 
     private AccountManager manager = AccountManager.getInstance();
+    private NetworkProcessorService processorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
 
     @Override
 
@@ -23,7 +29,15 @@ public class AccountModuleImpl extends AbstractAccountModule {
         AccountService accountService = AccountServiceImpl.getInstance();
         this.registerService(accountService);
         this.registerTransaction(AccountConstant.TX_TYPE_ALIAS, AliasTransaction.class);
+        this.registerEvent(AccountConstant.EVENT_TYPE_ALIAS, AliasEvent.class);
         AliasValidator.getInstance().setAccountService(accountService);
+
+        registerHanders();
+    }
+
+    private void registerHanders() {
+        AliasEventHandler.getInstance().addFilter(AliasEventFilter.getInstance());
+        processorService.registerEventHandler(AliasEvent.class, AliasEventHandler.getInstance());
     }
 
     @Override
