@@ -27,7 +27,7 @@ public class ConsensusCacheService {
      */
     private static final String CACHE_CONSENSUS_STATUS_INFO = "consensus-status-info";
     private static final String IN_AGENT_LIST = "agent-list-in";
-    private static final String WAIT_AGENT_LIST = "agent-list-in";
+    private static final String WAIT_AGENT_LIST = "agent-list-wait";
     private static final String CACHE_DELEGATE_LIST = "delegate-list";
 
     private static final ConsensusCacheService INSTANCE = new ConsensusCacheService();

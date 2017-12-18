@@ -177,7 +177,7 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
             blockMaintenanceThread.checkGenesisBlock();
             blockMaintenanceThread.syncBlock();
         } catch (Exception e) {
-            Log.error(e);
+            Log.error(e.getMessage());
         } finally {
             ThreadManager.createSingleThreadAndRun(this.getModuleId(),
                     BlockMaintenanceThread.THREAD_NAME, blockMaintenanceThread);
@@ -194,7 +194,6 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
 
     @Override
     public void destroy() {
-
     }
 
     @Override
