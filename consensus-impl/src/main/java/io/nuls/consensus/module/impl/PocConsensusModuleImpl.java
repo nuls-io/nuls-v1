@@ -4,7 +4,7 @@ import io.nuls.account.entity.Account;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.constant.PocConsensusConstant;
-import io.nuls.consensus.entity.ConsensusAccount;
+import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.consensus.entity.genesis.DevGenesisBlock;
 import io.nuls.consensus.entity.genesis.MainGenesisBlock;
@@ -64,7 +64,7 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
                 NulsContext.getInstance().setGenesisBlock(DevGenesisBlock.getInstance());
             }
         } catch (NulsException e) {
-            Log.error(e);
+            Log.error(e.getMessage());
             throw new NulsRuntimeException(e);
         }
         this.registerEvent(PocConsensusConstant.EVENT_TYPE_RED_PUNISH, RedPunishConsensusEvent.class);
@@ -135,7 +135,7 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
             Log.warn("local account is null!");
             return;
         }
-        ConsensusAccount<Agent> memberSelf =
+        Consensus<Agent> memberSelf =
                 consensusCacheService.getConsensusAccount(localAccount.getAddress().toString());
         if (null == memberSelf) {
             return;

@@ -10,4 +10,6 @@ public interface ConsensusEventType {
     short BLOCK = 3;
     short BLOCK_HEADER = 4;
     short GET_BLOCK = 5;
+    short GET_SMALL_BLOCK = 6;
+    short SMALL_BLOCK = 7;
 }

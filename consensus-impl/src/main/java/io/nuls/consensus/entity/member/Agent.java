@@ -1,17 +1,11 @@
 package io.nuls.consensus.entity.member;
 
-import io.nuls.account.entity.Address;
-import io.nuls.consensus.constant.ConsensusRole;
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.Na;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
-import io.nuls.core.utils.log.Log;
-import io.nuls.core.utils.str.StringUtils;
 
 import java.io.IOException;
 
@@ -31,6 +25,7 @@ public class Agent extends BaseNulsData {
     /**
      * the following fields is for The account self(delegate Account)
      */
+    private long startTime;
     private int status;
     private long roundNo;
     private long roundIndex;
@@ -51,9 +46,9 @@ public class Agent extends BaseNulsData {
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeVarInt(deposit.getValue());
-        stream.writeBytesWithLength(delegateAddress);
+        stream.writeString(delegateAddress);
         stream.writeDouble(this.commissionRate);
-        stream.writeBytesWithLength(this.introduction);
+        stream.writeString(this.introduction);
     }
 
     @Override
@@ -134,5 +129,13 @@ public class Agent extends BaseNulsData {
 
     public void setIntroduction(String introduction) {
         this.introduction = introduction;
+    }
+
+    public long getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
     }
 }

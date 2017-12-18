@@ -7,7 +7,6 @@ import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
 import java.io.IOException;
-import java.io.OutputStream;
 
 /**
  * @author facjas
@@ -18,6 +17,10 @@ public class NulsDigestData extends BaseNulsData {
     protected int digestAlgType;
     protected int digestLength;
     protected byte[] digestBytes;
+
+    private static final NulsDigestData getEmptyDigestData(){
+        return new NulsDigestData(new byte[]{0});
+    }
 
     public NulsDigestData() {
     }

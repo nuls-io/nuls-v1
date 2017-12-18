@@ -20,6 +20,17 @@ public class Delegate extends BaseNulsData {
     private Na deposit;
     private String delegateAddress;
 
+    private long startTime;
+    private String id;
+
+    public long getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
+    }
+
     public Na getDeposit() {
         return deposit;
     }
@@ -53,12 +64,20 @@ public class Delegate extends BaseNulsData {
     @Override
     public void serializeToStream(NulsOutputStreamBuffer buffer) throws IOException {
         buffer.writeVarInt(deposit.getValue());
-        buffer.writeBytesWithLength(delegateAddress);
+        buffer.writeString(delegateAddress);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
         this.deposit = Na.valueOf(byteBuffer.readVarInt());
         this.delegateAddress = byteBuffer.readString();
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

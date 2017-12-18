@@ -37,7 +37,7 @@ public class BasicTypeData<T> extends BaseNulsData {
         stream.write(type);
         switch (type) {
             case 1:
-                stream.writeBytesWithLength((String) val);
+                stream.writeString((String) val);
                 break;
             case 2:
                 stream.writeVarInt((Long) val);
@@ -55,7 +55,7 @@ public class BasicTypeData<T> extends BaseNulsData {
                 stream.writeBoolean((Boolean) val);
                 break;
             case 7:
-                stream.write((byte[]) val);
+                stream.writeBytesWithLength((byte[]) val);
                 break;
             default:
                 break;

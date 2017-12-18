@@ -1,6 +1,6 @@
 package io.nuls.consensus.service.intf;
 
-import io.nuls.consensus.entity.ConsensusAccount;
+import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
@@ -21,7 +21,7 @@ public interface ConsensusService {
 
     void exitTheConsensus(NulsDigestData joinTxHash, String password);
 
-    List<ConsensusAccount> getConsensusAccountList(String address,String agentAddress);
+    List<Consensus> getConsensusAccountList(String address, String agentAddress);
 
     ConsensusStatusInfo getConsensusInfo(String address);
 

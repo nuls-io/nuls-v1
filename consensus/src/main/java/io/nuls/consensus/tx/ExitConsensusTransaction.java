@@ -1,7 +1,6 @@
 package io.nuls.consensus.tx;
 
 import io.nuls.consensus.constant.ConsensusConstant;
-import io.nuls.consensus.entity.ConsensusAccount;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.utils.io.NulsByteBuffer;
 

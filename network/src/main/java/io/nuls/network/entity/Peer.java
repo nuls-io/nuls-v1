@@ -307,7 +307,7 @@ public class Peer extends BaseNulsData {
         stream.writeShort(version.getVersion());
         stream.write(new VarInt(magicNumber).encode());
         stream.write(new VarInt(port).encode());
-        stream.writeBytesWithLength(ip);
+        stream.writeString(ip);
     }
 
     @Override

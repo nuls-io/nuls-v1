@@ -4,14 +4,17 @@ import io.nuls.account.entity.Account;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.cache.service.intf.CacheService;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
-import io.nuls.consensus.entity.ConsensusAccount;
+import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.member.Delegate;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.consensus.entity.params.QueryConsensusAccountParam;
+import io.nuls.consensus.utils.ConsensusBeanUtils;
 import io.nuls.core.context.NulsContext;
 import io.nuls.db.dao.DelegateAccountDao;
 import io.nuls.db.dao.DelegateDao;
+import io.nuls.db.entity.DelegateAccountPo;
+import io.nuls.db.entity.DelegatePo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,9 +55,18 @@ public class ConsensusCacheService {
         this.cacheService.createCache(WAIT_AGENT_LIST);
         this.cacheService.createCache(CACHE_DELEGATE_LIST);
 
-        //todo 代理节点与委托单
         Account self = accountService.getLocalAccount();
-        this.delegateDao.queryAll();
+        List<DelegatePo> delegatePoList = this.delegateDao.queryAll();
+        List<DelegateAccountPo> delegateAccountPoList = this.delegateAccountDao.queryAll();
+        for(DelegateAccountPo po:delegateAccountPoList){
+            Consensus<Agent> ca =ConsensusBeanUtils.fromPojo(po);
+            this.addAgent(ca);
+            if(ca.getAddress().equals(self.getAddress().toString())){
+                //todo 自己的共识状态
+                ConsensusStatusInfo info = new ConsensusStatusInfo();
+                info.setStartTime(ca.getExtend().getStartTime());
+            }
+        }
     }
 
     public ConsensusStatusInfo getConsensusStatusInfo() {
@@ -67,7 +79,7 @@ public class ConsensusCacheService {
         this.cacheService.putElementWithoutClone(CACHE_CONSENSUS_STATUS_INFO, CACHE_CONSENSUS_STATUS_INFO, info);
     }
 
-    public void addAgent(ConsensusAccount<Agent> ca) {
+    public void addAgent(Consensus<Agent> ca) {
         if (ca.getExtend().getStatus() == ConsensusStatusEnum.IN.getCode()) {
             cacheService.putElement(IN_AGENT_LIST, ca.getAddress(), ca);
         } else if (ca.getExtend().getStatus() == ConsensusStatusEnum.WAITING.getCode()) {
@@ -75,10 +87,10 @@ public class ConsensusCacheService {
         }
     }
 
-    public ConsensusAccount<Agent> getConsensusAccount(String address) {
-        ConsensusAccount<Agent> ca = (ConsensusAccount<Agent>) this.cacheService.getElementValue(IN_AGENT_LIST, address);
+    public Consensus<Agent> getConsensusAccount(String address) {
+        Consensus<Agent> ca = (Consensus<Agent>) this.cacheService.getElementValue(IN_AGENT_LIST, address);
         if (ca == null) {
-            ca = (ConsensusAccount<Agent>) this.cacheService.getElementValue(WAIT_AGENT_LIST, address);
+            ca = (Consensus<Agent>) this.cacheService.getElementValue(WAIT_AGENT_LIST, address);
         }
         return ca;
     }
@@ -89,7 +101,7 @@ public class ConsensusCacheService {
     }
 
     public void changeStatus(String address, ConsensusStatusEnum statusEnum) {
-        ConsensusAccount<Agent> ca =getConsensusAccount(address);
+        Consensus<Agent> ca =getConsensusAccount(address);
         if (statusEnum.getCode() == ca.getExtend().getStatus()) {
             return;
         }
@@ -104,10 +116,10 @@ public class ConsensusCacheService {
 
     }
 
-    public List<ConsensusAccount> getConsensusAccountList(QueryConsensusAccountParam param) {
-        List<ConsensusAccount> list = new ArrayList<>();
-        ConsensusAccount<Delegate> consensusAccount = new
-                ConsensusAccount<>();
+    public List<Consensus> getConsensusAccountList(QueryConsensusAccountParam param) {
+        List<Consensus> list = new ArrayList<>();
+        Consensus<Delegate> consensus = new
+                Consensus<>();
         // todo auto-generated method stub(niels)
         return null;
     }

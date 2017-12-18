@@ -1,10 +1,5 @@
 package io.nuls.db.entity;
 
-import java.math.BigDecimal;
-/**
- * @author Niels
- * @date 2017/11/20
- */
 public class DelegatePo {
     /**
      *
@@ -40,7 +35,7 @@ public class DelegatePo {
      *
      * @mbg.generated
      */
-    private BigDecimal deposit;
+    private Long deposit;
 
     /**
      *
@@ -149,7 +144,7 @@ public class DelegatePo {
      *
      * @mbg.generated
      */
-    public BigDecimal getDeposit() {
+    public Long getDeposit() {
         return deposit;
     }
 
@@ -161,7 +156,7 @@ public class DelegatePo {
      *
      * @mbg.generated
      */
-    public void setDeposit(BigDecimal deposit) {
+    public void setDeposit(Long deposit) {
         this.deposit = deposit;
     }
 
