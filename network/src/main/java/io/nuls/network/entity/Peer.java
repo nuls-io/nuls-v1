@@ -88,8 +88,6 @@ public class Peer extends BaseNulsData {
 
     private AbstractNetWorkDataHandlerFactory messageHandlerFactory;
 
-    private PeerDao peerDao;
-
     public Peer() {
         super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
     }
@@ -104,7 +102,6 @@ public class Peer extends BaseNulsData {
         this.messageHandlerFactory = network.getMessageHandlerFactory();
         networkProcessorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
         localProcessorService = NulsContext.getInstance().getService(LocalProcessorService.class);
-        peerDao = NulsContext.getInstance().getService(PeerDao.class);
     }
 
     public Peer(AbstractNetworkParam network, int type) {
@@ -114,7 +111,6 @@ public class Peer extends BaseNulsData {
         this.messageHandlerFactory = network.getMessageHandlerFactory();
         networkProcessorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
         localProcessorService = NulsContext.getInstance().getService(LocalProcessorService.class);
-        peerDao = NulsContext.getInstance().getService(PeerDao.class);
     }
 
 
@@ -127,7 +123,6 @@ public class Peer extends BaseNulsData {
         this.messageHandlerFactory = network.getMessageHandlerFactory();
         networkProcessorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
         localProcessorService = NulsContext.getInstance().getService(LocalProcessorService.class);
-        peerDao = NulsContext.getInstance().getService(PeerDao.class);
         this.hash = this.ip + this.port;
     }
 
@@ -240,7 +235,7 @@ public class Peer extends BaseNulsData {
                     } catch (Exception e) {
                         Log.error("process message error", e);
                         //e.printStackTrace();
-                        Peer.this.destroy(true);
+                        Peer.this.destroy();
                     }
                 }
             });
@@ -279,22 +274,13 @@ public class Peer extends BaseNulsData {
         }
     }
 
-    public void destroy(boolean save) {
-
+    public void destroy() {
         lock.lock();
         try {
             this.status = Peer.CLOSE;
             if (this.writeTarget != null) {
                 this.writeTarget.closeConnection();
                 this.writeTarget = null;
-            }
-            if (save) {
-                //check failCount and save or remove from database
-                if (this.failCount == null) {
-                    this.failCount = 0;
-                }
-                this.failCount++;
-                peerDao.saveChange(PeerTransfer.transferToPeerPo(this));
             }
         } finally {
             lock.unlock();
@@ -332,7 +318,6 @@ public class Peer extends BaseNulsData {
         ip = new String(buffer.readByLengthByte());
         networkProcessorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
         localProcessorService = NulsContext.getInstance().getService(LocalProcessorService.class);
-        peerDao = NulsContext.getInstance().getService(PeerDao.class);
     }
 
 

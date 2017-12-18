@@ -1,7 +1,8 @@
 package io.nuls.network.entity.param;
 
-import io.nuls.core.chain.entity.Block;
+import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.network.IPUtil;
+import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.message.AbstractNetWorkDataHandlerFactory;
 import io.nuls.network.message.messageFilter.NulsMessageFilter;
 
@@ -15,6 +16,11 @@ import java.util.Set;
  * @date 2017/11/6
  */
 public abstract class AbstractNetworkParam {
+
+    public AbstractNetworkParam() {
+        this.maxInCount = ConfigLoader.getPropValue(NetworkConstant.NETWORK_PEER_MAX_IN, 50);
+        this.maxOutCount = ConfigLoader.getPropValue(NetworkConstant.NETWORK_PEER_MAX_OUT, 10);
+    }
 
     protected int port;
 
@@ -48,8 +54,16 @@ public abstract class AbstractNetworkParam {
         return maxInCount;
     }
 
+    public void maxInCount(int count) {
+        this.maxInCount = count;
+    }
+
     public int maxOutCount() {
         return maxOutCount;
+    }
+
+    public void maxOutCount(int count) {
+        this.maxOutCount = count;
     }
 
     public void setMessageFilter(NulsMessageFilter messageFilter) {

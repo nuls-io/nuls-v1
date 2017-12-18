@@ -21,7 +21,9 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.AccountDao;
+import io.nuls.db.dao.AliasDao;
 import io.nuls.db.entity.AccountPo;
+import io.nuls.db.entity.AliasPo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +43,8 @@ public class AccountServiceImpl implements AccountService {
     private AccountCacheService accountCacheService = AccountCacheService.getInstance();
 
     private AccountDao accountDao = NulsContext.getInstance().getService(AccountDao.class);
+
+    private AliasDao aliasDao = NulsContext.getInstance().getService(AliasDao.class);
 
     private boolean isLockNow = true;
 
@@ -354,6 +358,7 @@ public class AccountServiceImpl implements AccountService {
         return new Result(true, "OK");
     }
 
+
     @Override
     public NulsSignData signData(byte[] bytes) {
         return this.signData(bytes, this.getLocalAccount(), null);
@@ -394,20 +399,40 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void setAlias(String address, String alias) {
+    public Result canSetAlias(String address, String alias) {
+
         Account account = getAccount(address);
         if (account == null) {
-            return;
+            return new Result(false, "Account not found");
         }
-
         if (StringUtils.isNotBlank(account.getAlias())) {
-            return;
+            return new Result(false, "Alias has been set up");
         }
         if (!StringUtils.validAlias(alias)) {
-            return;
+            return new Result(false, "The alias is between 3 to 20 characters");
         }
+        AliasPo aliasPo = aliasDao.getByKey(alias);
+        if (aliasPo != null) {
+            return new Result(false, "The alias has been occupied");
+        }
+        return new Result(true, "OK");
+    }
 
-
+    @Override
+    public Result setAlias(String address, String alias) {
+        try {
+            Result result = canSetAlias(address, alias);
+            if (result.isFaild()) {
+                return result;
+            }
+            Account account = getAccount(address);
+            result = accountDao.setAlias(address, alias);
+            account.setAlias(alias);
+            accountCacheService.putAccount(account);
+            return result;
+        } catch (Exception e) {
+            return new Result(false, e.getMessage());
+        }
     }
 
     @Override

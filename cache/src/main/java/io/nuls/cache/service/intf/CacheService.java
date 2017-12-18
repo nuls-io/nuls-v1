@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
  * @author Niels
  * @date 2017/10/18
  */
@@ -45,7 +44,8 @@ public interface CacheService<K, V extends NulsCloneable> {
      * @param value
      */
     void putElement(String cacheTitle, K key, V value);
-    void putElementWithOutClone(String cacheTitle, K key, Object value);
+
+    void putElementWithoutClone(String cacheTitle, K key, Object value);
 
 
     /**
@@ -64,7 +64,9 @@ public interface CacheService<K, V extends NulsCloneable> {
      * @return
      */
     V getElementValue(String cacheTitle, K key);
+
     V getElementValueWithOutClone(String cacheTitle, K key);
+
     List<V> getElementValueList(String cacheTitle);
 
     /**

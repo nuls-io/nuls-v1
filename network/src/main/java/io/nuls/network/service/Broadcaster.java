@@ -17,13 +17,13 @@ public interface Broadcaster {
 
     BroadcastResult broadcast(byte[] data, String excludePeerId);
 
-    BroadcastResult broadcastSync(BaseNulsEvent event);
-
-    BroadcastResult broadcastSync(BaseNulsEvent event, String excludePeerId);
-
-    BroadcastResult broadcastSync(byte[] data);
-
-    BroadcastResult broadcastSync(byte[] data, String excludePeerId);
+//    BroadcastResult broadcastSync(BaseNulsEvent event);
+//
+//    BroadcastResult broadcastSync(BaseNulsEvent event, String excludePeerId);
+//
+//    BroadcastResult broadcastSync(byte[] data);
+//
+//    BroadcastResult broadcastSync(byte[] data, String excludePeerId);
 
     BroadcastResult broadcastToPeer(BaseNulsEvent event, String peerId);
 
@@ -37,12 +37,12 @@ public interface Broadcaster {
 
     BroadcastResult broadcastToGroup(byte[] data, String groupName, String excludePeerId);
 
-    BroadcastResult broadcastToGroupSync(BaseNulsEvent event, String groupName);
-
-    BroadcastResult broadcastToGroupSync(BaseNulsEvent event, String groupName, String excludePeerId);
-
-    BroadcastResult broadcastToGroupSync(byte[] data, String groupName);
-
-    BroadcastResult broadcastToGroupSync(byte[] data, String groupName, String excludePeerId);
+//    BroadcastResult broadcastToGroupSync(BaseNulsEvent event, String groupName);
+//
+//    BroadcastResult broadcastToGroupSync(BaseNulsEvent event, String groupName, String excludePeerId);
+//
+//    BroadcastResult broadcastToGroupSync(byte[] data, String groupName);
+//
+//    BroadcastResult broadcastToGroupSync(byte[] data, String groupName, String excludePeerId);
 
 }

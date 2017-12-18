@@ -1,17 +1,12 @@
 package io.nuls.network.message.impl;
 
-import io.nuls.core.context.NulsContext;
-import io.nuls.db.dao.PeerDao;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Peer;
 import io.nuls.network.message.BaseNetworkData;
 import io.nuls.network.message.NetworkDataResult;
-import io.nuls.network.message.entity.GetPeerData;
 import io.nuls.network.message.entity.PeerData;
 import io.nuls.network.message.messageHandler.NetWorkDataHandler;
 import io.nuls.network.service.impl.PeersManager;
-
-import java.util.List;
 
 /**
  * @author vivi

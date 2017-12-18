@@ -14,6 +14,7 @@ public class PeerSearchParams extends Searchable {
     public static final String SEARCH_FIELD_IP = "ip";
     public static final String SEARCH_FIELD_MAGIC_NUM = "magic_num";
     public static final String SEARCH_RANDOM = "ROWNUM()";
+    public static final String SEARCH_FAIL_TIME = "last_fail_time";
 
     public PeerSearchParams(Map<String, Object> params) {
         if (null == params) {
@@ -27,6 +28,9 @@ public class PeerSearchParams extends Searchable {
         }
         if(params.containsKey(SEARCH_RANDOM)) {
             this.addCondition(SEARCH_RANDOM, SearchOperator.in, params.get(SEARCH_RANDOM));
+        }
+        if(params.containsKey(SEARCH_FAIL_TIME)) {
+            this.addCondition(SEARCH_FAIL_TIME, SearchOperator.lt, params.get(SEARCH_FAIL_TIME));
         }
     }
 }

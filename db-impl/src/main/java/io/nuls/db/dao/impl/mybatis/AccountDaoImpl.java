@@ -53,11 +53,10 @@ public class AccountDaoImpl extends BaseDaoImpl<AccountMapper, String, AccountPo
             AccountPo po = new AccountPo();
             po.setId(id);
             po.setAlias(alias);
-            Integer.parseInt("s");
             this.getMapper().updateByPrimaryKeySelective(po);
+
         } catch (Exception e) {
-            Log.error(e);
-            return new Result(false, "set alias error");
+            throw new NulsRuntimeException(ErrorCode.DB_SAVE_ERROR);
         }
 
         return new Result(true, "OK");

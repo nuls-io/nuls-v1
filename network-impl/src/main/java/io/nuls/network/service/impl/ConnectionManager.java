@@ -168,7 +168,7 @@ public class ConnectionManager implements Runnable {
                     e1.printStackTrace();
                 }
             }
-            peer.destroy(true);
+            peer.destroy();
         }
     }
 
@@ -229,7 +229,7 @@ public class ConnectionManager implements Runnable {
 
     private void addOutPeer(SelectionKey key) {
         PendingConnect data = (PendingConnect) key.attachment();
-        if(data == null || data.peer == null) {
+        if (data == null || data.peer == null) {
             return;
         }
         Peer peer = data.peer;
@@ -245,11 +245,11 @@ public class ConnectionManager implements Runnable {
                 peer.connectionOpened();
             } else {
                 // Failed to connect for some reason
-                peer.destroy(true);
+                peer.destroy();
             }
         } catch (Exception e) {
             Log.warn("out peer Failed to connect:" + peer.getIp() + ":" + peer.getPort() + ",message:" + e.getMessage());
-            peer.destroy(true);
+            peer.destroy();
         }
     }
 
@@ -282,7 +282,7 @@ public class ConnectionManager implements Runnable {
                 }
             }
             if (peer != null) {
-                peer.destroy(false);
+                peer.destroy();
             }
         }
     }

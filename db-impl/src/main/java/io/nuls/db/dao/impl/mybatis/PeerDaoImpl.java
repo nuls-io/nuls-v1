@@ -1,5 +1,7 @@
 package io.nuls.db.dao.impl.mybatis;
 
+import com.github.pagehelper.PageHelper;
+import io.nuls.core.utils.date.TimeService;
 import io.nuls.db.dao.PeerDao;
 import io.nuls.db.dao.impl.mybatis.mapper.PeerMapper;
 import io.nuls.db.dao.impl.mybatis.params.PeerSearchParams;
@@ -19,33 +21,27 @@ public class PeerDaoImpl extends BaseDaoImpl<PeerMapper, String, PeerPo> impleme
         super(PeerMapper.class);
     }
 
+
     @Override
     protected Searchable getSearchable(Map<String, Object> params) {
         return new PeerSearchParams(params);
     }
 
     @Override
-    public List<PeerPo> getRandomPeerPoList(int size) {
-        long count = getCount();
-        if (count == 0) {
-            return null;
-        }
-
-        List<PeerPo> peerPos = null;
-        if (count <= size) {
-            peerPos = searchList(null);
+    public List<PeerPo> getRandomPeerPoList(int size, Set<String> keys) {
+        Searchable searchable = new Searchable();
+        PageHelper.startPage(1, 100);
+        PageHelper.orderBy("last_fail_time asc");
+        searchable.addCondition("id", SearchOperator.notIn, keys);
+        searchable.addCondition("last_fail_time", SearchOperator.lt, TimeService.currentTimeMillis() - TimeService.ONE_HOUR);
+        List<PeerPo> list = getMapper().selectList(searchable);
+        if (list.size() <= size) {
+            return list;
         } else {
-            Random random = new Random();
-            Set<Integer> set = new HashSet<>();
-            while (set.size() < size) {
-                set.add(random.nextInt((int) count));
-            }
-
-            Map<String, Object> map = new HashMap<>();
-            map.put(PeerSearchParams.SEARCH_RANDOM, set);
-            peerPos = searchList(map);
+            Collections.shuffle(list);
         }
-        return peerPos;
+
+        return list.subList(0, size - 1);
     }
 
     @Override
@@ -56,7 +52,7 @@ public class PeerDaoImpl extends BaseDaoImpl<PeerMapper, String, PeerPo> impleme
             searchable.addCondition("ip", SearchOperator.eq, po.getIp());
             searchable.addCondition("port", SearchOperator.eq, po.getPort());
             if (getMapper().selectCount(searchable) > 0) {
-                if (po.getFailCount() >= 5) {
+                if (po.getFailCount() >= 3) {
                     getMapper().deleteByIp(po);
                 } else {
                     getMapper().updateByIp(po);

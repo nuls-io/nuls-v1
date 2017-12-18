@@ -32,12 +32,21 @@ public class BroadcasterImpl implements Broadcaster {
         this.network = network;
     }
 
+    /**
+     * At least maxOutCount() Peers should be broadcast success
+     * @param message
+     * @param excludePeerId
+     * @return
+     */
     private BroadcastResult broadcast(NulsMessage message, String excludePeerId) {
         List<Peer> broadPeers = peersManager.getAvailablePeers(excludePeerId);
         //only one peer connected can't send message
         if (broadPeers.size() <= 0) {
             return new BroadcastResult(false, "no peer can be broadcast");
         }
+
+
+
 
         int successCount = 0;
 
@@ -203,12 +212,10 @@ public class BroadcasterImpl implements Broadcaster {
         return broadcast(message, excludePeerId);
     }
 
-    @Override
     public BroadcastResult broadcastSync(BaseNulsEvent event) {
         return broadcastSync(event, null);
     }
 
-    @Override
     public BroadcastResult broadcastSync(BaseNulsEvent event, String excludePeerId) {
         NulsMessage message = null;
         try {
@@ -220,12 +227,10 @@ public class BroadcasterImpl implements Broadcaster {
         return broadcastSync(message, excludePeerId);
     }
 
-    @Override
     public BroadcastResult broadcastSync(byte[] data) {
         return broadcastSync(data, null);
     }
 
-    @Override
     public BroadcastResult broadcastSync(byte[] data, String excludePeerId) {
         NulsMessage message = new NulsMessage(network.packetMagic(), NulsMessageHeader.EVENT_MESSAGE, data);
         return broadcastSync(message, excludePeerId);
@@ -275,12 +280,10 @@ public class BroadcasterImpl implements Broadcaster {
         return broadcastToGroup(message, groupName, excludePeerId);
     }
 
-    @Override
     public BroadcastResult broadcastToGroupSync(BaseNulsEvent event, String groupName) {
         return broadcastToGroupSync(event, groupName, null);
     }
 
-    @Override
     public BroadcastResult broadcastToGroupSync(BaseNulsEvent event, String groupName, String excludePeerId) {
         NulsMessage message = null;
         try {
@@ -291,12 +294,10 @@ public class BroadcasterImpl implements Broadcaster {
         return broadcastToGroupSync(message, groupName, excludePeerId);
     }
 
-    @Override
     public BroadcastResult broadcastToGroupSync(byte[] data, String groupName) {
         return broadcastToGroupSync(data, groupName, null);
     }
 
-    @Override
     public BroadcastResult broadcastToGroupSync(byte[] data, String groupName, String excludePeerId) {
         NulsMessage message = new NulsMessage(network.packetMagic(), NulsMessageHeader.EVENT_MESSAGE, data);
         return broadcastToGroupSync(message, groupName, excludePeerId);

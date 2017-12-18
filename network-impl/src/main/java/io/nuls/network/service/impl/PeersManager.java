@@ -4,7 +4,6 @@ package io.nuls.network.service.impl;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.ThreadManager;
 import io.nuls.core.utils.log.Log;
@@ -13,6 +12,7 @@ import io.nuls.db.dao.PeerDao;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Peer;
 import io.nuls.network.entity.PeerGroup;
+import io.nuls.network.entity.PeerTransfer;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.module.AbstractNetworkModule;
 
@@ -25,8 +25,6 @@ import java.util.concurrent.locks.ReentrantLock;
  * @date 2017/11/21
  */
 public class PeersManager {
-
-    private AbstractNetworkModule networkModule;
 
     private AbstractNetworkParam network;
 
@@ -44,8 +42,9 @@ public class PeersManager {
 
     private ReentrantLock lock;
 
+    private List<Peer> seedPeers;
+
     public PeersManager(AbstractNetworkModule module, AbstractNetworkParam network, PeerDao peerDao) {
-        this.networkModule = module;
         this.network = network;
         this.peerDao = peerDao;
         lock = new ReentrantLock();
@@ -70,12 +69,9 @@ public class PeersManager {
      * find other peers from connetcted peers
      */
     public void start() {
-
-//        List<Peer> peers = discovery.getLocalPeers(10);
-        List<Peer> peers = discovery.getSeedPeers();
-
-        if (peers == null || peers.size() == 0) {
-            peers = discovery.getSeedPeers();
+        List<Peer> peers = discovery.getLocalPeers(10);
+        if (peers.isEmpty()) {
+            peers = getSeedPeers();
         }
 
         for (Peer peer : peers) {
@@ -88,6 +84,21 @@ public class PeersManager {
         ThreadManager.createSingleThreadAndRun(NulsConstant.MODULE_ID_NETWORK, "peerDiscovery", this.discovery);
     }
 
+    public List<Peer> getSeedPeers() {
+        if (seedPeers == null) {
+            seedPeers = discovery.getSeedPeers();
+        }
+        return seedPeers;
+    }
+
+    public boolean isSeedPeers(String peerId) {
+        for (Peer peer : getSeedPeers()) {
+            if (peer.getHash().equals(peerId)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public void addPeer(Peer peer) {
         lock.lock();
@@ -103,7 +114,6 @@ public class PeersManager {
         }
     }
 
-
     public void addPeerToGroup(String groupName, Peer peer) {
         lock.lock();
         try {
@@ -111,11 +121,9 @@ public class PeersManager {
                 throw new NulsRuntimeException(ErrorCode.PEER_GROUP_NOT_FOUND);
             }
             if (groupName.equals(NetworkConstant.NETWORK_PEER_OUT_GROUP) &&
-
                     peerGroups.get(groupName).size() >= network.maxOutCount()) {
                 return;
             }
-
             if (groupName.equals(NetworkConstant.NETWORK_PEER_IN_GROUP) &&
                     peerGroups.get(groupName).size() >= network.maxInCount()) {
                 return;
@@ -128,7 +136,6 @@ public class PeersManager {
         }
     }
 
-
     public void removePeer(String peerHash) {
         lock.lock();
         try {
@@ -136,11 +143,15 @@ public class PeersManager {
                 for (PeerGroup group : peerGroups.values()) {
                     for (Peer peer : group.getPeers()) {
                         if (peer.getHash().equals(peerHash)) {
-
                             group.removePeer(peer);
                             break;
                         }
                     }
+                }
+                if (!isSeedPeers(peerHash)) {
+                    Peer peer = peers.get(peerHash);
+                    peer.setFailCount(peer.getFailCount() + 1);
+                    peerDao.saveChange(PeerTransfer.transferToPeerPo(peer));
                 }
                 peers.remove(peerHash);
             }
@@ -170,7 +181,7 @@ public class PeersManager {
 
             PeerGroup group = peerGroups.get(groupName);
             for (Peer p : group.getPeers()) {
-                p.destroy(false);
+                p.destroy();
                 group.removePeer(p);
             }
             peerGroups.remove(groupName);
@@ -185,12 +196,16 @@ public class PeersManager {
      * @param peer
      */
     public void deletePeer(Peer peer) {
-        peer.destroy(false);
+        peer.destroy();
         peerDao.deleteByKey(peer.getHash());
     }
 
     public Peer getPeer(String peerId) {
         return peers.get(peerId);
+    }
+
+    public Map<String, Peer> getPeers() {
+        return peers;
     }
 
     public PeerGroup getPeerGroup(String groupName) {

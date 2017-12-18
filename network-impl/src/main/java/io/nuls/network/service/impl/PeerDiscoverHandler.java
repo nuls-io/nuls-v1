@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author vivi
@@ -39,11 +40,11 @@ public class PeerDiscoverHandler implements Runnable {
 
     // get peers from local database
     public List<Peer> getLocalPeers(int size) {
+        Set<String> keys = peersManager.getPeers().keySet();
+        List<PeerPo> peerPos = peerDao.getRandomPeerPoList(size, keys);
 
         List<Peer> peers = new ArrayList<>();
-
-        List<PeerPo> peerPos = peerDao.getRandomPeerPoList(size);
-        if (peerPos == null || peerPos.size() == 0) {
+        if (peerPos == null || peerPos.isEmpty()) {
             return peers;
         }
         for (PeerPo po : peerPos) {
@@ -75,12 +76,14 @@ public class PeerDiscoverHandler implements Runnable {
     public void run() {
         while (running) {
             Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-            PeerGroup outPeers = peersManager.getPeerGroup(NetworkConstant.NETWORK_PEER_OUT_GROUP);
-            for (Peer peer : outPeers.getPeers()) {
+
+            for (Peer peer : peersManager.getPeers().values()) {
                 if (peer.getStatus() == Peer.CLOSE) {
                     peersManager.removePeer(peer.getHash());
                 }
             }
+
+            PeerGroup outPeers = peersManager.getPeerGroup(NetworkConstant.NETWORK_PEER_OUT_GROUP);
             if (outPeers.size() == 0) {
                 //  The seedPeers should be connected immediately
                 List<Peer> peers = getSeedPeers();
@@ -93,7 +96,7 @@ public class PeerDiscoverHandler implements Runnable {
                 }
             } else if (outPeers.size() < network.maxOutCount()) {
                 List<Peer> peers = getLocalPeers(network.maxOutCount() - outPeers.size());
-                if (peers == null || peers.size() == 0) {
+                if (peers.isEmpty()) {
 //                    // find other peer from connected peers
                     findOtherPeer(network.maxOutCount() - outPeers.size());
                 } else {
@@ -105,9 +108,8 @@ public class PeerDiscoverHandler implements Runnable {
                     }
                 }
             }
-
             try {
-                Thread.sleep(4000);
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -127,8 +129,9 @@ public class PeerDiscoverHandler implements Runnable {
                 try {
                     GetPeerData data = new GetPeerData(size);
                     peer.sendNetworkData(data);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     Log.warn("send getPeerData error", e);
+                    peer.destroy();
                 }
             }
         }
@@ -138,12 +141,11 @@ public class PeerDiscoverHandler implements Runnable {
             Peer peer = group.getPeers().get(0);
             if (peer.isHandShake()) {
                 try {
-
                     GetPeerData data = new GetPeerData(size);
                     peer.sendNetworkData(data);
-
-                } catch (IOException e) {
+                } catch (Exception e) {
                     Log.warn("send getPeerData error", e);
+                    peer.destroy();
                 }
             }
         }

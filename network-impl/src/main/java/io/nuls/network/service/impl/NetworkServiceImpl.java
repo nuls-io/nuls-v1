@@ -48,7 +48,7 @@ public class NetworkServiceImpl implements NetworkService {
         network.setMessageFilter(messageFilter);
 
         this.connectionManager = new ConnectionManager(module, network);
-        this.peersManager = new PeersManager(module, network,NulsContext.getInstance().getService(PeerDao.class));
+        this.peersManager = new PeersManager(module, network, NulsContext.getInstance().getService(PeerDao.class));
         this.broadcaster = new BroadcasterImpl(peersManager, network);
 
         peersManager.setConnectionManager(connectionManager);
@@ -79,6 +79,11 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
+    public boolean isSeedPeer(String peerId) {
+        return peersManager.isSeedPeers(peerId);
+    }
+
+    @Override
     public void addPeer(Peer peer) {
         peersManager.addPeer(peer);
     }
@@ -86,7 +91,7 @@ public class NetworkServiceImpl implements NetworkService {
     @Override
     public void removePeer(String peerId) {
         Peer peer = peersManager.getPeer(peerId);
-        if(peer == null) {
+        if (peer == null) {
             throw new NulsRuntimeException(ErrorCode.PEER_NOT_FOUND);
         }
         peersManager.deletePeer(peer);
@@ -95,23 +100,11 @@ public class NetworkServiceImpl implements NetworkService {
     @Override
     public void addPeerToGroup(String groupName, Peer peer) {
         peersManager.addPeerToGroup(groupName, peer);
-
     }
 
     @Override
     public void addPeerGroup(PeerGroup peerGroup) {
         peersManager.addPeerGroup(peerGroup);
-    }
-
-    private AbstractNetworkParam getNetworkInstance() {
-        String networkType = ConfigLoader.getPropValue(NetworkConstant.NETWORK_TYPE, "dev");
-        if ("dev".equals(networkType)) {
-            return DevNetworkParam.get();
-        }
-        if ("test".equals(networkType)) {
-            return TestNetworkParam.get();
-        }
-        return MainNetworkParam.get();
     }
 
 
@@ -142,17 +135,17 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public BroadcastResult broadcastSync(BaseNulsEvent event, String excludePeerId) {
-        return broadcaster.broadcastSync(event, excludePeerId);
+        return broadcaster.broadcast(event, excludePeerId);
     }
 
     @Override
     public BroadcastResult broadcastSync(byte[] data) {
-        return broadcaster.broadcastSync(data);
+        return broadcaster.broadcast(data);
     }
 
     @Override
     public BroadcastResult broadcastSync(byte[] data, String excludePeerId) {
-        return broadcaster.broadcastSync(data, excludePeerId);
+        return broadcaster.broadcast(data, excludePeerId);
     }
 
     @Override
@@ -187,7 +180,7 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public BroadcastResult broadcastToGroupSync(BaseNulsEvent event, String groupName) {
-        return broadcaster.broadcastToGroup(event, groupName);
+        return broadcaster.broadcast(event, groupName);
     }
 
     @Override
@@ -197,18 +190,23 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public BroadcastResult broadcastToGroupSync(byte[] data, String groupName) {
-        return broadcaster.broadcastToGroupSync(data, groupName);
+        return broadcaster.broadcastToGroup(data, groupName);
     }
 
     @Override
     public BroadcastResult broadcastToGroupSync(byte[] data, String groupName, String excludePeerId) {
-        return broadcaster.broadcastToGroupSync(data, groupName, excludePeerId);
+        return broadcaster.broadcastToGroup(data, groupName, excludePeerId);
     }
 
-    @Override
-    public boolean isSeedPeer() {
-        // todo auto-generated method stub(niels)
-        return true;
+    private AbstractNetworkParam getNetworkInstance() {
+        String networkType = ConfigLoader.getPropValue(NetworkConstant.NETWORK_TYPE, "dev");
+        if ("dev".equals(networkType)) {
+            return DevNetworkParam.get();
+        }
+        if ("test".equals(networkType)) {
+            return TestNetworkParam.get();
+        }
+        return MainNetworkParam.get();
     }
 
 }

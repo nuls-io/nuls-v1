@@ -33,6 +33,8 @@ public class TimeService implements Runnable {
 
     private static final long NET_REFRESH_TIME = 10 * 60 * 1000L;   // 10 minutes;
 
+    public static final long ONE_HOUR = 3600 * 1000L;
+
     /**
      * 网络时间偏移值
      */

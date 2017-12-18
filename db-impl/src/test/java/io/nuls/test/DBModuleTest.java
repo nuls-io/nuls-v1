@@ -1,7 +1,6 @@
 package io.nuls.test;
 
 import io.nuls.core.chain.entity.Result;
-import io.nuls.core.module.manager.ModuleManager;
 import io.nuls.core.module.manager.ServiceManager;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.AccountDao;
@@ -12,9 +11,14 @@ import io.nuls.db.entity.AccountPo;
 import io.nuls.db.entity.BlockPo;
 import io.nuls.db.entity.PeerPo;
 import io.nuls.db.module.impl.MybatisDBModuleImpl;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by zhouwei on 2017/10/24.
@@ -108,11 +112,31 @@ public class DBModuleTest {
 
     @Test
     public void testPeer() {
+        Set<String> keys = new HashSet<>();
+        keys.add("12");
+        keys.add("1442");
+        List<PeerPo> list = peerDao.getRandomPeerPoList(10, keys);
+        for (int i = 0; i < list.size(); i++) {
+            System.out.println(list.get(i).getIp());
+        }
+    }
 
-        List<PeerPo> list = peerDao.getRandomPeerPoList(10);
-//        List<PeerPo> list = peerDao.searchList(null);
-
-        System.out.println(list.size());
+    @Test
+    public void testInsertPeer() {
+        List<PeerPo> list = new ArrayList<>();
+        for (int i = 40; i < 50; i++) {
+            PeerPo peerPo = new PeerPo();
+            peerPo.setIp("192.168.1." + i);
+            peerPo.setPort(i + 1000);
+            peerPo.setId(peerPo.getIp() + ":" + peerPo.getPort());
+            peerPo.setLastTime(System.currentTimeMillis());
+            peerPo.setLastFailTime(System.currentTimeMillis() - 4123 * 999);
+            peerPo.setMagicNum(1234);
+            peerPo.setVersion((short) 5097);
+            peerPo.setFailCount(0);
+            list.add(peerPo);
+        }
+        peerDao.saveBatch(list);
     }
 
     @Test

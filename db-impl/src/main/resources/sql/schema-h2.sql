@@ -47,29 +47,26 @@ CREATE TABLE IF NOT EXISTS `delegate` (
   PRIMARY KEY (`id`)
 );
 
-
-
-
 CREATE TABLE IF NOT EXISTS `peer` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` VARCHAR(30) NOT NULL,
   `ip` varchar(20) NOT NULL,
   `port` int(6) NOT NULL,
   `last_time` bigint(20) NOT NULL,
+  `last_fail_time` bigint(20) NOT NULL,
   `fail_count` bigint(20) NOT NULL,
   `magic_num` int(11) NOT NULL,
   `version` int(11) NOT NULL,
   PRIMARY KEY (`id`)
 );
 CREATE TABLE IF NOT EXISTS `peer_group` (
-  `hid` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) NOT NULL,
+  `name` varchar(30) NOT NULL,
   `version` int(11) NOT NULL,
-  PRIMARY KEY (`hid`)
+  PRIMARY KEY (`name`)
 );
 CREATE TABLE IF NOT EXISTS `peer_group_relation` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `peer_id` int(11) NOT NULL,
-  `group_id` int(11) NOT NULL,
+  `peer_id` varchar(30) NOT NULL,
+  `group_id` varchar(30) NOT NULL,
   PRIMARY KEY (`id`)
 );
 CREATE TABLE IF NOT EXISTS `sub_chain` (

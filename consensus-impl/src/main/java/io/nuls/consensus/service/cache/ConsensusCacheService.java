@@ -64,7 +64,7 @@ public class ConsensusCacheService {
     }
 
     public void updateConsensusStatusInfo(ConsensusStatusInfo info) {
-        this.cacheService.putElementWithOutClone(CACHE_CONSENSUS_STATUS_INFO, CACHE_CONSENSUS_STATUS_INFO, info);
+        this.cacheService.putElementWithoutClone(CACHE_CONSENSUS_STATUS_INFO, CACHE_CONSENSUS_STATUS_INFO, info);
     }
 
     public void addAgent(ConsensusAccount<Agent> ca) {

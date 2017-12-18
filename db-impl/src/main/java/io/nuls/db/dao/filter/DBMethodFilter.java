@@ -19,19 +19,16 @@ public class DBMethodFilter implements MethodInterceptor {
 
     @Override
     public Object intercept(Object obj, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
-        if (!method.getName().equals("hashCode") && !method.getName().equals("toString")) {
-            System.out.println("----------" + method.getName());
-        }
 
         String lastId = SessionManager.getId();
         String id = lastId;
         Object result;
         boolean isSessionBeginning = false;
-        boolean required = false;
+        boolean isCommit = false;
         if (method.isAnnotationPresent(SessionAnnotation.class)) {
             SessionAnnotation annotation = method.getAnnotation(SessionAnnotation.class);
             if (annotation.value() == PROPAGATION.REQUIRED && !SessionManager.getTxState(id)) {
-                required = true;
+                isCommit = true;
                 id = StringUtils.getNewUUID();
             } else if (annotation.value() == PROPAGATION.INDEPENDENT) {
                 id = StringUtils.getNewUUID();
@@ -51,7 +48,7 @@ public class DBMethodFilter implements MethodInterceptor {
         try {
             SessionManager.startTransaction(id);
             result = methodProxy.invokeSuper(obj, args);
-            if (required) {
+            if (isCommit) {
                 session.commit();
                 SessionManager.endTransaction(id);
             }

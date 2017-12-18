@@ -1,7 +1,6 @@
 package io.nuls.network.service;
 
 import io.nuls.core.event.BaseNulsEvent;
-import io.nuls.core.mesasge.NulsMessage;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Peer;
 import io.nuls.network.entity.PeerGroup;
@@ -15,6 +14,8 @@ public interface NetworkService {
     void start();
 
     void shutdown();
+
+    boolean isSeedPeer(String peerId);
 
     void addPeer(Peer peer);
 
@@ -60,5 +61,4 @@ public interface NetworkService {
 
     BroadcastResult broadcastToGroupSync(byte[] data, String groupName, String excludePeerId);
 
-    boolean isSeedPeer();
 }
