@@ -7,4 +7,5 @@ package io.nuls.consensus.constant;
 public interface ConsensusConstant {
     int TX_TYPE_JOIN_CONSENSUS = 1;
     int TX_TYPE_EXIT_CONSENSUS = 2;
+    int TX_TYPE_COINBASE = 3;
 }

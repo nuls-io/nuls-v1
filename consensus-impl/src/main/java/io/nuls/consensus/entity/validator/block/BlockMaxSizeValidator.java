@@ -10,8 +10,14 @@ import io.nuls.core.validate.ValidateResult;
  * @date 2017/11/17
  */
 public class BlockMaxSizeValidator implements NulsDataValidator<Block> {
+    public static final BlockMaxSizeValidator INSTANCE = new BlockMaxSizeValidator();
+
     private static final String ERROR_MESSAGE = "The block is too big!";
 
+    private BlockMaxSizeValidator(){}
+    public static BlockMaxSizeValidator getInstance(){
+        return INSTANCE;
+    }
     @Override
     public ValidateResult validate(Block data) {
         if (data == null) {

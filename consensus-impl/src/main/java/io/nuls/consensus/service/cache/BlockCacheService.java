@@ -14,8 +14,20 @@ public class BlockCacheService {
         return INSTANCE;
     }
 
+    private long minHeight;
+    private long nowHeight;
+
+
+
+
+
+
+
+
+
+
     public void cacheBlock(Block block){
-        //todo
+        //todo 触发持久化检查，缓存block
     }
 
     public void clear() {

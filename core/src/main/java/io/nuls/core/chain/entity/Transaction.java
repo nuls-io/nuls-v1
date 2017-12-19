@@ -32,19 +32,19 @@ public class Transaction extends BaseNulsData {
     protected long time;
     protected byte[] remark;
 
-    public void onRollback() {
+    public final void onRollback() {
         if (null != listener) {
             listener.onRollback(this);
         }
     }
 
-    public void onCommit() {
+    public final void onCommit() {
         if (null != listener) {
             listener.onCommit(this);
         }
     }
 
-    public void onApproval() {
+    public final void onApproval() {
         if (null != listener) {
             listener.onApproval(this);
         }
@@ -71,7 +71,6 @@ public class Transaction extends BaseNulsData {
         size += VarInt.sizeOf(time);
         size += hash.size();
         size += sign.size();
-        size += Sha256Hash.LENGTH;
         if (null != remark) {
             size += remark.length;
         }

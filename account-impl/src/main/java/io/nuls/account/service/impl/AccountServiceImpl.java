@@ -32,7 +32,6 @@ import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.service.intf.LedgerService;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -440,7 +439,7 @@ public class AccountServiceImpl implements AccountService {
     public Result setAlias(String address, String alias) {
         try {
             Result result = canSetAlias(address, alias);
-            if (result.isFaild()) {
+            if (result.isFailed()) {
                 return result;
             }
             Account account = getAccount(address);
@@ -456,7 +455,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Result sendAliasTx(String address, String password, String alias) {
         Result result = canSetAlias(address, alias);
-        if (result.isFaild()) {
+        if (result.isFailed()) {
             return result;
         }
 

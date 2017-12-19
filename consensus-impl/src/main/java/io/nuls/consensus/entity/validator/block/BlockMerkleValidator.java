@@ -13,7 +13,11 @@ import java.util.List;
  */
 public class BlockMerkleValidator implements NulsDataValidator<Block> {
     private static final String ERROR_MESSAGE = "Merkle Hash is wrong!";
-
+    public static final BlockMerkleValidator INSTANCE = new BlockMerkleValidator();
+    private BlockMerkleValidator(){}
+    public static BlockMerkleValidator getInstance(){
+        return INSTANCE;
+    }
     @Override
     public ValidateResult validate(Block data) {
         ValidateResult result = ValidateResult.getFailedResult(ERROR_MESSAGE);

@@ -39,7 +39,7 @@ public class Result<T> {
         return success;
     }
 
-    public boolean isFaild() {
+    public boolean isFailed() {
         return !success;
     }
 
