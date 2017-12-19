@@ -57,6 +57,10 @@ public class Transaction extends BaseNulsData {
         this.initValidators();
     }
 
+    public Transaction(NulsByteBuffer buffer) {
+        super(buffer);
+    }
+
     private void initValidators() {
         List<NulsDataValidator> list = TransactionValidatorManager.getValidators();
         for (NulsDataValidator<Transaction> validator : list) {

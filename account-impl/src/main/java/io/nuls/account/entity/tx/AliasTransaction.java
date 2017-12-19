@@ -40,6 +40,10 @@ public class AliasTransaction extends Transaction {
         this.nulsTx = nulsTx;
     }
 
+    public AliasTransaction(NulsByteBuffer buffer) {
+        super(buffer);
+    }
+
     @Override
     public int size() {
         int s = super.size();

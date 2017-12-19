@@ -12,6 +12,8 @@ import io.nuls.account.service.impl.AccountServiceImpl;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.context.NulsContext;
 import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
+import io.nuls.ledger.service.intf.LedgerService;
+import io.nuls.network.service.NetworkService;
 
 /**
  * @author Niels
@@ -23,7 +25,6 @@ public class AccountModuleImpl extends AbstractAccountModule {
     private NetworkProcessorService processorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
 
     @Override
-
     public void start() {
         manager.init();
         AccountService accountService = AccountServiceImpl.getInstance();
@@ -36,7 +37,12 @@ public class AccountModuleImpl extends AbstractAccountModule {
     }
 
     private void registerHanders() {
+        NetworkService service = NulsContext.getInstance().getService(NetworkService.class);
+        LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
+
         AliasEventHandler.getInstance().addFilter(AliasEventFilter.getInstance());
+        AliasEventHandler.getInstance().setNetworkService(service);
+        AliasEventHandler.getInstance().setLedgerService(ledgerService);
         processorService.registerEventHandler(AliasEvent.class, AliasEventHandler.getInstance());
     }
 

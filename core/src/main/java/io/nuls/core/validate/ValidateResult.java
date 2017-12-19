@@ -45,13 +45,6 @@ public class ValidateResult extends Result {
         return result;
     }
 
-    public static ValidateResult getFailedResult(SeverityLevelEnum level, ErrorCode errorCode) {
-        ValidateResult result= new ValidateResult();
-        result.setSuccess(false);
-        result.setErrorCode(errorCode);
-        return result;
-    }
-
     public SeverityLevelEnum getLevel() {
         return level;
     }
