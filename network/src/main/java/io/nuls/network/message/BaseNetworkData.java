@@ -2,6 +2,7 @@ package io.nuls.network.message;
 
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.message.entity.GetPeerData;
@@ -18,7 +19,7 @@ public abstract class BaseNetworkData extends BaseNulsData {
 
     protected NetworkDataHeader networkHeader;
 
-    public BaseNetworkData(NulsByteBuffer buffer) {
+    public BaseNetworkData(NulsByteBuffer buffer) throws NulsException {
         super(buffer);
     }
 
@@ -32,7 +33,7 @@ public abstract class BaseNetworkData extends BaseNulsData {
         this.networkHeader = networkHeader;
     }
 
-    public static BaseNetworkData transfer(Short type, byte[] data) {
+    public static BaseNetworkData transfer(Short type, byte[] data) throws NulsException {
         BaseNetworkData networkData = null;
         NulsByteBuffer buffer = new NulsByteBuffer(data);
         switch (type) {

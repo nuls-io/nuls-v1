@@ -2,6 +2,7 @@ package io.nuls.network.message.entity;
 
 import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.crypto.VarInt;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.network.constant.NetworkConstant;
@@ -27,7 +28,7 @@ public class GetVersionData extends BaseNetworkData {
         this.externalPort = externalPort;
     }
 
-    public GetVersionData(NulsByteBuffer buffer) {
+    public GetVersionData(NulsByteBuffer buffer) throws NulsException {
         super(buffer);
     }
 

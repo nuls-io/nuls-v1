@@ -7,6 +7,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.VarInt;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsVerificationException;
 import io.nuls.core.mesasge.NulsMessage;
 import io.nuls.core.mesasge.NulsMessageHeader;
@@ -212,36 +213,43 @@ public class Peer extends BaseNulsData {
             if (checkBroadcastExist(message.getData())) {
                 return;
             }
-
-            message.verify();
             networkProcessorService.send(message.getData(), this.getHash());
         } else {
+
             byte[] networkHeader = new byte[NetworkDataHeader.NETWORK_HEADER_SIZE];
             System.arraycopy(message.getData(), 0, networkHeader, 0, NetworkDataHeader.NETWORK_HEADER_SIZE);
             NetworkDataHeader header = new NetworkDataHeader(new NulsByteBuffer(networkHeader));
 
-            BaseNetworkData networkMessage = BaseNetworkData.transfer(header.getType(), message.getData());
+            BaseNetworkData networkMessage = null;
+            try {
+                networkMessage = BaseNetworkData.transfer(header.getType(), message.getData());
+            } catch (NulsException e) {
+                Log.error("networkMessage transfer error:", e);
+                this.destroy();
+            }
             if (this.status != Peer.HANDSHAKE && !isHandShakeMessage(networkMessage)) {
                 return;
             }
-
-            NetWorkDataHandler handler = messageHandlerFactory.getHandler(networkMessage);
-            ThreadManager.asynExecuteRunnable(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        NetworkDataResult messageResult = handler.process(networkMessage, Peer.this);
-                        processMessageResult(messageResult);
-                    } catch (Exception e) {
-                        Log.error("process message error", e);
-                        //e.printStackTrace();
-                        Peer.this.destroy();
-                    }
-                }
-            });
+            asynExecute(networkMessage);
         }
     }
 
+    private void asynExecute(BaseNetworkData networkMessage) {
+        NetWorkDataHandler handler = messageHandlerFactory.getHandler(networkMessage);
+        ThreadManager.asynExecuteRunnable(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    NetworkDataResult messageResult = handler.process(networkMessage, Peer.this);
+                    processMessageResult(messageResult);
+                } catch (Exception e) {
+                    Log.error("process message error", e);
+                    //e.printStackTrace();
+                    Peer.this.destroy();
+                }
+            }
+        });
+    }
 
     public boolean checkBroadcastExist(byte[] data) throws IOException {
         String hash = Sha256Hash.twiceOf(data).toString();

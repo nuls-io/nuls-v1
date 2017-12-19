@@ -3,6 +3,7 @@ package io.nuls.network.message.entity;
 import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
@@ -35,7 +36,7 @@ public class VersionData extends BaseNetworkData {
         this.nulsVersion = NulsContext.nulsVersion;
     }
 
-    public VersionData(NulsByteBuffer buffer) {
+    public VersionData(NulsByteBuffer buffer) throws NulsException {
         super(buffer);
     }
 

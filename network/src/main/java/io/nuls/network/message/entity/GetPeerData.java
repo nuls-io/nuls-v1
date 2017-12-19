@@ -1,6 +1,7 @@
 package io.nuls.network.message.entity;
 
 import io.nuls.core.crypto.VarInt;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.network.constant.NetworkConstant;
@@ -31,7 +32,7 @@ public class GetPeerData extends BaseNetworkData {
         this.length = length;
     }
 
-    public GetPeerData(NulsByteBuffer buffer) {
+    public GetPeerData(NulsByteBuffer buffer) throws NulsException {
         super(buffer);
     }
 

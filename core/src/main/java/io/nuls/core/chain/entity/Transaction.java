@@ -3,6 +3,7 @@ package io.nuls.core.chain.entity;
 import io.nuls.core.chain.manager.TransactionValidatorManager;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.VarInt;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
@@ -57,7 +58,7 @@ public class Transaction extends BaseNulsData {
         this.initValidators();
     }
 
-    public Transaction(NulsByteBuffer buffer) {
+    public Transaction(NulsByteBuffer buffer) throws NulsException {
         super(buffer);
     }
 

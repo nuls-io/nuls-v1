@@ -2,6 +2,7 @@ package io.nuls.network.message.entity;
 
 import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.crypto.VarInt;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.network.constant.NetworkConstant;
@@ -29,7 +30,7 @@ public class PeerData extends BaseNetworkData {
         super(OWN_MAIN_VERSION, OWN_SUB_VERSION, NetworkConstant.NETWORK_PEER_MESSAGE);
     }
 
-    public PeerData(NulsByteBuffer buffer) {
+    public PeerData(NulsByteBuffer buffer) throws NulsException {
         super(buffer);
     }
 
