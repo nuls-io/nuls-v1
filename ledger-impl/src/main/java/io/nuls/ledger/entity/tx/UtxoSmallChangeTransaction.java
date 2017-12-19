@@ -18,8 +18,8 @@ public class UtxoSmallChangeTransaction extends AbstractCoinTransaction<UtxoData
 
     public UtxoSmallChangeTransaction() {
         super(TransactionConstant.TX_TYPE_SMALL_CHANGE);
-        this.registerValidator(new UtxoTxInputsValidator());
-        this.registerValidator(new UtxoTxOutputsValidator());
+        this.registerValidator(UtxoTxInputsValidator.getInstance());
+        this.registerValidator(UtxoTxOutputsValidator.getInstance());
     }
 
     @Override

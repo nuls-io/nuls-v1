@@ -18,7 +18,7 @@ public class UtxoTxOutputsValidator implements NulsDataValidator<AbstractCoinTra
     private static final String ERROR_MESSAGE = "the output is too much!";
     private static final UtxoTxOutputsValidator INSTANCE = new UtxoTxOutputsValidator();
     private UtxoTxOutputsValidator(){}
-    private static UtxoTxOutputsValidator getInstance(){
+    public static UtxoTxOutputsValidator getInstance(){
         return INSTANCE;
     }
     @Override

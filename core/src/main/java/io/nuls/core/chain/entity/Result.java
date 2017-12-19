@@ -78,15 +78,15 @@ public class Result<T> {
         return buffer.toString();
     }
 
-    public static Result getFaildResult(String msg) {
+    public static Result getFailed(String msg) {
         return new Result(false, msg);
     }
 
-    public static Result getSuccessResult() {
+    public static Result getSuccess() {
         return new Result(true, "");
     }
 
-    public static Result getFaildResult(ErrorCode errorCode) {
+    public static Result getFailed(ErrorCode errorCode) {
         return new Result(false,errorCode.getMsg());
     }
 

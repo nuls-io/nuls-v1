@@ -24,7 +24,7 @@ public class TxMaxSizeValidator implements NulsDataValidator<Transaction> {
     @Override
     public ValidateResult validate(Transaction data) {
         if (data.size() > MAX_STANDARD_TX_SIZE) {
-            return ValidateResult.getFailedResult(SeverityLevelEnum.NORMAL, ErrorCode.DATA_SIZE_ERROR);
+            return ValidateResult.getFailedResult( ErrorCode.DATA_SIZE_ERROR);
         }
         return ValidateResult.getSuccessResult();
     }

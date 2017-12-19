@@ -11,7 +11,7 @@ import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 public class UtxoTxInputsValidator implements NulsDataValidator<AbstractCoinTransaction> {
     private static final UtxoTxInputsValidator INSTANCE = new UtxoTxInputsValidator();
     private UtxoTxInputsValidator(){}
-    private static UtxoTxInputsValidator getInstance(){
+    public static UtxoTxInputsValidator getInstance(){
         return INSTANCE;
     }
 

@@ -9,20 +9,16 @@ import io.nuls.core.utils.log.Log;
  * @author Niels
  * @date 2017/11/16
  */
-public class ValidateResult extends Result{
+public class ValidateResult extends Result {
 
     private SeverityLevelEnum level;
 
     public static ValidateResult getFailedResult(String msg) {
-        ValidateResult result= new ValidateResult();
-        result.setSuccess(false);
-        result.setErrorCode(ErrorCode.VERIFICATION_FAILD);
-        result.setMessage(msg);
-        return result;
+        return getFailedResult(SeverityLevelEnum.NORMAL, msg);
     }
 
-    public static ValidateResult getFailedResult(String msg, SeverityLevelEnum level) {
-        ValidateResult result= new ValidateResult();
+    public static ValidateResult getFailedResult(SeverityLevelEnum level, String msg) {
+        ValidateResult result = new ValidateResult();
         result.setSuccess(false);
         result.setErrorCode(ErrorCode.VERIFICATION_FAILD);
         result.setMessage(msg);
@@ -31,15 +27,20 @@ public class ValidateResult extends Result{
     }
 
     public static ValidateResult getSuccessResult() {
-        ValidateResult result= new ValidateResult();
+        ValidateResult result = new ValidateResult();
         result.setSuccess(true);
         result.setMessage("");
         return result;
     }
 
-    public static ValidateResult getFailedResult(ErrorCode errorCode) {
-        ValidateResult result= new ValidateResult();
+    public static ValidateResult getFailedResult(ErrorCode msg) {
+        return getFailedResult(SeverityLevelEnum.NORMAL, msg);
+    }
+
+    public static ValidateResult getFailedResult(SeverityLevelEnum level, ErrorCode errorCode) {
+        ValidateResult result = new ValidateResult();
         result.setSuccess(false);
+        result.setLevel(level);
         result.setErrorCode(errorCode);
         return result;
     }
