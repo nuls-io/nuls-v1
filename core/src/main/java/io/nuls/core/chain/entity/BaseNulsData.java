@@ -28,7 +28,7 @@ public abstract class BaseNulsData  implements Serializable {
 
     }
 
-    public BaseNulsData(NulsByteBuffer buffer) {
+    public BaseNulsData(NulsByteBuffer buffer) throws NulsException {
         this.parse(buffer);
     }
 
@@ -74,9 +74,9 @@ public abstract class BaseNulsData  implements Serializable {
      */
     public abstract void serializeToStream(NulsOutputStreamBuffer stream) throws IOException;
 
-    public abstract void parse(NulsByteBuffer byteBuffer);
+    public abstract void parse(NulsByteBuffer byteBuffer) throws NulsException;
 
-    public final void parse(byte[] bytes) {
+    public final void parse(byte[] bytes) throws NulsException {
         this.parse(new NulsByteBuffer(bytes));
     }
 

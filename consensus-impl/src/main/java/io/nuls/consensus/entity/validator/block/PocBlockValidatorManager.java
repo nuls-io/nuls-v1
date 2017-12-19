@@ -8,10 +8,11 @@ import io.nuls.core.chain.manager.BlockValidatorManager;
  */
 public class PocBlockValidatorManager {
 
-    public static void initBlockValidators(){
-        BlockValidatorManager.addBlockDefValitor(new BlockMaxSizeValidator());
-        BlockValidatorManager.addBlockDefValitor(new BlockMerkleValidator());
-        BlockValidatorManager.addBlockDefValitor(new BlockTxValidator());
-        BlockValidatorManager.addBlockDefValitor(new BlockCoinbaseValidator());
+    public static void initBlockValidators() {
+        BlockValidatorManager.addBlockDefValitor(BlockSignValidator.getInstance());
+        BlockValidatorManager.addBlockDefValitor(BlockMaxSizeValidator.getInstance());
+        BlockValidatorManager.addBlockDefValitor(BlockTxValidator.getInstance());
+        BlockValidatorManager.addBlockDefValitor(BlockMerkleValidator.getInstance());
+
     }
 }

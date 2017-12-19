@@ -32,7 +32,6 @@ import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.service.intf.LedgerService;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
