@@ -2,7 +2,6 @@ package io.nuls.consensus.entity.validator.block;
 
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.core.chain.entity.Block;
-import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 
@@ -16,11 +15,11 @@ public class BlockMaxSizeValidator implements NulsDataValidator<Block> {
     @Override
     public ValidateResult validate(Block data) {
         if (data == null) {
-            return ValidateResult.getFaildResult(SeverityLevelEnum.NORMAL,"Data is null!");
+            return ValidateResult.getFailedResult("Data is null!");
         }
         int length = data.size();
         if (length >= PocConsensusConstant.MAX_BLOCK_SIZE) {
-            return ValidateResult.getFaildResult(SeverityLevelEnum.NORMAL,ERROR_MESSAGE);
+            return ValidateResult.getFailedResult(ERROR_MESSAGE);
         }
         return ValidateResult.getSuccessResult();
     }

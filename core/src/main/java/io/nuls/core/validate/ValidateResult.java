@@ -13,12 +13,20 @@ public class ValidateResult extends Result{
 
     private SeverityLevelEnum level;
 
-    public static ValidateResult getFaildResult(SeverityLevelEnum level,String msg) {
+    public static ValidateResult getFailedResult(String msg) {
         ValidateResult result= new ValidateResult();
         result.setSuccess(false);
-        result.setLevel(level);
         result.setErrorCode(ErrorCode.VERIFICATION_FAILD);
         result.setMessage(msg);
+        return result;
+    }
+
+    public static ValidateResult getFailedResult(String msg, SeverityLevelEnum level) {
+        ValidateResult result= new ValidateResult();
+        result.setSuccess(false);
+        result.setErrorCode(ErrorCode.VERIFICATION_FAILD);
+        result.setMessage(msg);
+        result.setLevel(level);
         return result;
     }
 
@@ -29,9 +37,8 @@ public class ValidateResult extends Result{
         return result;
     }
 
-    public static ValidateResult getFaildResult(SeverityLevelEnum level,ErrorCode errorCode) {
+    public static ValidateResult getFailedResult(ErrorCode errorCode) {
         ValidateResult result= new ValidateResult();
-        result.setLevel(level);
         result.setSuccess(false);
         result.setErrorCode(errorCode);
         return result;

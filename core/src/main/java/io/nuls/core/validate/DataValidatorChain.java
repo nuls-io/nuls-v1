@@ -1,7 +1,6 @@
 package io.nuls.core.validate;
 
 import io.nuls.core.chain.entity.BaseNulsData;
-import io.nuls.core.constant.SeverityLevelEnum;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +26,7 @@ public class DataValidatorChain {
         if (b) {
             return result;
         } else {
-            return ValidateResult.getFaildResult(SeverityLevelEnum.NORMAL,"The Validators not fully executed`");
+            return ValidateResult.getFailedResult("The Validators not fully executed`");
         }
     }
 

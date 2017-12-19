@@ -4,7 +4,6 @@ import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
 import io.nuls.consensus.event.RegisterAgentEvent;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
@@ -19,10 +18,10 @@ public class AgentDepositValidator implements NulsDataValidator<RegisterAgentTra
         ValidateResult result = ValidateResult.getSuccessResult();
         LockNulsTransaction tx = data.getLockNulsTransaction();
         if(null==tx){
-            result = ValidateResult.getFaildResult(SeverityLevelEnum.NORMAL,ErrorCode.DEPOSIT_ERROR);
+            result = ValidateResult.getFailedResult(ErrorCode.DEPOSIT_ERROR);
         }
         else if(!tx.getNa().isGreaterThan(PocConsensusConstant.AGENT_DEPOSIT_LOWER_LIMIT)){
-            result = ValidateResult.getFaildResult(SeverityLevelEnum.NORMAL,ErrorCode.DEPOSIT_NOT_ENOUGH);
+            result = ValidateResult.getFailedResult(ErrorCode.DEPOSIT_NOT_ENOUGH);
         }
         tx.verify();
         return result;
