@@ -2,6 +2,7 @@ package io.nuls.core.validate;
 
 import io.nuls.core.chain.entity.Result;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.utils.log.Log;
 
 /**
@@ -9,6 +10,8 @@ import io.nuls.core.utils.log.Log;
  * @date 2017/11/16
  */
 public class ValidateResult extends Result{
+
+    private SeverityLevelEnum level;
 
     public static ValidateResult getFaildResult(String msg) {
         ValidateResult result= new ValidateResult();
@@ -30,5 +33,13 @@ public class ValidateResult extends Result{
         result.setSuccess(false);
         result.setErrorCode(errorCode);
         return result;
+    }
+
+    public SeverityLevelEnum getLevel() {
+        return level;
+    }
+
+    public void setLevel(SeverityLevelEnum level) {
+        this.level = level;
     }
 }
