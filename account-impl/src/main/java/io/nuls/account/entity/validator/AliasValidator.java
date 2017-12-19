@@ -28,19 +28,19 @@ public class AliasValidator implements NulsDataValidator<AliasTransaction> {
     @Override
     public ValidateResult validate(AliasTransaction tx) {
         if (StringUtils.isBlank(tx.getAddress()) || tx.getAddress().length() >= 30) {
-            return ValidateResult.getFaildResult("The address format error");
+            return ValidateResult.getFailedResult("The address format error");
         }
         if (!StringUtils.validAlias(tx.getAlias())) {
-            return ValidateResult.getFaildResult(" The alias format error");
+            return ValidateResult.getFailedResult(" The alias format error");
         }
         if (tx.getNulsTx() == null) {
-            return ValidateResult.getFaildResult(" The NulsTx is required");
+            return ValidateResult.getFailedResult(" The NulsTx is required");
         }
         tx.getNulsTx().verify();
 
         Result result = accountService.canSetAlias(tx.getAddress(), tx.getAlias());
         if (!result.isSuccess()) {
-            return ValidateResult.getFaildResult(result.getMessage());
+            return ValidateResult.getFailedResult(result.getMessage());
         }
         return ValidateResult.getSuccessResult();
     }

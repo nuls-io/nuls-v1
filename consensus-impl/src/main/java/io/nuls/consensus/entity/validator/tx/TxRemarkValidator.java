@@ -18,14 +18,14 @@ public class TxRemarkValidator implements NulsDataValidator<Transaction> {
     @Override
     public ValidateResult validate(Transaction data) {
         if (data == null) {
-            return ValidateResult.getFaildResult( "Data is null!");
+            return ValidateResult.getFailedResult( "Data is null!");
         }
         if(null==data.getRemark()){
             return ValidateResult.getSuccessResult();
         }
         int length = data.getRemark().length;
         if (length >= MAX_SIZE) {
-            return ValidateResult.getFaildResult(ERROR_MESSAGE);
+            return ValidateResult.getFailedResult(ERROR_MESSAGE);
         }
         return ValidateResult.getSuccessResult();
     }

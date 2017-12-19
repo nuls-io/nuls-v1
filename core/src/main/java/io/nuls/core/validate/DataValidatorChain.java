@@ -26,7 +26,7 @@ public class DataValidatorChain {
         if (b) {
             return result;
         } else {
-            return ValidateResult.getFaildResult("The Validators not fully executed`");
+            return ValidateResult.getFailedResult("The Validators not fully executed`");
         }
     }
 

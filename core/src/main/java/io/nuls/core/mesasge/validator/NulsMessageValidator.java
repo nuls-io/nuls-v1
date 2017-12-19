@@ -14,15 +14,15 @@ import io.nuls.core.validate.ValidateResult;
 public class NulsMessageValidator {
     public ValidateResult validate(NulsMessage data) {
         if (data.getHeader() == null || data.getData() == null) {
-            return ValidateResult.getFaildResult(ErrorCode.NET_MESSAGE_ERROR);
+            return ValidateResult.getFailedResult(ErrorCode.NET_MESSAGE_ERROR);
         }
 
         if (data.getHeader().getLength() != data.getData().length) {
-            return ValidateResult.getFaildResult(ErrorCode.NET_MESSAGE_LENGTH_ERROR);
+            return ValidateResult.getFailedResult(ErrorCode.NET_MESSAGE_LENGTH_ERROR);
         }
 
         if (data.getHeader().getXor() != data.caculateXor()) {
-            return ValidateResult.getFaildResult(ErrorCode.NET_MESSAGE_XOR_ERROR);
+            return ValidateResult.getFailedResult(ErrorCode.NET_MESSAGE_XOR_ERROR);
         }
         return ValidateResult.getSuccessResult();
     }

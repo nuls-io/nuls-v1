@@ -13,6 +13,4 @@ public enum SeverityLevelEnum {
      * Flagrant Foul
      */
     FLAGRANT;
-
-
 }

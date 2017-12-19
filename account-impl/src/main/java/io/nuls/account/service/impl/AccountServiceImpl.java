@@ -8,14 +8,12 @@ import io.nuls.account.entity.tx.AliasTransaction;
 import io.nuls.account.manager.AccountManager;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.account.util.AccountTool;
-import io.nuls.core.chain.entity.Na;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.NulsSignData;
-import io.nuls.core.chain.entity.Result;
+import io.nuls.core.chain.entity.*;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.ECKey;
+import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.ThreadManager;
@@ -498,17 +496,29 @@ public class AccountServiceImpl implements AccountService {
         if (!result.isSuccess()) {
             return result;
         }
+        return export(account, (File) result.getObject(), true);
+    }
 
-        //备份账户
-        File backupFile = (File) result.getObject();
+    private Result export(Account account, File backupFile, boolean writeLength) {
+        List<Transaction> txList = ledgerService.queryListByAccount(account.getAddress().getBase58(), 0, 0);
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(backupFile);
+            if (writeLength) {
+                fos.write(1);   //account length
+            }
             fos.write(account.serialize());
+            fos.write(new VarInt(txList.size()).encode());
+
+            Transaction tx;
+            for (int i = 0; i < txList.size(); i++) {
+                tx = txList.get(i);
+                fos.write(tx.serialize());
+            }
         } catch (IOException e) {
             Log.error(e);
             return new Result(false, "export failed");
-        }finally {
+        } finally {
             if (fos != null) {
                 try {
                     fos.close();
@@ -548,12 +558,37 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result exportAccount(String address, String filePath) {
+        if (StringUtils.isBlank(filePath)) {
+            return new Result(false, "filePath is required");
+        }
+        if (StringUtils.isBlank(address)) {
+            return new Result(false, "address is required");
+        }
+        Account account = getAccount(address);
+        if (account == null) {
+            return new Result(false, "account not found");
+        }
 
-        return null;
+        Result result = backUpFile(filePath);
+        if (!result.isSuccess()) {
+            return result;
+        }
+        return export(account, (File) result.getObject(), true);
     }
 
     @Override
     public Result exportAccounts(String filePath) {
+        if (StringUtils.isBlank(filePath)) {
+            return new Result(false, "filePath is required");
+        }
+
+        List<Account> accounts = getLocalAccountList();
+        if(accounts == null || accounts.isEmpty()) {
+            return new Result(false, "no account can export");
+        }
+        if(accounts.size() == 1) {
+
+        }
         return null;
     }
 }
