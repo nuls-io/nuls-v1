@@ -32,7 +32,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     public void cacheTx(Transaction tx) {
-        tx.verify();
+        // tx.verify();
         tx.onApproval();
         ledgerCacheService.putTx(tx);
     }

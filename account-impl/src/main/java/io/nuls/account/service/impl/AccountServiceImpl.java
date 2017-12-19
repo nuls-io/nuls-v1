@@ -462,8 +462,8 @@ public class AccountServiceImpl implements AccountService {
         try {
             Account account = getAccount(address);
             AliasEvent event = new AliasEvent();
-            AliasTransaction aliasTx = new AliasTransaction(address, password);
-            LockNulsTransaction nulsTx = ledgerService.createLockNulsTx(account.getAddress().toString(), password, AccountConstant.ALIAS_Na);
+            AliasTransaction aliasTx = new AliasTransaction(address, alias);
+            LockNulsTransaction nulsTx = ledgerService.createLockNulsTx(account.getAddress().getBase58(), password, AccountConstant.ALIAS_Na);
             aliasTx.setNulsTx(nulsTx);
             aliasTx.setHash(NulsDigestData.calcDigestData(aliasTx.serialize()));
             aliasTx.setSign(signData(aliasTx.getHash(), account, password));
@@ -582,10 +582,10 @@ public class AccountServiceImpl implements AccountService {
         }
 
         List<Account> accounts = getLocalAccountList();
-        if(accounts == null || accounts.isEmpty()) {
+        if (accounts == null || accounts.isEmpty()) {
             return new Result(false, "no account can export");
         }
-        if(accounts.size() == 1) {
+        if (accounts.size() == 1) {
 
         }
         return null;
