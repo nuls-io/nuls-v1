@@ -1,10 +1,8 @@
 package io.nuls.core.utils.io;
 
-import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.exception.NulsVerificationException;

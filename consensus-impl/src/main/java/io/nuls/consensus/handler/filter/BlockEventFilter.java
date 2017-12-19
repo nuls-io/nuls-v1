@@ -10,15 +10,8 @@ import io.nuls.event.bus.event.filter.NulsEventFilterChain;
  */
 public class BlockEventFilter implements NulsEventFilter<BlockEvent> {
 
+    public BlockEventFilter() {
 
-    private static BlockEventFilter filter = new BlockEventFilter();
-
-    private BlockEventFilter() {
-
-    }
-
-    public static BlockEventFilter getInstance() {
-        return filter;
     }
 
     @Override

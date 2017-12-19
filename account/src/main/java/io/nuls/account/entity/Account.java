@@ -1,12 +1,11 @@
 package io.nuls.account.entity;
 
-import io.nuls.account.util.AccountTool;
 import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.chain.intf.NulsCloneable;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.ECKey;
-import io.nuls.core.crypto.EncryptedData;
-import io.nuls.core.crypto.Sha256Hash;
+import io.nuls.core.crypto.VarInt;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
@@ -21,7 +20,7 @@ import java.util.Arrays;
  * @author Niels
  * @date 2017/10/30
  */
-public class Account extends BaseNulsData implements NulsCloneable{
+public class Account extends BaseNulsData implements NulsCloneable {
 
     private String id;
 
@@ -92,13 +91,12 @@ public class Account extends BaseNulsData implements NulsCloneable{
         }
     }
 
-    public boolean validatePassword(String password){
+    public boolean validatePassword(String password) {
         //todo
         return true;
     }
 
     /**
-     *
      * @param password
      */
     public void encrypt(String password) {
@@ -113,16 +111,16 @@ public class Account extends BaseNulsData implements NulsCloneable{
     @Override
     public int size() {
         int s = 0;
-        //s += VarInt.sizeOf(version);
-        if (!StringUtils.isBlank(id)) {
-            try {
-                s += id.getBytes(NulsContext.DEFAULT_ENCODING).length + 1;
-            } catch (UnsupportedEncodingException e) {
-                Log.error(e);
-            }
-        } else {
-            s++;
-        }
+        s += 2;    //version size
+//        if (!StringUtils.isBlank(id)) {
+//            try {
+//                s += id.getBytes(NulsContext.DEFAULT_ENCODING).length + 1;
+//            } catch (UnsupportedEncodingException e) {
+//                Log.error(e);
+//            }
+//        } else {
+//            s++;
+//        }
         if (StringUtils.isNotBlank(alias)) {
             try {
                 s += alias.getBytes(NulsContext.DEFAULT_ENCODING).length + 1;
@@ -132,56 +130,49 @@ public class Account extends BaseNulsData implements NulsCloneable{
         } else {
             s++;
         }
-        if (null != address) {
-            s += address.getHash160().length;
+        try {
+            s += address.getBase58().getBytes(NulsContext.DEFAULT_ENCODING).length;
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
         }
         if (null != priSeed) {
             s += priSeed.length + 1;
+        } else {
+            s++;
         }
         s += 1;//status
 
         s += pubKey.length + 1;
         if (null != extend) {
             s += extend.length + 1;
+        } else {
+            s++;
         }
         return s;
     }
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        // stream.write(new VarInt(version).encode());
-//        if(StringUtils.isNotBlank(id)){
-//            stream.writeBytesWithLength(stream, id.getBytes(NulsContext.DEFAULT_ENCODING));
-//        }else {
-//            stream.write(0);
-//        }
-//        if(StringUtils.isNotBlank(alias)){
-//            stream.writeBytesWithLength(stream, alias.getBytes(NulsContext.DEFAULT_ENCODING));
-//        }else {
-//            stream.write(0);
-//        }
-//        if (null != address && null != address.getHash160()) {
-//            stream.write(address.getHash160());
-//        }
-//        stream.writeBytesWithLength(stream, priSeed);
-//        stream.write(status);
-//        stream.writeBytesWithLength(stream, sign);
-//        stream.writeBytesWithLength(stream, pubKey);
-//        stream.writeBytesWithLength(stream, extend);
 
+        stream.writeShort(version.getVersion());
+        stream.writeString(alias);
+        stream.writeString(address.getBase58());
+        stream.writeBytesWithLength(priSeed);
+        stream.writeBytesWithLength(pubKey);
+        stream.write(new VarInt(status).encode());
+        stream.writeBytesWithLength(extend);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
-//        id = new String(byteBuffer.readByLengthByte());
-//        alias = new String(byteBuffer.readByLengthByte());
-//        byte[] hash160 = byteBuffer.readBytes(Address.LENGTH);
-//        this.address = new Address(hash160);
-//        priSeed = byteBuffer.readByLengthByte();
-//        status = byteBuffer.readByte();
-//        sign = byteBuffer.readByLengthByte();
-//        pubKey = byteBuffer.readByLengthByte();
-//        extend = byteBuffer.readByLengthByte();
+        version = new NulsVersion(byteBuffer.readShort());
+        alias = new String(byteBuffer.readByLengthByte());
+        address = new Address(new String(byteBuffer.readByLengthByte()));
+        id = new String(new String(byteBuffer.readByLengthByte()));
+        priSeed = byteBuffer.readByLengthByte();
+        pubKey = byteBuffer.readByLengthByte();
+        status = byteBuffer.readInt32LE();
+        extend = byteBuffer.readByLengthByte();
     }
 
     public Address getAddress() {

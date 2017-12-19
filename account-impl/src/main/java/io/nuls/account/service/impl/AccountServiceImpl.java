@@ -20,6 +20,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.ThreadManager;
 import io.nuls.core.utils.crypto.Hex;
+import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
@@ -32,7 +33,12 @@ import io.nuls.event.bus.event.service.intf.EventService;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.service.intf.LedgerService;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -166,6 +172,9 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Account getLocalAccount() {
+        if (AccountManager.Local_acount_id == null) {
+            return null;
+        }
         return this.accountCacheService.getAccountById(AccountManager.Local_acount_id);
     }
 
@@ -474,5 +483,77 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Result verifySign(byte[] bytes, NulsSignData data) {
         return new Result(true, null);
+    }
+
+    @Override
+    public Result exportAccount(String filePath) {
+        if (StringUtils.isBlank(filePath)) {
+            return new Result(false, "filePath is required");
+        }
+        Account account = getLocalAccount();
+        if (account == null) {
+            return new Result(false, "no account can export");
+        }
+        Result result = backUpFile(filePath);
+        if (!result.isSuccess()) {
+            return result;
+        }
+
+        //备份账户
+        File backupFile = (File) result.getObject();
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(backupFile);
+            fos.write(account.serialize());
+        } catch (IOException e) {
+            Log.error(e);
+            return new Result(false, "export failed");
+        }finally {
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return new Result(true, "OK");
+    }
+
+
+    private Result<File> backUpFile(String filePath) {
+        File backupFile = new File(filePath);
+        //Does the superior directory exist
+        if (!backupFile.getParentFile().exists() && !backupFile.getParentFile().mkdirs()) {
+            return new Result(false, "create parent directory failed");
+        }
+        //if isDirectory(), rename backupFile
+        if (backupFile.isDirectory()) {
+            if (!backupFile.exists() && !backupFile.mkdir()) {
+                return new Result<>(false, "create directory failed");
+            }
+            backupFile = new File(backupFile, "wallet_backup_".concat(DateUtil.convertDate(new Date(TimeService.currentTimeMillis()), "yyyyMMddHHmm")).concat(".dat"));
+        }
+        //create backupFile
+        try {
+            if (!backupFile.exists() && !backupFile.createNewFile()) {
+                return new Result<>(false, "create file failed");
+            }
+        } catch (IOException e) {
+            Log.error(e);
+            return new Result(false, "create file failed");
+        }
+        return new Result<>(true, "OK", backupFile);
+    }
+
+    @Override
+    public Result exportAccount(String address, String filePath) {
+
+        return null;
+    }
+
+    @Override
+    public Result exportAccounts(String filePath) {
+        return null;
     }
 }

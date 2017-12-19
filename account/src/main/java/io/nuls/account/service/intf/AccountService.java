@@ -69,4 +69,10 @@ public interface AccountService {
     Result sendAliasTx(String address, String password, String alias);
 
     Result verifySign(byte[] bytes, NulsSignData data);
+
+    Result exportAccount(String filePath);
+
+    Result exportAccount(String address, String filePath);
+
+    Result exportAccounts(String filePath);
 }

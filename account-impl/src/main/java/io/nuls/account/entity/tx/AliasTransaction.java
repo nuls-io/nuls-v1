@@ -77,8 +77,8 @@ public class AliasTransaction extends Transaction {
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         super.serializeToStream(stream);
-        stream.writeBytesWithLength(address);
-        stream.writeBytesWithLength(alias);
+        stream.writeString(address);
+        stream.writeString(alias);
         nulsTx.serializeToStream(stream);
     }
 
