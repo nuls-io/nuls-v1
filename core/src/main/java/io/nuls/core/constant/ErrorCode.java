@@ -27,6 +27,7 @@ public enum ErrorCode {
     PARSE_OBJECT_ERROR("SYS012", 10012),
      HASH_ERROR("SYS013",10013 ),
     DATA_SIZE_ERROR("SYS014",10014),
+    DATA_FIELD_CHECK_ERROR("SYS015",10015),
 
     /**
      * ----------  Consensus Network code   ---------

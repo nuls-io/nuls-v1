@@ -11,5 +11,6 @@ public class CommonTxValidatorManager {
     public static void initTxValidators(){
         TransactionValidatorManager.addTxDefValidator(TxMaxSizeValidator.getInstance());
         TransactionValidatorManager.addTxDefValidator(TxRemarkValidator.getInstance());
+        TransactionValidatorManager.addTxDefValidator(TxFieldValidator.getInstance());
     }
 }
