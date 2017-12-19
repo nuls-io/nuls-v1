@@ -9,7 +9,7 @@ import io.nuls.core.chain.manager.TransactionValidatorManager;
 public class CommonTxValidatorManager {
 
     public static void initTxValidators(){
-        TransactionValidatorManager.addTxDefValidator(new UtxoTxInputsValidator());
-        TransactionValidatorManager.addTxDefValidator(new UtxoTxOutputsValidator());
+        TransactionValidatorManager.addTxDefValidator(TxMaxSizeValidator.getInstance());
+        TransactionValidatorManager.addTxDefValidator(TxRemarkValidator.getInstance());
     }
 }

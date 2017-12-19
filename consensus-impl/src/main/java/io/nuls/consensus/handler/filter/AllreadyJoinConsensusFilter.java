@@ -14,8 +14,13 @@ import io.nuls.event.bus.event.filter.NulsEventFilterChain;
  */
 public class AllreadyJoinConsensusFilter implements NulsEventFilter<JoinConsensusEvent> {
 
-    private ConsensusService consensusService = PocConsensusServiceImpl.getInstance();
+    private static final AllreadyJoinConsensusFilter INSTANCE = new AllreadyJoinConsensusFilter();
 
+    private ConsensusService consensusService = PocConsensusServiceImpl.getInstance();
+    private AllreadyJoinConsensusFilter(){}
+    public static final AllreadyJoinConsensusFilter getInstance(){
+        return INSTANCE;
+    }
     @Override
     public void doFilter(JoinConsensusEvent event, NulsEventFilterChain chain) {
         ConsensusStatusInfo info = consensusService.getConsensusInfo(event.getEventBody().getTxData().getAddress());
