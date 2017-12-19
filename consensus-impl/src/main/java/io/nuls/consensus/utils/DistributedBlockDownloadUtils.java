@@ -124,9 +124,9 @@ public class DistributedBlockDownloadUtils {
             } catch (InterruptedException e) {
                 Log.error(e);
             }
-            return Result.getFaildResult("");
+            return Result.getFailed("");
         }
-        return Result.getSuccessResult();
+        return Result.getSuccess();
     }
 
     private void finished() {
