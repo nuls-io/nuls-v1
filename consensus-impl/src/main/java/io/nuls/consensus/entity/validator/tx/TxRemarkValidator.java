@@ -1,6 +1,7 @@
 package io.nuls.consensus.entity.validator.tx;
 
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 
@@ -18,14 +19,14 @@ public class TxRemarkValidator implements NulsDataValidator<Transaction> {
     @Override
     public ValidateResult validate(Transaction data) {
         if (data == null) {
-            return ValidateResult.getFaildResult( "Data is null!");
+            return ValidateResult.getFaildResult(SeverityLevelEnum.NORMAL, "Data is null!");
         }
         if(null==data.getRemark()){
             return ValidateResult.getSuccessResult();
         }
         int length = data.getRemark().length;
         if (length >= MAX_SIZE) {
-            return ValidateResult.getFaildResult(ERROR_MESSAGE);
+            return ValidateResult.getFaildResult(SeverityLevelEnum.NORMAL,ERROR_MESSAGE);
         }
         return ValidateResult.getSuccessResult();
     }

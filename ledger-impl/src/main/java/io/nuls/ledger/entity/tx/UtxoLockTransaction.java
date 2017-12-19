@@ -10,7 +10,7 @@ import io.nuls.ledger.entity.validator.UtxoTxOutputsValidator;
 public class UtxoLockTransaction extends LockNulsTransaction<UtxoData> {
     public UtxoLockTransaction(){
         this.setCanBeUnlocked(false);
-        this.registerValidator(new UtxoTxInputsValidator());
-        this.registerValidator(new UtxoTxOutputsValidator());
+        this.registerValidator(UtxoTxInputsValidator.getInstance());
+        this.registerValidator(UtxoTxOutputsValidator.getInstance());
     }
 }

@@ -13,8 +13,8 @@ public class UtxoDepositTransaction extends LockNulsTransaction<UtxoData>  {
         this.setCanBeUnlocked(true);
         this.setUnlockHeight(0);
         this.setUnlockTime(0);
-        this.registerValidator(new UtxoTxInputsValidator());
-        this.registerValidator(new UtxoTxOutputsValidator());
+        this.registerValidator(UtxoTxInputsValidator.getInstance());
+        this.registerValidator(UtxoTxOutputsValidator.getInstance());
     }
 
 }

@@ -3,6 +3,7 @@ package io.nuls.account.entity.validator;
 import io.nuls.account.entity.tx.AliasTransaction;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.chain.entity.Result;
+import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
@@ -28,19 +29,19 @@ public class AliasValidator implements NulsDataValidator<AliasTransaction> {
     @Override
     public ValidateResult validate(AliasTransaction tx) {
         if (StringUtils.isBlank(tx.getAddress()) || tx.getAddress().length() >= 30) {
-            return ValidateResult.getFaildResult("The address format error");
+            return ValidateResult.getFaildResult(SeverityLevelEnum.NORMAL,"The address format error");
         }
         if (!StringUtils.validAlias(tx.getAlias())) {
-            return ValidateResult.getFaildResult(" The alias format error");
+            return ValidateResult.getFaildResult(SeverityLevelEnum.NORMAL," The alias format error");
         }
         if (tx.getNulsTx() == null) {
-            return ValidateResult.getFaildResult(" The NulsTx is required");
+            return ValidateResult.getFaildResult(SeverityLevelEnum.NORMAL," The NulsTx is required");
         }
         tx.getNulsTx().verify();
 
         Result result = accountService.canSetAlias(tx.getAddress(), tx.getAlias());
         if (!result.isSuccess()) {
-            return ValidateResult.getFaildResult(result.getMessage());
+            return ValidateResult.getFaildResult(SeverityLevelEnum.NORMAL,result.getMessage());
         }
         return ValidateResult.getSuccessResult();
     }

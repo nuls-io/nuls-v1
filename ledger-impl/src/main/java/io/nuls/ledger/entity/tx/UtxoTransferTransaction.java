@@ -13,8 +13,8 @@ public class UtxoTransferTransaction extends TransferTransaction<UtxoData> {
 
     public UtxoTransferTransaction() {
         super(TransactionConstant.TX_TYPE_TRANSFER);
-        this.registerValidator(new UtxoTxInputsValidator());
-        this.registerValidator(new UtxoTxOutputsValidator());
+        this.registerValidator(UtxoTxInputsValidator.getInstance());
+        this.registerValidator(UtxoTxOutputsValidator.getInstance());
     }
 
 }

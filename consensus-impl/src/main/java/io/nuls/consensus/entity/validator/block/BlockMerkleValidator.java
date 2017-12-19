@@ -2,6 +2,7 @@ package io.nuls.consensus.entity.validator.block;
 
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.NulsDigestData;
+import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 
@@ -16,7 +17,7 @@ public class BlockMerkleValidator implements NulsDataValidator<Block> {
 
     @Override
     public ValidateResult validate(Block data) {
-        ValidateResult result = ValidateResult.getFaildResult(ERROR_MESSAGE);
+        ValidateResult result = ValidateResult.getFaildResult(SeverityLevelEnum.NORMAL,ERROR_MESSAGE);
         do {
             if (null == data) {
                 result.setMessage("Data is null!");

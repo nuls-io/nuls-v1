@@ -1,5 +1,6 @@
 package io.nuls.ledger.entity.validator;
 
+import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.ledger.entity.UtxoData;
@@ -18,7 +19,7 @@ public class UtxoTxOutputsValidator implements NulsDataValidator<AbstractCoinTra
     private static final String ERROR_MESSAGE = "the output is too much!";
     private static final UtxoTxOutputsValidator INSTANCE = new UtxoTxOutputsValidator();
     private UtxoTxOutputsValidator(){}
-    private static UtxoTxOutputsValidator getInstance(){
+    public static UtxoTxOutputsValidator getInstance(){
         return INSTANCE;
     }
     @Override
@@ -26,7 +27,7 @@ public class UtxoTxOutputsValidator implements NulsDataValidator<AbstractCoinTra
         UtxoData utxoData = data.getTxData();
         List<UtxoOutput> outputs = utxoData.getOutputs();
         if(null!=outputs&&outputs.size()>MAX_INPUT_COUNT){
-            return ValidateResult.getFaildResult(ERROR_MESSAGE);
+            return ValidateResult.getFaildResult(SeverityLevelEnum.NORMAL,ERROR_MESSAGE);
         }
         return ValidateResult.getSuccessResult();
     }
