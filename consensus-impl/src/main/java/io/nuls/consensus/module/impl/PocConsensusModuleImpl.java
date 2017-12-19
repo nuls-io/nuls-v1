@@ -111,7 +111,7 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
         processorService.registerEventHandler(RegisterAgentEvent.class, registerAgentHandler);
 
         JoinConsensusHandler joinConsensusHandler = new JoinConsensusHandler();
-        joinConsensusHandler.addFilter(new JoinConsensusEventFilter());
+        joinConsensusHandler.addFilter(new AllreadyJoinConsensusFilter());
         processorService.registerEventHandler(JoinConsensusEvent.class, joinConsensusHandler);
 
         ExitConsensusHandler exitConsensusHandler = new ExitConsensusHandler();
