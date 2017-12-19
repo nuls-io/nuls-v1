@@ -2,18 +2,25 @@ package io.nuls.ledger.entity.validator;
 
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
-import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.UtxoOutput;
+import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 
 import java.util.List;
 
 /**
- * Created by Niels on 2017/11/20.
+ *
+ * @author Niels
+ * @date 2017/11/20
  */
 public class UtxoTxOutputsValidator implements NulsDataValidator<AbstractCoinTransaction<UtxoData>> {
     private static final int MAX_INPUT_COUNT = 200;
     private static final String ERROR_MESSAGE = "the output is too much!";
+    private static final UtxoTxOutputsValidator INSTANCE = new UtxoTxOutputsValidator();
+    private UtxoTxOutputsValidator(){}
+    private static UtxoTxOutputsValidator getInstance(){
+        return INSTANCE;
+    }
     @Override
     public ValidateResult validate(AbstractCoinTransaction<UtxoData> data) {
         UtxoData utxoData = data.getTxData();
