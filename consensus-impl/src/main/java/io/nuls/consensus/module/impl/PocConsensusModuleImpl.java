@@ -25,6 +25,7 @@ import io.nuls.consensus.service.impl.BlockServiceImpl;
 import io.nuls.consensus.service.impl.PocConsensusServiceImpl;
 import io.nuls.consensus.service.intf.ConsensusService;
 import io.nuls.consensus.thread.BlockMaintenanceThread;
+import io.nuls.consensus.thread.BlockPersistenceThread;
 import io.nuls.consensus.thread.ConsensusMeetingThread;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
@@ -82,7 +83,7 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
         this.startBlockMaintenanceThread();
         this.checkConsensusStatus();
         this.checkPeerType();
-
+        ThreadManager.createSingleThreadAndRun(this.getModuleId(), BlockPersistenceThread.THREAD_NAME, BlockPersistenceThread.getInstance());
         this.registerHanders();
         Log.info("the POC consensus module is started!");
 

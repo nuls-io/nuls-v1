@@ -1,5 +1,6 @@
 package io.nuls.core.chain.entity;
 
+import io.nuls.core.chain.intf.NulsCloneable;
 import io.nuls.core.chain.manager.BlockValidatorManager;
 import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ErrorCode;
@@ -20,7 +21,7 @@ import java.util.List;
  * @author win10
  * @date 2017/10/30
  */
-public class Block extends BaseNulsData {
+public class Block extends BaseNulsData implements NulsCloneable{
 
     private BlockHeader header;
 
@@ -92,5 +93,10 @@ public class Block extends BaseNulsData {
 
     public void setExtend(byte[] extend) {
         this.extend = extend;
+    }
+
+    @Override
+    public Object copy() {
+        return this;
     }
 }
