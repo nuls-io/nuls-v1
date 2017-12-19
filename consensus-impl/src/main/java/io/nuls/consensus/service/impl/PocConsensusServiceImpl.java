@@ -24,6 +24,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
+import io.nuls.core.utils.str.StringUtils;
 import io.nuls.event.bus.event.service.intf.EventService;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.entity.tx.UnlockNulsTransaction;
@@ -139,19 +140,19 @@ public class PocConsensusServiceImpl implements ConsensusService {
         if (null == account) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "The account is not exist,address:" + address);
         }
-        if (paramsMap == null || paramsMap.size() < 2) {
+        if (paramsMap == null || paramsMap.size() < 1) {
             throw new NulsRuntimeException(ErrorCode.NULL_PARAMETER);
         }
         if (!account.validatePassword(password)) {
             throw new NulsRuntimeException(ErrorCode.PASSWORD_IS_WRONG);
         }
         JoinConsensusParam params = new JoinConsensusParam(paramsMap);
-        if (params.getCommissionRate() != null) {
+        if (StringUtils.isNotBlank(params.getIntroduction())){
             Agent delegate = new Agent();
             delegate.setDelegateAddress(params.getAgentAddress());
             delegate.setDeposit(Na.parseNuls(params.getDeposit()));
-            delegate.setCommissionRate(params.getCommissionRate());
             delegate.setIntroduction(params.getIntroduction());
+            delegate.setSeed(params.isSeed());
             try {
                 this.registerAgent(delegate, account, password);
             } catch (IOException e) {

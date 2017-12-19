@@ -31,6 +31,7 @@ public class Agent extends BaseNulsData {
     private long roundIndex;
     private long roundStartTime;
     private long roundEndTime;
+    private boolean seed;
 
     @Override
     public int size() {
@@ -40,6 +41,7 @@ public class Agent extends BaseNulsData {
         size += Utils.sizeOfSerialize(this.delegateAddress);
         size += Utils.double2Bytes(commissionRate).length;
         size += Utils.sizeOfSerialize(this.introduction);
+        size += Utils.sizeOfSerialize(seed);
         return size;
     }
 
@@ -49,6 +51,7 @@ public class Agent extends BaseNulsData {
         stream.writeString(delegateAddress);
         stream.writeDouble(this.commissionRate);
         stream.writeString(this.introduction);
+        stream.writeBoolean(seed);
     }
 
     @Override
@@ -57,6 +60,7 @@ public class Agent extends BaseNulsData {
         this.delegateAddress = byteBuffer.readString();
         this.commissionRate = byteBuffer.readDouble();
         this.introduction = byteBuffer.readString();
+        this.seed = byteBuffer.readBoolean();
     }
 
     public Na getDeposit() {
@@ -137,5 +141,13 @@ public class Agent extends BaseNulsData {
 
     public void setStartTime(long startTime) {
         this.startTime = startTime;
+    }
+
+    public void setSeed(Boolean seed) {
+        this.seed = seed;
+    }
+
+    public Boolean getSeed() {
+        return seed;
     }
 }

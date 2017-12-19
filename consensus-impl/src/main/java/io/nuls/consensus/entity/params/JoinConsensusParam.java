@@ -10,12 +10,10 @@ import java.util.Map;
  * @date 2017/12/6
  */
 public class JoinConsensusParam {
-    private static final String ROLE = "role";
-    private static final String IS_SEED_PEER = "is-seed-peer";
-    private static final String DEPOSIT = "deposit";
-    private static final String AGENT_ADDRESS = "agentAddress";
-    private static final String INTRODUCTION = "introduction";
-    private static final String COMMISSION_RATE = "commissionRate";
+    public static final String IS_SEED_PEER = "is-seed-peer";
+    public static final String DEPOSIT = "deposit";
+    public static final String AGENT_ADDRESS = "agentAddress";
+    public static final String INTRODUCTION = "introduction";
 
     private final Map<String, Object> params;
 
@@ -24,6 +22,10 @@ public class JoinConsensusParam {
         AssertUtil.canNotEmpty(map.get(DEPOSIT), ErrorCode.NULL_PARAMETER.getMsg());
         AssertUtil.canNotEmpty(map.get(AGENT_ADDRESS), ErrorCode.NULL_PARAMETER.getMsg());
         this.params = map;
+    }
+
+    public Boolean isSeed(){
+        return (Boolean)params.get(IS_SEED_PEER);
     }
 
     public Double getDeposit() {
@@ -38,7 +40,4 @@ public class JoinConsensusParam {
         return (String) params.get(INTRODUCTION);
     }
 
-    public Double getCommissionRate() {
-        return (Double) params.get(COMMISSION_RATE);
-    }
 }

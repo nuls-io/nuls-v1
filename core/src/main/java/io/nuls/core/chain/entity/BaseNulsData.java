@@ -2,7 +2,6 @@ package io.nuls.core.chain.entity;
 
 import io.nuls.core.crypto.UnsafeByteArrayOutputStream;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.exception.NulsVerificationException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.validate.DataValidatorChain;
@@ -84,11 +83,8 @@ public abstract class BaseNulsData  implements Serializable {
     /**
      * @throws NulsException
      */
-    public final void verify() throws NulsVerificationException {
-        ValidateResult result = this.validatorChain.startDoValidator(this);
-        if (!result.isSuccess()) {
-            throw new NulsVerificationException(result.getMessage());
-        }
+    public final ValidateResult verify() {
+       return this.validatorChain.startDoValidator(this);
     }
 
     public NulsDataType getDataType() {
