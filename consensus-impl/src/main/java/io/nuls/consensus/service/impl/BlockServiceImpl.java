@@ -5,6 +5,8 @@ import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.utils.ConsensusBeanUtils;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.BlockDao;
 import io.nuls.db.entity.BlockPo;
 
@@ -27,7 +29,12 @@ public class BlockServiceImpl implements BlockService {
     @Override
     public Block getGengsisBlockFromDb() {
         BlockPo po = this.blockDao.getBlockByHeight(0);
-        return ConsensusBeanUtils.fromPojo(po);
+        try {
+            return ConsensusBeanUtils.fromPojo(po);
+        } catch (NulsException e) {
+            Log.error(e);
+            return null;
+        }
     }
 
     @Override

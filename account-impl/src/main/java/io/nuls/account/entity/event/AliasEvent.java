@@ -4,6 +4,7 @@ import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.entity.tx.AliasTransaction;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.event.BaseNulsEvent;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
@@ -29,6 +30,11 @@ public class AliasEvent extends BaseNulsEvent<AliasTransaction> {
 
     @Override
     protected AliasTransaction parseEventBody(NulsByteBuffer byteBuffer) {
-        return new AliasTransaction(byteBuffer);
+        try {
+            return new AliasTransaction(byteBuffer);
+        } catch (NulsException e) {
+            Log.error(e);
+            return null;
+        }
     }
 }

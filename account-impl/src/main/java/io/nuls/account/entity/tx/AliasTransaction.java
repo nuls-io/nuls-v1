@@ -5,6 +5,7 @@ import io.nuls.account.entity.validator.AliasValidator;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
@@ -40,7 +41,7 @@ public class AliasTransaction extends Transaction {
         this.nulsTx = nulsTx;
     }
 
-    public AliasTransaction(NulsByteBuffer buffer) {
+    public AliasTransaction(NulsByteBuffer buffer) throws NulsException {
         super(buffer);
     }
 

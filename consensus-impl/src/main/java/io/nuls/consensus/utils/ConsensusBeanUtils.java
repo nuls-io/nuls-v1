@@ -10,6 +10,7 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.entity.BlockPo;
 import io.nuls.db.entity.DelegateAccountPo;
@@ -46,7 +47,7 @@ public class ConsensusBeanUtils {
         return po;
     }
 
-    public static final Block fromPojo(BlockPo po) {
+    public static final Block fromPojo(BlockPo po) throws NulsException {
         if (null == po) {
             return null;
         }
