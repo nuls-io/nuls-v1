@@ -11,6 +11,7 @@ import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.consensus.entity.params.QueryConsensusAccountParam;
 import io.nuls.consensus.utils.ConsensusBeanUtils;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.DelegateAccountDao;
 import io.nuls.db.dao.DelegateDao;
 import io.nuls.db.entity.DelegateAccountPo;
@@ -125,6 +126,7 @@ public class ConsensusCacheService {
     }
 
     public ConsensusStatusInfo getConsensusStatusInfo(String address) {
+
         // todo auto-generated method stub(niels)
         return null;
     }

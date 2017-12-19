@@ -1,5 +1,6 @@
 package io.nuls.consensus.handler.filter;
 
+import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.consensus.event.JoinConsensusEvent;
 import io.nuls.consensus.service.impl.PocConsensusServiceImpl;
 import io.nuls.consensus.service.intf.ConsensusService;
@@ -16,8 +17,10 @@ public class AllreadyJoinConsensusFilter implements NulsEventFilter<JoinConsensu
 
     @Override
     public void doFilter(JoinConsensusEvent event, NulsEventFilterChain chain) {
-        //todo
-
+        ConsensusStatusInfo info = consensusService.getConsensusInfo(event.getEventBody().getTxData().getAddress());
+        if(info.getStatus()==1){
+//todo
+        }
 
         chain.doFilter(event);
     }
