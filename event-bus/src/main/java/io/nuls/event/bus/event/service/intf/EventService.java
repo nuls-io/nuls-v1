@@ -24,13 +24,13 @@ public interface EventService {
      * @param excludePeerId
      * @return
      */
-    List<String> broadcast(BaseNulsEvent event, String excludePeerId);
+    List<String> broadcastAndCache(BaseNulsEvent event, String excludePeerId);
 
     /**
      * broadcast msg ,no need to pass the message
      * @param event
      */
-    List<String> broadcast(BaseNulsEvent event);
+    List<String> broadcastAndCache(BaseNulsEvent event);
 
     /**
      * send msg to one peer

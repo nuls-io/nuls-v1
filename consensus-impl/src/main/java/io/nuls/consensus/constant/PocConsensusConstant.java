@@ -31,10 +31,6 @@ public interface PocConsensusConstant {
     int CONFIRM_BLOCK_COUNT = 6;
 
     /**
-     * Minimum safe quantity of consensus agents
-     */
-    int SAFELY_CONSENSUS_COUNT = 40;
-    /**
      * Set temporarily as a fixed value,unit:nuls
      */
     int BLOCK_COUNT_OF_YEAR = 3153600;

@@ -1,6 +1,8 @@
 package io.nuls.consensus.thread;
 
+import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.service.cache.BlockCacheService;
+import io.nuls.core.chain.entity.Block;
 import io.nuls.core.utils.log.Log;
 
 /**
@@ -31,7 +33,10 @@ public class BlockPersistenceThread implements Runnable {
     }
 
     private void doPersistence() {
+        long count = blockCacheService.getMaxHeight()-blockCacheService.getMinHeight()-PocConsensusConstant.CONFIRM_BLOCK_COUNT;
         // todo 检查缓存中的区块，将已确认的区块存入数据库，并且关联交易的存储及处理
-
+        for(int i=0;i<count;i++){
+            Block block = blockCacheService.earliestBlockAndRemove();
+        }
     }
 }
