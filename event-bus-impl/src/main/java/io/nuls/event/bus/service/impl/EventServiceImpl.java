@@ -49,14 +49,20 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<String> broadcast(BaseNulsEvent event, String excludePeerId) {
+    public List<String> broadcastAndCache(BaseNulsEvent event, String excludePeerId) {
         BroadcastResult result = networkService.broadcast(event, excludePeerId);
+        if (result.isSuccess()) {
+            eventCacheService.cacheSendedEvent(event);
+        }
         return getPeerIdList(result);
     }
 
     @Override
-    public List<String> broadcast(BaseNulsEvent event) {
+    public List<String> broadcastAndCache(BaseNulsEvent event) {
         BroadcastResult result = networkService.broadcast(event);
+        if (result.isSuccess()) {
+            eventCacheService.cacheSendedEvent(event);
+        }
         return getPeerIdList(result);
     }
 

@@ -171,15 +171,12 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
             startMining();
             return;
         }
-        int i = consensusCacheService.getDelegateAccountCount();
-        if (i <= PocConsensusConstant.SAFELY_CONSENSUS_COUNT) {
-            Map<String, Object> paramsMap = new HashMap<>();
-            paramsMap.put(JoinConsensusParam.IS_SEED_PEER, true);
-            paramsMap.put(JoinConsensusParam.AGENT_ADDRESS, localAccount.getAddress().toString());
-            paramsMap.put(JoinConsensusParam.DEPOSIT, 0L);
-            paramsMap.put(JoinConsensusParam.INTRODUCTION, "seed peer!");
-            this.pocConsensusService.joinTheConsensus(localAccount.getAddress().toString(), null, paramsMap);
-        }
+        Map<String, Object> paramsMap = new HashMap<>();
+        paramsMap.put(JoinConsensusParam.IS_SEED_PEER, true);
+        paramsMap.put(JoinConsensusParam.AGENT_ADDRESS, localAccount.getAddress().toString());
+        paramsMap.put(JoinConsensusParam.DEPOSIT, 0L);
+        paramsMap.put(JoinConsensusParam.INTRODUCTION, "seed peer!");
+        this.pocConsensusService.joinTheConsensus(localAccount.getAddress().toString(), null, paramsMap);
     }
 
     private void startMining() {

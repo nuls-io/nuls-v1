@@ -21,7 +21,7 @@ import java.util.List;
  * @author win10
  * @date 2017/10/30
  */
-public class Block extends BaseNulsData implements NulsCloneable{
+public class Block extends BaseNulsData implements NulsCloneable {
 
     private BlockHeader header;
 
@@ -97,6 +97,12 @@ public class Block extends BaseNulsData implements NulsCloneable{
 
     @Override
     public Object copy() {
-        return this;
+        //Temporary non realization
+        try {
+            return this.clone();
+        } catch (CloneNotSupportedException e) {
+            Log.error(e);
+            return null;
+        }
     }
 }

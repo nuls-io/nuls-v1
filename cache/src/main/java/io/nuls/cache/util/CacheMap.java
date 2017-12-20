@@ -14,7 +14,7 @@ import java.util.Set;
 public class CacheMap<K, V> {
 
     private final String cacheName;
-    private CacheService  cacheService = NulsContext.getInstance().getService(CacheService.class);
+    private CacheService cacheService = NulsContext.getInstance().getService(CacheService.class);
 
     public CacheMap(String cacheName, int timeToLiveSeconds, int timeToIdleSeconds) {
         this.cacheService.createCache(cacheName, timeToLiveSeconds, timeToIdleSeconds);
@@ -48,11 +48,11 @@ public class CacheMap<K, V> {
     }
 
 
-    public void put(K key, V value) {
-        this.cacheService.putElement(cacheName, key, (NulsCloneable) value);
+    public <V extends NulsCloneable> void put(K key, V value) {
+        this.cacheService.putElement(cacheName, key, value);
     }
 
-    public void putWithOutClone(K key, Object value) {
+    public void putWithOutClone(K key, V value) {
         this.cacheService.putElementWithoutClone(cacheName, key, value);
     }
 
@@ -73,4 +73,7 @@ public class CacheMap<K, V> {
         return this.cacheService.getElementValueList(cacheName);
     }
 
+    public void destroy() {
+        this.cacheService.removeCache(cacheName);
+    }
 }

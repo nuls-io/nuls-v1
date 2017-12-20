@@ -60,7 +60,7 @@ public class DistributedBlockInfoRequestUtils {
         } else {
             askBlockInfoEvent = new AskBlockInfoEvent(height);
         }
-        peerIdList = this.eventService.broadcast(askBlockInfoEvent);
+        peerIdList = this.eventService.broadcastAndCache(askBlockInfoEvent);
         if (peerIdList.isEmpty()) {
             Log.error("get best height from net faild!");
             lock.unlock();
