@@ -22,6 +22,7 @@ import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
@@ -61,7 +62,12 @@ public class PocConsensusServiceImpl implements ConsensusService {
         tx.setLockNulsTransaction(lockNulsTransaction);
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
         tx.setSign(accountService.signData(tx.getHash(), account, password));
-        ledgerService.cacheTx(tx);
+        try {
+            ledgerService.verifyAndCacheTx(tx);
+        } catch (NulsException e) {
+            Log.error(e);
+            throw new NulsRuntimeException(e);
+        }
         event.setEventBody(tx);
         eventService.broadcastHashAndCache(event);
     }
@@ -80,7 +86,12 @@ public class PocConsensusServiceImpl implements ConsensusService {
         tx.setLockNulsTransaction(lockNulsTransaction);
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
         tx.setSign(accountService.signData(tx.getHash(), account, password));
-        ledgerService.cacheTx(tx);
+        try {
+            ledgerService.verifyAndCacheTx(tx);
+        } catch (NulsException e) {
+            Log.error(e);
+            throw new NulsRuntimeException(e);
+        }
         event.setEventBody(tx);
         eventService.broadcastHashAndCache(event);
     }
@@ -125,7 +136,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
 
     @Override
     public ConsensusStatusInfo getConsensusInfo(String address) {
-        if(StringUtils.isBlank(address)){
+        if (StringUtils.isBlank(address)) {
             address = this.accountService.getDefaultAccount();
         }
         return consensusCacheService.getConsensusStatusInfo(address);
@@ -150,7 +161,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
             throw new NulsRuntimeException(ErrorCode.PASSWORD_IS_WRONG);
         }
         JoinConsensusParam params = new JoinConsensusParam(paramsMap);
-        if (StringUtils.isNotBlank(params.getIntroduction())){
+        if (StringUtils.isNotBlank(params.getIntroduction())) {
             Agent delegate = new Agent();
             delegate.setDelegateAddress(params.getAgentAddress());
             delegate.setDeposit(Na.parseNuls(params.getDeposit()));

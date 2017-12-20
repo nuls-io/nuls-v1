@@ -27,16 +27,16 @@ public class SmallBlockEventHandler extends AbstractNetworkNulsEventHandler<Smal
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
 
     @Override
-    public void onEvent(SmallBlockEvent event, String fromId) throws NulsException {
+    public void onEvent(SmallBlockEvent event, String fromId) {
 
         BlockHeader header = headerCacheService.getHeader(event.getEventBody().getHeight());
-        if(header==null){
+        if (header == null) {
             return;
         }
         Block block = new Block();
         block.setHeader(header);
         List<Transaction> txs = new ArrayList<>();
-        for(NulsDigestData txHash:header.getTxHashList()){
+        for (NulsDigestData txHash : header.getTxHashList()) {
             Transaction tx = ledgerService.getTxFromCache(txHash.getDigestHex());
             txs.add(tx);
         }

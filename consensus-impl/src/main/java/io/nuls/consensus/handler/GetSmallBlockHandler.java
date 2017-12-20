@@ -23,7 +23,7 @@ public class GetSmallBlockHandler extends AbstractNetworkNulsEventHandler<GetSma
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
     private EventService eventService = NulsContext.getInstance().getService(EventService.class);
     @Override
-    public void onEvent(GetSmallBlockEvent event,String fromId) throws NulsException {
+    public void onEvent(GetSmallBlockEvent event,String fromId) {
         AskSmallBlockData data = event.getEventBody();
         SmallBlockEvent blockEvent = new SmallBlockEvent();
         SmallBlockData blockData = new SmallBlockData();

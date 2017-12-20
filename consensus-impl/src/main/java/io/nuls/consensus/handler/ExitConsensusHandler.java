@@ -5,14 +5,13 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.event.bus.event.handler.AbstractNetworkNulsEventHandler;
 
 /**
- *
  * @author facjas
  * @date 2017/11/16
  */
 public class ExitConsensusHandler extends AbstractNetworkNulsEventHandler<ExitConsensusEvent> {
 
     @Override
-    public void onEvent(ExitConsensusEvent event,String fromId) throws NulsException {
+    public void onEvent(ExitConsensusEvent event, String fromId) {
         //todo
     }
 }

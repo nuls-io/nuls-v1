@@ -13,7 +13,7 @@ import io.nuls.event.bus.event.handler.AbstractNetworkNulsEventHandler;
 public class RegisterAgentHandler extends AbstractNetworkNulsEventHandler<RegisterAgentEvent> {
 
     @Override
-    public void onEvent(RegisterAgentEvent event,String fromId) throws NulsException {
+    public void onEvent(RegisterAgentEvent event,String fromId)   {
         //todo
 
     }

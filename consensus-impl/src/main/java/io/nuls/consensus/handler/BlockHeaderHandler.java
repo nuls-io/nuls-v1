@@ -28,7 +28,7 @@ public class BlockHeaderHandler extends AbstractNetworkNulsEventHandler<BlockHea
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
 
     @Override
-    public void onEvent(BlockHeaderEvent event, String fromId) throws NulsException {
+    public void onEvent(BlockHeaderEvent event, String fromId)   {
         if (DistributedBlockInfoRequestUtils.getInstance().addBlockHeader(fromId, event.getEventBody())) {
             return;
         }

@@ -4,6 +4,7 @@ import io.nuls.account.entity.event.AliasEvent;
 import io.nuls.account.entity.tx.AliasTransaction;
 import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.event.handler.AbstractNetworkNulsEventHandler;
 import io.nuls.ledger.service.intf.LedgerService;
@@ -37,7 +38,7 @@ public class AliasEventHandler extends AbstractNetworkNulsEventHandler<AliasEven
     }
 
     @Override
-    public void onEvent(AliasEvent event, String fromId) throws NulsException {
+    public void onEvent(AliasEvent event, String fromId)  {
         AliasTransaction tx = event.getEventBody();
         ValidateResult result = tx.verify();
         if (result.isFailed()) {
@@ -47,7 +48,12 @@ public class AliasEventHandler extends AbstractNetworkNulsEventHandler<AliasEven
             return;
         }
 
-        ledgerService.cacheTx(tx);
+        try {
+            ledgerService.verifyAndCacheTx(tx);
+        } catch (NulsException e) {
+            Log.error(e);
+            return;
+        }
         networkService.broadcast(event, fromId);
     }
 }

@@ -11,7 +11,7 @@ import io.nuls.ledger.event.UtxoLockNulsEvent;
 public class UtxoLockHandler<T extends UtxoLockNulsEvent> extends AbstractNetworkNulsEventHandler<T> {
 
     @Override
-    public void onEvent(T event,String fromId) throws NulsException {
+    public void onEvent(T event,String fromId) {
         //todo
     }
 }
