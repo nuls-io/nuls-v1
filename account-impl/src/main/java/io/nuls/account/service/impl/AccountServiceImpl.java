@@ -464,7 +464,7 @@ public class AccountServiceImpl implements AccountService {
             aliasTx.setNulsTx(nulsTx);
             aliasTx.setHash(NulsDigestData.calcDigestData(aliasTx.serialize()));
             aliasTx.setSign(signData(aliasTx.getHash(), account, password));
-            ledgerService.cacheTx(aliasTx);
+            ledgerService.verifyAndCacheTx(aliasTx);
             event.setEventBody(aliasTx);
             eventService.broadcastAndCache(event);
         } catch (Exception e) {

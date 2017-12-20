@@ -19,7 +19,6 @@ public interface NulsEventHandler<T extends BaseNulsEvent> {
     /**
      * @param event
      * @param fromId hash of the peer who send this event!
-     * @throws NulsException
      */
-    void onEvent(T event,String fromId)throws NulsException;
+    void onEvent(T event,String fromId) ;
 }

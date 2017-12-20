@@ -4,6 +4,8 @@ import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.validate.ValidateResult;
 import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.entity.tx.UnlockNulsTransaction;
@@ -18,7 +20,7 @@ import java.util.List;
  */
 public interface LedgerService {
 
-    void cacheTx(Transaction tx);
+    ValidateResult verifyAndCacheTx(Transaction tx) throws NulsException;
 
     Transaction getTxFromCache(String hash);
 

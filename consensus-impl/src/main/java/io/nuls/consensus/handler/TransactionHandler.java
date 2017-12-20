@@ -13,6 +13,6 @@ import io.nuls.ledger.event.AbstractCoinTransactionEvent;
 public class TransactionHandler extends AbstractNetworkNulsEventHandler<AbstractCoinTransactionEvent<AbstractCoinTransaction>> {
 
     @Override
-    public void onEvent(AbstractCoinTransactionEvent<AbstractCoinTransaction> event,String fromId) throws NulsException{
+    public void onEvent(AbstractCoinTransactionEvent<AbstractCoinTransaction> event,String fromId)  {
     }
 }

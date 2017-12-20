@@ -18,7 +18,7 @@ public class EventHashHandler extends AbstractNetworkNulsEventHandler<CommonHash
     private EventService eventService = EventServiceImpl.getInstance();
 
     @Override
-    public void onEvent(CommonHashEvent event, String fromId) throws NulsException {
+    public void onEvent(CommonHashEvent event, String fromId) {
         boolean exist = eventCacheService.isKnown(event.getEventBody().getDigestHex());
         if (exist) {
             return;

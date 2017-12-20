@@ -65,6 +65,7 @@ public class MybatisDBModuleImpl extends AbstractDBModule {
         this.registerService(UtxoOutputDao.class, AopUtils.createProxy(UtxoOutputDaoImpl.class, dbMethodFilter));
         this.registerService(UtxoInputDao.class, AopUtils.createProxy(UtxoInputDaoImpl.class, dbMethodFilter));
         this.registerService(SubChainDao.class, AopUtils.createProxy(SubChainDaoImpl.class, dbMethodFilter));
+        this.registerService(ConsensusDao.class,AopUtils.createProxy(ConsensusDaoImpl.class,dbMethodFilter));
     }
 
     @Override

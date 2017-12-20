@@ -33,19 +33,19 @@ public class Transaction extends BaseNulsData {
     protected long time;
     protected byte[] remark;
 
-    public final void onRollback() {
+    public final void onRollback() throws NulsException {
         if (null != listener) {
             listener.onRollback(this);
         }
     }
 
-    public final void onCommit() {
+    public final void onCommit() throws NulsException {
         if (null != listener) {
             listener.onCommit(this);
         }
     }
 
-    public final void onApproval() {
+    public final void onApproval() throws NulsException {
         if (null != listener) {
             listener.onApproval(this);
         }

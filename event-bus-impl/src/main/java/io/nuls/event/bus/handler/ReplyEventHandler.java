@@ -17,7 +17,7 @@ public class ReplyEventHandler extends AbstractLocalNulsEventHandler<ReplyEvent>
     private EventCacheService eventCacheService = EventCacheService.getInstance();
 
     @Override
-    public void onEvent(ReplyEvent event, String fromId) throws NulsException {
+    public void onEvent(ReplyEvent event, String fromId) {
         // todo auto-generated method stub(niels)
         NulsDigestData digestData = new NulsDigestData(event.getEventBody().getVal());
         BaseNulsEvent confrimEvent = eventCacheService.getEvent(digestData.getDigestHex());

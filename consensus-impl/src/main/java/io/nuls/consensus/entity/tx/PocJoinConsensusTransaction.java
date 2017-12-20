@@ -8,6 +8,7 @@ import io.nuls.ledger.entity.tx.LockNulsTransaction;
  * @date 2017/12/4
  */
 public class PocJoinConsensusTransaction extends JoinConsensusTransaction {
+
     private LockNulsTransaction lockNulsTransaction;
 
     public PocJoinConsensusTransaction() {

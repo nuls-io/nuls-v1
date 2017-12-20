@@ -25,12 +25,11 @@ public class BlockEventHandler extends AbstractNetworkNulsEventHandler<BlockEven
     private NetworkService networkService = NulsContext.getInstance().getService(NetworkService.class);
 
     @Override
-    public void onEvent(BlockEvent event, String fromId) throws NulsException {
+    public void onEvent(BlockEvent event, String fromId) {
         Block block = event.getEventBody();
         if (DistributedBlockDownloadUtils.getInstance().recieveBlock(fromId, block)) {
             return;
         }
-
         ValidateResult result = block.verify();
         if (result.isFailed()) {
             if (result.getLevel() == SeverityLevelEnum.FLAGRANT) {

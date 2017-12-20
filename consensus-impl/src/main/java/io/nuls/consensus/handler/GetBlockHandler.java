@@ -19,7 +19,7 @@ public class GetBlockHandler extends AbstractNetworkNulsEventHandler<GetBlockEve
     private BlockService blockService = NulsContext.getInstance().getService(BlockService.class);
     private EventService eventService = NulsContext.getInstance().getService(EventService.class);
     @Override
-    public void onEvent(GetBlockEvent event,String fromId) throws NulsException {
+    public void onEvent(GetBlockEvent event,String fromId)   {
         Block block = blockService.getBlockByHeight(event.getEventBody().getVal());
         BlockEvent blockEvent = new BlockEvent();
         blockEvent.setEventBody(block);

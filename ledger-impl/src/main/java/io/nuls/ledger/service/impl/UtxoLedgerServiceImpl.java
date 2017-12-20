@@ -4,7 +4,9 @@ import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsVerificationException;
+import io.nuls.core.validate.ValidateResult;
 import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
@@ -31,10 +33,14 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public void cacheTx(Transaction tx) {
-        // tx.verify();
+    public ValidateResult verifyAndCacheTx(Transaction tx) throws NulsException {
+        ValidateResult result = tx.verify();
+        if(result.isFailed()){
+            return result;
+        }
         tx.onApproval();
         ledgerCacheService.putTx(tx);
+        return result;
     }
 
     @Override
@@ -109,7 +115,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     public UtxoLockTransaction createLockNulsTx(String address, String password, Na na) {
         UtxoLockTransaction tx = new UtxoLockTransaction();
-        UtxoData data =  this.getUtxoData(na);
+        UtxoData data = this.getUtxoData(na);
         //
 
 
@@ -134,7 +140,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         return null;
     }
 
-    private UtxoData getUtxoData(Na na){
+    private UtxoData getUtxoData(Na na) {
         //todo
         return null;
     }

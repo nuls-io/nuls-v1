@@ -19,7 +19,7 @@ public class GetEventBodyHandler extends AbstractNetworkNulsEventHandler<GetBody
     private EventService eventService = EventServiceImpl.getInstance();
 
     @Override
-    public void onEvent(GetBodyEvent event, String fromId) throws NulsException {
+    public void onEvent(GetBodyEvent event, String fromId)  {
         BaseNulsEvent eventBody = eventCacheService.getEvent(event.getEventBody().getDigestHex());
         if (null == eventBody) {
             Log.warn("get event faild,peer:" + fromId + ",event:" + event.getEventBody().getDigestHex());
