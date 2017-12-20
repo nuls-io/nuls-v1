@@ -5,6 +5,7 @@ import io.nuls.core.chain.intf.NulsCloneable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Niels
@@ -85,5 +86,7 @@ public interface CacheService<K, V extends NulsCloneable> {
     List<String> getCacheTitleList();
 
 
-    boolean containsKey(String cacheTitle, String key);
+    boolean containsKey(String cacheTitle, K key);
+
+    Set<K> keySet(String cacheTitle);
 }

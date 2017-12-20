@@ -10,10 +10,7 @@ import io.nuls.core.exception.NulsRuntimeException;
 import org.ehcache.Cache;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Niels
@@ -137,7 +134,17 @@ public class EhCacheServiceImpl<K, T extends NulsCloneable> implements CacheServ
     }
 
     @Override
-    public boolean containsKey(String cacheTitle, String key) {
+    public boolean containsKey(String cacheTitle, K key) {
         return this.cacheManager.getCache(cacheTitle).containsKey(key);
+    }
+    @Override
+    public Set<K> keySet(String cacheTitle) {
+        Iterator it = cacheManager.getCache(cacheTitle).iterator();
+        Set<K> list = new HashSet<>();
+        while (it.hasNext()) {
+            Cache.Entry<K, T> entry = (Cache.Entry<K, T>) it.next();
+            list.add((K) entry.getKey());
+        }
+        return list;
     }
 }
