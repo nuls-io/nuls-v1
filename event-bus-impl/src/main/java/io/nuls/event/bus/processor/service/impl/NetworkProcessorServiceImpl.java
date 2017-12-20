@@ -3,7 +3,7 @@ package io.nuls.event.bus.processor.service.impl;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.event.EventManager;
 import io.nuls.core.event.BaseNulsEvent;
-import io.nuls.core.event.NulsEventHeader;
+import io.nuls.core.event.EventManager;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.constant.EventBusConstant;

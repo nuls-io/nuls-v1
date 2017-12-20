@@ -18,6 +18,9 @@ public interface EventService {
      */
     List<String> broadcastHashAndCache(BaseNulsEvent event);
 
+
+    List<String> broadcastHashAndCache(BaseNulsEvent event, String excludePeerId);
+
     /**
      * broadcast to peers except "excludePeerId"
      * @param event

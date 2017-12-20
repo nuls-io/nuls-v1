@@ -469,7 +469,7 @@ public class AccountServiceImpl implements AccountService {
             aliasTx.setSign(signData(aliasTx.getHash(), account, password));
             ledgerService.verifyAndCacheTx(aliasTx);
             event.setEventBody(aliasTx);
-            eventService.broadcastHashAndCache(event);
+            eventService.broadcastAndCache(event);
         } catch (Exception e) {
             Log.error(e);
             return new Result(false, e.getMessage());

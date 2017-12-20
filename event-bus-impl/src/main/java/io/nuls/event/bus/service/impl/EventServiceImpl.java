@@ -37,6 +37,15 @@ public class EventServiceImpl implements EventService {
         return getPeerIdList(result);
     }
 
+    @Override
+    public List<String> broadcastHashAndCache(BaseNulsEvent event, String excludePeerId) {
+        BroadcastResult result = this.networkService.broadcast(new CommonHashEvent(event.getHash()), excludePeerId);
+        if (result.isSuccess()) {
+            eventCacheService.cacheSendedEvent(event);
+        }
+        return getPeerIdList(result);
+    }
+
     private List<String> getPeerIdList(BroadcastResult result) {
         List<String> list = new ArrayList<>();
         if (!result.isSuccess() || result.getBroadcastPeers() == null || result.getBroadcastPeers().isEmpty()) {

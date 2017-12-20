@@ -18,9 +18,7 @@ public interface AccountConstant {
 
     String ACCOUNT_LIST_CACHE = "ACCOUNT_LIST";
 
-    int TX_TYPE_ALIAS = 14;
-
-    short EVENT_TYPE_ALIAS = 14;
+    short EVENT_TYPE_ALIAS = 1;
 
     Na ALIAS_Na = Na.parseNuls(1);
 }
