@@ -66,11 +66,24 @@ public class BlockCacheService {
         this.maxHeight = maxHeight;
     }
 
-    public Block earliestBlockAndRemove() {
-        Block block = blockCacheMap.get(minHeight);
+
+    public Block getBlock(long height) {
+        return blockCacheMap.get(height);
+    }
+
+    public Block getBlock(String hash) {
+        long height = hashHeightMap.get(hash);
+        return getBlock(height);
+    }
+
+    public void removeBlock(long height) {
+        Block block = blockCacheMap.get(height);
         blockCacheMap.remove(minHeight);
         hashHeightMap.remove(block.getHeader().getHash().getDigestHex());
         minHeight++;
-        return block;
+    }
+
+    public Block getMinHeighBlock() {
+        return getBlock(getMinHeight());
     }
 }
