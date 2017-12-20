@@ -75,4 +75,6 @@ public interface AccountService {
     Result exportAccount(String address, String filePath);
 
     Result exportAccounts(String filePath);
+
+    Result importAccountsFile(String walletFilePath);
 }

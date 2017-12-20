@@ -6,7 +6,6 @@ import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.exception.NulsException;
 import io.nuls.event.bus.event.handler.AbstractNetworkNulsEventHandler;
 import io.nuls.event.bus.event.service.intf.EventService;
 

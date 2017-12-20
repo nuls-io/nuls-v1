@@ -6,6 +6,7 @@ import io.nuls.core.chain.intf.NulsCloneable;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.VarInt;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
@@ -43,6 +44,12 @@ public class Account extends BaseNulsData implements NulsCloneable {
     //local field
     private ECKey ecKey;
 
+    public Account() {
+    }
+
+    public Account(NulsByteBuffer buffer) throws NulsException {
+        super(buffer);
+    }
 
     public ECKey getEcKey() {
         return ecKey;

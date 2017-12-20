@@ -20,6 +20,7 @@ import io.nuls.core.thread.manager.ThreadManager;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.date.TimeService;
+import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
@@ -31,9 +32,7 @@ import io.nuls.event.bus.event.service.intf.EventService;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.service.intf.LedgerService;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -598,7 +597,7 @@ public class AccountServiceImpl implements AccountService {
         Transaction tx;
         try {
             fos = new FileOutputStream(backupFile);
-            fos.write(accounts.size());   //account length
+            fos.write(new VarInt(accounts.size()).encode());   //account length
 
             for (Account account : accounts) {
                 fos.write(account.serialize());
@@ -611,17 +610,57 @@ public class AccountServiceImpl implements AccountService {
                 }
             }
         } catch (Exception e) {
-
+            Log.error(e);
+            return new Result(false, "export failed");
         } finally {
             if (fos != null) {
                 try {
                     fos.close();
                 } catch (IOException e) {
-                    Log.error(e);
-                    return new Result(false, "export failed");
+
                 }
             }
         }
         return new Result(true, "OK");
     }
+
+    @Override
+    public Result importAccountsFile(String walletFilePath) {
+        if (StringUtils.isBlank(walletFilePath)) {
+            return new Result(false, "walletFilePath is required");
+        }
+        File walletFile = new File(walletFilePath);
+        if (!walletFile.exists()) {
+            return new Result(false, "file not found");
+        }
+
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(walletFile);
+            byte[] datas = new byte[fis.available()];
+            fis.read(datas);
+
+            NulsByteBuffer buffer = new NulsByteBuffer(datas);
+            int accountSize = (int) buffer.readVarInt();
+
+            for (int i = 0; i < accountSize; i++) {
+                Account account = new Account();
+                account.parse(buffer);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+
+        return null;
+    }
+
 }
