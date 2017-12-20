@@ -371,10 +371,8 @@ public class AccountServiceImpl implements AccountService {
                 resetKeys(password);
             }
         });
-
         return new Result(true, "OK");
     }
-
 
     @Override
     public NulsSignData signData(byte[] bytes) {
@@ -458,7 +456,6 @@ public class AccountServiceImpl implements AccountService {
         if (result.isFailed()) {
             return result;
         }
-
         try {
             Account account = getAccount(address);
             AliasEvent event = new AliasEvent();
@@ -495,40 +492,48 @@ public class AccountServiceImpl implements AccountService {
         if (!result.isSuccess()) {
             return result;
         }
-        return export(account, (File) result.getObject(), true);
+        return exportAccount(account, (File) result.getObject());
     }
 
-    private Result export(Account account, File backupFile, boolean writeLength) {
-        List<Transaction> txList = ledgerService.queryListByAccount(account.getAddress().getBase58(), 0, 0);
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(backupFile);
-            if (writeLength) {
-                fos.write(1);   //account length
-            }
-            fos.write(account.serialize());
-            fos.write(new VarInt(txList.size()).encode());
-
-            Transaction tx;
-            for (int i = 0; i < txList.size(); i++) {
-                tx = txList.get(i);
-                fos.write(tx.serialize());
-            }
-        } catch (IOException e) {
-            Log.error(e);
-            return new Result(false, "export failed");
-        } finally {
-            if (fos != null) {
-                try {
-                    fos.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+    @Override
+    public Result exportAccount(String address, String filePath) {
+        if (StringUtils.isBlank(filePath)) {
+            return new Result(false, "filePath is required");
         }
-        return new Result(true, "OK");
+        if (StringUtils.isBlank(address)) {
+            return new Result(false, "address is required");
+        }
+        Account account = getAccount(address);
+        if (account == null) {
+            return new Result(false, "account not found");
+        }
+
+        Result result = backUpFile(filePath);
+        if (!result.isSuccess()) {
+            return result;
+        }
+        return exportAccount(account, (File) result.getObject());
     }
 
+    @Override
+    public Result exportAccounts(String filePath) {
+        if (StringUtils.isBlank(filePath)) {
+            return new Result(false, "filePath is required");
+        }
+        List<Account> accounts = getLocalAccountList();
+        if (accounts == null || accounts.isEmpty()) {
+            return new Result(false, "no account can export");
+        }
+        if (accounts.size() == 1) {
+            return exportAccount(accounts.get(0).getAddress().getBase58(), filePath);
+        }
+        Result result = backUpFile(filePath);
+        if (!result.isSuccess()) {
+            return result;
+        }
+
+        return null;
+    }
 
     private Result<File> backUpFile(String filePath) {
         File backupFile = new File(filePath);
@@ -552,42 +557,71 @@ public class AccountServiceImpl implements AccountService {
             Log.error(e);
             return new Result(false, "create file failed");
         }
+
         return new Result<>(true, "OK", backupFile);
     }
 
-    @Override
-    public Result exportAccount(String address, String filePath) {
-        if (StringUtils.isBlank(filePath)) {
-            return new Result(false, "filePath is required");
-        }
-        if (StringUtils.isBlank(address)) {
-            return new Result(false, "address is required");
-        }
-        Account account = getAccount(address);
-        if (account == null) {
-            return new Result(false, "account not found");
-        }
+    private Result exportAccount(Account account, File backupFile) {
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(backupFile);
+            fos.write(1);   //account length
+            fos.write(account.serialize());
 
-        Result result = backUpFile(filePath);
-        if (!result.isSuccess()) {
-            return result;
+            List<Transaction> txList = ledgerService.queryListByAccount(account.getAddress().getBase58(), 0, 0);
+            fos.write(new VarInt(txList.size()).encode());
+
+            Transaction tx;
+            for (int i = 0; i < txList.size(); i++) {
+                tx = txList.get(i);
+                fos.write(tx.serialize());
+            }
+        } catch (Exception e) {
+            Log.error(e);
+            return new Result(false, "export failed");
+        } finally {
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
-        return export(account, (File) result.getObject(), true);
+        return new Result(true, "OK");
     }
 
-    @Override
-    public Result exportAccounts(String filePath) {
-        if (StringUtils.isBlank(filePath)) {
-            return new Result(false, "filePath is required");
-        }
 
-        List<Account> accounts = getLocalAccountList();
-        if (accounts == null || accounts.isEmpty()) {
-            return new Result(false, "no account can export");
-        }
-        if (accounts.size() == 1) {
+    private Result exportAccounts(List<Account> accounts, File backupFile) {
+        FileOutputStream fos = null;
+        List<Transaction> txList;
+        Transaction tx;
+        try {
+            fos = new FileOutputStream(backupFile);
+            fos.write(accounts.size());   //account length
 
+            for (Account account : accounts) {
+                fos.write(account.serialize());
+                txList = ledgerService.queryListByAccount(account.getAddress().getBase58(), 0, 0);
+                fos.write(new VarInt(txList.size()).encode());
+
+                for (int i = 0; i < txList.size(); i++) {
+                    tx = txList.get(i);
+                    fos.write(tx.serialize());
+                }
+            }
+        } catch (Exception e) {
+
+        } finally {
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    Log.error(e);
+                    return new Result(false, "export failed");
+                }
+            }
         }
-        return null;
+        return new Result(true, "OK");
     }
 }
