@@ -6,6 +6,7 @@ import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.event.handler.AbstractNetworkNulsEventHandler;
+import io.nuls.event.bus.event.service.intf.EventService;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.network.service.NetworkService;
 
@@ -24,12 +25,12 @@ public class AliasEventHandler extends AbstractNetworkNulsEventHandler<AliasEven
         return handler;
     }
 
-    private NetworkService networkService;
+    private EventService eventService;
 
     private LedgerService ledgerService;
 
-    public void setNetworkService(NetworkService networkService) {
-        this.networkService = networkService;
+    public void setEventService(EventService eventService) {
+        this.eventService = eventService;
     }
 
     public void setLedgerService(LedgerService ledgerService) {
@@ -42,12 +43,12 @@ public class AliasEventHandler extends AbstractNetworkNulsEventHandler<AliasEven
         ValidateResult result = tx.verify();
         if (result.isFailed()) {
             if (SeverityLevelEnum.FLAGRANT.equals(result.getLevel())) {
-                networkService.removePeer(fromId);
+               // networkService.removePeer(fromId);
             }
             return;
         }
 
         ledgerService.cacheTx(tx);
-        networkService.broadcast(event, fromId);
+        eventService.broadcastHashAndCache(event, fromId);
     }
 }
