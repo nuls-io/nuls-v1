@@ -10,6 +10,7 @@ import io.nuls.account.manager.AccountManager;
 import io.nuls.account.module.intf.AbstractAccountModule;
 import io.nuls.account.service.impl.AccountServiceImpl;
 import io.nuls.account.service.intf.AccountService;
+import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
 import io.nuls.ledger.service.intf.LedgerService;
@@ -29,7 +30,7 @@ public class AccountModuleImpl extends AbstractAccountModule {
         manager.init();
         AccountService accountService = AccountServiceImpl.getInstance();
         this.registerService(accountService);
-        this.registerTransaction(AccountConstant.TX_TYPE_ALIAS, AliasTransaction.class);
+        this.registerTransaction(TransactionConstant.TX_TYPE_SET_ALIAS, AliasTransaction.class);
         this.registerEvent(AccountConstant.EVENT_TYPE_ALIAS, AliasEvent.class);
         AliasValidator.getInstance().setAccountService(accountService);
 
