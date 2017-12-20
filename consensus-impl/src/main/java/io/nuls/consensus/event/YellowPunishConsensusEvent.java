@@ -9,6 +9,7 @@ import io.nuls.core.utils.log.Log;
  * @author Niels
  * @date 2017/11/13
  */
+//todo
 public class YellowPunishConsensusEvent extends BaseConsensusEvent {
     public YellowPunishConsensusEvent() {
         super(PocConsensusConstant.EVENT_TYPE_YELLOW_PUNISH);
