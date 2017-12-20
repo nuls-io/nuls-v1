@@ -42,7 +42,6 @@ public class AccountModuleImpl extends AbstractAccountModule {
         LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
 
         AliasEventHandler.getInstance().addFilter(AliasEventFilter.getInstance());
-        AliasEventHandler.getInstance().setNetworkService(service);
         AliasEventHandler.getInstance().setLedgerService(ledgerService);
         processorService.registerEventHandler(AliasEvent.class, AliasEventHandler.getInstance());
     }
