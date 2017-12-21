@@ -2,7 +2,7 @@ package io.nuls.event.bus.processor.service.impl;
 
 import io.nuls.core.notice.BaseNulsNotice;
 import io.nuls.event.bus.constant.EventBusConstant;
-import io.nuls.event.bus.event.handler.AbstractNoticeHandler;
+import io.nuls.event.bus.bus.handler.AbstractNoticeBusHandler;
 import io.nuls.event.bus.processor.manager.ProcessData;
 import io.nuls.event.bus.processor.manager.ProcessorManager;
 import io.nuls.event.bus.processor.service.intf.NoticeProcessorService;
@@ -31,7 +31,7 @@ public class NoticeProcessorServiceImpl implements NoticeProcessorService {
     }
 
     @Override
-    public String registerNoticeHandler(Class<? extends BaseNulsNotice> eventClass, AbstractNoticeHandler<? extends BaseNulsNotice> handler) {
+    public String registerNoticeHandler(Class<? extends BaseNulsNotice> eventClass, AbstractNoticeBusHandler<? extends BaseNulsNotice> handler) {
         return processorManager.registerEventHandler(eventClass, handler);
     }
 

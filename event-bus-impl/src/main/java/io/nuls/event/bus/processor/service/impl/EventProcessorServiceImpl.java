@@ -5,7 +5,7 @@ import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.constant.EventBusConstant;
-import io.nuls.event.bus.event.handler.AbstractEventHandler;
+import io.nuls.event.bus.bus.handler.AbstractEventBusHandler;
 import io.nuls.event.bus.processor.manager.ProcessData;
 import io.nuls.event.bus.processor.manager.ProcessorManager;
 import io.nuls.event.bus.processor.service.intf.EventProcessorService;
@@ -49,7 +49,7 @@ public class EventProcessorServiceImpl implements EventProcessorService {
     }
 
     @Override
-    public String registerEventHandler(Class<? extends BaseNulsEvent> eventClass, AbstractEventHandler<? extends BaseNulsEvent> handler) {
+    public String registerEventHandler(Class<? extends BaseNulsEvent> eventClass, AbstractEventBusHandler<? extends BaseNulsEvent> handler) {
         return processorManager.registerEventHandler(eventClass, handler);
     }
 

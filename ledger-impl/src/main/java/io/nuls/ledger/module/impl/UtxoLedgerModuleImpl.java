@@ -11,9 +11,9 @@ import io.nuls.ledger.event.AbstractCoinTransactionEvent;
 import io.nuls.ledger.event.UtxoDepositNulsEvent;
 import io.nuls.ledger.event.UtxoLockNulsEvent;
 import io.nuls.ledger.event.UtxoSmallChangeEvent;
-import io.nuls.ledger.handler.UtxoCoinTransactionHandler;
-import io.nuls.ledger.handler.UtxoLockHandler;
-import io.nuls.ledger.handler.UtxoSmallChangeHandler;
+import io.nuls.ledger.handler.UtxoCoinTransactionBusHandler;
+import io.nuls.ledger.handler.UtxoLockBusHandler;
+import io.nuls.ledger.handler.UtxoSmallChangeBusHandler;
 import io.nuls.ledger.module.AbstractLedgerModule;
 import io.nuls.ledger.service.impl.LedgerCacheServiceImpl;
 import io.nuls.ledger.service.impl.UtxoLedgerServiceImpl;
@@ -46,9 +46,9 @@ public class UtxoLedgerModuleImpl extends AbstractLedgerModule {
         this.registerBusDataClass((short) 5, UtxoSmallChangeEvent.class);
         this.registerBusDataClass((short) 6, AbstractCoinTransactionEvent.class);
         this.registerBusDataClass((short) 7, UtxoDepositNulsEvent.class);
-        this.processorService.registerEventHandler(UtxoLockNulsEvent.class, new UtxoLockHandler());
-        this.processorService.registerEventHandler(UtxoSmallChangeEvent.class, new UtxoSmallChangeHandler());
-        this.processorService.registerEventHandler(AbstractCoinTransactionEvent.class, new UtxoCoinTransactionHandler());
+        this.processorService.registerEventHandler(UtxoLockNulsEvent.class, new UtxoLockBusHandler());
+        this.processorService.registerEventHandler(UtxoSmallChangeEvent.class, new UtxoSmallChangeBusHandler());
+        this.processorService.registerEventHandler(AbstractCoinTransactionEvent.class, new UtxoCoinTransactionBusHandler());
     }
 
     private void cacheStandingBook() {

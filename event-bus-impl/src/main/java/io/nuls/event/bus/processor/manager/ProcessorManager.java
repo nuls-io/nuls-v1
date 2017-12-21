@@ -10,7 +10,7 @@ import io.nuls.core.thread.manager.ThreadManager;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.event.bus.constant.EventBusConstant;
-import io.nuls.event.bus.event.handler.intf.NulsHandler;
+import io.nuls.event.bus.bus.handler.intf.NulsBusHandler;
 import io.nuls.event.bus.module.intf.AbstractEventBusModule;
 import io.nuls.event.bus.processor.thread.EventBusDispatchThread;
 import io.nuls.event.bus.processor.thread.NulsEventCall;
@@ -24,7 +24,7 @@ import java.util.concurrent.*;
  * @author Niels
  * @date 2017/11/6
  */
-public class ProcessorManager<E extends BaseNulsEvent, H extends NulsHandler<? extends BaseNulsEvent>> {
+public class ProcessorManager<E extends BaseNulsEvent, H extends NulsBusHandler<? extends BaseNulsEvent>> {
     private final Map<String, H> handlerMap = new HashMap<>();
     private final Map<Class, Set<String>> eventHandlerMapping = new HashMap<>();
     private DisruptorUtil<DisruptorEvent<ProcessData<E>>> disruptorService = DisruptorUtil.getInstance();
@@ -91,12 +91,12 @@ public class ProcessorManager<E extends BaseNulsEvent, H extends NulsHandler<? e
         handlerMap.remove(handlerId);
     }
 
-    private Set<NulsHandler> getHandlerList(Class<E> clazz) {
+    private Set<NulsBusHandler> getHandlerList(Class<E> clazz) {
         if (clazz.equals(BaseNulsEvent.class)) {
             return null;
         }
         Set<String> ids = eventHandlerMapping.get(clazz);
-        Set<NulsHandler> set = new HashSet<>();
+        Set<NulsBusHandler> set = new HashSet<>();
         do {
             if (null == ids || ids.isEmpty()) {
                 break;
@@ -105,7 +105,7 @@ public class ProcessorManager<E extends BaseNulsEvent, H extends NulsHandler<? e
                 if (StringUtils.isBlank(id)) {
                     continue;
                 }
-                NulsHandler handler = handlerMap.get(id);
+                NulsBusHandler handler = handlerMap.get(id);
                 if (null == handler) {
                     continue;
                 }
@@ -123,8 +123,8 @@ public class ProcessorManager<E extends BaseNulsEvent, H extends NulsHandler<? e
         if (null == data) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "execute event handler faild,the event is null!");
         }
-        Set<NulsHandler> handlerSet = this.getHandlerList((Class<E>) data.getData().getClass());
-        for (NulsHandler handler : handlerSet) {
+        Set<NulsBusHandler> handlerSet = this.getHandlerList((Class<E>) data.getData().getClass());
+        for (NulsBusHandler handler : handlerSet) {
             pool.execute(new NulsEventCall(data, handler));
         }
     }

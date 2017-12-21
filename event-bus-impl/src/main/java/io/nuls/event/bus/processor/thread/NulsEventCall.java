@@ -2,7 +2,7 @@ package io.nuls.event.bus.processor.thread;
 
 import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.core.utils.log.Log;
-import io.nuls.event.bus.event.handler.intf.NulsHandler;
+import io.nuls.event.bus.bus.handler.intf.NulsBusHandler;
 import io.nuls.event.bus.processor.manager.ProcessData;
 
 /**
@@ -11,9 +11,9 @@ import io.nuls.event.bus.processor.manager.ProcessData;
  */
 public class NulsEventCall<T extends BaseNulsEvent> implements Runnable {
     private final ProcessData<T> data;
-    private final NulsHandler<T> handler;
+    private final NulsBusHandler<T> handler;
 
-    public NulsEventCall(ProcessData<T> data, NulsHandler<T> handler) {
+    public NulsEventCall(ProcessData<T> data, NulsBusHandler<T> handler) {
         this.data = data;
         this.handler = handler;
     }

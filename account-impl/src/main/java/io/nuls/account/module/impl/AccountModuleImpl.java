@@ -4,8 +4,8 @@ import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.entity.event.AliasEvent;
 import io.nuls.account.entity.tx.AliasTransaction;
 import io.nuls.account.entity.validator.AliasValidator;
-import io.nuls.account.event.filter.AliasFilter;
-import io.nuls.account.event.handler.AliasHandler;
+import io.nuls.account.event.filter.AliasBusFilter;
+import io.nuls.account.event.handler.AliasBusHandler;
 import io.nuls.account.manager.AccountManager;
 import io.nuls.account.module.intf.AbstractAccountModule;
 import io.nuls.account.service.impl.AccountServiceImpl;
@@ -40,9 +40,9 @@ public class AccountModuleImpl extends AbstractAccountModule {
         NetworkService service = NulsContext.getInstance().getService(NetworkService.class);
         LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
 
-        AliasHandler.getInstance().addFilter(AliasFilter.getInstance());
-        AliasHandler.getInstance().setLedgerService(ledgerService);
-        processorService.registerEventHandler(AliasEvent.class, AliasHandler.getInstance());
+        AliasBusHandler.getInstance().addFilter(AliasBusFilter.getInstance());
+        AliasBusHandler.getInstance().setLedgerService(ledgerService);
+        processorService.registerEventHandler(AliasEvent.class, AliasBusHandler.getInstance());
     }
 
     @Override
