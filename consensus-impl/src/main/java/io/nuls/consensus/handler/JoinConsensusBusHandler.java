@@ -21,7 +21,7 @@ public class JoinConsensusBusHandler extends AbstractEventBusHandler<JoinConsens
 
     @Override
     public void onEvent(JoinConsensusEvent event, String fromId) {
-        PocJoinConsensusTransaction tx = (PocJoinConsensusTransaction) event.getEventBody();
+        PocJoinConsensusTransaction tx = event.getEventBody();
         ValidateResult result;
         try {
             result = ledgerService.verifyAndCacheTx(tx);
