@@ -15,7 +15,7 @@ import java.util.Map;
  */
 public interface ConsensusService {
 
-    Na getTxFee(long blockHeight, Transaction tx);
+    Na getTxFee(int txType);
 
     void joinTheConsensus(String address, String password, Map<String, Object> paramsMap);
 

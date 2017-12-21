@@ -16,11 +16,13 @@ import io.nuls.consensus.event.JoinConsensusEvent;
 import io.nuls.consensus.event.RegisterAgentEvent;
 import io.nuls.consensus.entity.params.JoinConsensusParam;
 import io.nuls.consensus.service.cache.ConsensusCacheService;
+import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.service.intf.ConsensusService;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -45,6 +47,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
     private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
     private BusDataService busDataService = NulsContext.getInstance().getService(BusDataService.class);
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
+    private BlockService blockService = NulsContext.getInstance().getService(BlockService.class);
     private ConsensusCacheService consensusCacheService = ConsensusCacheService.getInstance();
 
     private PocConsensusServiceImpl() {
@@ -54,12 +57,13 @@ public class PocConsensusServiceImpl implements ConsensusService {
         return INSTANCE;
     }
 
-    private void registerAgent(Agent delegate, Account account, String password) throws IOException {
+    private void registerAgent(Agent agent, Account account, String password) throws IOException {
         RegisterAgentEvent event = new RegisterAgentEvent();
         RegisterAgentTransaction tx = new RegisterAgentTransaction();
-        tx.setTxData(delegate);
-        LockNulsTransaction lockNulsTransaction = ledgerService.createLockNulsTx(account.getAddress().toString(), password, delegate.getDeposit());
-        tx.setLockNulsTransaction(lockNulsTransaction);
+        Consensus<Agent> con = new Consensus<>();
+        con.setAddress(account.getAddress().toString());
+        con.setExtend(agent);
+        tx.setTxData(con);
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
         tx.setSign(accountService.signData(tx.getHash(), account, password));
         try {
@@ -82,8 +86,6 @@ public class PocConsensusServiceImpl implements ConsensusService {
         delegate.setDeposit(Na.parseNuls(amount));
         ca.setExtend(delegate);
         tx.setTxData(ca);
-        LockNulsTransaction lockNulsTransaction = ledgerService.createLockNulsTx(account.getAddress().toString(), password, delegate.getDeposit());
-        tx.setLockNulsTransaction(lockNulsTransaction);
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
         tx.setSign(accountService.signData(tx.getHash(), account, password));
         try {
@@ -112,8 +114,6 @@ public class PocConsensusServiceImpl implements ConsensusService {
         ExitConsensusEvent event = new ExitConsensusEvent();
         PocExitConsensusTransaction tx = new PocExitConsensusTransaction();
         tx.setTxData(joinTxHash);
-        UnlockNulsTransaction unlockNulsTransaction = this.ledgerService.createUnlockTx(joinTx.getLockNulsTransaction());
-        tx.setUnlockNulsTransaction(unlockNulsTransaction);
         try {
             tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
         } catch (IOException e) {
@@ -143,7 +143,12 @@ public class PocConsensusServiceImpl implements ConsensusService {
     }
 
     @Override
-    public Na getTxFee(long blockHeight, Transaction tx) {
+    public Na getTxFee(int txType) {
+        long blockHeight = blockService.getLocalHeight();
+        if (txType == TransactionConstant.TX_TYPE_COIN_BASE ||
+                txType == TransactionConstant.TX_TYPE_SMALL_CHANGE) {
+            return Na.ZERO;
+        }
         long x = blockHeight / PocConsensusConstant.BLOCK_COUNT_OF_YEAR + 1;
         return PocConsensusConstant.TRANSACTION_FEE.div(x);
     }

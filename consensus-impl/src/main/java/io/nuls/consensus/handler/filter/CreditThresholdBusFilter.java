@@ -3,6 +3,7 @@ package io.nuls.consensus.handler.filter;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.event.JoinConsensusEvent;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.event.bus.bus.filter.NulsBusFilter;
 import io.nuls.event.bus.bus.filter.NulsBusFilterChain;
@@ -29,7 +30,7 @@ public class CreditThresholdBusFilter implements NulsBusFilter<JoinConsensusEven
     @Override
     public void doFilter(JoinConsensusEvent event, NulsBusFilterChain chain) {
         String address = event.getEventBody().getTxData().getAddress();
-        List<Transaction> list = ledgerService.queryListByAccount(address, PocConsensusConstant.TX_TYPE_RED_PUNISH, 0);
+        List<Transaction> list = ledgerService.queryListByAccount(address, TransactionConstant.TX_TYPE_RED_PUNISH, 0);
         if (null == list || list.isEmpty()) {
             chain.doFilter(event);
         }

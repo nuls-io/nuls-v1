@@ -463,8 +463,6 @@ public class AccountServiceImpl implements AccountService {
             Account account = getAccount(address);
             AliasEvent event = new AliasEvent();
             AliasTransaction aliasTx = new AliasTransaction(address, alias);
-            LockNulsTransaction nulsTx = ledgerService.createLockNulsTx(account.getAddress().getBase58(), password, AccountConstant.ALIAS_Na);
-            aliasTx.setNulsTx(nulsTx);
             aliasTx.setHash(NulsDigestData.calcDigestData(aliasTx.serialize()));
             aliasTx.setSign(signData(aliasTx.getHash(), account, password));
             ledgerService.verifyAndCacheTx(aliasTx);

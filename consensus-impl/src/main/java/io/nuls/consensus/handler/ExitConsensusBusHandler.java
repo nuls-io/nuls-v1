@@ -19,7 +19,7 @@ public class ExitConsensusBusHandler extends AbstractEventBusHandler<ExitConsens
 
     @Override
     public void onEvent(ExitConsensusEvent event, String fromId) {
-        PocExitConsensusTransaction tx = (PocExitConsensusTransaction) event.getEventBody();
+        PocExitConsensusTransaction tx = event.getEventBody();
         try {
             ledgerService.verifyAndCacheTx(tx);
         } catch (NulsException e) {

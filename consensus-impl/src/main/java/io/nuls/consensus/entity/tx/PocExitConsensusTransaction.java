@@ -1,24 +1,24 @@
 package io.nuls.consensus.entity.tx;
 
-import io.nuls.consensus.tx.ExitConsensusTransaction;
+import io.nuls.core.chain.entity.NulsDigestData;
+import io.nuls.core.constant.TransactionConstant;
+import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.ledger.entity.tx.UnlockNulsTransaction;
 
 /**
  * @author Niels
  * @date 2017/12/4
  */
-public class PocExitConsensusTransaction extends ExitConsensusTransaction {
-    private UnlockNulsTransaction unlockNulsTransaction;
+public class PocExitConsensusTransaction extends UnlockNulsTransaction<NulsDigestData> {
 
     public PocExitConsensusTransaction() {
-        super();
+        super(TransactionConstant.TX_TYPE_EXIT_CONSENSUS);
     }
 
-    public UnlockNulsTransaction getUnlockNulsTransaction() {
-        return unlockNulsTransaction;
-    }
-
-    public void setUnlockNulsTransaction(UnlockNulsTransaction unlockNulsTransaction) {
-        this.unlockNulsTransaction = unlockNulsTransaction;
+    @Override
+    protected NulsDigestData parseBody(NulsByteBuffer byteBuffer) {
+        NulsDigestData data = new NulsDigestData();
+        data.parse(byteBuffer);
+        return data;
     }
 }

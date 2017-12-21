@@ -38,11 +38,7 @@ public interface LedgerService {
 
     boolean lockNuls(String address, String password, Na na);
 
-    LockNulsTransaction createLockNulsTx(String address, String password, Na na);
-
     Transaction getTransaction(NulsDigestData txHash);
-
-    UnlockNulsTransaction createUnlockTx(LockNulsTransaction lockNulsTransaction);
 
     List<Transaction> queryListByHashs(List<NulsDigestData> txHashList);
 }

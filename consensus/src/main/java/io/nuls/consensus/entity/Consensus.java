@@ -39,19 +39,7 @@ public class Consensus<T extends BaseNulsData> extends BaseNulsData implements N
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
         this.address = byteBuffer.readString();
-        if (!byteBuffer.isFinished()) {
-            this.extend = this.parseExtend(byteBuffer);
-        }
-    }
 
-    /**
-     * Extended use method
-     *
-     * @param byteBuffer
-     * @return
-     */
-    protected T parseExtend(NulsByteBuffer byteBuffer) {
-        return null;
     }
 
     public String getAddress() {

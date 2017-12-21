@@ -1,9 +1,8 @@
 package io.nuls.consensus.entity.validator.block;
 
-import io.nuls.consensus.constant.ConsensusConstant;
-import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 
@@ -33,7 +32,7 @@ public class BlockTxValidator implements NulsDataValidator<Block> {
             if (result.isFailed()) {
                 return ValidateResult.getFailedResult("there is wrong transaction!");
             }
-            if (tx.getType() == ConsensusConstant.TX_TYPE_COINBASE) {
+            if (tx.getType() == TransactionConstant.TX_TYPE_COIN_BASE) {
                 count++;
             }
         }

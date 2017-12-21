@@ -9,7 +9,7 @@ import io.nuls.ledger.entity.params.LockData;
  * @author Niels
  * @date 2017/11/20
  */
-public class LockNulsTransaction extends AbstractCoinTransaction {
+public class LockNulsTransaction<T extends BaseNulsData>  extends AbstractCoinTransaction<T> {
 
     public LockNulsTransaction() {
         super(TransactionConstant.TX_TYPE_LOCK);
@@ -31,7 +31,7 @@ public class LockNulsTransaction extends AbstractCoinTransaction {
 
 
     @Override
-    protected BaseNulsData parseBody(NulsByteBuffer byteBuffer) {
+    protected T parseBody(NulsByteBuffer byteBuffer) {
         return null;
     }
 

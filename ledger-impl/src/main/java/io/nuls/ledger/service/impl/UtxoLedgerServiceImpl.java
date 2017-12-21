@@ -113,23 +113,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public UtxoLockTransaction createLockNulsTx(String address, String password, Na na) {
-        UtxoLockTransaction tx = new UtxoLockTransaction();
-        UtxoData data = this.getUtxoData(na);
-        //
-
-
-        return tx;
-    }
-
-    @Override
     public Transaction getTransaction(NulsDigestData txHash) {
-        // todo auto-generated method stub(niels)
-        return null;
-    }
-
-    @Override
-    public UnlockNulsTransaction createUnlockTx(LockNulsTransaction lockNulsTransaction) {
         // todo auto-generated method stub(niels)
         return null;
     }
