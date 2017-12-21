@@ -83,7 +83,7 @@ public class VersionData extends BaseNetworkData {
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.networkHeader = new NetworkDataHeader(byteBuffer);
         version = new NulsVersion(byteBuffer.readShort());
         bestBlockHeight = byteBuffer.readVarInt();

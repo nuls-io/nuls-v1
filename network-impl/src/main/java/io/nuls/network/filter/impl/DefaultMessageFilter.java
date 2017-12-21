@@ -1,10 +1,12 @@
 package io.nuls.network.filter.impl;
 
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.mesasge.NulsMessage;
 import io.nuls.core.mesasge.NulsMessageHeader;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.log.Log;
 import io.nuls.network.message.messageFilter.NulsMessageFilter;
 
 import java.util.Iterator;
@@ -33,7 +35,12 @@ public class DefaultMessageFilter implements NulsMessageFilter {
     @Override
     public NulsMessageHeader filterHeader(byte[] bytes) {
         NulsMessageHeader messageHeader = new NulsMessageHeader();
-        messageHeader.parse(new NulsByteBuffer(bytes));
+        try {
+            messageHeader.parse(new NulsByteBuffer(bytes));
+        } catch (NulsException e) {
+            Log.error(e);
+            //todo
+        }
 
         if (!magicSet.contains(messageHeader.getMagicNumber())) {
             throw new NulsRuntimeException(ErrorCode.DATA_ERROR);

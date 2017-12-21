@@ -66,7 +66,7 @@ public class AliasTransaction extends Transaction {
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         super.parse(byteBuffer);
         try {
             this.address = new String(byteBuffer.readByLengthByte(), NulsContext.DEFAULT_ENCODING);

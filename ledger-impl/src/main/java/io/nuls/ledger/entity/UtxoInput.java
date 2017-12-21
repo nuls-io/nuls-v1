@@ -6,6 +6,7 @@ import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.crypto.script.Script;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
@@ -69,7 +70,7 @@ public class UtxoInput extends BaseNulsData {
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         if (byteBuffer == null) {
             return;
         }

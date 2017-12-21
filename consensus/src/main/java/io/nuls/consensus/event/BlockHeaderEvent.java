@@ -2,6 +2,7 @@ package io.nuls.consensus.event;
 
 import io.nuls.consensus.constant.ConsensusEventType;
 import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
 /**
@@ -19,7 +20,7 @@ public class BlockHeaderEvent extends BaseConsensusEvent<BlockHeader> {
     }
 
     @Override
-    protected BlockHeader parseEventBody(NulsByteBuffer byteBuffer) {
+    protected BlockHeader parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
         BlockHeader blockHeader = new BlockHeader();
         blockHeader.parse(byteBuffer);
         return blockHeader;

@@ -3,6 +3,7 @@ package io.nuls.ledger.entity.tx;
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.ledger.entity.CoinData;
@@ -50,7 +51,7 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         super.parse(byteBuffer);
         this.coinData = coinDataProvider.parse(byteBuffer);
     }

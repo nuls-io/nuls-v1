@@ -37,7 +37,7 @@ public class NulsTextData extends BaseNulsData{
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         long len = byteBuffer.readVarInt();
         try {
             text = new String(byteBuffer.readBytes((int) len), NulsContext.DEFAULT_ENCODING);

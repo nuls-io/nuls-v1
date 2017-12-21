@@ -2,6 +2,7 @@ package io.nuls.core.chain.entity;
 
 
 import io.nuls.core.crypto.Sha256Hash;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
@@ -51,7 +52,7 @@ public class NulsDigestData extends BaseNulsData {
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.setDigestAlgType(byteBuffer.readByte());
         this.setDigestLength(byteBuffer.readByte());
         this.setDigestBytes(byteBuffer.readBytes(this.digestLength));

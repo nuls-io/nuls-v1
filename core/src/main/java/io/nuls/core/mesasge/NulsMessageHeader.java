@@ -2,6 +2,7 @@ package io.nuls.core.mesasge;
 
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.crypto.UnsafeByteArrayOutputStream;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -70,7 +71,7 @@ public class NulsMessageHeader extends BaseNulsData{
         this.extend = extend;
     }
 
-    public NulsMessageHeader(NulsByteBuffer buffer) {
+    public NulsMessageHeader(NulsByteBuffer buffer) throws NulsException {
         parse(buffer);
     }
 
@@ -91,7 +92,7 @@ public class NulsMessageHeader extends BaseNulsData{
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.magicNumber = byteBuffer.readInt32LE();
         this.length = byteBuffer.readInt32LE();
         this.headType = byteBuffer.readShort();

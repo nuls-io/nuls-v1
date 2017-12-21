@@ -4,6 +4,7 @@ import io.nuls.consensus.constant.ConsensusEventType;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.tx.PocExitConsensusTransaction;
 import io.nuls.core.chain.manager.TransactionManager;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 
@@ -24,6 +25,8 @@ public class ExitConsensusEvent extends BaseConsensusEvent<PocExitConsensusTrans
         } catch (IllegalAccessException e) {
             Log.error(e);
         } catch (InstantiationException e) {
+            Log.error(e);
+        } catch (NulsException e) {
             Log.error(e);
         }
         return null;

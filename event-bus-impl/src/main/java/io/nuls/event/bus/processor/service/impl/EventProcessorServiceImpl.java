@@ -2,6 +2,7 @@ package io.nuls.event.bus.processor.service.impl;
 
 import io.nuls.core.bus.BusDataManager;
 import io.nuls.core.event.BaseNulsEvent;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.constant.EventBusConstant;
@@ -44,6 +45,8 @@ public class EventProcessorServiceImpl implements EventProcessorService {
         } catch (IllegalAccessException e) {
             Log.error(e);
         } catch (InstantiationException e) {
+            Log.error(e);
+        } catch (NulsException e) {
             Log.error(e);
         }
     }

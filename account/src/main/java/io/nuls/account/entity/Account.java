@@ -168,7 +168,7 @@ public class Account extends BaseNulsData implements NulsCloneable {
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         version = new NulsVersion(byteBuffer.readShort());
         alias = new String(byteBuffer.readByLengthByte());
         address = new Address(new String(byteBuffer.readByLengthByte()));

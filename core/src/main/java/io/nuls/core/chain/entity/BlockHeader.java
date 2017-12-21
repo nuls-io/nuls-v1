@@ -2,6 +2,7 @@ package io.nuls.core.chain.entity;
 
 import io.nuls.core.chain.manager.BlockHeaderValidatorManager;
 import io.nuls.core.crypto.VarInt;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
@@ -79,7 +80,7 @@ public class BlockHeader extends BaseNulsData {
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.version = new NulsVersion(byteBuffer.readShort());
         this.hash = new NulsDigestData();
         this.hash.parse(byteBuffer);

@@ -1,6 +1,7 @@
 package io.nuls.core.bus;
 
 import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
@@ -76,7 +77,7 @@ public class BusDataHeader extends BaseNulsData {
     }
 
     @Override
-    public void parse(NulsByteBuffer buffer) {
+    public void parse(NulsByteBuffer buffer) throws NulsException {
         this.moduleId = buffer.readInt16LE();
         this.eventType = buffer.readInt16LE();
         this.extend = buffer.readBytes(EVENT_HEADER_EXTEND_LENGHT);

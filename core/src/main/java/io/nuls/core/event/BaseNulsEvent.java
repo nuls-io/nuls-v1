@@ -6,6 +6,7 @@ import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.chain.intf.NulsCloneable;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
@@ -43,7 +44,7 @@ public abstract class BaseNulsEvent<T extends BaseNulsData> extends BaseBusData<
     }
 
     @Override
-    public final void parse(NulsByteBuffer byteBuffer) {
+    public final void parse(NulsByteBuffer byteBuffer) throws NulsException {
         super.parse(byteBuffer);
         this.hash = new NulsDigestData();
         this.hash.parse(byteBuffer);

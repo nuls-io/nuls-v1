@@ -6,6 +6,7 @@ import io.nuls.consensus.entity.AskSmallBlockData;
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.BasicTypeData;
 import io.nuls.core.chain.entity.NulsDigestData;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
@@ -30,7 +31,7 @@ public class GetSmallBlockEvent extends BaseConsensusEvent<AskSmallBlockData> {
 
 
     @Override
-    protected AskSmallBlockData parseEventBody(NulsByteBuffer byteBuffer) {
+    protected AskSmallBlockData parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
         AskSmallBlockData data = new AskSmallBlockData();
         data.parse(byteBuffer);
         return data;

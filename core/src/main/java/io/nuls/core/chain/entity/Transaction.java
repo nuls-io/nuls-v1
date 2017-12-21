@@ -68,7 +68,7 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData {
         }
     }
 
-    protected abstract T parseTxData(NulsByteBuffer byteBuffer);
+    protected abstract T parseTxData(NulsByteBuffer byteBuffer) throws NulsException;
 
     @Override
     public int size() {
@@ -96,7 +96,7 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData {
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         type = (int) byteBuffer.readVarInt();
         time = byteBuffer.readVarInt();
 

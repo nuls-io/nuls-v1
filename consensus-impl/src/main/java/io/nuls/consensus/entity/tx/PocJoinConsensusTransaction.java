@@ -3,6 +3,7 @@ package io.nuls.consensus.entity.tx;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.member.Delegate;
 import io.nuls.core.constant.TransactionConstant;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
@@ -21,7 +22,7 @@ public class PocJoinConsensusTransaction extends LockNulsTransaction<Consensus<D
     }
 
     @Override
-    protected Consensus<Delegate> parseTxData(NulsByteBuffer byteBuffer) {
+    protected Consensus<Delegate> parseTxData(NulsByteBuffer byteBuffer) throws NulsException{
         Consensus<Delegate> con = new Consensus<Delegate>();
         con.parse(byteBuffer);
         Delegate agent = new Delegate();
