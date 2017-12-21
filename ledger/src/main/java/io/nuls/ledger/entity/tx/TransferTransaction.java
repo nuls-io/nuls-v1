@@ -33,8 +33,4 @@ public class TransferTransaction<T extends BaseNulsData> extends AbstractCoinTra
         return null;
     }
 
-    public CoinTransferData getTransferData() {
-        return this.getCoinDataProvider().getTransferData(this.coinData);
-    }
-
 }

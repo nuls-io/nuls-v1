@@ -32,8 +32,4 @@ public class UnlockNulsTransaction<T extends BaseNulsData> extends AbstractCoinT
     protected T parseTxData(NulsByteBuffer byteBuffer) {
         return null;
     }
-
-    public CoinTransferData getUnlockData(){
-        return this.getCoinDataProvider().getTransferData(this.coinData);
-    }
 }

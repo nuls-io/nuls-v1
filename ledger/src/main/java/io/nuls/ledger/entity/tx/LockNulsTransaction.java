@@ -35,8 +35,4 @@ public class LockNulsTransaction<T extends BaseNulsData>  extends AbstractCoinTr
         return null;
     }
 
-    public CoinTransferData getCoinTransferData(){
-        return this.getCoinDataProvider().getTransferData(this.coinData);
-    }
-
 }

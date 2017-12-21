@@ -6,6 +6,7 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.ledger.entity.CoinData;
+import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.service.intf.CoinDataProvider;
 
 import java.io.IOException;
@@ -18,7 +19,7 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
 
     private CoinDataProvider coinDataProvider = NulsContext.getInstance().getService(CoinDataProvider.class);
 
-    protected  CoinData coinData;
+    protected CoinData coinData;
 
     public AbstractCoinTransaction(int type) {
         super(type);
@@ -45,5 +46,10 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
 
     protected CoinDataProvider getCoinDataProvider() {
         return coinDataProvider;
+    }
+
+
+    public final CoinTransferData getCoinTransferData() {
+        return this.getCoinDataProvider().getTransferData(this.coinData);
     }
 }
