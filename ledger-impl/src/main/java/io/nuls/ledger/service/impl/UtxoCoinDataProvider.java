@@ -44,8 +44,9 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
     }
 
     @Override
-    public void createTransferData(CoinTransferData coinParam, String password) {
+    public CoinData createTransferData(CoinTransferData coinParam, String password) {
         // todo auto-generated method stub(niels)
 
+        return null;
     }
 }
