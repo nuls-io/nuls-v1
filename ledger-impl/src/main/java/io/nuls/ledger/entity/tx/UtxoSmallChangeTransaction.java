@@ -1,5 +1,6 @@
 package io.nuls.ledger.entity.tx;
 
+import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
@@ -14,7 +15,7 @@ import java.io.IOException;
  * @author Niels
  * @date 2017/11/14
  */
-public class UtxoSmallChangeTransaction extends AbstractCoinTransaction<UtxoData> {
+public class UtxoSmallChangeTransaction extends AbstractCoinTransaction {
 
     public UtxoSmallChangeTransaction() {
         super(TransactionConstant.TX_TYPE_SMALL_CHANGE);
@@ -22,22 +23,10 @@ public class UtxoSmallChangeTransaction extends AbstractCoinTransaction<UtxoData
         this.registerValidator(UtxoTxOutputsValidator.getInstance());
     }
 
-    @Override
-    public int size() {
-        //todo
-        return 0;
-    }
 
     @Override
-    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        //todo
+    protected BaseNulsData parseBody(NulsByteBuffer byteBuffer) {
+        // todo auto-generated method stub(niels)
+        return null;
     }
-
-    @Override
-    public void parse(NulsByteBuffer byteBuffer) {
-        //todo
-
-    }
-
-
 }
