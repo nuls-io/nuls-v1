@@ -28,6 +28,7 @@ import io.nuls.db.dao.AccountDao;
 import io.nuls.db.dao.AliasDao;
 import io.nuls.db.entity.AccountPo;
 import io.nuls.db.entity.AliasPo;
+import io.nuls.db.entity.TransactionPo;
 import io.nuls.event.bus.event.service.intf.EventService;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.service.intf.LedgerService;
@@ -642,11 +643,24 @@ public class AccountServiceImpl implements AccountService {
 
             NulsByteBuffer buffer = new NulsByteBuffer(datas);
             int accountSize = (int) buffer.readVarInt();
+            List<Account> accounts = new ArrayList<>();
 
             for (int i = 0; i < accountSize; i++) {
-                Account account = new Account();
-                account.parse(buffer);
+                Account account = new Account(buffer);
+                if (accountExsit(account)) {
+                    continue;
+                }
+                int txSize = (int) buffer.readVarInt();
+                List<Transaction> txList = new ArrayList<>();
+                for (int j = 0; j < txSize; j++) {
+                    Transaction tx = new Transaction(buffer);
+                    txList.add(tx);
+                }
+                account.setMyTxs(txList);
+                accounts.add(account);
             }
+
+            //save database
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -658,9 +672,32 @@ public class AccountServiceImpl implements AccountService {
                 }
             }
         }
-
-
         return null;
+    }
+
+    private boolean accountExsit(Account account) {
+        List<Account> accounts = getLocalAccountList();
+        if (accounts.isEmpty()) {
+            return true;
+        }
+        for (Account acct : accounts) {
+            if (account.getId().equals(acct.getId())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+    private void importSave(List<Account> accounts) {
+        List<AccountPo> accountPoList = new ArrayList<>();
+
+        for(Account account : accounts) {
+            AccountPo accountPo = new AccountPo();
+            AccountTool.toPojo(account, accountPo);
+
+            List<TransactionPo> transactionPos = new ArrayList<>();
+        }
     }
 
 }

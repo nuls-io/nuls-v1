@@ -2,6 +2,7 @@ package io.nuls.account.entity;
 
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.NulsVersion;
+import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.chain.intf.NulsCloneable;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.ECKey;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Niels
@@ -44,7 +46,10 @@ public class Account extends BaseNulsData implements NulsCloneable {
     //local field
     private ECKey ecKey;
 
+    private List<Transaction> myTxs;
+
     public Account() {
+
     }
 
     public Account(NulsByteBuffer buffer) throws NulsException {
@@ -119,15 +124,7 @@ public class Account extends BaseNulsData implements NulsCloneable {
     public int size() {
         int s = 0;
         s += 2;    //version size
-//        if (!StringUtils.isBlank(id)) {
-//            try {
-//                s += id.getBytes(NulsContext.DEFAULT_ENCODING).length + 1;
-//            } catch (UnsupportedEncodingException e) {
-//                Log.error(e);
-//            }
-//        } else {
-//            s++;
-//        }
+
         if (StringUtils.isNotBlank(alias)) {
             try {
                 s += alias.getBytes(NulsContext.DEFAULT_ENCODING).length + 1;
@@ -264,5 +261,13 @@ public class Account extends BaseNulsData implements NulsCloneable {
         account.setPriKey(priKey);
         account.setEcKey(ecKey);
         return account;
+    }
+
+    public List<Transaction> getMyTxs() {
+        return myTxs;
+    }
+
+    public void setMyTxs(List<Transaction> myTxs) {
+        this.myTxs = myTxs;
     }
 }
