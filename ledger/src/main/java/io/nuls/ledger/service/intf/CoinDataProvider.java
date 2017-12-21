@@ -26,4 +26,12 @@ public interface CoinDataProvider {
     LockData getLockData(CoinData coinData);
     UnlockData getUnlockData(CoinData coinData);
     TransferData getTransferData(CoinData coinData);
+
+    void approve(CoinData coinData,String txHash);
+
+    void save(CoinData coinData,String txHash);
+
+    void rollback(CoinData coinData,String txHash);
+
+
 }
