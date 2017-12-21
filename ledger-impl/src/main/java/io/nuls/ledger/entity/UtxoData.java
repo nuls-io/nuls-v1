@@ -1,11 +1,9 @@
 package io.nuls.ledger.entity;
 
-import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
 
 /**
@@ -13,6 +11,10 @@ import java.util.List;
  * @date 2017/11/16
  */
 public class UtxoData extends CoinData{
+    public UtxoData(){
+        //todo
+//        this.registerValidator();
+    }
     private List<UtxoInput> inputs;
     private List<UtxoOutput> outputs;
 
