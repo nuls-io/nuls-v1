@@ -12,7 +12,7 @@ import io.nuls.ledger.entity.params.CoinTransferData;
 public class TransferTransaction<T extends BaseNulsData> extends AbstractCoinTransaction<T> {
 
     public TransferTransaction() {
-        super(TransactionConstant.TX_TYPE_TRANSFER);
+        this(TransactionConstant.TX_TYPE_TRANSFER,null,null);
     }
 
     public TransferTransaction(CoinTransferData params, String password) {

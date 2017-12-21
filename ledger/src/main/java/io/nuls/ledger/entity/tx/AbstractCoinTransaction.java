@@ -22,12 +22,14 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
     protected CoinData coinData;
 
     public AbstractCoinTransaction(int type) {
-        super(type);
+        this(type,null,null);
     }
 
     public AbstractCoinTransaction(int type, CoinTransferData coinParam, String password) {
         super(type);
-        this.coinData = this.coinDataProvider.createTransferData(coinParam, password);
+        if (null != coinParam) {
+            this.coinData = this.coinDataProvider.createTransferData(coinParam, password);
+        }
     }
 
     @Override
