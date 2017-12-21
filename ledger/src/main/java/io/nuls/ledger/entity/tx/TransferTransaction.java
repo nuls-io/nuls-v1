@@ -12,6 +12,7 @@ import java.io.IOException;
  * @date 2017/11/20
  */
 public class TransferTransaction<T extends BaseNulsData> extends AbstractCoinTransaction<T> {
+
     public TransferTransaction() {
         super(TransactionConstant.TX_TYPE_TRANSFER);
     }

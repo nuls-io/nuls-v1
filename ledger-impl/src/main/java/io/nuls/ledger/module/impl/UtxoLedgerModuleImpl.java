@@ -4,7 +4,7 @@ import io.nuls.account.entity.Account;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.thread.manager.ThreadManager;
-import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
+import io.nuls.event.bus.processor.service.intf.EventProcessorService;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.entity.validator.CommonTxValidatorManager;
 import io.nuls.ledger.event.AbstractCoinTransactionEvent;
@@ -28,25 +28,24 @@ import java.util.List;
  */
 public class UtxoLedgerModuleImpl extends AbstractLedgerModule {
 
-    private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
 
     private LedgerCacheServiceImpl cacheService = LedgerCacheServiceImpl.getInstance();
 
     private LedgerService ledgerService = UtxoLedgerServiceImpl.getInstance();
 
-    private NetworkProcessorService processorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
+    private EventProcessorService processorService = NulsContext.getInstance().getService(EventProcessorService.class);
 
     @Override
     public void start() {
         CommonTxValidatorManager.initTxValidators();
-        cacheStandingBook();
         this.registerService(ledgerService);
+        cacheStandingBook();
         SmallChangeThread smallChangeThread = SmallChangeThread.getInstance();
         ThreadManager.createSingleThreadAndRun(this.getModuleId(), SmallChangeThread.class.getSimpleName(), smallChangeThread);
-        this.registerEvent((short) 4, UtxoLockNulsEvent.class);
-        this.registerEvent((short) 5, UtxoSmallChangeEvent.class);
-        this.registerEvent((short) 6, AbstractCoinTransactionEvent.class);
-        this.registerEvent((short) 7, UtxoDepositNulsEvent.class);
+        this.registerBusDataClass((short) 4, UtxoLockNulsEvent.class);
+        this.registerBusDataClass((short) 5, UtxoSmallChangeEvent.class);
+        this.registerBusDataClass((short) 6, AbstractCoinTransactionEvent.class);
+        this.registerBusDataClass((short) 7, UtxoDepositNulsEvent.class);
         this.processorService.registerEventHandler(UtxoLockNulsEvent.class, new UtxoLockHandler());
         this.processorService.registerEventHandler(UtxoSmallChangeEvent.class, new UtxoSmallChangeHandler());
         this.processorService.registerEventHandler(AbstractCoinTransactionEvent.class, new UtxoCoinTransactionHandler());
@@ -54,7 +53,7 @@ public class UtxoLedgerModuleImpl extends AbstractLedgerModule {
 
     private void cacheStandingBook() {
         //load account
-        List<Account> accounts = this.accountService.getLocalAccountList();
+        List<Account> accounts = NulsContext.getInstance().getService(AccountService.class).getLocalAccountList();
         if (null == accounts) {
             return;
         }

@@ -15,13 +15,13 @@ import io.nuls.core.module.BaseNulsModule;
 public abstract class AbstractConsensusModule extends BaseNulsModule {
     public AbstractConsensusModule() {
         super(NulsConstant.MODULE_ID_CONSENSUS);
-        this.registerEvent(ConsensusEventType.JOIN, JoinConsensusEvent.class);
-        this.registerEvent(ConsensusEventType.EXIT, ExitConsensusEvent.class);
-        this.registerEvent(ConsensusEventType.BLOCK, BlockEvent.class);
-        this.registerEvent(ConsensusEventType.BLOCK_HEADER, BlockHeaderEvent.class);
-        this.registerEvent(ConsensusEventType.SMALL_BLOCK, SmallBlockEvent.class);
-        this.registerEvent(ConsensusEventType.GET_SMALL_BLOCK, GetSmallBlockEvent.class);
-        this.registerEvent(ConsensusEventType.GET_BLOCK, GetBlockEvent.class);
+        this.registerBusDataClass(ConsensusEventType.JOIN, JoinConsensusEvent.class);
+        this.registerBusDataClass(ConsensusEventType.EXIT, ExitConsensusEvent.class);
+        this.registerBusDataClass(ConsensusEventType.BLOCK, BlockEvent.class);
+        this.registerBusDataClass(ConsensusEventType.BLOCK_HEADER, BlockHeaderEvent.class);
+        this.registerBusDataClass(ConsensusEventType.SMALL_BLOCK, SmallBlockEvent.class);
+        this.registerBusDataClass(ConsensusEventType.GET_SMALL_BLOCK, GetSmallBlockEvent.class);
+        this.registerBusDataClass(ConsensusEventType.GET_BLOCK, GetBlockEvent.class);
         
         this.registerTransaction(ConsensusConstant.TX_TYPE_JOIN_CONSENSUS, JoinConsensusTransaction.class);
         this.registerTransaction(ConsensusConstant.TX_TYPE_EXIT_CONSENSUS, ExitConsensusTransaction.class);

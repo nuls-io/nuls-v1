@@ -3,11 +3,10 @@ package io.nuls.consensus.handler;
 import io.nuls.consensus.entity.tx.PocJoinConsensusTransaction;
 import io.nuls.consensus.event.JoinConsensusEvent;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
-import io.nuls.event.bus.event.handler.AbstractNetworkNulsEventHandler;
+import io.nuls.event.bus.event.handler.AbstractEventHandler;
 import io.nuls.event.bus.event.service.intf.EventService;
 import io.nuls.ledger.service.intf.LedgerService;
 
@@ -15,7 +14,7 @@ import io.nuls.ledger.service.intf.LedgerService;
  * @author facjas
  * @date 2017/11/16
  */
-public class JoinConsensusHandler extends AbstractNetworkNulsEventHandler<JoinConsensusEvent> {
+public class JoinConsensusHandler extends AbstractEventHandler<JoinConsensusEvent> {
 
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
     private EventService eventService = NulsContext.getInstance().getService(EventService.class);

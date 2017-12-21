@@ -13,7 +13,7 @@ import io.nuls.ledger.event.AbstractCoinTransactionEvent;
 public abstract class AbstractLedgerModule extends BaseNulsModule {
     public AbstractLedgerModule() {
         super(NulsConstant.MODULE_ID_LEDGER);
-        this.registerEvent((short) 1, BaseLedgerEvent.class);
-        this.registerEvent((short) 2, AbstractCoinTransactionEvent.class);
+        this.registerBusDataClass((short) 1, BaseLedgerEvent.class);
+        this.registerBusDataClass((short) 2, AbstractCoinTransactionEvent.class);
     }
 }

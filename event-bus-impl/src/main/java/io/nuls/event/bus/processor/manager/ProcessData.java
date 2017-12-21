@@ -1,28 +1,28 @@
 package io.nuls.event.bus.processor.manager;
 
-import io.nuls.core.event.BaseNulsEvent;
+import io.nuls.core.bus.BaseBusData;
 
 /**
  * @author Niels
  * @date 2017/12/8
  */
-public class ProcessData<E extends BaseNulsEvent> {
+public class ProcessData<E extends BaseBusData> {
 
-    private final E event;
+    private final E data;
 
     private String peerId;
 
-    public ProcessData(E event){
-        this.event = event;
+    public ProcessData(E data){
+        this.data = data;
     }
 
-    public ProcessData(E event, String peerId) {
-        this.event = event;
+    public ProcessData(E data, String peerId) {
+        this.data = data;
         this.peerId = peerId;
     }
 
-    public E getEvent() {
-        return event;
+    public E getData() {
+        return data;
     }
 
     public String getPeerId() {

@@ -5,13 +5,13 @@ import io.nuls.event.bus.constant.EventConstant;
 import io.nuls.event.bus.event.CommonHashEvent;
 import io.nuls.event.bus.event.GetBodyEvent;
 import io.nuls.event.bus.event.service.intf.EventService;
-import io.nuls.event.bus.handler.EventHashHandler;
-import io.nuls.event.bus.handler.GetEventBodyHandler;
+import io.nuls.event.bus.handler.HashHandler;
+import io.nuls.event.bus.handler.GetBodyHandler;
 import io.nuls.event.bus.module.intf.AbstractEventBusModule;
-import io.nuls.event.bus.processor.service.impl.LocalProcessorServiceImpl;
-import io.nuls.event.bus.processor.service.impl.NetworkProcessorServiceImpl;
-import io.nuls.event.bus.processor.service.intf.LocalProcessorService;
-import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
+import io.nuls.event.bus.processor.service.impl.NoticeProcessorServiceImpl;
+import io.nuls.event.bus.processor.service.impl.EventProcessorServiceImpl;
+import io.nuls.event.bus.processor.service.intf.NoticeProcessorService;
+import io.nuls.event.bus.processor.service.intf.EventProcessorService;
 import io.nuls.event.bus.service.impl.EventServiceImpl;
 
 /**
@@ -20,21 +20,21 @@ import io.nuls.event.bus.service.impl.EventServiceImpl;
  */
 public class EventBusModuleImpl extends AbstractEventBusModule {
 
-    private LocalProcessorService localService;
-    private NetworkProcessorService networkService;
+    private NoticeProcessorService localService;
+    private EventProcessorService networkService;
 
     public EventBusModuleImpl() {
         super();
-        this.registerEvent(EventConstant.EVENT_TYPE_COMMON_EVENT_HASH_EVENT, CommonHashEvent.class);
-        this.registerEvent(EventConstant.EVENT_TYPE_GET_EVENT_BODY_EVENT, GetBodyEvent.class);
+        this.registerBusDataClass(EventConstant.EVENT_TYPE_COMMON_EVENT_HASH_EVENT, CommonHashEvent.class);
+        this.registerBusDataClass(EventConstant.EVENT_TYPE_GET_EVENT_BODY_EVENT, GetBodyEvent.class);
     }
 
     @Override
     public void start() {
-        localService = LocalProcessorServiceImpl.getInstance();
-        networkService = NetworkProcessorServiceImpl.getInstance();
-        networkService.registerEventHandler(CommonHashEvent.class, new EventHashHandler());
-        networkService.registerEventHandler(GetBodyEvent.class, new GetEventBodyHandler());
+        localService = NoticeProcessorServiceImpl.getInstance();
+        networkService = EventProcessorServiceImpl.getInstance();
+        networkService.registerEventHandler(CommonHashEvent.class, new HashHandler());
+        networkService.registerEventHandler(GetBodyEvent.class, new GetBodyHandler());
         this.registerService(localService);
         this.registerService(networkService);
         this.registerService(EventService.class,EventServiceImpl.getInstance());

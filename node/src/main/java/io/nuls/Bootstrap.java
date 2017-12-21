@@ -20,10 +20,12 @@ import java.util.Properties;
 
 /**
  * System start class
+ *
  * @author Niels
  */
 public class Bootstrap {
     private static final ModuleService moduleService = ModuleService.getInstance();
+
     public static void main(String[] args) {
         Thread.currentThread().setName("Nuls");
         try {
@@ -35,7 +37,7 @@ public class Bootstrap {
         }
     }
 
-    private static void  sysStart() {
+    private static void sysStart() {
         do {
             //load nuls.ini
             try {
@@ -60,9 +62,15 @@ public class Bootstrap {
                 throw new NulsRuntimeException(ErrorCode.FAILED, "Client start faild");
             }
         } while (false);
-        Log.debug("--------------------------------------------");
-        Log.info(ModuleManager.getInstance().getInfo());
-        Log.debug("--------------------------------------------");
+        while (true) {
+            try {
+                Thread.sleep(10000L);
+            } catch (InterruptedException e) {
+                Log.error(e);
+            }
+            Log.info(ModuleManager.getInstance().getInfo());
+            Log.info("--------------------------------------------");
+        }
     }
 
     private static void webStart() {
@@ -73,7 +81,7 @@ public class Bootstrap {
         List<String> keyList = new ArrayList<>(bootstrapClasses.stringPropertyNames());
         for (String key : keyList) {
             try {
-                moduleService.startModule(key,bootstrapClasses.getProperty(key));
+                moduleService.startModule(key, bootstrapClasses.getProperty(key));
             } catch (Exception e) {
                 throw new NulsRuntimeException(e);
             }
