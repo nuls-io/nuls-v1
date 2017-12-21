@@ -72,4 +72,14 @@ public class StringUtils {
     }
 
 
+    public static byte caculateXor(byte[] data) {
+        byte xor = 0x00;
+        if(data == null || data.length == 0) {
+            return xor;
+        }
+        for (int i = 0; i < data.length; i++) {
+            xor ^= data[i];
+        }
+        return xor;
+    }
 }
