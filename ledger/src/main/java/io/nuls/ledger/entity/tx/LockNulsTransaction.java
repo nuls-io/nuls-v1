@@ -21,8 +21,7 @@ public class LockNulsTransaction<T extends BaseNulsData>  extends AbstractCoinTr
     }
 
     protected LockNulsTransaction(int type, CoinTransferData params, String password) {
-        super(type);
-        this.coinData = this.getCoinDataProvider().createLockCoinData(params, password);
+        super(type,params,password);
     }
 
     protected LockNulsTransaction(int type) {

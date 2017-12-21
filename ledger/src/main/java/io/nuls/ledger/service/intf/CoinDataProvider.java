@@ -12,14 +12,6 @@ public interface CoinDataProvider {
 
     CoinData parse(NulsByteBuffer byteBuffer);
 
-    CoinData createLockCoinData(CoinTransferData txData, String password);
-
-    CoinData createTransferCoinData(CoinTransferData params, String password);
-
-    CoinData createUnlockCoinData(CoinTransferData txData, String password);
-
-    CoinData createCoinBaseCoinData(CoinTransferData txData, String password);
-
     CoinTransferData getTransferData(CoinData coinData);
 
     void approve(CoinData coinData,String txHash);
@@ -28,5 +20,5 @@ public interface CoinDataProvider {
 
     void rollback(CoinData coinData,String txHash);
 
-
+    CoinData createTransferData(CoinTransferData coinParam, String password);
 }

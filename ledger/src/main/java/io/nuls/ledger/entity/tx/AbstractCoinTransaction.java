@@ -25,6 +25,11 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
         super(type);
     }
 
+    public AbstractCoinTransaction(int type, CoinTransferData coinParam, String password) {
+        super(type);
+        this.coinData = this.coinDataProvider.createTransferData(coinParam, password);
+    }
+
     @Override
     public int size() {
         int size = super.size();

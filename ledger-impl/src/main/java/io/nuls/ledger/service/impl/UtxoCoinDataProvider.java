@@ -20,31 +20,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
     }
 
     @Override
-    public CoinData createLockCoinData(CoinTransferData txData, String password) {
-        // todo auto-generated method stub(niels)
-        return null;
-    }
-
-    @Override
-    public CoinData createTransferCoinData(CoinTransferData params, String password) {
-        // todo auto-generated method stub(niels)
-        return null;
-    }
-
-    @Override
-    public CoinData createUnlockCoinData(CoinTransferData txData, String password) {
-        // todo auto-generated method stub(niels)
-        return null;
-    }
-
-    @Override
-    public CoinData createCoinBaseCoinData(CoinTransferData txData, String password) {
-        // todo auto-generated method stub(niels)
-        return null;
-    }
-
-
-    @Override
     public CoinTransferData getTransferData(CoinData coinData) {
         // todo auto-generated method stub(niels)
         return null;
@@ -64,6 +39,12 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 
     @Override
     public void rollback(CoinData coinData, String txHash) {
+        // todo auto-generated method stub(niels)
+
+    }
+
+    @Override
+    public void createTransferData(CoinTransferData coinParam, String password) {
         // todo auto-generated method stub(niels)
 
     }

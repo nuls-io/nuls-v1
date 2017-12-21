@@ -20,8 +20,7 @@ public class TransferTransaction<T extends BaseNulsData> extends AbstractCoinTra
     }
 
     protected TransferTransaction(int type, CoinTransferData params, String password) {
-        super(type);
-        this.coinData = this.getCoinDataProvider().createTransferCoinData(params, password);
+        super(type,params,password);
     }
 
     protected TransferTransaction(int type) {

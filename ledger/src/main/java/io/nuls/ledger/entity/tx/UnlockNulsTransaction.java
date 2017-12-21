@@ -20,8 +20,7 @@ public class UnlockNulsTransaction<T extends BaseNulsData> extends AbstractCoinT
     }
 
     protected UnlockNulsTransaction(int type, CoinTransferData params, String password) {
-        super(type);
-        this.coinData = this.getCoinDataProvider().createUnlockCoinData(params, password);
+        super(type,params,password);
     }
 
     protected UnlockNulsTransaction(int type) {
