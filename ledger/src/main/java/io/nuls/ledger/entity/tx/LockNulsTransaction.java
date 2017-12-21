@@ -3,7 +3,7 @@ package io.nuls.ledger.entity.tx;
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.utils.io.NulsByteBuffer;
-import io.nuls.ledger.entity.params.LockData;
+import io.nuls.ledger.entity.params.CoinTransferData;
 
 /**
  * @author Niels
@@ -15,12 +15,12 @@ public class LockNulsTransaction<T extends BaseNulsData>  extends AbstractCoinTr
         super(TransactionConstant.TX_TYPE_LOCK);
     }
 
-    public LockNulsTransaction(LockData params, String password) {
+    public LockNulsTransaction(CoinTransferData params, String password) {
         this(TransactionConstant.TX_TYPE_LOCK, params, password);
 
     }
 
-    protected LockNulsTransaction(int type, LockData params, String password) {
+    protected LockNulsTransaction(int type, CoinTransferData params, String password) {
         super(type);
         this.coinData = this.getCoinDataProvider().createLockCoinData(params, password);
     }
@@ -35,8 +35,8 @@ public class LockNulsTransaction<T extends BaseNulsData>  extends AbstractCoinTr
         return null;
     }
 
-    public LockData getLockData(){
-        return this.getCoinDataProvider().getLockData(this.coinData);
+    public CoinTransferData getCoinTransferData(){
+        return this.getCoinDataProvider().getTransferData(this.coinData);
     }
 
 }

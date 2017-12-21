@@ -2,15 +2,20 @@ package io.nuls.ledger.entity.params;
 
 import io.nuls.core.chain.entity.Na;
 
+import java.util.Map;
+
 /**
  * @author Niels
  * @date 2017/12/21
  */
-public class LockData {
+public class CoinTransferData {
 
-    private String address;
+    private Map<String,Na> fromMap ;
+    private Map<String,Na> toMap ;
 
-    private Na na;
+    private Na totalNa;
+
+    private Na fee;
 
     private long unlockTime;
 
@@ -18,20 +23,36 @@ public class LockData {
 
     private boolean canBeUnlocked;
 
-    public String getAddress() {
-        return address;
+    public Map<String, Na> getFromMap() {
+        return fromMap;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public void setFromMap(Map<String, Na> fromMap) {
+        this.fromMap = fromMap;
     }
 
-    public Na getNa() {
-        return na;
+    public Map<String, Na> getToMap() {
+        return toMap;
     }
 
-    public void setNa(Na na) {
-        this.na = na;
+    public void setToMap(Map<String, Na> toMap) {
+        this.toMap = toMap;
+    }
+
+    public Na getTotalNa() {
+        return totalNa;
+    }
+
+    public void setTotalNa(Na totalNa) {
+        this.totalNa = totalNa;
+    }
+
+    public Na getFee() {
+        return fee;
+    }
+
+    public void setFee(Na fee) {
+        this.fee = fee;
     }
 
     public long getUnlockTime() {

@@ -2,10 +2,7 @@ package io.nuls.ledger.service.intf;
 
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.ledger.entity.CoinData;
-import io.nuls.ledger.entity.params.CoinBaseData;
-import io.nuls.ledger.entity.params.LockData;
-import io.nuls.ledger.entity.params.TransferData;
-import io.nuls.ledger.entity.params.UnlockData;
+import io.nuls.ledger.entity.params.CoinTransferData;
 
 /**
  * @author Niels
@@ -15,17 +12,15 @@ public interface CoinDataProvider {
 
     CoinData parse(NulsByteBuffer byteBuffer);
 
-    CoinData createLockCoinData(LockData txData, String password);
+    CoinData createLockCoinData(CoinTransferData txData, String password);
 
-    CoinData createTransferCoinData(TransferData params, String password);
+    CoinData createTransferCoinData(CoinTransferData params, String password);
 
-    CoinData createUnlockCoinData(UnlockData txData, String password);
+    CoinData createUnlockCoinData(CoinTransferData txData, String password);
 
-    CoinData createCoinBaseCoinData(CoinBaseData txData, String password);
+    CoinData createCoinBaseCoinData(CoinTransferData txData, String password);
 
-    LockData getLockData(CoinData coinData);
-    UnlockData getUnlockData(CoinData coinData);
-    TransferData getTransferData(CoinData coinData);
+    CoinTransferData getTransferData(CoinData coinData);
 
     void approve(CoinData coinData,String txHash);
 

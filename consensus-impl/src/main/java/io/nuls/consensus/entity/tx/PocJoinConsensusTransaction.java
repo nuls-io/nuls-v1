@@ -4,7 +4,7 @@ import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.member.Delegate;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.utils.io.NulsByteBuffer;
-import io.nuls.ledger.entity.params.LockData;
+import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 
 /**
@@ -16,7 +16,7 @@ public class PocJoinConsensusTransaction extends LockNulsTransaction<Consensus<D
         super(TransactionConstant.TX_TYPE_JOIN_CONSENSUS);
     }
 
-    public PocJoinConsensusTransaction(LockData lockData, String password) {
+    public PocJoinConsensusTransaction(CoinTransferData lockData, String password) {
         super(TransactionConstant.TX_TYPE_JOIN_CONSENSUS, lockData, password);
     }
 

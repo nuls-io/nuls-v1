@@ -13,7 +13,7 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
-import io.nuls.ledger.entity.params.LockData;
+import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 
 import java.io.IOException;
@@ -30,7 +30,7 @@ public class RegisterAgentTransaction extends LockNulsTransaction<Consensus<Agen
         this.registerValidator(new AgentDepositValidator());
     }
 
-    public RegisterAgentTransaction(LockData lockData, String password) {
+    public RegisterAgentTransaction(CoinTransferData lockData, String password) {
         super(TransactionConstant.TX_TYPE_REGISTER_AGENT, lockData, password);
     }
 
