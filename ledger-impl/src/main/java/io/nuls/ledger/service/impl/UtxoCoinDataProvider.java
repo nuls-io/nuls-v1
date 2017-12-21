@@ -63,4 +63,22 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         // todo auto-generated method stub(niels)
         return null;
     }
+
+    @Override
+    public void approve(CoinData coinData, String txHash) {
+        // todo auto-generated method stub(niels)
+
+    }
+
+    @Override
+    public void save(CoinData coinData, String txHash) {
+        // todo auto-generated method stub(niels)
+
+    }
+
+    @Override
+    public void rollback(CoinData coinData, String txHash) {
+        // todo auto-generated method stub(niels)
+
+    }
 }
