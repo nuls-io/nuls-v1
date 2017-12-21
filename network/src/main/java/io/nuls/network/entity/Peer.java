@@ -18,9 +18,8 @@ import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
-import io.nuls.db.dao.PeerDao;
-import io.nuls.event.bus.processor.service.intf.LocalProcessorService;
-import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
+import io.nuls.event.bus.processor.service.intf.NoticeProcessorService;
+import io.nuls.event.bus.processor.service.intf.EventProcessorService;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.message.*;
@@ -83,9 +82,9 @@ public class Peer extends BaseNulsData {
 
     private Lock lock = new ReentrantLock();
 
-    private NetworkProcessorService networkProcessorService;
+    private EventProcessorService eventProcessorService;
 
-    private LocalProcessorService localProcessorService;
+    private NoticeProcessorService NoticeProcessorService;
 
     private AbstractNetWorkDataHandlerFactory messageHandlerFactory;
 
@@ -101,8 +100,8 @@ public class Peer extends BaseNulsData {
         super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.magicNumber = network.packetMagic();
         this.messageHandlerFactory = network.getMessageHandlerFactory();
-        networkProcessorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
-        localProcessorService = NulsContext.getInstance().getService(LocalProcessorService.class);
+        eventProcessorService = NulsContext.getInstance().getService(EventProcessorService.class);
+        NoticeProcessorService = NulsContext.getInstance().getService(NoticeProcessorService.class);
     }
 
     public Peer(AbstractNetworkParam network, int type) {
@@ -110,8 +109,8 @@ public class Peer extends BaseNulsData {
         this.magicNumber = network.packetMagic();
         this.type = type;
         this.messageHandlerFactory = network.getMessageHandlerFactory();
-        networkProcessorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
-        localProcessorService = NulsContext.getInstance().getService(LocalProcessorService.class);
+        eventProcessorService = NulsContext.getInstance().getService(EventProcessorService.class);
+        NoticeProcessorService = NulsContext.getInstance().getService(NoticeProcessorService.class);
     }
 
 
@@ -122,8 +121,8 @@ public class Peer extends BaseNulsData {
         this.port = socketAddress.getPort();
         this.ip = socketAddress.getAddress().getHostAddress();
         this.messageHandlerFactory = network.getMessageHandlerFactory();
-        networkProcessorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
-        localProcessorService = NulsContext.getInstance().getService(LocalProcessorService.class);
+        eventProcessorService = NulsContext.getInstance().getService(EventProcessorService.class);
+        NoticeProcessorService = NulsContext.getInstance().getService(NoticeProcessorService.class);
         this.hash = this.ip + this.port;
     }
 
@@ -213,7 +212,7 @@ public class Peer extends BaseNulsData {
             if (checkBroadcastExist(message.getData())) {
                 return;
             }
-            networkProcessorService.send(message.getData(), this.getHash());
+            eventProcessorService.send(message.getData(), this.getHash());
         } else {
 
             byte[] networkHeader = new byte[NetworkDataHeader.NETWORK_HEADER_SIZE];
@@ -262,9 +261,9 @@ public class Peer extends BaseNulsData {
         if (result.getRepliedCount() < result.getWaitReplyCount()) {
             NetworkCacheService.getInstance().addBroadCastResult(result);
         } else {
-            ReplyEvent event = new ReplyEvent();
+            ReplyNotice event = new ReplyNotice();
             event.setEventBody(new BasicTypeData<>(data));
-            localProcessorService.send(event);
+            NoticeProcessorService.notice(event);
         }
         return true;
     }
@@ -324,8 +323,8 @@ public class Peer extends BaseNulsData {
         magicNumber = (int) buffer.readVarInt();
         port = (int) buffer.readVarInt();
         ip = new String(buffer.readByLengthByte());
-        networkProcessorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
-        localProcessorService = NulsContext.getInstance().getService(LocalProcessorService.class);
+        eventProcessorService = NulsContext.getInstance().getService(EventProcessorService.class);
+        NoticeProcessorService = NulsContext.getInstance().getService(NoticeProcessorService.class);
     }
 
 

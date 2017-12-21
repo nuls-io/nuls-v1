@@ -12,7 +12,7 @@ import java.util.List;
  * @author Niels
  * @date 2017/11/16
  */
-public class UtxoData extends BaseNulsData{
+public class UtxoData extends CoinData{
     private List<UtxoInput> inputs;
     private List<UtxoOutput> outputs;
 

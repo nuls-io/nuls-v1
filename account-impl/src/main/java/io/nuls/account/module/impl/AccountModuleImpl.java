@@ -4,15 +4,15 @@ import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.entity.event.AliasEvent;
 import io.nuls.account.entity.tx.AliasTransaction;
 import io.nuls.account.entity.validator.AliasValidator;
-import io.nuls.account.event.filter.AliasEventFilter;
-import io.nuls.account.event.handler.AliasEventHandler;
+import io.nuls.account.event.filter.AliasBusFilter;
+import io.nuls.account.event.handler.AliasBusHandler;
 import io.nuls.account.manager.AccountManager;
 import io.nuls.account.module.intf.AbstractAccountModule;
 import io.nuls.account.service.impl.AccountServiceImpl;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
-import io.nuls.event.bus.processor.service.intf.NetworkProcessorService;
+import io.nuls.event.bus.processor.service.intf.EventProcessorService;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.network.service.NetworkService;
 
@@ -23,17 +23,16 @@ import io.nuls.network.service.NetworkService;
 public class AccountModuleImpl extends AbstractAccountModule {
 
     private AccountManager manager = AccountManager.getInstance();
-    private NetworkProcessorService processorService = NulsContext.getInstance().getService(NetworkProcessorService.class);
+    private EventProcessorService processorService = NulsContext.getInstance().getService(EventProcessorService.class);
 
     @Override
     public void start() {
-        manager.init();
         AccountService accountService = AccountServiceImpl.getInstance();
         this.registerService(accountService);
         this.registerTransaction(TransactionConstant.TX_TYPE_SET_ALIAS, AliasTransaction.class);
-        this.registerEvent(AccountConstant.EVENT_TYPE_ALIAS, AliasEvent.class);
+        this.registerBusDataClass(AccountConstant.EVENT_TYPE_ALIAS, AliasEvent.class);
         AliasValidator.getInstance().setAccountService(accountService);
-
+        manager.init();
         registerHanders();
     }
 
@@ -41,9 +40,9 @@ public class AccountModuleImpl extends AbstractAccountModule {
         NetworkService service = NulsContext.getInstance().getService(NetworkService.class);
         LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
 
-        AliasEventHandler.getInstance().addFilter(AliasEventFilter.getInstance());
-        AliasEventHandler.getInstance().setLedgerService(ledgerService);
-        processorService.registerEventHandler(AliasEvent.class, AliasEventHandler.getInstance());
+        AliasBusHandler.getInstance().addFilter(AliasBusFilter.getInstance());
+        AliasBusHandler.getInstance().setLedgerService(ledgerService);
+        processorService.registerEventHandler(AliasEvent.class, AliasBusHandler.getInstance());
     }
 
     @Override

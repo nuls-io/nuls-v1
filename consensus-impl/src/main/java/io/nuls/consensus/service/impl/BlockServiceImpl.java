@@ -1,6 +1,6 @@
 package io.nuls.consensus.service.impl;
 
-import io.nuls.consensus.entity.genesis.DevGenesisBlock;
+import io.nuls.consensus.entity.genesis.GenesisBlock;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.utils.ConsensusBeanUtils;
 import io.nuls.core.chain.entity.Block;
@@ -64,7 +64,7 @@ public class BlockServiceImpl implements BlockService {
     @Override
     public Block getLocalHighestBlock() {
         // todo auto-generated method stub(niels)
-        return DevGenesisBlock.getInstance();
+        return GenesisBlock.getInstance();
     }
 
     @Override

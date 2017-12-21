@@ -28,6 +28,7 @@ import io.nuls.db.dao.AccountDao;
 import io.nuls.db.dao.AliasDao;
 import io.nuls.db.entity.AccountPo;
 import io.nuls.db.entity.AliasPo;
+import io.nuls.event.bus.bus.service.intf.BusDataService;
 import io.nuls.db.entity.TransactionPo;
 import io.nuls.event.bus.event.service.intf.EventService;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
@@ -58,7 +59,7 @@ public class AccountServiceImpl implements AccountService {
 
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
 
-    private EventService eventService = NulsContext.getInstance().getService(EventService.class);
+    private BusDataService busDataService = NulsContext.getInstance().getService(BusDataService.class);
 
     private boolean isLockNow = true;
 
@@ -466,7 +467,7 @@ public class AccountServiceImpl implements AccountService {
             aliasTx.setSign(signData(aliasTx.getHash(), account, password));
             ledgerService.verifyAndCacheTx(aliasTx);
             event.setEventBody(aliasTx);
-            eventService.broadcastAndCache(event);
+            busDataService.broadcastAndCache(event);
         } catch (Exception e) {
             Log.error(e);
             return new Result(false, e.getMessage());
