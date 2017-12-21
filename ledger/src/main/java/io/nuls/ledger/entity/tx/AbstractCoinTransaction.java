@@ -6,7 +6,9 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.ledger.entity.CoinData;
+import io.nuls.ledger.entity.listener.CoinDataTxListener;
 import io.nuls.ledger.entity.params.CoinTransferData;
+import io.nuls.ledger.entity.validator.CoinDataValidator;
 import io.nuls.ledger.service.intf.CoinDataProvider;
 
 import java.io.IOException;
@@ -22,7 +24,7 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
     protected CoinData coinData;
 
     public AbstractCoinTransaction(int type) {
-        this(type,null,null);
+        this(type, null, null);
     }
 
     public AbstractCoinTransaction(int type, CoinTransferData coinParam, String password) {
@@ -30,6 +32,8 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
         if (null != coinParam) {
             this.coinData = this.coinDataProvider.createTransferData(coinParam, password);
         }
+        this.registerValidator(CoinDataValidator.getInstance());
+        this.registerListener(CoinDataTxListener.getInstance());
     }
 
     @Override
@@ -51,12 +55,16 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
         this.coinData = coinDataProvider.parse(byteBuffer);
     }
 
-    protected CoinDataProvider getCoinDataProvider() {
+    public CoinDataProvider getCoinDataProvider() {
         return coinDataProvider;
     }
 
 
     public final CoinTransferData getCoinTransferData() {
         return this.getCoinDataProvider().getTransferData(this.coinData);
+    }
+
+    public final CoinData getCoinData() {
+        return coinData;
     }
 }

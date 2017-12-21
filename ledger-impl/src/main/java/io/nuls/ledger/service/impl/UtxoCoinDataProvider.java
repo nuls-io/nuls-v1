@@ -11,6 +11,15 @@ import io.nuls.ledger.service.intf.CoinDataProvider;
  * @date 2017/12/21
  */
 public class UtxoCoinDataProvider implements CoinDataProvider {
+    private static final UtxoCoinDataProvider INSTANCE = new UtxoCoinDataProvider();
+
+    private UtxoCoinDataProvider() {
+    }
+
+    public static UtxoCoinDataProvider getInstance() {
+        return INSTANCE;
+    }
+
 
     @Override
     public CoinData parse(NulsByteBuffer byteBuffer) {
@@ -49,4 +58,5 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 
         return null;
     }
+
 }
