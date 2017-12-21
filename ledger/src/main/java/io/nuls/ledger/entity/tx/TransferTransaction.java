@@ -29,7 +29,7 @@ public class TransferTransaction<T extends BaseNulsData> extends AbstractCoinTra
     }
 
     @Override
-    protected T parseBody(NulsByteBuffer byteBuffer) {
+    protected T parseTxData(NulsByteBuffer byteBuffer) {
         return null;
     }
 

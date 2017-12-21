@@ -1,22 +1,13 @@
 package io.nuls.consensus.entity.tx;
 
-import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.validator.consensus.AccountCreditValidator;
 import io.nuls.consensus.entity.validator.consensus.AgentDepositValidator;
-import io.nuls.consensus.tx.AbstractConsensusTransaction;
-import io.nuls.core.chain.manager.TransactionManager;
-import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TransactionConstant;
-import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.io.NulsByteBuffer;
-import io.nuls.core.utils.io.NulsOutputStreamBuffer;
-import io.nuls.core.utils.log.Log;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
-
-import java.io.IOException;
 
 /**
  * @author Niels
@@ -35,7 +26,7 @@ public class RegisterAgentTransaction extends LockNulsTransaction<Consensus<Agen
     }
 
     @Override
-    protected Consensus<Agent> parseBody(NulsByteBuffer byteBuffer) {
+    protected Consensus<Agent> parseTxData(NulsByteBuffer byteBuffer) {
         Consensus<Agent> consensus = new Consensus<>();
         consensus.parse(byteBuffer);
         Agent delegate = new Agent();

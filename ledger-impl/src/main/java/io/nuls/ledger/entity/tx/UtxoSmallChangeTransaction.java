@@ -25,7 +25,7 @@ public class UtxoSmallChangeTransaction extends AbstractCoinTransaction {
 
 
     @Override
-    protected BaseNulsData parseBody(NulsByteBuffer byteBuffer) {
+    protected BaseNulsData parseTxData(NulsByteBuffer byteBuffer) {
         // todo auto-generated method stub(niels)
         return null;
     }

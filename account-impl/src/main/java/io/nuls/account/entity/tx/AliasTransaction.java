@@ -2,6 +2,7 @@ package io.nuls.account.entity.tx;
 
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.entity.validator.AliasValidator;
+import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.TransactionConstant;
@@ -30,10 +31,9 @@ public class AliasTransaction extends Transaction {
     private LockNulsTransaction nulsTx;
 
     public AliasTransaction(String address, String alias) {
-        super(TransactionConstant.TX_TYPE_SET_ALIAS);
+        this();
         this.address = address;
         this.alias = alias;
-
         this.registerValidator(AliasValidator.getInstance());
     }
 
@@ -42,8 +42,13 @@ public class AliasTransaction extends Transaction {
         this.nulsTx = nulsTx;
     }
 
-    public AliasTransaction(NulsByteBuffer buffer) throws NulsException {
-        super(buffer);
+    public AliasTransaction() {
+        super(TransactionConstant.TX_TYPE_SET_ALIAS);
+    }
+
+    @Override
+    protected BaseNulsData parseTxData(NulsByteBuffer byteBuffer) {
+        return null;
     }
 
     @Override

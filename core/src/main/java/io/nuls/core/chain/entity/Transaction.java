@@ -1,9 +1,9 @@
 package io.nuls.core.chain.entity;
 
 import io.nuls.core.chain.manager.TransactionValidatorManager;
-import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
@@ -16,7 +16,7 @@ import java.util.List;
  * @author Niels
  * @date 2017/10/30
  */
-public class Transaction extends BaseNulsData {
+public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData {
 
     private TransactionListener listener;
     /**
@@ -25,6 +25,8 @@ public class Transaction extends BaseNulsData {
     private int type;
     private NulsDigestData hash;
     private NulsSignData sign;
+    private T txData;
+    private Na fee;
     /**
      * current time (ms)
      *
@@ -58,16 +60,14 @@ public class Transaction extends BaseNulsData {
         this.initValidators();
     }
 
-    public Transaction(NulsByteBuffer buffer) throws NulsException {
-        super(buffer);
-    }
-
     private void initValidators() {
         List<NulsDataValidator> list = TransactionValidatorManager.getValidators();
         for (NulsDataValidator<Transaction> validator : list) {
             this.registerValidator(validator);
         }
     }
+
+    protected abstract T parseTxData(NulsByteBuffer byteBuffer);
 
     @Override
     public int size() {
@@ -76,9 +76,9 @@ public class Transaction extends BaseNulsData {
         size += VarInt.sizeOf(time);
         size += hash.size();
         size += sign.size();
-        if (null != remark) {
-            size += remark.length;
-        }
+        size += Utils.sizeOfSerialize(remark);
+        size += Utils.sizeOfSerialize(txData);
+
         return size;
     }
 
@@ -89,6 +89,9 @@ public class Transaction extends BaseNulsData {
         stream.write(hash.serialize());
         stream.write(sign.serialize());
         stream.writeBytesWithLength(remark);
+        if(txData!=null){
+            txData.serializeToStream(stream);
+        }
     }
 
     @Override
@@ -103,6 +106,8 @@ public class Transaction extends BaseNulsData {
         sign.parse(byteBuffer);
 
         this.remark = byteBuffer.readByLengthByte();
+        txData = this.parseTxData(byteBuffer);
+
     }
 
     public void registerListener(TransactionListener listener) {
@@ -143,5 +148,21 @@ public class Transaction extends BaseNulsData {
 
     public void setSign(NulsSignData sign) {
         this.sign = sign;
+    }
+
+    public T getTxData() {
+        return txData;
+    }
+
+    public void setTxData(T txData) {
+        this.txData = txData;
+    }
+
+    public Na getFee() {
+        return fee;
+    }
+
+    public void setFee(Na fee) {
+        this.fee = fee;
     }
 }

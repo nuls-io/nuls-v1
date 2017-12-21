@@ -14,9 +14,9 @@ import java.io.IOException;
  * @author Niels
  * @date 2017/11/14
  */
-public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Transaction {
+public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Transaction<T> {
+
     private CoinDataProvider coinDataProvider = NulsContext.getInstance().getService(CoinDataProvider.class);
-    private T txData;
 
     protected  CoinData coinData;
 
@@ -24,21 +24,10 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
         super(type);
     }
 
-    public T getTxData() {
-        return txData;
-    }
-
-    public void setTxData(T txData) {
-        this.txData = txData;
-    }
-
     @Override
     public int size() {
         int size = super.size();
         size += this.coinData.size();
-        if (null != txData) {
-            size += txData.size();
-        }
         return size;
     }
 
@@ -46,22 +35,13 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         super.serializeToStream(stream);
         this.coinData.serializeToStream(stream);
-        if (txData != null) {
-            this.txData.serializeToStream(stream);
-        }
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
         super.parse(byteBuffer);
         this.coinData = coinDataProvider.parse(byteBuffer);
-        if (!byteBuffer.isFinished()) {
-            txData = parseBody(byteBuffer);
-        }
     }
-
-    protected abstract T parseBody(NulsByteBuffer byteBuffer);
-
 
     protected CoinDataProvider getCoinDataProvider() {
         return coinDataProvider;

@@ -21,7 +21,7 @@ public class PocJoinConsensusTransaction extends LockNulsTransaction<Consensus<D
     }
 
     @Override
-    protected Consensus<Delegate> parseBody(NulsByteBuffer byteBuffer) {
+    protected Consensus<Delegate> parseTxData(NulsByteBuffer byteBuffer) {
         Consensus<Delegate> con = new Consensus<Delegate>();
         con.parse(byteBuffer);
         Delegate agent = new Delegate();

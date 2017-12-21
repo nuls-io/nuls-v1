@@ -9,6 +9,7 @@ import io.nuls.account.manager.AccountManager;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.account.util.AccountTool;
 import io.nuls.core.chain.entity.*;
+import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
@@ -651,7 +652,7 @@ public class AccountServiceImpl implements AccountService {
                 int txSize = (int) buffer.readVarInt();
                 List<Transaction> txList = new ArrayList<>();
                 for (int j = 0; j < txSize; j++) {
-                    Transaction tx = new Transaction(buffer);
+                    Transaction tx =   TransactionManager.getInstance(buffer);
                     txList.add(tx);
                 }
                 account.setMyTxs(txList);
@@ -696,6 +697,7 @@ public class AccountServiceImpl implements AccountService {
 
             List<TransactionPo> transactionPos = new ArrayList<>();
             for(Transaction tx : account.getMyTxs()) {
+
 
             }
         }

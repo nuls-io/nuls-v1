@@ -23,7 +23,7 @@ public class UtxoTxOutputsValidator implements NulsDataValidator<AbstractCoinTra
     }
     @Override
     public ValidateResult validate(AbstractCoinTransaction<UtxoData> data) {
-        UtxoData utxoData = data.getTxData();
+        UtxoData utxoData = (UtxoData) data.getTxData();
         List<UtxoOutput> outputs = utxoData.getOutputs();
         if(null!=outputs&&outputs.size()>MAX_INPUT_COUNT){
             return ValidateResult.getFailedResult(ERROR_MESSAGE);

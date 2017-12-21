@@ -30,11 +30,8 @@ public class AliasEvent extends BaseNulsEvent<AliasTransaction> {
 
     @Override
     protected AliasTransaction parseEventBody(NulsByteBuffer byteBuffer) {
-        try {
-            return new AliasTransaction(byteBuffer);
-        } catch (NulsException e) {
-            Log.error(e);
-            return null;
-        }
+        AliasTransaction tx = new AliasTransaction();
+        tx.parse(byteBuffer);
+        return tx;
     }
 }
