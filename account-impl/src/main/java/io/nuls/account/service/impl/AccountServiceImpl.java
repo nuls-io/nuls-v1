@@ -30,7 +30,6 @@ import io.nuls.db.entity.AccountPo;
 import io.nuls.db.entity.AliasPo;
 import io.nuls.event.bus.bus.service.intf.BusDataService;
 import io.nuls.db.entity.TransactionPo;
-import io.nuls.event.bus.event.service.intf.EventService;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.service.intf.LedgerService;
 
@@ -693,11 +692,14 @@ public class AccountServiceImpl implements AccountService {
     private void importSave(List<Account> accounts) {
         List<AccountPo> accountPoList = new ArrayList<>();
 
-        for(Account account : accounts) {
+        for (Account account : accounts) {
             AccountPo accountPo = new AccountPo();
             AccountTool.toPojo(account, accountPo);
 
             List<TransactionPo> transactionPos = new ArrayList<>();
+            for(Transaction tx : account.getMyTxs()) {
+
+            }
         }
     }
 
