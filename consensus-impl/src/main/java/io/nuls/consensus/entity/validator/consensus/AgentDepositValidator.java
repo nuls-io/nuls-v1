@@ -20,9 +20,9 @@ public class AgentDepositValidator implements NulsDataValidator<RegisterAgentTra
         if(null==tx){
             result = ValidateResult.getFailedResult(ErrorCode.DEPOSIT_ERROR);
         }
-        else if(!tx.getNa().isGreaterThan(PocConsensusConstant.AGENT_DEPOSIT_LOWER_LIMIT)){
-            result = ValidateResult.getFailedResult(ErrorCode.DEPOSIT_NOT_ENOUGH);
-        }
+//todo        else if(!tx.getNa().isGreaterThan(PocConsensusConstant.AGENT_DEPOSIT_LOWER_LIMIT)){
+//            result = ValidateResult.getFailedResult(ErrorCode.DEPOSIT_NOT_ENOUGH);
+//        }
         tx.verify();
         return result;
     }

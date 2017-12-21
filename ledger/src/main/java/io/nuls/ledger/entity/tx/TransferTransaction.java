@@ -4,6 +4,8 @@ import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
+import io.nuls.ledger.entity.CoinData;
+import io.nuls.ledger.entity.params.TransferData;
 
 import java.io.IOException;
 
@@ -17,25 +19,26 @@ public class TransferTransaction<T extends BaseNulsData> extends AbstractCoinTra
         super(TransactionConstant.TX_TYPE_TRANSFER);
     }
 
-    public TransferTransaction(int type) {
+    public TransferTransaction(TransferData params, String password) {
+        this(TransactionConstant.TX_TYPE_TRANSFER, params, password);
+    }
+
+    protected TransferTransaction(int type, TransferData params, String password) {
+        super(type);
+        this.coinData = this.getCoinDataProvider().createTransferCoinData(params, password);
+    }
+
+    protected TransferTransaction(int type) {
         super(type);
     }
 
     @Override
-    public int size() {
-        //todo
-        return 0;
+    protected T parseBody(NulsByteBuffer byteBuffer) {
+        return null;
     }
 
-    @Override
-    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        //todo
-
+    public TransferData getTransferData() {
+        return this.getCoinDataProvider().getTransferData(this.coinData);
     }
 
-    @Override
-    public void parse(NulsByteBuffer byteBuffer) {
-        //todo
-
-    }
 }

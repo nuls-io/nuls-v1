@@ -8,7 +8,6 @@ import io.nuls.event.bus.processor.service.intf.EventProcessorService;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.entity.validator.CommonTxValidatorManager;
 import io.nuls.ledger.event.AbstractCoinTransactionEvent;
-import io.nuls.ledger.event.UtxoDepositNulsEvent;
 import io.nuls.ledger.event.UtxoLockNulsEvent;
 import io.nuls.ledger.event.UtxoSmallChangeEvent;
 import io.nuls.ledger.handler.UtxoCoinTransactionBusHandler;
@@ -45,7 +44,6 @@ public class UtxoLedgerModuleImpl extends AbstractLedgerModule {
         this.registerBusDataClass((short) 4, UtxoLockNulsEvent.class);
         this.registerBusDataClass((short) 5, UtxoSmallChangeEvent.class);
         this.registerBusDataClass((short) 6, AbstractCoinTransactionEvent.class);
-        this.registerBusDataClass((short) 7, UtxoDepositNulsEvent.class);
         this.processorService.registerEventHandler(UtxoLockNulsEvent.class, new UtxoLockBusHandler());
         this.processorService.registerEventHandler(UtxoSmallChangeEvent.class, new UtxoSmallChangeBusHandler());
         this.processorService.registerEventHandler(AbstractCoinTransactionEvent.class, new UtxoCoinTransactionBusHandler());
