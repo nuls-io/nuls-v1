@@ -3,25 +3,27 @@ package io.nuls.ledger.entity.tx;
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.constant.TransactionConstant;
+import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
+import io.nuls.core.utils.log.Log;
+import io.nuls.ledger.entity.CoinData;
+import io.nuls.ledger.entity.LockData;
+import io.nuls.ledger.service.intf.CoinDataProvider;
 
 import java.io.IOException;
 
 /**
- *
  * @author Niels
  * @date 2017/11/20
  */
-public class LockNulsTransaction<T extends BaseNulsData> extends AbstractCoinTransaction<T> {
+public class LockNulsTransaction extends AbstractCoinTransaction<LockData> {
 
-    private Na na;
+    private CoinDataProvider coinDataProvider = NulsContext.getInstance().getService(CoinDataProvider.class);
 
-    private long unlockTime;
-
-    private int unlockHeight;
-
-    private boolean canBeUnlocked;
+    private CoinData coinData;
 
     public LockNulsTransaction() {
         super(TransactionConstant.TX_TYPE_LOCK);
@@ -29,14 +31,14 @@ public class LockNulsTransaction<T extends BaseNulsData> extends AbstractCoinTra
 
     @Override
     public int size() {
-        //todo
-        return 0;
+        int size = super.size();
+        size += this.coinData.size();
+        return size;
     }
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        //todo
-
+        super.serializeToStream(stream);
     }
 
     @Override
@@ -45,35 +47,21 @@ public class LockNulsTransaction<T extends BaseNulsData> extends AbstractCoinTra
 
     }
 
-    public long getUnlockTime() {
-        return unlockTime;
+    @Override
+    protected LockData parseBody(NulsByteBuffer byteBuffer) {
+        LockData data = new LockData();
+        try {
+            data.parse(byteBuffer);
+        } catch (NulsException e) {
+            Log.error(e);
+            throw new NulsRuntimeException(e);
+        }
+        return data;
     }
 
-    public void setUnlockTime(long unlockTime) {
-        this.unlockTime = unlockTime;
+    @Override
+    public void setCoinData() {
+        coinData = coinDataProvider.getLockCoinData(this.getTxData());
     }
 
-    public int getUnlockHeight() {
-        return unlockHeight;
-    }
-
-    public void setUnlockHeight(int unlockHeight) {
-        this.unlockHeight = unlockHeight;
-    }
-
-    public boolean isCanBeUnlocked() {
-        return canBeUnlocked;
-    }
-
-    public void setCanBeUnlocked(boolean canBeUnlocked) {
-        this.canBeUnlocked = canBeUnlocked;
-    }
-
-    public Na getNa() {
-        return na;
-    }
-
-    public void setNa(Na na) {
-        this.na = na;
-    }
 }
