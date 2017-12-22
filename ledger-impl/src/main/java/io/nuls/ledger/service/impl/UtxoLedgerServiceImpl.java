@@ -7,6 +7,7 @@ import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsVerificationException;
 import io.nuls.core.validate.ValidateResult;
+import io.nuls.db.entity.TransactionPo;
 import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
@@ -103,6 +104,12 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     public List<Transaction> queryListByAccount(String address, int txType, long beginTime) {
         //todo
+        return null;
+    }
+
+    @Override
+    public List<TransactionPo> queryPoListByAccount(String address, int txType, long beginTime) {
+
         return null;
     }
 

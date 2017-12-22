@@ -8,13 +8,12 @@ import io.nuls.account.entity.tx.AliasTransaction;
 import io.nuls.account.manager.AccountManager;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.account.util.AccountTool;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.NulsSignData;
-import io.nuls.core.chain.entity.Result;
-import io.nuls.core.chain.entity.Transaction;
+import io.nuls.consensus.service.intf.ConsensusService;
+import io.nuls.core.chain.entity.*;
 import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.VarInt;
@@ -32,15 +31,13 @@ import io.nuls.db.dao.AccountDao;
 import io.nuls.db.dao.AliasDao;
 import io.nuls.db.entity.AccountPo;
 import io.nuls.db.entity.AliasPo;
-import io.nuls.db.entity.TransactionPo;
 import io.nuls.event.bus.bus.service.intf.BusDataService;
+import io.nuls.db.entity.TransactionPo;
+import io.nuls.ledger.entity.TransactionTool;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.service.intf.LedgerService;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -66,6 +63,8 @@ public class AccountServiceImpl implements AccountService {
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
 
     private BusDataService busDataService = NulsContext.getInstance().getService(BusDataService.class);
+
+    private ConsensusService consensusService = NulsContext.getInstance().getService(ConsensusService.class);
 
     private boolean isLockNow = true;
 
@@ -468,7 +467,7 @@ public class AccountServiceImpl implements AccountService {
             AliasEvent event = new AliasEvent();
 
             CoinTransferData coinData = new CoinTransferData();
-            coinData.setFee(NulsContext.getInstance().getTxFee());
+            coinData.setFee(consensusService.getTxFee(TransactionConstant.TX_TYPE_SET_ALIAS));
             coinData.setCanBeUnlocked(false);
             coinData.setUnlockHeight(0);
             coinData.setUnlockTime(0);
@@ -582,13 +581,13 @@ public class AccountServiceImpl implements AccountService {
             fos.write(1);   //account length
             fos.write(account.serialize());
 
-            List<Transaction> txList = ledgerService.queryListByAccount(account.getAddress().getBase58(), 0, 0);
+            List<TransactionPo> txList = ledgerService.queryPoListByAccount(account.getAddress().getBase58(), 0, 0);
             fos.write(new VarInt(txList.size()).encode());
 
-            Transaction tx;
+            TransactionPo tx;
             for (int i = 0; i < txList.size(); i++) {
                 tx = txList.get(i);
-                fos.write(tx.serialize());
+                fos.write(tx.getTxdata());
             }
         } catch (Exception e) {
             Log.error(e);
@@ -605,23 +604,22 @@ public class AccountServiceImpl implements AccountService {
         return new Result(true, "OK");
     }
 
-
     private Result exportAccounts(List<Account> accounts, File backupFile) {
         FileOutputStream fos = null;
-        List<Transaction> txList;
-        Transaction tx;
+        List<TransactionPo> txList;
+        TransactionPo tx;
         try {
             fos = new FileOutputStream(backupFile);
             fos.write(new VarInt(accounts.size()).encode());   //account length
 
             for (Account account : accounts) {
                 fos.write(account.serialize());
-                txList = ledgerService.queryListByAccount(account.getAddress().getBase58(), 0, 0);
+                txList = ledgerService.queryPoListByAccount(account.getAddress().getBase58(), 0, 0);
                 fos.write(new VarInt(txList.size()).encode());
 
                 for (int i = 0; i < txList.size(); i++) {
                     tx = txList.get(i);
-                    fos.write(tx.serialize());
+                    fos.write(tx.getTxdata());
                 }
             }
         } catch (Exception e) {
@@ -675,8 +673,10 @@ public class AccountServiceImpl implements AccountService {
             }
 
             //save database
+            importSave(accounts);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
+            return new Result(false, "import failed, file is broken");
         } finally {
             if (fis != null) {
                 try {
@@ -686,7 +686,7 @@ public class AccountServiceImpl implements AccountService {
                 }
             }
         }
-        return null;
+        return new Result(true, "OK");
     }
 
     private boolean accountExsit(Account account) {
@@ -703,7 +703,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
 
-    private void importSave(List<Account> accounts) {
+    private void importSave(List<Account> accounts) throws IOException {
         List<AccountPo> accountPoList = new ArrayList<>();
 
         for (Account account : accounts) {
@@ -712,10 +712,12 @@ public class AccountServiceImpl implements AccountService {
 
             List<TransactionPo> transactionPos = new ArrayList<>();
             for (Transaction tx : account.getMyTxs()) {
-
-
+                TransactionPo po = TransactionTool.toPojo(tx);
+                transactionPos.add(po);
             }
+            accountPo.setMyTxs(transactionPos);
         }
+
     }
 
 }
