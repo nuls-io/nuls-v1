@@ -108,6 +108,7 @@ public class BlockServiceImpl implements BlockService {
                 throw new NulsRuntimeException(e);
             }
         }
+        consensusDao.blockPersistence(blockPo,txPoList);
     }
 
     @Override
