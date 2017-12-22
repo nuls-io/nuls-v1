@@ -39,7 +39,7 @@ public class DefaultMessageFilter implements NulsMessageFilter {
             messageHeader.parse(new NulsByteBuffer(bytes));
         } catch (NulsException e) {
             Log.error(e);
-            //todo
+            throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
         }
 
         if (!magicSet.contains(messageHeader.getMagicNumber())) {
