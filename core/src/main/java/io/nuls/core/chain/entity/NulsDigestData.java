@@ -6,6 +6,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
+import io.nuls.core.utils.log.Log;
 
 import java.io.IOException;
 
@@ -91,6 +92,7 @@ public class NulsDigestData extends BaseNulsData {
         try {
             return calcDigestData(data.serialize(), digestAlgType);
         } catch (Exception e) {
+            Log.error(e);
             return null;
         }
     }

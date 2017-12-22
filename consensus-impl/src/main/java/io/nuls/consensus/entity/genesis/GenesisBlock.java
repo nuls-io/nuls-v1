@@ -72,6 +72,7 @@ public final class GenesisBlock extends Block {
 
     private void fillHeader() {
         BlockHeader header = new BlockHeader();
+        this.setHeader(header);
         header.setHeight(1);
         header.setPreHash(NulsDigestData.EMPTY_HASH);
         header.setMerkleHash(NulsDigestData.calcDigestData(new byte[]{0}));
@@ -80,9 +81,9 @@ public final class GenesisBlock extends Block {
         List<NulsDigestData> txHashList = new ArrayList<>();
         txHashList.add(NulsDigestData.EMPTY_HASH);
         header.setTxHashList(txHashList);
-        header.setHash(NulsDigestData.calcDigestData(this));
+        NulsDigestData hash = NulsDigestData.calcDigestData(this);
+        header.setHash(hash);
         header.setSign(NulsContext.getInstance().getService(AccountService.class).signData(header.getHash()));
-        this.setHeader(header);
     }
 
     private void initGengsisTxs() {

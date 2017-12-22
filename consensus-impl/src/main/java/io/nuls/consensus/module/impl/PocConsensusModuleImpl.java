@@ -8,9 +8,7 @@ import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.consensus.entity.genesis.GenesisBlock;
 import io.nuls.consensus.entity.member.Agent;
-import io.nuls.consensus.entity.tx.RedPunishTransaction;
-import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
-import io.nuls.consensus.entity.tx.YellowPunishTransaction;
+import io.nuls.consensus.entity.tx.*;
 import io.nuls.consensus.entity.validator.block.PocBlockValidatorManager;
 import io.nuls.consensus.event.*;
 import io.nuls.consensus.handler.*;
@@ -52,13 +50,18 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
         consensusCacheService = ConsensusCacheService.getInstance();
         accountService = NulsContext.getInstance().getService(AccountService.class);
         NulsContext.getInstance().setGenesisBlock(GenesisBlock.getInstance());
+        this.publish(PocConsensusConstant.EVENT_TYPE_JOIN_CONSENSUS, JoinConsensusEvent.class);
+        this.publish(PocConsensusConstant.EVENT_TYPE_EXIT_CONSENSUS, ExitConsensusEvent.class);
         this.publish(PocConsensusConstant.EVENT_TYPE_RED_PUNISH, RedPunishConsensusEvent.class);
         this.publish(PocConsensusConstant.EVENT_TYPE_YELLOW_PUNISH, YellowPunishConsensusEvent.class);
         this.publish(PocConsensusConstant.EVENT_TYPE_REGISTER_AGENT, RegisterAgentEvent.class);
         this.publish(PocConsensusConstant.EVENT_TYPE_ASK_BLOCK, AskBlockInfoEvent.class);
+
         this.registerTransaction(TransactionConstant.TX_TYPE_REGISTER_AGENT, RegisterAgentTransaction.class);
         this.registerTransaction(TransactionConstant.TX_TYPE_RED_PUNISH, RedPunishTransaction.class);
         this.registerTransaction(TransactionConstant.TX_TYPE_YELLOW_PUNISH, YellowPunishTransaction.class);
+        this.registerTransaction(TransactionConstant.TX_TYPE_JOIN_CONSENSUS, PocJoinConsensusTransaction.class);
+        this.registerTransaction(TransactionConstant.TX_TYPE_EXIT_CONSENSUS, PocExitConsensusTransaction.class);
         delegatePeer = ConfigLoader.getCfgValue(PocConsensusConstant.CFG_CONSENSUS_SECTION, PocConsensusConstant.PROPERTY_DELEGATE_PEER, false);
         PocBlockValidatorManager.initBlockValidators();
         BlockCacheService.getInstance().init();
@@ -205,7 +208,7 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
 
     @Override
     public String getInfo() {
-        if(this.getStatus()== ModuleStatusEnum.UNINITED||this.getStatus()==ModuleStatusEnum.INITING){
+        if (this.getStatus() == ModuleStatusEnum.UNINITED || this.getStatus() == ModuleStatusEnum.INITING) {
             return "";
         }
         StringBuilder str = new StringBuilder();

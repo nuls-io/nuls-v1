@@ -4,11 +4,18 @@ import io.nuls.consensus.entity.genesis.GenesisBlock;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.utils.ConsensusBeanUtils;
 import io.nuls.core.chain.entity.Block;
+import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.BlockDao;
+import io.nuls.db.dao.ConsensusDao;
 import io.nuls.db.entity.BlockPo;
+import io.nuls.db.entity.TransactionPo;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Niels
@@ -18,7 +25,7 @@ public class BlockServiceImpl implements BlockService {
     private static final BlockServiceImpl INSTANCE = new BlockServiceImpl();
 
     private BlockDao blockDao = NulsContext.getInstance().getService(BlockDao.class);
-
+    private ConsensusDao consensusDao = NulsContext.getInstance().getService(ConsensusDao.class);
     private BlockServiceImpl() {
     }
 
@@ -88,9 +95,19 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public void save(Block block) {
-        // todo auto-generated method stub(niels)
-//        保存交易信息
-        blockDao.save(ConsensusBeanUtils.toPojo(block));
+        BlockPo blockPo = ConsensusBeanUtils.toPojo(block);
+        List<TransactionPo> txPoList = new ArrayList<>();
+        for (int x = 0; x < block.getHeader().getTxCount(); x++) {
+            Transaction tx = block.getTxs().get(x);
+            try {
+                tx.onCommit();
+                txPoList.add(ConsensusBeanUtils.toPojo(tx));
+            } catch (NulsException e) {
+                Log.error(e);
+                rollback(block.getTxs(), x);
+                throw new NulsRuntimeException(e);
+            }
+        }
     }
 
     @Override
@@ -103,5 +120,18 @@ public class BlockServiceImpl implements BlockService {
     public void rollback(long height) {
         // todo auto-generated method stub(niels)
         //删除关联数据及区块数据
+    }
+
+
+    private void rollback(List<Transaction> txs, int max) {
+        for (int x = 0; x < max; x++) {
+            Transaction tx = txs.get(x);
+            try {
+                tx.onRollback();
+            } catch (NulsException e) {
+                Log.error(e);
+            }
+        }
+
     }
 }
