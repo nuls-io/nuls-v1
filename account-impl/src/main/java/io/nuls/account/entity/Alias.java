@@ -26,6 +26,10 @@ public class Alias extends BaseNulsData {
         this.alias = alias;
     }
 
+    public Alias(NulsByteBuffer buffer) throws NulsException {
+        super(buffer);
+    }
+
     @Override
     public int size() {
         int s = 0;

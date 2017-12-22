@@ -8,10 +8,12 @@ import io.nuls.account.entity.tx.AliasTransaction;
 import io.nuls.account.manager.AccountManager;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.account.util.AccountTool;
+import io.nuls.consensus.service.intf.ConsensusService;
 import io.nuls.core.chain.entity.*;
 import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.VarInt;
@@ -31,6 +33,7 @@ import io.nuls.db.entity.AccountPo;
 import io.nuls.db.entity.AliasPo;
 import io.nuls.event.bus.bus.service.intf.BusDataService;
 import io.nuls.db.entity.TransactionPo;
+import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.service.intf.LedgerService;
 
@@ -60,6 +63,8 @@ public class AccountServiceImpl implements AccountService {
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
 
     private BusDataService busDataService = NulsContext.getInstance().getService(BusDataService.class);
+
+    private ConsensusService consensusService = NulsContext.getInstance().getService(ConsensusService.class);
 
     private boolean isLockNow = true;
 
@@ -460,7 +465,16 @@ public class AccountServiceImpl implements AccountService {
         try {
             Account account = getAccount(address);
             AliasEvent event = new AliasEvent();
-            AliasTransaction aliasTx = new AliasTransaction(address, alias);
+
+            CoinTransferData coinData = new CoinTransferData();
+            coinData.setFee(consensusService.getTxFee(TransactionConstant.TX_TYPE_SET_ALIAS));
+            coinData.setCanBeUnlocked(false);
+            coinData.setUnlockHeight(0);
+            coinData.setUnlockTime(0);
+            coinData.setTotalNa(AccountConstant.ALIAS_Na);
+            coinData.addFrom(account.getAddress().getBase58(), AccountConstant.ALIAS_Na);
+
+            AliasTransaction aliasTx = new AliasTransaction(coinData, password);
             aliasTx.setHash(NulsDigestData.calcDigestData(aliasTx.serialize()));
             aliasTx.setSign(signData(aliasTx.getHash(), account, password));
             ledgerService.verifyAndCacheTx(aliasTx);
@@ -652,7 +666,7 @@ public class AccountServiceImpl implements AccountService {
                 int txSize = (int) buffer.readVarInt();
                 List<Transaction> txList = new ArrayList<>();
                 for (int j = 0; j < txSize; j++) {
-                    Transaction tx =   TransactionManager.getInstance(buffer);
+                    Transaction tx = TransactionManager.getInstance(buffer);
                     txList.add(tx);
                 }
                 account.setMyTxs(txList);
@@ -696,7 +710,7 @@ public class AccountServiceImpl implements AccountService {
             AccountTool.toPojo(account, accountPo);
 
             List<TransactionPo> transactionPos = new ArrayList<>();
-            for(Transaction tx : account.getMyTxs()) {
+            for (Transaction tx : account.getMyTxs()) {
 
 
             }

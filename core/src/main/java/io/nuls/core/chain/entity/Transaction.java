@@ -28,6 +28,9 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData {
     private NulsSignData sign;
     private T txData;
     private Na fee;
+
+    private int blockHeight;
+    private NulsDigestData blockHash;
     /**
      * current time (ms)
      *
@@ -123,6 +126,10 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData {
         this.time = time;
     }
 
+    public void setType(int type) {
+        this.type = type;
+    }
+
     public int getType() {
         return type;
     }
@@ -165,5 +172,21 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData {
 
     public void setFee(Na fee) {
         this.fee = fee;
+    }
+
+    public int getBlockHeight() {
+        return blockHeight;
+    }
+
+    public void setBlockHeight(int blockHeight) {
+        this.blockHeight = blockHeight;
+    }
+
+    public NulsDigestData getBlockHash() {
+        return blockHash;
+    }
+
+    public void setBlockHash(NulsDigestData blockHash) {
+        this.blockHash = blockHash;
     }
 }

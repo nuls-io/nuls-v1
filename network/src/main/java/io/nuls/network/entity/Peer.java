@@ -217,21 +217,17 @@ public class Peer extends BaseNulsData {
 
             byte[] networkHeader = new byte[NetworkDataHeader.NETWORK_HEADER_SIZE];
             System.arraycopy(message.getData(), 0, networkHeader, 0, NetworkDataHeader.NETWORK_HEADER_SIZE);
-            NetworkDataHeader header = null;
+            NetworkDataHeader header;
+            BaseNetworkData networkMessage;
             try {
                 header = new NetworkDataHeader(new NulsByteBuffer(networkHeader));
-            } catch (NulsException e) {
-                Log.error(e);
-                //todo
-            }
-
-            BaseNetworkData networkMessage = null;
-            try {
                 networkMessage = BaseNetworkData.transfer(header.getType(), message.getData());
             } catch (NulsException e) {
                 Log.error("networkMessage transfer error:", e);
                 this.destroy();
+                return;
             }
+
             if (this.status != Peer.HANDSHAKE && !isHandShakeMessage(networkMessage)) {
                 return;
             }
