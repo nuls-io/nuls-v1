@@ -8,6 +8,7 @@ import java.util.Map;
  * @date 2017/11/7
  */
 public class ConsensusStatusInfo {
+    private String address;
     private int status;
     private long startTime;
     private int parkedCount;
@@ -17,6 +18,15 @@ public class ConsensusStatusInfo {
 //    private String delegatePeerAddress;
 //    private double deposit;
 //    private double weightOfRound;
+
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
     public void putExtend(String key, Object value) {
         extend.put(key, value);

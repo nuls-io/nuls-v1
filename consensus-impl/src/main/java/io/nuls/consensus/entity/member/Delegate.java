@@ -20,7 +20,7 @@ import java.io.UnsupportedEncodingException;
 public class Delegate extends BaseNulsData {
     private Na deposit;
     private String delegateAddress;
-
+    private int status;
     private long startTime;
     private String id;
 
@@ -80,5 +80,13 @@ public class Delegate extends BaseNulsData {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 }

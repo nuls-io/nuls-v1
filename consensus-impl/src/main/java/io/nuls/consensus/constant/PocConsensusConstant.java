@@ -15,6 +15,8 @@ public interface PocConsensusConstant {
     String CFG_CONSENSUS_SECTION = "Consensus";
     String PROPERTY_DELEGATE_PEER = "delegate-peer";
 
+    String DEFAULT_CONSENSUS_LIST_FILE = "default-consensus-list.properties";
+
     short EVENT_TYPE_EXIT_CONSENSUS = 6;
     short EVENT_TYPE_JOIN_CONSENSUS = 7;
     short EVENT_TYPE_REGISTER_AGENT = 8;

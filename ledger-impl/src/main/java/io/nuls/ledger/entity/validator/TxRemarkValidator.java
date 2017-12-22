@@ -11,7 +11,7 @@ import io.nuls.core.validate.ValidateResult;
  * @date 2017/12/19
  */
 public class TxRemarkValidator implements NulsDataValidator<Transaction> {
-    public final static int MAX_REMARK_LEN = 128;
+    public final static int MAX_REMARK_LEN = 256;
     private static final TxRemarkValidator INSTANCE = new TxRemarkValidator();
 
     private TxRemarkValidator() {

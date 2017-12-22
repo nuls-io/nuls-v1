@@ -8,7 +8,6 @@ import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.consensus.entity.genesis.GenesisBlock;
 import io.nuls.consensus.entity.member.Agent;
-import io.nuls.consensus.entity.params.JoinConsensusParam;
 import io.nuls.consensus.entity.tx.RedPunishTransaction;
 import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
 import io.nuls.consensus.entity.tx.YellowPunishTransaction;
@@ -21,7 +20,6 @@ import io.nuls.consensus.service.cache.BlockCacheService;
 import io.nuls.consensus.service.cache.ConsensusCacheService;
 import io.nuls.consensus.service.impl.BlockServiceImpl;
 import io.nuls.consensus.service.impl.PocConsensusServiceImpl;
-import io.nuls.consensus.service.intf.ConsensusService;
 import io.nuls.consensus.thread.BlockMaintenanceThread;
 import io.nuls.consensus.thread.BlockPersistenceThread;
 import io.nuls.consensus.thread.ConsensusMeetingThread;
@@ -34,9 +32,7 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.processor.service.intf.EventProcessorService;
 import io.nuls.network.service.NetworkService;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Niels
@@ -48,21 +44,25 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
     private boolean delegatePeer = false;
     private ConsensusCacheService consensusCacheService = ConsensusCacheService.getInstance();
     private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
-    private ConsensusService pocConsensusService = PocConsensusServiceImpl.getInstance();
 
     @Override
-    public void start() {
+    public void init() {
         NulsContext.getInstance().setGenesisBlock(GenesisBlock.getInstance());
-        this.registerBusDataClass(PocConsensusConstant.EVENT_TYPE_RED_PUNISH, RedPunishConsensusEvent.class);
-        this.registerBusDataClass(PocConsensusConstant.EVENT_TYPE_YELLOW_PUNISH, YellowPunishConsensusEvent.class);
-        this.registerBusDataClass(PocConsensusConstant.EVENT_TYPE_REGISTER_AGENT, RegisterAgentEvent.class);
-        this.registerBusDataClass(PocConsensusConstant.EVENT_TYPE_ASK_BLOCK, AskBlockInfoEvent.class);
+        this.publish(PocConsensusConstant.EVENT_TYPE_RED_PUNISH, RedPunishConsensusEvent.class);
+        this.publish(PocConsensusConstant.EVENT_TYPE_YELLOW_PUNISH, YellowPunishConsensusEvent.class);
+        this.publish(PocConsensusConstant.EVENT_TYPE_REGISTER_AGENT, RegisterAgentEvent.class);
+        this.publish(PocConsensusConstant.EVENT_TYPE_ASK_BLOCK, AskBlockInfoEvent.class);
         this.registerTransaction(TransactionConstant.TX_TYPE_REGISTER_AGENT, RegisterAgentTransaction.class);
         this.registerTransaction(TransactionConstant.TX_TYPE_RED_PUNISH, RedPunishTransaction.class);
         this.registerTransaction(TransactionConstant.TX_TYPE_YELLOW_PUNISH, YellowPunishTransaction.class);
         delegatePeer = ConfigLoader.getCfgValue(PocConsensusConstant.CFG_CONSENSUS_SECTION, PocConsensusConstant.PROPERTY_DELEGATE_PEER, false);
         PocBlockValidatorManager.initBlockValidators();
-        this.registerService(BlockServiceImpl.getInstance());
+
+    }
+
+    @Override
+    public void start() {
+       this.registerService(BlockServiceImpl.getInstance());
         this.registerService(PocConsensusServiceImpl.getInstance());
         this.startBlockMaintenanceThread();
         this.checkConsensusStatus();
@@ -129,7 +129,7 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
             return;
         }
         Consensus<Agent> memberSelf =
-                consensusCacheService.getConsensusAccount(localAccount.getAddress().toString());
+                consensusCacheService.getCachedAgent(localAccount.getAddress().toString());
         if (null == memberSelf) {
             return;
         }
@@ -149,18 +149,19 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
             Log.warn("local account is null!");
             return;
         }
-        Consensus<Agent> memberSelf =
-                consensusCacheService.getConsensusAccount(localAccount.getAddress().toString());
-        if (null != memberSelf && memberSelf.getExtend().getStatus() != ConsensusStatusEnum.IN.getCode()) {
-            startMining();
-            return;
-        }
-        Map<String, Object> paramsMap = new HashMap<>();
-        paramsMap.put(JoinConsensusParam.IS_SEED_PEER, true);
-        paramsMap.put(JoinConsensusParam.AGENT_ADDRESS, localAccount.getAddress().toString());
-        paramsMap.put(JoinConsensusParam.DEPOSIT, 0L);
-        paramsMap.put(JoinConsensusParam.INTRODUCTION, "seed peer!");
-        this.pocConsensusService.joinTheConsensus(localAccount.getAddress().toString(), null, paramsMap);
+        this.startMining();
+//        Consensus<Agent> memberSelf =
+//                consensusCacheService.getConsensusAccount(localAccount.getAddress().toString());
+//        if (null != memberSelf && memberSelf.getExtend().getStatus() != ConsensusStatusEnum.IN.getCode()) {
+//            startMining();
+//            return;
+//        }
+//        Map<String, Object> paramsMap = new HashMap<>();
+//        paramsMap.put(JoinConsensusParam.IS_SEED_PEER, true);
+//        paramsMap.put(JoinConsensusParam.AGENT_ADDRESS, localAccount.getAddress().toString());
+//        paramsMap.put(JoinConsensusParam.DEPOSIT, 0L);
+//        paramsMap.put(JoinConsensusParam.INTRODUCTION, "seed peer!");
+//        this.pocConsensusService.joinTheConsensus(localAccount.getAddress().toString(), null, paramsMap);
     }
 
     private void startMining() {
@@ -200,7 +201,7 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
         StringBuilder str = new StringBuilder();
         str.append("module:[consensus]:\n");
         str.append("consensus status:");
-        ConsensusStatusInfo statusInfo = this.consensusCacheService.getConsensusStatusInfo();
+        ConsensusStatusInfo statusInfo = this.consensusCacheService.getConsensusStatusInfo(this.accountService.getDefaultAccount());
         if (null == statusInfo) {
             str.append(ConsensusStatusEnum.NOT_IN.getText());
         } else {

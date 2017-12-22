@@ -7,8 +7,9 @@ import io.nuls.rpc.service.impl.RpcServerServiceImpl;
 import io.nuls.rpc.service.intf.RpcServerService;
 
 /**
- * Created by Niels on 2017/9/27.
  *
+ * @author Niels
+ * @date 2017/9/27
  */
 public class RpcServerModuleImpl extends AbstractRpcServerModule {
 
@@ -17,20 +18,24 @@ public class RpcServerModuleImpl extends AbstractRpcServerModule {
     private String port;
     private String moduleUrl;
 
-    public RpcServerModuleImpl(){
+    public RpcServerModuleImpl() {
         super();
-        this.ip = getCfgProperty(RpcConstant.CFG_RPC_SECTION,RpcConstant.CFG_RPC_SERVER_IP);
-        this.port = getCfgProperty(RpcConstant.CFG_RPC_SECTION,RpcConstant.CFG_RPC_SERVER_PORT);
-        this.moduleUrl = getCfgProperty(RpcConstant.CFG_RPC_SECTION,RpcConstant.CFG_RPC_SERVER_URL);
-        this.registerService(rpcServerService);
+    }
+
+    @Override
+    public void init() {
+        this.ip = getCfgProperty(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_IP);
+        this.port = getCfgProperty(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_PORT);
+        this.moduleUrl = getCfgProperty(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_URL);
     }
 
     @Override
     public void start() {
-        if(StringUtils.isBlank(ip)|| StringUtils.isBlank(port)){
-            rpcServerService.startServer(RpcConstant.DEFAULT_IP,RpcConstant.DEFAULT_PORT,RpcConstant.DEFAULT_URL);
-        }else{
-            rpcServerService.startServer(ip,Integer.parseInt(port),moduleUrl);
+        this.registerService(rpcServerService);
+        if (StringUtils.isBlank(ip) || StringUtils.isBlank(port)) {
+            rpcServerService.startServer(RpcConstant.DEFAULT_IP, RpcConstant.DEFAULT_PORT, RpcConstant.DEFAULT_URL);
+        } else {
+            rpcServerService.startServer(ip, Integer.parseInt(port), moduleUrl);
         }
     }
 
@@ -40,7 +45,7 @@ public class RpcServerModuleImpl extends AbstractRpcServerModule {
     }
 
     @Override
-    public void destroy(){
+    public void destroy() {
         shutdown();
     }
 

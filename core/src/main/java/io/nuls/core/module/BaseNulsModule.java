@@ -25,8 +25,13 @@ public abstract class BaseNulsModule {
 
     public BaseNulsModule(short moduleId) {
         this.moduleId = moduleId;
-        this.status = ModuleStatusEnum.UNSTARTED;
+        this.status = ModuleStatusEnum.UNINITED;
     }
+
+    /**
+     *
+     */
+    public abstract void init();
 
     /**
      * start the module
@@ -97,7 +102,7 @@ public abstract class BaseNulsModule {
         ServiceManager.getInstance().regService(this.moduleId, serviceInterface, service);
     }
 
-    protected final void registerBusDataClass(short eventType, Class<? extends BaseBusData> eventClass) {
+    protected final void publish(short eventType, Class<? extends BaseBusData> eventClass) {
         BusDataManager.putBusData(this.getModuleId(), eventType, eventClass);
     }
 

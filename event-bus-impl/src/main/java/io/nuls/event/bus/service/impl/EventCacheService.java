@@ -13,9 +13,12 @@ public class EventCacheService {
     private static final String CACHE_OF_SENDED = "event-cache-sended";
     private static final String CACHE_OF_RECIEVED = "event-cache-recieved";
     private static final int TIME_OF_IDLE_SECONDS = 60;
-    private final CacheService cacheService;
+    private CacheService cacheService;
 
     private EventCacheService() {
+    }
+
+    public void init(){
         this.cacheService = NulsContext.getInstance().getService(CacheService.class);
         this.cacheService.createCache(CACHE_OF_SENDED, 0, TIME_OF_IDLE_SECONDS);
         this.cacheService.createCache(CACHE_OF_RECIEVED, 0, TIME_OF_IDLE_SECONDS);
@@ -40,5 +43,10 @@ public class EventCacheService {
 
     public BaseNulsEvent getEvent(String hashHex) {
         return (BaseNulsEvent) this.cacheService.getElementValue(CACHE_OF_SENDED, hashHex);
+    }
+
+    public void destroy() {
+        this.cacheService.removeCache(CACHE_OF_SENDED);
+        this.cacheService.removeCache(CACHE_OF_RECIEVED);
     }
 }

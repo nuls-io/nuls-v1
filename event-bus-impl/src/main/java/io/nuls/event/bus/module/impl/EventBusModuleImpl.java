@@ -13,6 +13,7 @@ import io.nuls.event.bus.processor.service.impl.EventProcessorServiceImpl;
 import io.nuls.event.bus.processor.service.intf.NoticeProcessorService;
 import io.nuls.event.bus.processor.service.intf.EventProcessorService;
 import io.nuls.event.bus.service.impl.BusDataServiceImpl;
+import io.nuls.event.bus.service.impl.EventCacheService;
 
 /**
  * @author Niels
@@ -25,8 +26,13 @@ public class EventBusModuleImpl extends AbstractEventBusModule {
 
     public EventBusModuleImpl() {
         super();
-        this.registerBusDataClass(EventConstant.EVENT_TYPE_COMMON_EVENT_HASH_EVENT, CommonHashEvent.class);
-        this.registerBusDataClass(EventConstant.EVENT_TYPE_GET_EVENT_BODY_EVENT, GetBodyEvent.class);
+        this.publish(EventConstant.EVENT_TYPE_COMMON_EVENT_HASH_EVENT, CommonHashEvent.class);
+        this.publish(EventConstant.EVENT_TYPE_GET_EVENT_BODY_EVENT, GetBodyEvent.class);
+    }
+
+    @Override
+    public void init() {
+        EventCacheService.getInstance().init();
     }
 
     @Override
@@ -49,8 +55,7 @@ public class EventBusModuleImpl extends AbstractEventBusModule {
 
     @Override
     public void destroy() {
-        localService.shutdown();
-        networkService.shutdown();
+        EventCacheService.getInstance().destroy();
     }
 
     @Override

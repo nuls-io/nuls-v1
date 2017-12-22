@@ -6,16 +6,17 @@ package io.nuls.core.constant;
  */
 public enum ModuleStatusEnum {
 
-    //UNINITED,INITED,
     NOT_FOUND,
-    UNSTARTED,
+    UNINITED,
+    INITED,
+    INITING,
     STARTING,
     RUNNING,
     STOPED,
     STOPPING,
     DESTROYED,
     DESTROYING,
-    EXCEPTION;
+    EXCEPTION,;
 
     @Override
     public String toString() {

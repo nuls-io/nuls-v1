@@ -2,11 +2,13 @@ package io.nuls.consensus.service.impl;
 
 import io.nuls.account.entity.Account;
 import io.nuls.account.service.intf.AccountService;
+import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.constant.PocConsensusConstant;
-import io.nuls.consensus.entity.member.Agent;
-import io.nuls.consensus.entity.member.Delegate;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
+import io.nuls.consensus.entity.member.Agent;
+import io.nuls.consensus.entity.member.Delegate;
+import io.nuls.consensus.entity.params.JoinConsensusParam;
 import io.nuls.consensus.entity.params.QueryConsensusAccountParam;
 import io.nuls.consensus.entity.tx.PocExitConsensusTransaction;
 import io.nuls.consensus.entity.tx.PocJoinConsensusTransaction;
@@ -14,13 +16,11 @@ import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
 import io.nuls.consensus.event.ExitConsensusEvent;
 import io.nuls.consensus.event.JoinConsensusEvent;
 import io.nuls.consensus.event.RegisterAgentEvent;
-import io.nuls.consensus.entity.params.JoinConsensusParam;
 import io.nuls.consensus.service.cache.ConsensusCacheService;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.service.intf.ConsensusService;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
@@ -30,11 +30,10 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.event.bus.bus.service.intf.BusDataService;
 import io.nuls.ledger.entity.params.CoinTransferData;
-import io.nuls.ledger.entity.tx.LockNulsTransaction;
-import io.nuls.ledger.entity.tx.UnlockNulsTransaction;
 import io.nuls.ledger.service.intf.LedgerService;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -66,9 +65,9 @@ public class PocConsensusServiceImpl implements ConsensusService {
         data.setUnlockHeight(0);
         data.setUnlockTime(0);
         data.setTotalNa(agent.getDeposit());
-        data.addFrom(account.getAddress().toString(),agent.getDeposit());
-        data.addTo(account.getAddress().toString(),agent.getDeposit());
-        RegisterAgentTransaction tx = new RegisterAgentTransaction(data,password);
+        data.addFrom(account.getAddress().toString(), agent.getDeposit());
+        data.addTo(account.getAddress().toString(), agent.getDeposit());
+        RegisterAgentTransaction tx = new RegisterAgentTransaction(data, password);
         Consensus<Agent> con = new Consensus<>();
         con.setAddress(account.getAddress().toString());
         con.setExtend(agent);
@@ -139,8 +138,10 @@ public class PocConsensusServiceImpl implements ConsensusService {
         QueryConsensusAccountParam param = new QueryConsensusAccountParam();
         param.setAddress(address);
         param.setAgentAddress(agentAddress);
-        List<Consensus> list = consensusCacheService.getConsensusAccountList(param);
-        return list;
+        List<Consensus<Agent>> list = consensusCacheService.getCachedAgentList(ConsensusStatusEnum.IN);
+        List<Consensus> resultList = new ArrayList<>(list);
+        resultList.addAll(consensusCacheService.getCachedDelegateList());
+        return resultList;
     }
 
     @Override
@@ -168,7 +169,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
         if (null == account) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "The account is not exist,address:" + address);
         }
-        if (paramsMap == null || paramsMap.size() < 1) {
+        if (paramsMap == null || paramsMap.size() < 2) {
             throw new NulsRuntimeException(ErrorCode.NULL_PARAMETER);
         }
         if (!account.validatePassword(password)) {

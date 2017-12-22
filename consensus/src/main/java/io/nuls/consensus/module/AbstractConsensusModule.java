@@ -12,11 +12,11 @@ import io.nuls.core.module.BaseNulsModule;
 public abstract class AbstractConsensusModule extends BaseNulsModule {
     public AbstractConsensusModule() {
         super(NulsConstant.MODULE_ID_CONSENSUS);
-        this.registerBusDataClass(ConsensusEventType.BLOCK, BlockEvent.class);
-        this.registerBusDataClass(ConsensusEventType.BLOCK_HEADER, BlockHeaderEvent.class);
-        this.registerBusDataClass(ConsensusEventType.SMALL_BLOCK, SmallBlockEvent.class);
-        this.registerBusDataClass(ConsensusEventType.GET_SMALL_BLOCK, GetSmallBlockEvent.class);
-        this.registerBusDataClass(ConsensusEventType.GET_BLOCK, GetBlockEvent.class);
+        this.publish(ConsensusEventType.BLOCK, BlockEvent.class);
+        this.publish(ConsensusEventType.BLOCK_HEADER, BlockHeaderEvent.class);
+        this.publish(ConsensusEventType.SMALL_BLOCK, SmallBlockEvent.class);
+        this.publish(ConsensusEventType.GET_SMALL_BLOCK, GetSmallBlockEvent.class);
+        this.publish(ConsensusEventType.GET_BLOCK, GetBlockEvent.class);
 
     }
 

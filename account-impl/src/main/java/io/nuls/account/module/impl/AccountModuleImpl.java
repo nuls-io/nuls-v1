@@ -26,11 +26,15 @@ public class AccountModuleImpl extends AbstractAccountModule {
     private EventProcessorService processorService = NulsContext.getInstance().getService(EventProcessorService.class);
 
     @Override
+    public void init() {
+        this.publish(AccountConstant.EVENT_TYPE_ALIAS, AliasEvent.class);
+        this.registerTransaction(TransactionConstant.TX_TYPE_SET_ALIAS, AliasTransaction.class);
+    }
+
+    @Override
     public void start() {
         AccountService accountService = AccountServiceImpl.getInstance();
         this.registerService(accountService);
-        this.registerTransaction(TransactionConstant.TX_TYPE_SET_ALIAS, AliasTransaction.class);
-        this.registerBusDataClass(AccountConstant.EVENT_TYPE_ALIAS, AliasEvent.class);
         AliasValidator.getInstance().setAccountService(accountService);
         manager.init();
         registerHanders();

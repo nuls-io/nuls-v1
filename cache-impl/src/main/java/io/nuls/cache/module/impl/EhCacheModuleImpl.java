@@ -17,8 +17,13 @@ public class EhCacheModuleImpl extends AbstractCacheModule {
     private EhCacheManager cacheManager = EhCacheManager.getInstance();
 
     @Override
-    public void start() {
+    public void init() {
         cacheManager.init();
+    }
+
+    @Override
+    public void start() {
+
         this.registerService(new EhCacheServiceImpl());
     }
 
