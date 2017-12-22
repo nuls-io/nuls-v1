@@ -51,7 +51,7 @@ public class GetPeerData extends BaseNetworkData {
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.networkHeader = new NetworkDataHeader(byteBuffer);
         length = (int) byteBuffer.readVarInt();
     }

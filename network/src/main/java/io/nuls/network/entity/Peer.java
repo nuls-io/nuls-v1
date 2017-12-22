@@ -92,7 +92,7 @@ public class Peer extends BaseNulsData {
         super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
     }
 
-    public Peer(NulsByteBuffer buffer) {
+    public Peer(NulsByteBuffer buffer) throws NulsException {
         parse(buffer);
     }
 
@@ -175,7 +175,7 @@ public class Peer extends BaseNulsData {
      *
      * @throws IOException
      */
-    public void receiveMessage(ByteBuffer buffer) throws IOException {
+    public void receiveMessage(ByteBuffer buffer) throws IOException, NulsException {
         buffer.flip();
         if (this.getStatus() == Peer.CLOSE) {
             return;
@@ -217,7 +217,13 @@ public class Peer extends BaseNulsData {
 
             byte[] networkHeader = new byte[NetworkDataHeader.NETWORK_HEADER_SIZE];
             System.arraycopy(message.getData(), 0, networkHeader, 0, NetworkDataHeader.NETWORK_HEADER_SIZE);
-            NetworkDataHeader header = new NetworkDataHeader(new NulsByteBuffer(networkHeader));
+            NetworkDataHeader header = null;
+            try {
+                header = new NetworkDataHeader(new NulsByteBuffer(networkHeader));
+            } catch (NulsException e) {
+                Log.error(e);
+                //todo
+            }
 
             BaseNetworkData networkMessage = null;
             try {
@@ -318,7 +324,7 @@ public class Peer extends BaseNulsData {
     }
 
     @Override
-    public void parse(NulsByteBuffer buffer) {
+    public void parse(NulsByteBuffer buffer) throws NulsException {
         version = new NulsVersion(buffer.readShort());
         magicNumber = (int) buffer.readVarInt();
         port = (int) buffer.readVarInt();

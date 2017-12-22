@@ -2,6 +2,7 @@ package io.nuls.ledger.entity.tx;
 
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.constant.TransactionConstant;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.ledger.entity.params.CoinTransferData;
 
@@ -30,7 +31,7 @@ public class LockNulsTransaction<T extends BaseNulsData>  extends AbstractCoinTr
 
 
     @Override
-    protected T parseTxData(NulsByteBuffer byteBuffer) {
+    protected T parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
         return null;
     }
 

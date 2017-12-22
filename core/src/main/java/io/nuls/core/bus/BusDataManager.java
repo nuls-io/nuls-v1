@@ -2,6 +2,7 @@ package io.nuls.core.bus;
 
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.event.BaseNulsEvent;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.module.BaseNulsModule;
 import io.nuls.core.notice.BaseNulsNotice;
@@ -52,14 +53,14 @@ public class BusDataManager {
         putBusData(module.getModuleId(), type, clazz);
     }
 
-    public static BaseNulsEvent getEventInstance(byte[] bytes) throws IllegalAccessException, InstantiationException {
+    public static BaseNulsEvent getEventInstance(byte[] bytes) throws IllegalAccessException, InstantiationException, NulsException {
         return (BaseNulsEvent) getInstance(bytes);
     }
-    public static BaseNulsNotice getNoticeInstance(byte[] bytes) throws IllegalAccessException, InstantiationException {
+    public static BaseNulsNotice getNoticeInstance(byte[] bytes) throws IllegalAccessException, InstantiationException, NulsException {
         return (BaseNulsNotice) getInstance(bytes);
     }
 
-    private static BaseBusData getInstance(byte[] bytes) throws IllegalAccessException, InstantiationException {
+    private static BaseBusData getInstance(byte[] bytes) throws IllegalAccessException, InstantiationException, NulsException {
         BusDataHeader header = new BusDataHeader();
         header.parse(new NulsByteBuffer(bytes));
         Class<? extends BaseBusData> clazz = EVENT_MAP.get(header.getModuleId() + "_" + header.getEventType());

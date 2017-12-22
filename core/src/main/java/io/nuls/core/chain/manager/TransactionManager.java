@@ -2,6 +2,7 @@ package io.nuls.core.chain.manager;
 
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
@@ -29,7 +30,7 @@ public class TransactionManager {
         return TX_MAP.get(txType);
     }
 
-    public static List<Transaction> getInstances(NulsByteBuffer byteBuffer) throws InstantiationException, IllegalAccessException {
+    public static List<Transaction> getInstances(NulsByteBuffer byteBuffer) throws InstantiationException, IllegalAccessException, NulsException {
         List<Transaction> list = new ArrayList<>();
         while (!byteBuffer.isFinished()) {
             list.add(getInstance(byteBuffer));
@@ -37,7 +38,7 @@ public class TransactionManager {
         return list;
     }
 
-    public static Transaction getInstance(NulsByteBuffer byteBuffer) throws IllegalAccessException, InstantiationException {
+    public static Transaction getInstance(NulsByteBuffer byteBuffer) throws IllegalAccessException, InstantiationException, NulsException {
         int txType = (int) new NulsByteBuffer(byteBuffer.getPayloadByCursor()).readVarInt();
         Class<? extends Transaction> txClass = getTxClass(txType);
         if (null == txClass) {

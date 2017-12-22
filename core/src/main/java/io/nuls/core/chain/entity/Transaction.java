@@ -10,6 +10,7 @@ import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.validate.NulsDataValidator;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,7 +19,7 @@ import java.util.List;
  */
 public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData {
 
-    private TransactionListener listener;
+    private List<TransactionListener> listenerList = new ArrayList<>();
     /**
      * tx type
      */
@@ -36,19 +37,19 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData {
     protected byte[] remark;
 
     public final void onRollback() throws NulsException {
-        if (null != listener) {
+        for (TransactionListener listener : listenerList) {
             listener.onRollback(this);
         }
     }
 
     public final void onCommit() throws NulsException {
-        if (null != listener) {
+        for (TransactionListener listener : listenerList) {
             listener.onCommit(this);
         }
     }
 
     public final void onApproval() throws NulsException {
-        if (null != listener) {
+        for (TransactionListener listener : listenerList) {
             listener.onApproval(this);
         }
     }
@@ -67,7 +68,7 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData {
         }
     }
 
-    protected abstract T parseTxData(NulsByteBuffer byteBuffer);
+    protected abstract T parseTxData(NulsByteBuffer byteBuffer) throws NulsException;
 
     @Override
     public int size() {
@@ -89,13 +90,13 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData {
         stream.write(hash.serialize());
         stream.write(sign.serialize());
         stream.writeBytesWithLength(remark);
-        if(txData!=null){
+        if (txData != null) {
             txData.serializeToStream(stream);
         }
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         type = (int) byteBuffer.readVarInt();
         time = byteBuffer.readVarInt();
 
@@ -111,7 +112,7 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData {
     }
 
     public void registerListener(TransactionListener listener) {
-        this.listener = listener;
+        this.listenerList.add(listener);
     }
 
     public long getTime() {

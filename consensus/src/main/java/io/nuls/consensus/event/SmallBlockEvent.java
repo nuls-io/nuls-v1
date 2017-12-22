@@ -4,6 +4,7 @@ import io.nuls.consensus.constant.ConsensusEventType;
 import io.nuls.consensus.entity.SmallBlockData;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public class SmallBlockEvent extends BaseConsensusEvent<SmallBlockData> {
     }
 
     @Override
-    protected SmallBlockData parseEventBody(NulsByteBuffer byteBuffer) {
+    protected SmallBlockData parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
         SmallBlockData data = new SmallBlockData();
         data.parse(byteBuffer);
         return data;

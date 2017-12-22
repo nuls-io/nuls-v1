@@ -1,6 +1,7 @@
 package io.nuls.core.mesasge;
 
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsVerificationException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
@@ -19,7 +20,7 @@ public class NulsMessage {
         this.data = new byte[0];
     }
 
-    public NulsMessage(ByteBuffer buffer) {
+    public NulsMessage(ByteBuffer buffer) throws NulsException {
         parse(buffer);
     }
 
@@ -95,7 +96,7 @@ public class NulsMessage {
         return value;
     }
 
-    public void parse(ByteBuffer byteBuffer) {
+    public void parse(ByteBuffer byteBuffer) throws NulsException {
         byte[] headers = new byte[NulsMessageHeader.MESSAGE_HEADER_SIZE];
         byteBuffer.get(headers, 0, headers.length);
         NulsMessageHeader header = new NulsMessageHeader(new NulsByteBuffer(headers));

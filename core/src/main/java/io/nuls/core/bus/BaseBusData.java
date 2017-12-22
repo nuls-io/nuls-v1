@@ -2,6 +2,7 @@ package io.nuls.core.bus;
 
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.intf.NulsCloneable;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
@@ -37,13 +38,13 @@ public abstract class BaseBusData<T extends BaseNulsData> extends BaseNulsData i
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.header = new BusDataHeader();
         this.header.parse(byteBuffer);
         this.eventBody = parseEventBody(byteBuffer);
     }
 
-    protected abstract T parseEventBody(NulsByteBuffer byteBuffer);
+    protected abstract T parseEventBody(NulsByteBuffer byteBuffer) throws NulsException;
 
     public T getEventBody() {
         return eventBody;

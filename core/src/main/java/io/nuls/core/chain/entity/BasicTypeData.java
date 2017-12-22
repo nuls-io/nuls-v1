@@ -1,5 +1,6 @@
 package io.nuls.core.chain.entity;
 
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
@@ -21,7 +22,7 @@ public class BasicTypeData<T> extends BaseNulsData {
         this.type = getType();
     }
 
-    public BasicTypeData(NulsByteBuffer buffer) {
+    public BasicTypeData(NulsByteBuffer buffer) throws NulsException {
         this.parse(buffer);
     }
 
@@ -63,7 +64,7 @@ public class BasicTypeData<T> extends BaseNulsData {
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.type = byteBuffer.readByte();
         switch (type) {
             case 1:

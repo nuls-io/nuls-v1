@@ -2,6 +2,7 @@ package io.nuls.ledger.entity.params;
 
 import io.nuls.core.chain.entity.Na;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -10,8 +11,8 @@ import java.util.Map;
  */
 public class CoinTransferData {
 
-    private Map<String,Na> fromMap ;
-    private Map<String,Na> toMap ;
+    private Map<String, Na> fromMap;
+    private Map<String, Na> toMap;
 
     private Na totalNa;
 
@@ -77,5 +78,19 @@ public class CoinTransferData {
 
     public void setCanBeUnlocked(boolean canBeUnlocked) {
         this.canBeUnlocked = canBeUnlocked;
+    }
+
+    public void addFrom(String address, Na na) {
+        if (null == this.fromMap) {
+            this.fromMap = new HashMap<>();
+        }
+        this.fromMap.put(address, na);
+    }
+
+    public void addTo(String address, Na na) {
+        if (null == this.toMap) {
+            this.toMap = new HashMap<>();
+        }
+        this.toMap.put(address, na);
     }
 }

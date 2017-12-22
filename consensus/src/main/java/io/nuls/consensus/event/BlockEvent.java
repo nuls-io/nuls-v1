@@ -2,6 +2,7 @@ package io.nuls.consensus.event;
 
 import io.nuls.consensus.constant.ConsensusEventType;
 import io.nuls.core.chain.entity.Block;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 
@@ -15,7 +16,7 @@ public class BlockEvent extends BaseConsensusEvent<Block> {
     }
 
     @Override
-    protected Block parseEventBody(NulsByteBuffer byteBuffer) {
+    protected Block parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
         Block block = new Block();
         block.parse(byteBuffer);
         return block;

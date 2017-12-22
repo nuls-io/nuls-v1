@@ -4,6 +4,7 @@ import io.nuls.core.chain.intf.NulsCloneable;
 import io.nuls.core.chain.manager.BlockValidatorManager;
 import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -57,7 +58,7 @@ public class Block extends BaseNulsData implements NulsCloneable {
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         header = new BlockHeader();
         header.parse(byteBuffer);
         extend = byteBuffer.readByLengthByte();

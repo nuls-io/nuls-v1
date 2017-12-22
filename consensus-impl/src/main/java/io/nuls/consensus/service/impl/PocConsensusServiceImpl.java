@@ -29,6 +29,7 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.event.bus.bus.service.intf.BusDataService;
+import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.entity.tx.UnlockNulsTransaction;
 import io.nuls.ledger.service.intf.LedgerService;
@@ -59,7 +60,15 @@ public class PocConsensusServiceImpl implements ConsensusService {
 
     private void registerAgent(Agent agent, Account account, String password) throws IOException {
         RegisterAgentEvent event = new RegisterAgentEvent();
-        RegisterAgentTransaction tx = new RegisterAgentTransaction();
+        CoinTransferData data = new CoinTransferData();
+        data.setFee(this.getTxFee(TransactionConstant.TX_TYPE_REGISTER_AGENT));
+        data.setCanBeUnlocked(true);
+        data.setUnlockHeight(0);
+        data.setUnlockTime(0);
+        data.setTotalNa(agent.getDeposit());
+        data.addFrom(account.getAddress().toString(),agent.getDeposit());
+        data.addTo(account.getAddress().toString(),agent.getDeposit());
+        RegisterAgentTransaction tx = new RegisterAgentTransaction(data,password);
         Consensus<Agent> con = new Consensus<>();
         con.setAddress(account.getAddress().toString());
         con.setExtend(agent);
