@@ -8,6 +8,7 @@ import io.nuls.db.dao.*;
 import io.nuls.db.dao.impl.mybatis.session.SessionAnnotation;
 import io.nuls.db.entity.AccountPo;
 import io.nuls.db.entity.AliasPo;
+import io.nuls.db.entity.TransactionLocalPo;
 
 import java.util.List;
 
@@ -44,9 +45,13 @@ public class AccountTxDaoImpl implements AccountTxDao {
 
     @SessionAnnotation
     @Override
-    public Result importAccount(List<AccountPo> accountPoList) {
-
-
-        return null;
+    public void importAccount(List<AccountPo> accountPoList) {
+        for (AccountPo account : accountPoList) {
+            accountDao.save(account);
+            for (int i = 0; i < account.getMyTxs().size(); i++) {
+                TransactionLocalPo tx = account.getMyTxs().get(i);
+                txDao.save(tx);
+            }
+        }
     }
 }
