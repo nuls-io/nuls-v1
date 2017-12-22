@@ -40,14 +40,18 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
     @Override
     public int size() {
         int size = super.size();
-        size += this.coinData.size();
+        if(coinData!=null){
+            size += this.coinData.size();
+        }
         return size;
     }
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         super.serializeToStream(stream);
-        this.coinData.serializeToStream(stream);
+        if(coinData!=null){
+            this.coinData.serializeToStream(stream);
+        }
     }
 
     @Override

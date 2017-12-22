@@ -8,8 +8,10 @@ import io.nuls.account.entity.tx.AliasTransaction;
 import io.nuls.account.manager.AccountManager;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.account.util.AccountTool;
-import io.nuls.consensus.service.intf.ConsensusService;
-import io.nuls.core.chain.entity.*;
+import io.nuls.core.chain.entity.NulsDigestData;
+import io.nuls.core.chain.entity.NulsSignData;
+import io.nuls.core.chain.entity.Result;
+import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
@@ -32,13 +34,16 @@ import io.nuls.db.dao.AccountTxDao;
 import io.nuls.db.dao.AliasDao;
 import io.nuls.db.entity.AccountPo;
 import io.nuls.db.entity.AliasPo;
-import io.nuls.event.bus.bus.service.intf.BusDataService;
 import io.nuls.db.entity.TransactionPo;
+import io.nuls.event.bus.bus.service.intf.BusDataService;
 import io.nuls.ledger.entity.TransactionTool;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.service.intf.LedgerService;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -66,8 +71,6 @@ public class AccountServiceImpl implements AccountService {
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
 
     private BusDataService busDataService = NulsContext.getInstance().getService(BusDataService.class);
-
-    private ConsensusService consensusService = NulsContext.getInstance().getService(ConsensusService.class);
 
     private boolean isLockNow = true;
 
@@ -470,7 +473,7 @@ public class AccountServiceImpl implements AccountService {
             AliasEvent event = new AliasEvent();
 
             CoinTransferData coinData = new CoinTransferData();
-            coinData.setFee(consensusService.getTxFee(TransactionConstant.TX_TYPE_SET_ALIAS));
+            coinData.setFee(NulsContext.getInstance().getTxFee());
             coinData.setCanBeUnlocked(false);
             coinData.setUnlockHeight(0);
             coinData.setUnlockTime(0);

@@ -6,6 +6,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
+import io.nuls.core.utils.log.Log;
 
 import java.io.IOException;
 
@@ -15,13 +16,10 @@ import java.io.IOException;
  */
 public class NulsDigestData extends BaseNulsData {
 
+    public static final NulsDigestData EMPTY_HASH = new NulsDigestData(new byte[]{0});
     protected int digestAlgType;
     protected int digestLength;
     protected byte[] digestBytes;
-
-    private static final NulsDigestData getEmptyDigestData(){
-        return new NulsDigestData(new byte[]{0});
-    }
 
     public NulsDigestData() {
     }
@@ -94,6 +92,7 @@ public class NulsDigestData extends BaseNulsData {
         try {
             return calcDigestData(data.serialize(), digestAlgType);
         } catch (Exception e) {
+            Log.error(e);
             return null;
         }
     }
@@ -120,16 +119,16 @@ public class NulsDigestData extends BaseNulsData {
 
     @Override
     public boolean equals(Object obj) {
-        if(obj==null){
+        if (obj == null) {
             return false;
         }
-        if(!(obj instanceof NulsDigestData)){
+        if (!(obj instanceof NulsDigestData)) {
             return false;
         }
-        if(this.getDigestBytes()==null||((NulsDigestData) obj).getDigestBytes()==null){
+        if (this.getDigestBytes() == null || ((NulsDigestData) obj).getDigestBytes() == null) {
             return false;
         }
-        if(this.getDigestBytes().length!=((NulsDigestData) obj).getDigestBytes().length){
+        if (this.getDigestBytes().length != ((NulsDigestData) obj).getDigestBytes().length) {
             return false;
         }
         return this.getDigestHex().equals(((NulsDigestData) obj).getDigestHex());

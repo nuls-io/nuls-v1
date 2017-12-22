@@ -4,14 +4,11 @@ package io.nuls.network.service.impl;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.ThreadManager;
 import io.nuls.core.utils.cfg.ConfigLoader;
-import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.network.IPUtil;
 import io.nuls.core.utils.str.StringUtils;
-import io.nuls.db.dao.BlockDao;
 import io.nuls.db.dao.PeerDao;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Peer;
@@ -39,8 +36,6 @@ public class PeersManager {
     private static Map<String, PeerGroup> peerGroups = new ConcurrentHashMap<>();
 
     private static Map<String, Peer> peers = new ConcurrentHashMap<>();
-
-    private BlockDao blockDao;
 
     private PeerDao peerDao;
 
@@ -303,19 +298,6 @@ public class PeersManager {
     }
 
 
-    private BlockDao getBlockDao() {
-        if (blockDao == null) {
-            while (NulsContext.getInstance().getService(BlockDao.class) == null) {
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    Log.error(e);
-                }
-            }
-            blockDao = NulsContext.getInstance().getService(BlockDao.class);
-        }
-        return blockDao;
-    }
 
 
     public void setConnectionManager(ConnectionManager connectionManager) {

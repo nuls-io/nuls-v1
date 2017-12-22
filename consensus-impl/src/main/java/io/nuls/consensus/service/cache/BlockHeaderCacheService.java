@@ -1,8 +1,6 @@
 package io.nuls.consensus.service.cache;
 
-import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
-import io.nuls.core.chain.entity.Transaction;
 
 /**
  * @author Niels
@@ -13,6 +11,10 @@ public class BlockHeaderCacheService {
     private BlockHeaderCacheService(){}
     public static BlockHeaderCacheService getInstance(){
         return INSTANCE;
+    }
+
+    public void init(){
+        // todo auto-generated method stub(niels)
     }
 
     public void clear() {

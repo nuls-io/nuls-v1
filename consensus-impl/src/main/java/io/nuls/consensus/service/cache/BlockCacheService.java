@@ -19,6 +19,10 @@ public class BlockCacheService {
     private long maxHeight;
 
     private BlockCacheService() {
+
+    }
+
+    public void init(){
         blockCacheMap = new CacheMap<>(BLOCK_CACHE);
         hashHeightMap = new CacheMap<>(HEIGHT_HASH_CACHE);
     }

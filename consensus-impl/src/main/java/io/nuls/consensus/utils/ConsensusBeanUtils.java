@@ -25,7 +25,9 @@ public class ConsensusBeanUtils {
 
     public static final BlockPo toPojo(Block block) {
         BlockPo po = new BlockPo();
-        po.setVarsion((int) block.getVersion().getVersion());
+        if(null!=block.getVersion()){
+            po.setVarsion((int) block.getVersion().getVersion());
+        }
         try {
             po.setBytes(block.serialize());
         } catch (IOException e) {

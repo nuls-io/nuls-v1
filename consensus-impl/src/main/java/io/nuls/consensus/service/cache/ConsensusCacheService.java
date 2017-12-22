@@ -49,14 +49,13 @@ public class ConsensusCacheService {
     private CacheMap<String, ConsensusStatusInfo> consensusStatusCache = new CacheMap<>(CACHE_CONSENSUS_STATUS_INFO);
 
     private ConsensusCacheService() {
-        initCache();
     }
 
     public static ConsensusCacheService getInstance() {
         return INSTANCE;
     }
 
-    private void initCache() {
+    public void initCache() {
 
         Account self = accountService.getLocalAccount();
         List<DelegatePo> delegatePoList = this.delegateDao.queryAll();
@@ -65,16 +64,19 @@ public class ConsensusCacheService {
         for (DelegateAccountPo po : delegateAccountPoList) {
             Consensus<Agent> ca = ConsensusBeanUtils.fromPojo(po);
             this.cacheAgent(ca);
-            if (ca.getAddress().equals(self.getAddress().toString())) {
+            if (null != self && ca.getAddress().equals(self.getAddress().toString())) {
                 mine = ca;
             }
         }
         for (DelegatePo dpo : delegatePoList) {
             Consensus<Delegate> cd = ConsensusBeanUtils.fromPojo(dpo);
             this.cacheDelegate(cd);
-            if (cd.getAddress().equals(self.getAddress().toString())) {
+            if (null != self && cd.getAddress().equals(self.getAddress().toString())) {
                 mine = cd;
             }
+        }
+        if (null == self) {
+            return;
         }
         ConsensusStatusInfo info = new ConsensusStatusInfo();
         info.setAddress(self.getAddress().getBase58());
