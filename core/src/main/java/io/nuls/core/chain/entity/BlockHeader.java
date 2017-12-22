@@ -49,14 +49,18 @@ public class BlockHeader extends BaseNulsData {
     public int size() {
         int size = 0;
         size += this.getVersion().size();
-        size += hash.size();
+        if(null!=hash){
+            size += hash.size();
+        }
         size += preHash.size();
         size += merkleHash.size();
         size += Utils.sizeOfSerialize(time);
         size += Utils.sizeOfSerialize(height);
         size += Utils.sizeOfSerialize(txCount);
         size += Utils.sizeOfSerialize(packingAddress);
-        size += sign.size();
+        if(null!=sign){
+            size += sign.size();
+        }
         for (NulsDigestData txHash : txHashList) {
             size += txHash.size();
         }
@@ -66,14 +70,18 @@ public class BlockHeader extends BaseNulsData {
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeShort(this.getVersion().getVersion());
-        this.hash.serializeToStream(stream);
+        if(null!=hash){
+            this.hash.serializeToStream(stream);
+        }
         this.preHash.serializeToStream(stream);
         this.merkleHash.serializeToStream(stream);
         stream.writeVarInt(time);
         stream.writeVarInt(height);
         stream.writeVarInt(txCount);
         stream.writeString(packingAddress);
-        this.sign.serializeToStream(stream);
+        if(null!=sign){
+            this.sign.serializeToStream(stream);
+        }
         for (int i = 0; i < txHashList.size(); i++) {
             txHashList.get(i).serializeToStream(stream);
         }

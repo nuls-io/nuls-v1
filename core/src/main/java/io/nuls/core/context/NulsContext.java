@@ -1,6 +1,7 @@
 package io.nuls.core.context;
 
 import io.nuls.core.chain.entity.Block;
+import io.nuls.core.chain.entity.Na;
 import io.nuls.core.module.manager.ServiceManager;
 
 import java.util.HashMap;
@@ -19,6 +20,8 @@ public class NulsContext {
     private static final NulsContext NC = new NulsContext();
     public static String DEFAULT_ENCODING = "UTF-8";
     public static String CHAIN_ID = "NULS";
+
+    private Na txFee;
 
     /**
      * get zhe only instance of NulsContext
@@ -87,4 +90,11 @@ public class NulsContext {
         chain_id_map.put(chainName,id);
     }
 
+    public Na getTxFee() {
+        return txFee;
+    }
+
+    public void setTxFee(Na txFee) {
+        this.txFee = txFee;
+    }
 }

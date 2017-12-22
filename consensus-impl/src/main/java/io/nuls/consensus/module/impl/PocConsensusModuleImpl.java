@@ -17,12 +17,14 @@ import io.nuls.consensus.handler.*;
 import io.nuls.consensus.handler.filter.*;
 import io.nuls.consensus.module.AbstractConsensusModule;
 import io.nuls.consensus.service.cache.BlockCacheService;
+import io.nuls.consensus.service.cache.BlockHeaderCacheService;
 import io.nuls.consensus.service.cache.ConsensusCacheService;
 import io.nuls.consensus.service.impl.BlockServiceImpl;
 import io.nuls.consensus.service.impl.PocConsensusServiceImpl;
 import io.nuls.consensus.thread.BlockMaintenanceThread;
 import io.nuls.consensus.thread.BlockPersistenceThread;
 import io.nuls.consensus.thread.ConsensusMeetingThread;
+import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.thread.BaseThread;
@@ -42,11 +44,13 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
 
     private EventProcessorService processorService = NulsContext.getInstance().getService(EventProcessorService.class);
     private boolean delegatePeer = false;
-    private ConsensusCacheService consensusCacheService = ConsensusCacheService.getInstance();
-    private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
+    private ConsensusCacheService consensusCacheService;
+    private AccountService accountService;
 
     @Override
     public void init() {
+        consensusCacheService = ConsensusCacheService.getInstance();
+        accountService = NulsContext.getInstance().getService(AccountService.class);
         NulsContext.getInstance().setGenesisBlock(GenesisBlock.getInstance());
         this.publish(PocConsensusConstant.EVENT_TYPE_RED_PUNISH, RedPunishConsensusEvent.class);
         this.publish(PocConsensusConstant.EVENT_TYPE_YELLOW_PUNISH, YellowPunishConsensusEvent.class);
@@ -57,12 +61,14 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
         this.registerTransaction(TransactionConstant.TX_TYPE_YELLOW_PUNISH, YellowPunishTransaction.class);
         delegatePeer = ConfigLoader.getCfgValue(PocConsensusConstant.CFG_CONSENSUS_SECTION, PocConsensusConstant.PROPERTY_DELEGATE_PEER, false);
         PocBlockValidatorManager.initBlockValidators();
-
+        BlockCacheService.getInstance().init();
+        ConsensusCacheService.getInstance().initCache();
+        BlockHeaderCacheService.getInstance().init();
     }
 
     @Override
     public void start() {
-       this.registerService(BlockServiceImpl.getInstance());
+        this.registerService(BlockServiceImpl.getInstance());
         this.registerService(PocConsensusServiceImpl.getInstance());
         this.startBlockMaintenanceThread();
         this.checkConsensusStatus();
@@ -187,17 +193,21 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
 
     @Override
     public void shutdown() {
-        ConsensusCacheService.getInstance().clear();
-        BlockCacheService.getInstance().clear();
         ThreadManager.shutdownByModuleId(this.getModuleId());
     }
 
     @Override
     public void destroy() {
+        ConsensusCacheService.getInstance().clear();
+        BlockCacheService.getInstance().clear();
+        BlockHeaderCacheService.getInstance().clear();
     }
 
     @Override
     public String getInfo() {
+        if(this.getStatus()== ModuleStatusEnum.UNINITED||this.getStatus()==ModuleStatusEnum.INITING){
+            return "";
+        }
         StringBuilder str = new StringBuilder();
         str.append("module:[consensus]:\n");
         str.append("consensus status:");

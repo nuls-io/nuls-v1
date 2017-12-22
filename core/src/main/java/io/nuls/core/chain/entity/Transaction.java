@@ -78,8 +78,12 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData {
         int size = 0;
         size += VarInt.sizeOf(type);
         size += VarInt.sizeOf(time);
-        size += hash.size();
-        size += sign.size();
+        if(null!=hash){
+            size += hash.size();
+        }
+        if(null!=sign){
+            size += sign.size();
+        }
         size += Utils.sizeOfSerialize(remark);
         size += Utils.sizeOfSerialize(txData);
 
@@ -90,8 +94,12 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData {
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeVarInt(type);
         stream.writeVarInt(time);
-        stream.write(hash.serialize());
-        stream.write(sign.serialize());
+        if(null!=hash){
+            stream.write(hash.serialize());
+        }
+        if(null!=sign){
+            stream.write(sign.serialize());
+        }
         stream.writeBytesWithLength(remark);
         if (txData != null) {
             txData.serializeToStream(stream);

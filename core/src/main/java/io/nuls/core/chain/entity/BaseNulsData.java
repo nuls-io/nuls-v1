@@ -48,7 +48,6 @@ public abstract class BaseNulsData  implements Serializable {
      * @return
      */
     public final byte[] serialize() throws IOException {
-        this.verify();
         ByteArrayOutputStream bos = null;
         try {
             bos = new UnsafeByteArrayOutputStream(size());
@@ -97,6 +96,9 @@ public abstract class BaseNulsData  implements Serializable {
 
 
     public NulsVersion getVersion() {
+        if(null==version){
+            version = new NulsVersion((short)1,(short)1);
+        }
         return version;
     }
 

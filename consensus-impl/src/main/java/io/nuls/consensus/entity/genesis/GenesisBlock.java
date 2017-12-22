@@ -72,19 +72,25 @@ public final class GenesisBlock extends Block {
 
     private void fillHeader() {
         BlockHeader header = new BlockHeader();
-        this.setHeader(header);
         header.setHeight(1);
+        header.setPreHash(NulsDigestData.EMPTY_HASH);
         header.setMerkleHash(NulsDigestData.calcDigestData(new byte[]{0}));
         header.setTime(0L);
         header.setTxCount(1);
+        List<NulsDigestData> txHashList = new ArrayList<>();
+        txHashList.add(NulsDigestData.EMPTY_HASH);
+        header.setTxHashList(txHashList);
         header.setHash(NulsDigestData.calcDigestData(this));
         header.setSign(NulsContext.getInstance().getService(AccountService.class).signData(header.getHash()));
+        this.setHeader(header);
     }
 
     private void initGengsisTxs() {
         //todo 总nuls量及每个地址的nuls量
         CoinbaseTransaction tx = new CoinbaseTransaction();
+        tx.setHash(NulsDigestData.EMPTY_HASH);
         List<Transaction> list = new ArrayList<>();
+        list.add(tx);
         setTxs(list);
     }
 
