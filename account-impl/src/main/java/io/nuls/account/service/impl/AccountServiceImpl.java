@@ -715,7 +715,9 @@ public class AccountServiceImpl implements AccountService {
                 TransactionPo po = TransactionTool.toPojo(tx);
                 transactionPos.add(po);
             }
+            accountPo.setMyTxs(transactionPos);
         }
+
     }
 
 }
