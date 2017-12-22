@@ -11,5 +11,7 @@ import java.util.List;
  */
 public interface AccountTxDao {
 
+    Result setAlias(String address, String alias);
+
     Result importAccount(List<AccountPo> accountPoList);
 }

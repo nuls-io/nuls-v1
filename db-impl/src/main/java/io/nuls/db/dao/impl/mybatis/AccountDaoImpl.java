@@ -28,40 +28,6 @@ public class AccountDaoImpl extends BaseDaoImpl<AccountMapper, String, AccountPo
         super(AccountMapper.class);
     }
 
-    private AliasDao aliasDao = ServiceManager.getInstance().getService(AliasDao.class);
-
-    @Override
-    @SessionAnnotation
-    public Result setAlias(String id, String alias) {
-//        AliasPo aliasPo = aliasDao.getByKey(alias);
-//        if (aliasPo != null) {
-//            return new Result(false, "alias exist");
-//        }
-//
-//        AccountPo accountPo = getByKey(id);
-//        if (accountPo == null) {
-//            return new Result(false, "account not exist");
-//        }
-
-
-        try {
-            AliasPo aliasPo = new AliasPo();
-            aliasPo.setAlias(alias);
-            aliasPo.setAddress(id);
-            aliasDao.save(aliasPo);
-
-            AccountPo po = new AccountPo();
-            po.setId(id);
-            po.setAlias(alias);
-            this.getMapper().updateByPrimaryKeySelective(po);
-
-        } catch (Exception e) {
-            throw new NulsRuntimeException(ErrorCode.DB_SAVE_ERROR);
-        }
-
-        return new Result(true, "OK");
-    }
-
     @Override
     public AccountPo loadByAddress(String address) {
         Map<String, Object> params = new HashMap<>();

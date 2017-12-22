@@ -28,6 +28,7 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.AccountDao;
+import io.nuls.db.dao.AccountTxDao;
 import io.nuls.db.dao.AliasDao;
 import io.nuls.db.entity.AccountPo;
 import io.nuls.db.entity.AliasPo;
@@ -57,6 +58,8 @@ public class AccountServiceImpl implements AccountService {
     private AccountCacheService accountCacheService = AccountCacheService.getInstance();
 
     private AccountDao accountDao = NulsContext.getInstance().getService(AccountDao.class);
+
+    private AccountTxDao accountTxDao = NulsContext.getInstance().getService(AccountTxDao.class);
 
     private AliasDao aliasDao = NulsContext.getInstance().getService(AliasDao.class);
 
@@ -447,7 +450,7 @@ public class AccountServiceImpl implements AccountService {
                 return result;
             }
             Account account = getAccount(address);
-            result = accountDao.setAlias(address, alias);
+            result = accountTxDao.setAlias(address, alias);
             account.setAlias(alias);
             accountCacheService.putAccount(account);
             return result;
@@ -544,8 +547,7 @@ public class AccountServiceImpl implements AccountService {
         if (!result.isSuccess()) {
             return result;
         }
-
-        return null;
+        return exportAccounts(accounts, (File) result.getObject());
     }
 
     private Result<File> backUpFile(String filePath) {
@@ -674,6 +676,10 @@ public class AccountServiceImpl implements AccountService {
 
             //save database
             importSave(accounts);
+
+            for (Account account : accounts) {
+                accountCacheService.putAccount(account);
+            }
         } catch (Exception e) {
             Log.error(e);
             return new Result(false, "import failed, file is broken");
@@ -703,7 +709,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
 
-    private void importSave(List<Account> accounts) throws IOException {
+    private void importSave(List<Account> accounts) throws Exception {
         List<AccountPo> accountPoList = new ArrayList<>();
 
         for (Account account : accounts) {
@@ -716,8 +722,9 @@ public class AccountServiceImpl implements AccountService {
                 transactionPos.add(po);
             }
             accountPo.setMyTxs(transactionPos);
+            accountPoList.add(accountPo);
         }
-
+        accountTxDao.importAccount(accountPoList);
     }
 
 }

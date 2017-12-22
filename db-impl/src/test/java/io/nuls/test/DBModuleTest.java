@@ -165,8 +165,5 @@ public class DBModuleTest {
     public void testAlias() {
         String alias = "zoro";
         String id = "abcd";
-
-        Result result = accountDao.setAlias(id, alias);
-        System.out.println(result.getMessage());
     }
 }
