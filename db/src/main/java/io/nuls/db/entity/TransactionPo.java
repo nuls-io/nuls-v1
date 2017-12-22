@@ -1,5 +1,7 @@
 package io.nuls.db.entity;
 
+import io.nuls.core.crypto.VarInt;
+
 /**
  * @author Niels
  * @date 2017/11/20
@@ -66,4 +68,5 @@ public class TransactionPo {
     public void setTxdata(byte[] txdata) {
         this.txdata = txdata;
     }
+
 }
