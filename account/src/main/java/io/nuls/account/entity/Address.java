@@ -48,7 +48,7 @@ public class Address {
 
     @Override
     public String toString() {
-        return Base58.encode(getHash());
+        return getBase58();
     }
 
     public int getChainId(){

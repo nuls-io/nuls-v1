@@ -27,6 +27,9 @@ public class ModuleRunner implements Runnable {
     public void run() {
         try {
             module = this.loadModule();
+            module.setStatus(ModuleStatusEnum.INITING);
+            module.init();
+            module.setStatus(ModuleStatusEnum.INITED);
             module.setStatus(ModuleStatusEnum.STARTING);
             module.start();
             module.setStatus(ModuleStatusEnum.RUNNING);
@@ -58,6 +61,7 @@ public class ModuleRunner implements Runnable {
             Log.info("load module:" + module.getInfo());
         } while (false);
         ModuleManager.getInstance().regModule(module);
+
         return module;
     }
 

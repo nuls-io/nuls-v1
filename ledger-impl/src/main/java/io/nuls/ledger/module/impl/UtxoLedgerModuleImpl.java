@@ -37,16 +37,20 @@ public class UtxoLedgerModuleImpl extends AbstractLedgerModule {
     private EventProcessorService processorService = NulsContext.getInstance().getService(EventProcessorService.class);
 
     @Override
-    public void start() {
+    public void init() {
         CommonTxValidatorManager.initTxValidators();
+    }
+
+    @Override
+    public void start() {
         this.registerService(ledgerService);
         this.registerService(CoinDataProvider.class, UtxoCoinDataProvider.getInstance());
         cacheStandingBook();
         SmallChangeThread smallChangeThread = SmallChangeThread.getInstance();
         ThreadManager.createSingleThreadAndRun(this.getModuleId(), SmallChangeThread.class.getSimpleName(), smallChangeThread);
-        this.registerBusDataClass((short) 4, UtxoLockNulsEvent.class);
-        this.registerBusDataClass((short) 5, UtxoSmallChangeEvent.class);
-        this.registerBusDataClass((short) 6, AbstractCoinTransactionEvent.class);
+        this.publish((short) 4, UtxoLockNulsEvent.class);
+        this.publish((short) 5, UtxoSmallChangeEvent.class);
+        this.publish((short) 6, AbstractCoinTransactionEvent.class);
         this.processorService.registerEventHandler(UtxoLockNulsEvent.class, new UtxoLockBusHandler());
         this.processorService.registerEventHandler(UtxoSmallChangeEvent.class, new UtxoSmallChangeBusHandler());
         this.processorService.registerEventHandler(AbstractCoinTransactionEvent.class, new UtxoCoinTransactionBusHandler());

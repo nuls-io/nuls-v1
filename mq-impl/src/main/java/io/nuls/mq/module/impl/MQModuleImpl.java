@@ -25,6 +25,11 @@ public class MQModuleImpl extends AbstractMQModule {
     }
 
     @Override
+    public void init() {
+        // todo auto-generated method stub(niels)
+    }
+
+    @Override
     public void start() {
         ScheduledExecutorService service =ThreadManager.createScheduledThreadPool(new NulsThreadFactory(this.getModuleId(),"queueStatusLogPool"));
         service.scheduleAtFixedRate(new StatusLogThread(), 0, QueueManager.getLatelySecond(), TimeUnit.SECONDS);

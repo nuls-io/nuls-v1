@@ -10,7 +10,6 @@ import java.util.Map;
  * @date 2017/12/6
  */
 public class JoinConsensusParam {
-    public static final String IS_SEED_PEER = "is-seed-peer";
     public static final String DEPOSIT = "deposit";
     public static final String AGENT_ADDRESS = "agentAddress";
     public static final String INTRODUCTION = "introduction";
@@ -24,8 +23,8 @@ public class JoinConsensusParam {
         this.params = map;
     }
 
-    public Boolean isSeed(){
-        return (Boolean)params.get(IS_SEED_PEER);
+    public Boolean isSeed() {
+        return false;
     }
 
     public Double getDeposit() {

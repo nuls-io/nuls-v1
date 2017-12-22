@@ -29,6 +29,12 @@ public class MybatisDBModuleImpl extends AbstractDBModule {
     private SqlSessionFactory sqlSessionFactory;
 
     @Override
+    public void init() {
+        // todo auto-generated method stub(niels)
+
+    }
+
+    @Override
     public void start() {
         try {
             initSqlSessionFactory();

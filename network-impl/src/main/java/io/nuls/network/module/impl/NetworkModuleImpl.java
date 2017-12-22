@@ -23,9 +23,14 @@ public class NetworkModuleImpl extends AbstractNetworkModule {
         ConfigLoader.loadProperties(NetworkConstant.NETWORK_PROPERTIES);
         networkService = new NetworkServiceImpl(this);
         this.registerService(networkService);
-        this.registerBusDataClass((short) 1, ReplyNotice.class);
+        this.publish((short) 1, ReplyNotice.class);
     }
 
+
+    @Override
+    public void init() {
+
+    }
 
     @Override
     public void start() {
