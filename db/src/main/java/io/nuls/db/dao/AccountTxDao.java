@@ -13,5 +13,5 @@ public interface AccountTxDao {
 
     Result setAlias(String address, String alias);
 
-    Result importAccount(List<AccountPo> accountPoList);
+    void importAccount(List<AccountPo> accountPoList);
 }

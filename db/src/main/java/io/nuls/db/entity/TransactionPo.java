@@ -21,6 +21,8 @@ public class TransactionPo {
     private byte[] txdata;
 
 
+
+
     public String getHash() {
         return hash;
     }

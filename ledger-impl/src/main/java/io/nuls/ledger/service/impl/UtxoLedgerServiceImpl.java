@@ -6,6 +6,7 @@ import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsVerificationException;
+import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.entity.TransactionPo;
 import io.nuls.ledger.entity.Balance;
@@ -24,7 +25,9 @@ import java.util.List;
 public class UtxoLedgerServiceImpl implements LedgerService {
 
     private static final LedgerService INSTANCE = new UtxoLedgerServiceImpl();
+
     private LedgerCacheServiceImpl ledgerCacheService = LedgerCacheServiceImpl.getInstance();
+
 
     private UtxoLedgerServiceImpl() {
     }
@@ -36,7 +39,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     public ValidateResult verifyAndCacheTx(Transaction tx) throws NulsException {
         ValidateResult result = tx.verify();
-        if(result.isFailed()){
+        if (result.isFailed()) {
             return result;
         }
         tx.onApproval();
@@ -46,7 +49,22 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     public Transaction getTxFromCache(String hash) {
-        // todo auto-generated method stub(niels)
+        Transaction tx = ledgerCacheService.getTx(hash);
+        return tx;
+    }
+
+    @Override
+    public Transaction gettx(byte[] txid) {
+        String hash = Hex.encode(txid);
+        Transaction tx = getTxFromCache(hash);
+        if(tx == null) {
+
+        }
+        return tx;
+    }
+
+    @Override
+    public Transaction gettx(String hash) {
         return null;
     }
 
@@ -93,12 +111,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             //todo save to db
         } while (false);
         return result;
-    }
-
-    @Override
-    public Transaction query(byte[] txid) {
-        //todo
-        return null;
     }
 
     @Override

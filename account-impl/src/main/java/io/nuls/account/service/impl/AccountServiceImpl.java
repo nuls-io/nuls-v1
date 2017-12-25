@@ -15,7 +15,6 @@ import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.VarInt;
@@ -34,6 +33,7 @@ import io.nuls.db.dao.AccountTxDao;
 import io.nuls.db.dao.AliasDao;
 import io.nuls.db.entity.AccountPo;
 import io.nuls.db.entity.AliasPo;
+import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.entity.TransactionPo;
 import io.nuls.event.bus.bus.service.intf.BusDataService;
 import io.nuls.ledger.entity.TransactionTool;
@@ -712,7 +712,6 @@ public class AccountServiceImpl implements AccountService {
         return true;
     }
 
-
     private void importSave(List<Account> accounts) throws Exception {
         List<AccountPo> accountPoList = new ArrayList<>();
 
@@ -720,9 +719,9 @@ public class AccountServiceImpl implements AccountService {
             AccountPo accountPo = new AccountPo();
             AccountTool.toPojo(account, accountPo);
 
-            List<TransactionPo> transactionPos = new ArrayList<>();
+            List<TransactionLocalPo> transactionPos = new ArrayList<>();
             for (Transaction tx : account.getMyTxs()) {
-                TransactionPo po = TransactionTool.toPojo(tx);
+                TransactionLocalPo po = TransactionTool.toPojoLocal(tx);
                 transactionPos.add(po);
             }
             accountPo.setMyTxs(transactionPos);
