@@ -41,5 +41,8 @@ public class TransactionTool {
         Transaction tx = TransactionManager.getInstance(new NulsByteBuffer(po.getTxdata()));
         return tx;
     }
-
+    public static Transaction toTransaction(TransactionLocalPo po) throws IllegalAccessException, NulsException, InstantiationException {
+        Transaction tx = TransactionManager.getInstance(new NulsByteBuffer(po.getTxdata()));
+        return tx;
+    }
 }

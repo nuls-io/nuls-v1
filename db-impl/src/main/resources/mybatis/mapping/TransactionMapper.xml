@@ -198,4 +198,11 @@
         select count(hash) from transaction
         <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Serach_Where"/>
     </select>
+
+    <select id="selectByAddress" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultMap="BaseResultMap">
+        SELECT a.*
+        from transaction a
+        join tx_account_relation b on a.hash = b.tx_hash
+        <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Serach_Where"/>
+    </select>
 </mapper>
