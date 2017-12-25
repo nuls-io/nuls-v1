@@ -56,18 +56,6 @@ public class ConsensusBeanUtils {
         return block;
     }
 
-    public static final Transaction fromPojo(TransactionPo po){
-        //todo
-
-        return null;
-    }
-
-    public static final TransactionPo toPojo(Transaction tx){
-        //todo
-
-        return null;
-    }
-
     public static Consensus<Agent> fromPojo(DelegateAccountPo po) {
         if (null == po) {
             return null;

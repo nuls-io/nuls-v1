@@ -242,6 +242,7 @@ public class AccountServiceImpl implements AccountService {
         } else {
             throw new NulsRuntimeException(ErrorCode.FAILED, "The account not exist,id:" + id);
         }
+        //todo 发送notice给其他模块
     }
 
     @Override

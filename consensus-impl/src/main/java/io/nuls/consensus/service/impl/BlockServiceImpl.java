@@ -13,6 +13,7 @@ import io.nuls.db.dao.BlockDao;
 import io.nuls.db.dao.ConsensusDao;
 import io.nuls.db.entity.BlockPo;
 import io.nuls.db.entity.TransactionPo;
+import io.nuls.ledger.entity.TransactionTool;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -101,8 +102,8 @@ public class BlockServiceImpl implements BlockService {
             Transaction tx = block.getTxs().get(x);
             try {
                 tx.onCommit();
-                txPoList.add(ConsensusBeanUtils.toPojo(tx));
-            } catch (NulsException e) {
+                txPoList.add(TransactionTool.toPojo(tx));
+            } catch (Exception e) {
                 Log.error(e);
                 rollback(block.getTxs(), x);
                 throw new NulsRuntimeException(e);
