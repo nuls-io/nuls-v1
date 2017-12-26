@@ -2,23 +2,19 @@ package io.nuls.consensus.service.cache;
 
 import io.nuls.account.entity.Account;
 import io.nuls.account.service.intf.AccountService;
-import io.nuls.cache.service.intf.CacheService;
 import io.nuls.cache.util.CacheMap;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.entity.Consensus;
+import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.member.Delegate;
-import io.nuls.consensus.entity.ConsensusStatusInfo;
-import io.nuls.consensus.entity.params.QueryConsensusAccountParam;
-import io.nuls.consensus.utils.ConsensusBeanUtils;
+import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.core.context.NulsContext;
 import io.nuls.db.dao.DelegateAccountDao;
 import io.nuls.db.dao.DelegateDao;
 import io.nuls.db.entity.DelegateAccountPo;
 import io.nuls.db.entity.DelegatePo;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -62,14 +58,14 @@ public class ConsensusCacheService {
         List<DelegateAccountPo> delegateAccountPoList = this.delegateAccountDao.queryAll();
         Consensus mine = null;
         for (DelegateAccountPo po : delegateAccountPoList) {
-            Consensus<Agent> ca = ConsensusBeanUtils.fromPojo(po);
+            Consensus<Agent> ca = ConsensusTool.fromPojo(po);
             this.cacheAgent(ca);
             if (null != self && ca.getAddress().equals(self.getAddress().toString())) {
                 mine = ca;
             }
         }
         for (DelegatePo dpo : delegatePoList) {
-            Consensus<Delegate> cd = ConsensusBeanUtils.fromPojo(dpo);
+            Consensus<Delegate> cd = ConsensusTool.fromPojo(dpo);
             this.cacheDelegate(cd);
             if (null != self && cd.getAddress().equals(self.getAddress().toString())) {
                 mine = cd;

@@ -4,7 +4,7 @@ import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.service.cache.BlockCacheService;
 import io.nuls.consensus.service.impl.BlockServiceImpl;
 import io.nuls.consensus.service.intf.BlockService;
-import io.nuls.consensus.utils.ConsensusBeanUtils;
+import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;

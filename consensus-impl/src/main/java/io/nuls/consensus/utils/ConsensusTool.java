@@ -3,11 +3,10 @@ package io.nuls.consensus.utils;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
+import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.member.Delegate;
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.Na;
-import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.chain.entity.*;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.entity.BlockPo;
@@ -16,16 +15,18 @@ import io.nuls.db.entity.DelegatePo;
 import io.nuls.db.entity.TransactionPo;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Niels
  * @date 2017/12/6
  */
-public class ConsensusBeanUtils {
+public class ConsensusTool {
 
     public static final BlockPo toPojo(Block block) {
         BlockPo po = new BlockPo();
-        if(null!=block.getVersion()){
+        if (null != block.getVersion()) {
             po.setVarsion((int) block.getVersion().getVersion());
         }
         try {
@@ -113,6 +114,33 @@ public class ConsensusBeanUtils {
         po.setAgentAddress(bean.getExtend().getDelegateAddress());
         po.setId(bean.getExtend().getId());
         return po;
+    }
+
+    public static Block createBlock(List<Transaction> txList, long time, NulsDigestData preHash, long height, BlockRoundData extend) {
+        Block block = new Block();
+        block.setTxs(txList);
+        BlockHeader header = new BlockHeader();
+        block.setHeader(header);
+        try {
+            block.setExtend(extend.serialize());
+        } catch (IOException e) {
+            Log.error(e);
+        }
+        header.setHeight(height);
+        header.setTime(time);
+        header.setPreHash(preHash);
+        header.setTxCount(txList.size());
+        List<NulsDigestData> txHashList = new ArrayList<>();
+        for(int i=0;i<txList.size();i++ ){
+            Transaction tx = txList.get(i);
+            txHashList.add(tx.getHash());
+        }
+        header.setTxHashList(txHashList);
+        header.setPackingAddress();
+        header.setMerkleHash();
+        header.setHash();
+        header.setSign();
+        return block;
     }
 }
 
