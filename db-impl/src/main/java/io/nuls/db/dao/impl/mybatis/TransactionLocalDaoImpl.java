@@ -53,10 +53,10 @@ public class TransactionLocalDaoImpl extends BaseDaoImpl<TransactionLocalMapper,
     public List<TransactionLocalPo> getTxs(String address, int type, int pageNum, int pageSize) {
         Searchable searchable = new Searchable();
         if(type != 0) {
-            searchable.addCondition("type", SearchOperator.eq, type);
+            searchable.addCondition("b.type", SearchOperator.eq, type);
         }
         if(StringUtils.isNotBlank(address)) {
-            searchable.addCondition("address", SearchOperator.eq, address);
+            searchable.addCondition("a.address", SearchOperator.eq, address);
         }
 
         PageHelper.startPage(pageNum, pageSize);

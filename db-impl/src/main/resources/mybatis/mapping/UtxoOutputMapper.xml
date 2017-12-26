@@ -8,7 +8,7 @@
         -->
         <id column="hash" jdbcType="VARCHAR" property="hash"/>
         <result column="tx_hash" jdbcType="VARCHAR" property="txHash"/>
-        <result column="value" jdbcType="DOUBLE" property="value"/>
+        <result column="value" jdbcType="BIGINT" property="value"/>
         <result column="lock_time" jdbcType="BIGINT" property="lockTime"/>
         <result column="status" jdbcType="TINYINT" property="status"/>
         <result column="out_index" jdbcType="INTEGER" property="outIndex"/>
@@ -63,7 +63,7 @@
         insert into utxo_output (hash, tx_hash, value,
         lock_time, status, out_index,
         address, script)
-        values (#{hash,jdbcType=VARCHAR}, #{txHash,jdbcType=VARCHAR}, #{value,jdbcType=DOUBLE},
+        values (#{hash,jdbcType=VARCHAR}, #{txHash,jdbcType=VARCHAR}, #{value,jdbcType=BIGINT},
         #{lockTime,jdbcType=BIGINT}, #{status,jdbcType=TINYINT}, #{outIndex,jdbcType=INTEGER},
         #{address,jdbcType=VARCHAR}, #{script,jdbcType=VARBINARY})
     </insert>
@@ -107,7 +107,7 @@
                 #{txHash,jdbcType=VARCHAR},
             </if>
             <if test="value != null">
-                #{value,jdbcType=DOUBLE},
+                #{value,jdbcType=BIGINT},
             </if>
             <if test="lockTime != null">
                 #{lockTime,jdbcType=BIGINT},
@@ -137,7 +137,7 @@
                 tx_hash = #{txHash,jdbcType=VARCHAR},
             </if>
             <if test="value != null">
-                value = #{value,jdbcType=DOUBLE},
+                value = #{value,jdbcType=BIGINT},
             </if>
             <if test="lockTime != null">
                 lock_time = #{lockTime,jdbcType=BIGINT},
@@ -164,7 +164,7 @@
         -->
         update utxo_output
         set tx_hash = #{txHash,jdbcType=VARCHAR},
-        value = #{value,jdbcType=DOUBLE},
+        value = #{value,jdbcType=BIGINT},
         lock_time = #{lockTime,jdbcType=BIGINT},
         status = #{status,jdbcType=TINYINT},
         out_index = #{outIndex,jdbcType=INTEGER},
@@ -179,7 +179,7 @@
         -->
         update utxo_output
         set tx_hash = #{txHash,jdbcType=VARCHAR},
-        value = #{value,jdbcType=DOUBLE},
+        value = #{value,jdbcType=BIGINT},
         lock_time = #{lockTime,jdbcType=BIGINT},
         status = #{status,jdbcType=TINYINT},
         out_index = #{outIndex,jdbcType=INTEGER},
@@ -194,7 +194,7 @@
         address, script)
         values
         <foreach collection="list" item="item" index="index" separator=",">
-            (#{hash,jdbcType=VARCHAR}, #{txHash,jdbcType=VARCHAR}, #{value,jdbcType=DOUBLE},
+            (#{hash,jdbcType=VARCHAR}, #{txHash,jdbcType=VARCHAR}, #{value,jdbcType=BIGINT},
             #{lockTime,jdbcType=BIGINT}, #{status,jdbcType=TINYINT}, #{outIndex,jdbcType=INTEGER},
             #{address,jdbcType=VARCHAR}, #{script,jdbcType=VARBINARY})
         </foreach>

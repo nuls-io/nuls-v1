@@ -26,18 +26,17 @@ public interface LedgerService {
 
     Transaction getTxFromCache(String hash);
 
-    Transaction gettx(byte[] txid);
+    Transaction gettx(byte[] txid, boolean isMine);
 
-    Transaction gettx(String hash);
+    Transaction gettx(String hash, boolean isMine);
 
     boolean txExist(String hash);
 
     Balance getBalance(String address);
 
-    boolean transfer(Address address, String password, Address toAddress, double amount, String remark);
+    Result transfer(Address address, String password, Address toAddress, Na amount, String remark);
 
     boolean saveTransaction(Transaction tx);
-
 
 
     List<Transaction> queryListByAccount(String address, int txType, long beginTime);

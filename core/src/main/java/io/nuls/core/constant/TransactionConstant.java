@@ -25,4 +25,10 @@ public interface TransactionConstant {
     int TX_TYPE_EXIT_CONSENSUS = 92;
     int TX_TYPE_YELLOW_PUNISH = 93;
     int TX_TYPE_RED_PUNISH = 94;
+
+
+
+    byte TX_OUTPUT_UNSPEND = 0;
+    byte TX_OUTPUT_LOCKED = 1;
+    byte TX_OUTPUT_SPENT = 2;
 }

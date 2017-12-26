@@ -2,9 +2,11 @@ package io.nuls.db.dao.impl.mybatis;
 
 import io.nuls.db.dao.UtxoInputDao;
 import io.nuls.db.dao.impl.mybatis.mapper.UtxoInputMapper;
+import io.nuls.db.dao.impl.mybatis.util.SearchOperator;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import io.nuls.db.entity.UtxoInputPo;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -20,5 +22,12 @@ public class UtxoInputDaoImpl extends BaseDaoImpl<UtxoInputMapper, String, UtxoI
     protected Searchable getSearchable(Map<String, Object> params) {
         //todo
         return null;
+    }
+
+    @Override
+    public List<UtxoInputPo> getTxInputs(String txHash) {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("tx_hash", SearchOperator.eq, txHash);
+        return getMapper().selectList(searchable);
     }
 }
