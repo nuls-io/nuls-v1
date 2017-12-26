@@ -1,9 +1,13 @@
 package io.nuls.ledger.service.impl;
 
+import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
+import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
+import io.nuls.core.chain.entity.Result;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsVerificationException;
@@ -12,12 +16,11 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.dao.UtxoTransactionDao;
 import io.nuls.db.entity.TransactionPo;
+import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.entity.TransactionTool;
 import io.nuls.ledger.entity.UtxoData;
-import io.nuls.ledger.entity.tx.LockNulsTransaction;
-import io.nuls.ledger.entity.tx.UnlockNulsTransaction;
-import io.nuls.ledger.entity.tx.UtxoLockTransaction;
+import io.nuls.ledger.entity.tx.TransferTransaction;
 import io.nuls.ledger.service.intf.LedgerService;
 
 import java.util.List;
@@ -32,7 +35,9 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     private LedgerCacheServiceImpl ledgerCacheService = LedgerCacheServiceImpl.getInstance();
 
-    private UtxoTransactionDao txdao = NulsContext.getInstance().getService(UtxoTransactionDao.class);
+    private UtxoTransactionDao txDao = NulsContext.getInstance().getService(UtxoTransactionDao.class);
+
+    private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
 
     private UtxoLedgerServiceImpl() {
     }
@@ -68,7 +73,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     public Transaction gettx(String hash, boolean isMine) {
         Transaction tx = getTxFromCache(hash);
         if (tx == null) {
-            TransactionPo po = txdao.gettx(hash, isMine);
+            TransactionPo po = txDao.gettx(hash, isMine);
             try {
                 tx = TransactionTool.toTransaction(po);
             } catch (Exception e) {
@@ -81,10 +86,10 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     public boolean txExist(String hash) {
         Transaction tx = getTxFromCache(hash);
-        if(tx != null) {
+        if (tx != null) {
             return true;
         }
-        TransactionPo po = txdao.gettx(hash, false);
+        TransactionPo po = txDao.gettx(hash, false);
         return po != null;
     }
 
@@ -100,14 +105,40 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     private Balance calcBalance(String address) {
         Balance balance = new Balance();
-        //todo use dao
+        List<UtxoOutputPo> unSpendList = txDao.getAccountOutputs(address, TransactionConstant.TX_OUTPUT_UNSPEND);
+        long value = 0;
+        for (UtxoOutputPo output : unSpendList) {
+            value += output.getValue();
+        }
+        balance.setUseable(Na.valueOf(value));
+
+        List<UtxoOutputPo> lockedList = txDao.getAccountOutputs(address, TransactionConstant.TX_OUTPUT_LOCKED);
+        value = 0;
+        for (UtxoOutputPo output : lockedList) {
+            value += output.getValue();
+        }
+        balance.setLocked(Na.valueOf(value));
+        balance.setBalance(balance.getLocked().add(balance.getUseable()));
         return balance;
     }
 
     @Override
-    public boolean transfer(Address address, String password, Address toAddress, double amount, String remark) {
-        //todo
-        return false;
+    public Result transfer(Address address, String password, Address toAddress, Na amount, String remark) {
+        Account account = accountService.getAccount(address.getBase58());
+        if(account == null) {
+            return new Result(false, "account not found");
+        }
+        if(!account.validatePassword(password)) {
+            return new Result(false, "password error");
+        }
+        Balance balance = getBalance(address.getBase58());
+        if(balance.getUseable().isLessThan(amount)) {
+            return new Result(false, "balance is not enough");
+        }
+
+        TransferTransaction tx = new TransferTransaction();
+
+        return null;
     }
 
     @Override

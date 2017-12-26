@@ -200,9 +200,9 @@
     </select>
 
     <select id="selectByAddress" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultMap="BaseResultMap">
-        SELECT a.*
-        from transaction a
-        join tx_account_relation b on a.hash = b.tx_hash
+        select b.*
+        from tx_account_relation a
+        join `transaction` b on a.tx_hash = b.`hash`
         <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Serach_Where"/>
     </select>
 </mapper>

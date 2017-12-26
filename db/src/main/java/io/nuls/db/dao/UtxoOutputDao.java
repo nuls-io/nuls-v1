@@ -2,6 +2,8 @@ package io.nuls.db.dao;
 
 import io.nuls.db.entity.UtxoOutputPo;
 
+import java.util.List;
+
 /**
  *
  * @author Niels
@@ -9,5 +11,7 @@ import io.nuls.db.entity.UtxoOutputPo;
  */
 public interface UtxoOutputDao extends BaseDao< String,UtxoOutputPo> {
 
+    List<UtxoOutputPo> getTxOutputs(String txHash);
 
+    List<UtxoOutputPo> getAccountOutputs(String address, byte status);
 }

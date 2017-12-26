@@ -112,18 +112,18 @@ public class UtxoTransactionDaoImpl implements UtxoTransactionDao {
     }
 
     @Override
-    public List<UtxoInputPo> getTxInputs(String txhash) {
-        return null;
+    public List<UtxoInputPo> getTxInputs(String txHash) {
+        return inputDao.getTxInputs(txHash);
     }
 
     @Override
-    public List<UtxoOutputPo> getTxOutputs(String txhash) {
-        return null;
+    public List<UtxoOutputPo> getTxOutputs(String txHash) {
+        return outputDao.getTxOutputs(txHash);
     }
 
     @Override
-    public List<UtxoOutputPo> getUnSpend(String address) {
-        return null;
+    public List<UtxoOutputPo> getAccountOutputs(String address, byte status){
+        return outputDao.getAccountOutputs(address, status);
     }
 
 }

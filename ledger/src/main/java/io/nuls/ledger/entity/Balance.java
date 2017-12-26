@@ -1,44 +1,53 @@
 package io.nuls.ledger.entity;
 
+import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.intf.NulsCloneable;
 
 import java.io.Serializable;
 
 /**
- *
  * @author Niels
  * @date 2017/11/13
- *
  */
-public class Balance implements Serializable,NulsCloneable{
+public class Balance implements Serializable, NulsCloneable {
 
-    private double balance;
+    private Na balance;
 
-    private double locked;
+    private Na locked;
 
-    private double useable;
+    private Na useable;
 
-    public double getBalance() {
+    public Balance() {
+
+    }
+
+    public Balance(Na useable, Na locked) {
+        this.useable = useable;
+        this.locked = locked;
+        this.balance = locked.add(useable);
+    }
+
+    public Na getBalance() {
         return balance;
     }
 
-    public void setBalance(double balance) {
+    public void setBalance(Na balance) {
         this.balance = balance;
     }
 
-    public double getLocked() {
+    public Na getLocked() {
         return locked;
     }
 
-    public void setLocked(double locked) {
+    public void setLocked(Na locked) {
         this.locked = locked;
     }
 
-    public double getUseable() {
+    public Na getUseable() {
         return useable;
     }
 
-    public void setUseable(double useable) {
+    public void setUseable(Na useable) {
         this.useable = useable;
     }
 

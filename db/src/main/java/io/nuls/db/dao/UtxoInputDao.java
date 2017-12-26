@@ -2,6 +2,8 @@ package io.nuls.db.dao;
 
 import io.nuls.db.entity.UtxoInputPo;
 
+import java.util.List;
+
 /**
  *
  * @author Niels
@@ -9,5 +11,5 @@ import io.nuls.db.entity.UtxoInputPo;
  */
 public interface UtxoInputDao extends BaseDao< String,UtxoInputPo> {
 
-
+    List<UtxoInputPo> getTxInputs(String txHash);
 }

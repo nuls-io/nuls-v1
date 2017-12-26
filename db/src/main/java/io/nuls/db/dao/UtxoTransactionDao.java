@@ -27,9 +27,10 @@ public interface UtxoTransactionDao {
 
     List<TransactionPo> listTransaction(long blockHeight, String address, boolean isLocal);
 
-    List<UtxoInputPo> getTxInputs(String txhash);
+    List<UtxoInputPo> getTxInputs(String txHash);
 
-    List<UtxoOutputPo> getTxOutputs(String txhash);
+    List<UtxoOutputPo> getTxOutputs(String txHash);
 
-    List<UtxoOutputPo> getUnSpend(String address);
+    List<UtxoOutputPo> getAccountOutputs(String address, byte status);
+
 }

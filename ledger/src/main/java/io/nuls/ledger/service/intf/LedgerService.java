@@ -3,6 +3,7 @@ package io.nuls.ledger.service.intf;
 import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
+import io.nuls.core.chain.entity.Result;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.validate.ValidateResult;
@@ -33,7 +34,7 @@ public interface LedgerService {
 
     Balance getBalance(String address);
 
-    boolean transfer(Address address, String password, Address toAddress, double amount, String remark);
+    Result transfer(Address address, String password, Address toAddress, Na amount, String remark);
 
     boolean saveTransaction(Transaction tx);
 

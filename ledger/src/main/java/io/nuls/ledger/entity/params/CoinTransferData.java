@@ -1,6 +1,8 @@
 package io.nuls.ledger.entity.params;
 
+import io.nuls.account.constant.AccountConstant;
 import io.nuls.core.chain.entity.Na;
+import io.nuls.core.context.NulsContext;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -92,5 +94,30 @@ public class CoinTransferData {
             this.toMap = new HashMap<>();
         }
         this.toMap.put(address, na);
+    }
+
+    public static CoinTransferData getBaseUnlockCoinData(String address, Na na) {
+        CoinTransferData coinData = new CoinTransferData();
+        coinData.setFee(NulsContext.getInstance().getTxFee());
+        coinData.setCanBeUnlocked(false);
+        coinData.setUnlockHeight(0);
+        coinData.setUnlockTime(0);
+        coinData.setTotalNa(na);
+        coinData.addFrom(address, na);
+        return coinData;
+    }
+
+    public static CoinTransferData getLockHeightCoinData(String address, Na na, int unlockHeight) {
+        CoinTransferData coinData =getBaseUnlockCoinData(address, na);
+        coinData.setCanBeUnlocked(true);
+        coinData.setUnlockHeight(unlockHeight);
+        return coinData;
+    }
+
+    public static CoinTransferData getLockTimeCoinData(String address, Na na, long unlockTime) {
+        CoinTransferData coinData =getBaseUnlockCoinData(address, na);
+        coinData.setCanBeUnlocked(true);
+        coinData.setUnlockTime(unlockTime);
+        return coinData;
     }
 }
