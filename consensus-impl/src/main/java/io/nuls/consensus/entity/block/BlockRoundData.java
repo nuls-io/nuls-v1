@@ -28,6 +28,8 @@ public class BlockRoundData extends BaseNulsData {
     public BlockRoundData(byte[] extend) throws NulsException {
         this.parse(new NulsByteBuffer(extend));
     }
+    public BlockRoundData( )   {
+    }
 
     @Override
     public int size() {

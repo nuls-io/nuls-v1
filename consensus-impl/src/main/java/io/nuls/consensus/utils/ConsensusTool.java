@@ -124,7 +124,7 @@ public class ConsensusTool {
         return po;
     }
 
-    public static Block createBlock(BlockData blockData, String password) {
+    public static Block createBlock(BlockData blockData ) {
         Account account = accountService.getLocalAccount();
         if (null == account) {
             throw new NulsRuntimeException(ErrorCode.ACCOUNT_NOT_EXIST);
@@ -152,7 +152,7 @@ public class ConsensusTool {
         header.setPackingAddress(account.getAddress().toString());
         header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
         header.setHash(NulsDigestData.calcDigestData(block));
-        header.setSign(accountService.signData(header.getHash(), password));
+        header.setSign(accountService.signData(header.getHash(), null));
         return block;
     }
 }

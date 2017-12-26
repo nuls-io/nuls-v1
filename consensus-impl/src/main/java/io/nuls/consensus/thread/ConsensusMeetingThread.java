@@ -4,14 +4,17 @@ import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
+import io.nuls.consensus.entity.block.BlockData;
 import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.entity.meeting.PocMeetingMember;
 import io.nuls.consensus.entity.meeting.PocMeetingRound;
 import io.nuls.consensus.entity.member.Agent;
+import io.nuls.consensus.event.BlockHeaderEvent;
 import io.nuls.consensus.service.cache.BlockCacheService;
 import io.nuls.consensus.service.cache.ConsensusCacheService;
 import io.nuls.consensus.service.impl.BlockServiceImpl;
 import io.nuls.consensus.service.intf.BlockService;
+import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.consensus.utils.TxComparator;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.Transaction;
@@ -21,8 +24,8 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
+import io.nuls.event.bus.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.service.intf.LedgerService;
-import org.spongycastle.util.Times;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -43,6 +46,7 @@ public class ConsensusMeetingThread implements Runnable {
     private BlockCacheService blockCacheService = BlockCacheService.getInstance();
     private BlockService blockService = BlockServiceImpl.getInstance();
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
+    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
     private boolean running = false;
     private NulsContext context = NulsContext.getInstance();
     private PocMeetingRound round;
@@ -104,15 +108,29 @@ public class ConsensusMeetingThread implements Runnable {
                 Log.error(e);
             }
         }
-        packing();
+        packing(self);
     }
 
-    private void packing() {
+    private void packing(PocMeetingMember self) {
+        Block bestBlock = blockService.getBestBlock();
         List<Transaction> txList = ledgerService.getTxListFromCache();
         txList.sort(new TxComparator());
-        Block block = new Block();
-        //todo
-
+        BlockData bd = new BlockData();
+        bd.setHeight(bestBlock.getHeader().getHeight() + 1);
+        bd.setTime(self.getPackTime());
+        bd.setPreHash(bestBlock.getHeader().getHash());
+        BlockRoundData roundData = new BlockRoundData();
+        roundData.setConsensusMemberCount(round.getMemberCount());
+        roundData.setPackingIndex(self.getRoundIndex());
+        roundData.setRoundStartTime(round.getStartTime());
+        bd.setRoundData(roundData);
+        bd.setTxList(txList);
+        Block newBlock = ConsensusTool.createBlock(bd);
+        newBlock.verify();
+        blockCacheService.cacheBlock(newBlock);
+        BlockHeaderEvent event = new BlockHeaderEvent();
+        event.setEventBody(newBlock.getHeader());
+        eventBroadcaster.broadcastAndCache(event);
     }
 
     private PocMeetingRound calcRound() {
@@ -159,13 +177,16 @@ public class ConsensusMeetingThread implements Runnable {
 
     private List<Consensus<Agent>> calcConsensusAgentList() {
         List<Consensus<Agent>> list = new ArrayList<>();
+        list.addAll(consensusCacheService.getCachedAgentList(ConsensusStatusEnum.IN));
+        if (list.size() >= PocConsensusConstant.MIN_CONSENSUS_AGENT_COUNT) {
+            return list;
+        }
         try {
             List<Consensus<Agent>> seedList = getDefaultSeedList();
             list.addAll(seedList);
         } catch (IOException e) {
             Log.error(e);
         }
-        list.addAll(consensusCacheService.getCachedAgentList(ConsensusStatusEnum.IN));
         return list;
     }
 
