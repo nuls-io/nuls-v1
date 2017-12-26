@@ -4,12 +4,16 @@ import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsVerificationException;
 import io.nuls.core.utils.crypto.Hex;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
+import io.nuls.db.dao.UtxoTransactionDao;
 import io.nuls.db.entity.TransactionPo;
 import io.nuls.ledger.entity.Balance;
+import io.nuls.ledger.entity.TransactionTool;
 import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.entity.tx.UnlockNulsTransaction;
@@ -28,6 +32,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     private LedgerCacheServiceImpl ledgerCacheService = LedgerCacheServiceImpl.getInstance();
 
+    private UtxoTransactionDao txdao = NulsContext.getInstance().getService(UtxoTransactionDao.class);
 
     private UtxoLedgerServiceImpl() {
     }
@@ -54,24 +59,33 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public Transaction gettx(byte[] txid) {
+    public Transaction gettx(byte[] txid, boolean isMine) {
         String hash = Hex.encode(txid);
-        Transaction tx = getTxFromCache(hash);
-        if(tx == null) {
+        return gettx(hash, isMine);
+    }
 
+    @Override
+    public Transaction gettx(String hash, boolean isMine) {
+        Transaction tx = getTxFromCache(hash);
+        if (tx == null) {
+            TransactionPo po = txdao.gettx(hash, isMine);
+            try {
+                tx = TransactionTool.toTransaction(po);
+            } catch (Exception e) {
+                Log.error(e);
+            }
         }
         return tx;
     }
 
     @Override
-    public Transaction gettx(String hash) {
-        return null;
-    }
-
-    @Override
     public boolean txExist(String hash) {
-        // todo auto-generated method stub(niels)
-        return false;
+        Transaction tx = getTxFromCache(hash);
+        if(tx != null) {
+            return true;
+        }
+        TransactionPo po = txdao.gettx(hash, false);
+        return po != null;
     }
 
     @Override

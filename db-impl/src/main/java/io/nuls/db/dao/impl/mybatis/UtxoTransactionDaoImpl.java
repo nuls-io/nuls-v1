@@ -4,6 +4,8 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.db.dao.*;
 import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.entity.TransactionPo;
+import io.nuls.db.entity.UtxoInputPo;
+import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.db.util.TransactionPoTool;
 
 import java.util.ArrayList;
@@ -106,6 +108,21 @@ public class UtxoTransactionDaoImpl implements UtxoTransactionDao {
 
     @Override
     public List<TransactionPo> listTransaction(long blockHeight, String address, boolean isLocal) {
+        return null;
+    }
+
+    @Override
+    public List<UtxoInputPo> getTxInputs(String txhash) {
+        return null;
+    }
+
+    @Override
+    public List<UtxoOutputPo> getTxOutputs(String txhash) {
+        return null;
+    }
+
+    @Override
+    public List<UtxoOutputPo> getUnSpend(String address) {
         return null;
     }
 

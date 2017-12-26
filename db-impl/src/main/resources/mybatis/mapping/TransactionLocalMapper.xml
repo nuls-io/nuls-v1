@@ -182,4 +182,5 @@
         select count(hash) from transaction_local
         <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Serach_Where"/>
     </select>
+
 </mapper>

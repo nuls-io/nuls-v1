@@ -30,7 +30,7 @@ public class UtxoOutputPo {
      *
      * @mbg.generated
      */
-    private Double value;
+    private Long value;
 
     /**
      *
@@ -133,7 +133,7 @@ public class UtxoOutputPo {
      *
      * @mbg.generated
      */
-    public Double getValue() {
+    public Long getValue() {
         return value;
     }
 
@@ -145,7 +145,7 @@ public class UtxoOutputPo {
      *
      * @mbg.generated
      */
-    public void setValue(Double value) {
+    public void setValue(Long value) {
         this.value = value;
     }
 
