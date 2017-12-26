@@ -8,7 +8,7 @@ import java.util.List;
  * @author Niels
  * @date 2017/12/8
  */
-public interface BusDataService {
+public interface EventBroadcaster {
 
     /**
      * broadcast a message that need to be passed

@@ -28,7 +28,8 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
-import io.nuls.event.bus.bus.service.intf.BusDataService;
+import io.nuls.event.bus.bus.service.intf.EventBroadcaster;
+import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.service.intf.LedgerService;
 
@@ -45,7 +46,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
 
     private static final ConsensusService INSTANCE = new PocConsensusServiceImpl();
     private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
-    private BusDataService busDataService = NulsContext.getInstance().getService(BusDataService.class);
+    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
     private BlockService blockService = NulsContext.getInstance().getService(BlockService.class);
     private ConsensusCacheService consensusCacheService = ConsensusCacheService.getInstance();
@@ -61,12 +62,15 @@ public class PocConsensusServiceImpl implements ConsensusService {
         RegisterAgentEvent event = new RegisterAgentEvent();
         CoinTransferData data = new CoinTransferData();
         data.setFee(this.getTxFee(TransactionConstant.TX_TYPE_REGISTER_AGENT));
-        data.setCanBeUnlocked(true);
-        data.setUnlockHeight(0);
-        data.setUnlockTime(0);
+
         data.setTotalNa(agent.getDeposit());
         data.addFrom(account.getAddress().toString(), agent.getDeposit());
-        data.addTo(account.getAddress().toString(), agent.getDeposit());
+        Coin coin = new Coin();
+        coin.setCanBeUnlocked(true);
+        coin.setUnlockHeight(0);
+        coin.setUnlockTime(0);
+        coin.setNa(agent.getDeposit());
+        data.addTo(account.getAddress().toString(), coin);
         RegisterAgentTransaction tx = new RegisterAgentTransaction(data, password);
         Consensus<Agent> con = new Consensus<>();
         con.setAddress(account.getAddress().toString());
@@ -81,7 +85,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
             throw new NulsRuntimeException(e);
         }
         event.setEventBody(tx);
-        busDataService.broadcastHashAndCache(event);
+        eventBroadcaster.broadcastHashAndCache(event);
     }
 
     private void joinTheConsensus(Account account, String password, double amount, String agentAddress) throws IOException {
@@ -103,7 +107,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
             throw new NulsRuntimeException(e);
         }
         event.setEventBody(tx);
-        busDataService.broadcastHashAndCache(event);
+        eventBroadcaster.broadcastHashAndCache(event);
     }
 
     @Override
@@ -130,7 +134,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
         }
         tx.setSign(accountService.signData(tx.getHash(), account, password));
         event.setEventBody(tx);
-        busDataService.broadcastHashAndCache(event);
+        eventBroadcaster.broadcastHashAndCache(event);
     }
 
     @Override

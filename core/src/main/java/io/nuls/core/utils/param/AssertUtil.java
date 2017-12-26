@@ -9,7 +9,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by Niels on 2017/9/29.
+ *
+ * @author Niels
+ * @date 2017/9/29
  */
 public final class AssertUtil {
 
@@ -18,6 +20,10 @@ public final class AssertUtil {
             return;
         }
         throw new NulsRuntimeException(ErrorCode.DATA_ERROR, msg);
+    }
+
+    public static void canNotEmpty(Object val, ErrorCode ec) {
+        canNotEmpty(val, ec.getMsg());
     }
 
     public static void canNotEmpty(Object val, String msg) {

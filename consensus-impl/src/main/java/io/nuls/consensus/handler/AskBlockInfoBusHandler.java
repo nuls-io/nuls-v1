@@ -7,7 +7,7 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.context.NulsContext;
 import io.nuls.event.bus.bus.handler.AbstractEventBusHandler;
-import io.nuls.event.bus.bus.service.intf.BusDataService;
+import io.nuls.event.bus.bus.service.intf.EventBroadcaster;
 
 /**
  * @author Niels
@@ -16,7 +16,7 @@ import io.nuls.event.bus.bus.service.intf.BusDataService;
 public class AskBlockInfoBusHandler extends AbstractEventBusHandler<AskBlockInfoEvent> {
 
     private BlockService blockService = NulsContext.getInstance().getService(BlockService.class);
-    private BusDataService busDataService = NulsContext.getInstance().getService(BusDataService.class);
+    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
     @Override
     public void onEvent(AskBlockInfoEvent event, String fromId)   {
         BlockHeader header ;
@@ -31,6 +31,6 @@ public class AskBlockInfoBusHandler extends AbstractEventBusHandler<AskBlockInfo
                 header = block.getHeader();
             }
         }
-        this.busDataService.sendToPeer(new BlockHeaderEvent(header),fromId);
+        this.eventBroadcaster.sendToPeer(new BlockHeaderEvent(header),fromId);
     }
 }

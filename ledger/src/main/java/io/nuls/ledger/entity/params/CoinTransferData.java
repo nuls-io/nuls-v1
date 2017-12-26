@@ -12,17 +12,11 @@ import java.util.Map;
 public class CoinTransferData {
 
     private Map<String, Na> fromMap;
-    private Map<String, Na> toMap;
+    private Map<String, Coin> toMap;
 
     private Na totalNa;
 
     private Na fee;
-
-    private long unlockTime;
-
-    private int unlockHeight;
-
-    private boolean canBeUnlocked;
 
     public Map<String, Na> getFromMap() {
         return fromMap;
@@ -32,11 +26,11 @@ public class CoinTransferData {
         this.fromMap = fromMap;
     }
 
-    public Map<String, Na> getToMap() {
+    public Map<String, Coin> getToMap() {
         return toMap;
     }
 
-    public void setToMap(Map<String, Na> toMap) {
+    public void setToMap(Map<String, Coin> toMap) {
         this.toMap = toMap;
     }
 
@@ -56,30 +50,6 @@ public class CoinTransferData {
         this.fee = fee;
     }
 
-    public long getUnlockTime() {
-        return unlockTime;
-    }
-
-    public void setUnlockTime(long unlockTime) {
-        this.unlockTime = unlockTime;
-    }
-
-    public int getUnlockHeight() {
-        return unlockHeight;
-    }
-
-    public void setUnlockHeight(int unlockHeight) {
-        this.unlockHeight = unlockHeight;
-    }
-
-    public boolean isCanBeUnlocked() {
-        return canBeUnlocked;
-    }
-
-    public void setCanBeUnlocked(boolean canBeUnlocked) {
-        this.canBeUnlocked = canBeUnlocked;
-    }
-
     public void addFrom(String address, Na na) {
         if (null == this.fromMap) {
             this.fromMap = new HashMap<>();
@@ -87,10 +57,10 @@ public class CoinTransferData {
         this.fromMap.put(address, na);
     }
 
-    public void addTo(String address, Na na) {
+    public void addTo(String address, Coin coin) {
         if (null == this.toMap) {
             this.toMap = new HashMap<>();
         }
-        this.toMap.put(address, na);
+        this.toMap.put(address, coin);
     }
 }
