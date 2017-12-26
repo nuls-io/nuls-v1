@@ -16,6 +16,7 @@ public interface PocConsensusConstant {
     String PROPERTY_DELEGATE_PEER = "delegate-peer";
 
     String DEFAULT_CONSENSUS_LIST_FILE = "default-consensus-list.properties";
+    String GENESIS_BLOCK_FILE = "genesis-block.json";
 
     short EVENT_TYPE_EXIT_CONSENSUS = 6;
     short EVENT_TYPE_JOIN_CONSENSUS = 7;

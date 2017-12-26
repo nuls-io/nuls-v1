@@ -3,6 +3,7 @@ package io.nuls.ledger.service.intf;
 import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
+import io.nuls.core.chain.entity.Result;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.validate.ValidateResult;
@@ -48,4 +49,8 @@ public interface LedgerService {
     Transaction getTransaction(NulsDigestData txHash);
 
     List<Transaction> queryListByHashs(List<NulsDigestData> txHashList);
+
+    void removeFromCache(List<NulsDigestData> txHashList);
+
+    List<Transaction> getTxListFromCache();
 }

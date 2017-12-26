@@ -1,5 +1,6 @@
 package io.nuls.consensus.service.impl;
 
+import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.genesis.GenesisBlock;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.utils.ConsensusBeanUtils;

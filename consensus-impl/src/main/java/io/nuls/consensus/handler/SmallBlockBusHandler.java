@@ -46,5 +46,6 @@ public class SmallBlockBusHandler extends AbstractEventBusHandler<SmallBlockEven
             return;
         }
         blockCacheService.cacheBlock(block);
+        ledgerService.removeFromCache(block.getHeader().getTxHashList());
     }
 }

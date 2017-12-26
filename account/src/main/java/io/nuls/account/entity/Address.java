@@ -4,6 +4,7 @@ import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.utils.crypto.Base58;
+import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.log.Log;
 
 import java.util.Arrays;
@@ -104,5 +105,9 @@ public class Address {
         if(!Arrays.equals(checkSin, sign)) {
             throw new NulsException(ErrorCode.DATA_ERROR);
         }
+    }
+
+    public String hashHex(){
+        return Hex.encode(getHash());
     }
 }

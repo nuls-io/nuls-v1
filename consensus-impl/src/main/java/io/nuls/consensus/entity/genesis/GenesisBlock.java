@@ -1,6 +1,8 @@
 package io.nuls.consensus.entity.genesis;
 
 import io.nuls.account.service.intf.AccountService;
+import io.nuls.consensus.constant.PocConsensusConstant;
+import io.nuls.consensus.utils.StringFileLoader;
 import io.nuls.core.chain.entity.*;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
@@ -21,9 +23,23 @@ import java.util.List;
 //todo temp
 public final class GenesisBlock extends Block {
 
-    private static final GenesisBlock INSTANCE = new GenesisBlock();
+    private static GenesisBlock INSTANCE;
 
-    public static GenesisBlock getInstance() {
+    public static void main(String args[]){
+        GenesisBlock gb = new GenesisBlock();
+        gb.setHeader();
+    }
+
+    public static GenesisBlock getInstance( ) {
+        try {
+            String json = StringFileLoader.read(PocConsensusConstant.GENESIS_BLOCK_FILE);
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+        //todo
+        if (null == INSTANCE) {
+            INSTANCE = new GenesisBlock();
+        }
         return INSTANCE;
     }
 
@@ -42,33 +58,6 @@ public final class GenesisBlock extends Block {
 //        }
     }
 
-    private String readJsonFile() throws NulsException {
-        String jsonPath = GenesisBlock.class.getResource("genesis-block.json").getPath();
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new FileReader(jsonPath));
-        } catch (FileNotFoundException e) {
-            Log.error(e);
-            throw new NulsException(e);
-        }
-        StringBuilder str = new StringBuilder();
-        String line;
-        try {
-            while ((line = br.readLine()) != null) {
-                str.append(line.trim());
-            }
-        } catch (IOException e) {
-            Log.error(e);
-            throw new NulsException(e);
-        }finally {
-            try {
-                br.close();
-            } catch (IOException e) {
-                Log.error(e);
-            }
-        }
-        return str.toString();
-    }
 
     private void fillHeader() {
         BlockHeader header = new BlockHeader();
