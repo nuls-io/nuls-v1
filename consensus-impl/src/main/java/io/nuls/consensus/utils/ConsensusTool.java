@@ -1,13 +1,19 @@
 package io.nuls.consensus.utils;
 
+import io.nuls.account.entity.Account;
+import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
+import io.nuls.consensus.entity.block.BlockData;
 import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.member.Delegate;
 import io.nuls.core.chain.entity.*;
+import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.entity.BlockPo;
 import io.nuls.db.entity.DelegateAccountPo;
@@ -23,6 +29,8 @@ import java.util.List;
  * @date 2017/12/6
  */
 public class ConsensusTool {
+
+    private static AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
 
     public static final BlockPo toPojo(Block block) {
         BlockPo po = new BlockPo();
@@ -116,30 +124,35 @@ public class ConsensusTool {
         return po;
     }
 
-    public static Block createBlock(List<Transaction> txList, long time, NulsDigestData preHash, long height, BlockRoundData extend) {
+    public static Block createBlock(BlockData blockData, String password) {
+        Account account = accountService.getLocalAccount();
+        if (null == account) {
+            throw new NulsRuntimeException(ErrorCode.ACCOUNT_NOT_EXIST);
+        }
         Block block = new Block();
-        block.setTxs(txList);
+        block.setTxs(blockData.getTxList());
         BlockHeader header = new BlockHeader();
         block.setHeader(header);
         try {
-            block.setExtend(extend.serialize());
+            block.setExtend(blockData.getRoundData().serialize());
         } catch (IOException e) {
             Log.error(e);
         }
-        header.setHeight(height);
-        header.setTime(time);
-        header.setPreHash(preHash);
-        header.setTxCount(txList.size());
+        header.setHeight(blockData.getHeight());
+        header.setTime(blockData.getTime());
+        header.setPreHash(blockData.getPreHash());
+        header.setTxCount(blockData.getTxList().size());
         List<NulsDigestData> txHashList = new ArrayList<>();
-        for(int i=0;i<txList.size();i++ ){
-            Transaction tx = txList.get(i);
+        for (int i = 0; i < blockData.getTxList().size(); i++) {
+            Transaction tx = blockData.getTxList().get(i);
             txHashList.add(tx.getHash());
         }
         header.setTxHashList(txHashList);
-        header.setPackingAddress();
-        header.setMerkleHash();
-        header.setHash();
-        header.setSign();
+
+        header.setPackingAddress(account.getAddress().toString());
+        header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
+        header.setHash(NulsDigestData.calcDigestData(block));
+        header.setSign(accountService.signData(header.getHash(), password));
         return block;
     }
 }

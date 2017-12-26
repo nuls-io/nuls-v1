@@ -107,11 +107,11 @@ public final class GenesisBlock extends Block {
         for(Transaction tx:this.getTxs()){
             txHashList.add(tx.getHash());
         }
-        header.setMerkleHash(NulsDigestData.calcDigestData(new byte[]{0}));
+        header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
         header.setTxHashList(txHashList);
-        NulsDigestData hash = NulsDigestData.calcDigestData(this);
-        header.setHash(hash);
+        header.setHash(NulsDigestData.calcDigestData(this));
     }
 
 
 }
+
