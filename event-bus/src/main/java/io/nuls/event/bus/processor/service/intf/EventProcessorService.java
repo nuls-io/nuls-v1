@@ -9,7 +9,7 @@ import io.nuls.event.bus.bus.handler.AbstractEventBusHandler;
  */
 public interface EventProcessorService {
 
-    void send(byte[] event,String peerHash);
+    void dispatch(byte[] event,String peerHash);
 
     String registerEventHandler(Class<? extends BaseNulsEvent> eventClass, AbstractEventBusHandler<? extends BaseNulsEvent> handler);
 

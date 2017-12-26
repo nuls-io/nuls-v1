@@ -212,7 +212,7 @@ public class Peer extends BaseNulsData {
             if (checkBroadcastExist(message.getData())) {
                 return;
             }
-            eventProcessorService.send(message.getData(), this.getHash());
+            eventProcessorService.dispatch(message.getData(), this.getHash());
         } else {
 
             byte[] networkHeader = new byte[NetworkDataHeader.NETWORK_HEADER_SIZE];
