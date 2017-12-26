@@ -8,7 +8,7 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.bus.handler.AbstractEventBusHandler;
-import io.nuls.event.bus.bus.service.intf.BusDataService;
+import io.nuls.event.bus.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.service.intf.LedgerService;
 
 /**
@@ -26,12 +26,12 @@ public class AliasBusHandler extends AbstractEventBusHandler<AliasEvent> {
         return handler;
     }
 
-    private BusDataService busDataService;
+    private EventBroadcaster eventBroadcaster;
 
     private LedgerService ledgerService;
 
-    public void setBusDataService(BusDataService busDataService) {
-        this.busDataService = busDataService;
+    public void setEventBroadcaster(EventBroadcaster eventBroadcaster) {
+        this.eventBroadcaster = eventBroadcaster;
     }
 
     public void setLedgerService(LedgerService ledgerService) {
@@ -55,6 +55,6 @@ public class AliasBusHandler extends AbstractEventBusHandler<AliasEvent> {
             Log.error(e);
             throw new NulsRuntimeException(e);
         }
-        busDataService.broadcastHashAndCache(event, fromId);
+        eventBroadcaster.broadcastHashAndCache(event, fromId);
     }
 }

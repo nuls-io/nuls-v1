@@ -35,7 +35,7 @@ import io.nuls.db.entity.AccountPo;
 import io.nuls.db.entity.AliasPo;
 import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.entity.TransactionPo;
-import io.nuls.event.bus.bus.service.intf.BusDataService;
+import io.nuls.event.bus.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.TransactionTool;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.service.intf.LedgerService;
@@ -70,7 +70,7 @@ public class AccountServiceImpl implements AccountService {
 
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
 
-    private BusDataService busDataService = NulsContext.getInstance().getService(BusDataService.class);
+    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
 
     private boolean isLockNow = true;
 
@@ -242,6 +242,7 @@ public class AccountServiceImpl implements AccountService {
         } else {
             throw new NulsRuntimeException(ErrorCode.FAILED, "The account not exist,id:" + id);
         }
+        //todo 发送notice给其他模块
     }
 
     @Override
@@ -471,21 +472,16 @@ public class AccountServiceImpl implements AccountService {
         try {
             Account account = getAccount(address);
             AliasEvent event = new AliasEvent();
-
             CoinTransferData coinData = new CoinTransferData();
             coinData.setFee(NulsContext.getInstance().getTxFee());
-            coinData.setCanBeUnlocked(false);
-            coinData.setUnlockHeight(0);
-            coinData.setUnlockTime(0);
             coinData.setTotalNa(AccountConstant.ALIAS_Na);
             coinData.addFrom(account.getAddress().getBase58(), AccountConstant.ALIAS_Na);
-
             AliasTransaction aliasTx = new AliasTransaction(coinData, password);
             aliasTx.setHash(NulsDigestData.calcDigestData(aliasTx.serialize()));
             aliasTx.setSign(signData(aliasTx.getHash(), account, password));
             ledgerService.verifyAndCacheTx(aliasTx);
             event.setEventBody(aliasTx);
-            busDataService.broadcastAndCache(event);
+            eventBroadcaster.broadcastAndCache(event);
         } catch (Exception e) {
             Log.error(e);
             return new Result(false, e.getMessage());

@@ -82,6 +82,11 @@ public class ModuleManager {
     }
 
     public void stopModule(short moduleId) {
+        BaseNulsModule module = MODULE_MAP.get(moduleId);
+        if (null == module) {
+            return;
+        }
+        module.shutdown();
         POOL.stopModule(moduleId);
     }
 
@@ -92,7 +97,6 @@ public class ModuleManager {
         }
         module.setStatus(ModuleStatusEnum.DESTROYING);
         try {
-            module.shutdown();
             module.destroy();
             POOL.stopModule(module.getModuleId());
             module.setStatus(ModuleStatusEnum.DESTROYED);

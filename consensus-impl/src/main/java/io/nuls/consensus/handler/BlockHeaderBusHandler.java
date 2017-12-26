@@ -9,7 +9,7 @@ import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.context.NulsContext;
 import io.nuls.event.bus.bus.handler.AbstractEventBusHandler;
-import io.nuls.event.bus.bus.service.intf.BusDataService;
+import io.nuls.event.bus.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.service.intf.LedgerService;
 
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ public class BlockHeaderBusHandler extends AbstractEventBusHandler<BlockHeaderEv
     private BlockHeaderCacheService headerCacheService = BlockHeaderCacheService.getInstance();
 
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
-    private BusDataService busDataService = NulsContext.getInstance().getService(BusDataService.class);
+    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
 
     @Override
     public void onEvent(BlockHeaderEvent event, String fromId) {
@@ -46,6 +46,6 @@ public class BlockHeaderBusHandler extends AbstractEventBusHandler<BlockHeaderEv
         }
         data.setTxHashList(txHashList);
         smallBlockEvent.setEventBody(data);
-        busDataService.sendToPeer(smallBlockEvent, fromId);
+        eventBroadcaster.sendToPeer(smallBlockEvent, fromId);
     }
 }

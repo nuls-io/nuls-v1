@@ -5,6 +5,7 @@ import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 
 import java.io.*;
@@ -46,7 +47,7 @@ public class I18nUtils {
                 ALL_MAPPING.put(key, prop);
             }
         } catch (IOException e) {
-            throw new NulsRuntimeException(e);
+            Log.error(e);
         }
     }
 

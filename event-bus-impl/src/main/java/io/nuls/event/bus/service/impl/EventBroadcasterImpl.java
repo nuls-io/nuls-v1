@@ -3,7 +3,7 @@ package io.nuls.event.bus.service.impl;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.event.bus.event.CommonHashEvent;
-import io.nuls.event.bus.bus.service.intf.BusDataService;
+import io.nuls.event.bus.bus.service.intf.EventBroadcaster;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Peer;
 import io.nuls.network.service.NetworkService;
@@ -15,16 +15,16 @@ import java.util.List;
  * @author Niels
  * @date 2017/12/8
  */
-public class BusDataServiceImpl implements BusDataService {
-    private static BusDataServiceImpl INSTANCE = new BusDataServiceImpl();
+public class EventBroadcasterImpl implements EventBroadcaster {
+    private static EventBroadcasterImpl INSTANCE = new EventBroadcasterImpl();
 
     private NetworkService networkService = NulsContext.getInstance().getService(NetworkService.class);
     private EventCacheService eventCacheService = EventCacheService.getInstance();
 
-    private BusDataServiceImpl() {
+    private EventBroadcasterImpl() {
     }
 
-    public static final BusDataServiceImpl getInstance() {
+    public static final EventBroadcasterImpl getInstance() {
         return INSTANCE;
     }
 

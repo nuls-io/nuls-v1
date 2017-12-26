@@ -7,7 +7,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.bus.handler.AbstractEventBusHandler;
-import io.nuls.event.bus.bus.service.intf.BusDataService;
+import io.nuls.event.bus.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.service.intf.LedgerService;
 
 /**
@@ -17,7 +17,7 @@ import io.nuls.ledger.service.intf.LedgerService;
 public class JoinConsensusBusHandler extends AbstractEventBusHandler<JoinConsensusEvent> {
 
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
-    private BusDataService busDataService = NulsContext.getInstance().getService(BusDataService.class);
+    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
 
     @Override
     public void onEvent(JoinConsensusEvent event, String fromId) {
@@ -32,6 +32,6 @@ public class JoinConsensusBusHandler extends AbstractEventBusHandler<JoinConsens
         if (result.isFailed()) {
             return;
         }
-        this.busDataService.broadcastHashAndCache(event);
+        this.eventBroadcaster.broadcastHashAndCache(event);
     }
 }

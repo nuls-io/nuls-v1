@@ -1,14 +1,19 @@
 package io.nuls.consensus.utils;
 
+import io.nuls.account.entity.Account;
+import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
+import io.nuls.consensus.entity.block.BlockData;
+import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.member.Delegate;
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.Na;
-import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.chain.entity.*;
+import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.entity.BlockPo;
 import io.nuls.db.entity.DelegateAccountPo;
@@ -16,16 +21,20 @@ import io.nuls.db.entity.DelegatePo;
 import io.nuls.db.entity.TransactionPo;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Niels
  * @date 2017/12/6
  */
-public class ConsensusBeanUtils {
+public class ConsensusTool {
+
+    private static AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
 
     public static final BlockPo toPojo(Block block) {
         BlockPo po = new BlockPo();
-        if(null!=block.getVersion()){
+        if (null != block.getVersion()) {
             po.setVarsion((int) block.getVersion().getVersion());
         }
         try {
@@ -54,18 +63,6 @@ public class ConsensusBeanUtils {
         Block block = new Block();
         block.parse(po.getBytes());
         return block;
-    }
-
-    public static final Transaction fromPojo(TransactionPo po){
-        //todo
-
-        return null;
-    }
-
-    public static final TransactionPo toPojo(Transaction tx){
-        //todo
-
-        return null;
     }
 
     public static Consensus<Agent> fromPojo(DelegateAccountPo po) {
@@ -125,6 +122,38 @@ public class ConsensusBeanUtils {
         po.setAgentAddress(bean.getExtend().getDelegateAddress());
         po.setId(bean.getExtend().getId());
         return po;
+    }
+
+    public static Block createBlock(BlockData blockData ) {
+        Account account = accountService.getLocalAccount();
+        if (null == account) {
+            throw new NulsRuntimeException(ErrorCode.ACCOUNT_NOT_EXIST);
+        }
+        Block block = new Block();
+        block.setTxs(blockData.getTxList());
+        BlockHeader header = new BlockHeader();
+        block.setHeader(header);
+        try {
+            block.setExtend(blockData.getRoundData().serialize());
+        } catch (IOException e) {
+            Log.error(e);
+        }
+        header.setHeight(blockData.getHeight());
+        header.setTime(blockData.getTime());
+        header.setPreHash(blockData.getPreHash());
+        header.setTxCount(blockData.getTxList().size());
+        List<NulsDigestData> txHashList = new ArrayList<>();
+        for (int i = 0; i < blockData.getTxList().size(); i++) {
+            Transaction tx = blockData.getTxList().get(i);
+            txHashList.add(tx.getHash());
+        }
+        header.setTxHashList(txHashList);
+
+        header.setPackingAddress(account.getAddress().toString());
+        header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
+        header.setHash(NulsDigestData.calcDigestData(block));
+        header.setSign(accountService.signData(header.getHash(), null));
+        return block;
     }
 }
 

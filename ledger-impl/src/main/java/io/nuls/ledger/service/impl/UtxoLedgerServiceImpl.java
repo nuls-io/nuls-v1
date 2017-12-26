@@ -188,6 +188,18 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         return null;
     }
 
+    @Override
+    public void removeFromCache(List<NulsDigestData> txHashList) {
+        // todo auto-generated method stub(niels)
+
+    }
+
+    @Override
+    public List<Transaction> getTxListFromCache() {
+        // todo auto-generated method stub(niels)
+        return null;
+    }
+
     private UtxoData getUtxoData(Na na) {
         //todo
         return null;

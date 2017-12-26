@@ -4,9 +4,9 @@ import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.event.GetBodyEvent;
 import io.nuls.event.bus.bus.handler.AbstractEventBusHandler;
-import io.nuls.event.bus.bus.service.intf.BusDataService;
+import io.nuls.event.bus.bus.service.intf.EventBroadcaster;
 import io.nuls.event.bus.service.impl.EventCacheService;
-import io.nuls.event.bus.service.impl.BusDataServiceImpl;
+import io.nuls.event.bus.service.impl.EventBroadcasterImpl;
 
 /**
  * @author Niels
@@ -15,7 +15,7 @@ import io.nuls.event.bus.service.impl.BusDataServiceImpl;
 public class GetBodyBusHandler extends AbstractEventBusHandler<GetBodyEvent> {
 
     private EventCacheService eventCacheService = EventCacheService.getInstance();
-    private BusDataService busDataService = BusDataServiceImpl.getInstance();
+    private EventBroadcaster eventBroadcaster = EventBroadcasterImpl.getInstance();
 
     @Override
     public void onEvent(GetBodyEvent event, String fromId)  {
@@ -24,6 +24,6 @@ public class GetBodyBusHandler extends AbstractEventBusHandler<GetBodyEvent> {
             Log.warn("get event faild,peer:" + fromId + ",event:" + event.getEventBody().getDigestHex());
             return;
         }
-        busDataService.sendToPeer(eventBody, fromId);
+        eventBroadcaster.sendToPeer(eventBody, fromId);
     }
 }

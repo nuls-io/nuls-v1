@@ -4,7 +4,7 @@ import io.nuls.event.bus.constant.EventBusConstant;
 import io.nuls.event.bus.constant.EventConstant;
 import io.nuls.event.bus.event.CommonHashEvent;
 import io.nuls.event.bus.event.GetBodyEvent;
-import io.nuls.event.bus.bus.service.intf.BusDataService;
+import io.nuls.event.bus.bus.service.intf.EventBroadcaster;
 import io.nuls.event.bus.handler.HashBusHandler;
 import io.nuls.event.bus.handler.GetBodyBusHandler;
 import io.nuls.event.bus.module.intf.AbstractEventBusModule;
@@ -12,7 +12,7 @@ import io.nuls.event.bus.processor.service.impl.NoticeProcessorServiceImpl;
 import io.nuls.event.bus.processor.service.impl.EventProcessorServiceImpl;
 import io.nuls.event.bus.processor.service.intf.NoticeProcessorService;
 import io.nuls.event.bus.processor.service.intf.EventProcessorService;
-import io.nuls.event.bus.service.impl.BusDataServiceImpl;
+import io.nuls.event.bus.service.impl.EventBroadcasterImpl;
 import io.nuls.event.bus.service.impl.EventCacheService;
 
 /**
@@ -43,7 +43,7 @@ public class EventBusModuleImpl extends AbstractEventBusModule {
         networkService.registerEventHandler(GetBodyEvent.class, new GetBodyBusHandler());
         this.registerService(localService);
         this.registerService(networkService);
-        this.registerService(BusDataService.class, BusDataServiceImpl.getInstance());
+        this.registerService(EventBroadcaster.class, EventBroadcasterImpl.getInstance());
 
     }
 

@@ -67,6 +67,8 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
         BlockCacheService.getInstance().init();
         ConsensusCacheService.getInstance().initCache();
         BlockHeaderCacheService.getInstance().init();
+
+        //todo 接收处理 账户切换的notice
     }
 
     @Override

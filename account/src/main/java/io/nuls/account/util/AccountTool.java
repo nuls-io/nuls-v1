@@ -48,8 +48,32 @@ public final class AccountTool {
         account.setEcKey(key);
         account.setPriKey(key.getPrivKeyBytes());
         account.setCreateTime(TimeService.currentTimeMillis());
-
         return account;
+    }
+
+    public static void main(String[] args) {
+        Account account = createAccount();
+        System.out.println("address:"+account.getAddress().toString());
+        System.out.println("pubkey:"+account.getEcKey().getPublicKeyAsHex() );
+        System.out.println("prikey:"+account.getEcKey().getPrivateKeyAsHex() );
+        System.out.println("\n\n");
+        account = createAccount();
+        System.out.println("address:"+account.getAddress().toString());
+        System.out.println("pubkey:"+account.getEcKey().getPublicKeyAsHex() );
+        System.out.println("prikey:"+account.getEcKey().getPrivateKeyAsHex() );
+        System.out.println("\n\n");
+
+        account = createAccount();
+        System.out.println("address:"+account.getAddress().toString());
+        System.out.println("pubkey:"+account.getEcKey().getPublicKeyAsHex() );
+        System.out.println("prikey:"+account.getEcKey().getPrivateKeyAsHex() );
+        System.out.println("\n\n");
+
+        account = createAccount();
+        System.out.println("address:"+account.getAddress().toString());
+        System.out.println("pubkey:"+account.getEcKey().getPublicKeyAsHex() );
+        System.out.println("prikey:"+account.getEcKey().getPrivateKeyAsHex() );
+        System.out.println("\n\n");
     }
 
 
@@ -110,10 +134,4 @@ public final class AccountTool {
         desc.setStatus(src.getStatus());
     }
 
-    public static void main(String[] args) {
-        ECKey key = new ECKey();
-
-        System.out.println(key.getPrivKeyBytes().length);
-
-    }
 }

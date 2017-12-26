@@ -10,7 +10,8 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
-import io.nuls.event.bus.bus.service.intf.BusDataService;
+import io.nuls.event.bus.bus.service.intf.EventBroadcaster;
+import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.mq.intf.QueueService;
 import io.nuls.network.service.NetworkService;
 
@@ -27,13 +28,13 @@ import java.util.concurrent.locks.ReentrantLock;
 public class DistributedBlockDownloadUtils {
     private static final DistributedBlockDownloadUtils INSTANCE = new DistributedBlockDownloadUtils();
     private String queueId = StringUtils.getNewUUID();
-    private BusDataService busDataService = NulsContext.getInstance().getService(BusDataService.class);
+    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
     private QueueService<String> queueService = NulsContext.getInstance().getService(QueueService.class);
     private BlockCacheService blockCacheService = NulsContext.getInstance().getService(BlockCacheService.class);
     private Map<Long, String> heightPeerMap = new HashMap<>();
     private Map<Long, Block> blockMap = new HashMap<>();
     private NetworkService networkService = NulsContext.getInstance().getService(NetworkService.class);
-
+    private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
     private boolean finished = true;
     private List<String> peerIdList;
     private long startHeight;
@@ -75,7 +76,7 @@ public class DistributedBlockDownloadUtils {
         heightPeerMap.put(height, peerId);
         GetBlockEvent event = new GetBlockEvent();
         event.setEventBody(new BasicTypeData<>(height));
-        this.busDataService.sendToPeer(event, peerId);
+        this.eventBroadcaster.sendToPeer(event, peerId);
     }
 
 
@@ -101,6 +102,7 @@ public class DistributedBlockDownloadUtils {
             Block block = blockMap.get(startHeight + i);
             block.verify();
             blockCacheService.cacheBlock(block);
+            ledgerService.removeFromCache(block.getHeader().getTxHashList());
         }
         finished();
     }

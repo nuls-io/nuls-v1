@@ -25,9 +25,10 @@ public enum ErrorCode {
     LANGUAGE_CANNOT_SET_NULL("SYS010", 10010),
     IO_ERROR("SYS011", 10011),
     PARSE_OBJECT_ERROR("SYS012", 10012),
-     HASH_ERROR("SYS013",10013 ),
-    DATA_SIZE_ERROR("SYS014",10014),
-    DATA_FIELD_CHECK_ERROR("SYS015",10015),
+    HASH_ERROR("SYS013", 10013),
+    DATA_SIZE_ERROR("SYS014", 10014),
+    DATA_FIELD_CHECK_ERROR("SYS015", 10015),
+    CONFIG_ERROR("SYS016", 10016),
 
     /**
      * ----------  Consensus Network code   ---------
@@ -57,10 +58,10 @@ public enum ErrorCode {
     DATA_OVER_SIZE_ERROR("DATA002", 11002),
     INPUT_VALUE_ERROR("DATA003", 11003),
     /**
-     *----------  Account code   ---------
+     * ----------  Account code   ---------
      */
-    PASSWORD_IS_WRONG("ACT000",45000),
-    ACCOUNT_NOT_EXIST("ACT001",45001),
+    PASSWORD_IS_WRONG("ACT000", 45000),
+    ACCOUNT_NOT_EXIST("ACT001", 45001),
 
     /**
      * ----------  DBException code   ---------
@@ -90,7 +91,7 @@ public enum ErrorCode {
     CS_UNKOWN_EXCEPTION("CS000", 60000),
     TIME_OUT("CS001", 60001),
     DEPOSIT_ERROR("CS002", 60002),
-    DEPOSIT_NOT_ENOUGH("CS003",60003 );
+    DEPOSIT_NOT_ENOUGH("CS003", 60003);
 
     private final int msg;
     private final String code;

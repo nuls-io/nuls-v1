@@ -7,7 +7,7 @@ import io.nuls.consensus.event.SmallBlockEvent;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.context.NulsContext;
 import io.nuls.event.bus.bus.handler.AbstractEventBusHandler;
-import io.nuls.event.bus.bus.service.intf.BusDataService;
+import io.nuls.event.bus.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.service.intf.LedgerService;
 
 import java.util.List;
@@ -20,7 +20,7 @@ import java.util.List;
 public class GetSmallBlockBusHandler extends AbstractEventBusHandler<GetSmallBlockEvent> {
 
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
-    private BusDataService busDataService = NulsContext.getInstance().getService(BusDataService.class);
+    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
     @Override
     public void onEvent(GetSmallBlockEvent event,String fromId) {
         AskSmallBlockData data = event.getEventBody();
@@ -30,6 +30,6 @@ public class GetSmallBlockBusHandler extends AbstractEventBusHandler<GetSmallBlo
         List<Transaction> txList = ledgerService.queryListByHashs(data.getTxHashList());
         blockData.setTxList(txList);
         blockEvent.setEventBody(blockData);
-        busDataService.sendToPeer(blockEvent,fromId);
+        eventBroadcaster.sendToPeer(blockEvent,fromId);
     }
 }

@@ -4,11 +4,13 @@ package io.nuls.core.chain.entity;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Hex;
+import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * @author facjas
@@ -108,6 +110,22 @@ public class NulsDigestData extends BaseNulsData {
         digestData.setDigestLength(content.length);
         digestData.setDigestBytes(content);
         return digestData;
+    }
+
+    public static NulsDigestData calcMerkleDigestData(List<NulsDigestData> ddList) {
+        //todo
+        int levelOffset = 0;
+        for (int levelSize = ddList.size(); levelSize > 1; levelSize = (levelSize + 1) / 2) {
+            for (int left = 0; left < levelSize; left += 2) {
+                int right = Math.min(left + 1, levelSize - 1);
+                byte[] leftBytes = Utils.reverseBytes(ddList.get(levelOffset + left).getDigestBytes());
+                byte[] rightBytes = Utils.reverseBytes(ddList.get(levelOffset + right).getDigestBytes());
+                ddList.add(new NulsDigestData(Utils.reverseBytes(Sha256Hash.hashTwice(leftBytes, 0, 32, rightBytes, 0, 32))));
+            }
+            levelOffset += levelSize;
+        }
+        Sha256Hash merkleHash = Sha256Hash.wrap(ddList.get(ddList.size() - 1).getDigestBytes());
+        return new NulsDigestData(merkleHash.getBytes());
     }
 
     public static void main(String[] args) {

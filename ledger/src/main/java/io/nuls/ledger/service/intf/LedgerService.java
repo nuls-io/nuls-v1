@@ -48,4 +48,8 @@ public interface LedgerService {
     Transaction getTransaction(NulsDigestData txHash);
 
     List<Transaction> queryListByHashs(List<NulsDigestData> txHashList);
+
+    void removeFromCache(List<NulsDigestData> txHashList);
+
+    List<Transaction> getTxListFromCache();
 }
