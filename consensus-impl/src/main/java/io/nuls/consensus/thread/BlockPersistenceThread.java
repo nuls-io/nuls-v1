@@ -8,11 +8,13 @@ import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.entity.BlockPo;
 import io.nuls.db.entity.TransactionPo;
+import io.nuls.ledger.service.intf.LedgerService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +28,7 @@ public class BlockPersistenceThread implements Runnable {
     private static final BlockPersistenceThread INSTANCE = new BlockPersistenceThread();
     private BlockCacheService blockCacheService = BlockCacheService.getInstance();
     private BlockService blockService = BlockServiceImpl.getInstance();
+    private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
     private boolean running;
 
     private BlockPersistenceThread() {
@@ -61,6 +64,7 @@ public class BlockPersistenceThread implements Runnable {
 
             blockService.save(block);
             this.blockCacheService.removeBlock(blockCacheService.getMinHeight());
+            this.ledgerService.removeFromCache(block.getHeader().getTxHashList());
         }
     }
 

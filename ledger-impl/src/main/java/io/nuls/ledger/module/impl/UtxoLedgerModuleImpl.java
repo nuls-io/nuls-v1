@@ -43,7 +43,7 @@ public class UtxoLedgerModuleImpl extends AbstractLedgerModule {
 
     @Override
     public void start() {
-        this.registerService(ledgerService);
+        this.registerService(LedgerService.class, ledgerService);
         this.registerService(CoinDataProvider.class, UtxoCoinDataProvider.getInstance());
         cacheStandingBook();
         SmallChangeThread smallChangeThread = SmallChangeThread.getInstance();

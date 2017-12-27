@@ -18,11 +18,12 @@ public class BlockCacheService {
     private long minHeight;
     private long maxHeight;
 
+
     private BlockCacheService() {
 
     }
 
-    public void init(){
+    public void init() {
         blockCacheMap = new CacheMap<>(BLOCK_CACHE);
         hashHeightMap = new CacheMap<>(HEIGHT_HASH_CACHE);
     }
@@ -31,6 +32,7 @@ public class BlockCacheService {
         return INSTANCE;
     }
 
+    //todo 分叉处理
     public void cacheBlock(Block block) {
         if (block.getHeader().getHeight() == (1 + maxHeight)) {
             maxHeight = block.getHeader().getHeight();

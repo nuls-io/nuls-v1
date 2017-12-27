@@ -22,7 +22,6 @@ import java.util.Map;
  * @author Niels
  * @date 2017/11/10
  */
-//todo temp
 public final class GenesisBlock extends Block {
     private static final String CONFIG_FILED_TIME = "time";
     private static final String CONFIG_FILED_HEIGHT = "height";
