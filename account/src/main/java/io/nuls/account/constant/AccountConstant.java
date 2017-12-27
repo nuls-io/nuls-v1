@@ -20,5 +20,5 @@ public interface AccountConstant {
 
     short EVENT_TYPE_ALIAS = 1;
 
-    Na ALIAS_Na = Na.parseNuls(1);
+    Na ALIAS_NA = Na.parseNuls(1);
 }
