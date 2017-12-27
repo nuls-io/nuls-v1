@@ -14,15 +14,7 @@ public interface BlockService {
 
     long getLocalHeight();
 
-    byte[] getLocalHighestHash();
-
-    long getBestHeight();
-
-    byte[] getBestHash();
-
-    Block getLocalHighestBlock();
-
-    Block getBestBlock();
+    Block getLocalBestBlock();
 
     Block getBlockByHash(String hash);
 

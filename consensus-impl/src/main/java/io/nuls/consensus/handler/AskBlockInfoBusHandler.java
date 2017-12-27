@@ -21,7 +21,7 @@ public class AskBlockInfoBusHandler extends AbstractEventBusHandler<AskBlockInfo
     public void onEvent(AskBlockInfoEvent event, String fromId)   {
         BlockHeader header ;
         if(null==event.getEventBody()||event.getEventBody().getVal()==0){
-            header = blockService.getLocalHighestBlock().getHeader();
+            header = blockService.getLocalBestBlock().getHeader();
         }else{
             Block block = blockService.getBlockByHeight(event.getEventBody().getVal());
             if(null==block){

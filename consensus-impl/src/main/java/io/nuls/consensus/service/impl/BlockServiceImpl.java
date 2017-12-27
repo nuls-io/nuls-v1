@@ -1,7 +1,5 @@
 package io.nuls.consensus.service.impl;
 
-import io.nuls.consensus.constant.PocConsensusConstant;
-import io.nuls.consensus.entity.genesis.GenesisBlock;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.core.chain.entity.Block;
@@ -53,31 +51,7 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public byte[] getLocalHighestHash() {
-        // todo auto-generated method stub(niels)
-        return new byte[0];
-    }
-
-    @Override
-    public long getBestHeight() {
-        // todo auto-generated method stub(niels)
-        return 0;
-    }
-
-    @Override
-    public byte[] getBestHash() {
-        // todo auto-generated method stub(niels)
-        return new byte[0];
-    }
-
-    @Override
-    public Block getLocalHighestBlock() {
-        // todo auto-generated method stub(niels)
-        return GenesisBlock.getInstance();
-    }
-
-    @Override
-    public Block getBestBlock() {
+    public Block getLocalBestBlock() {
         // todo auto-generated method stub(niels)
         return null;
     }
