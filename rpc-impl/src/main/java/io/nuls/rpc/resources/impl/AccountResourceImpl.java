@@ -8,8 +8,9 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
 /**
- * Created by Niels on 2017/9/30.
  *
+ * @author Niels
+ * @date 2017/9/30
  */
 @Path("/account")
 public class AccountResourceImpl implements AccountResource {

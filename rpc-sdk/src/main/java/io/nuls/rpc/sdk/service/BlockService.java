@@ -5,7 +5,9 @@ import io.nuls.rpc.sdk.utils.AssertUtil;
 import io.nuls.rpc.sdk.utils.RestFulUtils;
 
 /**
- * Created by Niels on 2017/11/1.
+ *
+ * @author Niels
+ * @date 2017/11/1
  *
  */
 public class BlockService {

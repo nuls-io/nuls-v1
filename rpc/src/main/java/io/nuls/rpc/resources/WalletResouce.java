@@ -5,8 +5,9 @@ import io.nuls.rpc.entity.RpcResult;
 import java.io.File;
 
 /**
- * Created by Niels on 2017/9/30.
  *
+ * @author Niels
+ * @date 2017/9/30
  */
 public interface WalletResouce {
     RpcResult lock();

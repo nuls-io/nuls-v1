@@ -10,7 +10,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 /**
- * Created by Niels on 2017/9/30.
+ *
+ * @author Niels
+ * @date 2017/9/30
  *
  */
 @Path("/peers")

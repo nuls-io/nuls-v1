@@ -66,11 +66,11 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     public Transaction gettx(byte[] txid, boolean isMine) {
         String hash = Hex.encode(txid);
-        return gettx(hash, isMine);
+        return getTx(hash, isMine);
     }
 
     @Override
-    public Transaction gettx(String hash, boolean isMine) {
+    public Transaction getTx(String hash, boolean isMine) {
         Transaction tx = getTxFromCache(hash);
         if (tx == null) {
             TransactionPo po = txDao.gettx(hash, isMine);

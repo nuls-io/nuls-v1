@@ -1,8 +1,9 @@
 package io.nuls.rpc.constant;
 
 /**
- * Created by Niels on 2017/10/9.
  *
+ * @author Niels
+ * @date 2017/10/9
  */
 public interface RpcConstant {
     //version

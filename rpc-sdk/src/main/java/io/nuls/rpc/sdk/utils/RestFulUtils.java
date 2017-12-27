@@ -12,7 +12,9 @@ import java.util.Map;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 /**
- * Created by Niels on 2017/10/31.
+ *
+ * @author Niels
+ * @date 2017/10/31
  *
  */
 public class RestFulUtils {
