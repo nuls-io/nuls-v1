@@ -64,7 +64,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public Transaction gettx(byte[] txid, boolean isMine) {
+    public Transaction getTx(byte[] txid, boolean isMine) {
         String hash = Hex.encode(txid);
         return getTx(hash, isMine);
     }
@@ -123,42 +123,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public Result transfer(Address address, String password, Address toAddress, Na amount, String remark) {
-        Account account = accountService.getAccount(address.getBase58());
-        if(account == null) {
-            return new Result(false, "account not found");
-        }
-        if(!account.validatePassword(password)) {
-            return new Result(false, "password error");
-        }
-        Balance balance = getBalance(address.getBase58());
-        if(balance.getUseable().isLessThan(amount)) {
-            return new Result(false, "balance is not enough");
-        }
-
-        TransferTransaction tx = new TransferTransaction();
-
-        return null;
-    }
-
-    @Override
-    public boolean saveTransaction(Transaction tx) {
-        boolean result = false;
-        do {
-            if (null == tx) {
-                break;
-            }
-            try {
-                tx.verify();
-            } catch (NulsVerificationException e) {
-                break;
-            }
-            //todo save to db
-        } while (false);
-        return result;
-    }
-
-    @Override
     public List<Transaction> queryListByAccount(String address, int txType, long beginTime) {
         //todo
         return null;
@@ -169,12 +133,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
         return null;
     }
-
-    @Override
-    public boolean lockNuls(String address, String password, Na na) {
-        // todo auto-generated method stub(niels)
-        return false;
-    }
+ 
 
     @Override
     public Transaction getTransaction(NulsDigestData txHash) {

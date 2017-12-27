@@ -13,7 +13,7 @@ import io.nuls.event.bus.bus.service.intf.EventBroadcaster;
  * @author Niels
  * @date 2017/12/12
  */
-public class AskBlockInfoBusHandler extends AbstractEventBusHandler<AskBlockInfoEvent> {
+public class AskBlockInfoHandler extends AbstractEventBusHandler<AskBlockInfoEvent> {
 
     private BlockService blockService = NulsContext.getInstance().getService(BlockService.class);
     private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);

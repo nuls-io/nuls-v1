@@ -1,8 +1,6 @@
 package io.nuls.core.chain.entity;
 
 
-import io.nuls.core.utils.crypto.Utils;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
 

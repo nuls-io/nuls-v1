@@ -19,7 +19,7 @@ import java.util.List;
  * @author facjas
  * @date 2017/11/16
  */
-public class BlockHeaderBusHandler extends AbstractEventBusHandler<BlockHeaderEvent> {
+public class BlockHeaderHandler extends AbstractEventBusHandler<BlockHeaderEvent> {
 
     private BlockHeaderCacheService headerCacheService = BlockHeaderCacheService.getInstance();
 
@@ -36,7 +36,7 @@ public class BlockHeaderBusHandler extends AbstractEventBusHandler<BlockHeaderEv
         headerCacheService.cacheHeader(header);
         GetSmallBlockEvent smallBlockEvent = new GetSmallBlockEvent();
         AskSmallBlockData data = new AskSmallBlockData();
-        data.setHeight(header.getHeight());
+        data.setBlockHash(header.getHash());
         List<NulsDigestData> txHashList = new ArrayList<>();
         for (NulsDigestData txHash : header.getTxHashList()) {
             boolean exist = ledgerService.txExist(txHash.getDigestHex());

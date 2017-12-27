@@ -17,14 +17,14 @@ import java.util.List;
  */
 public class AskSmallBlockData extends BaseNulsData {
 
-    private long height;
+    private NulsDigestData blockHash;
 
     private List<NulsDigestData> txHashList;
 
     @Override
     public int size() {
         int size = 0;
-        size += VarInt.sizeOf(height);
+        size += blockHash.size();
         size += VarInt.sizeOf(txHashList.size());
         size += this.getTxHashBytesLength();
         return size;
@@ -32,7 +32,7 @@ public class AskSmallBlockData extends BaseNulsData {
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeVarInt(height);
+        blockHash.serializeToStream(stream);
         stream.writeVarInt(txHashList.size());
         for(NulsDigestData data:txHashList){
             data.serializeToStream(stream);
@@ -41,7 +41,8 @@ public class AskSmallBlockData extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-       this.height = byteBuffer.readVarInt();
+        this.blockHash = new NulsDigestData();
+        this.blockHash.parse(byteBuffer);
        long txCount = byteBuffer.readVarInt();
        this.txHashList = new ArrayList<>();
        for(int i=0;i<txCount;i++){
@@ -73,12 +74,13 @@ public class AskSmallBlockData extends BaseNulsData {
         }
         return size;
     }
-    public long getHeight() {
-        return height;
+
+    public NulsDigestData getBlockHash() {
+        return blockHash;
     }
 
-    public void setHeight(long height) {
-        this.height = height;
+    public void setBlockHash(NulsDigestData blockHash) {
+        this.blockHash = blockHash;
     }
 
     public List<NulsDigestData> getTxHashList() {
