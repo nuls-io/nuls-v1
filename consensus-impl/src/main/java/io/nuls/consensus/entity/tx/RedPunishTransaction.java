@@ -5,7 +5,9 @@ import io.nuls.consensus.entity.RedPunishData;
 import io.nuls.consensus.entity.listener.RedPunishTxListener;
 import io.nuls.consensus.entity.validator.tx.DoubleSpendValidator;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.log.Log;
 
 /**
  * @author Niels
@@ -20,7 +22,12 @@ public class RedPunishTransaction extends Transaction<RedPunishData> {
 
     @Override
     protected RedPunishData parseTxData(NulsByteBuffer byteBuffer) {
-        // todo auto-generated method stub(niels)
-        return null;
+        RedPunishData data = new RedPunishData();
+        try {
+            data.parse(byteBuffer);
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+        return data;
     }
 }

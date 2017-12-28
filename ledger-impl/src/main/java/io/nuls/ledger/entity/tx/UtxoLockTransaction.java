@@ -9,6 +9,7 @@ import io.nuls.ledger.entity.validator.UtxoTxOutputsValidator;
  */
 public class UtxoLockTransaction extends LockNulsTransaction  {
     public UtxoLockTransaction(){
+        super(13);
         this.registerValidator(UtxoTxInputsValidator.getInstance());
         this.registerValidator(UtxoTxOutputsValidator.getInstance());
     }

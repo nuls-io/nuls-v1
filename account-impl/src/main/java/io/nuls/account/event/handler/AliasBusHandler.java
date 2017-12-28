@@ -44,7 +44,7 @@ public class AliasBusHandler extends AbstractEventBusHandler<AliasEvent> {
         ValidateResult result = tx.verify();
         if (result.isFailed()) {
             if (SeverityLevelEnum.FLAGRANT.equals(result.getLevel())) {
-               // networkService.removePeer(fromId);
+               //todo networkService.removePeer(fromId);
             }
             return;
         }
