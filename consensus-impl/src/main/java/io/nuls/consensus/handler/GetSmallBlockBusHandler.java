@@ -13,7 +13,6 @@ import io.nuls.ledger.service.intf.LedgerService;
 import java.util.List;
 
 /**
- *
  * @author facjas
  * @date 2017/11/16
  */
@@ -21,15 +20,16 @@ public class GetSmallBlockBusHandler extends AbstractEventBusHandler<GetSmallBlo
 
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
     private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
+
     @Override
-    public void onEvent(GetSmallBlockEvent event,String fromId) {
+    public void onEvent(GetSmallBlockEvent event, String fromId) {
         AskSmallBlockData data = event.getEventBody();
         SmallBlockEvent blockEvent = new SmallBlockEvent();
         SmallBlockData blockData = new SmallBlockData();
-        blockData.setHeight(data.getHeight());
+        blockData.setBlockHash(data.getBlockHash());
         List<Transaction> txList = ledgerService.queryListByHashs(data.getTxHashList());
         blockData.setTxList(txList);
         blockEvent.setEventBody(blockData);
-        eventBroadcaster.sendToPeer(blockEvent,fromId);
+        eventBroadcaster.sendToPeer(blockEvent, fromId);
     }
 }

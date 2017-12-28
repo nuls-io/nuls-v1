@@ -18,9 +18,9 @@ public interface ConsensusService {
 
     Na getTxFee(int txType);
 
-    void joinTheConsensus(String address, String password, Map<String, Object> paramsMap);
+    void joinConsensus(String address, String password, Map<String, Object> paramsMap);
 
-    void exitTheConsensus(NulsDigestData joinTxHash, String password);
+    void exitConsensus(NulsDigestData joinTxHash, String password);
 
     List<Consensus> getConsensusAccountList(String address, String agentAddress);
 

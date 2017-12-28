@@ -85,16 +85,6 @@ public class ThreadManager {
         return THREAD_DATA_CACHE.getThreadList(moduleId);
     }
 
-    public static final String getThreadPoolsInfoString(short moduleId) {
-        //todo
-        return null;
-    }
-
-    public static final Thread.State getThreadStateByName(String name) {
-        //todo
-        return null;
-    }
-
     public static void shutdownByModuleId(short moduleId) {
         List<ThreadPoolExecutor> poolList = THREAD_DATA_CACHE.getPoolList(moduleId);
         if (null != poolList) {

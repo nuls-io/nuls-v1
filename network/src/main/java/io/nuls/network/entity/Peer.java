@@ -84,7 +84,7 @@ public class Peer extends BaseNulsData {
 
     private EventProcessorService eventProcessorService;
 
-    private NoticeProcessorService NoticeProcessorService;
+    private NoticeProcessorService noticeProcessorService;
 
     private AbstractNetWorkDataHandlerFactory messageHandlerFactory;
 
@@ -101,7 +101,7 @@ public class Peer extends BaseNulsData {
         this.magicNumber = network.packetMagic();
         this.messageHandlerFactory = network.getMessageHandlerFactory();
         eventProcessorService = NulsContext.getInstance().getService(EventProcessorService.class);
-        NoticeProcessorService = NulsContext.getInstance().getService(NoticeProcessorService.class);
+        noticeProcessorService = NulsContext.getInstance().getService(NoticeProcessorService.class);
     }
 
     public Peer(AbstractNetworkParam network, int type) {
@@ -110,7 +110,7 @@ public class Peer extends BaseNulsData {
         this.type = type;
         this.messageHandlerFactory = network.getMessageHandlerFactory();
         eventProcessorService = NulsContext.getInstance().getService(EventProcessorService.class);
-        NoticeProcessorService = NulsContext.getInstance().getService(NoticeProcessorService.class);
+        noticeProcessorService = NulsContext.getInstance().getService(NoticeProcessorService.class);
     }
 
 
@@ -122,7 +122,7 @@ public class Peer extends BaseNulsData {
         this.ip = socketAddress.getAddress().getHostAddress();
         this.messageHandlerFactory = network.getMessageHandlerFactory();
         eventProcessorService = NulsContext.getInstance().getService(EventProcessorService.class);
-        NoticeProcessorService = NulsContext.getInstance().getService(NoticeProcessorService.class);
+        noticeProcessorService = NulsContext.getInstance().getService(NoticeProcessorService.class);
         this.hash = this.ip + this.port;
     }
 
@@ -212,7 +212,7 @@ public class Peer extends BaseNulsData {
             if (checkBroadcastExist(message.getData())) {
                 return;
             }
-            eventProcessorService.send(message.getData(), this.getHash());
+            eventProcessorService.dispatch(message.getData(), this.getHash());
         } else {
 
             byte[] networkHeader = new byte[NetworkDataHeader.NETWORK_HEADER_SIZE];
@@ -265,7 +265,7 @@ public class Peer extends BaseNulsData {
         } else {
             ReplyNotice event = new ReplyNotice();
             event.setEventBody(new BasicTypeData<>(data));
-            NoticeProcessorService.notice(event);
+            noticeProcessorService.notice(event);
         }
         return true;
     }
@@ -326,7 +326,7 @@ public class Peer extends BaseNulsData {
         port = (int) buffer.readVarInt();
         ip = new String(buffer.readByLengthByte());
         eventProcessorService = NulsContext.getInstance().getService(EventProcessorService.class);
-        NoticeProcessorService = NulsContext.getInstance().getService(NoticeProcessorService.class);
+        noticeProcessorService = NulsContext.getInstance().getService(NoticeProcessorService.class);
     }
 
 

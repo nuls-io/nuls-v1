@@ -32,7 +32,7 @@ public class EventProcessorServiceImpl implements EventProcessorService {
     }
 
     @Override
-    public void send(byte[] event,String peerId) {
+    public void dispatch(byte[] event,String peerId) {
         try {
             BaseNulsEvent eventObject = BusDataManager.getEventInstance(event);
             eventObject.parse(new NulsByteBuffer(event));

@@ -14,7 +14,7 @@ import io.nuls.network.service.NetworkService;
  * @author facjas
  * @date 2017/11/16
  */
-public class BlockBusHandler extends AbstractEventBusHandler<BlockEvent> {
+public class BlockEventHandler extends AbstractEventBusHandler<BlockEvent> {
 
     private BlockCacheService blockCacheService = BlockCacheService.getInstance();
     private NetworkService networkService = NulsContext.getInstance().getService(NetworkService.class);

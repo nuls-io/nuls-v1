@@ -1,8 +1,9 @@
 package io.nuls.rpc.service.intf;
 
 /**
- * Created by Niels on 2017/9/25.
  *
+ * @author Niels
+ * @date 2017/9/25
  */
 public interface RpcServerService {
     /**
@@ -13,5 +14,4 @@ public interface RpcServerService {
     void shutdown();
 
     boolean isStarted();
-
 }

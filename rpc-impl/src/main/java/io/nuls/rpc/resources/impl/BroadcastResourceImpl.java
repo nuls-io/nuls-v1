@@ -9,7 +9,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 /**
- * Created by Niels on 2017/10/24.
+ *
+ * @author Niels
+ * @date 2017/10/24
  *
  */
 @Path("/broadcast")

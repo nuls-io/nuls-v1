@@ -116,15 +116,21 @@ public class TaskManager {
     }
 
     public void remove(short moduleId) {
-        //todo
-    }
+        Set<String> threadNameSet = MODULE_THREAD_MAP.get(moduleId);
+        for (String name : threadNameSet) {
+            BaseThread thread = THREAD_MAP.get(name);
+            thread.interrupt();
+            THREAD_MAP.remove(name);
+        }
+        MODULE_THREAD_MAP.remove(moduleId);
+        Set<String> poolNameSet = MODULE_POOL_MAP.get(moduleId);
+        for (String name : poolNameSet) {
+            ThreadPoolExecutor pool = POOL_EXECUTOR_MAP.get(name);
+            pool.shutdown();
+            POOL_EXECUTOR_MAP.remove(name);
+            POOL_THREAD_MAP.remove(name);
+        }
+        MODULE_POOL_MAP.remove(moduleId);
 
-    public void removePool(String poolName) {
-        //todo
     }
-
-    public void removeThread(String threadName) {
-        //todo
-    }
-
 }

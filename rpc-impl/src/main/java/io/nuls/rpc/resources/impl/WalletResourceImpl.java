@@ -9,7 +9,9 @@ import javax.ws.rs.core.MediaType;
 import java.io.File;
 
 /**
- * Created by Niels on 2017/9/30.
+ *
+ * @author Niels
+ * @date 2017/9/30
  *
  */
 @Path("/wallet")

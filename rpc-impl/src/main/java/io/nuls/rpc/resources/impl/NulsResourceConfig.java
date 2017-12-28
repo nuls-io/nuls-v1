@@ -5,7 +5,9 @@ import io.nuls.rpc.aop.RpcServerFilter;
 import org.glassfish.jersey.server.ResourceConfig;
 
 /**
- * Created by Niels on 2017/9/28.
+ *
+ * @author Niels
+ * @date 2017/9/28
  *
  */
 public class NulsResourceConfig extends ResourceConfig {

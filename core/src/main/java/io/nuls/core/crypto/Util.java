@@ -178,7 +178,7 @@ public class Util {
         return digit;
     }
 
-    public static String StringToAsciiString(String content) {
+    public static String stringToAsciiString(String content) {
         String result = "";
         int max = content.length();
         for (int i = 0; i < max; i++) {
@@ -279,7 +279,7 @@ public class Util {
         return result;
     }
 
-    public static String AsciiStringToString(String content) {
+    public static String asciiStringToString(String content) {
         String result = "";
         int length = content.length() / 2;
         for (int i = 0; i < length; i++) {

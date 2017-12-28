@@ -112,7 +112,7 @@ public class ConsensusMeetingThread implements Runnable {
     }
 
     private void packing(PocMeetingMember self) {
-        Block bestBlock = blockService.getBestBlock();
+        Block bestBlock = blockService.getLocalBestBlock();
         List<Transaction> txList = ledgerService.getTxListFromCache();
         txList.sort(new TxComparator());
         BlockData bd = new BlockData();
@@ -134,7 +134,7 @@ public class ConsensusMeetingThread implements Runnable {
     }
 
     private PocMeetingRound calcRound() {
-        Block bestBlock = blockService.getLocalHighestBlock();
+        Block bestBlock = blockService.getLocalBestBlock();
         PocMeetingRound round = new PocMeetingRound();
         do {
             if (bestBlock.getHeader().getHeight() == 1) {

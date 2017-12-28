@@ -8,7 +8,7 @@ import io.nuls.event.bus.bus.handler.AbstractEventBusHandler;
  * @date 2017/11/16
  */
 //todo
-public class RedPunishBusHandler extends AbstractEventBusHandler<RedPunishConsensusEvent> {
+public class RedPunishHandler extends AbstractEventBusHandler<RedPunishConsensusEvent> {
 
     @Override
     public void onEvent(RedPunishConsensusEvent event, String fromId) {

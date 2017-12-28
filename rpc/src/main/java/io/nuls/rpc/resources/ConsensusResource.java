@@ -3,8 +3,9 @@ package io.nuls.rpc.resources;
 import io.nuls.rpc.entity.RpcResult;
 
 /**
- * Created by Niels on 2017/9/30.
  *
+ * @author Niels
+ * @date 2017/9/30
  */
 public interface ConsensusResource {
     RpcResult getInfo();

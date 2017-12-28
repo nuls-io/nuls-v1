@@ -67,13 +67,13 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public Transaction gettx(byte[] txid, boolean isMine) {
+    public Transaction getTx(byte[] txid, boolean isMine) {
         String hash = Hex.encode(txid);
-        return gettx(hash, isMine);
+        return getTx(hash, isMine);
     }
 
     @Override
-    public Transaction gettx(String hash, boolean isMine) {
+    public Transaction getTx(String hash, boolean isMine) {
         Transaction tx = getTxFromCache(hash);
         if (tx == null) {
             TransactionPo po = txDao.gettx(hash, isMine);
@@ -173,11 +173,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         return null;
     }
 
-    @Override
-    public boolean lockNuls(String address, String password, Na na) {
-        // todo auto-generated method stub(niels)
-        return false;
-    }
 
     @Override
     public Transaction getTransaction(NulsDigestData txHash) {

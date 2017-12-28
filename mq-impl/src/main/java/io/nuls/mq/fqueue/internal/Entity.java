@@ -1,5 +1,9 @@
 package io.nuls.mq.fqueue.internal;
 
+import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.context.NulsContext;
+import io.nuls.core.thread.manager.ThreadManager;
+import io.nuls.mq.MqConstant;
 import io.nuls.mq.fqueue.exception.FileEOFException;
 import io.nuls.mq.fqueue.exception.FileFormatException;
 import io.nuls.mq.util.MappedBufferCleanUtil;
@@ -91,9 +95,7 @@ public class Entity {
                 readerPosition = MESSAGE_START_POSITION;
             }
         }
-        Thread t = new Thread(new Sync());
-        t.setDaemon(true);
-        t.start();
+        ThreadManager.createSingleThreadAndRun(NulsConstant.MODULE_ID_MQ, path, new Sync());
     }
 
     public int getCurrentFileNumber() {

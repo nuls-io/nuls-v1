@@ -26,6 +26,7 @@ public class SessionManager {
     }
 
     public static void setId(String id) {
+        idHolder.remove();
         idHolder.set(id);
     }
 
@@ -54,6 +55,7 @@ public class SessionManager {
         } else {
             map.put(id, session);
         }
+        sessionHolder.remove();
         sessionHolder.set(map);
     }
 
@@ -63,6 +65,7 @@ public class SessionManager {
             map = new HashMap<>();
         }
         map.put(id, true);
+        txHolder.remove();
         txHolder.set(map);
     }
 
@@ -72,6 +75,7 @@ public class SessionManager {
             map = new HashMap<>();
         }
         map.remove(id);
+        txHolder.remove();
         txHolder.set(map);
     }
 

@@ -20,14 +20,14 @@ import java.util.List;
  * @author facjas
  * @date 2017/11/16
  */
-public class SmallBlockBusHandler extends AbstractEventBusHandler<SmallBlockEvent> {
+public class SmallBlockHandler extends AbstractEventBusHandler<SmallBlockEvent> {
     private BlockHeaderCacheService headerCacheService = BlockHeaderCacheService.getInstance();
     private BlockCacheService blockCacheService = BlockCacheService.getInstance();
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
 
     @Override
     public void onEvent(SmallBlockEvent event, String fromId) {
-        BlockHeader header = headerCacheService.getHeader(event.getEventBody().getHeight());
+        BlockHeader header = headerCacheService.getHeader(event.getEventBody().getBlockHash().getDigestHex());
         if (header == null) {
             return;
         }

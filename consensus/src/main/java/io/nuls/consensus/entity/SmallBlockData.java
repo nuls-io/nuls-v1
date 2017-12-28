@@ -1,6 +1,7 @@
 package io.nuls.consensus.entity;
 
 import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.crypto.VarInt;
@@ -20,14 +21,14 @@ import java.util.List;
  */
 public class SmallBlockData extends BaseNulsData {
 
-    private long height;
+    private NulsDigestData blockHash;
 
     private List<Transaction> txList;
 
     @Override
     public int size() {
         int size = 0;
-        size += VarInt.sizeOf(height);
+        size += blockHash.size();
         size += VarInt.sizeOf(txList.size());
         for (Transaction tx : txList) {
             size += tx.size();
@@ -37,7 +38,7 @@ public class SmallBlockData extends BaseNulsData {
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeVarInt(height);
+        blockHash.serializeToStream(stream);
         stream.writeVarInt(txList.size());
         for (Transaction tx : txList) {
             tx.serializeToStream(stream);
@@ -46,7 +47,8 @@ public class SmallBlockData extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.height = byteBuffer.readVarInt();
+        this.blockHash = new NulsDigestData();
+        this.blockHash.parse(byteBuffer);
         long txCount = byteBuffer.readVarInt();
         this.txList = new ArrayList<>();
         for (int i = 0; i < txCount; i++) {
@@ -64,12 +66,12 @@ public class SmallBlockData extends BaseNulsData {
 
     }
 
-    public long getHeight() {
-        return height;
+    public NulsDigestData getBlockHash() {
+        return blockHash;
     }
 
-    public void setHeight(long height) {
-        this.height = height;
+    public void setBlockHash(NulsDigestData blockHash) {
+        this.blockHash = blockHash;
     }
 
     public List<Transaction> getTxList() {

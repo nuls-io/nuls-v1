@@ -14,7 +14,7 @@ import io.nuls.ledger.service.intf.LedgerService;
  * @author facjas
  * @date 2017/11/16
  */
-public class JoinConsensusBusHandler extends AbstractEventBusHandler<JoinConsensusEvent> {
+public class JoinConsensusHandler extends AbstractEventBusHandler<JoinConsensusEvent> {
 
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
     private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);

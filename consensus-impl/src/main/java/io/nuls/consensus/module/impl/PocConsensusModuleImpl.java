@@ -86,15 +86,15 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
 
 
     private void registerHanders() {
-        BlockBusHandler blockEventHandler = new BlockBusHandler();
+        BlockEventHandler blockEventHandler = new BlockEventHandler();
         blockEventHandler.addFilter(new BlockBusFilter());
         processorService.registerEventHandler(BlockEvent.class, blockEventHandler);
 
-        BlockHeaderBusHandler blockHeaderHandler = new BlockHeaderBusHandler();
+        BlockHeaderHandler blockHeaderHandler = new BlockHeaderHandler();
         blockHeaderHandler.addFilter(new BlockHeaderBusFilter());
         processorService.registerEventHandler(BlockHeaderEvent.class, blockHeaderHandler);
 
-        GetBlockBusHandler getBlockHandler = new GetBlockBusHandler();
+        GetBlockHandler getBlockHandler = new GetBlockHandler();
         getBlockHandler.addFilter(new GetBlockBusFilter());
         processorService.registerEventHandler(GetSmallBlockEvent.class, getBlockHandler);
 
@@ -102,32 +102,33 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
         getSmallBlockHandler.addFilter(new GetSmallBlockBusFilter());
         processorService.registerEventHandler(GetSmallBlockEvent.class, getSmallBlockHandler);
 
-        RegisterAgentBusHandler registerAgentHandler = new RegisterAgentBusHandler();
+        RegisterAgentHandler registerAgentHandler = new RegisterAgentHandler();
         registerAgentHandler.addFilter(new RegisterAgentBusFilter());
         processorService.registerEventHandler(RegisterAgentEvent.class, registerAgentHandler);
 
-        JoinConsensusBusHandler joinConsensusHandler = new JoinConsensusBusHandler();
+        JoinConsensusHandler joinConsensusHandler = new JoinConsensusHandler();
         joinConsensusHandler.addFilter(AllreadyJoinConsensusBusFilter.getInstance());
         joinConsensusHandler.addFilter(CreditThresholdBusFilter.getInstance());
-
-
         processorService.registerEventHandler(JoinConsensusEvent.class, joinConsensusHandler);
 
-        ExitConsensusBusHandler exitConsensusHandler = new ExitConsensusBusHandler();
+        ExitConsensusHandler exitConsensusHandler = new ExitConsensusHandler();
         exitConsensusHandler.addFilter(new ExitConsensusBusFilter());
         processorService.registerEventHandler(ExitConsensusEvent.class, exitConsensusHandler);
 
-        RedPunishBusHandler redPunishHandler = new RedPunishBusHandler();
+        RedPunishHandler redPunishHandler = new RedPunishHandler();
         redPunishHandler.addFilter(new RedPunishBusFilter());
         processorService.registerEventHandler(RedPunishConsensusEvent.class, redPunishHandler);
 
-        YellowPunishBusHandler yellowPunishHandler = new YellowPunishBusHandler();
+        YellowPunishHandler yellowPunishHandler = new YellowPunishHandler();
         yellowPunishHandler.addFilter(new YellowPunishBusFilter());
         processorService.registerEventHandler(YellowPunishConsensusEvent.class, yellowPunishHandler);
 
-        AskBlockInfoBusHandler askBlockInfoHandler = new AskBlockInfoBusHandler();
+        AskBlockInfoHandler askBlockInfoHandler = new AskBlockInfoHandler();
         processorService.registerEventHandler(AskBlockInfoEvent.class, askBlockInfoHandler);
 
+        SmallBlockHandler smallBlockHandler = new SmallBlockHandler();
+//todo        smallBlockHandler.addFilter();
+        processorService.registerEventHandler(SmallBlockEvent.class, smallBlockHandler);
     }
 
     private void checkConsensusStatus() {

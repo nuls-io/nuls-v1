@@ -120,7 +120,7 @@ public class BlockMaintenanceThread implements Runnable {
     }
 
     private Block getLocalBestCorrectBlock() {
-        Block localBestBlock = this.blockService.getLocalHighestBlock();
+        Block localBestBlock = this.blockService.getLocalBestBlock();
         do {
             if (null == localBestBlock || localBestBlock.getHeader().getHeight() <= 1) {
                 break;
@@ -129,13 +129,13 @@ public class BlockMaintenanceThread implements Runnable {
             if (null == blockInfo || blockInfo.getHash() == null) {
                 //本地高度最高，查询网络最新高度，并回退
                 rollbackBlock(localBestBlock.getHeader().getHeight());
-                localBestBlock = this.blockService.getLocalHighestBlock();
+                localBestBlock = this.blockService.getLocalBestBlock();
                 break;
             }
             if (!blockInfo.getHash().equals(localBestBlock.getHeader().getHash())) {
                 //本地分叉，回退
                 rollbackBlock(blockInfo.getHeight());
-                localBestBlock = this.blockService.getLocalHighestBlock();
+                localBestBlock = this.blockService.getLocalBestBlock();
                 break;
             }
         } while (false);

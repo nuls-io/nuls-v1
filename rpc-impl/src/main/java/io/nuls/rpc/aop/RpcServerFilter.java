@@ -24,7 +24,9 @@ import javax.ws.rs.ext.ExceptionMapper;
 import java.io.IOException;
 
 /**
- * Created by Niels on 2017/9/28.
+ *
+ * @author Niels
+ * @date 2017/9/28
  */
 public class RpcServerFilter implements ContainerRequestFilter, ContainerResponseFilter, ExceptionMapper<Exception> {
 
