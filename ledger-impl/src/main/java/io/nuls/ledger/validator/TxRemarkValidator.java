@@ -1,4 +1,4 @@
-package io.nuls.ledger.entity.validator;
+package io.nuls.ledger.validator;
 
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;

@@ -10,22 +10,22 @@ import io.nuls.ledger.entity.params.CoinTransferData;
  * @author Niels
  * @date 2017/11/20
  */
-public class LockNulsTransaction<T extends BaseNulsData>  extends AbstractCoinTransaction<T> {
+public class SmallChangeTransaction<T extends BaseNulsData>  extends AbstractCoinTransaction<T> {
 
-    public LockNulsTransaction() {
-        this(TransactionConstant.TX_TYPE_LOCK,null,null);
+    public SmallChangeTransaction() {
+        this(TransactionConstant.TX_TYPE_SMALL_CHANGE,null,null);
     }
 
-    public LockNulsTransaction(CoinTransferData params, String password) {
-        this(TransactionConstant.TX_TYPE_LOCK, params, password);
+    public SmallChangeTransaction(CoinTransferData params, String password) {
+        this(TransactionConstant.TX_TYPE_SMALL_CHANGE, params, password);
 
     }
 
-    protected LockNulsTransaction(int type, CoinTransferData params, String password) {
+    protected SmallChangeTransaction(int type, CoinTransferData params, String password) {
         super(type,params,password);
     }
 
-    protected LockNulsTransaction(int type) {
+    protected SmallChangeTransaction(int type) {
         super(type);
     }
 

@@ -2,7 +2,6 @@ package io.nuls.ledger.constant;
 
 /**
  * Created by Niels on 2017/11/8.
- *
  */
 public interface LedgerConstant {
     //version
@@ -12,4 +11,10 @@ public interface LedgerConstant {
 
     int SMALL_CHANGE_COUNT = 500;
     String STANDING_BOOK = "STANDING_BOOK";
+
+    short EVENT_TYPE_TRANSFER = 1;
+    short EVENT_TYPE_LOCK_NULS = 2;
+    short EVENT_TYPE_UNLOCK_NULS = 3;
+    short EVENT_TYPE_SMALL_CHANGE = 4;
+
 }

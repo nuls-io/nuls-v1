@@ -1,5 +1,6 @@
 package io.nuls.ledger.service.impl;
 
+import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
@@ -20,6 +21,8 @@ import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.entity.TransactionTool;
 import io.nuls.ledger.entity.UtxoData;
+import io.nuls.ledger.entity.params.Coin;
+import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.tx.TransferTransaction;
 import io.nuls.ledger.service.intf.LedgerService;
 
@@ -123,6 +126,42 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
+    public Result transfer(Address address, String password, Address toAddress, Na amount, String remark) {
+        Account account = accountService.getAccount(address.getBase58());
+        if (account == null) {
+            return new Result(false, "account not found");
+        }
+        if (!account.validatePassword(password)) {
+            return new Result(false, "password error");
+        }
+        Balance balance = getBalance(address.getBase58());
+        if (balance.getUseable().isLessThan(amount)) {
+            return new Result(false, "balance is not enough");
+        }
+
+        CoinTransferData coinData = new CoinTransferData(amount, address.getBase58(), toAddress.getBase58());
+        TransferTransaction tx = new TransferTransaction(coinData, password);
+        return null;
+    }
+
+    @Override
+    public boolean saveTransaction(Transaction tx) {
+        boolean result = false;
+        do {
+            if (null == tx) {
+                break;
+            }
+            try {
+                tx.verify();
+            } catch (NulsVerificationException e) {
+                break;
+            }
+            //todo save to db
+        } while (false);
+        return result;
+    }
+
+    @Override
     public List<Transaction> queryListByAccount(String address, int txType, long beginTime) {
         //todo
         return null;
@@ -133,7 +172,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
         return null;
     }
- 
+
 
     @Override
     public Transaction getTransaction(NulsDigestData txHash) {

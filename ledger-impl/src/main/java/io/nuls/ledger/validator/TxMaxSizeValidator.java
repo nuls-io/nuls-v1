@@ -1,8 +1,7 @@
-package io.nuls.ledger.entity.validator;
+package io.nuls.ledger.validator;
 
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 
@@ -24,7 +23,7 @@ public class TxMaxSizeValidator implements NulsDataValidator<Transaction> {
     @Override
     public ValidateResult validate(Transaction data) {
         if (data.size() > MAX_STANDARD_TX_SIZE) {
-            return ValidateResult.getFailedResult( ErrorCode.DATA_SIZE_ERROR);
+            return ValidateResult.getFailedResult(ErrorCode.DATA_SIZE_ERROR);
         }
         return ValidateResult.getSuccessResult();
     }

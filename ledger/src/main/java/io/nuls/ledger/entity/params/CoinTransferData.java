@@ -1,6 +1,8 @@
 package io.nuls.ledger.entity.params;
 
 import io.nuls.core.chain.entity.Na;
+import io.nuls.core.context.NulsContext;
+import io.nuls.core.utils.str.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +13,29 @@ import java.util.Map;
  */
 public class CoinTransferData {
 
+    public CoinTransferData() {
+        this.fromMap = new HashMap<>();
+        this.toMap = new HashMap<>();
+        this.fee = NulsContext.getInstance().getTxFee();
+    }
+
+    public CoinTransferData(Na totalNa) {
+        this();
+        this.totalNa = totalNa;
+    }
+
+    public CoinTransferData(Na totalNa, String from, String to) {
+        this(totalNa);
+        if (StringUtils.isNotBlank(from)) {
+            this.addFrom(from, totalNa);
+        }
+        if (StringUtils.isNotBlank(to)) {
+            this.addTo(to, new Coin(totalNa));
+        }
+    }
+
     private Map<String, Na> fromMap;
+
     private Map<String, Coin> toMap;
 
     private Na totalNa;
@@ -51,16 +75,11 @@ public class CoinTransferData {
     }
 
     public void addFrom(String address, Na na) {
-        if (null == this.fromMap) {
-            this.fromMap = new HashMap<>();
-        }
         this.fromMap.put(address, na);
     }
 
     public void addTo(String address, Coin coin) {
-        if (null == this.toMap) {
-            this.toMap = new HashMap<>();
-        }
         this.toMap.put(address, coin);
     }
+
 }

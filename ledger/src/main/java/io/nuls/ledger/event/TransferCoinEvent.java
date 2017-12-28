@@ -1,5 +1,6 @@
 package io.nuls.ledger.event;
 
+import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.entity.tx.TransferTransaction;
 
 /**
@@ -7,9 +8,9 @@ import io.nuls.ledger.entity.tx.TransferTransaction;
  * @author Niels
  * @date 2017/11/20
  */
-public class TransferEvent<T extends TransferTransaction> extends AbstractCoinTransactionEvent<T> {
-    public TransferEvent() {
-        super((short) 2);
+public class TransferCoinEvent<T extends TransferTransaction> extends AbstractCoinTransactionEvent<T> {
+    public TransferCoinEvent() {
+        super(LedgerConstant.EVENT_TYPE_TRANSFER);
     }
 
     @Override
