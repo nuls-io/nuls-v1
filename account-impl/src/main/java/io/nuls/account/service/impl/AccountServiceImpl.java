@@ -472,10 +472,7 @@ public class AccountServiceImpl implements AccountService {
         try {
             Account account = getAccount(address);
             AliasEvent event = new AliasEvent();
-            CoinTransferData coinData = new CoinTransferData();
-            coinData.setFee(NulsContext.getInstance().getTxFee());
-            coinData.setTotalNa(AccountConstant.ALIAS_Na);
-            coinData.addFrom(account.getAddress().getBase58(), AccountConstant.ALIAS_Na);
+            CoinTransferData coinData = new CoinTransferData(AccountConstant.ALIAS_Na, address, null);
             AliasTransaction aliasTx = new AliasTransaction(coinData, password);
             aliasTx.setHash(NulsDigestData.calcDigestData(aliasTx.serialize()));
             aliasTx.setSign(signData(aliasTx.getHash(), account, password));

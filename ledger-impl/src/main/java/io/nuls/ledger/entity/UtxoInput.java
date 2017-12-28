@@ -3,16 +3,12 @@ package io.nuls.ledger.entity;
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.NulsSignData;
-import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.VarInt;
-import io.nuls.core.crypto.script.Script;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 

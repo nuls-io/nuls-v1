@@ -2,7 +2,6 @@ package io.nuls.ledger.module;
 
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.module.BaseNulsModule;
-import io.nuls.ledger.event.BaseLedgerEvent;
 import io.nuls.ledger.event.AbstractCoinTransactionEvent;
 
 /**
@@ -13,7 +12,5 @@ import io.nuls.ledger.event.AbstractCoinTransactionEvent;
 public abstract class AbstractLedgerModule extends BaseNulsModule {
     public AbstractLedgerModule() {
         super(NulsConstant.MODULE_ID_LEDGER);
-        this.publish((short) 1, BaseLedgerEvent.class);
-        this.publish((short) 2, AbstractCoinTransactionEvent.class);
     }
 }

@@ -1,15 +1,15 @@
 package io.nuls.ledger.event;
 
-import io.nuls.ledger.entity.tx.LockNulsTransaction;
+import io.nuls.ledger.entity.tx.LockCoinTransaction;
 
 /**
  *
  * @author Niels
  * @date 2017/11/20
  */
-public class LockNulsEvent<T extends LockNulsTransaction> extends AbstractCoinTransactionEvent<T> {
+public class LockCoinEvent<T extends LockCoinTransaction> extends AbstractCoinTransactionEvent<T> {
 
-    public LockNulsEvent() {
+    public LockCoinEvent() {
         super((short) 1);
     }
 

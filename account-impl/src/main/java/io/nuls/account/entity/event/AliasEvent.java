@@ -7,7 +7,6 @@ import io.nuls.core.event.BaseNulsEvent;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
-import io.nuls.core.validate.ValidateResult;
 
 /**
  * @author vivi

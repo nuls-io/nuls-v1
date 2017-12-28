@@ -9,8 +9,6 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.entity.TransactionPo;
 import io.nuls.ledger.entity.Balance;
-import io.nuls.ledger.entity.tx.LockNulsTransaction;
-import io.nuls.ledger.entity.tx.UnlockNulsTransaction;
 
 import java.util.List;
 
@@ -37,7 +35,6 @@ public interface LedgerService {
     Result transfer(Address address, String password, Address toAddress, Na amount, String remark);
 
     boolean saveTransaction(Transaction tx);
-
 
     List<Transaction> queryListByAccount(String address, int txType, long beginTime);
 

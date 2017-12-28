@@ -1,4 +1,4 @@
-package io.nuls.ledger.entity.validator;
+package io.nuls.ledger.validator;
 
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.validate.NulsDataValidator;
@@ -17,6 +17,7 @@ public class TxSignValidator implements NulsDataValidator<Transaction> {
     public static TxSignValidator getInstance() {
         return INSTANCE;
     }
+
     @Override
     public ValidateResult validate(Transaction data) {
         //todo verify sign
