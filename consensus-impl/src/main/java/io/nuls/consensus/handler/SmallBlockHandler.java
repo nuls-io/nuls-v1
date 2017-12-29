@@ -7,6 +7,7 @@ import io.nuls.consensus.entity.tx.RedPunishTransaction;
 import io.nuls.consensus.event.SmallBlockEvent;
 import io.nuls.consensus.service.cache.BlockCacheService;
 import io.nuls.consensus.service.cache.BlockHeaderCacheService;
+import io.nuls.consensus.thread.ConsensusMeetingThread;
 import io.nuls.core.chain.entity.*;
 import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.context.NulsContext;
@@ -52,13 +53,7 @@ public class SmallBlockHandler extends AbstractEventBusHandler<SmallBlockEvent> 
             networkService.removePeer(fromId);
             if (vResult.getLevel() == SeverityLevelEnum.FLAGRANT) {
                 RedPunishData data = vResult.getObject();
-                RedPunishTransaction tx = new RedPunishTransaction();
-                tx.setTxData(data);
-                tx.setFee(Na.ZERO);
-                tx.setTime(block.getHeader().getTime());
-                tx.setHash(NulsDigestData.calcDigestData(tx));
-                tx.setSign(accountService.signData(tx.getHash()));
-
+                ConsensusMeetingThread.putPunishData(data);
             }
             return;
         }

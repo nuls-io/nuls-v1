@@ -8,8 +8,9 @@ import io.nuls.core.crypto.Sha256Hash;
  * @date 2017/12/25
  */
 public class PocMeetingMember implements Comparable<PocMeetingMember> {
+    private long roundIndex;
     private long roundStartTime;
-    private int roundIndex;
+    private int indexOfRound;
     private String address;
     private String packerAddress;
     private long packTime;
@@ -62,12 +63,12 @@ public class PocMeetingMember implements Comparable<PocMeetingMember> {
         this.packerAddress = packerAddress;
     }
 
-    public int getRoundIndex() {
-        return roundIndex;
+    public int getIndexOfRound() {
+        return indexOfRound;
     }
 
-    public void setRoundIndex(int roundIndex) {
-        this.roundIndex = roundIndex;
+    public void setIndexOfRound(int indexOfRound) {
+        this.indexOfRound = indexOfRound;
     }
 
     public long getPackTime() {
@@ -76,5 +77,13 @@ public class PocMeetingMember implements Comparable<PocMeetingMember> {
 
     public void setPackTime(long packTime) {
         this.packTime = packTime;
+    }
+
+    public long getRoundIndex() {
+        return roundIndex;
+    }
+
+    public void setRoundIndex(long roundIndex) {
+        this.roundIndex = roundIndex;
     }
 }

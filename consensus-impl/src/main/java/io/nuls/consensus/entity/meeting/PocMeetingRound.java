@@ -1,7 +1,6 @@
 package io.nuls.consensus.entity.meeting;
 
 import io.nuls.consensus.constant.PocConsensusConstant;
-import io.nuls.core.chain.entity.Block;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
 
@@ -15,11 +14,18 @@ import java.util.Map;
  */
 public class PocMeetingRound {
 
+    public PocMeetingRound(PocMeetingRound previousRound) {
+        this.previousRound = previousRound;
+    }
+
+    private PocMeetingRound previousRound;
+    private long index;
     private long startTime;
     private long endTime;
     private int memberCount;
     private List<PocMeetingMember> memberList;
     private Map<String, Integer> addressOrderMap = new HashMap<>();
+    private ConsensusGroup consensusGroup;
 
     public long getStartTime() {
         return startTime;
@@ -60,8 +66,8 @@ public class PocMeetingRound {
         addressOrderMap.clear();
         for (int i = 0; i < memberList.size(); i++) {
             PocMeetingMember pmm = memberList.get(i);
-            pmm.setRoundIndex(i + 1);
-            pmm.setPackTime(pmm.getRoundStartTime() + PocConsensusConstant.BLOCK_TIME_INTERVAL * pmm.getRoundIndex());
+            pmm.setIndexOfRound(i + 1);
+            pmm.setPackTime(pmm.getRoundStartTime() + PocConsensusConstant.BLOCK_TIME_INTERVAL * pmm.getIndexOfRound());
             addressOrderMap.put(pmm.getPackerAddress(), i);
         }
     }
@@ -77,5 +83,29 @@ public class PocMeetingRound {
     public PocMeetingMember getMember(String address) {
         int order = getOrder(address);
         return getMember(order);
+    }
+
+    public PocMeetingRound getPreviousRound() {
+        return previousRound;
+    }
+
+    public void setPreviousRound(PocMeetingRound previousRound) {
+        this.previousRound = previousRound;
+    }
+
+    public ConsensusGroup getConsensusGroup() {
+        return consensusGroup;
+    }
+
+    public void setConsensusGroup(ConsensusGroup consensusGroup) {
+        this.consensusGroup = consensusGroup;
+    }
+
+    public long getIndex() {
+        return index;
+    }
+
+    public void setIndex(long index) {
+        this.index = index;
     }
 }
