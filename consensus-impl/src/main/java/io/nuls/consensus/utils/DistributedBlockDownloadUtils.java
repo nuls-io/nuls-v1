@@ -95,7 +95,7 @@ public class DistributedBlockDownloadUtils {
             return;
         }
         Result result = checkHash();
-        if (result.isFailed()) {
+        if (null==result||result.isFailed()) {
             return;
         }
         for (long i = 0; i <= (endHeight - startHeight); i++) {

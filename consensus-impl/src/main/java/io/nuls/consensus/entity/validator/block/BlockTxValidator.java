@@ -44,7 +44,7 @@ BlockTxValidator implements NulsDataValidator<Block> {
         int count = 0;
         for (Transaction tx : block.getTxs()) {
             ValidateResult result = tx.verify();
-            if (result.isFailed()) {
+            if (null==result||result.isFailed()) {
                 return ValidateResult.getFailedResult("there is wrong transaction!");
             }
             if (tx.getType() == TransactionConstant.TX_TYPE_COIN_BASE) {

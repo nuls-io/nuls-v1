@@ -10,20 +10,28 @@ public class ConsensusReward {
 
     private String address;
     private Na reward;
+    public ConsensusReward(){}
+
+    public ConsensusReward(String address, Na reward) {
+        this.address = address;
+        this.reward = reward;
+    }
 
     public String getAddress() {
         return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
     }
 
     public Na getReward() {
         return reward;
     }
 
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
     public void setReward(Na reward) {
         this.reward = reward;
     }
+
+
 }

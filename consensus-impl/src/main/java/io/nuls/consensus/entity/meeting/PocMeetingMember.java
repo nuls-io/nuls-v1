@@ -15,6 +15,7 @@ public class PocMeetingMember implements Comparable<PocMeetingMember> {
     private String packerAddress;
     private long packTime;
 
+    private double creditVal;
 
     private String sortValue;
 
@@ -85,5 +86,13 @@ public class PocMeetingMember implements Comparable<PocMeetingMember> {
 
     public void setRoundIndex(long roundIndex) {
         this.roundIndex = roundIndex;
+    }
+
+    public double getCreditVal() {
+        return creditVal;
+    }
+
+    public void setCreditVal(double creditVal) {
+        this.creditVal = creditVal;
     }
 }

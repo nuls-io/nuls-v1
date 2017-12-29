@@ -26,7 +26,7 @@ public class BlockEventHandler extends AbstractEventBusHandler<BlockEvent> {
             return;
         }
         ValidateResult result = block.verify();
-        if (result.isFailed()) {
+        if (null==result||result.isFailed()) {
              this.networkService.removePeer(fromId);
             return;
         }

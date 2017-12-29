@@ -173,9 +173,6 @@ public class ConsensusCacheService {
     public List<Consensus<Delegate>> getCachedDelegateList() {
         return inDelegateCache.values();
     }
-    public List<Consensus<Delegate>> getCachedDelegateList(String agentAddress) {
-        return inDelegateCache.values();
-    }
 
     public void delDelegate(String id) {
         inDelegateCache.remove(id);

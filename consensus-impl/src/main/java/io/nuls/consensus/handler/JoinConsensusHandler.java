@@ -29,7 +29,7 @@ public class JoinConsensusHandler extends AbstractEventBusHandler<JoinConsensusE
             Log.error(e);
             return;
         }
-        if (result.isFailed()) {
+        if (null==result||result.isFailed()) {
             return;
         }
         this.eventBroadcaster.broadcastHashAndCache(event);

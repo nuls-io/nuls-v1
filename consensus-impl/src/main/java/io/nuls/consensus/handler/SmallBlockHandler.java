@@ -49,7 +49,7 @@ public class SmallBlockHandler extends AbstractEventBusHandler<SmallBlockEvent> 
         }
         block.setTxs(txs);
         ValidateResult<RedPunishData> vResult = block.verify();
-        if (vResult.isFailed()) {
+        if (null==vResult||vResult.isFailed()) {
             networkService.removePeer(fromId);
             if (vResult.getLevel() == SeverityLevelEnum.FLAGRANT) {
                 RedPunishData data = vResult.getObject();

@@ -450,7 +450,7 @@ public class AccountServiceImpl implements AccountService {
     public Result setAlias(String address, String alias) {
         try {
             Result result = canSetAlias(address, alias);
-            if (result.isFailed()) {
+            if (null==result||result.isFailed()) {
                 return result;
             }
             Account account = getAccount(address);
@@ -466,7 +466,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Result sendAliasTx(String address, String password, String alias) {
         Result result = canSetAlias(address, alias);
-        if (result.isFailed()) {
+        if (null==result||result.isFailed()) {
             return result;
         }
         try {

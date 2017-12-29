@@ -42,7 +42,7 @@ public class AliasBusHandler extends AbstractEventBusHandler<AliasEvent> {
     public void onEvent(AliasEvent event, String fromId)   {
         AliasTransaction tx = event.getEventBody();
         ValidateResult result = tx.verify();
-        if (result.isFailed()) {
+        if (null==result||result.isFailed()) {
             if (SeverityLevelEnum.FLAGRANT.equals(result.getLevel())) {
                //todo networkService.removePeer(fromId);
             }

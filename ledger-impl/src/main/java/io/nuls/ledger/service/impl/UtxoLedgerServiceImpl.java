@@ -52,7 +52,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     public ValidateResult verifyAndCacheTx(Transaction tx) throws NulsException {
         ValidateResult result = tx.verify();
-        if (result.isFailed()) {
+        if (null==result||result.isFailed()) {
             return result;
         }
         tx.onApproval();

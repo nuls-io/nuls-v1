@@ -1,6 +1,7 @@
 package io.nuls.consensus.entity.meeting;
 
 import io.nuls.consensus.constant.PocConsensusConstant;
+import io.nuls.core.chain.entity.Na;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
 
@@ -14,11 +15,14 @@ import java.util.Map;
  */
 public class PocMeetingRound {
 
+
     public PocMeetingRound(PocMeetingRound previousRound) {
         this.previousRound = previousRound;
     }
 
     private PocMeetingRound previousRound;
+    private Na totalDeposit;
+    private Na agentTotalDeposit;
     private long index;
     private long startTime;
     private long endTime;
@@ -107,5 +111,21 @@ public class PocMeetingRound {
 
     public void setIndex(long index) {
         this.index = index;
+    }
+
+    public Na getTotalDeposit() {
+        return totalDeposit;
+    }
+
+    public void setTotalDeposit(Na totalDeposit) {
+        this.totalDeposit = totalDeposit;
+    }
+
+    public void setAgentTotalDeposit(Na agentTotalDeposit) {
+        this.agentTotalDeposit = agentTotalDeposit;
+    }
+
+    public Na getAgentTotalDeposit() {
+        return agentTotalDeposit;
     }
 }

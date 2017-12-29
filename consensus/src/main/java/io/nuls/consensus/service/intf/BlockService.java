@@ -25,4 +25,8 @@ public interface BlockService {
     void clearLocalBlocks();
 
     void rollback(long height);
+
+    int queryMyBlockCount(String localAccountAddress, long roundStart, long index);
+
+    int querySumOfYellowPunishRound(String localAccountAddress);
 }
