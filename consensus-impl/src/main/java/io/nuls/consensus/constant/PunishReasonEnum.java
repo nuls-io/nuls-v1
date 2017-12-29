@@ -37,8 +37,9 @@ public enum PunishReasonEnum {
     public static PunishReasonEnum getEnum(int code) {
         switch (code) {
             case 1:
-                //todo
-                return null;
+                return PunishReasonEnum.BIFURCATION;
+            case 2:
+                return PunishReasonEnum.DOUBLE_SPEND;
             default:
                 return null;
         }

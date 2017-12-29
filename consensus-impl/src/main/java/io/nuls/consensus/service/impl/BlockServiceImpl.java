@@ -99,6 +99,18 @@ public class BlockServiceImpl implements BlockService {
         //删除关联数据及区块数据
     }
 
+    @Override
+    public int queryMyBlockCount(String localAccountAddress, long roundStart, long index) {
+        // todo auto-generated method stub(niels)
+        return 0;
+    }
+
+    @Override
+    public int querySumOfYellowPunishRound(String localAccountAddress) {
+        // todo auto-generated method stub(niels)
+        return 0;
+    }
+
 
     private void rollback(List<Transaction> txs, int max) {
         for (int x = 0; x < max; x++) {

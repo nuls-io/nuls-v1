@@ -19,9 +19,9 @@ public enum MessageTypeEnum {
     public static MessageTypeEnum getMessageTypeEnum(int code) {
         switch (code) {
             case 1:
-                return NETWORK;
+                return MessageTypeEnum.NETWORK;
             case 2:
-                return EVENT;
+                return MessageTypeEnum.EVENT;
             default:
                 return null;
         }
