@@ -2,6 +2,7 @@ package io.nuls.ledger.service.impl;
 
 import io.nuls.cache.service.intf.CacheService;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.ledger.constant.LedgerConstant;
@@ -21,6 +22,7 @@ public class LedgerCacheServiceImpl {
     private LedgerCacheServiceImpl() {
         cacheService = NulsContext.getInstance().getService(CacheService.class);
         cacheService.createCache(LedgerConstant.STANDING_BOOK);
+        cacheService.createCache(TransactionConstant.TX_LIST);
     }
 
     public static LedgerCacheServiceImpl getInstance() {

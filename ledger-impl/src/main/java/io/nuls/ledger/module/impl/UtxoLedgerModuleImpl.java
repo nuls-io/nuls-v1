@@ -41,11 +41,15 @@ public class UtxoLedgerModuleImpl extends AbstractLedgerModule {
 
     @Override
     public void init() {
-        addTxValidator();
+        addNormalTxValidator();
         registerService();
+        pulishEvent();
     }
 
-    private void addTxValidator() {
+    /**
+     * there validators any kind of transaction will be used
+     */
+    private void addNormalTxValidator() {
         TransactionValidatorManager.addTxDefValidator(TxMaxSizeValidator.getInstance());
         TransactionValidatorManager.addTxDefValidator(TxRemarkValidator.getInstance());
         TransactionValidatorManager.addTxDefValidator(TxFieldValidator.getInstance());
@@ -71,11 +75,9 @@ public class UtxoLedgerModuleImpl extends AbstractLedgerModule {
 
     @Override
     public void start() {
-
         cacheStandingBook();
         SmallChangeThread smallChangeThread = SmallChangeThread.getInstance();
         ThreadManager.createSingleThreadAndRun(this.getModuleId(), SmallChangeThread.class.getSimpleName(), smallChangeThread);
-
     }
 
     private void cacheStandingBook() {
