@@ -2,7 +2,7 @@ package io.nuls.event.bus.service.impl;
 
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.event.BaseNulsEvent;
-import io.nuls.event.bus.event.CommonHashEvent;
+import io.nuls.event.bus.event.CommonDigestEvent;
 import io.nuls.event.bus.bus.service.intf.EventBroadcaster;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Peer;
@@ -30,7 +30,7 @@ public class EventBroadcasterImpl implements EventBroadcaster {
 
     @Override
     public List<String> broadcastHashAndCache(BaseNulsEvent event) {
-        BroadcastResult result = this.networkService.broadcast(new CommonHashEvent(event.getHash()));
+        BroadcastResult result = this.networkService.broadcast(new CommonDigestEvent(event.getHash()));
         if (result.isSuccess()) {
             eventCacheService.cacheSendedEvent(event);
         }
@@ -39,7 +39,7 @@ public class EventBroadcasterImpl implements EventBroadcaster {
 
     @Override
     public List<String> broadcastHashAndCache(BaseNulsEvent event, String excludePeerId) {
-        BroadcastResult result = this.networkService.broadcast(new CommonHashEvent(event.getHash()), excludePeerId);
+        BroadcastResult result = this.networkService.broadcast(new CommonDigestEvent(event.getHash()), excludePeerId);
         if (result.isSuccess()) {
             eventCacheService.cacheSendedEvent(event);
         }

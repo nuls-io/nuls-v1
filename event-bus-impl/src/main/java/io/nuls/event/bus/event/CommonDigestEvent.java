@@ -11,10 +11,11 @@ import io.nuls.event.bus.constant.EventConstant;
  * @author Niels
  * @date 2017/12/8
  */
-public class GetBodyEvent extends BaseNulsEvent<NulsDigestData> {
+public class CommonDigestEvent extends BaseNulsEvent<NulsDigestData> {
 
-    public GetBodyEvent() {
-        super(NulsConstant.MODULE_ID_EVENT_BUS, EventConstant.EVENT_TYPE_GET_EVENT_BODY_EVENT);
+    public CommonDigestEvent(NulsDigestData hash) {
+        super(NulsConstant.MODULE_ID_EVENT_BUS, EventConstant.EVENT_TYPE_COMMON_EVENT_HASH_EVENT);
+        this.setEventBody(hash);
     }
 
     @Override
@@ -26,9 +27,8 @@ public class GetBodyEvent extends BaseNulsEvent<NulsDigestData> {
 
     @Override
     public Object copy() {
-        GetBodyEvent event = new GetBodyEvent();
         NulsDigestData data = new NulsDigestData(this.getEventBody().getDigestBytes());
-        event.setEventBody(data);
+        CommonDigestEvent event = new CommonDigestEvent(data);
         return event;
     }
 }

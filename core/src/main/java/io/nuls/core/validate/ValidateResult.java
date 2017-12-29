@@ -9,7 +9,7 @@ import io.nuls.core.utils.log.Log;
  * @author Niels
  * @date 2017/11/16
  */
-public class ValidateResult extends Result {
+public class ValidateResult<T> extends Result<T> {
 
     private SeverityLevelEnum level;
 

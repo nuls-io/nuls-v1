@@ -1,17 +1,23 @@
 package io.nuls.consensus.handler;
 
+import io.nuls.account.entity.Account;
+import io.nuls.account.service.intf.AccountService;
+import io.nuls.consensus.entity.RedPunishData;
+import io.nuls.consensus.entity.tx.RedPunishTransaction;
 import io.nuls.consensus.event.SmallBlockEvent;
 import io.nuls.consensus.service.cache.BlockCacheService;
 import io.nuls.consensus.service.cache.BlockHeaderCacheService;
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.BlockHeader;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.chain.entity.*;
+import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
+import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.bus.handler.AbstractEventBusHandler;
 import io.nuls.ledger.service.intf.LedgerService;
+import io.nuls.network.service.NetworkService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +30,8 @@ public class SmallBlockHandler extends AbstractEventBusHandler<SmallBlockEvent> 
     private BlockHeaderCacheService headerCacheService = BlockHeaderCacheService.getInstance();
     private BlockCacheService blockCacheService = BlockCacheService.getInstance();
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
+    private NetworkService networkService = NulsContext.getInstance().getService(NetworkService.class);
+    private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
 
     @Override
     public void onEvent(SmallBlockEvent event, String fromId) {
@@ -39,13 +47,21 @@ public class SmallBlockHandler extends AbstractEventBusHandler<SmallBlockEvent> 
             txs.add(tx);
         }
         block.setTxs(txs);
-        try {
-            block.verify();
-        } catch (NulsRuntimeException e) {
-            Log.error(e);
+        ValidateResult<RedPunishData> vResult = block.verify();
+        if (vResult.isFailed()) {
+            networkService.removePeer(fromId);
+            if (vResult.getLevel() == SeverityLevelEnum.FLAGRANT) {
+                RedPunishData data = vResult.getObject();
+                RedPunishTransaction tx = new RedPunishTransaction();
+                tx.setTxData(data);
+                tx.setFee(Na.ZERO);
+                tx.setTime(block.getHeader().getTime());
+                tx.setHash(NulsDigestData.calcDigestData(tx));
+                tx.setSign(accountService.signData(tx.getHash()));
+
+            }
             return;
         }
         blockCacheService.cacheBlock(block);
-        ledgerService.removeFromCache(block.getHeader().getTxHashList());
     }
 }

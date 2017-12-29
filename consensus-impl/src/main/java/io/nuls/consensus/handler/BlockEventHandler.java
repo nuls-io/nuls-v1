@@ -27,9 +27,7 @@ public class BlockEventHandler extends AbstractEventBusHandler<BlockEvent> {
         }
         ValidateResult result = block.verify();
         if (result.isFailed()) {
-            if (result.getLevel() == SeverityLevelEnum.FLAGRANT) {
-                this.networkService.removePeer(fromId);
-            }
+             this.networkService.removePeer(fromId);
             return;
         }
         blockCacheService.cacheBlock(block);

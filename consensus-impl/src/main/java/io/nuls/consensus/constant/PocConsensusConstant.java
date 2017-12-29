@@ -18,8 +18,8 @@ public interface PocConsensusConstant {
     String DEFAULT_CONSENSUS_LIST_FILE = "default-consensus-list.properties";
     String GENESIS_BLOCK_FILE = "genesis-block.json";
 
-    short EVENT_TYPE_EXIT_CONSENSUS = 6;
-    short EVENT_TYPE_JOIN_CONSENSUS = 7;
+    short EVENT_TYPE_JOIN_CONSENSUS = 6;
+    short EVENT_TYPE_EXIT_CONSENSUS = 7;
     short EVENT_TYPE_REGISTER_AGENT = 8;
     short EVENT_TYPE_ASK_BLOCK = 9;
     short EVENT_TYPE_RED_PUNISH = 10;

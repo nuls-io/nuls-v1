@@ -32,6 +32,7 @@ public class BlockHeaderHandler extends AbstractEventBusHandler<BlockHeaderEvent
             return;
         }
         BlockHeader header = event.getEventBody();
+        //todo 分叉处理
         header.verify();
         headerCacheService.cacheHeader(header);
         GetSmallBlockEvent smallBlockEvent = new GetSmallBlockEvent();

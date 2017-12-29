@@ -1,6 +1,5 @@
 package io.nuls.consensus.event;
 
-import io.nuls.consensus.constant.ConsensusEventType;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.tx.PocExitConsensusTransaction;
 import io.nuls.core.chain.manager.TransactionManager;

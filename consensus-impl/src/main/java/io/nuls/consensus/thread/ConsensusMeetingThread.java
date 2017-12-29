@@ -4,11 +4,14 @@ import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
+import io.nuls.consensus.entity.RedPunishData;
 import io.nuls.consensus.entity.block.BlockData;
 import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.entity.meeting.PocMeetingMember;
 import io.nuls.consensus.entity.meeting.PocMeetingRound;
 import io.nuls.consensus.entity.member.Agent;
+import io.nuls.consensus.entity.tx.RedPunishTransaction;
+import io.nuls.consensus.entity.tx.YellowPunishTransaction;
 import io.nuls.consensus.event.BlockHeaderEvent;
 import io.nuls.consensus.service.cache.BlockCacheService;
 import io.nuls.consensus.service.cache.ConsensusCacheService;
@@ -25,13 +28,11 @@ import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.bus.service.intf.EventBroadcaster;
+import io.nuls.ledger.entity.tx.CoinBaseTransaction;
 import io.nuls.ledger.service.intf.LedgerService;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * @author Niels
@@ -51,11 +52,17 @@ public class ConsensusMeetingThread implements Runnable {
     private NulsContext context = NulsContext.getInstance();
     private PocMeetingRound round;
 
+    private static Map<Long, RedPunishData> punishMap = new HashMap<>();
+
     private ConsensusMeetingThread() {
     }
 
     public static ConsensusMeetingThread getInstance() {
         return INSTANCE;
+    }
+
+    public static void putPunishData(RedPunishData redPunishData) {
+        punishMap.put(redPunishData.getHeight(), redPunishData);
     }
 
     @Override
@@ -115,6 +122,7 @@ public class ConsensusMeetingThread implements Runnable {
         Block bestBlock = blockService.getLocalBestBlock();
         List<Transaction> txList = ledgerService.getTxListFromCache();
         txList.sort(new TxComparator());
+        addConsensusTx(bestBlock, txList, self);
         BlockData bd = new BlockData();
         bd.setHeight(bestBlock.getHeader().getHeight() + 1);
         bd.setTime(self.getPackTime());
@@ -131,6 +139,53 @@ public class ConsensusMeetingThread implements Runnable {
         BlockHeaderEvent event = new BlockHeaderEvent();
         event.setEventBody(newBlock.getHeader());
         eventBroadcaster.broadcastAndCache(event);
+    }
+
+    /**
+     * CoinBase transaction & Punish transaction
+     *
+     * @param bestBlock
+     * @param txList
+     * @param self
+     */
+    private void addConsensusTx(Block bestBlock, List<Transaction> txList, PocMeetingMember self) {
+        punishTx(bestBlock, txList, self);
+        coinBaseTx(txList, self);
+        CoinBaseTransaction cbTx = new CoinBaseTransaction();
+    }
+
+    private void coinBaseTx(List<Transaction> txList, PocMeetingMember self) {
+        //todo
+    }
+
+    private void punishTx(Block bestBlock, List<Transaction> txList, PocMeetingMember self) {
+//        BlockRoundData lastBlockRoundData = new BlockRoundData();
+//        try {
+//            lastBlockRoundData.parse(bestBlock.getExtend());
+//        } catch (NulsException e) {
+//            Log.error(e);
+//        }
+//        if (!punishMap.isEmpty()) {
+//            for (long height : punishMap.keySet()) {
+//                RedPunishData data = punishMap.get(height);
+//                if (data.getHeight() < (bestBlock.getHeader().getHeight() + 1)) {
+//                    punishMap.remove(height);
+//                } else if (data.getHeight() == (bestBlock.getHeader().getHeight() + 1)) {
+//
+//                }
+//            }
+//
+//
+//        }
+//        boolean punish = self.getRoundIndex() == 1 && lastBlockRoundData.getPackingIndex() != lastBlockRoundData.getConsensusMemberCount();
+//        punish = punish || (self.getRoundIndex() > 1 && self.getRoundIndex() != (lastBlockRoundData.getPackingIndex() + 1));
+//        if (!punish) {
+//            return;
+//        }
+//        YellowPunishTransaction punishTx = new YellowPunishTransaction();
+//
+//        //todo
+//        txList.add(punishTx);
     }
 
     private PocMeetingRound calcRound() {

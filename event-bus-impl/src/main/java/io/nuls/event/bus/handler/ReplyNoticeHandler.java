@@ -11,7 +11,7 @@ import io.nuls.network.message.ReplyNotice;
  * @author Niels
  * @date 2017/12/11
  */
-public class ReplyBusHandler extends AbstractNoticeBusHandler<ReplyNotice> {
+public class ReplyNoticeHandler extends AbstractNoticeBusHandler<ReplyNotice> {
 
     private EventCacheService eventCacheService = EventCacheService.getInstance();
 
