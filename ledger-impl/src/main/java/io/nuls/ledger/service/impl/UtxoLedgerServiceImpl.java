@@ -24,8 +24,10 @@ import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.tx.TransferTransaction;
+import io.nuls.ledger.event.TransferCoinEvent;
 import io.nuls.ledger.service.intf.LedgerService;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -126,6 +128,13 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
+    public Result transfer(TransferTransaction tx) {
+        TransferCoinEvent event = new TransferCoinEvent();
+        //event.setEventBody();
+        return null;
+    }
+
+    @Override
     public Result transfer(Address address, String password, Address toAddress, Na amount, String remark) {
         Account account = accountService.getAccount(address.getBase58());
         if (account == null) {
@@ -138,9 +147,20 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         if (balance.getUseable().isLessThan(amount)) {
             return new Result(false, "balance is not enough");
         }
+        try {
+            CoinTransferData coinData = new CoinTransferData(amount, address.getBase58(), toAddress.getBase58());
+            TransferTransaction tx = new TransferTransaction(coinData, password);
+            tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
+//            tx.setSign();
+//            TransferCoinEvent
+        } catch (IOException e) {
+            Log.error(e);
+            return new Result(false, "transaction failed");
+        } catch (Exception e) {
+            Log.error(e);
+            return new Result(false, e.getMessage());
+        }
 
-        CoinTransferData coinData = new CoinTransferData(amount, address.getBase58(), toAddress.getBase58());
-        TransferTransaction tx = new TransferTransaction(coinData, password);
         return null;
     }
 

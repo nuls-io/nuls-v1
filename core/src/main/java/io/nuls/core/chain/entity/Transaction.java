@@ -1,5 +1,6 @@
 package io.nuls.core.chain.entity;
 
+import io.nuls.core.chain.intf.NulsCloneable;
 import io.nuls.core.chain.manager.TransactionValidatorManager;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
@@ -17,7 +18,7 @@ import java.util.List;
  * @author Niels
  * @date 2017/10/30
  */
-public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData {
+public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData implements NulsCloneable {
 
     private List<TransactionListener> listenerList = new ArrayList<>();
     /**
