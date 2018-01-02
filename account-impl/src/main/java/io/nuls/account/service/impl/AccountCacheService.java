@@ -48,6 +48,18 @@ public class AccountCacheService {
         return this.cacheService.getElementValueList(AccountConstant.ACCOUNT_LIST_CACHE);
     }
 
+    public void removeAccount(Account account) {
+        this.cacheService.removeElement(AccountConstant.ACCOUNT_LIST_CACHE, account.getId());
+    }
+
+    public void removeAccount(String address) {
+        this.cacheService.removeElement(AccountConstant.ACCOUNT_LIST_CACHE, address);
+    }
+
+    public boolean accountExist(String address) {
+        return cacheService.containsKey(AccountConstant.ACCOUNT_LIST_CACHE, address);
+    }
+
     public void clear() {
         this.cacheService.clearCache(AccountConstant.ACCOUNT_LIST_CACHE);
     }

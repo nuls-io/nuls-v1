@@ -1,6 +1,5 @@
 package io.nuls.ledger.service.impl;
 
-import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
@@ -18,10 +17,10 @@ import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.dao.UtxoTransactionDao;
 import io.nuls.db.entity.TransactionPo;
 import io.nuls.db.entity.UtxoOutputPo;
+import io.nuls.event.bus.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.entity.TransactionTool;
 import io.nuls.ledger.entity.UtxoData;
-import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.tx.TransferTransaction;
 import io.nuls.ledger.event.TransferCoinEvent;
@@ -38,13 +37,16 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     private static final LedgerService INSTANCE = new UtxoLedgerServiceImpl();
 
-    private LedgerCacheServiceImpl ledgerCacheService = LedgerCacheServiceImpl.getInstance();
+    private LedgerCacheService ledgerCacheService = LedgerCacheService.getInstance();
 
     private UtxoTransactionDao txDao = NulsContext.getInstance().getService(UtxoTransactionDao.class);
 
     private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
 
+    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
+
     private UtxoLedgerServiceImpl() {
+
     }
 
     public static LedgerService getInstance() {
@@ -129,40 +131,47 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     public Result transfer(TransferTransaction tx) {
-        TransferCoinEvent event = new TransferCoinEvent();
-        //event.setEventBody();
-        return null;
-    }
-
-    @Override
-    public Result transfer(Address address, String password, Address toAddress, Na amount, String remark) {
-        Account account = accountService.getAccount(address.getBase58());
-        if (account == null) {
-            return new Result(false, "account not found");
-        }
-        if (!account.validatePassword(password)) {
-            return new Result(false, "password error");
-        }
-        Balance balance = getBalance(address.getBase58());
-        if (balance.getUseable().isLessThan(amount)) {
-            return new Result(false, "balance is not enough");
-        }
         try {
-            CoinTransferData coinData = new CoinTransferData(amount, address.getBase58(), toAddress.getBase58());
-            TransferTransaction tx = new TransferTransaction(coinData, password);
-            tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
-//            tx.setSign();
-//            TransferCoinEvent
-        } catch (IOException e) {
-            Log.error(e);
-            return new Result(false, "transaction failed");
-        } catch (Exception e) {
+            verifyAndCacheTx(tx);
+            TransferCoinEvent event = new TransferCoinEvent();
+            event.setEventBody(tx);
+            eventBroadcaster.broadcastAndCache(event);
+        }catch (Exception e) {
             Log.error(e);
             return new Result(false, e.getMessage());
         }
-
-        return null;
+        return new Result(true, "OK");
     }
+
+//    @Override
+//    public Result transfer(Address address, String password, Address toAddress, Na amount, String remark) {
+//        Account account = accountService.getAccount(address.getBase58());
+//        if (account == null) {
+//            return new Result(false, "account not found");
+//        }
+//        if (!account.validatePassword(password)) {
+//            return new Result(false, "password error");
+//        }
+//        Balance balance = getBalance(address.getBase58());
+//        if (balance.getUseable().isLessThan(amount)) {
+//            return new Result(false, "balance is not enough");
+//        }
+//        try {
+//            CoinTransferData coinData = new CoinTransferData(amount, address.getBase58(), toAddress.getBase58());
+//            TransferTransaction tx = new TransferTransaction(coinData, password);
+//            tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
+////            tx.setSign();
+////            TransferCoinEvent
+//        } catch (IOException e) {
+//            Log.error(e);
+//            return new Result(false, "transaction failed");
+//        } catch (Exception e) {
+//            Log.error(e);
+//            return new Result(false, e.getMessage());
+//        }
+//
+//        return null;
+//    }
 
     @Override
     public boolean saveTransaction(Transaction tx) {

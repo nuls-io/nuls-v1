@@ -35,7 +35,7 @@ public interface LedgerService {
 
     Result transfer(TransferTransaction tx);
 
-    Result transfer(Address address, String password, Address toAddress, Na amount, String remark);
+    //Result transfer(Address address, String password, Address toAddress, Na amount, String remark);
 
     boolean saveTransaction(Transaction tx);
 

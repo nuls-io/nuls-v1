@@ -1,10 +1,17 @@
 package io.nuls.ledger.service.impl;
 
+import io.nuls.core.chain.entity.Na;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.ledger.entity.CoinData;
 import io.nuls.ledger.entity.UtxoData;
+import io.nuls.ledger.entity.UtxoInput;
+import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.service.intf.CoinDataProvider;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Niels
@@ -14,6 +21,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
     private static final UtxoCoinDataProvider INSTANCE = new UtxoCoinDataProvider();
 
     private UtxoCoinDataProvider() {
+
     }
 
     public static UtxoCoinDataProvider getInstance() {
@@ -54,9 +62,14 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 
     @Override
     public CoinData createTransferData(CoinTransferData coinParam, String password) {
-        // todo auto-generated method stub(niels)
+        UtxoData utxoData = new UtxoData();
+        List<UtxoInput> inputs = new ArrayList<>();
+        List<UtxoOutput> outputs = new ArrayList<>();
 
-        return null;
+        for (Map.Entry<String, Na> entry : coinParam.getFromMap().entrySet()) {
+
+        }
+            return null;
     }
 
 }

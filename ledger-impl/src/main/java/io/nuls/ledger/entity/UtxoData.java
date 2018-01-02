@@ -2,6 +2,8 @@ package io.nuls.ledger.entity;
 
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
+import io.nuls.ledger.validator.UtxoTxInputsValidator;
+import io.nuls.ledger.validator.UtxoTxOutputsValidator;
 
 import java.io.IOException;
 import java.util.List;
@@ -12,10 +14,12 @@ import java.util.List;
  */
 public class UtxoData extends CoinData{
     public UtxoData(){
-        //todo
-//        this.registerValidator();
+        this.registerValidator(UtxoTxInputsValidator.getInstance());
+        this.registerValidator(UtxoTxOutputsValidator.getInstance());
     }
+
     private List<UtxoInput> inputs;
+
     private List<UtxoOutput> outputs;
 
     public List<UtxoInput> getInputs() {

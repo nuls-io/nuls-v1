@@ -13,6 +13,14 @@ import java.util.Map;
  */
 public class CoinTransferData {
 
+    private Map<String, Na> fromMap;
+
+    private Map<String, Coin> toMap;
+
+    private Na totalNa;
+
+    private Na fee;
+
     public CoinTransferData() {
         this.fromMap = new HashMap<>();
         this.toMap = new HashMap<>();
@@ -33,14 +41,6 @@ public class CoinTransferData {
             this.addTo(to, new Coin(totalNa));
         }
     }
-
-    private Map<String, Na> fromMap;
-
-    private Map<String, Coin> toMap;
-
-    private Na totalNa;
-
-    private Na fee;
 
     public Map<String, Na> getFromMap() {
         return fromMap;

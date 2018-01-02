@@ -13,7 +13,7 @@ import io.nuls.ledger.handler.SmallChangeBusHandler;
 import io.nuls.ledger.handler.UnlockCoinBusHandler;
 import io.nuls.ledger.handler.LockCoinBusHandler;
 import io.nuls.ledger.module.AbstractLedgerModule;
-import io.nuls.ledger.service.impl.LedgerCacheServiceImpl;
+import io.nuls.ledger.service.impl.LedgerCacheService;
 import io.nuls.ledger.service.impl.UtxoCoinDataProvider;
 import io.nuls.ledger.service.impl.UtxoLedgerServiceImpl;
 import io.nuls.ledger.service.intf.CoinDataProvider;
@@ -33,7 +33,7 @@ import java.util.List;
 public class UtxoLedgerModuleImpl extends AbstractLedgerModule {
 
 
-    private LedgerCacheServiceImpl cacheService = LedgerCacheServiceImpl.getInstance();
+    private LedgerCacheService cacheService = LedgerCacheService.getInstance();
 
     private LedgerService ledgerService = UtxoLedgerServiceImpl.getInstance();
 
@@ -75,12 +75,13 @@ public class UtxoLedgerModuleImpl extends AbstractLedgerModule {
 
     @Override
     public void start() {
-        cacheStandingBook();
+        cacheAccountAndBalance();
+
         SmallChangeThread smallChangeThread = SmallChangeThread.getInstance();
         ThreadManager.createSingleThreadAndRun(this.getModuleId(), SmallChangeThread.class.getSimpleName(), smallChangeThread);
     }
 
-    private void cacheStandingBook() {
+    private void cacheAccountAndBalance() {
         //load account
         List<Account> accounts = NulsContext.getInstance().getService(AccountService.class).getLocalAccountList();
         if (null == accounts) {

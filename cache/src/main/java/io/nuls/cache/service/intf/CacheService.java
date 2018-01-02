@@ -70,6 +70,7 @@ public interface CacheService<K, V extends NulsCloneable> {
 
     List<V> getElementValueList(String cacheTitle);
 
+    List<V> getElementValueListWithOutClone(String cacheTitle);
     /**
      * remove an element from the cache named cacheTitle
      *

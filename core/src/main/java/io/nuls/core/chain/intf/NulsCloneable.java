@@ -14,8 +14,9 @@ public interface NulsCloneable extends Cloneable {
      */
     default Object copy() {
         try {
-            return this.clone();
-        } catch (CloneNotSupportedException e) {
+            this.clone();
+            return null;
+        } catch (Exception e) {
             Log.error(e);
             return null;
         }
