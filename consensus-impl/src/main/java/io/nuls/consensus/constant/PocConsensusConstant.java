@@ -4,7 +4,6 @@ import io.nuls.core.chain.entity.Na;
 
 /**
  * @author Niels
- * @date 2017/11/8
  */
 public interface PocConsensusConstant {
     //version
@@ -55,6 +54,10 @@ public interface PocConsensusConstant {
 
     Na SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT = Na.parseNuls(200000);
     Na SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT = Na.parseNuls(500000);
+    /**
+     * Annual inflation
+     */
+    Na ANNUAL_INFLATION = Na.parseNuls(5000000);
     /**
      * unit: %
      */

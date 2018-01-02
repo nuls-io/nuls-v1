@@ -19,39 +19,45 @@ public class BlockRoundData extends BaseNulsData {
 
     protected long roundStartTime;
 
-    protected int packingIndex;
+    protected long roundIndex;
 
-    public long getRoundEndTime(){
-        return roundStartTime+consensusMemberCount* PocConsensusConstant.BLOCK_TIME_INTERVAL*1000L;
+    protected int packingIndexOfRound;
+
+    public long getRoundEndTime() {
+        return roundStartTime + consensusMemberCount * PocConsensusConstant.BLOCK_TIME_INTERVAL * 1000L;
     }
 
     public BlockRoundData(byte[] extend) throws NulsException {
         this.parse(new NulsByteBuffer(extend));
     }
-    public BlockRoundData( )   {
+
+    public BlockRoundData() {
     }
 
     @Override
     public int size() {
         int size = 0;
+        size += VarInt.sizeOf(roundIndex);
         size += VarInt.sizeOf(consensusMemberCount);
         size += VarInt.sizeOf(roundStartTime);
-        size += VarInt.sizeOf(packingIndex);
+        size += VarInt.sizeOf(packingIndexOfRound);
         return size;
     }
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeVarInt(roundIndex);
         stream.writeVarInt(consensusMemberCount);
         stream.writeVarInt(roundStartTime);
-        stream.writeVarInt(packingIndex);
+        stream.writeVarInt(packingIndexOfRound);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.roundIndex = byteBuffer.readVarInt();
         this.consensusMemberCount = (int) byteBuffer.readVarInt();
-        this.roundStartTime = (int) byteBuffer.readVarInt();
-        this.packingIndex = (int) byteBuffer.readVarInt();
+        this.roundStartTime = byteBuffer.readVarInt();
+        this.packingIndexOfRound = (int) byteBuffer.readVarInt();
     }
 
     public int getConsensusMemberCount() {
@@ -70,11 +76,19 @@ public class BlockRoundData extends BaseNulsData {
         this.roundStartTime = roundStartTime;
     }
 
-    public int getPackingIndex() {
-        return packingIndex;
+    public int getPackingIndexOfRound() {
+        return packingIndexOfRound;
     }
 
-    public void setPackingIndex(int packingIndex) {
-        this.packingIndex = packingIndex;
+    public void setPackingIndexOfRound(int packingIndexOfRound) {
+        this.packingIndexOfRound = packingIndexOfRound;
+    }
+
+    public long getRoundIndex() {
+        return roundIndex;
+    }
+
+    public void setRoundIndex(long roundIndex) {
+        this.roundIndex = roundIndex;
     }
 }

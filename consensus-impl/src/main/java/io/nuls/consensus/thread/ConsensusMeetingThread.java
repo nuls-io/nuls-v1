@@ -5,11 +5,15 @@ import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.RedPunishData;
+import io.nuls.consensus.entity.YellowPunishData;
 import io.nuls.consensus.entity.block.BlockData;
 import io.nuls.consensus.entity.block.BlockRoundData;
+import io.nuls.consensus.entity.meeting.ConsensusGroup;
+import io.nuls.consensus.entity.meeting.ConsensusReward;
 import io.nuls.consensus.entity.meeting.PocMeetingMember;
 import io.nuls.consensus.entity.meeting.PocMeetingRound;
 import io.nuls.consensus.entity.member.Agent;
+import io.nuls.consensus.entity.member.Delegate;
 import io.nuls.consensus.entity.tx.RedPunishTransaction;
 import io.nuls.consensus.entity.tx.YellowPunishTransaction;
 import io.nuls.consensus.event.BlockHeaderEvent;
@@ -20,14 +24,20 @@ import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.consensus.utils.TxComparator;
 import io.nuls.core.chain.entity.Block;
+import io.nuls.core.chain.entity.Na;
+import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
+import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.bus.service.intf.EventBroadcaster;
+import io.nuls.ledger.entity.params.Coin;
+import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.tx.CoinBaseTransaction;
 import io.nuls.ledger.service.intf.LedgerService;
 
@@ -50,7 +60,7 @@ public class ConsensusMeetingThread implements Runnable {
     private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
     private boolean running = false;
     private NulsContext context = NulsContext.getInstance();
-    private PocMeetingRound round;
+    private PocMeetingRound currentRound;
 
     private static Map<Long, RedPunishData> punishMap = new HashMap<>();
 
@@ -72,12 +82,20 @@ public class ConsensusMeetingThread implements Runnable {
         }
         this.running = true;
         this.localAccountAddress = accountService.getDefaultAccount();
-        nextRound();
+        while (running) {
+            try {
+                nextRound();
+            } catch (Exception e) {
+                Log.error(e);
+                Log.info("meeting exception&restart meeting");
+                startMeeting();
+            }
+        }
     }
 
     private void nextRound() {
-        round = calcRound();
-        while (TimeService.currentTimeMillis() < (round.getStartTime())) {
+        currentRound = calcRound();
+        while (TimeService.currentTimeMillis() < (currentRound.getStartTime())) {
             try {
                 Thread.sleep(100L);
             } catch (InterruptedException e) {
@@ -86,27 +104,51 @@ public class ConsensusMeetingThread implements Runnable {
         }
 
         List<Consensus<Agent>> list = calcConsensusAgentList();
-        round.setMemberCount(list.size());
+        currentRound.setMemberCount(list.size());
         List<PocMeetingMember> memberList = new ArrayList<>();
+        ConsensusGroup cg = new ConsensusGroup();
+        Na totalDeposit = Na.ZERO;
+        Na agentTotalDeposit = Na.ZERO;
+
         for (Consensus<Agent> ca : list) {
             PocMeetingMember mm = new PocMeetingMember();
+            mm.setRoundIndex(currentRound.getIndex());
             mm.setAddress(ca.getAddress());
             mm.setPackerAddress(ca.getExtend().getDelegateAddress());
-            mm.setRoundStartTime(round.getStartTime());
+            mm.setRoundStartTime(currentRound.getStartTime());
             memberList.add(mm);
+            if (ca.getAddress().equals(localAccountAddress)) {
+                cg.setAgentConsensus(ca);
+                agentTotalDeposit = agentTotalDeposit.add(ca.getExtend().getDeposit());
+            }
+            totalDeposit = totalDeposit.add(ca.getExtend().getDeposit());
         }
         Collections.sort(memberList);
-        round.setMemberList(memberList);
-        round.setEndTime(round.getStartTime() + round.getMemberCount() * PocConsensusConstant.BLOCK_TIME_INTERVAL * 1000L);
+        currentRound.setMemberList(memberList);
+        List<Consensus<Delegate>> delegateList = consensusCacheService.getCachedDelegateList();
+        List<Consensus<Delegate>> myDelegateList = new ArrayList<>();
+        for (Consensus<Delegate> cd : delegateList) {
+            totalDeposit = totalDeposit.add(cd.getExtend().getDeposit());
+            if (cd.getExtend().getDelegateAddress().equals(localAccountAddress)) {
+                myDelegateList.add(cd);
+                agentTotalDeposit = agentTotalDeposit.add(cd.getExtend().getDeposit());
+            }
+        }
+        currentRound.setTotalDeposit(totalDeposit);
+        currentRound.setAgentTotalDeposit(agentTotalDeposit);
+        currentRound.setEndTime(currentRound.getStartTime() + currentRound.getMemberCount() * PocConsensusConstant.BLOCK_TIME_INTERVAL * 1000L);
+        cg.setDelegateList(myDelegateList);
+        currentRound.setConsensusGroup(cg);
         startMeeting();
     }
 
     private void startMeeting() {
-        PocMeetingMember self = round.getMember(localAccountAddress);
+        PocMeetingMember self = currentRound.getMember(localAccountAddress);
         if (null == self) {
             this.nextRound();
             return;
         }
+        self.setCreditVal(calcCreditVal());
         long timeUnit = 100L;
         while (TimeService.currentTimeMillis() >= (self.getPackTime() - timeUnit)) {
             try {
@@ -116,6 +158,20 @@ public class ConsensusMeetingThread implements Runnable {
             }
         }
         packing(self);
+    }
+
+    private double calcCreditVal() {
+        long roundStart = currentRound.getIndex() - 1 - PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT;
+        if (roundStart < 0) {
+            roundStart = 0;
+        }
+        int blockCount = blockService.queryMyBlockCount(localAccountAddress, roundStart, currentRound.getIndex());
+        int sumRoundVal = blockService.querySumOfYellowPunishRound(localAccountAddress);
+
+        double ability = blockCount / PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT;
+        double penalty = (PocConsensusConstant.CREDIT_MAGIC_NUM * sumRoundVal) / (currentRound.getIndex() * currentRound.getIndex());
+
+        return ability - penalty;
     }
 
     private void packing(PocMeetingMember self) {
@@ -128,9 +184,10 @@ public class ConsensusMeetingThread implements Runnable {
         bd.setTime(self.getPackTime());
         bd.setPreHash(bestBlock.getHeader().getHash());
         BlockRoundData roundData = new BlockRoundData();
-        roundData.setConsensusMemberCount(round.getMemberCount());
-        roundData.setPackingIndex(self.getRoundIndex());
-        roundData.setRoundStartTime(round.getStartTime());
+        roundData.setRoundIndex(currentRound.getIndex());
+        roundData.setConsensusMemberCount(currentRound.getMemberCount());
+        roundData.setPackingIndexOfRound(self.getIndexOfRound());
+        roundData.setRoundStartTime(currentRound.getStartTime());
         bd.setRoundData(roundData);
         bd.setTxList(txList);
         Block newBlock = ConsensusTool.createBlock(bd);
@@ -144,59 +201,137 @@ public class ConsensusMeetingThread implements Runnable {
     /**
      * CoinBase transaction & Punish transaction
      *
-     * @param bestBlock
-     * @param txList
-     * @param self
+     * @param bestBlock local highest block
+     * @param txList    all tx of block
+     * @param self      agent meeting data
      */
     private void addConsensusTx(Block bestBlock, List<Transaction> txList, PocMeetingMember self) {
         punishTx(bestBlock, txList, self);
-        coinBaseTx(txList, self);
-        CoinBaseTransaction cbTx = new CoinBaseTransaction();
+        coinBaseTx(txList);
     }
 
-    private void coinBaseTx(List<Transaction> txList, PocMeetingMember self) {
-        //todo
+    private void coinBaseTx(List<Transaction> txList) {
+        CoinTransferData data = new CoinTransferData();
+        data.setFee(Na.ZERO);
+        List<ConsensusReward> rewardList = calcReward(txList);
+        Na total = Na.ZERO;
+        for (ConsensusReward reward : rewardList) {
+            Coin coin = new Coin();
+            coin.setNa(reward.getReward());
+            data.addTo(reward.getAddress(), coin);
+            total = total.add(reward.getReward());
+        }
+        data.setTotalNa(total);
+        CoinBaseTransaction tx = new CoinBaseTransaction(data, null);
+        tx.setFee(Na.ZERO);
+        tx.setHash(NulsDigestData.calcDigestData(tx));
+        tx.setSign(accountService.signData(tx.getHash()));
+        ValidateResult validateResult = null;
+        try {
+            validateResult = ledgerService.verifyAndCacheTx(tx);
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+        if (null == validateResult || validateResult.isFailed()) {
+            throw new NulsRuntimeException(ErrorCode.CONSENSUS_EXCEPTION);
+        }
+        txList.add(0, tx);
+    }
+
+    private List<ConsensusReward> calcReward(List<Transaction> txList) {
+        List<ConsensusReward> rewardList = new ArrayList<>();
+        ConsensusGroup cg = this.currentRound.getConsensusGroup();
+        long totalFee = 0;
+        for (Transaction tx : txList) {
+            totalFee += tx.getFee().getValue();
+        }
+        double total = totalFee + PocConsensusConstant.ANNUAL_INFLATION.getValue() *
+                (PocConsensusConstant.BLOCK_TIME_INTERVAL * currentRound.getMemberCount()) / PocConsensusConstant.BLOCK_COUNT_OF_YEAR
+                * (currentRound.getAgentTotalDeposit().getValue() / currentRound.getTotalDeposit().getValue());
+        Consensus<Agent> ca = cg.getAgentConsensus();
+        double caReward = total * ((ca.getExtend().getDeposit().getValue() / currentRound.getTotalDeposit().getValue())
+                + (((currentRound.getTotalDeposit().getValue() - ca.getExtend().getDeposit().getValue()) / currentRound.getTotalDeposit().getValue()
+        ) * ca.getExtend().getCommissionRate()));
+        ConsensusReward agentReword = new ConsensusReward();
+        agentReword.setAddress(ca.getAddress());
+        agentReword.setReward(Na.valueOf((long) caReward));
+        rewardList.add(agentReword);
+        for (Consensus<Delegate> cd : cg.getDelegateList()) {
+            double reward = total *
+                    (cd.getExtend().getDeposit().getValue() / currentRound.getTotalDeposit().getValue()) *
+                    (1 - ca.getExtend().getCommissionRate());
+            ConsensusReward delegateReword = new ConsensusReward();
+            delegateReword.setAddress(cd.getAddress());
+            delegateReword.setReward(Na.valueOf((long) reward));
+            rewardList.add(delegateReword);
+        }
+        return rewardList;
     }
 
     private void punishTx(Block bestBlock, List<Transaction> txList, PocMeetingMember self) {
-//        BlockRoundData lastBlockRoundData = new BlockRoundData();
-//        try {
-//            lastBlockRoundData.parse(bestBlock.getExtend());
-//        } catch (NulsException e) {
-//            Log.error(e);
-//        }
-//        if (!punishMap.isEmpty()) {
-//            for (long height : punishMap.keySet()) {
-//                RedPunishData data = punishMap.get(height);
-//                if (data.getHeight() < (bestBlock.getHeader().getHeight() + 1)) {
-//                    punishMap.remove(height);
-//                } else if (data.getHeight() == (bestBlock.getHeader().getHeight() + 1)) {
-//
-//                }
-//            }
-//
-//
-//        }
-//        boolean punish = self.getRoundIndex() == 1 && lastBlockRoundData.getPackingIndex() != lastBlockRoundData.getConsensusMemberCount();
-//        punish = punish || (self.getRoundIndex() > 1 && self.getRoundIndex() != (lastBlockRoundData.getPackingIndex() + 1));
-//        if (!punish) {
-//            return;
-//        }
-//        YellowPunishTransaction punishTx = new YellowPunishTransaction();
-//
-//        //todo
-//        txList.add(punishTx);
+        boolean b = redPunishTx(bestBlock, txList);
+        if (!b) {
+            yellowPunishTx(bestBlock, txList, self);
+        }
+    }
+
+    private boolean redPunishTx(Block bestBlock, List<Transaction> txList) {
+        boolean punish = false;
+        for (long height : punishMap.keySet()) {
+            RedPunishData data = punishMap.get(height);
+            punishMap.remove(height);
+            if (data.getHeight() < (bestBlock.getHeader().getHeight() + 1)) {
+                continue;
+            }
+            RedPunishTransaction tx = new RedPunishTransaction();
+            tx.setTxData(data);
+            tx.setTime(TimeService.currentTimeMillis());
+            tx.setFee(Na.ZERO);
+            tx.setHash(NulsDigestData.calcDigestData(tx));
+            tx.setSign(accountService.signData(tx.getHash()));
+            txList.add(tx);
+            punish = true;
+        }
+        return punish;
+    }
+
+    private void yellowPunishTx(Block bestBlock, List<Transaction> txList, PocMeetingMember self) {
+        BlockRoundData lastBlockRoundData = new BlockRoundData();
+        try {
+            lastBlockRoundData.parse(bestBlock.getExtend());
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+        boolean punish = self.getIndexOfRound() == 1 && lastBlockRoundData.getPackingIndexOfRound() != lastBlockRoundData.getConsensusMemberCount();
+        punish = punish || (self.getIndexOfRound() > 1 && self.getIndexOfRound() != (lastBlockRoundData.getPackingIndexOfRound() + 1));
+        if (!punish) {
+            return;
+        }
+        PocMeetingMember previous = currentRound.getMember(self.getIndexOfRound() - 1);
+        if (null == previous) {
+            return;
+        }
+        YellowPunishTransaction punishTx = new YellowPunishTransaction();
+        YellowPunishData data = new YellowPunishData();
+        data.setAddress(previous.getAddress());
+        data.setHeight(bestBlock.getHeader().getHeight() + 1);
+        punishTx.setTxData(data);
+        punishTx.setTime(TimeService.currentTimeMillis());
+        punishTx.setFee(Na.ZERO);
+        punishTx.setHash(NulsDigestData.calcDigestData(punishTx));
+        punishTx.setSign(accountService.signData(punishTx.getHash()));
+        txList.add(punishTx);
     }
 
     private PocMeetingRound calcRound() {
         Block bestBlock = blockService.getLocalBestBlock();
-        PocMeetingRound round = new PocMeetingRound();
+        PocMeetingRound round = new PocMeetingRound(this.currentRound);
         do {
             if (bestBlock.getHeader().getHeight() == 1) {
                 round.setStartTime(this.context.getGenesisBlock().getHeader().getTime() + 10000L);
                 break;
             }
-            BlockRoundData lastRoundData = null;
+            BlockRoundData lastRoundData;
             try {
                 lastRoundData = new BlockRoundData(bestBlock.getExtend());
             } catch (NulsException e) {

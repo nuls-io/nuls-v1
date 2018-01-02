@@ -1,7 +1,9 @@
 package io.nuls.consensus.event;
 
 import io.nuls.consensus.constant.PocConsensusConstant;
+import io.nuls.consensus.entity.tx.RedPunishTransaction;
 import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
 /**
@@ -11,14 +13,16 @@ import io.nuls.core.utils.io.NulsByteBuffer;
  *
  */
 //todo
-public class RedPunishConsensusEvent extends BaseConsensusEvent{
+public class RedPunishConsensusEvent extends BaseConsensusEvent<RedPunishTransaction>{
     public RedPunishConsensusEvent( ) {
         super(PocConsensusConstant.EVENT_TYPE_RED_PUNISH);
     }
 
     @Override
-    protected BaseNulsData parseEventBody(NulsByteBuffer byteBuffer) {
-        return null;
+    protected RedPunishTransaction parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
+        RedPunishTransaction tx = new RedPunishTransaction();
+        tx.parse(byteBuffer);
+        return tx;
     }
 
 

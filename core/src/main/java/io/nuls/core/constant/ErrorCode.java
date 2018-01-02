@@ -91,7 +91,8 @@ public enum ErrorCode {
     CS_UNKOWN_EXCEPTION("CS000", 60000),
     TIME_OUT("CS001", 60001),
     DEPOSIT_ERROR("CS002", 60002),
-    DEPOSIT_NOT_ENOUGH("CS003", 60003);
+    DEPOSIT_NOT_ENOUGH("CS003", 60003),
+    CONSENSUS_EXCEPTION("CS004", 60004 );
 
     private final int msg;
     private final String code;
