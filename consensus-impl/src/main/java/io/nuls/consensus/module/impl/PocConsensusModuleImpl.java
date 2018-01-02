@@ -21,7 +21,7 @@ import io.nuls.consensus.service.impl.BlockServiceImpl;
 import io.nuls.consensus.service.impl.PocConsensusServiceImpl;
 import io.nuls.consensus.thread.BlockMaintenanceThread;
 import io.nuls.consensus.thread.BlockPersistenceThread;
-import io.nuls.consensus.thread.ConsensusMeetingThread;
+import io.nuls.consensus.thread.ConsensusMeetingRunner;
 import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
@@ -178,8 +178,8 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
 
     private void startMining() {
         ThreadManager.createSingleThreadAndRun(this.getModuleId(),
-                ConsensusMeetingThread.THREAD_NAME,
-                ConsensusMeetingThread.getInstance());
+                ConsensusMeetingRunner.THREAD_NAME,
+                ConsensusMeetingRunner.getInstance());
     }
 
 

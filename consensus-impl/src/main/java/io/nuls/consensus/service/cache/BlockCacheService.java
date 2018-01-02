@@ -89,7 +89,7 @@ public class BlockCacheService {
         minHeight++;
     }
 
-    public Block getMinHeighBlock() {
+    public Block getMinHeightCacheBlock() {
         return getBlock(getMinHeight());
     }
 }

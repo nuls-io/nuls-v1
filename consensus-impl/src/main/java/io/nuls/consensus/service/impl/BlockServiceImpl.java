@@ -1,9 +1,11 @@
 package io.nuls.consensus.service.impl;
 
+import io.nuls.consensus.service.cache.BlockCacheService;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -26,6 +28,8 @@ public class BlockServiceImpl implements BlockService {
 
     private BlockDao blockDao = NulsContext.getInstance().getService(BlockDao.class);
     private ConsensusDao consensusDao = NulsContext.getInstance().getService(ConsensusDao.class);
+    private BlockCacheService blockCacheService = BlockCacheService.getInstance();
+
     private BlockServiceImpl() {
     }
 
@@ -46,26 +50,56 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public long getLocalHeight() {
-        // todo auto-generated method stub(niels)
-        return 0;
+        long height = blockCacheService.getMaxHeight();
+        if (height == 0) {
+            height = blockDao.queryMaxHeight();
+        }
+        return height;
     }
 
     @Override
     public Block getLocalBestBlock() {
-        // todo auto-generated method stub(niels)
-        return null;
+        Block block = blockCacheService.getBlock(blockCacheService.getMaxHeight());
+        if (null == block) {
+            BlockPo po = blockDao.getHighestBlock();
+            try {
+                block = ConsensusTool.fromPojo(po);
+            } catch (NulsException e) {
+                Log.error(e);
+                return null;
+            }
+        }
+        return block;
     }
 
     @Override
     public Block getBlockByHash(String hash) {
-        // todo auto-generated method stub(niels)
-        return null;
+        Block block = blockCacheService.getBlock(hash);
+        if (null == block) {
+            BlockPo po = blockDao.getBlockByHash(hash);
+            try {
+                block = ConsensusTool.fromPojo(po);
+            } catch (NulsException e) {
+                Log.error(e);
+                return null;
+            }
+        }
+        return block;
     }
 
     @Override
     public Block getBlockByHeight(long height) {
-        // todo auto-generated method stub(niels)
-        return null;
+        Block block = blockCacheService.getBlock(height);
+        if (null == block) {
+            BlockPo po = blockDao.getBlockByHeight(height);
+            try {
+                block = ConsensusTool.fromPojo(po);
+            } catch (NulsException e) {
+                Log.error(e);
+                return null;
+            }
+        }
+        return block;
     }
 
 
@@ -84,31 +118,34 @@ public class BlockServiceImpl implements BlockService {
                 throw new NulsRuntimeException(e);
             }
         }
-        consensusDao.blockPersistence(blockPo,txPoList);
+        consensusDao.blockPersistence(blockPo, txPoList);
     }
 
     @Override
     public void clearLocalBlocks() {
-        // todo auto-generated method stub(niels)
-
+        blockCacheService.clear();
+        blockDao.deleteAll();
     }
 
     @Override
     public void rollback(long height) {
-        // todo auto-generated method stub(niels)
-        //删除关联数据及区块数据
+        Block block = this.getBlockByHeight(height);
+        if (null == block) {
+            return;
+        }
+        this.rollback(block.getTxs(), block.getTxs().size() - 1);
+        blockDao.deleteByKey(block.getHeader().getHash().getDigestHex());
     }
 
     @Override
-    public int queryMyBlockCount(String localAccountAddress, long roundStart, long index) {
-        // todo auto-generated method stub(niels)
-        return 0;
+    public int queryBlockCount(String address, long roundStart, long roundEnd) {
+        return this.blockDao.count(address, roundStart, roundEnd);
     }
 
     @Override
-    public int querySumOfYellowPunishRound(String localAccountAddress) {
-        // todo auto-generated method stub(niels)
-        return 0;
+    public int querySumOfYellowPunishRound(String address) {
+        int count = this.blockDao.queryCount(address, TransactionConstant.TX_TYPE_YELLOW_PUNISH);
+        return count;
     }
 
 

@@ -1,20 +1,14 @@
 package io.nuls.consensus.handler;
 
-import io.nuls.account.entity.Account;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.entity.RedPunishData;
-import io.nuls.consensus.entity.tx.RedPunishTransaction;
 import io.nuls.consensus.event.SmallBlockEvent;
 import io.nuls.consensus.service.cache.BlockCacheService;
 import io.nuls.consensus.service.cache.BlockHeaderCacheService;
-import io.nuls.consensus.thread.ConsensusMeetingThread;
+import io.nuls.consensus.thread.ConsensusMeetingRunner;
 import io.nuls.core.chain.entity.*;
 import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.utils.date.TimeService;
-import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.bus.handler.AbstractEventBusHandler;
 import io.nuls.ledger.service.intf.LedgerService;
@@ -53,7 +47,7 @@ public class SmallBlockHandler extends AbstractEventBusHandler<SmallBlockEvent> 
             networkService.removePeer(fromId);
             if (vResult.getLevel() == SeverityLevelEnum.FLAGRANT) {
                 RedPunishData data = vResult.getObject();
-                ConsensusMeetingThread.putPunishData(data);
+                ConsensusMeetingRunner.putPunishData(data);
             }
             return;
         }

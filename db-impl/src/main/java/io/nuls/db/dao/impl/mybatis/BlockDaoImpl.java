@@ -26,7 +26,7 @@ public class BlockDaoImpl extends BaseDaoImpl<BlockMapper, String, BlockPo> impl
     }
 
     @Override
-    public BlockPo getBlockByHeight(int height) {
+    public BlockPo getBlockByHeight(long height) {
         // todo auto-generated method stub(niels)
         Map<String, Object> params = new HashMap<>();
         params.put(BlockSearchParams.SEARCH_FIELD_HEIGHT,height);
@@ -35,5 +35,29 @@ public class BlockDaoImpl extends BaseDaoImpl<BlockMapper, String, BlockPo> impl
             return null;
         }
         return list.get(0);
+    }
+
+    @Override
+    public long queryMaxHeight() {
+        // todo auto-generated method stub(niels)
+        return 0;
+    }
+
+    @Override
+    public BlockPo getHighestBlock() {
+        // todo auto-generated method stub(niels)
+        return null;
+    }
+
+    @Override
+    public BlockPo getBlockByHash(String hash) {
+        // todo auto-generated method stub(niels)
+        return null;
+    }
+
+    @Override
+    public int deleteAll() {
+        // todo auto-generated method stub(niels)
+        return 0;
     }
 }

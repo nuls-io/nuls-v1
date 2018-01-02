@@ -12,7 +12,6 @@ import io.nuls.core.utils.io.NulsByteBuffer;
  * @date 2017/11/13
  *
  */
-//todo
 public class RedPunishConsensusEvent extends BaseConsensusEvent<RedPunishTransaction>{
     public RedPunishConsensusEvent( ) {
         super(PocConsensusConstant.EVENT_TYPE_RED_PUNISH);

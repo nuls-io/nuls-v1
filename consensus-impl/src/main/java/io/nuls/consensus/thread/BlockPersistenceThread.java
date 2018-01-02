@@ -4,20 +4,12 @@ import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.service.cache.BlockCacheService;
 import io.nuls.consensus.service.impl.BlockServiceImpl;
 import io.nuls.consensus.service.intf.BlockService;
-import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
-import io.nuls.db.entity.BlockPo;
-import io.nuls.db.entity.TransactionPo;
 import io.nuls.ledger.service.intf.LedgerService;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Niels
@@ -57,7 +49,7 @@ public class BlockPersistenceThread implements Runnable {
     private void doPersistence() {
         long count = blockCacheService.getMaxHeight() - blockCacheService.getMinHeight() - PocConsensusConstant.CONFIRM_BLOCK_COUNT;
         for (int i = 0; i < count; i++) {
-            Block block = blockCacheService.getMinHeighBlock();
+            Block block = blockCacheService.getMinHeightCacheBlock();
             if (null == block) {
                 throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
             }
