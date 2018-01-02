@@ -8,6 +8,7 @@ import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.NulsDataValidator;
 
 import java.io.IOException;
@@ -79,10 +80,10 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
         int size = 0;
         size += VarInt.sizeOf(type);
         size += VarInt.sizeOf(time);
-        if(null!=hash){
+        if (null != hash) {
             size += hash.size();
         }
-        if(null!=sign){
+        if (null != sign) {
             size += sign.size();
         }
         size += Utils.sizeOfSerialize(remark);
@@ -95,10 +96,10 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeVarInt(type);
         stream.writeVarInt(time);
-        if(null!=hash){
+        if (null != hash) {
             stream.write(hash.serialize());
         }
-        if(null!=sign){
+        if (null != sign) {
             stream.write(sign.serialize());
         }
         stream.writeBytesWithLength(remark);
@@ -121,6 +122,17 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
         this.remark = byteBuffer.readByLengthByte();
         txData = this.parseTxData(byteBuffer);
 
+    }
+
+
+    @Override
+    public Object copy() {
+        try {
+            return this.clone();
+        } catch (Exception e) {
+            Log.error(e);
+            return null;
+        }
     }
 
     public void registerListener(TransactionListener listener) {

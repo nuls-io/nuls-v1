@@ -72,4 +72,6 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
     public final CoinData getCoinData() {
         return coinData;
     }
+
+
 }
