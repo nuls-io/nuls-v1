@@ -17,7 +17,7 @@ import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 public class RegisterAgentTransaction extends AbstractCoinTransaction<Consensus<Agent>> {
 
     public RegisterAgentTransaction() {
-        this(null,null);
+        this(null, null);
     }
 
     public RegisterAgentTransaction(CoinTransferData lockData, String password) {
@@ -28,10 +28,8 @@ public class RegisterAgentTransaction extends AbstractCoinTransaction<Consensus<
 
     @Override
     protected Consensus<Agent> parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
-        Consensus<Agent> consensus = new Consensus<>();
-        consensus.parse(byteBuffer);
-        Agent delegate = new Agent();
-        delegate.parse(byteBuffer);
+        Consensus<Agent> consensus = byteBuffer.readNulsData(new Consensus<>());
+        Agent delegate = byteBuffer.readNulsData(new Agent());
         consensus.setExtend(delegate);
         return consensus;
     }

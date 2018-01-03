@@ -29,8 +29,6 @@ public class AliasEvent extends BaseNulsEvent<AliasTransaction> {
 
     @Override
     protected AliasTransaction parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
-        AliasTransaction tx = new AliasTransaction();
-        tx.parse(byteBuffer);
-        return tx;
+        return byteBuffer.readNulsData(new AliasTransaction());
     }
 }

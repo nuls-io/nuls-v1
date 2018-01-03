@@ -34,9 +34,9 @@ public class DefaultMessageFilter implements NulsMessageFilter {
 
     @Override
     public NulsMessageHeader filterHeader(byte[] bytes) {
-        NulsMessageHeader messageHeader = new NulsMessageHeader();
+        NulsMessageHeader messageHeader;
         try {
-            messageHeader.parse(new NulsByteBuffer(bytes));
+            messageHeader = new NulsByteBuffer(bytes).readNulsData(new NulsMessageHeader());
         } catch (NulsException e) {
             Log.error(e);
             throw new NulsRuntimeException(ErrorCode.DATA_ERROR);

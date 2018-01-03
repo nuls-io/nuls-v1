@@ -102,7 +102,7 @@ public class DistributedBlockDownloadUtils {
             Block block = blockMap.get(startHeight + i);
             block.verify();
             blockCacheService.cacheBlock(block);
-            ledgerService.removeFromCache(block.getHeader().getTxHashList());
+            ledgerService.removeFromCache(block.getTxHashList());
         }
         finished();
     }

@@ -301,7 +301,7 @@ public class ConsensusMeetingRunner implements Runnable {
     private void yellowPunishTx(Block bestBlock, List<Transaction> txList, PocMeetingMember self) {
         BlockRoundData lastBlockRoundData = new BlockRoundData();
         try {
-            lastBlockRoundData.parse(bestBlock.getExtend());
+            lastBlockRoundData.parse(bestBlock.getHeader().getExtend());
         } catch (NulsException e) {
             Log.error(e);
         }
@@ -336,7 +336,7 @@ public class ConsensusMeetingRunner implements Runnable {
             }
             BlockRoundData lastRoundData;
             try {
-                lastRoundData = new BlockRoundData(bestBlock.getExtend());
+                lastRoundData = new BlockRoundData(bestBlock.getHeader().getExtend());
             } catch (NulsException e) {
                 Log.error(e);
                 throw new NulsRuntimeException(e);

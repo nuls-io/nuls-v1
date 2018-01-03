@@ -9,6 +9,7 @@ import io.nuls.consensus.utils.DistributedBlockDownloadUtils;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
@@ -143,7 +144,12 @@ public class BlockMaintenanceThread implements Runnable {
     }
 
     private void rollbackBlock(long startHeight) {
-        this.blockService.rollback(startHeight);
+        try {
+            this.blockService.rollback(startHeight);
+        } catch (NulsException e) {
+            Log.error(e);
+            return;
+        }
         long height = startHeight - 1;
         if (height < 1) {
             throw new NulsRuntimeException(ErrorCode.NET_MESSAGE_ERROR, "Block data error!");

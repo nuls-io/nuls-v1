@@ -33,20 +33,21 @@ public class BlockHeaderHandler extends AbstractEventBusHandler<BlockHeaderEvent
         }
         BlockHeader header = event.getEventBody();
         //todo 分叉处理
+        //todo 收到区块头后的处理变更
         header.verify();
-        headerCacheService.cacheHeader(header);
-        GetTxGroupEvent smallBlockEvent = new GetTxGroupEvent();
-        AskTxGroupData data = new AskTxGroupData();
-        data.setBlockHash(header.getHash());
-        List<NulsDigestData> txHashList = new ArrayList<>();
-        for (NulsDigestData txHash : header.getTxHashList()) {
-            boolean exist = ledgerService.txExist(txHash.getDigestHex());
-            if (!exist) {
-                txHashList.add(txHash);
-            }
-        }
-        data.setTxHashList(txHashList);
-        smallBlockEvent.setEventBody(data);
-        eventBroadcaster.sendToPeer(smallBlockEvent, fromId);
+//        headerCacheService.cacheHeader(header);
+//        GetTxGroupEvent smallBlockEvent = new GetTxGroupEvent();
+//        AskTxGroupData data = new AskTxGroupData();
+//        data.setBlockHash(header.getHash());
+//        List<NulsDigestData> txHashList = new ArrayList<>();
+//        for (NulsDigestData txHash : header.getTxHashList()) {
+//            boolean exist = ledgerService.txExist(txHash.getDigestHex());
+//            if (!exist) {
+//                txHashList.add(txHash);
+//            }
+//        }
+//        data.setTxHashList(txHashList);
+//        smallBlockEvent.setEventBody(data);
+//        eventBroadcaster.sendToPeer(smallBlockEvent, fromId);
     }
 }

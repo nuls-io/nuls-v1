@@ -17,9 +17,7 @@ public class RegisterAgentEvent extends BaseConsensusEvent<RegisterAgentTransact
 
     @Override
     protected RegisterAgentTransaction parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
-        RegisterAgentTransaction tx = new RegisterAgentTransaction();
-        tx.parse(byteBuffer);
-        return tx;
+        return byteBuffer.readNulsData(new RegisterAgentTransaction());
     }
 
 }

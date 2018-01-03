@@ -36,7 +36,7 @@ public class BlockMerkleValidator implements NulsDataValidator<Block> {
 
     private NulsDigestData buildMerkleHash(Block data) {
         //todo
-        List<NulsDigestData> txHashList = data.getHeader().getTxHashList();
+        List<NulsDigestData> txHashList = data.getTxHashList();
         //todo temp
         return data.getHeader().getMerkleHash();
     }

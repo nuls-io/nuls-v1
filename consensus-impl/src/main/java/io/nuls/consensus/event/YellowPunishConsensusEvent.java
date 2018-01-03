@@ -17,14 +17,8 @@ public class YellowPunishConsensusEvent extends BaseConsensusEvent<YellowPunishT
     }
 
     @Override
-    protected YellowPunishTransaction parseEventBody(NulsByteBuffer byteBuffer) {
-        YellowPunishTransaction tx = new YellowPunishTransaction();
-        try {
-            tx.parse(byteBuffer);
-        } catch (NulsException e) {
-            Log.error(e);
-        }
-        return tx;
+    protected YellowPunishTransaction parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new YellowPunishTransaction());
     }
     @Override
     public Object copy() {

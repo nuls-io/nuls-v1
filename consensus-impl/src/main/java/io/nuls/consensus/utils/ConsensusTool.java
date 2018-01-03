@@ -134,7 +134,7 @@ public class ConsensusTool {
         BlockHeader header = new BlockHeader();
         block.setHeader(header);
         try {
-            block.setExtend(blockData.getRoundData().serialize());
+            block.getHeader().setExtend(blockData.getRoundData().serialize());
         } catch (IOException e) {
             Log.error(e);
         }
@@ -147,8 +147,6 @@ public class ConsensusTool {
             Transaction tx = blockData.getTxList().get(i);
             txHashList.add(tx.getHash());
         }
-        header.setTxHashList(txHashList);
-
         header.setPackingAddress(account.getAddress().toString());
         header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
         header.setHash(NulsDigestData.calcDigestData(block));

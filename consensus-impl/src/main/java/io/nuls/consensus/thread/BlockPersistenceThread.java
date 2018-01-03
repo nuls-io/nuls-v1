@@ -56,7 +56,7 @@ public class BlockPersistenceThread implements Runnable {
 
             blockService.save(block);
             this.blockCacheService.removeBlock(blockCacheService.getMinHeight());
-            this.ledgerService.removeFromCache(block.getHeader().getTxHashList());
+            this.ledgerService.removeFromCache(block.getTxHashList());
         }
     }
 

@@ -30,27 +30,29 @@ public class TxGroupHandler extends AbstractEventBusHandler<TxGroupEvent> {
 
     @Override
     public void onEvent(TxGroupEvent event, String fromId) {
-        BlockHeader header = headerCacheService.getHeader(event.getEventBody().getBlockHash().getDigestHex());
-        if (header == null) {
-            return;
-        }
-        Block block = new Block();
-        block.setHeader(header);
-        List<Transaction> txs = new ArrayList<>();
-        for (NulsDigestData txHash : header.getTxHashList()) {
-            Transaction tx = ledgerService.getTxFromCache(txHash.getDigestHex());
-            txs.add(tx);
-        }
-        block.setTxs(txs);
-        ValidateResult<RedPunishData> vResult = block.verify();
-        if (null==vResult||vResult.isFailed()) {
-            networkService.removePeer(fromId);
-            if (vResult.getLevel() == SeverityLevelEnum.FLAGRANT) {
-                RedPunishData data = vResult.getObject();
-                ConsensusMeetingRunner.putPunishData(data);
-            }
-            return;
-        }
-        blockCacheService.cacheBlock(block);
+
+        //todo 重新处理，获取header应该改为获取smallblock
+//        BlockHeader header = headerCacheService.getHeader(event.getEventBody().getBlockHash().getDigestHex());
+//        if (header == null) {
+//            return;
+//        }
+//        Block block = new Block();
+//        block.setHeader(header);
+//        List<Transaction> txs = new ArrayList<>();
+//        for (NulsDigestData txHash : header.getTxHashList()) {
+//            Transaction tx = ledgerService.getTxFromCache(txHash.getDigestHex());
+//            txs.add(tx);
+//        }
+//        block.setTxs(txs);
+//        ValidateResult<RedPunishData> vResult = block.verify();
+//        if (null==vResult||vResult.isFailed()) {
+//            networkService.removePeer(fromId);
+//            if (vResult.getLevel() == SeverityLevelEnum.FLAGRANT) {
+//                RedPunishData data = vResult.getObject();
+//                ConsensusMeetingRunner.putPunishData(data);
+//            }
+//            return;
+//        }
+//        blockCacheService.cacheBlock(block);
     }
 }

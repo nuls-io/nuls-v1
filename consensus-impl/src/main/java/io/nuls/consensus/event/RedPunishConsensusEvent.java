@@ -19,9 +19,7 @@ public class RedPunishConsensusEvent extends BaseConsensusEvent<RedPunishTransac
 
     @Override
     protected RedPunishTransaction parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
-        RedPunishTransaction tx = new RedPunishTransaction();
-        tx.parse(byteBuffer);
-        return tx;
+        return byteBuffer.readNulsData(new RedPunishTransaction());
     }
 
 

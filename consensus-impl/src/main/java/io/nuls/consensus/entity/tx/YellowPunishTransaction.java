@@ -22,13 +22,7 @@ public class YellowPunishTransaction extends Transaction<YellowPunishData> {
     }
 
     @Override
-    protected YellowPunishData parseTxData(NulsByteBuffer byteBuffer) {
-        YellowPunishData data = new YellowPunishData();
-        try {
-            data.parse(byteBuffer);
-        } catch (NulsException e) {
-            Log.error(e);
-        }
-        return data;
+    protected YellowPunishData parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new YellowPunishData());
     }
 }

@@ -23,11 +23,9 @@ public class PocJoinConsensusTransaction extends LockCoinTransaction<Consensus<D
 
     @Override
     protected Consensus<Delegate> parseTxData(NulsByteBuffer byteBuffer) throws NulsException{
-        Consensus<Delegate> con = new Consensus<Delegate>();
-        con.parse(byteBuffer);
-        Delegate agent = new Delegate();
-        agent.parse(byteBuffer);
-        con.setExtend(agent);
-        return con;
+        Consensus<Delegate> consensus = byteBuffer.readNulsData(new Consensus<>());
+        Delegate delegate = byteBuffer.readNulsData(new Delegate());
+        consensus.setExtend(delegate);
+        return consensus;
     }
 }

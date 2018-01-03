@@ -13,6 +13,7 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.NulsDataValidator;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -92,5 +93,13 @@ public class Block extends BaseNulsData implements NulsCloneable {
             Log.error(e);
             return null;
         }
+    }
+
+    public List<NulsDigestData> getTxHashList() {
+        List<NulsDigestData> list = new ArrayList<>();
+        for (Transaction tx : txs) {
+            list.add(tx.getHash());
+        }
+        return list;
     }
 }

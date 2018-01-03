@@ -21,14 +21,8 @@ public class RedPunishTransaction extends Transaction<RedPunishData> {
     }
 
     @Override
-    protected RedPunishData parseTxData(NulsByteBuffer byteBuffer) {
-        RedPunishData data = new RedPunishData();
-        try {
-            data.parse(byteBuffer);
-        } catch (NulsException e) {
-            Log.error(e);
-        }
-        return data;
+    protected RedPunishData parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new RedPunishData());
     }
 
 }

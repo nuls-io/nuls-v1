@@ -18,9 +18,7 @@ public class JoinConsensusEvent extends BaseConsensusEvent<PocJoinConsensusTrans
 
     @Override
     protected PocJoinConsensusTransaction parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
-        PocJoinConsensusTransaction tx = new PocJoinConsensusTransaction();
-        tx.parse(byteBuffer);
-        return tx;
+        return byteBuffer.readNulsData(new PocJoinConsensusTransaction());
     }
 
 }
