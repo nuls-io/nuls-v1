@@ -47,11 +47,12 @@ public class UtxoInput extends BaseNulsData {
 
     @Override
     public int size() {
+        //todo
         return 0;
     }
 
     @Override
-    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         if (froms == null || froms.size() == 0) {
             stream.write(new VarInt(0).encode());
         } else {
@@ -62,11 +63,11 @@ public class UtxoInput extends BaseNulsData {
             }
         }
         //sign
-        stream.write(sign.serialize());
+        stream.writeNulsData(sign);
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         if (byteBuffer == null) {
             return;
         }
@@ -80,8 +81,7 @@ public class UtxoInput extends BaseNulsData {
             froms.add(pre);
         }
         //length of sign
-        sign = new NulsSignData();
-        sign.parse(byteBuffer);
+        sign = byteBuffer.readSign();
     }
 
     public NulsDigestData getTxHash() {

@@ -30,15 +30,13 @@ public abstract class BaseBusData<T extends BaseNulsData> extends BaseNulsData i
     }
 
     @Override
-    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         this.header.serializeToStream(stream);
-        if (eventBody != null) {
-            this.eventBody.serializeToStream(stream);
-        }
+        stream.writeNulsData(this.eventBody);
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.header = new BusDataHeader();
         this.header.parse(byteBuffer);
         this.eventBody = parseEventBody(byteBuffer);

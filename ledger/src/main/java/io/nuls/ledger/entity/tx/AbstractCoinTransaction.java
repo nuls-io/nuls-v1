@@ -4,6 +4,7 @@ import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.ledger.entity.CoinData;
@@ -40,22 +41,18 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
     @Override
     public int size() {
         int size = super.size();
-        if(coinData!=null){
-            size += this.coinData.size();
-        }
+        size += Utils.sizeOfSerialize(coinData);
         return size;
     }
 
     @Override
-    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         super.serializeToStream(stream);
-        if(coinData!=null){
-            this.coinData.serializeToStream(stream);
-        }
+        stream.writeNulsData(coinData);
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         super.parse(byteBuffer);
         this.coinData = coinDataProvider.parse(byteBuffer);
     }

@@ -156,7 +156,7 @@ public class Account extends BaseNulsData implements NulsCloneable {
     }
 
     @Override
-    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
 
         stream.writeShort(version.getVersion());
         stream.writeString(alias);
@@ -168,7 +168,7 @@ public class Account extends BaseNulsData implements NulsCloneable {
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         version = new NulsVersion(byteBuffer.readShort());
         alias = new String(byteBuffer.readByLengthByte());
         address = new Address(new String(byteBuffer.readByLengthByte()));

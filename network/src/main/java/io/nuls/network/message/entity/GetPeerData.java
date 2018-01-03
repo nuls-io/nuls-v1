@@ -45,13 +45,13 @@ public class GetPeerData extends BaseNetworkData {
     }
 
     @Override
-    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         networkHeader.serializeToStream(stream);
         stream.write(new VarInt(length).encode());
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.networkHeader = new NetworkDataHeader(byteBuffer);
         length = (int) byteBuffer.readVarInt();
     }

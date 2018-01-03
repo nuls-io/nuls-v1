@@ -1,5 +1,7 @@
 package io.nuls.core.utils.io;
 
+import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -83,6 +85,14 @@ public class NulsOutputStreamBuffer {
         } catch (IOException e) {
             Log.error(e);
             throw new NulsRuntimeException(e);
+        }
+    }
+
+    public void writeNulsData(BaseNulsData data) throws IOException {
+        if (null == data) {
+            write(NulsConstant.PLACE_HOLDER);
+        } else {
+            this.write(data.serialize());
         }
     }
 }

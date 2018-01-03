@@ -26,13 +26,13 @@ public class YellowPunishData extends BaseNulsData {
     }
 
     @Override
-    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeVarInt(height);
         stream.writeString(address);
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.height = byteBuffer.readVarInt();
         this.address = byteBuffer.readString();
     }

@@ -30,9 +30,9 @@ public class BlockHeader extends BaseNulsData {
 
     private String packingAddress;
 
-    private List<NulsDigestData> txHashList;
-
     private NulsSignData sign;
+
+    private byte[] extend;
 
     public BlockHeader() {
         initValidators();
@@ -49,7 +49,7 @@ public class BlockHeader extends BaseNulsData {
     public int size() {
         int size = 0;
         size += this.getVersion().size();
-        if(null!=hash){
+        if (null != hash) {
             size += hash.size();
         }
         size += preHash.size();
@@ -58,37 +58,29 @@ public class BlockHeader extends BaseNulsData {
         size += Utils.sizeOfSerialize(height);
         size += Utils.sizeOfSerialize(txCount);
         size += Utils.sizeOfSerialize(packingAddress);
-        if(null!=sign){
+        if (null != sign) {
             size += sign.size();
         }
-        for (NulsDigestData txHash : txHashList) {
-            size += txHash.size();
-        }
+        size += Utils.sizeOfSerialize(extend);
         return size;
     }
 
     @Override
-    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeShort(this.getVersion().getVersion());
-        if(null!=hash){
-            this.hash.serializeToStream(stream);
-        }
+        stream.writeNulsData(this.hash);
         this.preHash.serializeToStream(stream);
         this.merkleHash.serializeToStream(stream);
         stream.writeVarInt(time);
         stream.writeVarInt(height);
         stream.writeVarInt(txCount);
         stream.writeString(packingAddress);
-        if(null!=sign){
-            this.sign.serializeToStream(stream);
-        }
-        for (int i = 0; i < txHashList.size(); i++) {
-            txHashList.get(i).serializeToStream(stream);
-        }
+        stream.writeNulsData(this.sign);
+        stream.writeBytesWithLength(extend);
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.version = new NulsVersion(byteBuffer.readShort());
         this.hash = new NulsDigestData();
         this.hash.parse(byteBuffer);
@@ -100,14 +92,11 @@ public class BlockHeader extends BaseNulsData {
         this.height = byteBuffer.readVarInt();
         this.txCount = byteBuffer.readVarInt();
         this.packingAddress = byteBuffer.readString();
+
         this.sign = new NulsSignData();
         this.sign.parse(byteBuffer);
-        txHashList = new ArrayList<>();
-        for (int i = 0; i < txCount; i++) {
-            NulsDigestData hash = new NulsDigestData();
-            hash.parse(byteBuffer);
-            txHashList.add(hash);
-        }
+
+        this.extend = byteBuffer.readByLengthByte();
     }
 
     public NulsDigestData getHash() {
@@ -166,20 +155,18 @@ public class BlockHeader extends BaseNulsData {
         this.sign = sign;
     }
 
-    public List<NulsDigestData> getTxHashList() {
-        return txHashList;
-    }
-
-    public void setTxHashList(List<NulsDigestData> txHashList) {
-        this.txHashList = txHashList;
-    }
-
     public void setPackingAddress(String packingAddress) {
         this.packingAddress = packingAddress;
     }
 
     public String getPackingAddress() {
-
         return packingAddress;
+    }
+    public byte[] getExtend() {
+        return extend;
+    }
+
+    public void setExtend(byte[] extend) {
+        this.extend = extend;
     }
 }

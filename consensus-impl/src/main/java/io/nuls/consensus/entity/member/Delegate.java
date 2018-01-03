@@ -63,13 +63,13 @@ public class Delegate extends BaseNulsData {
     }
 
     @Override
-    public void serializeToStream(NulsOutputStreamBuffer buffer) throws IOException {
+    protected void serializeToStream(NulsOutputStreamBuffer buffer) throws IOException {
         buffer.writeVarInt(deposit.getValue());
         buffer.writeString(delegateAddress);
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.deposit = Na.valueOf(byteBuffer.readVarInt());
         this.delegateAddress = byteBuffer.readString();
     }

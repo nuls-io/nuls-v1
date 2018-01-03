@@ -96,11 +96,11 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
 
         GetBlockHandler getBlockHandler = new GetBlockHandler();
         getBlockHandler.addFilter(new GetBlockBusFilter());
-        processorService.registerEventHandler(GetSmallBlockEvent.class, getBlockHandler);
+        processorService.registerEventHandler(GetTxGroupEvent.class, getBlockHandler);
 
-        GetSmallBlockBusHandler getSmallBlockHandler = new GetSmallBlockBusHandler();
-        getSmallBlockHandler.addFilter(new GetSmallBlockBusFilter());
-        processorService.registerEventHandler(GetSmallBlockEvent.class, getSmallBlockHandler);
+        GetTxGroupHandler getSmallBlockHandler = new GetTxGroupHandler();
+        getSmallBlockHandler.addFilter(new GetTxGroupFilter());
+        processorService.registerEventHandler(GetTxGroupEvent.class, getSmallBlockHandler);
 
         RegisterAgentHandler registerAgentHandler = new RegisterAgentHandler();
         registerAgentHandler.addFilter(new RegisterAgentBusFilter());
@@ -126,9 +126,9 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
         AskBlockInfoHandler askBlockInfoHandler = new AskBlockInfoHandler();
         processorService.registerEventHandler(AskBlockInfoEvent.class, askBlockInfoHandler);
 
-        SmallBlockHandler smallBlockHandler = new SmallBlockHandler();
+        TxGroupHandler txGroupHandler = new TxGroupHandler();
 //todo        smallBlockHandler.addFilter();
-        processorService.registerEventHandler(SmallBlockEvent.class, smallBlockHandler);
+        processorService.registerEventHandler(TxGroupEvent.class, txGroupHandler);
     }
 
     private void checkConsensusStatus() {

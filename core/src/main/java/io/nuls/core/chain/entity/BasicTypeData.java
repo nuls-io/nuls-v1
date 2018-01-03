@@ -34,7 +34,7 @@ public class BasicTypeData<T> extends BaseNulsData {
     }
 
     @Override
-    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.write(type);
         switch (type) {
             case 1:
@@ -64,7 +64,7 @@ public class BasicTypeData<T> extends BaseNulsData {
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.type = byteBuffer.readByte();
         switch (type) {
             case 1:

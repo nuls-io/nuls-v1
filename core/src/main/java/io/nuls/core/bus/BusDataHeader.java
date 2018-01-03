@@ -51,7 +51,7 @@ public class BusDataHeader extends BaseNulsData {
     }
 
     @Override
-    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         byte[] header = new byte[EVENT_HEADER_LENGHT];
         Utils.int16ToByteArrayLE(moduleId, header, 0);
         Utils.int16ToByteArrayLE(eventType, header, 2);

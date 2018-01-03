@@ -1,8 +1,8 @@
 package io.nuls.consensus.handler;
 
-import io.nuls.consensus.entity.AskSmallBlockData;
+import io.nuls.consensus.entity.AskTxGroupData;
 import io.nuls.consensus.event.BlockHeaderEvent;
-import io.nuls.consensus.event.GetSmallBlockEvent;
+import io.nuls.consensus.event.GetTxGroupEvent;
 import io.nuls.consensus.service.cache.BlockHeaderCacheService;
 import io.nuls.consensus.utils.DistributedBlockInfoRequestUtils;
 import io.nuls.core.chain.entity.BlockHeader;
@@ -35,8 +35,8 @@ public class BlockHeaderHandler extends AbstractEventBusHandler<BlockHeaderEvent
         //todo 分叉处理
         header.verify();
         headerCacheService.cacheHeader(header);
-        GetSmallBlockEvent smallBlockEvent = new GetSmallBlockEvent();
-        AskSmallBlockData data = new AskSmallBlockData();
+        GetTxGroupEvent smallBlockEvent = new GetTxGroupEvent();
+        AskTxGroupData data = new AskTxGroupData();
         data.setBlockHash(header.getHash());
         List<NulsDigestData> txHashList = new ArrayList<>();
         for (NulsDigestData txHash : header.getTxHashList()) {

@@ -4,6 +4,7 @@ import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
@@ -15,7 +16,7 @@ import java.util.List;
  * @author Niels
  * @date 2017/12/18
  */
-public class AskSmallBlockData extends BaseNulsData {
+public class AskTxGroupData extends BaseNulsData {
 
     private NulsDigestData blockHash;
 
@@ -31,24 +32,21 @@ public class AskSmallBlockData extends BaseNulsData {
     }
 
     @Override
-    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        blockHash.serializeToStream(stream);
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeNulsData(blockHash);
         stream.writeVarInt(txHashList.size());
         for(NulsDigestData data:txHashList){
-            data.serializeToStream(stream);
+            stream.writeNulsData(data);
         }
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.blockHash = new NulsDigestData();
-        this.blockHash.parse(byteBuffer);
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.blockHash = byteBuffer.readHash();
        long txCount = byteBuffer.readVarInt();
        this.txHashList = new ArrayList<>();
        for(int i=0;i<txCount;i++){
-           NulsDigestData data = new NulsDigestData();
-           data.parse(byteBuffer);
-           this.txHashList.add(data);
+           this.txHashList.add(byteBuffer.readHash());
        }
     }
 
@@ -70,7 +68,7 @@ public class AskSmallBlockData extends BaseNulsData {
     private int getTxHashBytesLength(){
         int size = 0;
         for (NulsDigestData hash : txHashList) {
-            size += hash.size();
+            size += Utils.sizeOfSerialize(hash);
         }
         return size;
     }

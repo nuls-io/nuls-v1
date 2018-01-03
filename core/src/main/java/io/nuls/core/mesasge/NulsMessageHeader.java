@@ -81,7 +81,7 @@ public class NulsMessageHeader extends BaseNulsData{
     }
 
     @Override
-    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         byte[] header = new byte[MESSAGE_HEADER_SIZE];
         Utils.int32ToByteArrayLE(magicNumber, header, 0);
         Utils.int32ToByteArrayLE(length, header, 4);
@@ -92,7 +92,7 @@ public class NulsMessageHeader extends BaseNulsData{
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.magicNumber = byteBuffer.readInt32LE();
         this.length = byteBuffer.readInt32LE();
         this.headType = byteBuffer.readShort();

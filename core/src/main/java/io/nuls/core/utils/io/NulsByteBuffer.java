@@ -1,7 +1,10 @@
 package io.nuls.core.utils.io;
 
+import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.NulsDigestData;
+import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
@@ -124,9 +127,7 @@ public class NulsByteBuffer {
     }
 
     public NulsDigestData readHash() throws NulsException {
-        NulsDigestData data = new NulsDigestData();
-        data.parse(this);
-        return data;
+        return this.readNulsData(new NulsDigestData());
     }
 
     public int getCursor() {
@@ -171,5 +172,20 @@ public class NulsByteBuffer {
 
     public byte[] getPayload() {
         return payload;
+    }
+
+    public <T extends BaseNulsData> T readNulsData(T nulsData) throws NulsException {
+        if (payload == null || payload.length == 0 || NulsConstant.PLACE_HOLDER == payload[0]) {
+            return null;
+        }
+        int length = payload.length - cursor;
+        byte[] bytes = new byte[length];
+        System.arraycopy(payload, cursor, bytes, 0, length);
+        nulsData.parse(bytes);
+        return nulsData;
+    }
+
+    public NulsSignData readSign() throws NulsException {
+        return this.readNulsData(new NulsSignData());
     }
 }

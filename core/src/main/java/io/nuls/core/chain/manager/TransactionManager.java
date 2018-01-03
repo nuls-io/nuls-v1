@@ -44,8 +44,7 @@ public class TransactionManager {
         if (null == txClass) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "transaction type not exist!");
         }
-        Transaction tx = txClass.newInstance();
-        tx.parse(byteBuffer);
+        Transaction tx = byteBuffer.readNulsData(txClass.newInstance());
         return tx;
     }
 }

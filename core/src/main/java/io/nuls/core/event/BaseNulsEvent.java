@@ -7,6 +7,7 @@ import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.chain.intf.NulsCloneable;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
@@ -31,26 +32,23 @@ public abstract class BaseNulsEvent<T extends BaseNulsData> extends BaseBusData<
     @Override
     public final int size() {
         int size = super.size();
-        size += hash.size();
-        size += sign.size();
+        size += Utils.sizeOfSerialize(hash);
+        size += Utils.sizeOfSerialize(sign);
         return size;
     }
 
     @Override
     public final void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         super.serializeToStream(stream);
-        this.hash.serializeToStream(stream);
-        this.sign.serializeToStream(stream);
+        stream.writeNulsData(hash);
+        stream.writeNulsData(sign);
     }
 
     @Override
     public final void parse(NulsByteBuffer byteBuffer) throws NulsException {
         super.parse(byteBuffer);
-        this.hash = new NulsDigestData();
-        this.hash.parse(byteBuffer);
-        this.sign = new NulsSignData();
-        this.sign.parse(byteBuffer);
-
+        this.hash = byteBuffer.readHash();
+        this.sign = byteBuffer.readSign();
     }
 
     public NulsDigestData getHash() {

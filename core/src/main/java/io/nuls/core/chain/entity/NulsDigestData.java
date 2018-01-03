@@ -45,14 +45,14 @@ public class NulsDigestData extends BaseNulsData {
     }
 
     @Override
-    public void serializeToStream(NulsOutputStreamBuffer buffer) throws IOException {
+    protected void serializeToStream(NulsOutputStreamBuffer buffer) throws IOException {
         buffer.write(digestAlgType);
         buffer.write(digestLength);
         buffer.write(digestBytes);
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.setDigestAlgType(byteBuffer.readByte());
         this.setDigestLength(byteBuffer.readByte());
         this.setDigestBytes(byteBuffer.readBytes(this.digestLength));

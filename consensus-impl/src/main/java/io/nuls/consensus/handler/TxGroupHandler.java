@@ -2,7 +2,7 @@ package io.nuls.consensus.handler;
 
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.entity.RedPunishData;
-import io.nuls.consensus.event.SmallBlockEvent;
+import io.nuls.consensus.event.TxGroupEvent;
 import io.nuls.consensus.service.cache.BlockCacheService;
 import io.nuls.consensus.service.cache.BlockHeaderCacheService;
 import io.nuls.consensus.thread.ConsensusMeetingRunner;
@@ -21,7 +21,7 @@ import java.util.List;
  * @author facjas
  * @date 2017/11/16
  */
-public class SmallBlockHandler extends AbstractEventBusHandler<SmallBlockEvent> {
+public class TxGroupHandler extends AbstractEventBusHandler<TxGroupEvent> {
     private BlockHeaderCacheService headerCacheService = BlockHeaderCacheService.getInstance();
     private BlockCacheService blockCacheService = BlockCacheService.getInstance();
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
@@ -29,7 +29,7 @@ public class SmallBlockHandler extends AbstractEventBusHandler<SmallBlockEvent> 
     private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
 
     @Override
-    public void onEvent(SmallBlockEvent event, String fromId) {
+    public void onEvent(TxGroupEvent event, String fromId) {
         BlockHeader header = headerCacheService.getHeader(event.getEventBody().getBlockHash().getDigestHex());
         if (header == null) {
             return;

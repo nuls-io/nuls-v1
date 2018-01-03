@@ -45,7 +45,7 @@ public class BlockRoundData extends BaseNulsData {
     }
 
     @Override
-    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeVarInt(roundIndex);
         stream.writeVarInt(consensusMemberCount);
         stream.writeVarInt(roundStartTime);
@@ -53,7 +53,7 @@ public class BlockRoundData extends BaseNulsData {
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.roundIndex = byteBuffer.readVarInt();
         this.consensusMemberCount = (int) byteBuffer.readVarInt();
         this.roundStartTime = byteBuffer.readVarInt();

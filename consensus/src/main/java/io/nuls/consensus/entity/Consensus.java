@@ -30,7 +30,7 @@ public class Consensus<T extends BaseNulsData> extends BaseNulsData implements N
     }
 
     @Override
-    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeString(address);
         if (null != extend) {
             stream.writeBytesWithLength(extend.serialize());
@@ -38,7 +38,7 @@ public class Consensus<T extends BaseNulsData> extends BaseNulsData implements N
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.address = byteBuffer.readString();
 
     }

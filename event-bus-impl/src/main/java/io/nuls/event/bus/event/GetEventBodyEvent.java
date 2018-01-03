@@ -19,9 +19,7 @@ public class GetEventBodyEvent extends BaseNulsEvent<NulsDigestData> {
 
     @Override
     protected NulsDigestData parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
-        NulsDigestData data = new NulsDigestData();
-        data.parse(byteBuffer);
-        return data;
+        return byteBuffer.readHash();
     }
 
     @Override

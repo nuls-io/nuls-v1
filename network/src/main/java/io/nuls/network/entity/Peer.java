@@ -92,10 +92,6 @@ public class Peer extends BaseNulsData {
         super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
     }
 
-    public Peer(NulsByteBuffer buffer) throws NulsException {
-        parse(buffer);
-    }
-
     public Peer(AbstractNetworkParam network) {
         super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.magicNumber = network.packetMagic();
@@ -312,7 +308,7 @@ public class Peer extends BaseNulsData {
     }
 
     @Override
-    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeShort(version.getVersion());
         stream.write(new VarInt(magicNumber).encode());
         stream.write(new VarInt(port).encode());

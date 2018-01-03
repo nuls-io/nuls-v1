@@ -47,7 +47,7 @@ public class UtxoOutput extends BaseNulsData{
     }
 
     @Override
-    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeInt64(value);
         stream.writeInt32((int) lockTime);
         stream.write(new VarInt(scriptBytes.length).encode());
@@ -55,7 +55,7 @@ public class UtxoOutput extends BaseNulsData{
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         if(byteBuffer == null ) {
             return;
         }

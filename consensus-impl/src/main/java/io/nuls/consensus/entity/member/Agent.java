@@ -47,7 +47,7 @@ public class Agent extends BaseNulsData {
     }
 
     @Override
-    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeVarInt(deposit.getValue());
         stream.writeString(delegateAddress);
         stream.writeDouble(this.commissionRate);
@@ -56,7 +56,7 @@ public class Agent extends BaseNulsData {
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.deposit = Na.valueOf(byteBuffer.readVarInt());
         this.delegateAddress = byteBuffer.readString();
         this.commissionRate = byteBuffer.readDouble();

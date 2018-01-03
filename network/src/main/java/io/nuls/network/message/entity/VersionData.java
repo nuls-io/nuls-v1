@@ -74,7 +74,7 @@ public class VersionData extends BaseNetworkData {
     }
 
     @Override
-    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         networkHeader.serializeToStream(stream);
         stream.writeShort(version.getVersion());
         stream.write(new VarInt(bestBlockHeight).encode());
@@ -83,7 +83,7 @@ public class VersionData extends BaseNetworkData {
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.networkHeader = new NetworkDataHeader(byteBuffer);
         version = new NulsVersion(byteBuffer.readShort());
         bestBlockHeight = byteBuffer.readVarInt();

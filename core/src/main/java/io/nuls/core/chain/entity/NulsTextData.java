@@ -31,13 +31,13 @@ public class NulsTextData extends BaseNulsData{
     }
 
     @Override
-    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeVarInt(text.length());
         stream.write(text.getBytes());
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         long len = byteBuffer.readVarInt();
         try {
             text = new String(byteBuffer.readBytes((int) len), NulsContext.DEFAULT_ENCODING);

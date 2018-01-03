@@ -93,7 +93,7 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
     }
 
     @Override
-    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeVarInt(type);
         stream.writeVarInt(time);
         if (null != hash) {
@@ -109,7 +109,7 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         type = (int) byteBuffer.readVarInt();
         time = byteBuffer.readVarInt();
 

@@ -14,8 +14,8 @@ public abstract class AbstractConsensusModule extends BaseNulsModule {
         super(NulsConstant.MODULE_ID_CONSENSUS);
         this.publish(ConsensusEventType.BLOCK, BlockEvent.class);
         this.publish(ConsensusEventType.BLOCK_HEADER, BlockHeaderEvent.class);
-        this.publish(ConsensusEventType.SMALL_BLOCK, SmallBlockEvent.class);
-        this.publish(ConsensusEventType.GET_SMALL_BLOCK, GetSmallBlockEvent.class);
+        this.publish(ConsensusEventType.SMALL_BLOCK, TxGroupEvent.class);
+        this.publish(ConsensusEventType.GET_SMALL_BLOCK, GetTxGroupEvent.class);
         this.publish(ConsensusEventType.GET_BLOCK, GetBlockEvent.class);
 
     }
