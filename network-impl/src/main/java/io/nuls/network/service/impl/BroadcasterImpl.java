@@ -204,7 +204,7 @@ public class BroadcasterImpl implements Broadcaster {
     public BroadcastResult broadcast(BaseNulsEvent event, String excludePeerId) {
         NulsMessage message = null;
         try {
-            message = new NulsMessage(network.packetMagic(), NulsMessageHeader.EVENT_MESSAGE, event.serialize());
+            message = new NulsMessage(network.packetMagic(), event.serialize());
         } catch (IOException e) {
             return new BroadcastResult(false, "event.serialize() error");
         }
@@ -219,7 +219,7 @@ public class BroadcasterImpl implements Broadcaster {
 
     @Override
     public BroadcastResult broadcast(byte[] data, String excludePeerId) {
-        NulsMessage message = new NulsMessage(network.packetMagic(), NulsMessageHeader.EVENT_MESSAGE, data);
+        NulsMessage message = new NulsMessage(network.packetMagic(), data);
         return broadcast(message, excludePeerId);
     }
 
@@ -230,7 +230,7 @@ public class BroadcasterImpl implements Broadcaster {
     public BroadcastResult broadcastSync(BaseNulsEvent event, String excludePeerId) {
         NulsMessage message = null;
         try {
-            message = new NulsMessage(network.packetMagic(), NulsMessageHeader.EVENT_MESSAGE, event.serialize());
+            message = new NulsMessage(network.packetMagic(), event.serialize());
         } catch (IOException e) {
             return new BroadcastResult(false, "event.serialize() error");
         }
@@ -243,7 +243,7 @@ public class BroadcasterImpl implements Broadcaster {
     }
 
     public BroadcastResult broadcastSync(byte[] data, String excludePeerId) {
-        NulsMessage message = new NulsMessage(network.packetMagic(), NulsMessageHeader.EVENT_MESSAGE, data);
+        NulsMessage message = new NulsMessage(network.packetMagic(), data);
         return broadcastSync(message, excludePeerId);
     }
 
@@ -251,7 +251,7 @@ public class BroadcasterImpl implements Broadcaster {
     public BroadcastResult broadcastToPeer(BaseNulsEvent event, String peerId) {
         NulsMessage message = null;
         try {
-            message = new NulsMessage(network.packetMagic(), NulsMessageHeader.EVENT_MESSAGE, event.serialize());
+            message = new NulsMessage(network.packetMagic(), event.serialize());
         } catch (IOException e) {
             return new BroadcastResult(false, "event.serialize() error");
         }
@@ -260,7 +260,7 @@ public class BroadcasterImpl implements Broadcaster {
 
     @Override
     public BroadcastResult broadcastToPeer(byte[] data, String peerId) {
-        NulsMessage message = new NulsMessage(network.packetMagic(), NulsMessageHeader.EVENT_MESSAGE, data);
+        NulsMessage message = new NulsMessage(network.packetMagic(), data);
         return broadcastToPeer(message, peerId);
     }
 
@@ -273,7 +273,7 @@ public class BroadcasterImpl implements Broadcaster {
     public BroadcastResult broadcastToGroup(BaseNulsEvent event, String groupName, String excludePeerId) {
         NulsMessage message = null;
         try {
-            message = new NulsMessage(network.packetMagic(), NulsMessageHeader.EVENT_MESSAGE, event.serialize());
+            message = new NulsMessage(network.packetMagic(), event.serialize());
         } catch (IOException e) {
             return new BroadcastResult(false, "event.serialize() error");
         }
@@ -287,7 +287,7 @@ public class BroadcasterImpl implements Broadcaster {
 
     @Override
     public BroadcastResult broadcastToGroup(byte[] data, String groupName, String excludePeerId) {
-        NulsMessage message = new NulsMessage(network.packetMagic(), NulsMessageHeader.EVENT_MESSAGE, data);
+        NulsMessage message = new NulsMessage(network.packetMagic(), data);
         return broadcastToGroup(message, groupName, excludePeerId);
     }
 
@@ -298,7 +298,7 @@ public class BroadcasterImpl implements Broadcaster {
     public BroadcastResult broadcastToGroupSync(BaseNulsEvent event, String groupName, String excludePeerId) {
         NulsMessage message = null;
         try {
-            message = new NulsMessage(network.packetMagic(), NulsMessageHeader.EVENT_MESSAGE, event.serialize());
+            message = new NulsMessage(network.packetMagic(), event.serialize());
         } catch (IOException e) {
             return new BroadcastResult(false, "event.serialize() error");
         }
@@ -310,7 +310,7 @@ public class BroadcasterImpl implements Broadcaster {
     }
 
     public BroadcastResult broadcastToGroupSync(byte[] data, String groupName, String excludePeerId) {
-        NulsMessage message = new NulsMessage(network.packetMagic(), NulsMessageHeader.EVENT_MESSAGE, data);
+        NulsMessage message = new NulsMessage(network.packetMagic(), data);
         return broadcastToGroupSync(message, groupName, excludePeerId);
     }
 

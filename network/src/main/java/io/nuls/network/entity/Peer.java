@@ -159,7 +159,7 @@ public class Peer extends BaseNulsData {
         lock.lock();
         try {
             byte[] data = networkData.serialize();
-            NulsMessage message = new NulsMessage(magicNumber, NulsMessageHeader.NETWORK_MESSAGE, data);
+            NulsMessage message = new NulsMessage(magicNumber, data);
             this.writeTarget.write(message.serialize());
         } finally {
             lock.unlock();
@@ -195,7 +195,8 @@ public class Peer extends BaseNulsData {
      * @param message
      */
     public void processMessage(NulsMessage message) throws IOException {
-        if (message.getHeader().getHeadType() == NulsMessageHeader.EVENT_MESSAGE) {
+        //todo
+        if (true) {
             try {
                 System.out.println("------receive message:" + Hex.encode(message.serialize()));
             } catch (IOException e) {

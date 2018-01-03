@@ -38,39 +38,19 @@ public class NulsMessage {
         header.setLength(data.length);
     }
 
+    public NulsMessage(int magicNumber, byte[] data) {
+        this(data);
+        this.header.setMagicNumber(magicNumber);
+    }
+
     public NulsMessage(NulsMessageHeader header) {
         this.header = new NulsMessageHeader();
     }
 
-    public NulsMessage(int magicNumber, short msgType) {
+    public NulsMessage(int magicNumber) {
         this();
         this.header.setMagicNumber(magicNumber);
-        this.header.setHeadType(msgType);
     }
-
-    public NulsMessage(int magicNumber, short msgType, byte[] data) {
-        this(data);
-        this.header.setMagicNumber(magicNumber);
-        this.header.setHeadType(msgType);
-    }
-
-    public NulsMessage(int magicNumber, short msgType, byte[] extend, byte[] data) {
-        this(magicNumber, msgType, data);
-        if (extend == null) {
-            extend = new byte[9];
-        }
-        this.header.setExtend(extend);
-    }
-//
-//    public NulsMessage(int magicNumber, int length, short msgType, byte xor, byte[] data) {
-//        this.header = new NulsMessageHeader(magicNumber, msgType, length, xor);
-//        this.data = data;
-//    }
-//
-//    public NulsMessage(int magicNumber, int length, short msgType, byte xor, byte[] extend, byte[] data) {
-//        this.header = new NulsMessageHeader(magicNumber, msgType, length, xor, extend);
-//        this.data = data;
-//    }
 
     public NulsMessageHeader getHeader() {
         return header;
