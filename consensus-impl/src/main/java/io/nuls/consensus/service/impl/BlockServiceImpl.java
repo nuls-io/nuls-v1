@@ -14,7 +14,7 @@ import io.nuls.db.dao.BlockDao;
 import io.nuls.db.dao.ConsensusDao;
 import io.nuls.db.entity.BlockPo;
 import io.nuls.db.entity.TransactionPo;
-import io.nuls.ledger.entity.TransactionTool;
+import io.nuls.db.util.TransactionPoTool;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -111,7 +111,7 @@ public class BlockServiceImpl implements BlockService {
             Transaction tx = block.getTxs().get(x);
             try {
                 tx.onCommit();
-                txPoList.add(TransactionTool.toPojo(tx));
+                txPoList.add(TransactionPoTool.toPojo(tx));
             } catch (Exception e) {
                 Log.error(e);
                 rollback(block.getTxs(), x);

@@ -35,8 +35,8 @@ import io.nuls.db.entity.AccountPo;
 import io.nuls.db.entity.AliasPo;
 import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.entity.TransactionPo;
+import io.nuls.db.util.TransactionPoTool;
 import io.nuls.event.bus.bus.service.intf.EventBroadcaster;
-import io.nuls.ledger.entity.TransactionTool;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.service.intf.LedgerService;
 
@@ -450,7 +450,7 @@ public class AccountServiceImpl implements AccountService {
     public Result setAlias(String address, String alias) {
         try {
             Result result = canSetAlias(address, alias);
-            if (null==result||result.isFailed()) {
+            if (null == result || result.isFailed()) {
                 return result;
             }
             Account account = getAccount(address);
@@ -466,7 +466,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Result sendAliasTx(String address, String password, String alias) {
         Result result = canSetAlias(address, alias);
-        if (null==result||result.isFailed()) {
+        if (null == result || result.isFailed()) {
             return result;
         }
         try {
@@ -713,7 +713,7 @@ public class AccountServiceImpl implements AccountService {
 
             List<TransactionLocalPo> transactionPos = new ArrayList<>();
             for (Transaction tx : account.getMyTxs()) {
-                TransactionLocalPo po = TransactionTool.toPojoLocal(tx);
+                TransactionLocalPo po = TransactionPoTool.toPojoLocal(tx);
                 transactionPos.add(po);
             }
             accountPo.setMyTxs(transactionPos);
