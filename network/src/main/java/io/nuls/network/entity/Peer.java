@@ -186,7 +186,6 @@ public class Peer extends BaseNulsData {
 //        buffer.compact();
         buffer.clear();
         processMessage(message);
-
     }
 
     /**

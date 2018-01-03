@@ -24,6 +24,11 @@ public class NulsMessage {
         parse(buffer);
     }
 
+    public NulsMessage(NulsMessageHeader header) {
+        this.header = header;
+        this.data = new byte[0];
+    }
+
     public NulsMessage(NulsMessageHeader header, byte[] data) {
         this.header = header;
         this.data = data;
@@ -38,17 +43,13 @@ public class NulsMessage {
         header.setLength(data.length);
     }
 
-    public NulsMessage(int magicNumber, byte[] data) {
-        this(data);
+    public NulsMessage(int magicNumber) {
+        this();
         this.header.setMagicNumber(magicNumber);
     }
 
-    public NulsMessage(NulsMessageHeader header) {
-        this.header = new NulsMessageHeader();
-    }
-
-    public NulsMessage(int magicNumber) {
-        this();
+    public NulsMessage(int magicNumber, byte[] data) {
+        this(data);
         this.header.setMagicNumber(magicNumber);
     }
 

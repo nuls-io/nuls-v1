@@ -15,7 +15,7 @@ import java.io.IOException;
  * @date 2017/11/7
  */
 public class EventHeader extends BaseNulsData {
-    private static final int EVENT_HEADER_LENGHT = 4;
+    private static final int EVENT_HEADER_LENGTH = 4;
     private short moduleId;
     private short eventType;
 
@@ -38,12 +38,12 @@ public class EventHeader extends BaseNulsData {
 
     @Override
     public int size() {
-        return EVENT_HEADER_LENGHT;
+        return EVENT_HEADER_LENGTH;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        byte[] header = new byte[EVENT_HEADER_LENGHT];
+        byte[] header = new byte[EVENT_HEADER_LENGTH];
         Utils.int16ToByteArrayLE(moduleId, header, 0);
         Utils.int16ToByteArrayLE(eventType, header, 2);
         stream.write(header);
