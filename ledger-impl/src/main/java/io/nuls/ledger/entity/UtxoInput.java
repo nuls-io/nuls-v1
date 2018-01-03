@@ -6,6 +6,7 @@ import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
@@ -54,14 +55,15 @@ public class UtxoInput extends BaseNulsData {
 
     @Override
     public int size() {
-        return 0;
+
+        return Utils.sizeOfSerialize(sign);
     }
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
 
         //sign
-        stream.write(sign.serialize());
+        stream.writeNulsData(sign);
     }
 
     @Override
@@ -71,8 +73,7 @@ public class UtxoInput extends BaseNulsData {
         }
 
         //length of sign
-        sign = new NulsSignData();
-        sign.parse(byteBuffer);
+        sign = byteBuffer.readSign();
     }
 
     public NulsDigestData getTxHash() {
