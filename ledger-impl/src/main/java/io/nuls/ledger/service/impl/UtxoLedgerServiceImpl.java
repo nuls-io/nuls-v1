@@ -1,8 +1,5 @@
 package io.nuls.ledger.service.impl;
 
-import io.nuls.account.entity.Account;
-import io.nuls.account.entity.Address;
-import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Result;
@@ -17,16 +14,17 @@ import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.dao.UtxoTransactionDao;
 import io.nuls.db.entity.TransactionPo;
 import io.nuls.db.entity.UtxoOutputPo;
+import io.nuls.db.util.TransactionPoTool;
 import io.nuls.event.bus.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.Balance;
-import io.nuls.ledger.entity.TransactionTool;
+import io.nuls.ledger.entity.UtxoBalance;
 import io.nuls.ledger.entity.UtxoData;
-import io.nuls.ledger.entity.params.CoinTransferData;
+import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.tx.TransferTransaction;
 import io.nuls.ledger.event.TransferCoinEvent;
 import io.nuls.ledger.service.intf.LedgerService;
 
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -41,8 +39,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     private UtxoTransactionDao txDao = NulsContext.getInstance().getService(UtxoTransactionDao.class);
 
-    private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
-
     private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
 
     private UtxoLedgerServiceImpl() {
@@ -56,7 +52,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     public ValidateResult verifyAndCacheTx(Transaction tx) throws NulsException {
         ValidateResult result = tx.verify();
-        if (null==result||result.isFailed()) {
+        if (null == result || result.isFailed()) {
             return result;
         }
         tx.onApproval();
@@ -82,7 +78,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         if (tx == null) {
             TransactionPo po = txDao.gettx(hash, isMine);
             try {
-                tx = TransactionTool.toTransaction(po);
+                tx = TransactionPoTool.toTransaction(po);
             } catch (Exception e) {
                 Log.error(e);
             }
@@ -111,11 +107,15 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     private Balance calcBalance(String address) {
-        Balance balance = new Balance();
+        UtxoBalance balance = new UtxoBalance();
         List<UtxoOutputPo> unSpendList = txDao.getAccountOutputs(address, TransactionConstant.TX_OUTPUT_UNSPEND);
+        List<UtxoOutput> unSpends = new ArrayList<>();
+
         long value = 0;
         for (UtxoOutputPo output : unSpendList) {
             value += output.getValue();
+
+            //todo
         }
         balance.setUseable(Na.valueOf(value));
 
@@ -126,6 +126,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         }
         balance.setLocked(Na.valueOf(value));
         balance.setBalance(balance.getLocked().add(balance.getUseable()));
+//        balance.setUnSpends(unSpendList);
         return balance;
     }
 
@@ -136,7 +137,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             TransferCoinEvent event = new TransferCoinEvent();
             event.setEventBody(tx);
             eventBroadcaster.broadcastAndCache(event);
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.error(e);
             return new Result(false, e.getMessage());
         }
@@ -144,22 +145,22 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
 //    @Override
-//    public Result transfer(Address address, String password, Address toAddress, Na amount, String remark) {
-//        Account account = accountService.getAccount(address.getBase58());
+//    public Result transfer(Account account, String password, Address toAddress, Na amount, String remark) {
 //        if (account == null) {
 //            return new Result(false, "account not found");
 //        }
 //        if (!account.validatePassword(password)) {
 //            return new Result(false, "password error");
 //        }
-//        Balance balance = getBalance(address.getBase58());
+//        Balance balance = getBalance(account.getAddress().getBase58());
 //        if (balance.getUseable().isLessThan(amount)) {
 //            return new Result(false, "balance is not enough");
 //        }
 //        try {
-//            CoinTransferData coinData = new CoinTransferData(amount, address.getBase58(), toAddress.getBase58());
+//            CoinTransferData coinData = new CoinTransferData(amount, account.getAddress().getBase58(), toAddress.getBase58());
 //            TransferTransaction tx = new TransferTransaction(coinData, password);
 //            tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
+//            aliasTx.setSign(signData(aliasTx.getHash(), account, password));
 ////            tx.setSign();
 ////            TransferCoinEvent
 //        } catch (IOException e) {

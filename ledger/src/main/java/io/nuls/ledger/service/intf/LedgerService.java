@@ -1,5 +1,6 @@
 package io.nuls.ledger.service.intf;
 
+import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
@@ -35,7 +36,7 @@ public interface LedgerService {
 
     Result transfer(TransferTransaction tx);
 
-    //Result transfer(Address address, String password, Address toAddress, Na amount, String remark);
+//    Result transfer(Account account, String password, Address toAddress, Na amount, String remark);
 
     boolean saveTransaction(Transaction tx);
 

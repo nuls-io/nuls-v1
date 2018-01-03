@@ -3,6 +3,7 @@ package io.nuls.ledger.entity;
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.NulsSignData;
+import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -22,11 +23,17 @@ public class UtxoInput extends BaseNulsData {
     /**
      * the output last time
      */
-    private List<UtxoOutput> froms;
+
+    private String fromId;
+
+    private UtxoOutput from;
+
     private NulsSignData sign;
 
+    private Transaction parent;
+
     public UtxoInput() {
-        this.froms = new ArrayList<>();
+
     }
 
     public UtxoInput(NulsDigestData txHash) {
@@ -37,12 +44,12 @@ public class UtxoInput extends BaseNulsData {
     public UtxoInput(NulsDigestData txHash, UtxoOutput output) {
         this();
         this.txHash = txHash;
-        this.froms.add(output);
+        this.from = output;
     }
 
-    public UtxoInput(NulsDigestData txHash, List<UtxoOutput> froms) {
-        this.txHash = txHash;
-        this.froms = froms;
+    public UtxoInput(NulsDigestData txHash, UtxoOutput from, Transaction parent) {
+        this(txHash, from);
+        this.parent = parent;
     }
 
     @Override
@@ -52,15 +59,7 @@ public class UtxoInput extends BaseNulsData {
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        if (froms == null || froms.size() == 0) {
-            stream.write(new VarInt(0).encode());
-        } else {
-            stream.write(new VarInt(froms.size()).encode());
-            for (UtxoOutput from : froms) {
-                stream.write(from.getTxHash().getDigestBytes());
-                stream.writeShort((short) from.getIndex());
-            }
-        }
+
         //sign
         stream.write(sign.serialize());
     }
@@ -70,15 +69,7 @@ public class UtxoInput extends BaseNulsData {
         if (byteBuffer == null) {
             return;
         }
-        froms = new ArrayList<>();
 
-        int fromSize = (int) byteBuffer.readVarInt();
-        for (int i = 0; i < fromSize; i++) {
-            UtxoOutput pre = new UtxoOutput();
-            pre.setTxHash(byteBuffer.readHash());
-            pre.setIndex((int) byteBuffer.readUint32());
-            froms.add(pre);
-        }
         //length of sign
         sign = new NulsSignData();
         sign.parse(byteBuffer);
@@ -100,12 +91,28 @@ public class UtxoInput extends BaseNulsData {
         this.sign = sign;
     }
 
-    public List<UtxoOutput> getFroms() {
-        return froms;
+    public String getFromId() {
+        return fromId;
     }
 
-    public void setFroms(List<UtxoOutput> froms) {
-        this.froms = froms;
+    public void setFromId(String fromId) {
+        this.fromId = fromId;
+    }
+
+    public UtxoOutput getFrom() {
+        return from;
+    }
+
+    public void setFrom(UtxoOutput from) {
+        this.from = from;
+    }
+
+    public Transaction getParent() {
+        return parent;
+    }
+
+    public void setParent(Transaction parent) {
+        this.parent = parent;
     }
 
 }
