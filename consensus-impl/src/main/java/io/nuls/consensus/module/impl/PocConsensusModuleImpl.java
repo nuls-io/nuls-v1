@@ -17,6 +17,7 @@ import io.nuls.consensus.module.AbstractConsensusModule;
 import io.nuls.consensus.service.cache.BlockCacheService;
 import io.nuls.consensus.service.cache.BlockHeaderCacheService;
 import io.nuls.consensus.service.cache.ConsensusCacheService;
+import io.nuls.consensus.service.cache.SmallBlockCacheService;
 import io.nuls.consensus.service.impl.BlockServiceImpl;
 import io.nuls.consensus.service.impl.PocConsensusServiceImpl;
 import io.nuls.consensus.thread.BlockMaintenanceThread;
@@ -55,7 +56,6 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
         this.publish(PocConsensusConstant.EVENT_TYPE_RED_PUNISH, RedPunishConsensusEvent.class);
         this.publish(PocConsensusConstant.EVENT_TYPE_YELLOW_PUNISH, YellowPunishConsensusEvent.class);
         this.publish(PocConsensusConstant.EVENT_TYPE_REGISTER_AGENT, RegisterAgentEvent.class);
-        this.publish(PocConsensusConstant.EVENT_TYPE_ASK_BLOCK, AskBlockInfoEvent.class);
 
         this.registerTransaction(TransactionConstant.TX_TYPE_REGISTER_AGENT, RegisterAgentTransaction.class);
         this.registerTransaction(TransactionConstant.TX_TYPE_RED_PUNISH, RedPunishTransaction.class);
@@ -67,8 +67,9 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
         BlockCacheService.getInstance().init();
         ConsensusCacheService.getInstance().initCache();
         BlockHeaderCacheService.getInstance().init();
+        SmallBlockCacheService.getInstance().init();
 
-        //todo 接收处理 账户切换的notice，或者确认共识中不能切换账户
+        //todo 接收处理 账户切换的notice，或者确认共识打包中不能切换账户
     }
 
     @Override
@@ -96,11 +97,11 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
 
         GetBlockHandler getBlockHandler = new GetBlockHandler();
         getBlockHandler.addFilter(new GetBlockEventFilter());
-        processorService.registerEventHandler(GetTxGroupEvent.class, getBlockHandler);
+        processorService.registerEventHandler(GetSmallBlockEvent.class, getBlockHandler);
 
         GetTxGroupHandler getSmallBlockHandler = new GetTxGroupHandler();
         getSmallBlockHandler.addFilter(new GetTxGroupFilter());
-        processorService.registerEventHandler(GetTxGroupEvent.class, getSmallBlockHandler);
+        processorService.registerEventHandler(GetSmallBlockEvent.class, getSmallBlockHandler);
 
         RegisterAgentHandler registerAgentHandler = new RegisterAgentHandler();
         registerAgentHandler.addFilter(new RegisterAgentEventFilter());
@@ -123,8 +124,8 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
         yellowPunishHandler.addFilter(new YellowPunishEventFilter());
         processorService.registerEventHandler(YellowPunishConsensusEvent.class, yellowPunishHandler);
 
-        AskBlockInfoHandler askBlockInfoHandler = new AskBlockInfoHandler();
-        processorService.registerEventHandler(AskBlockInfoEvent.class, askBlockInfoHandler);
+        GetBlockHeaderHandler getBlockHeaderHandler = new GetBlockHeaderHandler();
+        processorService.registerEventHandler(GetBlockHeaderEvent.class, getBlockHeaderHandler);
 
         TxGroupHandler txGroupHandler = new TxGroupHandler();
 //todo        smallBlockHandler.addFilter();
@@ -207,6 +208,7 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
         ConsensusCacheService.getInstance().clear();
         BlockCacheService.getInstance().clear();
         BlockHeaderCacheService.getInstance().clear();
+        SmallBlockCacheService.getInstance().clear();
     }
 
     @Override

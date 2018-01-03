@@ -16,16 +16,16 @@ import java.util.List;
  * @author Niels
  * @date 2017/12/18
  */
-public class AskTxGroupData extends BaseNulsData {
+public class TxHashData extends BaseNulsData {
 
-    private long blockHeight;
+    private NulsDigestData blockHash;
 
     private List<NulsDigestData> txHashList;
 
     @Override
     public int size() {
         int size = 0;
-        size += Utils.sizeOfSerialize(blockHeight);
+        size += Utils.sizeOfSerialize(blockHash);
         size += VarInt.sizeOf(txHashList.size());
         size += this.getTxHashBytesLength();
         return size;
@@ -33,7 +33,7 @@ public class AskTxGroupData extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeVarInt(blockHeight);
+        stream.writeNulsData(blockHash);
         stream.writeVarInt(txHashList.size());
         for (NulsDigestData data : txHashList) {
             stream.writeNulsData(data);
@@ -42,27 +42,12 @@ public class AskTxGroupData extends BaseNulsData {
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.blockHeight = byteBuffer.readVarInt();
+        this.blockHash = byteBuffer.readHash();
         long txCount = byteBuffer.readVarInt();
         this.txHashList = new ArrayList<>();
         for (int i = 0; i < txCount; i++) {
             this.txHashList.add(byteBuffer.readHash());
         }
-    }
-
-    private byte[] getTxHashListBytes() throws IOException {
-        if (null == txHashList) {
-            return null;
-        }
-        int size = this.getTxHashBytesLength();
-        byte[] bytes = new byte[size];
-        int index = 0;
-        for (NulsDigestData hash : txHashList) {
-            int hashSize = hash.size();
-            System.arraycopy(hash.serialize(), 0, bytes, index, hashSize);
-            index += hashSize;
-        }
-        return bytes;
     }
 
     private int getTxHashBytesLength() {
@@ -73,12 +58,12 @@ public class AskTxGroupData extends BaseNulsData {
         return size;
     }
 
-    public long getBlockHeight() {
-        return blockHeight;
+    public NulsDigestData getBlockHash() {
+        return blockHash;
     }
 
-    public void setBlockHeight(long blockHeight) {
-        this.blockHeight = blockHeight;
+    public void setBlockHash(NulsDigestData blockHash) {
+        this.blockHash = blockHash;
     }
 
     public List<NulsDigestData> getTxHashList() {

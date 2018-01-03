@@ -1,6 +1,6 @@
 package io.nuls.consensus.handler;
 
-import io.nuls.consensus.event.AskBlockInfoEvent;
+import io.nuls.consensus.event.GetBlockHeaderEvent;
 import io.nuls.consensus.event.BlockHeaderEvent;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
@@ -13,12 +13,12 @@ import io.nuls.event.bus.service.intf.NetworkEventBroadcaster;
  * @author Niels
  * @date 2017/12/12
  */
-public class AskBlockInfoHandler extends AbstractNetworkEventHandler<AskBlockInfoEvent> {
+public class GetBlockHeaderHandler extends AbstractNetworkEventHandler<GetBlockHeaderEvent> {
 
     private BlockService blockService = NulsContext.getInstance().getService(BlockService.class);
     private NetworkEventBroadcaster networkEventBroadcaster = NulsContext.getInstance().getService(NetworkEventBroadcaster.class);
     @Override
-    public void onEvent(AskBlockInfoEvent event, String fromId)   {
+    public void onEvent(GetBlockHeaderEvent event, String fromId)   {
         BlockHeader header ;
         if(null==event.getEventBody()||event.getEventBody().getVal()==0){
             header = blockService.getLocalBestBlock().getHeader();

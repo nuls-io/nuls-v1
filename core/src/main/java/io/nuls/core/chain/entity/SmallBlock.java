@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class SmallBlock extends BaseNulsData {
     private NulsDigestData blockHash;
-    private int txCount;
+    private long txCount;
     private List<NulsDigestData> txHashList;
 
     @Override
@@ -66,11 +66,11 @@ public class SmallBlock extends BaseNulsData {
         this.txHashList = txHashList;
     }
 
-    public int getTxCount() {
+    public long getTxCount() {
         return txCount;
     }
 
-    public void setTxCount(int txCount) {
+    public void setTxCount(long txCount) {
         this.txCount = txCount;
     }
 }

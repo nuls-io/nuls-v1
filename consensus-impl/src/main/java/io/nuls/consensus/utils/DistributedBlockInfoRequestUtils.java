@@ -1,6 +1,6 @@
 package io.nuls.consensus.utils;
 
-import io.nuls.consensus.event.AskBlockInfoEvent;
+import io.nuls.consensus.event.GetBlockHeaderEvent;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
@@ -54,13 +54,13 @@ public class DistributedBlockInfoRequestUtils {
         headerMap.clear();
         calcMap.clear();
         askHeight = height;
-        AskBlockInfoEvent askBlockInfoEvent;
-        if (0 == height) {
-            askBlockInfoEvent = new AskBlockInfoEvent();
+        GetBlockHeaderEvent getBlockHeaderEvent;
+        if (0 > height) {
+            getBlockHeaderEvent = new GetBlockHeaderEvent();
         } else {
-            askBlockInfoEvent = new AskBlockInfoEvent(height);
+            getBlockHeaderEvent = new GetBlockHeaderEvent(height);
         }
-        peerIdList = this.networkEventBroadcaster.broadcastAndCache(askBlockInfoEvent);
+        peerIdList = this.networkEventBroadcaster.broadcastAndCache(getBlockHeaderEvent);
         if (peerIdList.isEmpty()) {
             Log.error("get best height from net faild!");
             lock.unlock();

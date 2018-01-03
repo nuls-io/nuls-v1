@@ -22,8 +22,7 @@ public class BasicTypeData<T> extends BaseNulsData {
         this.type = getType();
     }
 
-    public BasicTypeData(NulsByteBuffer buffer) throws NulsException {
-        this.parse(buffer);
+    public BasicTypeData() {
     }
 
     @Override

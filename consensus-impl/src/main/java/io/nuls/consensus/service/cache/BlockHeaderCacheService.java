@@ -27,7 +27,7 @@ public class BlockHeaderCacheService {
     private Map<Long, Set<String>> hashHeightMap;
 
     public void init() {
-        headerCacheMap = new CacheMap<>(CACHE_NAME, 600000, 0);
+        headerCacheMap = new CacheMap<>(CACHE_NAME, 300000, 0);
         hashHeightMap = new HashMap<>();
     }
 

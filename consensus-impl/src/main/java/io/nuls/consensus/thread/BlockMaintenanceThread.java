@@ -67,7 +67,7 @@ public class BlockMaintenanceThread implements Runnable {
         do {
             if (null == localBestBlock) {
                 doit = true;
-                blockInfo = BEST_HEIGHT_FROM_NET.request(0);
+                blockInfo = BEST_HEIGHT_FROM_NET.request(-1);
                 break;
             }
             startHeight = localBestBlock.getHeader().getHeight() + 1;
@@ -81,7 +81,7 @@ public class BlockMaintenanceThread implements Runnable {
                 }
                 break;
             }
-            blockInfo = BEST_HEIGHT_FROM_NET.request(0);
+            blockInfo = BEST_HEIGHT_FROM_NET.request(-1);
             if (blockInfo.getHeight() > localBestBlock.getHeader().getHeight()) {
                 doit = true;
                 break;
