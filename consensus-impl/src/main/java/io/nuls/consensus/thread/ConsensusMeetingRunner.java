@@ -36,7 +36,7 @@ import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
-import io.nuls.event.bus.bus.service.intf.EventBroadcaster;
+import io.nuls.event.bus.service.intf.NetworkEventBroadcaster;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.tx.CoinBaseTransaction;
@@ -58,7 +58,7 @@ public class ConsensusMeetingRunner implements Runnable {
     private BlockCacheService blockCacheService = BlockCacheService.getInstance();
     private BlockService blockService = BlockServiceImpl.getInstance();
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
-    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
+    private NetworkEventBroadcaster networkEventBroadcaster = NulsContext.getInstance().getService(NetworkEventBroadcaster.class);
     private boolean running = false;
     private NulsContext context = NulsContext.getInstance();
     private ConsensusContext cContext = ConsensusContext.getInstance();
@@ -198,7 +198,7 @@ public class ConsensusMeetingRunner implements Runnable {
         blockCacheService.cacheBlock(newBlock);
         BlockHeaderEvent event = new BlockHeaderEvent();
         event.setEventBody(newBlock.getHeader());
-        eventBroadcaster.broadcastAndCache(event);
+        networkEventBroadcaster.broadcastAndCache(event);
     }
 
     /**

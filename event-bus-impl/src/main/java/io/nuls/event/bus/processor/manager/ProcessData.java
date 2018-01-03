@@ -1,12 +1,12 @@
 package io.nuls.event.bus.processor.manager;
 
-import io.nuls.core.bus.BaseBusData;
+import io.nuls.core.event.BaseEvent;
 
 /**
  * @author Niels
  * @date 2017/12/8
  */
-public class ProcessData<E extends BaseBusData> {
+public class ProcessData<E extends BaseEvent> {
 
     private final E data;
 

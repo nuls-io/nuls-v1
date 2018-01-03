@@ -28,7 +28,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
-import io.nuls.event.bus.bus.service.intf.EventBroadcaster;
+import io.nuls.event.bus.service.intf.NetworkEventBroadcaster;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.service.intf.LedgerService;
@@ -46,7 +46,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
 
     private static final ConsensusService INSTANCE = new PocConsensusServiceImpl();
     private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
-    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
+    private NetworkEventBroadcaster networkEventBroadcaster = NulsContext.getInstance().getService(NetworkEventBroadcaster.class);
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
     private BlockService blockService = NulsContext.getInstance().getService(BlockService.class);
     private ConsensusCacheService consensusCacheService = ConsensusCacheService.getInstance();
@@ -85,7 +85,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
             throw new NulsRuntimeException(e);
         }
         event.setEventBody(tx);
-        eventBroadcaster.broadcastHashAndCache(event);
+        networkEventBroadcaster.broadcastHashAndCache(event);
     }
 
     private void joinTheConsensus(Account account, String password, double amount, String agentAddress) throws IOException {
@@ -107,7 +107,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
             throw new NulsRuntimeException(e);
         }
         event.setEventBody(tx);
-        eventBroadcaster.broadcastHashAndCache(event);
+        networkEventBroadcaster.broadcastHashAndCache(event);
     }
 
     @Override
@@ -134,7 +134,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
         }
         tx.setSign(accountService.signData(tx.getHash(), account, password));
         event.setEventBody(tx);
-        eventBroadcaster.broadcastHashAndCache(event);
+        networkEventBroadcaster.broadcastHashAndCache(event);
     }
 
     @Override

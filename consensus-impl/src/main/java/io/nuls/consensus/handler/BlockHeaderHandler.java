@@ -1,30 +1,24 @@
 package io.nuls.consensus.handler;
 
-import io.nuls.consensus.entity.AskTxGroupData;
 import io.nuls.consensus.event.BlockHeaderEvent;
-import io.nuls.consensus.event.GetTxGroupEvent;
 import io.nuls.consensus.service.cache.BlockHeaderCacheService;
 import io.nuls.consensus.utils.DistributedBlockInfoRequestUtils;
 import io.nuls.core.chain.entity.BlockHeader;
-import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.context.NulsContext;
-import io.nuls.event.bus.bus.handler.AbstractEventBusHandler;
-import io.nuls.event.bus.bus.service.intf.EventBroadcaster;
+import io.nuls.event.bus.handler.AbstractNetworkEventHandler;
+import io.nuls.event.bus.service.intf.NetworkEventBroadcaster;
 import io.nuls.ledger.service.intf.LedgerService;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author facjas
  * @date 2017/11/16
  */
-public class BlockHeaderHandler extends AbstractEventBusHandler<BlockHeaderEvent> {
+public class BlockHeaderHandler extends AbstractNetworkEventHandler<BlockHeaderEvent> {
 
     private BlockHeaderCacheService headerCacheService = BlockHeaderCacheService.getInstance();
 
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
-    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
+    private NetworkEventBroadcaster networkEventBroadcaster = NulsContext.getInstance().getService(NetworkEventBroadcaster.class);
 
     @Override
     public void onEvent(BlockHeaderEvent event, String fromId) {

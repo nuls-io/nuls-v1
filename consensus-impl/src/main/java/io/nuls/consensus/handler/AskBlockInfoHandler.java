@@ -6,17 +6,17 @@ import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.context.NulsContext;
-import io.nuls.event.bus.bus.handler.AbstractEventBusHandler;
-import io.nuls.event.bus.bus.service.intf.EventBroadcaster;
+import io.nuls.event.bus.handler.AbstractNetworkEventHandler;
+import io.nuls.event.bus.service.intf.NetworkEventBroadcaster;
 
 /**
  * @author Niels
  * @date 2017/12/12
  */
-public class AskBlockInfoHandler extends AbstractEventBusHandler<AskBlockInfoEvent> {
+public class AskBlockInfoHandler extends AbstractNetworkEventHandler<AskBlockInfoEvent> {
 
     private BlockService blockService = NulsContext.getInstance().getService(BlockService.class);
-    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
+    private NetworkEventBroadcaster networkEventBroadcaster = NulsContext.getInstance().getService(NetworkEventBroadcaster.class);
     @Override
     public void onEvent(AskBlockInfoEvent event, String fromId)   {
         BlockHeader header ;
@@ -31,6 +31,6 @@ public class AskBlockInfoHandler extends AbstractEventBusHandler<AskBlockInfoEve
                 header = block.getHeader();
             }
         }
-        this.eventBroadcaster.sendToPeer(new BlockHeaderEvent(header),fromId);
+        this.networkEventBroadcaster.sendToPeer(new BlockHeaderEvent(header),fromId);
     }
 }

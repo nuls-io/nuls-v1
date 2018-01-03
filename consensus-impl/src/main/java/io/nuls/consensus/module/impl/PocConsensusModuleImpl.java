@@ -29,7 +29,7 @@ import io.nuls.core.thread.BaseThread;
 import io.nuls.core.thread.manager.ThreadManager;
 import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.log.Log;
-import io.nuls.event.bus.processor.service.intf.EventProcessorService;
+import io.nuls.event.bus.processor.service.intf.NetworkEventProcessorService;
 import io.nuls.network.service.NetworkService;
 
 import java.util.List;
@@ -40,7 +40,7 @@ import java.util.List;
  */
 public class PocConsensusModuleImpl extends AbstractConsensusModule {
 
-    private EventProcessorService processorService = NulsContext.getInstance().getService(EventProcessorService.class);
+    private NetworkEventProcessorService processorService = NulsContext.getInstance().getService(NetworkEventProcessorService.class);
     private boolean delegatePeer = false;
     private ConsensusCacheService consensusCacheService;
     private AccountService accountService;
@@ -87,15 +87,15 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
 
     private void registerHanders() {
         BlockEventHandler blockEventHandler = new BlockEventHandler();
-        blockEventHandler.addFilter(new BlockBusFilter());
+        blockEventHandler.addFilter(new BlockEventFilter());
         processorService.registerEventHandler(BlockEvent.class, blockEventHandler);
 
         BlockHeaderHandler blockHeaderHandler = new BlockHeaderHandler();
-        blockHeaderHandler.addFilter(new BlockHeaderBusFilter());
+        blockHeaderHandler.addFilter(new BlockHeaderEventFilter());
         processorService.registerEventHandler(BlockHeaderEvent.class, blockHeaderHandler);
 
         GetBlockHandler getBlockHandler = new GetBlockHandler();
-        getBlockHandler.addFilter(new GetBlockBusFilter());
+        getBlockHandler.addFilter(new GetBlockEventFilter());
         processorService.registerEventHandler(GetTxGroupEvent.class, getBlockHandler);
 
         GetTxGroupHandler getSmallBlockHandler = new GetTxGroupHandler();
@@ -103,24 +103,24 @@ public class PocConsensusModuleImpl extends AbstractConsensusModule {
         processorService.registerEventHandler(GetTxGroupEvent.class, getSmallBlockHandler);
 
         RegisterAgentHandler registerAgentHandler = new RegisterAgentHandler();
-        registerAgentHandler.addFilter(new RegisterAgentBusFilter());
+        registerAgentHandler.addFilter(new RegisterAgentEventFilter());
         processorService.registerEventHandler(RegisterAgentEvent.class, registerAgentHandler);
 
         JoinConsensusHandler joinConsensusHandler = new JoinConsensusHandler();
-        joinConsensusHandler.addFilter(AllreadyJoinConsensusBusFilter.getInstance());
-        joinConsensusHandler.addFilter(CreditThresholdBusFilter.getInstance());
+        joinConsensusHandler.addFilter(AllreadyJoinConsensusEventFilter.getInstance());
+        joinConsensusHandler.addFilter(CreditThresholdEventFilter.getInstance());
         processorService.registerEventHandler(JoinConsensusEvent.class, joinConsensusHandler);
 
         ExitConsensusHandler exitConsensusHandler = new ExitConsensusHandler();
-        exitConsensusHandler.addFilter(new ExitConsensusBusFilter());
+        exitConsensusHandler.addFilter(new ExitConsensusEventFilter());
         processorService.registerEventHandler(ExitConsensusEvent.class, exitConsensusHandler);
 
         RedPunishHandler redPunishHandler = new RedPunishHandler();
-        redPunishHandler.addFilter(new RedPunishBusFilter());
+        redPunishHandler.addFilter(new RedPunishEventFilter());
         processorService.registerEventHandler(RedPunishConsensusEvent.class, redPunishHandler);
 
         YellowPunishHandler yellowPunishHandler = new YellowPunishHandler();
-        yellowPunishHandler.addFilter(new YellowPunishBusFilter());
+        yellowPunishHandler.addFilter(new YellowPunishEventFilter());
         processorService.registerEventHandler(YellowPunishConsensusEvent.class, yellowPunishHandler);
 
         AskBlockInfoHandler askBlockInfoHandler = new AskBlockInfoHandler();

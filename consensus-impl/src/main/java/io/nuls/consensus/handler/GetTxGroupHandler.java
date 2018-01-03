@@ -6,8 +6,8 @@ import io.nuls.consensus.event.GetTxGroupEvent;
 import io.nuls.consensus.event.TxGroupEvent;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.context.NulsContext;
-import io.nuls.event.bus.bus.handler.AbstractEventBusHandler;
-import io.nuls.event.bus.bus.service.intf.EventBroadcaster;
+import io.nuls.event.bus.handler.AbstractNetworkEventHandler;
+import io.nuls.event.bus.service.intf.NetworkEventBroadcaster;
 import io.nuls.ledger.service.intf.LedgerService;
 
 import java.util.List;
@@ -16,10 +16,10 @@ import java.util.List;
  * @author facjas
  * @date 2017/11/16
  */
-public class GetTxGroupHandler extends AbstractEventBusHandler<GetTxGroupEvent> {
+public class GetTxGroupHandler extends AbstractNetworkEventHandler<GetTxGroupEvent> {
 
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
-    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
+    private NetworkEventBroadcaster networkEventBroadcaster = NulsContext.getInstance().getService(NetworkEventBroadcaster.class);
 
     @Override
     public void onEvent(GetTxGroupEvent event, String fromId) {
@@ -30,6 +30,6 @@ public class GetTxGroupHandler extends AbstractEventBusHandler<GetTxGroupEvent> 
         List<Transaction> txList = ledgerService.queryListByHashs(data.getTxHashList());
         blockData.setTxList(txList);
         blockEvent.setEventBody(blockData);
-        eventBroadcaster.sendToPeer(blockEvent, fromId);
+        networkEventBroadcaster.sendToPeer(blockEvent, fromId);
     }
 }

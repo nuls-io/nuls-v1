@@ -5,13 +5,13 @@ import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.chain.manager.TransactionValidatorManager;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.thread.manager.ThreadManager;
-import io.nuls.event.bus.processor.service.intf.EventProcessorService;
+import io.nuls.event.bus.processor.service.intf.NetworkEventProcessorService;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.event.*;
-import io.nuls.ledger.handler.CoinTransactionBusHandler;
-import io.nuls.ledger.handler.SmallChangeBusHandler;
-import io.nuls.ledger.handler.UnlockCoinBusHandler;
-import io.nuls.ledger.handler.LockCoinBusHandler;
+import io.nuls.ledger.handler.CoinTransactionEventHandler;
+import io.nuls.ledger.handler.SmallChangeEventHandler;
+import io.nuls.ledger.handler.UnlockCoinEventHandler;
+import io.nuls.ledger.handler.LockCoinEventHandler;
 import io.nuls.ledger.module.AbstractLedgerModule;
 import io.nuls.ledger.service.impl.LedgerCacheService;
 import io.nuls.ledger.service.impl.UtxoCoinDataProvider;
@@ -37,7 +37,7 @@ public class UtxoLedgerModuleImpl extends AbstractLedgerModule {
 
     private LedgerService ledgerService = UtxoLedgerServiceImpl.getInstance();
 
-    private EventProcessorService processorService = NulsContext.getInstance().getService(EventProcessorService.class);
+    private NetworkEventProcessorService processorService = NulsContext.getInstance().getService(NetworkEventProcessorService.class);
 
     @Override
     public void init() {
@@ -67,10 +67,10 @@ public class UtxoLedgerModuleImpl extends AbstractLedgerModule {
         this.publish(LedgerConstant.EVENT_TYPE_UNLOCK_NULS, UnlockCoinEvent.class);
         this.publish(LedgerConstant.EVENT_TYPE_SMALL_CHANGE, SmallChangeEvent.class);
 
-        this.processorService.registerEventHandler(TransferCoinEvent.class, new CoinTransactionBusHandler());
-        this.processorService.registerEventHandler(LockCoinEvent.class, new LockCoinBusHandler());
-        this.processorService.registerEventHandler(UnlockCoinEvent.class, new UnlockCoinBusHandler());
-        this.processorService.registerEventHandler(SmallChangeEvent.class, new SmallChangeBusHandler());
+        this.processorService.registerEventHandler(TransferCoinEvent.class, new CoinTransactionEventHandler());
+        this.processorService.registerEventHandler(LockCoinEvent.class, new LockCoinEventHandler());
+        this.processorService.registerEventHandler(UnlockCoinEvent.class, new UnlockCoinEventHandler());
+        this.processorService.registerEventHandler(SmallChangeEvent.class, new SmallChangeEventHandler());
     }
 
     @Override

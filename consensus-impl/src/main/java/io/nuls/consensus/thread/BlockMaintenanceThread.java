@@ -13,7 +13,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
-import io.nuls.event.bus.bus.service.intf.EventBroadcaster;
+import io.nuls.event.bus.service.intf.NetworkEventBroadcaster;
 
 import java.util.List;
 
@@ -31,7 +31,7 @@ public class BlockMaintenanceThread implements Runnable {
 
     private final BlockService blockService = BlockServiceImpl.getInstance();
 
-    private final EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
+    private final NetworkEventBroadcaster networkEventBroadcaster = NulsContext.getInstance().getService(NetworkEventBroadcaster.class);
 
     public static synchronized BlockMaintenanceThread getInstance() {
         if (instance == null) {
