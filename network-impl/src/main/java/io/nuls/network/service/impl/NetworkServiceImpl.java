@@ -16,7 +16,7 @@ import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.filter.impl.DefaultMessageFilter;
 import io.nuls.network.message.impl.GetPeerDataHandler;
 import io.nuls.network.message.impl.PeerDataHandler;
-import io.nuls.network.message.messageFilter.NulsMessageFilter;
+import io.nuls.network.message.filter.NulsMessageFilter;
 import io.nuls.network.module.AbstractNetworkModule;
 import io.nuls.network.param.DevNetworkParam;
 import io.nuls.network.param.MainNetworkParam;

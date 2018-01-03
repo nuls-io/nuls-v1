@@ -22,8 +22,8 @@ public abstract class BaseEvent<T extends BaseNulsData> extends BaseNulsData imp
     private T eventBody;
     private NulsSignData sign;
 
-    public BaseEvent(short moduleId, short eventType, byte[] extend) {
-        this.header = new EventHeader(moduleId, eventType, extend);
+    public BaseEvent(short moduleId, short eventType) {
+        this.header = new EventHeader(moduleId, eventType);
     }
 
     @Override

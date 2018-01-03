@@ -4,7 +4,7 @@ import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.network.IPUtil;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.message.AbstractNetWorkDataHandlerFactory;
-import io.nuls.network.message.messageFilter.NulsMessageFilter;
+import io.nuls.network.message.filter.NulsMessageFilter;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;

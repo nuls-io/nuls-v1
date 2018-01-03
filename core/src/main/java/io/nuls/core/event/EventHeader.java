@@ -1,8 +1,6 @@
 package io.nuls.core.event;
 
 import io.nuls.core.chain.entity.BaseNulsData;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -19,21 +17,13 @@ public class EventHeader extends BaseNulsData {
     private short moduleId;
     private short eventType;
 
-    public EventHeader(short moduleId, short eventType, byte[] extend) {
-        this.moduleId = moduleId;
-        this.eventType = eventType;
+    public EventHeader() {
+
     }
 
     public EventHeader(short moduleId, short eventType) {
-        this(moduleId, eventType, null);
-    }
-
-    public EventHeader(short eventType) {
-        this((short) (0), eventType);
-    }
-
-    public EventHeader() {
-        this((short) 0, (short) 0);
+        this.moduleId = moduleId;
+        this.eventType = eventType;
     }
 
     @Override

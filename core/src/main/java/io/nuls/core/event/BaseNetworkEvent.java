@@ -15,14 +15,7 @@ import java.io.IOException;
  * @date 2017/11/7
  */
 public abstract class BaseNetworkEvent<T extends BaseNulsData> extends BaseEvent<T> {
-
-
-    public BaseNetworkEvent(short moduleId, short eventType, byte[] extend) {
-        super(moduleId, eventType, extend);
-    }
-
     public BaseNetworkEvent(short moduleId, short eventType) {
-        this(moduleId, eventType, null);
+        super(moduleId, eventType);
     }
-
 }

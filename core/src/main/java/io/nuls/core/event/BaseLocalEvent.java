@@ -10,11 +10,7 @@ import io.nuls.core.chain.entity.BaseNulsData;
 public abstract class BaseLocalEvent<T extends BaseNulsData> extends BaseEvent<T> {
 
 
-    public BaseLocalEvent(short moduleId, short eventType, byte[] extend) {
-        super(moduleId, eventType, extend);
-    }
-
     public BaseLocalEvent(short moduleId, short eventType) {
-        this(moduleId, eventType,null);
+        super(moduleId, eventType);
     }
 }

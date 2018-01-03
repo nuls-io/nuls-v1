@@ -4,9 +4,11 @@ import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.BasicTypeData;
 import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.VarInt;
+import io.nuls.core.event.BaseNetworkEvent;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsVerificationException;
 import io.nuls.core.mesasge.NulsMessage;
@@ -23,8 +25,9 @@ import io.nuls.event.bus.processor.service.intf.NetworkEventProcessorService;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.message.*;
-import io.nuls.network.message.entity.GetVersionData;
+import io.nuls.network.message.entity.GetVersionEvent;
 import io.nuls.network.message.entity.VersionData;
+import io.nuls.network.message.filter.MessageFilterChain;
 import io.nuls.network.message.messageHandler.NetWorkDataHandler;
 import io.nuls.network.module.AbstractNetworkModule;
 import io.nuls.network.service.MessageWriter;
@@ -123,8 +126,8 @@ public class Peer extends BaseNulsData {
     }
 
     public void connectionOpened() throws IOException {
-        GetVersionData data = new GetVersionData(AbstractNetworkModule.ExternalPort);
-        sendNetworkData(data);
+        GetVersionEvent event = new GetVersionEvent(AbstractNetworkModule.ExternalPort);
+        sendNetworkEvent(event);
         this.status = Peer.CONNECTING;
     }
 
@@ -135,10 +138,8 @@ public class Peer extends BaseNulsData {
         if (writeTarget == null || this.status != Peer.HANDSHAKE) {
             throw new NotYetConnectedException();
         }
-
         lock.lock();
         try {
-
             System.out.println("---send message:" + Hex.encode(message.serialize()));
             this.writeTarget.write(message.serialize());
         } finally {
@@ -146,19 +147,19 @@ public class Peer extends BaseNulsData {
         }
     }
 
-    public void sendNetworkData(BaseNetworkData networkData) throws IOException {
+    public void sendNetworkEvent(BaseNetworkEvent event) throws IOException {
         if (this.getStatus() == Peer.CLOSE) {
             return;
         }
         if (writeTarget == null) {
             throw new NotYetConnectedException();
         }
-        if (this.status != Peer.HANDSHAKE && !isHandShakeMessage(networkData)) {
+        if (this.status != Peer.HANDSHAKE && !isHandShakeMessage(event)) {
             throw new NotYetConnectedException();
         }
         lock.lock();
         try {
-            byte[] data = networkData.serialize();
+            byte[] data = event.serialize();
             NulsMessage message = new NulsMessage(magicNumber, data);
             this.writeTarget.write(message.serialize());
         } finally {
@@ -185,7 +186,9 @@ public class Peer extends BaseNulsData {
 
 //        buffer.compact();
         buffer.clear();
-        processMessage(message);
+        if (MessageFilterChain.getInstance().doFilter(message)) {
+            processMessage(message);
+        }
     }
 
     /**
@@ -326,9 +329,14 @@ public class Peer extends BaseNulsData {
     }
 
 
-    public boolean isHandShakeMessage(BaseNetworkData networkMessage) {
-        return (networkMessage.getNetworkHeader().getType() == NetworkConstant.NETWORK_GET_VERSION_MESSAGE
-                || networkMessage.getNetworkHeader().getType() == NetworkConstant.NETWORK_VERSION_MESSAGE);
+    public boolean isHandShakeMessage(BaseNetworkEvent event) {
+        if (event.getHeader().getModuleId() == NulsConstant.MODULE_ID_NETWORK) {
+            if (event.getHeader().getEventType() == NetworkConstant.NETWORK_GET_VERSION_MESSAGE
+                    || event.getHeader().getEventType() == NetworkConstant.NETWORK_VERSION_MESSAGE) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean isHandShake() {

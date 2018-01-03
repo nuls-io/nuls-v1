@@ -1,7 +1,7 @@
 package io.nuls.network.message;
 
 import io.nuls.network.message.entity.GetPeerData;
-import io.nuls.network.message.entity.GetVersionData;
+import io.nuls.network.message.entity.GetVersionEvent;
 import io.nuls.network.message.entity.PeerData;
 import io.nuls.network.message.entity.VersionData;
 import io.nuls.network.message.impl.GetPeerDataHandler;
@@ -25,7 +25,7 @@ public class DefaultNetWorkDataHandlerFactory extends AbstractNetWorkDataHandler
 
     private DefaultNetWorkDataHandlerFactory() {
         handlerMap.put(VersionData.class.getName(), VersionDataHandler.getInstance());
-        handlerMap.put(GetVersionData.class.getName(), GetVersionDataHandler.getInstance());
+        handlerMap.put(GetVersionEvent.class.getName(), GetVersionDataHandler.getInstance());
         handlerMap.put(GetPeerData.class.getName(), GetPeerDataHandler.getInstance());
         handlerMap.put(PeerData.class.getName(), PeerDataHandler.getInstance());
     }

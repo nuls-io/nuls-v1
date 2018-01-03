@@ -6,10 +6,9 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.message.entity.GetPeerData;
-import io.nuls.network.message.entity.GetVersionData;
+import io.nuls.network.message.entity.GetVersionEvent;
 import io.nuls.network.message.entity.PeerData;
 import io.nuls.network.message.entity.VersionData;
-import io.nuls.network.module.AbstractNetworkModule;
 
 /**
  * @author vivi
@@ -38,7 +37,7 @@ public abstract class BaseNetworkData extends BaseNulsData {
         NulsByteBuffer buffer = new NulsByteBuffer(data);
         switch (type) {
             case NetworkConstant.NETWORK_GET_VERSION_MESSAGE:
-                networkData = new GetVersionData(buffer);
+                networkData = new GetVersionEvent(buffer);
                 break;
             case NetworkConstant.NETWORK_VERSION_MESSAGE:
                 networkData = new VersionData(buffer);

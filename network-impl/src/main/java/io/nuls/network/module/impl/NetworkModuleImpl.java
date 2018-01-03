@@ -1,7 +1,10 @@
 package io.nuls.network.module.impl;
 
 
+import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.cfg.ConfigLoader;
+import io.nuls.core.utils.log.Log;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.message.ReplyNotice;
 import io.nuls.network.module.AbstractNetworkModule;
@@ -20,16 +23,21 @@ public class NetworkModuleImpl extends AbstractNetworkModule {
 
     public NetworkModuleImpl() throws IOException {
         super();
-        ConfigLoader.loadProperties(NetworkConstant.NETWORK_PROPERTIES);
-        networkService = new NetworkServiceImpl(this);
-        this.registerService(networkService);
-        this.publish((short) 1, ReplyNotice.class);
+
     }
 
 
     @Override
     public void init() {
-
+        try {
+            ConfigLoader.loadProperties(NetworkConstant.NETWORK_PROPERTIES);
+        } catch (IOException e) {
+            Log.error(e);
+            throw new NulsRuntimeException(ErrorCode.IO_ERROR);
+        }
+        networkService = new NetworkServiceImpl(this);
+        this.registerService(networkService);
+        this.publish((short) 1, ReplyNotice.class);
     }
 
     @Override
