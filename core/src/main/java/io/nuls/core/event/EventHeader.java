@@ -1,6 +1,8 @@
 package io.nuls.core.event;
 
 import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.chain.entity.NulsDigestData;
+import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -13,24 +15,13 @@ import java.io.IOException;
  * @date 2017/11/7
  */
 public class EventHeader extends BaseNulsData {
-    private static final int EVENT_HEADER_LENGHT = 10;
-    private static final int EVENT_HEADER_EXTEND_LENGHT = 6;
+    private static final int EVENT_HEADER_LENGHT = 4;
     private short moduleId;
     private short eventType;
-    private byte[] extend;
 
     public EventHeader(short moduleId, short eventType, byte[] extend) {
         this.moduleId = moduleId;
         this.eventType = eventType;
-        this.extend = extend;
-        checkExtend();
-
-    }
-
-    protected void checkExtend() {
-        if (extend == null || extend.length == 0) {
-            extend = new byte[EVENT_HEADER_EXTEND_LENGHT];
-        }
     }
 
     public EventHeader(short moduleId, short eventType) {
@@ -55,8 +46,6 @@ public class EventHeader extends BaseNulsData {
         byte[] header = new byte[EVENT_HEADER_LENGHT];
         Utils.int16ToByteArrayLE(moduleId, header, 0);
         Utils.int16ToByteArrayLE(eventType, header, 2);
-        checkExtend();
-        System.arraycopy(extend, 0, header, 4, EVENT_HEADER_EXTEND_LENGHT);
         stream.write(header);
     }
 
@@ -80,6 +69,5 @@ public class EventHeader extends BaseNulsData {
     public void parse(NulsByteBuffer buffer) throws NulsException {
         this.moduleId = buffer.readInt16LE();
         this.eventType = buffer.readInt16LE();
-        this.extend = buffer.readBytes(EVENT_HEADER_EXTEND_LENGHT);
     }
 }

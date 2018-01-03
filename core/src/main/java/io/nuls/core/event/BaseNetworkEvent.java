@@ -15,8 +15,7 @@ import java.io.IOException;
  * @date 2017/11/7
  */
 public abstract class BaseNetworkEvent<T extends BaseNulsData> extends BaseEvent<T> {
-    private NulsDigestData hash;
-    private NulsSignData sign;
+
 
     public BaseNetworkEvent(short moduleId, short eventType, byte[] extend) {
         super(moduleId, eventType, extend);
@@ -26,41 +25,4 @@ public abstract class BaseNetworkEvent<T extends BaseNulsData> extends BaseEvent
         this(moduleId, eventType, null);
     }
 
-    @Override
-    public final int size() {
-        int size = super.size();
-        size += Utils.sizeOfSerialize(hash);
-        size += Utils.sizeOfSerialize(sign);
-        return size;
-    }
-
-    @Override
-    public final void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        super.serializeToStream(stream);
-        stream.writeNulsData(hash);
-        stream.writeNulsData(sign);
-    }
-
-    @Override
-    public final void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        super.parse(byteBuffer);
-        this.hash = byteBuffer.readHash();
-        this.sign = byteBuffer.readSign();
-    }
-
-    public NulsDigestData getHash() {
-        return hash;
-    }
-
-    public void setHash(NulsDigestData hash) {
-        this.hash = hash;
-    }
-
-    public NulsSignData getSign() {
-        return sign;
-    }
-
-    public void setSign(NulsSignData sign) {
-        this.sign = sign;
-    }
 }
