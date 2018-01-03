@@ -1,11 +1,10 @@
 package io.nuls.core.module;
 
-import io.nuls.core.bus.BaseBusData;
+import io.nuls.core.event.BaseEvent;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ModuleStatusEnum;
-import io.nuls.core.event.BaseNulsEvent;
-import io.nuls.core.bus.BusDataManager;
+import io.nuls.core.event.EventManager;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.module.manager.ServiceManager;
 import io.nuls.core.utils.cfg.ConfigLoader;
@@ -102,8 +101,8 @@ public abstract class BaseNulsModule {
         ServiceManager.getInstance().regService(this.moduleId, serviceInterface, service);
     }
 
-    protected final void publish(short eventType, Class<? extends BaseBusData> eventClass) {
-        BusDataManager.putBusData(this.getModuleId(), eventType, eventClass);
+    protected final void publish(short eventType, Class<? extends BaseEvent> eventClass) {
+        EventManager.putBusData(this.getModuleId(), eventType, eventClass);
     }
 
     protected final void registerTransaction(int txType, Class<? extends Transaction> txClass){

@@ -3,7 +3,7 @@ package io.nuls.network.service.impl;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.event.BaseNulsEvent;
+import io.nuls.core.event.BaseNetworkEvent;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.log.Log;
@@ -114,12 +114,12 @@ public class NetworkServiceImpl implements NetworkService {
 
 
     @Override
-    public BroadcastResult broadcast(BaseNulsEvent event) {
+    public BroadcastResult broadcast(BaseNetworkEvent event) {
         return broadcaster.broadcast(event);
     }
 
     @Override
-    public BroadcastResult broadcast(BaseNulsEvent event, String excludePeerId) {
+    public BroadcastResult broadcast(BaseNetworkEvent event, String excludePeerId) {
         return broadcaster.broadcast(event, excludePeerId);
     }
 
@@ -134,12 +134,12 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
-    public BroadcastResult broadcastSync(BaseNulsEvent event) {
+    public BroadcastResult broadcastSync(BaseNetworkEvent event) {
         return broadcaster.broadcast(event);
     }
 
     @Override
-    public BroadcastResult broadcastSync(BaseNulsEvent event, String excludePeerId) {
+    public BroadcastResult broadcastSync(BaseNetworkEvent event, String excludePeerId) {
         return broadcaster.broadcast(event, excludePeerId);
     }
 
@@ -154,7 +154,7 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
-    public BroadcastResult broadcastToPeer(BaseNulsEvent event, String peerId) {
+    public BroadcastResult broadcastToPeer(BaseNetworkEvent event, String peerId) {
         return broadcaster.broadcastToPeer(event, peerId);
     }
 
@@ -164,12 +164,12 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
-    public BroadcastResult broadcastToGroup(BaseNulsEvent event, String groupName) {
+    public BroadcastResult broadcastToGroup(BaseNetworkEvent event, String groupName) {
         return broadcaster.broadcastToGroup(event, groupName);
     }
 
     @Override
-    public BroadcastResult broadcastToGroup(BaseNulsEvent event, String groupName, String excludePeerId) {
+    public BroadcastResult broadcastToGroup(BaseNetworkEvent event, String groupName, String excludePeerId) {
         return broadcaster.broadcastToGroup(event, groupName, excludePeerId);
     }
 
@@ -184,12 +184,12 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
-    public BroadcastResult broadcastToGroupSync(BaseNulsEvent event, String groupName) {
+    public BroadcastResult broadcastToGroupSync(BaseNetworkEvent event, String groupName) {
         return broadcaster.broadcast(event, groupName);
     }
 
     @Override
-    public BroadcastResult broadcastToGroupSync(BaseNulsEvent event, String groupName, String excludePeerId) {
+    public BroadcastResult broadcastToGroupSync(BaseNetworkEvent event, String groupName, String excludePeerId) {
         return broadcaster.broadcastToGroup(event, groupName, excludePeerId);
     }
 

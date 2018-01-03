@@ -2,7 +2,7 @@ package io.nuls.event.bus.service.impl;
 
 import io.nuls.cache.service.intf.CacheService;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.event.BaseNulsEvent;
+import io.nuls.core.event.BaseNetworkEvent;
 
 /**
  * @author Niels
@@ -28,7 +28,7 @@ public class EventCacheService {
         return INSTANCE;
     }
 
-    public void cacheSendedEvent(BaseNulsEvent event) {
+    public void cacheSendedEvent(BaseNetworkEvent event) {
         this.cacheService.putElement(CACHE_OF_SENDED, event.getHash().getDigestHex(), event);
     }
 
@@ -41,8 +41,8 @@ public class EventCacheService {
                 this.cacheService.containsKey(CACHE_OF_SENDED, hashHex);
     }
 
-    public BaseNulsEvent getEvent(String hashHex) {
-        return (BaseNulsEvent) this.cacheService.getElementValue(CACHE_OF_SENDED, hashHex);
+    public BaseNetworkEvent getEvent(String hashHex) {
+        return (BaseNetworkEvent) this.cacheService.getElementValue(CACHE_OF_SENDED, hashHex);
     }
 
     public void destroy() {

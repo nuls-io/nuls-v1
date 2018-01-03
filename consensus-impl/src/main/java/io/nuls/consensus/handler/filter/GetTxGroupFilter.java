@@ -1,16 +1,16 @@
 package io.nuls.consensus.handler.filter;
 
 import io.nuls.consensus.event.GetTxGroupEvent;
-import io.nuls.event.bus.bus.filter.NulsBusFilter;
-import io.nuls.event.bus.bus.filter.NulsBusFilterChain;
+import io.nuls.event.bus.filter.NulsEventFilter;
+import io.nuls.event.bus.filter.NulsEventFilterChain;
 
 /**
  * @author Niels
  * @date 2017/12/6
  */
-public class GetTxGroupFilter implements NulsBusFilter<GetTxGroupEvent> {
+public class GetTxGroupFilter implements NulsEventFilter<GetTxGroupEvent> {
     @Override
-    public void doFilter(GetTxGroupEvent event, NulsBusFilterChain chain) {
+    public void doFilter(GetTxGroupEvent event, NulsEventFilterChain chain) {
         //todo
         chain.doFilter(event);
     }

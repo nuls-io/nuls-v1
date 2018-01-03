@@ -15,7 +15,7 @@ import io.nuls.db.dao.UtxoTransactionDao;
 import io.nuls.db.entity.TransactionPo;
 import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.db.util.TransactionPoTool;
-import io.nuls.event.bus.bus.service.intf.EventBroadcaster;
+import io.nuls.event.bus.service.intf.NetworkEventBroadcaster;
 import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.entity.UtxoBalance;
 import io.nuls.ledger.entity.UtxoData;
@@ -39,7 +39,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     private UtxoTransactionDao txDao = NulsContext.getInstance().getService(UtxoTransactionDao.class);
 
-    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
+    private NetworkEventBroadcaster networkEventBroadcaster = NulsContext.getInstance().getService(NetworkEventBroadcaster.class);
 
     private UtxoLedgerServiceImpl() {
 
@@ -136,7 +136,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             verifyAndCacheTx(tx);
             TransferCoinEvent event = new TransferCoinEvent();
             event.setEventBody(tx);
-            eventBroadcaster.broadcastAndCache(event);
+            networkEventBroadcaster.broadcastAndCache(event);
         } catch (Exception e) {
             Log.error(e);
             return new Result(false, e.getMessage());

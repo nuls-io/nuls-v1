@@ -36,7 +36,7 @@ import io.nuls.db.entity.AliasPo;
 import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.entity.TransactionPo;
 import io.nuls.db.util.TransactionPoTool;
-import io.nuls.event.bus.bus.service.intf.EventBroadcaster;
+import io.nuls.event.bus.service.intf.NetworkEventBroadcaster;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.service.intf.LedgerService;
 
@@ -70,7 +70,7 @@ public class AccountServiceImpl implements AccountService {
 
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
 
-    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
+    private NetworkEventBroadcaster networkEventBroadcaster = NulsContext.getInstance().getService(NetworkEventBroadcaster.class);
 
     private boolean isLockNow = true;
 
@@ -478,7 +478,7 @@ public class AccountServiceImpl implements AccountService {
             aliasTx.setSign(signData(aliasTx.getHash(), account, password));
             ledgerService.verifyAndCacheTx(aliasTx);
             event.setEventBody(aliasTx);
-            eventBroadcaster.broadcastAndCache(event);
+            networkEventBroadcaster.broadcastAndCache(event);
         } catch (Exception e) {
             Log.error(e);
             return new Result(false, e.getMessage());

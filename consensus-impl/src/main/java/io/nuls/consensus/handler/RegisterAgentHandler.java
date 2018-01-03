@@ -5,8 +5,8 @@ import io.nuls.consensus.event.RegisterAgentEvent;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.log.Log;
-import io.nuls.event.bus.bus.handler.AbstractEventBusHandler;
-import io.nuls.event.bus.bus.service.intf.EventBroadcaster;
+import io.nuls.event.bus.handler.AbstractNetworkEventHandler;
+import io.nuls.event.bus.service.intf.NetworkEventBroadcaster;
 import io.nuls.ledger.service.intf.LedgerService;
 
 /**
@@ -14,9 +14,9 @@ import io.nuls.ledger.service.intf.LedgerService;
  * @author facjas
  * @date 2017/11/16
  */
-public class RegisterAgentHandler extends AbstractEventBusHandler<RegisterAgentEvent> {
+public class RegisterAgentHandler extends AbstractNetworkEventHandler<RegisterAgentEvent> {
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
-    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
+    private NetworkEventBroadcaster networkEventBroadcaster = NulsContext.getInstance().getService(NetworkEventBroadcaster.class);
 
     @Override
     public void onEvent(RegisterAgentEvent event,String fromId)   {
@@ -27,6 +27,6 @@ public class RegisterAgentHandler extends AbstractEventBusHandler<RegisterAgentE
             Log.error(e);
             return;
         }
-        this.eventBroadcaster.broadcastHashAndCache(event);
+        this.networkEventBroadcaster.broadcastHashAndCache(event);
     }
 }

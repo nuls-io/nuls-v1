@@ -4,16 +4,18 @@ import io.nuls.event.bus.constant.EventBusConstant;
 import io.nuls.event.bus.constant.EventConstant;
 import io.nuls.event.bus.event.CommonDigestEvent;
 import io.nuls.event.bus.event.GetEventBodyEvent;
-import io.nuls.event.bus.bus.service.intf.EventBroadcaster;
+import io.nuls.event.bus.service.impl.EventProducerImpl;
+import io.nuls.event.bus.service.intf.EventProducer;
+import io.nuls.event.bus.service.intf.NetworkEventBroadcaster;
 import io.nuls.event.bus.handler.CommonDigestHandler;
 import io.nuls.event.bus.handler.GetEventBodyHandler;
 import io.nuls.event.bus.handler.ReplyNoticeHandler;
 import io.nuls.event.bus.module.intf.AbstractEventBusModule;
-import io.nuls.event.bus.processor.service.impl.NoticeProcessorServiceImpl;
-import io.nuls.event.bus.processor.service.impl.EventProcessorServiceImpl;
-import io.nuls.event.bus.processor.service.intf.NoticeProcessorService;
-import io.nuls.event.bus.processor.service.intf.EventProcessorService;
-import io.nuls.event.bus.service.impl.EventBroadcasterImpl;
+import io.nuls.event.bus.processor.service.impl.LocalEventProcessorServiceImpl;
+import io.nuls.event.bus.processor.service.impl.NetworkEventProcessorServiceImpl;
+import io.nuls.event.bus.processor.service.intf.LocalEventProcessorService;
+import io.nuls.event.bus.processor.service.intf.NetworkEventProcessorService;
+import io.nuls.event.bus.service.impl.NetworkEventBroadcasterImpl;
 import io.nuls.event.bus.service.impl.EventCacheService;
 import io.nuls.network.message.ReplyNotice;
 
@@ -23,8 +25,8 @@ import io.nuls.network.message.ReplyNotice;
  */
 public class EventBusModuleImpl extends AbstractEventBusModule {
 
-    private NoticeProcessorService localService;
-    private EventProcessorService networkService;
+    private LocalEventProcessorService localService;
+    private NetworkEventProcessorService networkService;
 
     public EventBusModuleImpl() {
         super();
@@ -39,15 +41,16 @@ public class EventBusModuleImpl extends AbstractEventBusModule {
 
     @Override
     public void start() {
-        localService = NoticeProcessorServiceImpl.getInstance();
-        networkService = EventProcessorServiceImpl.getInstance();
+        localService = LocalEventProcessorServiceImpl.getInstance();
+        networkService = NetworkEventProcessorServiceImpl.getInstance();
         networkService.registerEventHandler(CommonDigestEvent.class, new CommonDigestHandler());
         networkService.registerEventHandler(GetEventBodyEvent.class, new GetEventBodyHandler());
         this.registerService(localService);
         this.registerService(networkService);
-        this.registerService(EventBroadcaster.class, EventBroadcasterImpl.getInstance());
+        this.registerService(NetworkEventBroadcaster.class, NetworkEventBroadcasterImpl.getInstance());
+        this.registerService(EventProducer.class, EventProducerImpl.getInstance());
         ReplyNoticeHandler replyNoticeHandler = new ReplyNoticeHandler();
-        this.localService.registerNoticeHandler(ReplyNotice.class,replyNoticeHandler);
+        this.localService.registerEventHandler(ReplyNotice.class, replyNoticeHandler);
 
     }
 
