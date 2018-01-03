@@ -26,7 +26,7 @@ public class GetTxGroupHandler extends AbstractNetworkEventHandler<GetTxGroupEve
         AskTxGroupData data = event.getEventBody();
         TxGroupEvent blockEvent = new TxGroupEvent();
         TxGroup blockData = new TxGroup();
-        blockData.setBlockHash(data.getBlockHash());
+        blockData.setBlockHeight(data.getBlockHeight());
         List<Transaction> txList = ledgerService.queryListByHashs(data.getTxHashList());
         blockData.setTxList(txList);
         blockEvent.setEventBody(blockData);
