@@ -30,36 +30,36 @@ public class EventProducerImpl implements EventProducer {
     }
 
     @Override
-    public void dispatch(EventCategoryEnum category, byte[] bytes, String fromId) throws IllegalAccessException, NulsException, InstantiationException {
+    public void send(EventCategoryEnum category, byte[] bytes, String fromId) throws IllegalAccessException, NulsException, InstantiationException {
         if (category == EventCategoryEnum.LOCAL) {
             BaseLocalEvent event = EventManager.getLocalEventInstance(bytes);
-            this.dispatchLocalEvent(event);
+            this.sendLocalEvent(event);
         } else {
-            this.dispatchNetworkEvent(bytes, fromId);
+            this.sendNetworkEvent(bytes, fromId);
         }
     }
 
     @Override
-    public void dispatch(EventCategoryEnum category, BaseEvent event, String fromId) {
+    public void send(EventCategoryEnum category, BaseEvent event, String fromId) {
         if (category == EventCategoryEnum.LOCAL) {
-            this.dispatchLocalEvent((BaseLocalEvent) event);
+            this.sendLocalEvent((BaseLocalEvent) event);
         } else {
-            this.dispatchNetworkEvent((BaseNetworkEvent) event, fromId);
+            this.sendNetworkEvent((BaseNetworkEvent) event, fromId);
         }
     }
 
     @Override
-    public void dispatchNetworkEvent(byte[] bytes, String fromId) {
+    public void sendNetworkEvent(byte[] bytes, String fromId) {
         networkService.dispatch(bytes, fromId);
     }
 
     @Override
-    public void dispatchNetworkEvent(BaseNetworkEvent event, String fromId) {
+    public void sendNetworkEvent(BaseNetworkEvent event, String fromId) {
         networkService.dispatch(event, fromId);
     }
 
     @Override
-    public void dispatchLocalEvent(BaseLocalEvent event) {
+    public void sendLocalEvent(BaseLocalEvent event) {
         localService.dispatch(event);
     }
 }

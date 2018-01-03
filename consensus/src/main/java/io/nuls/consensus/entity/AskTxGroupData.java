@@ -18,14 +18,14 @@ import java.util.List;
  */
 public class AskTxGroupData extends BaseNulsData {
 
-    private NulsDigestData blockHash;
+    private long blockHeight;
 
     private List<NulsDigestData> txHashList;
 
     @Override
     public int size() {
         int size = 0;
-        size += blockHash.size();
+        size += Utils.sizeOfSerialize(blockHeight);
         size += VarInt.sizeOf(txHashList.size());
         size += this.getTxHashBytesLength();
         return size;
@@ -33,21 +33,21 @@ public class AskTxGroupData extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(blockHash);
+        stream.writeVarInt(blockHeight);
         stream.writeVarInt(txHashList.size());
-        for(NulsDigestData data:txHashList){
+        for (NulsDigestData data : txHashList) {
             stream.writeNulsData(data);
         }
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.blockHash = byteBuffer.readHash();
-       long txCount = byteBuffer.readVarInt();
-       this.txHashList = new ArrayList<>();
-       for(int i=0;i<txCount;i++){
-           this.txHashList.add(byteBuffer.readHash());
-       }
+        this.blockHeight = byteBuffer.readVarInt();
+        long txCount = byteBuffer.readVarInt();
+        this.txHashList = new ArrayList<>();
+        for (int i = 0; i < txCount; i++) {
+            this.txHashList.add(byteBuffer.readHash());
+        }
     }
 
     private byte[] getTxHashListBytes() throws IOException {
@@ -65,7 +65,7 @@ public class AskTxGroupData extends BaseNulsData {
         return bytes;
     }
 
-    private int getTxHashBytesLength(){
+    private int getTxHashBytesLength() {
         int size = 0;
         for (NulsDigestData hash : txHashList) {
             size += Utils.sizeOfSerialize(hash);
@@ -73,12 +73,12 @@ public class AskTxGroupData extends BaseNulsData {
         return size;
     }
 
-    public NulsDigestData getBlockHash() {
-        return blockHash;
+    public long getBlockHeight() {
+        return blockHeight;
     }
 
-    public void setBlockHash(NulsDigestData blockHash) {
-        this.blockHash = blockHash;
+    public void setBlockHeight(long blockHeight) {
+        this.blockHeight = blockHeight;
     }
 
     public List<NulsDigestData> getTxHashList() {

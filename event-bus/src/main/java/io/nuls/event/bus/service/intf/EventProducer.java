@@ -12,13 +12,13 @@ import io.nuls.event.bus.constant.EventCategoryEnum;
  */
 public interface EventProducer {
 
-    void dispatch(EventCategoryEnum category, byte[] bytes, String fromId) throws IllegalAccessException, NulsException, InstantiationException;
+    void send(EventCategoryEnum category, byte[] bytes, String fromId) throws IllegalAccessException, NulsException, InstantiationException;
 
-    void dispatch(EventCategoryEnum category, BaseEvent event, String fromId);
+    void send(EventCategoryEnum category, BaseEvent event, String fromId);
 
-    void dispatchNetworkEvent(byte[] bytes, String fromId);
+    void sendNetworkEvent(byte[] bytes, String fromId);
 
-    void dispatchNetworkEvent(BaseNetworkEvent event, String fromId);
+    void sendNetworkEvent(BaseNetworkEvent event, String fromId);
 
-    void dispatchLocalEvent(BaseLocalEvent event);
+    void sendLocalEvent(BaseLocalEvent event);
 }

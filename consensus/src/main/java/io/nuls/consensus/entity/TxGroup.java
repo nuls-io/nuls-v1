@@ -22,14 +22,14 @@ import java.util.List;
  */
 public class TxGroup extends BaseNulsData {
 
-    private NulsDigestData blockHash;
+    private long blockHeight;
 
     private List<Transaction> txList;
 
     @Override
     public int size() {
         int size = 0;
-        size += Utils.sizeOfSerialize(blockHash);
+        size += Utils.sizeOfSerialize(blockHeight);
         size += VarInt.sizeOf(txList.size());
         for (Transaction tx : txList) {
             size += Utils.sizeOfSerialize(tx);
@@ -39,7 +39,7 @@ public class TxGroup extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(blockHash);
+        stream.writeVarInt(blockHeight);
         stream.writeVarInt(txList.size());
         for (Transaction tx : txList) {
             stream.writeNulsData(tx);
@@ -48,7 +48,7 @@ public class TxGroup extends BaseNulsData {
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.blockHash=byteBuffer.readHash();
+        this.blockHeight=byteBuffer.readVarInt();
         long txCount = byteBuffer.readVarInt();
         this.txList = new ArrayList<>();
         for (int i = 0; i < txCount; i++) {
@@ -66,12 +66,12 @@ public class TxGroup extends BaseNulsData {
 
     }
 
-    public NulsDigestData getBlockHash() {
-        return blockHash;
+    public long getBlockHeight() {
+        return blockHeight;
     }
 
-    public void setBlockHash(NulsDigestData blockHash) {
-        this.blockHash = blockHash;
+    public void setBlockHeight(long blockHeight) {
+        this.blockHeight = blockHeight;
     }
 
     public List<Transaction> getTxList() {
