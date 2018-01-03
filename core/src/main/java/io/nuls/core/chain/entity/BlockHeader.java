@@ -6,6 +6,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.NulsDataValidator;
 
 import java.io.IOException;
@@ -49,40 +50,33 @@ public class BlockHeader extends BaseNulsData {
     public int size() {
         int size = 0;
         size += this.getVersion().size();
-        if (null != hash) {
-            size += hash.size();
-        }
-        size += preHash.size();
-        size += merkleHash.size();
+        size += Utils.sizeOfSerialize(preHash);
+        size += Utils.sizeOfSerialize(merkleHash);
         size += Utils.sizeOfSerialize(time);
         size += Utils.sizeOfSerialize(height);
         size += Utils.sizeOfSerialize(txCount);
         size += Utils.sizeOfSerialize(packingAddress);
-        if (null != sign) {
-            size += sign.size();
-        }
         size += Utils.sizeOfSerialize(extend);
+        size += Utils.sizeOfSerialize(sign);
         return size;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeShort(this.getVersion().getVersion());
-        stream.writeNulsData(this.hash);
-        this.preHash.serializeToStream(stream);
-        this.merkleHash.serializeToStream(stream);
+        stream.writeNulsData(preHash);
+        stream.writeNulsData(merkleHash);
         stream.writeVarInt(time);
         stream.writeVarInt(height);
         stream.writeVarInt(txCount);
         stream.writeString(packingAddress);
-        stream.writeNulsData(this.sign);
         stream.writeBytesWithLength(extend);
+        stream.writeNulsData(this.sign);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.version = new NulsVersion(byteBuffer.readShort());
-        this.hash = new NulsDigestData();
         this.hash.parse(byteBuffer);
         this.preHash = new NulsDigestData();
         this.preHash.parse(byteBuffer);
@@ -92,11 +86,14 @@ public class BlockHeader extends BaseNulsData {
         this.height = byteBuffer.readVarInt();
         this.txCount = byteBuffer.readVarInt();
         this.packingAddress = byteBuffer.readString();
-
-        this.sign = new NulsSignData();
-        this.sign.parse(byteBuffer);
-
         this.extend = byteBuffer.readByLengthByte();
+        try {
+            this.hash = NulsDigestData.calcDigestData(this.serialize());
+        } catch (IOException e) {
+            Log.error(e);
+        }
+        this.sign = byteBuffer.readSign();
+
     }
 
     public NulsDigestData getHash() {
