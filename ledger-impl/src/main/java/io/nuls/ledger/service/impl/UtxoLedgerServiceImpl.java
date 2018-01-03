@@ -211,12 +211,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public List<Transaction> queryListByHashs(List<NulsDigestData> txHashList) {
-        // todo auto-generated method stub(niels)
-        return null;
-    }
-
-    @Override
     public void removeFromCache(List<NulsDigestData> txHashList) {
         // todo auto-generated method stub(niels)
 

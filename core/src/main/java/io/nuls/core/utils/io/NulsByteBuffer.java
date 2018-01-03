@@ -3,6 +3,8 @@ package io.nuls.core.utils.io;
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.NulsSignData;
+import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
@@ -187,5 +189,16 @@ public class NulsByteBuffer {
 
     public NulsSignData readSign() throws NulsException {
         return this.readNulsData(new NulsSignData());
+    }
+
+    public Transaction readTransaction() throws NulsException {
+        try {
+            return TransactionManager.getInstance(this);
+        } catch (IllegalAccessException e) {
+            Log.error(e);
+        } catch (InstantiationException e) {
+            Log.error(e);
+        }
+        return null;
     }
 }

@@ -7,17 +7,21 @@ import io.nuls.core.utils.io.NulsByteBuffer;
 
 /**
  * get block by height.
+ *
  * @author Niels
  * @date 2017/11/13
  */
-public class GetBlockEvent extends BaseConsensusEvent<BasicTypeData<Long>>{
-    public GetBlockEvent( ) {
-        super(ConsensusEventType.GET_BLOCK);
+public class GetSmallBlockEvent extends BaseConsensusEvent<BasicTypeData<Long>> {
+
+
+    public GetSmallBlockEvent() {
+        super(ConsensusEventType.GET_SMALL_BLOCK);
     }
+
 
     @Override
     protected BasicTypeData<Long> parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
-       return byteBuffer.readNulsData(new BasicTypeData<>());
+        return byteBuffer.readNulsData(new BasicTypeData<Long>());
     }
 
 }
