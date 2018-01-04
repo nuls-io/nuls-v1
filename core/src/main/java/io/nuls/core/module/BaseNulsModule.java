@@ -102,7 +102,7 @@ public abstract class BaseNulsModule {
     }
 
     protected final void publish(short eventType, Class<? extends BaseEvent> eventClass) {
-        EventManager.putBusData(this.getModuleId(), eventType, eventClass);
+        EventManager.putEvent(this.getModuleId(), eventType, eventClass);
     }
 
     protected final void registerTransaction(int txType, Class<? extends Transaction> txClass){

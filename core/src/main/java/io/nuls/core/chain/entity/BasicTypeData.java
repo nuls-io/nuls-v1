@@ -6,6 +6,7 @@ import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * @author Niels
@@ -112,7 +113,7 @@ public class BasicTypeData<T> extends BaseNulsData {
         } else if (val instanceof byte[]) {
             return 7;
         } else {
-            return 8;
+            return 0;
         }
     }
 }
