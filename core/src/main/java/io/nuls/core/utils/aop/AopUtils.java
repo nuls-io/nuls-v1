@@ -24,4 +24,10 @@ public class AopUtils {
         return (T) enhancer.create(paramsClass,params);
     }
 
+//    public static final<T> T createObjProxy(T obj, MethodInterceptor interceptor) {
+//        Enhancer enhancer = new Enhancer();
+//        enhancer.setSuperclass(obj.getClass());
+//        enhancer.setCallback(new ObjectProxyInterceptor(obj, interceptor));
+//        return (T) enhancer.create();
+//    }
 }

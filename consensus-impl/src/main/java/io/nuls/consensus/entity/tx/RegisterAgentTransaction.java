@@ -4,6 +4,7 @@ import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.validator.consensus.AccountCreditValidator;
 import io.nuls.consensus.entity.validator.consensus.AgentDepositValidator;
+import io.nuls.consensus.entity.validator.consensus.CommissionRateValidator;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -22,6 +23,7 @@ public class RegisterAgentTransaction extends AbstractCoinTransaction<Consensus<
 
     public RegisterAgentTransaction(CoinTransferData lockData, String password) {
         super(TransactionConstant.TX_TYPE_REGISTER_AGENT, lockData, password);
+        this.registerValidator(new CommissionRateValidator());
         this.registerValidator(new AccountCreditValidator());
         this.registerValidator(new AgentDepositValidator());
     }

@@ -2,6 +2,7 @@ package io.nuls.core.module.manager;
 
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.aop.AopUtils;
 import io.nuls.core.utils.log.Log;
 
 import java.util.HashMap;
@@ -74,6 +75,7 @@ public class ServiceManager {
         if (INTF_MAP.keySet().contains(serviceInterface)) {
             throw new NulsRuntimeException(ErrorCode.INTF_REPETITION);
         }
+//todo        AopUtils.createObjProxy(service,);
         INTF_MAP.put(serviceInterface, service);
         Set<Class> set = MODULE_INTF_MAP.get(moduleId);
         if (null == set) {

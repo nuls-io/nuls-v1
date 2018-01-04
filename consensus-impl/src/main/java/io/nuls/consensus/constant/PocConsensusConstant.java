@@ -63,7 +63,8 @@ public interface PocConsensusConstant {
     /**
      * commission rate,UNIT:%
      */
-    double DEFAULT_COMMISSION_RATE = 20;
+    double MAX_COMMISSION_RATE = 20;
+    double MIN_COMMISSION_RATE = 0;
     /**
      * unit:day
      */
