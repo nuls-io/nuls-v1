@@ -477,6 +477,13 @@ public class Utils {
         } else if (val instanceof BaseNulsData) {
             int size = ((BaseNulsData) val).size();
             return size == 0 ? 1 : size;
+        } else if (val instanceof List) {
+            List list = (List) val;
+            int size = VarInt.sizeOf(list.size());
+            for (Object o : list) {
+                size += sizeOfSerialize(o);
+            }
+            return size;
         }
         throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "instance of unkown");
     }
