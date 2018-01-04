@@ -4,7 +4,7 @@ import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.filter.impl.DefaultMessageFilter;
-import io.nuls.network.message.DefaultNetWorkDataHandlerFactory;
+import io.nuls.network.message.DefaultNetWorkEventHandlerFactory;
 
 import java.net.InetSocketAddress;
 
@@ -31,9 +31,7 @@ public class DevNetworkParam extends AbstractNetworkParam {
         seedPeers.add(address0);
 
         this.messageFilter = DefaultMessageFilter.getInstance();
-        this.messageHandlerFactory = DefaultNetWorkDataHandlerFactory.getInstance();
-        this.messageFilter.addMagicNum(this.packetMagic);
-
+        this.messageHandlerFactory = DefaultNetWorkEventHandlerFactory.getInstance();
     }
 
     public static synchronized DevNetworkParam get() {

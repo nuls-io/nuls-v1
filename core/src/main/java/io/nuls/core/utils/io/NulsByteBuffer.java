@@ -120,6 +120,9 @@ public class NulsByteBuffer {
 
     public byte[] readByLengthByte() throws NulsException {
         long length = this.readVarInt();
+        if(length == 0) {
+            return null;
+        }
         return readBytes((int) length);
     }
 
@@ -183,6 +186,7 @@ public class NulsByteBuffer {
         int length = payload.length - cursor;
         byte[] bytes = new byte[length];
         System.arraycopy(payload, cursor, bytes, 0, length);
+        cursor += length;
         nulsData.parse(bytes);
         return nulsData;
     }

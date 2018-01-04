@@ -5,6 +5,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.module.BaseNulsModule;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 
 import java.util.*;
@@ -54,15 +55,22 @@ public class EventManager {
     public static BaseNetworkEvent getNetworkEventInstance(byte[] bytes) throws IllegalAccessException, InstantiationException, NulsException {
         return (BaseNetworkEvent) getInstance(bytes);
     }
+
     public static BaseLocalEvent getLocalEventInstance(byte[] bytes) throws IllegalAccessException, InstantiationException, NulsException {
         return (BaseLocalEvent) getInstance(bytes);
     }
 
-    private static BaseEvent getInstance(byte[] bytes) throws IllegalAccessException, InstantiationException, NulsException {
+    public static BaseEvent getInstance(byte[] bytes) throws NulsException {
         EventHeader header = new EventHeader();
         header.parse(new NulsByteBuffer(bytes));
         Class<? extends BaseEvent> clazz = EVENT_MAP.get(header.getModuleId() + "_" + header.getEventType());
-        BaseEvent event = clazz.newInstance();
+        BaseEvent event = null;
+        try {
+            event = clazz.newInstance();
+        } catch (Exception e) {
+            Log.error(e);
+            throw  new NulsException(ErrorCode.DATA_PARSE_ERROR);
+        }
         event.parse(new NulsByteBuffer(bytes));
         return event;
     }

@@ -4,6 +4,7 @@ import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.chain.intf.NulsCloneable;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -49,9 +50,9 @@ public abstract class BaseEvent<T extends BaseNulsData> extends BaseNulsData imp
             this.hash = NulsDigestData.calcDigestData(this.serialize());
         } catch (IOException e) {
             Log.error(e);
+            throw new NulsException(ErrorCode.DATA_PARSE_ERROR);
         }
         this.sign = byteBuffer.readSign();
-
     }
 
     protected abstract T parseEventBody(NulsByteBuffer byteBuffer) throws NulsException;
