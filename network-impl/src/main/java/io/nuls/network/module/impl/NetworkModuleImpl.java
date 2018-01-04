@@ -21,12 +21,6 @@ public class NetworkModuleImpl extends AbstractNetworkModule {
 
     private NetworkService networkService;
 
-    public NetworkModuleImpl() throws IOException {
-        super();
-
-    }
-
-
     @Override
     public void init() {
         try {
@@ -53,7 +47,6 @@ public class NetworkModuleImpl extends AbstractNetworkModule {
     @Override
     public void destroy() {
         shutdown();
-
     }
 
     @Override

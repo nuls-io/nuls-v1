@@ -1,7 +1,5 @@
 package io.nuls.network.service.impl;
 
-import io.nuls.consensus.constant.PocConsensusConstant;
-import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.PeerDao;
 import io.nuls.db.entity.PeerPo;
@@ -10,9 +8,8 @@ import io.nuls.network.entity.Peer;
 import io.nuls.network.entity.PeerGroup;
 import io.nuls.network.entity.PeerTransfer;
 import io.nuls.network.entity.param.AbstractNetworkParam;
-import io.nuls.network.message.entity.GetPeerData;
+import io.nuls.network.message.entity.GetPeerEvent;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
@@ -125,32 +122,32 @@ public class PeerDiscoverHandler implements Runnable {
      * @param size
      */
     private void findOtherPeer(int size) {
-        PeerGroup group = peersManager.getPeerGroup(NetworkConstant.NETWORK_PEER_IN_GROUP);
-        if (group.getPeers().size() > 0) {
-            Peer peer = group.getPeers().get(0);
-            if (peer.isHandShake()) {
-                try {
-                    GetPeerData data = new GetPeerData(size);
-                    peer.sendNetworkData(data);
-                } catch (Exception e) {
-                    Log.warn("send getPeerData error", e);
-                    peer.destroy();
-                }
-            }
-        }
-
-        group = peersManager.getPeerGroup(NetworkConstant.NETWORK_PEER_OUT_GROUP);
-        if (group.getPeers().size() > 0) {
-            Peer peer = group.getPeers().get(0);
-            if (peer.isHandShake()) {
-                try {
-                    GetPeerData data = new GetPeerData(size);
-                    peer.sendNetworkData(data);
-                } catch (Exception e) {
-                    Log.warn("send getPeerData error", e);
-                    peer.destroy();
-                }
-            }
-        }
+//        PeerGroup group = peersManager.getPeerGroup(NetworkConstant.NETWORK_PEER_IN_GROUP);
+//        if (group.getPeers().size() > 0) {
+//            Peer peer = group.getPeers().get(0);
+//            if (peer.isHandShake()) {
+//                try {
+//                    GetPeerEvent data = new GetPeerEvent(size);
+//                    peer.sendNetworkData(data);
+//                } catch (Exception e) {
+//                    Log.warn("send getPeerData error", e);
+//                    peer.destroy();
+//                }
+//            }
+//        }
+//
+//        group = peersManager.getPeerGroup(NetworkConstant.NETWORK_PEER_OUT_GROUP);
+//        if (group.getPeers().size() > 0) {
+//            Peer peer = group.getPeers().get(0);
+//            if (peer.isHandShake()) {
+//                try {
+//                    GetPeerEvent data = new GetPeerEvent(size);
+//                    peer.sendNetworkData(data);
+//                } catch (Exception e) {
+//                    Log.warn("send getPeerData error", e);
+//                    peer.destroy();
+//                }
+//            }
+//        }
     }
 }

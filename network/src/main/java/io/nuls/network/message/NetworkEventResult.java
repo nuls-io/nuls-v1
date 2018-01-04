@@ -1,16 +1,18 @@
 package io.nuls.network.message;
 
+import io.nuls.core.event.BaseNetworkEvent;
+
 /**
  * @author vivi
  * @date 2017/11/21
  */
-public class NetworkDataResult {
+public class NetworkEventResult {
 
     private final boolean success;
 
-    private final BaseNetworkData replyMessage;
+    private final BaseNetworkEvent replyMessage;
 
-    public NetworkDataResult(boolean success, BaseNetworkData replyMessage) {
+    public NetworkEventResult(boolean success, BaseNetworkEvent replyMessage) {
         this.success = success;
         this.replyMessage = replyMessage;
     }
@@ -19,7 +21,7 @@ public class NetworkDataResult {
         return success;
     }
 
-    public BaseNetworkData getReplyMessage() {
+    public BaseNetworkEvent getReplyMessage() {
         return replyMessage;
     }
 }
