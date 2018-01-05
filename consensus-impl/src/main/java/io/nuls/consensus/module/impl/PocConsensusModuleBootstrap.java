@@ -75,13 +75,13 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
         this.checkConsensusStatus();
         this.checkPeerType();
         ThreadManager.createSingleThreadAndRun(this.getModuleId(), BlockPersistenceThread.THREAD_NAME, BlockPersistenceThread.getInstance());
-        this.registerHanders();
+        this.registerHandlers();
         Log.info("the POC consensus module is started!");
 
     }
 
 
-    private void registerHanders() {
+    private void registerHandlers() {
         BlockEventHandler blockEventHandler = new BlockEventHandler();
         blockEventHandler.addFilter(new BlockEventFilter());
         eventConsumer.subscribeNetworkEvent(BlockEvent.class, blockEventHandler);
