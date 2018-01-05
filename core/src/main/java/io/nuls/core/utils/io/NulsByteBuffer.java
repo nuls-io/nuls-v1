@@ -135,14 +135,6 @@ public class NulsByteBuffer {
         return this.readNulsData(new NulsDigestData());
     }
 
-    public int getCursor() {
-        return cursor;
-    }
-
-    public void setCursor(int cursor) {
-        this.cursor = cursor;
-    }
-
     public void resetCursor() {
         this.cursor = 0;
     }
@@ -186,8 +178,8 @@ public class NulsByteBuffer {
         int length = payload.length - cursor;
         byte[] bytes = new byte[length];
         System.arraycopy(payload, cursor, bytes, 0, length);
-        cursor += length;
         nulsData.parse(bytes);
+        cursor += nulsData.size();
         return nulsData;
     }
 

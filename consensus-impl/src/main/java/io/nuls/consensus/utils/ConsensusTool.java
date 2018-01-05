@@ -72,7 +72,7 @@ public class ConsensusTool {
         Agent agent = new Agent();
         agent.setStatus(ConsensusStatusEnum.WAITING.getCode());
         agent.setDeposit(Na.valueOf(po.getDeposit()));
-        agent.setCommissionRate(PocConsensusConstant.DEFAULT_COMMISSION_RATE);
+//todo        agent.setCommissionRate(PocConsensusConstant.DEFAULT_COMMISSION_RATE);
         agent.setDelegateAddress(po.getPeerAddress());
         agent.setIntroduction(po.getRemark());
         agent.setStartTime(po.getStartTime());

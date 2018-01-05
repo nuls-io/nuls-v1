@@ -55,7 +55,7 @@ public class GetPeerEvent extends BaseNetworkEvent<BasicTypeData<Integer>> {
         byte[] bytes = event.serialize();
 
         GetPeerEvent event1 = new GetPeerEvent();
-        event1.parse(new NulsByteBuffer(bytes));
+        event1.parse( bytes );
         System.out.println(event1.getEventBody().getVal());
 
     }
