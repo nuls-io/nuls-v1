@@ -3,7 +3,7 @@ package io.nuls.core.event;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.module.BaseNulsModule;
+import io.nuls.core.module.BaseModuleBootstrap;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
@@ -25,7 +25,18 @@ public class EventManager {
         }
     }
 
-    public static void putEvent(short moduleId, short type, Class<? extends BaseEvent> clazz) {
+    public static void putEvent(Class<? extends BaseEvent> clazz) {
+        try {
+            BaseEvent event = clazz.newInstance();
+            putEvent(event.getHeader().getModuleId(), event.getHeader().getEventType(), clazz);
+        } catch (InstantiationException e) {
+            Log.error(e);
+        } catch (IllegalAccessException e) {
+            Log.error(e);
+        }
+    }
+
+    private static void putEvent(short moduleId, short type, Class<? extends BaseEvent> clazz) {
         if (type == 0) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "the event type cannot be 0!,module:" + moduleId + ",eventType:" + type);
         }
@@ -43,14 +54,6 @@ public class EventManager {
         }
     }
 
-    public static void putEvent(BaseNulsModule module, short type, Class<? extends BaseEvent> clazz) {
-        AssertUtil.canNotEmpty(clazz, "event class is null!");
-        AssertUtil.canNotEmpty(module, "module is null,message" + clazz.getName());
-        if (type == 0) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "the event type cannot be 0!,module:" + module.getModuleId() + ",eventType:" + type);
-        }
-        putEvent(module.getModuleId(), type, clazz);
-    }
 
     public static BaseNetworkEvent getNetworkEventInstance(byte[] bytes) throws IllegalAccessException, InstantiationException, NulsException {
         return (BaseNetworkEvent) getInstance(bytes);
@@ -69,7 +72,7 @@ public class EventManager {
             event = clazz.newInstance();
         } catch (Exception e) {
             Log.error(e);
-            throw  new NulsException(ErrorCode.DATA_PARSE_ERROR);
+            throw new NulsException(ErrorCode.DATA_PARSE_ERROR);
         }
         event.parse(new NulsByteBuffer(bytes));
         return event;

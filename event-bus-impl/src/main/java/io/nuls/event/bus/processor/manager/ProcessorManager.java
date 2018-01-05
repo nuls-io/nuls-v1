@@ -6,7 +6,7 @@ import io.nuls.core.event.BaseNetworkEvent;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.module.service.ModuleService;
 import io.nuls.core.thread.manager.NulsThreadFactory;
-import io.nuls.core.thread.manager.ThreadManager;
+import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.event.bus.constant.EventBusConstant;
@@ -38,7 +38,7 @@ public class ProcessorManager<E extends BaseNetworkEvent, H extends NulsEventHan
 
     public final void init() {
         Short moduleId = ModuleService.getInstance().getModuleId(AbstractEventBusModule.class);
-        pool = ThreadManager.createThreadPool(EventBusConstant.THREAD_COUNT, EventBusConstant.THREAD_COUNT,
+        pool = TaskManager.createThreadPool(EventBusConstant.THREAD_COUNT, EventBusConstant.THREAD_COUNT,
                 new NulsThreadFactory(moduleId, EventBusConstant.THREAD_POOL_NAME));
         disruptorService.createDisruptor(disruptorName, EventBusConstant.DEFAULT_RING_BUFFER_SIZE);
         List<EventDispatchThread> handlerList = new ArrayList<>();
@@ -61,7 +61,7 @@ public class ProcessorManager<E extends BaseNetworkEvent, H extends NulsEventHan
     }
 
     public String registerEventHandler(Class<E> eventClass, H handler) {
-        EventManager.isLegal(eventClass);
+        EventManager.putEvent(eventClass);
         AssertUtil.canNotEmpty(eventClass, "registerEventHandler faild");
         AssertUtil.canNotEmpty(handler, "registerEventHandler faild");
         String handlerId = StringUtils.getNewUUID();

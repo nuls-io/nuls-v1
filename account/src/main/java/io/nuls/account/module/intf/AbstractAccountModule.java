@@ -1,7 +1,7 @@
 package io.nuls.account.module.intf;
 
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.module.BaseNulsModule;
+import io.nuls.core.module.BaseModuleBootstrap;
 
 /**
  *
@@ -9,7 +9,7 @@ import io.nuls.core.module.BaseNulsModule;
  * @date 2017/10/30
  *
  */
-public abstract class AbstractAccountModule extends BaseNulsModule {
+public abstract class AbstractAccountModule extends BaseModuleBootstrap {
     public AbstractAccountModule() {
         super(NulsConstant.MODULE_ID_ACCOUNT);
     }

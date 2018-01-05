@@ -2,15 +2,12 @@ package io.nuls.consensus.handler;
 
 import io.nuls.consensus.entity.TxGroup;
 import io.nuls.consensus.entity.TxHashData;
-import io.nuls.consensus.event.GetSmallBlockEvent;
 import io.nuls.consensus.event.GetTxGroupEvent;
-import io.nuls.consensus.event.SmallBlockEvent;
 import io.nuls.consensus.event.TxGroupEvent;
 import io.nuls.consensus.service.impl.BlockServiceImpl;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.SmallBlock;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
@@ -38,7 +35,7 @@ public class GetTxGroupHandler extends AbstractNetworkEventHandler<GetTxGroupEve
     public void onEvent(GetTxGroupEvent event, String fromId) {
 
         TxHashData eventBody = event.getEventBody();
-        Block block = blockService.getBlockByHash(eventBody.getBlockHash().getDigestHex());
+        Block block = blockService.getBlock(eventBody.getBlockHash().getDigestHex());
         if (null == block) {
             return;
         }

@@ -31,7 +31,7 @@ public class AccountCacheService {
     }
 
     public Account getAccountById(String id) {
-        return this.cacheService.getElementValue(AccountConstant.ACCOUNT_LIST_CACHE, id);
+        return this.cacheService.getElement(AccountConstant.ACCOUNT_LIST_CACHE, id);
     }
 
     public Account getAccountByAddress(String address) {
@@ -45,7 +45,7 @@ public class AccountCacheService {
     }
 
     public List<Account> getAccountList() {
-        return this.cacheService.getElementValueList(AccountConstant.ACCOUNT_LIST_CACHE);
+        return this.cacheService.getElementList(AccountConstant.ACCOUNT_LIST_CACHE);
     }
 
     public void removeAccount(Account account) {

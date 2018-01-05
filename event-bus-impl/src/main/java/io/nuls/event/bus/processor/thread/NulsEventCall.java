@@ -24,6 +24,7 @@ public class NulsEventCall<T extends BaseNetworkEvent> implements Runnable {
             return;
         }
         try {
+            //todo filter&handler is the same level
             boolean ok = handler.getFilterChain().startDoFilter(data.getData());
             if (ok) {
                 handler.onEvent(data.getData(), data.getPeerId());

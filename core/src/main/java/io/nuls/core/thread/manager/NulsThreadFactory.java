@@ -1,7 +1,6 @@
 package io.nuls.core.thread.manager;
 
 import io.nuls.core.thread.BaseThread;
-import io.nuls.core.thread.cache.TaskManager;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -14,7 +13,6 @@ public class NulsThreadFactory implements ThreadFactory {
     private final short moduleId;
     private final String poolName;
     private AtomicInteger threadNo = new AtomicInteger(1);
-    private static final TaskManager THREAD_DATA = TaskManager.getInstance();
 
     public NulsThreadFactory(short moduleId, String poolName) {
         this.poolName = poolName;
@@ -36,7 +34,7 @@ public class NulsThreadFactory implements ThreadFactory {
         if (newThread.getPriority() != Thread.NORM_PRIORITY) {
             newThread.setPriority(Thread.NORM_PRIORITY);
         }
-        THREAD_DATA.putThread(moduleId, poolName, threadName, newThread);
+        TaskManager.putThread(moduleId, poolName, threadName, newThread);
         return newThread;
     }
 

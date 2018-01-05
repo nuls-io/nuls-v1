@@ -31,7 +31,7 @@ public class NetworkCacheService {
     }
 
     public BroadcastResult getBroadCastResult(String hash) {
-        return (BroadcastResult) cacheService.getElementValue(BROADCAST_CACHE, hash);
+        return (BroadcastResult) cacheService.getElement(BROADCAST_CACHE, hash);
     }
 
     public void removeBroadCastResult(String hash) {

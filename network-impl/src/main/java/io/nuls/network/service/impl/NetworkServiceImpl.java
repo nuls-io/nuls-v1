@@ -8,6 +8,7 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.PeerDao;
+import io.nuls.network.NetworkContext;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Peer;
@@ -203,7 +204,7 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     private AbstractNetworkParam getNetworkInstance() {
-        String networkType = ConfigLoader.getPropValue(NetworkConstant.NETWORK_TYPE, "dev");
+        String networkType = NetworkContext.getNetworkConfig().getPropValue(NetworkConstant.NETWORK_TYPE, "dev");
         if ("dev".equals(networkType)) {
             return DevNetworkParam.get();
         }

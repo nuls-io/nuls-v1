@@ -1,6 +1,7 @@
 package io.nuls.network.param;
 
 import io.nuls.core.utils.cfg.ConfigLoader;
+import io.nuls.network.NetworkContext;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.filter.impl.DefaultMessageFilter;
@@ -17,9 +18,10 @@ public class DevNetworkParam extends AbstractNetworkParam {
     private static DevNetworkParam instance;
 
     private DevNetworkParam() {
-        super();
-        this.port = ConfigLoader.getPropValue(NetworkConstant.NETWORK_PORT_DEV, 8003);
-        this.packetMagic = ConfigLoader.getPropValue(NetworkConstant.NETWORK_MAGIC_DEV, 987654323);
+        this.maxInCount = NetworkContext.getNetworkConfig().getPropValue(NetworkConstant.NETWORK_PEER_MAX_IN, 50);
+        this.maxOutCount =  NetworkContext.getNetworkConfig().getPropValue(NetworkConstant.NETWORK_PEER_MAX_OUT, 10);
+        this.port =  NetworkContext.getNetworkConfig().getPropValue(NetworkConstant.NETWORK_PORT_DEV, 8003);
+        this.packetMagic =  NetworkContext.getNetworkConfig().getPropValue(NetworkConstant.NETWORK_MAGIC_DEV, 987654323);
 
         InetSocketAddress address2 = new InetSocketAddress("192.168.1.197", port);
         InetSocketAddress address3 = new InetSocketAddress("192.168.1.248", port);

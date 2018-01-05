@@ -57,7 +57,7 @@ public class RpcServerFilter implements ContainerRequestFilter, ContainerRespons
     private boolean whiteSheetVerifier(Request request) {
         String ips = null;
         try {
-            ips = ConfigLoader.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_REQUEST_WHITE_SHEET);
+            ips = NulsContext.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_REQUEST_WHITE_SHEET);
         } catch (NulsException e) {
             Log.error(e);
         }

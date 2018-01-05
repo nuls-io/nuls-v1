@@ -33,7 +33,7 @@ public class EventCacheService {
     }
 
     public void cacheRecievedEventHash(String hashHex) {
-        this.cacheService.putElementWithoutClone(CACHE_OF_SENDED, hashHex, 1);
+        this.cacheService.putElement(CACHE_OF_SENDED, hashHex, 1);
     }
 
     public boolean isKnown(String hashHex) {
@@ -42,7 +42,7 @@ public class EventCacheService {
     }
 
     public BaseNetworkEvent getEvent(String hashHex) {
-        return (BaseNetworkEvent) this.cacheService.getElementValue(CACHE_OF_SENDED, hashHex);
+        return (BaseNetworkEvent) this.cacheService.getElement(CACHE_OF_SENDED, hashHex);
     }
 
     public void destroy() {

@@ -1,6 +1,5 @@
 package io.nuls.test;
 
-import io.nuls.core.chain.entity.Result;
 import io.nuls.core.module.manager.ServiceManager;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.AccountDao;
@@ -10,7 +9,7 @@ import io.nuls.db.dao.impl.mybatis.BlockDaoImpl;
 import io.nuls.db.entity.AccountPo;
 import io.nuls.db.entity.BlockPo;
 import io.nuls.db.entity.PeerPo;
-import io.nuls.db.module.impl.MybatisDBModuleImpl;
+import io.nuls.db.module.impl.MybatisDBModuleBootstrap;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -25,7 +24,7 @@ import java.util.Set;
  */
 public class DBModuleTest {
 
-    private static MybatisDBModuleImpl dbModule;
+    private static MybatisDBModuleBootstrap dbModule;
 
     private static BlockDao blockDao;
 
@@ -35,7 +34,7 @@ public class DBModuleTest {
 
     @BeforeClass
     public static void init() {
-        dbModule = new MybatisDBModuleImpl();
+        dbModule = new MybatisDBModuleBootstrap();
         dbModule.start();
         blockDao = ServiceManager.getInstance().getService(BlockDao.class);
         peerDao = ServiceManager.getInstance().getService(PeerDao.class);
@@ -80,7 +79,7 @@ public class DBModuleTest {
 
 
     public static void main(String[] args) {
-        MybatisDBModuleImpl dbModule = new MybatisDBModuleImpl();
+        MybatisDBModuleBootstrap dbModule = new MybatisDBModuleBootstrap();
         dbModule.start();
         BlockDao blockDao = ServiceManager.getInstance().getService(BlockDaoImpl.class);
 

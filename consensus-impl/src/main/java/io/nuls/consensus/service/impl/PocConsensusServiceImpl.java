@@ -111,7 +111,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
     }
 
     @Override
-    public void exitConsensus(NulsDigestData joinTxHash, String password) {
+    public void stopConsensus(NulsDigestData joinTxHash, String password) {
         PocJoinConsensusTransaction joinTx = (PocJoinConsensusTransaction) ledgerService.getTransaction(joinTxHash);
         if (null == joinTx) {
             throw new NulsRuntimeException(ErrorCode.ACCOUNT_NOT_EXIST, "address:" + joinTx.getTxData().getAddress().toString());
@@ -168,7 +168,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
     }
 
     @Override
-    public void joinConsensus(String address, String password, Map<String, Object> paramsMap) {
+    public void startConsensus(String address, String password, Map<String, Object> paramsMap) {
         Account account = this.accountService.getAccount(address);
         if (null == account) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "The account is not exist,address:" + address);

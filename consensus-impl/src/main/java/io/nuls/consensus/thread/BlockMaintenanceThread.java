@@ -108,15 +108,14 @@ public class BlockMaintenanceThread implements Runnable {
     public void checkGenesisBlock() {
         Block genesisBlock = NulsContext.getInstance().getGenesisBlock();
         genesisBlock.verify();
-        Block localGenesisBlock = this.blockService.getGengsisBlockFromDb();
+        Block localGenesisBlock = this.blockService.getGengsisBlock();
         if (null == localGenesisBlock) {
-            this.blockService.save(genesisBlock);
+            this.blockService.saveBlock(genesisBlock);
             return;
         }
         localGenesisBlock.verify();
         if (!localGenesisBlock.equals(genesisBlock)) {
-            this.blockService.clearLocalBlocks();
-            this.blockService.save(genesisBlock);
+            throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
         }
     }
 
@@ -145,7 +144,7 @@ public class BlockMaintenanceThread implements Runnable {
 
     private void rollbackBlock(long startHeight) {
         try {
-            this.blockService.rollback(startHeight);
+            this.blockService.rollbackBlock(startHeight);
         } catch (NulsException e) {
             Log.error(e);
             return;
@@ -155,7 +154,7 @@ public class BlockMaintenanceThread implements Runnable {
             throw new NulsRuntimeException(ErrorCode.NET_MESSAGE_ERROR, "Block data error!");
         }
         BlockInfo blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(height);
-        Block localBlock = this.blockService.getBlockByHeight(height);
+        Block localBlock = this.blockService.getBlock(height);
         boolean previousRb = false;
         if (null == blockInfo || blockInfo.getHash() == null || localBlock == null || localBlock.getHeader().getHash() == null) {
             previousRb = true;

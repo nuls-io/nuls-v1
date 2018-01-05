@@ -1,6 +1,6 @@
 package io.nuls.core.utils.date;
 
-import io.nuls.core.thread.manager.ThreadManager;
+import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
 
 import java.io.IOException;
@@ -49,7 +49,7 @@ public class TimeService implements Runnable {
         Log.info("----------- network timeService start -------------");
         syncWebTime();
         running = true;
-        ThreadManager.createSingleThreadAndRun((short) 1, "TimeService", this, true);
+        TaskManager.createSingleThreadAndRun((short) 1, "TimeService", this, true);
     }
 
     private void syncWebTime() {

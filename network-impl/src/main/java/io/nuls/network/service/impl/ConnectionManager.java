@@ -4,7 +4,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.thread.manager.ThreadManager;
+import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Peer;
@@ -74,7 +74,7 @@ public class ConnectionManager implements Runnable {
     public void start() {
         Log.info("----------- network connectionManager start -------------");
         running = true;
-        ThreadManager.createSingleThreadAndRun(NulsConstant.MODULE_ID_NETWORK, "connectionManager", this);
+        TaskManager.createSingleThreadAndRun(NulsConstant.MODULE_ID_NETWORK, "connectionManager", this);
     }
 
     public void restart() {

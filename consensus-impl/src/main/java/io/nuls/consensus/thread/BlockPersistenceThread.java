@@ -54,7 +54,7 @@ public class BlockPersistenceThread implements Runnable {
                 throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
             }
 
-            blockService.save(block);
+            blockService.saveBlock(block);
             this.blockCacheService.removeBlock(blockCacheService.getMinHeight());
             this.ledgerService.removeFromCache(block.getTxHashList());
         }

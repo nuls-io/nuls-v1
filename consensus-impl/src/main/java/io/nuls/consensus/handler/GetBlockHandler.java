@@ -19,7 +19,7 @@ public class GetBlockHandler extends AbstractNetworkEventHandler<GetBlockEvent> 
     private NetworkEventBroadcaster networkEventBroadcaster = NulsContext.getInstance().getService(NetworkEventBroadcaster.class);
     @Override
     public void onEvent(GetBlockEvent event,String fromId)   {
-        Block block = blockService.getBlockByHeight(event.getEventBody().getVal());
+        Block block = blockService.getBlock(event.getEventBody().getVal());
         BlockEvent blockEvent = new BlockEvent();
         blockEvent.setEventBody(block);
         networkEventBroadcaster.sendToPeer(blockEvent,fromId);

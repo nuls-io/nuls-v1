@@ -54,7 +54,7 @@ public class LedgerCacheService {
 
 
     public Balance getBalance(String address) {
-        return cacheService.getElementValue(LedgerConstant.STANDING_BOOK, address);
+        return cacheService.getElement(LedgerConstant.STANDING_BOOK, address);
     }
 
 
@@ -63,11 +63,11 @@ public class LedgerCacheService {
     }
 
     public Transaction getTx(String hashHex) {
-        return txCacheService.getElementValue(TransactionConstant.TX_LIST, hashHex);
+        return txCacheService.getElement(TransactionConstant.TX_LIST, hashHex);
     }
 
     public List<Transaction> getTxList() {
-        return txCacheService.getElementValueList(TransactionConstant.TX_LIST);
+        return txCacheService.getElementList(TransactionConstant.TX_LIST);
     }
 
     public List<Transaction> getTxList(long startTime, long endTime) {

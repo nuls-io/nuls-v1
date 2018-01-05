@@ -33,7 +33,7 @@ public class GetSmallBlockHandler extends AbstractNetworkEventHandler<GetSmallBl
     @Override
     public void onEvent(GetSmallBlockEvent event, String fromId) {
         long height = event.getEventBody().getVal();
-        Block block = blockService.getBlockByHeight(height);
+        Block block = blockService.getBlock(height);
         SmallBlockEvent smallBlockEvent = new SmallBlockEvent();
         SmallBlock smallBlock = new SmallBlock();
         smallBlock.setBlockHash(block.getHeader().getHash());
@@ -42,7 +42,7 @@ public class GetSmallBlockHandler extends AbstractNetworkEventHandler<GetSmallBl
         smallBlockEvent.setEventBody(smallBlock);
         networkEventBroadcaster.sendToPeer(smallBlockEvent, fromId);
 //        TxHashData eventBody = event.getEventBody();
-//        Block block = blockService.getBlockByHeight(eventBody.getBlockHeight());
+//        Block block = blockService.getBlock(eventBody.getBlockHeight());
 //        if (null == block) {
 //            return;
 //        }

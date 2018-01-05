@@ -15,15 +15,14 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsVerificationException;
 import io.nuls.core.mesasge.NulsMessage;
 import io.nuls.core.mesasge.NulsMessageHeader;
-import io.nuls.core.thread.manager.ThreadManager;
+import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
-import io.nuls.event.bus.processor.service.intf.LocalEventProcessorService;
-import io.nuls.event.bus.service.intf.EventProducer;
+import io.nuls.event.bus.service.intf.EventBusService;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.message.*;
@@ -87,9 +86,7 @@ public class Peer extends BaseNulsData {
 
     private Lock lock = new ReentrantLock();
 
-    private EventProducer producer;
-
-    private LocalEventProcessorService localEventProcessorService;
+    private EventBusService eventBusService;
 
     private NetworkEventHandlerFactory messageHandlerFactory;
 
@@ -101,8 +98,7 @@ public class Peer extends BaseNulsData {
         super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.magicNumber = network.packetMagic();
         this.messageHandlerFactory = network.getMessageHandlerFactory();
-        producer = NulsContext.getInstance().getService(EventProducer.class);
-        localEventProcessorService = NulsContext.getInstance().getService(LocalEventProcessorService.class);
+        eventBusService = NulsContext.getInstance().getService(EventBusService.class);
     }
 
     public Peer(AbstractNetworkParam network, int type) {
@@ -110,8 +106,7 @@ public class Peer extends BaseNulsData {
         this.magicNumber = network.packetMagic();
         this.type = type;
         this.messageHandlerFactory = network.getMessageHandlerFactory();
-        producer = NulsContext.getInstance().getService(EventProducer.class);
-        localEventProcessorService = NulsContext.getInstance().getService(LocalEventProcessorService.class);
+        eventBusService = NulsContext.getInstance().getService(EventBusService.class);
     }
 
 
@@ -122,8 +117,7 @@ public class Peer extends BaseNulsData {
         this.port = socketAddress.getPort();
         this.ip = socketAddress.getAddress().getHostAddress();
         this.messageHandlerFactory = network.getMessageHandlerFactory();
-        producer = NulsContext.getInstance().getService(EventProducer.class);
-        localEventProcessorService = NulsContext.getInstance().getService(LocalEventProcessorService.class);
+        eventBusService = NulsContext.getInstance().getService(EventBusService.class);
         this.hash = this.ip + this.port;
     }
 
@@ -222,13 +216,13 @@ public class Peer extends BaseNulsData {
             if (checkBroadcastExist(message.getData())) {
                 return;
             }
-            producer.sendNetworkEvent(message.getData(), this.getHash());
+            eventBusService.publishNetworkEvent(message.getData(), this.getHash());
         }
     }
 
     private void asynExecute(BaseNetworkEvent networkMessage) {
         NetWorkEventHandler handler = messageHandlerFactory.getHandler(networkMessage);
-        ThreadManager.asynExecuteRunnable(new Runnable() {
+        TaskManager.asynExecuteRunnable(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -256,7 +250,7 @@ public class Peer extends BaseNulsData {
         } else {
             ReplyNotice event = new ReplyNotice();
             event.setEventBody(new BasicTypeData<>(data));
-            localEventProcessorService.dispatch(event);
+            eventBusService.publishLocalEvent(event);
         }
         return true;
     }
@@ -316,8 +310,7 @@ public class Peer extends BaseNulsData {
         magicNumber = (int) buffer.readVarInt();
         port = (int) buffer.readVarInt();
         ip = new String(buffer.readByLengthByte());
-        producer = NulsContext.getInstance().getService(EventProducer.class);
-        localEventProcessorService = NulsContext.getInstance().getService(LocalEventProcessorService.class);
+        eventBusService = NulsContext.getInstance().getService(EventBusService.class);
     }
 
 
