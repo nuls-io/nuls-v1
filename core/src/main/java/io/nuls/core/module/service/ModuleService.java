@@ -41,7 +41,7 @@ public class ModuleService {
     }
 
     public void destroy(short moduleId) {
-        moduleManager.destoryModule(moduleId);
+        moduleManager.destroyModule(moduleId);
     }
 
 }

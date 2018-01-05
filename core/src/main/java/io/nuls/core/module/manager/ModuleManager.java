@@ -90,7 +90,7 @@ public class ModuleManager {
         POOL.stopModule(moduleId);
     }
 
-    public void destoryModule(short moduleId) {
+    public void destroyModule(short moduleId) {
         BaseNulsModule module = MODULE_MAP.get(moduleId);
         if (null == module) {
             return;
