@@ -23,13 +23,12 @@ import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.event.bus.processor.service.intf.LocalEventProcessorService;
-import io.nuls.event.bus.processor.service.intf.NetworkEventProcessorService;
 import io.nuls.event.bus.service.intf.EventProducer;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.message.*;
 import io.nuls.network.message.entity.GetVersionEvent;
-import io.nuls.network.message.entity.VersionData;
+import io.nuls.network.message.entity.VersionEvent;
 import io.nuls.network.message.filter.MessageFilterChain;
 import io.nuls.network.message.handler.NetWorkEventHandler;
 import io.nuls.network.module.AbstractNetworkModule;
@@ -84,7 +83,7 @@ public class Peer extends BaseNulsData {
 
     private MessageWriter writeTarget;
 
-    private VersionData versionMessage;
+    private VersionEvent versionMessage;
 
     private Lock lock = new ReentrantLock();
 
@@ -398,11 +397,11 @@ public class Peer extends BaseNulsData {
         this.writeTarget = writeTarget;
     }
 
-    public VersionData getVersionMessage() {
+    public VersionEvent getVersionMessage() {
         return versionMessage;
     }
 
-    public void setVersionMessage(VersionData versionMessage) {
+    public void setVersionMessage(VersionEvent versionMessage) {
         this.versionMessage = versionMessage;
     }
 

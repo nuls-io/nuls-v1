@@ -55,6 +55,16 @@ public abstract class BaseEvent<T extends BaseNulsData> extends BaseNulsData imp
         this.sign = byteBuffer.readSign();
     }
 
+    @Override
+    public Object copy() {
+        try {
+            return this.clone();
+        } catch (CloneNotSupportedException e) {
+            Log.error(e);
+            return null;
+        }
+    }
+
     protected abstract T parseEventBody(NulsByteBuffer byteBuffer) throws NulsException;
 
     public T getEventBody() {

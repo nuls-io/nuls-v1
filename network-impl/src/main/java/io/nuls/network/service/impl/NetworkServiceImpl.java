@@ -15,7 +15,6 @@ import io.nuls.network.entity.PeerGroup;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.filter.impl.DefaultMessageFilter;
 import io.nuls.network.message.impl.GetPeerEventHandler;
-import io.nuls.network.message.impl.PeerDataHandler;
 import io.nuls.network.message.filter.NulsMessageFilter;
 import io.nuls.network.module.AbstractNetworkModule;
 import io.nuls.network.param.DevNetworkParam;
@@ -55,7 +54,7 @@ public class NetworkServiceImpl implements NetworkService {
         connectionManager.setPeersManager(peersManager);
 
         GetPeerEventHandler.getInstance().setPeersManager(peersManager);
-//        PeerDataHandler.getInstance().setPeersManager(peersManager);
+//        PeerEventHandler.getInstance().setPeersManager(peersManager);
     }
 
     @Override

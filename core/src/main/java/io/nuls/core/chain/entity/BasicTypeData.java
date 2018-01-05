@@ -6,7 +6,6 @@ import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
  * @author Niels
@@ -74,13 +73,13 @@ public class BasicTypeData<T> extends BaseNulsData {
                 this.val = (T) ((Object) byteBuffer.readVarInt());
                 break;
             case 3:
-                this.val = (T) ((Object)((Long) byteBuffer.readVarInt()).intValue());
+                this.val = (T) ((Object) ((Long) byteBuffer.readVarInt()).intValue());
                 break;
             case 4:
                 this.val = (T) ((Object) byteBuffer.readDouble());
                 break;
             case 5:
-                this.val = (T) ((Object)((Long) byteBuffer.readVarInt()).shortValue());
+                this.val = (T) ((Object) ((Long) byteBuffer.readVarInt()).shortValue());
                 break;
             case 6:
                 this.val = (T) ((Object) byteBuffer.readBoolean());

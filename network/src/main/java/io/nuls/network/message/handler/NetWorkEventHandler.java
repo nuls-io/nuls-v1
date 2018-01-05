@@ -9,5 +9,5 @@ import io.nuls.network.message.NetworkEventResult;
  * @date 2017/11/21
  */
 public interface NetWorkEventHandler {
-    NetworkEventResult process(BaseNetworkEvent message, Peer peer);
+    NetworkEventResult process(BaseNetworkEvent event, Peer peer);
 }
