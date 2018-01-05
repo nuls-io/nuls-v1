@@ -79,7 +79,8 @@ public class PocConsensusServiceImpl implements ConsensusService {
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
         tx.setSign(accountService.signData(tx.getHash(), account, password));
         try {
-            ledgerService.verifyAndCacheTx(tx);
+            ledgerService.verify(tx);
+            //todo 缓存
         } catch (NulsException e) {
             Log.error(e);
             throw new NulsRuntimeException(e);
@@ -101,7 +102,8 @@ public class PocConsensusServiceImpl implements ConsensusService {
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
         tx.setSign(accountService.signData(tx.getHash(), account, password));
         try {
-            ledgerService.verifyAndCacheTx(tx);
+            ledgerService.verify(tx);
+            //todo 缓存
         } catch (NulsException e) {
             Log.error(e);
             throw new NulsRuntimeException(e);
@@ -112,7 +114,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
 
     @Override
     public void stopConsensus(NulsDigestData joinTxHash, String password) {
-        PocJoinConsensusTransaction joinTx = (PocJoinConsensusTransaction) ledgerService.getTransaction(joinTxHash);
+        PocJoinConsensusTransaction joinTx = (PocJoinConsensusTransaction) ledgerService.getTx(joinTxHash.getDigestHex());
         if (null == joinTx) {
             throw new NulsRuntimeException(ErrorCode.ACCOUNT_NOT_EXIST, "address:" + joinTx.getTxData().getAddress().toString());
         }

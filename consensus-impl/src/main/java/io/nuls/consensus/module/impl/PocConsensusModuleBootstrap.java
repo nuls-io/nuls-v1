@@ -147,7 +147,7 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
     }
 
     private void checkPeerType() {
-        boolean isSeed = NulsContext.getInstance().getService(NetworkService.class).isSeedPeer(null);
+        boolean isSeed = isSeedPeer();
         if (!isSeed) {
             return;
         }
@@ -169,6 +169,11 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
 //        paramsMap.put(JoinConsensusParam.DEPOSIT, 0L);
 //        paramsMap.put(JoinConsensusParam.INTRODUCTION, "seed peer!");
 //        this.pocConsensusService.joinTheConsensus(localAccount.getAddress().toString(), null, paramsMap);
+    }
+
+    private boolean isSeedPeer() {
+        // todo auto-generated method stub(niels)
+        return false;
     }
 
     private void startMining() {
