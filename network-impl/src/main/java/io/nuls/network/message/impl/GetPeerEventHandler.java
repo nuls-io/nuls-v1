@@ -33,12 +33,12 @@ public class GetPeerEventHandler implements NetWorkEventHandler {
         GetPeerEvent getPeerEvent = (GetPeerEvent) event;
 
         List<Peer> list = peersManager.getAvailablePeers(getPeerEvent.getEventBody().getVal(), peer);
-        PeerEvent replyData = new PeerEvent();
-        replyData.setPeers(list);
+        PeerEvent replyData = new PeerEvent(list);
         return new NetworkEventResult(true, replyData);
     }
 
     public void setPeersManager(PeersManager peersManager) {
         this.peersManager = peersManager;
     }
+
 }

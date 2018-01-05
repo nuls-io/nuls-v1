@@ -13,7 +13,7 @@ import java.io.IOException;
  * @date 2017/11/7
  */
 public class EventHeader extends BaseNulsData {
-    private static final int EVENT_HEADER_LENGTH = 4;
+    public static final int EVENT_HEADER_LENGTH = 4;
     private short moduleId;
     private short eventType;
 
