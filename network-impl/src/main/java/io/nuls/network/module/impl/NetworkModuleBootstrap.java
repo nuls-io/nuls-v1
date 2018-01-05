@@ -5,6 +5,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.log.Log;
+import io.nuls.network.NetworkContext;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.message.ReplyNotice;
 import io.nuls.network.module.AbstractNetworkModule;
@@ -24,7 +25,7 @@ public class NetworkModuleBootstrap extends AbstractNetworkModule {
     @Override
     public void init() {
         try {
-            ConfigLoader.loadProperties(NetworkConstant.NETWORK_PROPERTIES);
+            NetworkContext.setNetworkConfig(ConfigLoader.loadProperties(NetworkConstant.NETWORK_PROPERTIES));
         } catch (IOException e) {
             Log.error(e);
             throw new NulsRuntimeException(ErrorCode.IO_ERROR);

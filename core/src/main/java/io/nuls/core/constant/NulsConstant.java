@@ -10,7 +10,8 @@ public interface NulsConstant {
     byte PLACE_HOLDER = (byte) 0xFF;
 
     String USER_CONFIG_FILE = "nuls.ini";
-    String SYSTEM_CONFIG_FILE = "sys.properties";
+    String MODULES_CONFIG_FILE = "modules.ini";
+    String MODULE_BOOTSTRAP_KEY = "bootstrap";
 
     /**
      * ----[ System] ----

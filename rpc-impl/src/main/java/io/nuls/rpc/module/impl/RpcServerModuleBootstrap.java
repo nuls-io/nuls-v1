@@ -24,9 +24,9 @@ public class RpcServerModuleBootstrap extends AbstractRpcServerModule {
 
     @Override
     public void init() {
-        this.ip = getCfgProperty(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_IP);
-        this.port = getCfgProperty(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_PORT);
-        this.moduleUrl = getCfgProperty(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_URL);
+        this.ip = getModuleCfgProperty(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_IP);
+        this.port = getModuleCfgProperty(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_PORT);
+        this.moduleUrl = getModuleCfgProperty(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_URL);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package io.nuls.core.module;
 
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.event.BaseEvent;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.chain.manager.TransactionManager;
@@ -79,9 +80,9 @@ public abstract class BaseModuleBootstrap {
         this.status = status;
     }
 
-    protected final String getCfgProperty(String section, String property) {
+    protected final String getModuleCfgProperty(String section, String property) {
         try {
-            return ConfigLoader.getCfgValue(section, property);
+            return NulsContext.MODULES_CONFIG.getCfgValue(section, property);
         } catch (NulsException e) {
             Log.error(e);
             return null;
@@ -101,8 +102,8 @@ public abstract class BaseModuleBootstrap {
         ServiceManager.getInstance().regService(this.moduleId, serviceInterface, service);
     }
 
-    protected final void registerTransaction(int txType, Class<? extends Transaction> txClass){
-        TransactionManager.putTx(txType,txClass);
+    protected final void registerTransaction(int txType, Class<? extends Transaction> txClass) {
+        TransactionManager.putTx(txType, txClass);
     }
 
     public Class<? extends BaseModuleBootstrap> getModuleClass() {

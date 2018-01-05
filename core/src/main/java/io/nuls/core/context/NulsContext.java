@@ -3,6 +3,7 @@ package io.nuls.core.context;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.module.manager.ServiceManager;
+import io.nuls.core.utils.cfg.IniEntity;
 
 import java.util.HashMap;
 
@@ -13,13 +14,15 @@ public class NulsContext {
 
     private NulsContext() {
         CHAIN_ID = "NULS";
-        chain_id_map.put(CHAIN_ID,1);
+        chain_id_map.put(CHAIN_ID, 1);
     }
 
-    private static HashMap<String,Integer> chain_id_map= new HashMap<String,Integer>();
+    private static HashMap<String, Integer> chain_id_map = new HashMap<String, Integer>();
     private static final NulsContext NC = new NulsContext();
     public static String DEFAULT_ENCODING = "UTF-8";
     public static String CHAIN_ID = "NULS";
+    public static IniEntity NULS_CONFIG;
+    public static IniEntity MODULES_CONFIG;
 
     private Na txFee;
 
@@ -44,7 +47,7 @@ public class NulsContext {
         return genesisBlock;
     }
 
-    public void setGenesisBlock(Block block){
+    public void setGenesisBlock(Block block) {
         this.genesisBlock = block;
     }
 
@@ -82,12 +85,12 @@ public class NulsContext {
         this.bestBlock = bestBlock;
     }
 
-    public int getChainId(String chainName){
+    public int getChainId(String chainName) {
         return chain_id_map.get(chainName);
     }
 
-    public void addChainId(String chainName,Integer id){
-        chain_id_map.put(chainName,id);
+    public void addChainId(String chainName, Integer id) {
+        chain_id_map.put(chainName, id);
     }
 
     public Na getTxFee() {

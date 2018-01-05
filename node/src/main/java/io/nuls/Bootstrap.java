@@ -14,9 +14,7 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.jettyserver.JettyServer;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * System start class
@@ -41,29 +39,25 @@ public class Bootstrap {
         do {
             //load nuls.ini
             try {
-                ConfigLoader.loadIni(NulsConstant.USER_CONFIG_FILE);
+                NulsContext.NULS_CONFIG = ConfigLoader.loadIni(NulsConstant.USER_CONFIG_FILE);
+                NulsContext.MODULES_CONFIG = ConfigLoader.loadIni(NulsConstant.MODULES_CONFIG_FILE);
             } catch (IOException e) {
                 Log.error("Client start faild", e);
                 throw new NulsRuntimeException(ErrorCode.FAILED, "Client start faild");
             }
             //set system language
             try {
-                NulsContext.DEFAULT_ENCODING = ConfigLoader.getCfgValue(NulsConstant.CFG_SYSTEM_SECTION, NulsConstant.CFG_SYSTEM_DEFAULT_ENCODING);
-                String language = ConfigLoader.getCfgValue(NulsConstant.CFG_SYSTEM_SECTION, NulsConstant.CFG_SYSTEM_LANGUAGE);
+                NulsContext.DEFAULT_ENCODING = NulsContext.NULS_CONFIG.getCfgValue(NulsConstant.CFG_SYSTEM_SECTION, NulsConstant.CFG_SYSTEM_DEFAULT_ENCODING);
+                String language = NulsContext.NULS_CONFIG.getCfgValue(NulsConstant.CFG_SYSTEM_SECTION, NulsConstant.CFG_SYSTEM_LANGUAGE);
                 I18nUtils.setLanguage(language);
             } catch (NulsException e) {
                 Log.error(e);
             }
-            try {
-                Properties bootstrapClasses = ConfigLoader.loadProperties(NulsConstant.SYSTEM_CONFIG_FILE);
-                initModules(bootstrapClasses);
-            } catch (IOException e) {
-                Log.error(e);
-                throw new NulsRuntimeException(ErrorCode.FAILED, "Client start faild");
-            }
+            initModules();
         } while (false);
         while (true) {
             try {
+                //todo 后续启动一个系统监视线程
                 Thread.sleep(10000L);
             } catch (InterruptedException e) {
                 Log.error(e);
@@ -77,15 +71,37 @@ public class Bootstrap {
         JettyServer.init();
     }
 
-    private static void initModules(Properties bootstrapClasses) {
-        List<String> keyList = new ArrayList<>(bootstrapClasses.stringPropertyNames());
+    private static void initModules() {
+        Map<String, String> bootstrapClasses = null;
+        try {
+            bootstrapClasses = getModuleBootstrapClass();
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+        if (null == bootstrapClasses || bootstrapClasses.isEmpty()) {
+            return;
+        }
+        List<String> keyList = new ArrayList<>(bootstrapClasses.keySet());
         for (String key : keyList) {
             try {
-                moduleService.startModule(key, bootstrapClasses.getProperty(key));
+                moduleService.startModule(key, bootstrapClasses.get(key));
             } catch (Exception e) {
                 throw new NulsRuntimeException(e);
             }
         }
+    }
+
+    private static Map<String, String> getModuleBootstrapClass() throws NulsException {
+        Map<String, String> map = new HashMap<>();
+        List<String> moduleNameList = NulsContext.MODULES_CONFIG.getSectionList();
+        if (null == moduleNameList || moduleNameList.isEmpty()) {
+            return map;
+        }
+        for (String moduleName : moduleNameList) {
+            String className = NulsContext.MODULES_CONFIG.getCfgValue(moduleName, NulsConstant.MODULE_BOOTSTRAP_KEY);
+            map.put(moduleName, className);
+        }
+        return map;
     }
 
 

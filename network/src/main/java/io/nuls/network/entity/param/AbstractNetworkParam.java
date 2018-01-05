@@ -1,5 +1,6 @@
 package io.nuls.network.entity.param;
 
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.network.IPUtil;
 import io.nuls.network.constant.NetworkConstant;
@@ -16,11 +17,6 @@ import java.util.Set;
  * @date 2017/11/6
  */
 public abstract class AbstractNetworkParam {
-
-    public AbstractNetworkParam() {
-        this.maxInCount = ConfigLoader.getPropValue(NetworkConstant.NETWORK_PEER_MAX_IN, 50);
-        this.maxOutCount = ConfigLoader.getPropValue(NetworkConstant.NETWORK_PEER_MAX_OUT, 10);
-    }
 
     protected int port;
 

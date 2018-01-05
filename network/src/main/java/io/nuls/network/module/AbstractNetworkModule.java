@@ -2,6 +2,7 @@ package io.nuls.network.module;
 
 
 import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.module.BaseModuleBootstrap;
 import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.network.constant.NetworkConstant;
@@ -16,6 +17,6 @@ public abstract class AbstractNetworkModule extends BaseModuleBootstrap {
 
     protected AbstractNetworkModule() {
         super(NulsConstant.MODULE_ID_NETWORK);
-        ExternalPort = ConfigLoader.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_EXTER_PORT, 8632);
+        ExternalPort = NulsContext.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_EXTER_PORT, 8632);
     }
 }
