@@ -17,7 +17,7 @@ import java.io.IOException;
  * @author vivi
  * @date 2017/11/21
  */
-public class NetworkModuleImpl extends AbstractNetworkModule {
+public class NetworkModuleBootstrap extends AbstractNetworkModule {
 
     private NetworkService networkService;
 

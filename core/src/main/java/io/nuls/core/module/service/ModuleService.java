@@ -2,7 +2,7 @@ package io.nuls.core.module.service;
 
 
 import io.nuls.core.constant.ModuleStatusEnum;
-import io.nuls.core.module.BaseNulsModule;
+import io.nuls.core.module.BaseModuleBootstrap;
 import io.nuls.core.module.manager.ModuleManager;
 import io.nuls.core.module.manager.ServiceManager;
 
@@ -24,7 +24,7 @@ public class ModuleService {
         return INSTANCE;
     }
 
-    public Short getModuleId(Class<? extends BaseNulsModule> clazz) {
+    public Short getModuleId(Class<? extends BaseModuleBootstrap> clazz) {
         return moduleManager.getModuleId(clazz);
     }
 

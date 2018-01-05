@@ -1,32 +1,32 @@
-package io.nuls.event.bus.processor.service.impl;
+package io.nuls.event.bus.service.impl;
 
 import io.nuls.core.event.BaseLocalEvent;
 import io.nuls.event.bus.constant.EventBusConstant;
 import io.nuls.event.bus.handler.AbstractLocalEventHandler;
 import io.nuls.event.bus.processor.manager.ProcessData;
 import io.nuls.event.bus.processor.manager.ProcessorManager;
-import io.nuls.event.bus.processor.service.intf.LocalEventProcessorService;
+import io.nuls.event.bus.service.intf.LocalEventService;
 
 /**
  *
  * @author Niels
  * @date 2017/11/3
  */
-public class LocalEventProcessorServiceImpl implements LocalEventProcessorService {
+public class LocalEventServiceImpl implements LocalEventService {
 
-    private static final LocalEventProcessorServiceImpl INSTANCE = new LocalEventProcessorServiceImpl();
+    private static final LocalEventServiceImpl INSTANCE = new LocalEventServiceImpl();
     private final ProcessorManager processorManager;
 
-    private LocalEventProcessorServiceImpl() {
+    private LocalEventServiceImpl() {
         this.processorManager = new ProcessorManager(EventBusConstant.DISRUPTOR_NAME_LOCAL);
     }
 
-    public static LocalEventProcessorService getInstance() {
+    public static LocalEventService getInstance() {
         return INSTANCE;
     }
 
     @Override
-    public void dispatch(BaseLocalEvent event) {
+    public void publish(BaseLocalEvent event) {
         processorManager.offer(new ProcessData(event));
     }
 

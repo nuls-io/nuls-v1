@@ -30,7 +30,7 @@ import io.nuls.core.thread.BaseThread;
 import io.nuls.core.thread.manager.ThreadManager;
 import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.log.Log;
-import io.nuls.event.bus.processor.service.intf.NetworkEventProcessorService;
+import io.nuls.event.bus.service.intf.NetworkEventService;
 import io.nuls.network.service.NetworkService;
 
 import java.util.List;
@@ -39,9 +39,9 @@ import java.util.List;
  * @author Niels
  * @date 2017/11/7
  */
-public class PocConsensusModuleImpl extends AbstractConsensusModule {
+public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
 
-    private NetworkEventProcessorService processorService = NulsContext.getInstance().getService(NetworkEventProcessorService.class);
+    private NetworkEventService processorService = NulsContext.getInstance().getService(NetworkEventService.class);
     private boolean delegatePeer = false;
     private ConsensusCacheService consensusCacheService;
     private AccountService accountService;

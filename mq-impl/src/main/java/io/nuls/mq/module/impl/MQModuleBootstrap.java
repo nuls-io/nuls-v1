@@ -19,9 +19,9 @@ import java.util.concurrent.TimeUnit;
  * @author Niels
  * @date 2017/9/27
  */
-public class MQModuleImpl extends AbstractMQModule {
+public class MQModuleBootstrap extends AbstractMQModule {
 
-    public MQModuleImpl() {
+    public MQModuleBootstrap() {
         super();
     }
 

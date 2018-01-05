@@ -3,7 +3,7 @@ package io.nuls.core.event;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.module.BaseNulsModule;
+import io.nuls.core.module.BaseModuleBootstrap;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
@@ -43,7 +43,7 @@ public class EventManager {
         }
     }
 
-    public static void putEvent(BaseNulsModule module, short type, Class<? extends BaseEvent> clazz) {
+    public static void putEvent(BaseModuleBootstrap module, short type, Class<? extends BaseEvent> clazz) {
         AssertUtil.canNotEmpty(clazz, "event class is null!");
         AssertUtil.canNotEmpty(module, "module is null,message" + clazz.getName());
         if (type == 0) {

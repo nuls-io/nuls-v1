@@ -11,14 +11,14 @@ import io.nuls.rpc.service.intf.RpcServerService;
  * @author Niels
  * @date 2017/9/27
  */
-public class RpcServerModuleImpl extends AbstractRpcServerModule {
+public class RpcServerModuleBootstrap extends AbstractRpcServerModule {
 
     private RpcServerService rpcServerService = RpcServerServiceImpl.getInstance();
     private String ip;
     private String port;
     private String moduleUrl;
 
-    public RpcServerModuleImpl() {
+    public RpcServerModuleBootstrap() {
         super();
     }
 

@@ -23,7 +23,7 @@ import java.sql.SQLException;
  * @author vivi
  * @date 2017/9/27
  */
-public class MybatisDBModuleImpl extends AbstractDBModule {
+public class MybatisDBModuleBootstrap extends AbstractDBModule {
 
     private SqlSessionFactory sqlSessionFactory;
 

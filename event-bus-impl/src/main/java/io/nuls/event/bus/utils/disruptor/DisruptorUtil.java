@@ -9,7 +9,7 @@ import io.nuls.core.module.service.ModuleService;
 import io.nuls.core.thread.manager.NulsThreadFactory;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
-import io.nuls.event.bus.module.impl.EventBusModuleImpl;
+import io.nuls.event.bus.module.impl.EventBusModuleBootstrap;
 import io.nuls.event.bus.processor.manager.ProcessData;
 
 import java.util.HashMap;
@@ -49,7 +49,7 @@ public class DisruptorUtil<T extends DisruptorEvent> {
         }
 
         Disruptor<DisruptorEvent> disruptor = new Disruptor<DisruptorEvent>(EVENT_FACTORY,
-                ringBufferSize, new NulsThreadFactory(ModuleService.getInstance().getModuleId(EventBusModuleImpl.class),name), ProducerType.SINGLE,
+                ringBufferSize, new NulsThreadFactory(ModuleService.getInstance().getModuleId(EventBusModuleBootstrap.class),name), ProducerType.SINGLE,
                 new SleepingWaitStrategy());
         disruptor.handleEventsWith(new EventHandler<DisruptorEvent>() {
             @Override

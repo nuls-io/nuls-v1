@@ -5,7 +5,7 @@ import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.chain.manager.TransactionValidatorManager;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.thread.manager.ThreadManager;
-import io.nuls.event.bus.processor.service.intf.NetworkEventProcessorService;
+import io.nuls.event.bus.service.intf.NetworkEventService;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.event.*;
 import io.nuls.ledger.handler.CoinTransactionEventHandler;
@@ -30,14 +30,14 @@ import java.util.List;
  * @author Niels
  * @date 2017/11/7
  */
-public class UtxoLedgerModuleImpl extends AbstractLedgerModule {
+public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
 
 
     private LedgerCacheService cacheService = LedgerCacheService.getInstance();
 
     private LedgerService ledgerService = UtxoLedgerServiceImpl.getInstance();
 
-    private NetworkEventProcessorService processorService = NulsContext.getInstance().getService(NetworkEventProcessorService.class);
+    private NetworkEventService processorService = NulsContext.getInstance().getService(NetworkEventService.class);
 
     @Override
     public void init() {

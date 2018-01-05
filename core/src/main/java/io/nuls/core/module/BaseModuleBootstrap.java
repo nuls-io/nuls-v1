@@ -14,7 +14,7 @@ import io.nuls.core.utils.log.Log;
  * @author Niels
  * @date 2017/9/26
  */
-public abstract class BaseNulsModule {
+public abstract class BaseModuleBootstrap {
 
     private final short moduleId;
 
@@ -22,7 +22,7 @@ public abstract class BaseNulsModule {
 
     private ModuleStatusEnum status;
 
-    public BaseNulsModule(short moduleId) {
+    public BaseModuleBootstrap(short moduleId) {
         this.moduleId = moduleId;
         this.status = ModuleStatusEnum.UNINITED;
     }
@@ -109,7 +109,7 @@ public abstract class BaseNulsModule {
         TransactionManager.putTx(txType,txClass);
     }
 
-    public Class<? extends BaseNulsModule> getModuleClass() {
+    public Class<? extends BaseModuleBootstrap> getModuleClass() {
         return this.getClass();
     }
 

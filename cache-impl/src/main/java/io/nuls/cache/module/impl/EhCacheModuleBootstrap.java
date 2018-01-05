@@ -12,7 +12,7 @@ import io.nuls.cache.service.intf.CacheService;
  * @date 2017/10/27
  *
  */
-public class EhCacheModuleImpl extends AbstractCacheModule {
+public class EhCacheModuleBootstrap extends AbstractCacheModule {
 
     private EhCacheManager cacheManager = EhCacheManager.getInstance();
 

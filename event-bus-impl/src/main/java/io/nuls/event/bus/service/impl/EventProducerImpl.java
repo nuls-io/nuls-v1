@@ -6,10 +6,8 @@ import io.nuls.core.event.BaseNetworkEvent;
 import io.nuls.core.event.EventManager;
 import io.nuls.core.exception.NulsException;
 import io.nuls.event.bus.constant.EventCategoryEnum;
-import io.nuls.event.bus.processor.service.impl.LocalEventProcessorServiceImpl;
-import io.nuls.event.bus.processor.service.impl.NetworkEventProcessorServiceImpl;
-import io.nuls.event.bus.processor.service.intf.LocalEventProcessorService;
-import io.nuls.event.bus.processor.service.intf.NetworkEventProcessorService;
+import io.nuls.event.bus.service.intf.LocalEventService;
+import io.nuls.event.bus.service.intf.NetworkEventService;
 import io.nuls.event.bus.service.intf.EventProducer;
 
 /**
@@ -19,8 +17,8 @@ import io.nuls.event.bus.service.intf.EventProducer;
 public class EventProducerImpl implements EventProducer {
     private static EventProducer INSTANCE = new EventProducerImpl();
 
-    private LocalEventProcessorService localService = LocalEventProcessorServiceImpl.getInstance();
-    private NetworkEventProcessorService networkService = NetworkEventProcessorServiceImpl.getInstance();
+    private LocalEventService localService = LocalEventServiceImpl.getInstance();
+    private NetworkEventService networkService = NetworkEventServiceImpl.getInstance();
 
     private EventProducerImpl() {
     }
@@ -30,36 +28,36 @@ public class EventProducerImpl implements EventProducer {
     }
 
     @Override
-    public void send(EventCategoryEnum category, byte[] bytes, String fromId) throws IllegalAccessException, NulsException, InstantiationException {
+    public void publish(EventCategoryEnum category, byte[] bytes, String fromId) throws IllegalAccessException, NulsException, InstantiationException {
         if (category == EventCategoryEnum.LOCAL) {
             BaseLocalEvent event = EventManager.getLocalEventInstance(bytes);
-            this.sendLocalEvent(event);
+            this.publishLocalEvent(event);
         } else {
-            this.sendNetworkEvent(bytes, fromId);
+            this.publishNetworkEvent(bytes, fromId);
         }
     }
 
     @Override
-    public void send(EventCategoryEnum category, BaseEvent event, String fromId) {
+    public void publish(EventCategoryEnum category, BaseEvent event, String fromId) {
         if (category == EventCategoryEnum.LOCAL) {
-            this.sendLocalEvent((BaseLocalEvent) event);
+            this.publishLocalEvent((BaseLocalEvent) event);
         } else {
-            this.sendNetworkEvent((BaseNetworkEvent) event, fromId);
+            this.publishNetworkEvent((BaseNetworkEvent) event, fromId);
         }
     }
 
     @Override
-    public void sendNetworkEvent(byte[] bytes, String fromId) {
-        networkService.dispatch(bytes, fromId);
+    public void publishNetworkEvent(byte[] bytes, String fromId) {
+        networkService.publish(bytes, fromId);
     }
 
     @Override
-    public void sendNetworkEvent(BaseNetworkEvent event, String fromId) {
-        networkService.dispatch(event, fromId);
+    public void publishNetworkEvent(BaseNetworkEvent event, String fromId) {
+        networkService.publish(event, fromId);
     }
 
     @Override
-    public void sendLocalEvent(BaseLocalEvent event) {
-        localService.dispatch(event);
+    public void publishLocalEvent(BaseLocalEvent event) {
+        localService.publish(event);
     }
 }

@@ -77,7 +77,7 @@ public class SystemResourceImpl implements ModuleResource {
     @Override
     public RpcResult distroyModule(Short moduleId) {
 //        AssertUtil.canNotEmpty(moduleName, "ModuleName can not empty");
-//        BaseNulsModule module = context.getModule(moduleName);
+//        BaseModuleBootstrap module = context.getModule(moduleName);
 //        AssertUtil.canNotEmpty(module, "The module of " + moduleName + " is not exist!");
 //        module.destroy();
         return RpcResult.getSuccess();
@@ -89,7 +89,7 @@ public class SystemResourceImpl implements ModuleResource {
     @Override
     public RpcResult restartModule(Short moduleId) {
 //        AssertUtil.canNotEmpty(moduleName, "ModuleName can not empty");
-//        BaseNulsModule module = context.getModule(moduleName);
+//        BaseModuleBootstrap module = context.getModule(moduleName);
 //        AssertUtil.canNotEmpty(module, "The module of " + moduleName + " is not exist!");
 //        module.shutdown();
 //        module.start();

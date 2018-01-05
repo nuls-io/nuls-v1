@@ -3,7 +3,7 @@ package io.nuls.core.module.thread;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.module.BaseNulsModule;
+import io.nuls.core.module.BaseModuleBootstrap;
 import io.nuls.core.module.manager.ModuleManager;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
@@ -16,7 +16,7 @@ public class ModuleRunner implements Runnable {
 
     private final String moduleKey;
     private final String moduleClass;
-    private  BaseNulsModule module;
+    private  BaseModuleBootstrap module;
 
     public ModuleRunner(String key, String moduleClass) {
         this.moduleKey = key;
@@ -48,15 +48,15 @@ public class ModuleRunner implements Runnable {
         }
     }
 
-    private BaseNulsModule loadModule() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-        BaseNulsModule module = null;
+    private BaseModuleBootstrap loadModule() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+        BaseModuleBootstrap module = null;
         do {
             if (StringUtils.isBlank(moduleClass)) {
                 Log.warn("module cannot start:" + moduleClass);
                 break;
             }
             Class clazz = Class.forName(moduleClass);
-            module = (BaseNulsModule) clazz.newInstance();
+            module = (BaseModuleBootstrap) clazz.newInstance();
             module.setModuleName(this.moduleKey);
             Log.info("load module:" + module.getInfo());
         } while (false);
@@ -69,7 +69,7 @@ public class ModuleRunner implements Runnable {
         return moduleKey;
     }
 
-    public BaseNulsModule getModule() {
+    public BaseModuleBootstrap getModule() {
         return module;
     }
 }
