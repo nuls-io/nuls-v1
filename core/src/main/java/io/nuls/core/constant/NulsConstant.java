@@ -32,6 +32,7 @@ public interface NulsConstant {
     /**
      * ----[ Module Id] ----
      */
+    short MODULE_ID_MICROKERNEL  = 0;
     short MODULE_ID_MQ = 1;
     short MODULE_ID_DB = 2;
     short MODULE_ID_CACHE = 3;
