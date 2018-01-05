@@ -39,7 +39,9 @@ public class ServiceManager {
             return;
         }
         if (index >= WAIT_TIMES) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "dependency module is not ready!" + tclass);
+//            throw new NulsRuntimeException(ErrorCode.FAILED, "dependency module is not ready!" + tclass);
+            //todo 记录哪个对象的哪个字段，最后赋值
+        return ;
         }
         sleepAndIncrement(tclass,index);
     }

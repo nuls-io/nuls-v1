@@ -100,16 +100,6 @@
         </dependency>
         <dependency>
             <groupId>io.nuls</groupId>
-            <artifactId>mq</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>io.nuls</groupId>
-            <artifactId>mq-impl</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>io.nuls</groupId>
             <artifactId>network</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>

@@ -18,8 +18,6 @@
     </properties>
     <modules>
         <module>core</module>
-        <module>mq</module>
-        <module>mq-impl</module>
         <module>cache</module>
         <module>cache-impl</module>
         <module>db</module>
