@@ -1,4 +1,4 @@
-package io.nuls.consensus.handler.filter;
+package io.nuls.consensus.event.filter;
 
 import io.nuls.consensus.event.JoinConsensusEvent;
 import io.nuls.core.chain.entity.Transaction;

@@ -10,9 +10,8 @@ import io.nuls.consensus.entity.genesis.GenesisBlock;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.tx.*;
 import io.nuls.consensus.entity.validator.block.PocBlockValidatorManager;
-import io.nuls.consensus.event.*;
-import io.nuls.consensus.handler.*;
-import io.nuls.consensus.handler.filter.*;
+import io.nuls.consensus.event.handler.*;
+import io.nuls.consensus.event.filter.*;
 import io.nuls.consensus.module.AbstractConsensusModule;
 import io.nuls.consensus.service.cache.BlockCacheService;
 import io.nuls.consensus.service.cache.BlockHeaderCacheService;
@@ -30,7 +29,6 @@ import io.nuls.core.thread.BaseThread;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.service.intf.EventBusService;
-import io.nuls.network.service.NetworkService;
 
 import java.util.List;
 

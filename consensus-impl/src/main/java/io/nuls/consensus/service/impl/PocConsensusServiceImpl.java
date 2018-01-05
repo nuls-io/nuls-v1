@@ -79,7 +79,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
         tx.setSign(accountService.signData(tx.getHash(), account, password));
         try {
-            ledgerService.verify(tx);
+            ledgerService.verifyTx(tx);
             //todo 缓存
         } catch (NulsException e) {
             Log.error(e);
@@ -102,7 +102,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
         tx.setSign(accountService.signData(tx.getHash(), account, password));
         try {
-            ledgerService.verify(tx);
+            ledgerService.verifyTx(tx);
             //todo 缓存
         } catch (NulsException e) {
             Log.error(e);

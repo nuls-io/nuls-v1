@@ -1,4 +1,4 @@
-package io.nuls.consensus.handler.filter;
+package io.nuls.consensus.event.filter;
 
 import io.nuls.consensus.event.RedPunishConsensusEvent;
 import io.nuls.event.bus.filter.NulsEventFilter;

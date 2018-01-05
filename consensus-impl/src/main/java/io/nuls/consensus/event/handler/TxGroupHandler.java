@@ -1,10 +1,7 @@
-package io.nuls.consensus.handler;
+package io.nuls.consensus.event.handler;
 
-import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.entity.RedPunishData;
 import io.nuls.consensus.entity.TxGroup;
-import io.nuls.consensus.entity.TxHashData;
-import io.nuls.consensus.event.GetSmallBlockEvent;
 import io.nuls.consensus.event.TxGroupEvent;
 import io.nuls.consensus.service.cache.BlockCacheService;
 import io.nuls.consensus.service.cache.BlockHeaderCacheService;
@@ -12,13 +9,11 @@ import io.nuls.consensus.service.cache.SmallBlockCacheService;
 import io.nuls.consensus.thread.ConsensusMeetingRunner;
 import io.nuls.core.chain.entity.*;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.handler.AbstractNetworkEventHandler;
-import io.nuls.event.bus.service.intf.NetworkEventBroadcaster;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.network.service.NetworkService;
 

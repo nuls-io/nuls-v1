@@ -23,7 +23,7 @@ public interface LedgerService {
      * @return
      * @throws NulsException
      */
-    ValidateResult verify(Transaction tx) throws NulsException;
+    ValidateResult verifyTx(Transaction tx) throws NulsException;
 
     /**
      * @param hash

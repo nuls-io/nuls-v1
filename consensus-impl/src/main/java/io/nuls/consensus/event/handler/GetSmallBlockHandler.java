@@ -1,24 +1,14 @@
-package io.nuls.consensus.handler;
+package io.nuls.consensus.event.handler;
 
-import io.nuls.consensus.entity.TxHashData;
 import io.nuls.consensus.event.GetSmallBlockEvent;
 import io.nuls.consensus.event.SmallBlockEvent;
-import io.nuls.consensus.event.TxGroupEvent;
-import io.nuls.consensus.service.cache.BlockHeaderCacheService;
 import io.nuls.consensus.service.impl.BlockServiceImpl;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.*;
-import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.event.bus.handler.AbstractNetworkEventHandler;
 import io.nuls.event.bus.service.intf.NetworkEventBroadcaster;
 import io.nuls.ledger.service.intf.LedgerService;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author facjas

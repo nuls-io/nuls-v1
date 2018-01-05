@@ -1,4 +1,4 @@
-package io.nuls.consensus.handler;
+package io.nuls.consensus.event.handler;
 
 import io.nuls.consensus.event.GetBlockHeaderEvent;
 import io.nuls.consensus.event.BlockHeaderEvent;

@@ -1,4 +1,4 @@
-package io.nuls.consensus.handler.filter;
+package io.nuls.consensus.event.filter;
 
 import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
