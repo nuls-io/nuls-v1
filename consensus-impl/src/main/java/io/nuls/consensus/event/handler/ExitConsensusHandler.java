@@ -5,6 +5,7 @@ import io.nuls.consensus.event.ExitConsensusEvent;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.log.Log;
+import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.handler.AbstractNetworkEventHandler;
 import io.nuls.event.bus.service.intf.NetworkEventBroadcaster;
 import io.nuls.ledger.service.intf.LedgerService;
@@ -20,11 +21,9 @@ public class ExitConsensusHandler extends AbstractNetworkEventHandler<ExitConsen
     @Override
     public void onEvent(ExitConsensusEvent event, String fromId) {
         PocExitConsensusTransaction tx = event.getEventBody();
-        try {
-            ledgerService.verifyAndCacheTx(tx);
-        } catch (NulsException e) {
-            Log.error(e);
-            return;
+        ValidateResult result = ledgerService.verifyTx(tx);
+        if(result.isSuccess()){
+            //todo cache
         }
         this.networkEventBroadcaster.broadcastHashAndCache(event);
     }

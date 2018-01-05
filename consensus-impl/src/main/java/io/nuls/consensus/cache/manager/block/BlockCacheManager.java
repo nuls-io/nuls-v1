@@ -1,4 +1,4 @@
-package io.nuls.consensus.service.cache;
+package io.nuls.consensus.cache.manager.block;
 
 import io.nuls.cache.util.CacheMap;
 import io.nuls.core.chain.entity.Block;
@@ -9,17 +9,17 @@ import io.nuls.core.exception.NulsRuntimeException;
  * @author Niels
  * @date 2017/12/12
  */
-public class BlockCacheService {
+public class BlockCacheManager {
     private static final String BLOCK_CACHE = "blocks";
     private static final String HEIGHT_HASH_CACHE = "blocks-height-hash";
-    private static final BlockCacheService INSTANCE = new BlockCacheService();
+    private static final BlockCacheManager INSTANCE = new BlockCacheManager();
     private CacheMap<Long, Block> blockCacheMap;
     private CacheMap<String, Long> hashHeightMap;
     private long minHeight;
     private long maxHeight;
 
 
-    private BlockCacheService() {
+    private BlockCacheManager() {
 
     }
 
@@ -28,7 +28,7 @@ public class BlockCacheService {
         hashHeightMap = new CacheMap<>(HEIGHT_HASH_CACHE);
     }
 
-    public static BlockCacheService getInstance() {
+    public static BlockCacheManager getInstance() {
         return INSTANCE;
     }
 
@@ -43,7 +43,7 @@ public class BlockCacheService {
             minHeight = block.getHeader().getHeight();
         }
         blockCacheMap.put(block.getHeader().getHeight(), block);
-        hashHeightMap.putWithOutClone(block.getHeader().getHash().getDigestHex(), block.getHeader().getHeight());
+        hashHeightMap.put(block.getHeader().getHash().getDigestHex(), block.getHeader().getHeight());
     }
 
     public void clear() {

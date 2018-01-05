@@ -1,6 +1,6 @@
 package io.nuls.consensus.service.impl;
 
-import io.nuls.consensus.service.cache.BlockCacheService;
+import io.nuls.consensus.cache.manager.block.BlockCacheManager;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.core.chain.entity.Block;
@@ -28,7 +28,7 @@ public class BlockServiceImpl implements BlockService {
 
     private BlockDataService blockDao = NulsContext.getInstance().getService(BlockDataService.class);
     private ConsensusDataService consensusDao = NulsContext.getInstance().getService(ConsensusDataService.class);
-    private BlockCacheService blockCacheService = BlockCacheService.getInstance();
+    private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
 
     private BlockServiceImpl() {
     }
@@ -50,7 +50,7 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public long getLocalHeight() {
-        long height = blockCacheService.getMaxHeight();
+        long height = blockCacheManager.getMaxHeight();
         if (height == 0) {
             height = blockDao.queryMaxHeight();
         }
@@ -59,7 +59,7 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public Block getLocalBestBlock() {
-        Block block = blockCacheService.getBlock(blockCacheService.getMaxHeight());
+        Block block = blockCacheManager.getBlock(blockCacheManager.getMaxHeight());
         if (null == block) {
             BlockPo po = blockDao.getHighestBlock();
             try {
@@ -80,7 +80,7 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public Block getBlock(String hash) {
-        Block block = blockCacheService.getBlock(hash);
+        Block block = blockCacheManager.getBlock(hash);
         if (null == block) {
             BlockPo po = blockDao.getBlockByHash(hash);
             try {
@@ -95,7 +95,7 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public Block getBlock(long height) {
-        Block block = blockCacheService.getBlock(height);
+        Block block = blockCacheManager.getBlock(height);
         if (null == block) {
             BlockPo po = blockDao.getBlock(height);
             try {

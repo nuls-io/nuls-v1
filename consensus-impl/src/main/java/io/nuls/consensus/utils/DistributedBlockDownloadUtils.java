@@ -1,7 +1,9 @@
 package io.nuls.consensus.utils;
 
+import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
+import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.consensus.event.GetBlockEvent;
-import io.nuls.consensus.service.cache.BlockCacheService;
+import io.nuls.consensus.cache.manager.block.BlockCacheManager;
 import io.nuls.core.chain.entity.BasicTypeData;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.Result;
@@ -12,7 +14,6 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.queue.service.impl.QueueService;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.event.bus.service.intf.NetworkEventBroadcaster;
-import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.network.service.NetworkService;
 
 import java.util.HashMap;
@@ -30,11 +31,13 @@ public class DistributedBlockDownloadUtils {
     private String queueId = StringUtils.getNewUUID();
     private NetworkEventBroadcaster networkEventBroadcaster = NulsContext.getInstance().getService(NetworkEventBroadcaster.class);
     private QueueService<String> queueService = NulsContext.getInstance().getService(QueueService.class);
-    private BlockCacheService blockCacheService = NulsContext.getInstance().getService(BlockCacheService.class);
+    private BlockCacheManager blockCacheManager = NulsContext.getInstance().getService(BlockCacheManager.class);
     private Map<Long, String> heightNodeMap = new HashMap<>();
     private Map<Long, Block> blockMap = new HashMap<>();
     private NetworkService networkService = NulsContext.getInstance().getService(NetworkService.class);
-    private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
+//    private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
+private ReceivedTxCacheManager receivedTxCacheManager = ReceivedTxCacheManager.getInstance();
+    private ConfirmingTxCacheManager confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
     private boolean finished = true;
     private List<String> nodeIdList;
     private long startHeight;
@@ -101,8 +104,9 @@ public class DistributedBlockDownloadUtils {
         for (long i = 0; i <= (endHeight - startHeight); i++) {
             Block block = blockMap.get(startHeight + i);
             block.verify();
-            blockCacheService.cacheBlock(block);
-            ledgerService.removeFromCache(block.getTxHashList());
+            blockCacheManager.cacheBlock(block);
+            receivedTxCacheManager.removeTx(block.getTxHashList());
+            confirmingTxCacheManager.putTxList(block.getTxs());
         }
         finished();
     }

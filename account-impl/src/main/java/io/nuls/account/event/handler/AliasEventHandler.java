@@ -41,19 +41,15 @@ public class AliasEventHandler extends AbstractNetworkEventHandler<AliasEvent> {
     @Override
     public void onEvent(AliasEvent event, String fromId)   {
         AliasTransaction tx = event.getEventBody();
-        ValidateResult result = tx.verify();
-        if (null==result||result.isFailed()) {
+
+        ValidateResult result = ledgerService.verifyTx(tx);
+        if(result.isSuccess()){
+            //todo cache
+        }else{
             if (SeverityLevelEnum.FLAGRANT.equals(result.getLevel())) {
-               //todo networkService.removeNode(fromId);
+                //todo networkService.removeNode(fromId);
             }
             return;
-        }
-
-        try {
-            ledgerService.verifyAndCacheTx(tx);
-        } catch (NulsException e) {
-            Log.error(e);
-            throw new NulsRuntimeException(e);
         }
         networkEventBroadcaster.broadcastHashAndCache(event, fromId);
     }

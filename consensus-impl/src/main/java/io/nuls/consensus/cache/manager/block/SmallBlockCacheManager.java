@@ -1,26 +1,20 @@
-package io.nuls.consensus.service.cache;
+package io.nuls.consensus.cache.manager.block;
 
 import io.nuls.cache.util.CacheMap;
-import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.SmallBlock;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Niels
  * @date 2017/12/12
  */
-public class SmallBlockCacheService {
+public class SmallBlockCacheManager {
     private static final String CACHE_NAME = "small-block-cache";
-    private static final SmallBlockCacheService INSTANCE = new SmallBlockCacheService();
+    private static final SmallBlockCacheManager INSTANCE = new SmallBlockCacheManager();
 
-    private SmallBlockCacheService() {
+    private SmallBlockCacheManager() {
     }
 
-    public static SmallBlockCacheService getInstance() {
+    public static SmallBlockCacheManager getInstance() {
         return INSTANCE;
     }
 
@@ -35,7 +29,7 @@ public class SmallBlockCacheService {
     }
 
     public void cacheSmallBlock(SmallBlock smallBlock) {
-        smallBlockCacheMap.putWithOutClone(smallBlock.getBlockHash().getDigestHex(), smallBlock);
+        smallBlockCacheMap.put(smallBlock.getBlockHash().getDigestHex(), smallBlock);
     }
 
     public SmallBlock getSmallBlock(String hash) {

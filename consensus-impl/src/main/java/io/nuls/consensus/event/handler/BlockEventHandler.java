@@ -1,7 +1,7 @@
 package io.nuls.consensus.event.handler;
 
 import io.nuls.consensus.event.BlockEvent;
-import io.nuls.consensus.service.cache.BlockCacheService;
+import io.nuls.consensus.cache.manager.block.BlockCacheManager;
 import io.nuls.consensus.utils.DistributedBlockDownloadUtils;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.context.NulsContext;
@@ -15,7 +15,7 @@ import io.nuls.network.service.NetworkService;
  */
 public class BlockEventHandler extends AbstractNetworkEventHandler<BlockEvent> {
 
-    private BlockCacheService blockCacheService = BlockCacheService.getInstance();
+    private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
     private NetworkService networkService = NulsContext.getInstance().getService(NetworkService.class);
 
     @Override
@@ -29,6 +29,6 @@ public class BlockEventHandler extends AbstractNetworkEventHandler<BlockEvent> {
              this.networkService.removeNode(fromId);
             return;
         }
-        blockCacheService.cacheBlock(block);
+        blockCacheManager.cacheBlock(block);
     }
 }

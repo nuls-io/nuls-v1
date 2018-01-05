@@ -11,13 +11,13 @@ import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.tx.*;
 import io.nuls.consensus.entity.validator.block.PocBlockValidatorManager;
 import io.nuls.consensus.event.*;
-import io.nuls.consensus.handler.*;
-import io.nuls.consensus.handler.filter.*;
+import io.nuls.consensus.event.filter.*;
+import io.nuls.consensus.event.handler.*;
 import io.nuls.consensus.module.AbstractConsensusModule;
-import io.nuls.consensus.service.cache.BlockCacheService;
-import io.nuls.consensus.service.cache.BlockHeaderCacheService;
-import io.nuls.consensus.service.cache.ConsensusCacheService;
-import io.nuls.consensus.service.cache.SmallBlockCacheService;
+import io.nuls.consensus.cache.manager.block.BlockCacheManager;
+import io.nuls.consensus.cache.manager.block.BlockHeaderCacheManager;
+import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
+import io.nuls.consensus.cache.manager.block.SmallBlockCacheManager;
 import io.nuls.consensus.service.impl.BlockServiceImpl;
 import io.nuls.consensus.service.impl.PocConsensusServiceImpl;
 import io.nuls.consensus.thread.BlockMaintenanceThread;
@@ -42,12 +42,12 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
 
     private EventBusService eventBusService = NulsContext.getInstance().getService(EventBusService.class);
     private boolean delegateNode = false;
-    private ConsensusCacheService consensusCacheService;
+    private ConsensusCacheManager consensusCacheManager;
     private AccountService accountService;
 
     @Override
     public void init() {
-        consensusCacheService = ConsensusCacheService.getInstance();
+        consensusCacheManager = ConsensusCacheManager.getInstance();
         accountService = NulsContext.getInstance().getService(AccountService.class);
         NulsContext.getInstance().setGenesisBlock(GenesisBlock.getInstance());
 
@@ -58,10 +58,10 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
         this.registerTransaction(TransactionConstant.TX_TYPE_EXIT_CONSENSUS, PocExitConsensusTransaction.class);
         delegateNode = NulsContext.MODULES_CONFIG.getCfgValue(PocConsensusConstant.CFG_CONSENSUS_SECTION, PocConsensusConstant.PROPERTY_DELEGATE_NODE, false);
         PocBlockValidatorManager.initBlockValidators();
-        BlockCacheService.getInstance().init();
-        ConsensusCacheService.getInstance().initCache();
-        BlockHeaderCacheService.getInstance().init();
-        SmallBlockCacheService.getInstance().init();
+        BlockCacheManager.getInstance().init();
+        ConsensusCacheManager.getInstance().initCache();
+        BlockHeaderCacheManager.getInstance().init();
+        SmallBlockCacheManager.getInstance().init();
 
         //todo 接收处理 账户切换的notice，或者确认共识打包中不能切换账户
     }
@@ -136,7 +136,7 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
             return;
         }
         Consensus<Agent> memberSelf =
-                consensusCacheService.getCachedAgent(localAccount.getAddress().toString());
+                consensusCacheManager.getCachedAgent(localAccount.getAddress().toString());
         if (null == memberSelf) {
             return;
         }
@@ -199,10 +199,10 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
 
     @Override
     public void destroy() {
-        ConsensusCacheService.getInstance().clear();
-        BlockCacheService.getInstance().clear();
-        BlockHeaderCacheService.getInstance().clear();
-        SmallBlockCacheService.getInstance().clear();
+        ConsensusCacheManager.getInstance().clear();
+        BlockCacheManager.getInstance().clear();
+        BlockHeaderCacheManager.getInstance().clear();
+        SmallBlockCacheManager.getInstance().clear();
     }
 
     @Override
@@ -213,7 +213,7 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
         StringBuilder str = new StringBuilder();
         str.append("module:[consensus]:\n");
         str.append("consensus status:");
-        ConsensusStatusInfo statusInfo = this.consensusCacheService.getConsensusStatusInfo(this.accountService.getDefaultAccount());
+        ConsensusStatusInfo statusInfo = this.consensusCacheManager.getConsensusStatusInfo(this.accountService.getDefaultAccount());
         if (null == statusInfo) {
             str.append(ConsensusStatusEnum.NOT_IN.getText());
         } else {

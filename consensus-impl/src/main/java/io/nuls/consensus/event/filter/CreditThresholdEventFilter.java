@@ -29,7 +29,7 @@ public class CreditThresholdEventFilter implements NulsEventFilter<JoinConsensus
     @Override
     public void doFilter(JoinConsensusEvent event, NulsEventFilterChain chain) {
         String address = event.getEventBody().getTxData().getAddress();
-        List<Transaction> list = ledgerService.queryListByAccount(address, TransactionConstant.TX_TYPE_RED_PUNISH, 0);
+        List<Transaction> list = ledgerService.getListByAddress(address, TransactionConstant.TX_TYPE_RED_PUNISH, 0, 0);
         if (null == list || list.isEmpty()) {
             chain.doFilter(event);
         }

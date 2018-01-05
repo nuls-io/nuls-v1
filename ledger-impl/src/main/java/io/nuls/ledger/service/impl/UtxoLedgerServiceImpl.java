@@ -51,7 +51,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public ValidateResult verifyTx(Transaction tx) throws NulsException {
+    public ValidateResult verifyTx(Transaction tx)   {
         return tx.verify();
     }
 

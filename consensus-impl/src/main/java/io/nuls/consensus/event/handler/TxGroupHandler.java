@@ -1,11 +1,12 @@
 package io.nuls.consensus.event.handler;
 
+import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.consensus.entity.RedPunishData;
 import io.nuls.consensus.entity.TxGroup;
 import io.nuls.consensus.event.TxGroupEvent;
-import io.nuls.consensus.service.cache.BlockCacheService;
-import io.nuls.consensus.service.cache.BlockHeaderCacheService;
-import io.nuls.consensus.service.cache.SmallBlockCacheService;
+import io.nuls.consensus.cache.manager.block.BlockCacheManager;
+import io.nuls.consensus.cache.manager.block.BlockHeaderCacheManager;
+import io.nuls.consensus.cache.manager.block.SmallBlockCacheManager;
 import io.nuls.consensus.thread.ConsensusMeetingRunner;
 import io.nuls.core.chain.entity.*;
 import io.nuls.core.constant.ErrorCode;
@@ -25,10 +26,10 @@ import java.util.List;
  * @date 2017/11/16
  */
 public class TxGroupHandler extends AbstractNetworkEventHandler<TxGroupEvent> {
-    private SmallBlockCacheService smallBlockCacheService = SmallBlockCacheService.getInstance();
-    private BlockHeaderCacheService headerCacheService = BlockHeaderCacheService.getInstance();
-    private BlockCacheService blockCacheService = BlockCacheService.getInstance();
-    private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
+    private SmallBlockCacheManager smallBlockCacheManager = SmallBlockCacheManager.getInstance();
+    private BlockHeaderCacheManager headerCacheService = BlockHeaderCacheManager.getInstance();
+    private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
+    private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
     private NetworkService networkService = NulsContext.getInstance().getService(NetworkService.class);
     @Override
     public void onEvent(TxGroupEvent event, String fromId) {
@@ -37,7 +38,7 @@ public class TxGroupHandler extends AbstractNetworkEventHandler<TxGroupEvent> {
         if (header == null) {
             return;
         }
-        SmallBlock smallBlock = smallBlockCacheService.getSmallBlock(header.getHash().getDigestHex());
+        SmallBlock smallBlock = smallBlockCacheManager.getSmallBlock(header.getHash().getDigestHex());
         if(null==smallBlock){
             return;
         }
@@ -45,7 +46,7 @@ public class TxGroupHandler extends AbstractNetworkEventHandler<TxGroupEvent> {
         block.setHeader(header);
         List<Transaction> txs = new ArrayList<>();
         for (NulsDigestData txHash : smallBlock.getTxHashList()) {
-            Transaction tx = ledgerService.getTxFromCache(txHash.getDigestHex());
+            Transaction tx = txCacheManager.getTx(txHash);
             if(null==tx){
                 tx = txGroup.getTx(txHash.getDigestHex());
             }
@@ -64,6 +65,6 @@ public class TxGroupHandler extends AbstractNetworkEventHandler<TxGroupEvent> {
             }
             return;
         }
-        blockCacheService.cacheBlock(block);
+        blockCacheManager.cacheBlock(block);
     }
 }

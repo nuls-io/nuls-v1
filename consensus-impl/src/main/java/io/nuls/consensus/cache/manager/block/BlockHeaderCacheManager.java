@@ -1,4 +1,4 @@
-package io.nuls.consensus.service.cache;
+package io.nuls.consensus.cache.manager.block;
 
 import io.nuls.cache.util.CacheMap;
 import io.nuls.core.chain.entity.BlockHeader;
@@ -12,14 +12,14 @@ import java.util.Set;
  * @author Niels
  * @date 2017/12/12
  */
-public class BlockHeaderCacheService {
+public class BlockHeaderCacheManager {
     private static final String CACHE_NAME = "block-header-cache";
-    private static final BlockHeaderCacheService INSTANCE = new BlockHeaderCacheService();
+    private static final BlockHeaderCacheManager INSTANCE = new BlockHeaderCacheManager();
 
-    private BlockHeaderCacheService() {
+    private BlockHeaderCacheManager() {
     }
 
-    public static BlockHeaderCacheService getInstance() {
+    public static BlockHeaderCacheManager getInstance() {
         return INSTANCE;
     }
 
@@ -36,7 +36,7 @@ public class BlockHeaderCacheService {
     }
 
     public void cacheHeader(BlockHeader header) {
-        headerCacheMap.putWithOutClone(header.getHash().getDigestHex(), header);
+        headerCacheMap.put(header.getHash().getDigestHex(), header);
         Set<String> hashSet = hashHeightMap.get(header.getHeight());
         if (null == hashSet) {
             hashSet = new HashSet<>();

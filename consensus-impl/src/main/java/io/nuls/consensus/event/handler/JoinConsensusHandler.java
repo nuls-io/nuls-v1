@@ -23,13 +23,10 @@ public class JoinConsensusHandler extends AbstractNetworkEventHandler<JoinConsen
     public void onEvent(JoinConsensusEvent event, String fromId) {
         PocJoinConsensusTransaction tx = event.getEventBody();
         ValidateResult result;
-        try {
-            result = ledgerService.verifyAndCacheTx(tx);
-        } catch (NulsException e) {
-            Log.error(e);
-            return;
-        }
-        if (null==result||result.isFailed()) {
+        result = ledgerService.verifyTx(tx);
+        //todo cache
+
+        if (null == result || result.isFailed()) {
             return;
         }
         this.networkEventBroadcaster.broadcastHashAndCache(event);

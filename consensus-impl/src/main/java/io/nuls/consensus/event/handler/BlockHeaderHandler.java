@@ -2,7 +2,7 @@ package io.nuls.consensus.event.handler;
 
 import io.nuls.consensus.event.BlockHeaderEvent;
 import io.nuls.consensus.event.GetSmallBlockEvent;
-import io.nuls.consensus.service.cache.BlockHeaderCacheService;
+import io.nuls.consensus.cache.manager.block.BlockHeaderCacheManager;
 import io.nuls.consensus.utils.DistributedBlockInfoRequestUtils;
 import io.nuls.core.chain.entity.BasicTypeData;
 import io.nuls.core.chain.entity.BlockHeader;
@@ -18,7 +18,7 @@ import io.nuls.network.service.NetworkService;
  */
 public class BlockHeaderHandler extends AbstractNetworkEventHandler<BlockHeaderEvent> {
 
-    private BlockHeaderCacheService headerCacheService = BlockHeaderCacheService.getInstance();
+    private BlockHeaderCacheManager headerCacheService = BlockHeaderCacheManager.getInstance();
 
     private NetworkService networkService = NulsContext.getInstance().getService(NetworkService.class);
     private NetworkEventBroadcaster networkEventBroadcaster = NulsContext.getInstance().getService(NetworkEventBroadcaster.class);

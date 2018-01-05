@@ -1,5 +1,6 @@
 package io.nuls.consensus.event.handler;
 
+import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.consensus.entity.TxHashData;
 import io.nuls.consensus.event.GetTxGroupEvent;
 import io.nuls.consensus.event.SmallBlockEvent;
@@ -18,7 +19,7 @@ import java.util.List;
  */
 public class SmallBlockHandler extends AbstractNetworkEventHandler<SmallBlockEvent> {
     private NetworkEventBroadcaster broadcaster = NulsContext.getInstance().getService(NetworkEventBroadcaster.class);
-    private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
+    private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
 
     @Override
     public void onEvent(SmallBlockEvent event, String fromId) {
@@ -27,7 +28,7 @@ public class SmallBlockHandler extends AbstractNetworkEventHandler<SmallBlockEve
         data.setBlockHash(event.getEventBody().getBlockHash());
         List<NulsDigestData> txHashList = new ArrayList<>();
         for (NulsDigestData txHash : event.getEventBody().getTxHashList()) {
-            boolean exist = ledgerService.txExist(txHash.getDigestHex());
+            boolean exist = txCacheManager.txExist(txHash);
             if (!exist) {
                 txHashList.add(txHash);
             }

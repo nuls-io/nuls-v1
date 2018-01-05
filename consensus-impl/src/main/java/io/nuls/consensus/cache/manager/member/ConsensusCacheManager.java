@@ -1,4 +1,4 @@
-package io.nuls.consensus.service.cache;
+package io.nuls.consensus.cache.manager.member;
 
 import io.nuls.account.entity.Account;
 import io.nuls.account.service.intf.AccountService;
@@ -21,7 +21,7 @@ import java.util.List;
  * @author Niels
  * @date 2017/12/6
  */
-public class ConsensusCacheService {
+public class ConsensusCacheManager {
 
     /**
      * the title of the cache(ConsensusStatusInfo,single)
@@ -32,7 +32,7 @@ public class ConsensusCacheService {
     private static final String IN_DELEGATE_LIST = "in-delegate-list";
     private static final String WAIT_DELEGATE_LIST = "wait-delegate-list";
 
-    private static final ConsensusCacheService INSTANCE = new ConsensusCacheService();
+    private static final ConsensusCacheManager INSTANCE = new ConsensusCacheManager();
 
     private DelegateDataService delegateDao = NulsContext.getInstance().getService(DelegateDataService.class);
     private DelegateAccountDataService delegateAccountDao = NulsContext.getInstance().getService(DelegateAccountDataService.class);
@@ -44,10 +44,10 @@ public class ConsensusCacheService {
     private CacheMap<String, Consensus<Delegate>> waitDelegateCache = new CacheMap<>(WAIT_DELEGATE_LIST);
     private CacheMap<String, ConsensusStatusInfo> consensusStatusCache = new CacheMap<>(CACHE_CONSENSUS_STATUS_INFO);
 
-    private ConsensusCacheService() {
+    private ConsensusCacheManager() {
     }
 
-    public static ConsensusCacheService getInstance() {
+    public static ConsensusCacheManager getInstance() {
         return INSTANCE;
     }
 
@@ -93,7 +93,7 @@ public class ConsensusCacheService {
     }
 
     public void updateConsensusStatusInfo(ConsensusStatusInfo info) {
-        this.consensusStatusCache.putWithOutClone(info.getAddress(), info);
+        this.consensusStatusCache.put(info.getAddress(), info);
     }
 
 
@@ -152,10 +152,10 @@ public class ConsensusCacheService {
 
     public void cacheDelegate(Consensus<Delegate> cd) {
         if (cd.getExtend().getStatus() == ConsensusStatusEnum.IN.getCode()) {
-            this.inDelegateCache.putWithOutClone(cd.getExtend().getId(), cd);
+            this.inDelegateCache.put(cd.getExtend().getId(), cd);
             return;
         }
-        this.waitDelegateCache.putWithOutClone(cd.getExtend().getId(), cd);
+        this.waitDelegateCache.put(cd.getExtend().getId(), cd);
     }
 
     public Consensus<Delegate> getCachedDelegate(String id) {

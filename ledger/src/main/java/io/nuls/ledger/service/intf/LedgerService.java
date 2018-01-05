@@ -23,7 +23,7 @@ public interface LedgerService {
      * @return
      * @throws NulsException
      */
-    ValidateResult verifyTx(Transaction tx) throws NulsException;
+    ValidateResult verifyTx(Transaction tx);
 
     /**
      * @param hash
@@ -52,7 +52,8 @@ public interface LedgerService {
      * @param unlockHeight
      * @return
      */
-    LockNulsTransaction lock(String address, String password, Na amount, long unlockTime,long unlockHeight);
+    LockNulsTransaction lock(String address, String password, Na amount, long unlockTime, long unlockHeight);
+
     /**
      * @param address
      * @param password

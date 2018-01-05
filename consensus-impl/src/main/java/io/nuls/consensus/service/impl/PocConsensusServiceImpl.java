@@ -16,7 +16,7 @@ import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
 import io.nuls.consensus.event.ExitConsensusEvent;
 import io.nuls.consensus.event.JoinConsensusEvent;
 import io.nuls.consensus.event.RegisterAgentEvent;
-import io.nuls.consensus.service.cache.ConsensusCacheService;
+import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.service.intf.ConsensusService;
 import io.nuls.core.chain.entity.Na;
@@ -49,7 +49,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
     private NetworkEventBroadcaster networkEventBroadcaster = NulsContext.getInstance().getService(NetworkEventBroadcaster.class);
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
     private BlockService blockService = NulsContext.getInstance().getService(BlockService.class);
-    private ConsensusCacheService consensusCacheService = ConsensusCacheService.getInstance();
+    private ConsensusCacheManager consensusCacheManager = ConsensusCacheManager.getInstance();
 
     private PocConsensusServiceImpl() {
     }
@@ -78,13 +78,9 @@ public class PocConsensusServiceImpl implements ConsensusService {
         tx.setTxData(con);
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
         tx.setSign(accountService.signData(tx.getHash(), account, password));
-        try {
-            ledgerService.verifyTx(tx);
-            //todo 缓存
-        } catch (NulsException e) {
-            Log.error(e);
-            throw new NulsRuntimeException(e);
-        }
+        ledgerService.verifyTx(tx);
+        //todo 缓存
+
         event.setEventBody(tx);
         networkEventBroadcaster.broadcastHashAndCache(event);
     }
@@ -101,20 +97,15 @@ public class PocConsensusServiceImpl implements ConsensusService {
         tx.setTxData(ca);
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
         tx.setSign(accountService.signData(tx.getHash(), account, password));
-        try {
-            ledgerService.verifyTx(tx);
-            //todo 缓存
-        } catch (NulsException e) {
-            Log.error(e);
-            throw new NulsRuntimeException(e);
-        }
+        ledgerService.verifyTx(tx);
+        //todo 缓存
         event.setEventBody(tx);
         networkEventBroadcaster.broadcastHashAndCache(event);
     }
 
     @Override
     public void stopConsensus(NulsDigestData joinTxHash, String password) {
-        PocJoinConsensusTransaction joinTx = (PocJoinConsensusTransaction) ledgerService.getTx(joinTxHash.getDigestHex());
+        PocJoinConsensusTransaction joinTx = (PocJoinConsensusTransaction) ledgerService.getTx(joinTxHash);
         if (null == joinTx) {
             throw new NulsRuntimeException(ErrorCode.ACCOUNT_NOT_EXIST, "address:" + joinTx.getTxData().getAddress().toString());
         }
@@ -144,9 +135,9 @@ public class PocConsensusServiceImpl implements ConsensusService {
         QueryConsensusAccountParam param = new QueryConsensusAccountParam();
         param.setAddress(address);
         param.setAgentAddress(agentAddress);
-        List<Consensus<Agent>> list = consensusCacheService.getCachedAgentList(ConsensusStatusEnum.IN);
+        List<Consensus<Agent>> list = consensusCacheManager.getCachedAgentList(ConsensusStatusEnum.IN);
         List<Consensus> resultList = new ArrayList<>(list);
-        resultList.addAll(consensusCacheService.getCachedDelegateList());
+        resultList.addAll(consensusCacheManager.getCachedDelegateList());
         return resultList;
     }
 
@@ -155,7 +146,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
         if (StringUtils.isBlank(address)) {
             address = this.accountService.getDefaultAccount();
         }
-        return consensusCacheService.getConsensusStatusInfo(address);
+        return consensusCacheManager.getConsensusStatusInfo(address);
     }
 
     @Override

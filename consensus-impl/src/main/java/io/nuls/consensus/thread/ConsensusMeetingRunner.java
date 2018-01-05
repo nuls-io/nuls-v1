@@ -1,6 +1,7 @@
 package io.nuls.consensus.thread;
 
 import io.nuls.account.service.intf.AccountService;
+import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.consensus.constant.ConsensusContext;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.constant.PocConsensusConstant;
@@ -18,8 +19,8 @@ import io.nuls.consensus.entity.member.Delegate;
 import io.nuls.consensus.entity.tx.RedPunishTransaction;
 import io.nuls.consensus.entity.tx.YellowPunishTransaction;
 import io.nuls.consensus.event.BlockHeaderEvent;
-import io.nuls.consensus.service.cache.BlockCacheService;
-import io.nuls.consensus.service.cache.ConsensusCacheService;
+import io.nuls.consensus.cache.manager.block.BlockCacheManager;
+import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.service.impl.BlockServiceImpl;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.utils.ConsensusTool;
@@ -53,11 +54,11 @@ public class ConsensusMeetingRunner implements Runnable {
     public static final String THREAD_NAME = "Consensus-Meeting";
     private static final ConsensusMeetingRunner INSTANCE = new ConsensusMeetingRunner();
     private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
-
-    private ConsensusCacheService consensusCacheService = ConsensusCacheService.getInstance();
-    private BlockCacheService blockCacheService = BlockCacheService.getInstance();
-    private BlockService blockService = BlockServiceImpl.getInstance();
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
+    private ConsensusCacheManager consensusCacheManager = ConsensusCacheManager.getInstance();
+    private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
+    private BlockService blockService = BlockServiceImpl.getInstance();
+    private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
     private NetworkEventBroadcaster networkEventBroadcaster = NulsContext.getInstance().getService(NetworkEventBroadcaster.class);
     private boolean running = false;
     private NulsContext context = NulsContext.getInstance();
@@ -128,7 +129,7 @@ public class ConsensusMeetingRunner implements Runnable {
         }
         Collections.sort(memberList);
         currentRound.setMemberList(memberList);
-        List<Consensus<Delegate>> delegateList = consensusCacheService.getCachedDelegateList();
+        List<Consensus<Delegate>> delegateList = consensusCacheManager.getCachedDelegateList();
         List<Consensus<Delegate>> myDelegateList = new ArrayList<>();
         for (Consensus<Delegate> cd : delegateList) {
             totalDeposit = totalDeposit.add(cd.getExtend().getDeposit());
@@ -180,7 +181,7 @@ public class ConsensusMeetingRunner implements Runnable {
 
     private void packing(PocMeetingMember self) {
         Block bestBlock = blockService.getLocalBestBlock();
-        List<Transaction> txList = ledgerService.getTxListFromCache();
+        List<Transaction> txList = txCacheManager.getTxList();
         txList.sort(new TxComparator());
         addConsensusTx(bestBlock, txList, self);
         BlockData bd = new BlockData();
@@ -196,7 +197,7 @@ public class ConsensusMeetingRunner implements Runnable {
         bd.setTxList(txList);
         Block newBlock = ConsensusTool.createBlock(bd);
         newBlock.verify();
-        blockCacheService.cacheBlock(newBlock);
+        blockCacheManager.cacheBlock(newBlock);
         BlockHeaderEvent event = new BlockHeaderEvent();
         event.setEventBody(newBlock.getHeader());
         networkEventBroadcaster.broadcastAndCache(event);
@@ -231,11 +232,8 @@ public class ConsensusMeetingRunner implements Runnable {
         tx.setHash(NulsDigestData.calcDigestData(tx));
         tx.setSign(accountService.signData(tx.getHash()));
         ValidateResult validateResult = null;
-        try {
-            validateResult = ledgerService.verifyAndCacheTx(tx);
-        } catch (NulsException e) {
-            Log.error(e);
-        }
+        validateResult = ledgerService.verifyTx(tx);
+        //todo cache
         if (null == validateResult || validateResult.isFailed()) {
             throw new NulsRuntimeException(ErrorCode.CONSENSUS_EXCEPTION);
         }
@@ -371,7 +369,7 @@ public class ConsensusMeetingRunner implements Runnable {
 
     private List<Consensus<Agent>> calcConsensusAgentList() {
         List<Consensus<Agent>> list = new ArrayList<>();
-        list.addAll(consensusCacheService.getCachedAgentList(ConsensusStatusEnum.IN));
+        list.addAll(consensusCacheManager.getCachedAgentList(ConsensusStatusEnum.IN));
         if (list.size() >= PocConsensusConstant.MIN_CONSENSUS_AGENT_COUNT) {
             return list;
         }
