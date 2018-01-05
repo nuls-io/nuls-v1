@@ -42,7 +42,7 @@ public class BlockService {
         return restFul.get("/block/" + hash + "/header", null);
     }
 
-    public RpcClientResult getBlockByHeight(int height) {
+    public RpcClientResult getBlock(int height) {
         return restFul.get("/block/height/"+height, null);
     }
 

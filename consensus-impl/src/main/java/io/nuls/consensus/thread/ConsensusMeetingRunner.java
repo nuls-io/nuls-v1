@@ -168,8 +168,9 @@ public class ConsensusMeetingRunner implements Runnable {
         if (roundStart < 0) {
             roundStart = 0;
         }
-        int blockCount = blockService.queryBlockCount(cContext.getLocalAccountAddress(), roundStart, cContext.getCurrentRound().getIndex());
-        int sumRoundVal = blockService.querySumOfYellowPunishRound(cContext.getLocalAccountAddress());
+        int blockCount = blockService.getBlockCount(cContext.getLocalAccountAddress(), roundStart, cContext.getCurrentRound().getIndex());
+        int sumRoundVal = 1;
+        //todo blockService.getSumOfYellowPunishRound(cContext.getLocalAccountAddress());
 
         double ability = blockCount / PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT;
         double penalty = (PocConsensusConstant.CREDIT_MAGIC_NUM * sumRoundVal) / (cContext.getCurrentRound().getIndex() * cContext.getCurrentRound().getIndex());

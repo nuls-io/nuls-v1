@@ -9,7 +9,9 @@ import io.nuls.core.utils.queue.manager.QueueManager;
 
 /**
  * 队列服务类
- * Created by Niels on 2017/9/20.
+ *
+ * @author Niels
+ * @date 2017/9/20
  */
 public class QueueService<T> {
 

@@ -1,6 +1,7 @@
 package io.nuls.consensus.service.intf;
 
 import io.nuls.core.chain.entity.Block;
+import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.exception.NulsException;
 
 /**
@@ -11,23 +12,22 @@ import io.nuls.core.exception.NulsException;
  */
 public interface BlockService {
 
-    Block getGengsisBlockFromDb();
+    Block getGengsisBlock();
 
     long getLocalHeight();
 
     Block getLocalBestBlock();
 
-    Block getBlockByHash(String hash);
+    BlockHeader getBlockHeader();
 
-    Block getBlockByHeight(long height);
+    Block getBlock(String hash);
 
-    void save(Block block);
+    Block getBlock(long height);
 
-    void clearLocalBlocks();
+    void saveBlock(Block block);
 
-    void rollback(long height) throws NulsException;
+    void rollbackBlock(long height) throws NulsException;
 
-    int queryBlockCount(String address, long roundStart, long index);
+    int getBlockCount(String address, long roundStart, long index);
 
-    int querySumOfYellowPunishRound(String localAccountAddress);
 }

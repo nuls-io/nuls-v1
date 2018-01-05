@@ -23,7 +23,7 @@ public class GetBlockHeaderHandler extends AbstractNetworkEventHandler<GetBlockH
         if(null==event.getEventBody()||event.getEventBody().getVal()==0){
             header = blockService.getLocalBestBlock().getHeader();
         }else{
-            Block block = blockService.getBlockByHeight(event.getEventBody().getVal());
+            Block block = blockService.getBlock(event.getEventBody().getVal());
             if(null==block){
                 header = new BlockHeader();
                 header.setHeight(event.getEventBody().getVal());

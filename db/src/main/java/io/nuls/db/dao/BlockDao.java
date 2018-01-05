@@ -9,7 +9,7 @@ import io.nuls.db.entity.BlockPo;
  */
 public interface BlockDao extends BaseDao<String, BlockPo> {
 
-    BlockPo getBlockByHeight(long height);
+    BlockPo getBlock(long height);
 
     long queryMaxHeight();
 
@@ -17,9 +17,6 @@ public interface BlockDao extends BaseDao<String, BlockPo> {
 
     BlockPo getBlockByHash(String hash);
 
-    int deleteAll();
-
     int count(String address, long roundStart, long roundEnd);
 
-    int queryCount(String address, int txType);
 }
