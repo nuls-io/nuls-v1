@@ -38,13 +38,13 @@ public class CacheMap<K, V> {
     }
 
     public boolean containsValue(V value) {
-        List<V> vlist = this.cacheService.getElementValueList(cacheName);
+        List<V> vlist = this.cacheService.getElementList(cacheName);
         return vlist.contains(value);
     }
 
 
     public V get(K key) {
-        return (V) this.cacheService.getElementValue(cacheName, key);
+        return (V) this.cacheService.getElement(cacheName, key);
     }
 
 
@@ -53,7 +53,7 @@ public class CacheMap<K, V> {
     }
 
     public void putWithOutClone(K key, V value) {
-        this.cacheService.putElementWithoutClone(cacheName, key, value);
+        this.cacheService.putElement(cacheName, key, value);
     }
 
 
@@ -70,7 +70,7 @@ public class CacheMap<K, V> {
     }
 
     public List<V> values() {
-        return this.cacheService.getElementValueList(cacheName);
+        return this.cacheService.getElementList(cacheName);
     }
 
     public void destroy() {

@@ -15,7 +15,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsVerificationException;
 import io.nuls.core.mesasge.NulsMessage;
 import io.nuls.core.mesasge.NulsMessageHeader;
-import io.nuls.core.thread.manager.ThreadManager;
+import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -222,7 +222,7 @@ public class Peer extends BaseNulsData {
 
     private void asynExecute(BaseNetworkEvent networkMessage) {
         NetWorkEventHandler handler = messageHandlerFactory.getHandler(networkMessage);
-        ThreadManager.asynExecuteRunnable(new Runnable() {
+        TaskManager.asynExecuteRunnable(new Runnable() {
             @Override
             public void run() {
                 try {

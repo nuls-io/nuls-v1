@@ -20,7 +20,7 @@ import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.thread.manager.ThreadManager;
+import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.date.TimeService;
@@ -366,7 +366,7 @@ public class AccountServiceImpl implements AccountService {
 
         isLockNow = false;
         long unlockTime = TimeService.currentTimeSeconds() + seconds;
-        ThreadManager.createSingleThreadAndRun(NulsConstant.MODULE_ID_ACCOUNT, "unlockAccountThread", new Runnable() {
+        TaskManager.createSingleThreadAndRun(NulsConstant.MODULE_ID_ACCOUNT, "unlockAccountThread", new Runnable() {
             @Override
             public void run() {
                 while (!isLockNow) {

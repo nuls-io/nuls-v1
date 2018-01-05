@@ -6,8 +6,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.thread.manager.ThreadManager;
-import io.nuls.core.utils.cfg.ConfigLoader;
+import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.network.IPUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.PeerDao;
@@ -87,7 +86,7 @@ public class PeersManager {
 
         System.out.println("-----------peerManager start");
         //start  heart beat thread
-        ThreadManager.createSingleThreadAndRun(NulsConstant.MODULE_ID_NETWORK, "peerDiscovery", this.discovery);
+        TaskManager.createSingleThreadAndRun(NulsConstant.MODULE_ID_NETWORK, "peerDiscovery", this.discovery);
     }
 
     public List<Peer> getSeedPeers() {

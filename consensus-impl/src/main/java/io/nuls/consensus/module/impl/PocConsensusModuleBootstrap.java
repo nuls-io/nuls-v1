@@ -27,8 +27,7 @@ import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.thread.BaseThread;
-import io.nuls.core.thread.manager.ThreadManager;
-import io.nuls.core.utils.cfg.ConfigLoader;
+import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.service.intf.EventConsumer;
 import io.nuls.network.service.NetworkService;
@@ -74,7 +73,7 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
         this.startBlockMaintenanceThread();
         this.checkConsensusStatus();
         this.checkPeerType();
-        ThreadManager.createSingleThreadAndRun(this.getModuleId(), BlockPersistenceThread.THREAD_NAME, BlockPersistenceThread.getInstance());
+        TaskManager.createSingleThreadAndRun(this.getModuleId(), BlockPersistenceThread.THREAD_NAME, BlockPersistenceThread.getInstance());
         this.registerHandlers();
         Log.info("the POC consensus module is started!");
 
@@ -173,7 +172,7 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
     }
 
     private void startMining() {
-        ThreadManager.createSingleThreadAndRun(this.getModuleId(),
+        TaskManager.createSingleThreadAndRun(this.getModuleId(),
                 ConsensusMeetingRunner.THREAD_NAME,
                 ConsensusMeetingRunner.getInstance());
     }
@@ -187,7 +186,7 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
         } catch (Exception e) {
             Log.error(e.getMessage());
         } finally {
-            ThreadManager.createSingleThreadAndRun(this.getModuleId(),
+            TaskManager.createSingleThreadAndRun(this.getModuleId(),
                     BlockMaintenanceThread.THREAD_NAME, blockMaintenanceThread);
         }
     }
@@ -195,7 +194,7 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
 
     @Override
     public void shutdown() {
-        ThreadManager.shutdownByModuleId(this.getModuleId());
+        TaskManager.shutdownByModuleId(this.getModuleId());
     }
 
     @Override
@@ -222,7 +221,7 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
         }
         str.append("\n");
         str.append("thread count:");
-        List<BaseThread> threadList = ThreadManager.getThreadList(this.getModuleId());
+        List<BaseThread> threadList = TaskManager.getThreadList(this.getModuleId());
         if (null == threadList) {
             str.append(0);
         } else {

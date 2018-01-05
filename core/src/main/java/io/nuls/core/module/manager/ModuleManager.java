@@ -5,10 +5,14 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.module.BaseModuleBootstrap;
-import io.nuls.core.module.thread.ModuleThreadPoolExecuter;
+import io.nuls.core.module.thread.ModuleProcess;
+import io.nuls.core.module.thread.ModuleProcessFactory;
+import io.nuls.core.module.thread.ModuleRunner;
 import io.nuls.core.utils.log.Log;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,7 +21,10 @@ import java.util.Map;
  */
 public class ModuleManager {
 
-    private static final ModuleThreadPoolExecuter POOL = ModuleThreadPoolExecuter.getInstance();
+
+    private final Map<Short, ModuleProcess> PROCCESS_MAP = new HashMap<>();
+
+    private ModuleProcessFactory factory = new ModuleProcessFactory();
 
     private static final Map<Short, BaseModuleBootstrap> MODULE_MAP = new HashMap<>();
 
@@ -77,17 +84,16 @@ public class ModuleManager {
     }
 
 
-    public void startModule(String key, String moduleClass) {
-        POOL.startModule(key,moduleClass);
-    }
-
     public void stopModule(short moduleId) {
         BaseModuleBootstrap module = MODULE_MAP.get(moduleId);
         if (null == module) {
             return;
         }
         module.shutdown();
-        POOL.stopModule(moduleId);
+        ModuleProcess process = PROCCESS_MAP.get(moduleId);
+        if (null != process && !process.isInterrupted()) {
+            process.interrupt();
+        }
     }
 
     public void destroyModule(short moduleId) {
@@ -97,14 +103,17 @@ public class ModuleManager {
         }
         module.setStatus(ModuleStatusEnum.DESTROYING);
         try {
+            if(module.getStatus()!=ModuleStatusEnum.STOPED){
+                stopModule(moduleId);
+            }
             module.destroy();
-            POOL.stopModule(module.getModuleId());
+            remModule(module.getModuleId());
+            removeProcess(module.getModuleId());
             module.setStatus(ModuleStatusEnum.DESTROYED);
         } catch (Exception e) {
             module.setStatus(ModuleStatusEnum.EXCEPTION);
         }
-        remModule(module.getModuleId());
-        POOL.removeProcess(module.getModuleId());
+
     }
 
     public String getInfo() {
@@ -130,12 +139,42 @@ public class ModuleManager {
             return ModuleStatusEnum.NOT_FOUND;
         }
         if (ModuleStatusEnum.RUNNING == module.getStatus()) {
-            Thread.State state = POOL.getProcessState(moduleId);
+            Thread.State state = getProcessState(moduleId);
             if (state == Thread.State.TERMINATED) {
                 module.setStatus(ModuleStatusEnum.EXCEPTION);
             }
         }
         return module.getStatus();
+    }
+
+    public void startModule(String key, String moduleClass) {
+        if(null==moduleClass){
+            return;
+        }
+        try {
+            ModuleRunner runner = new ModuleRunner(key, moduleClass);
+            ModuleProcess moduleProcess = factory.newThread(runner);
+            moduleProcess.start();
+        }catch (Exception e){
+            Log.error(e);
+        }
+    }
+
+
+    private Thread.State getProcessState(short moduleId) {
+        ModuleProcess process = PROCCESS_MAP.get(moduleId);
+        if (null != process) {
+            return process.getState();
+        }
+        return null;
+    }
+
+    public List<ModuleProcess> getProcessList() {
+        return new ArrayList<>(PROCCESS_MAP.values());
+    }
+
+    private void removeProcess(short moduleId){
+        //todo
     }
 
 }

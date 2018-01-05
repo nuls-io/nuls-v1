@@ -1,7 +1,7 @@
 package io.nuls.core.thread.manager;
 
 import io.nuls.core.thread.BaseThread;
-import io.nuls.core.thread.cache.TaskManager;
+import io.nuls.core.thread.cache.TaskTable;
 import io.nuls.core.utils.aop.AopUtils;
 
 import java.util.List;
@@ -10,11 +10,10 @@ import java.util.concurrent.*;
 /**
  * @author Niels
  */
-public class ThreadManager {
+public class TaskManager {
     private static final int DEFAULT_QUEUE_MAX_SIZE = Integer.MAX_VALUE;
 
-
-    private static final TaskManager THREAD_DATA_CACHE = TaskManager.getInstance();
+    private static final TaskTable THREAD_DATA_CACHE = TaskTable.getInstance();
 
     private static final String TEMPORARY_THREAD_POOL_NAME = "temporary";
     private static final int TEMPORARY_THREAD_POOL_COUNT = 10;
@@ -26,6 +25,10 @@ public class ThreadManager {
      */
     static {
         TEMPORARY_THREAD_POOL = createThreadPool(TEMPORARY_THREAD_POOL_COUNT, TEMPORARY_THREAD_POOL_QUEUE_SIZE, new NulsThreadFactory((short) 0, TEMPORARY_THREAD_POOL_NAME));
+    }
+
+    public static final void putThread(short moduleId, String poolName, String threadName, BaseThread newThread){
+        THREAD_DATA_CACHE.putThread(moduleId,poolName,threadName,newThread);
     }
 
     public static final ThreadPoolExecutor createThreadPool(int threadCount, int queueSize, NulsThreadFactory factory) {

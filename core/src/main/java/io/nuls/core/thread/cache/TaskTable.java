@@ -9,9 +9,9 @@ import java.util.concurrent.ThreadPoolExecutor;
  * @author Niels
  * @date 2017/11/27
  */
-public class TaskManager {
+public class TaskTable {
 
-    private static final TaskManager INSTANCE = new TaskManager();
+    private static final TaskTable INSTANCE = new TaskTable();
     /**
      * key  :  poolName
      * value:  pool
@@ -38,10 +38,10 @@ public class TaskManager {
      */
     private final Map<String, Set<String>> POOL_THREAD_MAP = new HashMap<>();
 
-    private TaskManager() {
+    private TaskTable() {
     }
 
-    public static final TaskManager getInstance() {
+    public static final TaskTable getInstance() {
         return INSTANCE;
     }
 

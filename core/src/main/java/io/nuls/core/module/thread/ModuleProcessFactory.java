@@ -9,7 +9,7 @@ import java.util.concurrent.ThreadFactory;
  * @author Niels
  * @date 2017/11/27
  */
-public class ModuleThreadFactory implements ThreadFactory {
+public class ModuleProcessFactory implements ThreadFactory {
 
     private static final String POOL_NAME = "Process";
     @Override

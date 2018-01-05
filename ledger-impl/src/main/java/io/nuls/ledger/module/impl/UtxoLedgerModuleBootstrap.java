@@ -4,7 +4,7 @@ import io.nuls.account.entity.Account;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.chain.manager.TransactionValidatorManager;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.thread.manager.ThreadManager;
+import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.event.bus.service.intf.EventConsumer;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.event.*;
@@ -74,7 +74,7 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
         cacheAccountAndBalance();
 
         SmallChangeThread smallChangeThread = SmallChangeThread.getInstance();
-        ThreadManager.createSingleThreadAndRun(this.getModuleId(), SmallChangeThread.class.getSimpleName(), smallChangeThread);
+        TaskManager.createSingleThreadAndRun(this.getModuleId(), SmallChangeThread.class.getSimpleName(), smallChangeThread);
     }
 
     private void cacheAccountAndBalance() {

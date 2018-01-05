@@ -44,9 +44,7 @@ public interface CacheService<K, V extends NulsCloneable> {
      * @param key
      * @param value
      */
-    void putElement(String cacheTitle, K key, V value);
-
-    void putElementWithoutClone(String cacheTitle, K key, Object value);
+    void putElement(String cacheTitle, K key, Object value);
 
 
     /**
@@ -64,13 +62,10 @@ public interface CacheService<K, V extends NulsCloneable> {
      * @param key
      * @return
      */
-    V getElementValue(String cacheTitle, K key);
+    V getElement(String cacheTitle, K key);
 
-    V getElementValueWithOutClone(String cacheTitle, K key);
+    List<V> getElementList(String cacheTitle);
 
-    List<V> getElementValueList(String cacheTitle);
-
-    List<V> getElementValueListWithOutClone(String cacheTitle);
     /**
      * remove an element from the cache named cacheTitle
      *
