@@ -29,7 +29,7 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.thread.BaseThread;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
-import io.nuls.event.bus.service.intf.EventConsumer;
+import io.nuls.event.bus.service.intf.EventBusService;
 import io.nuls.network.service.NetworkService;
 
 import java.util.List;
@@ -40,7 +40,7 @@ import java.util.List;
  */
 public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
 
-    private EventConsumer eventConsumer = NulsContext.getInstance().getService(EventConsumer.class);
+    private EventBusService eventBusService = NulsContext.getInstance().getService(EventBusService.class);
     private boolean delegatePeer = false;
     private ConsensusCacheService consensusCacheService;
     private AccountService accountService;
@@ -83,47 +83,47 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
     private void registerHandlers() {
         BlockEventHandler blockEventHandler = new BlockEventHandler();
         blockEventHandler.addFilter(new BlockEventFilter());
-        eventConsumer.subscribeNetworkEvent(BlockEvent.class, blockEventHandler);
+        eventBusService.subscribeNetworkEvent(BlockEvent.class, blockEventHandler);
 
         BlockHeaderHandler blockHeaderHandler = new BlockHeaderHandler();
         blockHeaderHandler.addFilter(new BlockHeaderEventFilter());
-        eventConsumer.subscribeNetworkEvent(BlockHeaderEvent.class, blockHeaderHandler);
+        eventBusService.subscribeNetworkEvent(BlockHeaderEvent.class, blockHeaderHandler);
 
         GetBlockHandler getBlockHandler = new GetBlockHandler();
         getBlockHandler.addFilter(new GetBlockEventFilter());
-        eventConsumer.subscribeNetworkEvent(GetSmallBlockEvent.class, getBlockHandler);
+        eventBusService.subscribeNetworkEvent(GetSmallBlockEvent.class, getBlockHandler);
 
         GetTxGroupHandler getSmallBlockHandler = new GetTxGroupHandler();
         getSmallBlockHandler.addFilter(new GetTxGroupFilter());
-        eventConsumer.subscribeNetworkEvent(GetSmallBlockEvent.class, getSmallBlockHandler);
+        eventBusService.subscribeNetworkEvent(GetSmallBlockEvent.class, getSmallBlockHandler);
 
         RegisterAgentHandler registerAgentHandler = new RegisterAgentHandler();
         registerAgentHandler.addFilter(new RegisterAgentEventFilter());
-        eventConsumer.subscribeNetworkEvent(RegisterAgentEvent.class, registerAgentHandler);
+        eventBusService.subscribeNetworkEvent(RegisterAgentEvent.class, registerAgentHandler);
 
         JoinConsensusHandler joinConsensusHandler = new JoinConsensusHandler();
         joinConsensusHandler.addFilter(AllreadyJoinConsensusEventFilter.getInstance());
         joinConsensusHandler.addFilter(CreditThresholdEventFilter.getInstance());
-        eventConsumer.subscribeNetworkEvent(JoinConsensusEvent.class, joinConsensusHandler);
+        eventBusService.subscribeNetworkEvent(JoinConsensusEvent.class, joinConsensusHandler);
 
         ExitConsensusHandler exitConsensusHandler = new ExitConsensusHandler();
         exitConsensusHandler.addFilter(new ExitConsensusEventFilter());
-        eventConsumer.subscribeNetworkEvent(ExitConsensusEvent.class, exitConsensusHandler);
+        eventBusService.subscribeNetworkEvent(ExitConsensusEvent.class, exitConsensusHandler);
 
         RedPunishHandler redPunishHandler = new RedPunishHandler();
         redPunishHandler.addFilter(new RedPunishEventFilter());
-        eventConsumer.subscribeNetworkEvent(RedPunishConsensusEvent.class, redPunishHandler);
+        eventBusService.subscribeNetworkEvent(RedPunishConsensusEvent.class, redPunishHandler);
 
         YellowPunishHandler yellowPunishHandler = new YellowPunishHandler();
         yellowPunishHandler.addFilter(new YellowPunishEventFilter());
-        eventConsumer.subscribeNetworkEvent(YellowPunishConsensusEvent.class, yellowPunishHandler);
+        eventBusService.subscribeNetworkEvent(YellowPunishConsensusEvent.class, yellowPunishHandler);
 
         GetBlockHeaderHandler getBlockHeaderHandler = new GetBlockHeaderHandler();
-        eventConsumer.subscribeNetworkEvent(GetBlockHeaderEvent.class, getBlockHeaderHandler);
+        eventBusService.subscribeNetworkEvent(GetBlockHeaderEvent.class, getBlockHeaderHandler);
 
         TxGroupHandler txGroupHandler = new TxGroupHandler();
 //todo        smallBlockHandler.addFilter();
-        eventConsumer.subscribeNetworkEvent(TxGroupEvent.class, txGroupHandler);
+        eventBusService.subscribeNetworkEvent(TxGroupEvent.class, txGroupHandler);
     }
 
     private void checkConsensusStatus() {

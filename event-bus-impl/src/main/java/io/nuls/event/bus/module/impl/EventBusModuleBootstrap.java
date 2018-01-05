@@ -18,8 +18,7 @@ import io.nuls.network.message.ReplyNotice;
  */
 public class EventBusModuleBootstrap extends AbstractEventBusModule {
 
-    private EventProducer producer;
-    private EventConsumer consumer;
+    private EventBusService eventBusService;
 
     public EventBusModuleBootstrap() {
         super();
@@ -32,16 +31,13 @@ public class EventBusModuleBootstrap extends AbstractEventBusModule {
 
     @Override
     public void start() {
-        producer = EventProducerImpl.getInstance();
-        consumer = EventConsumerImpl.getInstance();
-        consumer.subscribeNetworkEvent(CommonDigestEvent.class, new CommonDigestHandler());
-        consumer.subscribeNetworkEvent(GetEventBodyEvent.class, new GetEventBodyHandler());
-        this.registerService(producer);
-        this.registerService(consumer);
+        eventBusService = EventBusServiceImpl.getInstance();
+        eventBusService.subscribeNetworkEvent(CommonDigestEvent.class, new CommonDigestHandler());
+        eventBusService.subscribeNetworkEvent(GetEventBodyEvent.class, new GetEventBodyHandler());
+        this.registerService(eventBusService);
         this.registerService(NetworkEventBroadcaster.class, NetworkEventBroadcasterImpl.getInstance());
-        this.registerService(EventProducer.class, EventProducerImpl.getInstance());
         ReplyNoticeHandler replyNoticeHandler = new ReplyNoticeHandler();
-        this.consumer.subscribeLocalEvent(ReplyNotice.class, replyNoticeHandler);
+        this.eventBusService.subscribeLocalEvent(ReplyNotice.class, replyNoticeHandler);
 
     }
 

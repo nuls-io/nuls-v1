@@ -5,7 +5,7 @@ import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.chain.manager.TransactionValidatorManager;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.thread.manager.TaskManager;
-import io.nuls.event.bus.service.intf.EventConsumer;
+import io.nuls.event.bus.service.intf.EventBusService;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.event.*;
 import io.nuls.ledger.handler.CoinTransactionEventHandler;
@@ -37,7 +37,7 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
 
     private LedgerService ledgerService = UtxoLedgerServiceImpl.getInstance();
 
-    private EventConsumer eventConsumer = NulsContext.getInstance().getService(EventConsumer.class);
+    private EventBusService eventBusService = NulsContext.getInstance().getService(EventBusService.class);
 
     @Override
     public void init() {
@@ -63,10 +63,10 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
 
     private void pulishEvent() {
 
-        this.eventConsumer.subscribeNetworkEvent(TransferCoinEvent.class, new CoinTransactionEventHandler());
-        this.eventConsumer.subscribeNetworkEvent(LockCoinEvent.class, new LockCoinEventHandler());
-        this.eventConsumer.subscribeNetworkEvent(UnlockCoinEvent.class, new UnlockCoinEventHandler());
-        this.eventConsumer.subscribeNetworkEvent(SmallChangeEvent.class, new SmallChangeEventHandler());
+        this.eventBusService.subscribeNetworkEvent(TransferCoinEvent.class, new CoinTransactionEventHandler());
+        this.eventBusService.subscribeNetworkEvent(LockCoinEvent.class, new LockCoinEventHandler());
+        this.eventBusService.subscribeNetworkEvent(UnlockCoinEvent.class, new UnlockCoinEventHandler());
+        this.eventBusService.subscribeNetworkEvent(SmallChangeEvent.class, new SmallChangeEventHandler());
     }
 
     @Override

@@ -12,7 +12,7 @@ import io.nuls.account.service.impl.AccountServiceImpl;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
-import io.nuls.event.bus.service.intf.EventConsumer;
+import io.nuls.event.bus.service.intf.EventBusService;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.network.service.NetworkService;
 
@@ -23,7 +23,7 @@ import io.nuls.network.service.NetworkService;
 public class AccountModuleBootstrap extends AbstractAccountModule {
 
     private AccountManager manager = AccountManager.getInstance();
-    private EventConsumer eventConsumer = NulsContext.getInstance().getService(EventConsumer.class);
+    private EventBusService eventBusService = NulsContext.getInstance().getService(EventBusService.class);
 
     @Override
     public void init() {
@@ -45,7 +45,7 @@ public class AccountModuleBootstrap extends AbstractAccountModule {
 
         AliasEventHandler.getInstance().addFilter(AliasEventFilter.getInstance());
         AliasEventHandler.getInstance().setLedgerService(ledgerService);
-        eventConsumer.subscribeNetworkEvent(AliasEvent.class, AliasEventHandler.getInstance());
+        eventBusService.subscribeNetworkEvent(AliasEvent.class, AliasEventHandler.getInstance());
     }
 
     @Override

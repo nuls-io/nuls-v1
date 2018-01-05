@@ -22,7 +22,7 @@ import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
-import io.nuls.event.bus.service.intf.EventProducer;
+import io.nuls.event.bus.service.intf.EventBusService;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.message.*;
@@ -86,7 +86,7 @@ public class Peer extends BaseNulsData {
 
     private Lock lock = new ReentrantLock();
 
-    private EventProducer producer;
+    private EventBusService eventBusService;
 
     private NetworkEventHandlerFactory messageHandlerFactory;
 
@@ -98,7 +98,7 @@ public class Peer extends BaseNulsData {
         super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.magicNumber = network.packetMagic();
         this.messageHandlerFactory = network.getMessageHandlerFactory();
-        producer = NulsContext.getInstance().getService(EventProducer.class);
+        eventBusService = NulsContext.getInstance().getService(EventBusService.class);
     }
 
     public Peer(AbstractNetworkParam network, int type) {
@@ -106,7 +106,7 @@ public class Peer extends BaseNulsData {
         this.magicNumber = network.packetMagic();
         this.type = type;
         this.messageHandlerFactory = network.getMessageHandlerFactory();
-        producer = NulsContext.getInstance().getService(EventProducer.class);
+        eventBusService = NulsContext.getInstance().getService(EventBusService.class);
     }
 
 
@@ -117,7 +117,7 @@ public class Peer extends BaseNulsData {
         this.port = socketAddress.getPort();
         this.ip = socketAddress.getAddress().getHostAddress();
         this.messageHandlerFactory = network.getMessageHandlerFactory();
-        producer = NulsContext.getInstance().getService(EventProducer.class);
+        eventBusService = NulsContext.getInstance().getService(EventBusService.class);
         this.hash = this.ip + this.port;
     }
 
@@ -216,7 +216,7 @@ public class Peer extends BaseNulsData {
             if (checkBroadcastExist(message.getData())) {
                 return;
             }
-            producer.publishNetworkEvent(message.getData(), this.getHash());
+            eventBusService.publishNetworkEvent(message.getData(), this.getHash());
         }
     }
 
@@ -250,7 +250,7 @@ public class Peer extends BaseNulsData {
         } else {
             ReplyNotice event = new ReplyNotice();
             event.setEventBody(new BasicTypeData<>(data));
-            producer.publishLocalEvent(event);
+            eventBusService.publishLocalEvent(event);
         }
         return true;
     }
@@ -310,7 +310,7 @@ public class Peer extends BaseNulsData {
         magicNumber = (int) buffer.readVarInt();
         port = (int) buffer.readVarInt();
         ip = new String(buffer.readByLengthByte());
-        producer = NulsContext.getInstance().getService(EventProducer.class);
+        eventBusService = NulsContext.getInstance().getService(EventBusService.class);
     }
 
 
