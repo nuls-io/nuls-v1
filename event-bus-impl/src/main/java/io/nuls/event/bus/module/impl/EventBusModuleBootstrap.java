@@ -23,8 +23,6 @@ public class EventBusModuleBootstrap extends AbstractEventBusModule {
 
     public EventBusModuleBootstrap() {
         super();
-        this.publish(EventConstant.EVENT_TYPE_COMMON_EVENT_HASH_EVENT, CommonDigestEvent.class);
-        this.publish(EventConstant.EVENT_TYPE_GET_EVENT_BODY_EVENT, GetEventBodyEvent.class);
     }
 
     @Override
@@ -49,8 +47,8 @@ public class EventBusModuleBootstrap extends AbstractEventBusModule {
 
     @Override
     public void shutdown() {
-        LocalEventServiceImpl.getInstance().shutdown();
-        NetworkEventServiceImpl.getInstance().shutdown();
+        LocalEventService.getInstance().shutdown();
+        NetworkEventService.getInstance().shutdown();
     }
 
     @Override

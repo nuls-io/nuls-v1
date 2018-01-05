@@ -6,8 +6,6 @@ import io.nuls.core.event.BaseNetworkEvent;
 import io.nuls.core.event.EventManager;
 import io.nuls.core.exception.NulsException;
 import io.nuls.event.bus.constant.EventCategoryEnum;
-import io.nuls.event.bus.service.intf.LocalEventService;
-import io.nuls.event.bus.service.intf.NetworkEventService;
 import io.nuls.event.bus.service.intf.EventProducer;
 
 /**
@@ -17,8 +15,8 @@ import io.nuls.event.bus.service.intf.EventProducer;
 public class EventProducerImpl implements EventProducer {
     private static EventProducer INSTANCE = new EventProducerImpl();
 
-    private LocalEventService localService = LocalEventServiceImpl.getInstance();
-    private NetworkEventService networkService = NetworkEventServiceImpl.getInstance();
+    private LocalEventService localService = LocalEventService.getInstance();
+    private NetworkEventService networkService = NetworkEventService.getInstance();
 
     private EventProducerImpl() {
     }

@@ -5,7 +5,7 @@ import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.chain.manager.TransactionValidatorManager;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.thread.manager.ThreadManager;
-import io.nuls.event.bus.service.intf.NetworkEventService;
+import io.nuls.event.bus.service.intf.EventConsumer;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.event.*;
 import io.nuls.ledger.handler.CoinTransactionEventHandler;
@@ -37,7 +37,7 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
 
     private LedgerService ledgerService = UtxoLedgerServiceImpl.getInstance();
 
-    private NetworkEventService processorService = NulsContext.getInstance().getService(NetworkEventService.class);
+    private EventConsumer eventConsumer = NulsContext.getInstance().getService(EventConsumer.class);
 
     @Override
     public void init() {
@@ -62,15 +62,11 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
     }
 
     private void pulishEvent() {
-        this.publish(LedgerConstant.EVENT_TYPE_TRANSFER, TransferCoinEvent.class);
-        this.publish(LedgerConstant.EVENT_TYPE_LOCK_NULS, LockCoinEvent.class);
-        this.publish(LedgerConstant.EVENT_TYPE_UNLOCK_NULS, UnlockCoinEvent.class);
-        this.publish(LedgerConstant.EVENT_TYPE_SMALL_CHANGE, SmallChangeEvent.class);
 
-        this.processorService.registerEventHandler(TransferCoinEvent.class, new CoinTransactionEventHandler());
-        this.processorService.registerEventHandler(LockCoinEvent.class, new LockCoinEventHandler());
-        this.processorService.registerEventHandler(UnlockCoinEvent.class, new UnlockCoinEventHandler());
-        this.processorService.registerEventHandler(SmallChangeEvent.class, new SmallChangeEventHandler());
+        this.eventConsumer.subscribeNetworkEvent(TransferCoinEvent.class, new CoinTransactionEventHandler());
+        this.eventConsumer.subscribeNetworkEvent(LockCoinEvent.class, new LockCoinEventHandler());
+        this.eventConsumer.subscribeNetworkEvent(UnlockCoinEvent.class, new UnlockCoinEventHandler());
+        this.eventConsumer.subscribeNetworkEvent(SmallChangeEvent.class, new SmallChangeEventHandler());
     }
 
     @Override

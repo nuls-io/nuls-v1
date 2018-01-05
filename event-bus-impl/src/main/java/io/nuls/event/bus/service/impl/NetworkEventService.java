@@ -8,27 +8,25 @@ import io.nuls.event.bus.constant.EventBusConstant;
 import io.nuls.event.bus.handler.AbstractNetworkEventHandler;
 import io.nuls.event.bus.processor.manager.ProcessData;
 import io.nuls.event.bus.processor.manager.ProcessorManager;
-import io.nuls.event.bus.service.intf.NetworkEventService;
 
 /**
  * @author Niels
  * @date 2017/11/3
  */
-public class NetworkEventServiceImpl implements NetworkEventService {
+public class NetworkEventService {
 
-    private static final NetworkEventServiceImpl INSTANCE = new NetworkEventServiceImpl();
+    private static final NetworkEventService INSTANCE = new NetworkEventService();
     private EventCacheService eventCacheService = EventCacheService.getInstance();
     private final ProcessorManager processorManager;
 
-    private NetworkEventServiceImpl() {
+    private NetworkEventService() {
         this.processorManager = new ProcessorManager(EventBusConstant.DISRUPTOR_NAME_NETWORK);
     }
 
-    public static NetworkEventServiceImpl getInstance() {
+    public static NetworkEventService getInstance() {
         return INSTANCE;
     }
 
-    @Override
     public void publish(byte[] event, String peerId) {
         try {
             BaseNetworkEvent eventObject = EventManager.getNetworkEventInstance(event);
@@ -43,7 +41,6 @@ public class NetworkEventServiceImpl implements NetworkEventService {
 
     }
 
-    @Override
     public void publish(BaseNetworkEvent event, String peerId) {
         boolean exist = eventCacheService.isKnown(event.getHash().getDigestHex());
         if (exist) {
@@ -54,17 +51,14 @@ public class NetworkEventServiceImpl implements NetworkEventService {
 
     }
 
-    @Override
     public String registerEventHandler(Class<? extends BaseNetworkEvent> eventClass, AbstractNetworkEventHandler<? extends BaseNetworkEvent> handler) {
         return processorManager.registerEventHandler(eventClass, handler);
     }
 
-    @Override
     public void removeEventHandler(String handlerId) {
         processorManager.removeEventHandler(handlerId);
     }
 
-    @Override
     public void shutdown() {
         processorManager.shutdown();
     }

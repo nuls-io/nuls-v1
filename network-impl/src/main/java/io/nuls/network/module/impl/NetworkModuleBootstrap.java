@@ -31,7 +31,6 @@ public class NetworkModuleBootstrap extends AbstractNetworkModule {
         }
         networkService = new NetworkServiceImpl(this);
         this.registerService(networkService);
-        this.publish((short) 1, ReplyNotice.class);
     }
 
     @Override

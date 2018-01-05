@@ -61,7 +61,7 @@ public class ProcessorManager<E extends BaseNetworkEvent, H extends NulsEventHan
     }
 
     public String registerEventHandler(Class<E> eventClass, H handler) {
-        EventManager.isLegal(eventClass);
+        EventManager.putEvent(eventClass);
         AssertUtil.canNotEmpty(eventClass, "registerEventHandler faild");
         AssertUtil.canNotEmpty(handler, "registerEventHandler faild");
         String handlerId = StringUtils.getNewUUID();

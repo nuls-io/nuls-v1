@@ -101,10 +101,6 @@ public abstract class BaseModuleBootstrap {
         ServiceManager.getInstance().regService(this.moduleId, serviceInterface, service);
     }
 
-    protected final void publish(short eventType, Class<? extends BaseEvent> eventClass) {
-        EventManager.putEvent(this.getModuleId(), eventType, eventClass);
-    }
-
     protected final void registerTransaction(int txType, Class<? extends Transaction> txClass){
         TransactionManager.putTx(txType,txClass);
     }

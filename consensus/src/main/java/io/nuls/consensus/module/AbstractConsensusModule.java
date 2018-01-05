@@ -13,15 +13,6 @@ import io.nuls.core.module.BaseModuleBootstrap;
 public abstract class AbstractConsensusModule extends BaseModuleBootstrap {
     public AbstractConsensusModule() {
         super(NulsConstant.MODULE_ID_CONSENSUS);
-        this.publish(ConsensusEventType.BLOCK, BlockEvent.class);
-        this.publish(ConsensusEventType.BLOCK_HEADER, BlockHeaderEvent.class);
-        this.publish(ConsensusEventType.SMALL_BLOCK, SmallBlockEvent.class);
-        this.publish(ConsensusEventType.TX_GROUP, TxGroupEvent.class);
-        this.publish(ConsensusEventType.GET_SMALL_BLOCK, GetSmallBlockEvent.class);
-        this.publish(ConsensusEventType.GET_BLOCK, GetBlockEvent.class);
-        this.publish(ConsensusEventType.GET_TX_GROUP, GetTxGroupEvent.class);
-        this.publish(ConsensusEventType.GET_BLOCK_HEADER, GetBlockHeaderEvent.class);
-
     }
 
 }
