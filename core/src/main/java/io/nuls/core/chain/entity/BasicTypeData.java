@@ -74,13 +74,13 @@ public class BasicTypeData<T> extends BaseNulsData {
                 this.val = (T) ((Object) byteBuffer.readVarInt());
                 break;
             case 3:
-                this.val = (T) ((Object) byteBuffer.readVarInt());
+                this.val = (T) ((Object)((Long) byteBuffer.readVarInt()).intValue());
                 break;
             case 4:
                 this.val = (T) ((Object) byteBuffer.readDouble());
                 break;
             case 5:
-                this.val = (T) ((Object) byteBuffer.readVarInt());
+                this.val = (T) ((Object)((Long) byteBuffer.readVarInt()).shortValue());
                 break;
             case 6:
                 this.val = (T) ((Object) byteBuffer.readBoolean());
