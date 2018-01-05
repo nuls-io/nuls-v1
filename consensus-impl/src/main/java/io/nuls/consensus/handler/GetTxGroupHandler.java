@@ -46,7 +46,7 @@ public class GetTxGroupHandler extends AbstractNetworkEventHandler<GetTxGroupEve
         List<Transaction> txList = getTxList(block,eventBody.getTxHashList());
         txGroup.setTxList(txList);
         txGroupEvent.setEventBody(txGroup);
-        networkEventBroadcaster.sendToPeer(txGroupEvent, fromId);
+        networkEventBroadcaster.sendToNode(txGroupEvent, fromId);
     }
 
     private List<Transaction> getTxList(Block block, List<NulsDigestData> txHashList) {

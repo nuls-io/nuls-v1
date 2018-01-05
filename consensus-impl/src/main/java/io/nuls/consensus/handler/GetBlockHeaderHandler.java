@@ -31,6 +31,6 @@ public class GetBlockHeaderHandler extends AbstractNetworkEventHandler<GetBlockH
                 header = block.getHeader();
             }
         }
-        this.networkEventBroadcaster.sendToPeer(new BlockHeaderEvent(header),fromId);
+        this.networkEventBroadcaster.sendToNode(new BlockHeaderEvent(header),fromId);
     }
 }

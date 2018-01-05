@@ -26,7 +26,7 @@ public class BlockEventHandler extends AbstractNetworkEventHandler<BlockEvent> {
         }
         ValidateResult result = block.verify();
         if (null==result||result.isFailed()) {
-             this.networkService.removePeer(fromId);
+             this.networkService.removeNode(fromId);
             return;
         }
         blockCacheService.cacheBlock(block);

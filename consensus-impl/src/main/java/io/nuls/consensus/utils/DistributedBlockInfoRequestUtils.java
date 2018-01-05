@@ -23,7 +23,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class DistributedBlockInfoRequestUtils {
     private static final DistributedBlockInfoRequestUtils INSTANCE = new DistributedBlockInfoRequestUtils();
     private NetworkEventBroadcaster networkEventBroadcaster = NulsContext.getInstance().getService(NetworkEventBroadcaster.class);
-    private List<String> peerIdList;
+    private List<String> nodeIdList;
     private Map<String, BlockHeader> headerMap = new HashMap<>();
     /**
      * list order by answered time
@@ -60,8 +60,8 @@ public class DistributedBlockInfoRequestUtils {
         } else {
             getBlockHeaderEvent = new GetBlockHeaderEvent(height);
         }
-        peerIdList = this.networkEventBroadcaster.broadcastAndCache(getBlockHeaderEvent);
-        if (peerIdList.isEmpty()) {
+        nodeIdList = this.networkEventBroadcaster.broadcastAndCache(getBlockHeaderEvent);
+        if (nodeIdList.isEmpty()) {
             Log.error("get best height from net faild!");
             lock.unlock();
             throw new NulsRuntimeException(ErrorCode.NET_MESSAGE_ERROR, "broadcast faild!");
@@ -70,46 +70,46 @@ public class DistributedBlockInfoRequestUtils {
     }
 
 
-    public boolean addBlockHeader(String peerId, BlockHeader header) {
-        if (!headerMap.containsKey(peerId)) {
+    public boolean addBlockHeader(String nodeId, BlockHeader header) {
+        if (!headerMap.containsKey(nodeId)) {
             return false;
         }
         if (!requesting) {
             return false;
         }
-        headerMap.put(peerId, header);
+        headerMap.put(nodeId, header);
         String key = header.getHeight()+""+header.getHash();
-        List<String> peers = calcMap.get(key);
-        if (null == peers) {
-            peers = new ArrayList<>();
+        List<String> nodes = calcMap.get(key);
+        if (null == nodes) {
+            nodes = new ArrayList<>();
         }
-        if (!peers.contains(peerId)) {
-            peers.add(peerId);
+        if (!nodes.contains(nodeId)) {
+            nodes.add(nodeId);
         }
-        calcMap.put(key, peers);
+        calcMap.put(key, nodes);
         calc();
         return true;
     }
 
     private void calc() {
-        if (null == peerIdList || peerIdList.isEmpty()) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "success list of peers is empty!");
+        if (null == nodeIdList || nodeIdList.isEmpty()) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "success list of nodes is empty!");
         }
 
-        int size = peerIdList.size();
+        int size = nodeIdList.size();
         int halfSize = (size + 1) / 2;
         if (headerMap.size() < halfSize) {
             return;
         }
         BlockInfo result = null;
         for (String key : calcMap.keySet()) {
-            List<String> peers = calcMap.get(key);
-            if (peers.size() > halfSize) {
+            List<String> nodes = calcMap.get(key);
+            if (nodes.size() > halfSize) {
                 result = new BlockInfo();
-                BlockHeader header = headerMap.get(result.getPeerIdList().get(0));
+                BlockHeader header = headerMap.get(result.getNodeIdList().get(0));
                 result.setHash(header.getHash());
                 result.setHeight(header.getHeight());
-                result.setPeerIdList(peers);
+                result.setNodeIdList(nodes);
                 result.setFinished(true);
                 break;
             }

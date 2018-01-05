@@ -27,10 +27,10 @@ public class NetworkEventService {
         return INSTANCE;
     }
 
-    public void publish(byte[] event, String peerId) {
+    public void publish(byte[] event, String nodeId) {
         try {
             BaseNetworkEvent eventObject = EventManager.getNetworkEventInstance(event);
-            this.publish(eventObject, peerId);
+            this.publish(eventObject, nodeId);
         } catch (IllegalAccessException e) {
             Log.error(e);
         } catch (InstantiationException e) {
@@ -41,13 +41,13 @@ public class NetworkEventService {
 
     }
 
-    public void publish(BaseNetworkEvent event, String peerId) {
+    public void publish(BaseNetworkEvent event, String nodeId) {
         boolean exist = eventCacheService.isKnown(event.getHash().getDigestHex());
         if (exist) {
             return;
         }
         eventCacheService.cacheRecievedEventHash(event.getHash().getDigestHex());
-        processorManager.offer(new ProcessData(event, peerId));
+        processorManager.offer(new ProcessData(event, nodeId));
 
     }
 

@@ -32,13 +32,13 @@ public class BlockHeaderHandler extends AbstractNetworkEventHandler<BlockHeaderE
         //todo 分叉处理
         ValidateResult result = header.verify();
         if (result.isFailed()) {
-            networkService.removePeer(fromId);
+            networkService.removeNode(fromId);
             return;
         }
         headerCacheService.cacheHeader(header);
         GetSmallBlockEvent getSmallBlockEvent = new GetSmallBlockEvent();
         BasicTypeData<Long> data = new BasicTypeData<>(header.getHeight());
         getSmallBlockEvent.setEventBody(data);
-        networkEventBroadcaster.sendToPeer(getSmallBlockEvent, fromId);
+        networkEventBroadcaster.sendToNode(getSmallBlockEvent, fromId);
     }
 }

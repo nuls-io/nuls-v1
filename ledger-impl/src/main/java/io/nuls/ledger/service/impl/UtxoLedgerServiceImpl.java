@@ -11,7 +11,7 @@ import io.nuls.core.exception.NulsVerificationException;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
-import io.nuls.db.dao.UtxoTransactionDao;
+import io.nuls.db.dao.UtxoTransactionDataService;
 import io.nuls.db.entity.TransactionPo;
 import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.db.util.TransactionPoTool;
@@ -37,7 +37,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     private LedgerCacheService ledgerCacheService = LedgerCacheService.getInstance();
 
-    private UtxoTransactionDao txDao = NulsContext.getInstance().getService(UtxoTransactionDao.class);
+    private UtxoTransactionDataService txDao = NulsContext.getInstance().getService(UtxoTransactionDataService.class);
 
     private NetworkEventBroadcaster networkEventBroadcaster = NulsContext.getInstance().getService(NetworkEventBroadcaster.class);
 

@@ -83,9 +83,9 @@
         <mapper resource="mybatis/mapping/BlockMapper.xml" />
         <mapper resource="mybatis/mapping/DelegateMapper.xml" />
         <mapper resource="mybatis/mapping/DelegateAccountMapper.xml" />
-        <mapper resource="mybatis/mapping/PeerGroupMapper.xml" />
-        <mapper resource="mybatis/mapping/PeerGroupRelationMapper.xml" />
-        <mapper resource="mybatis/mapping/PeerMapper.xml" />
+        <mapper resource="mybatis/mapping/NodeGroupMapper.xml" />
+        <mapper resource="mybatis/mapping/NodeGroupRelationMapper.xml" />
+        <mapper resource="mybatis/mapping/NodeMapper.xml" />
         <mapper resource="mybatis/mapping/SubChainMapper.xml" />
         <mapper resource="mybatis/mapping/TransactionLocalMapper.xml" />
         <mapper resource="mybatis/mapping/TransactionMapper.xml" />

@@ -37,6 +37,6 @@ public class SmallBlockHandler extends AbstractNetworkEventHandler<SmallBlockEve
         }
         data.setTxHashList(txHashList);
         getTxGroupEvent.setEventBody(data);
-        broadcaster.sendToPeer(getTxGroupEvent, fromId);
+        broadcaster.sendToNode(getTxGroupEvent, fromId);
     }
 }

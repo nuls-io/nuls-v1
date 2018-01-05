@@ -73,7 +73,7 @@ public class ConsensusTool {
         agent.setStatus(ConsensusStatusEnum.WAITING.getCode());
         agent.setDeposit(Na.valueOf(po.getDeposit()));
 //todo        agent.setCommissionRate(PocConsensusConstant.DEFAULT_COMMISSION_RATE);
-        agent.setDelegateAddress(po.getPeerAddress());
+        agent.setDelegateAddress(po.getNodeAddress());
         agent.setIntroduction(po.getRemark());
         agent.setStartTime(po.getStartTime());
         Consensus<Agent> ca = new Consensus<>();
@@ -106,7 +106,7 @@ public class ConsensusTool {
         po.setDeposit(bean.getExtend().getDeposit().getValue());
         po.setStartTime(bean.getExtend().getStartTime());
         po.setRemark(bean.getExtend().getIntroduction());
-        po.setPeerAddress(bean.getExtend().getDelegateAddress());
+        po.setNodeAddress(bean.getExtend().getDelegateAddress());
         po.setId(bean.getAddress());
         return po;
     }

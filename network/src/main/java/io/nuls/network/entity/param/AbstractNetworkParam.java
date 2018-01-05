@@ -30,12 +30,12 @@ public abstract class AbstractNetworkParam {
 
     protected NetworkEventHandlerFactory messageHandlerFactory;
 
-    protected List<InetSocketAddress> seedPeers = new ArrayList<>();
+    protected List<InetSocketAddress> seedNodes = new ArrayList<>();
 
     protected Set<String> localIps = IPUtil.getIps();
 
-    public List<InetSocketAddress> getSeedPeers() {
-        return seedPeers;
+    public List<InetSocketAddress> getSeedNodes() {
+        return seedNodes;
     }
 
     public int port() {

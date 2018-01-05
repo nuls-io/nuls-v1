@@ -5,7 +5,7 @@ import io.nuls.core.event.BaseNetworkEvent;
 import io.nuls.event.bus.event.CommonDigestEvent;
 import io.nuls.event.bus.service.intf.NetworkEventBroadcaster;
 import io.nuls.network.entity.BroadcastResult;
-import io.nuls.network.entity.Peer;
+import io.nuls.network.entity.Node;
 import io.nuls.network.service.NetworkService;
 
 import java.util.ArrayList;
@@ -30,54 +30,54 @@ public class NetworkEventBroadcasterImpl implements NetworkEventBroadcaster {
 
     @Override
     public List<String> broadcastHashAndCache(BaseNetworkEvent event) {
-        BroadcastResult result = this.networkService.broadcast(new CommonDigestEvent(event.getHash()));
+        BroadcastResult result = this.networkService.sendToAllNode(new CommonDigestEvent(event.getHash()));
         if (result.isSuccess()) {
             eventCacheService.cacheSendedEvent(event);
         }
-        return getPeerIdList(result);
+        return getNodeIdList(result);
     }
 
     @Override
-    public List<String> broadcastHashAndCache(BaseNetworkEvent event, String excludePeerId) {
-        BroadcastResult result = this.networkService.broadcast(new CommonDigestEvent(event.getHash()), excludePeerId);
+    public List<String> broadcastHashAndCache(BaseNetworkEvent event, String excludeNodeId) {
+        BroadcastResult result = this.networkService.sendToAllNode(new CommonDigestEvent(event.getHash()), excludeNodeId);
         if (result.isSuccess()) {
             eventCacheService.cacheSendedEvent(event);
         }
-        return getPeerIdList(result);
+        return getNodeIdList(result);
     }
 
-    private List<String> getPeerIdList(BroadcastResult result) {
+    private List<String> getNodeIdList(BroadcastResult result) {
         List<String> list = new ArrayList<>();
-        if (!result.isSuccess() || result.getBroadcastPeers() == null || result.getBroadcastPeers().isEmpty()) {
+        if (!result.isSuccess() || result.getBroadcastNodes() == null || result.getBroadcastNodes().isEmpty()) {
             return list;
         }
-        for (Peer peer : result.getBroadcastPeers()) {
-            list.add(peer.getHash());
+        for (Node node : result.getBroadcastNodes()) {
+            list.add(node.getHash());
         }
         return list;
     }
 
     @Override
-    public List<String> broadcastAndCache(BaseNetworkEvent event, String excludePeerId) {
-        BroadcastResult result = networkService.broadcast(event, excludePeerId);
+    public List<String> broadcastAndCache(BaseNetworkEvent event, String excludeNodeId) {
+        BroadcastResult result = networkService.sendToAllNode(event, excludeNodeId);
         if (result.isSuccess()) {
             eventCacheService.cacheSendedEvent(event);
         }
-        return getPeerIdList(result);
+        return getNodeIdList(result);
     }
 
     @Override
     public List<String> broadcastAndCache(BaseNetworkEvent event) {
-        BroadcastResult result = networkService.broadcast(event);
+        BroadcastResult result = networkService.sendToAllNode(event);
         if (result.isSuccess()) {
             eventCacheService.cacheSendedEvent(event);
         }
-        return getPeerIdList(result);
+        return getNodeIdList(result);
     }
 
     @Override
-    public boolean sendToPeer(BaseNetworkEvent event, String peerId) {
-        BroadcastResult result = networkService.broadcastToPeer(event, peerId);
+    public boolean sendToNode(BaseNetworkEvent event, String nodeId) {
+        BroadcastResult result = networkService.sendToNode(event, nodeId);
         return result.isSuccess();
     }
 }

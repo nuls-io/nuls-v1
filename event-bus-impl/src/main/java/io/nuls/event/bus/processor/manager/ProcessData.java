@@ -10,26 +10,26 @@ public class ProcessData<E extends BaseEvent> {
 
     private final E data;
 
-    private String peerId;
+    private String nodeId;
 
     public ProcessData(E data){
         this.data = data;
     }
 
-    public ProcessData(E data, String peerId) {
+    public ProcessData(E data, String nodeId) {
         this.data = data;
-        this.peerId = peerId;
+        this.nodeId = nodeId;
     }
 
     public E getData() {
         return data;
     }
 
-    public String getPeerId() {
-        return peerId;
+    public String getNodeId() {
+        return nodeId;
     }
 
-    public void setPeerId(String peerId) {
-        this.peerId = peerId;
+    public void setNodeId(String nodeId) {
+        this.nodeId = nodeId;
     }
 }

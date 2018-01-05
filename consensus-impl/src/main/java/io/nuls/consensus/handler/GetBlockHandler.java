@@ -22,6 +22,6 @@ public class GetBlockHandler extends AbstractNetworkEventHandler<GetBlockEvent> 
         Block block = blockService.getBlock(event.getEventBody().getVal());
         BlockEvent blockEvent = new BlockEvent();
         blockEvent.setEventBody(block);
-        networkEventBroadcaster.sendToPeer(blockEvent,fromId);
+        networkEventBroadcaster.sendToNode(blockEvent,fromId);
     }
 }

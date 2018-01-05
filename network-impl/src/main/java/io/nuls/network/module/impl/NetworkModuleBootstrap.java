@@ -34,6 +34,10 @@ public class NetworkModuleBootstrap extends AbstractNetworkModule {
         this.registerService(networkService);
     }
 
+    private void registerEvent() {
+
+    }
+
     @Override
     public void start() {
         networkService.start();

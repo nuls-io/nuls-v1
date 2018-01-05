@@ -62,7 +62,7 @@ public class TxGroupHandler extends AbstractNetworkEventHandler<TxGroupEvent> {
         block.setTxs(txs);
         ValidateResult<RedPunishData> vResult = block.verify();
         if (null==vResult||vResult.isFailed()) {
-            networkService.removePeer(fromId);
+            networkService.removeNode(fromId);
             if (vResult.getLevel() == SeverityLevelEnum.FLAGRANT) {
                 RedPunishData data = vResult.getObject();
                 ConsensusMeetingRunner.putPunishData(data);

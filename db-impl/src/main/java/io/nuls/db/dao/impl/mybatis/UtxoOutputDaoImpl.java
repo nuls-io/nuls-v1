@@ -1,8 +1,7 @@
 package io.nuls.db.dao.impl.mybatis;
 
 import com.github.pagehelper.PageHelper;
-import io.nuls.core.constant.TransactionConstant;
-import io.nuls.db.dao.UtxoOutputDao;
+import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.db.dao.impl.mybatis.mapper.UtxoOutputMapper;
 import io.nuls.db.dao.impl.mybatis.util.SearchOperator;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
@@ -15,7 +14,7 @@ import java.util.Map;
  * @author Niels
  * @date 2017/11/22
  */
-public class UtxoOutputDaoImpl extends BaseDaoImpl<UtxoOutputMapper, String, UtxoOutputPo> implements UtxoOutputDao {
+public class UtxoOutputDaoImpl extends BaseDaoImpl<UtxoOutputMapper, String, UtxoOutputPo> implements UtxoOutputDataService {
     public UtxoOutputDaoImpl() {
         super(UtxoOutputMapper.class);
     }

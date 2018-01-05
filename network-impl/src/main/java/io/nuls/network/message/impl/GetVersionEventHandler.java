@@ -3,7 +3,7 @@ package io.nuls.network.message.impl;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.event.BaseNetworkEvent;
-import io.nuls.network.entity.Peer;
+import io.nuls.network.entity.Node;
 import io.nuls.network.message.NetworkEventResult;
 import io.nuls.network.message.entity.GetVersionEvent;
 import io.nuls.network.message.entity.VersionEvent;
@@ -26,11 +26,11 @@ public class GetVersionEventHandler implements NetWorkEventHandler {
     }
 
     @Override
-    public NetworkEventResult process(BaseNetworkEvent networkEvent, Peer peer) {
+    public NetworkEventResult process(BaseNetworkEvent networkEvent, Node node) {
         GetVersionEvent event = (GetVersionEvent) networkEvent;
         Block block = NulsContext.getInstance().getBestBlock();
         VersionEvent replyMessage = new VersionEvent(block.getHeader().getHeight(), block.getHeader().getHash().getDigestHex());
-        peer.setPort(event.getEventBody().getVal());
+        node.setPort(event.getEventBody().getVal());
         return new NetworkEventResult(true, replyMessage);
     }
 }

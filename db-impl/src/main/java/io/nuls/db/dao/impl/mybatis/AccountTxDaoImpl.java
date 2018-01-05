@@ -16,13 +16,13 @@ import java.util.List;
  * @author vivi
  * @date 2017/12/22.
  */
-public class AccountTxDaoImpl implements AccountTxDao {
+public class AccountTxDaoImpl implements AccountTxDataService {
 
-    private AccountDao accountDao = NulsContext.getInstance().getService(AccountDao.class);
+    private AccountDataService accountDao = NulsContext.getInstance().getService(AccountDataService.class);
 
-    private AliasDao aliasDao = NulsContext.getInstance().getService(AliasDao.class);
+    private AliasDataService aliasDao = NulsContext.getInstance().getService(AliasDataService.class);
 
-    private TransactionLocalDao txDao = NulsContext.getInstance().getService(TransactionLocalDao.class);
+    private TransactionLocalDataService txDao = NulsContext.getInstance().getService(TransactionLocalDataService.class);
 
     @SessionAnnotation
     @Override
@@ -36,7 +36,8 @@ public class AccountTxDaoImpl implements AccountTxDao {
             AccountPo po = new AccountPo();
             po.setId(address);
             po.setAlias(alias);
-            accountDao.updateSelective(po);
+            //todo
+//            accountDao.updateSelective(po);
         } catch (Exception e) {
             throw new NulsRuntimeException(ErrorCode.DB_SAVE_ERROR);
         }

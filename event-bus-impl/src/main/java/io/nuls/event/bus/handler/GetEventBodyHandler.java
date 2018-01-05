@@ -20,9 +20,9 @@ public class GetEventBodyHandler extends AbstractNetworkEventHandler<GetEventBod
     public void onEvent(GetEventBodyEvent event, String fromId)  {
         BaseNetworkEvent eventBody = eventCacheService.getEvent(event.getEventBody().getDigestHex());
         if (null == eventBody) {
-            Log.warn("get event faild,peer:" + fromId + ",event:" + event.getEventBody().getDigestHex());
+            Log.warn("get event faild,node:" + fromId + ",event:" + event.getEventBody().getDigestHex());
             return;
         }
-        networkEventBroadcaster.sendToPeer(eventBody, fromId);
+        networkEventBroadcaster.sendToNode(eventBody, fromId);
     }
 }

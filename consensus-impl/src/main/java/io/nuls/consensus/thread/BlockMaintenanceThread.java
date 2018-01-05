@@ -91,15 +91,15 @@ public class BlockMaintenanceThread implements Runnable {
             throw new NulsRuntimeException(ErrorCode.NET_MESSAGE_ERROR, "cannot get best block info!");
         }
         if (doit) {
-            downloadBlocks(blockInfo.getPeerIdList(), startHeight, blockInfo.getHeight(), blockInfo.getHash().getDigestHex());
+            downloadBlocks(blockInfo.getNodeIdList(), startHeight, blockInfo.getHeight(), blockInfo.getHash().getDigestHex());
         }
     }
 
 
-    private void downloadBlocks(List<String> peerIdList, long startHeight, long endHeight, String endHash) {
+    private void downloadBlocks(List<String> nodeIdList, long startHeight, long endHeight, String endHash) {
         DistributedBlockDownloadUtils utils = DistributedBlockDownloadUtils.getInstance();
         try {
-            utils.request(peerIdList, startHeight, endHeight, endHash);
+            utils.request(nodeIdList, startHeight, endHeight, endHash);
         } catch (InterruptedException e) {
             Log.error(e);
         }

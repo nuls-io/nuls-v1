@@ -44,7 +44,7 @@ public class AliasEventHandler extends AbstractNetworkEventHandler<AliasEvent> {
         ValidateResult result = tx.verify();
         if (null==result||result.isFailed()) {
             if (SeverityLevelEnum.FLAGRANT.equals(result.getLevel())) {
-               //todo networkService.removePeer(fromId);
+               //todo networkService.removeNode(fromId);
             }
             return;
         }
