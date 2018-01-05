@@ -18,17 +18,17 @@ public class TestNetworkParam extends AbstractNetworkParam {
     private static TestNetworkParam instance;
 
     private TestNetworkParam() {
-        this.maxInCount = NetworkContext.getNetworkConfig().getPropValue(NetworkConstant.NETWORK_PEER_MAX_IN, 50);
-        this.maxOutCount =  NetworkContext.getNetworkConfig().getPropValue(NetworkConstant.NETWORK_PEER_MAX_OUT, 10);
+        this.maxInCount = NetworkContext.getNetworkConfig().getPropValue(NetworkConstant.NETWORK_NODE_MAX_IN, 50);
+        this.maxOutCount =  NetworkContext.getNetworkConfig().getPropValue(NetworkConstant.NETWORK_NODE_MAX_OUT, 10);
         this.port = NetworkContext.getNetworkConfig().getPropValue(NetworkConstant.NETWORK_PORT_TEST, 8002);
         this.packetMagic = NetworkContext.getNetworkConfig().getPropValue(NetworkConstant.NETWORK_MAGIC_TEST, 987654322);
 
         InetSocketAddress address1 = new InetSocketAddress("192.168.1.156", port);
         InetSocketAddress address2 = new InetSocketAddress("192.168.1.157", port);
         InetSocketAddress address3 = new InetSocketAddress("192.168.1.158", port);
-        seedPeers.add(address1);
-        seedPeers.add(address2);
-        seedPeers.add(address3);
+        seedNodes.add(address1);
+        seedNodes.add(address2);
+        seedNodes.add(address3);
 
         this.messageFilter = DefaultMessageFilter.getInstance();
         this.messageHandlerFactory = DefaultNetWorkEventHandlerFactory.getInstance();

@@ -16,7 +16,7 @@ public interface NulsEventHandler<T extends BaseEvent> {
 
     /**
      * @param event
-     * @param fromId hash of the peer who send this event!
+     * @param fromId hash of the node who send this event!
      */
     void onEvent(T event, String fromId);
 }

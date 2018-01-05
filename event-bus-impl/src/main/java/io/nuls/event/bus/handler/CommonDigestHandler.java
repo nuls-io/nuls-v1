@@ -23,6 +23,6 @@ public class CommonDigestHandler extends AbstractNetworkEventHandler<CommonDiges
         }
         GetEventBodyEvent getEventBodyEvent = new GetEventBodyEvent();
         getEventBodyEvent.setEventBody(event.getEventBody());
-        networkEventBroadcaster.sendToPeer(getEventBodyEvent, fromId);
+        networkEventBroadcaster.sendToNode(getEventBodyEvent, fromId);
     }
 }

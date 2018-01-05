@@ -2,10 +2,9 @@ package io.nuls.network.service.impl;
 
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.mesasge.NulsMessage;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.constant.NetworkConstant;
-import io.nuls.network.entity.Peer;
+import io.nuls.network.entity.Node;
 import io.nuls.network.service.MessageWriter;
 
 import java.io.IOException;
@@ -26,7 +25,7 @@ public class ConnectionHandler implements MessageWriter {
 
     private SelectionKey key;
 
-    private Peer peer;
+    private Node node;
 
     private final ReentrantLock lock = new ReentrantLock();
 
@@ -34,17 +33,17 @@ public class ConnectionHandler implements MessageWriter {
 
     private final LinkedList<ByteBuffer> bytesToWrite = new LinkedList<>();
 
-    public ConnectionHandler(Peer peer, SelectionKey key) {
+    public ConnectionHandler(Node node, SelectionKey key) {
         this.key = key;
         this.channel = (SocketChannel) key.channel();
-        this.peer = peer;
+        this.node = node;
         readBuffer = ByteBuffer.allocate(NetworkConstant.MESSAGE_MAX_SIZE);
     }
 
-    public ConnectionHandler(Peer peer, SocketChannel channel, SelectionKey key) {
+    public ConnectionHandler(Node node, SocketChannel channel, SelectionKey key) {
         this.key = key;
         this.channel = channel;
-        this.peer = peer;
+        this.node = node;
         readBuffer = ByteBuffer.allocate(NetworkConstant.MESSAGE_MAX_SIZE);
     }
 
@@ -123,7 +122,7 @@ public class ConnectionHandler implements MessageWriter {
         try {
             if (!key.isValid()) {
                 // Key has been cancelled, make sure the socket gets closed
-                handler.peer.destroy();
+                handler.node.destroy();
                 return;
             }
             if (key.isReadable()) {
@@ -135,11 +134,11 @@ public class ConnectionHandler implements MessageWriter {
                 } else if (len == -1) {
                     // Socket was closed
                     key.cancel();
-                    handler.peer.destroy();
+                    handler.node.destroy();
                     return;
                 }
                 // "flip" the buffer - setting the limit to the current position and setting position to 0
-                handler.peer.receiveMessage(handler.readBuffer);
+                handler.node.receiveMessage(handler.readBuffer);
                 // Now drop the bytes which were read by compacting readBuff (resetting limit and keeping relative position)
             }
             if (key.isWritable()) {
@@ -149,7 +148,7 @@ public class ConnectionHandler implements MessageWriter {
             // This can happen eg if the channel closes while the thread is about to get killed
             // (ClosedByInterruptException), or if handler.connection.receiveBytes throws something
             Log.warn("Error handling SelectionKey: {}", e);
-            handler.peer.destroy();
+            handler.node.destroy();
         }
     }
 }

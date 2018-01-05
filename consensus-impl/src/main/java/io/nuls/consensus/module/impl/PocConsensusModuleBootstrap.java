@@ -10,8 +10,9 @@ import io.nuls.consensus.entity.genesis.GenesisBlock;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.tx.*;
 import io.nuls.consensus.entity.validator.block.PocBlockValidatorManager;
-import io.nuls.consensus.event.handler.*;
-import io.nuls.consensus.event.filter.*;
+import io.nuls.consensus.event.*;
+import io.nuls.consensus.handler.*;
+import io.nuls.consensus.handler.filter.*;
 import io.nuls.consensus.module.AbstractConsensusModule;
 import io.nuls.consensus.service.cache.BlockCacheService;
 import io.nuls.consensus.service.cache.BlockHeaderCacheService;
@@ -29,6 +30,7 @@ import io.nuls.core.thread.BaseThread;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.service.intf.EventBusService;
+import io.nuls.network.service.NetworkService;
 
 import java.util.List;
 
@@ -39,7 +41,7 @@ import java.util.List;
 public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
 
     private EventBusService eventBusService = NulsContext.getInstance().getService(EventBusService.class);
-    private boolean delegatePeer = false;
+    private boolean delegateNode = false;
     private ConsensusCacheService consensusCacheService;
     private AccountService accountService;
 
@@ -54,7 +56,7 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
         this.registerTransaction(TransactionConstant.TX_TYPE_YELLOW_PUNISH, YellowPunishTransaction.class);
         this.registerTransaction(TransactionConstant.TX_TYPE_JOIN_CONSENSUS, PocJoinConsensusTransaction.class);
         this.registerTransaction(TransactionConstant.TX_TYPE_EXIT_CONSENSUS, PocExitConsensusTransaction.class);
-        delegatePeer = NulsContext.MODULES_CONFIG.getCfgValue(PocConsensusConstant.CFG_CONSENSUS_SECTION, PocConsensusConstant.PROPERTY_DELEGATE_PEER, false);
+        delegateNode = NulsContext.MODULES_CONFIG.getCfgValue(PocConsensusConstant.CFG_CONSENSUS_SECTION, PocConsensusConstant.PROPERTY_DELEGATE_NODE, false);
         PocBlockValidatorManager.initBlockValidators();
         BlockCacheService.getInstance().init();
         ConsensusCacheService.getInstance().initCache();
@@ -70,7 +72,7 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
         this.registerService(PocConsensusServiceImpl.getInstance());
         this.startBlockMaintenanceThread();
         this.checkConsensusStatus();
-        this.checkPeerType();
+        this.checkNodeType();
         TaskManager.createSingleThreadAndRun(this.getModuleId(), BlockPersistenceThread.THREAD_NAME, BlockPersistenceThread.getInstance());
         this.registerHandlers();
         Log.info("the POC consensus module is started!");
@@ -125,7 +127,7 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
     }
 
     private void checkConsensusStatus() {
-        if (!isDelegatePeer()) {
+        if (!isDelegateNode()) {
             return;
         }
         Account localAccount = accountService.getLocalAccount();
@@ -144,8 +146,8 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
         startMining();
     }
 
-    private void checkPeerType() {
-        boolean isSeed = isSeedPeer();
+    private void checkNodeType() {
+        boolean isSeed = NulsContext.getInstance().getService(NetworkService.class).isSeed(null);
         if (!isSeed) {
             return;
         }
@@ -162,16 +164,11 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
 //            return;
 //        }
 //        Map<String, Object> paramsMap = new HashMap<>();
-//        paramsMap.put(JoinConsensusParam.IS_SEED_PEER, true);
+//        paramsMap.put(JoinConsensusParam.IS_SEED_NODE, true);
 //        paramsMap.put(JoinConsensusParam.AGENT_ADDRESS, localAccount.getAddress().toString());
 //        paramsMap.put(JoinConsensusParam.DEPOSIT, 0L);
-//        paramsMap.put(JoinConsensusParam.INTRODUCTION, "seed peer!");
+//        paramsMap.put(JoinConsensusParam.INTRODUCTION, "seed node!");
 //        this.pocConsensusService.joinTheConsensus(localAccount.getAddress().toString(), null, paramsMap);
-    }
-
-    private boolean isSeedPeer() {
-        // todo auto-generated method stub(niels)
-        return false;
     }
 
     private void startMining() {
@@ -245,7 +242,7 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
         return PocConsensusConstant.POC_CONSENSUS_MODULE_VERSION;
     }
 
-    public boolean isDelegatePeer() {
-        return delegatePeer;
+    public boolean isDelegateNode() {
+        return delegateNode;
     }
 }

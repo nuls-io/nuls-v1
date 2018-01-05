@@ -36,13 +36,11 @@ public class AccountModuleBootstrap extends AbstractAccountModule {
         this.registerService(accountService);
         AliasValidator.getInstance().setAccountService(accountService);
         manager.init();
-        registerHanders();
+        registerHandlers();
     }
 
-    private void registerHanders() {
-        NetworkService service = NulsContext.getInstance().getService(NetworkService.class);
+    private void registerHandlers() {
         LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
-
         AliasEventHandler.getInstance().addFilter(AliasEventFilter.getInstance());
         AliasEventHandler.getInstance().setLedgerService(ledgerService);
         eventBusService.subscribeNetworkEvent(AliasEvent.class, AliasEventHandler.getInstance());

@@ -56,23 +56,23 @@ public class MybatisDBModuleBootstrap extends AbstractDBModule {
 
     private void initService() {
         DBMethodFilter dbMethodFilter = new DBMethodFilter();
-        this.registerService(BlockDao.class, AopUtils.createProxy(BlockDaoImpl.class, dbMethodFilter));
-        this.registerService(AliasDao.class, AopUtils.createProxy(AliasDaoImpl.class, dbMethodFilter));
-        this.registerService(AccountDao.class, AopUtils.createProxy(AccountDaoImpl.class, dbMethodFilter));
-        this.registerService(DelegateDao.class, AopUtils.createProxy(DelegateDaoImpl.class, dbMethodFilter));
-        this.registerService(DelegateAccountDao.class, AopUtils.createProxy(DelegateAccountDaoImpl.class, dbMethodFilter));
-        this.registerService(PeerDao.class, AopUtils.createProxy(PeerDaoImpl.class, dbMethodFilter));
-        this.registerService(PeerGroupDao.class, AopUtils.createProxy(PeerGroupDaoImpl.class, dbMethodFilter));
-        this.registerService(PeerGroupRelationDao.class, AopUtils.createProxy(PeerGroupRelationDaoImpl.class, dbMethodFilter));
-        this.registerService(TransactionDao.class, AopUtils.createProxy(TransactionDaoImpl.class, dbMethodFilter));
-        this.registerService(TransactionLocalDao.class, AopUtils.createProxy(TransactionLocalDaoImpl.class, dbMethodFilter));
-        this.registerService(TxAccountRelationDao.class, AopUtils.createProxy(TxAccountRelationDaoImpl.class, dbMethodFilter));
-        this.registerService(UtxoOutputDao.class, AopUtils.createProxy(UtxoOutputDaoImpl.class, dbMethodFilter));
-        this.registerService(UtxoInputDao.class, AopUtils.createProxy(UtxoInputDaoImpl.class, dbMethodFilter));
-        this.registerService(SubChainDao.class, AopUtils.createProxy(SubChainDaoImpl.class, dbMethodFilter));
-        this.registerService(ConsensusDao.class, AopUtils.createProxy(ConsensusDaoImpl.class, dbMethodFilter));
-        this.registerService(AccountTxDao.class, AopUtils.createProxy(AccountTxDaoImpl.class, dbMethodFilter));
-        this.registerService(UtxoTransactionDao.class, AopUtils.createProxy(UtxoTransactionDaoImpl.class, dbMethodFilter));
+        this.registerService(BlockDataService.class, AopUtils.createProxy(BlockDaoImpl.class, dbMethodFilter));
+        this.registerService(AliasDataService.class, AopUtils.createProxy(AliasDaoImpl.class, dbMethodFilter));
+        this.registerService(AccountDataService.class, AopUtils.createProxy(AccountDaoImpl.class, dbMethodFilter));
+        this.registerService(DelegateDataService.class, AopUtils.createProxy(DelegateDaoImpl.class, dbMethodFilter));
+        this.registerService(DelegateAccountDataService.class, AopUtils.createProxy(DelegateAccountDaoImpl.class, dbMethodFilter));
+        this.registerService(NodeDataService.class, AopUtils.createProxy(NodeDaoImpl.class, dbMethodFilter));
+        this.registerService(NodeGroupDataService.class, AopUtils.createProxy(NodeGroupDaoImpl.class, dbMethodFilter));
+        this.registerService(NodeGroupRelationDataService.class, AopUtils.createProxy(NodeGroupRelationDaoImpl.class, dbMethodFilter));
+        this.registerService(TransactionDataService.class, AopUtils.createProxy(TransactionDaoImpl.class, dbMethodFilter));
+        this.registerService(TransactionLocalDataService.class, AopUtils.createProxy(TransactionLocalDaoImpl.class, dbMethodFilter));
+        this.registerService(TxAccountRelationDataService.class, AopUtils.createProxy(TxAccountRelationDaoImpl.class, dbMethodFilter));
+        this.registerService(UtxoOutputDataService.class, AopUtils.createProxy(UtxoOutputDaoImpl.class, dbMethodFilter));
+        this.registerService(UtxoInputDataService.class, AopUtils.createProxy(UtxoInputDaoImpl.class, dbMethodFilter));
+        this.registerService(SubChainDataService.class, AopUtils.createProxy(SubChainDaoImpl.class, dbMethodFilter));
+        this.registerService(ConsensusDataService.class, AopUtils.createProxy(ConsensusDaoImpl.class, dbMethodFilter));
+        this.registerService(AccountTxDataService.class, AopUtils.createProxy(AccountTxDaoImpl.class, dbMethodFilter));
+        this.registerService(UtxoTransactionDataService.class, AopUtils.createProxy(UtxoTransactionDaoImpl.class, dbMethodFilter));
     }
 
     @Override

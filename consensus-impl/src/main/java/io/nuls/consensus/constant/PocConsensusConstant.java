@@ -12,7 +12,7 @@ public interface PocConsensusConstant {
 
 
     String CFG_CONSENSUS_SECTION = "Consensus";
-    String PROPERTY_DELEGATE_PEER = "delegate-peer";
+    String PROPERTY_DELEGATE_NODE = "delegate-node";
 
     String DEFAULT_CONSENSUS_LIST_FILE = "default-consensus-list.properties";
     String GENESIS_BLOCK_FILE = "genesis-block.json";

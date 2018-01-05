@@ -3,12 +3,10 @@ package io.nuls.db.dao.impl.mybatis;
 import com.github.pagehelper.PageHelper;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.str.StringUtils;
-import io.nuls.db.dao.TransactionDao;
-import io.nuls.db.dao.TransactionLocalDao;
+import io.nuls.db.dao.TransactionDataService;
 import io.nuls.db.dao.impl.mybatis.mapper.TransactionMapper;
 import io.nuls.db.dao.impl.mybatis.util.SearchOperator;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
-import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.entity.TransactionPo;
 
 import java.util.List;
@@ -18,7 +16,7 @@ import java.util.Map;
  * @author Niels
  * @date 2017/11/22
  */
-public class TransactionDaoImpl extends BaseDaoImpl<TransactionMapper, String, TransactionPo> implements TransactionDao {
+public class TransactionDaoImpl extends BaseDaoImpl<TransactionMapper, String, TransactionPo> implements TransactionDataService {
     public TransactionDaoImpl() {
         super(TransactionMapper.class);
     }

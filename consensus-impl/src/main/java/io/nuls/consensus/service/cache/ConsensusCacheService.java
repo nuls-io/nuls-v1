@@ -10,8 +10,8 @@ import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.member.Delegate;
 import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.core.context.NulsContext;
-import io.nuls.db.dao.DelegateAccountDao;
-import io.nuls.db.dao.DelegateDao;
+import io.nuls.db.dao.DelegateAccountDataService;
+import io.nuls.db.dao.DelegateDataService;
 import io.nuls.db.entity.DelegateAccountPo;
 import io.nuls.db.entity.DelegatePo;
 
@@ -34,8 +34,8 @@ public class ConsensusCacheService {
 
     private static final ConsensusCacheService INSTANCE = new ConsensusCacheService();
 
-    private DelegateDao delegateDao = NulsContext.getInstance().getService(DelegateDao.class);
-    private DelegateAccountDao delegateAccountDao = NulsContext.getInstance().getService(DelegateAccountDao.class);
+    private DelegateDataService delegateDao = NulsContext.getInstance().getService(DelegateDataService.class);
+    private DelegateAccountDataService delegateAccountDao = NulsContext.getInstance().getService(DelegateAccountDataService.class);
     private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
 
     private CacheMap<String, Consensus<Agent>> inAgentCache = new CacheMap<>(IN_AGENT_LIST);
@@ -54,8 +54,8 @@ public class ConsensusCacheService {
     public void initCache() {
 
         Account self = accountService.getLocalAccount();
-        List<DelegatePo> delegatePoList = this.delegateDao.queryAll();
-        List<DelegateAccountPo> delegateAccountPoList = this.delegateAccountDao.queryAll();
+        List<DelegatePo> delegatePoList = this.delegateDao.getList();
+        List<DelegateAccountPo> delegateAccountPoList = this.delegateAccountDao.getList();
         Consensus mine = null;
         for (DelegateAccountPo po : delegateAccountPoList) {
             Consensus<Agent> ca = ConsensusTool.fromPojo(po);

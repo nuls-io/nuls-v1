@@ -30,7 +30,7 @@ public class GetSmallBlockHandler extends AbstractNetworkEventHandler<GetSmallBl
         smallBlock.setTxHashList(block.getTxHashList());
         smallBlock.setTxCount(block.getHeader().getTxCount());
         smallBlockEvent.setEventBody(smallBlock);
-        networkEventBroadcaster.sendToPeer(smallBlockEvent, fromId);
+        networkEventBroadcaster.sendToNode(smallBlockEvent, fromId);
 //        TxHashData eventBody = event.getEventBody();
 //        Block block = blockService.getBlock(eventBody.getBlockHeight());
 //        if (null == block) {
@@ -44,7 +44,7 @@ public class GetSmallBlockHandler extends AbstractNetworkEventHandler<GetSmallBl
 //        smallBlock.setTxList(txList);
 //        smallBlock.setTxCount(txList.size());
 //        blockEvent.setEventBody(smallBlock);
-//        networkEventBroadcaster.sendToPeer(blockEvent, fromId);
+//        networkEventBroadcaster.sendToNode(blockEvent, fromId);
     }
 
 //    private List<Transaction> getTxList(Block block, List<NulsDigestData> txHashList) {

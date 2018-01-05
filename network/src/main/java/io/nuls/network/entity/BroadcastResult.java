@@ -16,7 +16,7 @@ public class BroadcastResult implements NulsCloneable {
 
     private String hash;
 
-    private List<Peer> broadcastPeers;
+    private List<Node> broadcastNodes;
 
     private int waitReplyCount;
 
@@ -31,10 +31,10 @@ public class BroadcastResult implements NulsCloneable {
         this.message = message;
     }
 
-    public BroadcastResult(boolean success, String message, List<Peer> broadcastPeers) {
+    public BroadcastResult(boolean success, String message, List<Node> broadcastNodes) {
         this.success = success;
         this.message = message;
-        this.broadcastPeers = broadcastPeers;
+        this.broadcastNodes = broadcastNodes;
     }
 
     @Override
@@ -66,12 +66,12 @@ public class BroadcastResult implements NulsCloneable {
         this.hash = hash;
     }
 
-    public List<Peer> getBroadcastPeers() {
-        return broadcastPeers;
+    public List<Node> getBroadcastNodes() {
+        return broadcastNodes;
     }
 
-    public void setBroadcastPeers(List<Peer> broadcastPeers) {
-        this.broadcastPeers = broadcastPeers;
+    public void setBroadcastNodes(List<Node> broadcastNodes) {
+        this.broadcastNodes = broadcastNodes;
     }
 
     public int getWaitReplyCount() {
@@ -97,7 +97,7 @@ public class BroadcastResult implements NulsCloneable {
         result.setSuccess(this.success);
         result.setWaitReplyCount(this.waitReplyCount);
         result.setRepliedCount(this.repliedCount);
-        result.setBroadcastPeers(this.broadcastPeers);
+        result.setBroadcastNodes(this.broadcastNodes);
         result.setMessage(this.getMessage());
         return result;
     }

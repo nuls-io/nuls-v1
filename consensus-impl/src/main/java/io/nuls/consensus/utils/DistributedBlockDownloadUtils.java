@@ -31,12 +31,12 @@ public class DistributedBlockDownloadUtils {
     private NetworkEventBroadcaster networkEventBroadcaster = NulsContext.getInstance().getService(NetworkEventBroadcaster.class);
     private QueueService<String> queueService = NulsContext.getInstance().getService(QueueService.class);
     private BlockCacheService blockCacheService = NulsContext.getInstance().getService(BlockCacheService.class);
-    private Map<Long, String> heightPeerMap = new HashMap<>();
+    private Map<Long, String> heightNodeMap = new HashMap<>();
     private Map<Long, Block> blockMap = new HashMap<>();
     private NetworkService networkService = NulsContext.getInstance().getService(NetworkService.class);
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
     private boolean finished = true;
-    private List<String> peerIdList;
+    private List<String> nodeIdList;
     private long startHeight;
     private long endHeight;
     private String highestHash;
@@ -50,19 +50,19 @@ public class DistributedBlockDownloadUtils {
         return INSTANCE;
     }
 
-    private void init(List<String> peerIdList) {
-        this.peerIdList = peerIdList;
-        this.queueService.createQueue(queueId, (long) peerIdList.size(), false);
-        for (String peerId : peerIdList) {
-            this.queueService.offer(queueId, peerId);
+    private void init(List<String> nodeIdList) {
+        this.nodeIdList = nodeIdList;
+        this.queueService.createQueue(queueId, (long) nodeIdList.size(), false);
+        for (String nodeId : nodeIdList) {
+            this.queueService.offer(queueId, nodeId);
         }
-        heightPeerMap.clear();
+        heightNodeMap.clear();
         blockMap.clear();
     }
 
-    public void request(List<String> peerIdList, long startHeight, long endHeight, String highestHash) throws InterruptedException {
+    public void request(List<String> nodeIdList, long startHeight, long endHeight, String highestHash) throws InterruptedException {
         lock.lock();
-        this.init(peerIdList);
+        this.init(nodeIdList);
         this.startHeight = startHeight;
         this.endHeight = endHeight;
         this.highestHash = highestHash;
@@ -72,20 +72,20 @@ public class DistributedBlockDownloadUtils {
         }
     }
 
-    private void sendRequest(long height, String peerId) {
-        heightPeerMap.put(height, peerId);
+    private void sendRequest(long height, String nodeId) {
+        heightNodeMap.put(height, nodeId);
         GetBlockEvent event = new GetBlockEvent();
         event.setEventBody(new BasicTypeData<>(height));
-        this.networkEventBroadcaster.sendToPeer(event, peerId);
+        this.networkEventBroadcaster.sendToNode(event, nodeId);
     }
 
 
-    public boolean recieveBlock(String peerId, Block block) {
-        if (!this.peerIdList.contains(peerId) || !peerId.equals(heightPeerMap.get(block.getHeader().getHeight()))) {
+    public boolean recieveBlock(String nodeId, Block block) {
+        if (!this.nodeIdList.contains(nodeId) || !nodeId.equals(heightNodeMap.get(block.getHeader().getHeight()))) {
             return false;
         }
         blockMap.put(block.getHeader().getHeight(), block);
-        this.queueService.offer(queueId, peerId);
+        this.queueService.offer(queueId, nodeId);
         verify();
         return true;
     }
@@ -115,9 +115,9 @@ public class DistributedBlockDownloadUtils {
                 hash = block.getHeader().getPreHash().getDigestHex();
                 continue;
             }
-            String peerId = heightPeerMap.get(i);
-            networkService.removePeer(peerId);
-            this.queueService.remove(queueId, peerId);
+            String nodeId = heightNodeMap.get(i);
+            networkService.removeNode(nodeId);
+            this.queueService.remove(queueId, nodeId);
             if (this.queueService.size(queueId) == 0) {
                 throw new NulsRuntimeException(ErrorCode.NET_MESSAGE_ERROR, "download block faild!");
             }

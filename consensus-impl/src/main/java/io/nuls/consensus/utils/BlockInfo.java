@@ -14,7 +14,7 @@ public class BlockInfo {
 
     private long height;
     private NulsDigestData hash;
-    private List<String> peerIdList;
+    private List<String> nodeIdList;
     private boolean finished = false;
     public long getHeight() {
         return height;
@@ -32,15 +32,15 @@ public class BlockInfo {
         this.hash = hash;
     }
 
-    public List<String> getPeerIdList() {
-        return peerIdList;
+    public List<String> getNodeIdList() {
+        return nodeIdList;
     }
 
-    public void setPeerIdList(List<String> peerIdList) {
-        this.peerIdList = peerIdList;
+    public void setNodeIdList(List<String> nodeIdList) {
+        this.nodeIdList = nodeIdList;
     }
-    public void setPeerIdList(Set<String> peerIdSet) {
-        this.peerIdList = new ArrayList<>(peerIdSet);
+    public void setNodeIdList(Set<String> nodeIdSet) {
+        this.nodeIdList = new ArrayList<>(nodeIdSet);
     }
 
     public boolean isFinished() {

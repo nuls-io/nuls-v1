@@ -19,15 +19,15 @@ public interface NetworkEventBroadcaster {
     List<String> broadcastHashAndCache(BaseNetworkEvent event);
 
 
-    List<String> broadcastHashAndCache(BaseNetworkEvent event, String excludePeerId);
+    List<String> broadcastHashAndCache(BaseNetworkEvent event, String excludeNodeId);
 
     /**
-     * broadcast to peers except "excludePeerId"
+     * broadcast to nodes except "excludeNodeId"
      * @param event
-     * @param excludePeerId
+     * @param excludeNodeId
      * @return
      */
-    List<String> broadcastAndCache(BaseNetworkEvent event, String excludePeerId);
+    List<String> broadcastAndCache(BaseNetworkEvent event, String excludeNodeId);
 
     /**
      * broadcast msg ,no need to pass the message
@@ -36,10 +36,10 @@ public interface NetworkEventBroadcaster {
     List<String> broadcastAndCache(BaseNetworkEvent event);
 
     /**
-     * send msg to one peer
+     * send msg to one node
      * @param event
-     * @param peerId
+     * @param nodeId
      */
-    boolean sendToPeer(BaseNetworkEvent event, String peerId);
+    boolean sendToNode(BaseNetworkEvent event, String nodeId);
 
 }

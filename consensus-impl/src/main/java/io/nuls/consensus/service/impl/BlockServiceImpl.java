@@ -6,13 +6,12 @@ import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
-import io.nuls.db.dao.BlockDao;
-import io.nuls.db.dao.ConsensusDao;
+import io.nuls.db.dao.BlockDataService;
+import io.nuls.db.dao.ConsensusDataService;
 import io.nuls.db.entity.BlockPo;
 import io.nuls.db.entity.TransactionPo;
 import io.nuls.db.util.TransactionPoTool;
@@ -27,8 +26,8 @@ import java.util.List;
 public class BlockServiceImpl implements BlockService {
     private static final BlockServiceImpl INSTANCE = new BlockServiceImpl();
 
-    private BlockDao blockDao = NulsContext.getInstance().getService(BlockDao.class);
-    private ConsensusDao consensusDao = NulsContext.getInstance().getService(ConsensusDao.class);
+    private BlockDataService blockDao = NulsContext.getInstance().getService(BlockDataService.class);
+    private ConsensusDataService consensusDao = NulsContext.getInstance().getService(ConsensusDataService.class);
     private BlockCacheService blockCacheService = BlockCacheService.getInstance();
 
     private BlockServiceImpl() {
@@ -135,7 +134,7 @@ public class BlockServiceImpl implements BlockService {
             return;
         }
         this.rollback(block.getTxs(), block.getTxs().size() - 1);
-        blockDao.deleteByKey(block.getHeader().getHash().getDigestHex());
+        blockDao.delete(block.getHeader().getHash().getDigestHex());
     }
 
     @Override

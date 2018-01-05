@@ -19,8 +19,8 @@ public class DefaultNetWorkEventHandlerFactory extends NetworkEventHandlerFactor
     private DefaultNetWorkEventHandlerFactory() {
 //        handlerMap.put(VersionEvent.class.getName(), VersionEventHandler.getInstance());
 //        handlerMap.put(GetVersionEvent.class.getName(), GetVersionEventHandler.getInstance());
-//        handlerMap.put(GetPeerEvent.class.getName(), GetPeerEventHandler.getInstance());
-//        handlerMap.put(PeerEvent.class.getName(), PeerEventHandler.getInstance());
+//        handlerMap.put(GetNodeEvent.class.getName(), GetNodeEventHandler.getInstance());
+//        handlerMap.put(NodeEvent.class.getName(), NodeEventHandler.getInstance());
     }
 
     public static NetworkEventHandlerFactory getInstance() {

@@ -1,6 +1,6 @@
 package io.nuls.db.dao.impl.mybatis;
 
-import io.nuls.db.dao.BlockDao;
+import io.nuls.db.dao.BlockDataService;
 import io.nuls.db.dao.impl.mybatis.mapper.BlockMapper;
 import io.nuls.db.dao.impl.mybatis.params.BlockSearchParams;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
@@ -14,7 +14,7 @@ import java.util.Map;
  * @author v.chou
  * @date 2017/9/29
  */
-public class BlockDaoImpl extends BaseDaoImpl<BlockMapper, String, BlockPo> implements BlockDao {
+public class BlockDaoImpl extends BaseDaoImpl<BlockMapper, String, BlockPo> implements BlockDataService {
 
     public BlockDaoImpl() {
         super(BlockMapper.class);
@@ -29,7 +29,7 @@ public class BlockDaoImpl extends BaseDaoImpl<BlockMapper, String, BlockPo> impl
     public BlockPo getBlock(long height) {
         Map<String, Object> params = new HashMap<>();
         params.put(BlockSearchParams.SEARCH_FIELD_HEIGHT,height);
-        List<BlockPo> list = this.searchList(params);
+        List<BlockPo> list = this.getList(params);
         if(null==list||list.isEmpty()){
             return null;
         }
