@@ -1,14 +1,6 @@
 package io.nuls.network.message;
 
 import io.nuls.core.event.BaseNetworkEvent;
-import io.nuls.network.message.entity.GetPeerEvent;
-import io.nuls.network.message.entity.GetVersionEvent;
-import io.nuls.network.message.entity.PeerEvent;
-import io.nuls.network.message.entity.VersionData;
-import io.nuls.network.message.impl.GetPeerEventHandler;
-import io.nuls.network.message.impl.GetVersionDataHandler;
-import io.nuls.network.message.impl.PeerDataHandler;
-import io.nuls.network.message.impl.VersionDataHandler;
 import io.nuls.network.message.handler.NetWorkEventHandler;
 
 import java.util.HashMap;
@@ -25,10 +17,10 @@ public class DefaultNetWorkEventHandlerFactory extends NetworkEventHandlerFactor
     private Map<String, NetWorkEventHandler> handlerMap = new HashMap<>();
 
     private DefaultNetWorkEventHandlerFactory() {
-//        handlerMap.put(VersionData.class.getName(), VersionDataHandler.getInstance());
-//        handlerMap.put(GetVersionEvent.class.getName(), GetVersionDataHandler.getInstance());
+//        handlerMap.put(VersionEvent.class.getName(), VersionEventHandler.getInstance());
+//        handlerMap.put(GetVersionEvent.class.getName(), GetVersionEventHandler.getInstance());
 //        handlerMap.put(GetPeerEvent.class.getName(), GetPeerEventHandler.getInstance());
-//        handlerMap.put(PeerEvent.class.getName(), PeerDataHandler.getInstance());
+//        handlerMap.put(PeerEvent.class.getName(), PeerEventHandler.getInstance());
     }
 
     public static NetworkEventHandlerFactory getInstance() {
