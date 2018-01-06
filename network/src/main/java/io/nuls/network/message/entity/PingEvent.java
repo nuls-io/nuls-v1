@@ -10,7 +10,7 @@ import java.io.IOException;
  * @author vivi
  * @Date 2017.11.01
  */
-public class PingData {
+public class PingEvent {
     public static final short OWN_MAIN_VERSION = 1;
     public static final short OWN_SUB_VERSION = 0001;
 

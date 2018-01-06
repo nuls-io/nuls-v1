@@ -316,8 +316,8 @@ public class Node extends BaseNulsData {
 
     public boolean isHandShakeMessage(BaseEvent event) {
         if (isNetworkEvent(event)) {
-            if (event.getHeader().getEventType() == NetworkConstant.NETWORK_GET_VERSION_MESSAGE
-                    || event.getHeader().getEventType() == NetworkConstant.NETWORK_VERSION_MESSAGE) {
+            if (event.getHeader().getEventType() == NetworkConstant.NETWORK_GET_VERSION_EVENT
+                    || event.getHeader().getEventType() == NetworkConstant.NETWORK_VERSION_EVENT) {
                 return true;
             }
         }
