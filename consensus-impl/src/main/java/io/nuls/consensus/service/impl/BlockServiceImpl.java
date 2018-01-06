@@ -115,6 +115,8 @@ public class BlockServiceImpl implements BlockService {
         List<TransactionPo> txPoList = new ArrayList<>();
         for (int x = 0; x < block.getHeader().getTxCount(); x++) {
             Transaction tx = block.getTxs().get(x);
+            tx.setBlockHash(block.getHeader().getHash());
+            tx.setBlockHeight(block.getHeader().getHeight());
             try {
                 tx.onCommit();
                 txPoList.add(TransactionPoTool.toPojo(tx));

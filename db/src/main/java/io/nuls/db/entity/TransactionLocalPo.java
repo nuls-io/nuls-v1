@@ -11,7 +11,7 @@ public class TransactionLocalPo {
 
     private Long createTime;
 
-    private Integer blockHeight;
+    private Long blockHeight;
 
     private String blockHash;
 
@@ -41,11 +41,11 @@ public class TransactionLocalPo {
         this.createTime = createTime;
     }
 
-    public Integer getBlockHeight() {
+    public Long getBlockHeight() {
         return blockHeight;
     }
 
-    public void setBlockHeight(Integer blockHeight) {
+    public void setBlockHeight(Long blockHeight) {
         this.blockHeight = blockHeight;
     }
 

@@ -50,7 +50,9 @@ public class ConsensusTool {
         po.setHeight(block.getHeader().getHeight());
         po.setCreateTime(block.getHeader().getTime());
         po.setHash(block.getHeader().getHash().getDigestHex());
-        po.setSign(block.getHeader().getSign().getSignBytes());
+        if(null!=block.getHeader().getSign()){
+            po.setSign(block.getHeader().getSign().getSignBytes());
+        }
         po.setTxcount(block.getHeader().getTxCount());
         po.setConsensusAddress(block.getHeader().getPackingAddress());
         return po;

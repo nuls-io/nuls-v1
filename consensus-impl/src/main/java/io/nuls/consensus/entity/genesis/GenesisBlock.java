@@ -66,9 +66,9 @@ public final class GenesisBlock extends Block {
         for (Map<String, Object> map : list) {
             String address = (String) map.get(CONFIG_FILED_ADDRESS);
             AssertUtil.canNotEmpty(address, ErrorCode.NULL_PARAMETER);
-            Long nuls = (Long) map.get(CONFIG_FILED_NULS);
+            Integer nuls = (Integer) map.get(CONFIG_FILED_NULS);
             AssertUtil.canNotEmpty(nuls, ErrorCode.NULL_PARAMETER);
-            Long height = (Long) map.get(CONFIG_FILED_UNLOCK_HEIGHT);
+            Integer height = (Integer) map.get(CONFIG_FILED_UNLOCK_HEIGHT);
             Coin coin = new Coin();
             coin.setNa(Na.parseNuls(nuls));
             coin.setCanBeUnlocked(false);
@@ -91,7 +91,7 @@ public final class GenesisBlock extends Block {
 
 
     private void fillHeader(Map<String, Object> jsonMap) {
-        Long height = (Long) jsonMap.get(CONFIG_FILED_HEIGHT);
+        Integer height = (Integer) jsonMap.get(CONFIG_FILED_HEIGHT);
         AssertUtil.canNotEmpty(height,ErrorCode.CONFIG_ERROR);
         String time = (String) jsonMap.get(CONFIG_FILED_TIME);
         AssertUtil.canNotEmpty(time,ErrorCode.CONFIG_ERROR);
