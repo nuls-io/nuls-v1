@@ -13,8 +13,12 @@ import io.nuls.event.bus.constant.EventConstant;
  */
 public class CommonDigestEvent extends BaseNetworkEvent<NulsDigestData> {
 
-    public CommonDigestEvent(NulsDigestData hash) {
+    public CommonDigestEvent() {
         super(NulsConstant.MODULE_ID_EVENT_BUS, EventConstant.EVENT_TYPE_COMMON_EVENT_HASH_EVENT);
+    }
+
+    public CommonDigestEvent(NulsDigestData hash) {
+        this();
         this.setEventBody(hash);
     }
 
