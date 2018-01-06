@@ -24,8 +24,8 @@ public class BlockCacheManager {
     }
 
     public void init() {
-        blockCacheMap = new CacheMap<>(BLOCK_CACHE);
-        hashHeightMap = new CacheMap<>(HEIGHT_HASH_CACHE);
+        blockCacheMap = new CacheMap<>(BLOCK_CACHE,120,0);
+        hashHeightMap = new CacheMap<>(HEIGHT_HASH_CACHE,120,0);
     }
 
     public static BlockCacheManager getInstance() {

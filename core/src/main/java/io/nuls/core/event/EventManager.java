@@ -18,7 +18,7 @@ public class EventManager {
     private static final Map<String, Class<? extends BaseEvent>> EVENT_MAP = new HashMap<>();
     private static final Set<Class<? extends BaseEvent>> EVENT_CLASSES = new HashSet<>();
 
-    public static void isLegal(Class<? extends BaseEvent> busDataClass) {
+    public static void care(Class<? extends BaseEvent> busDataClass) {
         boolean b = EVENT_CLASSES.contains(busDataClass);
         if (!b) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "EventClass is not legal:" + busDataClass.getName());

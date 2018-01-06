@@ -21,7 +21,7 @@ public class SmallBlockCacheManager {
     private CacheMap<String, SmallBlock> smallBlockCacheMap;
 
     public void init() {
-        smallBlockCacheMap = new CacheMap<>(CACHE_NAME, 300000, 0);
+        smallBlockCacheMap = new CacheMap<>(CACHE_NAME, 120, 0);
     }
 
     public void clear() {

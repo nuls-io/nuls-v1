@@ -1,5 +1,6 @@
 package io.nuls.consensus.cache.manager.tx;
 
+import io.nuls.cache.util.CacheMap;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 
@@ -11,28 +12,41 @@ import java.util.List;
  */
 public class ReceivedTxCacheManager {
     private static ReceivedTxCacheManager INSTANCE = new ReceivedTxCacheManager();
-    private ReceivedTxCacheManager(){}
-    public static ReceivedTxCacheManager getInstance(){
+    private static final String CACHE_NAME = "Received-tx-cache";
+    /**
+     * 2 minutes alive
+     */
+    private static final int LIVE_TIME = 120;
+    private CacheMap<String, Transaction> txCache;
+
+    private ReceivedTxCacheManager() {
+    }
+
+    public static ReceivedTxCacheManager getInstance() {
         return INSTANCE;
     }
 
-    public boolean txExist(NulsDigestData hash){
-        //todo
-        return false;
+    public void init() {
+        txCache = new CacheMap<>(CACHE_NAME, LIVE_TIME, 0);
+    }
+
+    public boolean txExist(NulsDigestData hash) {
+        return null != txCache.get(hash.getDigestHex());
     }
 
     public Transaction getTx(NulsDigestData txHash) {
-        // todo auto-generated method stub(niels)
-        return null;
+
+        return txCache.get(txHash.getDigestHex());
     }
 
     public void removeTx(List<NulsDigestData> txHashList) {
-        // todo auto-generated method stub(niels)
-
+        for (NulsDigestData hash : txHashList) {
+            txCache.remove(hash.getDigestHex());
+        }
     }
 
     public List<Transaction> getTxList() {
-        // todo auto-generated method stub(niels)
-        return null;
+
+        return txCache.values();
     }
 }

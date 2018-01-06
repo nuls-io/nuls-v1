@@ -56,7 +56,7 @@ public class ProcessorManager<E extends BaseNetworkEvent, H extends NulsEventHan
     }
 
     public void offer(ProcessData<E> data) {
-        EventManager.isLegal(data.getData().getClass());
+        EventManager.care(data.getData().getClass());
         disruptorService.offer(disruptorName, data);
     }
 
