@@ -2,12 +2,17 @@ package io.nuls.network.module.impl;
 
 
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.event.EventManager;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.NetworkContext;
 import io.nuls.network.constant.NetworkConstant;
-import io.nuls.network.message.ReplyNotice;
+import io.nuls.network.message.entity.GetNodeEvent;
+import io.nuls.network.message.entity.GetVersionEvent;
+import io.nuls.network.message.entity.NodeEvent;
+import io.nuls.network.message.entity.VersionEvent;
 import io.nuls.network.module.AbstractNetworkModule;
 import io.nuls.network.service.NetworkService;
 import io.nuls.network.service.impl.NetworkServiceImpl;
@@ -31,11 +36,16 @@ public class NetworkModuleBootstrap extends AbstractNetworkModule {
             throw new NulsRuntimeException(ErrorCode.IO_ERROR);
         }
         networkService = new NetworkServiceImpl(this);
+        this.registerEvent();
         this.registerService(networkService);
+
     }
 
     private void registerEvent() {
-
+        EventManager.putEvent(GetVersionEvent.class);
+        EventManager.putEvent(VersionEvent.class);
+        EventManager.putEvent(GetNodeEvent.class);
+        EventManager.putEvent(NodeEvent.class);
     }
 
     @Override

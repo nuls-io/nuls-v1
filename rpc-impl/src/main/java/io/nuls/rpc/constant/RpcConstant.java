@@ -17,7 +17,7 @@ public interface RpcConstant {
     String DEFAULT_URL = "nuls";
 
 
-    String CFG_RPC_SECTION = "RPC_Server";
+    String CFG_RPC_SECTION = "rpc";
     String CFG_RPC_SERVER_IP = "server.ip";
     String CFG_RPC_SERVER_PORT ="server.port" ;
     String CFG_RPC_SERVER_URL = "server.url";

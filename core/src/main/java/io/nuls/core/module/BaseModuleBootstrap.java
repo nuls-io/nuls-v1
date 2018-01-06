@@ -82,6 +82,8 @@ public abstract class BaseModuleBootstrap {
 
     protected final String getModuleCfgProperty(String section, String property) {
         try {
+            System.out.println(section);
+            System.out.println(property);
             return NulsContext.MODULES_CONFIG.getCfgValue(section, property);
         } catch (NulsException e) {
             Log.error(e);

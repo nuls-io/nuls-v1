@@ -220,13 +220,13 @@ public class Node extends BaseNulsData {
         }
     }
 
-    private void asynExecute(BaseNetworkEvent networkMessage) {
-        NetWorkEventHandler handler = messageHandlerFactory.getHandler(networkMessage);
+    private void asynExecute(BaseNetworkEvent networkEvent) {
+        NetWorkEventHandler handler = messageHandlerFactory.getHandler(networkEvent);
         TaskManager.asynExecuteRunnable(new Runnable() {
             @Override
             public void run() {
                 try {
-                    NetworkEventResult messageResult = handler.process(networkMessage, Node.this);
+                    NetworkEventResult messageResult = handler.process(networkEvent, Node.this);
                     processMessageResult(messageResult);
                 } catch (Exception e) {
                     Log.error("process message error", e);

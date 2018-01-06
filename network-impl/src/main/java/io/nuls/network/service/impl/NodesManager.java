@@ -80,8 +80,8 @@ public class NodesManager {
 
         boolean isConsensus = NulsContext.MODULES_CONFIG.getCfgValue(PocConsensusConstant.CFG_CONSENSUS_SECTION, PocConsensusConstant.PROPERTY_DELEGATE_NODE, false);
         if (isConsensus) {
-            network.maxOutCount(network.maxOutCount() * 5);
-            network.maxInCount(network.maxInCount() * 5);
+            network.maxOutCount(network.maxOutCount() * 2);
+            network.maxInCount(network.maxInCount() * 2);
         }
 
         System.out.println("-----------nodeManager start");
