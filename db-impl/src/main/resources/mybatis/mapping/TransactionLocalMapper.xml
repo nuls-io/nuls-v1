@@ -6,7 +6,7 @@
         <id column="hash" jdbcType="VARCHAR" property="hash"/>
         <result column="type" jdbcType="INTEGER" property="type"/>
         <result column="create_time" jdbcType="BIGINT" property="createTime"/>
-        <result column="block_height" jdbcType="INTEGER" property="blockHeight"/>
+        <result column="block_height" jdbcType="BIGINT" property="blockHeight"/>
         <result column="block_hash" jdbcType="VARCHAR" property="blockHash"/>
     </resultMap>
     <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="io.nuls.db.entity.TransactionLocalPo">
@@ -48,7 +48,7 @@
         block_hash, txData
         )
         values (#{hash,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER},
-        #{createTime,jdbcType=BIGINT}, #{blockHeight,jdbcType=INTEGER},
+        #{createTime,jdbcType=BIGINT}, #{blockHeight,jdbcType=BIGINT},
         #{blockHash,jdbcType=VARCHAR}, #{txdata,jdbcType=VARBINARY}}
         )
     </insert>
@@ -89,7 +89,7 @@
                 #{createTime,jdbcType=BIGINT},
             </if>
             <if test="blockHeight != null">
-                #{blockHeight,jdbcType=INTEGER},
+                #{blockHeight,jdbcType=BIGINT},
             </if>
             <if test="blockHash != null">
                 #{blockHash,jdbcType=VARCHAR},
@@ -113,7 +113,7 @@
                 create_time = #{createTime,jdbcType=BIGINT},
             </if>
             <if test="blockHeight != null">
-                block_height = #{blockHeight,jdbcType=INTEGER},
+                block_height = #{blockHeight,jdbcType=BIGINT},
             </if>
             <if test="blockHash != null">
                 block_hash = #{blockHash,jdbcType=VARCHAR},
@@ -132,7 +132,7 @@
         update transaction_local
         set type = #{type,jdbcType=INTEGER},
         create_time = #{createTime,jdbcType=BIGINT},
-        block_height = #{blockHeight,jdbcType=INTEGER},
+        block_height = #{blockHeight,jdbcType=BIGINT},
         block_hash = #{blockHash,jdbcType=VARCHAR},
         txData = #{txdata,jdbcType=VARBINARY}
         where hash = #{hash,jdbcType=VARCHAR}
@@ -145,7 +145,7 @@
         update transaction_local
         set type = #{type,jdbcType=INTEGER},
         create_time = #{createTime,jdbcType=BIGINT},
-        block_height = #{blockHeight,jdbcType=INTEGER},
+        block_height = #{blockHeight,jdbcType=BIGINT},
         block_hash = #{blockHash,jdbcType=VARCHAR}
         where hash = #{hash,jdbcType=VARCHAR}
     </update>
@@ -158,7 +158,7 @@
         values
         <foreach collection="list" item="item" index="index" separator=",">
             (#{hash,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER},
-            #{createTime,jdbcType=BIGINT}, #{blockHeight,jdbcType=INTEGER},
+            #{createTime,jdbcType=BIGINT}, #{blockHeight,jdbcType=BIGINT},
             #{blockHash,jdbcType=VARCHAR}, #{txdata,jdbcType=VARBINARY} )
         </foreach>
     </insert>
