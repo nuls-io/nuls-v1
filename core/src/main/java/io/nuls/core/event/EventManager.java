@@ -27,6 +27,9 @@ public class EventManager {
 
     public static void putEvent(Class<? extends BaseEvent> clazz) {
         try {
+            if (EVENT_MAP.values().contains(clazz)) {
+                return;
+            }
             BaseEvent event = clazz.newInstance();
             putEvent(event.getHeader().getModuleId(), event.getHeader().getEventType(), clazz);
         } catch (InstantiationException e) {
@@ -41,7 +44,7 @@ public class EventManager {
             throw new NulsRuntimeException(ErrorCode.FAILED, "the event type cannot be 0!,module:" + moduleId + ",eventType:" + type);
         }
         if (EVENT_MAP.containsKey(moduleId + "_" + type)) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "the event type is repeated,module:" + moduleId + ",eventType:" + type);
+            return;
         }
         EVENT_MAP.put(moduleId + "_" + type, clazz);
         cacheDataClass(clazz);
