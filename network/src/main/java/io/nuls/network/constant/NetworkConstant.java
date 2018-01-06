@@ -24,13 +24,13 @@ public interface NetworkConstant {
     String NETWORK_PORT_DEV = "dev.port";
     String NETWORK_MAGIC_DEV = "dev.magic";
 
-    String NETWORK_PEER_MAX_IN = "net.peer.max.in";
-    String NETWORK_PEER_MAX_OUT = "net.peer.max.out";
+    String NETWORK_NODE_MAX_IN = "net.node.max.in";
+    String NETWORK_NODE_MAX_OUT = "net.node.max.out";
 
-    String NETWORK_PEER_IN_GROUP = "inPeers";
-    String NETWORK_PEER_OUT_GROUP = "outPeers";
-    String NETWORK_PEER_CONSENSUS_GROUP = "consensus_Group";
-    int NETWORK_PEER_OUT_MIN_COUNT = 1;
+    String NETWORK_NODE_IN_GROUP = "inNodes";
+    String NETWORK_NODE_OUT_GROUP = "outNodes";
+    String NETWORK_NODE_CONSENSUS_GROUP = "consensus_Group";
+    int NETWORK_NODE_OUT_MIN_COUNT = 1;
     int NETWORK_BROAD_MAX_TRY_COUNT = 3;
 
     //network message type
@@ -40,6 +40,6 @@ public interface NetworkConstant {
     short NETWORK_PING_MESSAGE = 03;
     short NETWORK_PONG_MESAAGE = 04;
     short NETWORK_BYE_MESSAGE = 05;
-    short NETWORK_GET_PEER_MESSAGE = 06;
-    short NETWORK_PEER_MESSAGE = 07;
+    short NETWORK_GET_NODE_MESSAGE = 06;
+    short NETWORK_NODE_MESSAGE = 07;
 }

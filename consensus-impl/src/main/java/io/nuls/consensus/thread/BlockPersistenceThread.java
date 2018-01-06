@@ -1,7 +1,8 @@
 package io.nuls.consensus.thread;
 
+import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.consensus.constant.PocConsensusConstant;
-import io.nuls.consensus.service.cache.BlockCacheService;
+import io.nuls.consensus.cache.manager.block.BlockCacheManager;
 import io.nuls.consensus.service.impl.BlockServiceImpl;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
@@ -18,9 +19,9 @@ import io.nuls.ledger.service.intf.LedgerService;
 public class BlockPersistenceThread implements Runnable {
     public static final String THREAD_NAME = "block-persistence-thread";
     private static final BlockPersistenceThread INSTANCE = new BlockPersistenceThread();
-    private BlockCacheService blockCacheService = BlockCacheService.getInstance();
+    private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
     private BlockService blockService = BlockServiceImpl.getInstance();
-    private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
+    private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
     private boolean running;
 
     private BlockPersistenceThread() {
@@ -47,16 +48,16 @@ public class BlockPersistenceThread implements Runnable {
     }
 
     private void doPersistence() {
-        long count = blockCacheService.getMaxHeight() - blockCacheService.getMinHeight() - PocConsensusConstant.CONFIRM_BLOCK_COUNT;
+        long count = blockCacheManager.getMaxHeight() - blockCacheManager.getMinHeight() - PocConsensusConstant.CONFIRM_BLOCK_COUNT;
         for (int i = 0; i < count; i++) {
-            Block block = blockCacheService.getMinHeightCacheBlock();
+            Block block = blockCacheManager.getMinHeightCacheBlock();
             if (null == block) {
                 throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
             }
 
             blockService.saveBlock(block);
-            this.blockCacheService.removeBlock(blockCacheService.getMinHeight());
-            this.ledgerService.removeFromCache(block.getTxHashList());
+            this.blockCacheManager.removeBlock(blockCacheManager.getMinHeight());
+            this.txCacheManager.removeTx(block.getTxHashList());
         }
     }
 

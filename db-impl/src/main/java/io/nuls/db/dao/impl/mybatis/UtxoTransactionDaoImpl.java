@@ -15,24 +15,24 @@ import java.util.List;
  * @author vivi
  * @date 2017/12/23.
  */
-public class UtxoTransactionDaoImpl implements UtxoTransactionDao {
+public class UtxoTransactionDaoImpl implements UtxoTransactionDataService {
 
-    private TransactionDao txDao = NulsContext.getInstance().getService(TransactionDao.class);
-    private TransactionLocalDao txLocalDao = NulsContext.getInstance().getService(TransactionLocalDao.class);
-    private UtxoInputDao inputDao = NulsContext.getInstance().getService(UtxoInputDao.class);
-    private UtxoOutputDao outputDao = NulsContext.getInstance().getService(UtxoOutputDao.class);
+    private TransactionDataService txDao = NulsContext.getInstance().getService(TransactionDataService.class);
+    private TransactionLocalDataService txLocalDao = NulsContext.getInstance().getService(TransactionLocalDataService.class);
+    private UtxoInputDataService inputDao = NulsContext.getInstance().getService(UtxoInputDataService.class);
+    private UtxoOutputDataService outputDao = NulsContext.getInstance().getService(UtxoOutputDataService.class);
 
     @Override
     public TransactionPo gettx(String hash, boolean isLocal) {
         TransactionPo tx;
         if (isLocal) {
-            TransactionLocalPo txLocal = txLocalDao.getByKey(hash);
+            TransactionLocalPo txLocal = txLocalDao.get(hash);
             if (txLocal == null) {
                 return null;
             }
             tx = TransactionPoTool.toTx(txLocal);
         } else {
-            tx = txDao.getByKey(hash);
+            tx = txDao.get(hash);
         }
         return tx;
     }

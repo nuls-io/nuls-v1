@@ -1,6 +1,6 @@
 package io.nuls.db.dao.impl.mybatis;
 
-import io.nuls.db.dao.BaseDao;
+import io.nuls.db.dao.BaseDataService;
 import io.nuls.db.dao.impl.mybatis.common.BaseMapper;
 import io.nuls.db.dao.impl.mybatis.session.SessionAnnotation;
 import io.nuls.db.dao.impl.mybatis.session.SessionManager;
@@ -18,7 +18,7 @@ import java.util.Map;
  * K : the type of primary key of Object
  * V : the type of Object
  */
-public abstract class BaseDaoImpl<T extends BaseMapper<K, V>, K extends Serializable, V> implements BaseDao<K, V> {
+public abstract class BaseDaoImpl<T extends BaseMapper<K, V>, K extends Serializable, V> implements BaseDataService<K, V> {
     private Class<T> mapperClass;
 
     public BaseDaoImpl(Class<T> mapperClass) {
@@ -41,7 +41,7 @@ public abstract class BaseDaoImpl<T extends BaseMapper<K, V>, K extends Serializ
 
     @Override
     @SessionAnnotation
-    public int saveBatch(List<V> list) {
+    public int save(List<V> list) {
         return getMapper().batchInsert(list);
     }
 
@@ -53,13 +53,7 @@ public abstract class BaseDaoImpl<T extends BaseMapper<K, V>, K extends Serializ
 
     @Override
     @SessionAnnotation
-    public int updateSelective(V o) {
-        return this.getMapper().updateByPrimaryKeySelective(o);
-    }
-
-    @Override
-    @SessionAnnotation
-    public int updateBatch(List<V> list) {
+    public int update(List<V> list) {
         int result = 0;
         for (int i = 0; i < list.size(); i++) {
             result += update(list.get(i));
@@ -68,25 +62,25 @@ public abstract class BaseDaoImpl<T extends BaseMapper<K, V>, K extends Serializ
     }
 
     @Override
-    public V getByKey(K key) {
+    public V get(K key) {
         return this.getMapper().selectByPrimaryKey(key);
     }
 
     @Override
     @SessionAnnotation
-    public int deleteByKey(K key) {
+    public int delete(K key) {
         return this.getMapper().deleteByPrimaryKey(key);
     }
 
     @Override
-    public List<V> queryAll() {
+    public List<V> getList() {
         return this.getMapper().selectList(null);
     }
 
     @Override
-    public final List<V> searchList(Map<String, Object> params) {
+    public final List<V> getList(Map<String, Object> params) {
         if (null == params || params.isEmpty()) {
-            return queryAll();
+            return getList();
         }
         return this.getMapper().selectList(getSearchable(params));
     }

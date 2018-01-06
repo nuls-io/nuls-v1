@@ -11,38 +11,38 @@ public interface Broadcaster {
 
     BroadcastResult broadcast(BaseNetworkEvent event);
 
-    BroadcastResult broadcast(BaseNetworkEvent event, String excludePeerId);
+    BroadcastResult broadcast(BaseNetworkEvent event, String excludeNodeId);
 
     BroadcastResult broadcast(byte[] data);
 
-    BroadcastResult broadcast(byte[] data, String excludePeerId);
+    BroadcastResult broadcast(byte[] data, String excludeNodeId);
 
 //    BroadcastResult broadcastSync(BaseNulsEvent event);
 //
-//    BroadcastResult broadcastSync(BaseNulsEvent event, String excludePeerId);
+//    BroadcastResult broadcastSync(BaseNulsEvent event, String excludeNodeId);
 //
 //    BroadcastResult broadcastSync(byte[] data);
 //
-//    BroadcastResult broadcastSync(byte[] data, String excludePeerId);
+//    BroadcastResult broadcastSync(byte[] data, String excludeNodeId);
 
-    BroadcastResult broadcastToPeer(BaseNetworkEvent event, String peerId);
+    BroadcastResult broadcastToNode(BaseNetworkEvent event, String nodeId);
 
-    BroadcastResult broadcastToPeer(byte[] data, String peerId);
+    BroadcastResult broadcastToNode(byte[] data, String nodeId);
 
     BroadcastResult broadcastToGroup(BaseNetworkEvent event, String groupName);
 
-    BroadcastResult broadcastToGroup(BaseNetworkEvent event, String groupName, String excludePeerId);
+    BroadcastResult broadcastToGroup(BaseNetworkEvent event, String groupName, String excludeNodeId);
 
     BroadcastResult broadcastToGroup(byte[] data, String groupName);
 
-    BroadcastResult broadcastToGroup(byte[] data, String groupName, String excludePeerId);
+    BroadcastResult broadcastToGroup(byte[] data, String groupName, String excludeNodeId);
 
 //    BroadcastResult broadcastToGroupSync(BaseNulsEvent event, String groupName);
 //
-//    BroadcastResult broadcastToGroupSync(BaseNulsEvent event, String groupName, String excludePeerId);
+//    BroadcastResult broadcastToGroupSync(BaseNulsEvent event, String groupName, String excludeNodeId);
 //
 //    BroadcastResult broadcastToGroupSync(byte[] data, String groupName);
 //
-//    BroadcastResult broadcastToGroupSync(byte[] data, String groupName, String excludePeerId);
+//    BroadcastResult broadcastToGroupSync(byte[] data, String groupName, String excludeNodeId);
 
 }

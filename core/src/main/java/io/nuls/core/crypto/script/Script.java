@@ -218,7 +218,7 @@ public class Script {
 
     /**
      * Returns true if this script is of the form <pubkey> OP_CHECKSIG. This form was originally intended for transactions
-     * where the peers talked to each other directly via TCP/IP, but has fallen out of favor with time due to that mode
+     * where the nodes talked to each other directly via TCP/IP, but has fallen out of favor with time due to that mode
      * of operation being susceptible to man-in-the-middle attacks. It is still used in coinbase outputs and can be
      * useful more exotic types of transaction, but today most payments are to addresses.
      */

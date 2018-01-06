@@ -28,9 +28,10 @@ import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
-import io.nuls.db.dao.AccountDao;
-import io.nuls.db.dao.AccountTxDao;
-import io.nuls.db.dao.AliasDao;
+import io.nuls.core.validate.ValidateResult;
+import io.nuls.db.dao.AccountDataService;
+import io.nuls.db.dao.AccountTxDataService;
+import io.nuls.db.dao.AliasDataService;
 import io.nuls.db.entity.AccountPo;
 import io.nuls.db.entity.AliasPo;
 import io.nuls.db.entity.TransactionLocalPo;
@@ -62,11 +63,11 @@ public class AccountServiceImpl implements AccountService {
 
     private AccountCacheService accountCacheService = AccountCacheService.getInstance();
 
-    private AccountDao accountDao = NulsContext.getInstance().getService(AccountDao.class);
+    private AccountDataService accountDao = NulsContext.getInstance().getService(AccountDataService.class);
 
-    private AccountTxDao accountTxDao = NulsContext.getInstance().getService(AccountTxDao.class);
+    private AccountTxDataService accountTxDBService = NulsContext.getInstance().getService(AccountTxDataService.class);
 
-    private AliasDao aliasDao = NulsContext.getInstance().getService(AliasDao.class);
+    private AliasDataService aliasDao = NulsContext.getInstance().getService(AliasDataService.class);
 
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
 
@@ -122,7 +123,7 @@ public class AccountServiceImpl implements AccountService {
                 resultList.add(account.getId());
             }
 
-            accountDao.saveBatch(accountPos);
+            accountDao.save(accountPos);
             accountCacheService.putAccountList(accounts);
 
             return new Result<>(true, "OK", resultList);
@@ -194,7 +195,7 @@ public class AccountServiceImpl implements AccountService {
             return list;
         }
         list = new ArrayList<>();
-        List<AccountPo> polist = this.accountDao.queryAll();
+        List<AccountPo> polist = this.accountDao.getList();
         if (null == polist || polist.isEmpty()) {
             return list;
         }
@@ -280,7 +281,7 @@ public class AccountServiceImpl implements AccountService {
                 AccountTool.toPojo(account, po);
                 accountPoList.add(po);
             }
-            accountDao.updateBatch(accountPoList);
+            accountDao.update(accountPoList);
             accountCacheService.putAccountList(accounts);
         } catch (Exception e) {
             Log.error(e);
@@ -313,7 +314,7 @@ public class AccountServiceImpl implements AccountService {
                 }
             }
             if (accountPoList.size() > 0) {
-                accountDao.updateBatch(accountPoList);
+                accountDao.update(accountPoList);
             }
 
             accountCacheService.putAccountList(accounts);
@@ -439,7 +440,7 @@ public class AccountServiceImpl implements AccountService {
         if (!StringUtils.validAlias(alias)) {
             return new Result(false, "The alias is between 3 to 20 characters");
         }
-        AliasPo aliasPo = aliasDao.getByKey(alias);
+        AliasPo aliasPo = aliasDao.get(alias);
         if (aliasPo != null) {
             return new Result(false, "The alias has been occupied");
         }
@@ -454,7 +455,7 @@ public class AccountServiceImpl implements AccountService {
                 return result;
             }
             Account account = getAccount(address);
-            result = accountTxDao.setAlias(address, alias);
+            result = accountTxDBService.setAlias(address, alias);
             account.setAlias(alias);
             accountCacheService.putAccount(account);
             return result;
@@ -476,7 +477,10 @@ public class AccountServiceImpl implements AccountService {
             AliasTransaction aliasTx = new AliasTransaction(coinData, password);
             aliasTx.setHash(NulsDigestData.calcDigestData(aliasTx.serialize()));
             aliasTx.setSign(signData(aliasTx.getHash(), account, password));
-            ledgerService.verifyAndCacheTx(aliasTx);
+            ValidateResult vresult = ledgerService.verifyTx(aliasTx);
+            if(vresult.isSuccess()){
+                //todo cache
+            }
             event.setEventBody(aliasTx);
             networkEventBroadcaster.broadcastAndCache(event);
         } catch (Exception e) {
@@ -578,15 +582,15 @@ public class AccountServiceImpl implements AccountService {
             fos = new FileOutputStream(backupFile);
             fos.write(1);   //account length
             fos.write(account.serialize());
-
-            List<TransactionPo> txList = ledgerService.queryPoListByAccount(account.getAddress().getBase58(), 0, 0);
-            fos.write(new VarInt(txList.size()).encode());
-
-            TransactionPo tx;
-            for (int i = 0; i < txList.size(); i++) {
-                tx = txList.get(i);
-                fos.write(tx.getTxdata());
-            }
+//todo 服务是否应该提供po的查询接口
+//            List<TransactionPo> txList = ledgerService.queryPoListByAccount(account.getAddress().getBase58(), 0, 0);
+//            fos.write(new VarInt(txList.size()).encode());
+//
+//            TransactionPo tx;
+//            for (int i = 0; i < txList.size(); i++) {
+//                tx = txList.get(i);
+//                fos.write(tx.getTxdata());
+//            }
         } catch (Exception e) {
             Log.error(e);
             return new Result(false, "export failed");
@@ -609,17 +613,17 @@ public class AccountServiceImpl implements AccountService {
         try {
             fos = new FileOutputStream(backupFile);
             fos.write(new VarInt(accounts.size()).encode());   //account length
-
-            for (Account account : accounts) {
-                fos.write(account.serialize());
-                txList = ledgerService.queryPoListByAccount(account.getAddress().getBase58(), 0, 0);
-                fos.write(new VarInt(txList.size()).encode());
-
-                for (int i = 0; i < txList.size(); i++) {
-                    tx = txList.get(i);
-                    fos.write(tx.getTxdata());
-                }
-            }
+//todo 服务是否应该提供po的查询接口
+//            for (Account account : accounts) {
+//                fos.write(account.serialize());
+//                txList = ledgerService.queryPoListByAccount(account.getAddress().getBase58(), 0, 0);
+//                fos.write(new VarInt(txList.size()).encode());
+//
+//                for (int i = 0; i < txList.size(); i++) {
+//                    tx = txList.get(i);
+//                    fos.write(tx.getTxdata());
+//                }
+//            }
         } catch (Exception e) {
             Log.error(e);
             return new Result(false, "export failed");
@@ -719,7 +723,7 @@ public class AccountServiceImpl implements AccountService {
             accountPo.setMyTxs(transactionPos);
             accountPoList.add(accountPo);
         }
-        accountTxDao.importAccount(accountPoList);
+        accountTxDBService.importAccount(accountPoList);
     }
 
 }

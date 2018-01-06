@@ -18,8 +18,12 @@ public class GetVersionEvent extends BaseNetworkEvent<BasicTypeData<Integer>> {
 
     public static final short OWN_SUB_VERSION = 1001;
 
-    public GetVersionEvent(int externalPort) {
+    public GetVersionEvent() {
         super(NulsConstant.MODULE_ID_NETWORK, NetworkConstant.NETWORK_GET_VERSION_MESSAGE);
+    }
+
+    public GetVersionEvent(int externalPort) {
+        this();
 //        this.version = new NulsVersion(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.setEventBody(new BasicTypeData(externalPort));
     }

@@ -1,6 +1,6 @@
 package io.nuls.db.dao.impl.mybatis;
 
-import io.nuls.db.dao.UtxoInputDao;
+import io.nuls.db.dao.UtxoInputDataService;
 import io.nuls.db.dao.impl.mybatis.mapper.UtxoInputMapper;
 import io.nuls.db.dao.impl.mybatis.util.SearchOperator;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
@@ -13,7 +13,7 @@ import java.util.Map;
  * @author Niels
  * @date 2017/11/22
  */
-public class UtxoInputDaoImpl extends BaseDaoImpl<UtxoInputMapper, String, UtxoInputPo> implements UtxoInputDao {
+public class UtxoInputDaoImpl extends BaseDaoImpl<UtxoInputMapper, String, UtxoInputPo> implements UtxoInputDataService {
     public UtxoInputDaoImpl() {
         super(UtxoInputMapper.class);
     }

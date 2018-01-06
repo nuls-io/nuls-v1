@@ -48,14 +48,9 @@ public class CacheMap<K, V> {
     }
 
 
-    public <V extends NulsCloneable> void put(K key, V value) {
+    public void put(K key, V value) {
         this.cacheService.putElement(cacheName, key, value);
     }
-
-    public void putWithOutClone(K key, V value) {
-        this.cacheService.putElement(cacheName, key, value);
-    }
-
 
     public void remove(K key) {
         this.cacheService.removeElement(cacheName, key);

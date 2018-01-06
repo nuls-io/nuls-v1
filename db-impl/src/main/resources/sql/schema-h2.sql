@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS `block` (
 CREATE TABLE IF NOT EXISTS `delegate_account` (
   `id` varchar(32) NOT NULL,
   `address` varchar(40) NOT NULL,
-  `peer_address` varchar(40) NOT NULL,
+  `node_address` varchar(40) NOT NULL,
   `deposit` decimal(19,8) NOT NULL,
   `remark` varchar(255) NOT NULL,
   `start_time` bigint(14) NOT NULL,
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS `delegate` (
   PRIMARY KEY (`id`)
 );
 
-CREATE TABLE IF NOT EXISTS `peer` (
+CREATE TABLE IF NOT EXISTS `node` (
   `id` VARCHAR(30) NOT NULL,
   `ip` varchar(20) NOT NULL,
   `port` int(6) NOT NULL,
@@ -59,14 +59,14 @@ CREATE TABLE IF NOT EXISTS `peer` (
   `version` int(11) NOT NULL,
   PRIMARY KEY (`id`)
 );
-CREATE TABLE IF NOT EXISTS `peer_group` (
+CREATE TABLE IF NOT EXISTS `node_group` (
   `name` varchar(30) NOT NULL,
   `version` int(11) NOT NULL,
   PRIMARY KEY (`name`)
 );
-CREATE TABLE IF NOT EXISTS `peer_group_relation` (
+CREATE TABLE IF NOT EXISTS `node_group_relation` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `peer_id` varchar(30) NOT NULL,
+  `node_id` varchar(30) NOT NULL,
   `group_id` varchar(30) NOT NULL,
   PRIMARY KEY (`id`)
 );
@@ -92,7 +92,7 @@ CREATE TABLE IF NOT EXISTS `transaction` (
   `txData` varbinary(1024) NOT NULL,
   `sign` varbinary(1024) NOT NULL,
   `extend` varbinary(1024) DEFAULT NULL,
-  `block_height` int(5) NOT NULL,
+  `block_height` bigint(15) NOT NULL,
   `block_hash` varchar(70) NOT NULL,
   `related_tx_hash` varchar(70) DEFAULT NULL,
   `version` int(11) NOT NULL,
@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS `transaction_local` (
   `txData` varbinary(1024) NOT NULL,
   `sign` varbinary(1024) NOT NULL,
   `extend` varbinary(1024) DEFAULT NULL,
-  `block_height` int(5) NOT NULL,
+  `block_height` bigint(15) NOT NULL,
   `block_hash` varchar(70) NOT NULL,
   `related_tx_hash` varchar(70) DEFAULT NULL,
   `version` int(11) NOT NULL,

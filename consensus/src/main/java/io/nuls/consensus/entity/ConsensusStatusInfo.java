@@ -15,7 +15,7 @@ public class ConsensusStatusInfo {
     private double accumulativeReward;
     private Map<String, Object> extend = new HashMap<>();
 //    private String agentAddress;
-//    private String delegatePeerAddress;
+//    private String delegateNodeAddress;
 //    private double deposit;
 //    private double weightOfRound;
 

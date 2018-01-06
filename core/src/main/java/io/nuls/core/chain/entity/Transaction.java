@@ -31,7 +31,7 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
     private T txData;
     private Na fee;
 
-    private int blockHeight;
+    private long blockHeight;
     private NulsDigestData blockHash;
     /**
      * current time (ms)
@@ -180,11 +180,11 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
         this.fee = fee;
     }
 
-    public int getBlockHeight() {
+    public long getBlockHeight() {
         return blockHeight;
     }
 
-    public void setBlockHeight(int blockHeight) {
+    public void setBlockHeight(long blockHeight) {
         this.blockHeight = blockHeight;
     }
 

@@ -7,8 +7,8 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.constant.NetworkConstant;
-import io.nuls.network.entity.Peer;
-import io.nuls.network.entity.PeerGroup;
+import io.nuls.network.entity.Node;
+import io.nuls.network.entity.NodeGroup;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.module.AbstractNetworkModule;
 
@@ -32,7 +32,7 @@ public class ConnectionManager implements Runnable {
 
     private AbstractNetworkModule networkModule;
 
-    private PeersManager peersManager;
+    private NodesManager nodesManager;
 
     private ServerSocketChannel serverSocketChannel;
 
@@ -142,20 +142,20 @@ public class ConnectionManager implements Runnable {
     }
 
     /**
-     * out peer try to connect
+     * out node try to connect
      *
-     * @param peer
+     * @param node
      */
-    public void openConnection(Peer peer) {
+    public void openConnection(Node node) {
 
         SocketChannel channel = null;
         try {
             channel = SocketChannel.open();
             channel.configureBlocking(false);
             channel.socket().setReuseAddress(true);
-            InetSocketAddress socketAddress = new InetSocketAddress(peer.getIp(), peer.getPort());
+            InetSocketAddress socketAddress = new InetSocketAddress(node.getIp(), node.getPort());
             channel.connect(socketAddress);
-            PendingConnect data = new PendingConnect(channel, peer);
+            PendingConnect data = new PendingConnect(channel, node);
             SelectionKey key = channel.register(selector, SelectionKey.OP_CONNECT);
             key.attach(data);
             selector.wakeup();
@@ -168,21 +168,21 @@ public class ConnectionManager implements Runnable {
                     e1.printStackTrace();
                 }
             }
-            peer.destroy();
+            node.destroy();
         }
     }
 
 
     public boolean allowConnection(InetSocketAddress socketAddress) {
-        //check the connecting peers count
+        //check the connecting nodes count
         boolean inAble = true;
         boolean outAble = true;
-        PeerGroup inPeers = peersManager.getPeerGroup("inPeers");
-        if (inPeers.size() >= network.maxInCount()) {
+        NodeGroup inNodes = nodesManager.getNodeGroup("inNodes");
+        if (inNodes.size() >= network.maxInCount()) {
             inAble = false;
         }
-        PeerGroup outPeers = peersManager.getPeerGroup("inPeers");
-        if (outPeers.size() >= network.maxOutCount()) {
+        NodeGroup outNodes = nodesManager.getNodeGroup("inNodes");
+        if (outNodes.size() >= network.maxOutCount()) {
             outAble = false;
         }
         if (!inAble && !outAble) {
@@ -193,16 +193,16 @@ public class ConnectionManager implements Runnable {
             return false;
         }
         //check it already connected
-        for (Peer peer : inPeers.getPeers()) {
-            if (peer.getIp().equals(socketAddress.getAddress().getHostAddress()) &&
-                    peer.getPort() == socketAddress.getPort()) {
+        for (Node node : inNodes.getNodes()) {
+            if (node.getIp().equals(socketAddress.getAddress().getHostAddress()) &&
+                    node.getPort() == socketAddress.getPort()) {
                 return false;
             }
         }
 
-        for (Peer peer : outPeers.getPeers()) {
-            if (peer.getIp().equals(socketAddress.getAddress().getHostAddress()) &&
-                    peer.getPort() == socketAddress.getPort()) {
+        for (Node node : outNodes.getNodes()) {
+            if (node.getIp().equals(socketAddress.getAddress().getHostAddress()) &&
+                    node.getPort() == socketAddress.getPort()) {
                 return false;
             }
         }
@@ -213,11 +213,11 @@ public class ConnectionManager implements Runnable {
     public void handleKey(SelectionKey key) {
 
         if (key.isValid() && key.isConnectable()) {
-            //out peer
-            addOutPeer(key);
+            //out node
+            addOutNode(key);
         } else if (key.isValid() && key.isAcceptable()) {
-            // in Peer
-            addInPeer(key);
+            // in Node
+            addInNode(key);
         } else {
             // read or write
             ConnectionHandler handler = (ConnectionHandler) key.attachment();
@@ -227,35 +227,35 @@ public class ConnectionManager implements Runnable {
         }
     }
 
-    private void addOutPeer(SelectionKey key) {
+    private void addOutNode(SelectionKey key) {
         PendingConnect data = (PendingConnect) key.attachment();
-        if (data == null || data.peer == null) {
+        if (data == null || data.node == null) {
             return;
         }
-        Peer peer = data.peer;
-        peer.setType(Peer.OUT);
+        Node node = data.node;
+        node.setType(Node.OUT);
         SocketChannel channel = (SocketChannel) key.channel();
-        ConnectionHandler handler = new ConnectionHandler(peer, channel, key);
+        ConnectionHandler handler = new ConnectionHandler(node, channel, key);
         //Must be connected after the completion of registration to other events
         try {
             if (channel.finishConnect()) {
                 key.interestOps((key.interestOps() | SelectionKey.OP_READ) & ~SelectionKey.OP_CONNECT);
                 key.attach(handler);
-                peer.setWriteTarget(handler);
-                peer.connectionOpened();
+                node.setWriteTarget(handler);
+                node.connectionOpened();
             } else {
                 // Failed to connect for some reason
-                peer.destroy();
+                node.destroy();
             }
         } catch (Exception e) {
-            Log.warn("out peer Failed to connect:" + peer.getIp() + ":" + peer.getPort() + ",message:" + e.getMessage());
-            peer.destroy();
+            Log.warn("out node Failed to connect:" + node.getIp() + ":" + node.getPort() + ",message:" + e.getMessage());
+            node.destroy();
         }
     }
 
-    private void addInPeer(SelectionKey key) {
+    private void addInNode(SelectionKey key) {
         SocketChannel socketChannel = null;
-        Peer peer = null;
+        Node node = null;
         try {
             socketChannel = serverSocketChannel.accept();
             InetSocketAddress socketAddress = (InetSocketAddress) socketChannel.getRemoteAddress();
@@ -266,38 +266,38 @@ public class ConnectionManager implements Runnable {
             socketChannel.configureBlocking(false);
             SelectionKey newKey = socketChannel.register(selector, SelectionKey.OP_READ);
 
-            peer = new Peer(network, Peer.IN, socketAddress);
-            peersManager.addPeerToGroup(NetworkConstant.NETWORK_PEER_IN_GROUP, peer);
-            ConnectionHandler handler = new ConnectionHandler(peer, socketChannel, newKey);
-            peer.setWriteTarget(handler);
+            node = new Node(network, Node.IN, socketAddress);
+            nodesManager.addNodeToGroup(NetworkConstant.NETWORK_NODE_IN_GROUP, node);
+            ConnectionHandler handler = new ConnectionHandler(node, socketChannel, newKey);
+            node.setWriteTarget(handler);
             newKey.attach(handler);
-            peer.connectionOpened();
+            node.connectionOpened();
         } catch (Exception e) {
             if (socketChannel != null) {
-                Log.warn("in peer Failed to connect" + peer.getIp());
+                Log.warn("in node Failed to connect" + node.getIp());
                 try {
                     socketChannel.close();
                 } catch (IOException e1) {
                     e1.printStackTrace();
                 }
             }
-            if (peer != null) {
-                peer.destroy();
+            if (node != null) {
+                node.destroy();
             }
         }
     }
 
-    public void setPeersManager(PeersManager peersManager) {
-        this.peersManager = peersManager;
+    public void setNodesManager(NodesManager nodesManager) {
+        this.nodesManager = nodesManager;
     }
 
     class PendingConnect {
         SocketChannel channel;
-        Peer peer;
+        Node node;
 
-        PendingConnect(SocketChannel channel, Peer peer) {
+        PendingConnect(SocketChannel channel, Node node) {
             this.channel = channel;
-            this.peer = peer;
+            this.node = node;
         }
     }
 
