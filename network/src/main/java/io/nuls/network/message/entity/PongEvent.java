@@ -10,7 +10,7 @@ import java.io.IOException;
  * @author vivi
  * @Date 2017.11.01
  */
-public class PongData {
+public class PongEvent {
 
 
 

@@ -35,9 +35,9 @@ public interface NetworkConstant {
 
     //network message type
 
-    short NETWORK_GET_VERSION_MESSAGE = 01;
-    short NETWORK_VERSION_MESSAGE = 02;
-    short NETWORK_PING_MESSAGE = 03;
+    short NETWORK_GET_VERSION_EVENT = 01;
+    short NETWORK_VERSION_EVENT = 02;
+    short NETWORK_PING_EVENT = 03;
     short NETWORK_PONG_MESAAGE = 04;
     short NETWORK_BYE_MESSAGE = 05;
     short NETWORK_GET_NODE_MESSAGE = 06;

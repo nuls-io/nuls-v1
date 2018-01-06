@@ -34,7 +34,7 @@ public class VersionEvent extends BaseNetworkEvent {
     private String nulsVersion;
 
     public VersionEvent() {
-        super(NulsConstant.MODULE_ID_NETWORK, NetworkConstant.NETWORK_VERSION_MESSAGE);
+        super(NulsConstant.MODULE_ID_NETWORK, NetworkConstant.NETWORK_VERSION_EVENT);
     }
 
     public VersionEvent(long bestBlockHeight, String bestBlockHash) {
