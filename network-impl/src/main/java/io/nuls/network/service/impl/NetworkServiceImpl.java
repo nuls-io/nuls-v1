@@ -1,10 +1,11 @@
 package io.nuls.network.service.impl;
 
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.ModuleStatusEnum;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.event.BaseNetworkEvent;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.NodeDataService;
 import io.nuls.network.NetworkContext;
@@ -30,8 +31,6 @@ import io.nuls.network.service.NetworkService;
  */
 public class NetworkServiceImpl implements NetworkService {
 
-    private AbstractNetworkModule networkModule;
-
     private AbstractNetworkParam network;
 
     private ConnectionManager connectionManager;
@@ -42,7 +41,6 @@ public class NetworkServiceImpl implements NetworkService {
 
 
     public NetworkServiceImpl(AbstractNetworkModule module) {
-        this.networkModule = module;
         this.network = getNetworkInstance();
         NulsMessageFilter messageFilter = DefaultMessageFilter.getInstance();
         network.setMessageFilter(messageFilter);
@@ -63,11 +61,8 @@ public class NetworkServiceImpl implements NetworkService {
         try {
             connectionManager.start();
             nodesManager.start();
-
-            networkModule.setStatus(ModuleStatusEnum.RUNNING);
         } catch (Exception e) {
             Log.error(e);
-            networkModule.setStatus(ModuleStatusEnum.EXCEPTION);
             throw new NulsRuntimeException(ErrorCode.NET_SERVER_START_ERROR);
         }
     }
@@ -75,6 +70,7 @@ public class NetworkServiceImpl implements NetworkService {
     @Override
     public void shutdown() {
         connectionManager.serverClose();
+        TaskManager.shutdownByModuleId(NulsConstant.MODULE_ID_NETWORK);
     }
 
     @Override
@@ -136,7 +132,6 @@ public class NetworkServiceImpl implements NetworkService {
     public BroadcastResult sendToAllNode(byte[] data, String excludeNodeId) {
         return broadcaster.broadcast(data, excludeNodeId);
     }
-
 
     @Override
     public BroadcastResult sendToNode(BaseNetworkEvent event, String nodeId) {

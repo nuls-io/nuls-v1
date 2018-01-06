@@ -23,6 +23,7 @@ import java.util.Map;
  */
 public class Bootstrap {
     private static final ModuleService moduleService = ModuleService.getInstance();
+    private MicroKernelBootstrap mk;
 
     public static void main(String[] args) {
         Thread.currentThread().setName("Nuls");
