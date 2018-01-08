@@ -1,8 +1,8 @@
 package io.nuls.event.bus.processor.manager;
 
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.event.BaseEvent;
 import io.nuls.core.event.EventManager;
-import io.nuls.core.event.BaseNetworkEvent;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.module.service.ModuleService;
 import io.nuls.core.thread.manager.NulsThreadFactory;
@@ -24,7 +24,7 @@ import java.util.concurrent.*;
  * @author Niels
  * @date 2017/11/6
  */
-public class ProcessorManager<E extends BaseNetworkEvent, H extends NulsEventHandler<? extends BaseNetworkEvent>> {
+public class ProcessorManager<E extends io.nuls.core.event.BaseEvent, H extends NulsEventHandler<? extends BaseEvent>> {
     private final Map<String, H> handlerMap = new HashMap<>();
     private final Map<Class, Set<String>> eventHandlerMapping = new HashMap<>();
     private DisruptorUtil<DisruptorEvent<ProcessData<E>>> disruptorService = DisruptorUtil.getInstance();
@@ -60,18 +60,20 @@ public class ProcessorManager<E extends BaseNetworkEvent, H extends NulsEventHan
         disruptorService.offer(disruptorName, data);
     }
 
-    public String registerEventHandler(Class<E> eventClass, H handler) {
+    public String registerEventHandler(String handlerId,Class<E> eventClass, H handler) {
         EventManager.putEvent(eventClass);
         AssertUtil.canNotEmpty(eventClass, "registerEventHandler faild");
         AssertUtil.canNotEmpty(handler, "registerEventHandler faild");
-        String handlerId = StringUtils.getNewUUID();
+       if(StringUtils.isBlank(handlerId)){
+           handlerId = StringUtils.getNewUUID();
+       }
         handlerMap.put(handlerId, handler);
         cacheHandlerMapping(eventClass, handlerId);
         return handlerId;
     }
 
     private void cacheHandlerMapping(Class<E> eventClass, String handlerId) {
-        if (eventClass.equals(BaseNetworkEvent.class)) {
+        if (eventClass.equals(BaseEvent.class)) {
             return;
         }
         Set<String> ids = eventHandlerMapping.get(eventClass);
@@ -92,7 +94,7 @@ public class ProcessorManager<E extends BaseNetworkEvent, H extends NulsEventHan
     }
 
     private Set<NulsEventHandler> getHandlerList(Class<E> clazz) {
-        if (clazz.equals(BaseNetworkEvent.class)) {
+        if (clazz.equals(BaseEvent.class)) {
             return null;
         }
         Set<String> ids = eventHandlerMapping.get(clazz);
@@ -112,7 +114,7 @@ public class ProcessorManager<E extends BaseNetworkEvent, H extends NulsEventHan
                 set.add(handler);
             }
         } while (false);
-        if (!clazz.getSuperclass().equals(BaseNetworkEvent.class)) {
+        if (!clazz.getSuperclass().equals(BaseEvent.class)) {
             set.addAll(getHandlerList((Class<E>) clazz.getSuperclass()));
         }
         return set;

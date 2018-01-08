@@ -5,7 +5,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.db.dao.*;
-import io.nuls.db.annotation.Transactional;
+import io.nuls.db.annotation.TransactionalAnnotation;
 import io.nuls.db.entity.AccountPo;
 import io.nuls.db.entity.AliasPo;
 import io.nuls.db.entity.TransactionLocalPo;
@@ -24,7 +24,7 @@ public class AccountTxDaoImpl implements AccountTxDataService {
 
     private TransactionLocalDataService txDao = NulsContext.getInstance().getService(TransactionLocalDataService.class);
 
-    @Transactional
+    @TransactionalAnnotation
     @Override
     public Result setAlias(String address, String alias) {
         try {
@@ -44,7 +44,7 @@ public class AccountTxDaoImpl implements AccountTxDataService {
         return new Result(true, "OK");
     }
 
-    @Transactional
+    @TransactionalAnnotation
     @Override
     public void importAccount(List<AccountPo> accountPoList) {
         for (AccountPo account : accountPoList) {

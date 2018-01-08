@@ -11,7 +11,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.tx.serivce.CommonTransactionService;
 import io.nuls.core.utils.log.Log;
-import io.nuls.db.annotation.Transactional;
+import io.nuls.db.annotation.TransactionalAnnotation;
 import io.nuls.db.dao.BlockDataService;
 import io.nuls.db.entity.BlockPo;
 import io.nuls.db.entity.TransactionPo;
@@ -131,7 +131,7 @@ public class BlockServiceImpl implements BlockService {
         this.dataPersistence(blockPo, txPoList);
     }
 
-    @Transactional
+    @TransactionalAnnotation
     private void dataPersistence(BlockPo blockPo, List<TransactionPo> txPoList) {
         //todo 调用多个dao/service进行
     }

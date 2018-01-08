@@ -1,9 +1,7 @@
 package io.nuls.network.message.entity;
 
 import io.nuls.core.chain.entity.BasicTypeData;
-import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.event.BaseNetworkEvent;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.network.constant.NetworkConstant;
@@ -12,7 +10,7 @@ import io.nuls.network.constant.NetworkConstant;
  * @author vivi
  * @date 2017/11/24.
  */
-public class GetVersionEvent extends BaseNetworkEvent<BasicTypeData<Integer>> {
+public class GetVersionEvent extends io.nuls.core.event.BaseEvent<BasicTypeData<Integer>> {
 
     public static final short OWN_MAIN_VERSION = 1;
 

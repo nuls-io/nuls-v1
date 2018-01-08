@@ -1,6 +1,6 @@
 package io.nuls.network.message.impl;
 
-import io.nuls.core.event.BaseNetworkEvent;
+import io.nuls.core.event.BaseEvent;
 import io.nuls.network.entity.Node;
 import io.nuls.network.message.NetworkCacheService;
 import io.nuls.network.message.NetworkEventResult;
@@ -32,7 +32,7 @@ public class GetNodeEventHandler implements NetWorkEventHandler {
     }
 
     @Override
-    public NetworkEventResult process(BaseNetworkEvent event, Node node) {
+    public NetworkEventResult process(BaseEvent event, Node node) {
         GetNodeEvent getNodeEvent = (GetNodeEvent) event;
 
         String key = event.getHeader().getEventType() + "-" + node.getIp() + "-" + node.getPort();

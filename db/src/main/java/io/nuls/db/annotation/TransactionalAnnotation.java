@@ -10,6 +10,6 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface Transactional {
+public @interface TransactionalAnnotation {
     PROPAGATION value() default PROPAGATION.REQUIRED;
 }

@@ -3,7 +3,7 @@ package io.nuls.network.service.impl;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.event.BaseNetworkEvent;
+import io.nuls.core.event.BaseEvent;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
@@ -109,12 +109,12 @@ public class NetworkServiceImpl implements NetworkService {
 
 
     @Override
-    public BroadcastResult sendToAllNode(BaseNetworkEvent event) {
+    public BroadcastResult sendToAllNode(BaseEvent event) {
         return broadcaster.broadcast(event);
     }
 
     @Override
-    public BroadcastResult sendToAllNode(BaseNetworkEvent event, String excludeNodeId) {
+    public BroadcastResult sendToAllNode(BaseEvent event, String excludeNodeId) {
         return broadcaster.broadcast(event, excludeNodeId);
     }
 
@@ -129,7 +129,7 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
-    public BroadcastResult sendToNode(BaseNetworkEvent event, String nodeId) {
+    public BroadcastResult sendToNode(BaseEvent event, String nodeId) {
         return broadcaster.broadcastToNode(event, nodeId);
     }
 
@@ -139,12 +139,12 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
-    public BroadcastResult sendToGroup(BaseNetworkEvent event, String groupName) {
+    public BroadcastResult sendToGroup(BaseEvent event, String groupName) {
         return broadcaster.broadcastToGroup(event, groupName);
     }
 
     @Override
-    public BroadcastResult sendToGroup(BaseNetworkEvent event, String groupName, String excludeNodeId) {
+    public BroadcastResult sendToGroup(BaseEvent event, String groupName, String excludeNodeId) {
         return broadcaster.broadcastToGroup(event, groupName, excludeNodeId);
     }
 

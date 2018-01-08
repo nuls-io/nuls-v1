@@ -1,21 +1,16 @@
 package io.nuls.network.message.entity;
 
 import io.nuls.core.chain.entity.BasicTypeData;
-import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.event.BaseNetworkEvent;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
-import io.nuls.core.utils.log.Log;
 import io.nuls.network.constant.NetworkConstant;
-
-import java.io.IOException;
 
 /**
  * @author vivi
  * @date 2017/12/1.
  */
-public class GetNodeEvent extends BaseNetworkEvent<BasicTypeData<Integer>> {
+public class GetNodeEvent extends io.nuls.core.event.BaseEvent<BasicTypeData<Integer>> {
 
     public static final short OWN_MAIN_VERSION = 1;
 

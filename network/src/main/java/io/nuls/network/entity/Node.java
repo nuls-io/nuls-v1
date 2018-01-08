@@ -1,15 +1,12 @@
 package io.nuls.network.entity;
 
 import io.nuls.core.chain.entity.BaseNulsData;
-import io.nuls.core.chain.entity.BasicTypeData;
 import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.event.BaseEvent;
-import io.nuls.core.event.BaseNetworkEvent;
 import io.nuls.core.event.EventManager;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsVerificationException;
@@ -143,7 +140,7 @@ public class Node extends BaseNulsData {
         }
     }
 
-    public void sendNetworkEvent(BaseNetworkEvent event) throws IOException {
+    public void sendNetworkEvent(BaseEvent event) throws IOException {
         if (this.getStatus() == Node.CLOSE) {
             return;
         }
@@ -200,7 +197,7 @@ public class Node extends BaseNulsData {
                 return;
             }
 
-            BaseNetworkEvent networkEvent = (BaseNetworkEvent) event;
+            BaseEvent networkEvent = (BaseEvent) event;
             asynExecute(networkEvent);
         } else {
 
@@ -214,7 +211,7 @@ public class Node extends BaseNulsData {
         }
     }
 
-    private void asynExecute(BaseNetworkEvent networkEvent) {
+    private void asynExecute(BaseEvent networkEvent) {
         NetWorkEventHandler handler = messageHandlerFactory.getHandler(networkEvent);
         TaskManager.asynExecuteRunnable(new Runnable() {
             @Override

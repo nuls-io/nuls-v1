@@ -68,47 +68,26 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
     private void registerHandlers() {
         BlockEventHandler blockEventHandler = new BlockEventHandler();
         blockEventHandler.addFilter(new BlockEventFilter());
-        eventBusService.subscribeNetworkEvent(BlockEvent.class, blockEventHandler);
+        eventBusService.subscribeEvent(BlockEvent.class, blockEventHandler);
 
         BlockHeaderHandler blockHeaderHandler = new BlockHeaderHandler();
         blockHeaderHandler.addFilter(new BlockHeaderEventFilter());
-        eventBusService.subscribeNetworkEvent(BlockHeaderEvent.class, blockHeaderHandler);
+        eventBusService.subscribeEvent(BlockHeaderEvent.class, blockHeaderHandler);
 
         GetBlockHandler getBlockHandler = new GetBlockHandler();
         getBlockHandler.addFilter(new GetBlockEventFilter());
-        eventBusService.subscribeNetworkEvent(GetSmallBlockEvent.class, getBlockHandler);
+        eventBusService.subscribeEvent(GetSmallBlockEvent.class, getBlockHandler);
 
         GetTxGroupHandler getSmallBlockHandler = new GetTxGroupHandler();
         getSmallBlockHandler.addFilter(new GetTxGroupFilter());
-        eventBusService.subscribeNetworkEvent(GetSmallBlockEvent.class, getSmallBlockHandler);
-
-        RegisterAgentHandler registerAgentHandler = new RegisterAgentHandler();
-        registerAgentHandler.addFilter(new RegisterAgentEventFilter());
-        eventBusService.subscribeNetworkEvent(RegisterAgentEvent.class, registerAgentHandler);
-
-        JoinConsensusHandler joinConsensusHandler = new JoinConsensusHandler();
-        joinConsensusHandler.addFilter(AllreadyJoinConsensusEventFilter.getInstance());
-        joinConsensusHandler.addFilter(CreditThresholdEventFilter.getInstance());
-        eventBusService.subscribeNetworkEvent(JoinConsensusEvent.class, joinConsensusHandler);
-
-        ExitConsensusHandler exitConsensusHandler = new ExitConsensusHandler();
-        exitConsensusHandler.addFilter(new ExitConsensusEventFilter());
-        eventBusService.subscribeNetworkEvent(ExitConsensusEvent.class, exitConsensusHandler);
-
-        RedPunishHandler redPunishHandler = new RedPunishHandler();
-        redPunishHandler.addFilter(new RedPunishEventFilter());
-        eventBusService.subscribeNetworkEvent(RedPunishConsensusEvent.class, redPunishHandler);
-
-        YellowPunishHandler yellowPunishHandler = new YellowPunishHandler();
-        yellowPunishHandler.addFilter(new YellowPunishEventFilter());
-        eventBusService.subscribeNetworkEvent(YellowPunishConsensusEvent.class, yellowPunishHandler);
+        eventBusService.subscribeEvent(GetSmallBlockEvent.class, getSmallBlockHandler);
 
         GetBlockHeaderHandler getBlockHeaderHandler = new GetBlockHeaderHandler();
-        eventBusService.subscribeNetworkEvent(GetBlockHeaderEvent.class, getBlockHeaderHandler);
+        eventBusService.subscribeEvent(GetBlockHeaderEvent.class, getBlockHeaderHandler);
 
         TxGroupHandler txGroupHandler = new TxGroupHandler();
         //todo        smallBlockHandler.addFilter();
-        eventBusService.subscribeNetworkEvent(TxGroupEvent.class, txGroupHandler);
+        eventBusService.subscribeEvent(TxGroupEvent.class, txGroupHandler);
     }
 
 

@@ -1,7 +1,6 @@
 package io.nuls.event.bus.filter;
 
 import io.nuls.core.event.BaseEvent;
-import io.nuls.core.event.BaseNetworkEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +14,7 @@ public class NulsEventFilterChain {
     private List<NulsEventFilter> list = new ArrayList<>();
     private ThreadLocal<Integer> index = new ThreadLocal<>();
 
-    public boolean startDoFilter(BaseNetworkEvent event) {
+    public boolean startDoFilter(BaseEvent event) {
         index.set(-1);
         doFilter(event);
         boolean result = index.get() == list.size();
@@ -23,7 +22,7 @@ public class NulsEventFilterChain {
         return result;
     }
 
-    public void doFilter(BaseNetworkEvent event) {
+    public void doFilter(BaseEvent event) {
         index.set(1 + index.get());
         if (index.get() == list.size()) {
             return;

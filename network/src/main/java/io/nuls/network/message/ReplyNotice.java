@@ -3,14 +3,13 @@ package io.nuls.network.message;
 import io.nuls.core.chain.entity.BasicTypeData;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.event.BaseLocalEvent;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
 /**
  * @author vivi
  * @date 2017/12/10.
  */
-public class ReplyNotice extends BaseLocalEvent<BasicTypeData<byte[]>> {
+public class ReplyNotice extends io.nuls.core.event.BaseEvent<BasicTypeData<byte[]>> {
 
     public ReplyNotice() {
         super(NulsConstant.MODULE_ID_NETWORK, (short) 1);

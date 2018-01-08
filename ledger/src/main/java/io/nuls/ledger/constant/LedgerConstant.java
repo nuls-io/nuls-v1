@@ -13,9 +13,6 @@ public interface LedgerConstant {
     int SMALL_CHANGE_COUNT = 500;
     String STANDING_BOOK = "STANDING_BOOK";
 
-    short EVENT_TYPE_TRANSFER = 1;
-    short EVENT_TYPE_LOCK_NULS = 2;
-    short EVENT_TYPE_UNLOCK_NULS = 3;
-    short EVENT_TYPE_SMALL_CHANGE = 4;
+    short EVENT_TYPE_TRANSACTION = 1;
 
 }

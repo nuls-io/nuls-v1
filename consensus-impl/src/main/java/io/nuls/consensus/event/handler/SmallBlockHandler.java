@@ -6,9 +6,8 @@ import io.nuls.consensus.event.GetTxGroupEvent;
 import io.nuls.consensus.event.SmallBlockEvent;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.context.NulsContext;
-import io.nuls.event.bus.handler.AbstractNetworkEventHandler;
-import io.nuls.event.bus.service.intf.NetworkEventBroadcaster;
-import io.nuls.ledger.service.intf.LedgerService;
+import io.nuls.event.bus.handler.AbstractEventHandler;
+import io.nuls.event.bus.service.intf.EventBroadcaster;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,8 +16,8 @@ import java.util.List;
  * @author facjas
  * @date 2017/11/16
  */
-public class SmallBlockHandler extends AbstractNetworkEventHandler<SmallBlockEvent> {
-    private NetworkEventBroadcaster broadcaster = NulsContext.getInstance().getService(NetworkEventBroadcaster.class);
+public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
+    private EventBroadcaster broadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
     private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
 
     @Override
