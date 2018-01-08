@@ -78,7 +78,7 @@ public class NodesManager {
             addNodeToGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP, node);
         }
 
-        boolean isConsensus = NulsContext.MODULES_CONFIG.getCfgValue(PocConsensusConstant.CFG_CONSENSUS_SECTION, PocConsensusConstant.PROPERTY_DELEGATE_NODE, false);
+        boolean isConsensus = NulsContext.MODULES_CONFIG.getCfgValue(PocConsensusConstant.CFG_CONSENSUS_SECTION, PocConsensusConstant.PROPERTY_PARTAKE_PACKING, false);
         if (isConsensus) {
             network.maxOutCount(network.maxOutCount() * 2);
             network.maxInCount(network.maxInCount() * 2);

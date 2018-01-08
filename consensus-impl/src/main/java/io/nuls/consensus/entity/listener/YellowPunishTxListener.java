@@ -1,13 +1,13 @@
 package io.nuls.consensus.entity.listener;
 
 import io.nuls.consensus.entity.tx.YellowPunishTransaction;
-import io.nuls.core.chain.entity.TransactionListener;
+import io.nuls.core.tx.serivce.TransactionService;
 
 /**
  * @author Niels
  * @date 2017/12/28
  */
-public class YellowPunishTxListener implements TransactionListener<YellowPunishTransaction> {
+public class YellowPunishTxListener implements TransactionService<YellowPunishTransaction> {
 
     private static final YellowPunishTxListener INSTANCE = new YellowPunishTxListener();
 

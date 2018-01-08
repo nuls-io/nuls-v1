@@ -1,28 +1,18 @@
 package io.nuls.consensus.module.impl;
 
-import io.nuls.account.entity.Account;
-import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.constant.PocConsensusConstant;
-import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
-import io.nuls.consensus.entity.genesis.GenesisBlock;
-import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.tx.*;
 import io.nuls.consensus.entity.validator.block.PocBlockValidatorManager;
 import io.nuls.consensus.event.*;
 import io.nuls.consensus.event.filter.*;
 import io.nuls.consensus.event.handler.*;
+import io.nuls.consensus.manager.ConsensusManager;
 import io.nuls.consensus.module.AbstractConsensusModule;
-import io.nuls.consensus.cache.manager.block.BlockCacheManager;
-import io.nuls.consensus.cache.manager.block.BlockHeaderCacheManager;
-import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
-import io.nuls.consensus.cache.manager.block.SmallBlockCacheManager;
 import io.nuls.consensus.service.impl.BlockServiceImpl;
 import io.nuls.consensus.service.impl.PocConsensusServiceImpl;
-import io.nuls.consensus.thread.BlockMaintenanceThread;
-import io.nuls.consensus.thread.BlockPersistenceThread;
-import io.nuls.consensus.thread.ConsensusMeetingRunner;
+import io.nuls.consensus.service.tx.*;
 import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
@@ -30,7 +20,6 @@ import io.nuls.core.thread.BaseThread;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.service.intf.EventBusService;
-import io.nuls.network.service.NetworkService;
 
 import java.util.List;
 
@@ -41,39 +30,35 @@ import java.util.List;
 public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
 
     private EventBusService eventBusService = NulsContext.getInstance().getService(EventBusService.class);
-    private boolean delegateNode = false;
-    private ConsensusCacheManager consensusCacheManager;
-    private AccountService accountService;
+
+    private ConsensusManager consensusManager = ConsensusManager.getInstance();
 
     @Override
     public void init() {
-        consensusCacheManager = ConsensusCacheManager.getInstance();
-        accountService = NulsContext.getInstance().getService(AccountService.class);
-        NulsContext.getInstance().setGenesisBlock(GenesisBlock.getInstance());
-
-        this.registerTransaction(TransactionConstant.TX_TYPE_REGISTER_AGENT, RegisterAgentTransaction.class);
-        this.registerTransaction(TransactionConstant.TX_TYPE_RED_PUNISH, RedPunishTransaction.class);
-        this.registerTransaction(TransactionConstant.TX_TYPE_YELLOW_PUNISH, YellowPunishTransaction.class);
-        this.registerTransaction(TransactionConstant.TX_TYPE_JOIN_CONSENSUS, PocJoinConsensusTransaction.class);
-        this.registerTransaction(TransactionConstant.TX_TYPE_EXIT_CONSENSUS, PocExitConsensusTransaction.class);
-        delegateNode = NulsContext.MODULES_CONFIG.getCfgValue(PocConsensusConstant.CFG_CONSENSUS_SECTION, PocConsensusConstant.PROPERTY_DELEGATE_NODE, false);
         PocBlockValidatorManager.initBlockValidators();
-        BlockCacheManager.getInstance().init();
-        ConsensusCacheManager.getInstance().initCache();
-        BlockHeaderCacheManager.getInstance().init();
-        SmallBlockCacheManager.getInstance().init();
+        initTransactions();
+        consensusManager.init();
+    }
 
-        //todo 接收处理 账户切换的notice，或者确认共识打包中不能切换账户
+    private void initTransactions() {
+        this.registerTransaction(TransactionConstant.TX_TYPE_REGISTER_AGENT, RegisterAgentTransaction.class,new RegisterAgentTxService());
+        this.registerTransaction(TransactionConstant.TX_TYPE_RED_PUNISH, RedPunishTransaction.class,new RedPunishTxService());
+        this.registerTransaction(TransactionConstant.TX_TYPE_YELLOW_PUNISH, YellowPunishTransaction.class,new YellowPunishTxService());
+        this.registerTransaction(TransactionConstant.TX_TYPE_JOIN_CONSENSUS, PocJoinConsensusTransaction.class,new JoinConsensusTxService());
+        this.registerTransaction(TransactionConstant.TX_TYPE_EXIT_CONSENSUS, PocExitConsensusTransaction.class,new ExitConsensusTxService());
     }
 
     @Override
     public void start() {
         this.registerService(BlockServiceImpl.getInstance());
         this.registerService(PocConsensusServiceImpl.getInstance());
-        this.startBlockMaintenanceThread();
-        this.checkConsensusStatus();
-        this.checkNodeType();
-        TaskManager.createSingleThreadAndRun(this.getModuleId(), BlockPersistenceThread.THREAD_NAME, BlockPersistenceThread.getInstance());
+
+        this. consensusManager.startMaintenanceWork();
+        ConsensusStatusInfo statusInfo = consensusManager.getConsensusStatusInfo();
+        if (statusInfo.getStatus() != ConsensusStatusEnum.NOT_IN.getCode()) {
+            consensusManager.joinMeeting();
+        }
+        consensusManager.startPersistenceWork();
         this.registerHandlers();
         Log.info("the POC consensus module is started!");
 
@@ -122,74 +107,10 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
         eventBusService.subscribeNetworkEvent(GetBlockHeaderEvent.class, getBlockHeaderHandler);
 
         TxGroupHandler txGroupHandler = new TxGroupHandler();
-//todo        smallBlockHandler.addFilter();
+        //todo        smallBlockHandler.addFilter();
         eventBusService.subscribeNetworkEvent(TxGroupEvent.class, txGroupHandler);
     }
 
-    private void checkConsensusStatus() {
-        if (!isDelegateNode()) {
-            return;
-        }
-        Account localAccount = accountService.getLocalAccount();
-        if (null == localAccount) {
-            Log.warn("local account is null!");
-            return;
-        }
-        Consensus<Agent> memberSelf =
-                consensusCacheManager.getCachedAgent(localAccount.getAddress().toString());
-        if (null == memberSelf) {
-            return;
-        }
-        if (memberSelf.getExtend().getStatus() != ConsensusStatusEnum.NOT_IN.getCode()) {
-            return;
-        }
-        startMining();
-    }
-
-    private void checkNodeType() {
-        boolean isSeed = NulsContext.getInstance().getService(NetworkService.class).isSeed(null);
-        if (!isSeed) {
-            return;
-        }
-        Account localAccount = accountService.getLocalAccount();
-        if (null == localAccount) {
-            Log.warn("local account is null!");
-            return;
-        }
-        this.startMining();
-//        Consensus<Agent> memberSelf =
-//                consensusCacheService.getConsensusAccount(localAccount.getAddress().toString());
-//        if (null != memberSelf && memberSelf.getExtend().getStatus() != ConsensusStatusEnum.IN.getCode()) {
-//            startMining();
-//            return;
-//        }
-//        Map<String, Object> paramsMap = new HashMap<>();
-//        paramsMap.put(JoinConsensusParam.IS_SEED_NODE, true);
-//        paramsMap.put(JoinConsensusParam.AGENT_ADDRESS, localAccount.getAddress().toString());
-//        paramsMap.put(JoinConsensusParam.DEPOSIT, 0L);
-//        paramsMap.put(JoinConsensusParam.INTRODUCTION, "seed node!");
-//        this.pocConsensusService.joinTheConsensus(localAccount.getAddress().toString(), null, paramsMap);
-    }
-
-    private void startMining() {
-        TaskManager.createSingleThreadAndRun(this.getModuleId(),
-                ConsensusMeetingRunner.THREAD_NAME,
-                ConsensusMeetingRunner.getInstance());
-    }
-
-
-    private void startBlockMaintenanceThread() {
-        BlockMaintenanceThread blockMaintenanceThread = BlockMaintenanceThread.getInstance();
-        try {
-            blockMaintenanceThread.checkGenesisBlock();
-            blockMaintenanceThread.syncBlock();
-        } catch (Exception e) {
-            Log.error(e.getMessage());
-        } finally {
-            TaskManager.createSingleThreadAndRun(this.getModuleId(),
-                    BlockMaintenanceThread.THREAD_NAME, blockMaintenanceThread);
-        }
-    }
 
 
     @Override
@@ -199,10 +120,7 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
 
     @Override
     public void destroy() {
-        ConsensusCacheManager.getInstance().clear();
-        BlockCacheManager.getInstance().clear();
-        BlockHeaderCacheManager.getInstance().clear();
-        SmallBlockCacheManager.getInstance().clear();
+        consensusManager.destroy();
     }
 
     @Override
@@ -213,7 +131,7 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
         StringBuilder str = new StringBuilder();
         str.append("module:[consensus]:\n");
         str.append("consensus status:");
-        ConsensusStatusInfo statusInfo = this.consensusCacheManager.getConsensusStatusInfo(this.accountService.getDefaultAccount());
+        ConsensusStatusInfo statusInfo = consensusManager.getConsensusStatusInfo();
         if (null == statusInfo) {
             str.append(ConsensusStatusEnum.NOT_IN.getText());
         } else {
@@ -242,7 +160,4 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
         return PocConsensusConstant.POC_CONSENSUS_MODULE_VERSION;
     }
 
-    public boolean isDelegateNode() {
-        return delegateNode;
-    }
 }

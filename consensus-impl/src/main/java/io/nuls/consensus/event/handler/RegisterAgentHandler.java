@@ -3,8 +3,6 @@ package io.nuls.consensus.event.handler;
 import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
 import io.nuls.consensus.event.RegisterAgentEvent;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.handler.AbstractNetworkEventHandler;
 import io.nuls.event.bus.service.intf.NetworkEventBroadcaster;
 import io.nuls.ledger.service.intf.LedgerService;

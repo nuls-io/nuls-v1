@@ -17,7 +17,6 @@ import io.nuls.core.utils.log.Log;
 public class YellowPunishTransaction extends Transaction<YellowPunishData> {
     public YellowPunishTransaction() {
         super(PocConsensusConstant.EVENT_TYPE_YELLOW_PUNISH);
-        this.registerListener(YellowPunishTxListener.getInstance());
         this.registerValidator(YellowPunishValidator.getInstance());
     }
 

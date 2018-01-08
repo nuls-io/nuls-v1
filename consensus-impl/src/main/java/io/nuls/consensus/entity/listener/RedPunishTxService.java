@@ -1,21 +1,20 @@
 package io.nuls.consensus.entity.listener;
 
 import io.nuls.consensus.entity.tx.RedPunishTransaction;
-import io.nuls.consensus.entity.tx.YellowPunishTransaction;
-import io.nuls.core.chain.entity.TransactionListener;
+import io.nuls.core.tx.serivce.TransactionService;
 
 /**
  * @author Niels
  * @date 2017/12/28
  */
-public class RedPunishTxListener implements TransactionListener<RedPunishTransaction> {
+public class RedPunishTxService implements TransactionService<RedPunishTransaction> {
 
-    private static final RedPunishTxListener INSTANCE = new RedPunishTxListener();
+    private static final RedPunishTxService INSTANCE = new RedPunishTxService();
 
-    private RedPunishTxListener() {
+    private RedPunishTxService() {
     }
 
-    public static RedPunishTxListener getInstance() {
+    public static RedPunishTxService getInstance() {
         return INSTANCE;
     }
 

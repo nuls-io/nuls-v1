@@ -7,6 +7,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.i18n.I18nUtils;
 import io.nuls.core.module.BaseModuleBootstrap;
+import io.nuls.core.tx.serivce.CommonTransactionService;
 import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.queue.manager.QueueManager;
@@ -24,7 +25,7 @@ public class MicroKernelBootstrap extends BaseModuleBootstrap {
         super(NulsConstant.MODULE_ID_MICROKERNEL);
     }
 
-    public static MicroKernelBootstrap getInstance(){
+    public static MicroKernelBootstrap getInstance() {
         return INSTANCE;
     }
 
@@ -50,7 +51,7 @@ public class MicroKernelBootstrap extends BaseModuleBootstrap {
     @Override
     public void start() {
         QueueManager.start();
-
+        this.registerService(CommonTransactionService.class, new CommonTransactionService());
     }
 
     @Override

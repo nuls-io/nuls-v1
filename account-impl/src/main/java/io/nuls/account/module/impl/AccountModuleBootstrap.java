@@ -10,6 +10,7 @@ import io.nuls.account.manager.AccountManager;
 import io.nuls.account.module.intf.AbstractAccountModule;
 import io.nuls.account.service.impl.AccountServiceImpl;
 import io.nuls.account.service.intf.AccountService;
+import io.nuls.account.service.tx.AliasTxService;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.event.bus.service.intf.EventBusService;
@@ -27,7 +28,7 @@ public class AccountModuleBootstrap extends AbstractAccountModule {
 
     @Override
     public void init() {
-        this.registerTransaction(TransactionConstant.TX_TYPE_SET_ALIAS, AliasTransaction.class);
+        this.registerTransaction(TransactionConstant.TX_TYPE_SET_ALIAS, AliasTransaction.class,new AliasTxService());
     }
 
     @Override

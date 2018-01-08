@@ -41,4 +41,8 @@ public class ConfirmingTxCacheManager {
             txCache.remove(hash.getDigestHex());
         }
     }
+
+    public void clear() {
+        txCache.clear();
+    }
 }

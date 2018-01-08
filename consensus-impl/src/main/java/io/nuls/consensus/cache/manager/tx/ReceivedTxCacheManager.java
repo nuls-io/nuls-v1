@@ -49,4 +49,9 @@ public class ReceivedTxCacheManager {
 
         return txCache.values();
     }
+
+
+    public void clear() {
+        txCache.clear();
+    }
 }
