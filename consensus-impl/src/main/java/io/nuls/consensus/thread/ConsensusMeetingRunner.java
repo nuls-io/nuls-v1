@@ -34,7 +34,6 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.tx.serivce.CommonTransactionService;
 import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
@@ -65,7 +64,6 @@ public class ConsensusMeetingRunner implements Runnable {
     private EventBroadcaster eventBroadcaster = context.getService(EventBroadcaster.class);
     private boolean running = false;
     private ConsensusManager consensusManager = ConsensusManager.getInstance();
-    private CommonTransactionService txService = context.getService(CommonTransactionService.class);
     private ConfirmingTxCacheManager confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
     private static Map<Long, RedPunishData> punishMap = new HashMap<>();
 
@@ -197,13 +195,13 @@ public class ConsensusMeetingRunner implements Runnable {
         List<Integer> outTxList = new ArrayList<>();
         for (int i = 0; i < txList.size(); i++) {
             Transaction tx = txList.get(i);
-            ValidateResult result = txService.verify(tx);
+            ValidateResult result = ledgerService.verifyTx(tx);
             if (result.isFailed()) {
                 outTxList.add(i);
                 continue;
             }
             try {
-                txService.approval(tx);
+                ledgerService.approvalTx(tx);
             } catch (NulsException e) {
                 Log.error(e);
                 outTxList.add(i);
