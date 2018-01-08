@@ -17,10 +17,6 @@ public interface NetworkService {
 
     void shutdown();
 
-    boolean isSeed(String nodeId);
-
-    boolean isSeed();
-
     void addNode(Node node);
 
     void removeNode(String nodeId);

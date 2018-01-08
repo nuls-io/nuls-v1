@@ -54,7 +54,8 @@ CREATE TABLE IF NOT EXISTS `node` (
   `port` int(6) NOT NULL,
   `last_time` bigint(20) NOT NULL,
   `last_fail_time` bigint(20) NOT NULL,
-  `fail_count` bigint(20) NOT NULL,
+  `fail_count` int(1) NOT NULL,
+  `status` int(1) NOT NULL,
   `magic_num` int(11) NOT NULL,
   `version` int(11) NOT NULL,
   PRIMARY KEY (`id`)
