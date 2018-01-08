@@ -133,7 +133,7 @@ public class BlockServiceImpl implements BlockService {
 
     @Transactional
     private void dataPersistence(BlockPo blockPo, List<TransactionPo> txPoList) {
-        //todo 调用多个dao进行
+        //todo 调用多个dao/service进行
     }
 
     @Override
