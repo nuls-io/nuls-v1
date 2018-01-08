@@ -35,6 +35,7 @@ public class NodeDaoImpl extends BaseDaoImpl<NodeMapper, String, NodePo> impleme
         if (!keys.isEmpty()) {
             searchable.addCondition("id", SearchOperator.notIn, keys);
         }
+        searchable.addCondition("status", SearchOperator.eq, 0);
         searchable.addCondition("last_fail_time", SearchOperator.lt, TimeService.currentTimeMillis() - TimeService.ONE_HOUR);
         List<NodePo> list = getMapper().selectList(searchable);
         if (list.size() <= size) {

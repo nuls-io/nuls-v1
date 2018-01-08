@@ -79,16 +79,6 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
-    public boolean isSeed(String nodeId) {
-        return nodesManager.isSeed(nodeId);
-    }
-
-    @Override
-    public boolean isSeed() {
-        return nodesManager.isSeed(null);
-    }
-
-    @Override
     public void addNode(Node node) {
         nodesManager.addNode(node);
     }
