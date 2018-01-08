@@ -1,4 +1,4 @@
-package io.nuls.db.dao.impl.mybatis.session;
+package io.nuls.db.annotation;
 
 /**
  *

@@ -11,8 +11,8 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.tx.serivce.CommonTransactionService;
 import io.nuls.core.utils.log.Log;
+import io.nuls.db.annotation.Transactional;
 import io.nuls.db.dao.BlockDataService;
-import io.nuls.db.dao.ConsensusDataService;
 import io.nuls.db.entity.BlockPo;
 import io.nuls.db.entity.TransactionPo;
 import io.nuls.db.util.TransactionPoTool;
@@ -28,7 +28,6 @@ public class BlockServiceImpl implements BlockService {
     private static final BlockServiceImpl INSTANCE = new BlockServiceImpl();
 
     private BlockDataService blockDao = NulsContext.getInstance().getService(BlockDataService.class);
-    private ConsensusDataService consensusDao = NulsContext.getInstance().getService(ConsensusDataService.class);
     private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
 
     private CommonTransactionService txService = NulsContext.getInstance().getService(CommonTransactionService.class);
@@ -129,7 +128,12 @@ public class BlockServiceImpl implements BlockService {
                 throw new NulsRuntimeException(e);
             }
         }
-        consensusDao.blockPersistence(blockPo, txPoList);
+        this.dataPersistence(blockPo, txPoList);
+    }
+
+    @Transactional
+    private void dataPersistence(BlockPo blockPo, List<TransactionPo> txPoList) {
+        //todo 调用多个dao进行
     }
 
     @Override
