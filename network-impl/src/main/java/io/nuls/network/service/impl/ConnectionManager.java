@@ -47,13 +47,12 @@ public class ConnectionManager implements Runnable {
         this.network = network;
         this.networkModule = module;
         lock = new ReentrantLock();
-        init();
     }
 
     /**
      * open the serverSocketChannel and register accept action
      */
-    private void init() {
+    public void init() {
         lock.lock();
         try {
             if (!running) {

@@ -3,6 +3,7 @@ package io.nuls.network.message.impl;
 import io.nuls.core.event.BaseNetworkEvent;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Node;
+import io.nuls.network.message.NetworkCacheService;
 import io.nuls.network.message.NetworkEventResult;
 import io.nuls.network.message.entity.NodeEvent;
 import io.nuls.network.message.handler.NetWorkEventHandler;
@@ -18,8 +19,10 @@ public class NodeEventHandler implements NetWorkEventHandler {
 
     private NodesManager nodesManager;
 
-    private NodeEventHandler() {
+    private NetworkCacheService cacheService;
 
+    private NodeEventHandler() {
+        cacheService = NetworkCacheService.getInstance();
     }
 
     public static NodeEventHandler getInstance() {
@@ -29,6 +32,14 @@ public class NodeEventHandler implements NetWorkEventHandler {
     @Override
     public NetworkEventResult process(BaseNetworkEvent networkEvent, Node node) {
         NodeEvent event = (NodeEvent) networkEvent;
+
+        String key = event.getHeader().getEventType() + "-" + node.getIp() + "-" + node.getPort();
+        if (cacheService.existEvent(key)) {
+            node.destroy();
+            return null;
+        }
+        cacheService.putEvent(key, event, false);
+
         for (Node newNode : event.getEventBody().getNodes()) {
             newNode.setType(Node.OUT);
             newNode.setMessageHandlerFactory(node.getMessageHandlerFactory());

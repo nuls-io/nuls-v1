@@ -87,38 +87,38 @@ public class BroadcasterImpl implements Broadcaster {
      * @return
      */
     private BroadcastResult broadcastSync(NulsMessage message, String excludeNodeId) {
-        List<Node> broadNodes = nodesManager.getAvailableNodes(excludeNodeId);
+//        List<Node> broadNodes = nodesManager.getAvailableNodes(excludeNodeId);
+//
+//        if (broadNodes.size() <= 0) {
+//            return new BroadcastResult(false, "no node can be broadcast");
+//        }
+//
+//        int numConnected = broadNodes.size();
+//        int numToBroadcastTo = (int) Math.max(1, Math.round(Math.ceil(broadNodes.size() / 2.0)));
+//        Collections.shuffle(broadNodes);
+//        broadNodes = broadNodes.subList(0, numToBroadcastTo);
+//
+//        int successCount = 0;
+//        for (Node node : broadNodes) {
+//            try {
+//                node.sendMessage(message);
+//                successCount++;
+//            } catch (IOException e) {
+//                broadNodes.remove(node);
+//                Log.warn("broadcast message error ， maybe the node closed ! node ip :{}, {}", node.getIp(), e.getMessage());
+//            }
+//        }
+//        if (successCount == 0) {
+//            return new BroadcastResult(false, "broadcast fail");
+//        }
+//
+//        BroadcastResult result = new BroadcastResult(true, "OK");
+//        result.setHash(Sha256Hash.twiceOf(message.getData()).toString());
+//        result.setBroadcastNodes(broadNodes);
+//        result.setWaitReplyCount(numConnected - numToBroadcastTo);
+//        NetworkCacheService.getInstance().addBroadCastResult(result);
 
-        if (broadNodes.size() <= 0) {
-            return new BroadcastResult(false, "no node can be broadcast");
-        }
-
-        int numConnected = broadNodes.size();
-        int numToBroadcastTo = (int) Math.max(1, Math.round(Math.ceil(broadNodes.size() / 2.0)));
-        Collections.shuffle(broadNodes);
-        broadNodes = broadNodes.subList(0, numToBroadcastTo);
-
-        int successCount = 0;
-        for (Node node : broadNodes) {
-            try {
-                node.sendMessage(message);
-                successCount++;
-            } catch (NotYetConnectedException | IOException e) {
-                broadNodes.remove(node);
-                Log.warn("broadcast message error ， maybe the node closed ! node ip :{}, {}", node.getIp(), e.getMessage());
-            }
-        }
-        if (successCount == 0) {
-            return new BroadcastResult(false, "broadcast fail");
-        }
-
-        BroadcastResult result = new BroadcastResult(true, "OK");
-        result.setHash(Sha256Hash.twiceOf(message.getData()).toString());
-        result.setBroadcastNodes(broadNodes);
-        result.setWaitReplyCount(numConnected - numToBroadcastTo);
-        NetworkCacheService.getInstance().addBroadCastResult(result);
-
-        return result;
+        return null;
     }
 
 
@@ -162,35 +162,36 @@ public class BroadcasterImpl implements Broadcaster {
     }
 
     private BroadcastResult broadcastToGroupSync(NulsMessage message, String groupName, String excludeNodeId) {
-        List<Node> broadNodes = nodesManager.getGroupAvailableNodes(groupName, excludeNodeId);
-        if (broadNodes.size() <= 1) {
-            return new BroadcastResult(false, "no node can be broadcast");
-        }
-
-        int numConnected = broadNodes.size();
-        int numToBroadcastTo = (int) Math.max(1, Math.round(Math.ceil(broadNodes.size() / 2.0)));
-        Collections.shuffle(broadNodes);
-        broadNodes = broadNodes.subList(0, numToBroadcastTo);
-
-        int successCount = 0;
-        for (Node node : broadNodes) {
-            try {
-                node.sendMessage(message);
-                successCount++;
-            } catch (NotYetConnectedException | IOException e) {
-                Log.warn("broadcast message error ， maybe the node closed ! node ip :{}, {}", node.getIp(), e.getMessage());
-            }
-        }
-        if (successCount == 0) {
-            new BroadcastResult(false, "broadcast fail");
-        }
-
-        BroadcastResult result = new BroadcastResult(true, "OK");
-        result.setHash(Sha256Hash.twiceOf(message.getData()).toString());
-        result.setBroadcastNodes(broadNodes);
-        result.setWaitReplyCount(numConnected - numToBroadcastTo);
-        NetworkCacheService.getInstance().addBroadCastResult(result);
-        return result;
+//        List<Node> broadNodes = nodesManager.getGroupAvailableNodes(groupName, excludeNodeId);
+//        if (broadNodes.size() <= 1) {
+//            return new BroadcastResult(false, "no node can be broadcast");
+//        }
+//
+//        int numConnected = broadNodes.size();
+//        int numToBroadcastTo = (int) Math.max(1, Math.round(Math.ceil(broadNodes.size() / 2.0)));
+//        Collections.shuffle(broadNodes);
+//        broadNodes = broadNodes.subList(0, numToBroadcastTo);
+//
+//        int successCount = 0;
+//        for (Node node : broadNodes) {
+//            try {
+//                node.sendMessage(message);
+//                successCount++;
+//            } catch (NotYetConnectedException | IOException e) {
+//                Log.warn("broadcast message error ， maybe the node closed ! node ip :{}, {}", node.getIp(), e.getMessage());
+//            }
+//        }
+//        if (successCount == 0) {
+//            new BroadcastResult(false, "broadcast fail");
+//        }
+//
+//        BroadcastResult result = new BroadcastResult(true, "OK");
+//        result.setHash(Sha256Hash.twiceOf(message.getData()).toString());
+//        result.setBroadcastNodes(broadNodes);
+//        result.setWaitReplyCount(numConnected - numToBroadcastTo);
+//        NetworkCacheService.getInstance().addBroadCastResult(result);
+//        return result;
+        return null;
     }
 
 

@@ -1,6 +1,5 @@
 package io.nuls.network.message.entity;
 
-import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.event.BaseNetworkEvent;
 import io.nuls.core.exception.NulsException;
@@ -21,13 +20,13 @@ public class NodeEvent extends BaseNetworkEvent<NodeEventBody> {
     public static final short OWN_SUB_VERSION = 1001;
 
     public NodeEvent() {
-        super(NulsConstant.MODULE_ID_NETWORK, NetworkConstant.NETWORK_NODE_MESSAGE);
-        this.version = new NulsVersion(OWN_MAIN_VERSION, OWN_SUB_VERSION);
+        super(NulsConstant.MODULE_ID_NETWORK, NetworkConstant.NETWORK_NODE_EVENT);
+     //   this.version = new NulsVersion(OWN_MAIN_VERSION, OWN_SUB_VERSION);
     }
 
     public NodeEvent(List<Node> nodes) {
-        super(NulsConstant.MODULE_ID_NETWORK, NetworkConstant.NETWORK_NODE_MESSAGE);
-        this.version = new NulsVersion(OWN_MAIN_VERSION, OWN_SUB_VERSION);
+        super(NulsConstant.MODULE_ID_NETWORK, NetworkConstant.NETWORK_NODE_EVENT);
+     //   this.version = new NulsVersion(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.setEventBody(new NodeEventBody(nodes));
     }
 

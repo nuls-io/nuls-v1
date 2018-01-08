@@ -8,6 +8,7 @@ import io.nuls.db.dao.NodeDataService;
 import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeTransfer;
 import io.nuls.network.exception.NetworkMessageException;
+import io.nuls.network.message.NetworkCacheService;
 import io.nuls.network.message.NetworkEventResult;
 import io.nuls.network.message.entity.VersionEvent;
 import io.nuls.network.message.handler.NetWorkEventHandler;
@@ -22,8 +23,10 @@ public class VersionEventHandler implements NetWorkEventHandler {
 
     private NodeDataService nodeDao;
 
-    private VersionEventHandler() {
+    private NetworkCacheService cacheService;
 
+    private VersionEventHandler() {
+        cacheService = NetworkCacheService.getInstance();
     }
 
     public static VersionEventHandler getInstance() {
@@ -31,12 +34,20 @@ public class VersionEventHandler implements NetWorkEventHandler {
     }
 
     @Override
-    public NetworkEventResult process(BaseNetworkEvent message, Node node) {
-        VersionEvent versionMessage = (VersionEvent) message;
-        if (versionMessage.getBestBlockHeight() < 0) {
+    public NetworkEventResult process(BaseNetworkEvent networkEvent, Node node) {
+        VersionEvent event = (VersionEvent) networkEvent;
+
+        String key = event.getHeader().getEventType() + "-" + node.getIp() + "-" + node.getPort();
+        if (cacheService.existEvent(key)) {
+            node.destroy();
+            return null;
+        }
+        cacheService.putEvent(key, event, false);
+
+        if (event.getBestBlockHeight() < 0) {
             throw new NetworkMessageException(ErrorCode.NET_MESSAGE_ERROR);
         }
-        node.setVersionMessage(versionMessage);
+        node.setVersionMessage(event);
         node.setStatus(Node.HANDSHAKE);
         node.setLastTime(TimeService.currentTimeMillis());
 

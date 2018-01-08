@@ -7,6 +7,7 @@ import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.TaskManager;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.network.IPUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.NodeDataService;
@@ -15,8 +16,9 @@ import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeGroup;
 import io.nuls.network.entity.NodeTransfer;
 import io.nuls.network.entity.param.AbstractNetworkParam;
-import io.nuls.network.module.AbstractNetworkModule;
+import io.nuls.network.message.entity.PingEvent;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
@@ -25,7 +27,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author vivi
  * @date 2017/11/21
  */
-public class NodesManager {
+public class NodesManager implements Runnable {
 
     private AbstractNetworkParam network;
 
@@ -43,7 +45,9 @@ public class NodesManager {
 
     private List<Node> seedNodes;
 
-    public NodesManager(AbstractNetworkModule module, AbstractNetworkParam network, NodeDataService nodeDao) {
+    private boolean running;
+
+    public NodesManager(AbstractNetworkParam network, NodeDataService nodeDao) {
         this.network = network;
         this.nodeDao = nodeDao;
         lock = new ReentrantLock();
@@ -68,6 +72,7 @@ public class NodesManager {
      * find other nodes from connetcted nodes
      */
     public void start() {
+        running = true;
         List<Node> nodes = discovery.getLocalNodes(10);
         if (nodes.isEmpty()) {
             nodes = getSeedNodes();
@@ -87,6 +92,14 @@ public class NodesManager {
         System.out.println("-----------nodeManager start");
         //start  heart beat thread
         TaskManager.createSingleThreadAndRun(NulsConstant.MODULE_ID_NETWORK, "nodeDiscovery", this.discovery);
+    }
+
+    public void stop() {
+        running = false;
+    }
+
+    public void destory() {
+        stop();
     }
 
     public List<Node> getSeedNodes() {
@@ -320,5 +333,29 @@ public class NodesManager {
 
     public ConnectionManager getConnectionManager() {
         return connectionManager;
+    }
+
+    @Override
+    public void run() {
+
+        while (running) {
+            for (Node node : nodes.values()) {
+                if (node.getStatus() == Node.HANDSHAKE) {
+                    PingEvent ping = new PingEvent();
+                    try {
+                        node.sendNetworkEvent(ping);
+                    } catch (IOException e) {
+                        Log.error(e);
+                        node.destroy();
+                    }
+                }
+            }
+
+            try {
+                Thread.sleep(6000);
+            } catch (InterruptedException e) {
+
+            }
+        }
     }
 }

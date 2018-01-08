@@ -18,7 +18,7 @@ public class ByeEvent extends BaseNetworkEvent {
     public static final short OWN_SUB_VERSION = 0001;
 
     public ByeEvent() {
-        super(NulsConstant.MODULE_ID_NETWORK, NetworkConstant.NETWORK_BYE_MESSAGE);
+        super(NulsConstant.MODULE_ID_NETWORK, NetworkConstant.NETWORK_BYE_EVENT);
         this.version = new NulsVersion(OWN_MAIN_VERSION, OWN_SUB_VERSION);
     }
 
