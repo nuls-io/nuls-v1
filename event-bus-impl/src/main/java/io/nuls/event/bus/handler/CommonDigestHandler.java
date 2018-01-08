@@ -2,18 +2,18 @@ package io.nuls.event.bus.handler;
 
 import io.nuls.event.bus.event.CommonDigestEvent;
 import io.nuls.event.bus.event.GetEventBodyEvent;
-import io.nuls.event.bus.service.intf.NetworkEventBroadcaster;
+import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.event.bus.service.impl.EventCacheService;
-import io.nuls.event.bus.service.impl.NetworkEventBroadcasterImpl;
+import io.nuls.event.bus.service.impl.EventBroadcasterImpl;
 
 /**
  * @author Niels
  * @date 2017/12/8
  */
-public class CommonDigestHandler extends AbstractNetworkEventHandler<CommonDigestEvent> {
+public class CommonDigestHandler extends AbstractEventHandler<CommonDigestEvent> {
 
     private EventCacheService eventCacheService = EventCacheService.getInstance();
-    private NetworkEventBroadcaster networkEventBroadcaster = NetworkEventBroadcasterImpl.getInstance();
+    private EventBroadcaster eventBroadcaster = EventBroadcasterImpl.getInstance();
 
     @Override
     public void onEvent(CommonDigestEvent event, String fromId) {
@@ -23,6 +23,6 @@ public class CommonDigestHandler extends AbstractNetworkEventHandler<CommonDiges
         }
         GetEventBodyEvent getEventBodyEvent = new GetEventBodyEvent();
         getEventBodyEvent.setEventBody(event.getEventBody());
-        networkEventBroadcaster.sendToNode(getEventBodyEvent, fromId);
+        eventBroadcaster.sendToNode(getEventBodyEvent, fromId);
     }
 }

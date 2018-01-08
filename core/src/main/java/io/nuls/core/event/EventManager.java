@@ -57,15 +57,6 @@ public class EventManager {
         }
     }
 
-
-    public static BaseNetworkEvent getNetworkEventInstance(byte[] bytes) throws IllegalAccessException, InstantiationException, NulsException {
-        return (BaseNetworkEvent) getInstance(bytes);
-    }
-
-    public static BaseLocalEvent getLocalEventInstance(byte[] bytes) throws IllegalAccessException, InstantiationException, NulsException {
-        return (BaseLocalEvent) getInstance(bytes);
-    }
-
     public static BaseEvent getInstance(byte[] bytes) throws NulsException {
         EventHeader header = new EventHeader();
         header.parse(new NulsByteBuffer(bytes));

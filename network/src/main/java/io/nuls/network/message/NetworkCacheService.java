@@ -2,7 +2,7 @@ package io.nuls.network.message;
 
 import io.nuls.cache.service.intf.CacheService;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.event.BaseNetworkEvent;
+import io.nuls.core.event.BaseEvent;
 
 /**
  * @author vivi
@@ -29,7 +29,7 @@ public class NetworkCacheService {
         return INSTANCE;
     }
 
-    public void putEvent(BaseNetworkEvent event, boolean isPingPong) {
+    public void putEvent(BaseEvent event, boolean isPingPong) {
         if (isPingPong) {
             cacheService.putElement(PING_EVENT_CACHE, event.getHash().getDigestHex(), event);
         } else {
@@ -37,7 +37,7 @@ public class NetworkCacheService {
         }
     }
 
-    public void putEvent(Object key, BaseNetworkEvent event, boolean isPingPong) {
+    public void putEvent(Object key, BaseEvent event, boolean isPingPong) {
         if (isPingPong) {
             cacheService.putElement(PING_EVENT_CACHE, key, event);
         } else {
@@ -45,11 +45,11 @@ public class NetworkCacheService {
         }
     }
 
-    public BaseNetworkEvent getEvent(Object key, boolean isPingPong) {
+    public BaseEvent getEvent(Object key, boolean isPingPong) {
         if (isPingPong) {
-            return (BaseNetworkEvent) cacheService.getElement(PING_EVENT_CACHE, key);
+            return (BaseEvent) cacheService.getElement(PING_EVENT_CACHE, key);
         } else {
-            return (BaseNetworkEvent) cacheService.getElement(NETWORK_EVENT_CACHE, key);
+            return (BaseEvent) cacheService.getElement(NETWORK_EVENT_CACHE, key);
         }
     }
 

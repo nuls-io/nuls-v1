@@ -1,7 +1,6 @@
 package io.nuls.network.message.entity;
 
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.event.BaseNetworkEvent;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.network.constant.NetworkConstant;
@@ -13,7 +12,7 @@ import java.util.List;
  * @author vivi
  * @date 2017/12/5.
  */
-public class NodeEvent extends BaseNetworkEvent<NodeEventBody> {
+public class NodeEvent extends io.nuls.core.event.BaseEvent<NodeEventBody> {
 
     public static final short OWN_MAIN_VERSION = 1;
 

@@ -1,6 +1,6 @@
 package io.nuls.network.message.impl;
 
-import io.nuls.core.event.BaseNetworkEvent;
+import io.nuls.core.event.BaseEvent;
 import io.nuls.network.entity.Node;
 import io.nuls.network.message.NetworkCacheService;
 import io.nuls.network.message.NetworkEventResult;
@@ -28,7 +28,7 @@ public class PongEventHandler implements NetWorkEventHandler {
      * @return
      */
     @Override
-    public NetworkEventResult process(BaseNetworkEvent event, Node node) {
+    public NetworkEventResult process(BaseEvent event, Node node) {
 
         String key = event.getHeader().getEventType() + "-" + node.getIp() + "-" + node.getPort();
         if (cacheService.existEvent(key)) {

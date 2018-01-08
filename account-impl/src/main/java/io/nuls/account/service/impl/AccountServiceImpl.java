@@ -3,7 +3,6 @@ package io.nuls.account.service.impl;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
-import io.nuls.account.entity.event.AliasEvent;
 import io.nuls.account.entity.tx.AliasTransaction;
 import io.nuls.account.manager.AccountManager;
 import io.nuls.account.service.intf.AccountService;
@@ -37,8 +36,10 @@ import io.nuls.db.entity.AliasPo;
 import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.entity.TransactionPo;
 import io.nuls.db.util.TransactionPoTool;
-import io.nuls.event.bus.service.intf.NetworkEventBroadcaster;
+import io.nuls.event.bus.service.intf.EventBroadcaster;
+import io.nuls.event.bus.service.intf.EventBusService;
 import io.nuls.ledger.entity.params.CoinTransferData;
+import io.nuls.ledger.event.TransactionEvent;
 import io.nuls.ledger.service.intf.LedgerService;
 
 import java.io.File;
@@ -71,8 +72,7 @@ public class AccountServiceImpl implements AccountService {
 
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
 
-    private NetworkEventBroadcaster networkEventBroadcaster = NulsContext.getInstance().getService(NetworkEventBroadcaster.class);
-
+    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
     private boolean isLockNow = true;
 
     private AccountServiceImpl() {
@@ -472,17 +472,14 @@ public class AccountServiceImpl implements AccountService {
         }
         try {
             Account account = getAccount(address);
-            AliasEvent event = new AliasEvent();
+            TransactionEvent event = new TransactionEvent();
             CoinTransferData coinData = new CoinTransferData(AccountConstant.ALIAS_NA, address, null);
             AliasTransaction aliasTx = new AliasTransaction(coinData, password);
             aliasTx.setHash(NulsDigestData.calcDigestData(aliasTx.serialize()));
             aliasTx.setSign(signData(aliasTx.getHash(), account, password));
             ValidateResult vresult = ledgerService.verifyTx(aliasTx);
-            if(vresult.isSuccess()){
-                //todo cache
-            }
             event.setEventBody(aliasTx);
-            networkEventBroadcaster.broadcastAndCache(event);
+            eventBroadcaster.broadcastAndCache(event,true);
         } catch (Exception e) {
             Log.error(e);
             return new Result(false, e.getMessage());

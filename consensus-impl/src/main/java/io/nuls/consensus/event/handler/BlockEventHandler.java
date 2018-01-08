@@ -6,14 +6,14 @@ import io.nuls.consensus.utils.DistributedBlockDownloadUtils;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.validate.ValidateResult;
-import io.nuls.event.bus.handler.AbstractNetworkEventHandler;
+import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.network.service.NetworkService;
 
 /**
  * @author facjas
  * @date 2017/11/16
  */
-public class BlockEventHandler extends AbstractNetworkEventHandler<BlockEvent> {
+public class BlockEventHandler extends AbstractEventHandler<BlockEvent> {
 
     private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
     private NetworkService networkService = NulsContext.getInstance().getService(NetworkService.class);

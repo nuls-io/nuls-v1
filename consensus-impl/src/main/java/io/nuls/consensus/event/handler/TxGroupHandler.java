@@ -14,7 +14,7 @@ import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.validate.ValidateResult;
-import io.nuls.event.bus.handler.AbstractNetworkEventHandler;
+import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.network.service.NetworkService;
 
@@ -25,7 +25,7 @@ import java.util.List;
  * @author facjas
  * @date 2017/11/16
  */
-public class TxGroupHandler extends AbstractNetworkEventHandler<TxGroupEvent> {
+public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
     private SmallBlockCacheManager smallBlockCacheManager = SmallBlockCacheManager.getInstance();
     private BlockHeaderCacheManager headerCacheService = BlockHeaderCacheManager.getInstance();
     private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();

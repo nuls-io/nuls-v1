@@ -2,7 +2,7 @@ package io.nuls.network.message.impl;
 
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.event.BaseNetworkEvent;
+import io.nuls.core.event.BaseEvent;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.db.dao.NodeDataService;
 import io.nuls.network.entity.Node;
@@ -34,7 +34,7 @@ public class VersionEventHandler implements NetWorkEventHandler {
     }
 
     @Override
-    public NetworkEventResult process(BaseNetworkEvent networkEvent, Node node) {
+    public NetworkEventResult process(BaseEvent networkEvent, Node node) {
         VersionEvent event = (VersionEvent) networkEvent;
 
         String key = event.getHeader().getEventType() + "-" + node.getIp() + "-" + node.getPort();

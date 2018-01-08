@@ -5,7 +5,7 @@ import io.nuls.core.utils.date.TimeService;
 import io.nuls.db.dao.NodeDataService;
 import io.nuls.db.dao.impl.mybatis.mapper.NodeMapper;
 import io.nuls.db.dao.impl.mybatis.params.NodeSearchParams;
-import io.nuls.db.annotation.Transactional;
+import io.nuls.db.annotation.TransactionalAnnotation;
 import io.nuls.db.dao.impl.mybatis.util.SearchOperator;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import io.nuls.db.entity.NodePo;
@@ -47,7 +47,7 @@ public class NodeDaoImpl extends BaseDaoImpl<NodeMapper, String, NodePo> impleme
     }
 
     @Override
-    @Transactional
+    @TransactionalAnnotation
     public void saveChange(NodePo po) {
         try {
             Searchable searchable = new Searchable();

@@ -1,6 +1,6 @@
 package io.nuls.event.bus.service.intf;
 
-import io.nuls.core.event.BaseNetworkEvent;
+import io.nuls.core.event.BaseEvent;
 
 import java.util.List;
 
@@ -8,7 +8,7 @@ import java.util.List;
  * @author Niels
  * @date 2017/12/8
  */
-public interface NetworkEventBroadcaster {
+public interface EventBroadcaster {
 
     /**
      * broadcast a message that need to be passed
@@ -16,30 +16,33 @@ public interface NetworkEventBroadcaster {
      * @param event
      * @return
      */
-    List<String> broadcastHashAndCache(BaseNetworkEvent event);
+    List<String> broadcastHashAndCache(BaseEvent event, boolean needToSelf);
 
 
-    List<String> broadcastHashAndCache(BaseNetworkEvent event, String excludeNodeId);
+    List<String> broadcastHashAndCache(BaseEvent event, boolean needToSelf, String excludeNodeId);
 
     /**
      * broadcast to nodes except "excludeNodeId"
+     *
      * @param event
      * @param excludeNodeId
      * @return
      */
-    List<String> broadcastAndCache(BaseNetworkEvent event, String excludeNodeId);
+    List<String> broadcastAndCache(BaseEvent event, boolean needToSelf, String excludeNodeId);
 
     /**
      * broadcast msg ,no need to pass the message
+     *
      * @param event
      */
-    List<String> broadcastAndCache(BaseNetworkEvent event);
+    List<String> broadcastAndCache(BaseEvent event, boolean needToSelf);
 
     /**
      * send msg to one node
+     *
      * @param event
      * @param nodeId
      */
-    boolean sendToNode(BaseNetworkEvent event, String nodeId);
+    boolean sendToNode(BaseEvent event, String nodeId);
 
 }

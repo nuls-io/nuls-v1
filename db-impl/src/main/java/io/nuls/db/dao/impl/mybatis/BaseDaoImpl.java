@@ -2,7 +2,7 @@ package io.nuls.db.dao.impl.mybatis;
 
 import io.nuls.db.dao.BaseDataService;
 import io.nuls.db.dao.impl.mybatis.common.BaseMapper;
-import io.nuls.db.annotation.Transactional;
+import io.nuls.db.annotation.TransactionalAnnotation;
 import io.nuls.db.dao.impl.mybatis.session.SessionManager;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import org.apache.ibatis.session.SqlSession;
@@ -34,25 +34,25 @@ public abstract class BaseDaoImpl<T extends BaseMapper<K, V>, K extends Serializ
     }
 
     @Override
-    @Transactional
+    @TransactionalAnnotation
     public int save(V o) {
         return getMapper().insert(o);
     }
 
     @Override
-    @Transactional
+    @TransactionalAnnotation
     public int save(List<V> list) {
         return getMapper().batchInsert(list);
     }
 
     @Override
-    @Transactional
+    @TransactionalAnnotation
     public int update(V o) {
         return this.getMapper().updateByPrimaryKey(o);
     }
 
     @Override
-    @Transactional
+    @TransactionalAnnotation
     public int update(List<V> list) {
         int result = 0;
         for (int i = 0; i < list.size(); i++) {
@@ -67,7 +67,7 @@ public abstract class BaseDaoImpl<T extends BaseMapper<K, V>, K extends Serializ
     }
 
     @Override
-    @Transactional
+    @TransactionalAnnotation
     public int delete(K key) {
         return this.getMapper().deleteByPrimaryKey(key);
     }

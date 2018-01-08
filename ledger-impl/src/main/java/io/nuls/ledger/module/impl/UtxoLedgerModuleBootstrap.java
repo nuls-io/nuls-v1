@@ -7,11 +7,6 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.event.bus.service.intf.EventBusService;
 import io.nuls.ledger.constant.LedgerConstant;
-import io.nuls.ledger.event.*;
-import io.nuls.ledger.handler.CoinTransactionEventHandler;
-import io.nuls.ledger.handler.SmallChangeEventHandler;
-import io.nuls.ledger.handler.UnlockCoinEventHandler;
-import io.nuls.ledger.handler.LockCoinEventHandler;
 import io.nuls.ledger.module.AbstractLedgerModule;
 import io.nuls.ledger.service.impl.LedgerCacheService;
 import io.nuls.ledger.service.impl.UtxoCoinDataProvider;
@@ -43,7 +38,6 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
     public void init() {
         addNormalTxValidator();
         registerService();
-        pulishEvent();
     }
 
     /**
@@ -59,14 +53,6 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
     private void registerService() {
         this.registerService(ledgerService);
         this.registerService(CoinDataProvider.class, UtxoCoinDataProvider.getInstance());
-    }
-
-    private void pulishEvent() {
-
-        this.eventBusService.subscribeNetworkEvent(TransferCoinEvent.class, new CoinTransactionEventHandler());
-        this.eventBusService.subscribeNetworkEvent(LockCoinEvent.class, new LockCoinEventHandler());
-        this.eventBusService.subscribeNetworkEvent(UnlockCoinEvent.class, new UnlockCoinEventHandler());
-        this.eventBusService.subscribeNetworkEvent(SmallChangeEvent.class, new SmallChangeEventHandler());
     }
 
     @Override

@@ -3,7 +3,7 @@ package io.nuls.db.dao.filter;
 
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.annotation.PROPAGATION;
-import io.nuls.db.annotation.Transactional;
+import io.nuls.db.annotation.TransactionalAnnotation;
 import io.nuls.db.dao.impl.mybatis.session.SessionManager;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
@@ -25,8 +25,8 @@ public class DBMethodFilter implements MethodInterceptor {
         Object result;
         boolean isSessionBeginning = false;
         boolean isCommit = false;
-        if (method.isAnnotationPresent(Transactional.class)) {
-            Transactional annotation = method.getAnnotation(Transactional.class);
+        if (method.isAnnotationPresent(TransactionalAnnotation.class)) {
+            TransactionalAnnotation annotation = method.getAnnotation(TransactionalAnnotation.class);
             if (annotation.value() == PROPAGATION.REQUIRED && !SessionManager.getTxState(id)) {
                 isCommit = true;
                 id = StringUtils.getNewUUID();
