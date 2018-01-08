@@ -54,4 +54,8 @@ public class ReceivedTxCacheManager {
     public void clear() {
         txCache.clear();
     }
+
+    public void putTx(Transaction tx) {
+        txCache.put(tx.getHash().getDigestHex(),tx);
+    }
 }

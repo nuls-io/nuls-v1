@@ -1,6 +1,7 @@
 package io.nuls.consensus.thread;
 
 import io.nuls.account.service.intf.AccountService;
+import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.constant.PocConsensusConstant;
@@ -33,6 +34,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.tx.serivce.CommonTransactionService;
 import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
@@ -51,19 +53,20 @@ import java.util.*;
  * @date 2017/12/15
  */
 public class ConsensusMeetingRunner implements Runnable {
+    private NulsContext context = NulsContext.getInstance();
     public static final String THREAD_NAME = "Consensus-Meeting";
     private static final ConsensusMeetingRunner INSTANCE = new ConsensusMeetingRunner();
-    private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
-    private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
+    private AccountService accountService = context.getService(AccountService.class);
+    private LedgerService ledgerService = context.getService(LedgerService.class);
     private ConsensusCacheManager consensusCacheManager = ConsensusCacheManager.getInstance();
     private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
     private BlockService blockService = BlockServiceImpl.getInstance();
     private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
-    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
+    private EventBroadcaster eventBroadcaster = context.getService(EventBroadcaster.class);
     private boolean running = false;
-    private NulsContext context = NulsContext.getInstance();
     private ConsensusManager consensusManager = ConsensusManager.getInstance();
-
+    private CommonTransactionService txService = context.getService(CommonTransactionService.class);
+    private ConfirmingTxCacheManager confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
     private static Map<Long, RedPunishData> punishMap = new HashMap<>();
 
     private ConsensusMeetingRunner() {
@@ -181,7 +184,6 @@ public class ConsensusMeetingRunner implements Runnable {
         Block bestBlock = blockService.getLocalBestBlock();
         List<Transaction> txList = txCacheManager.getTxList();
         txList.sort(new TxComparator());
-        addConsensusTx(bestBlock, txList, self);
         BlockData bd = new BlockData();
         bd.setHeight(bestBlock.getHeader().getHeight() + 1);
         bd.setTime(self.getPackTime());
@@ -192,13 +194,34 @@ public class ConsensusMeetingRunner implements Runnable {
         roundData.setPackingIndexOfRound(self.getIndexOfRound());
         roundData.setRoundStartTime(consensusManager.getCurrentRound().getStartTime());
         bd.setRoundData(roundData);
+        List<Integer> outTxList = new ArrayList<>();
+        for (int i = 0; i < txList.size(); i++) {
+            Transaction tx = txList.get(i);
+            ValidateResult result = txService.verify(tx);
+            if (result.isFailed()) {
+                outTxList.add(i);
+                continue;
+            }
+            try {
+                txService.approval(tx);
+            } catch (NulsException e) {
+                Log.error(e);
+                outTxList.add(i);
+                continue;
+            }
+            confirmingTxCacheManager.putTx(tx);
+        }
+        for (int i = outTxList.size() - 1; i >= 0; i--) {
+            txList.remove(i);
+        }
+        addConsensusTx(bestBlock, txList, self);
         bd.setTxList(txList);
         Block newBlock = ConsensusTool.createBlock(bd);
         newBlock.verify();
         blockCacheManager.cacheBlock(newBlock);
         BlockHeaderEvent event = new BlockHeaderEvent();
         event.setEventBody(newBlock.getHeader());
-        eventBroadcaster.broadcastAndCache(event,false);
+        eventBroadcaster.broadcastAndCache(event, false);
     }
 
     /**

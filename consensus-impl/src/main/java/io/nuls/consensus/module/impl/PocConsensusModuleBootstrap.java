@@ -20,6 +20,7 @@ import io.nuls.core.thread.BaseThread;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.service.intf.EventBusService;
+import io.nuls.ledger.event.TransactionEvent;
 
 import java.util.List;
 
@@ -41,11 +42,11 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
     }
 
     private void initTransactions() {
-        this.registerTransaction(TransactionConstant.TX_TYPE_REGISTER_AGENT, RegisterAgentTransaction.class,new RegisterAgentTxService());
-        this.registerTransaction(TransactionConstant.TX_TYPE_RED_PUNISH, RedPunishTransaction.class,new RedPunishTxService());
-        this.registerTransaction(TransactionConstant.TX_TYPE_YELLOW_PUNISH, YellowPunishTransaction.class,new YellowPunishTxService());
-        this.registerTransaction(TransactionConstant.TX_TYPE_JOIN_CONSENSUS, PocJoinConsensusTransaction.class,new JoinConsensusTxService());
-        this.registerTransaction(TransactionConstant.TX_TYPE_EXIT_CONSENSUS, PocExitConsensusTransaction.class,new ExitConsensusTxService());
+        this.registerTransaction(TransactionConstant.TX_TYPE_REGISTER_AGENT, RegisterAgentTransaction.class, new RegisterAgentTxService());
+        this.registerTransaction(TransactionConstant.TX_TYPE_RED_PUNISH, RedPunishTransaction.class, new RedPunishTxService());
+        this.registerTransaction(TransactionConstant.TX_TYPE_YELLOW_PUNISH, YellowPunishTransaction.class, new YellowPunishTxService());
+        this.registerTransaction(TransactionConstant.TX_TYPE_JOIN_CONSENSUS, PocJoinConsensusTransaction.class, new JoinConsensusTxService());
+        this.registerTransaction(TransactionConstant.TX_TYPE_EXIT_CONSENSUS, PocExitConsensusTransaction.class, new ExitConsensusTxService());
     }
 
     @Override
@@ -53,7 +54,7 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
         this.registerService(BlockServiceImpl.getInstance());
         this.registerService(PocConsensusServiceImpl.getInstance());
 
-        this. consensusManager.startMaintenanceWork();
+        this.consensusManager.startMaintenanceWork();
         ConsensusStatusInfo statusInfo = consensusManager.getConsensusStatusInfo();
         if (statusInfo.getStatus() != ConsensusStatusEnum.NOT_IN.getCode()) {
             consensusManager.joinMeeting();
@@ -88,8 +89,11 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
         TxGroupHandler txGroupHandler = new TxGroupHandler();
         //todo        smallBlockHandler.addFilter();
         eventBusService.subscribeEvent(TxGroupEvent.class, txGroupHandler);
-    }
 
+        NewTxEventHandler newTxEventHandler = NewTxEventHandler.getInstance();
+        newTxEventHandler.addFilter(new NewTxEventFilter());
+        eventBusService.subscribeEvent(TransactionEvent.class, newTxEventHandler);
+    }
 
 
     @Override
