@@ -46,7 +46,7 @@ public class NetworkServiceImpl implements NetworkService {
         network.setMessageFilter(messageFilter);
 
         this.connectionManager = new ConnectionManager(module, network);
-        this.nodesManager = new NodesManager(module, network, NulsContext.getInstance().getService(NodeDataService.class));
+        this.nodesManager = new NodesManager(network, NulsContext.getInstance().getService(NodeDataService.class));
         this.broadcaster = new BroadcasterImpl(nodesManager, network);
 
         nodesManager.setConnectionManager(connectionManager);
@@ -54,6 +54,11 @@ public class NetworkServiceImpl implements NetworkService {
 
         GetNodeEventHandler.getInstance().setNodesManager(nodesManager);
         NodeEventHandler.getInstance().setNodesManager(nodesManager);
+    }
+
+    @Override
+    public void init() {
+        connectionManager.init();
     }
 
     @Override

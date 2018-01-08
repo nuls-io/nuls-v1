@@ -38,8 +38,8 @@ public interface NetworkConstant {
     short NETWORK_GET_VERSION_EVENT = 01;
     short NETWORK_VERSION_EVENT = 02;
     short NETWORK_PING_EVENT = 03;
-    short NETWORK_PONG_MESAAGE = 04;
-    short NETWORK_BYE_MESSAGE = 05;
-    short NETWORK_GET_NODE_MESSAGE = 06;
-    short NETWORK_NODE_MESSAGE = 07;
+    short NETWORK_PONG_EVENT = 04;
+    short NETWORK_BYE_EVENT = 05;
+    short NETWORK_GET_NODE_EVENT = 06;
+    short NETWORK_NODE_EVENT = 07;
 }

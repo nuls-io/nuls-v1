@@ -22,12 +22,12 @@ public class GetNodeEvent extends BaseNetworkEvent<BasicTypeData<Integer>> {
     public static final short OWN_SUB_VERSION = 1001;
 
     public GetNodeEvent() {
-        super(NulsConstant.MODULE_ID_NETWORK, NetworkConstant.NETWORK_GET_NODE_MESSAGE);
+        super(NulsConstant.MODULE_ID_NETWORK, NetworkConstant.NETWORK_GET_NODE_EVENT);
 //        this.version = new NulsVersion(OWN_MAIN_VERSION, OWN_SUB_VERSION);
     }
 
     public GetNodeEvent(int length) {
-        super(NulsConstant.MODULE_ID_NETWORK, NetworkConstant.NETWORK_GET_NODE_MESSAGE);
+        super(NulsConstant.MODULE_ID_NETWORK, NetworkConstant.NETWORK_GET_NODE_EVENT);
 //        this.version = new NulsVersion(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.setEventBody(new BasicTypeData<>(length));
     }

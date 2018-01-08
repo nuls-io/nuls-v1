@@ -11,6 +11,8 @@ import io.nuls.network.entity.NodeGroup;
  */
 public interface NetworkService {
 
+    void init();
+
     void start();
 
     void shutdown();
