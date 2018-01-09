@@ -19,5 +19,5 @@ public interface EhCacheConstant {
     String POOL_DISK_FIELD = "disk";
     String POOL_TIME_OF_LIVE_SECONDS = "timeToLiveSeconds";
     String POOL_TIME_OF_IDLE_SECONDS = "timeToIdleSeconds";
-    int DEFAULT_MAX_SIZE = 0;
+    int DEFAULT_MAX_SIZE = 16;
 }

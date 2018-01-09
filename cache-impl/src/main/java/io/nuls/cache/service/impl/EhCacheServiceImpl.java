@@ -45,13 +45,13 @@ public class EhCacheServiceImpl<K, T > implements CacheService<K, T> {
     }
 
     @Override
-    public void createCache(String title) {
-        cacheManager.createCache(title, String.class, Serializable.class, EhCacheConstant.DEFAULT_MAX_SIZE, 0, 0);
+    public void createCache(String title,int heapMb) {
+        cacheManager.createCache(title, String.class, Serializable.class, heapMb, 0, 0);
     }
 
     @Override
-    public void createCache(String title, int timeToLiveSeconds, int timeToIdleSeconds) {
-        cacheManager.createCache(title, String.class, Serializable.class, EhCacheConstant.DEFAULT_MAX_SIZE, timeToLiveSeconds, timeToIdleSeconds);
+    public void createCache(String title,int heapMb, int timeToLiveSeconds, int timeToIdleSeconds) {
+        cacheManager.createCache(title, String.class, Serializable.class, heapMb, timeToLiveSeconds, timeToIdleSeconds);
     }
 
 
@@ -82,9 +82,6 @@ public class EhCacheServiceImpl<K, T > implements CacheService<K, T> {
 
     @Override
     public T getElement(String cacheTitle, K key) {
-        if (null == cacheManager.getCache(cacheTitle) || null == key) {
-            return null;
-        }
         if (null == cacheManager.getCache(cacheTitle) || null == key) {
             return null;
         }
@@ -152,26 +149,5 @@ public class EhCacheServiceImpl<K, T > implements CacheService<K, T> {
             list.add((K) entry.getKey());
         }
         return list;
-    }
-
-    public static void main(String[] args) throws InterruptedException {
-        String testCache = "testCache";
-        String testItem = "testitem";
-        String testValue = "12345678901234561234567890123456123456789012345612345678901234561234567890123456123456789012345612345678901234561234567890123456";
-
-        EhCacheServiceImpl cache = new EhCacheServiceImpl();
-        cache.cacheManager.init();
-        cache.createCache(testCache,5,5);
-        int i =0 ;
-        System.out.println(testValue.getBytes().length);
-        for(i=0;i<1000*100;i++){
-            String temp = testItem+i;
-            cache.putElement(testCache,temp,testValue);
-            if(i%100000 == 0){
-                System.out.println(i+" "+cache.getElementList(testCache).size());
-            }
-        }
-        Thread.sleep(16000L);
-        System.out.println(cache.getElement(testCache,testItem+1));
     }
 }

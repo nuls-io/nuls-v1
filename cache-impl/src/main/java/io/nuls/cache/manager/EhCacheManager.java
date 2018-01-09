@@ -30,7 +30,7 @@ public class EhCacheManager {
     private static final EhCacheManager INSTANCE = new EhCacheManager();
     private static final Map<String, Class> KEY_TYPE_MAP = new HashMap<>();
     private static final Map<String, Class> VALUE_TYPE_MAP = new HashMap<>();
-    private Map<String,Cache> cacheMap;
+    private CacheManager cacheManager;
 
     private EhCacheManager() {
     }
@@ -40,45 +40,37 @@ public class EhCacheManager {
     }
 
     public void init() {
-        cacheMap = new HashMap<>();
+        cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true);
     }
 
     public void createCache(String title, Class keyType, Class<? extends Serializable> valueType, int heapMb,int timeToLiveSeconds,int timeToIdleSeconds) {
-        UserManagedCacheBuilder cacheBuilder =
-                UserManagedCacheBuilder.newUserManagedCacheBuilder(keyType, valueType) ;
-        if(heapMb>0){
-            cacheBuilder.withResourcePools(ResourcePoolsBuilder.newResourcePoolsBuilder()
-                    .heap(heapMb, MemoryUnit.MB));
-        }
-        if(timeToLiveSeconds>0){
-            cacheBuilder.withExpiry(Expirations.timeToLiveExpiration(Duration.of(timeToLiveSeconds, TimeUnit.SECONDS)));
+        CacheConfigurationBuilder builder = CacheConfigurationBuilder.newCacheConfigurationBuilder(keyType, valueType,
+                ResourcePoolsBuilder.newResourcePoolsBuilder().heap(heapMb, MemoryUnit.MB)
+        ) ;
+        if(timeToLiveSeconds>10){
+            builder = builder.withExpiry(Expirations.timeToLiveExpiration(Duration.of(timeToLiveSeconds, TimeUnit.SECONDS)));
         }
         if(timeToIdleSeconds>0){
-            cacheBuilder.withExpiry(Expirations.timeToIdleExpiration(Duration.of(timeToIdleSeconds, TimeUnit.SECONDS)));
+            builder =  builder.withExpiry(Expirations.timeToIdleExpiration(Duration.of(timeToIdleSeconds, TimeUnit.SECONDS)));
         }
-        cacheMap.put(title,cacheBuilder.build(true));
+        cacheManager.createCache(title, builder.build());
         KEY_TYPE_MAP.put(title, keyType);
         VALUE_TYPE_MAP.put(title, valueType);
     }
 
     public Cache getCache(String title) {
-        return getCache(title, KEY_TYPE_MAP.get(title), VALUE_TYPE_MAP.get(title));
-    }
-
-    private <K,V> Cache<K,V> getCache(String title, Class<? extends K> aClass, Class<? extends V> aClass1) {
-        Cache<K,V> cache = cacheMap.get(title);
-        return cache;
+        return cacheManager.getCache(title, KEY_TYPE_MAP.get(title), VALUE_TYPE_MAP.get(title));
     }
 
     public void close() {
-        cacheMap.clear();
+        cacheManager.close();
     }
 
     public void removeCache(String title) {
-        cacheMap.remove(title);
+        cacheManager.removeCache(title);
     }
 
     public List<String> getCacheTitleList() {
-        return new ArrayList<>(KEY_TYPE_MAP.keySet());
+        return new ArrayList<String>(KEY_TYPE_MAP.keySet());
     }
 }

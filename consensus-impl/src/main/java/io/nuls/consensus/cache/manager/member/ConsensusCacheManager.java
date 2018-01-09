@@ -38,11 +38,11 @@ public class ConsensusCacheManager {
     private DelegateAccountDataService delegateAccountDao = NulsContext.getInstance().getService(DelegateAccountDataService.class);
     private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
 
-    private CacheMap<String, Consensus<Agent>> inAgentCache = new CacheMap<>(IN_AGENT_LIST);
-    private CacheMap<String, Consensus<Agent>> waitAgentCache = new CacheMap<>(WAIT_AGENT_LIST);
-    private CacheMap<String, Consensus<Delegate>> inDelegateCache = new CacheMap<>(IN_DELEGATE_LIST);
-    private CacheMap<String, Consensus<Delegate>> waitDelegateCache = new CacheMap<>(WAIT_DELEGATE_LIST);
-    private CacheMap<String, ConsensusStatusInfo> consensusStatusCache = new CacheMap<>(CACHE_CONSENSUS_STATUS_INFO);
+    private CacheMap<String, Consensus<Agent>> inAgentCache = new CacheMap<>(IN_AGENT_LIST,512);
+    private CacheMap<String, Consensus<Agent>> waitAgentCache = new CacheMap<>(WAIT_AGENT_LIST,512);
+    private CacheMap<String, Consensus<Delegate>> inDelegateCache = new CacheMap<>(IN_DELEGATE_LIST,1024);
+    private CacheMap<String, Consensus<Delegate>> waitDelegateCache = new CacheMap<>(WAIT_DELEGATE_LIST,1024);
+    private CacheMap<String, ConsensusStatusInfo> consensusStatusCache = new CacheMap<>(CACHE_CONSENSUS_STATUS_INFO,128);
 
     private ConsensusCacheManager() {
     }

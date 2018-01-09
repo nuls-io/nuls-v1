@@ -18,7 +18,7 @@ public interface CacheService<K, V> {
      *
      * @param title
      */
-    void createCache(String title);
+    void createCache(String title,int heapMb);
 
     /**
      * create a cache named title by configurations
@@ -28,7 +28,8 @@ public interface CacheService<K, V> {
      */
     void createCache(String title, Map<String, Object> initParams);
 
-    void createCache(String title, int timeToLiveSeconds, int timeToIdleSeconds);
+    void createCache(String title, int heapMb, int timeToLiveSeconds, int timeToIdleSeconds);
+
 
     /**
      * remove a cache by title
