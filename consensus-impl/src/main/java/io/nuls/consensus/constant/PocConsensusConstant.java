@@ -12,7 +12,9 @@ public interface PocConsensusConstant {
 
 
     String CFG_CONSENSUS_SECTION = "Consensus";
-    String PROPERTY_DELEGATE_NODE = "delegate-node";
+    String PROPERTY_PARTAKE_PACKING = "partake.packing";
+    String PROPERTY_SEED_NODES = "seed.nodes";
+    String SEED_NODES_DELIMITER = ",";
 
     String DEFAULT_CONSENSUS_LIST_FILE = "default-consensus-list.properties";
     String GENESIS_BLOCK_FILE = "genesis-block.json";

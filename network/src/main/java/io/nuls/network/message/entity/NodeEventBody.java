@@ -25,11 +25,12 @@ public class NodeEventBody extends BaseNulsData {
     private List<Node> nodes;
 
     public NodeEventBody() {
+        //  super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.nodes = new ArrayList<>();
     }
 
     public NodeEventBody(List nodes) {
-        super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
+      //  super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.nodes = nodes;
     }
 

@@ -4,6 +4,7 @@ import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.tx.serivce.TransactionService;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
 import java.util.ArrayList;
@@ -18,12 +19,14 @@ import java.util.Map;
 public class TransactionManager {
 
     private static final Map<Integer, Class<? extends Transaction>> TX_MAP = new HashMap<>();
+    private static final Map<Class<? extends Transaction>, TransactionService> TX_SERVICE_MAP = new HashMap<>();
 
-    public static final void putTx(int txType, Class<? extends Transaction> txClass) {
+    public static final void putTx(int txType, Class<? extends Transaction> txClass, TransactionService txService) {
         if (TX_MAP.containsKey(txType)) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "Transaction type repeating!");
         }
         TX_MAP.put(txType, txClass);
+        TX_SERVICE_MAP.put(txClass, txService);
     }
 
     public static final Class<? extends Transaction> getTxClass(int txType) {
@@ -46,5 +49,21 @@ public class TransactionManager {
         }
         Transaction tx = byteBuffer.readNulsData(txClass.newInstance());
         return tx;
+    }
+
+    public void onRollback(Transaction tx) {
+
+    }
+
+    public void onCommit(Transaction tx) {
+
+    }
+
+    public void onApproval(Transaction tx) {
+
+    }
+
+    public static TransactionService getService(Class<? extends Transaction> txClass) {
+        return TX_SERVICE_MAP.get(txClass);
     }
 }

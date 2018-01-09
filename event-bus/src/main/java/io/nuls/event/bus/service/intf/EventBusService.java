@@ -1,8 +1,6 @@
 package io.nuls.event.bus.service.intf;
 
 import io.nuls.core.event.BaseEvent;
-import io.nuls.core.event.BaseLocalEvent;
-import io.nuls.core.event.BaseNetworkEvent;
 import io.nuls.core.exception.NulsException;
 import io.nuls.event.bus.constant.EventCategoryEnum;
 import io.nuls.event.bus.handler.intf.NulsEventHandler;
@@ -13,11 +11,7 @@ import io.nuls.event.bus.handler.intf.NulsEventHandler;
  */
 public interface EventBusService {
 
-    String subscribeEvent(EventCategoryEnum category, Class<? extends BaseEvent> eventClass, NulsEventHandler<? extends BaseEvent> eventHandler);
-
-    String subscribeLocalEvent(Class<? extends BaseLocalEvent> eventClass, NulsEventHandler<? extends BaseLocalEvent> eventHandler);
-
-    String subscribeNetworkEvent(Class<? extends BaseNetworkEvent> eventClass, NulsEventHandler<? extends BaseNetworkEvent> eventHandler);
+    String subscribeEvent( Class<? extends BaseEvent> eventClass, NulsEventHandler<? extends BaseEvent> eventHandler);
 
     void unsubscribeEvent(String subcribeId);
 
@@ -27,7 +21,7 @@ public interface EventBusService {
 
     void publishNetworkEvent(byte[] bytes, String fromId);
 
-    void publishNetworkEvent(BaseNetworkEvent event, String fromId);
+    void publishNetworkEvent(BaseEvent event, String fromId);
 
-    void publishLocalEvent(BaseLocalEvent event);
+    void publishLocalEvent(BaseEvent event);
 }

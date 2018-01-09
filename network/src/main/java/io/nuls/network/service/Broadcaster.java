@@ -1,6 +1,6 @@
 package io.nuls.network.service;
 
-import io.nuls.core.event.BaseNetworkEvent;
+import io.nuls.core.event.BaseEvent;
 import io.nuls.network.entity.BroadcastResult;
 
 /**
@@ -9,9 +9,9 @@ import io.nuls.network.entity.BroadcastResult;
  */
 public interface Broadcaster {
 
-    BroadcastResult broadcast(BaseNetworkEvent event);
+    BroadcastResult broadcast(BaseEvent event);
 
-    BroadcastResult broadcast(BaseNetworkEvent event, String excludeNodeId);
+    BroadcastResult broadcast(BaseEvent event, String excludeNodeId);
 
     BroadcastResult broadcast(byte[] data);
 
@@ -25,13 +25,13 @@ public interface Broadcaster {
 //
 //    BroadcastResult broadcastSync(byte[] data, String excludeNodeId);
 
-    BroadcastResult broadcastToNode(BaseNetworkEvent event, String nodeId);
+    BroadcastResult broadcastToNode(BaseEvent event, String nodeId);
 
     BroadcastResult broadcastToNode(byte[] data, String nodeId);
 
-    BroadcastResult broadcastToGroup(BaseNetworkEvent event, String groupName);
+    BroadcastResult broadcastToGroup(BaseEvent event, String groupName);
 
-    BroadcastResult broadcastToGroup(BaseNetworkEvent event, String groupName, String excludeNodeId);
+    BroadcastResult broadcastToGroup(BaseEvent event, String groupName, String excludeNodeId);
 
     BroadcastResult broadcastToGroup(byte[] data, String groupName);
 

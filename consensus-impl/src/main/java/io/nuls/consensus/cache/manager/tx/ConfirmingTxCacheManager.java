@@ -41,4 +41,19 @@ public class ConfirmingTxCacheManager {
             txCache.remove(hash.getDigestHex());
         }
     }
+
+    public void clear() {
+        txCache.clear();
+    }
+
+    public Transaction getTx(NulsDigestData hash) {
+        if(null==hash){
+            return null;
+        }
+        return txCache.get(hash.getDigestHex());
+    }
+
+    public void putTx(Transaction tx) {
+        this.txCache.put(tx.getHash().getDigestHex(),tx);
+    }
 }

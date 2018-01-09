@@ -1,8 +1,8 @@
 package io.nuls.event.bus.service.impl;
 
-import io.nuls.core.event.BaseLocalEvent;
+import io.nuls.core.event.BaseEvent;
 import io.nuls.event.bus.constant.EventBusConstant;
-import io.nuls.event.bus.handler.AbstractLocalEventHandler;
+import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.event.bus.processor.manager.ProcessData;
 import io.nuls.event.bus.processor.manager.ProcessorManager;
 
@@ -23,12 +23,16 @@ public class LocalEventService {
         return INSTANCE;
     }
 
-    public void publish(BaseLocalEvent event) {
+    public void publish(BaseEvent event) {
         processorManager.offer(new ProcessData(event));
     }
 
-    public String registerEventHandler(Class<? extends BaseLocalEvent> eventClass, AbstractLocalEventHandler<? extends BaseLocalEvent> handler) {
-        return processorManager.registerEventHandler(eventClass, handler);
+    public String registerEventHandler(Class<? extends BaseEvent> eventClass, AbstractEventHandler<? extends BaseEvent> handler) {
+        return this.registerEventHandler(null, eventClass, handler);
+    }
+
+    public String registerEventHandler(String handlerId, Class<? extends BaseEvent> eventClass, AbstractEventHandler<? extends BaseEvent> handler) {
+        return processorManager.registerEventHandler(handlerId, eventClass, handler);
     }
 
     public void removeEventHandler(String handlerId) {

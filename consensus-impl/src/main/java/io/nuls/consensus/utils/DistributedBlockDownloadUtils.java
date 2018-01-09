@@ -13,7 +13,7 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.queue.service.impl.QueueService;
 import io.nuls.core.utils.str.StringUtils;
-import io.nuls.event.bus.service.intf.NetworkEventBroadcaster;
+import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.network.service.NetworkService;
 
 import java.util.HashMap;
@@ -29,7 +29,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class DistributedBlockDownloadUtils {
     private static final DistributedBlockDownloadUtils INSTANCE = new DistributedBlockDownloadUtils();
     private String queueId = StringUtils.getNewUUID();
-    private NetworkEventBroadcaster networkEventBroadcaster = NulsContext.getInstance().getService(NetworkEventBroadcaster.class);
+    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
     private QueueService<String> queueService = NulsContext.getInstance().getService(QueueService.class);
     private BlockCacheManager blockCacheManager = NulsContext.getInstance().getService(BlockCacheManager.class);
     private Map<Long, String> heightNodeMap = new HashMap<>();
@@ -79,7 +79,7 @@ private ReceivedTxCacheManager receivedTxCacheManager = ReceivedTxCacheManager.g
         heightNodeMap.put(height, nodeId);
         GetBlockEvent event = new GetBlockEvent();
         event.setEventBody(new BasicTypeData<>(height));
-        this.networkEventBroadcaster.sendToNode(event, nodeId);
+        this.eventBroadcaster.sendToNode(event, nodeId);
     }
 
 

@@ -10,11 +10,12 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
+import io.nuls.db.annotation.TransactionalAnnotation;
 import io.nuls.db.dao.BlockDataService;
-import io.nuls.db.dao.ConsensusDataService;
 import io.nuls.db.entity.BlockPo;
 import io.nuls.db.entity.TransactionPo;
 import io.nuls.db.util.TransactionPoTool;
+import io.nuls.ledger.service.intf.LedgerService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +28,8 @@ public class BlockServiceImpl implements BlockService {
     private static final BlockServiceImpl INSTANCE = new BlockServiceImpl();
 
     private BlockDataService blockDao = NulsContext.getInstance().getService(BlockDataService.class);
-    private ConsensusDataService consensusDao = NulsContext.getInstance().getService(ConsensusDataService.class);
     private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
+    private LedgerService txService = NulsContext.getInstance().getService(LedgerService.class);
 
     private BlockServiceImpl() {
     }
@@ -118,7 +119,7 @@ public class BlockServiceImpl implements BlockService {
             tx.setBlockHash(block.getHeader().getHash());
             tx.setBlockHeight(block.getHeader().getHeight());
             try {
-                tx.onCommit();
+                txService.commitTx(tx);
                 txPoList.add(TransactionPoTool.toPojo(tx));
             } catch (Exception e) {
                 Log.error(e);
@@ -126,7 +127,12 @@ public class BlockServiceImpl implements BlockService {
                 throw new NulsRuntimeException(e);
             }
         }
-        consensusDao.blockPersistence(blockPo, txPoList);
+        this.dataPersistence(blockPo, txPoList);
+    }
+
+    @TransactionalAnnotation
+    private void dataPersistence(BlockPo blockPo, List<TransactionPo> txPoList) {
+        //todo 调用多个dao/service进行
     }
 
     @Override
@@ -148,7 +154,7 @@ public class BlockServiceImpl implements BlockService {
         for (int x = 0; x < max; x++) {
             Transaction tx = txs.get(x);
             try {
-                tx.onRollback();
+                txService.rollbackTx(tx);
             } catch (NulsException e) {
                 Log.error(e);
             }

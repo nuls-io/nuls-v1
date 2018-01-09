@@ -1,7 +1,6 @@
 package io.nuls.event.bus.module.impl;
 
 import io.nuls.event.bus.constant.EventBusConstant;
-import io.nuls.event.bus.constant.EventConstant;
 import io.nuls.event.bus.event.CommonDigestEvent;
 import io.nuls.event.bus.event.GetEventBodyEvent;
 import io.nuls.event.bus.service.impl.*;
@@ -32,12 +31,12 @@ public class EventBusModuleBootstrap extends AbstractEventBusModule {
     @Override
     public void start() {
         eventBusService = EventBusServiceImpl.getInstance();
-        eventBusService.subscribeNetworkEvent(CommonDigestEvent.class, new CommonDigestHandler());
-        eventBusService.subscribeNetworkEvent(GetEventBodyEvent.class, new GetEventBodyHandler());
+        eventBusService.subscribeEvent(CommonDigestEvent.class, new CommonDigestHandler());
+        eventBusService.subscribeEvent(GetEventBodyEvent.class, new GetEventBodyHandler());
         this.registerService(eventBusService);
-        this.registerService(NetworkEventBroadcaster.class, NetworkEventBroadcasterImpl.getInstance());
+        this.registerService(EventBroadcaster.class, EventBroadcasterImpl.getInstance());
         ReplyNoticeHandler replyNoticeHandler = new ReplyNoticeHandler();
-        this.eventBusService.subscribeLocalEvent(ReplyNotice.class, replyNoticeHandler);
+        this.eventBusService.subscribeEvent(ReplyNotice.class, replyNoticeHandler);
 
     }
 

@@ -51,7 +51,7 @@ public class ConsensusCacheManager {
         return INSTANCE;
     }
 
-    public void initCache() {
+    public void init() {
 
         Account self = accountService.getLocalAccount();
         List<DelegatePo> delegatePoList = this.delegateDao.getList();

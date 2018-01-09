@@ -7,7 +7,7 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
-import io.nuls.event.bus.service.intf.NetworkEventBroadcaster;
+import io.nuls.event.bus.service.intf.EventBroadcaster;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,7 +22,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class DistributedBlockInfoRequestUtils {
     private static final DistributedBlockInfoRequestUtils INSTANCE = new DistributedBlockInfoRequestUtils();
-    private NetworkEventBroadcaster networkEventBroadcaster = NulsContext.getInstance().getService(NetworkEventBroadcaster.class);
+    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
     private List<String> nodeIdList;
     private Map<String, BlockHeader> headerMap = new HashMap<>();
     /**
@@ -60,7 +60,7 @@ public class DistributedBlockInfoRequestUtils {
         } else {
             getBlockHeaderEvent = new GetBlockHeaderEvent(height);
         }
-        nodeIdList = this.networkEventBroadcaster.broadcastAndCache(getBlockHeaderEvent);
+        nodeIdList = this.eventBroadcaster.broadcastAndCache(getBlockHeaderEvent,false);
         if (nodeIdList.isEmpty()) {
             Log.error("get best height from net faild!");
             lock.unlock();

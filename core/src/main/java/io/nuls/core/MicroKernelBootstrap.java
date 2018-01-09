@@ -24,7 +24,7 @@ public class MicroKernelBootstrap extends BaseModuleBootstrap {
         super(NulsConstant.MODULE_ID_MICROKERNEL);
     }
 
-    public static MicroKernelBootstrap getInstance(){
+    public static MicroKernelBootstrap getInstance() {
         return INSTANCE;
     }
 
@@ -50,7 +50,6 @@ public class MicroKernelBootstrap extends BaseModuleBootstrap {
     @Override
     public void start() {
         QueueManager.start();
-
     }
 
     @Override

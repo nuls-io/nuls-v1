@@ -12,8 +12,8 @@ import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.event.bus.handler.AbstractNetworkEventHandler;
-import io.nuls.event.bus.service.intf.NetworkEventBroadcaster;
+import io.nuls.event.bus.handler.AbstractEventHandler;
+import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.service.intf.LedgerService;
 
 import java.util.ArrayList;
@@ -25,9 +25,9 @@ import java.util.Map;
  * @author facjas
  * @date 2017/11/16
  */
-public class GetTxGroupHandler extends AbstractNetworkEventHandler<GetTxGroupEvent> {
+public class GetTxGroupHandler extends AbstractEventHandler<GetTxGroupEvent> {
 
-    private NetworkEventBroadcaster networkEventBroadcaster = NulsContext.getInstance().getService(NetworkEventBroadcaster.class);
+    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
     private BlockService blockService = BlockServiceImpl.getInstance();
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
 
@@ -46,7 +46,7 @@ public class GetTxGroupHandler extends AbstractNetworkEventHandler<GetTxGroupEve
         List<Transaction> txList = getTxList(block,eventBody.getTxHashList());
         txGroup.setTxList(txList);
         txGroupEvent.setEventBody(txGroup);
-        networkEventBroadcaster.sendToNode(txGroupEvent, fromId);
+        eventBroadcaster.sendToNode(txGroupEvent, fromId);
     }
 
     private List<Transaction> getTxList(Block block, List<NulsDigestData> txHashList) {

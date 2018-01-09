@@ -6,17 +6,17 @@ import io.nuls.consensus.service.impl.BlockServiceImpl;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.*;
 import io.nuls.core.context.NulsContext;
-import io.nuls.event.bus.handler.AbstractNetworkEventHandler;
-import io.nuls.event.bus.service.intf.NetworkEventBroadcaster;
+import io.nuls.event.bus.handler.AbstractEventHandler;
+import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.service.intf.LedgerService;
 
 /**
  * @author facjas
  * @date 2017/11/16
  */
-public class GetSmallBlockHandler extends AbstractNetworkEventHandler<GetSmallBlockEvent> {
+public class GetSmallBlockHandler extends AbstractEventHandler<GetSmallBlockEvent> {
 
-    private NetworkEventBroadcaster networkEventBroadcaster = NulsContext.getInstance().getService(NetworkEventBroadcaster.class);
+    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
     private BlockService blockService = BlockServiceImpl.getInstance();
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
 
@@ -30,7 +30,7 @@ public class GetSmallBlockHandler extends AbstractNetworkEventHandler<GetSmallBl
         smallBlock.setTxHashList(block.getTxHashList());
         smallBlock.setTxCount(block.getHeader().getTxCount());
         smallBlockEvent.setEventBody(smallBlock);
-        networkEventBroadcaster.sendToNode(smallBlockEvent, fromId);
+        eventBroadcaster.sendToNode(smallBlockEvent, fromId);
 //        TxHashData eventBody = event.getEventBody();
 //        Block block = blockService.getBlock(eventBody.getBlockHeight());
 //        if (null == block) {

@@ -1,15 +1,12 @@
 package io.nuls.network.entity;
 
 import io.nuls.core.chain.entity.BaseNulsData;
-import io.nuls.core.chain.entity.BasicTypeData;
 import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.event.BaseEvent;
-import io.nuls.core.event.BaseNetworkEvent;
 import io.nuls.core.event.EventManager;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsVerificationException;
@@ -143,7 +140,7 @@ public class Node extends BaseNulsData {
         }
     }
 
-    public void sendNetworkEvent(BaseNetworkEvent event) throws IOException {
+    public void sendNetworkEvent(BaseEvent event) throws IOException {
         if (this.getStatus() == Node.CLOSE) {
             return;
         }
@@ -200,27 +197,21 @@ public class Node extends BaseNulsData {
                 return;
             }
 
-            BaseNetworkEvent networkEvent = (BaseNetworkEvent) event;
+            BaseEvent networkEvent = (BaseEvent) event;
             asynExecute(networkEvent);
         } else {
-
-            try {
-                System.out.println("------receive message:" + Hex.encode(message.serialize()));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
 
             if (this.status != Node.HANDSHAKE) {
                 return;
             }
-            if (checkBroadcastExist(message.getData())) {
-                return;
-            }
+//            if (checkBroadcastExist(message.getData())) {
+//                return;
+//            }
             eventBusService.publishNetworkEvent(message.getData(), this.getHash());
         }
     }
 
-    private void asynExecute(BaseNetworkEvent networkEvent) {
+    private void asynExecute(BaseEvent networkEvent) {
         NetWorkEventHandler handler = messageHandlerFactory.getHandler(networkEvent);
         TaskManager.asynExecuteRunnable(new Runnable() {
             @Override
@@ -237,34 +228,34 @@ public class Node extends BaseNulsData {
         });
     }
 
-    public boolean checkBroadcastExist(byte[] data) throws IOException {
-        String hash = Sha256Hash.twiceOf(data).toString();
-        BroadcastResult result = NetworkCacheService.getInstance().getBroadCastResult(hash);
-        if (result == null) {
-            return false;
-        }
+//    public boolean checkBroadcastExist(byte[] data) throws IOException {
+//        String hash = Sha256Hash.twiceOf(data).toString();
+//        BroadcastResult result = NetworkCacheService.getInstance().getBroadCastResult(hash);
+//        if (result == null) {
+//            return false;
+//        }
+//
+//        result.setRepliedCount(result.getRepliedCount() + 1);
+//        if (result.getRepliedCount() < result.getWaitReplyCount()) {
+//            NetworkCacheService.getInstance().addBroadCastResult(result);
+//        } else {
+//            ReplyNotice event = new ReplyNotice();
+//            event.setEventBody(new BasicTypeData<>(data));
+//            eventBusService.publishLocalEvent(event);
+//        }
+//        return true;
+//    }
 
-        result.setRepliedCount(result.getRepliedCount() + 1);
-        if (result.getRepliedCount() < result.getWaitReplyCount()) {
-            NetworkCacheService.getInstance().addBroadCastResult(result);
-        } else {
-            ReplyNotice event = new ReplyNotice();
-            event.setEventBody(new BasicTypeData<>(data));
-            eventBusService.publishLocalEvent(event);
-        }
-        return true;
-    }
 
-
-    public void processMessageResult(NetworkEventResult dataResult) throws IOException {
+    public void processMessageResult(NetworkEventResult eventResult) throws IOException {
         if (this.getStatus() == Node.CLOSE) {
             return;
         }
-        if (dataResult == null) {
+        if (eventResult == null || !eventResult.isSuccess()) {
             return;
         }
-        if (dataResult.getReplyMessage() != null) {
-            sendNetworkEvent(dataResult.getReplyMessage());
+        if (eventResult.getReplyMessage() != null) {
+            sendNetworkEvent(eventResult.getReplyMessage());
         }
     }
 

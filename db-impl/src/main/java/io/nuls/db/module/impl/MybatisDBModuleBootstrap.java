@@ -70,7 +70,6 @@ public class MybatisDBModuleBootstrap extends AbstractDBModule {
         this.registerService(UtxoOutputDataService.class, AopUtils.createProxy(UtxoOutputDaoImpl.class, dbMethodFilter));
         this.registerService(UtxoInputDataService.class, AopUtils.createProxy(UtxoInputDaoImpl.class, dbMethodFilter));
         this.registerService(SubChainDataService.class, AopUtils.createProxy(SubChainDaoImpl.class, dbMethodFilter));
-        this.registerService(ConsensusDataService.class, AopUtils.createProxy(ConsensusDaoImpl.class, dbMethodFilter));
         this.registerService(AccountTxDataService.class, AopUtils.createProxy(AccountTxDaoImpl.class, dbMethodFilter));
         this.registerService(UtxoTransactionDataService.class, AopUtils.createProxy(UtxoTransactionDaoImpl.class, dbMethodFilter));
     }

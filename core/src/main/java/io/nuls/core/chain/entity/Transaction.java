@@ -21,7 +21,6 @@ import java.util.List;
  */
 public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData implements NulsCloneable {
 
-    private List<TransactionListener> listenerList = new ArrayList<>();
     /**
      * tx type
      */
@@ -40,24 +39,6 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
      */
     protected long time;
     protected byte[] remark;
-
-    public final void onRollback() throws NulsException {
-        for (TransactionListener listener : listenerList) {
-            listener.onRollback(this);
-        }
-    }
-
-    public final void onCommit() throws NulsException {
-        for (TransactionListener listener : listenerList) {
-            listener.onCommit(this);
-        }
-    }
-
-    public final void onApproval() throws NulsException {
-        for (TransactionListener listener : listenerList) {
-            listener.onApproval(this);
-        }
-    }
 
     public Transaction(int type) {
         this.dataType = NulsDataType.TRANSACTION;
@@ -118,10 +99,6 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
             Log.error(e);
             return null;
         }
-    }
-
-    public void registerListener(TransactionListener listener) {
-        this.listenerList.add(listener);
     }
 
     public long getTime() {

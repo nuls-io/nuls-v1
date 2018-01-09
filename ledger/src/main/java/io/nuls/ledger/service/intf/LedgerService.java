@@ -91,4 +91,10 @@ public interface LedgerService {
      * @return
      */
     List<Transaction> getListByHashs(List<NulsDigestData> txHashList);
+
+    void rollbackTx(Transaction tx) throws NulsException;
+
+    void commitTx(Transaction tx) throws NulsException;
+
+    void approvalTx(Transaction tx) throws NulsException;
 }

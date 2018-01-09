@@ -5,7 +5,7 @@ import io.nuls.core.utils.date.TimeService;
 import io.nuls.db.dao.NodeDataService;
 import io.nuls.db.dao.impl.mybatis.mapper.NodeMapper;
 import io.nuls.db.dao.impl.mybatis.params.NodeSearchParams;
-import io.nuls.db.dao.impl.mybatis.session.SessionAnnotation;
+import io.nuls.db.annotation.TransactionalAnnotation;
 import io.nuls.db.dao.impl.mybatis.util.SearchOperator;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import io.nuls.db.entity.NodePo;
@@ -35,6 +35,7 @@ public class NodeDaoImpl extends BaseDaoImpl<NodeMapper, String, NodePo> impleme
         if (!keys.isEmpty()) {
             searchable.addCondition("id", SearchOperator.notIn, keys);
         }
+        searchable.addCondition("status", SearchOperator.eq, 0);
         searchable.addCondition("last_fail_time", SearchOperator.lt, TimeService.currentTimeMillis() - TimeService.ONE_HOUR);
         List<NodePo> list = getMapper().selectList(searchable);
         if (list.size() <= size) {
@@ -47,7 +48,7 @@ public class NodeDaoImpl extends BaseDaoImpl<NodeMapper, String, NodePo> impleme
     }
 
     @Override
-    @SessionAnnotation
+    @TransactionalAnnotation
     public void saveChange(NodePo po) {
         try {
             Searchable searchable = new Searchable();

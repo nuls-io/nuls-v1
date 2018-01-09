@@ -2,7 +2,6 @@ package io.nuls.ledger.module;
 
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.module.BaseModuleBootstrap;
-import io.nuls.ledger.event.AbstractCoinTransactionEvent;
 
 /**
  *

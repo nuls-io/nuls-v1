@@ -1,11 +1,11 @@
 package io.nuls.event.bus.service.impl;
 
+import io.nuls.core.event.BaseEvent;
 import io.nuls.core.event.EventManager;
-import io.nuls.core.event.BaseNetworkEvent;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.constant.EventBusConstant;
-import io.nuls.event.bus.handler.AbstractNetworkEventHandler;
+import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.event.bus.processor.manager.ProcessData;
 import io.nuls.event.bus.processor.manager.ProcessorManager;
 
@@ -29,19 +29,15 @@ public class NetworkEventService {
 
     public void publish(byte[] event, String nodeId) {
         try {
-            BaseNetworkEvent eventObject = EventManager.getNetworkEventInstance(event);
+            BaseEvent eventObject = EventManager.getInstance(event);
             this.publish(eventObject, nodeId);
-        } catch (IllegalAccessException e) {
-            Log.error(e);
-        } catch (InstantiationException e) {
-            Log.error(e);
         } catch (NulsException e) {
             Log.error(e);
         }
 
     }
 
-    public void publish(BaseNetworkEvent event, String nodeId) {
+    public void publish(BaseEvent event, String nodeId) {
         boolean exist = eventCacheService.isKnown(event.getHash().getDigestHex());
         if (exist) {
             return;
@@ -51,8 +47,8 @@ public class NetworkEventService {
 
     }
 
-    public String registerEventHandler(Class<? extends BaseNetworkEvent> eventClass, AbstractNetworkEventHandler<? extends BaseNetworkEvent> handler) {
-        return processorManager.registerEventHandler(eventClass, handler);
+    public String registerEventHandler(Class<? extends BaseEvent> eventClass, AbstractEventHandler<? extends BaseEvent> handler) {
+        return registerEventHandler(null,eventClass, handler);
     }
 
     public void removeEventHandler(String handlerId) {
@@ -61,5 +57,10 @@ public class NetworkEventService {
 
     public void shutdown() {
         processorManager.shutdown();
+    }
+
+    public String registerEventHandler(String id, Class<? extends BaseEvent> eventClass, AbstractEventHandler<? extends BaseEvent> eventHandler) {
+       return processorManager.registerEventHandler(id,eventClass,eventHandler);
+
     }
 }

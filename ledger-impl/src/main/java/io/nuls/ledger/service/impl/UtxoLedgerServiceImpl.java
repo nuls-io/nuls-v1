@@ -2,27 +2,28 @@ package io.nuls.ledger.service.impl;
 
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.Result;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.chain.manager.TransactionManager;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsVerificationException;
-import io.nuls.core.utils.crypto.Hex;
+import io.nuls.core.tx.serivce.TransactionService;
 import io.nuls.core.utils.log.Log;
+import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.validate.ValidateResult;
+import io.nuls.db.annotation.TransactionalAnnotation;
 import io.nuls.db.dao.UtxoTransactionDataService;
 import io.nuls.db.entity.TransactionPo;
 import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.db.util.TransactionPoTool;
-import io.nuls.event.bus.service.intf.NetworkEventBroadcaster;
+import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.entity.UtxoBalance;
-import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.entity.tx.TransferTransaction;
-import io.nuls.ledger.event.TransferCoinEvent;
 import io.nuls.ledger.service.intf.LedgerService;
 
 import java.util.ArrayList;
@@ -40,7 +41,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     private UtxoTransactionDataService txDao = NulsContext.getInstance().getService(UtxoTransactionDataService.class);
 
-    private NetworkEventBroadcaster networkEventBroadcaster = NulsContext.getInstance().getService(NetworkEventBroadcaster.class);
+    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
 
     private UtxoLedgerServiceImpl() {
 
@@ -52,6 +53,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     public ValidateResult verifyTx(Transaction tx)   {
+        AssertUtil.canNotEmpty(tx,ErrorCode.NULL_PARAMETER);
         return tx.verify();
     }
 
@@ -133,6 +135,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 //    }
 
     @Override
+    @TransactionalAnnotation
     public boolean saveTx(Transaction tx) {
         boolean result = false;
         do {
@@ -168,6 +171,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
+    @TransactionalAnnotation
     public boolean saveTxList(List<Transaction> txList) {
         // todo auto-generated method stub(niels)
         return false;
@@ -183,5 +187,43 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     public List<Transaction> getListByHashs(List<NulsDigestData> txHashList) {
         // todo auto-generated method stub(niels)
         return null;
+    }
+
+    @Override
+    public void rollbackTx(Transaction tx) throws NulsException {
+        AssertUtil.canNotEmpty(tx, ErrorCode.NULL_PARAMETER);
+        List<TransactionService> serviceList = getServiceList(tx.getClass());
+        for (TransactionService service : serviceList) {
+            service.onRollback(tx);
+        }
+    }
+    @Override
+    public void commitTx(Transaction tx) throws NulsException {
+        AssertUtil.canNotEmpty(tx, ErrorCode.NULL_PARAMETER);
+        List<TransactionService> serviceList = getServiceList(tx.getClass());
+        for (TransactionService service : serviceList) {
+            service.onCommit(tx);
+        }
+    }
+    @Override
+    public void approvalTx(Transaction tx) throws NulsException {
+        AssertUtil.canNotEmpty(tx, ErrorCode.NULL_PARAMETER);
+        List<TransactionService> serviceList = getServiceList(tx.getClass());
+        for (TransactionService service : serviceList) {
+            service.onApproval(tx);
+        }
+    }
+
+    public List<TransactionService> getServiceList(Class<? extends Transaction> txClass) {
+        List<TransactionService> list = new ArrayList<>();
+        Class clazz = txClass;
+        while (!clazz.equals(Transaction.class)) {
+            TransactionService txService = TransactionManager.getService(clazz);
+            if (null != txService) {
+                list.add(0, txService);
+            }
+            clazz = clazz.getSuperclass();
+        }
+        return list;
     }
 }

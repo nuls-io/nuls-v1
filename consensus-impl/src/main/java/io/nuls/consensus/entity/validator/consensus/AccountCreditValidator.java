@@ -1,7 +1,6 @@
 package io.nuls.consensus.entity.validator.consensus;
 
 import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
-import io.nuls.consensus.event.RegisterAgentEvent;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 

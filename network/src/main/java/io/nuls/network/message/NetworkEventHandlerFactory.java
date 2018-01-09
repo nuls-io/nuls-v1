@@ -1,6 +1,6 @@
 package io.nuls.network.message;
 
-import io.nuls.core.event.BaseNetworkEvent;
+import io.nuls.core.event.BaseEvent;
 import io.nuls.network.message.handler.NetWorkEventHandler;
 
 /**
@@ -10,5 +10,5 @@ import io.nuls.network.message.handler.NetWorkEventHandler;
 public abstract class NetworkEventHandlerFactory {
 
 
-    public abstract NetWorkEventHandler getHandler(BaseNetworkEvent data) ;
+    public abstract NetWorkEventHandler getHandler(BaseEvent data) ;
 }

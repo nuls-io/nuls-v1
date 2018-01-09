@@ -32,7 +32,7 @@ public final class GenesisBlock extends Block {
 
     private static GenesisBlock INSTANCE;
 
-    public static GenesisBlock getInstance() {
+    public static GenesisBlock  getInstance() {
         if (null == INSTANCE) {
             String json = null;
             try {

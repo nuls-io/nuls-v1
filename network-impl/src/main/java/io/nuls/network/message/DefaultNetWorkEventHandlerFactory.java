@@ -1,6 +1,6 @@
 package io.nuls.network.message;
 
-import io.nuls.core.event.BaseNetworkEvent;
+import io.nuls.core.event.BaseEvent;
 import io.nuls.network.message.entity.GetNodeEvent;
 import io.nuls.network.message.entity.GetVersionEvent;
 import io.nuls.network.message.entity.NodeEvent;
@@ -36,7 +36,7 @@ public class DefaultNetWorkEventHandlerFactory extends NetworkEventHandlerFactor
     }
 
     @Override
-    public NetWorkEventHandler getHandler(BaseNetworkEvent event) {
+    public NetWorkEventHandler getHandler(BaseEvent event) {
         return handlerMap.get(event.getClass().getName());
     }
 }

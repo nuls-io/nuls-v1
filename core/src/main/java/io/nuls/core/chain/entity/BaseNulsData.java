@@ -26,7 +26,6 @@ public abstract class BaseNulsData implements Serializable {
     private DataValidatorChain validatorChain = new DataValidatorChain();
 
     public BaseNulsData() {
-
     }
 
     public BaseNulsData(NulsByteBuffer buffer) throws NulsException {
