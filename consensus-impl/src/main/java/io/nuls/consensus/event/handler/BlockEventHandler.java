@@ -24,11 +24,6 @@ public class BlockEventHandler extends AbstractEventHandler<BlockEvent> {
         if (DistributedBlockDownloadUtils.getInstance().recieveBlock(fromId, block)) {
             return;
         }
-        ValidateResult result = block.verify();
-        if (null==result||result.isFailed()) {
-             this.networkService.removeNode(fromId);
-            return;
-        }
         blockCacheManager.cacheBlock(block);
     }
 }

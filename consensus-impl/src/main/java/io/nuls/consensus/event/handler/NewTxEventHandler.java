@@ -39,9 +39,9 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
         }
         ValidateResult result = txService.verifyTx(tx);
         if(result.isFailed()){
-            if(result.getLevel()== SeverityLevelEnum.FOUL){
+            if(result.getLevel()== SeverityLevelEnum.NORMAL_FOUL){
                 networkService.removeNode(fromId);
-            }else if(result.getLevel()==SeverityLevelEnum.FLAGRANT){
+            }else if(result.getLevel()==SeverityLevelEnum.FLAGRANT_FOUL){
                 networkService.removeNode(fromId);
             }
         }

@@ -39,15 +39,15 @@ public class BlockCacheManager {
     }
 
     public void init() {
-        smallBlockCacheMap = new CacheMap<>(ConsensusCacheConstant.SMALL_BLOCK_CACHE_NAME,32, ConsensusCacheConstant.LIVE_TIME, 0);
-        headerCacheMap = new CacheMap<>(ConsensusCacheConstant.BLOCK_HEADER_CACHE_NAME,16, ConsensusCacheConstant.LIVE_TIME, 0);
-        blockCacheMap = new CacheMap<>(ConsensusCacheConstant.BLOCK_CACHE_NAME,64 ,ConsensusCacheConstant.LIVE_TIME, 0);
-        tempHeaderCacheMap = new CacheMap<>(ConsensusCacheConstant.TEMP_BLOCK_HEADER_CACHE_NAME,32, ConsensusCacheConstant.LIVE_TIME, 0);
-        blockHeightCacheMap = new CacheMap<>(ConsensusCacheConstant.BLOCK_HEIGHT_CACHE_NAME,16 ,ConsensusCacheConstant.LIVE_TIME, 0);
-        hashConfirmedCountMap = new CacheMap<>(ConsensusCacheConstant.HASH_CONFIRMED_COUNT_CACHE,16, ConsensusCacheConstant.LIVE_TIME, 0);
+        smallBlockCacheMap = new CacheMap<>(ConsensusCacheConstant.SMALL_BLOCK_CACHE_NAME, 32, ConsensusCacheConstant.LIVE_TIME, 0);
+        headerCacheMap = new CacheMap<>(ConsensusCacheConstant.BLOCK_HEADER_CACHE_NAME, 16, ConsensusCacheConstant.LIVE_TIME, 0);
+        blockCacheMap = new CacheMap<>(ConsensusCacheConstant.BLOCK_CACHE_NAME, 64, ConsensusCacheConstant.LIVE_TIME, 0);
+        tempHeaderCacheMap = new CacheMap<>(ConsensusCacheConstant.TEMP_BLOCK_HEADER_CACHE_NAME, 32, ConsensusCacheConstant.LIVE_TIME, 0);
+        blockHeightCacheMap = new CacheMap<>(ConsensusCacheConstant.BLOCK_HEIGHT_CACHE_NAME, 16, ConsensusCacheConstant.LIVE_TIME, 0);
+        hashConfirmedCountMap = new CacheMap<>(ConsensusCacheConstant.HASH_CONFIRMED_COUNT_CACHE, 16, ConsensusCacheConstant.LIVE_TIME, 0);
     }
 
-    public void cacheBlockHeader(BlockHeader header) {
+    public boolean cacheBlockHeader(BlockHeader header) {
         long height = header.getHeight();
         boolean discard = true;
         if (height > maxHeight) {
@@ -55,6 +55,13 @@ public class BlockCacheManager {
             discard = false;
         } else if (height <= storedHeight) {
             discard = true;
+        }
+
+
+
+
+        if (discard) {
+            return false;
         }
 
 
@@ -71,6 +78,12 @@ public class BlockCacheManager {
         }
         set.add(header.getHash().getDigestHex());
         blockHeightCacheMap.put(height, set);
+        checkNextBlockHeader(height);
+        return true;
+    }
+
+    private void checkNextBlockHeader(long height) {
+        // todo auto-generated method stub(niels)
 
     }
 
@@ -130,5 +143,9 @@ public class BlockCacheManager {
     public Block getBlock(long height) {
         // todo auto-generated method stub(niels)
         return null;
+    }
+
+    public long getStoredHeight() {
+        return storedHeight;
     }
 }

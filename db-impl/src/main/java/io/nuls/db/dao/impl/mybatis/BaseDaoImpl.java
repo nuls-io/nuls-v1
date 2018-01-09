@@ -2,7 +2,7 @@ package io.nuls.db.dao.impl.mybatis;
 
 import io.nuls.db.dao.BaseDataService;
 import io.nuls.db.dao.impl.mybatis.common.BaseMapper;
-import io.nuls.db.annotation.TransactionalAnnotation;
+import io.nuls.db.transactional.annotation.TransactionalAnnotation;
 import io.nuls.db.dao.impl.mybatis.session.SessionManager;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import org.apache.ibatis.session.SqlSession;

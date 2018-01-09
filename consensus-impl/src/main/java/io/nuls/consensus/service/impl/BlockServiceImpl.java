@@ -10,7 +10,7 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
-import io.nuls.db.annotation.TransactionalAnnotation;
+import io.nuls.db.transactional.annotation.TransactionalAnnotation;
 import io.nuls.db.dao.BlockDataService;
 import io.nuls.db.entity.BlockPo;
 import io.nuls.db.entity.TransactionPo;
@@ -25,18 +25,10 @@ import java.util.List;
  * @date 2017/12/11
  */
 public class BlockServiceImpl implements BlockService {
-    private static final BlockServiceImpl INSTANCE = new BlockServiceImpl();
 
     private BlockDataService blockDao = NulsContext.getInstance().getService(BlockDataService.class);
     private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
     private LedgerService txService = NulsContext.getInstance().getService(LedgerService.class);
-
-    private BlockServiceImpl() {
-    }
-
-    public static BlockServiceImpl getInstance() {
-        return INSTANCE;
-    }
 
     @Override
     public Block getGengsisBlock() {
@@ -111,6 +103,7 @@ public class BlockServiceImpl implements BlockService {
 
 
     @Override
+    @TransactionalAnnotation
     public void saveBlock(Block block) {
         BlockPo blockPo = ConsensusTool.toPojo(block);
         List<TransactionPo> txPoList = new ArrayList<>();
@@ -136,6 +129,7 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
+    @TransactionalAnnotation
     public void rollbackBlock(long height) {
         Block block = this.getBlock(height);
         if (null == block) {

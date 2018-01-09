@@ -7,6 +7,7 @@ import io.nuls.consensus.service.impl.BlockServiceImpl;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 
@@ -18,7 +19,7 @@ public class BlockPersistenceThread implements Runnable {
     public static final String THREAD_NAME = "block-persistence-thread";
     private static final BlockPersistenceThread INSTANCE = new BlockPersistenceThread();
     private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
-    private BlockService blockService = BlockServiceImpl.getInstance();
+    private BlockService blockService = NulsContext.getInstance().getService(BlockService.class);
     private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
     private boolean running;
 
@@ -47,7 +48,7 @@ public class BlockPersistenceThread implements Runnable {
 
     private void doPersistence() {
         //todo
-//        long count = blockCacheManager.getMaxHeight() - blockCacheManager.getMinHeight() - PocConsensusConstant.CONFIRM_BLOCK_COUNT;
+        long height = blockCacheManager.getStoredHeight()+1;
 //        for (int i = 0; i < count; i++) {
 //            Block block = blockCacheManager.getMinHeightCacheBlock();
 //            if (null == block) {

@@ -29,7 +29,7 @@ public class BlockMaintenanceThread implements Runnable {
 
     private static BlockMaintenanceThread instance;
 
-    private final BlockService blockService = BlockServiceImpl.getInstance();
+    private final BlockService blockService = NulsContext.getInstance().getService(BlockService.class);
 
     private final EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
 

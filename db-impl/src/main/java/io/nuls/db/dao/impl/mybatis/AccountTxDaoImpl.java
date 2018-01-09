@@ -5,7 +5,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.db.dao.*;
-import io.nuls.db.annotation.TransactionalAnnotation;
+import io.nuls.db.transactional.annotation.TransactionalAnnotation;
 import io.nuls.db.entity.AccountPo;
 import io.nuls.db.entity.AliasPo;
 import io.nuls.db.entity.TransactionLocalPo;

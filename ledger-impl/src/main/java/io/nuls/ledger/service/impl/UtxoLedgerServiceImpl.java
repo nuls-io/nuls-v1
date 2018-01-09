@@ -13,7 +13,7 @@ import io.nuls.core.tx.serivce.TransactionService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.validate.ValidateResult;
-import io.nuls.db.annotation.TransactionalAnnotation;
+import io.nuls.db.transactional.annotation.TransactionalAnnotation;
 import io.nuls.db.dao.UtxoTransactionDataService;
 import io.nuls.db.entity.TransactionPo;
 import io.nuls.db.entity.UtxoOutputPo;

@@ -9,6 +9,11 @@ import io.nuls.core.validate.ValidateResult;
  * @date 2017/12/20
  */
 public class BlockPackerValidator implements NulsDataValidator<Block> {
+    private static BlockPackerValidator INSTANCE = new BlockPackerValidator();
+    private BlockPackerValidator(){}
+    public static BlockPackerValidator getInstance(){
+        return INSTANCE;
+    }
     @Override
     public ValidateResult validate(Block data) {
         // todo auto-generated method stub(niels)

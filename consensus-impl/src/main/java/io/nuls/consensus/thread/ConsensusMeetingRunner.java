@@ -59,7 +59,7 @@ public class ConsensusMeetingRunner implements Runnable {
     private LedgerService ledgerService = context.getService(LedgerService.class);
     private ConsensusCacheManager consensusCacheManager = ConsensusCacheManager.getInstance();
     private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
-    private BlockService blockService = BlockServiceImpl.getInstance();
+    private BlockService blockService = NulsContext.getInstance().getService(BlockService.class);
     private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
     private EventBroadcaster eventBroadcaster = context.getService(EventBroadcaster.class);
     private boolean running = false;

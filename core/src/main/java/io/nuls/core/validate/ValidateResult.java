@@ -14,7 +14,7 @@ public class ValidateResult<T> extends Result<T> {
     private SeverityLevelEnum level;
 
     public static ValidateResult getFailedResult(String msg) {
-        return getFailedResult(SeverityLevelEnum.NORMAL, msg);
+        return getFailedResult(SeverityLevelEnum.WRONG, msg);
     }
 
     public static ValidateResult getFailedResult(SeverityLevelEnum level, String msg) {
@@ -34,7 +34,7 @@ public class ValidateResult<T> extends Result<T> {
     }
 
     public static ValidateResult getFailedResult(ErrorCode msg) {
-        return getFailedResult(SeverityLevelEnum.NORMAL, msg);
+        return getFailedResult(SeverityLevelEnum.WRONG, msg);
     }
 
     public static ValidateResult getFailedResult(SeverityLevelEnum level, ErrorCode errorCode) {
