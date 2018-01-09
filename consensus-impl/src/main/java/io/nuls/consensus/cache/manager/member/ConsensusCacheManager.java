@@ -53,7 +53,7 @@ public class ConsensusCacheManager {
 
     public void init() {
 
-        Account self = accountService.getLocalAccount();
+        Account self = accountService.getDefaultAccount();
         List<DelegatePo> delegatePoList = this.delegateDao.getList();
         List<DelegateAccountPo> delegateAccountPoList = this.delegateAccountDao.getList();
         Consensus mine = null;

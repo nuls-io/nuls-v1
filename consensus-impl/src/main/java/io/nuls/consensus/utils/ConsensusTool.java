@@ -127,7 +127,7 @@ public class ConsensusTool {
     }
 
     public static Block createBlock(BlockData blockData ) {
-        Account account = accountService.getLocalAccount();
+        Account account = accountService.getDefaultAccount();
         if (null == account) {
             throw new NulsRuntimeException(ErrorCode.ACCOUNT_NOT_EXIST);
         }

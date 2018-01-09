@@ -8,7 +8,6 @@ import io.nuls.core.validate.ValidateResult;
 import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.entity.tx.TransferTransaction;
-import io.nuls.ledger.entity.tx.UnlockNulsTransaction;
 
 import java.util.List;
 

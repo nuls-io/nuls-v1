@@ -141,7 +141,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
     @Override
     public ConsensusStatusInfo getConsensusInfo(String address) {
         if (StringUtils.isBlank(address)) {
-            address = this.accountService.getDefaultAccount();
+            address = this.accountService.getDefaultAccount().getAddress().getBase58();
         }
         return consensusCacheManager.getConsensusStatusInfo(address);
     }

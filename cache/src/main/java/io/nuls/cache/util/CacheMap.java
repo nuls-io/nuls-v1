@@ -1,7 +1,6 @@
 package io.nuls.cache.util;
 
 import io.nuls.cache.service.intf.CacheService;
-import io.nuls.core.chain.intf.NulsCloneable;
 import io.nuls.core.context.NulsContext;
 
 import java.util.List;
