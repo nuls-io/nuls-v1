@@ -16,7 +16,7 @@ import java.util.*;
  * @author Niels
  * @date 2017/10/27
  */
-public class EhCacheServiceImpl<K, T extends NulsCloneable> implements CacheService<K, T> {
+public class EhCacheServiceImpl<K, T > implements CacheService<K, T> {
     private final EhCacheManager cacheManager = EhCacheManager.getInstance();
 
     @Override
@@ -93,9 +93,9 @@ public class EhCacheServiceImpl<K, T extends NulsCloneable> implements CacheServ
             return t;
         }
         if (t instanceof NulsCloneable) {
-            return (T) t.copy();
+            return (T) ((NulsCloneable) t).copy();
         }
-        return (T) t.copy();
+        return t;
     }
 
     @Override
@@ -107,7 +107,7 @@ public class EhCacheServiceImpl<K, T extends NulsCloneable> implements CacheServ
             T t = entry.getValue();
             T value = t;
             if (t instanceof NulsCloneable) {
-                value = (T) t.copy();
+                value = (T) ((NulsCloneable) t).copy();
             }
             list.add(value);
         }
@@ -152,5 +152,26 @@ public class EhCacheServiceImpl<K, T extends NulsCloneable> implements CacheServ
             list.add((K) entry.getKey());
         }
         return list;
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        String testCache = "testCache";
+        String testItem = "testitem";
+        String testValue = "12345678901234561234567890123456123456789012345612345678901234561234567890123456123456789012345612345678901234561234567890123456";
+
+        EhCacheServiceImpl cache = new EhCacheServiceImpl();
+        cache.cacheManager.init();
+        cache.createCache(testCache,5,5);
+        int i =0 ;
+        System.out.println(testValue.getBytes().length);
+        for(i=0;i<1000*100;i++){
+            String temp = testItem+i;
+            cache.putElement(testCache,temp,testValue);
+            if(i%100000 == 0){
+                System.out.println(i+" "+cache.getElementList(testCache).size());
+            }
+        }
+        Thread.sleep(16000L);
+        System.out.println(cache.getElement(testCache,testItem+1));
     }
 }

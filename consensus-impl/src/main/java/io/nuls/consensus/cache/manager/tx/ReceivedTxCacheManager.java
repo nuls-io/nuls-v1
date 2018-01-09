@@ -1,6 +1,7 @@
 package io.nuls.consensus.cache.manager.tx;
 
 import io.nuls.cache.util.CacheMap;
+import io.nuls.consensus.constant.ConsensusCacheConstant;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 
@@ -13,10 +14,6 @@ import java.util.List;
 public class ReceivedTxCacheManager {
     private static ReceivedTxCacheManager INSTANCE = new ReceivedTxCacheManager();
     private static final String CACHE_NAME = "Received-tx-cache";
-    /**
-     * 2 minutes alive
-     */
-    private static final int LIVE_TIME = 120;
     private CacheMap<String, Transaction> txCache;
 
     private ReceivedTxCacheManager() {
@@ -27,7 +24,7 @@ public class ReceivedTxCacheManager {
     }
 
     public void init() {
-        txCache = new CacheMap<>(CACHE_NAME, LIVE_TIME, 0);
+        txCache = new CacheMap<>(CACHE_NAME, ConsensusCacheConstant.LIVE_TIME, 0);
     }
 
     public boolean txExist(NulsDigestData hash) {
@@ -56,6 +53,6 @@ public class ReceivedTxCacheManager {
     }
 
     public void putTx(Transaction tx) {
-        txCache.put(tx.getHash().getDigestHex(),tx);
+        txCache.put(tx.getHash().getDigestHex(), tx);
     }
 }

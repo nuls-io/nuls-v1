@@ -11,7 +11,7 @@ import java.util.Set;
  * @author Niels
  * @date 2017/10/18
  */
-public interface CacheService<K, V extends NulsCloneable> {
+public interface CacheService<K, V> {
 
     /**
      * create a cache named title

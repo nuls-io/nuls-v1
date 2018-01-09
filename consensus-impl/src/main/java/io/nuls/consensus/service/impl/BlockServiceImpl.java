@@ -51,7 +51,7 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public long getLocalHeight() {
-        long height = blockCacheManager.getMaxHeight();
+        long height = blockCacheManager.getBestHeight();
         if (height == 0) {
             height = blockDao.queryMaxHeight();
         }
@@ -60,7 +60,7 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public Block getLocalBestBlock() {
-        Block block = blockCacheManager.getBlock(blockCacheManager.getMaxHeight());
+        Block block = blockCacheManager.getBlock(getLocalHeight());
         if (null == block) {
             BlockPo po = blockDao.getHighestBlock();
             try {

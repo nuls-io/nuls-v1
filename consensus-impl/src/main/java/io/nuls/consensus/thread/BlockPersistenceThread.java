@@ -7,10 +7,8 @@ import io.nuls.consensus.service.impl.BlockServiceImpl;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
-import io.nuls.ledger.service.intf.LedgerService;
 
 /**
  * @author Niels
@@ -48,17 +46,18 @@ public class BlockPersistenceThread implements Runnable {
     }
 
     private void doPersistence() {
-        long count = blockCacheManager.getMaxHeight() - blockCacheManager.getMinHeight() - PocConsensusConstant.CONFIRM_BLOCK_COUNT;
-        for (int i = 0; i < count; i++) {
-            Block block = blockCacheManager.getMinHeightCacheBlock();
-            if (null == block) {
-                throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
-            }
-
-            blockService.saveBlock(block);
-            this.blockCacheManager.removeBlock(blockCacheManager.getMinHeight());
-            this.txCacheManager.removeTx(block.getTxHashList());
-        }
+        //todo
+//        long count = blockCacheManager.getMaxHeight() - blockCacheManager.getMinHeight() - PocConsensusConstant.CONFIRM_BLOCK_COUNT;
+//        for (int i = 0; i < count; i++) {
+//            Block block = blockCacheManager.getMinHeightCacheBlock();
+//            if (null == block) {
+//                throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
+//            }
+//
+//            blockService.saveBlock(block);
+//            this.blockCacheManager.removeCache(blockCacheManager.getMinHeight());
+//            this.txCacheManager.removeTx(block.getTxHashList());
+//        }
     }
 
 }
