@@ -21,8 +21,8 @@ public class NetworkCacheService {
 
     private NetworkCacheService() {
         this.cacheService = NulsContext.getInstance().getService(CacheService.class);
-        this.cacheService.createCache(PING_EVENT_CACHE, 6, 0);
-        this.cacheService.createCache(NETWORK_EVENT_CACHE, 60, 0);
+        this.cacheService.createCache(PING_EVENT_CACHE,5, 6, 0);
+        this.cacheService.createCache(NETWORK_EVENT_CACHE,10, 60, 0);
     }
 
     public static NetworkCacheService getInstance() {

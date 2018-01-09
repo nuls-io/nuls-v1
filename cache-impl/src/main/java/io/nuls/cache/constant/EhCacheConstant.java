@@ -12,8 +12,6 @@ public interface EhCacheConstant {
     //Minimum version supported
     int MINIMUM_VERSION_SUPPORTED = 0;
 
-    int DEFAULT_MAX_SIZE = 16;
-
     String KEY_TYPE_FIELD="keyType";
     String VALUE_TYPE_FIELD="valueType";
     String POOL_HEAP_FIELD = "heap";
@@ -21,4 +19,5 @@ public interface EhCacheConstant {
     String POOL_DISK_FIELD = "disk";
     String POOL_TIME_OF_LIVE_SECONDS = "timeToLiveSeconds";
     String POOL_TIME_OF_IDLE_SECONDS = "timeToIdleSeconds";
+    int DEFAULT_MAX_SIZE = 16;
 }

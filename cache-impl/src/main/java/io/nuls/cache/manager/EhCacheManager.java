@@ -3,10 +3,12 @@ package io.nuls.cache.manager;
 import io.nuls.core.chain.entity.Block;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
+import org.ehcache.UserManagedCache;
 import org.ehcache.config.CacheConfiguration;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
 import org.ehcache.config.builders.CacheManagerBuilder;
 import org.ehcache.config.builders.ResourcePoolsBuilder;
+import org.ehcache.config.builders.UserManagedCacheBuilder;
 import org.ehcache.config.units.MemoryUnit;
 import org.ehcache.expiry.Duration;
 import org.ehcache.expiry.Expirations;
@@ -43,16 +45,15 @@ public class EhCacheManager {
 
     public void createCache(String title, Class keyType, Class<? extends Serializable> valueType, int heapMb,int timeToLiveSeconds,int timeToIdleSeconds) {
         CacheConfigurationBuilder builder = CacheConfigurationBuilder.newCacheConfigurationBuilder(keyType, valueType,
-                ResourcePoolsBuilder.newResourcePoolsBuilder()
-                        .heap(heapMb, MemoryUnit.MB)
-        );
-        if(timeToLiveSeconds>0){
-            builder.withExpiry(Expirations.timeToLiveExpiration(Duration.of(timeToLiveSeconds, TimeUnit.SECONDS)));
+                ResourcePoolsBuilder.newResourcePoolsBuilder().heap(heapMb, MemoryUnit.MB)
+        ) ;
+        if(timeToLiveSeconds>10){
+            builder = builder.withExpiry(Expirations.timeToLiveExpiration(Duration.of(timeToLiveSeconds, TimeUnit.SECONDS)));
         }
         if(timeToIdleSeconds>0){
-            builder.withExpiry(Expirations.timeToIdleExpiration(Duration.of(timeToIdleSeconds, TimeUnit.SECONDS)));
+            builder =  builder.withExpiry(Expirations.timeToIdleExpiration(Duration.of(timeToIdleSeconds, TimeUnit.SECONDS)));
         }
-        cacheManager.createCache(title, builder);
+        cacheManager.createCache(title, builder.build());
         KEY_TYPE_MAP.put(title, keyType);
         VALUE_TYPE_MAP.put(title, valueType);
     }

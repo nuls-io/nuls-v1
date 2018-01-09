@@ -13,15 +13,14 @@ import java.util.Set;
 public class CacheMap<K, V> {
 
     private final String cacheName;
+
     private CacheService cacheService = NulsContext.getInstance().getService(CacheService.class);
-
-    public CacheMap(String cacheName, int timeToLiveSeconds, int timeToIdleSeconds) {
-        this.cacheService.createCache(cacheName, timeToLiveSeconds, timeToIdleSeconds);
-        this.cacheName = cacheName;
+    public CacheMap(String cacheName, int heapMb ) {
+        this(cacheName,heapMb,0,0);
     }
-
-    public CacheMap(String cacheName) {
-        this(cacheName, 0, 0);
+    public CacheMap(String cacheName, int heapMb, int timeToLiveSeconds, int timeToIdleSeconds) {
+        this.cacheService.createCache(cacheName, heapMb, timeToLiveSeconds, timeToIdleSeconds);
+        this.cacheName = cacheName;
     }
 
     public int size() {

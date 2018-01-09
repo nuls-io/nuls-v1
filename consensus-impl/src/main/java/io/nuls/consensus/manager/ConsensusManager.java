@@ -2,8 +2,6 @@ package io.nuls.consensus.manager;
 
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.cache.manager.block.BlockCacheManager;
-import io.nuls.consensus.cache.manager.block.BlockHeaderCacheManager;
-import io.nuls.consensus.cache.manager.block.SmallBlockCacheManager;
 import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
@@ -39,8 +37,6 @@ import java.util.Set;
 public class ConsensusManager {
     private static ConsensusManager INSTANCE = new ConsensusManager();
     private BlockCacheManager blockCacheManager;
-    private BlockHeaderCacheManager headerCacheManager;
-    private SmallBlockCacheManager smallBlockCacheManager;
     private ConsensusCacheManager consensusCacheManager;
     private ConfirmingTxCacheManager confirmingTxCacheManager;
     private ReceivedTxCacheManager receivedTxCacheManager;
@@ -88,10 +84,6 @@ public class ConsensusManager {
         blockCacheManager.init();
         consensusCacheManager = ConsensusCacheManager.getInstance();
         consensusCacheManager.init();
-        headerCacheManager = BlockHeaderCacheManager.getInstance();
-        headerCacheManager.init();
-        smallBlockCacheManager = SmallBlockCacheManager.getInstance();
-        smallBlockCacheManager.init();
         confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
         confirmingTxCacheManager.init();
         receivedTxCacheManager = ReceivedTxCacheManager.getInstance();
@@ -160,8 +152,6 @@ public class ConsensusManager {
     public void destroy() {
         blockCacheManager.clear();
         consensusCacheManager.clear();
-        headerCacheManager.clear();
-        smallBlockCacheManager.clear();
         confirmingTxCacheManager.clear();
         receivedTxCacheManager.clear();
     }

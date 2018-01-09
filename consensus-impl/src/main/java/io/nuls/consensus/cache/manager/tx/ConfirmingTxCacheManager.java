@@ -27,7 +27,7 @@ public class ConfirmingTxCacheManager {
     }
 
     public void init() {
-        txCache = new CacheMap<>(CACHE_NAME, LIVE_TIME, 0);
+        txCache = new CacheMap<>(CACHE_NAME,64, LIVE_TIME, 0);
     }
 
     public void putTxList(List<Transaction> txs) {

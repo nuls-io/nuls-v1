@@ -16,7 +16,7 @@ import java.util.*;
  * @author Niels
  * @date 2017/10/27
  */
-public class EhCacheServiceImpl<K, T extends NulsCloneable> implements CacheService<K, T> {
+public class EhCacheServiceImpl<K, T > implements CacheService<K, T> {
     private final EhCacheManager cacheManager = EhCacheManager.getInstance();
 
     @Override
@@ -45,13 +45,13 @@ public class EhCacheServiceImpl<K, T extends NulsCloneable> implements CacheServ
     }
 
     @Override
-    public void createCache(String title) {
-        cacheManager.createCache(title, String.class, Serializable.class, EhCacheConstant.DEFAULT_MAX_SIZE, 0, 0);
+    public void createCache(String title,int heapMb) {
+        cacheManager.createCache(title, String.class, Serializable.class, heapMb, 0, 0);
     }
 
     @Override
-    public void createCache(String title, int timeToLiveSeconds, int timeToIdleSeconds) {
-        cacheManager.createCache(title, String.class, Serializable.class, EhCacheConstant.DEFAULT_MAX_SIZE, timeToLiveSeconds, timeToIdleSeconds);
+    public void createCache(String title,int heapMb, int timeToLiveSeconds, int timeToIdleSeconds) {
+        cacheManager.createCache(title, String.class, Serializable.class, heapMb, timeToLiveSeconds, timeToIdleSeconds);
     }
 
 
@@ -85,17 +85,14 @@ public class EhCacheServiceImpl<K, T extends NulsCloneable> implements CacheServ
         if (null == cacheManager.getCache(cacheTitle) || null == key) {
             return null;
         }
-        if (null == cacheManager.getCache(cacheTitle) || null == key) {
-            return null;
-        }
         T t = ((T) cacheManager.getCache(cacheTitle).get(key));
         if (null == t) {
             return t;
         }
         if (t instanceof NulsCloneable) {
-            return (T) t.copy();
+            return (T) ((NulsCloneable) t).copy();
         }
-        return (T) t.copy();
+        return t;
     }
 
     @Override
@@ -107,7 +104,7 @@ public class EhCacheServiceImpl<K, T extends NulsCloneable> implements CacheServ
             T t = entry.getValue();
             T value = t;
             if (t instanceof NulsCloneable) {
-                value = (T) t.copy();
+                value = (T) ((NulsCloneable) t).copy();
             }
             list.add(value);
         }

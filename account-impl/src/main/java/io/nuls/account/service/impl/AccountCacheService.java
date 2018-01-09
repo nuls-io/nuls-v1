@@ -18,7 +18,7 @@ public class AccountCacheService {
 
     private AccountCacheService() {
         this.cacheService = NulsContext.getInstance().getService(CacheService.class);
-        cacheService.createCache(AccountConstant.ACCOUNT_LIST_CACHE);
+        cacheService.createCache(AccountConstant.ACCOUNT_LIST_CACHE,32);
     }
 
     public static AccountCacheService getInstance() {

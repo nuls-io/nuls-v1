@@ -20,8 +20,8 @@ public class EventCacheService {
 
     public void init(){
         this.cacheService = NulsContext.getInstance().getService(CacheService.class);
-        this.cacheService.createCache(CACHE_OF_SENDED, 0, TIME_OF_IDLE_SECONDS);
-        this.cacheService.createCache(CACHE_OF_RECIEVED, 0, TIME_OF_IDLE_SECONDS);
+        this.cacheService.createCache(CACHE_OF_SENDED,100, 0, TIME_OF_IDLE_SECONDS);
+        this.cacheService.createCache(CACHE_OF_RECIEVED,100, 0, TIME_OF_IDLE_SECONDS);
     }
 
     public static EventCacheService getInstance() {
