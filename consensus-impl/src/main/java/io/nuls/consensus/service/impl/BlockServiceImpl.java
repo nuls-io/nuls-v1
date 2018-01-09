@@ -13,11 +13,8 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.db.transactional.annotation.TransactionalAnnotation;
 import io.nuls.db.dao.BlockDataService;
 import io.nuls.db.entity.BlockPo;
-import io.nuls.db.entity.TransactionPo;
-import io.nuls.db.util.TransactionPoTool;
 import io.nuls.ledger.service.intf.LedgerService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,7 +25,7 @@ public class BlockServiceImpl implements BlockService {
 
     private BlockDataService blockDao = NulsContext.getInstance().getService(BlockDataService.class);
     private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
-    private LedgerService txService = NulsContext.getInstance().getService(LedgerService.class);
+    private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
 
     @Override
     public Block getGengsisBlock() {
@@ -105,28 +102,23 @@ public class BlockServiceImpl implements BlockService {
     @Override
     @TransactionalAnnotation
     public void saveBlock(Block block) {
-        BlockPo blockPo = ConsensusTool.toPojo(block);
-        List<TransactionPo> txPoList = new ArrayList<>();
         for (int x = 0; x < block.getHeader().getTxCount(); x++) {
             Transaction tx = block.getTxs().get(x);
             tx.setBlockHash(block.getHeader().getHash());
             tx.setBlockHeight(block.getHeader().getHeight());
             try {
-                txService.commitTx(tx);
-                txPoList.add(TransactionPoTool.toPojo(tx));
+                ledgerService.commitTx(tx);
             } catch (Exception e) {
                 Log.error(e);
                 rollback(block.getTxs(), x);
                 throw new NulsRuntimeException(e);
             }
         }
-        this.dataPersistence(blockPo, txPoList);
+        BlockPo blockPo = ConsensusTool.toPojo(block);
+        blockDao.save(blockPo);
+        ledgerService.saveTxList(block.getTxs());
     }
 
-    @TransactionalAnnotation
-    private void dataPersistence(BlockPo blockPo, List<TransactionPo> txPoList) {
-        //todo 调用多个dao/service进行
-    }
 
     @Override
     @TransactionalAnnotation
@@ -148,7 +140,7 @@ public class BlockServiceImpl implements BlockService {
         for (int x = 0; x < max; x++) {
             Transaction tx = txs.get(x);
             try {
-                txService.rollbackTx(tx);
+                ledgerService.rollbackTx(tx);
             } catch (NulsException e) {
                 Log.error(e);
             }
