@@ -78,7 +78,7 @@ public class ConsensusManager {
     public void init() {
         loadConfigration();
         accountService = NulsContext.getInstance().getService(AccountService.class);
-        localAccountAddress = accountService.getDefaultAccount();
+        localAccountAddress = accountService.getDefaultAccount().getAddress().getBase58();
 
         blockCacheManager = BlockCacheManager.getInstance();
         blockCacheManager.init();

@@ -49,7 +49,6 @@ public class NodeDiscoverHandler implements Runnable {
             NodeTransfer.toNode(node, po);
             nodes.add(node);
         }
-
         return nodes;
     }
 

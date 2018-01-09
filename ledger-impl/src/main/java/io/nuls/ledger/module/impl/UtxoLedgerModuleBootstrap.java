@@ -27,15 +27,18 @@ import java.util.List;
  */
 public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
 
+    private LedgerCacheService cacheService;
 
-    private LedgerCacheService cacheService = LedgerCacheService.getInstance();
+    private LedgerService ledgerService;
 
-    private LedgerService ledgerService = UtxoLedgerServiceImpl.getInstance();
-
-    private EventBusService eventBusService = NulsContext.getInstance().getService(EventBusService.class);
+    private EventBusService eventBusService;
 
     @Override
     public void init() {
+        cacheService = LedgerCacheService.getInstance();
+        ledgerService = UtxoLedgerServiceImpl.getInstance();
+        eventBusService = NulsContext.getInstance().getService(EventBusService.class);
+
         addNormalTxValidator();
         registerService();
     }
@@ -65,7 +68,7 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
 
     private void cacheAccountAndBalance() {
         //load account
-        List<Account> accounts = NulsContext.getInstance().getService(AccountService.class).getLocalAccountList();
+        List<Account> accounts = NulsContext.getInstance().getService(AccountService.class).getAccountList();
         if (null == accounts) {
             return;
         }
