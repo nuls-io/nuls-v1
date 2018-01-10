@@ -26,7 +26,7 @@ public class AccountModuleBootstrap extends AbstractAccountModule {
         this.registerService(accountService);
         //eventBusService = NulsContext.getInstance().getService(EventBusService.class);
 
-       // this.registerTransaction(TransactionConstant.TX_TYPE_SET_ALIAS, AliasTransaction.class,new AliasTxService());
+        this.registerTransaction(TransactionConstant.TX_TYPE_SET_ALIAS, AliasTransaction.class,AliasTxService.getInstance());
     }
 
     @Override
