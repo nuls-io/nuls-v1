@@ -39,8 +39,7 @@ public class AliasTxService implements TransactionService<AliasTransaction> {
     @Override
     public void onCommit(AliasTransaction tx) throws NulsException {
         Alias alias = tx.getTxData();
-        alias.setStatus(1);
-
+//        alias.setStatus(1);
         dataService.saveAlias(AccountTool.toAliasPojo(alias));
     }
 
