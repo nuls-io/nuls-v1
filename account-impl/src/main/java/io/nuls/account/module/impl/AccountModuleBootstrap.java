@@ -17,7 +17,6 @@ import io.nuls.event.bus.service.intf.EventBusService;
  */
 public class AccountModuleBootstrap extends AbstractAccountModule {
 
-    private EventBusService eventBusService;
     private AccountService accountService;
 
     @Override
@@ -25,9 +24,9 @@ public class AccountModuleBootstrap extends AbstractAccountModule {
         accountService = AccountServiceImpl.getInstance();
         accountService.init();
         this.registerService(accountService);
-        eventBusService = NulsContext.getInstance().getService(EventBusService.class);
+        //eventBusService = NulsContext.getInstance().getService(EventBusService.class);
 
-        this.registerTransaction(TransactionConstant.TX_TYPE_SET_ALIAS, AliasTransaction.class,new AliasTxService());
+       // this.registerTransaction(TransactionConstant.TX_TYPE_SET_ALIAS, AliasTransaction.class,new AliasTxService());
     }
 
     @Override

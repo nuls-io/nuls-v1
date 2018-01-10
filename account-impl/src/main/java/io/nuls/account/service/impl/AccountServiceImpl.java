@@ -6,6 +6,7 @@ import io.nuls.account.entity.Address;
 import io.nuls.account.entity.tx.AliasTransaction;
 import io.nuls.account.entity.validator.AliasValidator;
 import io.nuls.account.service.intf.AccountService;
+import io.nuls.account.service.tx.AliasTxService;
 import io.nuls.account.util.AccountTool;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.NulsSignData;
@@ -29,7 +30,7 @@ import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.dao.AccountDataService;
-import io.nuls.db.dao.AccountTxDataService;
+import io.nuls.db.dao.AccountAliasDataService;
 import io.nuls.db.dao.AliasDataService;
 import io.nuls.db.entity.AccountPo;
 import io.nuls.db.entity.TransactionLocalPo;
@@ -63,9 +64,10 @@ public class AccountServiceImpl implements AccountService {
 
     private AccountDataService accountDao;
 
-    private AccountTxDataService accountTxDBService;
+    private AccountAliasDataService accountAliasDBService;
 
-    private AliasDataService aliasDao;
+    private AliasDataService aliasDataService;
+
 
     private EventBroadcaster eventBroadcaster;
 
@@ -85,11 +87,12 @@ public class AccountServiceImpl implements AccountService {
     public void init() {
         accountCacheService = AccountCacheService.getInstance();
         accountDao = NulsContext.getInstance().getService(AccountDataService.class);
-        accountTxDBService = NulsContext.getInstance().getService(AccountTxDataService.class);
-        aliasDao = NulsContext.getInstance().getService(AliasDataService.class);
+        accountAliasDBService = NulsContext.getInstance().getService(AccountAliasDataService.class);
+        aliasDataService = NulsContext.getInstance().getService(AliasDataService.class);
         eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
 
-        AliasValidator.getInstance().setAliasDao(aliasDao);
+        AliasValidator.getInstance().setAliasDataService(aliasDataService);
+        AliasTxService.getInstance().setDataService(accountAliasDBService);
     }
 
     @Override
@@ -678,7 +681,7 @@ public class AccountServiceImpl implements AccountService {
             accountPo.setMyTxs(transactionPos);
             accountPoList.add(accountPo);
         }
-        accountTxDBService.importAccount(accountPoList);
+        accountAliasDBService.importAccount(accountPoList);
     }
 
     private void resetKeys(String password) {
