@@ -2,6 +2,7 @@ package io.nuls.consensus.cache.manager.block;
 
 import io.nuls.cache.util.CacheMap;
 import io.nuls.consensus.constant.ConsensusCacheConstant;
+import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.SmallBlock;
@@ -28,6 +29,7 @@ public class BlockCacheManager {
     private CacheMap<String, SmallBlock> smallBlockCacheMap;
 
     private long maxHeight;
+    private long bestHeight;
     private long storedHeight;
 
 
@@ -39,15 +41,16 @@ public class BlockCacheManager {
     }
 
     public void init() {
-        smallBlockCacheMap = new CacheMap<>(ConsensusCacheConstant.SMALL_BLOCK_CACHE_NAME,32, ConsensusCacheConstant.LIVE_TIME, 0);
-        headerCacheMap = new CacheMap<>(ConsensusCacheConstant.BLOCK_HEADER_CACHE_NAME,16, ConsensusCacheConstant.LIVE_TIME, 0);
-        blockCacheMap = new CacheMap<>(ConsensusCacheConstant.BLOCK_CACHE_NAME,64 ,ConsensusCacheConstant.LIVE_TIME, 0);
-        tempHeaderCacheMap = new CacheMap<>(ConsensusCacheConstant.TEMP_BLOCK_HEADER_CACHE_NAME,32, ConsensusCacheConstant.LIVE_TIME, 0);
-        blockHeightCacheMap = new CacheMap<>(ConsensusCacheConstant.BLOCK_HEIGHT_CACHE_NAME,16 ,ConsensusCacheConstant.LIVE_TIME, 0);
-        hashConfirmedCountMap = new CacheMap<>(ConsensusCacheConstant.HASH_CONFIRMED_COUNT_CACHE,16, ConsensusCacheConstant.LIVE_TIME, 0);
+        smallBlockCacheMap = new CacheMap<>(ConsensusCacheConstant.SMALL_BLOCK_CACHE_NAME, 32, ConsensusCacheConstant.LIVE_TIME, 0);
+        headerCacheMap = new CacheMap<>(ConsensusCacheConstant.BLOCK_HEADER_CACHE_NAME, 16, ConsensusCacheConstant.LIVE_TIME, 0);
+        blockCacheMap = new CacheMap<>(ConsensusCacheConstant.BLOCK_CACHE_NAME, 64, ConsensusCacheConstant.LIVE_TIME, 0);
+        tempHeaderCacheMap = new CacheMap<>(ConsensusCacheConstant.TEMP_BLOCK_HEADER_CACHE_NAME, 32, ConsensusCacheConstant.LIVE_TIME, 0);
+        blockHeightCacheMap = new CacheMap<>(ConsensusCacheConstant.BLOCK_HEIGHT_CACHE_NAME, 16, ConsensusCacheConstant.LIVE_TIME, 0);
+        hashConfirmedCountMap = new CacheMap<>(ConsensusCacheConstant.HASH_CONFIRMED_COUNT_CACHE, 16, ConsensusCacheConstant.LIVE_TIME, 0);
     }
 
-    public void cacheBlockHeader(BlockHeader header) {
+    //todo
+    public boolean cacheBlockHeader(BlockHeader header) {
         long height = header.getHeight();
         boolean discard = true;
         if (height > maxHeight) {
@@ -55,6 +58,11 @@ public class BlockCacheManager {
             discard = false;
         } else if (height <= storedHeight) {
             discard = true;
+        }
+
+
+        if (discard) {
+            return false;
         }
 
 
@@ -71,6 +79,12 @@ public class BlockCacheManager {
         }
         set.add(header.getHash().getDigestHex());
         blockHeightCacheMap.put(height, set);
+        checkNextBlockHeader(height);
+        return true;
+    }
+
+    private void checkNextBlockHeader(long height) {
+        // todo auto-generated method stub(niels)
 
     }
 
@@ -108,7 +122,7 @@ public class BlockCacheManager {
         this.smallBlockCacheMap.destroy();
     }
 
-    public void removeCache(long height) {
+    public void removeBlock(long height) {
         Set<String> hashset = blockHeightCacheMap.get(height);
         if (null == hashset) {
             return;
@@ -123,12 +137,39 @@ public class BlockCacheManager {
     }
 
     public long getBestHeight() {
-        // todo auto-generated method stub(niels)
-        return 0;
+        return bestHeight;
     }
 
     public Block getBlock(long height) {
         // todo auto-generated method stub(niels)
         return null;
+    }
+
+    public long getStoredHeight() {
+        return storedHeight;
+    }
+
+    public void setStoredHeight(long storedHeight) {
+        this.storedHeight = storedHeight;
+    }
+
+    public Block getConfirmedBlock(long height) {
+        Set<String> hashset = blockHeightCacheMap.get(height);
+        if (null == hashset) {
+            return null;
+        }
+        String rightBlockHash = null;
+        int confirmedCount = 0;
+        for (String hash : hashset) {
+            int count = hashConfirmedCountMap.get(hash);
+            if (count > confirmedCount) {
+                rightBlockHash = hash;
+                confirmedCount = count;
+            }
+        }
+        if (confirmedCount <= PocConsensusConstant.CONFIRM_BLOCK_COUNT) {
+            return null;
+        }
+        return blockCacheMap.get(rightBlockHash);
     }
 }

@@ -46,7 +46,7 @@ public class TxFieldValidator implements NulsDataValidator<Transaction> {
             }
         } while (false);
         if (!result) {
-            return ValidateResult.getFailedResult(SeverityLevelEnum.NORMAL, ErrorCode.DATA_FIELD_CHECK_ERROR);
+            return ValidateResult.getFailedResult( ErrorCode.DATA_FIELD_CHECK_ERROR);
         }
         return ValidateResult.getSuccessResult();
     }

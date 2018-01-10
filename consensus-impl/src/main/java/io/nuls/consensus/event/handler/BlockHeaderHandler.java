@@ -3,6 +3,7 @@ package io.nuls.consensus.event.handler;
 import io.nuls.consensus.cache.manager.block.BlockCacheManager;
 import io.nuls.consensus.event.BlockHeaderEvent;
 import io.nuls.consensus.event.GetSmallBlockEvent;
+import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.utils.DistributedBlockInfoRequestUtils;
 import io.nuls.core.chain.entity.BasicTypeData;
 import io.nuls.core.chain.entity.BlockHeader;
@@ -21,6 +22,9 @@ public class BlockHeaderHandler extends AbstractEventHandler<BlockHeaderEvent> {
     private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
 
     private NetworkService networkService = NulsContext.getInstance().getService(NetworkService.class);
+
+    private BlockService blockService = NulsContext.getInstance().getService(BlockService.class);
+
     private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
 
     @Override
@@ -29,15 +33,6 @@ public class BlockHeaderHandler extends AbstractEventHandler<BlockHeaderEvent> {
             return;
         }
         BlockHeader header = event.getEventBody();
-        ValidateResult result = header.verify();
-        if (result.isFailed()) {
-            networkService.removeNode(fromId);
-            return;
-        }
         blockCacheManager.cacheBlockHeader(header);
-        GetSmallBlockEvent getSmallBlockEvent = new GetSmallBlockEvent();
-        BasicTypeData<Long> data = new BasicTypeData<>(header.getHeight());
-        getSmallBlockEvent.setEventBody(data);
-        eventBroadcaster.sendToNode(getSmallBlockEvent, fromId);
     }
 }

@@ -12,13 +12,16 @@ import io.nuls.consensus.manager.ConsensusManager;
 import io.nuls.consensus.module.AbstractConsensusModule;
 import io.nuls.consensus.service.impl.BlockServiceImpl;
 import io.nuls.consensus.service.impl.PocConsensusServiceImpl;
+import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.service.tx.*;
 import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.thread.BaseThread;
 import io.nuls.core.thread.manager.TaskManager;
+import io.nuls.core.utils.aop.AopUtils;
 import io.nuls.core.utils.log.Log;
+import io.nuls.db.transactional.TransactionalAopFilter;
 import io.nuls.event.bus.service.intf.EventBusService;
 import io.nuls.ledger.event.TransactionEvent;
 
@@ -51,7 +54,8 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
 
     @Override
     public void start() {
-        this.registerService(BlockServiceImpl.getInstance());
+        this.registerService(BlockService.class, AopUtils.createProxy(BlockServiceImpl.class,
+                NulsContext.getInstance().getService(TransactionalAopFilter.class)));
         this.registerService(PocConsensusServiceImpl.getInstance());
 
         this.consensusManager.startMaintenanceWork();

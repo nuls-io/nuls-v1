@@ -1,12 +1,12 @@
 package io.nuls.consensus.thread;
 
+import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
-import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.cache.manager.block.BlockCacheManager;
-import io.nuls.consensus.service.impl.BlockServiceImpl;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 
@@ -18,8 +18,8 @@ public class BlockPersistenceThread implements Runnable {
     public static final String THREAD_NAME = "block-persistence-thread";
     private static final BlockPersistenceThread INSTANCE = new BlockPersistenceThread();
     private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
-    private BlockService blockService = BlockServiceImpl.getInstance();
-    private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
+    private BlockService blockService = NulsContext.getInstance().getService(BlockService.class);
+    private ConfirmingTxCacheManager txCacheManager = ConfirmingTxCacheManager.getInstance();
     private boolean running;
 
     private BlockPersistenceThread() {
@@ -46,18 +46,15 @@ public class BlockPersistenceThread implements Runnable {
     }
 
     private void doPersistence() {
-        //todo
-//        long count = blockCacheManager.getMaxHeight() - blockCacheManager.getMinHeight() - PocConsensusConstant.CONFIRM_BLOCK_COUNT;
-//        for (int i = 0; i < count; i++) {
-//            Block block = blockCacheManager.getMinHeightCacheBlock();
-//            if (null == block) {
-//                throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
-//            }
-//
-//            blockService.saveBlock(block);
-//            this.blockCacheManager.removeCache(blockCacheManager.getMinHeight());
-//            this.txCacheManager.removeTx(block.getTxHashList());
-//        }
+        long height = blockCacheManager.getStoredHeight() + 1;
+        Block block = blockCacheManager.getConfirmedBlock(height);
+        if (null == block) {
+            return;
+        }
+        blockService.saveBlock(block);
+        blockCacheManager.removeBlock(height);
+        blockCacheManager.setStoredHeight(height);
+        txCacheManager.removeTxList(block.getTxHashList());
     }
 
 }
