@@ -18,10 +18,9 @@ public class TransactionPo {
 
     private String blockHash;
 
+    private int index;
+
     private byte[] txdata;
-
-
-
 
     public String getHash() {
         return hash;
@@ -71,4 +70,11 @@ public class TransactionPo {
         this.txdata = txdata;
     }
 
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
+    }
 }

@@ -3,11 +3,11 @@ package io.nuls.test;
 import io.nuls.core.module.manager.ServiceManager;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.AccountDataService;
-import io.nuls.db.dao.BlockDataService;
+import io.nuls.db.dao.BlockHeaderService;
 import io.nuls.db.dao.NodeDataService;
 import io.nuls.db.dao.impl.mybatis.BlockDaoImpl;
 import io.nuls.db.entity.AccountPo;
-import io.nuls.db.entity.BlockPo;
+import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.db.entity.NodePo;
 import io.nuls.db.module.impl.MybatisDBModuleBootstrap;
 import org.junit.AfterClass;
@@ -26,7 +26,7 @@ public class DBModuleTest {
 
     private static MybatisDBModuleBootstrap dbModule;
 
-    private static BlockDataService blockDao;
+    private static BlockHeaderService blockDao;
 
     private static NodeDataService nodeDao;
 
@@ -36,7 +36,7 @@ public class DBModuleTest {
     public static void init() {
         dbModule = new MybatisDBModuleBootstrap();
         dbModule.start();
-        blockDao = ServiceManager.getInstance().getService(BlockDataService.class);
+        blockDao = ServiceManager.getInstance().getService(BlockHeaderService.class);
         nodeDao = ServiceManager.getInstance().getService(NodeDataService.class);
         accountDao = ServiceManager.getInstance().getService(AccountDataService.class);
     }
@@ -48,47 +48,47 @@ public class DBModuleTest {
 
     @Test
     public void testCallback() {
-        BlockPo blockPo = blockDao.get("aaa");
-        Log.debug("=============" + blockPo.getHeight());
-        blockPo.setHeight(blockPo.getHeight() + 2);
+        BlockHeaderPo blockHeaderPo = blockDao.get("aaa");
+        Log.debug("=============" + blockHeaderPo.getHeight());
+        blockHeaderPo.setHeight(blockHeaderPo.getHeight() + 2);
 
     }
 
     @Test
     public void testSaveBlock() {
-        BlockPo blockPo = new BlockPo();
-        blockPo.setCreateTime(111L);
-        blockPo.setHash("aaa");
-        blockPo.setHeight(111L);
-        blockPo.setMerkleHash("aaab");
-        blockPo.setPreHash("xxx");
-        blockPo.setTxcount(10L);
-        blockPo.setBytes(new byte[10]);
-        blockPo.setVarsion(1);
-        blockPo.setSign(new byte[2]);
+        BlockHeaderPo blockHeaderPo = new BlockHeaderPo();
+        blockHeaderPo.setCreateTime(111L);
+        blockHeaderPo.setHash("aaa");
+        blockHeaderPo.setHeight(111L);
+        blockHeaderPo.setMerkleHash("aaab");
+        blockHeaderPo.setPreHash("xxx");
+        blockHeaderPo.setTxcount(10L);
+        blockHeaderPo.setBytes(new byte[10]);
+        blockHeaderPo.setVarsion(1);
+        blockHeaderPo.setSign(new byte[2]);
 //        blockPo.setScript("dsfasdf".getBytes());
-        int result = blockDao.save(blockPo);
+        int result = blockDao.save(blockHeaderPo);
         Log.debug("result" + result);
     }
 
     @Test
     public void testSelect() {
-        BlockPo blockPo = blockDao.get("bbb");
-        Log.debug(blockPo.getCreateTime() + "");
+        BlockHeaderPo blockHeaderPo = blockDao.get("bbb");
+        Log.debug(blockHeaderPo.getCreateTime() + "");
     }
 
 
     public static void main(String[] args) {
         MybatisDBModuleBootstrap dbModule = new MybatisDBModuleBootstrap();
         dbModule.start();
-        BlockDataService blockDao = ServiceManager.getInstance().getService(BlockDaoImpl.class);
+        BlockHeaderService blockDao = ServiceManager.getInstance().getService(BlockDaoImpl.class);
 
         for (int i = 0; i < 10; i++) {
             new Thread() {
                 public void run() {
                     try {
-                        BlockPo blockPo = blockDao.get("aaa");
-                        Log.debug(blockPo.getCreateTime() + "");
+                        BlockHeaderPo blockHeaderPo = blockDao.get("aaa");
+                        Log.debug(blockHeaderPo.getCreateTime() + "");
                     } catch (Exception e) {
                         Log.error(e);
                     }

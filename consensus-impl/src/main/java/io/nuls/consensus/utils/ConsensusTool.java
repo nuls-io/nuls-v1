@@ -3,10 +3,8 @@ package io.nuls.consensus.utils;
 import io.nuls.account.entity.Account;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
-import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.block.BlockData;
-import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.member.Delegate;
 import io.nuls.core.chain.entity.*;
@@ -15,10 +13,9 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
-import io.nuls.db.entity.BlockPo;
+import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.db.entity.DelegateAccountPo;
 import io.nuls.db.entity.DelegatePo;
-import io.nuls.db.entity.TransactionPo;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,39 +29,31 @@ public class ConsensusTool {
 
     private static AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
 
-    public static final BlockPo toPojo(Block block) {
-        BlockPo po = new BlockPo();
-        if (null != block.getVersion()) {
-            po.setVarsion((int) block.getVersion().getVersion());
+    public static final BlockHeaderPo toPojo(BlockHeader header) {
+        BlockHeaderPo po = new BlockHeaderPo();
+        po.setTxcount(header.getTxCount());
+        if (header.getHeight() > 1) {
+            po.setPreHash(header.getPreHash().getDigestHex());
         }
-        try {
-            po.setBytes(block.serialize());
-        } catch (IOException e) {
-            Log.error(e);
+        po.setMerkleHash(header.getMerkleHash().getDigestHex());
+        po.setHeight(header.getHeight());
+        po.setCreateTime(header.getTime());
+        po.setHash(header.getHash().getDigestHex());
+        if(null!=header.getSign()){
+            po.setSign(header.getSign().getSignBytes());
         }
-        po.setTxcount(block.getHeader().getTxCount());
-        if (block.getHeader().getHeight() > 1) {
-            po.setPreHash(block.getHeader().getPreHash().getDigestHex());
-        }
-        po.setMerkleHash(block.getHeader().getMerkleHash().getDigestHex());
-        po.setHeight(block.getHeader().getHeight());
-        po.setCreateTime(block.getHeader().getTime());
-        po.setHash(block.getHeader().getHash().getDigestHex());
-        if(null!=block.getHeader().getSign()){
-            po.setSign(block.getHeader().getSign().getSignBytes());
-        }
-        po.setTxcount(block.getHeader().getTxCount());
-        po.setConsensusAddress(block.getHeader().getPackingAddress());
+        po.setTxcount(header.getTxCount());
+        po.setConsensusAddress(header.getPackingAddress());
         return po;
     }
 
-    public static final Block fromPojo(BlockPo po) throws NulsException {
+    public static final BlockHeader fromPojo(BlockHeaderPo po)  {
         if (null == po) {
             return null;
         }
-        Block block = new Block();
-        block.parse(po.getBytes());
-        return block;
+        BlockHeader header = new BlockHeader();
+        //todo
+        return header;
     }
 
     public static Consensus<Agent> fromPojo(DelegateAccountPo po) {

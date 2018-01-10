@@ -7,6 +7,7 @@ import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.utils.DistributedBlockInfoRequestUtils;
 import io.nuls.core.chain.entity.BasicTypeData;
 import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.handler.AbstractEventHandler;
@@ -23,16 +24,18 @@ public class BlockHeaderHandler extends AbstractEventHandler<BlockHeaderEvent> {
 
     private NetworkService networkService = NulsContext.getInstance().getService(NetworkService.class);
 
-    private BlockService blockService = NulsContext.getInstance().getService(BlockService.class);
-
-    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
-
     @Override
     public void onEvent(BlockHeaderEvent event, String fromId) {
         if (DistributedBlockInfoRequestUtils.getInstance().addBlockHeader(fromId, event.getEventBody())) {
             return;
         }
         BlockHeader header = event.getEventBody();
-        blockCacheManager.cacheBlockHeader(header);
+        ValidateResult result = blockCacheManager.cacheBlockHeader(header);
+        if (result.isSuccess()) {
+            return;
+        }
+        if (result.getLevel() == SeverityLevelEnum.FLAGRANT_FOUL) {
+            networkService.removeNode(fromId);
+        }
     }
 }

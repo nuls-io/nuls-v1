@@ -58,7 +58,7 @@ public class MybatisDBModuleBootstrap extends AbstractDBModule {
     private void initService() {
         TransactionalAopFilterImpl transactionalFilter = new TransactionalAopFilterImpl();
         this.registerService(TransactionalAopFilter.class,transactionalFilter);
-        this.registerService(BlockDataService.class, AopUtils.createProxy(BlockDaoImpl.class, transactionalFilter));
+        this.registerService(BlockHeaderService.class, AopUtils.createProxy(BlockDaoImpl.class, transactionalFilter));
         this.registerService(AliasDataService.class, AopUtils.createProxy(AliasDaoImpl.class, transactionalFilter));
         this.registerService(AccountDataService.class, AopUtils.createProxy(AccountDaoImpl.class, transactionalFilter));
         this.registerService(DelegateDataService.class, AopUtils.createProxy(DelegateDaoImpl.class, transactionalFilter));

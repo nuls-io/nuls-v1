@@ -8,6 +8,7 @@ import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.SmallBlock;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.validate.ValidateResult;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -24,11 +25,9 @@ public class BlockCacheManager {
     private CacheMap<Long, Set<String>> blockHeightCacheMap;
     private CacheMap<String, Integer> hashConfirmedCountMap;
 
-
     private CacheMap<String, Block> blockCacheMap;
     private CacheMap<String, SmallBlock> smallBlockCacheMap;
 
-    private long maxHeight;
     private long bestHeight;
     private long storedHeight;
 
@@ -50,19 +49,29 @@ public class BlockCacheManager {
     }
 
     //todo
-    public boolean cacheBlockHeader(BlockHeader header) {
+    public ValidateResult cacheBlockHeader(BlockHeader header) {
         long height = header.getHeight();
         boolean discard = true;
-        if (height > maxHeight) {
-            maxHeight = height;
-            discard = false;
-        } else if (height <= storedHeight) {
+        if (height <= storedHeight) {
             discard = true;
+        }else if (height <= bestHeight) {
+            //todo 验证出块人、签名，如果签名正确，则处罚（分叉[red]、网络延时出块失败[yellow]）
+
         }
 
 
+
+
+
+
+
+
+
+
+
+
         if (discard) {
-            return false;
+            return ValidateResult.getFailedResult("");
         }
 
 
@@ -80,11 +89,13 @@ public class BlockCacheManager {
         set.add(header.getHash().getDigestHex());
         blockHeightCacheMap.put(height, set);
         checkNextBlockHeader(height);
-        return true;
+        return ValidateResult.getSuccessResult();
     }
 
     private void checkNextBlockHeader(long height) {
         // todo auto-generated method stub(niels)
+        // 检查下一个头，如果存在则验证并下载
+
 
     }
 
@@ -92,8 +103,13 @@ public class BlockCacheManager {
         return this.headerCacheMap.get(hash);
     }
 
-    public void cacheBlock(Block block) {
+    public ValidateResult cacheBlock(Block block) {
+        ValidateResult result = block.verify();
+        if (result.isFailed()) {
+            return result;
+        }
         blockCacheMap.put(block.getHeader().getHash().getDigestHex(), block);
+        return ValidateResult.getSuccessResult();
     }
 
     public Block getBlock(String hash) {
@@ -141,7 +157,13 @@ public class BlockCacheManager {
     }
 
     public Block getBlock(long height) {
-        // todo auto-generated method stub(niels)
+        Set<String> hashset = blockHeightCacheMap.get(height);
+        if (null == hashset || hashset.size() != 1) {
+            return null;
+        }
+        for (String hash : hashset) {
+            return getBlock(hash);
+        }
         return null;
     }
 
@@ -171,5 +193,16 @@ public class BlockCacheManager {
             return null;
         }
         return blockCacheMap.get(rightBlockHash);
+    }
+
+    public BlockHeader getBlockHeader(long height) {
+        Set<String> hashset = blockHeightCacheMap.get(height);
+        if (null == hashset || hashset.size() != 1) {
+            return null;
+        }
+        for (String hash : hashset) {
+            return getBlockHeader(hash);
+        }
+        return null;
     }
 }

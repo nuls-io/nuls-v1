@@ -18,7 +18,7 @@ public interface BlockService {
 
     Block getLocalBestBlock();
 
-    BlockHeader getBlockHeader();
+    BlockHeader getBlockHeader(long height);
 
     Block getBlock(String hash);
 

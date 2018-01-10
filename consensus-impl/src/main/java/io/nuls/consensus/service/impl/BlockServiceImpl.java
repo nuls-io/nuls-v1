@@ -1,7 +1,6 @@
 package io.nuls.consensus.service.impl;
 
 import io.nuls.consensus.cache.manager.block.BlockCacheManager;
-import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
@@ -11,8 +10,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.transactional.annotation.TransactionalAnnotation;
-import io.nuls.db.dao.BlockDataService;
-import io.nuls.db.entity.BlockPo;
+import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.ledger.service.intf.LedgerService;
 
 import java.util.List;
@@ -21,64 +19,47 @@ import java.util.List;
  * @author Niels
  * @date 2017/12/11
  */
-public class BlockServiceImpl implements BlockService {
+public class BlockServiceImpl implements io.nuls.consensus.service.intf.BlockService {
 
-    private BlockDataService blockDao = NulsContext.getInstance().getService(BlockDataService.class);
+    private BlockStorageService blockStorageService = BlockStorageService.getInstance();
     private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
 
     @Override
     public Block getGengsisBlock() {
-        BlockPo po = this.blockDao.getBlock(0);
-        try {
-            return ConsensusTool.fromPojo(po);
-        } catch (NulsException e) {
-            Log.error(e);
-            return null;
-        }
+        return blockStorageService.getBlock(0);
     }
 
     @Override
     public long getLocalHeight() {
         long height = blockCacheManager.getBestHeight();
         if (height == 0) {
-            height = blockDao.queryMaxHeight();
+            height = blockStorageService.getBestHeight();
         }
         return height;
     }
 
     @Override
     public Block getLocalBestBlock() {
-        Block block = blockCacheManager.getBlock(getLocalHeight());
-        if (null == block) {
-            BlockPo po = blockDao.getHighestBlock();
-            try {
-                block = ConsensusTool.fromPojo(po);
-            } catch (NulsException e) {
-                Log.error(e);
-                return null;
-            }
-        }
-        return block;
+        return getBlock(getLocalHeight());
     }
 
     @Override
-    public BlockHeader getBlockHeader() {
-        // todo auto-generated method stub(niels)
-        return null;
+    public BlockHeader getBlockHeader(long height) {
+        BlockHeader header;
+        if (height <= blockCacheManager.getStoredHeight()) {
+            header = blockStorageService.getBlockHeader(height);
+        } else {
+            header = blockCacheManager.getBlockHeader(height);
+        }
+        return header;
     }
 
     @Override
     public Block getBlock(String hash) {
         Block block = blockCacheManager.getBlock(hash);
         if (null == block) {
-            BlockPo po = blockDao.getBlockByHash(hash);
-            try {
-                block = ConsensusTool.fromPojo(po);
-            } catch (NulsException e) {
-                Log.error(e);
-                return null;
-            }
+            block = blockStorageService.getBlock(hash);
         }
         return block;
     }
@@ -87,13 +68,7 @@ public class BlockServiceImpl implements BlockService {
     public Block getBlock(long height) {
         Block block = blockCacheManager.getBlock(height);
         if (null == block) {
-            BlockPo po = blockDao.getBlock(height);
-            try {
-                block = ConsensusTool.fromPojo(po);
-            } catch (NulsException e) {
-                Log.error(e);
-                return null;
-            }
+            block = blockStorageService.getBlock(height);
         }
         return block;
     }
@@ -114,9 +89,8 @@ public class BlockServiceImpl implements BlockService {
                 throw new NulsRuntimeException(e);
             }
         }
-        BlockPo blockPo = ConsensusTool.toPojo(block);
-        blockDao.save(blockPo);
-        ledgerService.saveTxList(block.getTxs());
+        blockStorageService.save(block.getHeader());
+        ledgerService.saveTxList(block.getHeader().getHeight(),block.getHeader().getHash().getDigestHex(),block.getTxs());
     }
 
 
@@ -128,12 +102,12 @@ public class BlockServiceImpl implements BlockService {
             return;
         }
         this.rollback(block.getTxs(), block.getTxs().size() - 1);
-        blockDao.delete(block.getHeader().getHash().getDigestHex());
+        blockStorageService.delete(block.getHeader().getHash().getDigestHex());
     }
 
     @Override
     public int getBlockCount(String address, long roundStart, long roundEnd) {
-        return this.blockDao.count(address, roundStart, roundEnd);
+        return this.blockStorageService.getCount(address, roundStart, roundEnd);
     }
 
     private void rollback(List<Transaction> txs, int max) {

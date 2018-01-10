@@ -4,7 +4,9 @@ import io.nuls.consensus.event.BlockEvent;
 import io.nuls.consensus.cache.manager.block.BlockCacheManager;
 import io.nuls.consensus.utils.DistributedBlockDownloadUtils;
 import io.nuls.core.chain.entity.Block;
+import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.network.service.NetworkService;
 
@@ -23,6 +25,12 @@ public class BlockEventHandler extends AbstractEventHandler<BlockEvent> {
         if (DistributedBlockDownloadUtils.getInstance().downloadedBlock(fromId, block)) {
             return;
         }
-        blockCacheManager.cacheBlock(block);
+        ValidateResult result = blockCacheManager.cacheBlock(block);
+        if (result.isSuccess()) {
+            return;
+        }
+        if (result.getLevel() == SeverityLevelEnum.FLAGRANT_FOUL) {
+            networkService.removeNode(fromId);
+        }
     }
 }
