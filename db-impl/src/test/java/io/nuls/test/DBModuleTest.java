@@ -63,7 +63,7 @@ public class DBModuleTest {
         blockHeaderPo.setMerkleHash("aaab");
         blockHeaderPo.setPreHash("xxx");
         blockHeaderPo.setTxcount(10L);
-        blockHeaderPo.setBytes(new byte[10]);
+//        blockHeaderPo.setBytes(new byte[10]);
         blockHeaderPo.setVarsion(1);
         blockHeaderPo.setSign(new byte[2]);
 //        blockPo.setScript("dsfasdf".getBytes());

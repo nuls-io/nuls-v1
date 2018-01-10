@@ -69,6 +69,8 @@ public interface LedgerService {
      */
     boolean saveTxList(long height,String blockHash,List<Transaction> txList);
 
+    boolean saveTxList(long height, long blockHash, List<Transaction> txList);
+
     /**
      * @param address
      * @param txType

@@ -153,6 +153,12 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
+    public boolean saveTxList(long height, String blockHash, List<Transaction> txList) {
+        // todo auto-generated method stub(niels)
+        return false;
+    }
+
+    @Override
     @TransactionalAnnotation
     public boolean saveTxList(long height,long blockHash,List<Transaction> txList) {
         // todo auto-generated method stub(niels)
