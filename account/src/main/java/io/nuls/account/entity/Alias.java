@@ -21,6 +21,12 @@ public class Alias extends BaseNulsData {
 
     private String alias;
 
+    // 0: locked   1:confirm
+    private int status;
+
+    public static final int LOCKED = 0;
+    public static final int CONFIRM = 1;
+
     public Alias(String address, String alias) {
         this.address = address;
         this.alias = alias;
@@ -73,5 +79,13 @@ public class Alias extends BaseNulsData {
 
     public void setAlias(String alias) {
         this.alias = alias;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 }

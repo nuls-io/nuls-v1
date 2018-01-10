@@ -1,5 +1,6 @@
 package io.nuls.db.dao.impl.mybatis;
 
+import io.nuls.db.annotation.TransactionalAnnotation;
 import io.nuls.db.dao.AliasDataService;
 import io.nuls.db.dao.impl.mybatis.mapper.AliasMapper;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;

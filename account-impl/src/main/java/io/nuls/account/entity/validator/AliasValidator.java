@@ -17,7 +17,7 @@ public class AliasValidator implements NulsDataValidator<AliasTransaction> {
 
     private static final AliasValidator INSTANCE = new AliasValidator();
 
-    private AliasDataService aliasDao;
+    private AliasDataService aliasDataService;
 
     private AliasValidator() {
 
@@ -37,14 +37,14 @@ public class AliasValidator implements NulsDataValidator<AliasTransaction> {
             return ValidateResult.getFailedResult("The alias is between 3 to 20 characters");
         }
 
-        AliasPo aliasPo = aliasDao.get(alias.getAlias());
+        AliasPo aliasPo = aliasDataService.get(alias.getAlias());
         if (aliasPo != null) {
             return ValidateResult.getFailedResult("The alias has been occupied");
         }
         return ValidateResult.getSuccessResult();
     }
 
-    public void setAliasDao(AliasDataService aliasDao) {
-        this.aliasDao = aliasDao;
+    public void setAliasDataService(AliasDataService aliasDataService) {
+        this.aliasDataService = aliasDataService;
     }
 }

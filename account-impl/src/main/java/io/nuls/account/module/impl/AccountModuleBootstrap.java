@@ -17,7 +17,6 @@ import io.nuls.event.bus.service.intf.EventBusService;
  */
 public class AccountModuleBootstrap extends AbstractAccountModule {
 
-    private EventBusService eventBusService;
     private AccountService accountService;
 
     @Override

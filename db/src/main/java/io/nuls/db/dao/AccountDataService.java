@@ -11,4 +11,5 @@ public interface AccountDataService extends BaseDataService<String, AccountPo> {
 
     AccountPo loadByAddress(String address);
 
+    int updateAlias(AccountPo po);
 }

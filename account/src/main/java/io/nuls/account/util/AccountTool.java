@@ -2,6 +2,7 @@ package io.nuls.account.util;
 
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
+import io.nuls.account.entity.Alias;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.context.NulsContext;
@@ -14,6 +15,7 @@ import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.db.entity.AccountPo;
+import io.nuls.db.entity.AliasPo;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -50,32 +52,6 @@ public final class AccountTool {
         account.setCreateTime(TimeService.currentTimeMillis());
         return account;
     }
-
-    public static void main(String[] args) {
-        Account account = createAccount();
-        System.out.println("address:"+account.getAddress().toString());
-        System.out.println("pubkey:"+account.getEcKey().getPublicKeyAsHex() );
-        System.out.println("prikey:"+account.getEcKey().getPrivateKeyAsHex() );
-        System.out.println("\n\n");
-        account = createAccount();
-        System.out.println("address:"+account.getAddress().toString());
-        System.out.println("pubkey:"+account.getEcKey().getPublicKeyAsHex() );
-        System.out.println("prikey:"+account.getEcKey().getPrivateKeyAsHex() );
-        System.out.println("\n\n");
-
-        account = createAccount();
-        System.out.println("address:"+account.getAddress().toString());
-        System.out.println("pubkey:"+account.getEcKey().getPublicKeyAsHex() );
-        System.out.println("prikey:"+account.getEcKey().getPrivateKeyAsHex() );
-        System.out.println("\n\n");
-
-        account = createAccount();
-        System.out.println("address:"+account.getAddress().toString());
-        System.out.println("pubkey:"+account.getEcKey().getPublicKeyAsHex() );
-        System.out.println("prikey:"+account.getEcKey().getPrivateKeyAsHex() );
-        System.out.println("\n\n");
-    }
-
 
     /**
      * Generate the corresponding account management private key or transaction private key according to the seed private key and password
@@ -132,6 +108,20 @@ public final class AccountTool {
         desc.setPriKey(Hex.encode(src.getPriKey()));
         desc.setPriSeed(src.getPriSeed());
         desc.setStatus(src.getStatus());
+    }
+
+    public static AliasPo toAliasPojo(Alias alias) {
+        AliasPo po = new AliasPo();
+        po.setAddress(alias.getAddress());
+        po.setAlias(alias.getAlias());
+        po.setStatus(alias.getStatus());
+        return po;
+    }
+
+    public static Alias toAliasBean(AliasPo po) {
+        Alias alias = new Alias(po.getAddress(), po.getAlias());
+        alias.setStatus(po.getStatus());
+        return alias;
     }
 
 }
