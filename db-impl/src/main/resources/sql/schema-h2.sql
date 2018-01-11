@@ -24,7 +24,6 @@ CREATE TABLE IF NOT EXISTS `block` (
   `consensus_address` varchar(40) DEFAULT NULL,
   `varsion` int(5) NOT NULL,
   `txCount` int(5) NOT NULL,
-  `bytes` varbinary(1024) NOT NULL,
   `sign` varbinary(1024) NOT NULL,
   PRIMARY KEY (`hash`)
 );

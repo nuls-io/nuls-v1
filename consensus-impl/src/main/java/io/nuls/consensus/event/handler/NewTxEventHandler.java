@@ -4,11 +4,8 @@ import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.handler.AbstractEventHandler;
-import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.event.TransactionEvent;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.network.service.NetworkService;
@@ -36,24 +33,18 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
 
     @Override
     public void onEvent(TransactionEvent event, String fromId) {
-        // todo auto-generated method stub(niels)
         Transaction tx = event.getEventBody();
         if (null == tx) {
             return;
         }
         ValidateResult result = txService.verifyTx(tx);
         if(result.isFailed()){
-            if(result.getLevel()== SeverityLevelEnum.FOUL){
+            if(result.getLevel()== SeverityLevelEnum.NORMAL_FOUL){
                 networkService.removeNode(fromId);
-            }else if(result.getLevel()==SeverityLevelEnum.FLAGRANT){
+            }else if(result.getLevel()==SeverityLevelEnum.FLAGRANT_FOUL){
                 networkService.removeNode(fromId);
             }
         }
         cacheManager.putTx(tx);
-        try {
-            txService.approvalTx(tx);
-        } catch (NulsException e) {
-            Log.error(e);
-        }
     }
 }

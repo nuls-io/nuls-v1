@@ -1,4 +1,4 @@
-package io.nuls.db.annotation;
+package io.nuls.db.transactional.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

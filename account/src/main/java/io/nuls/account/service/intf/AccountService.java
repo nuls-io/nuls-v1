@@ -1,6 +1,5 @@
 package io.nuls.account.service.intf;
 
-
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.NulsDigestData;
@@ -14,39 +13,35 @@ import java.util.List;
  */
 public interface AccountService {
 
+    void init();
+
+    void start();
+
+    void shutdown();
+
+    void destroy();
+
     Account createAccount();
 
     Result<List<String>> createAccount(int count);
 
-    void resetKey(Account account);
-
-    void resetKey(Account account, String password);
-
-    void resetKeys();
-
-    void resetKeys(String password);
-
-    Account getLocalAccount();
-
-    List<Account> getLocalAccountList();
+    Account getDefaultAccount();
 
     Account getAccount(String address);
 
+    List<Account> getAccountList();
+
     Address getAddress(String pubKey);
 
-    byte[] getPriKey(String address);
+    byte[] getPrivateKey(String address);
 
-    void switchAccount(String id);
+    void setDefaultAccount(String id);
 
-    String getDefaultAccount();
+    Result encryptAccount(String password);
 
-    Result changePassword(String oldpw, String newpw);
-
-    Result setPassword(String password);
+    Result changePassword(String oldPassword, String newPassword);
 
     boolean isEncrypted();
-
-    Result lockAccounts();
 
     Result unlockAccounts(String password, int seconds);
 
@@ -62,11 +57,7 @@ public interface AccountService {
 
     NulsSignData signData(NulsDigestData digestData, Account account, String password);
 
-    Result canSetAlias(String address, String alias);
-
-    Result setAlias(String address, String alias);
-
-    Result sendAliasTx(String address, String password, String alias);
+    Result setAlias(String address, String password, String alias);
 
     Result verifySign(byte[] bytes, NulsSignData data);
 

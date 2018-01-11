@@ -25,7 +25,7 @@ public class TxRemarkValidator implements NulsDataValidator<Transaction> {
     public ValidateResult validate(Transaction data) {
         byte[] remark = data.getRemark();
         if (remark != null && remark.length > MAX_REMARK_LEN) {
-            return ValidateResult.getFailedResult(SeverityLevelEnum.NORMAL, ErrorCode.DATA_SIZE_ERROR);
+            return ValidateResult.getFailedResult(ErrorCode.DATA_SIZE_ERROR);
         }
         return ValidateResult.getSuccessResult();
     }

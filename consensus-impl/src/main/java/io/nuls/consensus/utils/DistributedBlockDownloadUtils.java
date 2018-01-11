@@ -83,7 +83,7 @@ private ReceivedTxCacheManager receivedTxCacheManager = ReceivedTxCacheManager.g
     }
 
 
-    public boolean recieveBlock(String nodeId, Block block) {
+    public boolean downloadedBlock(String nodeId, Block block) {
         if (!this.nodeIdList.contains(nodeId) || !nodeId.equals(heightNodeMap.get(block.getHeader().getHeight()))) {
             return false;
         }

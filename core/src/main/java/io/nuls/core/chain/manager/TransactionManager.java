@@ -51,18 +51,6 @@ public class TransactionManager {
         return tx;
     }
 
-    public void onRollback(Transaction tx) {
-
-    }
-
-    public void onCommit(Transaction tx) {
-
-    }
-
-    public void onApproval(Transaction tx) {
-
-    }
-
     public static TransactionService getService(Class<? extends Transaction> txClass) {
         return TX_SERVICE_MAP.get(txClass);
     }

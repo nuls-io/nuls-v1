@@ -4,8 +4,9 @@ import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.account.entity.tx.AliasTransaction;
-import io.nuls.account.manager.AccountManager;
+import io.nuls.account.entity.validator.AliasValidator;
 import io.nuls.account.service.intf.AccountService;
+import io.nuls.account.service.tx.AliasTxService;
 import io.nuls.account.util.AccountTool;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.NulsSignData;
@@ -29,18 +30,15 @@ import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.dao.AccountDataService;
-import io.nuls.db.dao.AccountTxDataService;
+import io.nuls.db.dao.AccountAliasDataService;
 import io.nuls.db.dao.AliasDataService;
 import io.nuls.db.entity.AccountPo;
-import io.nuls.db.entity.AliasPo;
 import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.entity.TransactionPo;
 import io.nuls.db.util.TransactionPoTool;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
-import io.nuls.event.bus.service.intf.EventBusService;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.event.TransactionEvent;
-import io.nuls.ledger.service.intf.LedgerService;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -58,28 +56,61 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class AccountServiceImpl implements AccountService {
 
-    private static AccountServiceImpl thisService = new AccountServiceImpl();
+    private static AccountServiceImpl instance = new AccountServiceImpl();
 
     private Lock locker = new ReentrantLock();
 
-    private AccountCacheService accountCacheService = AccountCacheService.getInstance();
+    private AccountCacheService accountCacheService;
 
-    private AccountDataService accountDao = NulsContext.getInstance().getService(AccountDataService.class);
+    private AccountDataService accountDao;
 
-    private AccountTxDataService accountTxDBService = NulsContext.getInstance().getService(AccountTxDataService.class);
+    private AccountAliasDataService accountAliasDBService;
 
-    private AliasDataService aliasDao = NulsContext.getInstance().getService(AliasDataService.class);
+    private AliasDataService aliasDataService;
 
-    private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
 
-    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
+    private EventBroadcaster eventBroadcaster;
+
     private boolean isLockNow = true;
 
+    private String Default_Account_ID;
+
     private AccountServiceImpl() {
+
     }
 
     public static AccountServiceImpl getInstance() {
-        return thisService;
+        return instance;
+    }
+
+    @Override
+    public void init() {
+        accountCacheService = AccountCacheService.getInstance();
+        accountDao = NulsContext.getInstance().getService(AccountDataService.class);
+        accountAliasDBService = NulsContext.getInstance().getService(AccountAliasDataService.class);
+        aliasDataService = NulsContext.getInstance().getService(AliasDataService.class);
+        eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
+
+        AliasValidator.getInstance().setAliasDataService(aliasDataService);
+        AliasTxService.getInstance().setDataService(accountAliasDBService);
+    }
+
+    @Override
+    public void start() {
+        List<Account> accounts = getAccountList();
+        if (accounts != null && !accounts.isEmpty()) {
+            Default_Account_ID = accounts.get(0).getId();
+        }
+    }
+
+    @Override
+    public void shutdown() {
+        accountCacheService.clear();
+    }
+
+    @Override
+    public void destroy() {
+        accountCacheService.destroy();
     }
 
     @Override
@@ -135,83 +166,38 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
-    private void signAccount(Account account) {
-        if (null == account || account.getEcKey() == null) {
-            return;
-        }
-        //todo
-//        byte[] sign = null;
-//        //sign by mgprikey
-//        Sha256Hash hash = null;
-//        try {
-//            hash = Sha256Hash.of(account.serialize());
-//        } catch (IOException e) {
-//            Log.error(e);
-//        }
-//        ECKey.ECDSASignature signature1 = account.getEcKey().sign(hash);
-//        //sign result
-//        sign = signature1.encodeToDER();
-//        account.setSign(sign);
-    }
-
     @Override
-    public void resetKey(Account account) {
-        resetKey(account, null);
-    }
-
-    @Override
-    public void resetKey(Account account, String password) {
-        AssertUtil.canNotEmpty(account, "");
-        account.resetKey(password);
-    }
-
-    @Override
-    public void resetKeys() {
-        resetKeys(null);
-    }
-
-    @Override
-    public void resetKeys(String password) {
-        List<Account> accounts = this.accountCacheService.getAccountList();
-        if (accounts != null && !accounts.isEmpty()) {
-            for (Account account : accounts) {
-                account.resetKey(password);
-            }
-        }
-    }
-
-    @Override
-    public Account getLocalAccount() {
-        if (AccountManager.Local_acount_id == null) {
+    public Account getDefaultAccount() {
+        if (Default_Account_ID == null) {
             return null;
         }
-        return this.accountCacheService.getAccountById(AccountManager.Local_acount_id);
-    }
-
-    @Override
-    public List<Account> getLocalAccountList() {
-        List<Account> list = this.accountCacheService.getAccountList();
-        if (null != list && !list.isEmpty()) {
-            return list;
-        }
-        list = new ArrayList<>();
-        List<AccountPo> polist = this.accountDao.getList();
-        if (null == polist || polist.isEmpty()) {
-            return list;
-        }
-        for (AccountPo po : polist) {
-            Account account = new Account();
-            AccountTool.toBean(po, account);
-            list.add(account);
-        }
-        this.accountCacheService.putAccountList(list);
-        return list;
+        return getAccount(Default_Account_ID);
     }
 
     @Override
     public Account getAccount(String address) {
         AssertUtil.canNotEmpty(address, "");
         return accountCacheService.getAccountByAddress(address);
+    }
+
+    @Override
+    public List<Account> getAccountList() {
+        List<Account> list = this.accountCacheService.getAccountList();
+        if (null != list && !list.isEmpty()) {
+            return list;
+        }
+        list = new ArrayList<>();
+        List<AccountPo> poList = this.accountDao.getList();
+        if (null == poList || poList.isEmpty()) {
+            return list;
+        }
+        for (AccountPo po : poList) {
+            Account account = new Account();
+            AccountTool.toBean(po, account);
+            list.add(account);
+        }
+        this.accountCacheService.putAccountList(list);
+        return list;
     }
 
     @Override
@@ -226,7 +212,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public byte[] getPriKey(String address) {
+    public byte[] getPrivateKey(String address) {
         AssertUtil.canNotEmpty(address, "");
         Account account = accountCacheService.getAccountByAddress(address);
         if (account == null) {
@@ -236,10 +222,10 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void switchAccount(String id) {
+    public void setDefaultAccount(String id) {
         Account account = accountCacheService.getAccountById(id);
         if (null != account) {
-            AccountManager.Local_acount_id = id;
+            Default_Account_ID = id;
         } else {
             throw new NulsRuntimeException(ErrorCode.FAILED, "The account not exist,id:" + id);
         }
@@ -247,58 +233,13 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public String getDefaultAccount() {
-        return AccountManager.Local_acount_id;
-    }
-
-    @Override
-    public Result changePassword(String oldpw, String newpw) {
-        if (!StringUtils.validPassword(oldpw)) {
-            return new Result(false, "Length between 8 and 20, the combination of characters and numbers");
-        }
-        if (!StringUtils.validPassword(newpw)) {
-            return new Result(false, "Length between 8 and 20, the combination of characters and numbers");
-        }
-        List<Account> accounts = this.getLocalAccountList();
-        if (accounts == null || accounts.size() == 0) {
-            return new Result(false, "No account was found");
-        }
-
-        try {
-            Account acct = accounts.get(0);
-            if (!acct.isEncrypted()) {
-                return new Result(false, "No password has been set up yet");
-            }
-
-            List<AccountPo> accountPoList = new ArrayList<>();
-            for (Account account : accounts) {
-                if (!account.decrypt(oldpw)) {
-                    return new Result(false, "old password error");
-                }
-                account.encrypt(newpw);
-
-                AccountPo po = new AccountPo();
-                AccountTool.toPojo(account, po);
-                accountPoList.add(po);
-            }
-            accountDao.update(accountPoList);
-            accountCacheService.putAccountList(accounts);
-        } catch (Exception e) {
-            Log.error(e);
-            return new Result(false, "change password failed");
-        }
-
-        return new Result(true, "OK");
-    }
-
-    @Override
-    public Result setPassword(String password) {
+    public Result encryptAccount(String password) {
         if (!StringUtils.validPassword(password)) {
             return new Result(false, "Length between 8 and 20, the combination of characters and numbers");
         }
 
-        List<Account> accounts = this.getLocalAccountList();
-        if (accounts == null || accounts.size() == 0) {
+        List<Account> accounts = this.getAccountList();
+        if (accounts == null || accounts.isEmpty()) {
             return new Result(false, "No account was found");
         }
         try {
@@ -327,11 +268,54 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public Result changePassword(String oldPassword, String newPassword) {
+        if (!StringUtils.validPassword(oldPassword)) {
+            return new Result(false, "Length between 8 and 20, the combination of characters and numbers");
+        }
+        if (!StringUtils.validPassword(newPassword)) {
+            return new Result(false, "Length between 8 and 20, the combination of characters and numbers");
+        }
+        List<Account> accounts = this.getAccountList();
+        if (accounts == null || accounts.isEmpty()) {
+            return new Result(false, "No account was found");
+        }
+
+        try {
+            Account acct = accounts.get(0);
+            if (!acct.isEncrypted()) {
+                return new Result(false, "No password has been set up yet");
+            }
+
+            List<AccountPo> accountPoList = new ArrayList<>();
+            for (Account account : accounts) {
+                if (!account.decrypt(oldPassword)) {
+                    return new Result(false, "old password error");
+                }
+
+                //todo
+                account.resetKey(oldPassword);
+                account.encrypt(newPassword);
+
+                AccountPo po = new AccountPo();
+                AccountTool.toPojo(account, po);
+                accountPoList.add(po);
+            }
+            accountDao.update(accountPoList);
+            accountCacheService.putAccountList(accounts);
+        } catch (Exception e) {
+            Log.error(e);
+            return new Result(false, "change password failed");
+        }
+
+        return new Result(true, "OK");
+    }
+
+    @Override
     public boolean isEncrypted() {
         if (!isLockNow) {
             return false;
         }
-        List<Account> accounts = this.getLocalAccountList();
+        List<Account> accounts = this.getAccountList();
         if (accounts == null || accounts.size() == 0) {
             return false;
         }
@@ -340,13 +324,8 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Result lockAccounts() {
-        return null;
-    }
-
-    @Override
     public Result unlockAccounts(String password, int seconds) {
-        List<Account> accounts = this.getLocalAccountList();
+        List<Account> accounts = this.getAccountList();
         if (accounts == null || accounts.isEmpty()) {
             return new Result(false, "No account was found");
         }
@@ -390,22 +369,22 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public NulsSignData signData(byte[] bytes) {
-        return this.signData(bytes, this.getLocalAccount(), null);
+        return this.signData(bytes, this.getDefaultAccount(), null);
     }
 
     @Override
     public NulsSignData signData(NulsDigestData digestData) {
-        return this.signData(digestData, this.getLocalAccount(), null);
+        return this.signData(digestData, this.getDefaultAccount(), null);
     }
 
     @Override
     public NulsSignData signData(byte[] bytes, String password) {
-        return this.signData(bytes, this.getLocalAccount(), password);
+        return this.signData(bytes, this.getDefaultAccount(), password);
     }
 
     @Override
     public NulsSignData signData(NulsDigestData digestData, String password) {
-        return this.signData(digestData, this.getLocalAccount(), password);
+        return this.signData(digestData, this.getDefaultAccount(), password);
     }
 
     @Override
@@ -428,8 +407,30 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Result canSetAlias(String address, String alias) {
+    public Result verifySign(byte[] bytes, NulsSignData data) {
+        //todo
+        return new Result(true, null);
+    }
 
+//    @Override
+//    public Result setAlias(String address, String alias) {
+//        try {
+//            Result result = canSetAlias(address, alias);
+//            if (null == result || result.isFailed()) {
+//                return result;
+//            }
+//            Account account = getAccount(address);
+//            result = accountTxDBService.setAlias(address, alias);
+//            account.setAlias(alias);
+//            accountCacheService.putAccount(account);
+//            return result;
+//        } catch (Exception e) {
+//            return new Result(false, e.getMessage());
+//        }
+//    }
+
+    @Override
+    public Result setAlias(String address, String password, String alias) {
         Account account = getAccount(address);
         if (account == null) {
             return new Result(false, "Account not found");
@@ -440,46 +441,20 @@ public class AccountServiceImpl implements AccountService {
         if (!StringUtils.validAlias(alias)) {
             return new Result(false, "The alias is between 3 to 20 characters");
         }
-        AliasPo aliasPo = aliasDao.get(alias);
-        if (aliasPo != null) {
-            return new Result(false, "The alias has been occupied");
-        }
-        return new Result(true, "OK");
-    }
 
-    @Override
-    public Result setAlias(String address, String alias) {
         try {
-            Result result = canSetAlias(address, alias);
-            if (null == result || result.isFailed()) {
-                return result;
-            }
-            Account account = getAccount(address);
-            result = accountTxDBService.setAlias(address, alias);
-            account.setAlias(alias);
-            accountCacheService.putAccount(account);
-            return result;
-        } catch (Exception e) {
-            return new Result(false, e.getMessage());
-        }
-    }
-
-    @Override
-    public Result sendAliasTx(String address, String password, String alias) {
-        Result result = canSetAlias(address, alias);
-        if (null == result || result.isFailed()) {
-            return result;
-        }
-        try {
-            Account account = getAccount(address);
             TransactionEvent event = new TransactionEvent();
             CoinTransferData coinData = new CoinTransferData(AccountConstant.ALIAS_NA, address, null);
             AliasTransaction aliasTx = new AliasTransaction(coinData, password);
             aliasTx.setHash(NulsDigestData.calcDigestData(aliasTx.serialize()));
             aliasTx.setSign(signData(aliasTx.getHash(), account, password));
-            ValidateResult vresult = ledgerService.verifyTx(aliasTx);
+            ValidateResult validate = aliasTx.verify();
+            if (validate.isFailed()) {
+                return new Result(false, validate.getMessage());
+            }
+
             event.setEventBody(aliasTx);
-            eventBroadcaster.broadcastAndCache(event,true);
+            eventBroadcaster.broadcastAndCache(event, true);
         } catch (Exception e) {
             Log.error(e);
             return new Result(false, e.getMessage());
@@ -488,16 +463,11 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Result verifySign(byte[] bytes, NulsSignData data) {
-        return new Result(true, null);
-    }
-
-    @Override
     public Result exportAccount(String filePath) {
         if (StringUtils.isBlank(filePath)) {
             return new Result(false, "filePath is required");
         }
-        Account account = getLocalAccount();
+        Account account = getDefaultAccount();
         if (account == null) {
             return new Result(false, "no account can export");
         }
@@ -533,7 +503,7 @@ public class AccountServiceImpl implements AccountService {
         if (StringUtils.isBlank(filePath)) {
             return new Result(false, "filePath is required");
         }
-        List<Account> accounts = getLocalAccountList();
+        List<Account> accounts = getAccountList();
         if (accounts == null || accounts.isEmpty()) {
             return new Result(false, "no account can export");
         }
@@ -658,7 +628,7 @@ public class AccountServiceImpl implements AccountService {
 
             for (int i = 0; i < accountSize; i++) {
                 Account account = new Account(buffer);
-                if (accountExsit(account)) {
+                if (accountExist(account)) {
                     continue;
                 }
                 int txSize = (int) buffer.readVarInt();
@@ -692,17 +662,8 @@ public class AccountServiceImpl implements AccountService {
         return new Result(true, "OK");
     }
 
-    private boolean accountExsit(Account account) {
-        List<Account> accounts = getLocalAccountList();
-        if (accounts.isEmpty()) {
-            return true;
-        }
-        for (Account acct : accounts) {
-            if (account.getId().equals(acct.getId())) {
-                return false;
-            }
-        }
-        return true;
+    private boolean accountExist(Account account) {
+        return accountCacheService.accountExist(account.getId());
     }
 
     private void importSave(List<Account> accounts) throws Exception {
@@ -720,7 +681,17 @@ public class AccountServiceImpl implements AccountService {
             accountPo.setMyTxs(transactionPos);
             accountPoList.add(accountPo);
         }
-        accountTxDBService.importAccount(accountPoList);
+        accountAliasDBService.importAccount(accountPoList);
     }
 
+    private void resetKeys(String password) {
+        //todo
+    }
+
+    private void signAccount(Account account) {
+        if (null == account || account.getEcKey() == null) {
+            return;
+        }
+        //todo
+    }
 }

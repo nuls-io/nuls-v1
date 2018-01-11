@@ -86,10 +86,10 @@ public class NetworkServiceImpl implements NetworkService {
     @Override
     public void removeNode(String nodeId) {
         Node node = nodesManager.getNode(nodeId);
-        if (node == null) {
-            throw new NulsRuntimeException(ErrorCode.NODE_NOT_FOUND);
+        if(node != null) {
+            node.destroy();
+            nodesManager.removeNode(nodeId);
         }
-        nodesManager.deleteNode(node);
     }
 
     @Override

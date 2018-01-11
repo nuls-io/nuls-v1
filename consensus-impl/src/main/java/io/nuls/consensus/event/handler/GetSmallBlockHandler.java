@@ -17,7 +17,7 @@ import io.nuls.ledger.service.intf.LedgerService;
 public class GetSmallBlockHandler extends AbstractEventHandler<GetSmallBlockEvent> {
 
     private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
-    private BlockService blockService = BlockServiceImpl.getInstance();
+    private BlockService blockService =NulsContext.getInstance().getService(BlockService.class);
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
 
     @Override

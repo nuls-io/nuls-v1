@@ -74,7 +74,8 @@ public enum ErrorCode {
     DB_SAVE_BATCH_LIMIT_OVER("DB004", 20004),
     DB_DATA_ERROR("DB005", 20005),
     DB_SAVE_ERROR("DB006", 20006),
-
+    DB_UPDATE_ERROR("DB007", 20007),
+    DB_ROLLBACK_ERROR("DB008", 20008),
     /**
      * ----------  MQ Exception code   ---------
      */

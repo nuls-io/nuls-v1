@@ -13,7 +13,7 @@ import io.nuls.core.tx.serivce.TransactionService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.validate.ValidateResult;
-import io.nuls.db.annotation.TransactionalAnnotation;
+import io.nuls.db.transactional.annotation.TransactionalAnnotation;
 import io.nuls.db.dao.UtxoTransactionDataService;
 import io.nuls.db.entity.TransactionPo;
 import io.nuls.db.entity.UtxoOutputPo;
@@ -135,24 +135,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 //    }
 
     @Override
-    @TransactionalAnnotation
-    public boolean saveTx(Transaction tx) {
-        boolean result = false;
-        do {
-            if (null == tx) {
-                break;
-            }
-            try {
-                tx.verify();
-            } catch (NulsVerificationException e) {
-                break;
-            }
-            //todo save to db
-        } while (false);
-        return result;
-    }
-
-    @Override
     public Transaction getLocalTx(NulsDigestData hash) {
         // todo auto-generated method stub(niels)
         return null;
@@ -171,8 +153,14 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
+    public boolean saveTxList(long height, String blockHash, List<Transaction> txList) {
+        // todo auto-generated method stub(niels)
+        return false;
+    }
+
+    @Override
     @TransactionalAnnotation
-    public boolean saveTxList(List<Transaction> txList) {
+    public boolean saveTxList(long height,long blockHash,List<Transaction> txList) {
         // todo auto-generated method stub(niels)
         return false;
     }
@@ -185,6 +173,18 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     public List<Transaction> getListByHashs(List<NulsDigestData> txHashList) {
+        // todo auto-generated method stub(niels)
+        return null;
+    }
+
+    @Override
+    public List<Transaction> getListByHeight(long startHeight, long endHeight) {
+        // todo auto-generated method stub(niels)
+        return null;
+    }
+
+    @Override
+    public List<Transaction> getListByHeight(long height) {
         // todo auto-generated method stub(niels)
         return null;
     }

@@ -1,10 +1,10 @@
 package io.nuls.db.dao.impl.mybatis;
 
-import io.nuls.db.dao.BlockDataService;
+import io.nuls.db.dao.BlockHeaderService;
 import io.nuls.db.dao.impl.mybatis.mapper.BlockMapper;
 import io.nuls.db.dao.impl.mybatis.params.BlockSearchParams;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
-import io.nuls.db.entity.BlockPo;
+import io.nuls.db.entity.BlockHeaderPo;
 
 import java.util.HashMap;
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.Map;
  * @author v.chou
  * @date 2017/9/29
  */
-public class BlockDaoImpl extends BaseDaoImpl<BlockMapper, String, BlockPo> implements BlockDataService {
+public class BlockDaoImpl extends BaseDaoImpl<BlockMapper, String, BlockHeaderPo> implements BlockHeaderService {
 
     public BlockDaoImpl() {
         super(BlockMapper.class);
@@ -26,10 +26,10 @@ public class BlockDaoImpl extends BaseDaoImpl<BlockMapper, String, BlockPo> impl
     }
 
     @Override
-    public BlockPo getBlock(long height) {
+    public BlockHeaderPo getHeader(long height) {
         Map<String, Object> params = new HashMap<>();
         params.put(BlockSearchParams.SEARCH_FIELD_HEIGHT,height);
-        List<BlockPo> list = this.getList(params);
+        List<BlockHeaderPo> list = this.getList(params);
         if(null==list||list.isEmpty()){
             return null;
         }
@@ -37,28 +37,34 @@ public class BlockDaoImpl extends BaseDaoImpl<BlockMapper, String, BlockPo> impl
     }
 
     @Override
-    public long queryMaxHeight() {
+    public long getBestHeight() {
         // todo auto-generated method stub(niels)
         return 0;
     }
 
     @Override
-    public BlockPo getHighestBlock() {
+    public BlockHeaderPo getBestBlockHeader() {
         // todo auto-generated method stub(niels)
         return null;
     }
 
     @Override
-    public BlockPo getBlockByHash(String hash) {
+    public BlockHeaderPo getHeader(String hash) {
         // todo auto-generated method stub(niels)
         return null;
     }
 
 
     @Override
-    public int count(String address, long roundStart, long roundEnd) {
+    public int getCount(String address, long roundStart, long roundEnd) {
         // todo auto-generated method stub(niels)
         return 0;
     }
- 
+
+    @Override
+    public List<BlockHeaderPo> getHeaderList(long startHeight, long endHeight) {
+        // todo auto-generated method stub(niels)
+        return null;
+    }
+
 }

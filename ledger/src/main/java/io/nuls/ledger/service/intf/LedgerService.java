@@ -8,7 +8,6 @@ import io.nuls.core.validate.ValidateResult;
 import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.entity.tx.TransferTransaction;
-import io.nuls.ledger.entity.tx.UnlockNulsTransaction;
 
 import java.util.List;
 
@@ -65,16 +64,12 @@ public interface LedgerService {
     TransferTransaction transfer(String address, String password, String toAddress, Na amount, String remark);
 
     /**
-     * @param tx
-     * @return
-     */
-    boolean saveTx(Transaction tx);
-
-    /**
      * @param txList
      * @return
      */
-    boolean saveTxList(List<Transaction> txList);
+    boolean saveTxList(long height,String blockHash,List<Transaction> txList);
+
+    boolean saveTxList(long height, long blockHash, List<Transaction> txList);
 
     /**
      * @param address
@@ -91,6 +86,8 @@ public interface LedgerService {
      * @return
      */
     List<Transaction> getListByHashs(List<NulsDigestData> txHashList);
+    List<Transaction> getListByHeight(long startHeight,long endHeight);
+    List<Transaction> getListByHeight(long height);
 
     void rollbackTx(Transaction tx) throws NulsException;
 

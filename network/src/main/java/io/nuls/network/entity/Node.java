@@ -77,6 +77,8 @@ public class Node extends BaseNulsData {
     public final static int CLOSE = 3;
     private volatile int status;
 
+
+
     private MessageWriter writeTarget;
 
     private VersionEvent versionMessage;

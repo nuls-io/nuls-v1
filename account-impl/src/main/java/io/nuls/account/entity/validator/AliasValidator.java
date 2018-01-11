@@ -1,12 +1,13 @@
 package io.nuls.account.entity.validator;
 
+import io.nuls.account.entity.Address;
 import io.nuls.account.entity.Alias;
 import io.nuls.account.entity.tx.AliasTransaction;
-import io.nuls.account.service.intf.AccountService;
-import io.nuls.core.chain.entity.Result;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
+import io.nuls.db.dao.AliasDataService;
+import io.nuls.db.entity.AliasPo;
 
 /**
  * @author vivi
@@ -16,7 +17,7 @@ public class AliasValidator implements NulsDataValidator<AliasTransaction> {
 
     private static final AliasValidator INSTANCE = new AliasValidator();
 
-    private AccountService accountService;
+    private AliasDataService aliasDataService;
 
     private AliasValidator() {
 
@@ -29,21 +30,21 @@ public class AliasValidator implements NulsDataValidator<AliasTransaction> {
     @Override
     public ValidateResult validate(AliasTransaction tx) {
         Alias alias = tx.getTxData();
-        if (StringUtils.isBlank(alias.getAddress()) || alias.getAddress().length() >= 30) {
+        if (StringUtils.isBlank(alias.getAddress()) || new Address(alias.getAddress()).getHash160().length > 25) {
             return ValidateResult.getFailedResult("The address format error");
         }
         if (!StringUtils.validAlias(alias.getAlias())) {
-            return ValidateResult.getFailedResult(" The alias format error");
+            return ValidateResult.getFailedResult("The alias is between 3 to 20 characters");
         }
 
-        Result result = accountService.canSetAlias(alias.getAddress(), alias.getAlias());
-        if (!result.isSuccess()) {
-            return ValidateResult.getFailedResult(result.getMessage());
+        AliasPo aliasPo = aliasDataService.get(alias.getAlias());
+        if (aliasPo != null) {
+            return ValidateResult.getFailedResult("The alias has been occupied");
         }
         return ValidateResult.getSuccessResult();
     }
 
-    public void setAccountService(AccountService service) {
-        this.accountService = service;
+    public void setAliasDataService(AliasDataService aliasDataService) {
+        this.aliasDataService = aliasDataService;
     }
 }

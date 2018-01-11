@@ -6,11 +6,11 @@ package io.nuls.core.constant;
  */
 public enum SeverityLevelEnum {
 
-    NORMAL,
+    WRONG,
 
-    FOUL,
+    NORMAL_FOUL,
     /**
      * Flagrant Foul
      */
-    FLAGRANT;
+    FLAGRANT_FOUL;
 }

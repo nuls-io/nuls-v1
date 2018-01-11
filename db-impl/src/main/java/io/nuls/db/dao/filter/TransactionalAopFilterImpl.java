@@ -2,8 +2,9 @@ package io.nuls.db.dao.filter;
 
 
 import io.nuls.core.utils.str.StringUtils;
-import io.nuls.db.annotation.PROPAGATION;
-import io.nuls.db.annotation.TransactionalAnnotation;
+import io.nuls.db.transactional.TransactionalAopFilter;
+import io.nuls.db.transactional.annotation.PROPAGATION;
+import io.nuls.db.transactional.annotation.TransactionalAnnotation;
 import io.nuls.db.dao.impl.mybatis.session.SessionManager;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
@@ -15,7 +16,7 @@ import java.lang.reflect.Method;
  * @author zhouwei
  * @date 2017/10/13
  */
-public class DBMethodFilter implements MethodInterceptor {
+public class TransactionalAopFilterImpl implements TransactionalAopFilter {
 
     @Override
     public Object intercept(Object obj, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
