@@ -9,4 +9,5 @@ import io.nuls.db.entity.AccountPo;
  */
 public interface AccountMapper extends BaseMapper<String,AccountPo> {
 
+    int updateAlias(AccountPo po);
 }

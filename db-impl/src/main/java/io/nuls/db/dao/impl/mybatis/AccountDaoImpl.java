@@ -38,7 +38,7 @@ public class AccountDaoImpl extends BaseDaoImpl<AccountMapper, String, AccountPo
 
     @Override
     public int updateAlias(AccountPo po) {
-        return getMapper().updateByPrimaryKeySelective(po);
+        return getMapper().updateAlias(po);
     }
 
     @Override

@@ -5,9 +5,10 @@
 
     <id column="alias" property="alias" jdbcType="VARCHAR" />
     <result column="address" property="address" jdbcType="VARCHAR" />
+    <result column="status" property="statuc" jdbcType="INTEGER" />
   </resultMap>
   <sql id="Base_Column_List" >
-    alias, address
+    alias, address, status
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select
@@ -20,8 +21,8 @@
     where alias = #{alias,jdbcType=VARCHAR}
   </delete>
   <insert id="insert" parameterType="io.nuls.db.entity.AliasPo" >
-    insert into alias (alias, address)
-    values (#{alias,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR})
+    insert into alias (alias, address, status)
+    values (#{alias,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER})
   </insert>
   <insert id="insertSelective" parameterType="io.nuls.db.entity.AliasPo" >
     insert into alias
@@ -32,6 +33,9 @@
       <if test="address != null" >
         address,
       </if>
+      <if test="status != null" >
+        status,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="alias != null" >
@@ -39,6 +43,9 @@
       </if>
       <if test="address != null" >
         #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
       </if>
     </trim>
   </insert>
@@ -48,13 +55,16 @@
       <if test="address != null" >
         address = #{address,jdbcType=VARCHAR},
       </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
     </set>
     where alias = #{alias,jdbcType=VARCHAR}
   </update>
-  <update id="updateByPrimaryKey" parameterType="io.nuls.db.entity.AliasPo" >
 
+  <update id="updateByPrimaryKey" parameterType="io.nuls.db.entity.AliasPo" >
     update alias
-    set address = #{address,jdbcType=VARCHAR}
+    set address = #{address,jdbcType=VARCHAR},status = #{status,jdbcType=INTEGER}
     where alias = #{alias,jdbcType=VARCHAR}
   </update>
 
