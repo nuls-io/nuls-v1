@@ -209,6 +209,14 @@
         pri_key = #{priKey,jdbcType=VARCHAR}
         where id = #{id,jdbcType=VARCHAR}
     </update>
+
+    <update id="updateAlias" parameterType="io.nuls.db.entity.AccountPo">
+        update account
+        set alias = #{alias,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=VARCHAR}
+    </update>
+
+
     <insert id="batchInsert" parameterType="java.util.List">
         insert into account (id, address, create_time,
         alias, version,

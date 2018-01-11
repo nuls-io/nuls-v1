@@ -31,8 +31,8 @@ public class AliasTxService implements TransactionService<AliasTransaction> {
     @Override
     public void onRollback(AliasTransaction tx) throws NulsException {
         // todo auto-generated method stub(niels)
-
-
+        AliasPo po = AccountTool.toAliasPojo(tx.getTxData());
+        dataService.rollbackAlias(po);
 
     }
 
