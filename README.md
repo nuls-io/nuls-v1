@@ -4,9 +4,10 @@
 
 ## Introduction
 
-Nuls is a global blockchain open-source project which is a highly customizable modular blockchain infrastructure; it consists of a microkernel and functional modules. NULS provides smart contract, multi-chain mechanism and cross-chain consensus. It aims to break the technical barriers of blockchain, to reduce the cost of development, and to promote the usage of blockchain technology in the commercial field.
-
-To learn more about us, visit [nuls.io](https://nuls.io/).
+Nuls is a global blockchain open-source project which is a highly customizable modular blockchain infrastructure.  
+It consists of a microkernel and functional modules.  
+Nuls provides smart contract, multi-chain mechanism and cross-chain consensus.  
+It aims to break the technical barriers of blockchain, to reduce the cost of development, and to promote the usage of blockchain technology in the commercial field.
 
 **Project Features**
 
@@ -14,6 +15,8 @@ To learn more about us, visit [nuls.io](https://nuls.io/).
 - Parallel chains  
 - Smart contract  
 - POC consensus mechanisms
+
+To learn more about us, visit [nuls.io](https://nuls.io/).
 
 ## Contributing to Nuls
 
