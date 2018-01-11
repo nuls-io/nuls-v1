@@ -39,6 +39,12 @@ Maven:[Maven 3.3+](http://maven.apache.org/download.cgi)
 IDE: Any one you  like
 > JetBrains [IntelliJ IDEA](https://www.jetbrains.com/idea/) is recommended, but we do not rovoke the IDE war.
 
+
+### Code style guide
+Use Alibaba Java Coding Guidelines [@Github](https://github.com/alibaba/p3c).  
+* [Alibaba-Java-Coding-Guidelines](https://alibaba.github.io/Alibaba-Java-Coding-Guidelines/)  
+> recommend use IDE plugin lint code. [wiki](https://github.com/alibaba/p3c/wiki)
+
 ### Getting Sources
 
 ```shell
