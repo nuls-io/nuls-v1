@@ -44,6 +44,8 @@ IDE: Any one you  like
 Use Alibaba Java Coding Guidelines [@Github](https://github.com/alibaba/p3c).  
 * [Alibaba-Java-Coding-Guidelines](https://alibaba.github.io/Alibaba-Java-Coding-Guidelines/)  
 > recommend use IDE plugin lint code. [wiki](https://github.com/alibaba/p3c/wiki)
+> * [IntelliJ IDEA Plugin](https://github.com/alibaba/p3c/tree/master/idea-plugin)
+> * [Eclipse Plugin](https://github.com/alibaba/p3c/tree/master/eclipse-plugin)
 
 ### Getting Sources
 
