@@ -4,7 +4,6 @@ import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.validate.ValidateResult;
 import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.entity.tx.TransferTransaction;
@@ -16,13 +15,6 @@ import java.util.List;
  * @date 2017/11/9
  */
 public interface LedgerService {
-
-    /**
-     * @param tx
-     * @return
-     * @throws NulsException
-     */
-    ValidateResult verifyTx(Transaction tx);
 
     /**
      * @param hash
@@ -42,6 +34,15 @@ public interface LedgerService {
      */
     Balance getBalance(String address);
 
+    /**
+     * @param address
+     * @param password
+     * @param toAddress
+     * @param amount
+     * @param remark
+     * @return
+     */
+    TransferTransaction transfer(String address, String password, String toAddress, Na amount, String remark);
 
     /**
      * @param address
@@ -52,16 +53,6 @@ public interface LedgerService {
      * @return
      */
     LockNulsTransaction lock(String address, String password, Na amount, long unlockTime, long unlockHeight);
-
-    /**
-     * @param address
-     * @param password
-     * @param toAddress
-     * @param amount
-     * @param remark
-     * @return
-     */
-    TransferTransaction transfer(String address, String password, String toAddress, Na amount, String remark);
 
     /**
      * @param txList

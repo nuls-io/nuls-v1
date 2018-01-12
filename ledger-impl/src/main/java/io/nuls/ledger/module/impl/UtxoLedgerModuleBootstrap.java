@@ -1,15 +1,14 @@
 package io.nuls.ledger.module.impl;
 
-import io.nuls.account.entity.Account;
-import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.chain.manager.TransactionValidatorManager;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.thread.manager.TaskManager;
-import io.nuls.event.bus.service.intf.EventBusService;
+import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.module.AbstractLedgerModule;
 import io.nuls.ledger.service.impl.LedgerCacheService;
 import io.nuls.ledger.service.impl.UtxoCoinDataProvider;
+import io.nuls.ledger.service.impl.UtxoCoinManager;
 import io.nuls.ledger.service.impl.UtxoLedgerServiceImpl;
 import io.nuls.ledger.service.intf.CoinDataProvider;
 import io.nuls.ledger.service.intf.LedgerService;
@@ -19,7 +18,6 @@ import io.nuls.ledger.validator.TxMaxSizeValidator;
 import io.nuls.ledger.validator.TxRemarkValidator;
 import io.nuls.ledger.validator.TxSignValidator;
 
-import java.util.List;
 
 /**
  * @author Niels
@@ -31,13 +29,15 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
 
     private LedgerService ledgerService;
 
-    private EventBusService eventBusService;
+    private UtxoCoinManager coinManager;
 
     @Override
     public void init() {
         cacheService = LedgerCacheService.getInstance();
         ledgerService = UtxoLedgerServiceImpl.getInstance();
-        eventBusService = NulsContext.getInstance().getService(EventBusService.class);
+        coinManager = UtxoCoinManager.getInstance();
+        UtxoOutputDataService outputDataService = NulsContext.getInstance().getService(UtxoOutputDataService.class);
+        coinManager.setOutputDataService(outputDataService);
 
         addNormalTxValidator();
         registerService();
@@ -60,23 +60,10 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
 
     @Override
     public void start() {
-        cacheAccountAndBalance();
+        coinManager.cacheAllUnSpendOutPut();
 
         SmallChangeThread smallChangeThread = SmallChangeThread.getInstance();
         TaskManager.createSingleThreadAndRun(this.getModuleId(), SmallChangeThread.class.getSimpleName(), smallChangeThread);
-    }
-
-    private void cacheAccountAndBalance() {
-        //load account
-        List<Account> accounts = NulsContext.getInstance().getService(AccountService.class).getAccountList();
-        if (null == accounts) {
-            return;
-        }
-        //calc balance
-        //put standing book to cache
-        for (Account account : accounts) {
-            this.ledgerService.getBalance(account.getAddress().toString());
-        }
     }
 
     @Override
