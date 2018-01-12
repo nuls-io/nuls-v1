@@ -73,11 +73,11 @@ public class TaskManager {
         TEMPORARY_THREAD_POOL.execute(runnable);
     }
 
-    public static final void createSingleThreadAndRun(short moduleId, String threadName, Runnable runnable) {
-        createSingleThreadAndRun(moduleId,threadName,runnable,true);
+    public static final void createAndRunThread(short moduleId, String threadName, Runnable runnable) {
+        createAndRunThread(moduleId,threadName,runnable,true);
     }
 
-    public static final void createSingleThreadAndRun(short moduleId, String threadName, Runnable runnable, boolean deamon) {
+    public static final void createAndRunThread(short moduleId, String threadName, Runnable runnable, boolean deamon) {
         NulsThreadFactory factory = new NulsThreadFactory(moduleId, threadName);
         Thread thread = factory.newThread(runnable);
         thread.setDaemon(deamon);

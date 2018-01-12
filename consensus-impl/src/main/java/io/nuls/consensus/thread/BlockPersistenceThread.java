@@ -51,10 +51,11 @@ public class BlockPersistenceThread implements Runnable {
         if (null == block) {
             return;
         }
-        blockService.saveBlock(block);
-        blockCacheManager.removeBlock(height);
-        blockCacheManager.setStoredHeight(height);
-        txCacheManager.removeTxList(block.getTxHashList());
+        //todo
+//        blockService.saveBlock(block);
+//        blockCacheManager.removeBlock(height);
+//        blockCacheManager.setStoredHeight(height);
+//        txCacheManager.removeTxList(block.getTxHashList());
     }
 
 }

@@ -2,7 +2,7 @@ package io.nuls.consensus.event.handler;
 
 import io.nuls.consensus.event.BlockEvent;
 import io.nuls.consensus.cache.manager.block.BlockCacheManager;
-import io.nuls.consensus.utils.DistributedBlockDownloadUtils;
+import io.nuls.consensus.utils.BlockBatchDownloadUtils;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.context.NulsContext;
@@ -22,10 +22,17 @@ public class BlockEventHandler extends AbstractEventHandler<BlockEvent> {
     @Override
     public void onEvent(BlockEvent event, String fromId) {
         Block block = event.getEventBody();
-        if (DistributedBlockDownloadUtils.getInstance().downloadedBlock(fromId, block)) {
+        ValidateResult result = block.verify();
+        if (result.isFailed()) {
+            if (result.getLevel() == SeverityLevelEnum.FLAGRANT_FOUL) {
+                networkService.removeNode(fromId);
+            }
             return;
         }
-        blockCacheManager.cacheBlock(block,fromId);
+        if (BlockBatchDownloadUtils.getInstance().downloadedBlock(fromId, block)) {
+            return;
+        }
+        blockCacheManager.cacheBlock(block);
 
     }
 }

@@ -12,10 +12,10 @@ import io.nuls.core.utils.io.NulsByteBuffer;
  * @author Niels
  * @date 2017/11/13
  */
-public class GetTxGroupEvent extends BaseConsensusEvent<TxHashData> {
+public class GetTxGroupRequest extends BaseConsensusEvent<TxHashData> {
 
 
-    public GetTxGroupEvent() {
+    public GetTxGroupRequest() {
         super(ConsensusEventType.GET_TX_GROUP);
     }
 

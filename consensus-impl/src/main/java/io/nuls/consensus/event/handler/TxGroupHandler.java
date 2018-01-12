@@ -6,6 +6,7 @@ import io.nuls.consensus.entity.TxGroup;
 import io.nuls.consensus.event.TxGroupEvent;
 import io.nuls.consensus.cache.manager.block.BlockCacheManager;
 import io.nuls.consensus.thread.ConsensusMeetingRunner;
+import io.nuls.consensus.utils.DownloadDataUtils;
 import io.nuls.core.chain.entity.*;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.SeverityLevelEnum;
@@ -26,6 +27,8 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
     private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
     private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
     private NetworkService networkService = NulsContext.getInstance().getService(NetworkService.class);
+    private DownloadDataUtils downloadDataUtils = DownloadDataUtils.getInstance();
+
     @Override
     public void onEvent(TxGroupEvent event, String fromId) {
         TxGroup txGroup = event.getEventBody();
@@ -34,7 +37,7 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
             return;
         }
         SmallBlock smallBlock = blockCacheManager.getSmallBlock(header.getHash().getDigestHex());
-        if(null==smallBlock){
+        if (null == smallBlock) {
             return;
         }
         Block block = new Block();
@@ -42,17 +45,17 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
         List<Transaction> txs = new ArrayList<>();
         for (NulsDigestData txHash : smallBlock.getTxHashList()) {
             Transaction tx = txCacheManager.getTx(txHash);
-            if(null==tx){
+            if (null == tx) {
                 tx = txGroup.getTx(txHash.getDigestHex());
             }
-            if(null==tx){
+            if (null == tx) {
                 throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
             }
             txs.add(tx);
         }
         block.setTxs(txs);
         ValidateResult<RedPunishData> vResult = block.verify();
-        if (null==vResult||vResult.isFailed()) {
+        if (null == vResult || vResult.isFailed()) {
             networkService.removeNode(fromId);
             if (vResult.getLevel() == SeverityLevelEnum.FLAGRANT_FOUL) {
                 RedPunishData data = vResult.getObject();
@@ -61,5 +64,6 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
             return;
         }
         blockCacheManager.cacheBlock(block);
+        downloadDataUtils.removeTxGroup(block.getHeader().getHash().getDigestHex());
     }
 }

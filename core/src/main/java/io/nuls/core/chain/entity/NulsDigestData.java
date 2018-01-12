@@ -82,6 +82,11 @@ public class NulsDigestData extends BaseNulsData {
         return Hex.encode(toBytes());
     }
 
+    public static NulsDigestData fromDigestHex(String hex) {
+        byte[] bytes = Hex.decode(hex);
+        return new NulsDigestData(bytes);
+    }
+
     private void setDigestBytes(byte[] digestBytes) {
         this.digestBytes = digestBytes;
     }

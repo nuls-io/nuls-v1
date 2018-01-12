@@ -63,7 +63,7 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
         cacheAccountAndBalance();
 
         SmallChangeThread smallChangeThread = SmallChangeThread.getInstance();
-        TaskManager.createSingleThreadAndRun(this.getModuleId(), SmallChangeThread.class.getSimpleName(), smallChangeThread);
+        TaskManager.createAndRunThread(this.getModuleId(), SmallChangeThread.class.getSimpleName(), smallChangeThread);
     }
 
     private void cacheAccountAndBalance() {
