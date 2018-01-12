@@ -1,9 +1,7 @@
 package io.nuls.ledger.entity;
 
 import io.nuls.core.chain.entity.Na;
-import io.nuls.core.chain.intf.NulsCloneable;
 
-import java.io.Serializable;
 import java.util.List;
 
 /**
