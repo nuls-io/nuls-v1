@@ -30,12 +30,7 @@ public class BlockHeaderHandler extends AbstractEventHandler<BlockHeaderEvent> {
             return;
         }
         BlockHeader header = event.getEventBody();
-        ValidateResult result = blockCacheManager.cacheBlockHeader(header);
-        if (result.isSuccess()) {
-            return;
-        }
-        if (result.getLevel() == SeverityLevelEnum.FLAGRANT_FOUL) {
-            networkService.removeNode(fromId);
-        }
+         blockCacheManager.cacheBlockHeader(header,fromId);
+
     }
 }

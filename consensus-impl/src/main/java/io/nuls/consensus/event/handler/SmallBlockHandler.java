@@ -27,7 +27,7 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
     public void onEvent(SmallBlockEvent event, String fromId) {
         ValidateResult result = event.getEventBody().verify();
         if(result.isFailed()){
-            //todo 9
+
             return;
         }
         blockCacheManager.cacheSmallBlock(event.getEventBody());

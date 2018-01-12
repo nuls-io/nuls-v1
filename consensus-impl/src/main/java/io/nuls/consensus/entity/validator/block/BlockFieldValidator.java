@@ -37,30 +37,12 @@ public class BlockFieldValidator implements NulsDataValidator<Block> {
                 failed = true;
                 break;
             }
-            if(data.getHeader().getSign()==null){
-                failed = true;
-                break;
-            }
+
             if(data.getHeader().getTxCount()==0||data.getTxs().size()!=data.getHeader().getTxCount()){
                 failed = true;
                 break;
             }
-            if(data.getHeader().getHash()==null){
-                failed = true;
-                break;
-            }
-            if(data.getHeader().getHeight()<0){
-                failed = true;
-                break;
-            }
-            if(data.getHeader().getMerkleHash()==null){
-                failed = true;
-                break;
-            }
-            if(data.getHeader().getPackingAddress()==null){
-                failed = true;
-                break;
-            }
+
         } while (false);
         if (failed) {
             result = ValidateResult.getFailedResult(ERROR_MESSAGE);

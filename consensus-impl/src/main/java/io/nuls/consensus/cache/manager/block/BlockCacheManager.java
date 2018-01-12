@@ -3,12 +3,19 @@ package io.nuls.consensus.cache.manager.block;
 import io.nuls.cache.util.CacheMap;
 import io.nuls.consensus.constant.ConsensusCacheConstant;
 import io.nuls.consensus.constant.PocConsensusConstant;
+import io.nuls.consensus.entity.block.BlockHeaderChain;
+import io.nuls.consensus.event.GetBlockHeaderEvent;
+import io.nuls.core.chain.entity.BasicTypeData;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.SmallBlock;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.SeverityLevelEnum;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.validate.ValidateResult;
+import io.nuls.event.bus.service.intf.EventBroadcaster;
+import io.nuls.network.service.NetworkService;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -20,7 +27,11 @@ import java.util.Set;
 public class BlockCacheManager {
     private static final String HEIGHT_HASH_CACHE = "blocks-height-hash";
     private static final BlockCacheManager INSTANCE = new BlockCacheManager();
-    private CacheMap<String, BlockHeader> headerCacheMap;
+
+    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
+    private NetworkService networkService = NulsContext.getInstance().getService(NetworkService.class);
+
+    private CacheMap<String, BlockHeaderChain> headerCacheMap;
     private CacheMap<String, BlockHeader> tempHeaderCacheMap;
     private CacheMap<Long, Set<String>> blockHeightCacheMap;
     private CacheMap<String, Integer> hashConfirmedCountMap;
@@ -49,29 +60,40 @@ public class BlockCacheManager {
     }
 
     //todo
-    public ValidateResult cacheBlockHeader(BlockHeader header) {
+    public void cacheBlockHeader(BlockHeader header, String sender) {
         long height = header.getHeight();
         boolean discard = true;
-        if (height <= storedHeight) {
-            discard = true;
-        }else if (height <= bestHeight) {
-            //todo 验证出块人、签名，如果签名正确，则处罚（分叉[red]、网络延时出块失败[yellow]）
-
-        }
-
-
-
-
-
-
-
-
+        do {
+            ValidateResult result = header.verify();
+            if (result.isFailed()) {
+                discard = true;
+                break;
+            }
+            if (height <= storedHeight) {
+                discard = true;
+                break;
+            }
+            if (height <= bestHeight) {
+                //todo 验证出块人、签名，如果签名正确，则处罚（分叉[red]、网络延时出块失败[yellow]）
 
 
+            }
+            long nextHeight = 1 + bestHeight;
+            if (height == nextHeight) {
+                discard = false;
+                break;
+            }
+            if (height > nextHeight) {
+                tempHeaderCacheMap.put(header.getHash().getDigestHex(), header);
+                GetBlockHeaderEvent event = new GetBlockHeaderEvent();
+                event.setEventBody(new BasicTypeData<>(height - 1));
+                eventBroadcaster.sendToNode(event, sender);
+            }
+        } while (false);
 
 
         if (discard) {
-            return ValidateResult.getFailedResult("");
+            return  ;
         }
 
 
@@ -89,7 +111,6 @@ public class BlockCacheManager {
         set.add(header.getHash().getDigestHex());
         blockHeightCacheMap.put(height, set);
         checkNextBlockHeader(height);
-        return ValidateResult.getSuccessResult();
     }
 
     private void checkNextBlockHeader(long height) {
@@ -100,23 +121,26 @@ public class BlockCacheManager {
     }
 
     public BlockHeader getBlockHeader(String hash) {
-        return this.headerCacheMap.get(hash);
+//todo       return this.headerCacheMap.get(hash);
+        return null;
     }
 
-    public ValidateResult cacheBlock(Block block) {
+    public void cacheBlock(Block block, String sender) {
         ValidateResult result = block.verify();
-        if (result.isFailed()) {
-            return result;
+        if (result.isSuccess()) {
+            blockCacheMap.put(block.getHeader().getHash().getDigestHex(), block);
+            return;
         }
-        blockCacheMap.put(block.getHeader().getHash().getDigestHex(), block);
-        return ValidateResult.getSuccessResult();
+        if (result.getLevel() == SeverityLevelEnum.FLAGRANT_FOUL) {
+            networkService.removeNode(sender);
+        }
     }
 
     public Block getBlock(String hash) {
         return blockCacheMap.get(hash);
     }
 
-    public void cacheSmallBlock(SmallBlock smallBlock) {
+    public void cacheSmallBlock(SmallBlock smallBlock ) {
         smallBlockCacheMap.put(smallBlock.getBlockHash().getDigestHex(), smallBlock);
     }
 

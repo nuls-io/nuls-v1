@@ -25,12 +25,7 @@ public class BlockEventHandler extends AbstractEventHandler<BlockEvent> {
         if (DistributedBlockDownloadUtils.getInstance().downloadedBlock(fromId, block)) {
             return;
         }
-        ValidateResult result = blockCacheManager.cacheBlock(block);
-        if (result.isSuccess()) {
-            return;
-        }
-        if (result.getLevel() == SeverityLevelEnum.FLAGRANT_FOUL) {
-            networkService.removeNode(fromId);
-        }
+        blockCacheManager.cacheBlock(block,fromId);
+
     }
 }
