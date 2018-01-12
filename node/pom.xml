@@ -60,22 +60,12 @@
         </dependency>
         <dependency>
             <groupId>io.nuls</groupId>
-            <artifactId>ledger-impl</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>io.nuls</groupId>
             <artifactId>event-bus-impl</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>event-bus</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>io.nuls</groupId>
-            <artifactId>ledger</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
