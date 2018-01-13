@@ -70,7 +70,7 @@ public class BlockHeaderChain implements NulsCloneable {
         }
     }
 
-    public HeaderDigest rollback() {
+     public HeaderDigest rollback() {
         lock.lock();
         if (headerDigestList.isEmpty()) {
             lock.unlock();

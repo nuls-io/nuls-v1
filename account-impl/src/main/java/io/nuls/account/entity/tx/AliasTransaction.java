@@ -14,11 +14,11 @@ import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
  */
 public class AliasTransaction extends AbstractCoinTransaction<Alias> {
 
-    public AliasTransaction() {
+    public AliasTransaction() throws NulsException {
         super(TransactionConstant.TX_TYPE_SET_ALIAS, null, null);
     }
 
-    public AliasTransaction(CoinTransferData coinParam, String password) {
+    public AliasTransaction(CoinTransferData coinParam, String password) throws NulsException {
         super(TransactionConstant.TX_TYPE_SET_ALIAS, coinParam, password);
     }
 

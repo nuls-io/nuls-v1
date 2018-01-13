@@ -21,9 +21,11 @@ import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
+import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
@@ -68,18 +70,22 @@ public class PocConsensusServiceImpl implements ConsensusService {
         coin.setUnlockTime(0);
         coin.setNa(agent.getDeposit());
         data.addTo(account.getAddress().toString(), coin);
-        RegisterAgentTransaction tx = new RegisterAgentTransaction(data, password);
+        RegisterAgentTransaction tx = null;
+        try {
+            tx = new RegisterAgentTransaction(data, password);
+        } catch (NulsException e) {
+            Log.error(e);
+            throw new NulsRuntimeException(e);
+        }
         Consensus<Agent> con = new Consensus<>();
         con.setAddress(account.getAddress().toString());
         con.setExtend(agent);
         tx.setTxData(con);
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
         tx.setSign(accountService.signData(tx.getHash(), account, password));
-        ledgerService.verifyTx(tx);
-        //todo 缓存
-
+        tx.verifyWithException();
         event.setEventBody(tx);
-        eventBroadcaster.broadcastHashAndCache(event,true);
+        eventBroadcaster.broadcastHashAndCache(event, true);
     }
 
     private void joinTheConsensus(Account account, String password, double amount, String agentAddress) throws IOException {
@@ -94,10 +100,9 @@ public class PocConsensusServiceImpl implements ConsensusService {
         tx.setTxData(ca);
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
         tx.setSign(accountService.signData(tx.getHash(), account, password));
-        ledgerService.verifyTx(tx);
-        //todo 缓存
+        tx.verifyWithException();
         event.setEventBody(tx);
-        eventBroadcaster.broadcastHashAndCache(event,true);
+        eventBroadcaster.broadcastHashAndCache(event, true);
     }
 
     @Override
@@ -124,7 +129,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
         }
         tx.setSign(accountService.signData(tx.getHash(), account, password));
         event.setEventBody(tx);
-        eventBroadcaster.broadcastHashAndCache(event,true);
+        eventBroadcaster.broadcastHashAndCache(event, true);
     }
 
     @Override

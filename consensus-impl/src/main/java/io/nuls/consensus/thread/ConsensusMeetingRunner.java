@@ -245,7 +245,13 @@ public class ConsensusMeetingRunner implements Runnable {
             total = total.add(reward.getReward());
         }
         data.setTotalNa(total);
-        CoinBaseTransaction tx = new CoinBaseTransaction(data, null);
+        CoinBaseTransaction tx = null;
+        try {
+            tx = new CoinBaseTransaction(data, null);
+        } catch (NulsException e) {
+            Log.error(e);
+            throw new NulsRuntimeException(e);
+        }
         tx.setFee(Na.ZERO);
         tx.setHash(NulsDigestData.calcDigestData(tx));
         tx.setSign(accountService.signData(tx.getHash()));
