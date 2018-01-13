@@ -93,7 +93,7 @@ public class Entity {
                 readerPosition = MESSAGE_START_POSITION;
             }
         }
-        TaskManager.createSingleThreadAndRun(NulsConstant.MODULE_ID_MQ, path, new Sync());
+        TaskManager.createAndRunThread(NulsConstant.MODULE_ID_MQ, path, new Sync());
     }
 
     public int getCurrentFileNumber() {

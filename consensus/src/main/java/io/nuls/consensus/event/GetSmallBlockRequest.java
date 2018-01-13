@@ -2,6 +2,7 @@ package io.nuls.consensus.event;
 
 import io.nuls.consensus.constant.ConsensusEventType;
 import io.nuls.core.chain.entity.BasicTypeData;
+import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
@@ -11,17 +12,17 @@ import io.nuls.core.utils.io.NulsByteBuffer;
  * @author Niels
  * @date 2017/11/13
  */
-public class GetSmallBlockEvent extends BaseConsensusEvent<BasicTypeData<Long>> {
+public class GetSmallBlockRequest extends BaseConsensusEvent<NulsDigestData> {
 
 
-    public GetSmallBlockEvent() {
+    public GetSmallBlockRequest() {
         super(ConsensusEventType.GET_SMALL_BLOCK);
     }
 
 
     @Override
-    protected BasicTypeData<Long> parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
-        return byteBuffer.readNulsData(new BasicTypeData<Long>());
+    protected NulsDigestData  parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readHash();
     }
 
 }

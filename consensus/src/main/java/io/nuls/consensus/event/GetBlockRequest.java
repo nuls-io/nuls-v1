@@ -10,8 +10,8 @@ import io.nuls.core.utils.io.NulsByteBuffer;
  * @author Niels
  * @date 2017/11/13
  */
-public class GetBlockEvent extends BaseConsensusEvent<BasicTypeData<Long>>{
-    public GetBlockEvent( ) {
+public class GetBlockRequest extends BaseConsensusEvent<BasicTypeData<Long>>{
+    public GetBlockRequest( ) {
         super(ConsensusEventType.GET_BLOCK);
     }
 

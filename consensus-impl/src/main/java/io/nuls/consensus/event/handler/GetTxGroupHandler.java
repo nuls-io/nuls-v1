@@ -2,9 +2,8 @@ package io.nuls.consensus.event.handler;
 
 import io.nuls.consensus.entity.TxGroup;
 import io.nuls.consensus.entity.TxHashData;
-import io.nuls.consensus.event.GetTxGroupEvent;
+import io.nuls.consensus.event.GetTxGroupRequest;
 import io.nuls.consensus.event.TxGroupEvent;
-import io.nuls.consensus.service.impl.BlockServiceImpl;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.NulsDigestData;
@@ -25,14 +24,14 @@ import java.util.Map;
  * @author facjas
  * @date 2017/11/16
  */
-public class GetTxGroupHandler extends AbstractEventHandler<GetTxGroupEvent> {
+public class GetTxGroupHandler extends AbstractEventHandler<GetTxGroupRequest> {
 
     private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
     private BlockService blockService =NulsContext.getInstance().getService(BlockService.class);
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
 
     @Override
-    public void onEvent(GetTxGroupEvent event, String fromId) {
+    public void onEvent(GetTxGroupRequest event, String fromId) {
 
         TxHashData eventBody = event.getEventBody();
         Block block = blockService.getBlock(eventBody.getBlockHash().getDigestHex());

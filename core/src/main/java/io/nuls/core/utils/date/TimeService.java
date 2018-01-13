@@ -49,7 +49,7 @@ public class TimeService implements Runnable {
         Log.info("----------- network timeService start -------------");
         syncWebTime();
         running = true;
-        TaskManager.createSingleThreadAndRun((short) 1, "TimeService", this, true);
+        TaskManager.createAndRunThread((short) 1, "TimeService", this, true);
     }
 
     private void syncWebTime() {

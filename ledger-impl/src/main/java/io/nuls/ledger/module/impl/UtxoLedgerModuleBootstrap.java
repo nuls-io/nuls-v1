@@ -63,7 +63,7 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
         coinManager.cacheAllUnSpendOutPut();
 
         SmallChangeThread smallChangeThread = SmallChangeThread.getInstance();
-        TaskManager.createSingleThreadAndRun(this.getModuleId(), SmallChangeThread.class.getSimpleName(), smallChangeThread);
+        TaskManager.createAndRunThread(this.getModuleId(), SmallChangeThread.class.getSimpleName(), smallChangeThread);
     }
 
     @Override
