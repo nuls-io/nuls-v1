@@ -12,16 +12,16 @@ import io.nuls.ledger.entity.params.CoinTransferData;
  */
 public class UnlockNulsTransaction<T extends BaseNulsData> extends AbstractCoinTransaction<T> {
     public UnlockNulsTransaction() {
-        this(TransactionConstant.TX_TYPE_UNLOCK,null,null);
+        this(TransactionConstant.TX_TYPE_UNLOCK);
     }
 
-    public UnlockNulsTransaction(CoinTransferData params, String password) {
+    public UnlockNulsTransaction(CoinTransferData params, String password) throws NulsException {
         this(TransactionConstant.TX_TYPE_UNLOCK, params, password);
 
     }
 
-    protected UnlockNulsTransaction(int type, CoinTransferData params, String password) {
-        super(type,params,password);
+    protected UnlockNulsTransaction(int type, CoinTransferData params, String password) throws NulsException {
+        super(type, params, password);
     }
 
     protected UnlockNulsTransaction(int type) {

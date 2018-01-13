@@ -13,15 +13,15 @@ import io.nuls.ledger.entity.params.CoinTransferData;
 public class LockNulsTransaction<T extends BaseNulsData>  extends AbstractCoinTransaction<T> {
 
     public LockNulsTransaction() {
-        this(TransactionConstant.TX_TYPE_LOCK,null,null);
+        this(TransactionConstant.TX_TYPE_LOCK);
     }
 
-    public LockNulsTransaction(CoinTransferData params, String password) {
+    public LockNulsTransaction(CoinTransferData params, String password) throws NulsException {
         this(TransactionConstant.TX_TYPE_LOCK, params, password);
 
     }
 
-    protected LockNulsTransaction(int type, CoinTransferData params, String password) {
+    protected LockNulsTransaction(int type, CoinTransferData params, String password) throws NulsException {
         super(type,params,password);
     }
 

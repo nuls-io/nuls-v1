@@ -34,6 +34,10 @@ public class UtxoOutput extends BaseNulsData{
     //0: useable, 1:locked， 2：spent
     private int status;
 
+    public static final int USEABLE = 0;
+    public static final int LOCKED = 1;
+    public static final int SPENT = 2;
+
     public UtxoOutput() {
 
     }

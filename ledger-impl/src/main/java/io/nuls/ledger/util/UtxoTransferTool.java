@@ -34,7 +34,7 @@ public class UtxoTransferTool {
         po.setTxHash(output.getTxHash().getDigestHex());
         po.setValue(output.getValue());
         po.setAddress(new Address(po.getAddress()).getBase58());
-        po.setHash(Sha256Hash.hash(output.serialize()));
+        po.setHash(Hex.encode(Sha256Hash.hash(output.serialize())));
         //todo version
         return po;
     }

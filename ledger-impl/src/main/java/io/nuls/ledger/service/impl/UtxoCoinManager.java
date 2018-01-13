@@ -1,6 +1,7 @@
 package io.nuls.ledger.service.impl;
 
 import io.nuls.core.chain.entity.Na;
+import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.ledger.entity.UtxoBalance;
@@ -9,6 +10,8 @@ import io.nuls.ledger.util.UtxoTransferTool;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * cache and operate all unspend utxo
@@ -27,9 +30,9 @@ public class UtxoCoinManager {
 
     private LedgerCacheService cacheService;
 
-
     private UtxoOutputDataService outputDataService;
 
+    private Lock lock = new ReentrantLock();
 
     public void cacheAllUnSpendOutPut() {
         List<UtxoOutputPo> utxoOutputPos = outputDataService.getAllUnSpend();
@@ -65,6 +68,43 @@ public class UtxoCoinManager {
             }
             list.add(output);
         }
+    }
+
+    /**
+     *  Utxo is used to ensure that each transaction will not double
+     * @param address
+     * @param value
+     * @return
+     */
+    public List<UtxoOutput> getAccountUnSpend(String address, Na value) {
+        lock.lock();
+        List<UtxoOutput> unSpends = new ArrayList<>();
+        try {
+            UtxoBalance balance = (UtxoBalance) cacheService.getBalance(address);
+            if (balance == null || balance.getUseable().isLessThan(value)) {
+                return unSpends;
+            }
+
+            Na amount = Na.ZERO;
+            for (int i = 0; i < balance.getUnSpends().size(); i++) {
+                UtxoOutput output = balance.getUnSpends().get(i);
+                output.setStatus(output.LOCKED);
+                unSpends.add(output);
+                amount = amount.add(Na.valueOf(output.getValue()));
+                if(amount.isGreaterThan(value)) {
+                    break;
+                }
+            }
+
+        } catch (Exception e) {
+            Log.error(e);
+            for(UtxoOutput output : unSpends) {
+                output.setStatus(output.USEABLE);
+            }
+        } finally {
+            lock.unlock();
+        }
+        return unSpends;
     }
 
     public void setOutputDataService(UtxoOutputDataService outputDataService) {

@@ -17,7 +17,7 @@ public class PocJoinConsensusTransaction extends LockNulsTransaction<Consensus<D
         super(TransactionConstant.TX_TYPE_JOIN_CONSENSUS);
     }
 
-    public PocJoinConsensusTransaction(CoinTransferData lockData, String password) {
+    public PocJoinConsensusTransaction(CoinTransferData lockData, String password) throws NulsException {
         super(TransactionConstant.TX_TYPE_JOIN_CONSENSUS, lockData, password);
     }
 
