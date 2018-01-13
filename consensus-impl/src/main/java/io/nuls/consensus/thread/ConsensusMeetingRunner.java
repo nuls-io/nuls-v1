@@ -1,6 +1,8 @@
 package io.nuls.consensus.thread;
 
 import io.nuls.account.service.intf.AccountService;
+import io.nuls.consensus.cache.manager.block.BlockCacheManager;
+import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
@@ -19,10 +21,7 @@ import io.nuls.consensus.entity.member.Delegate;
 import io.nuls.consensus.entity.tx.RedPunishTransaction;
 import io.nuls.consensus.entity.tx.YellowPunishTransaction;
 import io.nuls.consensus.event.BlockHeaderEvent;
-import io.nuls.consensus.cache.manager.block.BlockCacheManager;
-import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.manager.ConsensusManager;
-import io.nuls.consensus.service.impl.BlockServiceImpl;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.consensus.utils.TxComparator;
@@ -195,7 +194,7 @@ public class ConsensusMeetingRunner implements Runnable {
         List<Integer> outTxList = new ArrayList<>();
         for (int i = 0; i < txList.size(); i++) {
             Transaction tx = txList.get(i);
-            ValidateResult result = ledgerService.verifyTx(tx);
+            ValidateResult result = tx.verify();
             if (result.isFailed()) {
                 outTxList.add(i);
                 continue;
@@ -250,8 +249,7 @@ public class ConsensusMeetingRunner implements Runnable {
         tx.setFee(Na.ZERO);
         tx.setHash(NulsDigestData.calcDigestData(tx));
         tx.setSign(accountService.signData(tx.getHash()));
-        ValidateResult validateResult = null;
-        validateResult = ledgerService.verifyTx(tx);
+        ValidateResult validateResult = tx.verify();
         //todo cache
         if (null == validateResult || validateResult.isFailed()) {
             throw new NulsRuntimeException(ErrorCode.CONSENSUS_EXCEPTION);

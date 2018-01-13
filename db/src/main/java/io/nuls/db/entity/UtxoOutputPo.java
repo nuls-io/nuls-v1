@@ -97,7 +97,7 @@ public class UtxoOutputPo {
      *
      * @mbg.generated
      */
-    public void setHash(byte[] hash) {
+    public void setHash(String hash) {
         this.hash = hash == null ? null : hash.trim();
     }
 

@@ -18,10 +18,13 @@ import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 public class RegisterAgentTransaction extends AbstractCoinTransaction<Consensus<Agent>> {
 
     public RegisterAgentTransaction() {
-        this(null, null);
+        super(TransactionConstant.TX_TYPE_REGISTER_AGENT);
+        this.registerValidator(new CommissionRateValidator());
+        this.registerValidator(new AccountCreditValidator());
+        this.registerValidator(new AgentDepositValidator());
     }
 
-    public RegisterAgentTransaction(CoinTransferData lockData, String password) {
+    public RegisterAgentTransaction(CoinTransferData lockData, String password) throws NulsException {
         super(TransactionConstant.TX_TYPE_REGISTER_AGENT, lockData, password);
         this.registerValidator(new CommissionRateValidator());
         this.registerValidator(new AccountCreditValidator());

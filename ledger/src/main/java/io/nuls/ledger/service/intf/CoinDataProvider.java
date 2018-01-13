@@ -21,5 +21,5 @@ public interface CoinDataProvider {
 
     void rollback(CoinData coinData,String txHash);
 
-    CoinData createTransferData(CoinTransferData coinParam, String password);
+    CoinData createTransferData(CoinTransferData coinParam, String password) throws NulsException;
 }
