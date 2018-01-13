@@ -28,4 +28,12 @@ public class HeaderDigest {
     public void setHeight(long height) {
         this.height = height;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof HeaderDigest)) {
+            return false;
+        }
+        return this.getHeight() == ((HeaderDigest) obj).getHeight() && this.getHash().equals(((HeaderDigest) obj).getHash());
+    }
 }

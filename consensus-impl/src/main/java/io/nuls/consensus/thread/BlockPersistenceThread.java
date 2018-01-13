@@ -47,7 +47,7 @@ public class BlockPersistenceThread implements Runnable {
 
     private void doPersistence() {
         long height = blockCacheManager.getStoredHeight() + 1;
-        Block block = blockCacheManager.getConfirmedBlock(height);
+        Block block = blockCacheManager.getBlock(height);
         if (null == block) {
             return;
         }

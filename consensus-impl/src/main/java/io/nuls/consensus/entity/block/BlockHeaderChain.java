@@ -17,7 +17,7 @@ public class BlockHeaderChain implements NulsCloneable {
     private final ReentrantLock lock = new ReentrantLock();
 
     public BlockHeaderChain getBifurcateChain(BlockHeader header) {
-        int index = indexOf(header.getPreHash().getDigestHex());
+        int index = indexOf(header.getPreHash().getDigestHex(),header.getHeight());
         if (index == -1) {
             return null;
         }
@@ -31,8 +31,9 @@ public class BlockHeaderChain implements NulsCloneable {
         return chain;
     }
 
-    public int indexOf(String hash) {
-        return headerDigestList.indexOf(hash);
+    public int indexOf(String hash,long height) {
+        HeaderDigest hd = new HeaderDigest(hash,height);
+        return headerDigestList.indexOf(hd);
     }
 
     public boolean addHeader(BlockHeader header) {
@@ -50,13 +51,12 @@ public class BlockHeaderChain implements NulsCloneable {
         headerDigestList.clear();
     }
 
-    public HeaderDigest poll() {
+    public HeaderDigest getFirst() {
         lock.lock();
         if (headerDigestList.size() < 1 + PocConsensusConstant.CONFIRM_BLOCK_COUNT) {
             return null;
         }
         HeaderDigest headerDigest = headerDigestList.get(0);
-
         lock.unlock();
         return headerDigest;
     }
