@@ -2,8 +2,6 @@ package io.nuls.consensus.cache.manager.block;
 
 import io.nuls.cache.util.CacheMap;
 import io.nuls.consensus.constant.ConsensusCacheConstant;
-import io.nuls.consensus.constant.PocConsensusConstant;
-import io.nuls.consensus.entity.block.BlockHeaderChain;
 import io.nuls.consensus.event.GetBlockHeaderEvent;
 import io.nuls.consensus.utils.DownloadDataUtils;
 import io.nuls.core.chain.entity.BasicTypeData;
@@ -14,9 +12,6 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.network.service.NetworkService;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author Niels
@@ -29,7 +24,7 @@ public class BlockCacheManager {
     private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
     private NetworkService networkService = NulsContext.getInstance().getService(NetworkService.class);
 
-    private CacheMap<String, BlockHeader> tempHeaderCacheMap;
+    private CacheMap<String, BlockHeader> headerCacheMap;
 
     private CacheMap<String, Block> blockCacheMap;
     private CacheMap<String, SmallBlock> smallBlockCacheMap;
@@ -38,7 +33,6 @@ public class BlockCacheManager {
 
     private long bestHeight;
     private long storedHeight;
-
 
     private BlockCacheManager() {
     }
@@ -50,7 +44,7 @@ public class BlockCacheManager {
     public void init() {
         smallBlockCacheMap = new CacheMap<>(ConsensusCacheConstant.SMALL_BLOCK_CACHE_NAME, 32, ConsensusCacheConstant.LIVE_TIME, 0);
         blockCacheMap = new CacheMap<>(ConsensusCacheConstant.BLOCK_CACHE_NAME, 64, ConsensusCacheConstant.LIVE_TIME, 0);
-        tempHeaderCacheMap = new CacheMap<>(ConsensusCacheConstant.TEMP_BLOCK_HEADER_CACHE_NAME, 32, ConsensusCacheConstant.LIVE_TIME, 0);
+        headerCacheMap = new CacheMap<>(ConsensusCacheConstant.TEMP_BLOCK_HEADER_CACHE_NAME, 32, ConsensusCacheConstant.LIVE_TIME, 0);
     }
 
     public void cacheBlockHeader(BlockHeader header, String sender) {
@@ -77,7 +71,7 @@ public class BlockCacheManager {
                 break;
             }
             if (height > nextHeight) {
-                tempHeaderCacheMap.put(header.getHash().getDigestHex(), header);
+                headerCacheMap.put(header.getHash().getDigestHex(), header);
                 GetBlockHeaderEvent event = new GetBlockHeaderEvent();
                 event.setEventBody(new BasicTypeData<>(height - 1));
                 eventBroadcaster.sendToNode(event, sender);
@@ -88,24 +82,21 @@ public class BlockCacheManager {
         if (discard) {
             return;
         }
-        tempHeaderCacheMap.put(header.getHash().getDigestHex(), header);
+        headerCacheMap.put(header.getHash().getDigestHex(), header);
         downloadDataUtils.requestSmallBlock(header.getHash(), sender);
-        checkNextBlockHeader(height);
+        checkNextBlockHeader(header.getHash().getDigestHex(), sender);
     }
 
-    private void checkNextBlockHeader(long height) {
-        // todo auto-generated method stub(niels)
-        // 检查下一个头，如果存在则验证并下载
-
-
+    private void checkNextBlockHeader(String preHash, String nodeId) {
+        for (BlockHeader header : headerCacheMap.values()) {
+            if (header.getPreHash().getDigestHex().equals(preHash)) {
+                this.cacheBlockHeader(header, nodeId);
+            }
+        }
     }
 
     public BlockHeader getBlockHeader(String hash) {
-        BlockHeader header = this.tempHeaderCacheMap.get(hash);
-        if (header == null) {
-
-        }
-        return header;
+        return headerCacheMap.get(hash);
     }
 
     public void cacheBlock(Block block) {
@@ -127,20 +118,20 @@ public class BlockCacheManager {
 
     public void clear() {
         this.blockCacheMap.clear();
-        this.tempHeaderCacheMap.clear();
+        this.headerCacheMap.clear();
         this.smallBlockCacheMap.clear();
     }
 
     public void destroy() {
         this.blockCacheMap.destroy();
-        this.tempHeaderCacheMap.destroy();
+        this.headerCacheMap.destroy();
         this.smallBlockCacheMap.destroy();
     }
 
     public void removeBlock(String hash) {
         this.blockCacheMap.remove(hash);
         this.smallBlockCacheMap.remove(hash);
-        this.tempHeaderCacheMap.remove(hash);
+        this.headerCacheMap.remove(hash);
     }
 
     public long getBestHeight() {

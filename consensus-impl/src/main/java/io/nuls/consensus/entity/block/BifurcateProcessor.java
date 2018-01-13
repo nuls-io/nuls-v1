@@ -15,6 +15,8 @@ public class BifurcateProcessor {
 
     private List<BlockHeaderChain> chainList = new ArrayList<>();
 
+    private long currentHeight;
+
     private BifurcateProcessor() {
     }
 
@@ -22,33 +24,41 @@ public class BifurcateProcessor {
         return INSTANCE;
     }
 
-    public void addHeader(BlockHeader header){
-        for(BlockHeaderChain chain:chainList){
-//todo            chain.get
+    public void addHeader(BlockHeader header) {
+        for (BlockHeaderChain chain : chainList) {
+            int index = chain.indexOf(header.getPreHash().getDigestHex());
+            if (index == chain.size() - 1) {
+                chain.addHeader(header);
+                return;
+            } else {
+                BlockHeaderChain newChain = chain.getBifurcateChain(header);
+                chainList.add(newChain);
+                return;
+            }
         }
+        if (currentHeight > 0 && currentHeight < header.getHeight()) {
+            return;
+        }
+        BlockHeaderChain chain = new BlockHeaderChain();
+        chain.addHeader(header);
+        chainList.add(chain);
     }
 
-    public void removeHeader(String hash){
-//todo
-    }
-
-    public BlockHeaderChain getLongestChain(){
+    public BlockHeaderChain getLongestChain() {
         List<BlockHeaderChain> longestChainList = new ArrayList<>();
-        for(BlockHeaderChain chain :chainList){
-            if(longestChainList.isEmpty()||chain.size()>longestChainList.get(0).size()){
+        for (BlockHeaderChain chain : chainList) {
+            if (longestChainList.isEmpty() || chain.size() > longestChainList.get(0).size()) {
                 longestChainList.clear();
                 longestChainList.add(chain);
-            }else if(longestChainList.isEmpty()||chain.size()==longestChainList.get(0).size()){
+            } else if (longestChainList.isEmpty() || chain.size() == longestChainList.get(0).size()) {
                 longestChainList.add(chain);
             }
         }
-        if(longestChainList.size()>1||longestChainList.isEmpty()){
+        if (longestChainList.size() > 1 || longestChainList.isEmpty()) {
             return null;
         }
         return longestChainList.get(0);
     }
-
-
 
 
 }

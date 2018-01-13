@@ -13,53 +13,90 @@ import java.util.concurrent.locks.ReentrantLock;
  * @date 2018/1/11
  */
 public class BlockHeaderChain implements NulsCloneable {
-    private List<BlockHeader> headerList = new ArrayList<>();
+    private List<HeaderDigest> headerDigestList = new ArrayList<>();
     private final ReentrantLock lock = new ReentrantLock();
+
+    public BlockHeaderChain getBifurcateChain(BlockHeader header) {
+        int index = indexOf(header.getPreHash().getDigestHex());
+        if (index == -1) {
+            return null;
+        }
+        List<HeaderDigest> list = new ArrayList<>();
+        for (int i = 0; i <= index; i++) {
+            list.add(headerDigestList.get(i));
+        }
+        list.add(new HeaderDigest(header.getHash().getDigestHex(), header.getHeight()));
+        BlockHeaderChain chain = new BlockHeaderChain();
+        chain.setHeaderDigestList(list);
+        return chain;
+    }
+
+    public int indexOf(String hash) {
+        return headerDigestList.indexOf(hash);
+    }
 
     public boolean addHeader(BlockHeader header) {
         lock.lock();
-        if (!headerList.isEmpty() &&
-                !headerList.get(headerList.size() - 1).getHash().getDigestHex().equals(header.getHash().getDigestHex())) {
+        if (!headerDigestList.isEmpty() &&
+                !headerDigestList.get(headerDigestList.size() - 1).equals(header.getPreHash().getDigestHex())) {
             return false;
         }
-        headerList.add(header);
+        headerDigestList.add(new HeaderDigest(header.getHash().getDigestHex(), header.getHeight()));
         lock.unlock();
         return true;
     }
 
     public void destroy() {
-        headerList.clear();
+        headerDigestList.clear();
     }
 
-    public BlockHeader poll() {
+    public HeaderDigest poll() {
         lock.lock();
-        if (headerList.size() < 1 + PocConsensusConstant.CONFIRM_BLOCK_COUNT) {
+        if (headerDigestList.size() < 1 + PocConsensusConstant.CONFIRM_BLOCK_COUNT) {
             return null;
         }
-        BlockHeader header = headerList.get(0);
-        headerList.remove(0);
+        HeaderDigest headerDigest = headerDigestList.get(0);
+
         lock.unlock();
-        return header;
+        return headerDigest;
     }
 
-    public BlockHeader rollback() {
+    public void removeHeaderDigest(long height) {
+        for (int i = headerDigestList.size() - 1; i >= 0; i--) {
+            HeaderDigest headerDigest = headerDigestList.get(i);
+            if (headerDigest.getHeight() <= height) {
+                headerDigestList.remove(i);
+            }
+        }
+    }
+
+    public HeaderDigest rollback() {
         lock.lock();
-        if (headerList.isEmpty()) {
+        if (headerDigestList.isEmpty()) {
             lock.unlock();
             return null;
         }
-        BlockHeader header = headerList.get(headerList.size() - 1);
-        headerList.remove(headerList.size() - 1);
+        HeaderDigest headerDigest = headerDigestList.get(headerDigestList.size() - 1);
+        headerDigestList.remove(headerDigestList.size() - 1);
         lock.unlock();
-        return header;
+        return headerDigest;
     }
 
     public int size() {
-        return headerList.size();
+        return headerDigestList.size();
     }
 
     @Override
     public Object copy() {
         return this;
     }
+
+    public List<HeaderDigest> getHeaderDigestList() {
+        return headerDigestList;
+    }
+
+    public void setHeaderDigestList(List<HeaderDigest> headerDigestList) {
+        this.headerDigestList = headerDigestList;
+    }
+
 }
