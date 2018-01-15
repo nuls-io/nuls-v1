@@ -47,15 +47,14 @@ public class BlockPersistenceThread implements Runnable {
 
     private void doPersistence() {
         long height = blockCacheManager.getStoredHeight() + 1;
-        Block block = blockCacheManager.getConfirmedBlock(height);
+        Block block = blockCacheManager.getBlock(height);
         if (null == block) {
             return;
         }
-        //todo
-//        blockService.saveBlock(block);
-//        blockCacheManager.removeBlock(height);
-//        blockCacheManager.setStoredHeight(height);
-//        txCacheManager.removeTxList(block.getTxHashList());
+        blockService.saveBlock(block);
+        blockCacheManager.removeBlock(block.getHeader());
+        blockCacheManager.setStoredHeight(height);
+        txCacheManager.removeTxList(block.getTxHashList());
     }
 
 }

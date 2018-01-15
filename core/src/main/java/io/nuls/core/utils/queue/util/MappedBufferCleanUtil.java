@@ -10,7 +10,7 @@ package io.nuls.core.utils.queue.util;
 public class MappedBufferCleanUtil {
 
 
-    public static void clean(final Object buffer) {
+    public static void clean1(final Object buffer) {
         if (null == buffer) {
             return;
         }
