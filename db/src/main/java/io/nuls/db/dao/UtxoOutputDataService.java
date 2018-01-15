@@ -14,4 +14,8 @@ public interface UtxoOutputDataService extends BaseDataService< String,UtxoOutpu
     List<UtxoOutputPo> getTxOutputs(String txHash);
 
     List<UtxoOutputPo> getAccountOutputs(String address, byte status);
+
+    List<UtxoOutputPo> getAllUnSpend();
+
+    List<UtxoOutputPo> getAccountUnSpend(String address);
 }

@@ -91,8 +91,8 @@ public class NodesManager implements Runnable {
 
         System.out.println("-----------nodeManager start");
         //start  heart beat thread
-        TaskManager.createSingleThreadAndRun(NulsConstant.MODULE_ID_NETWORK, "nodeManager", this);
-        TaskManager.createSingleThreadAndRun(NulsConstant.MODULE_ID_NETWORK, "nodeDiscovery", this.discovery);
+        TaskManager.createAndRunThread(NulsConstant.MODULE_ID_NETWORK, "nodeManager", this);
+        TaskManager.createAndRunThread(NulsConstant.MODULE_ID_NETWORK, "nodeDiscovery", this.discovery);
     }
 
     public void stop() {

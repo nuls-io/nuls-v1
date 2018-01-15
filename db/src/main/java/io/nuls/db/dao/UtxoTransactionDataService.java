@@ -33,4 +33,6 @@ public interface UtxoTransactionDataService {
 
     List<UtxoOutputPo> getAccountOutputs(String address, byte status);
 
+    List<UtxoOutputPo> getAccountUnSpend(String address);
+
 }

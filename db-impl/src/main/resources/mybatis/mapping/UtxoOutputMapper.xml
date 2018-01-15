@@ -12,7 +12,7 @@
         <result column="lock_time" jdbcType="BIGINT" property="lockTime"/>
         <result column="status" jdbcType="TINYINT" property="status"/>
         <result column="out_index" jdbcType="INTEGER" property="outIndex"/>
-        <result column="address" jdbcType="VARCHAR" property="address"/>
+
     </resultMap>
     <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="io.nuls.db.entity.UtxoOutputPo">
         <!--

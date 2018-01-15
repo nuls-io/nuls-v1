@@ -73,11 +73,11 @@ public class EhCacheServiceImpl<K, T > implements CacheService<K, T> {
     }
 
     @Override
-    public void putElement(String cacheTitle, CacheElement element) {
-        if (null == cacheManager.getCache(cacheTitle)) {
+    public void putElement(CacheElement element) {
+        if (null == cacheManager.getCache(element.getCacheTitle())) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "Cache not exist!");
         }
-        cacheManager.getCache(cacheTitle).put(element.getKey(), element.getValue().copy());
+        cacheManager.getCache(element.getCacheTitle()).put(element.getKey(), element.getValue().copy());
     }
 
     @Override

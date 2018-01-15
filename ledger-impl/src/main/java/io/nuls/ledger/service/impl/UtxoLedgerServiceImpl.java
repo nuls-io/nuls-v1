@@ -8,15 +8,14 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.exception.NulsVerificationException;
 import io.nuls.core.tx.serivce.TransactionService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
-import io.nuls.core.validate.ValidateResult;
-import io.nuls.db.transactional.annotation.TransactionalAnnotation;
+import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.db.dao.UtxoTransactionDataService;
 import io.nuls.db.entity.TransactionPo;
 import io.nuls.db.entity.UtxoOutputPo;
+import io.nuls.db.transactional.annotation.TransactionalAnnotation;
 import io.nuls.db.util.TransactionPoTool;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.Balance;
@@ -25,6 +24,7 @@ import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.entity.tx.TransferTransaction;
 import io.nuls.ledger.service.intf.LedgerService;
+import io.nuls.ledger.util.UtxoTransferTool;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,9 +39,9 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     private LedgerCacheService ledgerCacheService = LedgerCacheService.getInstance();
 
-    private UtxoTransactionDataService txDao = NulsContext.getInstance().getService(UtxoTransactionDataService.class);
+    private UtxoTransactionDataService txDao;
 
-    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
+    private EventBroadcaster eventBroadcaster;
 
     private UtxoLedgerServiceImpl() {
 
@@ -51,23 +51,35 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         return INSTANCE;
     }
 
-    @Override
-    public ValidateResult verifyTx(Transaction tx)   {
-        AssertUtil.canNotEmpty(tx,ErrorCode.NULL_PARAMETER);
-        return tx.verify();
+    public void init() {
+        txDao = NulsContext.getInstance().getService(UtxoTransactionDataService.class);
+        eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
+
+        UtxoOutputDataService outputDataService = NulsContext.getInstance().getService(UtxoOutputDataService.class);
+
     }
 
     @Override
     public Transaction getTx(NulsDigestData hash) {
-            TransactionPo po = txDao.gettx(hash.getDigestHex(), false);
-            try {
-                return TransactionPoTool.toTransaction(po);
-            } catch (Exception e) {
-                Log.error(e);
-            }
+        TransactionPo po = txDao.gettx(hash.getDigestHex(), false);
+        try {
+            return TransactionPoTool.toTransaction(po);
+        } catch (Exception e) {
+            Log.error(e);
+        }
         return null;
     }
 
+    @Override
+    public Transaction getLocalTx(NulsDigestData hash) {
+        TransactionPo po = txDao.gettx(hash.getDigestHex(), true);
+        try {
+            return TransactionPoTool.toTransaction(po);
+        } catch (Exception e) {
+            Log.error(e);
+        }
+        return null;
+    }
 
     @Override
     public Balance getBalance(String address) {
@@ -82,24 +94,26 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     private Balance calcBalance(String address) {
         UtxoBalance balance = new UtxoBalance();
         List<UtxoOutputPo> unSpendList = txDao.getAccountOutputs(address, TransactionConstant.TX_OUTPUT_UNSPEND);
+        if (unSpendList == null || unSpendList.isEmpty()) {
+            return null;
+        }
         List<UtxoOutput> unSpends = new ArrayList<>();
 
-        long value = 0;
-        for (UtxoOutputPo output : unSpendList) {
-            value += output.getValue();
-
-            //todo
+        long useable = 0;
+        long locked = 0;
+        for (UtxoOutputPo po : unSpendList) {
+            UtxoOutput output = UtxoTransferTool.toOutput(po);
+            if (output.getStatus() == 0) {
+                useable += output.getValue();
+            } else {
+                locked += output.getValue();
+            }
+            unSpends.add(output);
         }
-        balance.setUseable(Na.valueOf(value));
-
-        List<UtxoOutputPo> lockedList = txDao.getAccountOutputs(address, TransactionConstant.TX_OUTPUT_LOCKED);
-        value = 0;
-        for (UtxoOutputPo output : lockedList) {
-            value += output.getValue();
-        }
-        balance.setLocked(Na.valueOf(value));
+        balance.setUseable(Na.valueOf(useable));
+        balance.setLocked(Na.valueOf(locked));
         balance.setBalance(balance.getLocked().add(balance.getUseable()));
-//        balance.setUnSpends(unSpendList);
+        balance.setUnSpends(unSpends);
         return balance;
     }
 
@@ -134,20 +148,15 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 //        return null;
 //    }
 
+
     @Override
-    public Transaction getLocalTx(NulsDigestData hash) {
+    public TransferTransaction transfer(String address, String password, String toAddress, Na amount, String remark) {
         // todo auto-generated method stub(niels)
         return null;
     }
 
     @Override
     public LockNulsTransaction lock(String address, String password, Na amount, long unlockTime, long unlockHeight) {
-        // todo auto-generated method stub(niels)
-        return null;
-    }
-
-    @Override
-    public TransferTransaction transfer(String address, String password, String toAddress, Na amount, String remark) {
         // todo auto-generated method stub(niels)
         return null;
     }
@@ -160,7 +169,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     @TransactionalAnnotation
-    public boolean saveTxList(long height,long blockHash,List<Transaction> txList) {
+    public boolean saveTxList(long height, long blockHash, List<Transaction> txList) {
         // todo auto-generated method stub(niels)
         return false;
     }
@@ -197,6 +206,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             service.onRollback(tx);
         }
     }
+
     @Override
     public void commitTx(Transaction tx) throws NulsException {
         AssertUtil.canNotEmpty(tx, ErrorCode.NULL_PARAMETER);
@@ -205,6 +215,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             service.onCommit(tx);
         }
     }
+
     @Override
     public void approvalTx(Transaction tx) throws NulsException {
         AssertUtil.canNotEmpty(tx, ErrorCode.NULL_PARAMETER);

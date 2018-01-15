@@ -346,7 +346,7 @@ public class AccountServiceImpl implements AccountService {
 
         isLockNow = false;
         long unlockTime = TimeService.currentTimeSeconds() + seconds;
-        TaskManager.createSingleThreadAndRun(NulsConstant.MODULE_ID_ACCOUNT, "unlockAccountThread", new Runnable() {
+        TaskManager.createAndRunThread(NulsConstant.MODULE_ID_ACCOUNT, "unlockAccountThread", new Runnable() {
             @Override
             public void run() {
                 while (!isLockNow) {

@@ -120,7 +120,7 @@ public class ConsensusManager {
     }
 
     public void joinMeeting() {
-        TaskManager.createSingleThreadAndRun(NulsConstant.MODULE_ID_CONSENSUS,
+        TaskManager.createAndRunThread(NulsConstant.MODULE_ID_CONSENSUS,
                 ConsensusMeetingRunner.THREAD_NAME,
                 ConsensusMeetingRunner.getInstance());
     }
@@ -129,7 +129,7 @@ public class ConsensusManager {
      * data storage
      */
     public void startPersistenceWork() {
-        TaskManager.createSingleThreadAndRun(NulsConstant.MODULE_ID_CONSENSUS, BlockPersistenceThread.THREAD_NAME, BlockPersistenceThread.getInstance());
+        TaskManager.createAndRunThread(NulsConstant.MODULE_ID_CONSENSUS, BlockPersistenceThread.THREAD_NAME, BlockPersistenceThread.getInstance());
     }
 
     public ConsensusStatusInfo getConsensusStatusInfo() {
@@ -144,7 +144,7 @@ public class ConsensusManager {
         } catch (Exception e) {
             Log.error(e.getMessage());
         } finally {
-            TaskManager.createSingleThreadAndRun(NulsConstant.MODULE_ID_CONSENSUS,
+            TaskManager.createAndRunThread(NulsConstant.MODULE_ID_CONSENSUS,
                     BlockMaintenanceThread.THREAD_NAME, blockMaintenanceThread);
         }
     }

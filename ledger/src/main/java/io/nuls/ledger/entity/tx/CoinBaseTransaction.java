@@ -2,6 +2,7 @@ package io.nuls.ledger.entity.tx;
 
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.constant.TransactionConstant;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.ledger.entity.params.CoinTransferData;
 
@@ -12,14 +13,14 @@ import io.nuls.ledger.entity.params.CoinTransferData;
 public class CoinBaseTransaction<T extends BaseNulsData> extends AbstractCoinTransaction<T> {
 
     public CoinBaseTransaction() {
-        this(TransactionConstant.TX_TYPE_COIN_BASE, null, null);
+        this(TransactionConstant.TX_TYPE_COIN_BASE);
     }
 
-    public CoinBaseTransaction(CoinTransferData params, String password) {
+    public CoinBaseTransaction(CoinTransferData params, String password) throws NulsException {
         this(TransactionConstant.TX_TYPE_TRANSFER, params, password);
     }
 
-    protected CoinBaseTransaction(int type, CoinTransferData params, String password) {
+    protected CoinBaseTransaction(int type, CoinTransferData params, String password) throws NulsException {
         super(type, params, password);
     }
 

@@ -1,10 +1,8 @@
 package io.nuls.core.crypto;
 
+import java.util.Base64;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
 
 /**
  * Created by facjas on 2017/11/20.
@@ -37,7 +35,8 @@ public class SM4Utils {
             SM4 sm4 = new SM4();
             sm4.sm4_setkey_enc(ctx, keyBytes);
             byte[] encrypted = sm4.sm4_crypt_ecb(ctx, plainText.getBytes("GBK"));
-            String cipherText = new BASE64Encoder().encode(encrypted);
+            Base64.Encoder encoder = Base64.getEncoder();
+            String cipherText = encoder.encodeToString(encrypted);
             if (cipherText != null && cipherText.trim().length() > 0) {
 
                 Matcher m = PATTERN_1.matcher(cipherText);
@@ -65,7 +64,8 @@ public class SM4Utils {
 
             SM4 sm4 = new SM4();
             sm4.sm4_setkey_dec(ctx, keyBytes);
-            byte[] decrypted = sm4.sm4_crypt_ecb(ctx, new BASE64Decoder().decodeBuffer(cipherText));
+            Base64.Decoder decoder = Base64.getDecoder();
+            byte[] decrypted = sm4.sm4_crypt_ecb(ctx, decoder.decode(cipherText));
             return new String(decrypted, "UTF-8");
         } catch (Exception e) {
             e.printStackTrace();
@@ -92,7 +92,8 @@ public class SM4Utils {
             SM4 sm4 = new SM4();
             sm4.sm4_setkey_enc(ctx, keyBytes);
             byte[] encrypted = sm4.sm4_crypt_cbc(ctx, ivBytes, plainText.getBytes("UTF-8"));
-            String cipherText = new BASE64Encoder().encode(encrypted);
+            Base64.Encoder encoder = Base64.getEncoder();
+            String cipherText = encoder.encodeToString(encrypted);
             if (cipherText != null && cipherText.trim().length() > 0) {
                 Matcher m = PATTERN_1.matcher(cipherText);
                 cipherText = m.replaceAll("");
@@ -121,7 +122,8 @@ public class SM4Utils {
             }
             SM4 sm4 = new SM4();
             sm4.sm4_setkey_dec(ctx, keyBytes);
-            byte[] decrypted = sm4.sm4_crypt_cbc(ctx, ivBytes, new BASE64Decoder().decodeBuffer(cipherText));
+            Base64.Decoder decoder = Base64.getDecoder();
+            byte[] decrypted = sm4.sm4_crypt_cbc(ctx, ivBytes, decoder.decode(cipherText));
             return new String(decrypted, "UTF-8");
         } catch (Exception e) {
             e.printStackTrace();

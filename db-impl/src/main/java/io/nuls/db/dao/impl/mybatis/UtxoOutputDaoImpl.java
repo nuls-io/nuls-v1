@@ -7,6 +7,7 @@ import io.nuls.db.dao.impl.mybatis.util.SearchOperator;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import io.nuls.db.entity.UtxoOutputPo;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +39,23 @@ public class UtxoOutputDaoImpl extends BaseDaoImpl<UtxoOutputMapper, String, Utx
         searchable.addCondition("status", SearchOperator.eq, status);
         searchable.addCondition("address", SearchOperator.eq, address);
         PageHelper.orderBy("value asc");
+        return getMapper().selectList(searchable);
+    }
+
+    @Override
+    public List<UtxoOutputPo> getAllUnSpend() {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("status", SearchOperator.ne, 2);
+        PageHelper.orderBy("address asc, status asc, value asc");
+        return getMapper().selectList(searchable);
+    }
+
+    @Override
+    public List<UtxoOutputPo> getAccountUnSpend(String address) {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("status", SearchOperator.ne, 2);
+        searchable.addCondition("address", SearchOperator.eq, address);
+        PageHelper.orderBy("status asc, value asc");
         return getMapper().selectList(searchable);
     }
 }

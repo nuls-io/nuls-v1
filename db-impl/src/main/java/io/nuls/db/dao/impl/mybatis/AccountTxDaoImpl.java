@@ -66,7 +66,6 @@ public class AccountTxDaoImpl implements AccountAliasDataService {
             AccountPo po = new AccountPo();
             po.setId(aliasPo.getAddress());
             po.setAlias("");
-            //todo
             accountDao.updateAlias(po);
         } catch (Exception e) {
             throw new NulsRuntimeException(ErrorCode.DB_ROLLBACK_ERROR);

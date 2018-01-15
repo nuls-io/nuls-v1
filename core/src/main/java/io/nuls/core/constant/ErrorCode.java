@@ -35,36 +35,32 @@ public enum ErrorCode {
      */
 
     /**
-     * ----------  Network code   ---------
+     * ----------  Network Exception code   ---------
      */
     NET_SERVER_START_ERROR("NET001", 40001),
     NET_MESSAGE_ERROR("NET002", 40002),
     NET_MESSAGE_XOR_ERROR("NET003", 40003),
     NET_MESSAGE_LENGTH_ERROR("NET004", 40004),
+    NET_P2P_UNKOWN_EXCEPTION("NET005", 40005),
+    NODE_GROUP_ALREADY_EXISTS("NET006", 40006),
+    NODE_GROUP_NOT_FOUND("NET007", 40007),
+    NODE_NOT_FOUND("NET008", 40008),
 
     /**
-     * ----------  p2p Network code   ---------
-     */
-    P2P_UNKOWN_EXCEPTION("P2P000", 30000),
-    NODE_GROUP_ALREADY_EXISTS("P2P001", 30001),
-    NODE_GROUP_NOT_FOUND("P2P002", 30002),
-    NODE_NOT_FOUND("P2P003", 30003),
-    /**
-     * ---- direct ---
+     * ---- direct Exception code---
      **/
-
     VERIFICATION_FAILD("SYS000", 11000),
     DATA_PARSE_ERROR("DATA001", 11001),
     DATA_OVER_SIZE_ERROR("DATA002", 11002),
     INPUT_VALUE_ERROR("DATA003", 11003),
     /**
-     * ----------  Account code   ---------
+     * ----------  Account Exception code   ---------
      */
     PASSWORD_IS_WRONG("ACT000", 45000),
     ACCOUNT_NOT_EXIST("ACT001", 45001),
 
     /**
-     * ----------  DBException code   ---------
+     * ----------  DB Exception code   ---------
      */
 
     DB_MODULE_START_FAIL("DB000", 20000),
@@ -79,7 +75,7 @@ public enum ErrorCode {
     /**
      * ----------  MQ Exception code   ---------
      */
-    QUEUE_NAME_ERROR("MQ001", 40001),
+    QUEUE_NAME_ERROR("MQ001", 70001),
 
     /**
      * ----------  RPC Exception code   ---------
@@ -87,13 +83,19 @@ public enum ErrorCode {
     REQUEST_DENIED("RPC001", 50001),
 
     /**
-     * ----------  Consensus Network code   ---------
+     * ----------  Consensus Exception code   ---------
      */
     CS_UNKOWN_EXCEPTION("CS000", 60000),
     TIME_OUT("CS001", 60001),
     DEPOSIT_ERROR("CS002", 60002),
     DEPOSIT_NOT_ENOUGH("CS003", 60003),
-    CONSENSUS_EXCEPTION("CS004", 60004 ), COMMISSION_RATE_OUT_OF_RANGE("cs005", 60005);
+    CONSENSUS_EXCEPTION("CS004", 60004 ), COMMISSION_RATE_OUT_OF_RANGE("cs005", 60005),
+
+    /**
+     * ------------  Ledger Exception code   --------------
+     */
+    BALANCE_NOT_ENOUGH("LED001", 70001);
+
 
     private final int msg;
     private final String code;

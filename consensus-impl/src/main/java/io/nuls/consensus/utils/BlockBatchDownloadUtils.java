@@ -2,7 +2,7 @@ package io.nuls.consensus.utils;
 
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
-import io.nuls.consensus.event.GetBlockEvent;
+import io.nuls.consensus.event.GetBlockRequest;
 import io.nuls.consensus.cache.manager.block.BlockCacheManager;
 import io.nuls.core.chain.entity.BasicTypeData;
 import io.nuls.core.chain.entity.Block;
@@ -26,8 +26,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Niels
  * @date 2017/12/11
  */
-public class DistributedBlockDownloadUtils {
-    private static final DistributedBlockDownloadUtils INSTANCE = new DistributedBlockDownloadUtils();
+public class BlockBatchDownloadUtils {
+    private static final BlockBatchDownloadUtils INSTANCE = new BlockBatchDownloadUtils();
     private String queueId = StringUtils.getNewUUID();
     private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
     private QueueService<String> queueService = NulsContext.getInstance().getService(QueueService.class);
@@ -46,10 +46,10 @@ private ReceivedTxCacheManager receivedTxCacheManager = ReceivedTxCacheManager.g
 
     private Lock lock = new ReentrantLock();
 
-    private DistributedBlockDownloadUtils() {
+    private BlockBatchDownloadUtils() {
     }
 
-    public static DistributedBlockDownloadUtils getInstance() {
+    public static BlockBatchDownloadUtils getInstance() {
         return INSTANCE;
     }
 
@@ -77,7 +77,7 @@ private ReceivedTxCacheManager receivedTxCacheManager = ReceivedTxCacheManager.g
 
     private void sendRequest(long height, String nodeId) {
         heightNodeMap.put(height, nodeId);
-        GetBlockEvent event = new GetBlockEvent();
+        GetBlockRequest event = new GetBlockRequest();
         event.setEventBody(new BasicTypeData<>(height));
         this.eventBroadcaster.sendToNode(event, nodeId);
     }

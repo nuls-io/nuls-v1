@@ -82,7 +82,13 @@ public final class GenesisBlock extends Block {
             total = total.add(coin.getNa());
         }
         data.setTotalNa(total);
-        CoinBaseTransaction tx = new CoinBaseTransaction(data, null);
+        CoinBaseTransaction tx = null;
+        try {
+            tx = new CoinBaseTransaction(data, null);
+        } catch (NulsException e) {
+            Log.error(e);
+            throw new NulsRuntimeException(e);
+        }
         tx.setHash(NulsDigestData.calcDigestData(tx));
         List<Transaction> txlist = new ArrayList<>();
         txlist.add(tx);

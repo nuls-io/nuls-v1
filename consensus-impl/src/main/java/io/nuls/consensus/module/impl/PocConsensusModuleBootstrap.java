@@ -4,7 +4,7 @@ import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.consensus.entity.tx.*;
-import io.nuls.consensus.entity.validator.block.PocBlockValidatorManager;
+import io.nuls.consensus.entity.validator.PocBlockValidatorManager;
 import io.nuls.consensus.event.*;
 import io.nuls.consensus.event.filter.*;
 import io.nuls.consensus.event.handler.*;
@@ -81,11 +81,11 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
 
         GetBlockHandler getBlockHandler = new GetBlockHandler();
         getBlockHandler.addFilter(new GetBlockEventFilter());
-        eventBusService.subscribeEvent(GetSmallBlockEvent.class, getBlockHandler);
+        eventBusService.subscribeEvent(GetSmallBlockRequest.class, getBlockHandler);
 
         GetTxGroupHandler getSmallBlockHandler = new GetTxGroupHandler();
         getSmallBlockHandler.addFilter(new GetTxGroupFilter());
-        eventBusService.subscribeEvent(GetSmallBlockEvent.class, getSmallBlockHandler);
+        eventBusService.subscribeEvent(GetSmallBlockRequest.class, getSmallBlockHandler);
 
         GetBlockHeaderHandler getBlockHeaderHandler = new GetBlockHeaderHandler();
         eventBusService.subscribeEvent(GetBlockHeaderEvent.class, getBlockHeaderHandler);

@@ -1,11 +1,10 @@
 package io.nuls.consensus.thread;
 
 import io.nuls.consensus.constant.PocConsensusConstant;
-import io.nuls.consensus.service.impl.BlockServiceImpl;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.utils.BlockInfo;
 import io.nuls.consensus.utils.DistributedBlockInfoRequestUtils;
-import io.nuls.consensus.utils.DistributedBlockDownloadUtils;
+import io.nuls.consensus.utils.BlockBatchDownloadUtils;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
@@ -97,7 +96,7 @@ public class BlockMaintenanceThread implements Runnable {
 
 
     private void downloadBlocks(List<String> nodeIdList, long startHeight, long endHeight, String endHash) {
-        DistributedBlockDownloadUtils utils = DistributedBlockDownloadUtils.getInstance();
+        BlockBatchDownloadUtils utils = BlockBatchDownloadUtils.getInstance();
         try {
             utils.request(nodeIdList, startHeight, endHeight, endHash);
         } catch (InterruptedException e) {

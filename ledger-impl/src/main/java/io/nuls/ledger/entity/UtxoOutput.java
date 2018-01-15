@@ -14,20 +14,29 @@ import java.io.IOException;
  * Created by win10 on 2017/10/30.
  */
 public class UtxoOutput extends BaseNulsData{
-    //交易
+
     private NulsDigestData txHash;
-    //下次的花费
+
     private UtxoInput spentBy;
-    //交易金额
+
     private long value;
-    //锁定时间
+
+    private byte[] address;
+
     private long lockTime;
 
     private byte[] scriptBytes;
 
     private Script script;
-    //交易输出的索引
+
     private int index;
+
+    //0: useable, 1:locked， 2：spent
+    private int status;
+
+    public static final int USEABLE = 0;
+    public static final int LOCKED = 1;
+    public static final int SPENT = 2;
 
     public UtxoOutput() {
 
@@ -66,6 +75,8 @@ public class UtxoOutput extends BaseNulsData{
         scriptBytes = byteBuffer.readBytes(signLength);
         script = new Script(scriptBytes);
     }
+
+
 
     public NulsDigestData getTxHash() {
         return txHash;
@@ -124,4 +135,19 @@ public class UtxoOutput extends BaseNulsData{
     }
 
 
+    public byte[] getAddress() {
+        return address;
+    }
+
+    public void setAddress(byte[] address) {
+        this.address = address;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
 }
