@@ -4,11 +4,11 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.exception.NulsException;
 
+import java.util.List;
+
 /**
- *
  * @author Niels
  * @date 2017/11/10
- *
  */
 public interface BlockService {
 
@@ -23,6 +23,8 @@ public interface BlockService {
     Block getBlock(String hash);
 
     Block getBlock(long height);
+
+    List<Block> getBlockList(long startHeight, long endHeight);
 
     void saveBlock(Block block);
 

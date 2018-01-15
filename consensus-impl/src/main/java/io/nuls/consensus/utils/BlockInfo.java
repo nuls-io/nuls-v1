@@ -39,9 +39,6 @@ public class BlockInfo {
     public void setNodeIdList(List<String> nodeIdList) {
         this.nodeIdList = nodeIdList;
     }
-    public void setNodeIdList(Set<String> nodeIdSet) {
-        this.nodeIdList = new ArrayList<>(nodeIdSet);
-    }
 
     public boolean isFinished() {
         return finished;

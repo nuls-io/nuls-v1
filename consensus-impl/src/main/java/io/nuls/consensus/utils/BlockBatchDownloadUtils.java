@@ -4,7 +4,6 @@ import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.consensus.event.GetBlockRequest;
 import io.nuls.consensus.cache.manager.block.BlockCacheManager;
-import io.nuls.core.chain.entity.BasicTypeData;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.Result;
 import io.nuls.core.constant.ErrorCode;
@@ -27,18 +26,34 @@ import java.util.concurrent.locks.ReentrantLock;
  * @date 2017/12/11
  */
 public class BlockBatchDownloadUtils {
+
+    private static final int DOWNLOAD_NODE_COUNT = 10;
+    private static final int DOWNLOAD_BLOCKS_PER_TIME = 10;
+    /**
+     * unit:ms
+     */
+    private static final long DOWNLOAD_IDLE_TIME_OUT = 1000;
+
     private static final BlockBatchDownloadUtils INSTANCE = new BlockBatchDownloadUtils();
-    private String queueId = StringUtils.getNewUUID();
     private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
     private QueueService<String> queueService = NulsContext.getInstance().getService(QueueService.class);
     private BlockCacheManager blockCacheManager = NulsContext.getInstance().getService(BlockCacheManager.class);
-    private Map<Long, String> heightNodeMap = new HashMap<>();
-    private Map<Long, Block> blockMap = new HashMap<>();
     private NetworkService networkService = NulsContext.getInstance().getService(NetworkService.class);
-//    private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
-private ReceivedTxCacheManager receivedTxCacheManager = ReceivedTxCacheManager.getInstance();
+
+    private ReceivedTxCacheManager receivedTxCacheManager = ReceivedTxCacheManager.getInstance();
     private ConfirmingTxCacheManager confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
+
+    private String queueId = StringUtils.getNewUUID();
+
+    private Map<String, Long> nodeEndHeightMap = new HashMap<>();
+    private Map<String, Long> nodeStartHeightMap = new HashMap<>();
+
+    private Map<String, Long> nodeTimeMap = new HashMap<>();
+
+    private Map<Long, Block> blockMap = new HashMap<>();
+
     private boolean finished = true;
+
     private List<String> nodeIdList;
     private long startHeight;
     private long endHeight;
@@ -59,7 +74,9 @@ private ReceivedTxCacheManager receivedTxCacheManager = ReceivedTxCacheManager.g
         for (String nodeId : nodeIdList) {
             this.queueService.offer(queueId, nodeId);
         }
-        heightNodeMap.clear();
+        nodeEndHeightMap.clear();
+        nodeStartHeightMap.clear();
+        nodeTimeMap.clear();
         blockMap.clear();
     }
 
@@ -69,26 +86,46 @@ private ReceivedTxCacheManager receivedTxCacheManager = ReceivedTxCacheManager.g
         this.startHeight = startHeight;
         this.endHeight = endHeight;
         this.highestHash = highestHash;
+        request(startHeight, endHeight);
+    }
+
+    private void request(long startHeight, long endHeight) throws InterruptedException {
         finished = false;
         for (long i = 0; i <= (endHeight - startHeight); i++) {
-            sendRequest(i + startHeight, this.queueService.take(queueId));
+            long start = i + startHeight;
+            long end = i + startHeight + DOWNLOAD_BLOCKS_PER_TIME;
+            if (end > endHeight) {
+                end = endHeight;
+            }
+            i = i + DOWNLOAD_BLOCKS_PER_TIME;
+            String nodeId = this.queueService.take(queueId);
+            nodeEndHeightMap.put(nodeId, end);
+            nodeStartHeightMap.put(nodeId, start);
+            sendRequest(start, end, nodeId);
         }
     }
 
-    private void sendRequest(long height, String nodeId) {
-        heightNodeMap.put(height, nodeId);
-        GetBlockRequest event = new GetBlockRequest();
-        event.setEventBody(new BasicTypeData<>(height));
+    private void sendRequest(long startHeight, long endHeight, String nodeId) {
+        nodeTimeMap.put(nodeId, System.currentTimeMillis());
+        GetBlockRequest event = new GetBlockRequest(startHeight, endHeight);
         this.eventBroadcaster.sendToNode(event, nodeId);
     }
 
-
     public boolean downloadedBlock(String nodeId, Block block) {
-        if (!this.nodeIdList.contains(nodeId) || !nodeId.equals(heightNodeMap.get(block.getHeader().getHeight()))) {
+        Long start = nodeStartHeightMap.get(nodeId);
+        Long end = nodeEndHeightMap.get(nodeId);
+        if (null == start || null == end) {
+            return false;
+        }
+        if (!this.nodeIdList.contains(nodeId) || start > block.getHeader().getHeight() || end < block.getHeader().getHeight()) {
             return false;
         }
         blockMap.put(block.getHeader().getHeight(), block);
-        this.queueService.offer(queueId, nodeId);
+        //todo 判断是否完成、标记时间
+        if (block.getHeader().getHeight() == end) {
+            this.queueService.offer(queueId, nodeId);
+        }
+
         verify();
         return true;
     }
@@ -98,7 +135,7 @@ private ReceivedTxCacheManager receivedTxCacheManager = ReceivedTxCacheManager.g
             return;
         }
         Result result = checkHash();
-        if (null==result||result.isFailed()) {
+        if (null == result || result.isFailed()) {
             return;
         }
         for (long i = 0; i <= (endHeight - startHeight); i++) {

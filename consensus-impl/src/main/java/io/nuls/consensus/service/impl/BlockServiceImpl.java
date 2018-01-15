@@ -73,6 +73,12 @@ public class BlockServiceImpl implements io.nuls.consensus.service.intf.BlockSer
         return block;
     }
 
+    @Override
+    public List<Block> getBlockList(long startHeight, long endHeight) {
+        // todo auto-generated method stub(niels)
+        return null;
+    }
+
 
     @Override
     @TransactionalAnnotation
