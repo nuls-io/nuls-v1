@@ -4,8 +4,6 @@ import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.Transaction;
-import sun.management.Agent;
 
 import java.util.List;
 import java.util.Map;

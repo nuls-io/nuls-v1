@@ -2,6 +2,7 @@ package io.nuls.ledger.service.intf;
 
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
+import io.nuls.core.chain.entity.Result;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.exception.NulsException;
 import io.nuls.ledger.entity.Balance;
@@ -42,7 +43,7 @@ public interface LedgerService {
      * @param remark
      * @return
      */
-    TransferTransaction transfer(String address, String password, String toAddress, Na amount, String remark);
+    Result transfer(String address, String password, String toAddress, Na amount, String remark);
 
     /**
      * @param address

@@ -1,7 +1,10 @@
 package io.nuls.ledger.service.impl;
 
+import io.nuls.account.entity.Account;
+import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
+import io.nuls.core.chain.entity.Result;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ErrorCode;
@@ -21,8 +24,10 @@ import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.entity.UtxoBalance;
 import io.nuls.ledger.entity.UtxoOutput;
+import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.entity.tx.TransferTransaction;
+import io.nuls.ledger.event.TransactionEvent;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.ledger.util.UtxoTransferTool;
 
@@ -118,42 +123,28 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
 
-//    @Override
-//    public Result transfer(Account account, String password, Address toAddress, Na amount, String remark) {
-//        if (account == null) {
-//            return new Result(false, "account not found");
-//        }
-//        if (!account.validatePassword(password)) {
-//            return new Result(false, "password error");
-//        }
-//        Balance balance = getBalance(account.getAddress().getBase58());
-//        if (balance.getUseable().isLessThan(amount)) {
-//            return new Result(false, "balance is not enough");
-//        }
-//        try {
-//            CoinTransferData coinData = new CoinTransferData(amount, account.getAddress().getBase58(), toAddress.getBase58());
-//            TransferTransaction tx = new TransferTransaction(coinData, password);
-//            tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
-//            aliasTx.setSign(signData(aliasTx.getHash(), account, password));
-////            tx.setSign();
-////            TransferCoinEvent
-//        } catch (IOException e) {
-//            Log.error(e);
-//            return new Result(false, "transaction failed");
-//        } catch (Exception e) {
-//            Log.error(e);
-//            return new Result(false, e.getMessage());
-//        }
-//
-//        return null;
-//    }
-
-
     @Override
-    public TransferTransaction transfer(String address, String password, String toAddress, Na amount, String remark) {
-        // todo auto-generated method stub(niels)
+    public Result transfer(String address, String password, String toAddress, Na amount, String remark) {
+        try {
+            CoinTransferData coinData = new CoinTransferData(amount, address, toAddress);
+            TransferTransaction tx = new TransferTransaction(coinData, password);
+            TransactionEvent event = new TransactionEvent();
+            event.setEventBody(tx);
+            eventBroadcaster.broadcastAndCache(event, true);
+        } catch (Exception e) {
+            Log.error(e);
+            return new Result(false, e.getMessage());
+        }
+
         return null;
     }
+
+
+//    @Override
+//    public TransferTransaction transfer(String address, String password, String toAddress, Na amount, String remark) {
+//        // todo auto-generated method stub(niels)
+//        return null;
+//    }
 
     @Override
     public LockNulsTransaction lock(String address, String password, Na amount, long unlockTime, long unlockHeight) {
