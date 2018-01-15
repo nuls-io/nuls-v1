@@ -1,7 +1,5 @@
 package io.nuls.core.utils.network;
 
-import sun.net.util.IPAddressUtil;
-
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -13,7 +11,7 @@ import java.util.Set;
  * @author vivi
  * @date 2017/11/22.
  */
-public class IPUtil extends IPAddressUtil {
+public class IPUtil {
 
     /**
      * 多IP处理，可以得到最终ip

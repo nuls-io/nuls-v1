@@ -12,7 +12,6 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.NulsDataValidator;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**

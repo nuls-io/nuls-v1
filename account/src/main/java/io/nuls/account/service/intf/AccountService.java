@@ -29,6 +29,8 @@ public interface AccountService {
 
     Account getAccount(String address);
 
+    boolean isMine(String address);
+
     List<Account> getAccountList();
 
     Address getAddress(String pubKey);

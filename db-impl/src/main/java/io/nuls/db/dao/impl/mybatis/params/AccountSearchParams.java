@@ -2,7 +2,6 @@ package io.nuls.db.dao.impl.mybatis.params;
 
 import io.nuls.db.dao.impl.mybatis.util.SearchOperator;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
-import sun.security.krb5.internal.PAData;
 
 import java.util.Map;
 

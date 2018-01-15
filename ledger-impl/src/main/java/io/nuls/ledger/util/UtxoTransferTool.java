@@ -2,7 +2,6 @@ package io.nuls.ledger.util;
 
 import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.script.Script;
 import io.nuls.core.utils.crypto.Hex;
