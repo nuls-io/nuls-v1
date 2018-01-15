@@ -125,7 +125,12 @@ public class BlockCacheManager {
         this.smallBlockCacheMap.destroy();
     }
 
-    public void removeBlock(String hash) {
+    public void removeBlock(BlockHeader header) {
+        if (null == header) {
+            return;
+        }
+        this.bifurcateProcessor.removeHeight(header.getHeight());
+        String hash = header.getHash().getDigestHex();
         this.blockCacheMap.remove(hash);
         this.smallBlockCacheMap.remove(hash);
         this.headerCacheMap.remove(hash);

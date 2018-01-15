@@ -99,4 +99,12 @@ public class BlockHeaderChain implements NulsCloneable {
         this.headerDigestList = headerDigestList;
     }
 
+    public HeaderDigest getHeaderDigest(long height) {
+        for(HeaderDigest hd:this.headerDigestList){
+            if(hd.getHeight()==height){
+                return hd;
+            }
+        }
+        return null;
+    }
 }

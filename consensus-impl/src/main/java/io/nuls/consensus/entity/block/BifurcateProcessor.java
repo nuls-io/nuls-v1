@@ -66,6 +66,16 @@ public class BifurcateProcessor {
     }
 
     public void removeHeight(long height) {
-        this.chainList.forEach((BlockHeaderChain chain) -> chain.removeHeaderDigest(height));
+        this.chainList.forEach((BlockHeaderChain chain) -> removeBlock(chain,height));
+
+    }
+
+    private void removeBlock(BlockHeaderChain chain, long height) {
+        HeaderDigest hd = chain.getHeaderDigest(height);
+        if(hd==null){
+            return;
+        }
+        chain.removeHeaderDigest(height);
+
     }
 }
