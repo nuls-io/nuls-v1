@@ -71,7 +71,8 @@ public class UtxoCoinManager {
     }
 
     /**
-     *  Utxo is used to ensure that each transaction will not double
+     * Utxo is used to ensure that each transaction will not double
+     *
      * @param address
      * @param value
      * @return
@@ -91,14 +92,63 @@ public class UtxoCoinManager {
                 output.setStatus(output.LOCKED);
                 unSpends.add(output);
                 amount = amount.add(Na.valueOf(output.getValue()));
-                if(amount.isGreaterThan(value)) {
+                if (amount.isGreaterThan(value)) {
                     break;
                 }
             }
-
         } catch (Exception e) {
             Log.error(e);
-            for(UtxoOutput output : unSpends) {
+            for (UtxoOutput output : unSpends) {
+                output.setStatus(output.USEABLE);
+            }
+        } finally {
+            lock.unlock();
+        }
+        return unSpends;
+    }
+
+    public List<UtxoOutput> getAccountsUnSpend(List<String> addressList, Na value) {
+        lock.lock();
+        List<UtxoOutput> unSpends = new ArrayList<>();
+        try {
+
+            // first, check use-able is enough
+            Na amount = Na.ZERO;
+            boolean enough = false;
+            for (String address : addressList) {
+                UtxoBalance balance = (UtxoBalance) cacheService.getBalance(address);
+                amount = amount.add(balance.getUseable());
+                if (amount.isGreaterThan(value)) {
+                    enough = true;
+                    break;
+                }
+            }
+            if (!enough) {
+                return unSpends;
+            }
+
+            //find unSpend utxo
+            amount = Na.ZERO;
+            enough = false;
+            for (String address : addressList) {
+                UtxoBalance balance = (UtxoBalance) cacheService.getBalance(address);
+                for (int i = 0; i < balance.getUnSpends().size(); i++) {
+                    UtxoOutput output = balance.getUnSpends().get(i);
+                    output.setStatus(output.LOCKED);
+                    unSpends.add(output);
+                    amount = amount.add(Na.valueOf(output.getValue()));
+                    if (amount.isGreaterThan(value)) {
+                        enough = true;
+                        break;
+                    }
+                }
+                if(enough) {
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            Log.error(e);
+            for (UtxoOutput output : unSpends) {
                 output.setStatus(output.USEABLE);
             }
         } finally {

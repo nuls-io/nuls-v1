@@ -54,6 +54,11 @@ public class EventBroadcasterImpl implements EventBroadcaster {
         return getNodeIdList(result);
     }
 
+    @Override
+    public void broadcastHashAndCacheAysn(BaseEvent event, boolean needToSelf, String excludeNodeId) {
+
+    }
+
     private List<String> getNodeIdList(BroadcastResult result) {
         List<String> list = new ArrayList<>();
         if (!result.isSuccess() || result.getBroadcastNodes() == null || result.getBroadcastNodes().isEmpty()) {
@@ -87,6 +92,11 @@ public class EventBroadcasterImpl implements EventBroadcaster {
             eventCacheService.cacheSendedEvent(event);
         }
         return getNodeIdList(result);
+    }
+
+
+    public void broadcastAndCacheAysn(BaseEvent event, boolean needToSelf) {
+
     }
 
     @Override

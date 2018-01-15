@@ -24,11 +24,13 @@ import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.entity.UtxoBalance;
 import io.nuls.ledger.entity.UtxoOutput;
+import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.entity.tx.TransferTransaction;
 import io.nuls.ledger.event.TransactionEvent;
 import io.nuls.ledger.service.intf.LedgerService;
+import io.nuls.ledger.util.UtxoTransactionTool;
 import io.nuls.ledger.util.UtxoTransferTool;
 
 import java.util.ArrayList;
@@ -122,12 +124,12 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         return balance;
     }
 
-
     @Override
     public Result transfer(String address, String password, String toAddress, Na amount, String remark) {
+        TransferTransaction tx = null;
         try {
             CoinTransferData coinData = new CoinTransferData(amount, address, toAddress);
-            TransferTransaction tx = new TransferTransaction(coinData, password);
+            tx = UtxoTransactionTool.getInstance().createTransferTx(coinData, password, remark);
             TransactionEvent event = new TransactionEvent();
             event.setEventBody(tx);
             eventBroadcaster.broadcastAndCache(event, true);
@@ -136,20 +138,43 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             return new Result(false, e.getMessage());
         }
 
-        return null;
+        return new Result(true, "OK", tx.getHash().getDigestHex());
+    }
+
+    @Override
+    public Result transfer(List<String> addressList, String password, String toAddress, Na amount, String remark) {
+        TransferTransaction tx = null;
+        try {
+            CoinTransferData coinData = new CoinTransferData(amount, addressList, toAddress);
+            tx = UtxoTransactionTool.getInstance().createTransferTx(coinData, password, remark);
+            TransactionEvent event = new TransactionEvent();
+            event.setEventBody(tx);
+            eventBroadcaster.broadcastAndCache(event, true);
+        } catch (Exception e) {
+            Log.error(e);
+            return new Result(false, e.getMessage());
+        }
+
+        return new Result(true, "OK", tx.getHash().getDigestHex());
     }
 
 
-//    @Override
-//    public TransferTransaction transfer(String address, String password, String toAddress, Na amount, String remark) {
-//        // todo auto-generated method stub(niels)
-//        return null;
-//    }
-
     @Override
-    public LockNulsTransaction lock(String address, String password, Na amount, long unlockTime, long unlockHeight) {
-        // todo auto-generated method stub(niels)
-        return null;
+    public Result lock(String address, String password, Na amount, long unlockTime) {
+        LockNulsTransaction tx = null;
+        try {
+            CoinTransferData coinData = new CoinTransferData(amount, address);
+            coinData.addTo(address, new Coin(amount, unlockTime));
+            tx = UtxoTransactionTool.getInstance().createLockNulsTx(coinData, password);
+            TransactionEvent event = new TransactionEvent();
+            event.setEventBody(tx);
+            eventBroadcaster.broadcastAndCache(event, true);
+
+        } catch (Exception e) {
+            return new Result(false, e.getMessage());
+        }
+
+        return new Result(true, "OK", tx.getHash().getDigestHex());
     }
 
     @Override
@@ -228,4 +253,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         }
         return list;
     }
+
+
 }
