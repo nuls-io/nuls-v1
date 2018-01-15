@@ -1,11 +1,13 @@
 package io.nuls.core.utils.network;
 
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.util.Enumeration;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.*;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author vivi
@@ -13,37 +15,50 @@ import java.util.Set;
  */
 public class IPUtil {
 
-    /**
-     * 多IP处理，可以得到最终ip
-     *
-     * @return Set<String>
-     */
+    public static void main(String[] args) {
+        getIps();
+    }
+
     public static Set<String> getIps() {
-        //返回本机所有的IP地址 ，包括了内网和外网的IP4地址
-        Set<String> ips = new HashSet<String>();
+        Set<String> ips = new HashSet<>();
         try {
-            Enumeration<NetworkInterface> netInterfaces = NetworkInterface.getNetworkInterfaces();
-            InetAddress ip = null;
-            while (netInterfaces.hasMoreElements()) {
-                NetworkInterface ni = netInterfaces.nextElement();
-                Enumeration<InetAddress> address = ni.getInetAddresses();
-                while (address.hasMoreElements()) {
-                    ip = address.nextElement();
-                    if (!ip.isSiteLocalAddress() && !ip.isLoopbackAddress()
-                            && ip.getHostAddress().indexOf(":") == -1) {
-                        // 外网IP
-                        ips.add(ip.getHostAddress());
-                        break;
-                    } else if (ip.isSiteLocalAddress()
-                            && !ip.isLoopbackAddress()
-                            && ip.getHostAddress().indexOf(":") == -1) {
-                        // 内网IP
-                        ips.add(ip.getHostAddress());
-                    }
+            ips.add(InetAddress.getLocalHost().getHostAddress());
+        } catch (UnknownHostException e) {
+        }
+
+        String chinaz = "http://ip.chinaz.com";
+
+        StringBuilder inputLine = new StringBuilder();
+        String read = "";
+        URL url = null;
+        HttpURLConnection urlConnection = null;
+        BufferedReader in = null;
+        try {
+            url = new URL(chinaz);
+            urlConnection = (HttpURLConnection) url.openConnection();
+            in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
+            while ((read = in.readLine()) != null) {
+                inputLine.append(read + "\r\n");
+            }
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
                 }
             }
-        } catch (SocketException e) {
-            e.printStackTrace();
+        }
+
+        Pattern p = Pattern.compile("\\<dd class\\=\"fz24\">(.*?)\\<\\/dd>");
+        Matcher m = p.matcher(inputLine.toString());
+        if (m.find()) {
+            ips.add(m.group(1));
         }
         return ips;
     }

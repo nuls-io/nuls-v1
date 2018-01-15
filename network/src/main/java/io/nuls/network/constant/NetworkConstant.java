@@ -19,10 +19,6 @@ public interface NetworkConstant {
     String NETWORK_SERVER_PORT = "network.server.port";
     String NETWORK_EXTER_PORT = "network.external.port";
     String NETWORK_MAGIC = "network.magic";
-    String NETWORK_PORT_TEST = "test.port";
-    String NETWORK_MAGIC_TEST = "test.magic";
-    String NETWORK_PORT_DEV = "dev.port";
-    String NETWORK_MAGIC_DEV = "dev.magic";
 
     String NETWORK_NODE_MAX_IN = "net.node.max.in";
     String NETWORK_NODE_MAX_OUT = "net.node.max.out";
@@ -30,7 +26,7 @@ public interface NetworkConstant {
     String NETWORK_NODE_IN_GROUP = "inNodes";
     String NETWORK_NODE_OUT_GROUP = "outNodes";
     String NETWORK_NODE_CONSENSUS_GROUP = "consensus_Group";
-    int NETWORK_NODE_OUT_MIN_COUNT = 1;
+    int NETWORK_BROAD_SUCCESS_MIN_COUNT = 1;
     int NETWORK_BROAD_MAX_TRY_COUNT = 3;
 
     //network message type

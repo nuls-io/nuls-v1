@@ -1,9 +1,6 @@
 package io.nuls.network.entity.param;
 
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.network.IPUtil;
-import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.message.NetworkEventHandlerFactory;
 import io.nuls.network.message.filter.NulsMessageFilter;
 
@@ -77,4 +74,5 @@ public abstract class AbstractNetworkParam {
     public Set<String> getLocalIps() {
         return localIps;
     }
+
 }

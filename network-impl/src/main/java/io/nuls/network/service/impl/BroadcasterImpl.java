@@ -39,7 +39,7 @@ public class BroadcasterImpl implements Broadcaster {
     private BroadcastResult broadcast(NulsMessage message, String excludeNodeId) {
         List<Node> broadNodes = nodesManager.getAvailableNodes(excludeNodeId);
         //only one node connected can't send message
-        if (broadNodes.size() <= NetworkConstant.NETWORK_NODE_OUT_MIN_COUNT) {
+        if (broadNodes.size() <= NetworkConstant.NETWORK_BROAD_SUCCESS_MIN_COUNT) {
             return new BroadcastResult(false, "no node can be broadcast");
         }
 
