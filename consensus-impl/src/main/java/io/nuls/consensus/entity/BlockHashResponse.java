@@ -72,9 +72,33 @@ public class BlockHashResponse extends BaseNulsData {
         }
     }
 
-    public NulsDigestData getHash(){
+    public boolean isBest() {
+        return best;
+    }
+
+    public void setBest(boolean best) {
+        this.best = best;
+    }
+
+    public List<Long> getHeightList() {
+        return heightList;
+    }
+
+    public void setHeightList(List<Long> heightList) {
+        this.heightList = heightList;
+    }
+
+    public List<NulsDigestData> getHashList() {
+        return hashList;
+    }
+
+    public void setHashList(List<NulsDigestData> hashList) {
+        this.hashList = hashList;
+    }
+
+    public NulsDigestData getHash() {
         try {
-            return NulsDigestData.calcDigestData(this.serialize())
+            return NulsDigestData.calcDigestData(this.serialize());
         } catch (IOException e) {
             Log.error(e);
         }

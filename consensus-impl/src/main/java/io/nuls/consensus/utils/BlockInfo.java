@@ -2,34 +2,42 @@ package io.nuls.consensus.utils;
 
 import io.nuls.core.chain.entity.NulsDigestData;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Niels
  * @date 2017/12/11
  */
 public class BlockInfo {
-
-    private long height;
-    private NulsDigestData hash;
+    private long bestHeight ;
+    private NulsDigestData bestHash ;
+    private Map<Long, NulsDigestData> heightHashMap = new HashMap<>();
     private List<String> nodeIdList;
     private boolean finished = false;
-    public long getHeight() {
-        return height;
+
+
+    public NulsDigestData getHash(long height) {
+        return heightHashMap.get(height);
     }
 
-    public void setHeight(long height) {
-        this.height = height;
+    public void putHash(long height, NulsDigestData hash) {
+        heightHashMap.put(height, hash);
     }
 
-    public NulsDigestData getHash() {
-        return hash;
+    public long getBestHeight() {
+        return bestHeight;
     }
 
-    public void setHash(NulsDigestData hash) {
-        this.hash = hash;
+    public void setBestHeight(long bestHeight) {
+        this.bestHeight = bestHeight;
+    }
+
+    public NulsDigestData getBestHash() {
+        return bestHash;
+    }
+
+    public void setBestHash(NulsDigestData bestHash) {
+        this.bestHash = bestHash;
     }
 
     public List<String> getNodeIdList() {

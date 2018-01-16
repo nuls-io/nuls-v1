@@ -3,6 +3,7 @@ package io.nuls.consensus.utils;
 import io.nuls.consensus.entity.BlockHashResponse;
 import io.nuls.consensus.event.GetBlocksHashRequest;
 import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -109,8 +110,19 @@ public class DistributedBlockInfoRequestUtils {
             if (nodes.size() > halfSize) {
                 result = new BlockInfo();
                 BlockHashResponse response = hashesMap.get(result.getNodeIdList().get(0));
-                result.setHash(header.getHash());
-                result.setHeight(header.getHeight());
+                Long bestHeight = 0L;
+                NulsDigestData bestHash = null;
+                for (int i = 0; i < response.getHeightList().size(); i++) {
+                    Long height = response.getHeightList().get(i);
+                    NulsDigestData hash = response.getHashList().get(i);
+                    if (height > bestHeight) {
+                        bestHash = hash;
+                        bestHeight = height;
+                    }
+                    result.putHash(height, hash);
+                }
+                result.setBestHash(bestHash);
+                result.setBestHeight(bestHeight);
                 result.setNodeIdList(nodes);
                 result.setFinished(true);
                 break;
