@@ -87,7 +87,6 @@ public class BlockServiceImpl implements io.nuls.consensus.service.intf.BlockSer
         for (int x = 0; x < block.getHeader().getTxCount(); x++) {
             Transaction tx = block.getTxs().get(x);
             tx.setBlockHeight(block.getHeader().getHeight());
-            tx.setBlockHeight(block.getHeader().getHeight());
             try {
                 ledgerService.commitTx(tx);
             } catch (Exception e) {
@@ -97,7 +96,7 @@ public class BlockServiceImpl implements io.nuls.consensus.service.intf.BlockSer
             }
         }
         blockStorageService.save(block.getHeader());
-        ledgerService.saveTxList(block.getHeader().getHeight(),block.getHeader().getHash().getDigestHex(),block.getTxs());
+        ledgerService.saveTxList(block.getTxs());
     }
 
 
