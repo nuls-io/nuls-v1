@@ -2,9 +2,10 @@ package io.nuls.ledger.entity.params;
 
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.utils.str.StringUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -13,7 +14,7 @@ import java.util.Map;
  */
 public class CoinTransferData {
 
-    private Map<String, Na> fromMap;
+    private List from;
 
     private Map<String, Coin> toMap;
 
@@ -22,7 +23,7 @@ public class CoinTransferData {
     private Na fee;
 
     public CoinTransferData() {
-        this.fromMap = new HashMap<>();
+        this.from = new ArrayList();
         this.toMap = new HashMap<>();
         this.fee = NulsContext.getInstance().getTxFee();
     }
@@ -32,22 +33,34 @@ public class CoinTransferData {
         this.totalNa = totalNa;
     }
 
+    public CoinTransferData(Na totalNa, String from) {
+        this(totalNa);
+        this.addFrom(from, totalNa);
+    }
+
     public CoinTransferData(Na totalNa, String from, String to) {
         this(totalNa);
-        if (StringUtils.isNotBlank(from)) {
-            this.addFrom(from, totalNa);
-        }
-        if (StringUtils.isNotBlank(to)) {
-            this.addTo(to, new Coin(totalNa));
-        }
+        this.addFrom(from, totalNa);
+        this.addTo(to, new Coin(totalNa));
     }
 
-    public Map<String, Na> getFromMap() {
-        return fromMap;
+    public CoinTransferData(Na totalNa, List<String> from) {
+        this(totalNa);
+        this.from = from;
     }
 
-    public void setFromMap(Map<String, Na> fromMap) {
-        this.fromMap = fromMap;
+    public CoinTransferData(Na totalNa, List<String> from, String to) {
+        this(totalNa);
+        this.from = from;
+        this.addTo(to, new Coin(totalNa));
+    }
+
+    public void setFrom(List<String> from) {
+        this.from = from;
+    }
+
+    public List<String> getFrom() {
+        return from;
     }
 
     public Map<String, Coin> getToMap() {
@@ -75,7 +88,7 @@ public class CoinTransferData {
     }
 
     public void addFrom(String address, Na na) {
-        this.fromMap.put(address, na);
+        this.from.add(address);
     }
 
     public void addTo(String address, Coin coin) {

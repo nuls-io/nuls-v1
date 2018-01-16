@@ -29,7 +29,7 @@ public class CoinBaseTransaction<T extends BaseNulsData> extends AbstractCoinTra
     }
 
     @Override
-    protected T parseTxData(NulsByteBuffer byteBuffer) {
+    public T parseTxData(NulsByteBuffer byteBuffer) {
         // todo auto-generated method stub(niels)
         return null;
     }

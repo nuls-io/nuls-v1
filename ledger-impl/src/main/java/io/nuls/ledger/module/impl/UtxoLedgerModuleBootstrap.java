@@ -38,7 +38,7 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
         coinManager = UtxoCoinManager.getInstance();
         UtxoOutputDataService outputDataService = NulsContext.getInstance().getService(UtxoOutputDataService.class);
         coinManager.setOutputDataService(outputDataService);
-
+        ledgerService.init();
         addNormalTxValidator();
         registerService();
     }

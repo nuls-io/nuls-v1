@@ -1,7 +1,5 @@
 package io.nuls.db.entity;
 
-import io.nuls.core.crypto.VarInt;
-
 /**
  * @author Niels
  * @date 2017/11/20
@@ -16,11 +14,13 @@ public class TransactionPo {
 
     private Long blockHeight;
 
-    private String blockHash;
+    private Long fee;
+
+    private String remark;
 
     private int index;
 
-    private byte[] txdata;
+    private byte[] txData;
 
     public String getHash() {
         return hash;
@@ -54,20 +54,12 @@ public class TransactionPo {
         this.blockHeight = blockHeight;
     }
 
-    public String getBlockHash() {
-        return blockHash;
+    public byte[] getTxData() {
+        return txData;
     }
 
-    public void setBlockHash(String blockHash) {
-        this.blockHash = blockHash;
-    }
-
-    public byte[] getTxdata() {
-        return txdata;
-    }
-
-    public void setTxdata(byte[] txdata) {
-        this.txdata = txdata;
+    public void setTxData(byte[] txdata) {
+        this.txData = txdata;
     }
 
     public int getIndex() {
@@ -76,5 +68,21 @@ public class TransactionPo {
 
     public void setIndex(int index) {
         this.index = index;
+    }
+
+    public Long getFee() {
+        return fee;
+    }
+
+    public void setFee(Long fee) {
+        this.fee = fee;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 }

@@ -7,6 +7,7 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.tx.serivce.TransactionService;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +34,16 @@ public class TransactionManager {
         return TX_MAP.get(txType);
     }
 
-    public static List<Transaction> getInstances(NulsByteBuffer byteBuffer) throws InstantiationException, IllegalAccessException, NulsException {
+    public static Transaction getInstanceByType(int txType) throws Exception {
+        Class<? extends Transaction> txClass = getTxClass(txType);
+        if (null == txClass) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "transaction type not exist!");
+        }
+        Transaction tx = txClass.getConstructor().newInstance();
+        return tx;
+    }
+
+    public static List<Transaction> getInstances(NulsByteBuffer byteBuffer) throws Exception {
         List<Transaction> list = new ArrayList<>();
         while (!byteBuffer.isFinished()) {
             list.add(getInstance(byteBuffer));
@@ -41,13 +51,13 @@ public class TransactionManager {
         return list;
     }
 
-    public static Transaction getInstance(NulsByteBuffer byteBuffer) throws IllegalAccessException, InstantiationException, NulsException {
+    public static Transaction getInstance(NulsByteBuffer byteBuffer) throws Exception {
         int txType = (int) new NulsByteBuffer(byteBuffer.getPayloadByCursor()).readVarInt();
         Class<? extends Transaction> txClass = getTxClass(txType);
         if (null == txClass) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "transaction type not exist!");
         }
-        Transaction tx = byteBuffer.readNulsData(txClass.newInstance());
+        Transaction tx = byteBuffer.readNulsData(txClass.getConstructor().newInstance());
         return tx;
     }
 

@@ -9,6 +9,7 @@ import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.entity.tx.TransferTransaction;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -16,6 +17,8 @@ import java.util.List;
  * @date 2017/11/9
  */
 public interface LedgerService {
+
+    void init();
 
     /**
      * @param hash
@@ -45,23 +48,25 @@ public interface LedgerService {
      */
     Result transfer(String address, String password, String toAddress, Na amount, String remark);
 
+    Result transfer(List<String> addressList, String password, String toAddress, Na amount, String remark);
+
     /**
+     * unlockTime < 100,000,000,000  means the blockHeight
+     * unlockTime > 100,000,000,000  means the timestamp
+     *
      * @param address
      * @param password
      * @param amount
      * @param unlockTime
-     * @param unlockHeight
      * @return
      */
-    LockNulsTransaction lock(String address, String password, Na amount, long unlockTime, long unlockHeight);
+    Result lock(String address, String password, Na amount, long unlockTime);
 
     /**
      * @param txList
      * @return
      */
-    boolean saveTxList(long height,String blockHash,List<Transaction> txList);
-
-    boolean saveTxList(long height, long blockHash, List<Transaction> txList);
+    boolean saveTxList(long height, String blockHash, List<Transaction> txList) throws IOException;
 
     /**
      * @param address
@@ -78,7 +83,9 @@ public interface LedgerService {
      * @return
      */
     List<Transaction> getListByHashs(List<NulsDigestData> txHashList);
-    List<Transaction> getListByHeight(long startHeight,long endHeight);
+
+    List<Transaction> getListByHeight(long startHeight, long endHeight);
+
     List<Transaction> getListByHeight(long height);
 
     void rollbackTx(Transaction tx) throws NulsException;

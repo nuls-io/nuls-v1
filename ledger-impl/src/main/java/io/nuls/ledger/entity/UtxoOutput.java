@@ -2,6 +2,7 @@ package io.nuls.ledger.entity;
 
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.NulsDigestData;
+import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.crypto.script.Script;
 import io.nuls.core.exception.NulsException;
@@ -13,9 +14,11 @@ import java.io.IOException;
 /**
  * Created by win10 on 2017/10/30.
  */
-public class UtxoOutput extends BaseNulsData{
+public class UtxoOutput extends BaseNulsData {
 
     private NulsDigestData txHash;
+
+    private Transaction parent;
 
     private UtxoInput spentBy;
 
@@ -65,17 +68,16 @@ public class UtxoOutput extends BaseNulsData{
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        if(byteBuffer == null ) {
+        if (byteBuffer == null) {
             return;
         }
         value = byteBuffer.readInt64();
         lockTime = byteBuffer.readUint32();
         //赎回脚本名的长度
-        int signLength = (int)byteBuffer.readVarInt();
+        int signLength = (int) byteBuffer.readVarInt();
         scriptBytes = byteBuffer.readBytes(signLength);
         script = new Script(scriptBytes);
     }
-
 
 
     public NulsDigestData getTxHash() {
@@ -149,5 +151,13 @@ public class UtxoOutput extends BaseNulsData{
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public Transaction getParent() {
+        return parent;
+    }
+
+    public void setParent(Transaction parent) {
+        this.parent = parent;
     }
 }

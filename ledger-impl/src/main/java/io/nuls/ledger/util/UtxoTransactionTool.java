@@ -1,11 +1,10 @@
 package io.nuls.ledger.util;
 
-import io.nuls.account.entity.Account;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.ledger.entity.params.CoinTransferData;
+import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.entity.tx.TransferTransaction;
 
 public class UtxoTransactionTool {
@@ -26,8 +25,16 @@ public class UtxoTransactionTool {
         TransferTransaction tx = new TransferTransaction(transferData, password);
         tx.setRemark(remark.getBytes(NulsContext.DEFAULT_ENCODING));
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
-        tx.setSign(getAccountService().signData(tx.getHash(), password));
 
+        tx.setSign(getAccountService().signData(tx.getHash(), password));
+        return tx;
+    }
+
+    public LockNulsTransaction createLockNulsTx(CoinTransferData transferData, String password) throws Exception {
+        LockNulsTransaction tx = new LockNulsTransaction(transferData, password);
+        tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
+
+        tx.setSign(getAccountService().signData(tx.getHash(), password));
         return tx;
     }
 
@@ -37,4 +44,5 @@ public class UtxoTransactionTool {
         }
         return accountService;
     }
+
 }
