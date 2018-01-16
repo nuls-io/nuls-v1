@@ -17,7 +17,7 @@ public class PocExitConsensusTransaction extends UnlockNulsTransaction<NulsDiges
     }
 
     @Override
-    protected NulsDigestData parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
+    public NulsDigestData parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
         return byteBuffer.readHash();
     }
 }

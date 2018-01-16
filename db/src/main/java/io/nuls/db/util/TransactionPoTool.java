@@ -5,12 +5,10 @@ import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.entity.TransactionPo;
-import io.nuls.db.entity.UtxoOutputPo;
 
 import java.io.IOException;
 
@@ -20,7 +18,7 @@ import java.io.IOException;
  */
 public class TransactionPoTool {
 
-    public static TransactionPo toPojo(Transaction tx, int index) throws IOException {
+    public static TransactionPo toPojo(Transaction tx) throws IOException {
         TransactionPo po = new TransactionPo();
         if (tx.getHash() != null) {
             po.setHash(tx.getHash().getDigestHex());
@@ -28,7 +26,7 @@ public class TransactionPoTool {
         po.setType(tx.getType());
         po.setCreateTime(tx.getTime());
         po.setBlockHeight(tx.getBlockHeight());
-        po.setIndex(index);
+        po.setIndex(tx.getIndex());
 
         if (null != tx.getTxData()) {
             po.setTxData(tx.getTxData().serialize());
@@ -43,7 +41,7 @@ public class TransactionPoTool {
         return po;
     }
 
-    public static TransactionLocalPo toPojoLocal(Transaction tx, int index) throws IOException {
+    public static TransactionLocalPo toPojoLocal(Transaction tx) throws IOException {
         TransactionLocalPo po = new TransactionLocalPo();
         if (tx.getHash() != null) {
             po.setHash(tx.getHash().getDigestHex());
@@ -51,7 +49,7 @@ public class TransactionPoTool {
         po.setType(tx.getType());
         po.setCreateTime(tx.getTime());
         po.setBlockHeight(tx.getBlockHeight());
-        po.setIndex(index);
+        po.setIndex(tx.getIndex());
 
         if (null != tx.getTxData()) {
             po.setTxData(tx.getTxData().serialize());
@@ -66,13 +64,13 @@ public class TransactionPoTool {
         return po;
     }
 
-
     public static Transaction toTransaction(TransactionPo po) throws Exception {
         Transaction tx = TransactionManager.getInstanceByType(po.getType());
         tx.setHash(new NulsDigestData(Hex.decode(po.getHash())));
         tx.setTime(po.getCreateTime());
         tx.setBlockHeight(po.getBlockHeight());
         tx.setFee(Na.valueOf(po.getFee()));
+        tx.setIndex(po.getIndex());
         tx.setRemark(po.getRemark().getBytes(NulsContext.DEFAULT_ENCODING));
         tx.parseTxData(new NulsByteBuffer(po.getTxData()));
         return tx;
@@ -84,6 +82,7 @@ public class TransactionPoTool {
         tx.setTime(po.getCreateTime());
         tx.setBlockHeight(po.getBlockHeight());
         tx.setFee(Na.valueOf(po.getFee()));
+        tx.setIndex(po.getIndex());
         tx.setRemark(po.getRemark().getBytes(NulsContext.DEFAULT_ENCODING));
         tx.parseTxData(new NulsByteBuffer(po.getTxData()));
         return tx;

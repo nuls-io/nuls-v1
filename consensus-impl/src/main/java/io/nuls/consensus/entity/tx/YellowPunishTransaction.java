@@ -18,7 +18,7 @@ public class YellowPunishTransaction extends Transaction<YellowPunishData> {
     }
 
     @Override
-    protected YellowPunishData parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
+    public YellowPunishData parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
         return byteBuffer.readNulsData(new YellowPunishData());
     }
 }

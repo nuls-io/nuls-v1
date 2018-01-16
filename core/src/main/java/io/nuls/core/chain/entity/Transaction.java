@@ -20,21 +20,23 @@ import java.util.List;
  */
 public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData implements NulsCloneable {
 
-    private NulsDigestData hash;
+    protected NulsDigestData hash;
 
-    private int type;
+    protected int type;
 
     protected long time;
 
-    private long blockHeight;
+    protected long blockHeight;
 
-    private Na fee;
+    protected Na fee;
 
     protected byte[] remark;
 
-    private NulsSignData sign;
+    protected int index;
 
-    private T txData;
+    protected NulsSignData sign;
+
+    protected T txData;
 
     public Transaction(int type) {
         this.dataType = NulsDataType.TRANSACTION;
@@ -159,5 +161,13 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
 
     public void setBlockHeight(long blockHeight) {
         this.blockHeight = blockHeight;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
     }
 }

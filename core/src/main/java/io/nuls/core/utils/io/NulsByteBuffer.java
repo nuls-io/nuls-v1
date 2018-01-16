@@ -187,7 +187,12 @@ public class NulsByteBuffer {
         return this.readNulsData(new NulsSignData());
     }
 
-    public Transaction readTransaction() throws Exception {
-        return TransactionManager.getInstance(this);
+    public Transaction readTransaction() throws NulsException {
+        try {
+            return TransactionManager.getInstance(this);
+        } catch (Exception e) {
+            Log.error(e);
+            throw new NulsException(ErrorCode.DATA_PARSE_ERROR);
+        }
     }
 }
