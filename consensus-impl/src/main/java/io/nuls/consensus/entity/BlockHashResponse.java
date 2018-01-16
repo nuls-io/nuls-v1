@@ -18,16 +18,13 @@ import java.util.List;
  */
 public class BlockHashResponse extends BaseNulsData {
 
-    private boolean best;
+    private List<Long> heightList = new ArrayList<>();
 
-    private List<Long> heightList;
-
-    private List<NulsDigestData> hashList;
+    private List<NulsDigestData> hashList = new ArrayList<>();
 
     @Override
     public int size() {
-        //best
-        int size = 1;
+        int size = 0;
         size += Utils.sizeOfSerialize(heightList.size());
         for (Long height : heightList) {
             size += Utils.sizeOfSerialize(height);
@@ -41,7 +38,6 @@ public class BlockHashResponse extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeBoolean(best);
         stream.writeVarInt(heightList.size());
         for (Long height : heightList) {
             stream.writeVarInt(height);
@@ -54,7 +50,6 @@ public class BlockHashResponse extends BaseNulsData {
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        best = byteBuffer.readBoolean();
         int heightListSize = byteBuffer.readInt32LE();
         if (heightListSize > 0) {
             this.heightList = new ArrayList<>();
@@ -72,28 +67,12 @@ public class BlockHashResponse extends BaseNulsData {
         }
     }
 
-    public boolean isBest() {
-        return best;
-    }
-
-    public void setBest(boolean best) {
-        this.best = best;
-    }
-
     public List<Long> getHeightList() {
         return heightList;
     }
 
-    public void setHeightList(List<Long> heightList) {
-        this.heightList = heightList;
-    }
-
     public List<NulsDigestData> getHashList() {
         return hashList;
-    }
-
-    public void setHashList(List<NulsDigestData> hashList) {
-        this.hashList = hashList;
     }
 
     public NulsDigestData getHash() {
@@ -103,5 +82,27 @@ public class BlockHashResponse extends BaseNulsData {
             Log.error(e);
         }
         return null;
+    }
+
+    public void put(long height, NulsDigestData hash) {
+        heightList.add(height);
+        hashList.add(hash);
+    }
+
+    public void setHeightList(List<Long> heightList) {
+        this.heightList = heightList;
+    }
+
+    public void setHashList(List<NulsDigestData> hashList) {
+        this.hashList = hashList;
+    }
+
+    public void merge(BlockHashResponse response) {
+        long lastEnd = this.heightList.get(heightList.size() - 1);
+        long nowStart = response.getHeightList().get(0);
+        if (nowStart == lastEnd + 1) {
+            this.heightList.addAll(response.getHeightList());
+            this.hashList.addAll(response.getHashList());
+        }
     }
 }

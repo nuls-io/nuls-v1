@@ -2,6 +2,7 @@ package io.nuls.consensus.service.intf;
 
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.exception.NulsException;
 
 import java.io.IOException;
@@ -33,4 +34,5 @@ public interface BlockService {
 
     int getBlockCount(String address, long roundStart, long index);
 
+    List<NulsDigestData> getBlockHashList(long start, long end, long split);
 }
