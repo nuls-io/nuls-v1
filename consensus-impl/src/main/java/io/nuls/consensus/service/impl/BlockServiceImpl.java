@@ -13,6 +13,7 @@ import io.nuls.db.transactional.annotation.TransactionalAnnotation;
 import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.ledger.service.intf.LedgerService;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -82,10 +83,10 @@ public class BlockServiceImpl implements io.nuls.consensus.service.intf.BlockSer
 
     @Override
     @TransactionalAnnotation
-    public void saveBlock(Block block) {
+    public void saveBlock(Block block) throws IOException {
         for (int x = 0; x < block.getHeader().getTxCount(); x++) {
             Transaction tx = block.getTxs().get(x);
-            tx.setBlockHash(block.getHeader().getHash());
+            tx.setBlockHeight(block.getHeader().getHeight());
             tx.setBlockHeight(block.getHeader().getHeight());
             try {
                 ledgerService.commitTx(tx);

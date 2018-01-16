@@ -2,6 +2,7 @@ package io.nuls.consensus.cache.manager.block;
 
 import io.nuls.cache.util.CacheMap;
 import io.nuls.consensus.constant.ConsensusCacheConstant;
+import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.block.BifurcateProcessor;
 import io.nuls.consensus.entity.block.BlockHeaderChain;
 import io.nuls.consensus.entity.block.HeaderDigest;
@@ -187,4 +188,7 @@ public class BlockCacheManager {
         return headerCacheMap.get(headerDigest.getHash());
     }
 
+    public boolean canPersistence() {
+        return bifurcateProcessor.getLongestChain().size()> PocConsensusConstant.CONFIRM_BLOCK_COUNT;
+    }
 }
