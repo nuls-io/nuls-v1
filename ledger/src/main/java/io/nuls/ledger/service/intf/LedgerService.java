@@ -66,7 +66,7 @@ public interface LedgerService {
      * @param txList
      * @return
      */
-    boolean saveTxList(long height, String blockHash, List<Transaction> txList) throws IOException;
+    boolean saveTxList(List<Transaction> txList) throws IOException;
 
     /**
      * @param address

@@ -1,11 +1,17 @@
 package io.nuls.ledger.util;
 
+import io.nuls.account.entity.Account;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.context.NulsContext;
+import io.nuls.ledger.entity.CoinData;
+import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.params.CoinTransferData;
+import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.entity.tx.TransferTransaction;
+
+import java.util.List;
 
 public class UtxoTransactionTool {
 
@@ -36,6 +42,17 @@ public class UtxoTransactionTool {
 
         tx.setSign(getAccountService().signData(tx.getHash(), password));
         return tx;
+    }
+
+    public boolean isMine(AbstractCoinTransaction tx) {
+        UtxoData coinData = (UtxoData) tx.getCoinData();
+        List<Account> accounts = getAccountService().getAccountList();
+        for (Account account : accounts) {
+            if (coinData.getInputs().contains(account.getAddress().getBase58())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private AccountService getAccountService() {

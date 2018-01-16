@@ -4,6 +4,8 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.exception.NulsException;
 
+import java.io.IOException;
+
 /**
  *
  * @author Niels
@@ -24,7 +26,7 @@ public interface BlockService {
 
     Block getBlock(long height);
 
-    void saveBlock(Block block);
+    void saveBlock(Block block) throws IOException;
 
     void rollbackBlock(long height) throws NulsException;
 

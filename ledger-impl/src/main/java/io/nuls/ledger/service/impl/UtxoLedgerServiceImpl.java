@@ -14,6 +14,7 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.db.dao.UtxoTransactionDataService;
+import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.entity.TransactionPo;
 import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.db.transactional.annotation.TransactionalAnnotation;
@@ -181,14 +182,14 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     @TransactionalAnnotation
-    public boolean saveTxList(long height, String blockHash, List<Transaction> txList) throws IOException {
+    public boolean saveTxList(List<Transaction> txList) throws IOException {
         lock.lock();
         try {
+            List<TransactionPo> poList = new ArrayList<>();
+            List<TransactionLocalPo> localPoList = new ArrayList<>();
             for (int i = 0; i < txList.size(); i++) {
-                TransactionPo po = TransactionPoTool.toPojo(txList.get(i), i);
+                TransactionPo po = TransactionPoTool.toPojo(txList.get(i));
             }
-
-
         } finally {
             lock.unlock();
         }

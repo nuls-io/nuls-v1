@@ -14,6 +14,7 @@ import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -41,7 +42,11 @@ public class BlockMaintenanceThread implements Runnable {
 
     @Override
     public void run() {
-        checkGenesisBlock();
+        try {
+            checkGenesisBlock();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         while (true) {
             try {
                 syncBlock();
@@ -56,7 +61,6 @@ public class BlockMaintenanceThread implements Runnable {
 
         }
     }
-
 
     public synchronized void syncBlock() {
         Block localBestBlock = getLocalBestCorrectBlock();
@@ -104,7 +108,7 @@ public class BlockMaintenanceThread implements Runnable {
         }
     }
 
-    public void checkGenesisBlock() {
+    public void checkGenesisBlock() throws IOException {
         Block genesisBlock = NulsContext.getInstance().getGenesisBlock();
         genesisBlock.verify();
         Block localGenesisBlock = this.blockService.getGengsisBlock();

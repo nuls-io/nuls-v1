@@ -32,7 +32,7 @@ public class RegisterAgentTransaction extends AbstractCoinTransaction<Consensus<
     }
 
     @Override
-    protected Consensus<Agent> parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
+    public Consensus<Agent> parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
         Consensus<Agent> consensus = byteBuffer.readNulsData(new Consensus<>());
         Agent delegate = byteBuffer.readNulsData(new Agent());
         consensus.setExtend(delegate);
