@@ -1,7 +1,5 @@
 package io.nuls.ledger.service.impl;
 
-import io.nuls.account.entity.Account;
-import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Result;
@@ -33,8 +31,11 @@ import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.ledger.util.UtxoTransactionTool;
 import io.nuls.ledger.util.UtxoTransferTool;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Niels
@@ -50,6 +51,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     private EventBroadcaster eventBroadcaster;
 
+    private Lock lock = new ReentrantLock();
+
     private UtxoLedgerServiceImpl() {
 
     }
@@ -62,8 +65,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         txDao = NulsContext.getInstance().getService(UtxoTransactionDataService.class);
         eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
 
-        UtxoOutputDataService outputDataService = NulsContext.getInstance().getService(UtxoOutputDataService.class);
-
+        // UtxoOutputDataService outputDataService = NulsContext.getInstance().getService(UtxoOutputDataService.class);
     }
 
     @Override
@@ -132,7 +134,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             tx = UtxoTransactionTool.getInstance().createTransferTx(coinData, password, remark);
             TransactionEvent event = new TransactionEvent();
             event.setEventBody(tx);
-            eventBroadcaster.broadcastAndCache(event, true);
+            eventBroadcaster.broadcastAndCacheAysn(event, true);
         } catch (Exception e) {
             Log.error(e);
             return new Result(false, e.getMessage());
@@ -149,7 +151,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             tx = UtxoTransactionTool.getInstance().createTransferTx(coinData, password, remark);
             TransactionEvent event = new TransactionEvent();
             event.setEventBody(tx);
-            eventBroadcaster.broadcastAndCache(event, true);
+            eventBroadcaster.broadcastAndCacheAysn(event, true);
         } catch (Exception e) {
             Log.error(e);
             return new Result(false, e.getMessage());
@@ -168,7 +170,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             tx = UtxoTransactionTool.getInstance().createLockNulsTx(coinData, password);
             TransactionEvent event = new TransactionEvent();
             event.setEventBody(tx);
-            eventBroadcaster.broadcastAndCache(event, true);
+            eventBroadcaster.broadcastAndCacheAysn(event, true);
 
         } catch (Exception e) {
             return new Result(false, e.getMessage());
@@ -178,15 +180,18 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public boolean saveTxList(long height, String blockHash, List<Transaction> txList) {
-        // todo auto-generated method stub(niels)
-        return false;
-    }
-
-    @Override
     @TransactionalAnnotation
-    public boolean saveTxList(long height, long blockHash, List<Transaction> txList) {
-        // todo auto-generated method stub(niels)
+    public boolean saveTxList(long height, String blockHash, List<Transaction> txList) throws IOException {
+        lock.lock();
+        try {
+            for (int i = 0; i < txList.size(); i++) {
+                TransactionPo po = TransactionPoTool.toPojo(txList.get(i), i);
+            }
+
+
+        } finally {
+            lock.unlock();
+        }
         return false;
     }
 

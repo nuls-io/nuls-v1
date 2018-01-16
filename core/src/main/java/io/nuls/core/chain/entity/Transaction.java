@@ -20,24 +20,21 @@ import java.util.List;
  */
 public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData implements NulsCloneable {
 
-    /**
-     * tx type
-     */
-    private int type;
     private NulsDigestData hash;
-    private NulsSignData sign;
-    private T txData;
-    private Na fee;
+
+    private int type;
+
+    protected long time;
 
     private long blockHeight;
-    private NulsDigestData blockHash;
-    /**
-     * current time (ms)
-     *
-     * @return
-     */
-    protected long time;
+
+    private Na fee;
+
     protected byte[] remark;
+
+    private NulsSignData sign;
+
+    private T txData;
 
     public Transaction(int type) {
         this.dataType = NulsDataType.TRANSACTION;
@@ -53,7 +50,7 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
         }
     }
 
-    protected abstract T parseTxData(NulsByteBuffer byteBuffer) throws NulsException;
+    public abstract T parseTxData(NulsByteBuffer byteBuffer) throws NulsException;
 
     @Override
     public int size() {
@@ -162,13 +159,5 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
 
     public void setBlockHeight(long blockHeight) {
         this.blockHeight = blockHeight;
-    }
-
-    public NulsDigestData getBlockHash() {
-        return blockHash;
-    }
-
-    public void setBlockHash(NulsDigestData blockHash) {
-        this.blockHash = blockHash;
     }
 }
