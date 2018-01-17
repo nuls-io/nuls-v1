@@ -75,9 +75,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 
         //find unSpends to create inputs for this tx
         List<UtxoOutput> unSpends = coinManager.getAccountsUnSpend(coinParam.getFrom(), coinParam.getTotalNa().add(coinParam.getFee()));
-        if (unSpends.isEmpty()) {
-            throw new NulsException(ErrorCode.BALANCE_NOT_ENOUGH);
-        }
 
         long inputValue = 0;
         for (UtxoOutput output : unSpends) {

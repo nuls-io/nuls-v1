@@ -15,10 +15,6 @@ import java.util.regex.Pattern;
  */
 public class IPUtil {
 
-    public static void main(String[] args) {
-        getIps();
-    }
-
     public static Set<String> getIps() {
         Set<String> ips = new HashSet<>();
         try {
@@ -40,17 +36,13 @@ public class IPUtil {
             while ((read = in.readLine()) != null) {
                 inputLine.append(read + "\r\n");
             }
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+
         } finally {
             if (in != null) {
                 try {
                     in.close();
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
                 }
             }
         }

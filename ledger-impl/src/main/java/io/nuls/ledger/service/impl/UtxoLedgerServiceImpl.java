@@ -26,6 +26,7 @@ import io.nuls.ledger.entity.UtxoBalance;
 import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
+import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.entity.tx.TransferTransaction;
 import io.nuls.ledger.event.TransactionEvent;
@@ -191,7 +192,19 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             List<TransactionPo> poList = new ArrayList<>();
             List<TransactionLocalPo> localPoList = new ArrayList<>();
             for (int i = 0; i < txList.size(); i++) {
-                TransactionPo po = TransactionPoTool.toPojo(txList.get(i));
+                Transaction tx = txList.get(i);
+                TransactionPo po = TransactionPoTool.toPojo(tx);
+                poList.add(po);
+                if (tx instanceof AbstractCoinTransaction) {
+                    if (UtxoTransactionTool.getInstance().isMine((AbstractCoinTransaction) tx)) {
+                        TransactionLocalPo localPo = TransactionPoTool.toPojoLocal(tx);
+                        localPoList.add(localPo);
+                    }
+                }
+            }
+            txDao.saveTxList(poList);
+            if (localPoList.size() > 0) {
+                txDao.saveLocalList(localPoList);
             }
         } finally {
             lock.unlock();
@@ -200,27 +213,44 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public List<Transaction> getListByAddress(String address, int txType, long beginTime, long endTime) {
-        // todo auto-generated method stub(niels)
-        return null;
+    public List<Transaction> getListByAddress(String address, int txType, int pageNumber, int pageSize) throws Exception {
+        List<Transaction> txList = new ArrayList<>();
+        List<TransactionPo> poList = txDao.getTxs(address, txType, pageNumber, pageSize, true);
+
+        for (TransactionPo po : poList) {
+            txList.add(TransactionPoTool.toTransaction(po));
+        }
+        return txList;
     }
 
     @Override
-    public List<Transaction> getListByHashs(List<NulsDigestData> txHashList) {
-        // todo auto-generated method stub(niels)
-        return null;
+    public List<Transaction> getListByBlockHash(String blockHash) throws Exception {
+        List<Transaction> txList = new ArrayList<>();
+        List<TransactionPo> poList = txDao.getTxs(blockHash, true);
+        for (TransactionPo po : poList) {
+            txList.add(TransactionPoTool.toTransaction(po));
+        }
+        return txList;
     }
 
     @Override
-    public List<Transaction> getListByHeight(long startHeight, long endHeight) {
-        // todo auto-generated method stub(niels)
-        return null;
+    public List<Transaction> getListByHeight(long startHeight, long endHeight) throws Exception {
+        List<Transaction> txList = new ArrayList<>();
+        List<TransactionPo> poList = txDao.getTxs(startHeight, endHeight, true);
+        for (TransactionPo po : poList) {
+            txList.add(TransactionPoTool.toTransaction(po));
+        }
+        return txList;
     }
 
     @Override
-    public List<Transaction> getListByHeight(long height) {
-        // todo auto-generated method stub(niels)
-        return null;
+    public List<Transaction> getListByHeight(long height) throws Exception {
+        List<Transaction> txList = new ArrayList<>();
+        List<TransactionPo> poList = txDao.getTxs(height, true);
+        for (TransactionPo po : poList) {
+            txList.add(TransactionPoTool.toTransaction(po));
+        }
+        return txList;
     }
 
     @Override

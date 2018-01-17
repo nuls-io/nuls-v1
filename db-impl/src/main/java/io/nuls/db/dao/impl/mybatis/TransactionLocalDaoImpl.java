@@ -31,7 +31,16 @@ public class TransactionLocalDaoImpl extends BaseDaoImpl<TransactionLocalMapper,
     public List<TransactionLocalPo> getTxs(Long blockHeight) {
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.eq, blockHeight);
-        PageHelper.orderBy("create_time asc");
+        PageHelper.orderBy("block_height asc, create_time asc");
+        return getMapper().selectList(searchable);
+    }
+
+    @Override
+    public List<TransactionLocalPo> getTxs(Long startHeight, Long endHeight) {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("block_height", SearchOperator.gte, startHeight);
+        searchable.addCondition("block_height", SearchOperator.lte, endHeight);
+        PageHelper.orderBy("block_height asc, create_time asc");
         return getMapper().selectList(searchable);
     }
 
@@ -39,7 +48,7 @@ public class TransactionLocalDaoImpl extends BaseDaoImpl<TransactionLocalMapper,
     public List<TransactionLocalPo> getTxs(String blockHash) {
         Searchable searchable = new Searchable();
         searchable.addCondition("block_hash", SearchOperator.eq, blockHash);
-        PageHelper.orderBy("create_time asc");
+        PageHelper.orderBy("block_height asc, create_time asc");
         return getMapper().selectList(searchable);
     }
 
@@ -52,17 +61,19 @@ public class TransactionLocalDaoImpl extends BaseDaoImpl<TransactionLocalMapper,
     @Override
     public List<TransactionLocalPo> getTxs(String address, int type, int pageNum, int pageSize) {
         Searchable searchable = new Searchable();
-        if(type != 0) {
+        if (type != 0) {
             searchable.addCondition("b.type", SearchOperator.eq, type);
         }
-        if(StringUtils.isNotBlank(address)) {
+        if (StringUtils.isNotBlank(address)) {
             searchable.addCondition("a.address", SearchOperator.eq, address);
         }
 
-        PageHelper.startPage(pageNum, pageSize);
-        PageHelper.orderBy("create_time asc");
+        if (pageNum > 0 && pageSize > 0) {
+            PageHelper.startPage(pageNum, pageSize);
+        }
+        PageHelper.orderBy("block_height asc, create_time asc");
 
-        return getMapper().selectList(searchable);
+        return getMapper().selectByAddress(searchable);
     }
 
     @Override
