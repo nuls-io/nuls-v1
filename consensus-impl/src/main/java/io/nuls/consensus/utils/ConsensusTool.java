@@ -3,6 +3,7 @@ package io.nuls.consensus.utils;
 import io.nuls.account.entity.Account;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
+import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.block.BlockData;
 import io.nuls.consensus.entity.member.Agent;
@@ -39,7 +40,7 @@ public class ConsensusTool {
         po.setHeight(header.getHeight());
         po.setCreateTime(header.getTime());
         po.setHash(header.getHash().getDigestHex());
-        if(null!=header.getSign()){
+        if (null != header.getSign()) {
             po.setSign(header.getSign().getSignBytes());
         }
         po.setTxcount(header.getTxCount());
@@ -47,7 +48,7 @@ public class ConsensusTool {
         return po;
     }
 
-    public static final BlockHeader fromPojo(BlockHeaderPo po)  {
+    public static final BlockHeader fromPojo(BlockHeaderPo po) {
         if (null == po) {
             return null;
         }
@@ -63,7 +64,7 @@ public class ConsensusTool {
         Agent agent = new Agent();
         agent.setStatus(ConsensusStatusEnum.WAITING.getCode());
         agent.setDeposit(Na.valueOf(po.getDeposit()));
-//todo        agent.setCommissionRate(PocConsensusConstant.DEFAULT_COMMISSION_RATE);
+        agent.setCommissionRate(po.getCommissionRate());
         agent.setDelegateAddress(po.getNodeAddress());
         agent.setIntroduction(po.getRemark());
         agent.setStartTime(po.getStartTime());
@@ -115,7 +116,7 @@ public class ConsensusTool {
         return po;
     }
 
-    public static Block createBlock(BlockData blockData ) {
+    public static Block createBlock(BlockData blockData) {
         Account account = accountService.getDefaultAccount();
         if (null == account) {
             throw new NulsRuntimeException(ErrorCode.ACCOUNT_NOT_EXIST);

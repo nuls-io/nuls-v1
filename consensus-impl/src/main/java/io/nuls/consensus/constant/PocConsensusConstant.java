@@ -23,7 +23,7 @@ public interface PocConsensusConstant {
     short EVENT_TYPE_BLOCKS_HASH = 21;
 
     /**
-     * TODO THE PARAMETERS OF CONSENSUS,bellow
+     *   THE PARAMETERS OF CONSENSUS,bellow
      */
     int CONFIRM_BLOCK_COUNT = 6;
     int MIN_CONSENSUS_AGENT_COUNT = 30;

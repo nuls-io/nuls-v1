@@ -20,7 +20,7 @@ public interface ConsensusService {
 
     void stopConsensus(NulsDigestData joinTxHash, String password);
 
-    List<Consensus> getConsensusAccountList(String address, String agentAddress);
+    List<Consensus> getConsensusAccountList();
 
     ConsensusStatusInfo getConsensusInfo(String address);
 

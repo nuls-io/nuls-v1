@@ -19,13 +19,15 @@ public class RegisterAgentTransaction extends AbstractCoinTransaction<Consensus<
 
     public RegisterAgentTransaction() {
         super(TransactionConstant.TX_TYPE_REGISTER_AGENT);
-        this.registerValidator(new CommissionRateValidator());
-        this.registerValidator(new AccountCreditValidator());
-        this.registerValidator(new AgentDepositValidator());
+        this.initValidator();
     }
 
     public RegisterAgentTransaction(CoinTransferData lockData, String password) throws NulsException {
         super(TransactionConstant.TX_TYPE_REGISTER_AGENT, lockData, password);
+        this.initValidator();
+    }
+
+    private void initValidator() {
         this.registerValidator(new CommissionRateValidator());
         this.registerValidator(new AccountCreditValidator());
         this.registerValidator(new AgentDepositValidator());

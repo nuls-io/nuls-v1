@@ -1,6 +1,7 @@
 package io.nuls.consensus.entity.validator.block;
 
 import io.nuls.core.chain.entity.Block;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 
@@ -21,7 +22,9 @@ public class BlockHeaderValidator implements NulsDataValidator<Block> {
 
     @Override
     public ValidateResult validate(Block data) {
-        // todo auto-generated method stub(niels)
-        return null;
+        if(null==data||data.getHeader()==null){
+            return ValidateResult.getFailedResult(ErrorCode.NULL_PARAMETER);
+        }
+        return data.getHeader().verify();
     }
 }

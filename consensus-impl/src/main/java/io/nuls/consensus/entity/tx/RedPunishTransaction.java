@@ -1,8 +1,6 @@
 package io.nuls.consensus.entity.tx;
 
-import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.RedPunishData;
-import io.nuls.consensus.entity.listener.RedPunishTxService;
 import io.nuls.consensus.entity.validator.tx.DoubleSpendValidator;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.TransactionConstant;

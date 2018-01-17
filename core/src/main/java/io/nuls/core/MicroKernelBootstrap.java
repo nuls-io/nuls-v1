@@ -59,18 +59,15 @@ public class MicroKernelBootstrap extends BaseModuleBootstrap {
 
     @Override
     public void destroy() {
-
     }
 
     @Override
     public String getInfo() {
-        // todo auto-generated method stub(niels)
         return null;
     }
 
     @Override
     public int getVersion() {
-        // todo auto-generated method stub(niels)
         return 0;
     }
 }

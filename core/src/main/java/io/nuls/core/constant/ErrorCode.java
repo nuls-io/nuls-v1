@@ -89,7 +89,11 @@ public enum ErrorCode {
     TIME_OUT("CS001", 60001),
     DEPOSIT_ERROR("CS002", 60002),
     DEPOSIT_NOT_ENOUGH("CS003", 60003),
-    CONSENSUS_EXCEPTION("CS004", 60004 ), COMMISSION_RATE_OUT_OF_RANGE("cs005", 60005),
+    CONSENSUS_EXCEPTION("CS004", 60004 ),
+    COMMISSION_RATE_OUT_OF_RANGE("cs005", 60005),
+    LACK_OF_CREDIT("cs006", 60006),
+    DELEGATE_OVER_COUNT("cs007", 60007 ),
+    DEPOSIT_TOO_MUCH("cs008", 60008 ),
 
     /**
      * ------------  Ledger Exception code   --------------

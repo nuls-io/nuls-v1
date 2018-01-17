@@ -133,13 +133,10 @@ public class PocConsensusServiceImpl implements ConsensusService {
     }
 
     @Override
-    public List<Consensus> getConsensusAccountList(String address, String agentAddress) {
-        QueryConsensusAccountParam param = new QueryConsensusAccountParam();
-        param.setAddress(address);
-        param.setAgentAddress(agentAddress);
+    public List<Consensus> getConsensusAccountList() {
         List<Consensus<Agent>> list = consensusCacheManager.getCachedAgentList(ConsensusStatusEnum.IN);
         List<Consensus> resultList = new ArrayList<>(list);
-        resultList.addAll(consensusCacheManager.getCachedDelegateList());
+        resultList.addAll(consensusCacheManager.getCachedDelegateList(ConsensusStatusEnum.IN));
         return resultList;
     }
 

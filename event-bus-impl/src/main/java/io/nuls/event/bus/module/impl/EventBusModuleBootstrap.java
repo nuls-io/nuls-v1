@@ -7,7 +7,6 @@ import io.nuls.event.bus.service.impl.*;
 import io.nuls.event.bus.service.intf.*;
 import io.nuls.event.bus.handler.CommonDigestHandler;
 import io.nuls.event.bus.handler.GetEventBodyHandler;
-import io.nuls.event.bus.handler.ReplyNoticeHandler;
 import io.nuls.event.bus.module.intf.AbstractEventBusModule;
 import io.nuls.network.message.ReplyNotice;
 
@@ -35,8 +34,6 @@ public class EventBusModuleBootstrap extends AbstractEventBusModule {
         eventBusService.subscribeEvent(GetEventBodyEvent.class, new GetEventBodyHandler());
         this.registerService(eventBusService);
         this.registerService(EventBroadcaster.class, EventBroadcasterImpl.getInstance());
-        ReplyNoticeHandler replyNoticeHandler = new ReplyNoticeHandler();
-        this.eventBusService.subscribeEvent(ReplyNotice.class, replyNoticeHandler);
 
     }
 
@@ -53,7 +50,6 @@ public class EventBusModuleBootstrap extends AbstractEventBusModule {
 
     @Override
     public String getInfo() {
-        //todo
         return null;
     }
 

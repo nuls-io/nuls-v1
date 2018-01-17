@@ -38,6 +38,7 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
 
     @Override
     public void init() {
+        PocBlockValidatorManager.initHeaderValidators();
         PocBlockValidatorManager.initBlockValidators();
         initTransactions();
         consensusManager.init();

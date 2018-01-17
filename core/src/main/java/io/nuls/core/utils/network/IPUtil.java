@@ -1,5 +1,7 @@
 package io.nuls.core.utils.network;
 
+import io.nuls.core.utils.log.Log;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -14,7 +16,7 @@ import java.util.regex.Pattern;
  * @date 2017/11/22.
  */
 public class IPUtil {
-
+    private static final Pattern p = Pattern.compile("\\<dd class\\=\"fz24\">(.*?)\\<\\/dd>");
     public static void main(String[] args) {
         getIps();
     }
@@ -49,13 +51,12 @@ public class IPUtil {
                 try {
                     in.close();
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    Log.error(e);
                 }
             }
         }
 
-        Pattern p = Pattern.compile("\\<dd class\\=\"fz24\">(.*?)\\<\\/dd>");
+
         Matcher m = p.matcher(inputLine.toString());
         if (m.find()) {
             ips.add(m.group(1));

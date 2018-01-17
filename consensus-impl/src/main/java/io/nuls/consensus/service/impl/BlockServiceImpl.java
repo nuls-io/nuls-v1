@@ -123,6 +123,12 @@ public class BlockServiceImpl implements io.nuls.consensus.service.intf.BlockSer
         return null;
     }
 
+    @Override
+    public BlockHeader getBlockHeader(NulsDigestData hash) {
+        // todo auto-generated method stub(niels)
+        return null;
+    }
+
     private void rollback(List<Transaction> txs, int max) {
         for (int x = 0; x < max; x++) {
             Transaction tx = txs.get(x);

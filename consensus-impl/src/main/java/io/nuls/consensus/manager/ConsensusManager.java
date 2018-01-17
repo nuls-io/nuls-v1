@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * todo 加载配置、验证区块、验证交易、缓存、定时持久化、分叉处理、双花处理、共识会议、
  *
  * @author Niels
  * @date 2018/1/8
@@ -90,15 +89,6 @@ public class ConsensusManager {
         receivedTxCacheManager.init();
 
         this.initConsensusStatusInfo();
-    }
-
-
-    public void receiveBlock(Block block) {
-        //todo
-    }
-
-    public void receiveTx(Transaction tx) {
-        //todo
     }
 
     public void initConsensusStatusInfo() {
@@ -167,5 +157,9 @@ public class ConsensusManager {
 
     public PocMeetingRound getCurrentRound() {
         return currentRound;
+    }
+
+    public boolean isPartakePacking() {
+        return partakePacking;
     }
 }
