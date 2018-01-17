@@ -6,7 +6,6 @@ import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.consensus.entity.tx.*;
 import io.nuls.consensus.entity.validator.PocBlockValidatorManager;
 import io.nuls.consensus.event.*;
-import io.nuls.consensus.event.filter.*;
 import io.nuls.consensus.event.handler.*;
 import io.nuls.consensus.manager.ConsensusManager;
 import io.nuls.consensus.module.AbstractConsensusModule;
@@ -72,30 +71,24 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
 
     private void registerHandlers() {
         BlockEventHandler blockEventHandler = new BlockEventHandler();
-        blockEventHandler.addFilter(new BlockEventFilter());
         eventBusService.subscribeEvent(BlockEvent.class, blockEventHandler);
 
         BlockHeaderHandler blockHeaderHandler = new BlockHeaderHandler();
-        blockHeaderHandler.addFilter(new BlockHeaderEventFilter());
         eventBusService.subscribeEvent(BlockHeaderEvent.class, blockHeaderHandler);
 
         GetBlockHandler getBlockHandler = new GetBlockHandler();
-        getBlockHandler.addFilter(new GetBlockEventFilter());
         eventBusService.subscribeEvent(GetSmallBlockRequest.class, getBlockHandler);
 
         GetTxGroupHandler getSmallBlockHandler = new GetTxGroupHandler();
-        getSmallBlockHandler.addFilter(new GetTxGroupFilter());
         eventBusService.subscribeEvent(GetSmallBlockRequest.class, getSmallBlockHandler);
 
         GetBlockHeaderHandler getBlockHeaderHandler = new GetBlockHeaderHandler();
         eventBusService.subscribeEvent(GetBlockHeaderEvent.class, getBlockHeaderHandler);
 
         TxGroupHandler txGroupHandler = new TxGroupHandler();
-        //todo        smallBlockHandler.addFilter();
         eventBusService.subscribeEvent(TxGroupEvent.class, txGroupHandler);
 
         NewTxEventHandler newTxEventHandler = NewTxEventHandler.getInstance();
-        newTxEventHandler.addFilter(new NewTxEventFilter());
         eventBusService.subscribeEvent(TransactionEvent.class, newTxEventHandler);
     }
 

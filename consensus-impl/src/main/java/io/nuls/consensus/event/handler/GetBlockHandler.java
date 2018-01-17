@@ -8,8 +8,9 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 
+import java.util.List;
+
 /**
- *
  * @author facjas
  * @date 2017/11/16
  */
@@ -17,11 +18,14 @@ public class GetBlockHandler extends AbstractEventHandler<GetBlockRequest> {
 
     private BlockService blockService = NulsContext.getInstance().getService(BlockService.class);
     private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
+
     @Override
-    public void onEvent(GetBlockRequest event, String fromId)   {
-        Block block = blockService.getBlock(event.getEventBody().getVal());
-        BlockEvent blockEvent = new BlockEvent();
-        blockEvent.setEventBody(block);
-        eventBroadcaster.sendToNode(blockEvent,fromId);
+    public void onEvent(GetBlockRequest event, String fromId) {
+        List<Block> blockList = blockService.getBlockList(event.getStart(), event.getEnd());
+        for (Block block : blockList) {
+            BlockEvent blockEvent = new BlockEvent();
+            blockEvent.setEventBody(block);
+            eventBroadcaster.sendToNode(blockEvent, fromId);
+        }
     }
 }

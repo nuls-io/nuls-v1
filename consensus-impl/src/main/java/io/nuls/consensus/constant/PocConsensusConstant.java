@@ -19,11 +19,8 @@ public interface PocConsensusConstant {
     String DEFAULT_CONSENSUS_LIST_FILE = "default-consensus-list.properties";
     String GENESIS_BLOCK_FILE = "genesis-block.json";
 
-    short EVENT_TYPE_JOIN_CONSENSUS = 11;
-    short EVENT_TYPE_EXIT_CONSENSUS = 12;
-    short EVENT_TYPE_REGISTER_AGENT = 13;
-    short EVENT_TYPE_RED_PUNISH = 10;
-    short EVENT_TYPE_YELLOW_PUNISH = 13;
+    short EVENT_TYPE_GET_BLOCKS_HASH = 20;
+    short EVENT_TYPE_BLOCKS_HASH = 21;
 
     /**
      * TODO THE PARAMETERS OF CONSENSUS,bellow
@@ -51,6 +48,10 @@ public interface PocConsensusConstant {
 
     Na AGENT_DEPOSIT_LOWER_LIMIT = Na.parseNuls(20000);
     Na ENTRUSTER_DEPOSIT_LOWER_LIMIT = Na.parseNuls(2000);
+    /**
+     * Maximum acceptable number of delegate
+     */
+    int MAX_ACCEPT_NUM_OF_DELEGATE = 1000;
 
     Na SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT = Na.parseNuls(200000);
     Na SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT = Na.parseNuls(500000);

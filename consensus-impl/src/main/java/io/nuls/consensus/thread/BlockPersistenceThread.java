@@ -40,6 +40,9 @@ public class BlockPersistenceThread implements Runnable {
         while (true) {
             try {
                 doPersistence();
+                if(blockCacheManager.canPersistence()){
+                    continue;
+                }
                 Thread.sleep(1000L);
             } catch (Exception e) {
                 Log.error(e);

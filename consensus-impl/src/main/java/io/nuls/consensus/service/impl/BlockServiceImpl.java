@@ -4,6 +4,7 @@ import io.nuls.consensus.cache.manager.block.BlockCacheManager;
 import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
@@ -74,6 +75,12 @@ public class BlockServiceImpl implements io.nuls.consensus.service.intf.BlockSer
         return block;
     }
 
+    @Override
+    public List<Block> getBlockList(long startHeight, long endHeight) {
+        // todo auto-generated method stub(niels)
+        return null;
+    }
+
 
     @Override
     @TransactionalAnnotation
@@ -81,7 +88,6 @@ public class BlockServiceImpl implements io.nuls.consensus.service.intf.BlockSer
         for (int x = 0; x < block.getHeader().getTxCount(); x++) {
             Transaction tx = block.getTxs().get(x);
             tx.setBlockHeight(block.getHeader().getHeight());
-            tx.setIndex(x);
             try {
                 ledgerService.commitTx(tx);
             } catch (Exception e) {
@@ -109,6 +115,12 @@ public class BlockServiceImpl implements io.nuls.consensus.service.intf.BlockSer
     @Override
     public int getBlockCount(String address, long roundStart, long roundEnd) {
         return this.blockStorageService.getCount(address, roundStart, roundEnd);
+    }
+
+    @Override
+    public List<NulsDigestData> getBlockHashList(long start, long end, long split) {
+        // todo auto-generated method stub(niels)
+        return null;
     }
 
     private void rollback(List<Transaction> txs, int max) {

@@ -1,7 +1,9 @@
 package io.nuls.consensus.utils;
 
-import io.nuls.consensus.event.GetBlockHeaderEvent;
+import io.nuls.consensus.entity.BlockHashResponse;
+import io.nuls.consensus.event.GetBlocksHashRequest;
 import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -20,17 +22,18 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Niels
  * @date 2017/12/11
  */
+//todo 设置超时
 public class DistributedBlockInfoRequestUtils {
     private static final DistributedBlockInfoRequestUtils INSTANCE = new DistributedBlockInfoRequestUtils();
     private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
     private List<String> nodeIdList;
-    private Map<String, BlockHeader> headerMap = new HashMap<>();
+    private Map<String, BlockHashResponse> hashesMap = new HashMap<>();
     /**
      * list order by answered time
      */
     private Map<String, List<String>> calcMap = new HashMap<>();
     private BlockInfo bestBlockInfo;
-    private long askHeight;
+    private long start, end, split;
     private Lock lock = new ReentrantLock();
     private boolean requesting;
     private long startTime;
@@ -48,19 +51,20 @@ public class DistributedBlockInfoRequestUtils {
      * @param height
      */
     public BlockInfo request(long height) {
+        return this.request(height, height, 1);
+    }
+
+    public BlockInfo request(long start, long end, long split) {
         lock.lock();
         this.startTime = TimeService.currentTimeMillis();
         requesting = true;
-        headerMap.clear();
+        hashesMap.clear();
         calcMap.clear();
-        askHeight = height;
-        GetBlockHeaderEvent getBlockHeaderEvent;
-        if (0 > height) {
-            getBlockHeaderEvent = new GetBlockHeaderEvent();
-        } else {
-            getBlockHeaderEvent = new GetBlockHeaderEvent(height);
-        }
-        nodeIdList = this.eventBroadcaster.broadcastAndCache(getBlockHeaderEvent,false);
+        this.start = start;
+        this.end = end;
+        this.split = split;
+        GetBlocksHashRequest event = new GetBlocksHashRequest(start, end, split);
+        nodeIdList = this.eventBroadcaster.broadcastAndCache(event, false);
         if (nodeIdList.isEmpty()) {
             Log.error("get best height from net faild!");
             lock.unlock();
@@ -70,15 +74,24 @@ public class DistributedBlockInfoRequestUtils {
     }
 
 
-    public boolean addBlockHeader(String nodeId, BlockHeader header) {
-        if (!headerMap.containsKey(nodeId)) {
+    public boolean addBlockHashResponse(String nodeId, BlockHashResponse response) {
+        if (!hashesMap.containsKey(nodeId)) {
             return false;
         }
         if (!requesting) {
             return false;
         }
-        headerMap.put(nodeId, header);
-        String key = header.getHeight()+""+header.getHash();
+        if(hashesMap.get(nodeId)==null){
+            hashesMap.put(nodeId, response);
+        }else{
+            BlockHashResponse instance = hashesMap.get(nodeId);
+            instance.merge(response);
+            hashesMap.put(nodeId,instance);
+        }
+        if(response.getHeightList().get(response.getHeightList().size()-1)<end){
+            return true;
+        }
+        String key = response.getHash().getDigestHex();
         List<String> nodes = calcMap.get(key);
         if (null == nodes) {
             nodes = new ArrayList<>();
@@ -98,7 +111,7 @@ public class DistributedBlockInfoRequestUtils {
 
         int size = nodeIdList.size();
         int halfSize = (size + 1) / 2;
-        if (headerMap.size() < halfSize) {
+        if (hashesMap.size() < halfSize) {
             return;
         }
         BlockInfo result = null;
@@ -106,9 +119,20 @@ public class DistributedBlockInfoRequestUtils {
             List<String> nodes = calcMap.get(key);
             if (nodes.size() > halfSize) {
                 result = new BlockInfo();
-                BlockHeader header = headerMap.get(result.getNodeIdList().get(0));
-                result.setHash(header.getHash());
-                result.setHeight(header.getHeight());
+                BlockHashResponse response = hashesMap.get(result.getNodeIdList().get(0));
+                Long bestHeight = 0L;
+                NulsDigestData bestHash = null;
+                for (int i = 0; i < response.getHeightList().size(); i++) {
+                    Long height = response.getHeightList().get(i);
+                    NulsDigestData hash = response.getHashList().get(i);
+                    if (height > bestHeight) {
+                        bestHash = hash;
+                        bestHeight = height;
+                    }
+                    result.putHash(height, hash);
+                }
+                result.setBestHash(bestHash);
+                result.setBestHeight(bestHeight);
                 result.setNodeIdList(nodes);
                 result.setFinished(true);
                 break;
@@ -122,7 +146,7 @@ public class DistributedBlockInfoRequestUtils {
             } catch (InterruptedException e) {
                 Log.error(e);
             }
-            this.request(askHeight);
+            this.request(start, end, split);
         }
 
     }
@@ -137,9 +161,9 @@ public class DistributedBlockInfoRequestUtils {
             } catch (InterruptedException e) {
                 Log.error(e);
             }
-            if((TimeService.currentTimeMillis()-startTime)>10000L){
+            if ((TimeService.currentTimeMillis() - startTime) > 10000L) {
                 lock.unlock();
-              throw new NulsRuntimeException(ErrorCode.TIME_OUT);
+                throw new NulsRuntimeException(ErrorCode.TIME_OUT);
             }
         }
         BlockInfo info = bestBlockInfo;

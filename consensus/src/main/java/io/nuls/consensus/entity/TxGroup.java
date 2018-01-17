@@ -49,7 +49,11 @@ public class TxGroup extends BaseNulsData {
         long txCount = byteBuffer.readVarInt();
         this.txList = new ArrayList<>();
         for (int i = 0; i < txCount; i++) {
-            this.txList.add(byteBuffer.readTransaction());
+            try {
+                this.txList.add(byteBuffer.readTransaction());
+            } catch (Exception e) {
+                throw new NulsException(e);
+            }
         }
         initTxMap();
     }
