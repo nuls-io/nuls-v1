@@ -18,11 +18,11 @@ public class UtxoOutput extends BaseNulsData {
 
     private NulsDigestData txHash;
 
-    private Transaction parent;
-
-    private UtxoInput spentBy;
+    private int index;
 
     private long value;
+
+    private UtxoInput spentBy;
 
     private byte[] address;
 
@@ -32,14 +32,14 @@ public class UtxoOutput extends BaseNulsData {
 
     private Script script;
 
-    private int index;
-
     //0: useable, 1:locked， 2：spent
     private int status;
 
     public static final int USEABLE = 0;
     public static final int LOCKED = 1;
     public static final int SPENT = 2;
+
+    private Transaction parent;
 
     public UtxoOutput() {
 
