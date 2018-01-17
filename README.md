@@ -34,7 +34,7 @@ To be a great community, Nuls needs to welcome developers from all walks of life
 Nuls is based on the Java and you can choose your favorite OS.  
 
 **Dependencies SDK**  
-JDK:[JDK 1.8+](http://www.oracle.com/technetwork/java/javase/downloads/index.html)  
+JDK:[JDK 1.8](http://www.oracle.com/technetwork/java/javase/downloads/index.html)  
 Maven:[Maven 3.3+](http://maven.apache.org/download.cgi)  
 IDE: Any one you  like
 > JetBrains [IntelliJ IDEA](https://www.jetbrains.com/idea/) is recommended, but we do not rovoke the IDE war.
