@@ -36,9 +36,9 @@ public class NetworkModuleBootstrap extends AbstractNetworkModule {
             throw new NulsRuntimeException(ErrorCode.IO_ERROR);
         }
         networkService = new NetworkServiceImpl(this);
+        networkService.init();
         this.registerEvent();
         this.registerService(networkService);
-
     }
 
     private void registerEvent() {
