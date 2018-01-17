@@ -8,7 +8,7 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
-import io.nuls.core.utils.network.IPUtil;
+import io.nuls.core.utils.network.IpUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.NodeDataService;
 import io.nuls.network.constant.NetworkConstant;
@@ -118,7 +118,7 @@ public class NodesManager implements Runnable {
      */
     public boolean isSeed(String nodeId) {
         if (StringUtils.isBlank(nodeId)) {
-            Set<String> ips = IPUtil.getIps();
+            Set<String> ips = IpUtil.getIps();
             for (String self : ips) {
                 for (Node node : getSeedNodes()) {
                     if (node.getHash().equals(self)) {

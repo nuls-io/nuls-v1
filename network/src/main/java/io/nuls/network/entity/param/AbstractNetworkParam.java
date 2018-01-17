@@ -1,6 +1,6 @@
 package io.nuls.network.entity.param;
 
-import io.nuls.core.utils.network.IPUtil;
+import io.nuls.core.utils.network.IpUtil;
 import io.nuls.network.message.NetworkEventHandlerFactory;
 import io.nuls.network.message.filter.NulsMessageFilter;
 
@@ -29,7 +29,7 @@ public abstract class AbstractNetworkParam {
 
     protected List<InetSocketAddress> seedNodes = new ArrayList<>();
 
-    protected Set<String> localIps = IPUtil.getIps();
+    protected Set<String> localIps = IpUtil.getIps();
 
     public List<InetSocketAddress> getSeedNodes() {
         return seedNodes;
