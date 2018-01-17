@@ -13,6 +13,8 @@ public interface TransactionDataService extends BaseDataService<String, Transact
 
     List<TransactionPo> getTxs(Long blockHeight);
 
+    List<TransactionPo> getTxs(Long startHeight, Long endHeight);
+
     List<TransactionPo> getTxs(String blockHash);
 
     List<TransactionPo> getTxs(byte[] blockHash);

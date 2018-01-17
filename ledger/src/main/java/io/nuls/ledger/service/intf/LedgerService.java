@@ -6,8 +6,6 @@ import io.nuls.core.chain.entity.Result;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.exception.NulsException;
 import io.nuls.ledger.entity.Balance;
-import io.nuls.ledger.entity.tx.LockNulsTransaction;
-import io.nuls.ledger.entity.tx.TransferTransaction;
 
 import java.io.IOException;
 import java.util.List;
@@ -71,22 +69,22 @@ public interface LedgerService {
     /**
      * @param address
      * @param txType
-     * @param beginTime
-     * @param endTime
+     * @param pageNumber
+     * @param pageSize
      * @return
      */
-    List<Transaction> getListByAddress(String address, int txType, long beginTime, long endTime);
+    List<Transaction> getListByAddress(String address, int txType, int pageNumber, int pageSize) throws Exception;
 
 
     /**
-     * @param txHashList
+     * @param blockHash
      * @return
      */
-    List<Transaction> getListByHashs(List<NulsDigestData> txHashList);
+    List<Transaction> getListByBlockHash(String blockHash) throws Exception;
 
-    List<Transaction> getListByHeight(long startHeight, long endHeight);
+    List<Transaction> getListByHeight(long startHeight, long endHeight) throws Exception;
 
-    List<Transaction> getListByHeight(long height);
+    List<Transaction> getListByHeight(long height) throws Exception;
 
     void rollbackTx(Transaction tx) throws NulsException;
 

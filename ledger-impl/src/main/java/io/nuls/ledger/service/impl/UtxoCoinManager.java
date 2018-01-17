@@ -86,6 +86,7 @@ public class UtxoCoinManager {
                 return unSpends;
             }
 
+            boolean enough = false;
             Na amount = Na.ZERO;
             for (int i = 0; i < balance.getUnSpends().size(); i++) {
                 UtxoOutput output = balance.getUnSpends().get(i);
@@ -93,8 +94,15 @@ public class UtxoCoinManager {
                 unSpends.add(output);
                 amount = amount.add(Na.valueOf(output.getValue()));
                 if (amount.isGreaterThan(value)) {
+                    enough = true;
                     break;
                 }
+            }
+            if(!enough) {
+                for (UtxoOutput output : unSpends) {
+                    output.setStatus(output.USEABLE);
+                }
+                unSpends = new ArrayList<>();
             }
         } catch (Exception e) {
             Log.error(e);
@@ -111,25 +119,9 @@ public class UtxoCoinManager {
         lock.lock();
         List<UtxoOutput> unSpends = new ArrayList<>();
         try {
-
-            // first, check use-able is enough
+            //check use-able is enough , find unSpend utxo
             Na amount = Na.ZERO;
             boolean enough = false;
-            for (String address : addressList) {
-                UtxoBalance balance = (UtxoBalance) cacheService.getBalance(address);
-                amount = amount.add(balance.getUseable());
-                if (amount.isGreaterThan(value)) {
-                    enough = true;
-                    break;
-                }
-            }
-            if (!enough) {
-                return unSpends;
-            }
-
-            //find unSpend utxo
-            amount = Na.ZERO;
-            enough = false;
             for (String address : addressList) {
                 UtxoBalance balance = (UtxoBalance) cacheService.getBalance(address);
                 for (int i = 0; i < balance.getUnSpends().size(); i++) {
@@ -142,15 +134,22 @@ public class UtxoCoinManager {
                         break;
                     }
                 }
-                if(enough) {
+                if (enough) {
                     break;
                 }
+            }
+            if (!enough) {
+                for (UtxoOutput output : unSpends) {
+                    output.setStatus(output.USEABLE);
+                }
+                unSpends = new ArrayList<>();
             }
         } catch (Exception e) {
             Log.error(e);
             for (UtxoOutput output : unSpends) {
                 output.setStatus(output.USEABLE);
             }
+            unSpends = new ArrayList<>();
         } finally {
             lock.unlock();
         }

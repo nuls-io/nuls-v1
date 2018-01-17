@@ -42,17 +42,14 @@ public class IPUtil {
             while ((read = in.readLine()) != null) {
                 inputLine.append(read + "\r\n");
             }
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            Log.error(e);
         } finally {
             if (in != null) {
                 try {
                     in.close();
                 } catch (IOException e) {
-                    Log.error(e);
-                }
+                    Log.error(e);}
             }
         }
 
