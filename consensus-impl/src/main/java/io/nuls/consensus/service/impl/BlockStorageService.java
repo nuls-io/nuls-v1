@@ -31,13 +31,13 @@ public class BlockStorageService {
         return INSTANCE;
     }
 
-    public Block getBlock(long height) {
+    public Block getBlock(long height) throws Exception {
         BlockHeader header = getBlockHeader(height);
         List<Transaction> txList = ledgerService.getListByHeight(height);
         return fillBlock(header, txList);
     }
 
-    public Block getBlock(String hash) {
+    public Block getBlock(String hash) throws Exception {
         BlockHeader header = getBlockHeader(hash);
         List<Transaction> txList = ledgerService.getListByHeight(header.getHeight());
         return fillBlock(header, txList);
@@ -55,7 +55,7 @@ public class BlockStorageService {
     }
 
 
-    public List<Block> getBlock(long startHeight, long endHeight) {
+    public List<Block> getBlock(long startHeight, long endHeight) throws Exception {
         List<Block> blockList = new ArrayList<>();
         List<BlockHeaderPo> poList = headerDao.getHeaderList(startHeight, endHeight);
         List<Transaction> txList = ledgerService.getListByHeight(startHeight, endHeight);

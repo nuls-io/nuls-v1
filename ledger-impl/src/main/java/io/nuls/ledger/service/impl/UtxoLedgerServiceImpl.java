@@ -137,11 +137,17 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         try {
             CoinTransferData coinData = new CoinTransferData(amount, address, toAddress);
             tx = UtxoTransactionTool.getInstance().createTransferTx(coinData, password, remark);
+            tx.verify();
             TransactionEvent event = new TransactionEvent();
             event.setEventBody(tx);
             eventBroadcaster.broadcastAndCacheAysn(event, true);
         } catch (Exception e) {
             Log.error(e);
+            try {
+                rollbackTx(tx);
+            } catch (NulsException e1) {
+                Log.error(e1);
+            }
             return new Result(false, e.getMessage());
         }
 
@@ -154,11 +160,17 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         try {
             CoinTransferData coinData = new CoinTransferData(amount, addressList, toAddress);
             tx = UtxoTransactionTool.getInstance().createTransferTx(coinData, password, remark);
+            tx.verify();
             TransactionEvent event = new TransactionEvent();
             event.setEventBody(tx);
             eventBroadcaster.broadcastAndCacheAysn(event, true);
         } catch (Exception e) {
             Log.error(e);
+            try {
+                rollbackTx(tx);
+            } catch (NulsException e1) {
+                Log.error(e1);
+            }
             return new Result(false, e.getMessage());
         }
 
@@ -173,11 +185,18 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             CoinTransferData coinData = new CoinTransferData(amount, address);
             coinData.addTo(address, new Coin(amount, unlockTime));
             tx = UtxoTransactionTool.getInstance().createLockNulsTx(coinData, password);
+            tx.verify();
             TransactionEvent event = new TransactionEvent();
             event.setEventBody(tx);
             eventBroadcaster.broadcastAndCacheAysn(event, true);
 
         } catch (Exception e) {
+            Log.error(e);
+            try {
+                rollbackTx(tx);
+            } catch (NulsException e1) {
+                Log.error(e1);
+            }
             return new Result(false, e.getMessage());
         }
 
@@ -292,6 +311,4 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         }
         return list;
     }
-
-
 }

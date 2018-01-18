@@ -53,6 +53,5 @@ public class UtxoData extends CoinData{
     @Override
     protected void parse(NulsByteBuffer byteBuffer) {
         //todo
-
     }
 }

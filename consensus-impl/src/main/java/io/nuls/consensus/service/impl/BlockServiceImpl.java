@@ -29,7 +29,12 @@ public class BlockServiceImpl implements io.nuls.consensus.service.intf.BlockSer
 
     @Override
     public Block getGengsisBlock() {
-        return blockStorageService.getBlock(0);
+        try {
+            return blockStorageService.getBlock(0);
+        } catch (Exception e) {
+            Log.error(e);
+        }
+        return null;
     }
 
     @Override
@@ -61,7 +66,11 @@ public class BlockServiceImpl implements io.nuls.consensus.service.intf.BlockSer
     public Block getBlock(String hash) {
         Block block = blockCacheManager.getBlock(hash);
         if (null == block) {
-            block = blockStorageService.getBlock(hash);
+            try {
+                block = blockStorageService.getBlock(hash);
+            } catch (Exception e) {
+                Log.error(e);
+            }
         }
         return block;
     }
@@ -70,7 +79,11 @@ public class BlockServiceImpl implements io.nuls.consensus.service.intf.BlockSer
     public Block getBlock(long height) {
         Block block = blockCacheManager.getBlock(height);
         if (null == block) {
-            block = blockStorageService.getBlock(height);
+            try {
+                block = blockStorageService.getBlock(height);
+            } catch (Exception e) {
+                Log.error(e);
+            }
         }
         return block;
     }

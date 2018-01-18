@@ -13,7 +13,7 @@ import java.util.List;
  * @date 2017/11/20
  */
 public class UtxoTxOutputsValidator implements NulsDataValidator<AbstractCoinTransaction<UtxoData>> {
-    private static final int MAX_INPUT_COUNT = 200;
+    private static final int MAX_OUTPUT_COUNT = 200;
     private static final String ERROR_MESSAGE = "the output is too much!";
     private static final UtxoTxOutputsValidator INSTANCE = new UtxoTxOutputsValidator();
 
@@ -29,7 +29,7 @@ public class UtxoTxOutputsValidator implements NulsDataValidator<AbstractCoinTra
     public ValidateResult validate(AbstractCoinTransaction<UtxoData> data) {
         UtxoData utxoData = data.getTxData();
         List<UtxoOutput> outputs = utxoData.getOutputs();
-        if (null != outputs && outputs.size() > MAX_INPUT_COUNT) {
+        if (null != outputs && outputs.size() > MAX_OUTPUT_COUNT) {
             return ValidateResult.getFailedResult(ERROR_MESSAGE);
         }
         return ValidateResult.getSuccessResult();

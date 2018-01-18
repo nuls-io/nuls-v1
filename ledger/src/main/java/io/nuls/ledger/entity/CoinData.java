@@ -8,6 +8,4 @@ import io.nuls.core.chain.entity.BaseNulsData;
  */
 public abstract class CoinData extends BaseNulsData {
 
-
-
 }

@@ -34,7 +34,7 @@ public class UtxoTransactionTool {
 
     private UtxoInputDataService inputDataService;
 
-    private LedgerCacheService ledgerCacheService;
+    private LedgerCacheService ledgerCacheService = LedgerCacheService.getInstance();
 
     public TransferTransaction createTransferTx(CoinTransferData transferData, String password, String remark) throws Exception {
         TransferTransaction tx = new TransferTransaction(transferData, password);
