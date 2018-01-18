@@ -2,6 +2,7 @@ package io.nuls.db.dao.impl.mybatis;
 
 import io.nuls.db.dao.DelegateDataService;
 import io.nuls.db.dao.impl.mybatis.mapper.DelegateMapper;
+import io.nuls.db.dao.impl.mybatis.params.DelegateSearchParams;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import io.nuls.db.entity.DelegatePo;
 
@@ -18,6 +19,12 @@ public class DelegateDaoImpl extends BaseDaoImpl<DelegateMapper, String, Delegat
 
     @Override
     protected Searchable getSearchable(Map<String, Object> params) {
-        return null;
+        return new DelegateSearchParams(params);
+    }
+
+    @Override
+    public void deleteByAgentAddress(String address) {
+        // todo auto-generated method stub(niels)
+
     }
 }

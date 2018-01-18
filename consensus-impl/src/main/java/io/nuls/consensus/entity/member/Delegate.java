@@ -2,10 +2,12 @@ package io.nuls.consensus.entity.member;
 
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.Na;
+import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
@@ -22,7 +24,7 @@ public class Delegate extends BaseNulsData {
     private String delegateAddress;
     private int status;
     private long startTime;
-    private String id;
+    private String hash;
 
     public long getStartTime() {
         return startTime;
@@ -51,14 +53,8 @@ public class Delegate extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        try {
-            size += VarInt.sizeOf(deposit.getValue());
-            size += delegateAddress.getBytes(NulsContext.DEFAULT_ENCODING).length;
-
-        } catch (UnsupportedEncodingException e) {
-            Log.error(e);
-            throw new NulsRuntimeException(e);
-        }
+        size += VarInt.sizeOf(deposit.getValue());
+        size += Utils.sizeOfSerialize(delegateAddress);
         return size;
     }
 
@@ -72,14 +68,22 @@ public class Delegate extends BaseNulsData {
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.deposit = Na.valueOf(byteBuffer.readVarInt());
         this.delegateAddress = byteBuffer.readString();
+        try {
+            this.hash = NulsDigestData.calcDigestData(this.serialize()).getDigestHex();
+        } catch (IOException e) {
+            Log.error(e);
+        }
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
+    public String getHash() {
+        if(hash==null){
+            try {
+                this.hash = NulsDigestData.calcDigestData(this.serialize()).getDigestHex();
+            } catch (IOException e) {
+                Log.error(e);
+            }
+        }
+        return hash;
     }
 
     public int getStatus() {
@@ -88,5 +92,9 @@ public class Delegate extends BaseNulsData {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public void setHash(String hash) {
+        this.hash = hash;
     }
 }
