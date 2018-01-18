@@ -5,6 +5,7 @@ import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.filter.NulsEventFilter;
@@ -32,7 +33,12 @@ public class CreditThresholdValidator implements NulsDataValidator<PocJoinConsen
     @Override
     public ValidateResult validate(PocJoinConsensusTransaction data) {
         String address = data.getTxData().getAddress();
-        List<Transaction> list = ledgerService.getListByAddress(address, TransactionConstant.TX_TYPE_RED_PUNISH, 0, 0);
+        List<Transaction> list = null;
+        try {
+            list = ledgerService.getListByAddress(address, TransactionConstant.TX_TYPE_RED_PUNISH, 0, 0);
+        } catch (Exception e) {
+            Log.error(e);
+        }
         if (null == list || list.isEmpty()) {
             return ValidateResult.getSuccessResult();
         }

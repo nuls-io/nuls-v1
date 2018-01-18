@@ -20,4 +20,9 @@ public class DelegateAccountDaoImpl extends BaseDaoImpl<DelegateAccountMapper, S
     protected Searchable getSearchable(Map<String, Object> params) {
         return null;
     }
+
+    @Override
+    public int updateSelective(DelegateAccountPo po) {
+        return getMapper().updateByPrimaryKeySelective(po);
+    }
 }

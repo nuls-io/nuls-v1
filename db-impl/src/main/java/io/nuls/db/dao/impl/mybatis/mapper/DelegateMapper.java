@@ -9,4 +9,7 @@ import io.nuls.db.entity.DelegatePo;
  */
 public interface DelegateMapper extends BaseMapper<String,DelegatePo> {
 
+    int deleteByAgentAddress(String address);
+
+    int updateSelectiveByAgentAddress(DelegatePo po);
 }

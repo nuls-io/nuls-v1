@@ -68,6 +68,7 @@ public class ConsensusTool {
         agent.setDelegateAddress(po.getNodeAddress());
         agent.setIntroduction(po.getRemark());
         agent.setStartTime(po.getStartTime());
+        agent.setStatus(po.getStatus());
         Consensus<Agent> ca = new Consensus<>();
         ca.setAddress(po.getAddress());
         ca.setExtend(agent);
@@ -84,7 +85,7 @@ public class ConsensusTool {
         delegate.setDelegateAddress(po.getAgentAddress());
         delegate.setDeposit(Na.valueOf(po.getDeposit()));
         delegate.setStartTime(po.getTime());
-        delegate.setId(po.getId());
+        delegate.setHash(po.getId());
         ca.setExtend(delegate);
         return ca;
     }
@@ -100,6 +101,7 @@ public class ConsensusTool {
         po.setRemark(bean.getExtend().getIntroduction());
         po.setNodeAddress(bean.getExtend().getDelegateAddress());
         po.setId(bean.getAddress());
+        po.setStatus(bean.getExtend().getStatus());
         return po;
     }
 
@@ -112,7 +114,7 @@ public class ConsensusTool {
         po.setDeposit(bean.getExtend().getDeposit().getValue());
         po.setTime(bean.getExtend().getStartTime());
         po.setAgentAddress(bean.getExtend().getDelegateAddress());
-        po.setId(bean.getExtend().getId());
+        po.setId(bean.getExtend().getHash());
         return po;
     }
 

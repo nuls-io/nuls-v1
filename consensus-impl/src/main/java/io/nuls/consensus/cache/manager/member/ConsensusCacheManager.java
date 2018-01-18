@@ -16,7 +16,9 @@ import io.nuls.db.entity.DelegateAccountPo;
 import io.nuls.db.entity.DelegatePo;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Niels
@@ -29,9 +31,9 @@ public class ConsensusCacheManager {
      */
     private static final String CACHE_CONSENSUS_STATUS_INFO = "consensus-status-info";
     private static final String IN_AGENT_LIST = "agent-list-in";
-    private static final String WAIT_AGENT_LIST = "agent-list-wait";
+    private static final String OUT_AGENT_LIST = "agent-list-wait";
     private static final String IN_DELEGATE_LIST = "in-delegate-list";
-    private static final String WAIT_DELEGATE_LIST = "wait-delegate-list";
+    private static final String OUT_DELEGATE_LIST = "wait-delegate-list";
 
     private static final ConsensusCacheManager INSTANCE = new ConsensusCacheManager();
 
@@ -40,9 +42,9 @@ public class ConsensusCacheManager {
     private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
 
     private CacheMap<String, Consensus<Agent>> inAgentCache = new CacheMap<>(IN_AGENT_LIST, 512);
-    private CacheMap<String, Consensus<Agent>> waitAgentCache = new CacheMap<>(WAIT_AGENT_LIST, 512);
+    private CacheMap<String, Consensus<Agent>> outAgentCache = new CacheMap<>(OUT_AGENT_LIST, 512);
     private CacheMap<String, Consensus<Delegate>> inDelegateCache = new CacheMap<>(IN_DELEGATE_LIST, 1024);
-    private CacheMap<String, Consensus<Delegate>> waitDelegateCache = new CacheMap<>(WAIT_DELEGATE_LIST, 1024);
+    private CacheMap<String, Consensus<Delegate>> outDelegateCache = new CacheMap<>(OUT_DELEGATE_LIST, 1024);
     private CacheMap<String, ConsensusStatusInfo> consensusStatusCache = new CacheMap<>(CACHE_CONSENSUS_STATUS_INFO, 128);
 
     private ConsensusCacheManager() {
@@ -53,7 +55,6 @@ public class ConsensusCacheManager {
     }
 
     public void init() {
-
         Account self = accountService.getDefaultAccount();
         List<DelegatePo> delegatePoList = this.delegateDao.getList();
         List<DelegateAccountPo> delegateAccountPoList = this.delegateAccountDao.getList();
@@ -100,7 +101,7 @@ public class ConsensusCacheManager {
 
     public List<Consensus<Agent>> getCachedAgentList(ConsensusStatusEnum status) {
         if (status == ConsensusStatusEnum.WAITING) {
-            return this.waitAgentCache.values();
+            return this.outAgentCache.values();
         }
         return this.inAgentCache.values();
     }
@@ -108,29 +109,31 @@ public class ConsensusCacheManager {
     public void cacheAgent(Consensus<Agent> ca) {
         if (ca.getExtend().getStatus() == ConsensusStatusEnum.IN.getCode()) {
             this.inAgentCache.put(ca.getAddress(), ca);
-        } else if (ca.getExtend().getStatus() == ConsensusStatusEnum.WAITING.getCode()) {
-            this.waitAgentCache.put(ca.getAddress(), ca);
+            this.outAgentCache.remove(ca.getAddress());
+        } else {
+            this.outAgentCache.put(ca.getAddress(), ca);
+            this.inAgentCache.remove(ca.getAddress());
         }
     }
 
     public Consensus<Agent> getCachedAgent(String address) {
         Consensus<Agent> ca = this.inAgentCache.get(address);
         if (ca == null) {
-            ca = this.waitAgentCache.get(address);
+            ca = this.outAgentCache.get(address);
         }
         return ca;
     }
 
     public int getAgentCount(ConsensusStatusEnum status) {
         if (status == ConsensusStatusEnum.WAITING) {
-            return this.waitAgentCache.size();
+            return this.outAgentCache.size();
         }
         return this.inAgentCache.size();
     }
 
     public void delAgent(String address) {
         this.inAgentCache.remove(address);
-        this.waitAgentCache.remove(address);
+        this.outAgentCache.remove(address);
     }
 
     public void changeAgentStatus(String address, ConsensusStatusEnum statusEnum) {
@@ -145,38 +148,40 @@ public class ConsensusCacheManager {
 
     public void clear() {
         this.inAgentCache.clear();
-        this.waitAgentCache.clear();
+        this.outAgentCache.clear();
         this.inDelegateCache.clear();
-        this.waitDelegateCache.clear();
+        this.outDelegateCache.clear();
         this.consensusStatusCache.clear();
     }
 
     public void cacheDelegate(Consensus<Delegate> cd) {
         if (cd.getExtend().getStatus() == ConsensusStatusEnum.IN.getCode()) {
-            this.inDelegateCache.put(cd.getExtend().getId(), cd);
+            this.inDelegateCache.put(cd.getExtend().getHash(), cd);
+            this.outDelegateCache.remove(cd.getExtend().getHash());
             return;
         }
-        this.waitDelegateCache.put(cd.getExtend().getId(), cd);
+        this.inDelegateCache.remove(cd.getExtend().getHash());
+        this.outDelegateCache.put(cd.getExtend().getHash(), cd);
     }
 
     public Consensus<Delegate> getCachedDelegate(String id) {
         Consensus<Delegate> cd = inDelegateCache.get(id);
         if (null == cd) {
-            cd = waitDelegateCache.get(id);
+            cd = outDelegateCache.get(id);
         }
         return cd;
     }
 
     public List<Consensus<Delegate>> getCachedDelegateList(ConsensusStatusEnum status) {
         if (ConsensusStatusEnum.WAITING == status) {
-            return waitDelegateCache.values();
+            return outDelegateCache.values();
         }
         return inDelegateCache.values();
     }
 
     public void delDelegate(String id) {
         inDelegateCache.remove(id);
-        waitDelegateCache.remove(id);
+        outDelegateCache.remove(id);
     }
 
     public void changeDelegateStatus(String id, ConsensusStatusEnum statusEnum) {
@@ -191,23 +196,64 @@ public class ConsensusCacheManager {
 
     public List<Consensus<Delegate>> getCachedDelegateList(String agentAddress) {
         Consensus<Agent> ca = this.getCachedAgent(agentAddress);
-        if(null==ca){
+        if (null == ca) {
             return null;
         }
-        if(ca.getExtend().getStatus()==ConsensusStatusEnum.IN.getCode()) {
-            return filter(inDelegateCache.values(),agentAddress);
-        }else{
-            return filter(waitDelegateCache.values(),agentAddress);
+        if (ca.getExtend().getStatus() == ConsensusStatusEnum.IN.getCode()) {
+            return filter(inDelegateCache.values(), agentAddress);
+        } else {
+            return filter(outDelegateCache.values(), agentAddress);
         }
     }
 
-    private List<Consensus<Delegate>> filter(List<Consensus<Delegate>> allList,String agentAddress){
+    private List<Consensus<Delegate>> filter(List<Consensus<Delegate>> allList, String agentAddress) {
         List<Consensus<Delegate>> list = new ArrayList<>();
-        for(Consensus<Delegate> cd:allList){
-            if(cd.getExtend().getDelegateAddress().equals(agentAddress)){
+        for (Consensus<Delegate> cd : allList) {
+            if (cd.getExtend().getDelegateAddress().equals(agentAddress)) {
                 list.add(cd);
             }
         }
         return list;
+    }
+
+    public void changeDelegateStatusByAgent(String address, ConsensusStatusEnum status) {
+        if (status == ConsensusStatusEnum.IN) {
+            List<Consensus<Delegate>> allOutList = new ArrayList<>(outDelegateCache.values());
+            for (Consensus<Delegate> cd : allOutList) {
+                if (cd.getExtend().getDelegateAddress().equals(address)) {
+                    outDelegateCache.remove(cd.getExtend().getHash());
+                    inDelegateCache.put(cd.getExtend().getHash(), cd);
+                }
+            }
+            return;
+        }
+        List<Consensus<Delegate>> allOutList = new ArrayList<>(inDelegateCache.values());
+        for (Consensus<Delegate> cd : allOutList) {
+            if (cd.getExtend().getDelegateAddress().equals(address)) {
+                inDelegateCache.remove(cd.getExtend().getHash());
+                outDelegateCache.put(cd.getExtend().getHash(), cd);
+            }
+        }
+    }
+
+    public void delDelegateByAgent(String address) {
+        List<Consensus<Delegate>> allList = new ArrayList<>(outDelegateCache.values());
+        for (Consensus<Delegate> cd : allList) {
+            if (cd.getExtend().getDelegateAddress().equals(address)) {
+                outDelegateCache.remove(cd.getExtend().getHash());
+            }
+        }
+        allList = new ArrayList<>(inDelegateCache.values());
+        for (Consensus<Delegate> cd : allList) {
+            if (cd.getExtend().getDelegateAddress().equals(address)) {
+                inDelegateCache.remove(cd.getExtend().getHash());
+            }
+        }
+    }
+
+    public List<Consensus<Delegate>> getCachedDelegateList() {
+        Set<Consensus<Delegate>> allSet = new HashSet<>(outDelegateCache.values());
+        allSet.addAll(inDelegateCache.values());
+        return new ArrayList<>(allSet);
     }
 }
