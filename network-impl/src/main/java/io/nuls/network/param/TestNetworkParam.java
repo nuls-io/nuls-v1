@@ -1,6 +1,5 @@
 package io.nuls.network.param;
 
-import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.network.NetworkContext;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.param.AbstractNetworkParam;
@@ -18,10 +17,10 @@ public class TestNetworkParam extends AbstractNetworkParam {
     private static TestNetworkParam instance;
 
     private TestNetworkParam() {
-        this.maxInCount = NetworkContext.getNetworkConfig().getPropValue(NetworkConstant.NETWORK_NODE_MAX_IN, 50);
+        this.maxInCount = NetworkContext.getNetworkConfig().getPropValue(NetworkConstant.NETWORK_NODE_MAX_IN, 20);
         this.maxOutCount =  NetworkContext.getNetworkConfig().getPropValue(NetworkConstant.NETWORK_NODE_MAX_OUT, 10);
-        this.port = NetworkContext.getNetworkConfig().getPropValue(NetworkConstant.NETWORK_PORT_TEST, 8002);
-        this.packetMagic = NetworkContext.getNetworkConfig().getPropValue(NetworkConstant.NETWORK_MAGIC_TEST, 987654322);
+        this.port = 8002;
+        this.packetMagic = 987654322;
 
         InetSocketAddress address1 = new InetSocketAddress("192.168.1.156", port);
         InetSocketAddress address2 = new InetSocketAddress("192.168.1.157", port);

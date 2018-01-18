@@ -31,7 +31,7 @@ public class LockNulsTransaction<T extends BaseNulsData>  extends AbstractCoinTr
 
 
     @Override
-    protected T parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
+    public T parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
         return null;
     }
 

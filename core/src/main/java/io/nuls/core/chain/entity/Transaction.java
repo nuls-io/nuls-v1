@@ -12,7 +12,6 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.NulsDataValidator;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,24 +20,23 @@ import java.util.List;
  */
 public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData implements NulsCloneable {
 
-    /**
-     * tx type
-     */
-    private int type;
-    private NulsDigestData hash;
-    private NulsSignData sign;
-    private T txData;
-    private Na fee;
+    protected NulsDigestData hash;
 
-    private long blockHeight;
-    private NulsDigestData blockHash;
-    /**
-     * current time (ms)
-     *
-     * @return
-     */
+    protected int type;
+
     protected long time;
+
+    protected long blockHeight;
+
+    protected Na fee;
+
     protected byte[] remark;
+
+    protected int index;
+
+    protected NulsSignData sign;
+
+    protected T txData;
 
     public Transaction(int type) {
         this.dataType = NulsDataType.TRANSACTION;
@@ -54,7 +52,7 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
         }
     }
 
-    protected abstract T parseTxData(NulsByteBuffer byteBuffer) throws NulsException;
+    public abstract T parseTxData(NulsByteBuffer byteBuffer) throws NulsException;
 
     @Override
     public int size() {
@@ -165,11 +163,11 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
         this.blockHeight = blockHeight;
     }
 
-    public NulsDigestData getBlockHash() {
-        return blockHash;
+    public int getIndex() {
+        return index;
     }
 
-    public void setBlockHash(NulsDigestData blockHash) {
-        this.blockHash = blockHash;
+    public void setIndex(int index) {
+        this.index = index;
     }
 }

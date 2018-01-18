@@ -5,7 +5,7 @@
 
     <id column="alias" property="alias" jdbcType="VARCHAR" />
     <result column="address" property="address" jdbcType="VARCHAR" />
-    <result column="status" property="statuc" jdbcType="INTEGER" />
+    <result column="status" property="status" jdbcType="INTEGER" />
   </resultMap>
   <sql id="Base_Column_List" >
     alias, address, status

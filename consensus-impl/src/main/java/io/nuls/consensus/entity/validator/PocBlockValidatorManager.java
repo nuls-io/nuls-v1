@@ -22,8 +22,8 @@ public class PocBlockValidatorManager {
     }
 
     public static void initBlockValidators() {
-        //todo
         BlockValidatorManager.addBlockDefValitor(BlockHeaderValidator.getInstance());
+
         BlockValidatorManager.addBlockDefValitor(BlockFieldValidator.getInstance());
 
         BlockValidatorManager.addBlockDefValitor(BlockContinuityValidator.getInstance());

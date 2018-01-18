@@ -4,6 +4,7 @@ import io.nuls.consensus.cache.manager.block.BlockCacheManager;
 import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
@@ -13,6 +14,7 @@ import io.nuls.db.transactional.annotation.TransactionalAnnotation;
 import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.ledger.service.intf.LedgerService;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -73,13 +75,18 @@ public class BlockServiceImpl implements io.nuls.consensus.service.intf.BlockSer
         return block;
     }
 
+    @Override
+    public List<Block> getBlockList(long startHeight, long endHeight) {
+        // todo auto-generated method stub(niels)
+        return null;
+    }
+
 
     @Override
     @TransactionalAnnotation
-    public void saveBlock(Block block) {
+    public void saveBlock(Block block) throws IOException {
         for (int x = 0; x < block.getHeader().getTxCount(); x++) {
             Transaction tx = block.getTxs().get(x);
-            tx.setBlockHash(block.getHeader().getHash());
             tx.setBlockHeight(block.getHeader().getHeight());
             try {
                 ledgerService.commitTx(tx);
@@ -90,7 +97,7 @@ public class BlockServiceImpl implements io.nuls.consensus.service.intf.BlockSer
             }
         }
         blockStorageService.save(block.getHeader());
-        ledgerService.saveTxList(block.getHeader().getHeight(),block.getHeader().getHash().getDigestHex(),block.getTxs());
+        ledgerService.saveTxList(block.getTxs());
     }
 
 
@@ -108,6 +115,18 @@ public class BlockServiceImpl implements io.nuls.consensus.service.intf.BlockSer
     @Override
     public int getBlockCount(String address, long roundStart, long roundEnd) {
         return this.blockStorageService.getCount(address, roundStart, roundEnd);
+    }
+
+    @Override
+    public List<NulsDigestData> getBlockHashList(long start, long end, long split) {
+        // todo auto-generated method stub(niels)
+        return null;
+    }
+
+    @Override
+    public BlockHeader getBlockHeader(NulsDigestData hash) {
+        // todo auto-generated method stub(niels)
+        return null;
     }
 
     private void rollback(List<Transaction> txs, int max) {

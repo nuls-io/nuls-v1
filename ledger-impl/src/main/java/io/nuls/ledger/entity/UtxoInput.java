@@ -18,13 +18,14 @@ import java.io.IOException;
 public class UtxoInput extends BaseNulsData {
 
     private NulsDigestData txHash;
-    /**
-     * the output last time
-     */
 
-    private UtxoOutput from;
+    private int index;
+
+    private int fromIndex;
 
     private NulsSignData sign;
+
+    private UtxoOutput from;
 
     private Transaction parent;
 
@@ -72,6 +73,11 @@ public class UtxoInput extends BaseNulsData {
     }
 
     public NulsDigestData getTxHash() {
+        if (txHash == null) {
+            if (parent != null) {
+                txHash = parent.getHash();
+            }
+        }
         return txHash;
     }
 
@@ -103,4 +109,19 @@ public class UtxoInput extends BaseNulsData {
         this.parent = parent;
     }
 
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
+    public int getFromIndex() {
+        return fromIndex;
+    }
+
+    public void setFromIndex(int fromIndex) {
+        this.fromIndex = fromIndex;
+    }
 }

@@ -15,6 +15,7 @@ import io.nuls.db.dao.DelegateDataService;
 import io.nuls.db.entity.DelegateAccountPo;
 import io.nuls.db.entity.DelegatePo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -38,11 +39,11 @@ public class ConsensusCacheManager {
     private DelegateAccountDataService delegateAccountDao = NulsContext.getInstance().getService(DelegateAccountDataService.class);
     private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
 
-    private CacheMap<String, Consensus<Agent>> inAgentCache = new CacheMap<>(IN_AGENT_LIST,512);
-    private CacheMap<String, Consensus<Agent>> waitAgentCache = new CacheMap<>(WAIT_AGENT_LIST,512);
-    private CacheMap<String, Consensus<Delegate>> inDelegateCache = new CacheMap<>(IN_DELEGATE_LIST,1024);
-    private CacheMap<String, Consensus<Delegate>> waitDelegateCache = new CacheMap<>(WAIT_DELEGATE_LIST,1024);
-    private CacheMap<String, ConsensusStatusInfo> consensusStatusCache = new CacheMap<>(CACHE_CONSENSUS_STATUS_INFO,128);
+    private CacheMap<String, Consensus<Agent>> inAgentCache = new CacheMap<>(IN_AGENT_LIST, 512);
+    private CacheMap<String, Consensus<Agent>> waitAgentCache = new CacheMap<>(WAIT_AGENT_LIST, 512);
+    private CacheMap<String, Consensus<Delegate>> inDelegateCache = new CacheMap<>(IN_DELEGATE_LIST, 1024);
+    private CacheMap<String, Consensus<Delegate>> waitDelegateCache = new CacheMap<>(WAIT_DELEGATE_LIST, 1024);
+    private CacheMap<String, ConsensusStatusInfo> consensusStatusCache = new CacheMap<>(CACHE_CONSENSUS_STATUS_INFO, 128);
 
     private ConsensusCacheManager() {
     }
@@ -166,11 +167,10 @@ public class ConsensusCacheManager {
         return cd;
     }
 
-    public int getDelegateCount() {
-        return inDelegateCache.size();
-    }
-
-    public List<Consensus<Delegate>> getCachedDelegateList() {
+    public List<Consensus<Delegate>> getCachedDelegateList(ConsensusStatusEnum status) {
+        if (ConsensusStatusEnum.WAITING == status) {
+            return waitDelegateCache.values();
+        }
         return inDelegateCache.values();
     }
 
@@ -187,5 +187,27 @@ public class ConsensusCacheManager {
         this.delDelegate(id);
         ca.getExtend().setStatus(statusEnum.getCode());
         this.cacheDelegate(ca);
+    }
+
+    public List<Consensus<Delegate>> getCachedDelegateList(String agentAddress) {
+        Consensus<Agent> ca = this.getCachedAgent(agentAddress);
+        if(null==ca){
+            return null;
+        }
+        if(ca.getExtend().getStatus()==ConsensusStatusEnum.IN.getCode()) {
+            return filter(inDelegateCache.values(),agentAddress);
+        }else{
+            return filter(waitDelegateCache.values(),agentAddress);
+        }
+    }
+
+    private List<Consensus<Delegate>> filter(List<Consensus<Delegate>> allList,String agentAddress){
+        List<Consensus<Delegate>> list = new ArrayList<>();
+        for(Consensus<Delegate> cd:allList){
+            if(cd.getExtend().getDelegateAddress().equals(agentAddress)){
+                list.add(cd);
+            }
+        }
+        return list;
     }
 }

@@ -8,7 +8,6 @@ import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.ledger.entity.CoinData;
-import io.nuls.ledger.entity.listener.CoinDataTxService;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.validator.CoinDataValidator;
 import io.nuls.ledger.service.intf.CoinDataProvider;
@@ -32,7 +31,7 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
 
     public AbstractCoinTransaction(int type, CoinTransferData coinParam, String password) throws NulsException {
         this(type);
-        this.coinData = this.coinDataProvider.createTransferData(coinParam, password);
+        this.coinData = this.coinDataProvider.createTransferData(this, coinParam, password);
     }
 
     @Override

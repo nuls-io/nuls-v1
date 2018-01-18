@@ -203,7 +203,7 @@ public class Entity {
         if (mappedByteBuffer != null) {
             mappedByteBuffer.force();
             mappedByteBuffer.clear();
-            MappedBufferCleanUtil.clean(mappedByteBuffer);
+//todo            MappedBufferCleanUtil.clean(mappedByteBuffer);
             mappedByteBuffer = null;
         }
         if (null != fc) {

@@ -10,6 +10,8 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 
+import java.io.IOException;
+
 /**
  * @author Niels
  * @date 2017/12/19
@@ -38,24 +40,26 @@ public class BlockPersistenceThread implements Runnable {
         while (true) {
             try {
                 doPersistence();
+                if(blockCacheManager.canPersistence()){
+                    continue;
+                }
                 Thread.sleep(1000L);
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
                 Log.error(e);
             }
         }
     }
 
-    private void doPersistence() {
+    private void doPersistence() throws IOException {
         long height = blockCacheManager.getStoredHeight() + 1;
-        Block block = blockCacheManager.getConfirmedBlock(height);
+        Block block = blockCacheManager.getBlock(height);
         if (null == block) {
             return;
         }
-        //todo
-//        blockService.saveBlock(block);
-//        blockCacheManager.removeBlock(height);
-//        blockCacheManager.setStoredHeight(height);
-//        txCacheManager.removeTxList(block.getTxHashList());
+        blockService.saveBlock(block);
+        blockCacheManager.removeBlock(block.getHeader());
+        blockCacheManager.setStoredHeight(height);
+        txCacheManager.removeTxList(block.getTxHashList());
     }
 
 }

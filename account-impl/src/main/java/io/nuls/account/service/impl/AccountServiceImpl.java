@@ -181,6 +181,11 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public boolean isMine(String address) {
+        return accountCacheService.contains(address);
+    }
+
+    @Override
     public List<Account> getAccountList() {
         List<Account> list = this.accountCacheService.getAccountList();
         if (null != list && !list.isEmpty()) {

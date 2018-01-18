@@ -5,6 +5,7 @@ package io.nuls.db.entity;
  * @date 2017/11/20
  */
 public class TransactionLocalPo {
+
     private String hash;
 
     private Integer type;
@@ -13,9 +14,13 @@ public class TransactionLocalPo {
 
     private Long blockHeight;
 
-    private String blockHash;
+    private Long fee;
 
-    private byte[] txdata;
+    private String remark;
+
+    private int index;
+
+    private byte[] txData;
 
     public String getHash() {
         return hash;
@@ -49,19 +54,35 @@ public class TransactionLocalPo {
         this.blockHeight = blockHeight;
     }
 
-    public String getBlockHash() {
-        return blockHash;
+    public Long getFee() {
+        return fee;
     }
 
-    public void setBlockHash(String blockHash) {
-        this.blockHash = blockHash;
+    public void setFee(Long fee) {
+        this.fee = fee;
     }
 
-    public byte[] getTxdata() {
-        return txdata;
+    public String getRemark() {
+        return remark;
     }
 
-    public void setTxdata(byte[] txdata) {
-        this.txdata = txdata;
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
+    public byte[] getTxData() {
+        return txData;
+    }
+
+    public void setTxData(byte[] txData) {
+        this.txData = txData;
     }
 }

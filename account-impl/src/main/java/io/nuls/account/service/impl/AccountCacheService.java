@@ -25,7 +25,6 @@ public class AccountCacheService {
         return INSTANCE;
     }
 
-
     public void putAccount(Account account) {
         this.cacheService.putElement(AccountConstant.ACCOUNT_LIST_CACHE, account.getId(), account);
     }
@@ -42,6 +41,10 @@ public class AccountCacheService {
             }
         }
         return null;
+    }
+
+    public boolean contains(String address) {
+        return this.cacheService.containsKey(AccountConstant.ACCOUNT_LIST_CACHE, address);
     }
 
     public List<Account> getAccountList() {

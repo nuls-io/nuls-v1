@@ -174,7 +174,8 @@ public class ModuleManager {
     }
 
     private void removeProcess(short moduleId){
-        //todo
+       this.destroyModule(moduleId);
+       PROCCESS_MAP.remove(moduleId);
     }
 
 }

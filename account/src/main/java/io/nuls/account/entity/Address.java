@@ -52,7 +52,7 @@ public class Address {
         return getBase58();
     }
 
-    public int getChainId(){
+    public int getChainId() {
         return this.chainId;
     }
 
@@ -61,7 +61,7 @@ public class Address {
     }
 
     public static Address fromHashs(byte[] hashs) throws NulsException {
-        if(hashs == null || hashs.length != HASH_LENGTH) {
+        if (hashs == null || hashs.length != HASH_LENGTH) {
             throw new NulsException(ErrorCode.DATA_ERROR);
         }
 
@@ -102,12 +102,18 @@ public class Address {
         byte[] checkSin = new byte[4];
         System.arraycopy(Sha256Hash.hashTwice(versionAndHash160), 0, checkSin, 0, 4);
 
-        if(!Arrays.equals(checkSin, sign)) {
+        if (!Arrays.equals(checkSin, sign)) {
             throw new NulsException(ErrorCode.DATA_ERROR);
         }
     }
 
-    public String hashHex(){
+    @Override
+    public boolean equals(Object obj) {
+        Address other = (Address) obj;
+        return this.getBase58().equals(other.getBase58());
+    }
+
+    public String hashHex() {
         return Hex.encode(getHash());
     }
 }

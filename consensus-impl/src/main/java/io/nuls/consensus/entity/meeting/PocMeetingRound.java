@@ -128,4 +128,10 @@ public class PocMeetingRound {
     public Na getAgentTotalDeposit() {
         return agentTotalDeposit;
     }
+
+    public Integer indexOf(String address) {
+        return addressOrderMap.get(address);
+    }
+
+
 }

@@ -120,7 +120,7 @@ public class NulsByteBuffer {
 
     public byte[] readByLengthByte() throws NulsException {
         long length = this.readVarInt();
-        if(length == 0) {
+        if (length == 0) {
             return null;
         }
         return readBytes((int) length);
@@ -190,11 +190,9 @@ public class NulsByteBuffer {
     public Transaction readTransaction() throws NulsException {
         try {
             return TransactionManager.getInstance(this);
-        } catch (IllegalAccessException e) {
+        } catch (Exception e) {
             Log.error(e);
-        } catch (InstantiationException e) {
-            Log.error(e);
+            throw new NulsException(ErrorCode.DATA_PARSE_ERROR);
         }
-        return null;
     }
 }

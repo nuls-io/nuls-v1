@@ -2,6 +2,7 @@ package io.nuls.ledger.service.impl;
 
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
+import io.nuls.core.chain.entity.Result;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ErrorCode;
@@ -11,8 +12,10 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.tx.serivce.TransactionService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
+import io.nuls.db.dao.UtxoInputDataService;
 import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.db.dao.UtxoTransactionDataService;
+import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.entity.TransactionPo;
 import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.db.transactional.annotation.TransactionalAnnotation;
@@ -21,13 +24,21 @@ import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.entity.UtxoBalance;
 import io.nuls.ledger.entity.UtxoOutput;
+import io.nuls.ledger.entity.params.Coin;
+import io.nuls.ledger.entity.params.CoinTransferData;
+import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.entity.tx.TransferTransaction;
+import io.nuls.ledger.event.TransactionEvent;
 import io.nuls.ledger.service.intf.LedgerService;
+import io.nuls.ledger.util.UtxoTransactionTool;
 import io.nuls.ledger.util.UtxoTransferTool;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Niels
@@ -43,6 +54,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     private EventBroadcaster eventBroadcaster;
 
+    private Lock lock = new ReentrantLock();
+
     private UtxoLedgerServiceImpl() {
 
     }
@@ -56,7 +69,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
 
         UtxoOutputDataService outputDataService = NulsContext.getInstance().getService(UtxoOutputDataService.class);
-
+        UtxoInputDataService inputDataService = NulsContext.getInstance().getService(UtxoInputDataService.class);
+        UtxoTransactionTool.getInstance().setInputDataService(inputDataService);
     }
 
     @Override
@@ -117,85 +131,126 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         return balance;
     }
 
-
-//    @Override
-//    public Result transfer(Account account, String password, Address toAddress, Na amount, String remark) {
-//        if (account == null) {
-//            return new Result(false, "account not found");
-//        }
-//        if (!account.validatePassword(password)) {
-//            return new Result(false, "password error");
-//        }
-//        Balance balance = getBalance(account.getAddress().getBase58());
-//        if (balance.getUseable().isLessThan(amount)) {
-//            return new Result(false, "balance is not enough");
-//        }
-//        try {
-//            CoinTransferData coinData = new CoinTransferData(amount, account.getAddress().getBase58(), toAddress.getBase58());
-//            TransferTransaction tx = new TransferTransaction(coinData, password);
-//            tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
-//            aliasTx.setSign(signData(aliasTx.getHash(), account, password));
-////            tx.setSign();
-////            TransferCoinEvent
-//        } catch (IOException e) {
-//            Log.error(e);
-//            return new Result(false, "transaction failed");
-//        } catch (Exception e) {
-//            Log.error(e);
-//            return new Result(false, e.getMessage());
-//        }
-//
-//        return null;
-//    }
-
-
     @Override
-    public TransferTransaction transfer(String address, String password, String toAddress, Na amount, String remark) {
-        // todo auto-generated method stub(niels)
-        return null;
+    public Result transfer(String address, String password, String toAddress, Na amount, String remark) {
+        TransferTransaction tx = null;
+        try {
+            CoinTransferData coinData = new CoinTransferData(amount, address, toAddress);
+            tx = UtxoTransactionTool.getInstance().createTransferTx(coinData, password, remark);
+            TransactionEvent event = new TransactionEvent();
+            event.setEventBody(tx);
+            eventBroadcaster.broadcastAndCacheAysn(event, true);
+        } catch (Exception e) {
+            Log.error(e);
+            return new Result(false, e.getMessage());
+        }
+
+        return new Result(true, "OK", tx.getHash().getDigestHex());
     }
 
     @Override
-    public LockNulsTransaction lock(String address, String password, Na amount, long unlockTime, long unlockHeight) {
-        // todo auto-generated method stub(niels)
-        return null;
+    public Result transfer(List<String> addressList, String password, String toAddress, Na amount, String remark) {
+        TransferTransaction tx = null;
+        try {
+            CoinTransferData coinData = new CoinTransferData(amount, addressList, toAddress);
+            tx = UtxoTransactionTool.getInstance().createTransferTx(coinData, password, remark);
+            TransactionEvent event = new TransactionEvent();
+            event.setEventBody(tx);
+            eventBroadcaster.broadcastAndCacheAysn(event, true);
+        } catch (Exception e) {
+            Log.error(e);
+            return new Result(false, e.getMessage());
+        }
+
+        return new Result(true, "OK", tx.getHash().getDigestHex());
     }
 
+
     @Override
-    public boolean saveTxList(long height, String blockHash, List<Transaction> txList) {
-        // todo auto-generated method stub(niels)
-        return false;
+    public Result lock(String address, String password, Na amount, long unlockTime) {
+        LockNulsTransaction tx = null;
+        try {
+            CoinTransferData coinData = new CoinTransferData(amount, address);
+            coinData.addTo(address, new Coin(amount, unlockTime));
+            tx = UtxoTransactionTool.getInstance().createLockNulsTx(coinData, password);
+            TransactionEvent event = new TransactionEvent();
+            event.setEventBody(tx);
+            eventBroadcaster.broadcastAndCacheAysn(event, true);
+
+        } catch (Exception e) {
+            return new Result(false, e.getMessage());
+        }
+
+        return new Result(true, "OK", tx.getHash().getDigestHex());
     }
 
     @Override
     @TransactionalAnnotation
-    public boolean saveTxList(long height, long blockHash, List<Transaction> txList) {
-        // todo auto-generated method stub(niels)
+    public boolean saveTxList(List<Transaction> txList) throws IOException {
+        lock.lock();
+        try {
+            List<TransactionPo> poList = new ArrayList<>();
+            List<TransactionLocalPo> localPoList = new ArrayList<>();
+            for (int i = 0; i < txList.size(); i++) {
+                Transaction tx = txList.get(i);
+                TransactionPo po = TransactionPoTool.toPojo(tx);
+                poList.add(po);
+                if (tx instanceof AbstractCoinTransaction) {
+                    if (UtxoTransactionTool.getInstance().isMine((AbstractCoinTransaction) tx)) {
+                        TransactionLocalPo localPo = TransactionPoTool.toPojoLocal(tx);
+                        localPoList.add(localPo);
+                    }
+                }
+            }
+            txDao.saveTxList(poList);
+            if (localPoList.size() > 0) {
+                txDao.saveLocalList(localPoList);
+            }
+        } finally {
+            lock.unlock();
+        }
         return false;
     }
 
     @Override
-    public List<Transaction> getListByAddress(String address, int txType, long beginTime, long endTime) {
-        // todo auto-generated method stub(niels)
-        return null;
+    public List<Transaction> getListByAddress(String address, int txType, int pageNumber, int pageSize) throws Exception {
+        List<Transaction> txList = new ArrayList<>();
+        List<TransactionPo> poList = txDao.getTxs(address, txType, pageNumber, pageSize, true);
+
+        for (TransactionPo po : poList) {
+            txList.add(TransactionPoTool.toTransaction(po));
+        }
+        return txList;
     }
 
     @Override
-    public List<Transaction> getListByHashs(List<NulsDigestData> txHashList) {
-        // todo auto-generated method stub(niels)
-        return null;
+    public List<Transaction> getListByBlockHash(String blockHash) throws Exception {
+        List<Transaction> txList = new ArrayList<>();
+        List<TransactionPo> poList = txDao.getTxs(blockHash, true);
+        for (TransactionPo po : poList) {
+            txList.add(TransactionPoTool.toTransaction(po));
+        }
+        return txList;
     }
 
     @Override
-    public List<Transaction> getListByHeight(long startHeight, long endHeight) {
-        // todo auto-generated method stub(niels)
-        return null;
+    public List<Transaction> getListByHeight(long startHeight, long endHeight) throws Exception {
+        List<Transaction> txList = new ArrayList<>();
+        List<TransactionPo> poList = txDao.getTxs(startHeight, endHeight, true);
+        for (TransactionPo po : poList) {
+            txList.add(TransactionPoTool.toTransaction(po));
+        }
+        return txList;
     }
 
     @Override
-    public List<Transaction> getListByHeight(long height) {
-        // todo auto-generated method stub(niels)
-        return null;
+    public List<Transaction> getListByHeight(long height) throws Exception {
+        List<Transaction> txList = new ArrayList<>();
+        List<TransactionPo> poList = txDao.getTxs(height, true);
+        for (TransactionPo po : poList) {
+            txList.add(TransactionPoTool.toTransaction(po));
+        }
+        return txList;
     }
 
     @Override
@@ -237,4 +292,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         }
         return list;
     }
+
+
 }
