@@ -38,6 +38,7 @@ public class RegisterAgentTxService implements TransactionService<RegisterAgentT
         delegateAccountService.updateSelective(po);
     }
 
+
     @Override
     public void onApproval(RegisterAgentTransaction tx) throws NulsException {
         Consensus<Agent> ca = tx.getTxData();

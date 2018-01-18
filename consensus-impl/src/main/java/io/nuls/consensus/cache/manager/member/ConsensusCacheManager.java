@@ -16,7 +16,9 @@ import io.nuls.db.entity.DelegateAccountPo;
 import io.nuls.db.entity.DelegatePo;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Niels
@@ -247,5 +249,11 @@ public class ConsensusCacheManager {
                 inDelegateCache.remove(cd.getExtend().getHash());
             }
         }
+    }
+
+    public List<Consensus<Delegate>> getCachedDelegateList() {
+        Set<Consensus<Delegate>> allSet = new HashSet<>(outDelegateCache.values());
+        allSet.addAll(inDelegateCache.values());
+        return new ArrayList<>(allSet);
     }
 }

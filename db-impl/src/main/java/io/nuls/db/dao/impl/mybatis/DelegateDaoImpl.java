@@ -23,8 +23,17 @@ public class DelegateDaoImpl extends BaseDaoImpl<DelegateMapper, String, Delegat
     }
 
     @Override
-    public void deleteByAgentAddress(String address) {
-        // todo auto-generated method stub(niels)
+    public int deleteByAgentAddress(String address) {
+        return this.getMapper().deleteByAgentAddress(address);
+    }
 
+    @Override
+    public int updateSelective(DelegatePo po) {
+        return this.getMapper().updateByPrimaryKeySelective(po);
+    }
+
+    @Override
+    public int updateSelectiveByAgentAddress(DelegatePo po) {
+        return this.getMapper().updateSelectiveByAgentAddress(po);
     }
 }
