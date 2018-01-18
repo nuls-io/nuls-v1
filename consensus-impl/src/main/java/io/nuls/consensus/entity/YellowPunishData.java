@@ -16,7 +16,9 @@ import java.io.IOException;
 public class YellowPunishData extends BaseNulsData {
     private long height;
     private String address;
-
+    public YellowPunishData(){
+//todo        this.registerValidator();
+    }
     @Override
     public int size() {
         int size = 0;

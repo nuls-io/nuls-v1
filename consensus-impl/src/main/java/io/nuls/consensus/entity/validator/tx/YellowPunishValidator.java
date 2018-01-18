@@ -21,7 +21,6 @@ public class YellowPunishValidator implements NulsDataValidator<YellowPunishTran
 
     @Override
     public ValidateResult validate(YellowPunishTransaction data) {
-        // todo auto-generated method stub(niels)
-        return null;
+        return data.getTxData().verify();
     }
 }

@@ -47,5 +47,4 @@ public class EhCacheModuleBootstrap extends AbstractCacheModule {
         return EhCacheConstant.CACHE_MODULE_VERSION;
     }
 
-
 }

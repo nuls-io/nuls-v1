@@ -30,6 +30,7 @@ import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -171,6 +172,8 @@ public class ConsensusMeetingRunner implements Runnable {
         int sumRoundVal = 1;
         //todo blockService.getSumOfYellowPunishRound(consensusManager.getLocalAccountAddress());
 
+//        ledgerService.getListByAddress(consensusManager.getLocalAccountAddress(), TransactionConstant.TX_TYPE_YELLOW_PUNISH,roundStart,consensusManager.getCurrentRound().getIndex());
+
         double ability = blockCount / PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT;
         double penalty = (PocConsensusConstant.CREDIT_MAGIC_NUM * sumRoundVal) / (consensusManager.getCurrentRound().getIndex() * consensusManager.getCurrentRound().getIndex());
 
@@ -256,7 +259,7 @@ public class ConsensusMeetingRunner implements Runnable {
         tx.setHash(NulsDigestData.calcDigestData(tx));
         tx.setSign(accountService.signData(tx.getHash()));
         ValidateResult validateResult = tx.verify();
-        //todo cache
+        confirmingTxCacheManager.putTx(tx);
         if (null == validateResult || validateResult.isFailed()) {
             throw new NulsRuntimeException(ErrorCode.CONSENSUS_EXCEPTION);
         }
