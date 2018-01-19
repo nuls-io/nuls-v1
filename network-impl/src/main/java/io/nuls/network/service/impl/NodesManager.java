@@ -196,7 +196,7 @@ public class NodesManager implements Runnable {
         try {
             if (nodes.containsKey(nodeHash)) {
                 for (NodeGroup group : nodeGroups.values()) {
-                    for (Node node : group.getNodes()) {
+                    for (Node node : group.getNodes().values()) {
                         if (node.getHash().equals(nodeHash)) {
                             group.removeNode(node);
                             break;
@@ -272,7 +272,7 @@ public class NodesManager implements Runnable {
             }
 
             NodeGroup group = nodeGroups.get(groupName);
-            for (Node p : group.getNodes()) {
+            for (Node p : group.getNodes().values()) {
                 p.destroy();
                 group.removeNode(p);
             }
@@ -315,7 +315,7 @@ public class NodesManager implements Runnable {
     public List<Node> getAvailableNodesByGroup(String areaName, String groupName) {
         List<Node> availableNodes = new ArrayList<>();
         if (hasNodeGroup(areaName,groupName)) {
-            for (Node node : getNodeGroup(areaName,groupName).getNodes()) {
+            for (Node node : getNodeGroup(areaName,groupName).getNodes().values()) {
                 if (node.getStatus() == Node.HANDSHAKE) {
                     availableNodes.add(node);
                 }
@@ -379,7 +379,7 @@ public class NodesManager implements Runnable {
         }
         List<Node> availableNodes = new ArrayList<>();
         NodeGroup group = nodeArea.get(areaName).get(groupName);
-        for (Node node : group.getNodes()) {
+        for (Node node : group.getNodes().values()) {
             if (node.getStatus() == Node.HANDSHAKE && !node.getIp().equals(excludeNodeId)) {
                 availableNodes.add(node);
             }

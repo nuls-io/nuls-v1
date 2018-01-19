@@ -85,7 +85,7 @@ public class NodeDiscoverHandler implements Runnable {
                 List<Node> nodes = getSeedNodes();
 
                 for (Node newNode : nodes) {
-                    if (outNodes.getNodes().contains(newNode)) {
+                    if (outNodes.getNodes().values().contains(newNode)) {
                         continue;
                     }
                     nodesManager.addNodeToGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP, newNode);
@@ -97,7 +97,7 @@ public class NodeDiscoverHandler implements Runnable {
                     findOtherNode(network.maxOutCount() - outNodes.size());
                 } else {
                     for (Node newNode : nodes) {
-                        if (outNodes.getNodes().contains(newNode)) {
+                        if (outNodes.getNodes().values().contains(newNode)) {
                             continue;
                         }
                         nodesManager.addNodeToGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP, newNode);

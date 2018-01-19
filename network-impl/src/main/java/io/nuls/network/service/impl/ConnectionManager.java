@@ -192,14 +192,14 @@ public class ConnectionManager implements Runnable {
             return false;
         }
         //check it already connected
-        for (Node node : inNodes.getNodes()) {
+        for (Node node : inNodes.getNodes().values()) {
             if (node.getIp().equals(socketAddress.getAddress().getHostAddress()) &&
                     node.getPort() == socketAddress.getPort()) {
                 return false;
             }
         }
 
-        for (Node node : outNodes.getNodes()) {
+        for (Node node : outNodes.getNodes().values()) {
             if (node.getIp().equals(socketAddress.getAddress().getHostAddress()) &&
                     node.getPort() == socketAddress.getPort()) {
                 return false;
