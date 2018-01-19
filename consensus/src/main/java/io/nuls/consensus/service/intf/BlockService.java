@@ -32,8 +32,6 @@ public interface BlockService {
 
     void rollbackBlock(long height) throws NulsException;
 
-    int getBlockCount(String address, long roundStart, long index);
-
     List<NulsDigestData> getBlockHashList(long start, long end, long split);
 
     BlockHeader getBlockHeader(NulsDigestData hash);

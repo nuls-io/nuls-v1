@@ -22,6 +22,7 @@ import io.nuls.consensus.entity.tx.RedPunishTransaction;
 import io.nuls.consensus.entity.tx.YellowPunishTransaction;
 import io.nuls.consensus.event.BlockHeaderEvent;
 import io.nuls.consensus.manager.ConsensusManager;
+import io.nuls.consensus.service.impl.PocBlockService;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.consensus.utils.TxComparator;
@@ -60,6 +61,7 @@ public class ConsensusMeetingRunner implements Runnable {
     private ConsensusCacheManager consensusCacheManager = ConsensusCacheManager.getInstance();
     private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
     private BlockService blockService = NulsContext.getInstance().getService(BlockService.class);
+    private PocBlockService pocBlockService = PocBlockService.getInstance();
     private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
     private EventBroadcaster eventBroadcaster = context.getService(EventBroadcaster.class);
     private boolean running = false;
@@ -171,15 +173,10 @@ public class ConsensusMeetingRunner implements Runnable {
         if (roundStart < 0) {
             roundStart = 0;
         }
-        int blockCount = blockService.getBlockCount(consensusManager.getConsensusAccountAddress(), roundStart, consensusManager.getCurrentRound().getIndex());
-        int sumRoundVal = 1;
-        //todo blockService.getSumOfYellowPunishRound(consensusManager.getLocalAccountAddress());
-
-//        ledgerService.getListByAddress(consensusManager.getLocalAccountAddress(), TransactionConstant.TX_TYPE_YELLOW_PUNISH,roundStart,consensusManager.getCurrentRound().getIndex());
-
+        long blockCount = pocBlockService.getBlockCount(consensusManager.getConsensusAccountAddress(), roundStart, consensusManager.getCurrentRound().getIndex()-1);
+        long sumRoundVal = pocBlockService.getSumOfRoundIndexOfYellowPunish(consensusManager.getConsensusAccountAddress(),consensusManager.getCurrentRound().getIndex()-1);
         double ability = blockCount / PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT;
         double penalty = (PocConsensusConstant.CREDIT_MAGIC_NUM * sumRoundVal) / (consensusManager.getCurrentRound().getIndex() * consensusManager.getCurrentRound().getIndex());
-
         return ability - penalty;
     }
 

@@ -126,11 +126,6 @@ public class BlockServiceImpl implements io.nuls.consensus.service.intf.BlockSer
     }
 
     @Override
-    public int getBlockCount(String address, long roundStart, long roundEnd) {
-        return this.blockStorageService.getCount(address, roundStart, roundEnd);
-    }
-
-    @Override
     public List<NulsDigestData> getBlockHashList(long start, long end, long split) {
         // todo auto-generated method stub(niels)
         return null;

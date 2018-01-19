@@ -119,7 +119,5 @@ public class BlockStorageService {
         headerDao.delete(hash);
     }
 
-    public int getCount(String address, long roundStart, long roundEnd) {
-        return headerDao.getCount(address,roundStart,roundEnd);
-    }
+
 }
