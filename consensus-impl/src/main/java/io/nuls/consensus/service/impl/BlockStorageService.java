@@ -5,6 +5,7 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.BlockHeaderService;
 import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.ledger.service.intf.LedgerService;
@@ -33,13 +34,23 @@ public class BlockStorageService {
 
     public Block getBlock(long height) throws Exception {
         BlockHeader header = getBlockHeader(height);
-        List<Transaction> txList = ledgerService.getListByHeight(height);
+        List<Transaction> txList = null;
+        try {
+            txList = ledgerService.getListByHeight(height);
+        } catch (Exception e) {
+            Log.error(e);
+        }
         return fillBlock(header, txList);
     }
 
     public Block getBlock(String hash) throws Exception {
         BlockHeader header = getBlockHeader(hash);
-        List<Transaction> txList = ledgerService.getListByHeight(header.getHeight());
+        List<Transaction> txList = null;
+        try {
+            txList = ledgerService.getListByHeight(header.getHeight());
+        } catch (Exception e) {
+            Log.error(e);
+        }
         return fillBlock(header, txList);
     }
 
@@ -58,7 +69,12 @@ public class BlockStorageService {
     public List<Block> getBlock(long startHeight, long endHeight) throws Exception {
         List<Block> blockList = new ArrayList<>();
         List<BlockHeaderPo> poList = headerDao.getHeaderList(startHeight, endHeight);
-        List<Transaction> txList = ledgerService.getListByHeight(startHeight, endHeight);
+        List<Transaction> txList = null;
+        try {
+            txList = ledgerService.getListByHeight(startHeight, endHeight);
+        } catch (Exception e) {
+            Log.error(e);
+        }
         Map<Long, List<Transaction>> txListGroup = txListGrouping(txList);
         for (BlockHeaderPo po : poList) {
             BlockHeader header = ConsensusTool.fromPojo(po);

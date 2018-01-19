@@ -10,4 +10,5 @@ import io.nuls.db.entity.DelegateAccountPo;
 public interface DelegateAccountDataService extends BaseDataService< String,DelegateAccountPo> {
 
 
+    int updateSelective(DelegateAccountPo po);
 }
