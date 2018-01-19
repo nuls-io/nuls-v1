@@ -53,7 +53,16 @@ public class ConsensusTool {
             return null;
         }
         BlockHeader header = new BlockHeader();
+        header.setHash(NulsDigestData.fromDigestHex(po.getHash()));
+        header.setMerkleHash(NulsDigestData.fromDigestHex(po.getMerkleHash()));
         //todo
+//        header.setPackingAddress();
+//        header.setTxCount();
+//        header.setPreHash();
+//        header.setTime();
+//        header.setHeight();
+//        header.setExtend();
+//        header.setSign();
         return header;
     }
 

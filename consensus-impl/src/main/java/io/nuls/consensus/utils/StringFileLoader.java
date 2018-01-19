@@ -17,9 +17,13 @@ public class StringFileLoader {
     public static String read(String path) throws NulsException {
         AssertUtil.canNotEmpty(path, ErrorCode.NULL_PARAMETER.getMsg());
         String filePath = StringFileLoader.class.getClassLoader().getResource(path).getPath();
+        return readRealPath(filePath, false);
+    }
+
+    public static String readRealPath(String realPath, boolean format) throws NulsException {
         BufferedReader br = null;
         try {
-            br = new BufferedReader(new FileReader(filePath));
+            br = new BufferedReader(new FileReader(realPath));
         } catch (FileNotFoundException e) {
             Log.error(e);
             throw new NulsException(e);
@@ -28,7 +32,13 @@ public class StringFileLoader {
         String line;
         try {
             while ((line = br.readLine()) != null) {
-                str.append(line.trim());
+
+                if (format) {
+                    str.append(line);
+                    str.append("\n");
+                } else {
+                    str.append(line.trim());
+                }
             }
         } catch (IOException e) {
             Log.error(e);
@@ -42,5 +52,4 @@ public class StringFileLoader {
         }
         return str.toString();
     }
-
 }
