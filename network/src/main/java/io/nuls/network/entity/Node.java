@@ -36,6 +36,8 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.NotYetConnectedException;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -60,6 +62,8 @@ public class Node extends BaseNulsData {
     private Long lastTime;
 
     private Integer failCount;
+
+    private Set<String> groupSet;
 
     /**
      * 1: inNode ,  2: outNode
@@ -95,28 +99,22 @@ public class Node extends BaseNulsData {
 
     public Node(AbstractNetworkParam network) {
         super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
+        this.groupSet = new HashSet<>();
         this.magicNumber = network.packetMagic();
         this.messageHandlerFactory = network.getMessageHandlerFactory();
         eventBusService = NulsContext.getInstance().getService(EventBusService.class);
     }
 
     public Node(AbstractNetworkParam network, int type) {
-        super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
-        this.magicNumber = network.packetMagic();
+        this(network);
         this.type = type;
-        this.messageHandlerFactory = network.getMessageHandlerFactory();
-        eventBusService = NulsContext.getInstance().getService(EventBusService.class);
     }
 
 
     public Node(AbstractNetworkParam network, int type, InetSocketAddress socketAddress) {
-        super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
-        this.magicNumber = network.packetMagic();
-        this.type = type;
+        this(network,type);
         this.port = socketAddress.getPort();
         this.ip = socketAddress.getAddress().getHostAddress();
-        this.messageHandlerFactory = network.getMessageHandlerFactory();
-        eventBusService = NulsContext.getInstance().getService(EventBusService.class);
         this.hash = this.ip + this.port;
     }
 

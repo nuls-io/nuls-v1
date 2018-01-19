@@ -26,6 +26,7 @@ public interface NetworkConstant {
     String NETWORK_NODE_IN_GROUP = "inNodes";
     String NETWORK_NODE_OUT_GROUP = "outNodes";
     String NETWORK_NODE_CONSENSUS_GROUP = "consensus_Group";
+    String NETWORK_NODE_DEFAULT_GROUP = "all";
     int NETWORK_BROAD_SUCCESS_MIN_COUNT = 1;
     int NETWORK_BROAD_MAX_TRY_COUNT = 3;
 
