@@ -64,6 +64,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         return INSTANCE;
     }
 
+    @Override
     public void init() {
         txDao = NulsContext.getInstance().getService(UtxoTransactionDataService.class);
         eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
@@ -243,8 +244,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public List<Transaction> getTxList(String address, int txType, long startHeight, long endHeight) throws Exception {
-
+    public List<Transaction> getTxList(String address, int txType) throws Exception {
+        //todo
         return null;
     }
 
