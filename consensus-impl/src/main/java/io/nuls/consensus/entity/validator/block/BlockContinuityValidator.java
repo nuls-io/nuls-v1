@@ -15,7 +15,6 @@ import io.nuls.core.validate.ValidateResult;
 public class BlockContinuityValidator implements NulsDataValidator<Block> {
     private static final String ERROR_MESSAGE = "block continuity check failed";
     public static final BlockContinuityValidator INSTANCE = new BlockContinuityValidator();
-    private BlockService blockService = NulsContext.getInstance().getService(BlockService.class);
 
     private BlockContinuityValidator() {
     }
@@ -33,7 +32,7 @@ public class BlockContinuityValidator implements NulsDataValidator<Block> {
                 failed = !block.getHeader().getPreHash().equals(NulsDigestData.EMPTY_HASH);
                 break;
             }
-            Block preBlock = blockService.getBlock(block.getHeader().getHeight());
+            Block preBlock = NulsContext.getServiceBean(BlockService.class).getBlock(block.getHeader().getHeight());
             failed = preBlock.getHeader().getHash().equals(block.getHeader().getPreHash());
             if(failed){
                 break;

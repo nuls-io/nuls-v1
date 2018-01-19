@@ -11,7 +11,7 @@ public interface PocConsensusConstant {
     int MINIMUM_VERSION_SUPPORTED = 0;
 
 
-    String CFG_CONSENSUS_SECTION = "Consensus";
+    String CFG_CONSENSUS_SECTION = "consensus";
     String PROPERTY_PARTAKE_PACKING = "partake.packing";
     String PROPERTY_SEED_NODES = "seed.nodes";
     String SEED_NODES_DELIMITER = ",";

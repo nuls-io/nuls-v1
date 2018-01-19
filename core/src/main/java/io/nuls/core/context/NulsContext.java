@@ -13,6 +13,12 @@ import java.util.Set;
  */
 public class NulsContext {
 
+    private static final HashMap<String, Integer> chain_id_map = new HashMap<String, Integer>();
+    public static String DEFAULT_ENCODING = "UTF-8";
+    public static String CHAIN_ID = "NULS";
+    public static IniEntity NULS_CONFIG;
+    public static IniEntity MODULES_CONFIG;
+
     private NulsContext() {
         CHAIN_ID = "NULS";
         chain_id_map.put(CHAIN_ID, 1);
@@ -28,12 +34,6 @@ public class NulsContext {
     public static final NulsContext getInstance() {
         return NC;
     }
-
-    private static HashMap<String, Integer> chain_id_map = new HashMap<String, Integer>();
-    public static String DEFAULT_ENCODING = "UTF-8";
-    public static String CHAIN_ID = "NULS";
-    public static IniEntity NULS_CONFIG;
-    public static IniEntity MODULES_CONFIG;
 
     private Na txFee;
     /**
@@ -105,4 +105,7 @@ public class NulsContext {
         this.txFee = txFee;
     }
 
+    public static final <T> T getServiceBean(Class<T> tClass) {
+        return getInstance().getService(tClass);
+    }
 }

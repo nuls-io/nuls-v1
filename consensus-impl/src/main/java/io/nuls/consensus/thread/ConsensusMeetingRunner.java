@@ -96,6 +96,9 @@ public class ConsensusMeetingRunner implements Runnable {
     }
 
     private void nextRound() {
+        if(this.consensusManager.getConsensusAccountAddress()==null){
+            return;
+        }
         PocMeetingRound currentRound = calcRound();
         consensusManager.setCurrentRound(currentRound);
         while (TimeService.currentTimeMillis() < (currentRound.getStartTime())) {
@@ -120,7 +123,7 @@ public class ConsensusMeetingRunner implements Runnable {
             mm.setPackerAddress(ca.getExtend().getDelegateAddress());
             mm.setRoundStartTime(currentRound.getStartTime());
             memberList.add(mm);
-            if (ca.getAddress().equals(consensusManager.getLocalAccountAddress())) {
+            if (ca.getAddress().equals(consensusManager.getConsensusStatusInfo().getAddress())) {
                 cg.setAgentConsensus(ca);
                 agentTotalDeposit = agentTotalDeposit.add(ca.getExtend().getDeposit());
             }
@@ -132,7 +135,7 @@ public class ConsensusMeetingRunner implements Runnable {
         List<Consensus<Delegate>> myDelegateList = new ArrayList<>();
         for (Consensus<Delegate> cd : delegateList) {
             totalDeposit = totalDeposit.add(cd.getExtend().getDeposit());
-            if (cd.getExtend().getDelegateAddress().equals(consensusManager.getLocalAccountAddress())) {
+            if (cd.getExtend().getDelegateAddress().equals(consensusManager.getConsensusAccountAddress())) {
                 myDelegateList.add(cd);
                 agentTotalDeposit = agentTotalDeposit.add(cd.getExtend().getDeposit());
             }
@@ -146,7 +149,7 @@ public class ConsensusMeetingRunner implements Runnable {
     }
 
     private void startMeeting() {
-        PocMeetingMember self = consensusManager.getCurrentRound().getMember(consensusManager.getLocalAccountAddress());
+        PocMeetingMember self = consensusManager.getCurrentRound().getMember(consensusManager.getConsensusAccountAddress());
         if (null == self) {
             this.nextRound();
             return;
@@ -168,7 +171,7 @@ public class ConsensusMeetingRunner implements Runnable {
         if (roundStart < 0) {
             roundStart = 0;
         }
-        int blockCount = blockService.getBlockCount(consensusManager.getLocalAccountAddress(), roundStart, consensusManager.getCurrentRound().getIndex());
+        int blockCount = blockService.getBlockCount(consensusManager.getConsensusAccountAddress(), roundStart, consensusManager.getCurrentRound().getIndex());
         int sumRoundVal = 1;
         //todo blockService.getSumOfYellowPunishRound(consensusManager.getLocalAccountAddress());
 

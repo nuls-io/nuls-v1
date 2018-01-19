@@ -60,7 +60,7 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
 
         this.consensusManager.startMaintenanceWork();
         ConsensusStatusInfo statusInfo = consensusManager.getConsensusStatusInfo();
-        if (statusInfo.getStatus() != ConsensusStatusEnum.NOT_IN.getCode()) {
+        if (null!=statusInfo&&statusInfo.getStatus() != ConsensusStatusEnum.NOT_IN.getCode()) {
             consensusManager.joinMeeting();
         }
         consensusManager.startPersistenceWork();
