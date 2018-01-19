@@ -20,7 +20,6 @@ import io.nuls.core.validate.ValidateResult;
 public class HeaderPackerValidator implements NulsDataValidator<BlockHeader> {
     private static final String ERROR_MESSAGE = "block header packer check failed";
     public static final HeaderPackerValidator INSTANCE = new HeaderPackerValidator();
-    private BlockService blockService = NulsContext.getInstance().getService(BlockService.class);
     private ConsensusManager consensusManager = ConsensusManager.getInstance();
 
     private HeaderPackerValidator() {
@@ -32,7 +31,7 @@ public class HeaderPackerValidator implements NulsDataValidator<BlockHeader> {
 
     @Override
     public ValidateResult validate(BlockHeader header) {
-        BlockHeader preHeader = blockService.getBlockHeader(header.getPreHash());
+        BlockHeader preHeader = NulsContext.getServiceBean(BlockService.class).getBlockHeader(header.getPreHash());
         BlockRoundData roundData = null;
         try {
             roundData = new BlockRoundData(preHeader.getExtend());

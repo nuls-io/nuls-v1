@@ -19,8 +19,6 @@ public interface BlockHeaderService extends BaseDataService<String, BlockHeaderP
 
     BlockHeaderPo getBestBlockHeader();
 
-    int getCount(String address, long roundStart, long roundEnd);
-
     List<BlockHeaderPo> getHeaderList(long startHeight, long endHeight);
 
 

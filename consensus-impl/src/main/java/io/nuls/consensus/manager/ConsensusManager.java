@@ -33,7 +33,7 @@ import java.util.Set;
  * @author Niels
  * @date 2018/1/8
  */
-public class ConsensusManager {
+public class ConsensusManager implements Runnable {
     private static ConsensusManager INSTANCE = new ConsensusManager();
     private BlockCacheManager blockCacheManager;
     private ConsensusCacheManager consensusCacheManager;
@@ -43,7 +43,7 @@ public class ConsensusManager {
     private boolean partakePacking = false;
     private List<String> seedNodeList;
 
-    private String localAccountAddress;
+    private String consensusAccountAddress;
     private PocMeetingRound currentRound;
     private ConsensusStatusInfo consensusStatusInfo;
 
@@ -71,13 +71,16 @@ public class ConsensusManager {
         for (String address : array) {
             seedAddressSet.add(address);
         }
+        //todo Test special
+        seedAddressSet.add(NulsContext.DEFAULT_ACCOUNT_ID);
+
+
         this.seedNodeList.addAll(seedAddressSet);
     }
 
     public void init() {
         loadConfigration();
         accountService = NulsContext.getInstance().getService(AccountService.class);
-        localAccountAddress = accountService.getDefaultAccount().getAddress().getBase58();
 
         blockCacheManager = BlockCacheManager.getInstance();
         blockCacheManager.init();
@@ -88,28 +91,55 @@ public class ConsensusManager {
         receivedTxCacheManager = ReceivedTxCacheManager.getInstance();
         receivedTxCacheManager.init();
 
+        TaskManager.createAndRunThread(NulsConstant.MODULE_ID_CONSENSUS, "consensus-status-manager", this);
+    }
+
+    @Override
+    public void run() {
         this.initConsensusStatusInfo();
     }
 
     public void initConsensusStatusInfo() {
-        ConsensusStatusInfo info = new ConsensusStatusInfo();
-        info.setAddress(localAccountAddress);
-        //consensus seed must partake packing
-        boolean isSeed = this.seedNodeList.contains(localAccountAddress);
-        if (isSeed) {
-            info.setStatus(ConsensusStatusEnum.IN.getCode());
-        } else {
-            Consensus<Agent> memberSelf =
-                    consensusCacheManager.getCachedAgent(localAccountAddress);
-            if (null == memberSelf) {
-                info.setStatus(ConsensusStatusEnum.NOT_IN.getCode());
+
+        if (null == NulsContext.LOCAL_ADDRESS_LIST || NulsContext.LOCAL_ADDRESS_LIST.isEmpty()) {
+            try {
+                Thread.sleep(5000L);
+            } catch (InterruptedException e) {
+                Log.error(e);
             }
-            info.setStatus(memberSelf.getExtend().getStatus());
+            initConsensusStatusInfo();
+            return;
+        }
+        List<Consensus<Agent>> agentList = consensusCacheManager.getCachedAgentList();
+        ConsensusStatusInfo info = new ConsensusStatusInfo();
+        for (String address : NulsContext.LOCAL_ADDRESS_LIST) {
+            if (this.seedNodeList.contains(address)) {
+                info.setAddress(address);
+                info.setStatus(ConsensusStatusEnum.IN.getCode());
+                break;
+            }
+            for (Consensus<Agent> agent : agentList) {
+                if (agent.getExtend().getDelegateAddress().equals(address)) {
+                    info.setAddress(address);
+                    info.setStatus(agent.getExtend().getStatus());
+                }
+            }
+        }
+        if (info.getAddress() == null) {
+            try {
+                Thread.sleep(5000L);
+            } catch (InterruptedException e) {
+                Log.error(e);
+            }
+            return;
         }
         this.consensusStatusInfo = info;
     }
 
     public void joinMeeting() {
+        if(null==this.consensusStatusInfo){
+            return;
+        }
         TaskManager.createAndRunThread(NulsConstant.MODULE_ID_CONSENSUS,
                 ConsensusMeetingRunner.THREAD_NAME,
                 ConsensusMeetingRunner.getInstance());
@@ -146,8 +176,8 @@ public class ConsensusManager {
         receivedTxCacheManager.clear();
     }
 
-    public String getLocalAccountAddress() {
-        return localAccountAddress;
+    public String getConsensusAccountAddress() {
+        return consensusAccountAddress;
     }
 
     public void setCurrentRound(PocMeetingRound currentRound) {
@@ -164,6 +194,6 @@ public class ConsensusManager {
     }
 
     public void exitMeeting() {
-        TaskManager.stopThread(NulsConstant.MODULE_ID_CONSENSUS,BlockMaintenanceThread.THREAD_NAME);
+        TaskManager.stopThread(NulsConstant.MODULE_ID_CONSENSUS, BlockMaintenanceThread.THREAD_NAME);
     }
 }

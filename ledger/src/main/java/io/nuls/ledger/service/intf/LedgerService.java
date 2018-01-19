@@ -75,7 +75,8 @@ public interface LedgerService {
      */
     List<Transaction> getTxList(String address, int txType, int pageNumber, int pageSize) throws Exception;
 
-    List<Transaction> getTxList(String address, int txType, long startHeight, long endHeight) throws Exception;
+    List<Transaction> getTxList(String address, int txType) throws Exception;
+
     /**
      * @param blockHash
      * @return

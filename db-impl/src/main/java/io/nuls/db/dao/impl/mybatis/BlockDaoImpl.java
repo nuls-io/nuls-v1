@@ -56,12 +56,6 @@ public class BlockDaoImpl extends BaseDaoImpl<BlockMapper, String, BlockHeaderPo
 
 
     @Override
-    public int getCount(String address, long roundStart, long roundEnd) {
-        // todo auto-generated method stub(niels)
-        return 0;
-    }
-
-    @Override
     public List<BlockHeaderPo> getHeaderList(long startHeight, long endHeight) {
         // todo auto-generated method stub(niels)
         return null;

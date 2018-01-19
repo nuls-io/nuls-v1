@@ -23,7 +23,7 @@ public class AccountCreditValidator implements NulsDataValidator<RegisterAgentTr
     public ValidateResult validate(RegisterAgentTransaction data) {
         List<Transaction> list = null;
         try {
-            //todo            list = ledgerService.getListByAddress(data.getTxData().getAddress(), TransactionConstant.TX_TYPE_RED_PUNISH,0,0);
+               list = ledgerService.getTxList(data.getTxData().getAddress(), TransactionConstant.TX_TYPE_RED_PUNISH);
         } catch (Exception e) {
             Log.error(e);
         }

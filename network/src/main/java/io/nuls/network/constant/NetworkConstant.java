@@ -14,7 +14,7 @@ public interface NetworkConstant {
      * --------[network] -------
      */
     String NETWORK_PROPERTIES = "network.properties";
-    String NETWORK_SECTION = "Network";
+    String NETWORK_SECTION = "network";
     String NETWORK_TYPE = "net.type";
     String NETWORK_SERVER_PORT = "network.server.port";
     String NETWORK_EXTER_PORT = "network.external.port";

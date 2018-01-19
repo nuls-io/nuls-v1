@@ -106,6 +106,13 @@ public class ConsensusCacheManager {
         return this.inAgentCache.values();
     }
 
+    public List<Consensus<Agent>> getCachedAgentList() {
+        List<Consensus<Agent>> agentList = new ArrayList<>();
+        agentList.addAll(this.inAgentCache.values());
+        agentList.addAll(this.outAgentCache.values());
+        return agentList;
+    }
+
     public void cacheAgent(Consensus<Agent> ca) {
         if (ca.getExtend().getStatus() == ConsensusStatusEnum.IN.getCode()) {
             this.inAgentCache.put(ca.getAddress(), ca);

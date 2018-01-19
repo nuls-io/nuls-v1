@@ -12,15 +12,15 @@ import io.nuls.core.validate.ValidateResult;
  * @date 2017/12/20
  */
 public class BlockPackerValidator implements NulsDataValidator<Block> {
-    private static BlockPackerValidator INSTANCE = new BlockPackerValidator();private BlockService blockService = NulsContext.getInstance().getService(BlockService.class);
+    private static BlockPackerValidator INSTANCE = new BlockPackerValidator();
     private BlockPackerValidator(){}
     public static BlockPackerValidator getInstance(){
         return INSTANCE;
     }
     @Override
     public ValidateResult validate(Block block) {
-        BlockHeader preHeader = blockService.getBlockHeader(block.getHeader().getPreHash());
-
+        BlockHeader preHeader = NulsContext.getServiceBean(BlockService.class).getBlockHeader(block.getHeader().getPreHash());
+        //todo
         return null;
     }
 }
