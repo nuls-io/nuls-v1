@@ -314,8 +314,8 @@ public class NodesManager implements Runnable {
 
     public List<Node> getAvailableNodesByGroup(String areaName, String groupName) {
         List<Node> availableNodes = new ArrayList<>();
-        if (hasNodeGroup(groupName)) {
-            for (Node node : getNodeGroup(groupName).getNodes()) {
+        if (hasNodeGroup(areaName,groupName)) {
+            for (Node node : getNodeGroup(areaName,groupName).getNodes()) {
                 if (node.getStatus() == Node.HANDSHAKE) {
                     availableNodes.add(node);
                 }
@@ -325,15 +325,7 @@ public class NodesManager implements Runnable {
     }
 
     public List<Node> getAvailableNodesByGroup(String groupName) {
-        List<Node> availableNodes = new ArrayList<>();
-        if (hasNodeGroup(groupName)) {
-            for (Node node : getNodeGroup(groupName).getNodes()) {
-                if (node.getStatus() == Node.HANDSHAKE) {
-                    availableNodes.add(node);
-                }
-            }
-        }
-        return availableNodes;
+        return  getAvailableNodesByGroup(DEFAULT_AREA, groupName);
     }
 
     public List<Node> getAvailableNodes(String excludeNodeId) {

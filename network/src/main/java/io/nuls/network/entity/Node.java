@@ -63,7 +63,7 @@ public class Node extends BaseNulsData {
 
     private Integer failCount;
 
-    private Set<String> groupSet;
+    private Set<NodeGroup> groupSet;
 
     /**
      * 1: inNode ,  2: outNode
@@ -99,10 +99,10 @@ public class Node extends BaseNulsData {
 
     public Node(AbstractNetworkParam network) {
         super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
-        this.groupSet = new HashSet<>();
         this.magicNumber = network.packetMagic();
         this.messageHandlerFactory = network.getMessageHandlerFactory();
         eventBusService = NulsContext.getInstance().getService(EventBusService.class);
+        this.groupSet = new HashSet<>();
     }
 
     public Node(AbstractNetworkParam network, int type) {
@@ -325,17 +325,17 @@ public class Node extends BaseNulsData {
 
     @Override
     public String toString() {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("node:{");
-        buffer.append("ip: " + getIp() + ",");
-        buffer.append("port: " + getPort() + ",");
+        StringBuilder sb = new StringBuilder();
+        sb.append("{node:{");
+        sb.append("ip:' " + getIp() + "',");
+        sb.append("port: " + getPort() + ",");
         if (lastTime == null) {
             lastTime = System.currentTimeMillis();
         }
 
-        buffer.append("lastTime: " + DateUtil.convertDate(new Date(lastTime)) + ",");
-        buffer.append("magicNumber: " + magicNumber + "}");
-        return buffer.toString();
+        sb.append("lastTime: " + DateUtil.convertDate(new Date(lastTime)) + ",");
+        sb.append("magicNumber: " + magicNumber + "}}");
+        return sb.toString();
     }
 
     public int getType() {
@@ -437,5 +437,25 @@ public class Node extends BaseNulsData {
             return false;
         }
         return other.getHash().equals(this.hash);
+    }
+
+    public void addToGroup(NodeGroup nodeGroup){
+        if(nodeGroup != null) {
+            this.groupSet.add(nodeGroup);
+        }
+    }
+
+    public void removeFromGroup(NodeGroup nodeGroup){
+        if(nodeGroup != null) {
+            this.groupSet.remove(nodeGroup);
+        }
+    }
+
+    public int getGroupCount(String groupName){
+        return this.groupSet.size();
+    }
+
+    public Set<NodeGroup> getGroupSet(){
+        return this.groupSet;
     }
 }
