@@ -44,9 +44,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -60,7 +58,7 @@ public class AccountServiceImpl implements AccountService {
 
     private Lock locker = new ReentrantLock();
 
-    private AccountCacheService accountCacheService;
+    private AccountCacheService accountCacheService = AccountCacheService.getInstance();
 
     private AccountDataService accountDao;
 
@@ -73,8 +71,6 @@ public class AccountServiceImpl implements AccountService {
 
     private boolean isLockNow = true;
 
-    private String Default_Account_ID;
-
     private AccountServiceImpl() {
 
     }
@@ -85,7 +81,6 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public void init() {
-        accountCacheService = AccountCacheService.getInstance();
         accountDao = NulsContext.getInstance().getService(AccountDataService.class);
         accountAliasDBService = NulsContext.getInstance().getService(AccountAliasDataService.class);
         aliasDataService = NulsContext.getInstance().getService(AliasDataService.class);
@@ -98,8 +93,13 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public void start() {
         List<Account> accounts = getAccountList();
+        Set<String> addressList = new HashSet<>();
         if (accounts != null && !accounts.isEmpty()) {
-            Default_Account_ID = accounts.get(0).getId();
+            NulsContext.DEFAULT_ACCOUNT_ID = accounts.get(0).getId();
+            for (Account account : accounts) {
+                addressList.add(account.getAddress().getBase58());
+            }
+            NulsContext.LOCAL_ADDRESS_LIST = addressList;
         }
     }
 
@@ -123,6 +123,7 @@ public class AccountServiceImpl implements AccountService {
             AccountTool.toPojo(account, po);
             this.accountDao.save(po);
             this.accountCacheService.putAccount(account);
+
             return account;
         } catch (Exception e) {
             Log.error(e);
@@ -168,10 +169,10 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Account getDefaultAccount() {
-        if (Default_Account_ID == null) {
+        if (NulsContext.DEFAULT_ACCOUNT_ID == null) {
             return null;
         }
-        return getAccount(Default_Account_ID);
+        return getAccount(NulsContext.DEFAULT_ACCOUNT_ID);
     }
 
     @Override
@@ -230,7 +231,7 @@ public class AccountServiceImpl implements AccountService {
     public void setDefaultAccount(String id) {
         Account account = accountCacheService.getAccountById(id);
         if (null != account) {
-            Default_Account_ID = id;
+            NulsContext.DEFAULT_ACCOUNT_ID = id;
         } else {
             throw new NulsRuntimeException(ErrorCode.FAILED, "The account not exist,id:" + id);
         }

@@ -232,7 +232,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public List<Transaction> getListByAddress(String address, int txType, int pageNumber, int pageSize) throws Exception {
+    public List<Transaction> getTxList(String address, int txType, int pageNumber, int pageSize) throws Exception {
         List<Transaction> txList = new ArrayList<>();
         List<TransactionPo> poList = txDao.getTxs(address, txType, pageNumber, pageSize, true);
 
@@ -243,9 +243,15 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public List<Transaction> getListByBlockHash(String blockHash) throws Exception {
+    public List<Transaction> getTxList(String address, int txType, long startHeight, long endHeight) throws Exception {
+
+        return null;
+    }
+
+    @Override
+    public List<Transaction> getTxList(String blockHash) throws Exception {
         List<Transaction> txList = new ArrayList<>();
-        List<TransactionPo> poList = txDao.getTxs(blockHash, true);
+        List<TransactionPo> poList = txDao.getTxs(blockHash, false);
         for (TransactionPo po : poList) {
             txList.add(TransactionPoTool.toTransaction(po));
         }
@@ -253,9 +259,9 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public List<Transaction> getListByHeight(long startHeight, long endHeight) throws Exception {
+    public List<Transaction> getTxList(long startHeight, long endHeight) throws Exception {
         List<Transaction> txList = new ArrayList<>();
-        List<TransactionPo> poList = txDao.getTxs(startHeight, endHeight, true);
+        List<TransactionPo> poList = txDao.getTxs(startHeight, endHeight, false);
         for (TransactionPo po : poList) {
             txList.add(TransactionPoTool.toTransaction(po));
         }
@@ -263,9 +269,9 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public List<Transaction> getListByHeight(long height) throws Exception {
+    public List<Transaction> getTxList(long height) throws Exception {
         List<Transaction> txList = new ArrayList<>();
-        List<TransactionPo> poList = txDao.getTxs(height, true);
+        List<TransactionPo> poList = txDao.getTxs(height, false);
         for (TransactionPo po : poList) {
             txList.add(TransactionPoTool.toTransaction(po));
         }

@@ -14,10 +14,11 @@ import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 public class UtxoTxInputsValidator implements NulsDataValidator<UtxoData> {
     private static final UtxoTxInputsValidator INSTANCE = new UtxoTxInputsValidator();
 
-    private UtxoTxInputsValidator(){
+    private UtxoTxInputsValidator() {
 
     }
-    public static UtxoTxInputsValidator getInstance(){
+
+    public static UtxoTxInputsValidator getInstance() {
         return INSTANCE;
     }
 
@@ -27,12 +28,15 @@ public class UtxoTxInputsValidator implements NulsDataValidator<UtxoData> {
     @Override
     public ValidateResult validate(UtxoData data) {
 
+        for (int i = 0; i < data.getInputs().size(); i++) {
+
+        }
         return null;
     }
 
 
     private AccountService getAccountService() {
-        if(accountService == null) {
+        if (accountService == null) {
             accountService = NulsContext.getInstance().getService(AccountService.class);
         }
         return accountService;

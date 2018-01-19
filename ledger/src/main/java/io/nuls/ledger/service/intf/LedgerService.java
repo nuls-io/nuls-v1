@@ -73,18 +73,18 @@ public interface LedgerService {
      * @param pageSize
      * @return
      */
-    List<Transaction> getListByAddress(String address, int txType, int pageNumber, int pageSize) throws Exception;
+    List<Transaction> getTxList(String address, int txType, int pageNumber, int pageSize) throws Exception;
 
-
+    List<Transaction> getTxList(String address, int txType, long startHeight, long endHeight) throws Exception;
     /**
      * @param blockHash
      * @return
      */
-    List<Transaction> getListByBlockHash(String blockHash) throws Exception;
+    List<Transaction> getTxList(String blockHash) throws Exception;
 
-    List<Transaction> getListByHeight(long startHeight, long endHeight) throws Exception;
+    List<Transaction> getTxList(long startHeight, long endHeight) throws Exception;
 
-    List<Transaction> getListByHeight(long height) throws Exception;
+    List<Transaction> getTxList(long height) throws Exception;
 
     void rollbackTx(Transaction tx) throws NulsException;
 

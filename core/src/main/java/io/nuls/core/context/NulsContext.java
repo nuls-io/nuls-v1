@@ -6,6 +6,7 @@ import io.nuls.core.module.manager.ServiceManager;
 import io.nuls.core.utils.cfg.IniEntity;
 
 import java.util.HashMap;
+import java.util.Set;
 
 /**
  * @author Niels
@@ -17,14 +18,7 @@ public class NulsContext {
         chain_id_map.put(CHAIN_ID, 1);
     }
 
-    private static HashMap<String, Integer> chain_id_map = new HashMap<String, Integer>();
     private static final NulsContext NC = new NulsContext();
-    public static String DEFAULT_ENCODING = "UTF-8";
-    public static String CHAIN_ID = "NULS";
-    public static IniEntity NULS_CONFIG;
-    public static IniEntity MODULES_CONFIG;
-
-    private Na txFee;
 
     /**
      * get zhe only instance of NulsContext
@@ -35,11 +29,21 @@ public class NulsContext {
         return NC;
     }
 
+    private static HashMap<String, Integer> chain_id_map = new HashMap<String, Integer>();
+    public static String DEFAULT_ENCODING = "UTF-8";
+    public static String CHAIN_ID = "NULS";
+    public static IniEntity NULS_CONFIG;
+    public static IniEntity MODULES_CONFIG;
+
+    private Na txFee;
     /**
      * cache the best block
      */
     private Block bestBlock;
     private Block genesisBlock;
+
+    public static Set<String> LOCAL_ADDRESS_LIST;
+    public static String DEFAULT_ACCOUNT_ID;
 
     public static String nulsVersion = "1.0";
 
@@ -100,4 +104,5 @@ public class NulsContext {
     public void setTxFee(Na txFee) {
         this.txFee = txFee;
     }
+
 }

@@ -36,7 +36,7 @@ public class BlockStorageService {
         BlockHeader header = getBlockHeader(height);
         List<Transaction> txList = null;
         try {
-            txList = ledgerService.getListByHeight(height);
+            txList = ledgerService.getTxList(height);
         } catch (Exception e) {
             Log.error(e);
         }
@@ -47,7 +47,7 @@ public class BlockStorageService {
         BlockHeader header = getBlockHeader(hash);
         List<Transaction> txList = null;
         try {
-            txList = ledgerService.getListByHeight(header.getHeight());
+            txList = ledgerService.getTxList(header.getHeight());
         } catch (Exception e) {
             Log.error(e);
         }
@@ -71,7 +71,7 @@ public class BlockStorageService {
         List<BlockHeaderPo> poList = headerDao.getHeaderList(startHeight, endHeight);
         List<Transaction> txList = null;
         try {
-            txList = ledgerService.getListByHeight(startHeight, endHeight);
+            txList = ledgerService.getTxList(startHeight, endHeight);
         } catch (Exception e) {
             Log.error(e);
         }
