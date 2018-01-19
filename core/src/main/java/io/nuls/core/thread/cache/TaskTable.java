@@ -133,4 +133,13 @@ public class TaskTable {
         MODULE_POOL_MAP.remove(moduleId);
 
     }
+
+    public void removeThread(short moduleId,String threadName) {
+        THREAD_MAP.remove(threadName);
+        Set<String> set = MODULE_THREAD_MAP.get(moduleId);
+        set.remove(threadName);
+        for(Set<String> tset:POOL_THREAD_MAP.values()){
+            tset.remove(threadName);
+        }
+    }
 }

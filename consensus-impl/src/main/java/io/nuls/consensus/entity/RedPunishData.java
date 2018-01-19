@@ -19,7 +19,7 @@ public class RedPunishData extends BaseNulsData {
     private short reasonCode;
     private byte[] evidence;
 
-    private RedPunishData(){
+    public RedPunishData(){
 //todo        this.registerValidator();
     }
     @Override

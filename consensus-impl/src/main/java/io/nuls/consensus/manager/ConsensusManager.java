@@ -19,6 +19,7 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.thread.BaseThread;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
@@ -29,7 +30,6 @@ import java.util.List;
 import java.util.Set;
 
 /**
- *
  * @author Niels
  * @date 2018/1/8
  */
@@ -161,5 +161,9 @@ public class ConsensusManager {
 
     public boolean isPartakePacking() {
         return partakePacking;
+    }
+
+    public void exitMeeting() {
+        TaskManager.stopThread(NulsConstant.MODULE_ID_CONSENSUS,BlockMaintenanceThread.THREAD_NAME);
     }
 }
