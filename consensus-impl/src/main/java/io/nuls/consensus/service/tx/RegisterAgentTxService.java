@@ -5,6 +5,7 @@ import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
+import io.nuls.consensus.manager.ConsensusManager;
 import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
@@ -21,12 +22,14 @@ import io.nuls.ledger.service.intf.LedgerService;
  */
 public class RegisterAgentTxService implements TransactionService<RegisterAgentTransaction> {
     private ConsensusCacheManager manager = ConsensusCacheManager.getInstance();
+    private ConsensusManager consensusManager = ConsensusManager.getInstance();
     private DelegateAccountDataService delegateAccountService = NulsContext.getInstance().getService(DelegateAccountDataService.class);
 
     @Override
     public void onRollback(RegisterAgentTransaction tx) throws NulsException {
         this.manager.delAgent(tx.getTxData().getAddress());
         this.delegateAccountService.delete(tx.getTxData().getAddress());
+        consensusManager.exitMeeting();
     }
 
     @Override
@@ -36,6 +39,7 @@ public class RegisterAgentTxService implements TransactionService<RegisterAgentT
         po.setId(tx.getTxData().getAddress());
         po.setStatus(ConsensusStatusEnum.IN.getCode());
         delegateAccountService.updateSelective(po);
+        consensusManager.joinMeeting();
     }
 
 

@@ -31,11 +31,19 @@ public interface Broadcaster {
 
     BroadcastResult broadcastToGroup(BaseEvent event, String groupName);
 
+    BroadcastResult broadcastToGroup(String area, BaseEvent event, String groupName);
+
     BroadcastResult broadcastToGroup(BaseEvent event, String groupName, String excludeNodeId);
+
+    BroadcastResult broadcastToGroup( BaseEvent event, String area, String groupName, String excludeNodeId);
 
     BroadcastResult broadcastToGroup(byte[] data, String groupName);
 
+    BroadcastResult broadcastToGroup(String area, byte[] data,  String groupName);
+
     BroadcastResult broadcastToGroup(byte[] data, String groupName, String excludeNodeId);
+
+    BroadcastResult broadcastToGroup(String area, byte[] data, String groupName, String excludeNodeId);
 
 //    BroadcastResult broadcastToGroupSync(BaseNulsEvent event, String groupName);
 //

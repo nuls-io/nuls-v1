@@ -105,4 +105,18 @@ public class TaskManager {
         }
         THREAD_DATA_CACHE.remove(moduleId);
     }
+
+    public static BaseThread getThread( String threadName) {
+        BaseThread thread = THREAD_DATA_CACHE.getThread(threadName);
+        return thread;
+    }
+
+    public static void stopThread(short moduleId,String threadName) {
+        BaseThread thread = THREAD_DATA_CACHE.getThread(threadName);
+        if (thread.getState() == Thread.State.RUNNABLE) {
+            thread.interrupt();
+        }
+        THREAD_DATA_CACHE.removeThread(moduleId,threadName);
+
+    }
 }

@@ -44,7 +44,8 @@ public enum ErrorCode {
     NET_P2P_UNKOWN_EXCEPTION("NET005", 40005),
     NODE_GROUP_ALREADY_EXISTS("NET006", 40006),
     NODE_GROUP_NOT_FOUND("NET007", 40007),
-    NODE_NOT_FOUND("NET008", 40008),
+    NODE_AREA_NOT_FOUND("NET008", 40008),
+    NODE_NOT_FOUND("NET009", 40009),
 
     /**
      * ---- direct Exception code---

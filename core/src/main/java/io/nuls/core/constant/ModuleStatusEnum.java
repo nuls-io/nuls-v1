@@ -2,14 +2,16 @@ package io.nuls.core.constant;
 
 /**
  * @author Niels
- * @date 2017/9/27
  */
 public enum ModuleStatusEnum {
 
     NOT_FOUND,
-    UNINITED,
-    INITED,
-    INITING,
+    UNINITIALIZED,
+    /**
+     * initialized
+     */
+    INITIALIZED,
+    INITIALIZING,
     STARTING,
     RUNNING,
     STOPED,

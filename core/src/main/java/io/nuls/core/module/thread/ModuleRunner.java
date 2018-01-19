@@ -27,9 +27,9 @@ public class ModuleRunner implements Runnable {
     public void run() {
         try {
             module = this.loadModule();
-            module.setStatus(ModuleStatusEnum.INITING);
+            module.setStatus(ModuleStatusEnum.INITIALIZING);
             module.init();
-            module.setStatus(ModuleStatusEnum.INITED);
+            module.setStatus(ModuleStatusEnum.INITIALIZED);
             module.setStatus(ModuleStatusEnum.STARTING);
             module.start();
             module.setStatus(ModuleStatusEnum.RUNNING);

@@ -23,7 +23,7 @@ public abstract class BaseModuleBootstrap {
 
     public BaseModuleBootstrap(short moduleId) {
         this.moduleId = moduleId;
-        this.status = ModuleStatusEnum.UNINITED;
+        this.status = ModuleStatusEnum.UNINITIALIZED;
     }
 
     /**

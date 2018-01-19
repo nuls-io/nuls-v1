@@ -9,6 +9,7 @@ import io.nuls.consensus.entity.tx.PocExitConsensusTransaction;
 import io.nuls.consensus.entity.tx.PocJoinConsensusTransaction;
 import io.nuls.consensus.entity.tx.RedPunishTransaction;
 import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
+import io.nuls.consensus.manager.ConsensusManager;
 import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.TransactionConstant;
@@ -36,7 +37,7 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
     private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
     private DelegateAccountDataService delegateAccountService = NulsContext.getInstance().getService(DelegateAccountDataService.class);
     private DelegateDataService delegateDataService = NulsContext.getInstance().getService(DelegateDataService.class);
-
+    private ConsensusManager consensusManager = ConsensusManager.getInstance();
     @Override
     public void onRollback(PocExitConsensusTransaction tx) throws NulsException {
         Transaction joinTx = ledgerService.getTx(tx.getTxData());
@@ -53,6 +54,7 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
             dpo.setAgentAddress(raTx.getTxData().getAddress());
             dpo.setStatus(ConsensusStatusEnum.IN.getCode());
             this.delegateDataService.updateSelectiveByAgentAddress(dpo);
+            consensusManager.joinMeeting();
             return;
         }
         PocJoinConsensusTransaction pjcTx = (PocJoinConsensusTransaction) joinTx;
@@ -81,6 +83,7 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
             dpo.setAgentAddress(raTx.getTxData().getAddress());
             dpo.setStatus(ConsensusStatusEnum.NOT_IN.getCode());
             this.delegateDataService.updateSelectiveByAgentAddress(dpo);
+            consensusManager.exitMeeting();
             return;
         }
         PocJoinConsensusTransaction pjcTx = (PocJoinConsensusTransaction) joinTx;

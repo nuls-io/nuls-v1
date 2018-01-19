@@ -1,5 +1,6 @@
 package io.nuls.core.mesasge;
 
+
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsVerificationException;
