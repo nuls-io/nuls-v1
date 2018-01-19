@@ -24,7 +24,7 @@
 package io.nuls.db.dao.impl.mybatis;
 
 import io.nuls.db.dao.BlockHeaderService;
-import io.nuls.db.dao.impl.mybatis.mapper.BlockMapper;
+import io.nuls.db.dao.impl.mybatis.mapper.BlockHeaderMapper;
 import io.nuls.db.dao.impl.mybatis.params.BlockSearchParams;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import io.nuls.db.entity.BlockHeaderPo;
@@ -37,10 +37,10 @@ import java.util.Map;
  * @author v.chou
  * @date 2017/9/29
  */
-public class BlockDaoImpl extends BaseDaoImpl<BlockMapper, String, BlockHeaderPo> implements BlockHeaderService {
+public class BlockDaoImpl extends BaseDaoImpl<BlockHeaderMapper, String, BlockHeaderPo> implements BlockHeaderService {
 
     public BlockDaoImpl() {
-        super(BlockMapper.class);
+        super(BlockHeaderMapper.class);
     }
 
     @Override

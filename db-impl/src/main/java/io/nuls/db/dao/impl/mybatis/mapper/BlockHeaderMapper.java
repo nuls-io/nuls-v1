@@ -30,6 +30,6 @@ import io.nuls.db.entity.BlockHeaderPo;
  * @author Niels
  * @date 2017/11/20
  */
-public interface BlockMapper extends BaseMapper<String, BlockHeaderPo> {
+public interface BlockHeaderMapper extends BaseMapper<String, BlockHeaderPo> {
 
 }

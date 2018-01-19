@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS `account` (
   PRIMARY KEY (`id`)
 );
 
-CREATE TABLE IF NOT EXISTS `block` (
+CREATE TABLE IF NOT EXISTS `block_header` (
   `hash` varchar(70) NOT NULL,
   `height` bigint(14) NOT NULL,
   `pre_hash` varchar(70) ,
@@ -22,18 +22,22 @@ CREATE TABLE IF NOT EXISTS `block` (
   `period_start_time` bigint(14) DEFAULT NULL,
   `time_period` int(5) DEFAULT NULL,
   `consensus_address` varchar(40) DEFAULT NULL,
-  `varsion` int(5) NOT NULL,
-  `txCount` int(5) NOT NULL,
-  `sign` varbinary(1024) NOT NULL,
+  `varsion` int(5),
+  `tx_count` int(5) NOT NULL,
+  `round_index` bigint(14) NOT NULL,
+  `sign` varbinary(1024) ,
+  `extend` varbinary(1024) NOT NULL,
   PRIMARY KEY (`hash`)
 );
 CREATE TABLE IF NOT EXISTS `delegate_account` (
   `id` varchar(32) NOT NULL,
   `address` varchar(40) NOT NULL,
   `node_address` varchar(40) NOT NULL,
-  `deposit` decimal(19,8) NOT NULL,
+  `deposit` bigint(18) NOT NULL,
   `remark` varchar(255) NOT NULL,
   `start_time` bigint(14) NOT NULL,
+  `commission_rate` decimal(14) NOT NULL,
+
   PRIMARY KEY (`id`)
 );
 CREATE TABLE IF NOT EXISTS `delegate` (

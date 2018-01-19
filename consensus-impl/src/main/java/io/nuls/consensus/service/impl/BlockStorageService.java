@@ -57,6 +57,9 @@ public class BlockStorageService {
 
     public Block getBlock(long height) throws Exception {
         BlockHeader header = getBlockHeader(height);
+        if(null==header){
+            return null;
+        }
         List<Transaction> txList = null;
         try {
             txList = ledgerService.getTxList(height);

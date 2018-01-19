@@ -212,6 +212,7 @@ public class BlockCacheManager {
     }
 
     public boolean canPersistence() {
-        return bifurcateProcessor.getLongestChain().size()> PocConsensusConstant.CONFIRM_BLOCK_COUNT;
+
+        return null != bifurcateProcessor.getLongestChain() && bifurcateProcessor.getLongestChain().size() > PocConsensusConstant.CONFIRM_BLOCK_COUNT;
     }
 }

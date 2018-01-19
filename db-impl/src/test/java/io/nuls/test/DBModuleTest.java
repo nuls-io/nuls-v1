@@ -85,7 +85,7 @@ public class DBModuleTest {
         blockHeaderPo.setHeight(111L);
         blockHeaderPo.setMerkleHash("aaab");
         blockHeaderPo.setPreHash("xxx");
-        blockHeaderPo.setTxcount(10L);
+        blockHeaderPo.setTxCount(10L);
 //        blockHeaderPo.setBytes(new byte[10]);
         blockHeaderPo.setVarsion(1);
         blockHeaderPo.setSign(new byte[2]);

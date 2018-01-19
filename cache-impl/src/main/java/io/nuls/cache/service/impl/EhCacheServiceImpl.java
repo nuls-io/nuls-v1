@@ -120,6 +120,9 @@ public class EhCacheServiceImpl<K, T > implements CacheService<K, T> {
 
     @Override
     public List<T> getElementList(String cacheTitle) {
+        if (null == cacheManager.getCache(cacheTitle)) {
+           return null;
+        }
         Iterator it = cacheManager.getCache(cacheTitle).iterator();
         List<T> list = new ArrayList<>();
         while (it.hasNext()) {

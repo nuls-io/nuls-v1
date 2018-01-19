@@ -24,6 +24,7 @@
 package io.nuls.consensus.entity.genesis;
 
 import io.nuls.consensus.constant.PocConsensusConstant;
+import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.utils.StringFileLoader;
 import io.nuls.core.chain.entity.*;
 import io.nuls.core.constant.ErrorCode;
@@ -37,6 +38,7 @@ import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.tx.CoinBaseTransaction;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +57,7 @@ public final class GenesisBlock extends Block {
 
     private static GenesisBlock INSTANCE;
 
-    public static GenesisBlock  getInstance() {
+    public static GenesisBlock getInstance() {
         if (null == INSTANCE) {
             String json = null;
             try {
@@ -78,6 +80,7 @@ public final class GenesisBlock extends Block {
         this.initGengsisTxs(jsonMap);
         this.fillHeader(jsonMap);
     }
+
     private void initGengsisTxs(Map<String, Object> jsonMap) {
         List<Map<String, Object>> list = (List<Map<String, Object>>) jsonMap.get(CONFIG_FILED_TXS);
         if (null == list || list.isEmpty()) {
@@ -121,9 +124,9 @@ public final class GenesisBlock extends Block {
 
     private void fillHeader(Map<String, Object> jsonMap) {
         Integer height = (Integer) jsonMap.get(CONFIG_FILED_HEIGHT);
-        AssertUtil.canNotEmpty(height,ErrorCode.CONFIG_ERROR);
+        AssertUtil.canNotEmpty(height, ErrorCode.CONFIG_ERROR);
         String time = (String) jsonMap.get(CONFIG_FILED_TIME);
-        AssertUtil.canNotEmpty(time,ErrorCode.CONFIG_ERROR);
+        AssertUtil.canNotEmpty(time, ErrorCode.CONFIG_ERROR);
         long blockTime = DateUtil.convertStringToDate(time).getTime();
         BlockHeader header = new BlockHeader();
         this.setHeader(header);
@@ -132,11 +135,24 @@ public final class GenesisBlock extends Block {
         header.setPreHash(NulsDigestData.EMPTY_HASH);
         header.setTxCount(this.getTxs().size());
         List<NulsDigestData> txHashList = new ArrayList<>();
-        for(Transaction tx:this.getTxs()){
+        for (Transaction tx : this.getTxs()) {
             txHashList.add(tx.getHash());
         }
         header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
         header.setHash(NulsDigestData.calcDigestData(this));
+        BlockRoundData data = new BlockRoundData();
+        data.setRoundIndex(1);
+        data.setRoundStartTime(header.getTime());
+        data.setConsensusMemberCount(1);
+        data.setPackingIndexOfRound(1);
+        try {
+            header.setExtend(data.serialize());
+        } catch (IOException e) {
+            Log.error(e);
+        }
+        //todo
+        header.setPackingAddress("00000");
+        header.setSign(new NulsSignData());
     }
 
 

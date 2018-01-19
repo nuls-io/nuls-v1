@@ -26,9 +26,9 @@ package io.nuls.consensus.utils;
 import io.nuls.account.entity.Account;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
-import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.block.BlockData;
+import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.member.Delegate;
 import io.nuls.core.chain.entity.*;
@@ -55,7 +55,7 @@ public class ConsensusTool {
 
     public static final BlockHeaderPo toPojo(BlockHeader header) {
         BlockHeaderPo po = new BlockHeaderPo();
-        po.setTxcount(header.getTxCount());
+        po.setTxCount(header.getTxCount());
         if (header.getHeight() > 1) {
             po.setPreHash(header.getPreHash().getDigestHex());
         }
@@ -64,10 +64,22 @@ public class ConsensusTool {
         po.setCreateTime(header.getTime());
         po.setHash(header.getHash().getDigestHex());
         if (null != header.getSign()) {
-            po.setSign(header.getSign().getSignBytes());
+            try {
+                po.setSign(header.getSign().serialize());
+            } catch (IOException e) {
+                Log.error(e);
+            }
         }
-        po.setTxcount(header.getTxCount());
+        po.setTxCount(header.getTxCount());
         po.setConsensusAddress(header.getPackingAddress());
+        po.setExtend(header.getExtend());
+        BlockRoundData data = new BlockRoundData();
+        try {
+            data.parse(header.getExtend());
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+        po.setRoundIndex(data.getRoundIndex());
         return po;
     }
 
@@ -78,14 +90,15 @@ public class ConsensusTool {
         BlockHeader header = new BlockHeader();
         header.setHash(NulsDigestData.fromDigestHex(po.getHash()));
         header.setMerkleHash(NulsDigestData.fromDigestHex(po.getMerkleHash()));
-        //todo
-//        header.setPackingAddress();
-//        header.setTxCount();
-//        header.setPreHash();
-//        header.setTime();
-//        header.setHeight();
-//        header.setExtend();
-//        header.setSign();
+        header.setPackingAddress(po.getConsensusAddress());
+        header.setTxCount(po.getTxCount());
+        if (null != po.getPreHash()) {
+            header.setPreHash(NulsDigestData.fromDigestHex(po.getPreHash()));
+        }
+        header.setTime(po.getCreateTime());
+        header.setHeight(po.getHeight());
+        header.setExtend(po.getExtend());
+        header.setSign(new NulsSignData(po.getSign()));
         return header;
     }
 

@@ -24,8 +24,10 @@
 package io.nuls.core.chain.entity;
 
 import io.nuls.core.crypto.VarInt;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
+import io.nuls.core.utils.log.Log;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -48,20 +50,31 @@ public class NulsSignData extends BaseNulsData{
         this.signAlgType = signAlgType;
     }
 
+    public NulsSignData(){}
+    public NulsSignData(byte[] bytes){
+        try {
+            this.parse(bytes);
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+    }
 
     @Override
     public int size() {
+        //todo
         return 0;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-
+        //todo
+        stream.write(0);
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) {
-
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        //todo
+        byteBuffer.readByte();
     }
 
     public int getSignLength() {
