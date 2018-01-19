@@ -6,6 +6,7 @@ import io.nuls.core.module.manager.ServiceManager;
 import io.nuls.core.utils.cfg.IniEntity;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -42,7 +43,7 @@ public class NulsContext {
     private Block bestBlock;
     private Block genesisBlock;
 
-    public static Set<String> LOCAL_ADDRESS_LIST;
+    public static Set<String> LOCAL_ADDRESS_LIST = new HashSet<>();
     public static String DEFAULT_ACCOUNT_ID;
 
     public static String nulsVersion = "1.0";

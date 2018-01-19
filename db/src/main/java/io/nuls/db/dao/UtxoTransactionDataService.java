@@ -27,6 +27,8 @@ public interface UtxoTransactionDataService {
 
     List<TransactionPo> getTxs(String address, int type, int pageNum, int pageSize, boolean isLocal);
 
+    List<TransactionPo> getTxs(String address, int type, long startHeight, long endHeight, boolean isLocal);
+
     List<TransactionPo> listTranscation(int limit, String address, boolean isLocal);
 
     List<TransactionPo> listTransaction(long blockHeight, String address, boolean isLocal);

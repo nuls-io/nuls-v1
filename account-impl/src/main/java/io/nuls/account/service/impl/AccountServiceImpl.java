@@ -20,6 +20,7 @@ import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.thread.manager.NulsThreadFactory;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.date.DateUtil;
@@ -123,7 +124,7 @@ public class AccountServiceImpl implements AccountService {
             AccountTool.toPojo(account, po);
             this.accountDao.save(po);
             this.accountCacheService.putAccount(account);
-
+            NulsContext.LOCAL_ADDRESS_LIST.add(account.getAddress().getBase58());
             return account;
         } catch (Exception e) {
             Log.error(e);
@@ -153,6 +154,8 @@ public class AccountServiceImpl implements AccountService {
                 accounts.add(account);
                 accountPos.add(po);
                 resultList.add(account.getId());
+
+                NulsContext.LOCAL_ADDRESS_LIST.add(account.getId());
             }
 
             accountDao.save(accountPos);
@@ -194,6 +197,7 @@ public class AccountServiceImpl implements AccountService {
         }
         list = new ArrayList<>();
         List<AccountPo> poList = this.accountDao.getList();
+        Set<String> addressList = new HashSet<>();
         if (null == poList || poList.isEmpty()) {
             return list;
         }
@@ -201,8 +205,10 @@ public class AccountServiceImpl implements AccountService {
             Account account = new Account();
             AccountTool.toBean(po, account);
             list.add(account);
+            addressList.add(account.getId());
         }
         this.accountCacheService.putAccountList(list);
+        NulsContext.LOCAL_ADDRESS_LIST = addressList;
         return list;
     }
 
@@ -235,7 +241,7 @@ public class AccountServiceImpl implements AccountService {
         } else {
             throw new NulsRuntimeException(ErrorCode.FAILED, "The account not exist,id:" + id);
         }
-        //todo 发送notice给其他模块
+        //todo send notice to other module
     }
 
     @Override

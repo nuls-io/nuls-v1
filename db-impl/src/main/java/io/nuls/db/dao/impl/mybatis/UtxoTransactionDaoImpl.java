@@ -61,18 +61,23 @@ public class UtxoTransactionDaoImpl implements UtxoTransactionDataService {
     @Override
     public List<TransactionPo> getTxs(long startHeight, long endHeight, boolean isLocal) {
         List<TransactionPo> txList;
-        if(isLocal) {
-
-        }else {
-
+        if (isLocal) {
+            List<TransactionLocalPo> localPoList = txLocalDao.getTxs(startHeight, endHeight);
+            txList = new ArrayList<>();
+            for (TransactionLocalPo localPo : localPoList) {
+                TransactionPo tx = TransactionPoTool.toTx(localPo);
+                txList.add(tx);
+            }
+        } else {
+            txList = txDao.getTxs(startHeight, endHeight);
         }
-        return null;
+        return txList;
     }
 
     @Override
     public List<TransactionPo> getTxs(String blockHash, boolean isLocal) {
         BlockHeaderPo header = blockHeaderDao.getHeader(blockHash);
-        if(header == null) {
+        if (header == null) {
             return null;
         }
 
@@ -108,6 +113,22 @@ public class UtxoTransactionDaoImpl implements UtxoTransactionDataService {
             }
         } else {
             txList = txDao.getTxs(address, type, pageNum, pageSize);
+        }
+        return txList;
+    }
+
+    @Override
+    public List<TransactionPo> getTxs(String address, int type, long startHeight, long endHeight, boolean isLocal) {
+        List<TransactionPo> txList;
+        if (isLocal) {
+            List<TransactionLocalPo> localPoList = txLocalDao.getTxs(address, type, startHeight, endHeight);
+            txList = new ArrayList<>();
+            for (TransactionLocalPo localPo : localPoList) {
+                TransactionPo tx = TransactionPoTool.toTx(localPo);
+                txList.add(tx);
+            }
+        } else {
+            txList = txDao.getTxs(address, type, startHeight, endHeight);
         }
         return txList;
     }
