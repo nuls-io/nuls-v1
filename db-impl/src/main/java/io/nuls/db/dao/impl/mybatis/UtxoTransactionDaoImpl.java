@@ -118,17 +118,17 @@ public class UtxoTransactionDaoImpl implements UtxoTransactionDataService {
     }
 
     @Override
-    public List<TransactionPo> getTxs(String address, int type, long startHeight, long endHeight, boolean isLocal) {
+    public List<TransactionPo> getTxs(String address, int type, boolean isLocal) {
         List<TransactionPo> txList;
         if (isLocal) {
-            List<TransactionLocalPo> localPoList = txLocalDao.getTxs(address, type, startHeight, endHeight);
+            List<TransactionLocalPo> localPoList = txLocalDao.getTxs(address, type);
             txList = new ArrayList<>();
             for (TransactionLocalPo localPo : localPoList) {
                 TransactionPo tx = TransactionPoTool.toTx(localPo);
                 txList.add(tx);
             }
         } else {
-            txList = txDao.getTxs(address, type, startHeight, endHeight);
+            txList = txDao.getTxs(address, type);
         }
         return txList;
     }

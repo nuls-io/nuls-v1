@@ -21,7 +21,7 @@ public interface TransactionDataService extends BaseDataService<String, Transact
 
     List<TransactionPo> getTxs(String address, int type, int pageNum, int pageSize);
 
-    List<TransactionPo> getTxs(String address, int type, long startHeight, long endHeight);
+    List<TransactionPo> getTxs(String address, int type);
 
     List<TransactionPo> listTranscation(int limit, String address);
 

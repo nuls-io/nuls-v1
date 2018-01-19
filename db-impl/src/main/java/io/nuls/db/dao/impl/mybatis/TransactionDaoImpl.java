@@ -76,22 +76,8 @@ public class TransactionDaoImpl extends BaseDaoImpl<TransactionMapper, String, T
     }
 
     @Override
-    public List<TransactionPo> getTxs(String address, int type, long startHeight, long endHeight) {
-        Searchable searchable = new Searchable();
-        if (type != 0) {
-            searchable.addCondition("b.type", SearchOperator.eq, type);
-        }
-        if (StringUtils.isNotBlank(address)) {
-            searchable.addCondition("a.address", SearchOperator.eq, address);
-        }
-        if (startHeight > 0) {
-            searchable.addCondition("b.block_height", SearchOperator.gte, startHeight);
-        }
-        if (endHeight > 0) {
-            searchable.addCondition("b.block_height", SearchOperator.lte, endHeight);
-        }
-        PageHelper.orderBy("block_height asc, create_time asc");
-        return getMapper().selectByAddress(searchable);
+    public List<TransactionPo> getTxs(String address, int type) {
+       return getTxs(address, type, 0, 0);
     }
 
     @Override

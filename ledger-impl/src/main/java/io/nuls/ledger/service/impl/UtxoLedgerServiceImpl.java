@@ -244,10 +244,10 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public List<Transaction> getTxList(String address, int txType, long startHeight, long endHeight) throws Exception {
+    public List<Transaction> getTxList(String address, int txType) throws Exception {
         List<Transaction> txList = new ArrayList<>();
         boolean isLocal = NulsContext.LOCAL_ADDRESS_LIST.contains(address);
-        List<TransactionPo> poList = txDao.getTxs(address, txType, startHeight, endHeight, isLocal);
+        List<TransactionPo> poList = txDao.getTxs(address, txType, isLocal);
 
         for (TransactionPo po : poList) {
             txList.add(TransactionPoTool.toTransaction(po));
