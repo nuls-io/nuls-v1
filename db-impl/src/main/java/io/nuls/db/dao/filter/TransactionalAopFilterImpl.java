@@ -46,6 +46,9 @@ public class TransactionalAopFilterImpl implements TransactionalAopFilter {
 
         String lastId = SessionManager.getId();
         String id = lastId;
+        if(id ==null){
+            id = StringUtils.getNewUUID();
+        }
         Object result;
         boolean isSessionBeginning = false;
         boolean isCommit = false;
@@ -53,10 +56,10 @@ public class TransactionalAopFilterImpl implements TransactionalAopFilter {
             TransactionalAnnotation annotation = method.getAnnotation(TransactionalAnnotation.class);
             if (annotation.value() == PROPAGATION.REQUIRED && !SessionManager.getTxState(id)) {
                 isCommit = true;
-                id = StringUtils.getNewUUID();
-            } else if (annotation.value() == PROPAGATION.INDEPENDENT) {
-                id = StringUtils.getNewUUID();
             }
+//            else if (annotation.value() == PROPAGATION.INDEPENDENT) {
+//                id = StringUtils.getNewUUID();
+//            }
         }
 
         SqlSession session = SessionManager.getSession(id);
