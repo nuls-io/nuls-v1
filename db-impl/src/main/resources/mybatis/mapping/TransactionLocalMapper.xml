@@ -7,11 +7,10 @@
         <result column="type" jdbcType="INTEGER" property="type"/>
         <result column="create_time" jdbcType="BIGINT" property="createTime"/>
         <result column="block_height" jdbcType="BIGINT" property="blockHeight"/>
-        <result column="block_hash" jdbcType="VARCHAR" property="blockHash"/>
     </resultMap>
     <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="io.nuls.db.entity.TransactionLocalPo">
 
-        <result column="txData" jdbcType="VARBINARY" property="txdata"/>
+        <result column="txData" jdbcType="VARBINARY" property="txData"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -45,11 +44,11 @@
         -->
         insert into transaction_local (hash, type,
         create_time, block_height,
-        block_hash, txData
+        txData
         )
         values (#{hash,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER},
         #{createTime,jdbcType=BIGINT}, #{blockHeight,jdbcType=BIGINT},
-        #{blockHash,jdbcType=VARCHAR}, #{txdata,jdbcType=VARBINARY}}
+        #{txData,jdbcType=VARBINARY}}
         )
     </insert>
     <insert id="insertSelective" parameterType="io.nuls.db.entity.TransactionLocalPo">
@@ -71,10 +70,7 @@
             <if test="blockHeight != null">
                 block_height,
             </if>
-            <if test="blockHash != null">
-                block_hash,
-            </if>
-            <if test="txdata != null">
+            <if test="txData != null">
                 txData,
             </if>
         </trim>
@@ -91,11 +87,8 @@
             <if test="blockHeight != null">
                 #{blockHeight,jdbcType=BIGINT},
             </if>
-            <if test="blockHash != null">
-                #{blockHash,jdbcType=VARCHAR},
-            </if>
-            <if test="txdata != null">
-                #{txdata,jdbcType=VARBINARY},
+            <if test="txData != null">
+                #{txData,jdbcType=VARBINARY},
             </if>
         </trim>
     </insert>
@@ -107,7 +100,7 @@
         update transaction_local
         <set>
             <if test="type != null">
-               type = #{type,jdbcType=INTEGER},
+                type = #{type,jdbcType=INTEGER},
             </if>
             <if test="createTime != null">
                 create_time = #{createTime,jdbcType=BIGINT},
@@ -115,11 +108,8 @@
             <if test="blockHeight != null">
                 block_height = #{blockHeight,jdbcType=BIGINT},
             </if>
-            <if test="blockHash != null">
-                block_hash = #{blockHash,jdbcType=VARCHAR},
-            </if>
-            <if test="txdata != null">
-                txData = #{txdata,jdbcType=VARBINARY},
+            <if test="txData != null">
+                txData = #{txData,jdbcType=VARBINARY},
             </if>
         </set>
         where hash = #{hash,jdbcType=VARCHAR}
@@ -133,8 +123,8 @@
         set type = #{type,jdbcType=INTEGER},
         create_time = #{createTime,jdbcType=BIGINT},
         block_height = #{blockHeight,jdbcType=BIGINT},
-        block_hash = #{blockHash,jdbcType=VARCHAR},
-        txData = #{txdata,jdbcType=VARBINARY}
+
+        txData = #{txData,jdbcType=VARBINARY}
         where hash = #{hash,jdbcType=VARCHAR}
     </update>
     <update id="updateByPrimaryKey" parameterType="io.nuls.db.entity.TransactionLocalPo">
@@ -145,8 +135,7 @@
         update transaction_local
         set type = #{type,jdbcType=INTEGER},
         create_time = #{createTime,jdbcType=BIGINT},
-        block_height = #{blockHeight,jdbcType=BIGINT},
-        block_hash = #{blockHash,jdbcType=VARCHAR}
+        block_height = #{blockHeight,jdbcType=BIGINT}
         where hash = #{hash,jdbcType=VARCHAR}
     </update>
 
@@ -154,12 +143,12 @@
     <insert id="batchInsert" parameterType="java.util.List">
         insert into transaction_local (hash, type,
         create_time, block_height,
-        block_hash, txData )
+        txData )
         values
         <foreach collection="list" item="item" index="index" separator=",">
-            (#{hash,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER},
-            #{createTime,jdbcType=BIGINT}, #{blockHeight,jdbcType=BIGINT},
-            #{blockHash,jdbcType=VARCHAR}, #{txdata,jdbcType=VARBINARY} )
+            (#{item.hash,jdbcType=VARCHAR}, #{item.type,jdbcType=INTEGER},
+            #{item.createTime,jdbcType=BIGINT}, #{item.blockHeight,jdbcType=BIGINT},
+             #{item.txData,jdbcType=VARBINARY} )
         </foreach>
     </insert>
     <select id="countAll" resultType="java.lang.Long">

@@ -26,10 +26,18 @@ package io.nuls.db.dao.impl.mybatis.mapper;
 import io.nuls.db.dao.impl.mybatis.common.BaseMapper;
 import io.nuls.db.entity.BlockHeaderPo;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * @author Niels
  * @date 2017/11/20
  */
 public interface BlockHeaderMapper extends BaseMapper<String, BlockHeaderPo> {
 
+    long getMaxHeight();
+
+    List<String> getSplitHashList(Map<String, Object> params);
+
+    long getSumOfRoundIndexOfYellowPunish(Map<String, Object> params);
 }

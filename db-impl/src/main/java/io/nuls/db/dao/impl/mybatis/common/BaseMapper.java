@@ -93,7 +93,7 @@ public interface BaseMapper<K extends Serializable, V> {
      */
     int updateByPrimaryKey(V record);
 
-    int batchInsert(List<V> records);
+    int batchInsert(List<V> list);
     Long countAll();
     List<V> selectList(Searchable searchable);
     long selectCount(Searchable searchable);

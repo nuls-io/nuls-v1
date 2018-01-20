@@ -105,7 +105,7 @@
         insert into node_group_relation (id, node_id, group_id)
         values
         <foreach collection="list" item="item" index="index" separator=",">
-            (#{id,jdbcType=INTEGER}, #{nodeId,jdbcType=INTEGER}, #{groupId,jdbcType=INTEGER} )
+            (#{item.id,jdbcType=INTEGER}, #{item.nodeId,jdbcType=INTEGER}, #{item.groupId,jdbcType=INTEGER} )
         </foreach>
     </insert>
     <select id="countAll" resultType="java.lang.Long">

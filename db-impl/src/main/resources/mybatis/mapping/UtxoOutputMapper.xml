@@ -194,9 +194,9 @@
         address, script)
         values
         <foreach collection="list" item="item" index="index" separator=",">
-            (#{hash,jdbcType=VARCHAR}, #{txHash,jdbcType=VARCHAR}, #{value,jdbcType=BIGINT},
-            #{lockTime,jdbcType=BIGINT}, #{status,jdbcType=TINYINT}, #{outIndex,jdbcType=INTEGER},
-            #{address,jdbcType=VARCHAR}, #{script,jdbcType=VARBINARY})
+            (#{item.hash,jdbcType=VARCHAR}, #{item.txHash,jdbcType=VARCHAR}, #{item.value,jdbcType=BIGINT},
+            #{item.lockTime,jdbcType=BIGINT}, #{item.status,jdbcType=TINYINT}, #{item.outIndex,jdbcType=INTEGER},
+            #{item.address,jdbcType=VARCHAR}, #{item.script,jdbcType=VARBINARY})
         </foreach>
     </insert>
     <select id="countAll" resultType="java.lang.Long">

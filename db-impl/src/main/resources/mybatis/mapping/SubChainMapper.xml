@@ -206,9 +206,9 @@
         g_block, g_block_header, sign )
         values
         <foreach collection="list" item="item" index="index" separator=",">
-            (#{id,jdbcType=VARCHAR}, #{creatorAddress,jdbcType=VARCHAR}, #{txHash,jdbcType=VARCHAR},
-            #{gBlockHash,jdbcType=VARCHAR}, #{gMerkleHash,jdbcType=VARCHAR}, #{title,jdbcType=VARCHAR},
-            #{gBlock,jdbcType=VARBINARY}, #{gBlockHeader,jdbcType=VARBINARY}, #{sign,jdbcType=VARBINARY} )
+            (#{item.id,jdbcType=VARCHAR}, #{item.creatorAddress,jdbcType=VARCHAR}, #{item.txHash,jdbcType=VARCHAR},
+            #{item.gBlockHash,jdbcType=VARCHAR}, #{item.gMerkleHash,jdbcType=VARCHAR}, #{item.title,jdbcType=VARCHAR},
+            #{item.gBlock,jdbcType=VARBINARY}, #{item.gBlockHeader,jdbcType=VARBINARY}, #{item.sign,jdbcType=VARBINARY} )
         </foreach>
     </insert>
     <select id="countAll" resultType="java.lang.Long">

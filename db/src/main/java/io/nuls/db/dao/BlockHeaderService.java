@@ -34,15 +34,64 @@ import java.util.List;
  */
 public interface BlockHeaderService extends BaseDataService<String, BlockHeaderPo> {
 
+    /**
+     * get blockheanderpo from block height
+     * @param height
+     * @return
+     */
     BlockHeaderPo getHeader(long height);
 
+    /**
+     * get blockheanderpo from block hash
+     * @param hash
+     * @return
+     */
     BlockHeaderPo getHeader(String hash);
 
+    /**
+     * return highest height
+     * @return
+     */
     long getBestHeight();
 
+    /**
+     * blockheanderpo of highest height
+     * @return
+     */
     BlockHeaderPo getBestBlockHeader();
 
+    /**
+     * get blockheanderpo list from block height
+     * @param startHeight
+     * @param endHeight
+     * @return
+     */
     List<BlockHeaderPo> getHeaderList(long startHeight, long endHeight);
 
 
+    /**
+     * Piecewise get the hashes of blocks;
+     * @param startHeight
+     * @param endHeight
+     * @param split
+     * @return
+     */
+    List<String> getHashList(long startHeight, long endHeight, long split);
+
+    /**
+     * calc count of roundIndex between start and end;
+     * @param address
+     * @param roundStart
+     * @param roundEnd
+     * @return
+     */
+    long getCount(String address, long roundStart, long roundEnd);
+
+    /**
+     * use for POC consensus
+     * @param address
+     * @param endRoundIndex
+     * @return
+     */
+    long getSumOfRoundIndexOfYellowPunish(String address, long endRoundIndex);
 }

@@ -41,12 +41,11 @@ public class PocBlockService  {
     }
 
     public long getBlockCount(String address, long roundStart, long roundEnd) {
-        // todo auto-generated method stub(niels)
-        return 0;
+        return blockStorageService.getBlockCount(address,roundStart,roundEnd);
     }
 
     public long getSumOfRoundIndexOfYellowPunish(String address, long endRoundIndex) {
-        // todo auto-generated method stub(niels)
-        return 0;
+
+        return blockStorageService.getSumOfRoundIndexOfYellowPunish(address,endRoundIndex);
     }
 }
