@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,15 +23,24 @@
  */
 package io.nuls.rpc.resources.impl;
 
+import io.nuls.account.entity.Account;
+import io.nuls.account.entity.Address;
+import io.nuls.account.service.intf.AccountService;
+import io.nuls.core.chain.entity.Na;
+import io.nuls.core.chain.entity.Result;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.utils.crypto.Hex;
+import io.nuls.ledger.entity.Balance;
+import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.rpc.entity.RpcResult;
 import io.nuls.rpc.resources.AccountResource;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.util.List;
 
 /**
- *
  * @author Niels
  * @date 2017/9/30
  */
@@ -39,18 +48,28 @@ import javax.ws.rs.core.MediaType;
 public class AccountResourceImpl implements AccountResource {
 
     private NulsContext context = NulsContext.getInstance();
+    private AccountService accountService = context.getService(AccountService.class);
+    private LedgerService ledgerService = context.getService(LedgerService.class);
+
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Override
-    public RpcResult create(@QueryParam("count") Integer count ) {
-        return null;
+    public RpcResult create(@QueryParam("count") Integer count) {
+        RpcResult result = RpcResult.getSuccess();
+        Result<List<String>> accountReslut = accountService.createAccount(count);
+        result.setData(accountReslut.getObject());
+        return result;
     }
+
     @Override
     @GET
     @Path("/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult load(@PathParam("address") String address) {
-        return RpcResult.getSuccess();
+        RpcResult result = RpcResult.getSuccess();
+        Account account = accountService.getAccount(address);
+        result.setData(account);
+        return result;
     }
 
     @GET
@@ -58,7 +77,10 @@ public class AccountResourceImpl implements AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Override
     public RpcResult getBalance(@PathParam("address") String address) {
-        return null;
+        Balance balance = ledgerService.getBalance(address);
+        RpcResult result = RpcResult.getSuccess();
+        result.setData(balance);
+        return result;
     }
 
     @GET
@@ -66,6 +88,7 @@ public class AccountResourceImpl implements AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Override
     public RpcResult getCredit(@PathParam("address") String address) {
+        //todo
         return null;
     }
 
@@ -74,15 +97,21 @@ public class AccountResourceImpl implements AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Override
     public RpcResult getPrikey(@PathParam("address") String address, @QueryParam("password") String password) {
-        return null;
+        RpcResult result = RpcResult.getSuccess();
+        byte[] prikey = accountService.getPrivateKey(address, password);
+        result.setData(Hex.encode(prikey));
+        return result;
     }
 
     @GET
     @Path("/address")
     @Produces(MediaType.APPLICATION_JSON)
     @Override
-    public RpcResult getAddress(@QueryParam("publicKey") String publicKey, @QueryParam("subChainId") String subChainId) {
-        return null;
+    public RpcResult getAddress(@QueryParam("publicKey") String publicKey, @QueryParam("subChainId") Integer subChainId) {
+        Address address = new Address(subChainId, Hex.decode(publicKey));
+        RpcResult result = RpcResult.getSuccess();
+        result.setData(address.toString());
+        return result;
     }
 
 
@@ -92,16 +121,16 @@ public class AccountResourceImpl implements AccountResource {
     @Override
     public RpcResult lock(@QueryParam("address") String address, @QueryParam("password") String password,
                           @QueryParam("amount") Double amount, @QueryParam("remark") String remark,
-                          @QueryParam("unlockTime") String unlockTime) {
-        return null;
-    }
-
-    @GET
-    @Path("/address/{address}/validate")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Override
-    public RpcResult getAddress(@QueryParam("address") String address) {
-        return null;
+                          @QueryParam("unlockTime") Long unlockTime) {
+        Result lockResult = ledgerService.lock(address, password, Na.parseNuls(amount), unlockTime, remark);
+        RpcResult result;
+        if (lockResult.isSuccess()) {
+            result = RpcResult.getSuccess();
+        } else {
+            result = RpcResult.getFailed(lockResult.getMessage());
+        }
+        result.setData(lockResult.getObject());
+        return result;
     }
 
 }

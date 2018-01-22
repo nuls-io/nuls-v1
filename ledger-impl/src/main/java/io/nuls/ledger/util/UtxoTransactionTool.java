@@ -27,7 +27,9 @@ import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.chain.entity.NulsDigestData;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.UtxoInputDataService;
 import io.nuls.ledger.entity.UtxoBalance;
 import io.nuls.ledger.entity.UtxoData;
@@ -68,10 +70,12 @@ public class UtxoTransactionTool {
         return tx;
     }
 
-    public LockNulsTransaction createLockNulsTx(CoinTransferData transferData, String password) throws Exception {
+    public LockNulsTransaction createLockNulsTx(CoinTransferData transferData, String password,String remark) throws Exception {
         LockNulsTransaction tx = new LockNulsTransaction(transferData, password);
+        if(StringUtils.isNotBlank(remark)){
+            tx.setRemark(remark.getBytes(NulsContext.DEFAULT_ENCODING));
+        }
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
-
         tx.setSign(getAccountService().signData(tx.getHash(), password));
         return tx;
     }

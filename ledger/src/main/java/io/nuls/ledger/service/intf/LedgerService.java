@@ -81,7 +81,7 @@ public interface LedgerService {
      * @param unlockTime
      * @return
      */
-    Result lock(String address, String password, Na amount, long unlockTime);
+    Result lock(String address, String password, Na amount, long unlockTime,String remark);
 
     /**
      * @param txList

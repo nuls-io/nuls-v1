@@ -25,6 +25,7 @@ package io.nuls.event.bus.service.impl;
 
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.event.BaseEvent;
+import io.nuls.core.event.CommonStringEvent;
 import io.nuls.event.bus.event.CommonDigestEvent;
 import io.nuls.event.bus.service.intf.EventBusService;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
@@ -120,12 +121,24 @@ public class EventBroadcasterImpl implements EventBroadcaster {
 
     @Override
     public void broadcastAndCacheAysn(BaseEvent event, boolean needToSelf) {
-        //todo
+        // todo auto-generated method stub
     }
 
     @Override
     public boolean sendToNode(BaseEvent event, String nodeId) {
         BroadcastResult result = networkService.sendToNode(event, nodeId);
         return result.isSuccess();
+    }
+
+    @Override
+    public void sendToNodeAysn(CommonStringEvent event, String nodeId) {
+        // todo auto-generated method stub(niels)
+
+    }
+
+    @Override
+    public void sendToGroupAysn(CommonStringEvent event, String groupName) {
+        // todo auto-generated method stub(niels)
+
     }
 }

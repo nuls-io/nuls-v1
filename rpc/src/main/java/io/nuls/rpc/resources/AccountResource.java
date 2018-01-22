@@ -44,9 +44,7 @@ public interface AccountResource {
 
     RpcResult lock(String address, String password,
                    Double amount, String remark,
-                   String unlockTime);
+                   Long unlockTime);
 
-    RpcResult getAddress(String publicKey, String subChainId);
-
-    RpcResult getAddress(String address);
+    RpcResult getAddress(String publicKey, Integer subChainId);
 }

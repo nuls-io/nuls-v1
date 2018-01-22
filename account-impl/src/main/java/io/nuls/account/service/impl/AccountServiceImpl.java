@@ -43,7 +43,6 @@ import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.thread.manager.NulsThreadFactory;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.date.DateUtil;
@@ -247,12 +246,13 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public byte[] getPrivateKey(String address) {
+    public byte[] getPrivateKey(String address, String password) {
         AssertUtil.canNotEmpty(address, "");
         Account account = accountCacheService.getAccountByAddress(address);
         if (account == null) {
             return null;
         }
+        //todo decode by password
         return account.getEcKey().getPrivKeyBytes();
     }
 

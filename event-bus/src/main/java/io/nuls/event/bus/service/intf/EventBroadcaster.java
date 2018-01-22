@@ -24,6 +24,7 @@
 package io.nuls.event.bus.service.intf;
 
 import io.nuls.core.event.BaseEvent;
+import io.nuls.core.event.CommonStringEvent;
 
 import java.util.List;
 
@@ -67,10 +68,11 @@ public interface EventBroadcaster {
 
     /**
      * send msg to one node
-     *
      * @param event
      * @param nodeId
      */
     boolean sendToNode(BaseEvent event, String nodeId);
 
+    void sendToNodeAysn(CommonStringEvent event, String nodeId);
+    void sendToGroupAysn(CommonStringEvent event, String groupName);
 }

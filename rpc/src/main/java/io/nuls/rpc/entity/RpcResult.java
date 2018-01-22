@@ -90,6 +90,9 @@ public class RpcResult {
     public static RpcResult getFailed(){
         return new RpcResult(ErrorCode.FAILED);
     }
+    public static RpcResult getFailed(String msg){
+        return new RpcResult(ErrorCode.FAILED.getCode(),msg);
+    }
     public static RpcResult getFailed(ErrorCode errorCode){
         return new RpcResult(errorCode);
     }

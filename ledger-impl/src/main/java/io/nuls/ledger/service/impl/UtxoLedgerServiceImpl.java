@@ -202,12 +202,13 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
 
     @Override
-    public Result lock(String address, String password, Na amount, long unlockTime) {
+    public Result lock(String address, String password, Na amount, long unlockTime,String remark) {
         LockNulsTransaction tx = null;
         try {
             CoinTransferData coinData = new CoinTransferData(amount, address);
             coinData.addTo(address, new Coin(amount, unlockTime));
-            tx = UtxoTransactionTool.getInstance().createLockNulsTx(coinData, password);
+            tx = UtxoTransactionTool.getInstance().createLockNulsTx(coinData, password,remark);
+
             tx.verify();
             TransactionEvent event = new TransactionEvent();
             event.setEventBody(tx);

@@ -58,7 +58,7 @@ public interface AccountService {
 
     Address getAddress(String pubKey);
 
-    byte[] getPrivateKey(String address);
+    byte[] getPrivateKey(String address, String password);
 
     void setDefaultAccount(String id);
 

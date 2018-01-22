@@ -30,6 +30,8 @@ import io.nuls.rpc.entity.RpcResult;
  * @author Niels
  * @date 2017/10/24
  */
-public interface BroadcastResource {
+public interface NetworkMessageResource {
     RpcResult broadcast(String message);
+    RpcResult send(String message,String nodeId);
+    RpcResult broadcast(String message,String groupId);
 }
