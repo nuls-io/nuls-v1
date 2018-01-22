@@ -132,7 +132,7 @@ CREATE TABLE IF NOT EXISTS `utxo_output` (
   `status` tinyint(1) NOT NULL,
   `script` varbinary(1024) NOT NULL,
   `address` varchar(40) NOT NULL,
-  PRIMARY KEY (`hash`,`out_index`)
+  PRIMARY KEY (`tx_hash`,`out_index`)
 );
 
 
