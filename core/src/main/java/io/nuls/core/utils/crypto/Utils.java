@@ -484,7 +484,7 @@ public class Utils {
             return 1;
         }
         if (val instanceof String) {
-            sizeOfString((String) val);
+           return sizeOfString((String) val);
         } else if (val instanceof Long) {
             return VarInt.sizeOf((Long) val);
         } else if (val instanceof Integer) {

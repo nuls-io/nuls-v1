@@ -30,6 +30,7 @@ import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.entity.TransactionPo;
 
@@ -92,8 +93,12 @@ public class TransactionPoTool {
         tx.setBlockHeight(po.getBlockHeight());
         tx.setFee(Na.valueOf(po.getFee()));
         tx.setIndex(po.getTxIndex());
-        tx.setRemark(po.getRemark().getBytes(NulsContext.DEFAULT_ENCODING));
-        tx.parseTxData(new NulsByteBuffer(po.getTxData()));
+        if(null!=po.getTxData()){
+            tx.parseTxData(new NulsByteBuffer(po.getTxData()));
+        }
+        if(StringUtils.isNotBlank(po.getRemark())){
+            tx.setRemark(po.getRemark().getBytes(NulsContext.DEFAULT_ENCODING));
+        }
         return tx;
     }
 
@@ -104,10 +109,15 @@ public class TransactionPoTool {
         tx.setBlockHeight(po.getBlockHeight());
         tx.setFee(Na.valueOf(po.getFee()));
         tx.setIndex(po.getTxIndex());
-        tx.setRemark(po.getRemark().getBytes(NulsContext.DEFAULT_ENCODING));
-        tx.parseTxData(new NulsByteBuffer(po.getTxData()));
+        if(StringUtils.isNotBlank(po.getRemark())){
+            tx.setRemark(po.getRemark().getBytes(NulsContext.DEFAULT_ENCODING));
+        }
+        if(null!=po.getTxData()){
+            tx.parseTxData(new NulsByteBuffer(po.getTxData()));
+        }
         return tx;
     }
+
 
     public static TransactionLocalPo toLocal(TransactionPo po) {
         TransactionLocalPo localPo = new TransactionLocalPo();

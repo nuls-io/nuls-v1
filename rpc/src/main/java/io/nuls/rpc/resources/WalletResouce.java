@@ -33,7 +33,6 @@ import java.io.File;
  * @date 2017/9/30
  */
 public interface WalletResouce {
-    RpcResult lock();
 
     RpcResult unlock(String password, String unlockTime);
 

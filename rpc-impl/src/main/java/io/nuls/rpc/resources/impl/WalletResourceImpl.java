@@ -42,14 +42,6 @@ public class WalletResourceImpl implements WalletResouce {
     private NulsContext context = NulsContext.getInstance();
 
     @POST
-    @Path("/lock")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Override
-    public RpcResult lock() {
-        return RpcResult.getSuccess();
-    }
-
-    @POST
     @Path("/unlock")
     @Produces(MediaType.APPLICATION_JSON)
     @Override
