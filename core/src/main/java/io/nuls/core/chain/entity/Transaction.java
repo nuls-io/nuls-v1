@@ -47,6 +47,8 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
 
     protected int type;
 
+    protected int index;
+
     protected long time;
 
     protected long blockHeight;
@@ -54,8 +56,6 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
     protected Na fee;
 
     protected byte[] remark;
-
-    protected int index;
 
     protected NulsSignData sign;
 

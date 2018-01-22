@@ -33,17 +33,19 @@ public class TransactionLocalPo {
 
     private Integer type;
 
-    private Long createTime;
+    private Integer txIndex;
 
     private Long blockHeight;
+
+    private Long createTime;
 
     private Long fee;
 
     private String remark;
 
-    private int index;
-
     private byte[] txData;
+
+    private byte[] sign;
 
     public String getHash() {
         return hash;
@@ -93,13 +95,6 @@ public class TransactionLocalPo {
         this.remark = remark;
     }
 
-    public int getIndex() {
-        return index;
-    }
-
-    public void setIndex(int index) {
-        this.index = index;
-    }
 
     public byte[] getTxData() {
         return txData;
@@ -107,5 +102,13 @@ public class TransactionLocalPo {
 
     public void setTxData(byte[] txData) {
         this.txData = txData;
+    }
+
+    public int getTxIndex() {
+        return txIndex;
+    }
+
+    public void setTxIndex(int txIndex) {
+        this.txIndex = txIndex;
     }
 }

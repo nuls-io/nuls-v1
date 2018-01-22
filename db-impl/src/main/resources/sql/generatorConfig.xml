@@ -11,12 +11,12 @@
 
         <commentGenerator>
             <property name="suppressAllComments" value="true" /><!-- 是否取消注释 -->
-            <property name="suppressDate" value="true" /> <!-- 是否生成注释代时间戳 -->
+            <property name="suppressDate" value="false" /> <!-- 是否生成注释代时间戳 -->
         </commentGenerator>
 
         <!-- !!!! Database Configurations !!!! -->
         <jdbcConnection driverClass="com.mysql.jdbc.Driver"
-                        connectionURL="jdbc:mysql://192.168.1.248:3306/test?useUnicode=true&amp;characterEncoding=UTF-8"
+                        connectionURL="jdbc:mysql://192.168.1.103:3306/niels?useUnicode=true&amp;characterEncoding=UTF-8"
                         userId="root" password="123123" />
 
         <javaTypeResolver>
@@ -41,7 +41,7 @@
         </javaClientGenerator>
 
         <!-- !!!! Table Configurations !!!! -->
-        <table tableName="alias" domainObjectName="AliasPo" enableCountByExample="false" enableDeleteByExample="false" enableSelectByExample="false" enableUpdateByExample="false"/>
+        <table tableName="utxo_input" domainObjectName="UtxoInputPo" enableCountByExample="false" enableDeleteByExample="false" enableSelectByExample="false" enableUpdateByExample="false"/>
 
     </context>
 </generatorConfiguration>
