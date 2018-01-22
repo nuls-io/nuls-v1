@@ -45,7 +45,6 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Niels
  * @date 2017/12/11
  */
-//todo 设置超时
 public class DistributedBlockInfoRequestUtils {
     private static final DistributedBlockInfoRequestUtils INSTANCE = new DistributedBlockInfoRequestUtils();
     private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);

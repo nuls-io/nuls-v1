@@ -79,7 +79,7 @@ public class EventBroadcasterImpl implements EventBroadcaster {
 
     @Override
     public void broadcastHashAndCacheAysn(BaseEvent event, boolean needToSelf, String excludeNodeId) {
-
+        //todo
     }
 
     private List<String> getNodeIdList(BroadcastResult result) {
@@ -118,8 +118,9 @@ public class EventBroadcasterImpl implements EventBroadcaster {
     }
 
 
+    @Override
     public void broadcastAndCacheAysn(BaseEvent event, boolean needToSelf) {
-
+        //todo
     }
 
     @Override

@@ -28,6 +28,7 @@ import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.member.Delegate;
 import io.nuls.consensus.entity.tx.PocJoinConsensusTransaction;
+import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.validate.NulsDataValidator;
@@ -41,7 +42,15 @@ import java.util.List;
  */
 public class DelegateDepositValidator implements NulsDataValidator<PocJoinConsensusTransaction> {
 
+    private static final DelegateDepositValidator INSTANCE = new DelegateDepositValidator();
     private ConsensusCacheManager consensusCacheManager = ConsensusCacheManager.getInstance();
+
+    private DelegateDepositValidator() {
+    }
+
+    public static DelegateDepositValidator getInstance() {
+        return INSTANCE;
+    }
 
     @Override
     public ValidateResult validate(PocJoinConsensusTransaction data) {
@@ -59,4 +68,5 @@ public class DelegateDepositValidator implements NulsDataValidator<PocJoinConsen
         }
         return ValidateResult.getSuccessResult();
     }
+
 }

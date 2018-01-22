@@ -113,8 +113,7 @@ public class BlockServiceImpl implements io.nuls.consensus.service.intf.BlockSer
 
     @Override
     public List<Block> getBlockList(long startHeight, long endHeight) {
-        // todo auto-generated method stub(niels)
-        return null;
+        return blockStorageService.getBlockList(startHeight, endHeight);
     }
 
 
@@ -149,15 +148,18 @@ public class BlockServiceImpl implements io.nuls.consensus.service.intf.BlockSer
     }
 
     @Override
-    public List<NulsDigestData> getBlockHashList(long start, long end, long split) {
-        // todo auto-generated method stub(niels)
-        return null;
+    public List<NulsDigestData> getBlockHashList(long startHeight, long endHeight, long split) {
+        return blockStorageService.getBlockHashList(startHeight, endHeight, split);
     }
 
     @Override
     public BlockHeader getBlockHeader(NulsDigestData hash) {
-        // todo auto-generated method stub(niels)
-        return null;
+        String hashHex = hash.getDigestHex();
+        BlockHeader header = blockCacheManager.getBlockHeader(hashHex);
+        if (null == header) {
+            header = blockStorageService.getBlockHeader(hashHex);
+        }
+        return header;
     }
 
     private void rollback(List<Transaction> txs, int max) {

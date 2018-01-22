@@ -58,7 +58,7 @@ public class CreditThresholdValidator implements NulsDataValidator<PocJoinConsen
         String address = data.getTxData().getAddress();
         List<Transaction> list = null;
         try {
-//todo            list = ledgerService.getListByAddress(address, TransactionConstant.TX_TYPE_RED_PUNISH, 0, 0);
+            list = ledgerService.getTxList(address, TransactionConstant.TX_TYPE_RED_PUNISH);
         } catch (Exception e) {
             Log.error(e);
         }

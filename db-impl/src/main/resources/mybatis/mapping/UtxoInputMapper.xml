@@ -143,8 +143,8 @@
     script)
     values
     <foreach collection="list" item="item" index="index" separator="," >
-      (#{hash,jdbcType=VARCHAR}, #{txHash,jdbcType=VARCHAR}, #{fromId,jdbcType=VARCHAR},
-      #{script,jdbcType=VARBINARY})
+      (#{item.hash,jdbcType=VARCHAR}, #{item.txHash,jdbcType=VARCHAR}, #{item.fromId,jdbcType=VARCHAR},
+      #{item.script,jdbcType=VARBINARY})
     </foreach>
   </insert>
   <select id="countAll"  resultType="java.lang.Long">

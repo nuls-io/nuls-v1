@@ -189,9 +189,9 @@
     block_height)
     values
     <foreach collection="list" item="item" index="index" separator=",">
-      (#{id,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR}, #{agentAddress,jdbcType=VARCHAR},
-      #{deposit,jdbcType=BIGINT}, #{status,jdbcType=INTEGER}, #{time,jdbcType=BIGINT},
-      #{blockHeight,jdbcType=BIGINT})
+      (#{item.id,jdbcType=VARCHAR}, #{item.address,jdbcType=VARCHAR}, #{item.agentAddress,jdbcType=VARCHAR},
+      #{item.deposit,jdbcType=BIGINT}, #{item.status,jdbcType=INTEGER}, #{item.time,jdbcType=BIGINT},
+      #{item.blockHeight,jdbcType=BIGINT})
     </foreach>
   </insert>
 

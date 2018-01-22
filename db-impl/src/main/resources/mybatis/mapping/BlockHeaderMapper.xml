@@ -241,5 +241,19 @@
         select count(hash) from block_header
         <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Serach_Where"/>
     </select>
+    <select id="getMaxHeight" resultType="long">
+        select max(height) from block_header
+    </select>
+    <select id="getSplitHashList" resultType="java.lang.String" parameterType="java.util.Map">
+        SELECT hash from block_header where
+        height &gt;=#{startHeight,jdbcType=BIGINT}
+        and height &lt;= #{endHeight,jdbcType=BIGINT}
+        and mod((height-startHeight),#{split,jdbcType=BIGINT})=0
+    </select>
+    <select id="getSumOfRoundIndexOfYellowPunish" resultType="long" parameterType="java.util.Map">
+        select sum(b.round_index) from block_header b INNER JOIN transaction t on t.block_height=b.height
+        INNER JOIN tx_account_relation r on r.tx_hash = t.hash
+        where r.address=#{address ,jdbcType=VARCHAR } and b.round_index &lt;=#{endRoundIndex,jdbcType=BIGINT}
+    </select>
 
 </mapper>

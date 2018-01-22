@@ -106,7 +106,7 @@
     insert into tx_account_relation (id, tx_hash, address)
     values
     <foreach collection="list" item="item" index="index" separator="," >
-      (#{id,jdbcType=VARCHAR}, #{txHash,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR})
+      (#{item.id,jdbcType=VARCHAR}, #{item.txHash,jdbcType=VARCHAR}, #{item.address,jdbcType=VARCHAR})
     </foreach>
   </insert>
   <select id="countAll"  resultType="java.lang.Long">

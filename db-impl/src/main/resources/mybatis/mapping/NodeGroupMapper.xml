@@ -106,7 +106,7 @@
         insert into node_group (hid, name, version)
         values
         <foreach collection="list" item="item" index="index" separator=",">
-            (#{hid,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, #{version,jdbcType=INTEGER})
+            (#{item.hid,jdbcType=INTEGER}, #{item.name,jdbcType=VARCHAR}, #{item.version,jdbcType=INTEGER})
         </foreach>
     </insert>
     <select id="countAll" resultType="java.lang.Long">

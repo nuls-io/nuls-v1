@@ -115,7 +115,10 @@ public final class GenesisBlock extends Block {
             Log.error(e);
             throw new NulsRuntimeException(e);
         }
+        tx.setFee(Na.ZERO);
         tx.setHash(NulsDigestData.calcDigestData(tx));
+        //todo
+        tx.setSign(new NulsSignData());
         List<Transaction> txlist = new ArrayList<>();
         txlist.add(tx);
         setTxs(txlist);
@@ -150,7 +153,7 @@ public final class GenesisBlock extends Block {
         } catch (IOException e) {
             Log.error(e);
         }
-        //todo
+        //todo change to real address & signature
         header.setPackingAddress("00000");
         header.setSign(new NulsSignData());
     }

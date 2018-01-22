@@ -50,7 +50,6 @@ public class TransactionPoTool {
         po.setCreateTime(tx.getTime());
         po.setBlockHeight(tx.getBlockHeight());
         po.setIndex(tx.getIndex());
-
         if (null != tx.getTxData()) {
             po.setTxData(tx.getTxData().serialize());
         }
@@ -60,7 +59,6 @@ public class TransactionPoTool {
         if (null != tx.getFee()) {
             po.setFee(tx.getFee().getValue());
         }
-
         return po;
     }
 

@@ -148,8 +148,8 @@
     deposit, remark,start_time,commission_rate)
     values
     <foreach collection="list" item="item" index="index" separator=",">
-      (#{id,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR}, #{nodeAddress,jdbcType=VARCHAR},
-      #{deposit,jdbcType=BIGINT}, #{remark,jdbcType=VARCHAR}),#{startTime,jdbcType=BIGINT},#{commissionRate,jdbcType=NUMERIC}
+      (#{item.id,jdbcType=VARCHAR}, #{item.address,jdbcType=VARCHAR}, #{item.nodeAddress,jdbcType=VARCHAR},
+      #{item.deposit,jdbcType=BIGINT}, #{item.remark,jdbcType=VARCHAR}),#{item.startTime,jdbcType=BIGINT},#{item.commissionRate,jdbcType=NUMERIC}
     </foreach>
   </insert>
 

@@ -26,6 +26,7 @@ package io.nuls.consensus.service.impl;
 import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.Log;
@@ -57,7 +58,7 @@ public class BlockStorageService {
 
     public Block getBlock(long height) throws Exception {
         BlockHeader header = getBlockHeader(height);
-        if(null==header){
+        if (null == header) {
             return null;
         }
         List<Transaction> txList = null;
@@ -84,15 +85,11 @@ public class BlockStorageService {
         Block block = new Block();
         block.setTxs(txList);
         block.setHeader(header);
-//        ValidateResult result = block.verify();
-//        if (result.isFailed()) {
-//            throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
-//        }
         return block;
     }
 
 
-    public List<Block> getBlock(long startHeight, long endHeight) throws Exception {
+    public List<Block> getBlockList(long startHeight, long endHeight) {
         List<Block> blockList = new ArrayList<>();
         List<BlockHeaderPo> poList = headerDao.getHeaderList(startHeight, endHeight);
         List<Transaction> txList = null;
@@ -111,7 +108,6 @@ public class BlockStorageService {
 
     private Map<Long, List<Transaction>> txListGrouping(List<Transaction> txList) {
         Map<Long, List<Transaction>> map = new HashMap<>();
-
         for (Transaction tx : txList) {
             List<Transaction> list = map.get(tx.getBlockHeight());
             if (null == list) {
@@ -145,5 +141,22 @@ public class BlockStorageService {
         headerDao.delete(hash);
     }
 
+    public List<NulsDigestData> getBlockHashList(long startHeight, long endHeight, long split) {
+        List<String> strList = this.headerDao.getHashList(startHeight, endHeight, split);
+        List<NulsDigestData> hashList = new ArrayList<>();
+        for (String hash : strList) {
+            hashList.add(NulsDigestData.fromDigestHex(hash));
+        }
+        return hashList;
+    }
 
+    public long getBlockCount(String address, long roundStart, long roundEnd) {
+
+        return this.headerDao.getCount(address, roundStart, roundEnd);
+    }
+
+    public long getSumOfRoundIndexOfYellowPunish(String address, long endRoundIndex) {
+
+        return this.headerDao.getSumOfRoundIndexOfYellowPunish(address, endRoundIndex);
+    }
 }

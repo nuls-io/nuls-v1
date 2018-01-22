@@ -97,7 +97,6 @@ public class ConsensusManager implements Runnable {
         //todo Test special
         seedAddressSet.add(NulsContext.DEFAULT_ACCOUNT_ID);
 
-
         this.seedNodeList.addAll(seedAddressSet);
     }
 

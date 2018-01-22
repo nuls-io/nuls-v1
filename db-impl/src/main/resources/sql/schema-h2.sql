@@ -92,16 +92,13 @@ CREATE TABLE IF NOT EXISTS `transaction` (
   `type` int(5) NOT NULL,
   `create_time` bigint(14) NOT NULL,
   `block_height` bigint(15) NOT NULL,
-  `block_hash` varchar(70) NOT NULL,
   `remark` varchar(100) DEFAULT NULL,
-
   `fee` decimal(15,8) NOT NULL,
-  `txData` varbinary(1024) NOT NULL,
-  `sign` varbinary(1024) NOT NULL,
+  `txData` varbinary(1024)  ,
+  `sign` varbinary(1024) ,
   `extend` varbinary(1024) DEFAULT NULL,
-
   `related_tx_hash` varchar(70) DEFAULT NULL,
-  `version` int(11) NOT NULL,
+  `version` int(11) ,
   PRIMARY KEY (`hash`)
 );
 CREATE TABLE IF NOT EXISTS `transaction_local` (
@@ -110,13 +107,12 @@ CREATE TABLE IF NOT EXISTS `transaction_local` (
   `remark` varchar(100) DEFAULT NULL,
   `create_time` bigint(14) NOT NULL,
   `fee` decimal(19,8) NOT NULL,
-  `txData` varbinary(1024) NOT NULL,
-  `sign` varbinary(1024) NOT NULL,
+  `txData` varbinary(1024) ,
+  `sign` varbinary(1024)  ,
   `extend` varbinary(1024) DEFAULT NULL,
   `block_height` bigint(15) NOT NULL,
-  `block_hash` varchar(70) NOT NULL,
   `related_tx_hash` varchar(70) DEFAULT NULL,
-  `version` int(11) NOT NULL,
+  `version` int(11) ,
   PRIMARY KEY (`hash`)
 );
 CREATE TABLE IF NOT EXISTS `tx_account_relation` (

@@ -120,4 +120,8 @@ public abstract class BaseDaoImpl<T extends BaseMapper<K, V>, K extends Serializ
     public Long getCount() {
         return this.getMapper().countAll();
     }
+
+    public long getCount(Map<String, Object> params) {
+        return this.getMapper().selectCount(getSearchable(params));
+    }
 }
