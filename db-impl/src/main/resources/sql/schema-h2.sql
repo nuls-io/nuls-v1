@@ -89,30 +89,26 @@ CREATE TABLE IF NOT EXISTS `sub_chain` (
 );
 CREATE TABLE IF NOT EXISTS `transaction` (
   `hash` varchar(70) NOT NULL,
+  `tx_index` int(5) NOT NULL,
   `type` int(5) NOT NULL,
-  `create_time` bigint(14) NOT NULL,
+  `create_time` bigint(15) NOT NULL,
   `block_height` bigint(15) NOT NULL,
   `remark` varchar(100) DEFAULT NULL,
-  `fee` decimal(15,8) NOT NULL,
+  `fee` long(19) NOT NULL,
   `txData` varbinary(1024)  ,
-  `sign` varbinary(1024) ,
-  `extend` varbinary(1024) DEFAULT NULL,
-  `related_tx_hash` varchar(70) DEFAULT NULL,
-  `version` int(11) ,
+  `sign` varbinary(255) ,
   PRIMARY KEY (`hash`)
 );
 CREATE TABLE IF NOT EXISTS `transaction_local` (
   `hash` varchar(70) NOT NULL,
+  `tx_index` int(5) NOT NULL,
   `type` int(5) NOT NULL,
-  `remark` varchar(100) DEFAULT NULL,
-  `create_time` bigint(14) NOT NULL,
-  `fee` decimal(19,8) NOT NULL,
-  `txData` varbinary(1024) ,
-  `sign` varbinary(1024)  ,
-  `extend` varbinary(1024) DEFAULT NULL,
+  `create_time` bigint(15) NOT NULL,
   `block_height` bigint(15) NOT NULL,
-  `related_tx_hash` varchar(70) DEFAULT NULL,
-  `version` int(11) ,
+  `remark` varchar(100) DEFAULT NULL,
+  `fee` long(19) NOT NULL,
+  `txData` varbinary(1024)  ,
+  `sign` varbinary(255) ,
   PRIMARY KEY (`hash`)
 );
 CREATE TABLE IF NOT EXISTS `tx_account_relation` (
@@ -122,22 +118,21 @@ CREATE TABLE IF NOT EXISTS `tx_account_relation` (
   PRIMARY KEY (`id`)
 );
 CREATE TABLE IF NOT EXISTS `utxo_input` (
-  `hash` varchar(70) NOT NULL,
   `tx_hash` varchar(70) NOT NULL,
-  `from_id` varchar(32) NOT NULL,
-  `script` varbinary(1024) NOT NULL,
-  PRIMARY KEY (`hash`)
+  `from_index` int(5) NOT NULL,
+  `index` int(5) NOT NULL,
+  `sign` varbinary(255) NOT NULL,
+  PRIMARY KEY (`tx_hash`,`from_index`)
 );
 CREATE TABLE IF NOT EXISTS `utxo_output` (
-  `hash` varchar(70) NOT NULL,
   `tx_hash` varchar(70) NOT NULL,
+  `out_index` int(5) NOT NULL,
   `value` decimal(19,8) NOT NULL,
   `lock_time` bigint(20) DEFAULT NULL,
-  `status` tinyint(4) NOT NULL,
+  `status` tinyint(1) NOT NULL,
   `script` varbinary(1024) NOT NULL,
-  `out_index` int(5) NOT NULL,
   `address` varchar(40) NOT NULL,
-  PRIMARY KEY (`hash`)
+  PRIMARY KEY (`hash`,`out_index`)
 );
 
 

@@ -93,12 +93,11 @@
     and from_index = #{fromIndex,jdbcType=INTEGER}
   </update>
   <insert id="batchInsert" parameterType="java.util.List">
-    insert into utxo_input (hash, tx_hash, from_id,
-    script)
+    insert into utxo_input (tx_hash,in_index, from_index,sign)
     values
     <foreach collection="list" item="item" index="index" separator="," >
-      (#{item.hash,jdbcType=VARCHAR}, #{item.txHash,jdbcType=VARCHAR}, #{item.fromId,jdbcType=VARCHAR},
-      #{item.script,jdbcType=VARBINARY})
+      (#{item.txHash,jdbcType=VARCHAR},#{item.in_index,jdbcType=INTEGER}, #{item.from_index,jdbcType=INTEGER},
+      #{item.sign,jdbcType=VARBINARY})
     </foreach>
   </insert>
   <select id="countAll"  resultType="java.lang.Long">

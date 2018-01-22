@@ -49,7 +49,7 @@ public class TransactionPoTool {
         po.setType(tx.getType());
         po.setCreateTime(tx.getTime());
         po.setBlockHeight(tx.getBlockHeight());
-        po.setIndex(tx.getIndex());
+        po.setTxIndex(tx.getIndex());
         if (null != tx.getTxData()) {
             po.setTxData(tx.getTxData().serialize());
         }
@@ -70,7 +70,7 @@ public class TransactionPoTool {
         po.setType(tx.getType());
         po.setCreateTime(tx.getTime());
         po.setBlockHeight(tx.getBlockHeight());
-        po.setIndex(tx.getIndex());
+        po.setTxIndex(tx.getIndex());
 
         if (null != tx.getTxData()) {
             po.setTxData(tx.getTxData().serialize());
@@ -91,7 +91,7 @@ public class TransactionPoTool {
         tx.setTime(po.getCreateTime());
         tx.setBlockHeight(po.getBlockHeight());
         tx.setFee(Na.valueOf(po.getFee()));
-        tx.setIndex(po.getIndex());
+        tx.setIndex(po.getTxIndex());
         tx.setRemark(po.getRemark().getBytes(NulsContext.DEFAULT_ENCODING));
         tx.parseTxData(new NulsByteBuffer(po.getTxData()));
         return tx;
@@ -103,7 +103,7 @@ public class TransactionPoTool {
         tx.setTime(po.getCreateTime());
         tx.setBlockHeight(po.getBlockHeight());
         tx.setFee(Na.valueOf(po.getFee()));
-        tx.setIndex(po.getIndex());
+        tx.setIndex(po.getTxIndex());
         tx.setRemark(po.getRemark().getBytes(NulsContext.DEFAULT_ENCODING));
         tx.parseTxData(new NulsByteBuffer(po.getTxData()));
         return tx;
@@ -116,7 +116,7 @@ public class TransactionPoTool {
         localPo.setCreateTime(po.getCreateTime());
         localPo.setBlockHeight(po.getBlockHeight());
         localPo.setFee(po.getFee());
-        localPo.setIndex(po.getIndex());
+        localPo.setTxIndex(po.getTxIndex());
         localPo.setRemark(po.getRemark());
         localPo.setTxData(po.getTxData());
         return localPo;
@@ -129,7 +129,7 @@ public class TransactionPoTool {
         po.setCreateTime(localPo.getCreateTime());
         po.setBlockHeight(localPo.getBlockHeight());
         po.setFee(localPo.getFee());
-        po.setIndex(localPo.getIndex());
+        po.setTxIndex(localPo.getTxIndex());
         po.setRemark(localPo.getRemark());
         po.setTxData(localPo.getTxData());
 

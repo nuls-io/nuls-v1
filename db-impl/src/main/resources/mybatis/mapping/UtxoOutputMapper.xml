@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="andy.dao.UtxoOutputPoMapper" >
-    <resultMap id="BaseResultMap" type="andy.model.UtxoOutputPo" >
+<mapper namespace="io.nuls.db.dao.impl.mybatis.mapper.UtxoOutputMapper">
+    <resultMap id="BaseResultMap" type="io.nuls.db.entity.UtxoOutputPo" >
         <id column="tx_hash" property="txHash" jdbcType="VARCHAR" />
         <id column="out_index" property="outIndex" jdbcType="INTEGER" />
         <result column="value" property="value" jdbcType="BIGINT" />
@@ -9,7 +9,7 @@
         <result column="status" property="status" jdbcType="TINYINT" />
         <result column="address" property="address" jdbcType="VARCHAR" />
     </resultMap>
-    <resultMap id="ResultMapWithBLOBs" type="andy.model.UtxoOutputPo" extends="BaseResultMap" >
+    <resultMap id="ResultMapWithBLOBs" type="io.nuls.db.entity.UtxoOutputPo" extends="BaseResultMap" >
         <result column="script" property="script" jdbcType="VARBINARY" />
     </resultMap>
     <sql id="Base_Column_List" >
@@ -18,7 +18,7 @@
     <sql id="Blob_Column_List" >
         script
     </sql>
-    <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="andy.model.UtxoOutputPoKey" >
+    <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="io.nuls.db.entity.UtxoOutputPoKey" >
         select
         <include refid="Base_Column_List" />
         ,
@@ -27,12 +27,12 @@
         where tx_hash = #{txHash,jdbcType=VARCHAR}
         and out_index = #{outIndex,jdbcType=INTEGER}
     </select>
-    <delete id="deleteByPrimaryKey" parameterType="andy.model.UtxoOutputPoKey" >
+    <delete id="deleteByPrimaryKey" parameterType="io.nuls.db.entity.UtxoOutputPoKey" >
         delete from utxo_output
         where tx_hash = #{txHash,jdbcType=VARCHAR}
         and out_index = #{outIndex,jdbcType=INTEGER}
     </delete>
-    <insert id="insert" parameterType="andy.model.UtxoOutputPo" >
+    <insert id="insert" parameterType="io.nuls.db.entity.UtxoOutputPo" >
         insert into utxo_output (tx_hash, out_index, value,
         lock_time, status, address,
         script)
@@ -40,7 +40,7 @@
         #{lockTime,jdbcType=BIGINT}, #{status,jdbcType=TINYINT}, #{address,jdbcType=VARCHAR},
         #{script,jdbcType=VARBINARY})
     </insert>
-    <insert id="insertSelective" parameterType="andy.model.UtxoOutputPo" >
+    <insert id="insertSelective" parameterType="io.nuls.db.entity.UtxoOutputPo" >
         insert into utxo_output
         <trim prefix="(" suffix=")" suffixOverrides="," >
             <if test="txHash != null" >
@@ -89,7 +89,7 @@
             </if>
         </trim>
     </insert>
-    <update id="updateByPrimaryKeySelective" parameterType="andy.model.UtxoOutputPo" >
+    <update id="updateByPrimaryKeySelective" parameterType="io.nuls.db.entity.UtxoOutputPo" >
         update utxo_output
         <set >
             <if test="value != null" >
@@ -111,7 +111,7 @@
         where tx_hash = #{txHash,jdbcType=VARCHAR}
         and out_index = #{outIndex,jdbcType=INTEGER}
     </update>
-    <update id="updateByPrimaryKeyWithBLOBs" parameterType="andy.model.UtxoOutputPo" >
+    <update id="updateByPrimaryKeyWithBLOBs" parameterType="io.nuls.db.entity.UtxoOutputPo" >
         update utxo_output
         set value = #{value,jdbcType=BIGINT},
         lock_time = #{lockTime,jdbcType=BIGINT},
@@ -121,7 +121,7 @@
         where tx_hash = #{txHash,jdbcType=VARCHAR}
         and out_index = #{outIndex,jdbcType=INTEGER}
     </update>
-    <update id="updateByPrimaryKey" parameterType="andy.model.UtxoOutputPo" >
+    <update id="updateByPrimaryKey" parameterType="io.nuls.db.entity.UtxoOutputPo" >
         update utxo_output
         set value = #{value,jdbcType=BIGINT},
         lock_time = #{lockTime,jdbcType=BIGINT},
@@ -132,14 +132,14 @@
     </update>
 
     <insert id="batchInsert" parameterType="java.util.List">
-        insert into utxo_output (hash, tx_hash, value,
-        lock_time, status, out_index,
-        address, script)
+        insert into utxo_output (tx_hash, out_index, value,
+        lock_time, status, address,
+        script)
         values
         <foreach collection="list" item="item" index="index" separator=",">
-            (#{item.hash,jdbcType=VARCHAR}, #{item.txHash,jdbcType=VARCHAR}, #{item.value,jdbcType=BIGINT},
-            #{item.lockTime,jdbcType=BIGINT}, #{item.status,jdbcType=TINYINT}, #{item.outIndex,jdbcType=INTEGER},
-            #{item.address,jdbcType=VARCHAR}, #{item.script,jdbcType=VARBINARY})
+            (#{item.txHash,jdbcType=VARCHAR}, #{item.outIndex,jdbcType=INTEGER}, #{item.value,jdbcType=BIGINT},
+            #{item.lockTime,jdbcType=BIGINT}, #{item.status,jdbcType=TINYINT}, #{item.address,jdbcType=VARCHAR},
+            #{item.script,jdbcType=VARBINARY})
         </foreach>
     </insert>
     <select id="countAll" resultType="java.lang.Long">
