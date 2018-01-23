@@ -144,6 +144,7 @@ public class BlockServiceImpl implements io.nuls.consensus.service.intf.BlockSer
             return;
         }
         this.rollback(block.getTxs(), block.getTxs().size() - 1);
+        this.ledgerService.deleteTx(block.getHeader().getHeight());
         blockStorageService.delete(block.getHeader().getHash().getDigestHex());
     }
 

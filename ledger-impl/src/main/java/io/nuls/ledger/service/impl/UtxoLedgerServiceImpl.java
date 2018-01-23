@@ -336,6 +336,18 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         }
     }
 
+    @Override
+    public void deleteTx(Transaction tx) {
+        // todo auto-generated method stub(niels)
+
+    }
+
+    @Override
+    public void deleteTx(long blockHeight) {
+        // todo auto-generated method stub(niels)
+
+    }
+
     public List<TransactionService> getServiceList(Class<? extends Transaction> txClass) {
         List<TransactionService> list = new ArrayList<>();
         Class clazz = txClass;

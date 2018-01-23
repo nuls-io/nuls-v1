@@ -115,4 +115,7 @@ public interface LedgerService {
     void commitTx(Transaction tx) throws NulsException;
 
     void approvalTx(Transaction tx) throws NulsException;
+
+    void deleteTx(Transaction tx);
+    void deleteTx(long blockHeight);
 }

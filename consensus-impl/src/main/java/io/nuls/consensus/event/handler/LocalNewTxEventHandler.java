@@ -21,53 +21,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.cache.module.impl;
+package io.nuls.consensus.event.handler;
 
-import io.nuls.cache.constant.EhCacheConstant;
-import io.nuls.cache.manager.EhCacheManager;
-import io.nuls.cache.module.AbstractCacheModule;
-import io.nuls.cache.service.impl.EhCacheServiceImpl;
-import io.nuls.cache.service.intf.CacheService;
+import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
+import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.constant.SeverityLevelEnum;
+import io.nuls.core.context.NulsContext;
+import io.nuls.core.validate.ValidateResult;
+import io.nuls.event.bus.handler.AbstractEventHandler;
+import io.nuls.ledger.event.TransactionEvent;
+import io.nuls.network.service.NetworkService;
 
 /**
- *
  * @author Niels
- * @date 2017/10/27
- *
+ * @date 2018/1/8
  */
-public class EhCacheModuleBootstrap extends AbstractCacheModule {
+public class LocalNewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
 
-    private EhCacheManager cacheManager = EhCacheManager.getInstance();
+    private static LocalNewTxEventHandler INSTANCE = new LocalNewTxEventHandler();
 
-    @Override
-    public void init() {
-        cacheManager.init();
+    private ReceivedTxCacheManager cacheManager = ReceivedTxCacheManager.getInstance();
+
+    private LocalNewTxEventHandler() {
     }
 
-    @Override
-    public void start() {
-
-        this.registerService(EhCacheServiceImpl.getInstance());
+    public static LocalNewTxEventHandler getInstance() {
+        return INSTANCE;
     }
-
+    //todo 如果是自己的，超时需要回滚
     @Override
-    public void shutdown() {
-        cacheManager.close();
-    }
+    public void onEvent(TransactionEvent event, String fromId) {
 
-    @Override
-    public void destroy() {
-        cacheManager.close();
     }
-
-    @Override
-    public String getInfo() {
-        return null;
-    }
-
-    @Override
-    public int getVersion() {
-        return EhCacheConstant.CACHE_MODULE_VERSION;
-    }
-
 }
