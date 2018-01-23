@@ -83,6 +83,10 @@ public class Address {
         return Base58.encode(getHash());
     }
 
+    public String getCommonBase58(){
+        return Base58.encode(hash160);
+    }
+
     public static Address fromHashs(byte[] hashs) throws NulsException {
         if (hashs == null || hashs.length != HASH_LENGTH) {
             throw new NulsException(ErrorCode.DATA_ERROR);

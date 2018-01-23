@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -26,6 +26,7 @@ package io.nuls.core.chain.entity;
 
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -41,9 +42,8 @@ import java.util.List;
  */
 public class NulsDigestData extends BaseNulsData {
 
-    public static final NulsDigestData EMPTY_HASH = new NulsDigestData(new byte[]{0});
-    protected int digestAlgType;
-    protected int digestLength;
+    public static final NulsDigestData EMPTY_HASH = new NulsDigestData(new byte[]{0, 0, 0});
+    protected short digestAlgType = 0;
     protected byte[] digestBytes;
 
     public NulsDigestData() {
@@ -51,58 +51,46 @@ public class NulsDigestData extends BaseNulsData {
 
     public NulsDigestData(byte[] bytes) {
         this();
-        this.digestBytes = bytes;
+        try {
+            this.parse(bytes);
+        } catch (NulsException e) {
+            Log.error(e);
+            throw new NulsRuntimeException(e);
+        }
     }
 
-    public int getDigestAlgType() {
+    public short getDigestAlgType() {
         return digestAlgType;
     }
 
-    public void setDigestAlgType(int digestAlgType) {
+    public void setDigestAlgType(short digestAlgType) {
         this.digestAlgType = digestAlgType;
     }
 
     @Override
     public int size() {
-        return digestBytes.length + 2;
+        return Utils.sizeOfSerialize(digestBytes) + 2;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer buffer) throws IOException {
-        buffer.write(digestAlgType);
-        buffer.write(digestLength);
-        buffer.write(digestBytes);
+        buffer.writeShort(digestAlgType);
+        buffer.writeBytesWithLength(digestBytes);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.setDigestAlgType(byteBuffer.readByte());
-        this.setDigestLength(byteBuffer.readByte());
-        this.setDigestBytes(byteBuffer.readBytes(this.digestLength));
-    }
-
-    public int getDigestLength() {
-        return digestLength;
-    }
-
-    public void setDigestLength(int digestLength) {
-        this.digestLength = digestLength;
-    }
-
-    public byte[] getDigestBytes() {
-        return this.digestBytes;
-    }
-
-    public byte[] toBytes() {
-        byte[] bytes = new byte[digestLength + 2];
-        bytes[0] = (byte) digestAlgType;
-        bytes[1] = (byte) digestLength;
-        System.arraycopy(digestBytes, 0, bytes, 2, digestLength);
-        return bytes;
+        this.setDigestAlgType(byteBuffer.readShort());
+        this.digestBytes = byteBuffer.readByLengthByte();
     }
 
     public String getDigestHex() {
-        return Hex.encode(toBytes());
+        try {
+            return Hex.encode(serialize());
+        } catch (IOException e) {
+            Log.error(e);
+            return null;
+        }
     }
 
     public static NulsDigestData fromDigestHex(String hex) {
@@ -110,15 +98,11 @@ public class NulsDigestData extends BaseNulsData {
         return new NulsDigestData(bytes);
     }
 
-    private void setDigestBytes(byte[] digestBytes) {
-        this.digestBytes = digestBytes;
-    }
-
     public static NulsDigestData calcDigestData(BaseNulsData data) {
-        return calcDigestData(data, 0);
+        return calcDigestData(data, (short) 0);
     }
 
-    public static NulsDigestData calcDigestData(BaseNulsData data, int digestAlgType) {
+    public static NulsDigestData calcDigestData(BaseNulsData data, short digestAlgType) {
         try {
             return calcDigestData(data.serialize(), digestAlgType);
         } catch (Exception e) {
@@ -127,16 +111,27 @@ public class NulsDigestData extends BaseNulsData {
         }
     }
 
-    public static NulsDigestData calcDigestData(byte[] data) {
-        return calcDigestData(data, 0);
+    public byte[] getDigestBytes() {
+        return digestBytes;
     }
 
-    public static NulsDigestData calcDigestData(byte[] data, int digestAlgType) {
+    public byte[] getWholeBytes() {
+        byte[] bytes = new byte[2 + digestBytes.length];
+        byte[] algBytes = Utils.shortToBytes(this.digestAlgType);
+        System.arraycopy(algBytes, 0, bytes, 0, algBytes.length);
+        System.arraycopy(digestBytes, 0, bytes, algBytes.length, digestBytes.length);
+        return bytes;
+    }
+
+    public static NulsDigestData calcDigestData(byte[] data) {
+        return calcDigestData(data, (short) 0);
+    }
+
+    public static NulsDigestData calcDigestData(byte[] data, short digestAlgType) {
         NulsDigestData digestData = new NulsDigestData();
         digestData.setDigestAlgType(digestAlgType);
         byte[] content = Sha256Hash.hashTwice(data);
-        digestData.setDigestLength(content.length);
-        digestData.setDigestBytes(content);
+        digestData.digestBytes = content;
         return digestData;
     }
 
@@ -152,15 +147,11 @@ public class NulsDigestData extends BaseNulsData {
             }
             levelOffset += levelSize;
         }
-        Sha256Hash merkleHash = Sha256Hash.wrap(ddList.get(ddList.size() - 1).getDigestBytes());
-        return new NulsDigestData(merkleHash.getBytes());
-    }
-
-    public static void main(String[] args) {
-        NulsTextData textData = new NulsTextData();
-        textData.setText("this is a text");
-        NulsDigestData nulsDigestData = NulsDigestData.calcDigestData(textData);
-        System.out.println(nulsDigestData.getDigestHex());
+        byte[] bytes = ddList.get(ddList.size() - 1).getDigestBytes();
+        Sha256Hash merkleHash = Sha256Hash.wrap(bytes);
+        NulsDigestData digestData = new NulsDigestData();
+        digestData.digestBytes = merkleHash.getBytes();
+        return digestData;
     }
 
     @Override
@@ -171,10 +162,10 @@ public class NulsDigestData extends BaseNulsData {
         if (!(obj instanceof NulsDigestData)) {
             return false;
         }
-        if (this.getDigestBytes() == null || ((NulsDigestData) obj).getDigestBytes() == null) {
+        if (this.getWholeBytes() == null || ((NulsDigestData) obj).getWholeBytes() == null) {
             return false;
         }
-        if (this.getDigestBytes().length != ((NulsDigestData) obj).getDigestBytes().length) {
+        if (this.getWholeBytes().length != ((NulsDigestData) obj).getWholeBytes().length) {
             return false;
         }
         return this.getDigestHex().equals(((NulsDigestData) obj).getDigestHex());

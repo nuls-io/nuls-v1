@@ -80,14 +80,6 @@ public class AccountResource {
     }
 
     @GET
-    @Path("/{address}/credit")
-    @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult getCredit(@PathParam("address") String address) {
-        //todo
-        return null;
-    }
-
-    @GET
     @Path("/{address}/prikey")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getPrikey(@PathParam("address") String address, @QueryParam("password") String password) {
@@ -106,7 +98,6 @@ public class AccountResource {
         result.setData(address.toString());
         return result;
     }
-
 
     @POST
     @Path("/lock")

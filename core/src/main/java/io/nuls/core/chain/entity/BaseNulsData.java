@@ -73,10 +73,12 @@ public abstract class BaseNulsData implements Serializable {
      */
     public final byte[] serialize() throws IOException {
         ByteArrayOutputStream bos = null;
+
         try {
-            bos = new UnsafeByteArrayOutputStream(size());
+            int size = size();
+            bos = new UnsafeByteArrayOutputStream(size);
             NulsOutputStreamBuffer buffer = new NulsOutputStreamBuffer(bos);
-            if (size() == 0) {
+            if (size == 0) {
                 bos.write(NulsConstant.PLACE_HOLDER);
             } else {
                 serializeToStream(buffer);

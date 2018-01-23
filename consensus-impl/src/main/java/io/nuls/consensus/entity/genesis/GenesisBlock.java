@@ -123,7 +123,12 @@ public final class GenesisBlock extends Block {
         }
         tx.setTime(this.blockTime);
         tx.setFee(Na.ZERO);
-        tx.setHash(NulsDigestData.calcDigestData(tx));
+        try {
+            tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
+        } catch (IOException e) {
+            Log.error(e);
+            throw new NulsRuntimeException(e);
+        }
         //todo
         tx.setSign(new NulsSignData());
         List<Transaction> txlist = new ArrayList<>();

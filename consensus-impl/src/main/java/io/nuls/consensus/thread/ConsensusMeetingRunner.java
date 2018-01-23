@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -121,7 +121,7 @@ public class ConsensusMeetingRunner implements Runnable {
     }
 
     private void nextRound() {
-        if(this.consensusManager.getConsensusAccountAddress()==null){
+        if (this.consensusManager.getConsensusStatusInfo() == null || this.consensusManager.getConsensusStatusInfo().getAddress() == null) {
             return;
         }
         PocMeetingRound currentRound = calcRound();
@@ -160,7 +160,7 @@ public class ConsensusMeetingRunner implements Runnable {
         List<Consensus<Delegate>> myDelegateList = new ArrayList<>();
         for (Consensus<Delegate> cd : delegateList) {
             totalDeposit = totalDeposit.add(cd.getExtend().getDeposit());
-            if (cd.getExtend().getDelegateAddress().equals(consensusManager.getConsensusAccountAddress())) {
+            if (cd.getExtend().getDelegateAddress().equals(consensusManager.getConsensusStatusInfo().getAddress())) {
                 myDelegateList.add(cd);
                 agentTotalDeposit = agentTotalDeposit.add(cd.getExtend().getDeposit());
             }
@@ -174,7 +174,7 @@ public class ConsensusMeetingRunner implements Runnable {
     }
 
     private void startMeeting() {
-        PocMeetingMember self = consensusManager.getCurrentRound().getMember(consensusManager.getConsensusAccountAddress());
+        PocMeetingMember self = consensusManager.getCurrentRound().getMember(consensusManager.getConsensusStatusInfo().getAddress());
         if (null == self) {
             this.nextRound();
             return;
@@ -196,8 +196,8 @@ public class ConsensusMeetingRunner implements Runnable {
         if (roundStart < 0) {
             roundStart = 0;
         }
-        long blockCount = pocBlockService.getBlockCount(consensusManager.getConsensusAccountAddress(), roundStart, consensusManager.getCurrentRound().getIndex()-1);
-        long sumRoundVal = pocBlockService.getSumOfRoundIndexOfYellowPunish(consensusManager.getConsensusAccountAddress(),consensusManager.getCurrentRound().getIndex()-1);
+        long blockCount = pocBlockService.getBlockCount(consensusManager.getConsensusStatusInfo().getAddress(), roundStart, consensusManager.getCurrentRound().getIndex() - 1);
+        long sumRoundVal = pocBlockService.getSumOfRoundIndexOfYellowPunish(consensusManager.getConsensusStatusInfo().getAddress(), consensusManager.getCurrentRound().getIndex() - 1);
         double ability = blockCount / PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT;
         double penalty = (PocConsensusConstant.CREDIT_MAGIC_NUM * sumRoundVal) / (consensusManager.getCurrentRound().getIndex() * consensusManager.getCurrentRound().getIndex());
         return ability - penalty;

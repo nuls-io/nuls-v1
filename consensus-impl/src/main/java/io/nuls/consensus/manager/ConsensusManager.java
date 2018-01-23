@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,6 +23,7 @@
  */
 package io.nuls.consensus.manager;
 
+import io.nuls.account.entity.Account;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.cache.manager.block.BlockCacheManager;
 import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
@@ -66,7 +67,6 @@ public class ConsensusManager implements Runnable {
     private boolean partakePacking = false;
     private List<String> seedNodeList;
 
-    private String consensusAccountAddress;
     private PocMeetingRound currentRound;
     private ConsensusStatusInfo consensusStatusInfo;
 
@@ -103,7 +103,12 @@ public class ConsensusManager implements Runnable {
     public void init() {
         loadConfigration();
         accountService = NulsContext.getInstance().getService(AccountService.class);
-
+        List<Account> list = this.accountService.getAccountList();
+        boolean noneAccount = list == null || list.isEmpty();
+        if (this.partakePacking && noneAccount) {
+            Account account = this.accountService.createAccount();
+            this.accountService.setDefaultAccount(account.getId());
+        }
         blockCacheManager = BlockCacheManager.getInstance();
         blockCacheManager.init();
         consensusCacheManager = ConsensusCacheManager.getInstance();
@@ -112,7 +117,6 @@ public class ConsensusManager implements Runnable {
         confirmingTxCacheManager.init();
         receivedTxCacheManager = ReceivedTxCacheManager.getInstance();
         receivedTxCacheManager.init();
-
         TaskManager.createAndRunThread(NulsConstant.MODULE_ID_CONSENSUS, "consensus-status-manager", this);
     }
 
@@ -144,6 +148,9 @@ public class ConsensusManager implements Runnable {
                 if (agent.getExtend().getDelegateAddress().equals(address)) {
                     info.setAddress(address);
                     info.setStatus(agent.getExtend().getStatus());
+                    if (ConsensusStatusEnum.IN.getCode() == info.getStatus()) {
+                        break;
+                    }
                 }
             }
         }
@@ -159,7 +166,7 @@ public class ConsensusManager implements Runnable {
     }
 
     public void joinMeeting() {
-        if(null==this.consensusStatusInfo){
+        if (null == this.consensusStatusInfo) {
             return;
         }
         TaskManager.createAndRunThread(NulsConstant.MODULE_ID_CONSENSUS,
@@ -184,7 +191,7 @@ public class ConsensusManager implements Runnable {
             blockMaintenanceThread.checkGenesisBlock();
             blockMaintenanceThread.syncBlock();
         } catch (Exception e) {
-            Log.error(e);
+            Log.error(e.getMessage());
         } finally {
             TaskManager.createAndRunThread(NulsConstant.MODULE_ID_CONSENSUS,
                     BlockMaintenanceThread.THREAD_NAME, blockMaintenanceThread);
@@ -196,10 +203,6 @@ public class ConsensusManager implements Runnable {
         consensusCacheManager.clear();
         confirmingTxCacheManager.clear();
         receivedTxCacheManager.clear();
-    }
-
-    public String getConsensusAccountAddress() {
-        return consensusAccountAddress;
     }
 
     public void setCurrentRound(PocMeetingRound currentRound) {

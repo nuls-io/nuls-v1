@@ -45,7 +45,7 @@ public class PocConsensusResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult getInfo(@FormParam("address") String address) {
+    public RpcResult getInfo(@QueryParam("address") String address) {
         AssertUtil.canNotEmpty(address, ErrorCode.NULL_PARAMETER);
         RpcResult result = RpcResult.getSuccess();
         ConsensusStatusInfo status = consensusService.getConsensusInfo(address);

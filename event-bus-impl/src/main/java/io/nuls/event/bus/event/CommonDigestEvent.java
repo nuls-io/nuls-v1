@@ -51,7 +51,7 @@ public class CommonDigestEvent extends io.nuls.core.event.BaseEvent<NulsDigestDa
 
     @Override
     public Object copy() {
-        NulsDigestData data = new NulsDigestData(this.getEventBody().getDigestBytes());
+        NulsDigestData data = new NulsDigestData(this.getEventBody().getWholeBytes());
         CommonDigestEvent event = new CommonDigestEvent(data);
         return event;
     }
