@@ -23,52 +23,58 @@
  */
 package io.nuls.rpc.resources.impl;
 
+import io.nuls.consensus.entity.ConsensusStatusInfo;
+import io.nuls.consensus.service.intf.ConsensusService;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.event.CommonStringEvent;
-import io.nuls.event.bus.service.intf.EventBroadcaster;
-import io.nuls.network.service.NetworkService;
+import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.rpc.entity.RpcResult;
-import io.nuls.rpc.resources.NetworkMessageResource;
 
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
 /**
- *
  * @author Niels
- * @date 2017/10/24
- *
+ * @date 2017/9/30
  */
-@Path("/broadcast")
-public class NetworkMessageResourceImpl implements NetworkMessageResource {
+@Path("/consensus")
+public class PocConsensusResource {
+    private NulsContext context = NulsContext.getInstance();
+    private ConsensusService consensusService = context.getService(ConsensusService.class);
 
-    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
 
-    @Override
-    @PUT
+    @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult broadcast(String message) {
-        CommonStringEvent event = new CommonStringEvent();
-        event.setMessage(message);
-        eventBroadcaster.broadcastAndCacheAysn(event, false);
+    public RpcResult getInfo(@FormParam("address") String address) {
+        AssertUtil.canNotEmpty(address, ErrorCode.NULL_PARAMETER);
+        RpcResult result = RpcResult.getSuccess();
+        ConsensusStatusInfo status = consensusService.getConsensusInfo(address);
+        result.setData(status);
+        return result;
+    }
+
+
+    @GET
+    @Path("/condition")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult getCondition() {
         return RpcResult.getSuccess();
     }
 
-    @Override
-    public RpcResult send(String message, String nodeId) {
-        CommonStringEvent event = new CommonStringEvent();
-        event.setMessage(message);
-        eventBroadcaster.sendToNodeAysn(event, nodeId);
+
+    @POST
+    @Path("/in")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult in(@FormParam("address") String address, @FormParam("password") String password) {
         return RpcResult.getSuccess();
     }
 
-    @Override
-    public RpcResult broadcast(String message, String groupId) {
-        CommonStringEvent event = new CommonStringEvent();
-        event.setMessage(message);
-        eventBroadcaster.sendToGroupAysn(event, groupId);
+
+    @POST
+    @Path("/out")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult out(@FormParam("address") String address, @FormParam("password") String password) {
         return RpcResult.getSuccess();
     }
+
 }

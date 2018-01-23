@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,51 +24,49 @@
 package io.nuls.rpc.resources.impl;
 
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.event.CommonStringEvent;
+import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.rpc.entity.RpcResult;
-import io.nuls.rpc.resources.ConsensusResource;
 
-import javax.ws.rs.*;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 /**
  *
  * @author Niels
- * @date 2017/9/30
+ * @date 2017/10/24
  *
  */
-@Path("/consensus")
-public class ConsensusResourceImpl implements ConsensusResource {
-    private NulsContext context = NulsContext.getInstance();
+@Path("/broadcast")
+public class NetworkMessageResource  {
 
-    @Override
-    @GET
+    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
+
+    
+    @PUT
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult getInfo() {
+    public RpcResult broadcast(String message) {
+        CommonStringEvent event = new CommonStringEvent();
+        event.setMessage(message);
+        eventBroadcaster.broadcastAndCacheAysn(event, false);
         return RpcResult.getSuccess();
     }
 
-    @Override
-    @GET
-    @Path("/condition")
-    @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult getCondition() {
+    
+    public RpcResult send(String message, String nodeId) {
+        CommonStringEvent event = new CommonStringEvent();
+        event.setMessage(message);
+        eventBroadcaster.sendToNodeAysn(event, nodeId);
         return RpcResult.getSuccess();
     }
 
-    @Override
-    @POST
-    @Path("/in")
-    @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult in(@FormParam("address") String address, @FormParam("password") String password) {
+    
+    public RpcResult broadcast(String message, String groupId) {
+        CommonStringEvent event = new CommonStringEvent();
+        event.setMessage(message);
+        eventBroadcaster.sendToGroupAysn(event, groupId);
         return RpcResult.getSuccess();
     }
-
-    @Override
-    @POST
-    @Path("/out")
-    @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult out(@FormParam("address") String address, @FormParam("password") String password) {
-        return RpcResult.getSuccess();
-    }
-
 }

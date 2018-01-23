@@ -27,7 +27,6 @@ import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.context.NulsContext;
 import io.nuls.rpc.entity.RpcResult;
-import io.nuls.rpc.resources.BlockResource;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -40,14 +39,14 @@ import javax.ws.rs.core.MediaType;
  * @date 2017/9/30
  */
 @Path("/block")
-public class BlockResourceImpl implements BlockResource {
+public class BlockResource  {
 
     private BlockService blockService = NulsContext.getInstance().getService(BlockService.class);
 
     @GET
     @Path("/{hash}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Override
+    
     public RpcResult loadBlock(@PathParam("hash") String hash) {
         RpcResult result = RpcResult.getSuccess();
         result.setData(blockService.getBlock(hash));
@@ -57,7 +56,7 @@ public class BlockResourceImpl implements BlockResource {
     @GET
     @Path("/count")
     @Produces(MediaType.APPLICATION_JSON)
-    @Override
+    
     public RpcResult getBlockCount() {
         RpcResult result = RpcResult.getSuccess();
         result.setData(blockService.getLocalHeight() + 1);
@@ -67,7 +66,7 @@ public class BlockResourceImpl implements BlockResource {
     @GET
     @Path("/bestheight")
     @Produces(MediaType.APPLICATION_JSON)
-    @Override
+    
     public RpcResult getBestBlockHeiht() {
         RpcResult result = RpcResult.getSuccess();
         result.setData(blockService.getLocalHeight());
@@ -77,7 +76,7 @@ public class BlockResourceImpl implements BlockResource {
     @GET
     @Path("/besthash")
     @Produces(MediaType.APPLICATION_JSON)
-    @Override
+    
     public RpcResult getBestBlockHash() {
         RpcResult result = RpcResult.getSuccess();
         result.setData(blockService.getLocalBestBlock().getHeader().getHash());
@@ -87,7 +86,7 @@ public class BlockResourceImpl implements BlockResource {
     @GET
     @Path("/height/{height}/hash")
     @Produces(MediaType.APPLICATION_JSON)
-    @Override
+    
     public RpcResult getHashByHeight(@PathParam("height") Integer height) {
         RpcResult result = RpcResult.getSuccess();
         Block block = blockService.getBlock(height);
@@ -100,7 +99,7 @@ public class BlockResourceImpl implements BlockResource {
     @GET
     @Path("/height/{height}/header")
     @Produces(MediaType.APPLICATION_JSON)
-    @Override
+    
     public RpcResult getHeaderByHeight(@PathParam("height") Integer height) {
         RpcResult result = RpcResult.getSuccess();
         Block block = blockService.getBlock(height);
@@ -113,7 +112,7 @@ public class BlockResourceImpl implements BlockResource {
     @GET
     @Path("/{hash}/header")
     @Produces(MediaType.APPLICATION_JSON)
-    @Override
+    
     public RpcResult getHeader(@PathParam("hash") String hash) {
         RpcResult result = RpcResult.getSuccess();
         Block block = blockService.getBlock(hash);
@@ -126,7 +125,7 @@ public class BlockResourceImpl implements BlockResource {
     @GET
     @Path("/height/{height}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Override
+    
     public RpcResult getBlock(@PathParam("height") Integer height) {
         RpcResult result = RpcResult.getSuccess();
         Block block = blockService.getBlock(height);

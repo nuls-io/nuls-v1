@@ -137,7 +137,12 @@ public class BlockMaintenanceThread implements Runnable {
             return;
         }
         localGenesisBlock.verify();
-        if (!localGenesisBlock.getHeader().getHash().getDigestHex().equals(genesisBlock.getHeader().getHash().getDigestHex())) {
+        System.out.println(genesisBlock.size()+"===="+localGenesisBlock.size());
+        String logicHash = genesisBlock.getHeader().getHash().getDigestHex();
+        System.out.println(logicHash);
+        String localHash = localGenesisBlock.getHeader().getHash().getDigestHex();
+        System.out.println(localHash);
+        if (!logicHash.equals(localHash)) {
             throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
         }
     }

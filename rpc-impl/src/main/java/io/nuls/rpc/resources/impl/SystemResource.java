@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -28,8 +28,6 @@ import io.nuls.core.module.service.ModuleService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.rpc.entity.RpcResult;
-import io.nuls.rpc.resources.ModuleResource;
-import io.nuls.rpc.resources.SystemResource;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -39,10 +37,10 @@ import javax.ws.rs.core.MediaType;
  * @date 2017/9/30
  */
 @Path("/sys")
-public class SystemResourceImpl implements ModuleResource {
+public class SystemResource {
     private NulsContext context = NulsContext.getInstance();
 
-    @Override
+
     @GET
     @Path("/version")
     @Produces(MediaType.APPLICATION_JSON)
@@ -50,7 +48,7 @@ public class SystemResourceImpl implements ModuleResource {
         return null;
     }
 
-    @Override
+
     @PUT
     @Path("/version")
     @Produces(MediaType.APPLICATION_JSON)
@@ -61,7 +59,7 @@ public class SystemResourceImpl implements ModuleResource {
     @POST
     @Path("/module/load")
     @Produces(MediaType.APPLICATION_JSON)
-    @Override
+
     public RpcResult startModule(@FormParam("moduleName") String moduleName, @FormParam("moduleClass") String moduleClass) {
         RpcResult result = null;
         do {
@@ -87,7 +85,7 @@ public class SystemResourceImpl implements ModuleResource {
     @POST
     @Path("/module/stop")
     @Produces(MediaType.APPLICATION_JSON)
-    @Override
+
     public RpcResult shutdownModule(Short moduleId) {
         AssertUtil.canNotEmpty(moduleId, "ModuleName can not empty");
 
@@ -97,7 +95,7 @@ public class SystemResourceImpl implements ModuleResource {
     @POST
     @Path("/module/distroy")
     @Produces(MediaType.APPLICATION_JSON)
-    @Override
+
     public RpcResult distroyModule(Short moduleId) {
 //        AssertUtil.canNotEmpty(moduleName, "ModuleName can not empty");
 //        BaseModuleBootstrap module = context.getModule(moduleName);
@@ -109,7 +107,7 @@ public class SystemResourceImpl implements ModuleResource {
     @POST
     @Path("/module/restart")
     @Produces(MediaType.APPLICATION_JSON)
-    @Override
+
     public RpcResult restartModule(Short moduleId) {
 //        AssertUtil.canNotEmpty(moduleName, "ModuleName can not empty");
 //        BaseModuleBootstrap module = context.getModule(moduleName);

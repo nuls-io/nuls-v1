@@ -33,11 +33,11 @@ import io.nuls.core.utils.log.Log;
  * @author Niels
  * @date 2017/9/27
  */
-public class RpcResult {
+public class RpcResult<T> {
 
     private String code;
     private String msg;
-    private Object data;
+    private T data;
 
     public RpcResult() {
     }
@@ -47,7 +47,7 @@ public class RpcResult {
         this.msg = msg;
     }
 
-    public RpcResult(String code, String msg, Object data) {
+    public RpcResult(String code, String msg, T data) {
         this.code = code;
         this.msg = msg;
         this.data = data;
@@ -66,7 +66,7 @@ public class RpcResult {
         return msg;
     }
 
-    public Object getData() {
+    public T getData() {
         return data;
     }
 
@@ -78,7 +78,7 @@ public class RpcResult {
         this.msg = msg;return this;
     }
 
-    public RpcResult setData(Object data) {
+    public RpcResult setData(T data) {
         this.data = data;
         return this;
     }
