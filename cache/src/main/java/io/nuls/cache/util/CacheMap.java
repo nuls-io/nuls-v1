@@ -23,6 +23,7 @@
  */
 package io.nuls.cache.util;
 
+import io.nuls.cache.listener.intf.NulsCacheListener;
 import io.nuls.cache.service.intf.CacheService;
 import io.nuls.core.context.NulsContext;
 
@@ -42,7 +43,11 @@ public class CacheMap<K, V> {
         this(cacheName,heapMb,0,0);
     }
     public CacheMap(String cacheName, int heapMb, int timeToLiveSeconds, int timeToIdleSeconds) {
-        this.cacheService.createCache(cacheName, heapMb, timeToLiveSeconds, timeToIdleSeconds);
+            this(cacheName,heapMb,timeToLiveSeconds,timeToIdleSeconds,null);
+    }
+
+    public CacheMap(String cacheName, int heapMb, int timeToLiveSeconds, int timeToIdleSeconds,NulsCacheListener listener){
+        this.cacheService.createCache(cacheName, heapMb, timeToLiveSeconds, timeToIdleSeconds,listener);
         this.cacheName = cacheName;
     }
 

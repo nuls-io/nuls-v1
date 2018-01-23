@@ -25,6 +25,7 @@ package io.nuls.cache.service.impl;
 
 import io.nuls.cache.constant.EhCacheConstant;
 import io.nuls.cache.entity.CacheElement;
+import io.nuls.cache.listener.intf.NulsCacheListener;
 import io.nuls.cache.manager.EhCacheManager;
 import io.nuls.cache.service.intf.CacheService;
 import io.nuls.core.chain.intf.NulsCloneable;
@@ -48,6 +49,11 @@ public class EhCacheServiceImpl<K, T> implements CacheService<K, T> {
 
     public static CacheService getInstance() {
         return INSTANCE;
+    }
+
+    @Override
+    public void createCache(String cacheName, int heapMb, int timeToLiveSeconds, int timeToIdleSeconds, NulsCacheListener listener) {
+       cacheManager.createCache(cacheName, String.class, Serializable.class,heapMb,timeToLiveSeconds,timeToIdleSeconds,listener);
     }
 
     @Override
@@ -184,4 +190,5 @@ public class EhCacheServiceImpl<K, T> implements CacheService<K, T> {
         }
         return list;
     }
+
 }
