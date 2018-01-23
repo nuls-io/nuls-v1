@@ -19,8 +19,6 @@ CREATE TABLE IF NOT EXISTS `block_header` (
   `pre_hash` varchar(70) ,
   `merkle_hash` varchar(70) NOT NULL,
   `create_time` bigint(14) NOT NULL,
-  `period_start_time` bigint(14) DEFAULT NULL,
-  `time_period` int(5) DEFAULT NULL,
   `consensus_address` varchar(40) DEFAULT NULL,
   `varsion` int(5),
   `tx_count` int(5) NOT NULL,

@@ -45,6 +45,10 @@ public final class AssertUtil {
         throw new NulsRuntimeException(ErrorCode.DATA_ERROR, msg);
     }
 
+    public static void canNotEmpty(Object val) {
+        canNotEmpty(val,ErrorCode.NULL_PARAMETER);
+    }
+
     public static void canNotEmpty(Object val, ErrorCode ec) {
         canNotEmpty(val, ec.getMsg());
     }

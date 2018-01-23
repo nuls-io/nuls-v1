@@ -57,6 +57,8 @@ public final class GenesisBlock extends Block {
 
     private static GenesisBlock INSTANCE;
 
+    private long blockTime;
+
     public static GenesisBlock getInstance() {
         if (null == INSTANCE) {
             String json = null;
@@ -77,6 +79,10 @@ public final class GenesisBlock extends Block {
         } catch (Exception e) {
             Log.error(e);
         }
+        String time = (String) jsonMap.get(CONFIG_FILED_TIME);
+        AssertUtil.canNotEmpty(time, ErrorCode.CONFIG_ERROR);
+         blockTime = DateUtil.convertStringToDate(time).getTime();
+
         this.initGengsisTxs(jsonMap);
         this.fillHeader(jsonMap);
     }
@@ -115,8 +121,14 @@ public final class GenesisBlock extends Block {
             Log.error(e);
             throw new NulsRuntimeException(e);
         }
+        tx.setTime(this.blockTime);
         tx.setFee(Na.ZERO);
-        tx.setHash(NulsDigestData.calcDigestData(tx));
+        try {
+            tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
+        } catch (IOException e) {
+            Log.error(e);
+            throw new NulsRuntimeException(e);
+        }
         //todo
         tx.setSign(new NulsSignData());
         List<Transaction> txlist = new ArrayList<>();
@@ -128,9 +140,7 @@ public final class GenesisBlock extends Block {
     private void fillHeader(Map<String, Object> jsonMap) {
         Integer height = (Integer) jsonMap.get(CONFIG_FILED_HEIGHT);
         AssertUtil.canNotEmpty(height, ErrorCode.CONFIG_ERROR);
-        String time = (String) jsonMap.get(CONFIG_FILED_TIME);
-        AssertUtil.canNotEmpty(time, ErrorCode.CONFIG_ERROR);
-        long blockTime = DateUtil.convertStringToDate(time).getTime();
+
         BlockHeader header = new BlockHeader();
         this.setHeader(header);
         header.setHeight(height);

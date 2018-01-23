@@ -25,6 +25,7 @@ package io.nuls.core.exception;
 
 
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.utils.str.StringUtils;
 
 /**
  * @author Niels
@@ -114,5 +115,13 @@ public class NulsRuntimeException extends RuntimeException {
         super(msg);
         this.code = errorCode.getCode();
         this.message = errorCode.getMsg()+":"+msg;
+    }
+
+    @Override
+    public String getMessage() {
+        if(StringUtils.isBlank(message)){
+            return super.getMessage();
+        }
+        return message;
     }
 }

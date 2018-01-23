@@ -28,13 +28,11 @@ import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.Result;
-import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.rpc.entity.RpcResult;
-import io.nuls.rpc.resources.AccountResource;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -45,7 +43,7 @@ import java.util.List;
  * @date 2017/9/30
  */
 @Path("/account")
-public class AccountResourceImpl implements AccountResource {
+public class AccountResource {
 
     private NulsContext context = NulsContext.getInstance();
     private AccountService accountService = context.getService(AccountService.class);
@@ -53,7 +51,6 @@ public class AccountResourceImpl implements AccountResource {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @Override
     public RpcResult create(@QueryParam("count") Integer count) {
         RpcResult result = RpcResult.getSuccess();
         Result<List<String>> accountReslut = accountService.createAccount(count);
@@ -61,7 +58,7 @@ public class AccountResourceImpl implements AccountResource {
         return result;
     }
 
-    @Override
+
     @GET
     @Path("/{address}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -75,7 +72,6 @@ public class AccountResourceImpl implements AccountResource {
     @GET
     @Path("/{address}/balance")
     @Produces(MediaType.APPLICATION_JSON)
-    @Override
     public RpcResult getBalance(@PathParam("address") String address) {
         Balance balance = ledgerService.getBalance(address);
         RpcResult result = RpcResult.getSuccess();
@@ -84,18 +80,8 @@ public class AccountResourceImpl implements AccountResource {
     }
 
     @GET
-    @Path("/{address}/credit")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Override
-    public RpcResult getCredit(@PathParam("address") String address) {
-        //todo
-        return null;
-    }
-
-    @GET
     @Path("/{address}/prikey")
     @Produces(MediaType.APPLICATION_JSON)
-    @Override
     public RpcResult getPrikey(@PathParam("address") String address, @QueryParam("password") String password) {
         RpcResult result = RpcResult.getSuccess();
         byte[] prikey = accountService.getPrivateKey(address, password);
@@ -106,7 +92,6 @@ public class AccountResourceImpl implements AccountResource {
     @GET
     @Path("/address")
     @Produces(MediaType.APPLICATION_JSON)
-    @Override
     public RpcResult getAddress(@QueryParam("publicKey") String publicKey, @QueryParam("subChainId") Integer subChainId) {
         Address address = new Address(subChainId, Hex.decode(publicKey));
         RpcResult result = RpcResult.getSuccess();
@@ -114,11 +99,9 @@ public class AccountResourceImpl implements AccountResource {
         return result;
     }
 
-
     @POST
     @Path("/lock")
     @Produces(MediaType.APPLICATION_JSON)
-    @Override
     public RpcResult lock(@QueryParam("address") String address, @QueryParam("password") String password,
                           @QueryParam("amount") Double amount, @QueryParam("remark") String remark,
                           @QueryParam("unlockTime") Long unlockTime) {

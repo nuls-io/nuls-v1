@@ -51,7 +51,7 @@ public class TxFieldValidator implements NulsDataValidator<Transaction> {
                 result = false;
                 break;
             }
-            if (data.getHash() == null || data.getHash().getDigestLength() == 0) {
+            if (data.getHash() == null || data.getHash().size() == 0) {
                 result = false;
                 break;
             }

@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,6 +24,7 @@
 package io.nuls.rpc.entity;
 
 
+import io.nuls.core.chain.entity.Result;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.utils.json.JSONUtils;
 import io.nuls.core.utils.log.Log;
@@ -33,11 +34,11 @@ import io.nuls.core.utils.log.Log;
  * @author Niels
  * @date 2017/9/27
  */
-public class RpcResult {
+public class RpcResult<T> {
 
     private String code;
     private String msg;
-    private Object data;
+    private T data;
 
     public RpcResult() {
     }
@@ -47,15 +48,25 @@ public class RpcResult {
         this.msg = msg;
     }
 
-    public RpcResult(String code, String msg, Object data) {
+    public RpcResult(String code, String msg, T data) {
         this.code = code;
         this.msg = msg;
         this.data = data;
     }
 
     public RpcResult(ErrorCode ec) {
-        this.code = ec.getCode()+"";
+        this.code = ec.getCode() + "";
         this.msg = ec.getMsg();
+    }
+
+    public RpcResult(Result result) {
+        if (result.isSuccess()) {
+            this.code = ErrorCode.SUCCESS.getCode();
+        } else {
+            this.code = ErrorCode.FAILED.getCode();
+        }
+        this.msg = result.getMessage();
+        this.data = (T) result.getObject();
     }
 
     public String getCode() {
@@ -66,38 +77,43 @@ public class RpcResult {
         return msg;
     }
 
-    public Object getData() {
+    public T getData() {
         return data;
     }
 
     public RpcResult setCode(String code) {
-        this.code = code;return this;
+        this.code = code;
+        return this;
     }
 
     public RpcResult setMsg(String msg) {
-        this.msg = msg;return this;
+        this.msg = msg;
+        return this;
     }
 
-    public RpcResult setData(Object data) {
+    public RpcResult setData(T data) {
         this.data = data;
         return this;
     }
 
-    public static RpcResult getSuccess(){
+    public static RpcResult getSuccess() {
         return new RpcResult(ErrorCode.SUCCESS);
     }
 
-    public static RpcResult getFailed(){
+    public static RpcResult getFailed() {
         return new RpcResult(ErrorCode.FAILED);
     }
-    public static RpcResult getFailed(String msg){
-        return new RpcResult(ErrorCode.FAILED.getCode(),msg);
+
+    public static RpcResult getFailed(String msg) {
+        return new RpcResult(ErrorCode.FAILED.getCode(), msg);
     }
-    public static RpcResult getFailed(ErrorCode errorCode){
+
+    public static RpcResult getFailed(ErrorCode errorCode) {
         return new RpcResult(errorCode);
     }
+
     @Override
-    public String toString(){
+    public String toString() {
         try {
             return JSONUtils.obj2json(this);
         } catch (Exception e) {

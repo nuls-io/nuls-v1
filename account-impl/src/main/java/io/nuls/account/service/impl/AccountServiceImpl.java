@@ -438,7 +438,7 @@ public class AccountServiceImpl implements AccountService {
         if (null == digestData) {
             return null;
         }
-        return this.signData(digestData.getDigestBytes(), account, password);
+        return this.signData(digestData.getWholeBytes(), account, password);
     }
 
     @Override

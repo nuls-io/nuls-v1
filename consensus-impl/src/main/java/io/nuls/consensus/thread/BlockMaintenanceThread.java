@@ -105,6 +105,9 @@ public class BlockMaintenanceThread implements Runnable {
                 break;
             }
             blockInfo = BEST_HEIGHT_FROM_NET.request(-1);
+            if(null==blockInfo){
+                break;
+            }
             if (blockInfo.getBestHeight() > localBestBlock.getHeader().getHeight()) {
                 doit = true;
                 break;
@@ -137,7 +140,9 @@ public class BlockMaintenanceThread implements Runnable {
             return;
         }
         localGenesisBlock.verify();
-        if (!localGenesisBlock.getHeader().getHash().getDigestHex().equals(genesisBlock.getHeader().getHash().getDigestHex())) {
+        String logicHash = genesisBlock.getHeader().getHash().getDigestHex();
+        String localHash = localGenesisBlock.getHeader().getHash().getDigestHex();
+        if (!logicHash.equals(localHash)) {
             throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
         }
     }

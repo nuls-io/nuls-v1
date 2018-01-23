@@ -47,7 +47,7 @@ public class EhCacheModuleBootstrap extends AbstractCacheModule {
     @Override
     public void start() {
 
-        this.registerService(new EhCacheServiceImpl());
+        this.registerService(EhCacheServiceImpl.getInstance());
     }
 
     @Override

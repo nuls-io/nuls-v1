@@ -60,7 +60,7 @@ public class BlockCacheManager {
 
     private BlockCacheManager() {
     }
-
+    //todo 未分叉时应该调用approval
     public static BlockCacheManager getInstance() {
         return INSTANCE;
     }

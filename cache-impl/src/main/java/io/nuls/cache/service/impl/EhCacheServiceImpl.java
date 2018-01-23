@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -39,8 +39,16 @@ import java.util.*;
  * @author Niels
  * @date 2017/10/27
  */
-public class EhCacheServiceImpl<K, T > implements CacheService<K, T> {
+public class EhCacheServiceImpl<K, T> implements CacheService<K, T> {
+    private static final CacheService INSTANCE = new EhCacheServiceImpl();
     private final EhCacheManager cacheManager = EhCacheManager.getInstance();
+
+    private EhCacheServiceImpl() {
+    }
+
+    public static CacheService getInstance() {
+        return INSTANCE;
+    }
 
     @Override
     public void createCache(String title, Map<String, Object> initParams) {
@@ -69,12 +77,12 @@ public class EhCacheServiceImpl<K, T > implements CacheService<K, T> {
     }
 
     @Override
-    public void createCache(String title,int heapMb) {
+    public void createCache(String title, int heapMb) {
         cacheManager.createCache(title, String.class, Serializable.class, heapMb, 0, 0);
     }
 
     @Override
-    public void createCache(String title,int heapMb, int timeToLiveSeconds, int timeToIdleSeconds) {
+    public void createCache(String title, int heapMb, int timeToLiveSeconds, int timeToIdleSeconds) {
         cacheManager.createCache(title, String.class, Serializable.class, heapMb, timeToLiveSeconds, timeToIdleSeconds);
     }
 
@@ -121,8 +129,8 @@ public class EhCacheServiceImpl<K, T > implements CacheService<K, T> {
 
     @Override
     public List<T> getElementList(String cacheTitle) {
-        if (null == cacheManager.getCache(cacheTitle)) {
-           return null;
+        if (cacheManager == null || null == cacheManager.getCache(cacheTitle)) {
+            return null;
         }
         Iterator it = cacheManager.getCache(cacheTitle).iterator();
         List<T> list = new ArrayList<>();

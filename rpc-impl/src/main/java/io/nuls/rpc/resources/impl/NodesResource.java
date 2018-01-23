@@ -21,12 +21,63 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.rpc.resources;
+package io.nuls.rpc.resources.impl;
+
+import io.nuls.core.context.NulsContext;
+import io.nuls.rpc.entity.RpcResult;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
 /**
  *
  * @author Niels
- * @date 2017/9/27
+ * @date 2017/9/30
+ *
  */
-public interface CertAccountResource {
+@Path("/nodes")
+public class NodesResource  {
+    private NulsContext context = NulsContext.getInstance();
+
+    
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult getList() {
+        return RpcResult.getSuccess();
+    }
+
+    
+    @GET
+    @Path("/count")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult getCount() {
+        return RpcResult.getSuccess();
+    }
+
+    
+    @GET
+    @Path("/consensus")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult getConsensusNodes() {
+        return RpcResult.getSuccess();
+    }
+
+
+    
+    @GET
+    @Path("/count/consensus")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult getConsensusCount() {
+        return RpcResult.getSuccess();
+    }
+
+    
+    @GET
+    @Path("/groups")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult getGroups() {
+        return RpcResult.getSuccess();
+    }
 }
