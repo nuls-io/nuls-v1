@@ -37,7 +37,7 @@ import java.util.Set;
  */
 public class NulsContext {
 
-    private static final HashMap<String, Integer> chain_id_map = new HashMap<String, Integer>();
+    private static final HashMap<String, Integer> CHAIN_ID_MAP = new HashMap<String, Integer>();
     public static String DEFAULT_ENCODING = "UTF-8";
     public static String CHAIN_ID = "NULS";
     public static IniEntity NULS_CONFIG;
@@ -45,7 +45,7 @@ public class NulsContext {
 
     private NulsContext() {
         CHAIN_ID = "NULS";
-        chain_id_map.put(CHAIN_ID, 1);
+        CHAIN_ID_MAP.put(CHAIN_ID, 1);
     }
 
     private static final NulsContext NC = new NulsContext();
@@ -114,11 +114,11 @@ public class NulsContext {
     }
 
     public int getChainId(String chainName) {
-        return chain_id_map.get(chainName);
+        return CHAIN_ID_MAP.get(chainName);
     }
 
     public void addChainId(String chainName, Integer id) {
-        chain_id_map.put(chainName, id);
+        CHAIN_ID_MAP.put(chainName, id);
     }
 
     public Na getTxFee() {

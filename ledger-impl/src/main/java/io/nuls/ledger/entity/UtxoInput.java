@@ -32,6 +32,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
+import io.nuls.core.utils.str.StringUtils;
 
 import java.io.IOException;
 
@@ -52,6 +53,9 @@ public class UtxoInput extends BaseNulsData {
     private UtxoOutput from;
 
     private Transaction parent;
+
+    // key = txHash + "-" + fromIndex, a key that will not be serialized, only used for caching
+    private String key;
 
     public UtxoInput() {
 
@@ -150,5 +154,16 @@ public class UtxoInput extends BaseNulsData {
 
     public void setFromIndex(int fromIndex) {
         this.fromIndex = fromIndex;
+    }
+
+    public String getKey() {
+        if(StringUtils.isBlank(key)) {
+            key = txHash.getDigestHex() + "-" + fromIndex;
+        }
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
     }
 }

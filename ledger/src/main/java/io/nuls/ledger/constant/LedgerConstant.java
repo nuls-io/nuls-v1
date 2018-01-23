@@ -34,7 +34,10 @@ public interface LedgerConstant {
     int MINIMUM_VERSION_SUPPORTED = 0;
 
     int SMALL_CHANGE_COUNT = 500;
+
     String STANDING_BOOK = "STANDING_BOOK";
+
+    String UTXO = "UTXO";
 
     short EVENT_TYPE_TRANSACTION = 1;
 

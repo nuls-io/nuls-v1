@@ -24,7 +24,6 @@
 package io.nuls.ledger.entity.listener;
 
 import io.nuls.core.tx.serivce.TransactionService;
-import io.nuls.core.validate.ValidateResult;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 
 /**

@@ -123,8 +123,8 @@ public enum ErrorCode {
     /**
      * ------------  Ledger Exception code   --------------
      */
-    BALANCE_NOT_ENOUGH("LED001", 70001);
-
+    BALANCE_NOT_ENOUGH("LED001", 70001),
+    UTXO_STATUS_CHANGE("LED002", 700002);
 
     private final int msg;
     private final String code;

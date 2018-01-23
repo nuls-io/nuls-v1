@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -27,15 +27,20 @@ import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.io.NulsByteBuffer;
-import io.nuls.ledger.entity.CoinData;
-import io.nuls.ledger.entity.UtxoData;
-import io.nuls.ledger.entity.UtxoInput;
-import io.nuls.ledger.entity.UtxoOutput;
+import io.nuls.db.dao.UtxoInputDataService;
+import io.nuls.db.dao.UtxoOutputDataService;
+import io.nuls.db.entity.UtxoInputPo;
+import io.nuls.db.entity.UtxoOutputPo;
+import io.nuls.db.transactional.annotation.TransactionalAnnotation;
+import io.nuls.ledger.entity.*;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.service.intf.CoinDataProvider;
+import io.nuls.ledger.util.UtxoTransferTool;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,17 +54,21 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 
     private static final UtxoCoinDataProvider INSTANCE = new UtxoCoinDataProvider();
 
+    private LedgerCacheService cacheService = LedgerCacheService.getInstance();
+
+    private UtxoOutputDataService outputDataService;
+
+    private UtxoInputDataService inputDataService;
+
     private UtxoCoinDataProvider() {
 
     }
-
 
     private UtxoCoinManager coinManager = UtxoCoinManager.getInstance();
 
     public static UtxoCoinDataProvider getInstance() {
         return INSTANCE;
     }
-
 
     @Override
     public CoinData parse(NulsByteBuffer byteBuffer) throws NulsException {
@@ -69,19 +78,109 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 
     @Override
     public CoinTransferData getTransferData(CoinData coinData) {
+        UtxoData utxoData = (UtxoData) coinData;
+
         return null;
     }
 
     @Override
     public void approve(CoinData coinData, String txHash) {
-        // todo auto-generated method stub(niels)
-
+        UtxoData utxoData = (UtxoData) coinData;
+        List<UtxoOutput> outputs = new ArrayList<>();
+        try {
+            for (int i = 0; i < utxoData.getInputs().size(); i++) {
+                UtxoInput input = utxoData.getInputs().get(i);
+                String key = input.getTxHash().getDigestHex() + "-" + input.getFromIndex();
+                UtxoOutput unSpend = cacheService.getUtxo(key);
+                unSpend.setStatus(UtxoOutput.LOCKED);
+                outputs.add(unSpend);
+                //todo address format
+                Balance balance = cacheService.getBalance(new Address(0, unSpend.getAddress()).getBase58());
+                balance.setLocked(balance.getLocked().add(Na.valueOf(unSpend.getValue())));
+                balance.setUseable(balance.getUseable().subtract(Na.valueOf(unSpend.getValue())));
+            }
+        } catch (Exception e) {
+            for (UtxoOutput output : outputs) {
+                cacheService.updateUtxoStatus(output.getKey(), UtxoOutput.USEABLE, UtxoOutput.LOCKED);
+            }
+            throw e;
+        }
     }
 
     @Override
+    @TransactionalAnnotation
     public void save(CoinData coinData, String txHash) {
-        // todo auto-generated method stub(niels)
+        UtxoData utxoData = (UtxoData) coinData;
 
+        List<UtxoInputPo> inputPoList = new ArrayList<>();
+        List<UtxoOutputPo> spends = new ArrayList<>();
+
+        boolean update;
+        for (int i = 0; i < utxoData.getInputs().size(); i++) {
+            UtxoInput input = utxoData.getInputs().get(i);
+            inputPoList.add(UtxoTransferTool.toInPutPojo(input));
+
+            UtxoOutput spend = cacheService.getUtxo(input.getKey());
+            //change utxo status
+            update = cacheService.updateUtxoStatus(input.getKey(), UtxoOutput.SPENT, UtxoOutput.LOCKED);
+            if (!update) {
+                throw new NulsRuntimeException(ErrorCode.UTXO_STATUS_CHANGE);
+            }
+
+            //calc balance
+            UtxoBalance balance = (UtxoBalance) cacheService.getBalance(new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), spend.getAddress()).getBase58());
+
+            balance.setLocked(balance.getLocked().subtract(Na.valueOf(spend.getValue())));
+            balance.setBalance(balance.getBalance().subtract(Na.valueOf(spend.getValue())));
+
+            System.out.println("------------balance contains output:" + balance.containsSpend(spend.getKey()));
+            cacheService.removeUtxo(spend.getKey());
+            System.out.println("------------balance contains output:" + balance.containsSpend(spend.getKey()));
+
+            //spends.add(UtxoTransferTool.toOutPutPojo(unSpend));
+        }
+
+        List<UtxoOutputPo> outputPoList = new ArrayList<>();
+        for (int i = 0; i < utxoData.getOutputs().size(); i++) {
+            UtxoOutput output = utxoData.getOutputs().get(i);
+            outputPoList.add(UtxoTransferTool.toOutPutPojo(output));
+        }
+        outputDataService.update(spends);
+        inputDataService.save(inputPoList);
+        outputDataService.save(outputPoList);
+
+        //calc balance
+        for (int i = 0; i < spends.size(); i++) {
+            UtxoOutputPo spend = spends.get(i);
+            UtxoBalance balance = (UtxoBalance) cacheService.getBalance(spend.getAddress());
+            balance.setLocked(balance.getLocked().subtract(Na.valueOf(spend.getValue())));
+            balance.setBalance(balance.getBalance().subtract(Na.valueOf(spend.getValue())));
+
+            String key = spend.getTxHash() + "-" + spend.getOutIndex();
+            System.out.println("------------balance contains output:" + balance.containsSpend(key));
+            cacheService.removeUtxo(key);
+            System.out.println("------------balance contains output:" + balance.containsSpend(key));
+        }
+
+        // cache new unSpends
+        for (int i = 0; i < utxoData.getOutputs().size(); i++) {
+            UtxoOutput output = utxoData.getOutputs().get(i);
+
+            String key = output.getTxHash().getDigestHex() + "-" + output.getIndex();
+            cacheService.putUtxo(key, output);
+
+            String address = new Address(0, output.getAddress()).getBase58();
+            UtxoBalance balance = (UtxoBalance) cacheService.getBalance(address);
+            if (balance == null) {
+                balance = new UtxoBalance(Na.valueOf(output.getValue()), Na.ZERO);
+                balance.addUnSpend(output);
+                cacheService.putBalance(address, balance);
+            } else {
+                balance.setUseable(balance.getUseable().add(Na.valueOf(output.getValue())));
+                balance.setBalance(balance.getBalance().add(Na.valueOf(output.getValue())));
+                balance.addUnSpend(output);
+            }
+        }
     }
 
     @Override
@@ -100,11 +199,13 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         List<UtxoOutput> unSpends = coinManager.getAccountsUnSpend(coinParam.getFrom(), coinParam.getTotalNa().add(coinParam.getFee()));
 
         long inputValue = 0;
-        for (UtxoOutput output : unSpends) {
+        for (int i = 0; i < unSpends.size(); i++) {
+            UtxoOutput output = unSpends.get(i);
             UtxoInput input = new UtxoInput();
             input.setFrom(output);
             inputs.add(input);
             input.setParent(tx);
+            input.setIndex(i);
             inputValue += output.getValue();
         }
 
@@ -142,6 +243,5 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         utxoData.setOutputs(outputs);
         return utxoData;
     }
-
 
 }

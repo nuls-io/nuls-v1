@@ -44,6 +44,7 @@ public class EhCacheServiceImpl<K, T > implements CacheService<K, T> {
 
     @Override
     public void createCache(String title, Map<String, Object> initParams) {
+
         Class keyType = String.class;
         if (initParams.get(EhCacheConstant.KEY_TYPE_FIELD) != null) {
             keyType = (Class) initParams.get(EhCacheConstant.KEY_TYPE_FIELD);
