@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -26,6 +26,7 @@ package io.nuls.account.service.impl;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.entity.Account;
 import io.nuls.cache.service.intf.CacheService;
+import io.nuls.cache.util.CacheMap;
 import io.nuls.core.context.NulsContext;
 
 import java.util.List;
@@ -37,11 +38,10 @@ import java.util.List;
 public class AccountCacheService {
     private static final AccountCacheService INSTANCE = new AccountCacheService();
 
-    private final CacheService<String, Account> cacheService;
+    private final CacheMap<String, Account> cacheMap;
 
     private AccountCacheService() {
-        this.cacheService = NulsContext.getInstance().getService(CacheService.class);
-        cacheService.createCache(AccountConstant.ACCOUNT_LIST_CACHE,32);
+        this.cacheMap = new CacheMap<>(AccountConstant.ACCOUNT_LIST_CACHE, 32);
     }
 
     public static AccountCacheService getInstance() {
@@ -49,11 +49,11 @@ public class AccountCacheService {
     }
 
     public void putAccount(Account account) {
-        this.cacheService.putElement(AccountConstant.ACCOUNT_LIST_CACHE, account.getId(), account);
+        this.cacheMap.put(account.getId(), account);
     }
 
     public Account getAccountById(String id) {
-        return this.cacheService.getElement(AccountConstant.ACCOUNT_LIST_CACHE, id);
+        return this.cacheMap.get(id);
     }
 
     public Account getAccountByAddress(String address) {
@@ -67,31 +67,31 @@ public class AccountCacheService {
     }
 
     public boolean contains(String address) {
-        return this.cacheService.containsKey(AccountConstant.ACCOUNT_LIST_CACHE, address);
+        return this.cacheMap.containsKey(address);
     }
 
     public List<Account> getAccountList() {
-        return this.cacheService.getElementList(AccountConstant.ACCOUNT_LIST_CACHE);
+        return this.cacheMap.values();
     }
 
     public void removeAccount(Account account) {
-        this.cacheService.removeElement(AccountConstant.ACCOUNT_LIST_CACHE, account.getId());
+        this.cacheMap.remove(account.getId());
     }
 
     public void removeAccount(String address) {
-        this.cacheService.removeElement(AccountConstant.ACCOUNT_LIST_CACHE, address);
+        this.cacheMap.remove(address);
     }
 
     public boolean accountExist(String address) {
-        return cacheService.containsKey(AccountConstant.ACCOUNT_LIST_CACHE, address);
+        return cacheMap.containsKey(address);
     }
 
     public void clear() {
-        this.cacheService.clearCache(AccountConstant.ACCOUNT_LIST_CACHE);
+        this.cacheMap.clear();
     }
 
     public void destroy() {
-        this.cacheService.removeCache(AccountConstant.ACCOUNT_LIST_CACHE);
+        this.cacheMap.destroy();
     }
 
     public void putAccountList(List<Account> list) {
