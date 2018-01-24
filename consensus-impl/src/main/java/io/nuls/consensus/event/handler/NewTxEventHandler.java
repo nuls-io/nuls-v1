@@ -51,7 +51,7 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
     public static NewTxEventHandler getInstance() {
         return INSTANCE;
     }
-    //todo 如果是自己的，超时需要回滚
+
     @Override
     public void onEvent(TransactionEvent event, String fromId) {
         Transaction tx = event.getEventBody();

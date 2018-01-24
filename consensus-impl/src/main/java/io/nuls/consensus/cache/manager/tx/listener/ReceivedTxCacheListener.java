@@ -21,54 +21,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.rpc.resources.impl;
+package io.nuls.consensus.cache.manager.tx.listener;
 
-import io.nuls.core.chain.entity.NulsDigestData;
+import io.nuls.cache.entity.CacheListenerItem;
+import io.nuls.cache.listener.intf.NulsCacheListener;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.ledger.service.intf.LedgerService;
-import io.nuls.rpc.entity.RpcResult;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import java.util.List;
 
 /**
  * @author Niels
- * @date 2017/9/30
+ * @date 2018/1/24
  */
-@Path("/tx")
-public class TransactionResource {
-    private NulsContext nulsContext = NulsContext.getInstance();
-    private LedgerService ledgerService = nulsContext.getService(LedgerService.class);
+public class ReceivedTxCacheListener implements NulsCacheListener<String, Transaction> {
 
+    private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
 
-    @GET
-    @Path("/{hash}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult load(@PathParam("hash") String hash) {
-        RpcResult result = RpcResult.getSuccess();
-        result.setData(ledgerService.getTx(NulsDigestData.fromDigestHex(hash)));
-        return result;
+    @Override
+    public void onCreate(CacheListenerItem<String, Transaction> item) {
     }
 
-    @GET
-    @Path("/list")
-    @Produces(MediaType.APPLICATION_JSON)
+    @Override
+    public void onEvict(CacheListenerItem<String, Transaction> item) {
+        rollbackTx(item.getOldValue());
+    }
 
-    public RpcResult list(@QueryParam("address") String address, @QueryParam("type") int type
-            , @QueryParam("pageNum") int pageNum, @QueryParam("pageSize") int pageSize) {
-        RpcResult result = RpcResult.getSuccess();
-        List<Transaction> txList = null;
-        try {
-            txList = ledgerService.getTxList(address, type, pageNum, pageSize);
-            result.setData(txList);
-        } catch (Exception e) {
-            Log.error(e);
-            return RpcResult.getFailed(e.getMessage());
+    private void rollbackTx(Transaction tx) {
+        if (tx.getStatus() == TxStatusEnum.CACHED) {
+            return;
         }
-        return result;
+        try {
+            ledgerService.rollbackTx(tx);
+        } catch (NulsException e) {
+            Log.error(e);
+        }
     }
 
+    @Override
+    public void onRemove(CacheListenerItem<String, Transaction> item) {
+    }
+
+    @Override
+    public void onUpdate(CacheListenerItem<String, Transaction> item) {
+    }
+
+    @Override
+    public void onExpire(CacheListenerItem<String, Transaction> item) {
+        rollbackTx(item.getOldValue());
+    }
 }
