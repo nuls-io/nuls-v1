@@ -80,7 +80,6 @@ public class ConsensusManager implements Runnable {
     private void loadConfigration() {
         NulsContext.getInstance().setGenesisBlock(GenesisBlock.getInstance());
         partakePacking = NulsContext.MODULES_CONFIG.getCfgValue(PocConsensusConstant.CFG_CONSENSUS_SECTION, PocConsensusConstant.PROPERTY_PARTAKE_PACKING, false);
-
         seedNodeList = new ArrayList<>();
         Set<String> seedAddressSet = new HashSet<>();
         String addresses = NulsContext.MODULES_CONFIG.getCfgValue(PocConsensusConstant.CFG_CONSENSUS_SECTION, PocConsensusConstant.PROPERTY_SEED_NODES, "");
@@ -217,5 +216,9 @@ public class ConsensusManager implements Runnable {
 
     public void exitMeeting() {
         TaskManager.stopThread(NulsConstant.MODULE_ID_CONSENSUS, BlockMaintenanceThread.THREAD_NAME);
+    }
+
+    public List<String> getSeedNodeList() {
+        return seedNodeList;
     }
 }
