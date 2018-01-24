@@ -36,7 +36,7 @@ import java.util.Map;
  * @author Niels
  * @date 2017/11/22
  */
-public class UtxoInputDaoImpl extends BaseDaoImpl<UtxoInputMapper, String, UtxoInputPo> implements UtxoInputDataService {
+public class UtxoInputDaoImpl extends BaseDaoImpl<UtxoInputMapper, Map<String,Object>, UtxoInputPo> implements UtxoInputDataService {
     public UtxoInputDaoImpl() {
         super(UtxoInputMapper.class);
     }

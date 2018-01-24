@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -231,25 +231,48 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             }
         } else if (tx.getStatus().equals(TxStatusEnum.CONFIRMED)) {
             String address;
-            Map<String,Object> keyMap = new HashMap<>();
+            Map<String, Object> keyMap = new HashMap<>();
+
+            //process output
             for (UtxoOutput output : utxoData.getOutputs()) {
+                keyMap.clear();
                 keyMap.put("txHash", output.getTxHash().getDigestHex());
                 keyMap.put("outIndex", output.getIndex());
                 UtxoOutputPo outputPo = outputDataService.get(keyMap);
 
                 outputDataService.delete(keyMap);
                 // if utxo not spent,should calc balance and clear cache
-                if(outputPo.getStatus() != UtxoOutput.SPENT) {
+                if (outputPo.getStatus() != UtxoOutput.SPENT) {
                     cacheService.removeUtxo(output.getKey());
 
+                    //todo address format
+                    address = new Address(1, output.getAddress()).getBase58();
+                    UtxoBalance balance = (UtxoBalance) cacheService.getBalance(address);
+                    if (outputPo.getStatus().equals(UtxoOutput.USEABLE)) {
+                        balance.setBalance(balance.getBalance().subtract(Na.valueOf(outputPo.getValue())));
+                        balance.setUseable(balance.getUseable().subtract(Na.valueOf(outputPo.getValue())));
+                    } else {
+                        balance.setBalance(balance.getBalance().subtract(Na.valueOf(outputPo.getValue())));
+                        balance.setLocked(balance.getLocked().subtract(Na.valueOf(outputPo.getValue())));
+                    }
                 }
-
-
-
-                address = new Address(1,output.getAddress()).getBase58();
-                UtxoBalance balance = (UtxoBalance) cacheService.getBalance(address);
-
             }
+
+            //process input
+            List<UtxoOutputPo> outputPoList = new ArrayList<>();
+            for (UtxoInput input : utxoData.getInputs()) {
+                keyMap.clear();
+                keyMap.put("txHash", input.getTxHash().getDigestHex());
+                keyMap.put("fromIndex", input.getFromIndex());
+                keyMap.put("outIndex", input.getFromIndex());
+                inputDataService.delete(keyMap);
+
+                UtxoOutputPo outputPo = outputDataService.get(keyMap);
+                outputPo.setStatus((byte) UtxoOutput.USEABLE);
+                outputPoList.add(outputPo);
+            }
+
+            outputDataService.updateStatus(outputPoList);
         }
 
     }

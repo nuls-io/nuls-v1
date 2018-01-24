@@ -6,7 +6,7 @@
         <id column="out_index" jdbcType="INTEGER" property="outIndex"/>
         <result column="value" jdbcType="BIGINT" property="value"/>
         <result column="lock_time" jdbcType="BIGINT" property="lockTime"/>
-        <result column="status" jdbcType="BIT" property="status"/>
+        <result column="status" jdbcType="TINYINT" property="status"/>
         <result column="address" jdbcType="VARCHAR" property="address"/>
     </resultMap>
     <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="io.nuls.db.entity.UtxoOutputPo">
@@ -38,7 +38,7 @@
         lock_time, status, address,
         script)
         values (#{txHash,jdbcType=VARCHAR}, #{outIndex,jdbcType=INTEGER}, #{value,jdbcType=BIGINT},
-        #{lockTime,jdbcType=BIGINT}, #{status,jdbcType=BIT}, #{address,jdbcType=VARCHAR},
+        #{lockTime,jdbcType=BIGINT}, #{status,jdbcType=TINYINT}, #{address,jdbcType=VARCHAR},
         #{script,jdbcType=VARBINARY})
     </insert>
     <insert id="insertSelective" parameterType="io.nuls.db.entity.UtxoOutputPo">
@@ -80,7 +80,7 @@
                 #{lockTime,jdbcType=BIGINT},
             </if>
             <if test="status != null">
-                #{status,jdbcType=BIT},
+                #{status,jdbcType=TINYINT},
             </if>
             <if test="address != null">
                 #{address,jdbcType=VARCHAR},
@@ -100,7 +100,7 @@
                 lock_time = #{lockTime,jdbcType=BIGINT},
             </if>
             <if test="status != null">
-                status = #{status,jdbcType=BIT},
+                status = #{status,jdbcType=TINYINT},
             </if>
             <if test="address != null">
                 address = #{address,jdbcType=VARCHAR},
@@ -116,7 +116,7 @@
         update utxo_output
         set value = #{value,jdbcType=BIGINT},
         lock_time = #{lockTime,jdbcType=BIGINT},
-        status = #{status,jdbcType=BIT},
+        status = #{status,jdbcType=TINYINT},
         address = #{address,jdbcType=VARCHAR},
         script = #{script,jdbcType=VARBINARY}
         where tx_hash = #{txHash,jdbcType=VARCHAR}
@@ -126,7 +126,7 @@
     update utxo_output
     set value = #{value,jdbcType=BIGINT},
       lock_time = #{lockTime,jdbcType=BIGINT},
-      status = #{status,jdbcType=BIT},
+      status = #{status,jdbcType=TINYINT},
       address = #{address,jdbcType=VARCHAR}
     where tx_hash = #{txHash,jdbcType=VARCHAR}
       and out_index = #{outIndex,jdbcType=INTEGER}
@@ -134,7 +134,7 @@
 
     <update id="updateStatus" parameterType="io.nuls.db.entity.UtxoOutputPo">
       update utxo_output
-      set status = #{status,jdbcType=BIT}
+      set status = #{status,jdbcType=TINYINT}
       where tx_hash = #{txHash,jdbcType=VARCHAR}
       and out_index = #{outIndex,jdbcType=INTEGER}
     </update>
