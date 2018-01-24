@@ -41,4 +41,6 @@ public interface UtxoOutputDataService extends BaseDataService< String,UtxoOutpu
     List<UtxoOutputPo> getAllUnSpend();
 
     List<UtxoOutputPo> getAccountUnSpend(String address);
+
+    int updateStatus(List<UtxoOutputPo> list);
 }

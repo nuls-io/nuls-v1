@@ -38,12 +38,14 @@ import io.nuls.ledger.entity.UtxoOutput;
 public class LedgerCacheService {
     private static LedgerCacheService instance = new LedgerCacheService();
     private final CacheService<String, Balance> cacheService;
-    private final CacheService<String, UtxoOutput> utxoCacheService = null;
+    private final CacheService<String, UtxoOutput> utxoCacheService;
 
 
     private LedgerCacheService() {
         cacheService = NulsContext.getInstance().getService(CacheService.class);
         cacheService.createCache(LedgerConstant.STANDING_BOOK, 1024);
+
+        utxoCacheService = NulsContext.getInstance().getService(CacheService.class);
         utxoCacheService.createCache(LedgerConstant.UTXO, 1024);
     }
 

@@ -2,15 +2,15 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="io.nuls.db.dao.impl.mybatis.mapper.UtxoOutputMapper">
     <resultMap id="BaseResultMap" type="io.nuls.db.entity.UtxoOutputPo">
-        <id column="tx_hash" jdbcType="VARCHAR" property="txHash" />
-        <id column="out_index" jdbcType="INTEGER" property="outIndex" />
-        <result column="value" jdbcType="BIGINT" property="value" />
-        <result column="lock_time" jdbcType="BIGINT" property="lockTime" />
-        <result column="status" jdbcType="BIT" property="status" />
-        <result column="address" jdbcType="VARCHAR" property="address" />
+        <id column="tx_hash" jdbcType="VARCHAR" property="txHash"/>
+        <id column="out_index" jdbcType="INTEGER" property="outIndex"/>
+        <result column="value" jdbcType="BIGINT" property="value"/>
+        <result column="lock_time" jdbcType="BIGINT" property="lockTime"/>
+        <result column="status" jdbcType="BIT" property="status"/>
+        <result column="address" jdbcType="VARCHAR" property="address"/>
     </resultMap>
     <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="io.nuls.db.entity.UtxoOutputPo">
-        <result column="script" jdbcType="VARBINARY" property="script" />
+        <result column="script" jdbcType="VARBINARY" property="script"/>
     </resultMap>
     <sql id="Base_Column_List">
         tx_hash, out_index, value, lock_time, status, address
@@ -20,9 +20,9 @@
     </sql>
     <select id="selectByPrimaryKey" parameterType="map" resultMap="ResultMapWithBLOBs">
         select
-        <include refid="Base_Column_List" />
+        <include refid="Base_Column_List"/>
         ,
-        <include refid="Blob_Column_List" />
+        <include refid="Blob_Column_List"/>
         from utxo_output
         where tx_hash = #{txHash,jdbcType=VARCHAR}
         and out_index = #{outIndex,jdbcType=INTEGER}
@@ -130,6 +130,13 @@
     where tx_hash = #{txHash,jdbcType=VARCHAR}
       and out_index = #{outIndex,jdbcType=INTEGER}
   </update>
+
+    <update id="updateStatus" parameterType="io.nuls.db.entity.UtxoOutputPo">
+      update utxo_output
+      set status = #{status,jdbcType=BIT}
+      where tx_hash = #{txHash,jdbcType=VARCHAR}
+      and out_index = #{outIndex,jdbcType=INTEGER}
+    </update>
 
     <insert id="batchInsert" parameterType="java.util.List">
         insert into utxo_output (tx_hash, out_index, value,
