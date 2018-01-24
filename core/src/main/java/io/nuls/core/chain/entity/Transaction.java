@@ -25,6 +25,7 @@ package io.nuls.core.chain.entity;
 
 import io.nuls.core.chain.intf.NulsCloneable;
 import io.nuls.core.chain.manager.TransactionValidatorManager;
+import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
@@ -60,6 +61,8 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
     protected NulsSignData sign;
 
     protected T txData;
+
+    protected TxStatusEnum status;
 
     public Transaction(int type) {
         this.dataType = NulsDataType.TRANSACTION;
@@ -192,5 +195,13 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
 
     public void setIndex(int index) {
         this.index = index;
+    }
+
+    public TxStatusEnum getStatus() {
+        return status;
+    }
+
+    public void setStatus(TxStatusEnum status) {
+        this.status = status;
     }
 }

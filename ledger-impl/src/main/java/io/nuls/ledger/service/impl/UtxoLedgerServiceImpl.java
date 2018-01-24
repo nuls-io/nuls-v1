@@ -30,6 +30,7 @@ import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TransactionConstant;
+import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.tx.serivce.TransactionService;
@@ -87,6 +88,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         return INSTANCE;
     }
 
+    @Override
     public void init() {
         txDao = NulsContext.getInstance().getService(UtxoTransactionDataService.class);
         eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
@@ -316,6 +318,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         for (TransactionService service : serviceList) {
             service.onRollback(tx);
         }
+        tx.setStatus(TxStatusEnum.CACHED);
     }
 
     @Override
@@ -324,7 +327,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         List<TransactionService> serviceList = getServiceList(tx.getClass());
         for (TransactionService service : serviceList) {
             service.onCommit(tx);
-        }
+        }tx.setStatus(TxStatusEnum.CONFIRMED);
     }
 
     @Override
@@ -334,6 +337,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         for (TransactionService service : serviceList) {
             service.onApproval(tx);
         }
+        tx.setStatus(TxStatusEnum.AGREED);
     }
 
     @Override

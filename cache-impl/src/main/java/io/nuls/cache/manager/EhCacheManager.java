@@ -23,31 +23,26 @@
  */
 package io.nuls.cache.manager;
 
-import io.nuls.core.chain.entity.Block;
+import io.nuls.cache.listener.intf.NulsCacheListener;
+import io.nuls.cache.utils.EhcacheListener;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
-import org.ehcache.UserManagedCache;
-import org.ehcache.config.CacheConfiguration;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
+import org.ehcache.config.builders.CacheEventListenerConfigurationBuilder;
 import org.ehcache.config.builders.CacheManagerBuilder;
 import org.ehcache.config.builders.ResourcePoolsBuilder;
-import org.ehcache.config.builders.UserManagedCacheBuilder;
 import org.ehcache.config.units.MemoryUnit;
+import org.ehcache.event.EventType;
 import org.ehcache.expiry.Duration;
 import org.ehcache.expiry.Expirations;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
- *
  * @author Niels
  * @date 2017/10/27
- *
  */
 public class EhCacheManager {
     private static final EhCacheManager INSTANCE = new EhCacheManager();
@@ -66,15 +61,33 @@ public class EhCacheManager {
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true);
     }
 
-    public void createCache(String title, Class keyType, Class<? extends Serializable> valueType, int heapMb,int timeToLiveSeconds,int timeToIdleSeconds) {
+    public void createCache(String title, Class keyType, Class<? extends Serializable> valueType, int heapMb, int timeToLiveSeconds, int timeToIdleSeconds) {
+        this.createCache(title, keyType, valueType, heapMb, timeToLiveSeconds, timeToIdleSeconds, null);
+    }
+
+    public void createCache(String title, Class keyType, Class<? extends Serializable> valueType, int heapMb, int timeToLiveSeconds, int timeToIdleSeconds, NulsCacheListener listener) {
         CacheConfigurationBuilder builder = CacheConfigurationBuilder.newCacheConfigurationBuilder(keyType, valueType,
                 ResourcePoolsBuilder.newResourcePoolsBuilder().heap(heapMb, MemoryUnit.MB)
-        ) ;
-        if(timeToLiveSeconds>10){
+        );
+        if (timeToLiveSeconds > 10) {
             builder = builder.withExpiry(Expirations.timeToLiveExpiration(Duration.of(timeToLiveSeconds, TimeUnit.SECONDS)));
         }
-        if(timeToIdleSeconds>0){
-            builder =  builder.withExpiry(Expirations.timeToIdleExpiration(Duration.of(timeToIdleSeconds, TimeUnit.SECONDS)));
+        if (timeToIdleSeconds > 0) {
+            builder = builder.withExpiry(Expirations.timeToIdleExpiration(Duration.of(timeToIdleSeconds, TimeUnit.SECONDS)));
+        }
+        if (listener != null) {
+            Set<EventType> types = new HashSet<>();
+            types.add(EventType.CREATED);
+            types.add(EventType.UPDATED);
+            types.add(EventType.EVICTED);
+            types.add(EventType.EXPIRED);
+            types.add(EventType.REMOVED);
+            CacheEventListenerConfigurationBuilder cacheEventListenerConfiguration = CacheEventListenerConfigurationBuilder
+                    .newEventListenerConfiguration(new EhcacheListener(listener), types)
+                    .unordered().asynchronous();
+            builder = builder.add(cacheEventListenerConfiguration);
+
+
         }
         cacheManager.createCache(title, builder.build());
         KEY_TYPE_MAP.put(title, keyType);
@@ -96,4 +109,5 @@ public class EhCacheManager {
     public List<String> getCacheTitleList() {
         return new ArrayList<String>(KEY_TYPE_MAP.keySet());
     }
+
 }

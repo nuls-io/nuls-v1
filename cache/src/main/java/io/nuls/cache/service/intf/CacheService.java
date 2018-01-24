@@ -24,6 +24,7 @@
 package io.nuls.cache.service.intf;
 
 import io.nuls.cache.entity.CacheElement;
+import io.nuls.cache.listener.intf.NulsCacheListener;
 
 import java.util.List;
 import java.util.Map;
@@ -106,4 +107,6 @@ public interface CacheService<K, V> {
     boolean containsKey(String cacheTitle, K key);
 
     Set<K> keySet(String cacheTitle);
+
+    void createCache(String cacheName, int heapMb, int timeToLiveSeconds, int timeToIdleSeconds, NulsCacheListener listener);
 }
