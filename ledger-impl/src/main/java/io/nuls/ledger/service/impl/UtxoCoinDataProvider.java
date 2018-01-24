@@ -259,7 +259,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             }
 
             //process input
-            List<UtxoOutputPo> outputPoList = new ArrayList<>();
             for (UtxoInput input : utxoData.getInputs()) {
                 keyMap.clear();
                 keyMap.put("txHash", input.getTxHash().getDigestHex());
@@ -269,10 +268,20 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 
                 UtxoOutputPo outputPo = outputDataService.get(keyMap);
                 outputPo.setStatus((byte) UtxoOutput.USEABLE);
-                outputPoList.add(outputPo);
+                outputDataService.updateStatus(outputPo);
+
+                UtxoOutput output = UtxoTransferTool.toOutput(outputPo);
+                cacheService.putUtxo(output.getKey(), output);
+
+                //calc balance
+                address = new Address(1, output.getAddress()).getBase58();
+                UtxoBalance balance = (UtxoBalance) cacheService.getBalance(address);
+                if (balance == null) {
+                    balance = new UtxoBalance(Na.valueOf(output.getValue()), Na.ZERO);
+                    balance.addUnSpend(output);
+                }
             }
 
-            outputDataService.updateStatus(outputPoList);
         }
 
     }

@@ -44,4 +44,6 @@ public interface UtxoOutputDataService extends BaseDataService<Map<String, Objec
     List<UtxoOutputPo> getAccountUnSpend(String address);
 
     int updateStatus(List<UtxoOutputPo> list);
+
+    int updateStatus(UtxoOutputPo po);
 }
