@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,6 +23,9 @@
  */
 package io.nuls.network.param;
 
+import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.log.Log;
 import io.nuls.network.NetworkContext;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.param.AbstractNetworkParam;
@@ -42,13 +45,19 @@ public class DevNetworkParam extends AbstractNetworkParam {
     private DevNetworkParam() {
         this.maxInCount = NetworkContext.getNetworkConfig().getPropValue(NetworkConstant.NETWORK_NODE_MAX_IN, 20);
         this.maxOutCount = NetworkContext.getNetworkConfig().getPropValue(NetworkConstant.NETWORK_NODE_MAX_OUT, 10);
-        this.port = 8003;
-        this.packetMagic = 987654323;
+        try {
+            String value = NulsContext.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_EXTER_PORT);
+            this.port = Integer.parseInt(value);
+            String magic = NulsContext.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_MAGIC);
+            this.packetMagic = Integer.parseInt(magic);
+        } catch (NulsException e) {
+            Log.error(e);
+        }
 
-        InetSocketAddress address2 = new InetSocketAddress("192.168.1.197", port);
-        InetSocketAddress address3 = new InetSocketAddress("192.168.1.248", port);
-        InetSocketAddress address1 = new InetSocketAddress("192.168.1.199", port);
-        InetSocketAddress address0 = new InetSocketAddress("192.168.1.249", port);
+        InetSocketAddress address2 = new InetSocketAddress("192.168.1.101", port);
+        InetSocketAddress address3 = new InetSocketAddress("192.168.1.102", port);
+        InetSocketAddress address1 = new InetSocketAddress("192.168.1.103", port);
+        InetSocketAddress address0 = new InetSocketAddress("127.0.0.1", port + 1);
         seedNodes.add(address1);
         seedNodes.add(address2);
         seedNodes.add(address3);
