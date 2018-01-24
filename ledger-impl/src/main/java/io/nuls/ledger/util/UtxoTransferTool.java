@@ -45,7 +45,7 @@ public class UtxoTransferTool {
         return output;
     }
 
-    public static UtxoOutputPo toOutPutPojo(UtxoOutput output) {
+    public static UtxoOutputPo toOutputPojo(UtxoOutput output) {
         UtxoOutputPo po = new UtxoOutputPo();
         po.setTxHash(output.getTxHash().getDigestHex());
         po.setOutIndex(output.getIndex());
@@ -56,7 +56,7 @@ public class UtxoTransferTool {
         return po;
     }
 
-    public static UtxoInputPo toInPutPojo(UtxoInput input) {
+    public static UtxoInputPo toInputPojo(UtxoInput input) {
         UtxoInputPo po = new UtxoInputPo();
         po.setTxHash(input.getTxHash().getDigestHex());
         po.setInIndex(input.getIndex());

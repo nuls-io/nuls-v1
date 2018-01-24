@@ -118,7 +118,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         boolean update;
         for (int i = 0; i < utxoData.getInputs().size(); i++) {
             UtxoInput input = utxoData.getInputs().get(i);
-            inputPoList.add(UtxoTransferTool.toInPutPojo(input));
+            inputPoList.add(UtxoTransferTool.toInputPojo(input));
 
             UtxoOutput spend = cacheService.getUtxo(input.getKey());
             //change utxo status
@@ -143,7 +143,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         List<UtxoOutputPo> outputPoList = new ArrayList<>();
         for (int i = 0; i < utxoData.getOutputs().size(); i++) {
             UtxoOutput output = utxoData.getOutputs().get(i);
-            outputPoList.add(UtxoTransferTool.toOutPutPojo(output));
+            outputPoList.add(UtxoTransferTool.toOutputPojo(output));
         }
         outputDataService.update(spends);
         inputDataService.save(inputPoList);
