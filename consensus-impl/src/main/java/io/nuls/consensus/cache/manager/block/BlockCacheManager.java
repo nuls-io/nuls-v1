@@ -31,13 +31,16 @@ import io.nuls.consensus.entity.block.BlockHeaderChain;
 import io.nuls.consensus.entity.block.HeaderDigest;
 import io.nuls.consensus.event.GetBlockHeaderEvent;
 import io.nuls.consensus.utils.DownloadDataUtils;
-import io.nuls.core.chain.entity.BasicTypeData;
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.BlockHeader;
-import io.nuls.core.chain.entity.SmallBlock;
+import io.nuls.core.chain.entity.*;
+import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
+import io.nuls.ledger.service.intf.LedgerService;
+
+import java.util.List;
 
 /**
  * @author Niels
@@ -48,6 +51,7 @@ public class BlockCacheManager {
     private static final BlockCacheManager INSTANCE = new BlockCacheManager();
 
     private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
+    private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
 
     private CacheMap<String, BlockHeader> headerCacheMap;
     private CacheMap<String, Block> blockCacheMap;
@@ -60,7 +64,6 @@ public class BlockCacheManager {
 
     private BlockCacheManager() {
     }
-    //todo 未分叉时应该调用approval
     public static BlockCacheManager getInstance() {
         return INSTANCE;
     }
@@ -122,6 +125,44 @@ public class BlockCacheManager {
 
     public void cacheBlock(Block block) {
         blockCacheMap.put(block.getHeader().getHash().getDigestHex(), block);
+        //txs approval
+        BlockHeader header = this.getBlockHeader(block.getHeader().getHeight());
+        if(null==header){
+            List<String> blockHashList = bifurcateProcessor.getHashList(block.getHeader().getHeight());
+            rollbackBlocksTxs(blockHashList);
+            return;
+        }
+        for(Transaction tx:block.getTxs()){
+            if(tx.getStatus()== TxStatusEnum.CACHED){
+                try {
+                    this.ledgerService.approvalTx(tx);
+                } catch (NulsException e) {
+                    Log.error(e);
+                }
+            }
+        }
+    }
+
+    private void rollbackBlocksTxs(List<String> blockHashList) {
+        for(String hash :blockHashList){
+            Block block = getBlock(hash);
+            if(null!=block){
+                rollbackTxs(block.getTxs());
+            }
+        }
+
+    }
+
+    private void rollbackTxs(List<Transaction> txs) {
+        for(Transaction tx:txs){
+            if(tx.getStatus()==TxStatusEnum.AGREED&&!tx.isLocalTx()){
+                try {
+                    ledgerService.rollbackTx(tx);
+                } catch (NulsException e) {
+                    Log.error(e);
+                }
+            }
+        }
     }
 
     public Block getBlock(String hash) {
@@ -212,7 +253,6 @@ public class BlockCacheManager {
     }
 
     public boolean canPersistence() {
-
         return null != bifurcateProcessor.getLongestChain() && bifurcateProcessor.getLongestChain().size() > PocConsensusConstant.CONFIRM_BLOCK_COUNT;
     }
 }
