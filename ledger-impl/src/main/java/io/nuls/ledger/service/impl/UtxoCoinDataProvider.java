@@ -113,63 +113,80 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         UtxoData utxoData = (UtxoData) coinData;
 
         List<UtxoInputPo> inputPoList = new ArrayList<>();
-        List<UtxoOutputPo> spends = new ArrayList<>();
+        List<UtxoOutput> spends = new ArrayList<>();
+        List<UtxoOutputPo> spendPoList = new ArrayList<>();
 
+        int step = 0;
+        try {
+            processDataInput(utxoData, inputPoList, spends, spendPoList);
+            step = 1;
+
+            List<UtxoOutputPo> outputPoList = new ArrayList<>();
+            for (int i = 0; i < utxoData.getOutputs().size(); i++) {
+                UtxoOutput output = utxoData.getOutputs().get(i);
+                outputPoList.add(UtxoTransferTool.toOutputPojo(output));
+            }
+
+            outputDataService.updateStatus(spendPoList);
+            inputDataService.save(inputPoList);
+            outputDataService.save(outputPoList);
+
+            processDataOutput(utxoData);
+            step = 2;
+
+            for (UtxoOutput spend : spends) {
+                UtxoBalance balance = (UtxoBalance) cacheService.getBalance(new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), spend.getAddress()).getBase58());
+                System.out.println("------------balance contains output:" + balance.containsSpend(spend.getKey()));
+                cacheService.removeUtxo(spend.getKey());
+                System.out.println("------------balance contains output:" + balance.containsSpend(spend.getKey()));
+            }
+        } catch (Exception e) {
+            //rollback
+
+
+            for (UtxoOutput spend : spends) {
+                spend.setStatus(UtxoOutput.LOCKED);
+                UtxoBalance balance = (UtxoBalance) cacheService.getBalance(new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), spend.getAddress()).getBase58());
+                balance.setLocked(balance.getLocked().add(Na.valueOf(spend.getValue())));
+                balance.setBalance(balance.getBalance().add(Na.valueOf(spend.getValue())));
+            }
+        }
+    }
+
+
+    private void processDataInput(UtxoData utxoData, List<UtxoInputPo> inputPoList, List<UtxoOutput> spends, List<UtxoOutputPo> spendPoList) {
         boolean update;
         for (int i = 0; i < utxoData.getInputs().size(); i++) {
             UtxoInput input = utxoData.getInputs().get(i);
             inputPoList.add(UtxoTransferTool.toInputPojo(input));
 
-            UtxoOutput spend = cacheService.getUtxo(input.getKey());
             //change utxo status
+            UtxoOutput spend = cacheService.getUtxo(input.getKey());
             update = cacheService.updateUtxoStatus(input.getKey(), UtxoOutput.SPENT, UtxoOutput.LOCKED);
             if (!update) {
                 throw new NulsRuntimeException(ErrorCode.UTXO_STATUS_CHANGE);
             }
-
+            spends.add(spend);
+            spendPoList.add(UtxoTransferTool.toOutputPojo(spend));
             //calc balance
+            //todo address format
             UtxoBalance balance = (UtxoBalance) cacheService.getBalance(new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), spend.getAddress()).getBase58());
 
             balance.setLocked(balance.getLocked().subtract(Na.valueOf(spend.getValue())));
             balance.setBalance(balance.getBalance().subtract(Na.valueOf(spend.getValue())));
 
-            System.out.println("------------balance contains output:" + balance.containsSpend(spend.getKey()));
-            cacheService.removeUtxo(spend.getKey());
-            System.out.println("------------balance contains output:" + balance.containsSpend(spend.getKey()));
 
-            //spends.add(UtxoTransferTool.toOutPutPojo(unSpend));
         }
+    }
 
-        List<UtxoOutputPo> outputPoList = new ArrayList<>();
-        for (int i = 0; i < utxoData.getOutputs().size(); i++) {
-            UtxoOutput output = utxoData.getOutputs().get(i);
-            outputPoList.add(UtxoTransferTool.toOutputPojo(output));
-        }
-        outputDataService.update(spends);
-        inputDataService.save(inputPoList);
-        outputDataService.save(outputPoList);
-
-        //calc balance
-        for (int i = 0; i < spends.size(); i++) {
-            UtxoOutputPo spend = spends.get(i);
-            UtxoBalance balance = (UtxoBalance) cacheService.getBalance(spend.getAddress());
-            balance.setLocked(balance.getLocked().subtract(Na.valueOf(spend.getValue())));
-            balance.setBalance(balance.getBalance().subtract(Na.valueOf(spend.getValue())));
-
-            String key = spend.getTxHash() + "-" + spend.getOutIndex();
-            System.out.println("------------balance contains output:" + balance.containsSpend(key));
-            cacheService.removeUtxo(key);
-            System.out.println("------------balance contains output:" + balance.containsSpend(key));
-        }
-
-        // cache new unSpends
+    private void processDataOutput(UtxoData utxoData) {
+        // cache new unSpends and calc balance
         for (int i = 0; i < utxoData.getOutputs().size(); i++) {
             UtxoOutput output = utxoData.getOutputs().get(i);
 
-            String key = output.getTxHash().getDigestHex() + "-" + output.getIndex();
-            cacheService.putUtxo(key, output);
-
-            String address = new Address(0, output.getAddress()).getBase58();
+            cacheService.putUtxo(output.getKey(), output);
+            //todo address format
+            String address = new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), output.getAddress()).getBase58();
             UtxoBalance balance = (UtxoBalance) cacheService.getBalance(address);
             if (balance == null) {
                 balance = new UtxoBalance(Na.valueOf(output.getValue()), Na.ZERO);

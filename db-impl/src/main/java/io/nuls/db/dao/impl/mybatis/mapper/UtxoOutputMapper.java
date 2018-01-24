@@ -32,4 +32,5 @@ import io.nuls.db.entity.UtxoOutputPo;
  */
 public interface UtxoOutputMapper  extends BaseMapper<String,UtxoOutputPo> {
 
+    int updateStatus(UtxoOutputPo po);
 }
