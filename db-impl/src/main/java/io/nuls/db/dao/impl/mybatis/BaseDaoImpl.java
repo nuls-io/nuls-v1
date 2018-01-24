@@ -41,7 +41,7 @@ import java.util.Map;
  * K : the type of primary key of Object
  * V : the type of Object
  */
-public abstract class BaseDaoImpl<T extends BaseMapper<K, V>, K extends Serializable, V> implements BaseDataService<K, V> {
+public abstract class BaseDaoImpl<T extends BaseMapper<K, V>, K, V> implements BaseDataService<K, V> {
     private Class<T> mapperClass;
 
     public BaseDaoImpl(Class<T> mapperClass) {

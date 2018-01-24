@@ -36,17 +36,17 @@ public class CoinDataTxService implements TransactionService<AbstractCoinTransac
 
     @Override
     public void onRollback(AbstractCoinTransaction tx) {
-        tx.getCoinDataProvider().rollback(tx.getCoinData(),tx.getHash().getDigestHex());
+        tx.getCoinDataProvider().rollback(tx.getCoinData(),tx);
     }
 
     @Override
     public void onCommit(AbstractCoinTransaction tx) {
-        tx.getCoinDataProvider().save(tx.getCoinData(),tx.getHash().getDigestHex());
+        tx.getCoinDataProvider().save(tx.getCoinData(),tx);
     }
 
     @Override
     public void onApproval(AbstractCoinTransaction tx) {
-        tx.getCoinDataProvider().approve(tx.getCoinData(),tx.getHash().getDigestHex());
+        tx.getCoinDataProvider().approve(tx.getCoinData(),tx);
     }
 
     public static CoinDataTxService getInstance() {

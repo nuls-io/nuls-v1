@@ -39,7 +39,7 @@ import java.util.Map;
  * @author Niels
  * @date 2017/11/22
  */
-public class UtxoOutputDaoImpl extends BaseDaoImpl<UtxoOutputMapper, String, UtxoOutputPo> implements UtxoOutputDataService {
+public class UtxoOutputDaoImpl extends BaseDaoImpl<UtxoOutputMapper, Map<String, Object>, UtxoOutputPo> implements UtxoOutputDataService {
     public UtxoOutputDaoImpl() {
         super(UtxoOutputMapper.class);
     }
@@ -95,4 +95,5 @@ public class UtxoOutputDaoImpl extends BaseDaoImpl<UtxoOutputMapper, String, Utx
         }
         return result;
     }
+
 }

@@ -32,6 +32,7 @@
         where tx_hash = #{txHash,jdbcType=VARCHAR}
         and out_index = #{outIndex,jdbcType=INTEGER}
     </delete>
+
     <insert id="insert" parameterType="io.nuls.db.entity.UtxoOutputPo">
         insert into utxo_output (tx_hash, out_index, value,
         lock_time, status, address,
