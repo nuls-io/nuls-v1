@@ -396,12 +396,10 @@ public class ConsensusMeetingRunner implements Runnable {
 
     private List<Consensus<Agent>> getDefaultSeedList() throws IOException {
         List<Consensus<Agent>> seedList = new ArrayList<>();
-        Properties prop = ConfigLoader.loadProperties(PocConsensusConstant.DEFAULT_CONSENSUS_LIST_FILE);
-        if (null == prop || prop.isEmpty()) {
+        if (consensusManager.getSeedNodeList() == null) {
             return seedList;
         }
-        for (Object key : prop.keySet()) {
-            String address = prop.getProperty((String) key);
+        for (String address : consensusManager.getSeedNodeList()) {
             Consensus<Agent> member = new Consensus<>();
             member.setAddress(address);
             Agent agent = new Agent();

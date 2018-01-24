@@ -71,8 +71,8 @@ public class Bootstrap {
             } catch (InterruptedException e) {
                 Log.error(e);
             }
-            Log.info(ModuleManager.getInstance().getInfo());
-            Log.info("--------------------------------------------");
+//            Log.info(ModuleManager.getInstance().getInfo());
+//            Log.info("--------------------------------------------");
         }
     }
 

@@ -62,7 +62,11 @@ public class BlockDaoImpl extends BaseDaoImpl<BlockHeaderMapper, String, BlockHe
 
     @Override
     public long getBestHeight() {
-        return this.getMapper().getMaxHeight();
+        Long value = this.getMapper().getMaxHeight();
+        if (null == value) {
+            return 0;
+        }
+        return value.longValue();
     }
 
     @Override
@@ -108,7 +112,11 @@ public class BlockDaoImpl extends BaseDaoImpl<BlockHeaderMapper, String, BlockHe
         params.put("address", address);
         params.put("endRoundIndex", endRoundIndex);
         params.put("txType", TransactionConstant.TX_TYPE_YELLOW_PUNISH);
-        return this.getMapper().getSumOfRoundIndexOfYellowPunish(params);
+        Long value = this.getMapper().getSumOfRoundIndexOfYellowPunish(params);
+        if (null == value) {
+            value = 0L;
+        }
+        return value.longValue();
     }
 
 }
