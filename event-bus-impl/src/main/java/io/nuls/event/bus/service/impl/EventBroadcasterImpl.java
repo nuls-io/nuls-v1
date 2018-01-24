@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,6 +23,7 @@
  */
 package io.nuls.event.bus.service.impl;
 
+import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.event.BaseEvent;
 import io.nuls.core.event.CommonStringEvent;
@@ -58,6 +59,9 @@ public class EventBroadcasterImpl implements EventBroadcaster {
     public List<String> broadcastHashAndCache(BaseEvent event, boolean needToSelf) {
         BroadcastResult result = this.networkService.sendToAllNode(new CommonDigestEvent(event.getHash()));
         if (needToSelf) {
+            if (event.getEventBody() instanceof Transaction) {
+                ((Transaction) event.getEventBody()).setLocalTx(true);
+            }
             eventBusService.publishLocalEvent(event);
         }
         if (result.isSuccess()) {
@@ -70,6 +74,9 @@ public class EventBroadcasterImpl implements EventBroadcaster {
     public List<String> broadcastHashAndCache(BaseEvent event, boolean needToSelf, String excludeNodeId) {
         BroadcastResult result = this.networkService.sendToAllNode(new CommonDigestEvent(event.getHash()), excludeNodeId);
         if (needToSelf) {
+            if (event.getEventBody() instanceof Transaction) {
+                ((Transaction) event.getEventBody()).setLocalTx(true);
+            }
             eventBusService.publishLocalEvent(event);
         }
         if (result.isSuccess()) {
@@ -78,10 +85,6 @@ public class EventBroadcasterImpl implements EventBroadcaster {
         return getNodeIdList(result);
     }
 
-    @Override
-    public void broadcastHashAndCacheAysn(BaseEvent event, boolean needToSelf, String excludeNodeId) {
-        //todo
-    }
 
     private List<String> getNodeIdList(BroadcastResult result) {
         List<String> list = new ArrayList<>();
@@ -98,6 +101,9 @@ public class EventBroadcasterImpl implements EventBroadcaster {
     public List<String> broadcastAndCache(BaseEvent event, boolean needToSelf, String excludeNodeId) {
         BroadcastResult result = networkService.sendToAllNode(event, excludeNodeId);
         if (needToSelf) {
+            if (event.getEventBody() instanceof Transaction) {
+                ((Transaction) event.getEventBody()).setLocalTx(true);
+            }
             eventBusService.publishLocalEvent(event);
         }
         if (result.isSuccess()) {
@@ -110,6 +116,9 @@ public class EventBroadcasterImpl implements EventBroadcaster {
     public List<String> broadcastAndCache(BaseEvent event, boolean needToSelf) {
         BroadcastResult result = networkService.sendToAllNode(event);
         if (needToSelf) {
+            if (event.getEventBody() instanceof Transaction) {
+                ((Transaction) event.getEventBody()).setLocalTx(true);
+            }
             eventBusService.publishLocalEvent(event);
         }
         if (result.isSuccess()) {
@@ -118,16 +127,20 @@ public class EventBroadcasterImpl implements EventBroadcaster {
         return getNodeIdList(result);
     }
 
-
-    @Override
-    public void broadcastAndCacheAysn(BaseEvent event, boolean needToSelf) {
-        // todo auto-generated method stub
-    }
-
     @Override
     public boolean sendToNode(BaseEvent event, String nodeId) {
         BroadcastResult result = networkService.sendToNode(event, nodeId);
         return result.isSuccess();
+    }
+
+    @Override
+    public void broadcastHashAndCacheAysn(BaseEvent event, boolean needToSelf, String excludeNodeId) {
+        //todo
+    }
+
+    @Override
+    public void broadcastAndCacheAysn(BaseEvent event, boolean needToSelf) {
+        // todo auto-generated method stub
     }
 
     @Override

@@ -95,6 +95,9 @@ public class EhCacheManager {
     }
 
     public Cache getCache(String title) {
+        if(null==cacheManager){
+            return null;
+        }
         return cacheManager.getCache(title, KEY_TYPE_MAP.get(title), VALUE_TYPE_MAP.get(title));
     }
 

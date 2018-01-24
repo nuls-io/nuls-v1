@@ -100,7 +100,7 @@ public final class AccountTool {
         desc.setCreateTime(src.getCreateTime());
         desc.setVersion(new NulsVersion(src.getVersion()));
         try {
-            desc.setAddress(newAddress(src.getPubKey()));
+            desc.setAddress(Address.fromHashs(src.getAddress()));
         } catch (NulsException e) {
             Log.error(e);
         }
@@ -112,10 +112,6 @@ public final class AccountTool {
         desc.setPriSeed(src.getPriSeed());
         desc.setEcKey(ECKey.fromPrivate(new BigInteger(desc.getPriKey())));
         desc.setStatus(src.getStatus());
-    }
-
-    private static Address newAddress(byte[] pubKey) throws NulsException {
-        return Address.fromHashs(Utils.sha256hash160(pubKey));
     }
 
     public static void toPojo(Account src, AccountPo desc) {

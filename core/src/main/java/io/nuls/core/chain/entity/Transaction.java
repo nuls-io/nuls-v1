@@ -64,6 +64,8 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
 
     protected TxStatusEnum status;
 
+    protected boolean localTx;
+
     public Transaction(int type) {
         this.dataType = NulsDataType.TRANSACTION;
         this.time = TimeService.currentTimeMillis();
@@ -203,5 +205,13 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
 
     public void setStatus(TxStatusEnum status) {
         this.status = status;
+    }
+
+    public boolean isLocalTx() {
+        return localTx;
+    }
+
+    public void setLocalTx(boolean localTx) {
+        this.localTx = localTx;
     }
 }
