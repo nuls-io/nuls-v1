@@ -35,9 +35,9 @@ import java.util.Map;
  */
 public interface BlockHeaderMapper extends BaseMapper<String, BlockHeaderPo> {
 
-    long getMaxHeight();
+    Long getMaxHeight();
 
     List<String> getSplitHashList(Map<String, Object> params);
 
-    long getSumOfRoundIndexOfYellowPunish(Map<String, Object> params);
+    Long getSumOfRoundIndexOfYellowPunish(Map<String, Object> params);
 }
