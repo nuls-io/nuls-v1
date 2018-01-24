@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -62,7 +62,11 @@ public class BlockDaoImpl extends BaseDaoImpl<BlockHeaderMapper, String, BlockHe
 
     @Override
     public long getBestHeight() {
-        return this.getMapper().getMaxHeight();
+        Long value = this.getMapper().getMaxHeight();
+        if (null == value) {
+            return 0;
+        }
+        return value.longValue();
     }
 
     @Override
@@ -108,7 +112,11 @@ public class BlockDaoImpl extends BaseDaoImpl<BlockHeaderMapper, String, BlockHe
         params.put("address", address);
         params.put("endRoundIndex", endRoundIndex);
         params.put("txType", TransactionConstant.TX_TYPE_YELLOW_PUNISH);
-        return this.getMapper().getSumOfRoundIndexOfYellowPunish(params);
+        Long value = this.getMapper().getSumOfRoundIndexOfYellowPunish(params);
+        if (null == value) {
+            value = 0L;
+        }
+        return value.longValue();
     }
 
 }

@@ -395,6 +395,7 @@ public class ConsensusMeetingRunner implements Runnable {
     }
 
     private List<Consensus<Agent>> getDefaultSeedList() throws IOException {
+        //todo
         List<Consensus<Agent>> seedList = new ArrayList<>();
         Properties prop = ConfigLoader.loadProperties(PocConsensusConstant.DEFAULT_CONSENSUS_LIST_FILE);
         if (null == prop || prop.isEmpty()) {
