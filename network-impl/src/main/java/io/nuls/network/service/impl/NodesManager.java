@@ -239,7 +239,7 @@ public class NodesManager implements Runnable {
         }
     }
 
-    public void blackNode(String nodeHash) {
+    public void blackNode(String nodeHash, int status) {
         lock.lock();
         try {
             if (nodes.containsKey(nodeHash)) {
@@ -255,7 +255,7 @@ public class NodesManager implements Runnable {
                     Node node = nodes.get(nodeHash);
                     node.setFailCount(node.getFailCount() + 1);
                     NodePo po = NodeTransferTool.toPojo(node);
-                    po.setStatus(NodePo.BLACK);
+                    po.setStatus(status);
                     nodeDao.saveChange(po);
                 }
                 nodes.remove(nodeHash);

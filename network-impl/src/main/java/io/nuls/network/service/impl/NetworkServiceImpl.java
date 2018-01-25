@@ -116,11 +116,11 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
-    public void blackNode(String nodeId) {
+    public void blackNode(String nodeId, int status) {
         Node node = nodesManager.getNode(nodeId);
         if(node != null) {
             node.destroy();
-            nodesManager.removeNode(nodeId);
+            nodesManager.blackNode(nodeId, status);
         }
     }
 

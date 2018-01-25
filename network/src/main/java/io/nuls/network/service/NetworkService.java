@@ -44,7 +44,7 @@ public interface NetworkService {
 
     void removeNode(String nodeId);
 
-    void blackNode(String nodeId);
+    void blackNode(String nodeId, int status);
 
     void addNodeToGroup(String groupName, Node node);
 
