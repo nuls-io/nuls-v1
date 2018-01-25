@@ -178,6 +178,9 @@ public class ConnectionManager implements Runnable {
             InetSocketAddress socketAddress = new InetSocketAddress(node.getIp(), node.getPort());
             channel.connect(socketAddress);
             PendingConnect data = new PendingConnect(channel, node);
+            if(channel == null) {
+                System.out.println("----------------channel is null");
+            }
             SelectionKey key = channel.register(selector, SelectionKey.OP_CONNECT);
             key.attach(data);
             selector.wakeup();
@@ -295,6 +298,7 @@ public class ConnectionManager implements Runnable {
             newKey.attach(handler);
             node.connectionOpened();
         } catch (Exception e) {
+            Log.error(e);
             if (socketChannel != null) {
                 Log.warn("in node Failed to connect" + node.getIp());
                 try {
