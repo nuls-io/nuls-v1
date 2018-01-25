@@ -185,6 +185,9 @@ public class NodePo {
     }
 
     public Integer getFailCount() {
+        if(failCount == null) {
+            failCount = 0 ;
+        }
         return failCount;
     }
 

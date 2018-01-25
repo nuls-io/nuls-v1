@@ -35,19 +35,18 @@ public class NodeTransfer {
 
 
     public static void toNode(Node node, NodePo po) {
-        node.setFailCount(null);
+        node.setFailCount(po.getFailCount());
         node.setIp(po.getIp());
         node.setPort(po.getPort());
         node.setLastTime(po.getLastTime());
         node.setMagicNumber(po.getMagicNum());
         node.setFailCount(po.getFailCount());
         node.setVersion(new NulsVersion(po.getVersion()));
-        node.setHash(node.getIp() + node.getPort());
+        node.setHash(po.getId());
     }
 
 
     public static NodePo toPojo(Node node) {
-
         NodePo po = new NodePo();
         po.setFailCount(node.getFailCount());
         po.setIp(node.getIp());
@@ -61,6 +60,7 @@ public class NodeTransfer {
         if(po.getFailCount() == null) {
             po.setFailCount(0);
         }
+        po.setId(node.getHash());
         return po;
     }
 }
