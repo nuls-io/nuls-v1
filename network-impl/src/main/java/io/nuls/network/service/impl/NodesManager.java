@@ -34,10 +34,11 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.network.IpUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.NodeDataService;
+import io.nuls.db.entity.NodePo;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeGroup;
-import io.nuls.network.entity.NodeTransfer;
+import io.nuls.network.entity.NodeTransferTool;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.message.entity.PingEvent;
 
@@ -229,7 +230,33 @@ public class NodesManager implements Runnable {
                 if (!isSeed(nodeHash)) {
                     Node node = nodes.get(nodeHash);
                     node.setFailCount(node.getFailCount() + 1);
-                    nodeDao.saveChange(NodeTransfer.toPojo(node));
+                    nodeDao.saveChange(NodeTransferTool.toPojo(node));
+                }
+                nodes.remove(nodeHash);
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void blackNode(String nodeHash) {
+        lock.lock();
+        try {
+            if (nodes.containsKey(nodeHash)) {
+                for (NodeGroup group : nodeGroups.values()) {
+                    for (Node node : group.getNodes().values()) {
+                        if (node.getHash().equals(nodeHash)) {
+                            group.removeNode(node);
+                            break;
+                        }
+                    }
+                }
+                if (!isSeed(nodeHash)) {
+                    Node node = nodes.get(nodeHash);
+                    node.setFailCount(node.getFailCount() + 1);
+                    NodePo po = NodeTransferTool.toPojo(node);
+                    po.setStatus(NodePo.BLACK);
+                    nodeDao.saveChange(po);
                 }
                 nodes.remove(nodeHash);
             }

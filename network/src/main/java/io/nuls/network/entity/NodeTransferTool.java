@@ -31,7 +31,7 @@ import io.nuls.db.entity.NodePo;
  * @author vivi
  * @date 2017/11/30.
  */
-public class NodeTransfer {
+public class NodeTransferTool {
 
 
     public static void toNode(Node node, NodePo po) {
@@ -54,6 +54,7 @@ public class NodeTransfer {
         po.setLastTime(node.getLastTime());
         po.setMagicNum(node.getMagicNumber());
         po.setVersion(node.getVersion().getVersion());
+        po.setStatus(0);
         po.setLastFailTime(node.getLastFailTime());
         if (po.getLastTime() == null) {
             po.setLastTime(TimeService.currentTimeMillis());

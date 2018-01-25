@@ -46,6 +46,9 @@ public class NodePo {
      *  1 : yellow
      *  2 : black
      */
+    public static final int WHITE = 0;
+    public static final int YELLOW = 1;
+    public static final int BLACK = 2;
     private Integer status;
 
     private Integer magicNum;

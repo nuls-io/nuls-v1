@@ -28,7 +28,7 @@ import io.nuls.db.entity.NodePo;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeGroup;
-import io.nuls.network.entity.NodeTransfer;
+import io.nuls.network.entity.NodeTransferTool;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 
 import java.net.InetSocketAddress;
@@ -69,7 +69,7 @@ public class NodeDiscoverHandler implements Runnable {
         }
         for (NodePo po : nodePos) {
             Node node = new Node(network);
-            NodeTransfer.toNode(node, po);
+            NodeTransferTool.toNode(node, po);
             nodes.add(node);
         }
         return nodes;
