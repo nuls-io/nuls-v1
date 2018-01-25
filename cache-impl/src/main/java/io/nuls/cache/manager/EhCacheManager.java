@@ -95,10 +95,12 @@ public class EhCacheManager {
     }
 
     public Cache getCache(String title) {
-        if(null==cacheManager){
+        Class keyType =  KEY_TYPE_MAP.get(title);
+        Class valueType= VALUE_TYPE_MAP.get(title);
+        if(null==cacheManager||null==keyType||valueType==null){
             return null;
         }
-        return cacheManager.getCache(title, KEY_TYPE_MAP.get(title), VALUE_TYPE_MAP.get(title));
+        return cacheManager.getCache(title,keyType, valueType);
     }
 
     public void close() {
