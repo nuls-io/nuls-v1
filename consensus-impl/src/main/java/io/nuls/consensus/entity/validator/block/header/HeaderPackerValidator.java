@@ -70,11 +70,12 @@ public class HeaderPackerValidator implements NulsDataValidator<BlockHeader> {
             if (currentRound.indexOf(header.getPackingAddress()) <= roundData.getPackingIndexOfRound()) {
                 return ValidateResult.getFailedResult(ERROR_MESSAGE);
             }
-        } else if (currentRound.getIndex() == (1 + roundData.getRoundIndex())) {
-            if (currentRound.getPreviousRound().indexOf(header.getPackingAddress()) <= roundData.getPackingIndexOfRound()) {
-                return ValidateResult.getFailedResult(ERROR_MESSAGE);
-            }
         }
+//TODO        else if (currentRound.getIndex() == (1 + roundData.getRoundIndex())) {
+//            if (currentRound.getPreviousRound().indexOf(header.getPackingAddress()) <= roundData.getPackingIndexOfRound()) {
+//                return ValidateResult.getFailedResult(ERROR_MESSAGE);
+//            }
+//        }
         BlockRoundData nowRoundData = null;
         try {
             nowRoundData = new BlockRoundData(header.getExtend());

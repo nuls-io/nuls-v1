@@ -244,8 +244,8 @@ public class ConsensusMeetingRunner implements Runnable {
         bd.setTxList(txList);
         Block newBlock = ConsensusTool.createBlock(bd);
         ValidateResult result = newBlock.verify();
-        if(result.isFailed()){
-            Log.error("packing block error"+result.getMessage());
+        if (result.isFailed()) {
+            Log.error("packing block error" + result.getMessage());
             return;
         }
         blockCacheManager.cacheBlock(newBlock);
@@ -387,20 +387,23 @@ public class ConsensusMeetingRunner implements Runnable {
     private PocMeetingRound calcRound() {
         Block bestBlock = blockService.getLocalBestBlock();
         PocMeetingRound round = new PocMeetingRound(this.consensusManager.getCurrentRound());
-        do {
-            if (bestBlock.getHeader().getHeight() == NulsContext.getInstance().getGenesisBlock().getHeader().getHeight()) {
-                round.setStartTime(this.context.getGenesisBlock().getHeader().getTime() + 10000L);
-                break;
-            }
-            BlockRoundData lastRoundData;
-            try {
-                lastRoundData = new BlockRoundData(bestBlock.getHeader().getExtend());
-            } catch (NulsException e) {
-                Log.error(e);
-                throw new NulsRuntimeException(e);
-            }
-            round.setStartTime(lastRoundData.getRoundEndTime());
-        } while (false);
+        BlockRoundData lastRoundData;
+        try {
+            lastRoundData = new BlockRoundData(bestBlock.getHeader().getExtend());
+        } catch (NulsException e) {
+            Log.error(e);
+            throw new NulsRuntimeException(e);
+        }
+        if(round.getPreviousRound()==null){
+            PocMeetingRound preRound = new PocMeetingRound(null);
+            preRound.setIndex(lastRoundData.getRoundIndex());
+            preRound.setEndTime(lastRoundData.getRoundEndTime());
+            preRound.setStartTime(lastRoundData.getRoundStartTime());
+            preRound.setMemberCount(lastRoundData.getConsensusMemberCount());
+            round.setPreviousRound(preRound);
+        }
+        round.setStartTime(lastRoundData.getRoundEndTime());
+        round.setIndex(lastRoundData.getRoundIndex() + 1);
         return round;
     }
 
