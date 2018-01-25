@@ -38,9 +38,12 @@ import java.util.List;
 public class AccountCacheService {
     private static final AccountCacheService INSTANCE = new AccountCacheService();
 
-    private final CacheMap<String, Account> cacheMap;
+    private CacheMap<String, Account> cacheMap;
 
     private AccountCacheService() {
+    }
+
+    public void init() {
         this.cacheMap = new CacheMap<>(AccountConstant.ACCOUNT_LIST_CACHE, 32);
     }
 

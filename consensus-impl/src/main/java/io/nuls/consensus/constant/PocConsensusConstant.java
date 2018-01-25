@@ -30,8 +30,8 @@ import io.nuls.core.chain.entity.Na;
  */
 public interface PocConsensusConstant {
     //version
-    int POC_CONSENSUS_MODULE_VERSION = 0;
-    int MINIMUM_VERSION_SUPPORTED = 0;
+    short POC_CONSENSUS_MODULE_VERSION = 0;
+    short MINIMUM_VERSION_SUPPORTED = 0;
 
 
     String CFG_CONSENSUS_SECTION = "consensus";

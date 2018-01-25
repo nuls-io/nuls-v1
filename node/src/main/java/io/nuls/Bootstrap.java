@@ -92,14 +92,7 @@ public class Bootstrap {
         if (null == bootstrapClasses || bootstrapClasses.isEmpty()) {
             return;
         }
-        List<String> keyList = new ArrayList<>(bootstrapClasses.keySet());
-        for (String key : keyList) {
-            try {
-                moduleService.startModule(key, bootstrapClasses.get(key));
-            } catch (Exception e) {
-                throw new NulsRuntimeException(e);
-            }
-        }
+        moduleService.startModules(bootstrapClasses);
     }
 
     private static Map<String, String> getModuleBootstrapClass() throws NulsException {

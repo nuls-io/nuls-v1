@@ -243,7 +243,11 @@ public class ConsensusMeetingRunner implements Runnable {
         addConsensusTx(bestBlock, txList, self);
         bd.setTxList(txList);
         Block newBlock = ConsensusTool.createBlock(bd);
-        newBlock.verify();
+        ValidateResult result = newBlock.verify();
+        if(result.isFailed()){
+            Log.error("packing block error"+result.getMessage());
+            return;
+        }
         blockCacheManager.cacheBlock(newBlock);
         BlockHeaderEvent event = new BlockHeaderEvent();
         event.setEventBody(newBlock.getHeader());

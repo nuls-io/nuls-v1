@@ -24,6 +24,7 @@
 package io.nuls.core.validate;
 
 import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.utils.log.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +61,9 @@ public class DataValidatorChain {
         }
         NulsDataValidator<BaseNulsData> validator = list.get(index.get());
         ValidateResult result = validator.validate(data);
+        if(null==result){
+            Log.error(validator.getClass()+" has null result!");
+        }
         if (!result.isSuccess()) {
             return result;
         }

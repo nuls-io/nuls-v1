@@ -130,7 +130,7 @@ public final class GenesisBlock extends Block {
             throw new NulsRuntimeException(e);
         }
         //todo
-        tx.setSign(new NulsSignData());
+        tx.setSign(NulsSignData.EMPTY_SIGN);
         List<Transaction> txlist = new ArrayList<>();
         txlist.add(tx);
         setTxs(txlist);
