@@ -80,9 +80,9 @@ public class NodeDiscoverHandler implements Runnable {
         List<Node> seedNodes = new ArrayList<>();
         for (InetSocketAddress socketAddress : network.getSeedNodes()) {
             // remove myself
-            if (network.getLocalIps().contains(socketAddress.getAddress().getHostAddress())) {
-                continue;
-            }
+//todo            if (network.getLocalIps().contains(socketAddress.getAddress().getHostAddress())) {
+//                continue;
+//            }
             seedNodes.add(new Node(network, Node.OUT, socketAddress));
         }
         return seedNodes;

@@ -51,13 +51,14 @@ public class EhCacheManager {
     private CacheManager cacheManager;
 
     private EhCacheManager() {
+        init();
     }
 
     public static EhCacheManager getInstance() {
         return INSTANCE;
     }
 
-    public void init() {
+    private void init() {
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true);
     }
 

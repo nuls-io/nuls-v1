@@ -12,7 +12,6 @@ public class EhCacheManagerTest {
     EhCacheManager manager = EhCacheManager.getInstance();
     @Test
     public void test() throws Exception {
-        manager.init();
         CacheService<String,String> cache = EhCacheServiceImpl.getInstance();
         String cacheName = "test1";
         cache.createCache(cacheName,100,0,0);

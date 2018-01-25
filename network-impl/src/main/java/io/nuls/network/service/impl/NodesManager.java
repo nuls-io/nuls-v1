@@ -193,6 +193,7 @@ public class NodesManager implements Runnable {
             if (!nodeArea.get(areaName).containsKey(groupName)) {
                 throw new NulsRuntimeException(ErrorCode.NODE_GROUP_NOT_FOUND);
             }
+            addNode(node);
             if (areaName.equals(DEFAULT_AREA) && groupName.equals(NetworkConstant.NETWORK_NODE_OUT_GROUP) &&
                     nodeGroups.get(groupName).size() >= network.maxOutCount()) {
                 return;
@@ -202,7 +203,6 @@ public class NodesManager implements Runnable {
                 return;
             }
 
-            addNode(node);
             nodeArea.get(areaName).get(groupName).addNode(node);
         } finally {
             lock.unlock();
