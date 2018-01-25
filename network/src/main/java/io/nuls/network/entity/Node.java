@@ -38,6 +38,7 @@ import io.nuls.core.mesasge.NulsMessageHeader;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.date.DateUtil;
+import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
@@ -83,6 +84,8 @@ public class Node extends BaseNulsData {
     private Integer port;
 
     private Long lastTime;
+
+    private Long lastFailTime;
 
     private Integer failCount;
 
@@ -284,6 +287,7 @@ public class Node extends BaseNulsData {
     public void destroy() {
         lock.lock();
         try {
+            this.lastFailTime = TimeService.currentTimeMillis();
             this.status = Node.CLOSE;
             if (this.writeTarget != null) {
                 this.writeTarget.closeConnection();
@@ -482,5 +486,16 @@ public class Node extends BaseNulsData {
 
     public Set<NodeGroup> getGroupSet() {
         return this.groupSet;
+    }
+
+    public Long getLastFailTime() {
+        if(lastFailTime == null) {
+            lastFailTime = 0L;
+        }
+        return lastFailTime;
+    }
+
+    public void setLastFailTime(Long lastFailTime) {
+        this.lastFailTime = lastFailTime;
     }
 }

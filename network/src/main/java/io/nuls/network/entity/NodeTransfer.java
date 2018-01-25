@@ -54,6 +54,7 @@ public class NodeTransfer {
         po.setLastTime(node.getLastTime());
         po.setMagicNum(node.getMagicNumber());
         po.setVersion(node.getVersion().getVersion());
+        po.setLastFailTime(node.getLastFailTime());
         if (po.getLastTime() == null) {
             po.setLastTime(TimeService.currentTimeMillis());
         }
