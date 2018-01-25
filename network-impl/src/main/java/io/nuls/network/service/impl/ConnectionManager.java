@@ -202,11 +202,11 @@ public class ConnectionManager implements Runnable {
         //check the connecting nodes count
         boolean inAble = true;
         boolean outAble = true;
-        NodeGroup inNodes = nodesManager.getNodeGroup("inNodes");
+        NodeGroup inNodes = nodesManager.getNodeGroup(NetworkConstant.NETWORK_NODE_IN_GROUP);
         if (inNodes.size() >= network.maxInCount()) {
             inAble = false;
         }
-        NodeGroup outNodes = nodesManager.getNodeGroup("inNodes");
+        NodeGroup outNodes = nodesManager.getNodeGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP);
         if (outNodes.size() >= network.maxOutCount()) {
             outAble = false;
         }
