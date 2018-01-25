@@ -92,8 +92,7 @@ public class NulsMessageHeader extends BaseNulsData {
         Utils.int32ToByteArrayLE(magicNumber, header, 0);
         Utils.int32ToByteArrayLE(length, header, 4);
         Utils.uint16ToByteArrayLE(xor, header, 8);
-        header[9] = xor;
-        header[10] = arithmetic;
+        header[9] = arithmetic;
         stream.write(header);
     }
 
