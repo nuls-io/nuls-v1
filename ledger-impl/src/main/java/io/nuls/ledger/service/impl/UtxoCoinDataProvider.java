@@ -287,24 +287,33 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
     }
 
     @Override
-    public CoinData createTransferData(Transaction tx, CoinTransferData coinParam, String password) throws NulsException {
+    public CoinData createByTransferData(Transaction tx, CoinTransferData coinParam, String password) throws NulsException {
         UtxoData utxoData = new UtxoData();
         List<UtxoInput> inputs = new ArrayList<>();
         List<UtxoOutput> outputs = new ArrayList<>();
 
-        //find unSpends to create inputs for this tx
-        List<UtxoOutput> unSpends = coinManager.getAccountsUnSpend(coinParam.getFrom(), coinParam.getTotalNa().add(coinParam.getFee()));
+        if (coinParam.getTotalNa().equals(Na.ZERO)) {
+            utxoData.setInputs(inputs);
+            utxoData.setOutputs(outputs);
+            return utxoData;
+        }
 
         long inputValue = 0;
-        for (int i = 0; i < unSpends.size(); i++) {
-            UtxoOutput output = unSpends.get(i);
-            UtxoInput input = new UtxoInput();
-            input.setFrom(output);
-            inputs.add(input);
-            input.setParent(tx);
-            input.setIndex(i);
-            inputValue += output.getValue();
+        if (!coinParam.getFrom().isEmpty()) {
+            //find unSpends to create inputs for this tx
+            List<UtxoOutput> unSpends = coinManager.getAccountsUnSpend(coinParam.getFrom(), coinParam.getTotalNa().add(coinParam.getFee()));
+
+            for (int i = 0; i < unSpends.size(); i++) {
+                UtxoOutput output = unSpends.get(i);
+                UtxoInput input = new UtxoInput();
+                input.setFrom(output);
+                inputs.add(input);
+                input.setParent(tx);
+                input.setIndex(i);
+                inputValue += output.getValue();
+            }
         }
+
 
         int i = 0;
         long outputValue = 0;
@@ -330,7 +339,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         long balance = inputValue - outputValue - coinParam.getFee().getValue();
         if (balance > 0) {
             UtxoOutput output = new UtxoOutput();
-            output.setAddress(unSpends.get(0).getAddress());
+            output.setAddress(inputs.get(0).getFrom().getAddress());
             output.setValue(balance);
             output.setIndex(i);
             outputs.add(output);

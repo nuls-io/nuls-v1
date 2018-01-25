@@ -54,7 +54,7 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
 
     public AbstractCoinTransaction(int type, CoinTransferData coinParam, String password) throws NulsException {
         this(type);
-        this.coinData = this.coinDataProvider.createTransferData(this, coinParam, password);
+        this.coinData = this.coinDataProvider.createByTransferData(this, coinParam, password);
     }
 
     @Override

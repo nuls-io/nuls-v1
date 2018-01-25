@@ -45,5 +45,5 @@ public interface CoinDataProvider {
 
     void rollback(CoinData coinData, Transaction tx);
 
-    CoinData createTransferData(Transaction tx, CoinTransferData coinParam, String password) throws NulsException;
+    CoinData createByTransferData(Transaction tx, CoinTransferData coinParam, String password) throws NulsException;
 }
