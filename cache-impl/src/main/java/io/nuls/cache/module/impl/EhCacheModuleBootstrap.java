@@ -41,7 +41,6 @@ public class EhCacheModuleBootstrap extends AbstractCacheModule {
 
     @Override
     public void init() {
-        cacheManager.init();
     }
 
     @Override
