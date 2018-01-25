@@ -36,6 +36,7 @@ import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.validate.ValidateResult;
+import io.nuls.db.entity.NodePo;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.network.service.NetworkService;
 
@@ -79,7 +80,7 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
         block.setTxs(txs);
         ValidateResult<RedPunishData> vResult = block.verify();
         if (null == vResult || vResult.isFailed()) {
-            networkService.removeNode(fromId);
+            networkService.blackNode(fromId, NodePo.YELLOW);
             if (vResult.getLevel() == SeverityLevelEnum.FLAGRANT_FOUL) {
                 RedPunishData data = vResult.getObject();
                 ConsensusMeetingRunner.putPunishData(data);

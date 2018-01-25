@@ -181,7 +181,7 @@ public class ConsensusMeetingRunner implements Runnable {
         }
         self.setCreditVal(calcCreditVal());
         long timeUnit = 100L;
-        while (TimeService.currentTimeMillis() >= (self.getPackTime() - timeUnit)) {
+        while (TimeService.currentTimeMillis() <= (self.getPackTime() - timeUnit)) {
             try {
                 Thread.sleep(timeUnit);
             } catch (InterruptedException e) {
@@ -294,6 +294,9 @@ public class ConsensusMeetingRunner implements Runnable {
 
     private List<ConsensusReward> calcReward(List<Transaction> txList) {
         List<ConsensusReward> rewardList = new ArrayList<>();
+        if (this.consensusManager.getCurrentRound().getTotalDeposit().getValue() == 0) {
+            return rewardList;
+        }
         ConsensusGroup cg = this.consensusManager.getCurrentRound().getConsensusGroup();
         long totalFee = 0;
         for (Transaction tx : txList) {
@@ -381,7 +384,7 @@ public class ConsensusMeetingRunner implements Runnable {
         Block bestBlock = blockService.getLocalBestBlock();
         PocMeetingRound round = new PocMeetingRound(this.consensusManager.getCurrentRound());
         do {
-            if (bestBlock.getHeader().getHeight() == 1) {
+            if (bestBlock.getHeader().getHeight() == NulsContext.getInstance().getGenesisBlock().getHeader().getHeight()) {
                 round.setStartTime(this.context.getGenesisBlock().getHeader().getTime() + 10000L);
                 break;
             }

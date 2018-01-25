@@ -104,6 +104,8 @@ public class ConsensusManager implements Runnable {
         if (this.partakePacking && noneAccount) {
             Account account = this.accountService.createAccount();
             this.accountService.setDefaultAccount(account.getId());
+            NulsContext. DEFAULT_ACCOUNT_ID = account.getId();
+            NulsContext.LOCAL_ADDRESS_LIST.add(account.getId());
         }
         blockCacheManager = BlockCacheManager.getInstance();
         blockCacheManager.init();

@@ -152,7 +152,7 @@ public final class GenesisBlock extends Block {
             txHashList.add(tx.getHash());
         }
         header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
-        header.setHash(NulsDigestData.calcDigestData(this));
+
         BlockRoundData data = new BlockRoundData();
         data.setRoundIndex(1);
         data.setRoundStartTime(header.getTime());
@@ -163,9 +163,10 @@ public final class GenesisBlock extends Block {
         } catch (IOException e) {
             Log.error(e);
         }
-        //todo change to real address & signature
         header.setPackingAddress("00000");
-        header.setSign(new NulsSignData());
+        header.setHash(NulsDigestData.calcDigestData(header));
+        //todo change to real address & signature
+        header.setSign(NulsSignData.EMPTY_SIGN);
     }
 
 

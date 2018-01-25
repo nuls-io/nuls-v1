@@ -86,6 +86,9 @@ public class UtxoTransactionTool {
 
         for (Account account : accounts) {
             UtxoBalance balance = (UtxoBalance) ledgerCacheService.getBalance(account.getAddress().getBase58());
+            if(balance==null){
+                continue;
+            }
             for (UtxoOutput output : balance.getUnSpends()) {
                 for (UtxoInput input : coinData.getInputs()) {
                     if (output.getTxHash().getDigestHex().equals(input.getTxHash().getDigestHex()) &&

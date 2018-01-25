@@ -48,12 +48,16 @@ public class HeaderHashValidator implements NulsDataValidator<BlockHeader> {
     public ValidateResult validate(BlockHeader data) {
         ValidateResult result = ValidateResult.getSuccessResult();
         NulsDigestData hash = data.getHash();
+        NulsSignData signData = data.getSign();
         data.setSign(null);
         NulsDigestData cfmHash = null;
         try {
             cfmHash = NulsDigestData.calcDigestData(data.serialize());
+
         } catch (IOException e) {
             Log.error(e);
+        }finally {
+            data.setSign(signData);
         }
         if (!cfmHash.getDigestHex().equals(hash.getDigestHex())) {
             result = ValidateResult.getFailedResult(ERROR_MESSAGE);

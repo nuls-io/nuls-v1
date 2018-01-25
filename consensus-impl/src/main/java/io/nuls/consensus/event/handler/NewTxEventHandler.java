@@ -28,6 +28,7 @@ import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.validate.ValidateResult;
+import io.nuls.db.entity.NodePo;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.ledger.event.TransactionEvent;
 import io.nuls.ledger.service.intf.LedgerService;
@@ -61,9 +62,9 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
         ValidateResult result = tx.verify();
         if (result.isFailed()) {
             if (result.getLevel() == SeverityLevelEnum.NORMAL_FOUL) {
-                networkService.removeNode(fromId);
+                networkService.blackNode(fromId,NodePo.YELLOW);
             } else if (result.getLevel() == SeverityLevelEnum.FLAGRANT_FOUL) {
-                networkService.removeNode(fromId);
+                networkService.blackNode(fromId, NodePo.BLACK);
             }
         }
         cacheManager.putTx(tx);

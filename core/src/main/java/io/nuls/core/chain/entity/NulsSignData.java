@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,6 +25,7 @@ package io.nuls.core.chain.entity;
 
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
@@ -33,25 +34,29 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- *
  * @author facjas
  * @date 2017/11/20
  */
-public class NulsSignData extends BaseNulsData{
-    protected int signAlgType;
-    protected int signLength;
+public class NulsSignData extends BaseNulsData {
+
+    public static final NulsSignData EMPTY_SIGN = new NulsSignData(new byte[]{0, 0, 1, 0});
+
+    protected short signAlgType;
     protected byte[] signBytes;
 
     public int getSignAlgType() {
         return signAlgType;
     }
 
-    public void setSignAlgType(int signAlgType) {
+    public void setSignAlgType(short signAlgType) {
         this.signAlgType = signAlgType;
     }
 
-    public NulsSignData(){}
-    public NulsSignData(byte[] bytes){
+    public NulsSignData() {
+    }
+
+    public NulsSignData(byte[] bytes) {
+        this();
         try {
             this.parse(bytes);
         } catch (NulsException e) {
@@ -61,28 +66,27 @@ public class NulsSignData extends BaseNulsData{
 
     @Override
     public int size() {
-        //todo
-        return 0;
+        return Utils.sizeOfSerialize(signBytes) + 2;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        //todo
-        stream.write(0);
+        stream.writeShort(signAlgType);
+        stream.writeBytesWithLength(signBytes);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        //todo
-        byteBuffer.readByte();
+        this.signAlgType = byteBuffer.readShort();
+        this.signBytes = byteBuffer.readByLengthByte();
     }
 
     public int getSignLength() {
-        return signLength;
-    }
-
-    public void setSignLength(int signLength) {
-        this.signLength = signLength;
+        //todo
+        if (null == this.signBytes) {
+            return 0;
+        }
+        return this.signBytes.length;
     }
 
     public byte[] getSignBytes() {

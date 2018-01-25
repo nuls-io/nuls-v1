@@ -42,6 +42,7 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.queue.service.impl.QueueService;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.core.validate.ValidateResult;
+import io.nuls.db.entity.NodePo;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.network.service.NetworkService;
 
@@ -238,7 +239,7 @@ public class BlockBatchDownloadUtils {
         if (null == nodeStatus) {
             return;
         }
-        networkService.removeNode(nodeStatus.getNodeId());
+        networkService.blackNode(nodeStatus.getNodeId(), NodePo.YELLOW);
         this.nodeIdList.remove(nodeIdList);
         this.queueService.remove(queueId, nodeStatus.getNodeId());
         this.sendRequest(nodeStatus.getStart(), nodeStatus.getEnd(), this.queueService.take(queueId));
