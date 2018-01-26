@@ -93,7 +93,7 @@ public class AccountResource {
     @Path("/address")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getAddress(@QueryParam("publicKey") String publicKey, @QueryParam("subChainId") Integer subChainId) {
-        Address address = new Address(subChainId, Hex.decode(publicKey));
+        Address address = new Address((short)subChainId.intValue(), Hex.decode(publicKey));
         RpcResult result = RpcResult.getSuccess();
         result.setData(address.toString());
         return result;

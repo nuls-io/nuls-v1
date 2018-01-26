@@ -53,7 +53,7 @@ public class AliasValidator implements NulsDataValidator<AliasTransaction> {
     @Override
     public ValidateResult validate(AliasTransaction tx) {
         Alias alias = tx.getTxData();
-        if (StringUtils.isBlank(alias.getAddress()) || new Address(alias.getAddress()).getHash160().length > 25) {
+        if (StringUtils.isBlank(alias.getAddress()) || new Address(alias.getAddress()).getHash().length !=23 ) {
             return ValidateResult.getFailedResult("The address format error");
         }
         if (!StringUtils.validAlias(alias.getAlias())) {

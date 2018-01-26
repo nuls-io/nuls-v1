@@ -100,7 +100,7 @@ public class UtxoTransactionTool {
                 }
             }
             for (UtxoOutput output : coinData.getOutputs()) {
-                if (new Address(0, output.getAddress()).equals(account.getAddress())) {
+                if (new Address((short) 0, output.getAddress()).equals(account.getAddress())) {
                     return true;
                 }
             }
