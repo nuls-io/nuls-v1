@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -38,9 +38,7 @@ public class Address {
     /**
      *
      */
-
     public static final int HASH_LENGTH = 23;
-
 
     // RIPEMD160 length
     public static final int LENGTH = 20;
@@ -51,28 +49,26 @@ public class Address {
     protected byte[] hash160;
 
     /**
-     *  chain id
+     * chain id
      */
-    private short chainId = 0;
+    private short addressType = 0;
 
     public Address(String address) {
         try {
             byte[] bytes = Base58.decode(address);
 
             Address addressTmp = Address.fromHashs(bytes);
-            this.chainId = addressTmp.getChainId();
+            this.addressType = addressTmp.getAddressType();
             this.hash160 = addressTmp.getHash160();
         } catch (NulsException e) {
             Log.error(e);
         }
     }
 
-
-    public Address(short chainId, byte[] hash160) {
-        this.chainId = chainId;
+    public Address(short addressType, byte[] hash160) {
+        this.addressType = addressType;
         this.hash160 = hash160;
     }
-
 
     private byte[] getHash160() {
         return hash160;
@@ -83,16 +79,12 @@ public class Address {
         return getBase58();
     }
 
-    public short getChainId() {
-        return this.chainId;
+    public short getAddressType() {
+        return this.addressType;
     }
 
     public String getBase58() {
         return Base58.encode(getHash());
-    }
-
-    public String getCommonBase58() {
-        return Base58.encode(hash160);
     }
 
     public static Address fromHashs(String address) throws NulsException {
@@ -105,21 +97,21 @@ public class Address {
             throw new NulsException(ErrorCode.DATA_ERROR);
         }
 
-        short chainId = Utils.bytes2Short(hashs);
+        short addressType = Utils.bytes2Short(hashs);
         byte[] content = new byte[LENGTH];
         System.arraycopy(hashs, 2, content, 0, LENGTH);
 
         byte[] sign = new byte[1];
         System.arraycopy(hashs, 22, sign, 0, 1);
 
-        Address address = new Address(chainId, content);
+        Address address = new Address(addressType, content);
         address.checkXOR(sign[0]);
         return address;
     }
 
     public byte[] getHash() {
         byte[] body = new byte[22];
-        System.arraycopy(Utils.shortToBytes(chainId),0,body,0,2);
+        System.arraycopy(Utils.shortToBytes(addressType), 0, body, 0, 2);
         System.arraycopy(hash160, 0, body, 2, hash160.length);
         byte xor = getXor(body);
         byte[] base58bytes = new byte[23];
@@ -140,8 +132,8 @@ public class Address {
 
     protected void checkXOR(byte xorByte) throws NulsException {
         byte[] body = new byte[22];
-        System.arraycopy(Utils.shortToBytes(chainId),0,body,0,2);
-        System.arraycopy(hash160, 0, body,2, hash160.length);
+        System.arraycopy(Utils.shortToBytes(addressType), 0, body, 0, 2);
+        System.arraycopy(hash160, 0, body, 2, hash160.length);
 
         byte xor = 0x00;
         for (int i = 0; i < body.length; i++) {

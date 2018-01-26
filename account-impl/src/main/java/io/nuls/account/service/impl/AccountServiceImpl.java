@@ -118,7 +118,7 @@ public class AccountServiceImpl implements AccountService {
         List<Account> accounts = getAccountList();
         Set<String> addressList = new HashSet<>();
         if (accounts != null && !accounts.isEmpty()) {
-            NulsContext.DEFAULT_ACCOUNT_ID = accounts.get(0).getId();
+            NulsContext.DEFAULT_ACCOUNT_ID = accounts.get(0).getAddress().getBase58();
             for (Account account : accounts) {
                 addressList.add(account.getAddress().getBase58());
             }
@@ -175,9 +175,9 @@ public class AccountServiceImpl implements AccountService {
 
                 accounts.add(account);
                 accountPos.add(po);
-                resultList.add(account.getId());
+                resultList.add(account.getAddress().getBase58());
 
-                NulsContext.LOCAL_ADDRESS_LIST.add(account.getId());
+                NulsContext.LOCAL_ADDRESS_LIST.add(account.getAddress().getBase58());
             }
 
             accountDao.save(accountPos);
@@ -227,7 +227,7 @@ public class AccountServiceImpl implements AccountService {
             Account account = new Account();
             AccountTool.toBean(po, account);
             list.add(account);
-            addressList.add(account.getId());
+            addressList.add(account.getAddress().getBase58());
         }
         this.accountCacheService.putAccountList(list);
         NulsContext.LOCAL_ADDRESS_LIST = addressList;
@@ -696,7 +696,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     private boolean accountExist(Account account) {
-        return accountCacheService.accountExist(account.getId());
+        return accountCacheService.accountExist(account.getAddress().getBase58());
     }
 
     private void importSave(List<Account> accounts) throws Exception {

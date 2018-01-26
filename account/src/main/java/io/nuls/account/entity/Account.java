@@ -48,11 +48,9 @@ import java.util.List;
  */
 public class Account extends BaseNulsData implements NulsCloneable {
 
-    private String id;
+    private Address address;
 
     private String alias;
-
-    private Address address;
 
     // is default acct
     private int status;
@@ -180,7 +178,6 @@ public class Account extends BaseNulsData implements NulsCloneable {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-
         stream.writeShort(version.getVersion());
         stream.writeString(alias);
         stream.writeString(address.getBase58());
@@ -195,7 +192,6 @@ public class Account extends BaseNulsData implements NulsCloneable {
         version = new NulsVersion(byteBuffer.readShort());
         alias = new String(byteBuffer.readByLengthByte());
         address = new Address(new String(byteBuffer.readByLengthByte()));
-        id = new String(new String(byteBuffer.readByLengthByte()));
         priSeed = byteBuffer.readByLengthByte();
         pubKey = byteBuffer.readByLengthByte();
         status = byteBuffer.readInt32LE();
@@ -234,14 +230,6 @@ public class Account extends BaseNulsData implements NulsCloneable {
         this.pubKey = pubKey;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
     public String getAlias() {
         return alias;
     }
@@ -258,10 +246,6 @@ public class Account extends BaseNulsData implements NulsCloneable {
         this.createTime = createTime;
     }
 
-    public int getAccountChainId() {
-        return this.getAddress().getChainId();
-    }
-
     public int getStatus() {
         return status;
     }
@@ -273,7 +257,6 @@ public class Account extends BaseNulsData implements NulsCloneable {
     @Override
     public Object copy() {
         Account account = new Account();
-        account.setId(id);
         account.setAlias(alias);
         account.setAddress(address);
         account.setStatus(status);

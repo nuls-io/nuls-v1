@@ -79,9 +79,9 @@ public class NodeDaoImpl extends BaseDaoImpl<NodeMapper, String, NodePo> impleme
             searchable.addCondition("port", SearchOperator.eq, po.getPort());
             if (getMapper().selectCount(searchable) > 0) {
                 if (po.getFailCount() >= 3) {
-                    getMapper().deleteByIp(po);
+                    getMapper().deleteByPrimaryKey(po.getId());
                 } else {
-                    getMapper().updateByIp(po);
+                    getMapper().updateByPrimaryKey(po);
                 }
             } else {
                 getMapper().insert(po);

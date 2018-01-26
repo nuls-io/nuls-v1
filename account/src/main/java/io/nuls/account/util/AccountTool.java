@@ -68,7 +68,6 @@ public final class AccountTool {
         account.setPriSeed(key.getPrivKeyBytes());
         account.setVersion(new NulsVersion((short) 0));
         account.setAddress(address);
-        account.setId(address.toString());
         account.setPubKey(key.getPubKey(true));
         account.setEcKey(key);
         account.setPriKey(key.getPrivKeyBytes());
@@ -106,10 +105,7 @@ public final class AccountTool {
         }
         desc.setAlias(src.getAlias());
         desc.setExtend(src.getExtend());
-        desc.setId(src.getId());
-        desc.setPubKey(src.getPubKey());
-        desc.setPriKey(src.getPriKey().getBytes());
-        desc.setPriSeed(src.getPriSeed());
+        desc.setPriKey(src.getPriKey());
         desc.setEcKey(ECKey.fromPrivate(new BigInteger(desc.getPriKey())));
         desc.setStatus(src.getStatus());
     }
@@ -117,15 +113,12 @@ public final class AccountTool {
     public static void toPojo(Account src, AccountPo desc) {
         AssertUtil.canNotEmpty(src, "Object type conversion failed!");
         AssertUtil.canNotEmpty(desc, "Object type conversion failed!");
-        desc.setId(src.getId());
         desc.setAddress(src.getAddress().toString());
         desc.setAlias(src.getAlias());
         desc.setCreateTime(src.getCreateTime());
-        desc.setPubKey(src.getPubKey());
         desc.setVersion(src.getVersion().getVersion());
         desc.setExtend(src.getExtend());
-        desc.setPriKey(Hex.encode(src.getPriKey()));
-        desc.setPriSeed(src.getPriSeed());
+        desc.setPriKey(src.getPriKey());
         desc.setStatus(src.getStatus());
     }
 

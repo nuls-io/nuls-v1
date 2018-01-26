@@ -25,9 +25,7 @@ package io.nuls.account.service.impl;
 
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.entity.Account;
-import io.nuls.cache.service.intf.CacheService;
 import io.nuls.cache.util.CacheMap;
-import io.nuls.core.context.NulsContext;
 
 import java.util.List;
 
@@ -51,7 +49,7 @@ public class AccountCacheService {
 
     public void putAccount(Account account) {
 
-        this.cacheMap.put(account.getId(), account);
+        this.cacheMap.put(account.getAddress().getBase58(), account);
     }
 
     public Account getAccountById(String id) {
@@ -77,7 +75,7 @@ public class AccountCacheService {
     }
 
     public void removeAccount(Account account) {
-        this.cacheMap.remove(account.getId());
+        this.cacheMap.remove(account.getAddress().getBase58());
     }
 
     public void removeAccount(String address) {

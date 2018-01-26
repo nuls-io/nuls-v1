@@ -32,7 +32,4 @@ import io.nuls.db.entity.NodePo;
  */
 public interface NodeMapper  extends BaseMapper<String,NodePo> {
 
-    int updateByIp(NodePo po);
-
-    int deleteByIp(NodePo po);
 }

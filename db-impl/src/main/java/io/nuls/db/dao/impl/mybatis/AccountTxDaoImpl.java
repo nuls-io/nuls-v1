@@ -59,7 +59,7 @@ public class AccountTxDaoImpl implements AccountAliasDataService {
             } else {
                 aliasDao.update(alias);
                 AccountPo po = new AccountPo();
-                po.setId(alias.getAddress());
+                po.setAddress(alias.getAddress());
                 po.setAlias(alias.getAlias());
                 accountDao.updateAlias(po);
             }
@@ -87,7 +87,7 @@ public class AccountTxDaoImpl implements AccountAliasDataService {
             aliasDao.delete(aliasPo.getAlias());
 
             AccountPo po = new AccountPo();
-            po.setId(aliasPo.getAddress());
+            po.setAddress(aliasPo.getAddress());
             po.setAlias("");
             accountDao.updateAlias(po);
         } catch (Exception e) {

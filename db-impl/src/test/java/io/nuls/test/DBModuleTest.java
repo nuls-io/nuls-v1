@@ -175,7 +175,6 @@ public class DBModuleTest {
     @Test
     public void testAccount() {
         AccountPo accountPo = new AccountPo();
-        accountPo.setId("abcd");
         accountPo.setAddress("abcd");
         accountPo.setCreateTime(System.currentTimeMillis());
         accountPo.setVersion((short) 11);
