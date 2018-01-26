@@ -106,6 +106,8 @@ public final class AccountTool {
         desc.setAlias(src.getAlias());
         desc.setExtend(src.getExtend());
         desc.setPriKey(src.getPriKey());
+        desc.setPubKey(src.getPubKey());
+        desc.setPriSeed(src.getPriSeed());
         desc.setEcKey(ECKey.fromPrivate(new BigInteger(desc.getPriKey())));
         desc.setStatus(src.getStatus());
     }
@@ -119,6 +121,8 @@ public final class AccountTool {
         desc.setVersion(src.getVersion().getVersion());
         desc.setExtend(src.getExtend());
         desc.setPriKey(src.getPriKey());
+        desc.setPubKey(src.getPubKey());
+        desc.setPriSeed(src.getPriSeed());
         desc.setStatus(src.getStatus());
     }
 

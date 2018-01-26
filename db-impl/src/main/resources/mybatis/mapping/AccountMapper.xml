@@ -11,15 +11,17 @@
     </resultMap>
 
     <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="io.nuls.db.entity.AccountPo">
-        <result column="pri_key" jdbcType="VARBINARY" property="pri_key"/>
+        <result column="pub_key" jdbcType="VARBINARY" property="pubKey"/>
+        <result column="pri_key" jdbcType="VARBINARY" property="priKey"/>
+        <result column="pri_seed" jdbcType="VARBINARY" property="priSeed"/>
         <result column="extend" jdbcType="VARBINARY" property="extend"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        address, create_time, alias, version, , status
+        address, create_time, alias, version, status
     </sql>
     <sql id="Blob_Column_List">
-        pri_key, extend
+        pub_key, pri_key, pri_seed, extend
     </sql>
 
     <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="ResultMapWithBLOBs">
@@ -37,86 +39,12 @@
     </delete>
     <insert id="insert" parameterType="io.nuls.db.entity.AccountPo">
         insert into account (address, create_time,
-        alias, version, status, pri_key, extend)
+        alias, version, status, pub_key, pri_key, pri_seed, extend)
         values (#{address,jdbcType=VARCHAR}, #{createTime,jdbcType=BIGINT},
         #{alias,jdbcType=VARCHAR}, #{version,jdbcType=INTEGER},#{status,jdbcType=INTEGER},
-        #{priKey,jdbcType=VARBINARY}, #{extend,jdbcType=VARBINARY})
+        #{pubKey,jdbcType=VARBINARY}, #{priKey,jdbcType=VARBINARY},
+        #{priSeed,jdbcType=VARBINARY}, #{extend,jdbcType=VARBINARY})
     </insert>
-
-    <insert id="insertSelective" parameterType="io.nuls.db.entity.AccountPo">
-        insert into account
-        <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="address != null">
-                address,
-            </if>
-            <if test="createTime != null">
-                create_time,
-            </if>
-            <if test="alias != null">
-                alias,
-            </if>
-            <if test="version != null">
-                version,
-            </if>
-            <if test="status != null">
-                status,
-            </if>
-            <if test="priKey != null">
-                pri_key,
-            </if>
-            <if test="extend != null">
-                extend,
-            </if>
-        </trim>
-        <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="address != null">
-                #{address,jdbcType=VARCHAR},
-            </if>
-            <if test="createTime != null">
-                #{createTime,jdbcType=BIGINT},
-            </if>
-            <if test="alias != null">
-                #{alias,jdbcType=VARCHAR},
-            </if>
-            <if test="version != null">
-                #{version,jdbcType=INTEGER},
-            </if>
-            <if test="status != null">
-                #{status,jdbcType=INTEGER},
-            </if>
-            <if test="priKey != null">
-                #{priKey,jdbcType=VARBINARY},
-            </if>
-            <if test="extend != null">
-                #{extend,jdbcType=VARBINARY},
-            </if>
-        </trim>
-    </insert>
-
-    <update id="updateByPrimaryKeySelective" parameterType="io.nuls.db.entity.AccountPo">
-        update account
-        <set>
-            <if test="createTime != null">
-                create_time = #{createTime,jdbcType=BIGINT},
-            </if>
-            <if test="alias != null">
-                alias = #{alias,jdbcType=VARCHAR},
-            </if>
-            <if test="version != null">
-                version = #{version,jdbcType=INTEGER},
-            </if>
-            <if test="status != null">
-                status = #{status,jdbcType=INTEGER},
-            </if>
-            <if test="priKey != null">
-                pri_key = #{priKey,jdbcType=VARBINARY},
-            </if>
-            <if test="extend != null">
-                extend = #{extend,jdbcType=VARBINARY},
-            </if>
-        </set>
-        where address = #{address,jdbcType=VARCHAR}
-    </update>
 
     <update id="updateByPrimaryKey" parameterType="io.nuls.db.entity.AccountPo">
         update account
@@ -125,7 +53,9 @@
         alias = #{alias,jdbcType=VARCHAR},
         version = #{version,jdbcType=INTEGER},
         status = #{status,jdbcType=INTEGER},
+        pubKey = #{pubKey,jdbcType=VARBINARY},
         pri_key = #{priKey,jdbcType=VARBINARY},
+        priSeed = #{priSeed,jdbcType=VARBINARY},
         extend = #{extend,jdbcType=VARBINARY}
         where id = #{id,jdbcType=VARCHAR}
     </update>
@@ -138,12 +68,12 @@
 
     <insert id="batchInsert" parameterType="java.util.List">
         insert into account (address, create_time,
-        alias, version, status, pri_key, extend)
+        alias, version, status, pub_key, pri_key, pri_seed, extend)
         values
         <foreach collection="list" item="item" index="index" separator=",">
             (#{item.id,jdbcType=VARCHAR}, #{item.address,jdbcType=VARCHAR}, #{item.createTime,jdbcType=BIGINT},
             #{item.alias,jdbcType=VARCHAR}, #{item.version,jdbcType=INTEGER}, #{item.status,jdbcType=INTEGER},
-            #{item.priKey,jdbcType=VARBINARY}, #{item.extend,jdbcType=VARBINARY})
+            #{item.pubKey,jdbcType=VARBINARY}, #{item.priKey,jdbcType=VARBINARY}, #{item.priSeed,jdbcType=VARBINARY}, #{item.extend,jdbcType=VARBINARY})
         </foreach>
     </insert>
 

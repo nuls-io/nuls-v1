@@ -4,7 +4,9 @@ CREATE TABLE IF NOT EXISTS `account` (
   `create_time` bigint(14) NOT NULL,
   `alias` varchar(100) DEFAULT NULL,
   `version` int(11) NOT NULL,
+  `pub_key` varbinary(100) DEFAULT NULL,
   `pri_key` varbinary(100) DEFAULT NULL,
+  `pri_seed` varbinary(100) DEFAULT NULL,
   `extend` varbinary(1024) DEFAULT NULL,
   `status` INT DEFAULT 0,
   PRIMARY KEY (`address`)
