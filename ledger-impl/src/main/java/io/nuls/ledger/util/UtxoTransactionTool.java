@@ -84,6 +84,7 @@ public class UtxoTransactionTool {
         UtxoData coinData = (UtxoData) tx.getCoinData();
         List<Account> accounts = getAccountService().getAccountList();
 
+        //todo
         //check input
         for (Account account : accounts) {
             UtxoBalance balance = (UtxoBalance) ledgerCacheService.getBalance(account.getAddress().getBase58());

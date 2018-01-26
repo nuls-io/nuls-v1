@@ -39,7 +39,7 @@ import java.util.regex.Pattern;
  * @date 2017/11/22.
  */
 public class IpUtil {
-    private static final Pattern pattern = Pattern.compile("\\<dd class\\=\"fz24\">(.*?)\\<\\/dd>");
+    private static final Pattern pattern = Pattern.compile("\\<center>(.*?)\\<\\/dd>");
 
     public static Set<String> getIps() {
         Set<String> ips = new HashSet<>();
@@ -48,7 +48,7 @@ public class IpUtil {
         } catch (UnknownHostException e) {
         }
 
-        String chinaz = "http://ip.chinaz.com";
+        String chinaz = "http://ip138.com";
 
         StringBuilder inputLine = new StringBuilder();
         String read = "";
@@ -76,9 +76,14 @@ public class IpUtil {
 
 
         Matcher m = pattern.matcher(inputLine.toString());
+        System.out.println(inputLine.toString());
         if (m.find()) {
             ips.add(m.group(1));
         }
         return ips;
+    }
+
+    public static void main(String[] args) {
+
     }
 }
