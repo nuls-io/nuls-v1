@@ -51,7 +51,7 @@ public class BifurcateProcessor {
 
     public void addHeader(BlockHeader header) {
         for (BlockHeaderChain chain : chainList) {
-            int index = chain.indexOf(header.getPreHash().getDigestHex(), header.getHeight());
+            int index = chain.indexOf(header.getPreHash().getDigestHex(), header.getHeight()-1);
             if (index == chain.size() - 1) {
                 chain.addHeader(header);
                 return;

@@ -40,7 +40,7 @@ public class BlockHeaderChain implements NulsCloneable {
     private final ReentrantLock lock = new ReentrantLock();
 
     public BlockHeaderChain getBifurcateChain(BlockHeader header) {
-        int index = indexOf(header.getPreHash().getDigestHex(),header.getHeight());
+        int index = indexOf(header.getPreHash().getDigestHex(),header.getHeight()-1);
         if (index == -1) {
             return new BlockHeaderChain();
         }
