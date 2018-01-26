@@ -52,7 +52,7 @@ public enum ErrorCode {
     DATA_SIZE_ERROR("SYS014", 10014),
     DATA_FIELD_CHECK_ERROR("SYS015", 10015),
     CONFIG_ERROR("SYS016", 10016),
-
+    MODULE_LOAD_TIME_OUT("SYS017", 10017),
     /**
      * ----------  Consensus Network code   ---------
      */

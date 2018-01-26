@@ -42,7 +42,7 @@ import java.util.List;
  */
 public class NulsDigestData extends BaseNulsData {
 
-    public static final NulsDigestData EMPTY_HASH = new NulsDigestData(new byte[]{0, 0, 0});
+    public static final NulsDigestData EMPTY_HASH = new NulsDigestData(new byte[]{0, 0,1, 0});
     protected short digestAlgType = 0;
     protected byte[] digestBytes;
 
@@ -116,6 +116,9 @@ public class NulsDigestData extends BaseNulsData {
     }
 
     public byte[] getWholeBytes() {
+        if(null==digestBytes){
+            return null;
+        }
         byte[] bytes = new byte[2 + digestBytes.length];
         byte[] algBytes = Utils.shortToBytes(this.digestAlgType);
         System.arraycopy(algBytes, 0, bytes, 0, algBytes.length);

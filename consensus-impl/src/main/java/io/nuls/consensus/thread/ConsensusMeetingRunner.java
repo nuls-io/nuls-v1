@@ -181,7 +181,7 @@ public class ConsensusMeetingRunner implements Runnable {
         }
         self.setCreditVal(calcCreditVal());
         long timeUnit = 100L;
-        while (TimeService.currentTimeMillis() >= (self.getPackTime() - timeUnit)) {
+        while (TimeService.currentTimeMillis() <= (self.getPackTime() - timeUnit)) {
             try {
                 Thread.sleep(timeUnit);
             } catch (InterruptedException e) {
@@ -243,7 +243,11 @@ public class ConsensusMeetingRunner implements Runnable {
         addConsensusTx(bestBlock, txList, self);
         bd.setTxList(txList);
         Block newBlock = ConsensusTool.createBlock(bd);
-        newBlock.verify();
+        ValidateResult result = newBlock.verify();
+        if (result.isFailed()) {
+            Log.error("packing block error" + result.getMessage());
+            return;
+        }
         blockCacheManager.cacheBlock(newBlock);
         BlockHeaderEvent event = new BlockHeaderEvent();
         event.setEventBody(newBlock.getHeader());
@@ -294,6 +298,9 @@ public class ConsensusMeetingRunner implements Runnable {
 
     private List<ConsensusReward> calcReward(List<Transaction> txList) {
         List<ConsensusReward> rewardList = new ArrayList<>();
+        if (this.consensusManager.getCurrentRound().getTotalDeposit().getValue() == 0) {
+            return rewardList;
+        }
         ConsensusGroup cg = this.consensusManager.getCurrentRound().getConsensusGroup();
         long totalFee = 0;
         for (Transaction tx : txList) {
@@ -380,20 +387,23 @@ public class ConsensusMeetingRunner implements Runnable {
     private PocMeetingRound calcRound() {
         Block bestBlock = blockService.getLocalBestBlock();
         PocMeetingRound round = new PocMeetingRound(this.consensusManager.getCurrentRound());
-        do {
-            if (bestBlock.getHeader().getHeight() == 1) {
-                round.setStartTime(this.context.getGenesisBlock().getHeader().getTime() + 10000L);
-                break;
-            }
-            BlockRoundData lastRoundData;
-            try {
-                lastRoundData = new BlockRoundData(bestBlock.getHeader().getExtend());
-            } catch (NulsException e) {
-                Log.error(e);
-                throw new NulsRuntimeException(e);
-            }
-            round.setStartTime(lastRoundData.getRoundEndTime());
-        } while (false);
+        BlockRoundData lastRoundData;
+        try {
+            lastRoundData = new BlockRoundData(bestBlock.getHeader().getExtend());
+        } catch (NulsException e) {
+            Log.error(e);
+            throw new NulsRuntimeException(e);
+        }
+        if(round.getPreviousRound()==null){
+            PocMeetingRound preRound = new PocMeetingRound(null);
+            preRound.setIndex(lastRoundData.getRoundIndex());
+            preRound.setEndTime(lastRoundData.getRoundEndTime());
+            preRound.setStartTime(lastRoundData.getRoundStartTime());
+            preRound.setMemberCount(lastRoundData.getConsensusMemberCount());
+            round.setPreviousRound(preRound);
+        }
+        round.setStartTime(lastRoundData.getRoundEndTime());
+        round.setIndex(lastRoundData.getRoundIndex() + 1);
         return round;
     }
 

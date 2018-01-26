@@ -55,8 +55,8 @@ public class BlockContinuityValidator implements NulsDataValidator<Block> {
                 failed = !block.getHeader().getPreHash().equals(NulsDigestData.EMPTY_HASH);
                 break;
             }
-            Block preBlock = NulsContext.getServiceBean(BlockService.class).getBlock(block.getHeader().getHeight());
-            failed = preBlock.getHeader().getHash().equals(block.getHeader().getPreHash());
+            Block preBlock = NulsContext.getServiceBean(BlockService.class).getBlock(block.getHeader().getHeight()-1);
+            failed = !preBlock.getHeader().getHash().equals(block.getHeader().getPreHash());
             if(failed){
                 break;
             }

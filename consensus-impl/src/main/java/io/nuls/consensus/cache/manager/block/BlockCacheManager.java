@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -32,6 +32,7 @@ import io.nuls.consensus.entity.block.HeaderDigest;
 import io.nuls.consensus.event.GetBlockHeaderEvent;
 import io.nuls.consensus.utils.DownloadDataUtils;
 import io.nuls.core.chain.entity.*;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
@@ -64,6 +65,7 @@ public class BlockCacheManager {
 
     private BlockCacheManager() {
     }
+
     public static BlockCacheManager getInstance() {
         return INSTANCE;
     }
@@ -127,13 +129,13 @@ public class BlockCacheManager {
         blockCacheMap.put(block.getHeader().getHash().getDigestHex(), block);
         //txs approval
         BlockHeader header = this.getBlockHeader(block.getHeader().getHeight());
-        if(null==header){
+        if (null == header) {
             List<String> blockHashList = bifurcateProcessor.getHashList(block.getHeader().getHeight());
             rollbackBlocksTxs(blockHashList);
             return;
         }
-        for(Transaction tx:block.getTxs()){
-            if(tx.getStatus()== TxStatusEnum.CACHED){
+        for (Transaction tx : block.getTxs()) {
+            if (tx.getStatus() == TxStatusEnum.CACHED) {
                 try {
                     this.ledgerService.approvalTx(tx);
                 } catch (NulsException e) {
@@ -141,12 +143,16 @@ public class BlockCacheManager {
                 }
             }
         }
+        Block block1 = this.getBlock(block.getHeader().getHeight());
+        if (null != block1 && block1.getHeader().getHeight() > NulsContext.getInstance().getBestBlock().getHeader().getHeight()) {
+            NulsContext.getInstance().setBestBlock(block1);
+        }
     }
 
     private void rollbackBlocksTxs(List<String> blockHashList) {
-        for(String hash :blockHashList){
+        for (String hash : blockHashList) {
             Block block = getBlock(hash);
-            if(null!=block){
+            if (null != block) {
                 rollbackTxs(block.getTxs());
             }
         }
@@ -154,8 +160,8 @@ public class BlockCacheManager {
     }
 
     private void rollbackTxs(List<Transaction> txs) {
-        for(Transaction tx:txs){
-            if(tx.getStatus()==TxStatusEnum.AGREED&&!tx.isLocalTx()){
+        for (Transaction tx : txs) {
+            if (tx.getStatus() == TxStatusEnum.AGREED && !tx.isLocalTx()) {
                 try {
                     ledgerService.rollbackTx(tx);
                 } catch (NulsException e) {

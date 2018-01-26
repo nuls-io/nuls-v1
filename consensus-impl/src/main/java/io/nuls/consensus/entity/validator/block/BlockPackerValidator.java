@@ -44,6 +44,6 @@ public class BlockPackerValidator implements NulsDataValidator<Block> {
     public ValidateResult validate(Block block) {
         BlockHeader preHeader = NulsContext.getServiceBean(BlockService.class).getBlockHeader(block.getHeader().getPreHash());
         //todo
-        return null;
+        return ValidateResult.getSuccessResult();
     }
 }

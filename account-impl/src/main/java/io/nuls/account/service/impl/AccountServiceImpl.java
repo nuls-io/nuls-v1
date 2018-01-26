@@ -428,9 +428,7 @@ public class AccountServiceImpl implements AccountService {
         if (null == bytes || bytes.length == 0) {
             return null;
         }
-        NulsSignData data = new NulsSignData();
-        data.setSignBytes(new byte[]{1});
-        return data;
+        return NulsSignData.EMPTY_SIGN;
     }
 
     @Override

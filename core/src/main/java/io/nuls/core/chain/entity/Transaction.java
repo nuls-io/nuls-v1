@@ -87,6 +87,7 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
         int size = 0;
         size += VarInt.sizeOf(type);
         size += VarInt.sizeOf(time);
+        size += VarInt.sizeOf(fee.getValue());
         size += Utils.sizeOfSerialize(remark);
         size += Utils.sizeOfSerialize(txData);
         size += Utils.sizeOfSerialize(sign);
@@ -97,6 +98,7 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeVarInt(type);
         stream.writeVarInt(time);
+        stream.writeVarInt(fee.getValue());
         stream.writeBytesWithLength(remark);
         stream.writeNulsData(txData);
         stream.writeNulsData(sign);
@@ -106,6 +108,8 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         type = (int) byteBuffer.readVarInt();
         time = byteBuffer.readVarInt();
+        long feeValue = byteBuffer.readVarInt();
+        this.fee = Na.valueOf(feeValue);
         this.remark = byteBuffer.readByLengthByte();
         txData = this.parseTxData(byteBuffer);
         try {

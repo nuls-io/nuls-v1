@@ -44,6 +44,7 @@ import java.util.Map;
  */
 public class ModuleManager {
 
+    private Map<String,String> modulesCfg ;
 
     private final Map<Short, ModuleProcess> PROCCESS_MAP = new HashMap<>();
 
@@ -197,8 +198,15 @@ public class ModuleManager {
     }
 
     private void removeProcess(short moduleId){
-       this.destroyModule(moduleId);
-       PROCCESS_MAP.remove(moduleId);
+        this.destroyModule(moduleId);
+        PROCCESS_MAP.remove(moduleId);
     }
 
+    public Map<String, String> getModulesCfg() {
+        return modulesCfg;
+    }
+
+    public void setModulesCfg(Map<String, String> modulesCfg) {
+        this.modulesCfg = modulesCfg;
+    }
 }

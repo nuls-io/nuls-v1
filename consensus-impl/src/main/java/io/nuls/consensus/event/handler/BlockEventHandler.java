@@ -30,6 +30,7 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.validate.ValidateResult;
+import io.nuls.db.entity.NodePo;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.network.service.NetworkService;
 
@@ -48,7 +49,7 @@ public class BlockEventHandler extends AbstractEventHandler<BlockEvent> {
         ValidateResult result = block.verify();
         if (result.isFailed()) {
             if (result.getLevel() == SeverityLevelEnum.FLAGRANT_FOUL) {
-                networkService.removeNode(fromId);
+                networkService.blackNode(fromId, NodePo.YELLOW);
             }
             return;
         }

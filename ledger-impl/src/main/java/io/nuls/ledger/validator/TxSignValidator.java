@@ -44,6 +44,6 @@ public class TxSignValidator implements NulsDataValidator<Transaction> {
     @Override
     public ValidateResult validate(Transaction data) {
         //todo verify sign
-        return null;
+        return ValidateResult.getSuccessResult();
     }
 }

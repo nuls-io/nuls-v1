@@ -54,7 +54,7 @@ public class UtxoTxInputsValidator implements NulsDataValidator<UtxoData> {
         for (int i = 0; i < data.getInputs().size(); i++) {
 
         }
-        return null;
+        return ValidateResult.getSuccessResult();
     }
 
 
