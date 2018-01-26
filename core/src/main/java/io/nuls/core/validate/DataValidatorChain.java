@@ -27,7 +27,9 @@ import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.utils.log.Log;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Niels
@@ -36,6 +38,7 @@ import java.util.List;
 public class DataValidatorChain {
 
     private List<NulsDataValidator<BaseNulsData>> list = new ArrayList<>();
+    private Set<Class> classSet = new HashSet<>();
     private ThreadLocal<Integer> index = new ThreadLocal<>();
 
     public ValidateResult startDoValidator(BaseNulsData data) {
@@ -57,12 +60,12 @@ public class DataValidatorChain {
     private ValidateResult doValidate(BaseNulsData data) {
         index.set(1 + index.get());
         if (index.get() == list.size()) {
-            return null;
+            return ValidateResult.getSuccessResult();
         }
         NulsDataValidator<BaseNulsData> validator = list.get(index.get());
         ValidateResult result = validator.validate(data);
-        if(null==result){
-            Log.error(validator.getClass()+" has null result!");
+        if (null == result) {
+            Log.error(validator.getClass() + " has null result!");
         }
         if (!result.isSuccess()) {
             return result;
@@ -71,6 +74,11 @@ public class DataValidatorChain {
     }
 
     public void addValidator(NulsDataValidator validator) {
-        list.add(validator);
+        if (null == validator) {
+            return;
+        }
+        if (classSet.add(validator.getClass())) {
+            list.add(validator);
+        }
     }
 }

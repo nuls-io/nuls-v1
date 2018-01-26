@@ -37,6 +37,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.db.entity.DelegateAccountPo;
@@ -176,7 +177,7 @@ public class ConsensusTool {
             Log.error(e);
         }
         header.setHeight(blockData.getHeight());
-        header.setTime(blockData.getTime());
+        header.setTime(TimeService.currentTimeMillis());
         header.setPreHash(blockData.getPreHash());
         header.setTxCount(blockData.getTxList().size());
         List<NulsDigestData> txHashList = new ArrayList<>();

@@ -94,7 +94,9 @@ public class BlockCacheManager {
                 headerCacheMap.put(header.getHash().getDigestHex(), header);
                 GetBlockHeaderEvent event = new GetBlockHeaderEvent();
                 event.setEventBody(new BasicTypeData<>(height - 1));
-                eventBroadcaster.sendToNode(event, sender);
+                if (null != sender) {
+                    eventBroadcaster.sendToNode(event, sender);
+                }
                 discard = true;
                 break;
             }
@@ -103,14 +105,17 @@ public class BlockCacheManager {
                 break;
 
             }
+            discard = false;
         } while (false);
         if (discard) {
             return;
         }
         bifurcateProcessor.addHeader(header);
         headerCacheMap.put(header.getHash().getDigestHex(), header);
-        downloadDataUtils.requestSmallBlock(header.getHash(), sender);
-        checkNextBlockHeader(header.getHash().getDigestHex(), sender);
+        if (null != sender) {
+            downloadDataUtils.requestSmallBlock(header.getHash(), sender);
+            checkNextBlockHeader(header.getHash().getDigestHex(), sender);
+        }
     }
 
     private void checkNextBlockHeader(String preHash, String nodeId) {
@@ -219,43 +224,51 @@ public class BlockCacheManager {
         this.storedHeight = storedHeight;
     }
 
-    private HeaderDigest getNextHeaderDigest(long height) {
-        HeaderDigest headerDigest = nextHeaderDigest();
-        if (null == headerDigest) {
-            return null;
-        }
-        while (height > headerDigest.getHeight()) {
-            this.bifurcateProcessor.removeHeight(headerDigest.getHeight());
-            headerDigest = nextHeaderDigest();
-            if (null == headerDigest) {
-                return null;
-            }
-        }
-        return headerDigest;
-    }
-
-    private HeaderDigest nextHeaderDigest() {
-        BlockHeaderChain chain = this.bifurcateProcessor.getLongestChain();
-        if (null == chain) {
-            return null;
-        }
-        return chain.getFirst();
-    }
+//    private HeaderDigest getNextHeaderDigest1(long height) {
+//        HeaderDigest headerDigest = nextHeaderDigest();
+//        if (null == headerDigest) {
+//            return null;
+//        }
+//        while (height > headerDigest.getHeight()) {
+//            this.bifurcateProcessor.removeHeight(headerDigest.getHeight());
+//            headerDigest = nextHeaderDigest();
+//            if (null == headerDigest) {
+//                return null;
+//            }
+//        }
+//        return headerDigest;
+//    }
+//
+//    private HeaderDigest nextHeaderDigest() {
+//        BlockHeaderChain chain = this.bifurcateProcessor.getLongestChain();
+//        if (null == chain) {
+//            return null;
+//        }
+//        return chain.getFirst();
+//    }
 
     public Block getBlock(long height) {
-        HeaderDigest headerDigest = getNextHeaderDigest(height);
-        if (null == headerDigest) {
+        String hash = getDigestHex(height);
+        if(hash==null){
             return null;
         }
-        return blockCacheMap.get(headerDigest.getHash());
+        return blockCacheMap.get(hash);
     }
 
     public BlockHeader getBlockHeader(long height) {
-        HeaderDigest headerDigest = getNextHeaderDigest(height);
-        if (null == headerDigest) {
+        String hash = getDigestHex(height);
+        if(hash==null){
             return null;
         }
-        return headerCacheMap.get(headerDigest.getHash());
+        return headerCacheMap.get(hash);
+    }
+
+    public String getDigestHex(long height){
+        List<String> hashList = bifurcateProcessor.getHashList(height);
+        if (null == hashList||hashList.isEmpty()||hashList.size()>1) {
+            return null;
+        }
+        return (hashList.get(0));
     }
 
     public boolean canPersistence() {

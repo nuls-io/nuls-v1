@@ -42,7 +42,7 @@ public class BlockHeaderChain implements NulsCloneable {
     public BlockHeaderChain getBifurcateChain(BlockHeader header) {
         int index = indexOf(header.getPreHash().getDigestHex(),header.getHeight());
         if (index == -1) {
-            return null;
+            return new BlockHeaderChain();
         }
         List<HeaderDigest> list = new ArrayList<>();
         for (int i = 0; i <= index; i++) {

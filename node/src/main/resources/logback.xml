@@ -34,7 +34,7 @@
         <appender-ref ref="FILE"/>
     </root>
     <logger name="org.apache.ibatis" level="info" additivity="false"/>
-    <logger name="org.ehcache" level="info" additivity="false"/>
+    <!--<logger name="org.ehcache" level="info" additivity="false"/>-->
     <logger name="io.nuls.db.dao.impl.mybatis.mapper" level="info" additivity="false"/>
 
     <!--    日志异步到数据库

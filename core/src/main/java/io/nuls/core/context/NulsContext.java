@@ -97,11 +97,6 @@ public class NulsContext {
 
     public Block getBestBlock() {
         if (bestBlock == null) {
-            // find the best from database
-
-            //bestBlock = blockDao().getBestBlock();
-
-            //when database not found create GenesisBlock
             if (bestBlock == null) {
                 bestBlock = getGenesisBlock();
             }

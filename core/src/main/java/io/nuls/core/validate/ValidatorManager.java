@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,29 +21,44 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.cache.constant;
+
+package io.nuls.core.validate;
+
+import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.constant.ErrorCode;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- *
  * @author Niels
- * @date 2017/10/27
- *
+ * @date 2018/1/26
  */
-public interface EhCacheConstant {
-    //version
-    int CACHE_MODULE_VERSION = 1111;
-    //Minimum version supported
-    int MINIMUM_VERSION_SUPPORTED = 0;
+public class ValidatorManager {
 
-    long MAX_SIZE_OF_CACHE_OBJ_GRAPH =  1024*1024*5;
+    private static Map<Class, DataValidatorChain> chainMap = new HashMap<>();
 
-    String KEY_TYPE_FIELD="keyType";
-    String VALUE_TYPE_FIELD="valueType";
-    String POOL_HEAP_FIELD = "heap";
-    String POOL_OFF_HEAP_FIELD = "offheap";
-    String POOL_DISK_FIELD = "disk";
-    String POOL_TIME_OF_LIVE_SECONDS = "timeToLiveSeconds";
-    String POOL_TIME_OF_IDLE_SECONDS = "timeToIdleSeconds";
-    int DEFAULT_MAX_SIZE = 16;
+
+    public static void addValidator(Class<? extends BaseNulsData> clazz, NulsDataValidator<? extends BaseNulsData> validator) {
+        DataValidatorChain chain = chainMap.get(clazz);
+        if (null == chain) {
+            chain = new DataValidatorChain();
+        }
+        chain.addValidator(validator);
+        chainMap.put(clazz, chain);
+    }
+
+    public static ValidateResult startDoValidator(BaseNulsData data) {
+        if (data == null) {
+            return ValidateResult.getFailedResult(ErrorCode.NULL_PARAMETER);
+        }
+        DataValidatorChain chain = chainMap.get(data.getClass());
+        if (null == chain) {
+            return ValidateResult.getSuccessResult();
+        }
+        return chain.startDoValidator(data);
+    }
 }
+

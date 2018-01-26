@@ -27,6 +27,7 @@ import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.chain.manager.TransactionManager;
+import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -99,6 +100,7 @@ public class TransactionPoTool {
         if(StringUtils.isNotBlank(po.getRemark())){
             tx.setRemark(po.getRemark().getBytes(NulsContext.DEFAULT_ENCODING));
         }
+        tx.setStatus(TxStatusEnum.CONFIRMED);
         return tx;
     }
 
