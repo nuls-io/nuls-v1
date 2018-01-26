@@ -46,7 +46,5 @@ public class NulsTest {
 
         System.out.println(address.getBase58());
         System.out.println(address.getHash().length);
-        System.out.println(address.getHash160().length);
-
     }
 }

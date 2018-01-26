@@ -96,7 +96,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 unSpend.setStatus(UtxoOutput.LOCKED);
                 outputs.add(unSpend);
                 //todo address format
-                Balance balance = cacheService.getBalance(new Address(0, unSpend.getAddress()).getBase58());
+                Balance balance = cacheService.getBalance(new Address((short) 0, unSpend.getAddress()).getBase58());
                 balance.setLocked(balance.getLocked().add(Na.valueOf(unSpend.getValue())));
                 balance.setUseable(balance.getUseable().subtract(Na.valueOf(unSpend.getValue())));
             }
@@ -246,7 +246,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                     cacheService.removeUtxo(output.getKey());
 
                     //todo address format
-                    address = new Address(1, output.getAddress()).getBase58();
+                    address = new Address((short) 1, output.getAddress()).getBase58();
                     UtxoBalance balance = (UtxoBalance) cacheService.getBalance(address);
                     if (outputPo.getStatus().equals(UtxoOutput.USEABLE)) {
                         balance.setBalance(balance.getBalance().subtract(Na.valueOf(outputPo.getValue())));
@@ -274,7 +274,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 cacheService.putUtxo(output.getKey(), output);
 
                 //calc balance
-                address = new Address(1, output.getAddress()).getBase58();
+                address = new Address((short)1, output.getAddress()).getBase58();
                 UtxoBalance balance = (UtxoBalance) cacheService.getBalance(address);
                 if (balance == null) {
                     balance = new UtxoBalance(Na.valueOf(output.getValue()), Na.ZERO);
@@ -321,7 +321,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             UtxoOutput output = new UtxoOutput();
             String address = entry.getKey();
             Coin coin = entry.getValue();
-            output.setAddress(new Address(address).getHash160());
+            output.setAddress(new Address(address).getHash());
             output.setValue(coin.getNa().getValue());
             output.setIndex(i);
             if (coin.getUnlockHeight() > 0) {

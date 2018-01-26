@@ -40,7 +40,7 @@ public class UtxoTransferTool {
         output.setIndex(po.getOutIndex());
         output.setLockTime(po.getLockTime());
         output.setValue(po.getValue());
-        output.setAddress(new Address(po.getAddress()).getHash160());
+        output.setAddress(new Address(po.getAddress()).getHash());
         output.setScript(new Script(po.getScript()));
         return output;
     }
