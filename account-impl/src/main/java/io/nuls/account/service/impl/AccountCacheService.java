@@ -41,17 +41,16 @@ public class AccountCacheService {
     private CacheMap<String, Account> cacheMap;
 
     private AccountCacheService() {
-    }
-
-    public void init() {
         this.cacheMap = new CacheMap<>(AccountConstant.ACCOUNT_LIST_CACHE, 32);
     }
+
 
     public static AccountCacheService getInstance() {
         return INSTANCE;
     }
 
     public void putAccount(Account account) {
+
         this.cacheMap.put(account.getId(), account);
     }
 

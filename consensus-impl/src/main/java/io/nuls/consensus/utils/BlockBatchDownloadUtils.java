@@ -201,6 +201,9 @@ public class BlockBatchDownloadUtils {
             }
             done = false;
         }
+        if(!done){
+            return;
+        }
         Result result;
         try {
             result = checkHash();

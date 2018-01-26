@@ -44,7 +44,6 @@ public class AccountModuleBootstrap extends AbstractAccountModule {
     @Override
     public void init() {
         cacheService = AccountCacheService.getInstance();
-        cacheService.init();
         accountService = AccountServiceImpl.getInstance();
         accountService.init();
 
