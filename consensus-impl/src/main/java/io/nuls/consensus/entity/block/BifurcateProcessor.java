@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,6 +25,7 @@ package io.nuls.consensus.entity.block;
 
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
+import io.nuls.core.context.NulsContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,18 +55,26 @@ public class BifurcateProcessor {
             if (index == chain.size() - 1) {
                 chain.addHeader(header);
                 return;
-            } else {
+            } else if (index >= 0) {
                 BlockHeaderChain newChain = chain.getBifurcateChain(header);
                 chainList.add(newChain);
                 return;
             }
         }
-        if (bestHeight > 0 && bestHeight < header.getHeight()) {
+        if ((bestHeight+1) != header.getHeight()) {
             return;
         }
         BlockHeaderChain chain = new BlockHeaderChain();
         chain.addHeader(header);
         chainList.add(chain);
+        setBestHeight(header);
+    }
+
+    private void setBestHeight(BlockHeader header) {
+        if (header.getHeight() <= bestHeight) {
+            return;
+        }
+        bestHeight = header.getHeight();
     }
 
     public BlockHeaderChain getLongestChain() {
@@ -86,10 +95,16 @@ public class BifurcateProcessor {
 
 
     public long getBestHeight() {
+        if(bestHeight==0){
+            bestHeight = NulsContext.getInstance().getBestBlock().getHeader().getHeight();
+        }
         return bestHeight;
     }
 
     public void removeHeight(long height) {
+        if (chainList.isEmpty()) {
+            return;
+        }
         this.chainList.forEach((BlockHeaderChain chain) -> removeBlock(chain, height));
 
     }

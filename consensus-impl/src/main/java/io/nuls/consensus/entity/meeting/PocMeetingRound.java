@@ -94,7 +94,7 @@ public class PocMeetingRound {
         for (int i = 0; i < memberList.size(); i++) {
             PocMeetingMember pmm = memberList.get(i);
             pmm.setIndexOfRound(i + 1);
-            pmm.setPackTime(pmm.getRoundStartTime() + PocConsensusConstant.BLOCK_TIME_INTERVAL * pmm.getIndexOfRound());
+            pmm.setPackTime(pmm.getRoundStartTime() + PocConsensusConstant.BLOCK_TIME_INTERVAL * 1000 * pmm.getIndexOfRound());
             addressOrderMap.put(pmm.getPackerAddress(), i);
         }
     }

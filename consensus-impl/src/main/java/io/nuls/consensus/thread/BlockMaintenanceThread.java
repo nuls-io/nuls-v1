@@ -153,11 +153,15 @@ public class BlockMaintenanceThread implements Runnable {
 
     private Block getLocalBestCorrectBlock() {
         Block localBestBlock = this.blockService.getLocalBestBlock();
+        BlockInfo blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(0);
+        if(null == blockInfo || blockInfo.getBestHash() == null){
+            return localBestBlock;
+        }
         do {
             if (null == localBestBlock || localBestBlock.getHeader().getHeight() <= 1) {
                 break;
             }
-            BlockInfo blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(localBestBlock.getHeader().getHeight());
+            blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(localBestBlock.getHeader().getHeight());
             if (null == blockInfo || blockInfo.getBestHash() == null) {
                 //本地高度最高，查询网络最新高度，并回退
                 rollbackBlock(localBestBlock.getHeader().getHeight());
@@ -182,8 +186,8 @@ public class BlockMaintenanceThread implements Runnable {
             return;
         }
         long height = startHeight - 1;
-        if (height < 1) {
-            throw new NulsRuntimeException(ErrorCode.NET_MESSAGE_ERROR, "Block data error!");
+        if (height < 0) {
+            return;
         }
         BlockInfo blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(height);
         Block localBlock = this.blockService.getBlock(height);

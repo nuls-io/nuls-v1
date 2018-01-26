@@ -55,6 +55,7 @@ import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TransactionConstant;
+import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -67,6 +68,7 @@ import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.tx.CoinBaseTransaction;
 import io.nuls.ledger.service.intf.LedgerService;
+import org.spongycastle.util.Times;
 
 import java.io.IOException;
 import java.util.*;
@@ -83,7 +85,6 @@ public class ConsensusMeetingRunner implements Runnable {
     private LedgerService ledgerService = context.getService(LedgerService.class);
     private ConsensusCacheManager consensusCacheManager = ConsensusCacheManager.getInstance();
     private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
-    private BlockService blockService = NulsContext.getInstance().getService(BlockService.class);
     private PocBlockService pocBlockService = PocBlockService.getInstance();
     private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
     private EventBroadcaster eventBroadcaster = context.getService(EventBroadcaster.class);
@@ -188,6 +189,7 @@ public class ConsensusMeetingRunner implements Runnable {
                 Log.error(e);
             }
         }
+        System.out.println("mytime:" + self.getPackTime() + ",now:" + TimeService.currentTimeMillis());
         packing(self);
     }
 
@@ -207,12 +209,11 @@ public class ConsensusMeetingRunner implements Runnable {
     }
 
     private void packing(PocMeetingMember self) {
-        Block bestBlock = blockService.getLocalBestBlock();
+        Block bestBlock = context.getBestBlock();
         List<Transaction> txList = txCacheManager.getTxList();
         txList.sort(new TxComparator());
         BlockData bd = new BlockData();
         bd.setHeight(bestBlock.getHeader().getHeight() + 1);
-        bd.setTime(self.getPackTime());
         bd.setPreHash(bestBlock.getHeader().getHash());
         BlockRoundData roundData = new BlockRoundData();
         roundData.setRoundIndex(consensusManager.getCurrentRound().getIndex());
@@ -248,6 +249,7 @@ public class ConsensusMeetingRunner implements Runnable {
             Log.error("packing block error" + result.getMessage());
             return;
         }
+        blockCacheManager.cacheBlockHeader(newBlock.getHeader(), null);
         blockCacheManager.cacheBlock(newBlock);
         BlockHeaderEvent event = new BlockHeaderEvent();
         event.setEventBody(newBlock.getHeader());
@@ -289,6 +291,7 @@ public class ConsensusMeetingRunner implements Runnable {
         tx.setHash(NulsDigestData.calcDigestData(tx));
         tx.setSign(accountService.signData(tx.getHash()));
         ValidateResult validateResult = tx.verify();
+        tx.setStatus(TxStatusEnum.AGREED);
         confirmingTxCacheManager.putTx(tx);
         if (null == validateResult || validateResult.isFailed()) {
             throw new NulsRuntimeException(ErrorCode.CONSENSUS_EXCEPTION);
@@ -385,16 +388,32 @@ public class ConsensusMeetingRunner implements Runnable {
     }
 
     private PocMeetingRound calcRound() {
-        Block bestBlock = blockService.getLocalBestBlock();
         PocMeetingRound round = new PocMeetingRound(this.consensusManager.getCurrentRound());
+        Block bestBlock = context.getBestBlock();
         BlockRoundData lastRoundData;
         try {
-            lastRoundData = new BlockRoundData(bestBlock.getHeader().getExtend());
+            lastRoundData = new BlockRoundData( bestBlock.getHeader().getExtend());
         } catch (NulsException e) {
             Log.error(e);
             throw new NulsRuntimeException(e);
         }
-        if(round.getPreviousRound()==null){
+        if (round.getPreviousRound() == null) {
+            while (true){
+                if(lastRoundData.getPackingIndexOfRound()==lastRoundData.getConsensusMemberCount()){
+                    break;
+                }
+                try {
+                    bestBlock = context.getBestBlock();
+                    lastRoundData = new BlockRoundData(bestBlock.getHeader().getExtend());
+                } catch (NulsException e) {
+                    Log.error(e);
+                }
+                try {
+                    Thread.sleep(100L);
+                } catch (InterruptedException e) {
+                    Log.error(e);
+                }
+            }
             PocMeetingRound preRound = new PocMeetingRound(null);
             preRound.setIndex(lastRoundData.getRoundIndex());
             preRound.setEndTime(lastRoundData.getRoundEndTime());
@@ -402,7 +421,12 @@ public class ConsensusMeetingRunner implements Runnable {
             preRound.setMemberCount(lastRoundData.getConsensusMemberCount());
             round.setPreviousRound(preRound);
         }
-        round.setStartTime(lastRoundData.getRoundEndTime());
+        long addTime = PocConsensusConstant.BLOCK_TIME_INTERVAL*1000L;
+        if (round.getPreviousRound().getEndTime() <  bestBlock.getHeader().getTime()) {
+            round.setStartTime( bestBlock.getHeader().getTime()+addTime);
+        }else{
+            round.setStartTime(round.getPreviousRound().getEndTime()+addTime);
+        }
         round.setIndex(lastRoundData.getRoundIndex() + 1);
         return round;
     }

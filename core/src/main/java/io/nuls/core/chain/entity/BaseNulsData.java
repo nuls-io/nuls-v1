@@ -32,6 +32,7 @@ import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.validate.DataValidatorChain;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
+import io.nuls.core.validate.ValidatorManager;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -41,13 +42,11 @@ import java.io.Serializable;
  * @author Niels
  * @date 2017/10/30
  */
-public abstract class BaseNulsData implements Serializable {
+public abstract class BaseNulsData implements Serializable,Cloneable {
 
     protected NulsDataType dataType;
 
     protected NulsVersion version;
-
-    private DataValidatorChain validatorChain = new DataValidatorChain();
 
     public BaseNulsData() {
     }
@@ -61,7 +60,7 @@ public abstract class BaseNulsData implements Serializable {
     }
 
     protected void registerValidator(NulsDataValidator<? extends BaseNulsData> validator) {
-        this.validatorChain.addValidator(validator);
+        ValidatorManager.addValidator(this.getClass(),validator);
     }
 
     public abstract int size();
@@ -116,7 +115,7 @@ public abstract class BaseNulsData implements Serializable {
      * @throws NulsException
      */
     public final ValidateResult verify() {
-        return this.validatorChain.startDoValidator(this);
+        return ValidatorManager.startDoValidator(this);
     }
 
     public final void verifyWithException() throws NulsVerificationException {
@@ -149,4 +148,5 @@ public abstract class BaseNulsData implements Serializable {
     public void setVersionBy(short main, short sub) {
         version.setVersionBy(main, sub);
     }
+
 }

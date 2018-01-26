@@ -225,14 +225,16 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
     @TransactionalAnnotation
     public void rollback(CoinData coinData, Transaction tx) {
         UtxoData utxoData = (UtxoData) coinData;
-        if (tx.getStatus().equals(TxStatusEnum.AGREED)) {
+        if(utxoData==null){
+            return;
+        }
+        if (TxStatusEnum.AGREED.equals(tx.getStatus())) {
             for (UtxoInput input : utxoData.getInputs()) {
                 cacheService.updateUtxoStatus(input.getKey(), UtxoOutput.USEABLE, UtxoOutput.LOCKED);
             }
         } else if (tx.getStatus().equals(TxStatusEnum.CONFIRMED)) {
             String address;
             Map<String, Object> keyMap = new HashMap<>();
-
             //process output
             for (UtxoOutput output : utxoData.getOutputs()) {
                 keyMap.clear();
