@@ -41,6 +41,8 @@ public interface BlockService {
 
     long getLocalHeight();
 
+    long getLocalSavedHeight();
+
     Block getLocalBestBlock();
 
     BlockHeader getBlockHeader(long height);
