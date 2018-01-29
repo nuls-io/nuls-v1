@@ -61,7 +61,7 @@ public class NetworkModuleBootstrap extends AbstractNetworkModule {
         networkService = new NetworkServiceImpl(this);
         networkService.init();
         this.registerEvent();
-        this.registerService(networkService);
+        this.registerService(NetworkService.class,networkService);
     }
 
     private void registerEvent() {

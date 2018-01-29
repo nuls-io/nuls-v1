@@ -112,15 +112,6 @@ public abstract class BaseModuleBootstrap {
         }
     }
 
-    /**
-     * register the service to ModuleManager
-     *
-     * @param service
-     */
-    protected final void registerService(Object service) {
-        ServiceManager.getInstance().regService(this.moduleId, service);
-    }
-
     protected final void registerService(Class serviceInterface, Object service) {
         ServiceManager.getInstance().regService(this.moduleId, serviceInterface, service);
     }
