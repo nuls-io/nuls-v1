@@ -135,11 +135,11 @@ public class ConnectionManager implements Runnable {
                 } catch (IOException e) {
                     Log.warn("Error closing channel", e);
                 }
-                key.cancel();
                 if (key.attachment() instanceof ConnectionHandler) {
                     // Close connection if relevant
                     ConnectionHandler.handleKey(key);
                 }
+                key.cancel();
             }
             try {
                 selector.close();
