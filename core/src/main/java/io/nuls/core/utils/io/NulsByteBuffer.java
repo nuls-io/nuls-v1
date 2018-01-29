@@ -163,12 +163,20 @@ public class NulsByteBuffer {
     }
 
     public short readShort() throws NulsException {
-        return Utils.bytes2Short(readBytes(2));
+        byte[] bytes = this.readBytes(2);
+        if(null==bytes){
+            return 0;
+        }
+        return Utils.bytes2Short(bytes);
     }
 
     public String readString() throws NulsException {
         try {
-            return new String(this.readByLengthByte(), NulsContext.DEFAULT_ENCODING);
+            byte[] bytes = this.readByLengthByte();
+            if(null==bytes){
+                return null;
+            }
+            return new String(bytes, NulsContext.DEFAULT_ENCODING);
         } catch (UnsupportedEncodingException e) {
             Log.error(e);
             throw new NulsException(e);
@@ -176,8 +184,11 @@ public class NulsByteBuffer {
 
     }
 
-    public double readDouble() throws NulsException {
-        return Utils.bytes2Double(this.readByLengthByte());
+    public double readDouble() throws NulsException { byte[] bytes = this.readByLengthByte();
+        if(null==bytes){
+            return 0;
+        }
+        return Utils.bytes2Double(bytes);
     }
 
     public boolean isFinished() {
