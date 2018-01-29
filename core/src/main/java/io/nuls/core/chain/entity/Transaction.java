@@ -66,6 +66,11 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
 
     protected boolean localTx;
 
+    public static final int TRANSFER_RECEIVE = 1;
+    public static final int TRANSFER_SEND = 0;
+    // when localTx is true, should care transferType
+    protected int transferType;
+
     public Transaction(int type) {
         this.dataType = NulsDataType.TRANSACTION;
         this.time = TimeService.currentTimeMillis();
@@ -217,5 +222,13 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
 
     public void setLocalTx(boolean localTx) {
         this.localTx = localTx;
+    }
+
+    public int getTransferType() {
+        return transferType;
+    }
+
+    public void setTransferType(int transferType) {
+        this.transferType = transferType;
     }
 }

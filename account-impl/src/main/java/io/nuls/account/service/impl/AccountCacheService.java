@@ -48,7 +48,6 @@ public class AccountCacheService {
     }
 
     public void putAccount(Account account) {
-
         this.cacheMap.put(account.getAddress().getBase58(), account);
     }
 
