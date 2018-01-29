@@ -87,12 +87,12 @@
         ,
         <include refid="Blob_Column_List"/>
         from account
-        <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Serach_Where"/>
+        <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
         ORDER by create_time desc
     </select>
     <select id="selectCount" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultType="java.lang.Long">
         select count(id) from account
-        <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Serach_Where"/>
+        <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
     </select>
 
 </mapper>

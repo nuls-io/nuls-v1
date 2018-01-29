@@ -78,21 +78,6 @@ public class ServiceManager {
         }
     }
 
-    public void regService(short moduleId, Object service) {
-        Class serviceInterface =  null;
-        boolean useSuperClass = null == service.getClass().getInterfaces() || service.getClass().getInterfaces().length == 0 && !service.getClass().getSuperclass().equals(Object.class);
-        if (useSuperClass) {
-            serviceInterface = service.getClass().getSuperclass();
-        } else if (null != service.getClass().getInterfaces() && service.getClass().getInterfaces().length == 1) {
-            serviceInterface = service.getClass().getInterfaces()[0];
-        } else if (null == service.getClass().getInterfaces() || service.getClass().getInterfaces().length > 1) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "register service faild:interface is uncertain");
-        } else {
-            serviceInterface = service.getClass();
-        }
-        this.regService(moduleId, serviceInterface, service);
-    }
-
     public void regService(short moduleId, Class serviceInterface, Object service) {
         if (serviceInterface == null) {
             serviceInterface = service.getClass();

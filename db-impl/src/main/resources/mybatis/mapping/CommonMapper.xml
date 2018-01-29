@@ -4,7 +4,7 @@
     <!-- 以下两个<cache>标签二选一,第一个可以输出日志,第二个不输出日志 -->
     <!--<cache type="org.mybatis.caches.ehcache.LoggingEhcache"/>-->
     <!--<cache type="org.mybatis.caches.ehcache.EhcacheCache"/>-->
-    <sql id="Serach_Where">
+    <sql id="Search_Where">
         <if test="operators != null and operators.size > 0">
             <where>
                 <foreach collection="operators" index="index" item="item">

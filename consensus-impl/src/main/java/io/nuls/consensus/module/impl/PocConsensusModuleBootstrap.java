@@ -80,7 +80,7 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
     public void start() {
         this.registerService(BlockService.class, AopUtils.createProxy(BlockServiceImpl.class,
                 NulsContext.getInstance().getService(TransactionalAopFilter.class)));
-         this.registerService(PocConsensusServiceImpl.getInstance());
+         this.registerService(ConsensusService.class,PocConsensusServiceImpl.getInstance());
         NulsContext.getInstance().setBestBlock(NulsContext.getInstance().getService(BlockService.class).getLocalBestBlock());
         this.consensusManager.startMaintenanceWork();
         ConsensusStatusInfo statusInfo = consensusManager.getConsensusStatusInfo();

@@ -84,7 +84,7 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
     }
 
     private void registerService() {
-        this.registerService(ledgerService);
+        this.registerService(LedgerService.class,ledgerService);
         this.registerService(CoinDataProvider.class, UtxoCoinDataProvider.getInstance());
     }
 

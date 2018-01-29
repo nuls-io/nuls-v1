@@ -120,10 +120,10 @@
     select
     <include refid="Base_Column_List" />
     from tx_account_relation
-    <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Serach_Where"/>
+    <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
   </select>
   <select id="selectCount" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultType="java.lang.Long">
     select count(id) from tx_account_relation
-    <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Serach_Where"/>
+    <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
   </select>
 </mapper>
