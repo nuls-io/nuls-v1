@@ -154,6 +154,7 @@ public class ConnectionManager implements Runnable {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            System.out.println("------------------server closed-------------------");
             Log.info("Network closing connectManager");
 
             //todo sent a event to other module
@@ -180,6 +181,9 @@ public class ConnectionManager implements Runnable {
             PendingConnect data = new PendingConnect(channel, node);
             if(channel == null) {
                 System.out.println("----------------channel is null");
+            }
+            if(selector == null) {
+                System.out.println("----------------selector is null");
             }
             SelectionKey key = channel.register(selector, SelectionKey.OP_CONNECT);
             key.attach(data);

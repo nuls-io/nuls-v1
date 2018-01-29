@@ -145,6 +145,7 @@ public class ConnectionHandler implements MessageWriter {
         try {
             if (!key.isValid()) {
                 // Key has been cancelled, make sure the socket gets closed
+                key.cancel();
                 handler.node.destroy();
                 return;
             }
