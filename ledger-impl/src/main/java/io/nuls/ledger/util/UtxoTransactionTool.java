@@ -27,12 +27,11 @@ import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.UtxoInputDataService;
-import io.nuls.ledger.entity.UtxoBalance;
 import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.UtxoInput;
 import io.nuls.ledger.entity.UtxoOutput;
@@ -108,6 +107,7 @@ public class UtxoTransactionTool {
             for (Account account : accounts) {
                 if (account.getAddress().equals(Address.fromHashs(unSpend.getAddress()))) {
                     tx.setLocalTx(true);
+                    tx.setTransferType(Transaction.TRANSFER_SEND);
                     return true;
                 }
             }
@@ -118,6 +118,7 @@ public class UtxoTransactionTool {
             for (Account account : accounts) {
                 if (account.getAddress().equals(Address.fromHashs(output.getAddress()))) {
                     tx.setLocalTx(true);
+                    tx.setTransferType(Transaction.TRANSFER_RECEIVE);
                     return true;
                 }
             }
