@@ -110,6 +110,8 @@ public interface LedgerService {
 
     List<Transaction> getTxList(long height) throws Exception;
 
+    boolean checkTxIsMine(Transaction tx);
+
     void rollbackTx(Transaction tx) throws NulsException;
 
     void commitTx(Transaction tx) throws NulsException;
@@ -117,5 +119,6 @@ public interface LedgerService {
     void approvalTx(Transaction tx) throws NulsException;
 
     void deleteTx(Transaction tx);
+
     void deleteTx(long blockHeight);
 }

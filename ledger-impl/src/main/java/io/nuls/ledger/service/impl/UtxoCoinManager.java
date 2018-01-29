@@ -23,9 +23,7 @@
  */
 package io.nuls.ledger.service.impl;
 
-import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.Na;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.db.entity.UtxoOutputPo;
@@ -62,7 +60,7 @@ public class UtxoCoinManager {
     public void cacheAllUnSpendOutPut() {
         List<UtxoOutputPo> utxoOutputPos = outputDataService.getAllUnSpend();
         String address = null;
-        long useable = 0;
+        long useAble = 0;
         long lock = 0;
         List<UtxoOutput> list = new ArrayList<>();
 
@@ -70,23 +68,26 @@ public class UtxoCoinManager {
             UtxoOutputPo po = utxoOutputPos.get(i);
             UtxoOutput output = UtxoTransferTool.toOutput(po);
             cacheService.putUtxo(output.getKey(), output);
-            //todo address format
+
             if (i == 0) {
-                address = new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), po.getAddress().getBytes()).getBase58();
+                address = po.getAddress();
             } else if (!address.equals(po.getAddress())) {
+
                 UtxoBalance balance = new UtxoBalance();
-                balance.setUseable(Na.valueOf(useable));
+                balance.setUseable(Na.valueOf(useAble));
                 balance.setLocked(Na.valueOf(lock));
                 balance.setBalance(balance.getUseable().add(balance.getLocked()));
                 balance.setUnSpends(list);
                 cacheService.putBalance(address, balance);
 
-                useable = 0;
+                useAble = 0;
                 lock = 0;
                 list = new ArrayList<>();
+                address = po.getAddress();
             }
+
             if (po.getStatus() == UtxoOutput.USEABLE) {
-                useable += po.getValue();
+                useAble += po.getValue();
             } else if (po.getStatus() == UtxoOutput.LOCKED) {
                 lock += po.getValue();
             }
@@ -94,7 +95,7 @@ public class UtxoCoinManager {
 
             if (i == utxoOutputPos.size() - 1) {
                 UtxoBalance balance = new UtxoBalance();
-                balance.setUseable(Na.valueOf(useable));
+                balance.setUseable(Na.valueOf(useAble));
                 balance.setLocked(Na.valueOf(lock));
                 balance.setBalance(balance.getUseable().add(balance.getLocked()));
                 balance.setUnSpends(list);
@@ -114,17 +115,18 @@ public class UtxoCoinManager {
         lock.lock();
         List<UtxoOutput> unSpends = new ArrayList<>();
         try {
-            //todo address format
             UtxoBalance balance = (UtxoBalance) cacheService.getBalance(address);
             if (balance == null || balance.getUseable().isLessThan(value)) {
                 return unSpends;
             }
 
+            //check use-able is enough , find unSpend utxo
             boolean enough = false;
             Na amount = Na.ZERO;
             for (int i = 0; i < balance.getUnSpends().size(); i++) {
                 UtxoOutput output = balance.getUnSpends().get(i);
                 boolean update = cacheService.updateUtxoStatus(output.getKey(), UtxoOutput.LOCKED, UtxoOutput.USEABLE);
+                //other tx locked this utxo
                 if (!update) {
                     continue;
                 }
@@ -154,7 +156,6 @@ public class UtxoCoinManager {
 
     public List<UtxoOutput> getAccountsUnSpend(List<String> addressList, Na value) {
         lock.lock();
-        //todo address format
         List<UtxoOutput> unSpends = new ArrayList<>();
         try {
             //check use-able is enough , find unSpend utxo
