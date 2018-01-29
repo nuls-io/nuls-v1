@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -29,6 +29,7 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.event.EventHeader;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
@@ -72,21 +73,8 @@ public class VersionEvent extends io.nuls.core.event.BaseEvent {
         s += VarInt.sizeOf(bestBlockHeight);
         // put the bestBlockHash.length
         s += 1;
-        if (!StringUtils.isBlank(bestBlockHash)) {
-            try {
-                s += bestBlockHash.getBytes(NulsContext.DEFAULT_ENCODING).length;
-            } catch (UnsupportedEncodingException e) {
-                Log.error(e);
-            }
-        }
-        s += 1;
-        if (!StringUtils.isBlank(nulsVersion)) {
-            try {
-                s += nulsVersion.getBytes(NulsContext.DEFAULT_ENCODING).length;
-            } catch (UnsupportedEncodingException e) {
-                Log.error(e);
-            }
-        }
+        s += Utils.sizeOfSerialize(bestBlockHash);
+        s += Utils.sizeOfSerialize(nulsVersion);
         return s;
     }
 
@@ -104,8 +92,8 @@ public class VersionEvent extends io.nuls.core.event.BaseEvent {
         this.setHeader(byteBuffer.readNulsData(new EventHeader()));
 //        version = new NulsVersion(byteBuffer.readShort());
         bestBlockHeight = byteBuffer.readVarInt();
-        bestBlockHash = new String(byteBuffer.readByLengthByte());
-        nulsVersion = new String(byteBuffer.readByLengthByte());
+        bestBlockHash = byteBuffer.readString();
+        nulsVersion = byteBuffer.readString();
     }
 
     @Override

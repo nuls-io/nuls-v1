@@ -189,7 +189,6 @@ public class ConsensusMeetingRunner implements Runnable {
                 Log.error(e);
             }
         }
-        System.out.println("mytime:" + self.getPackTime() + ",now:" + TimeService.currentTimeMillis());
         packing(self);
     }
 

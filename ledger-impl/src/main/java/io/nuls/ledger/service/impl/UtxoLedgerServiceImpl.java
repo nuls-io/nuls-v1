@@ -44,6 +44,7 @@ import io.nuls.db.transactional.annotation.TransactionalAnnotation;
 import io.nuls.db.util.TransactionPoTool;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.Balance;
+import io.nuls.ledger.entity.CoinData;
 import io.nuls.ledger.entity.UtxoBalance;
 import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.params.Coin;
@@ -152,9 +153,13 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     public Result transfer(String address, String password, String toAddress, Na amount, String remark) {
+        CoinTransferData coinData = new CoinTransferData(amount, address, toAddress);
+        return transfer(coinData, password, remark);
+    }
+
+    private Result transfer(CoinTransferData coinData, String password, String remark) {
         TransferTransaction tx = null;
         try {
-            CoinTransferData coinData = new CoinTransferData(amount, address, toAddress);
             tx = UtxoTransactionTool.getInstance().createTransferTx(coinData, password, remark);
             tx.verify();
             TransactionEvent event = new TransactionEvent();
@@ -169,31 +174,13 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             }
             return new Result(false, e.getMessage());
         }
-
         return new Result(true, "OK", tx.getHash().getDigestHex());
     }
 
     @Override
     public Result transfer(List<String> addressList, String password, String toAddress, Na amount, String remark) {
-        TransferTransaction tx = null;
-        try {
-            CoinTransferData coinData = new CoinTransferData(amount, addressList, toAddress);
-            tx = UtxoTransactionTool.getInstance().createTransferTx(coinData, password, remark);
-            tx.verify();
-            TransactionEvent event = new TransactionEvent();
-            event.setEventBody(tx);
-            eventBroadcaster.broadcastAndCacheAysn(event, true);
-        } catch (Exception e) {
-            Log.error(e);
-            try {
-                rollbackTx(tx);
-            } catch (NulsException e1) {
-                Log.error(e1);
-            }
-            return new Result(false, e.getMessage());
-        }
-
-        return new Result(true, "OK", tx.getHash().getDigestHex());
+        CoinTransferData coinData = new CoinTransferData(amount, addressList, toAddress);
+        return transfer(coinData, password, remark);
     }
 
 
@@ -234,7 +221,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 Transaction tx = txList.get(i);
                 TransactionPo po = TransactionPoTool.toPojo(tx);
                 poList.add(po);
-                if(tx.isLocalTx()) {
+                if (tx.isLocalTx()) {
                     TransactionLocalPo localPo = TransactionPoTool.toPojoLocal(tx);
                     localPoList.add(localPo);
                 }
@@ -304,7 +291,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public boolean checkTxIsMine(Transaction tx) throws NulsException{
+    public boolean checkTxIsMine(Transaction tx) throws NulsException {
         if (tx instanceof AbstractCoinTransaction) {
             return UtxoTransactionTool.getInstance().isMine((AbstractCoinTransaction) tx);
         }
