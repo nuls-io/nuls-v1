@@ -73,7 +73,7 @@ public class TransactionPoTool {
         po.setCreateTime(tx.getTime());
         po.setBlockHeight(tx.getBlockHeight());
         po.setTxIndex(tx.getIndex());
-
+        po.setTransferType(tx.getTransferType());
         if (null != tx.getTxData()) {
             po.setTxData(tx.getTxData().serialize());
         }

@@ -31,7 +31,6 @@ import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.str.StringUtils;
-import io.nuls.db.dao.UtxoInputDataService;
 import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.UtxoInput;
 import io.nuls.ledger.entity.UtxoOutput;
@@ -56,8 +55,6 @@ public class UtxoTransactionTool {
     }
 
     private AccountService accountService;
-
-    private UtxoInputDataService inputDataService;
 
     private LedgerCacheService ledgerCacheService = LedgerCacheService.getInstance();
 
@@ -133,7 +130,4 @@ public class UtxoTransactionTool {
         return accountService;
     }
 
-    public void setInputDataService(UtxoInputDataService inputDataService) {
-        this.inputDataService = inputDataService;
-    }
 }

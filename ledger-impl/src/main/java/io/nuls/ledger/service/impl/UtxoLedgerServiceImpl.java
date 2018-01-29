@@ -36,8 +36,6 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.tx.serivce.TransactionService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
-import io.nuls.db.dao.UtxoInputDataService;
-import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.db.dao.UtxoTransactionDataService;
 import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.entity.TransactionPo;
@@ -92,10 +90,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     public void init() {
         txDao = NulsContext.getInstance().getService(UtxoTransactionDataService.class);
         eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
-
-        UtxoOutputDataService outputDataService = NulsContext.getInstance().getService(UtxoOutputDataService.class);
-        UtxoInputDataService inputDataService = NulsContext.getInstance().getService(UtxoInputDataService.class);
-        UtxoTransactionTool.getInstance().setInputDataService(inputDataService);
     }
 
     @Override
