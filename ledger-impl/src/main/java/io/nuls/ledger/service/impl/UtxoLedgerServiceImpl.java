@@ -240,11 +240,9 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 Transaction tx = txList.get(i);
                 TransactionPo po = TransactionPoTool.toPojo(tx);
                 poList.add(po);
-                if (tx instanceof AbstractCoinTransaction) {
-                    if (UtxoTransactionTool.getInstance().isMine((AbstractCoinTransaction) tx)) {
-                        TransactionLocalPo localPo = TransactionPoTool.toPojoLocal(tx);
-                        localPoList.add(localPo);
-                    }
+                if(tx.isLocalTx()) {
+                    TransactionLocalPo localPo = TransactionPoTool.toPojoLocal(tx);
+                    localPoList.add(localPo);
                 }
             }
             txDao.saveTxList(poList);
@@ -312,7 +310,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public boolean checkTxIsMine(Transaction tx) {
+    public boolean checkTxIsMine(Transaction tx) throws NulsException{
         if (tx instanceof AbstractCoinTransaction) {
             return UtxoTransactionTool.getInstance().isMine((AbstractCoinTransaction) tx);
         }

@@ -110,7 +110,7 @@ public interface LedgerService {
 
     List<Transaction> getTxList(long height) throws Exception;
 
-    boolean checkTxIsMine(Transaction tx);
+    boolean checkTxIsMine(Transaction tx) throws NulsException;
 
     void rollbackTx(Transaction tx) throws NulsException;
 

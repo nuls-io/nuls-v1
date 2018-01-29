@@ -29,6 +29,7 @@ import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.UtxoInputDataService;
 import io.nuls.ledger.entity.UtxoBalance;
@@ -83,10 +84,14 @@ public class UtxoTransactionTool {
     /**
      * check the tx is mine
      * when any input or output has my address
+     *
      * @param tx
      * @return
      */
-    public boolean isMine(AbstractCoinTransaction tx) {
+    public boolean isMine(AbstractCoinTransaction tx) throws NulsException {
+        if (tx.isLocalTx()) {
+            return true;
+        }
         List<Account> accounts = getAccountService().getAccountList();
         if (accounts == null || accounts.isEmpty()) {
             return false;
@@ -94,21 +99,25 @@ public class UtxoTransactionTool {
 
         UtxoData coinData = (UtxoData) tx.getCoinData();
         //check input
-        for (Account account : accounts) {
-            UtxoBalance balance = (UtxoBalance) ledgerCacheService.getBalance(account.getAddress().getBase58());
-            if (balance == null) {
-                continue;
+        for (UtxoInput input : coinData.getInputs()) {
+            UtxoOutput unSpend = ledgerCacheService.getUtxo(input.getKey());
+            if (unSpend == null) {
+                tx.setLocalTx(false);
+                return false;
             }
-            for (UtxoOutput output : balance.getUnSpends()) {
-                for (UtxoInput input : coinData.getInputs()) {
-                    if (output.getTxHash().getDigestHex().equals(input.getTxHash().getDigestHex()) &&
-                            output.getIndex() == input.getFromIndex()) {
-                        return true;
-                    }
+            for (Account account : accounts) {
+                if (account.getAddress().equals(Address.fromHashs(unSpend.getAddress()))) {
+                    tx.setLocalTx(true);
+                    return true;
                 }
             }
-            for (UtxoOutput output : coinData.getOutputs()) {
-                if (new Address((short) 0, output.getAddress()).equals(account.getAddress())) {
+        }
+
+        // check output
+        for (UtxoOutput output : coinData.getOutputs()) {
+            for (Account account : accounts) {
+                if (account.getAddress().equals(Address.fromHashs(output.getAddress()))) {
+                    tx.setLocalTx(true);
                     return true;
                 }
             }
