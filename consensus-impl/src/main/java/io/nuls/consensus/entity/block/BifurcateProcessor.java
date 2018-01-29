@@ -51,13 +51,15 @@ public class BifurcateProcessor {
 
     public void addHeader(BlockHeader header) {
         for (BlockHeaderChain chain : chainList) {
-            int index = chain.indexOf(header.getPreHash().getDigestHex(), header.getHeight());
+            int index = chain.indexOf(header.getPreHash().getDigestHex(), header.getHeight()-1);
             if (index == chain.size() - 1) {
                 chain.addHeader(header);
+                setBestHeight(header);
                 return;
             } else if (index >= 0) {
                 BlockHeaderChain newChain = chain.getBifurcateChain(header);
                 chainList.add(newChain);
+                setBestHeight(header);
                 return;
             }
         }
@@ -68,6 +70,7 @@ public class BifurcateProcessor {
         chain.addHeader(header);
         chainList.add(chain);
         setBestHeight(header);
+
     }
 
     private void setBestHeight(BlockHeader header) {
@@ -105,7 +108,8 @@ public class BifurcateProcessor {
         if (chainList.isEmpty()) {
             return;
         }
-        this.chainList.forEach((BlockHeaderChain chain) -> removeBlock(chain, height));
+        List<BlockHeaderChain> tempList = new ArrayList<>(this.chainList);
+        tempList.forEach((BlockHeaderChain chain) -> removeBlock(chain, height));
 
     }
 

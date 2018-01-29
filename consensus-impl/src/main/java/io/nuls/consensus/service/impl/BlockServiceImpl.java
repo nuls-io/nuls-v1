@@ -70,6 +70,11 @@ public class BlockServiceImpl implements io.nuls.consensus.service.intf.BlockSer
     }
 
     @Override
+    public long getLocalSavedHeight() {
+        return blockStorageService.getBestHeight();
+    }
+
+    @Override
     public Block getLocalBestBlock() {
         return getBlock(getLocalHeight());
     }

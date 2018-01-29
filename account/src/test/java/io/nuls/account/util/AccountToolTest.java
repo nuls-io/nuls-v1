@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,44 +21,26 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.consensus.service.intf;
 
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.BlockHeader;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.exception.NulsException;
+package io.nuls.account.util;
 
-import java.io.IOException;
-import java.util.List;
+import io.nuls.account.entity.Account;
+import io.nuls.core.utils.crypto.Hex;
 
 /**
  * @author Niels
- * @date 2017/11/10
+ * @date 2018/1/26
  */
-public interface BlockService {
+public class AccountToolTest {
+    @org.junit.Test
+    public void createAccount() throws Exception {
+        for( int i=0;i<10;i++) {
+            Account account = AccountTool.createAccount();
+            System.out.println("address:"+account.getAddress().getBase58());
+            System.out.println("priKey :"+Hex.encode(account.getPriKey()));
+        }
+    }
 
-    Block getGengsisBlock();
-
-    long getLocalHeight();
-
-    long getLocalSavedHeight();
-
-    Block getLocalBestBlock();
-
-    BlockHeader getBlockHeader(long height);
-
-    Block getBlock(String hash);
-
-    Block getBlock(long height);
-
-    List<Block> getBlockList(long startHeight, long endHeight);
-
-    void saveBlock(Block block) throws IOException;
-
-    void rollbackBlock(long height) throws NulsException;
-
-    List<NulsDigestData> getBlockHashList(long start, long end, long split);
-
-    BlockHeader getBlockHeader(NulsDigestData hash);
 }
