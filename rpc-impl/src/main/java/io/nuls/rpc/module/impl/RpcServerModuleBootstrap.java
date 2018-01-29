@@ -54,7 +54,7 @@ public class RpcServerModuleBootstrap extends AbstractRpcServerModule {
 
     @Override
     public void start() {
-        this.registerService(rpcServerService);
+        this.registerService(RpcServerService.class,rpcServerService);
         if (StringUtils.isBlank(ip) || StringUtils.isBlank(port)) {
             rpcServerService.startServer(RpcConstant.DEFAULT_IP, RpcConstant.DEFAULT_PORT, RpcConstant.DEFAULT_URL);
         } else {
