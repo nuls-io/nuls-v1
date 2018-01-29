@@ -55,7 +55,7 @@ public class EventBusModuleBootstrap extends AbstractEventBusModule {
         eventBusService = EventBusServiceImpl.getInstance();
         eventBusService.subscribeEvent(CommonDigestEvent.class, new CommonDigestHandler());
         eventBusService.subscribeEvent(GetEventBodyEvent.class, new GetEventBodyHandler());
-        this.registerService(eventBusService);
+        this.registerService(EventBusService.class,eventBusService);
         this.registerService(EventBroadcaster.class, EventBroadcasterImpl.getInstance());
 
     }
