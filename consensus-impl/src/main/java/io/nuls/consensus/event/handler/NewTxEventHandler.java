@@ -27,6 +27,8 @@ import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.entity.NodePo;
 import io.nuls.event.bus.handler.AbstractEventHandler;
@@ -45,6 +47,7 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
     private ReceivedTxCacheManager cacheManager = ReceivedTxCacheManager.getInstance();
 
     private NetworkService networkService = NulsContext.getInstance().getService(NetworkService.class);
+    private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
 
     private NewTxEventHandler() {
     }
@@ -58,6 +61,12 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
         Transaction tx = event.getEventBody();
         if (null == tx) {
             return;
+        }
+        // check the transaction local & Differentiated type
+        try {
+            ledgerService.checkTxIsMine(tx);
+        } catch (NulsException e) {
+            Log.error(e);
         }
         ValidateResult result = tx.verify();
         if (result.isFailed()) {
