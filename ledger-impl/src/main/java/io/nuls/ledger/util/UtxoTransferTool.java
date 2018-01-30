@@ -88,7 +88,7 @@ public class UtxoTransferTool {
         po.setTxIndex(tx.getIndex());
 
         if (null != tx.getSign()) {
-            po.setSign(tx.getSign().getSignBytes());
+            po.setSign(tx.getSign().serialize());
         }
         if (null != tx.getTxData()) {
             po.setTxData(tx.getTxData().serialize());
@@ -114,7 +114,7 @@ public class UtxoTransferTool {
         po.setTransferType(tx.getTransferType());
 
         if (null != tx.getSign()) {
-            po.setSign(tx.getSign().getSignBytes());
+            po.setSign(tx.getSign().serialize());
         }
         if (null != tx.getTxData()) {
             po.setTxData(tx.getTxData().serialize());

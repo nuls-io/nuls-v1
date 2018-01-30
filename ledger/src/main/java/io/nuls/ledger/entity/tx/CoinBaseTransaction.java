@@ -40,7 +40,7 @@ public class CoinBaseTransaction<T extends BaseNulsData> extends AbstractCoinTra
     }
 
     public CoinBaseTransaction(CoinTransferData params, String password) throws NulsException {
-        this(TransactionConstant.TX_TYPE_TRANSFER, params, password);
+        this(TransactionConstant.TX_TYPE_COIN_BASE, params, password);
     }
 
     protected CoinBaseTransaction(int type, CoinTransferData params, String password) throws NulsException {

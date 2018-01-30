@@ -76,7 +76,7 @@
         SELECT hash from block_header
         <![CDATA[
         where height >=#{startHeight,jdbcType=BIGINT}
-        and height &lt;= #{endHeight,jdbcType=BIGINT}
+        and height <= #{endHeight,jdbcType=BIGINT}
         and mod((height-startHeight),#{split,jdbcType=BIGINT})=0
         ]]>
     </select>
@@ -86,7 +86,7 @@
         INNER JOIN transaction t on t.block_height=b.height
         INNER JOIN tx_account_relation r on r.tx_hash = t.hash
         <![CDATA[
-        where r.address=#{address ,jdbcType=VARCHAR } and b.round_index &lt;=#{endRoundIndex,jdbcType=BIGINT}
+        where r.address=#{address ,jdbcType=VARCHAR } and b.round_index <=#{endRoundIndex,jdbcType=BIGINT}
         ]]>
     </select>
 

@@ -37,14 +37,24 @@ import java.util.List;
  */
 public interface BlockService {
 
+    /**
+     * @return
+     */
     Block getGengsisBlock();
 
+    /**
+     * @return
+     */
     long getLocalHeight();
 
     long getLocalSavedHeight();
 
     Block getLocalBestBlock();
 
+    /**
+     * @param height
+     * @return
+     */
     BlockHeader getBlockHeader(long height);
 
     Block getBlock(String hash);

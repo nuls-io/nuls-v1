@@ -30,8 +30,10 @@ import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.entity.listener.CoinDataTxService;
+import io.nuls.ledger.entity.tx.CoinBaseTransaction;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.entity.tx.TransferTransaction;
+import io.nuls.ledger.entity.tx.UnlockNulsTransaction;
 import io.nuls.ledger.module.AbstractLedgerModule;
 import io.nuls.ledger.service.impl.LedgerCacheService;
 import io.nuls.ledger.service.impl.UtxoCoinDataProvider;
@@ -69,7 +71,9 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
         addNormalTxValidator();
         registerService();
 
+        this.registerTransaction(TransactionConstant.TX_TYPE_COIN_BASE, CoinBaseTransaction.class, CoinDataTxService.getInstance());
         this.registerTransaction(TransactionConstant.TX_TYPE_TRANSFER, TransferTransaction.class, CoinDataTxService.getInstance());
+        this.registerTransaction(TransactionConstant.TX_TYPE_UNLOCK, UnlockNulsTransaction.class, CoinDataTxService.getInstance());
         this.registerTransaction(TransactionConstant.TX_TYPE_LOCK, LockNulsTransaction.class, CoinDataTxService.getInstance());
     }
 

@@ -55,6 +55,6 @@ public class NulsEventFilterChain {
     }
 
     public void addFilter(NulsEventFilter<? extends BaseEvent> filter) {
-        list.add(filter);
+        list.add(0,filter);
     }
 }

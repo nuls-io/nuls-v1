@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS `block_header` (
   `merkle_hash` varchar(70) NOT NULL,
   `create_time` bigint(14) NOT NULL,
   `consensus_address` varchar(40) DEFAULT NULL,
-  `varsion` int(5),
+  `version` int(5),
   `tx_count` int(5) NOT NULL,
   `round_index` bigint(14) NOT NULL,
   `sign` varbinary(1024) ,
