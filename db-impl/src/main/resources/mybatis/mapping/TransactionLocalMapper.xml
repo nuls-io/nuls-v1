@@ -83,10 +83,21 @@
         <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
     </select>
 
-    <select id="selectByAddress" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultMap="BaseResultMap">
+    <select id="selectByAddress" resultMap="BaseResultMap">
         select b.*
         from tx_account_relation a
         join `transaction_local` b on a.tx_hash = b.`hash`
-        <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
+      <where>
+          <if test="address != null">
+            and a.address = #{address,jdbcType=VARCHAR}
+          </if>
+          <if test="type != 0">
+            and b.type = #{type,jdbcType=INTEGER}
+          </if>
+      </where>
+        order by block_height asc, create_time asc
+        <if test="start != null and limit != null">
+             limit #{start,jdbcType=INTEGER}, #{limit,jdbcType=INTEGER}
+        </if>
     </select>
 </mapper>

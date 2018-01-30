@@ -38,24 +38,23 @@ public interface UtxoTransactionDataService {
 
     TransactionPo gettx(String hash);
 
-    List<TransactionPo> getTxs(long blockHeight);
+    TransactionLocalPo getLocaltx(String hash);
 
-    List<TransactionPo> getTxs(long startHeight, long endHeight);
+    List<TransactionPo> getTxs(long blockHeight);
 
     List<TransactionPo> getTxs(String blockHash);
 
-    List<TransactionPo> getTxs(String address, int type, int start, int limit);
+    List<TransactionPo> getTxs(long startHeight, long endHeight);
 
-    TransactionLocalPo getLocaltx(String hash);
+    List<TransactionPo> getTxs(String address, int type, Integer start, Integer limit);
 
     List<TransactionLocalPo> getLocalTxs(long blockHeight);
 
-    List<TransactionLocalPo> getLocalTxs(long startHeight, long endHeight);
-
     List<TransactionLocalPo> getLocalTxs(String blockHash);
 
-    List<TransactionLocalPo> getLocalTxs(String address, int type, int start, int limit);
+    List<TransactionLocalPo> getLocalTxs(long startHeight, long endHeight);
 
+    List<TransactionLocalPo> getLocalTxs(String address, int type, Integer start, Integer limit);
 
     List<UtxoInputPo> getTxInputs(String txHash);
 

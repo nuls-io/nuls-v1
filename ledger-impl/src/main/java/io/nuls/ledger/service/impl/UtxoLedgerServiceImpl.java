@@ -23,6 +23,7 @@
  */
 package io.nuls.ledger.service.impl;
 
+import io.nuls.cache.service.intf.CacheService;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Result;
@@ -75,6 +76,12 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     private EventBroadcaster eventBroadcaster;
 
+    private static final String RECEIVE_TX_CACHE = "Received-tx-cache";
+
+    private static final String CONFIRM_TX_CACHE = "Confirming-tx-cache";
+
+    private CacheService<String, Transaction> txCacheService;
+
     private Lock lock = new ReentrantLock();
 
     private UtxoLedgerServiceImpl() {
@@ -89,6 +96,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     public void init() {
         txDao = NulsContext.getInstance().getService(UtxoTransactionDataService.class);
         eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
+        txCacheService = NulsContext.getInstance().getService(CacheService.class);
     }
 
     @Override
@@ -114,14 +122,16 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public List<Transaction> getTxList(String address, int txType, int start, int limit) throws Exception {
+    public List<Transaction> getTxList(String address, int txType) throws Exception {
+        return getTxList(address, txType, null, null);
+    }
+
+    @Override
+    public List<Transaction> getTxList(String address, int txType, Integer start, Integer limit) throws Exception {
         List<Transaction> txList = new ArrayList<>();
         boolean isLocal = NulsContext.LOCAL_ADDRESS_LIST.contains(address);
         if (isLocal) {
-            List<TransactionLocalPo> poList = txDao.getLocalTxs(address, txType, start, limit);
-            for (TransactionLocalPo po : poList) {
-                txList.add(UtxoTransferTool.toTransaction(po));
-            }
+            txList = getLocalTxList(address, txType, start, limit);
         } else {
             List<TransactionPo> poList = txDao.getTxs(address, txType, start, limit);
             for (TransactionPo po : poList) {
@@ -131,9 +141,37 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         return txList;
     }
 
-    @Override
-    public List<Transaction> getTxList(String address, int txType) throws Exception {
-        return getTxList(address, txType, 0, 0);
+    public List<Transaction> getLocalTxList(String address, int txType, Integer start, Integer limit) throws Exception {
+        List<Transaction> txList = new ArrayList<>();
+        List<Transaction> cacheTxList = txCacheService.getElementList(RECEIVE_TX_CACHE);
+        for (Transaction tx : cacheTxList) {
+            if (tx.isLocalTx()) {
+                txList.add(tx);
+            }
+        }
+        cacheTxList = txCacheService.getElementList(CONFIRM_TX_CACHE);
+        for (Transaction tx : cacheTxList) {
+            if (tx.isLocalTx()) {
+                txList.add(tx);
+            }
+        }
+
+        List<TransactionLocalPo> poList;
+        if (start != null && limit != null) {
+            if (txList.size() >= start + limit) {
+                return txList.subList(start, start + limit);
+            }
+            txList = txList.subList(start, txList.size() - 1);
+
+            poList = txDao.getLocalTxs(address, txType, (start + limit), (txList.size() - start - limit));
+        } else {
+            poList = txDao.getLocalTxs(address, txType, start, limit);
+        }
+        for (TransactionLocalPo po : poList) {
+            txList.add(UtxoTransferTool.toTransaction(po));
+        }
+
+        return txList;
     }
 
     @Override

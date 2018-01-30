@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -82,7 +82,7 @@ public class TransactionLocalDaoImpl extends BaseDaoImpl<TransactionLocalMapper,
     }
 
     @Override
-    public List<TransactionLocalPo> getTxs(String address, int type, int pageNum, int pageSize) {
+    public List<TransactionLocalPo> getTxs(String address, int type, Integer start, Integer limit) {
         Searchable searchable = new Searchable();
         if (type != 0) {
             searchable.addCondition("b.type", SearchOperator.eq, type);
@@ -91,28 +91,14 @@ public class TransactionLocalDaoImpl extends BaseDaoImpl<TransactionLocalMapper,
             searchable.addCondition("a.address", SearchOperator.eq, address);
         }
 
-        if (pageNum > 0 && pageSize > 0) {
-            PageHelper.startPage(pageNum, pageSize);
-        }
         PageHelper.orderBy("block_height asc, create_time asc");
 
-        return getMapper().selectByAddress(searchable);
+        return getMapper().selectByAddress(address, type, start, limit);
     }
 
     @Override
     public List<TransactionLocalPo> getTxs(String address, int type) {
-        return getTxs(address, type, 0, 0);
+        return getTxs(address, type, null, null);
     }
 
-    @Override
-    public List<TransactionLocalPo> listTranscation(int limit, String address) {
-        //todo
-        return null;
-    }
-
-    @Override
-    public List<TransactionLocalPo> listTransaction(long blockHeight, String address) {
-        //todo
-        return null;
-    }
 }

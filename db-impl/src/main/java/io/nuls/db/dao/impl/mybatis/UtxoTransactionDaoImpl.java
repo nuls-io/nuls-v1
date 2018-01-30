@@ -71,7 +71,7 @@ public class UtxoTransactionDaoImpl implements UtxoTransactionDataService {
     }
 
     @Override
-    public List<TransactionPo> getTxs(String address, int type, int start, int limit) {
+    public List<TransactionPo> getTxs(String address, int type, Integer start, Integer limit) {
         return txDao.getTxs(address, type, start, limit);
     }
 
@@ -100,7 +100,7 @@ public class UtxoTransactionDaoImpl implements UtxoTransactionDataService {
     }
 
     @Override
-    public List<TransactionLocalPo> getLocalTxs(String address, int type, int start, int limit) {
+    public List<TransactionLocalPo> getLocalTxs(String address, int type, Integer start, Integer limit) {
         return txLocalDao.getTxs(address, type, start, limit);
     }
 

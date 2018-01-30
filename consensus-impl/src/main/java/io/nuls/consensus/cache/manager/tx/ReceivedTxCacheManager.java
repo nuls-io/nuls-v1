@@ -41,6 +41,7 @@ public class ReceivedTxCacheManager {
     private CacheMap<String, Transaction> txCache;
 
     private ReceivedTxCacheManager() {
+
     }
 
     public static ReceivedTxCacheManager getInstance() {

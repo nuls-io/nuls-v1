@@ -58,6 +58,7 @@ import io.nuls.db.dao.AliasDataService;
 import io.nuls.db.entity.AccountPo;
 import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.entity.TransactionPo;
+import io.nuls.db.transactional.annotation.TransactionalAnnotation;
 import io.nuls.db.util.TransactionPoTool;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.params.CoinTransferData;
@@ -138,6 +139,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    @TransactionalAnnotation
     public Account createAccount() {
         locker.lock();
         try {
@@ -158,9 +160,10 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    @TransactionalAnnotation
     public Result<List<String>> createAccount(int count) {
         if (count <= 0 || count > AccountTool.CREATE_MAX_SIZE) {
-            return new Result<>(false, "Only 0 to 100 can be created at once");
+            return new Result<>(false, "between 0 and 100 can be created at once");
         }
 
         locker.lock();
@@ -177,12 +180,11 @@ public class AccountServiceImpl implements AccountService {
                 accounts.add(account);
                 accountPos.add(po);
                 resultList.add(account.getAddress().getBase58());
-
-                NulsContext.LOCAL_ADDRESS_LIST.add(account.getAddress().getBase58());
             }
 
             accountDao.save(accountPos);
             accountCacheService.putAccountList(accounts);
+            NulsContext.LOCAL_ADDRESS_LIST.addAll(resultList);
 
             return new Result<>(true, "OK", resultList);
         } catch (Exception e) {
@@ -328,7 +330,6 @@ public class AccountServiceImpl implements AccountService {
                     return new Result(false, "old password error");
                 }
 
-                //todo
                 account.resetKey(oldPassword);
                 account.encrypt(newPassword);
 
@@ -391,7 +392,7 @@ public class AccountServiceImpl implements AccountService {
                         break;
                     } else {
                         try {
-                            Thread.sleep(1000L);
+                            Thread.sleep(1001L);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -445,23 +446,6 @@ public class AccountServiceImpl implements AccountService {
         //todo
         return new Result(true, null);
     }
-
-//    @Override
-//    public Result setAlias(String address, String alias) {
-//        try {
-//            Result result = canSetAlias(address, alias);
-//            if (null == result || result.isFailed()) {
-//                return result;
-//            }
-//            Account account = getAccount(address);
-//            result = accountTxDBService.setAlias(address, alias);
-//            account.setAlias(alias);
-//            accountCacheService.putAccount(account);
-//            return result;
-//        } catch (Exception e) {
-//            return new Result(false, e.getMessage());
-//        }
-//    }
 
     @Override
     public Result setAlias(String address, String password, String alias) {
