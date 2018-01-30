@@ -62,6 +62,7 @@ import io.nuls.db.util.TransactionPoTool;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.event.TransactionEvent;
+import io.nuls.ledger.util.UtxoTransferTool;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -708,7 +709,7 @@ public class AccountServiceImpl implements AccountService {
 
             List<TransactionLocalPo> transactionPos = new ArrayList<>();
             for (Transaction tx : account.getMyTxs()) {
-                TransactionLocalPo po = TransactionPoTool.toPojoLocal(tx);
+                TransactionLocalPo po = UtxoTransferTool.toLocalTransactionPojo(tx);
                 transactionPos.add(po);
             }
             accountPo.setMyTxs(transactionPos);

@@ -23,14 +23,12 @@
  */
 package io.nuls.db.dao;
 
-import io.nuls.core.chain.entity.Transaction;
 import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.entity.TransactionPo;
 import io.nuls.db.entity.UtxoInputPo;
 import io.nuls.db.entity.UtxoOutputPo;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author vivi
@@ -38,23 +36,26 @@ import java.util.Set;
  */
 public interface UtxoTransactionDataService {
 
-    TransactionPo gettx(String hash, boolean isLocal);
+    TransactionPo gettx(String hash);
 
-    List<TransactionPo> getTxs(long blockHeight, boolean isLocal);
+    List<TransactionPo> getTxs(long blockHeight);
 
-    List<TransactionPo> getTxs(long startHeight, long endHeight, boolean isLocal);
+    List<TransactionPo> getTxs(long startHeight, long endHeight);
 
-    List<TransactionPo> getTxs(String blockHash, boolean isLocal);
+    List<TransactionPo> getTxs(String blockHash);
 
-    List<TransactionPo> getTxs(byte[] blockHash, boolean isLocal);
+    List<TransactionPo> getTxs(String address, int type, int start, int limit);
 
-    List<TransactionPo> getTxs(String address, int type, int pageNum, int pageSize, boolean isLocal);
+    TransactionLocalPo getLocaltx(String hash);
 
-    List<TransactionPo> getTxs(String address, int type, boolean isLocal);
+    List<TransactionLocalPo> getLocalTxs(long blockHeight);
 
-    List<TransactionPo> listTranscation(int limit, String address, boolean isLocal);
+    List<TransactionLocalPo> getLocalTxs(long startHeight, long endHeight);
 
-    List<TransactionPo> listTransaction(long blockHeight, String address, boolean isLocal);
+    List<TransactionLocalPo> getLocalTxs(String blockHash);
+
+    List<TransactionLocalPo> getLocalTxs(String address, int type, int start, int limit);
+
 
     List<UtxoInputPo> getTxInputs(String txHash);
 
