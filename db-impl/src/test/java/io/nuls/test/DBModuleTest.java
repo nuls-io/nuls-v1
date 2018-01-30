@@ -87,7 +87,7 @@ public class DBModuleTest {
         blockHeaderPo.setPreHash("xxx");
         blockHeaderPo.setTxCount(10L);
 //        blockHeaderPo.setBytes(new byte[10]);
-        blockHeaderPo.setVarsion(1);
+        blockHeaderPo.setVersion(1);
         blockHeaderPo.setSign(new byte[2]);
 //        blockPo.setScript("dsfasdf".getBytes());
         int result = blockDao.save(blockHeaderPo);

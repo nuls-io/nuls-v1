@@ -8,25 +8,21 @@
         <result column="lock_time" jdbcType="BIGINT" property="lockTime"/>
         <result column="status" jdbcType="TINYINT" property="status"/>
         <result column="address" jdbcType="VARCHAR" property="address"/>
-    </resultMap>
-    <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="io.nuls.db.entity.UtxoOutputPo">
         <result column="script" jdbcType="VARBINARY" property="script"/>
     </resultMap>
+
     <sql id="Base_Column_List">
-        tx_hash, out_index, value, lock_time, status, address
+        tx_hash, out_index, value, lock_time, status, address,  script
     </sql>
-    <sql id="Blob_Column_List">
-        script
-    </sql>
-    <select id="selectByPrimaryKey" parameterType="map" resultMap="ResultMapWithBLOBs">
+
+    <select id="selectByPrimaryKey" parameterType="map" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        ,
-        <include refid="Blob_Column_List"/>
         from utxo_output
         where tx_hash = #{txHash,jdbcType=VARCHAR}
         and out_index = #{outIndex,jdbcType=INTEGER}
     </select>
+
     <delete id="deleteByPrimaryKey" parameterType="map">
         delete from utxo_output
         where tx_hash = #{txHash,jdbcType=VARCHAR}
@@ -35,85 +31,14 @@
 
     <insert id="insert" parameterType="io.nuls.db.entity.UtxoOutputPo">
         insert into utxo_output (tx_hash, out_index, value,
-        lock_time, status, address,
-        script)
+        lock_time, status, address, script)
         values (#{txHash,jdbcType=VARCHAR}, #{outIndex,jdbcType=INTEGER}, #{value,jdbcType=BIGINT},
         #{lockTime,jdbcType=BIGINT}, #{status,jdbcType=TINYINT}, #{address,jdbcType=VARCHAR},
         #{script,jdbcType=VARBINARY})
     </insert>
-    <insert id="insertSelective" parameterType="io.nuls.db.entity.UtxoOutputPo">
-        insert into utxo_output
-        <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="txHash != null">
-                tx_hash,
-            </if>
-            <if test="outIndex != null">
-                out_index,
-            </if>
-            <if test="value != null">
-                value,
-            </if>
-            <if test="lockTime != null">
-                lock_time,
-            </if>
-            <if test="status != null">
-                status,
-            </if>
-            <if test="address != null">
-                address,
-            </if>
-            <if test="script != null">
-                script,
-            </if>
-        </trim>
-        <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="txHash != null">
-                #{txHash,jdbcType=VARCHAR},
-            </if>
-            <if test="outIndex != null">
-                #{outIndex,jdbcType=INTEGER},
-            </if>
-            <if test="value != null">
-                #{value,jdbcType=BIGINT},
-            </if>
-            <if test="lockTime != null">
-                #{lockTime,jdbcType=BIGINT},
-            </if>
-            <if test="status != null">
-                #{status,jdbcType=TINYINT},
-            </if>
-            <if test="address != null">
-                #{address,jdbcType=VARCHAR},
-            </if>
-            <if test="script != null">
-                #{script,jdbcType=VARBINARY},
-            </if>
-        </trim>
-    </insert>
-    <update id="updateByPrimaryKeySelective" parameterType="io.nuls.db.entity.UtxoOutputPo">
-        update utxo_output
-        <set>
-            <if test="value != null">
-                value = #{value,jdbcType=BIGINT},
-            </if>
-            <if test="lockTime != null">
-                lock_time = #{lockTime,jdbcType=BIGINT},
-            </if>
-            <if test="status != null">
-                status = #{status,jdbcType=TINYINT},
-            </if>
-            <if test="address != null">
-                address = #{address,jdbcType=VARCHAR},
-            </if>
-            <if test="script != null">
-                script = #{script,jdbcType=VARBINARY},
-            </if>
-        </set>
-        where tx_hash = #{txHash,jdbcType=VARCHAR}
-        and out_index = #{outIndex,jdbcType=INTEGER}
-    </update>
-    <update id="updateByPrimaryKeyWithBLOBs" parameterType="io.nuls.db.entity.UtxoOutputPo">
-        update utxo_output
+
+    <update id="updateByPrimaryKey" parameterType="io.nuls.db.entity.UtxoOutputPo">
+     update utxo_output
         set value = #{value,jdbcType=BIGINT},
         lock_time = #{lockTime,jdbcType=BIGINT},
         status = #{status,jdbcType=TINYINT},
@@ -121,15 +46,6 @@
         script = #{script,jdbcType=VARBINARY}
         where tx_hash = #{txHash,jdbcType=VARCHAR}
         and out_index = #{outIndex,jdbcType=INTEGER}
-    </update>
-    <update id="updateByPrimaryKey" parameterType="io.nuls.db.entity.UtxoOutputPo">
-    update utxo_output
-    set value = #{value,jdbcType=BIGINT},
-      lock_time = #{lockTime,jdbcType=BIGINT},
-      status = #{status,jdbcType=TINYINT},
-      address = #{address,jdbcType=VARCHAR}
-    where tx_hash = #{txHash,jdbcType=VARCHAR}
-      and out_index = #{outIndex,jdbcType=INTEGER}
   </update>
 
     <update id="updateStatus" parameterType="io.nuls.db.entity.UtxoOutputPo">
@@ -152,11 +68,9 @@
     <select id="countAll" resultType="java.lang.Long">
         select count(id) from utxo_output
     </select>
-    <select id="selectList" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultMap="ResultMapWithBLOBs">
+    <select id="selectList" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        ,
-        <include refid="Blob_Column_List"/>
         from utxo_output
         <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
     </select>

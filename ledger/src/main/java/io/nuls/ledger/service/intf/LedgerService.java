@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -41,32 +41,22 @@ public interface LedgerService {
 
     void init();
 
-    /**
-     * @param hash
-     * @return
-     */
     Transaction getTx(NulsDigestData hash);
 
-    /**
-     * @param hash
-     * @return
-     */
     Transaction getLocalTx(NulsDigestData hash);
 
-    /**
-     * @param address
-     * @return
-     */
+    List<Transaction> getTxList(String address, int txType) throws Exception;
+
+    List<Transaction> getTxList(String address, int txType, Integer start, Integer limit) throws Exception;
+
+    List<Transaction> getTxList(String blockHash) throws Exception;
+
+    List<Transaction> getTxList(long startHeight, long endHeight) throws Exception;
+
+    List<Transaction> getTxList(long height) throws Exception;
+
     Balance getBalance(String address);
 
-    /**
-     * @param address
-     * @param password
-     * @param toAddress
-     * @param amount
-     * @param remark
-     * @return
-     */
     Result transfer(String address, String password, String toAddress, Na amount, String remark);
 
     Result transfer(List<String> addressList, String password, String toAddress, Na amount, String remark);
@@ -74,41 +64,10 @@ public interface LedgerService {
     /**
      * unlockTime < 100,000,000,000  means the blockHeight
      * unlockTime > 100,000,000,000  means the timestamp
-     *
-     * @param address
-     * @param password
-     * @param amount
-     * @param unlockTime
-     * @return
      */
-    Result lock(String address, String password, Na amount, long unlockTime,String remark);
+    Result lock(String address, String password, Na amount, long unlockTime, String remark);
 
-    /**
-     * @param txList
-     * @return
-     */
     boolean saveTxList(List<Transaction> txList) throws IOException;
-
-    /**
-     * @param address
-     * @param txType
-     * @param pageNumber
-     * @param pageSize
-     * @return
-     */
-    List<Transaction> getTxList(String address, int txType, int pageNumber, int pageSize) throws Exception;
-
-    List<Transaction> getTxList(String address, int txType) throws Exception;
-
-    /**
-     * @param blockHash
-     * @return
-     */
-    List<Transaction> getTxList(String blockHash) throws Exception;
-
-    List<Transaction> getTxList(long startHeight, long endHeight) throws Exception;
-
-    List<Transaction> getTxList(long height) throws Exception;
 
     boolean checkTxIsMine(Transaction tx) throws NulsException;
 

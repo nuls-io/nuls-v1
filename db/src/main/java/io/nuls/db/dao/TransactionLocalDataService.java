@@ -42,11 +42,8 @@ public interface TransactionLocalDataService extends BaseDataService<String, Tra
 
     List<TransactionLocalPo> getTxs(byte[] blockHash);
 
-    List<TransactionLocalPo> getTxs(String address, int type, int pageNum, int pageSize);
+    List<TransactionLocalPo> getTxs(String address, int type, Integer start, Integer limit);
 
     List<TransactionLocalPo> getTxs(String address, int type);
 
-    List<TransactionLocalPo> listTranscation(int limit, String address);
-
-    List<TransactionLocalPo> listTransaction(long blockHeight, String address);
 }

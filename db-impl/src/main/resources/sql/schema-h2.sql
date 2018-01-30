@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS `transaction` (
   `create_time` bigint(15) NOT NULL,
   `block_height` bigint(15) NOT NULL,
   `remark` varchar(100) DEFAULT NULL,
-  `fee` long(19) NOT NULL,
+  `fee` bigint(19) NOT NULL,
   `txData` varbinary(1024)  ,
   `sign` varbinary(255) ,
   PRIMARY KEY (`hash`)
@@ -103,7 +103,8 @@ CREATE TABLE IF NOT EXISTS `transaction_local` (
   `create_time` bigint(15) NOT NULL,
   `block_height` bigint(15) NOT NULL,
   `remark` varchar(100) DEFAULT NULL,
-  `fee` long(19) NOT NULL,
+  `fee` bigint(19) NOT NULL,
+  `transferType` int(1),
   `txData` varbinary(1024)  ,
   `sign` varbinary(255) ,
   PRIMARY KEY (`hash`)

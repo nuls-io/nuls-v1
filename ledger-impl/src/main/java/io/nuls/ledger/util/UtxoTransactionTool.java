@@ -23,7 +23,6 @@
  */
 package io.nuls.ledger.util;
 
-import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.chain.entity.NulsDigestData;
@@ -31,7 +30,6 @@ import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.str.StringUtils;
-import io.nuls.db.dao.UtxoInputDataService;
 import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.UtxoInput;
 import io.nuls.ledger.entity.UtxoOutput;
@@ -40,8 +38,6 @@ import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.entity.tx.TransferTransaction;
 import io.nuls.ledger.service.impl.LedgerCacheService;
-
-import java.util.List;
 
 public class UtxoTransactionTool {
 
@@ -56,8 +52,6 @@ public class UtxoTransactionTool {
     }
 
     private AccountService accountService;
-
-    private UtxoInputDataService inputDataService;
 
     private LedgerCacheService ledgerCacheService = LedgerCacheService.getInstance();
 
@@ -91,8 +85,7 @@ public class UtxoTransactionTool {
         if (tx.isLocalTx()) {
             return true;
         }
-        List<Account> accounts = getAccountService().getAccountList();
-        if (accounts == null || accounts.isEmpty()) {
+        if (NulsContext.LOCAL_ADDRESS_LIST.isEmpty()) {
             return false;
         }
 
@@ -101,26 +94,21 @@ public class UtxoTransactionTool {
         for (UtxoInput input : coinData.getInputs()) {
             UtxoOutput unSpend = ledgerCacheService.getUtxo(input.getKey());
             if (unSpend == null) {
-                tx.setLocalTx(false);
-                return false;
+                continue;
             }
-            for (Account account : accounts) {
-                if (account.getAddress().equals(Address.fromHashs(unSpend.getAddress()))) {
-                    tx.setLocalTx(true);
-                    tx.setTransferType(Transaction.TRANSFER_SEND);
-                    return true;
-                }
+            if (NulsContext.LOCAL_ADDRESS_LIST.contains(Address.fromHashs(unSpend.getAddress()).getBase58())) {
+                tx.setLocalTx(true);
+                tx.setTransferType(Transaction.TRANSFER_SEND);
+                return true;
             }
         }
 
         // check output
         for (UtxoOutput output : coinData.getOutputs()) {
-            for (Account account : accounts) {
-                if (account.getAddress().equals(Address.fromHashs(output.getAddress()))) {
-                    tx.setLocalTx(true);
-                    tx.setTransferType(Transaction.TRANSFER_RECEIVE);
-                    return true;
-                }
+            if (NulsContext.LOCAL_ADDRESS_LIST.contains(Address.fromHashs(output.getAddress()).getBase58())) {
+                tx.setLocalTx(true);
+                tx.setTransferType(Transaction.TRANSFER_RECEIVE);
+                return true;
             }
         }
         return false;
@@ -133,7 +121,4 @@ public class UtxoTransactionTool {
         return accountService;
     }
 
-    public void setInputDataService(UtxoInputDataService inputDataService) {
-        this.inputDataService = inputDataService;
-    }
 }

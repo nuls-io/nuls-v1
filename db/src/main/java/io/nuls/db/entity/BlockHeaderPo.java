@@ -89,7 +89,7 @@ public class BlockHeaderPo {
      *
      * @mbg.generated
      */
-    private Integer varsion;
+    private Integer version;
 
     /**
      *
@@ -265,8 +265,8 @@ public class BlockHeaderPo {
      *
      * @mbg.generated
      */
-    public Integer getVarsion() {
-        return varsion;
+    public Integer getVersion() {
+        return version;
     }
 
     /**
@@ -277,8 +277,8 @@ public class BlockHeaderPo {
      *
      * @mbg.generated
      */
-    public void setVarsion(Integer varsion) {
-        this.varsion = varsion;
+    public void setVersion(Integer varsion) {
+        this.version = varsion;
     }
 
     /**

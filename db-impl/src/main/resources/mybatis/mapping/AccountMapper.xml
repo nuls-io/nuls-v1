@@ -8,9 +8,6 @@
         <result column="alias" jdbcType="VARCHAR" property="alias"/>
         <result column="version" jdbcType="INTEGER" property="version"/>
         <result column="status" javaType="Integer" property="status"/>
-    </resultMap>
-
-    <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="io.nuls.db.entity.AccountPo">
         <result column="pub_key" jdbcType="VARBINARY" property="pubKey"/>
         <result column="pri_key" jdbcType="VARBINARY" property="priKey"/>
         <result column="pri_seed" jdbcType="VARBINARY" property="priSeed"/>
@@ -18,17 +15,12 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        address, create_time, alias, version, status
-    </sql>
-    <sql id="Blob_Column_List">
-        pub_key, pri_key, pri_seed, extend
+        address, create_time, alias, version, status, pub_key, pri_key, pri_seed, extend
     </sql>
 
-    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="ResultMapWithBLOBs">
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        ,
-        <include refid="Blob_Column_List"/>
         from account
         where address = #{address,jdbcType=VARCHAR}
     </select>
@@ -81,11 +73,9 @@
         select count(id) from account
     </select>
 
-    <select id="selectList" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultMap="ResultMapWithBLOBs">
+    <select id="selectList" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        ,
-        <include refid="Blob_Column_List"/>
         from account
         <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
         ORDER by create_time desc

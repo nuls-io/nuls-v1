@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -35,6 +35,7 @@ import io.nuls.network.entity.NodeGroup;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.module.AbstractNetworkModule;
 
+import javax.management.relation.RoleUnresolved;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
@@ -120,9 +121,10 @@ public class ConnectionManager implements Runnable {
             }
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            serverClose();
         }
+//        finally {
+//            serverClose();
+//        }
     }
 
     public void serverClose() {
@@ -144,18 +146,12 @@ public class ConnectionManager implements Runnable {
             try {
                 selector.close();
                 selector = null;
-            } catch (IOException e) {
-                Log.warn("Error closing client manager selector", e);
-            }
-
-            try {
                 serverSocketChannel.close();
                 serverSocketChannel = null;
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.warn("Error closing manager selector and serverChannel", e);
             }
-            System.out.println("------------------server closed-------------------");
-            Log.info("Network closing connectManager");
+            Log.info("---------------------------Network closing connectManager---------------------");
 
             //todo sent a event to other module
             networkModule.setStatus(ModuleStatusEnum.DESTROYED);
@@ -172,6 +168,7 @@ public class ConnectionManager implements Runnable {
     public void openConnection(Node node) {
 
         SocketChannel channel = null;
+        SelectionKey key = null;
         try {
             channel = SocketChannel.open();
             channel.configureBlocking(false);
@@ -179,13 +176,13 @@ public class ConnectionManager implements Runnable {
             InetSocketAddress socketAddress = new InetSocketAddress(node.getIp(), node.getPort());
             channel.connect(socketAddress);
             PendingConnect data = new PendingConnect(channel, node);
-            if(channel == null) {
+            if (channel == null) {
                 System.out.println("----------------channel is null");
             }
-            if(selector == null) {
+            if (selector == null) {
                 System.out.println("----------------selector is null");
             }
-            SelectionKey key = channel.register(selector, SelectionKey.OP_CONNECT);
+            key = channel.register(selector, SelectionKey.OP_CONNECT);
             key.attach(data);
             selector.wakeup();
         } catch (IOException e) {
@@ -196,6 +193,9 @@ public class ConnectionManager implements Runnable {
                 } catch (IOException e1) {
                     e1.printStackTrace();
                 }
+            }
+            if (key != null) {
+                key.cancel();
             }
             node.destroy();
         }
@@ -274,10 +274,11 @@ public class ConnectionManager implements Runnable {
                 node.connectionOpened();
             } else {
                 // Failed to connect for some reason
-                node.destroy();
+                throw new RuntimeException();
             }
         } catch (Exception e) {
             Log.warn("out node Failed to connect:" + node.getIp() + ":" + node.getPort() + ",message:" + e.getMessage());
+            key.cancel();
             node.destroy();
         }
     }
@@ -285,6 +286,7 @@ public class ConnectionManager implements Runnable {
     private void addInNode(SelectionKey key) {
         SocketChannel socketChannel = null;
         Node node = null;
+        SelectionKey newKey = null;
         try {
             socketChannel = serverSocketChannel.accept();
             InetSocketAddress socketAddress = (InetSocketAddress) socketChannel.getRemoteAddress();
@@ -293,7 +295,7 @@ public class ConnectionManager implements Runnable {
                 return;
             }
             socketChannel.configureBlocking(false);
-            SelectionKey newKey = socketChannel.register(selector, SelectionKey.OP_READ);
+            newKey = socketChannel.register(selector, SelectionKey.OP_READ);
 
             node = new Node(network, Node.IN, socketAddress);
             nodesManager.addNodeToGroup(NetworkConstant.NETWORK_NODE_IN_GROUP, node);
@@ -304,12 +306,18 @@ public class ConnectionManager implements Runnable {
         } catch (Exception e) {
             Log.error(e);
             if (socketChannel != null) {
-                Log.warn("in node Failed to connect" + node.getIp());
+                Log.warn("-------------in node Failed to connect" + node.getIp() + "--------------");
                 try {
                     socketChannel.close();
                 } catch (IOException e1) {
                     e1.printStackTrace();
                 }
+            }
+            if (key != null) {
+                key.cancel();
+            }
+            if (newKey != null) {
+                key.cancel();
             }
             if (node != null) {
                 node.destroy();
