@@ -54,6 +54,7 @@ public class UtxoTransferTool {
         output.setValue(po.getValue());
         output.setAddress(new Address(po.getAddress()).getHash());
         output.setScript(new Script(po.getScript()));
+        output.setStatus(po.getStatus());
         return output;
     }
 
@@ -65,6 +66,7 @@ public class UtxoTransferTool {
         po.setLockTime(output.getLockTime());
         po.setAddress(Address.fromHashs(output.getAddress()).getBase58());
         po.setScript(output.getScriptBytes());
+        po.setStatus((byte) output.getStatus());
         return po;
     }
 

@@ -28,6 +28,9 @@ import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TxStatusEnum;
+import io.nuls.core.crypto.ECKey;
+import io.nuls.core.crypto.script.Script;
+import io.nuls.core.crypto.script.ScriptBuilder;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -140,17 +143,20 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             }
         } catch (Exception e) {
             //rollback
+            e.printStackTrace();
             for (UtxoOutput output : utxoData.getOutputs()) {
                 cacheService.removeUtxo(output.getKey());
                 UtxoBalance balance = (UtxoBalance) cacheService.getBalance(Address.fromHashs(output.getAddress()).getBase58());
-                balance.getUnSpends().remove(output);
+                if (balance != null) {
+                    balance.getUnSpends().remove(output);
+                }
             }
 
             for (UtxoOutput spend : spends) {
                 cacheService.putUtxo(spend.getKey(), spend);
                 cacheService.updateUtxoStatus(spend.getKey(), UtxoOutput.SPENT, UtxoOutput.LOCKED);
                 UtxoBalance balance = (UtxoBalance) cacheService.getBalance(Address.fromHashs(spend.getAddress()).getBase58());
-                if (!balance.getUnSpends().contains(spend)) {
+                if (balance != null && !balance.getUnSpends().contains(spend)) {
                     balance.getUnSpends().add(spend);
                 }
             }
@@ -293,12 +299,16 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         int i = 0;
         long outputValue = 0;
         for (Map.Entry<String, Coin> entry : coinParam.getToMap().entrySet()) {
+            //todo script
             UtxoOutput output = new UtxoOutput();
             String address = entry.getKey();
             Coin coin = entry.getValue();
             output.setAddress(new Address(address).getHash());
             output.setValue(coin.getNa().getValue());
+            output.setStatus(UtxoOutput.USEABLE);
             output.setIndex(i);
+            output.setScript(ScriptBuilder.createOutputScript(new ECKey()));
+            output.setScriptBytes(output.getScript().getProgram());
             if (coin.getUnlockHeight() > 0) {
                 output.setLockTime(coin.getUnlockHeight());
             } else {
@@ -314,10 +324,14 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         long balance = inputValue - outputValue - coinParam.getFee().getValue();
         if (balance > 0) {
             UtxoOutput output = new UtxoOutput();
+            //todo script
             output.setAddress(inputs.get(0).getFrom().getAddress());
             output.setValue(balance);
             output.setIndex(i);
             output.setParent(tx);
+            output.setStatus(UtxoOutput.USEABLE);
+            output.setScript(ScriptBuilder.createOutputScript(new ECKey()));
+            output.setScriptBytes(output.getScript().getProgram());
             outputs.add(output);
         }
 
