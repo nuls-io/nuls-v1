@@ -337,6 +337,9 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     public void rollbackTx(Transaction tx) throws NulsException {
         AssertUtil.canNotEmpty(tx, ErrorCode.NULL_PARAMETER);
+        if (tx.getStatus() == TxStatusEnum.CACHED) {
+            return;
+        }
         List<TransactionService> serviceList = getServiceList(tx.getClass());
         for (TransactionService service : serviceList) {
             service.onRollback(tx);
@@ -347,6 +350,9 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     public void commitTx(Transaction tx) throws NulsException {
         AssertUtil.canNotEmpty(tx, ErrorCode.NULL_PARAMETER);
+        if (tx.getStatus() == TxStatusEnum.AGREED) {
+            return;
+        }
         List<TransactionService> serviceList = getServiceList(tx.getClass());
         for (TransactionService service : serviceList) {
             service.onCommit(tx);
@@ -357,6 +363,9 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     public void approvalTx(Transaction tx) throws NulsException {
         AssertUtil.canNotEmpty(tx, ErrorCode.NULL_PARAMETER);
+        if (tx.getStatus() == TxStatusEnum.AGREED || tx.getStatus() == TxStatusEnum.CONFIRMED) {
+            return;
+        }
         List<TransactionService> serviceList = getServiceList(tx.getClass());
         for (TransactionService service : serviceList) {
             service.onApproval(tx);
