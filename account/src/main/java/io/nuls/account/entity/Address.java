@@ -25,6 +25,7 @@ package io.nuls.account.entity;
 
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.crypto.Base58;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
@@ -92,9 +93,9 @@ public class Address {
         return fromHashs(bytes);
     }
 
-    public static Address fromHashs(byte[] hashs) throws NulsException {
+    public static Address fromHashs(byte[] hashs){
         if (hashs == null || hashs.length != HASH_LENGTH) {
-            throw new NulsException(ErrorCode.DATA_ERROR);
+            throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
         }
 
         short addressType = Utils.bytes2Short(hashs);
@@ -130,7 +131,7 @@ public class Address {
         return xor;
     }
 
-    protected void checkXOR(byte xorByte) throws NulsException {
+    protected void checkXOR(byte xorByte){
         byte[] body = new byte[22];
         System.arraycopy(Utils.shortToBytes(addressType), 0, body, 0, 2);
         System.arraycopy(hash160, 0, body, 2, hash160.length);
@@ -141,7 +142,7 @@ public class Address {
         }
 
         if (xor != xorByte) {
-            throw new NulsException(ErrorCode.DATA_ERROR);
+            throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
         }
     }
 

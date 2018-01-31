@@ -62,8 +62,8 @@ public class UtxoTransferTool {
         po.setTxHash(output.getTxHash().getDigestHex());
         po.setOutIndex(output.getIndex());
         po.setValue(output.getValue());
-        po.setLockTime(po.getLockTime());
-        po.setAddress(new Address(po.getAddress()).getBase58());
+        po.setLockTime(output.getLockTime());
+        po.setAddress(Address.fromHashs(output.getAddress()).getBase58());
         po.setScript(output.getScriptBytes());
         return po;
     }
