@@ -27,6 +27,7 @@ import io.nuls.core.chain.manager.TransactionValidatorManager;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.thread.manager.TaskManager;
+import io.nuls.db.dao.UtxoInputDataService;
 import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.entity.listener.CoinDataTxService;
@@ -69,6 +70,9 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
         coinManager.setOutputDataService(outputDataService);
         ledgerService.init();
         addNormalTxValidator();
+
+        UtxoCoinDataProvider.getInstance().setInputDataService(NulsContext.getInstance().getService(UtxoInputDataService.class));
+        UtxoCoinDataProvider.getInstance().setOutputDataService(outputDataService);
         registerService();
 
         this.registerTransaction(TransactionConstant.TX_TYPE_COIN_BASE, CoinBaseTransaction.class, CoinDataTxService.getInstance());
@@ -89,6 +93,8 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
 
     private void registerService() {
         this.registerService(LedgerService.class,ledgerService);
+
+
         this.registerService(CoinDataProvider.class, UtxoCoinDataProvider.getInstance());
     }
 

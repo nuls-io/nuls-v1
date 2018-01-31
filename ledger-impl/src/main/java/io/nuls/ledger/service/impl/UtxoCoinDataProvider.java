@@ -351,4 +351,11 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         return utxoData;
     }
 
+    public void setOutputDataService(UtxoOutputDataService outputDataService) {
+        this.outputDataService = outputDataService;
+    }
+
+    public void setInputDataService(UtxoInputDataService inputDataService) {
+        this.inputDataService = inputDataService;
+    }
 }
