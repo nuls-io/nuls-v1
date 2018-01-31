@@ -337,7 +337,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     public void rollbackTx(Transaction tx) throws NulsException {
         AssertUtil.canNotEmpty(tx, ErrorCode.NULL_PARAMETER);
-        if (tx.getStatus() == TxStatusEnum.CACHED) {
+        if (tx.getStatus() == TxStatusEnum.CACHED ) {
             return;
         }
         List<TransactionService> serviceList = getServiceList(tx.getClass());
