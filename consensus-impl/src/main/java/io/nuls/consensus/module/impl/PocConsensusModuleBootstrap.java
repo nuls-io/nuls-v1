@@ -66,7 +66,7 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
         initTransactions();
         this.registerService(BlockServiceImpl.class );
         this.registerService(PocConsensusServiceImpl.class );
-        consensusManager.init();
+
     }
 
     private void initTransactions() {
@@ -79,7 +79,7 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
 
     @Override
     public void start() {
-
+        consensusManager.init();
         NulsContext.getInstance().setBestBlock(NulsContext.getServiceBean(BlockService.class).getLocalBestBlock());
         this.consensusManager.startMaintenanceWork();
         ConsensusStatusInfo statusInfo = consensusManager.getConsensusStatusInfo();

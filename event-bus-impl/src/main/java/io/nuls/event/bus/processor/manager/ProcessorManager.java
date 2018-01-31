@@ -24,6 +24,7 @@
 package io.nuls.event.bus.processor.manager;
 
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.event.BaseEvent;
 import io.nuls.core.event.EventManager;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -60,9 +61,9 @@ public class ProcessorManager<E extends io.nuls.core.event.BaseEvent, H extends 
     }
 
     public final void init() {
-        Short moduleId = ModuleService.getInstance().getModuleId(AbstractEventBusModule.class);
+
         pool = TaskManager.createThreadPool(EventBusConstant.THREAD_COUNT, EventBusConstant.THREAD_COUNT,
-                new NulsThreadFactory(moduleId, EventBusConstant.THREAD_POOL_NAME));
+                new NulsThreadFactory(NulsConstant.MODULE_ID_EVENT_BUS, EventBusConstant.THREAD_POOL_NAME));
         disruptorService.createDisruptor(disruptorName, EventBusConstant.DEFAULT_RING_BUFFER_SIZE);
         List<EventDispatchThread> handlerList = new ArrayList<>();
         for (int i = 0; i < EventBusConstant.THREAD_COUNT; i++) {

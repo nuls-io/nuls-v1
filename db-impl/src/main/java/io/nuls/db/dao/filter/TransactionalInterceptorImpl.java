@@ -59,7 +59,7 @@ public class TransactionalInterceptorImpl implements TransactionalInterceptor {
         SqlSession session = SessionManager.getSession(id);
         if (session == null) {
             isSessionBeginning = true;
-            session = SessionManager.sqlSessionFactory.openSession(false);
+            session = SessionManager.openSession(false);
             SessionManager.setConnection(id, session);
             SessionManager.setId(id);
         } else {

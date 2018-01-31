@@ -23,8 +23,6 @@
  */
 package io.nuls.core.utils.spring.lite.core;
 
-import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.core.utils.spring.lite.annotation.Interceptor;
@@ -79,7 +77,7 @@ public class SpringLiteContext {
 
     private static void injectionBeanFields(Object obj, Class objType) throws Exception {
         //todo debug
-        if(objType.getSimpleName().equals("CacheService")){
+        if(objType.getSimpleName().equals("UtxoLedgerServiceImpl")){
             System.out.println();
         }
         Set<Field> fieldSet = getFieldSet(objType);
@@ -212,7 +210,8 @@ public class SpringLiteContext {
         CLASS_NAME_SET_MAP.put(clazz, nameSet);
         if (null != clazz.getSuperclass() && !clazz.getSuperclass().equals(Object.class)) {
             addClassNameMap(clazz.getSuperclass(), beanName);
-        } else if (clazz.getInterfaces() != null && clazz.getInterfaces().length > 0) {
+        }
+        if (clazz.getInterfaces() != null && clazz.getInterfaces().length > 0) {
             for (Class intfClass : clazz.getInterfaces()) {
                 addClassNameMap(intfClass, beanName);
             }
@@ -256,5 +255,14 @@ public class SpringLiteContext {
 
     public static boolean checkBeanOk(Object bean) {
        return BEAN_OK_MAP.containsValue(bean);
+    }
+
+    //todo
+    public static void debug() {
+        for(Object obj :BEAN_TEMP_MAP.values()){
+            System.out.println(obj);
+        }
+
+
     }
 }

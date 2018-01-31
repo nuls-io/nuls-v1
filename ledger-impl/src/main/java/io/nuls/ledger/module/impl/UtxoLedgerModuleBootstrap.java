@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -67,15 +67,9 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
         registerService();
         ledgerService = NulsContext.getServiceBean(LedgerService.class);
         coinManager = UtxoCoinManager.getInstance();
-        UtxoOutputDataService outputDataService = NulsContext. getServiceBean(UtxoOutputDataService.class);
+        UtxoOutputDataService outputDataService = NulsContext.getServiceBean(UtxoOutputDataService.class);
         coinManager.setOutputDataService(outputDataService);
-        ledgerService.init();
         addNormalTxValidator();
-        UtxoCoinDataProvider provider = NulsContext.getServiceBean(UtxoCoinDataProvider.class);
-        provider.setInputDataService(NulsContext.getServiceBean(UtxoInputDataService.class));
-        provider.setOutputDataService(outputDataService);
-
-
         this.registerTransaction(TransactionConstant.TX_TYPE_COIN_BASE, CoinBaseTransaction.class, CoinDataTxService.getInstance());
         this.registerTransaction(TransactionConstant.TX_TYPE_TRANSFER, TransferTransaction.class, CoinDataTxService.getInstance());
         this.registerTransaction(TransactionConstant.TX_TYPE_UNLOCK, UnlockNulsTransaction.class, CoinDataTxService.getInstance());
@@ -94,11 +88,12 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
 
     private void registerService() {
         this.registerService(UtxoLedgerServiceImpl.class);
-        this.registerService(UtxoCoinDataProvider.class );
+        this.registerService(UtxoCoinDataProvider.class);
     }
 
     @Override
     public void start() {
+        ledgerService.init();
         coinManager.cacheAllUnSpendOutPut();
 
         SmallChangeThread smallChangeThread = SmallChangeThread.getInstance();

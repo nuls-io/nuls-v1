@@ -29,6 +29,7 @@ import io.nuls.consensus.entity.tx.PocJoinConsensusTransaction;
 import io.nuls.consensus.service.impl.PocConsensusServiceImpl;
 import io.nuls.consensus.service.intf.ConsensusService;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.filter.NulsEventFilter;
@@ -42,7 +43,7 @@ public class AllreadyJoinConsensusValidator implements NulsDataValidator<PocJoin
 
     private static final AllreadyJoinConsensusValidator INSTANCE = new AllreadyJoinConsensusValidator();
 
-    private ConsensusService consensusService = PocConsensusServiceImpl.getInstance();
+    private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
     private AllreadyJoinConsensusValidator(){}
     public static final AllreadyJoinConsensusValidator getInstance(){
         return INSTANCE;

@@ -32,6 +32,7 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.db.dao.UtxoInputDataService;
 import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.db.entity.UtxoInputPo;
@@ -55,9 +56,9 @@ import java.util.Map;
 public class UtxoCoinDataProvider implements CoinDataProvider {
 
     private LedgerCacheService cacheService = LedgerCacheService.getInstance();
-
+@Autowired
     private UtxoOutputDataService outputDataService;
-
+@Autowired
     private UtxoInputDataService inputDataService;
 
     private UtxoCoinManager coinManager = UtxoCoinManager.getInstance();
@@ -341,11 +342,4 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         return utxoData;
     }
 
-    public void setOutputDataService(UtxoOutputDataService outputDataService) {
-        this.outputDataService = outputDataService;
-    }
-
-    public void setInputDataService(UtxoInputDataService inputDataService) {
-        this.inputDataService = inputDataService;
-    }
 }

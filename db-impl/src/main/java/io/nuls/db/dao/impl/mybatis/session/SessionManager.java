@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -38,7 +38,7 @@ import java.util.Map;
  */
 public class SessionManager {
 
-    public static SqlSessionFactory sqlSessionFactory;
+    private static SqlSessionFactory sqlSessionFactory;
 
     private static ThreadLocal<Map<String, SqlSession>> sessionHolder = new ThreadLocal<>();
     private static ThreadLocal<Map<String, Boolean>> txHolder = new ThreadLocal<>();
@@ -53,7 +53,14 @@ public class SessionManager {
         idHolder.set(id);
     }
 
-    public static SqlSession getSession(){
+    public static SqlSession openSession(boolean autoCommit) {
+        if (sqlSessionFactory == null) {
+            throw new DBException(ErrorCode.DB_SAVE_CANNOT_NULL);
+        }
+        return sqlSessionFactory.openSession(autoCommit);
+    }
+
+    public static SqlSession getSession() {
         return getSession(idHolder.get());
     }
 
@@ -103,7 +110,7 @@ public class SessionManager {
     }
 
     public static boolean getTxState(String id) {
-        if(StringUtils.isBlank(id)) {
+        if (StringUtils.isBlank(id)) {
             return false;
         }
         Map<String, Boolean> map = txHolder.get();
@@ -111,5 +118,9 @@ public class SessionManager {
             return false;
         }
         return map.get(id);
+    }
+
+    public static void setSqlSessionFactory(SqlSessionFactory sqlSessionFactory) {
+        SessionManager.sqlSessionFactory = sqlSessionFactory;
     }
 }
