@@ -23,6 +23,7 @@
  */
 package io.nuls.event.bus.module.impl;
 
+import io.nuls.core.context.NulsContext;
 import io.nuls.event.bus.constant.EventBusConstant;
 import io.nuls.event.bus.event.CommonDigestEvent;
 import io.nuls.event.bus.event.GetEventBodyEvent;
@@ -51,12 +52,12 @@ public class EventBusModuleBootstrap extends AbstractEventBusModule {
     }
 
     @Override
-    public void start() {
-        eventBusService = EventBusServiceImpl.getInstance();
+    public void start() {this.registerService(EventBusServiceImpl.class);
+        eventBusService = NulsContext.getServiceBean(EventBusService.class);
         eventBusService.subscribeEvent(CommonDigestEvent.class, new CommonDigestHandler());
         eventBusService.subscribeEvent(GetEventBodyEvent.class, new GetEventBodyHandler());
-        this.registerService(EventBusService.class,eventBusService);
-        this.registerService(EventBroadcaster.class, EventBroadcasterImpl.getInstance());
+
+        this.registerService(EventBroadcasterImpl.class);
 
     }
 

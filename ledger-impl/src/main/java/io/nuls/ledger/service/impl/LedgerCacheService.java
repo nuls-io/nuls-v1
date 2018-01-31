@@ -38,15 +38,14 @@ import io.nuls.ledger.entity.UtxoOutput;
  */
 public class LedgerCacheService {
     private static LedgerCacheService instance = new LedgerCacheService();
-    @Autowired
     private CacheService<String, Balance> cacheService;
-    @Autowired
     private CacheService<String, UtxoOutput> utxoCacheService;
 
 
     private LedgerCacheService() {
+        cacheService = NulsContext.getServiceBean(CacheService.class);
         cacheService.createCache(LedgerConstant.STANDING_BOOK, 1024);
-
+        utxoCacheService = NulsContext.getServiceBean(CacheService.class);
         utxoCacheService.createCache(LedgerConstant.UTXO, 1024);
     }
 

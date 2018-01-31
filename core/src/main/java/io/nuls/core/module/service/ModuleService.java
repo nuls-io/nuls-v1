@@ -28,7 +28,6 @@ import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.module.BaseModuleBootstrap;
 import io.nuls.core.module.manager.ModuleManager;
-import io.nuls.core.module.manager.ServiceManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +44,6 @@ public class ModuleService {
     private static final ModuleService INSTANCE = new ModuleService();
 
     private ModuleService() {
-        ServiceManager.getInstance().regService((short) 0, ModuleService.class);
     }
 
     public static ModuleService getInstance() {

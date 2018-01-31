@@ -41,12 +41,6 @@ import java.util.Map;
  */
 public class RpcServerServiceImpl implements RpcServerService {
 
-    private static final RpcServerServiceImpl INSTANCE = new RpcServerServiceImpl();
-
-    public static RpcServerService getInstance() {
-        return INSTANCE;
-    }
-
     private HttpServer httpServer;
 
     @Override

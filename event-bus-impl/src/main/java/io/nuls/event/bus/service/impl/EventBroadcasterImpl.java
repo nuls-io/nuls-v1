@@ -43,18 +43,11 @@ import java.util.List;
  * @date 2017/12/8
  */
 public class EventBroadcasterImpl implements EventBroadcaster {
-    private static EventBroadcasterImpl INSTANCE = new EventBroadcasterImpl();
     @Autowired
     private NetworkService networkService;
     private EventCacheService eventCacheService = EventCacheService.getInstance();
-    private EventBusService eventBusService = EventBusServiceImpl.getInstance();
-
-    private EventBroadcasterImpl() {
-    }
-
-    public static final EventBroadcasterImpl getInstance() {
-        return INSTANCE;
-    }
+    @Autowired
+    private EventBusService eventBusService;
 
     @Override
     public List<String> broadcastHashAndCache(BaseEvent event, boolean needToSelf) {

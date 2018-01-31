@@ -31,6 +31,7 @@ import io.nuls.account.service.impl.AccountServiceImpl;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.account.service.tx.AliasTxService;
 import io.nuls.core.constant.TransactionConstant;
+import io.nuls.core.context.NulsContext;
 
 /**
  * @author Niels
@@ -45,13 +46,13 @@ public class AccountModuleBootstrap extends AbstractAccountModule {
     public void init() {
         cacheService = AccountCacheService.getInstance();
         this.registerService(AccountServiceImpl.class);
-        accountService.init();
-
+        accountService = NulsContext.getServiceBean(AccountService.class);
         this.registerTransaction(TransactionConstant.TX_TYPE_SET_ALIAS, AliasTransaction.class,AliasTxService.getInstance());
     }
 
     @Override
     public void start() {
+        accountService.init();
         accountService.start();
     }
 

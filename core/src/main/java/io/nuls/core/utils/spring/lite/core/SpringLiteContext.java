@@ -60,24 +60,28 @@ public class SpringLiteContext {
         SpringLiteContext.interceptor = interceptor;
         List<Class> list = ScanUtil.scan(packName);
         list.forEach((Class clazz) -> checkBeanClass(clazz));
-        autowiredFields();
+        autowireFields();
 
     }
 
-    private static void autowiredFields() {
-        Set<String> keySet = BEAN_TEMP_MAP.keySet();
+    private static void autowireFields() {
+        Set<String> keySet = new HashSet<>(BEAN_TEMP_MAP.keySet());
         for (String key : keySet) {
             try {
                 injectionBeanFields(BEAN_TEMP_MAP.get(key), BEAN_TYPE_MAP.get(key));
                 BEAN_OK_MAP.put(key, BEAN_TEMP_MAP.get(key));
                 BEAN_TEMP_MAP.remove(key);
             } catch (Exception e) {
-                Log.error(e);
+                Log.warn(key+" autowire fields failed!");
             }
         }
     }
 
     private static void injectionBeanFields(Object obj, Class objType) throws Exception {
+        //todo debug
+        if(objType.getSimpleName().equals("CacheService")){
+            System.out.println();
+        }
         Set<Field> fieldSet = getFieldSet(objType);
         for (Field field : fieldSet) {
             injectionBeanField(obj, field);
@@ -242,11 +246,15 @@ public class SpringLiteContext {
 
     public static void putBean(Class clazz) {
         loadBean(getBeanName(clazz), clazz);
-        autowiredFields();
+        autowireFields();
     }
 
     public static void removeBean(Class clazz) {
         // todo auto-generated method stub(niels)
 
+    }
+
+    public static boolean checkBeanOk(Object bean) {
+       return BEAN_OK_MAP.containsValue(bean);
     }
 }

@@ -26,6 +26,11 @@
 
 package io.nuls.core.utils.spring.lite.core;
 
+import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.ModuleStatusEnum;
+import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.module.BaseModuleBootstrap;
+import io.nuls.core.module.manager.ServiceManager;
 import io.nuls.core.utils.spring.lite.core.interceptor.BeanMethodInterceptorManager;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
@@ -39,11 +44,26 @@ import java.lang.reflect.Method;
 public class ModularServiceMethodInterceptor implements MethodInterceptor {
     @Override
     public Object intercept(Object obj, Method method, Object[] params, MethodProxy methodProxy) throws Throwable {
-        // todo 判断是哪个模块 ，该模块是否运行中
+        if(!method.getDeclaringClass().equals(Object.class)){
+            String className = obj.getClass().getCanonicalName();
+            className = className.substring(0,className.indexOf("$$"));
+            Class clazz = Class.forName(className);
 
+            BaseModuleBootstrap module = ServiceManager.getInstance().getModule(clazz);
+            if(module==null){
+                throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "Access to a service of an un start module!" + method.toString());
+            }
+            if (module.getStatus() != ModuleStatusEnum.STARTING && module.getStatus() != ModuleStatusEnum.RUNNING) {
+                throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "Access to a service of an un start module!" + method.toString());
+            }
+            boolean isOk = SpringLiteContext.checkBeanOk(obj);
+            if (!isOk) {
+                throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "Service has not autowired");
+            }
+        }
         if (null == method.getDeclaredAnnotations() || method.getDeclaredAnnotations().length == 0) {
             return methodProxy.invokeSuper(obj, params);
         }
-        return BeanMethodInterceptorManager.doFilter(method.getDeclaredAnnotations(), obj, method, params,methodProxy);
+        return BeanMethodInterceptorManager.doFilter(method.getDeclaredAnnotations(), obj, method, params, methodProxy);
     }
 }

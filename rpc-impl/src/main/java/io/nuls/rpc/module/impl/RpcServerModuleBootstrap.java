@@ -23,6 +23,7 @@
  */
 package io.nuls.rpc.module.impl;
 
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.rpc.constant.RpcConstant;
 import io.nuls.rpc.module.AbstractRpcServerModule;
@@ -36,7 +37,7 @@ import io.nuls.rpc.service.intf.RpcServerService;
  */
 public class RpcServerModuleBootstrap extends AbstractRpcServerModule {
 
-    private RpcServerService rpcServerService = RpcServerServiceImpl.getInstance();
+    private RpcServerService rpcServerService ;
     private String ip;
     private String port;
     private String moduleUrl;
@@ -50,11 +51,13 @@ public class RpcServerModuleBootstrap extends AbstractRpcServerModule {
         this.ip = getModuleCfgProperty(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_IP);
         this.port = getModuleCfgProperty(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_PORT);
         this.moduleUrl = getModuleCfgProperty(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_URL);
+        this.registerService(RpcServerServiceImpl.class );
+        this.rpcServerService = NulsContext.getServiceBean(RpcServerService.class);
     }
 
     @Override
     public void start() {
-        this.registerService(RpcServerService.class,rpcServerService);
+
         if (StringUtils.isBlank(ip) || StringUtils.isBlank(port)) {
             rpcServerService.startServer(RpcConstant.DEFAULT_IP, RpcConstant.DEFAULT_PORT, RpcConstant.DEFAULT_URL);
         } else {
@@ -78,7 +81,11 @@ public class RpcServerModuleBootstrap extends AbstractRpcServerModule {
         str.append("moduleName:");
         str.append(getModuleName());
         str.append(",isServerRunning:");
-        str.append(rpcServerService.isStarted());
+        if(null==rpcServerService){
+            str.append(false);
+        }else{
+            str.append(rpcServerService.isStarted());
+        }
         return str.toString();
     }
 

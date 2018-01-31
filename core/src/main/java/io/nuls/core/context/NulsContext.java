@@ -118,8 +118,25 @@ public class NulsContext {
         try {
             return SpringLiteContext.getBean(tClass);
         } catch (Exception e) {
-            Log.error(e);
-            return null;
+            return getServiceBean(tClass,0L);
         }
+    }
+
+    private static <T> T getServiceBean(Class<T> tClass, long l) {
+        try {
+            Thread.sleep(100L);
+        } catch (InterruptedException e1) {
+            Log.error(e1);
+        }
+        try {
+            return SpringLiteContext.getBean(tClass);
+        } catch (Exception e) {
+            if(l>60000){
+                Log.error(e);
+                return null;
+            }
+            return getServiceBean(tClass,l+100L);
+        }
+
     }
 }

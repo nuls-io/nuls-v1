@@ -38,16 +38,8 @@ import io.nuls.event.bus.service.intf.EventBusService;
  */
 public class EventBusServiceImpl implements EventBusService {
 
-    private static EventBusService INSTANCE = new EventBusServiceImpl();
     private LocalEventService localService = LocalEventService.getInstance();
     private NetworkEventService networkService = NetworkEventService.getInstance();
-
-    private EventBusServiceImpl() {
-    }
-
-    public static EventBusService getInstance() {
-        return INSTANCE;
-    }
 
     @Override
     public String subscribeEvent(Class<? extends BaseEvent> eventClass, NulsEventHandler<? extends BaseEvent> eventHandler) {

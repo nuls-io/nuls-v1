@@ -26,7 +26,6 @@ package io.nuls.network.service.impl;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.module.service.ModuleService;
 import io.nuls.core.thread.manager.TaskManager;
@@ -37,7 +36,6 @@ import io.nuls.network.entity.NodeGroup;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.module.AbstractNetworkModule;
 
-import javax.management.relation.RoleUnresolved;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;

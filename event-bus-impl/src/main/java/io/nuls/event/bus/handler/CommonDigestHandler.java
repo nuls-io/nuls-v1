@@ -23,6 +23,7 @@
  */
 package io.nuls.event.bus.handler;
 
+import io.nuls.core.context.NulsContext;
 import io.nuls.event.bus.event.CommonDigestEvent;
 import io.nuls.event.bus.event.GetEventBodyEvent;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
@@ -36,7 +37,7 @@ import io.nuls.event.bus.service.impl.EventBroadcasterImpl;
 public class CommonDigestHandler extends AbstractEventHandler<CommonDigestEvent> {
 
     private EventCacheService eventCacheService = EventCacheService.getInstance();
-    private EventBroadcaster eventBroadcaster = EventBroadcasterImpl.getInstance();
+    private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
 
     @Override
     public void onEvent(CommonDigestEvent event, String fromId) {

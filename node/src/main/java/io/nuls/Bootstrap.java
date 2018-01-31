@@ -27,13 +27,10 @@ import io.nuls.core.MicroKernelBootstrap;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.module.manager.ModuleManager;
 import io.nuls.core.module.service.ModuleService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.jettyserver.JettyServer;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +41,6 @@ import java.util.Map;
  * @author Niels
  */
 public class Bootstrap {
-    private static final ModuleService moduleService = ModuleService.getInstance();
 
     public static void main(String[] args) {
         Thread.currentThread().setName("Nuls");
@@ -92,7 +88,7 @@ public class Bootstrap {
         if (null == bootstrapClasses || bootstrapClasses.isEmpty()) {
             return;
         }
-        moduleService.startModules(bootstrapClasses);
+        ModuleService.getInstance().startModules(bootstrapClasses);
     }
 
     private static Map<String, String> getModuleBootstrapClass() throws NulsException {

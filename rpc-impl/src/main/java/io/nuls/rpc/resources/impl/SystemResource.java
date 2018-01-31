@@ -23,7 +23,6 @@
  */
 package io.nuls.rpc.resources.impl;
 
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.module.service.ModuleService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
@@ -61,7 +60,7 @@ public class SystemResource {
     public RpcResult startModule(@FormParam("moduleName") String moduleName, @FormParam("moduleClass") String moduleClass) {
         RpcResult result = null;
         do {
-            ModuleService service = NulsContext.getServiceBean(ModuleService.class);
+            ModuleService service = ModuleService.getInstance();
             AssertUtil.canNotEmpty(service, "System module service error!");
             try {
                 service.startModule(moduleName, moduleClass);
