@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="io.nuls.db.dao.impl.mybatis.mapper.UtxoInputPoMapper">
+<mapper namespace="io.nuls.db.dao.impl.mybatis.mapper.UtxoInputMapper">
   <resultMap id="BaseResultMap" type="io.nuls.db.entity.UtxoInputPo">
     <id column="tx_hash" jdbcType="VARCHAR" property="txHash" />
     <id column="from_index" jdbcType="INTEGER" property="fromIndex" />
@@ -40,10 +40,10 @@
   </update>
 
   <insert id="batchInsert" parameterType="java.util.List">
-    insert into utxo_input (tx_hash,in_index, from_index,sign)
+    insert into utxo_input (tx_hash,from_index,in_index,sign)
     values
     <foreach collection="list" item="item" index="index" separator="," >
-      (#{item.txHash,jdbcType=VARCHAR},#{item.in_index,jdbcType=INTEGER}, #{item.from_index,jdbcType=INTEGER}, #{item.sign,jdbcType=VARBINARY})
+      (#{item.txHash,jdbcType=VARCHAR}, #{item.fromIndex,jdbcType=INTEGER}, #{item.inIndex,jdbcType=INTEGER}, #{item.sign,jdbcType=VARBINARY})
     </foreach>
   </insert>
 

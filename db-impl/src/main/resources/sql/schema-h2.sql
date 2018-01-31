@@ -118,7 +118,7 @@ CREATE TABLE IF NOT EXISTS `tx_account_relation` (
 CREATE TABLE IF NOT EXISTS `utxo_input` (
   `tx_hash` varchar(70) NOT NULL,
   `from_index` int(5) NOT NULL,
-  `index` int(5) NOT NULL,
+  `in_index` int(5) NOT NULL,
   `sign` varbinary(255) NOT NULL,
   PRIMARY KEY (`tx_hash`,`from_index`)
 );
