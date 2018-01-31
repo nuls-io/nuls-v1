@@ -41,7 +41,7 @@ import io.nuls.network.service.NetworkService;
 public class BlockEventHandler extends AbstractEventHandler<BlockEvent> {
 
     private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
-    private NetworkService networkService = NulsContext.getInstance().getService(NetworkService.class);
+    private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
 
     @Override
     public void onEvent(BlockEvent event, String fromId) {

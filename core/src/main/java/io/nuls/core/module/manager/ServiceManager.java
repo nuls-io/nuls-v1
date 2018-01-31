@@ -27,6 +27,8 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.aop.AopUtils;
 import io.nuls.core.utils.log.Log;
+import io.nuls.core.utils.param.AssertUtil;
+import io.nuls.core.utils.spring.lite.core.SpringLiteContext;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,10 +41,8 @@ import java.util.Set;
  */
 public class ServiceManager {
     private static final ServiceManager INSTANCE = new ServiceManager();
-    private static final Map<Class, Object> INTF_MAP = new HashMap<>();
     private static final Map<Short, Set<Class>> MODULE_INTF_MAP = new HashMap<>();
     private static final Map<Class, Short> MODULE_ID_MAP = new HashMap<>();
-    private static final int WAIT_TIMES = 100;
 
     private ServiceManager() {
     }
@@ -51,68 +51,30 @@ public class ServiceManager {
         return INSTANCE;
     }
 
-    public <T> T getService(Class<T> tclass) {
-        dependencyCheck(tclass, 0);
-        return (T) INTF_MAP.get(tclass);
-    }
-
-    private void dependencyCheck(Class tclass, int index) {
-        Object service = INTF_MAP.get(tclass);
-        if(service!=null){
-            return;
-        }
-        if (index >= WAIT_TIMES) {
-//            throw new NulsRuntimeException(ErrorCode.FAILED, "dependency module is not ready!" + tclass);
-            //todo 记录哪个对象的哪个字段，最后赋值
-        return ;
-        }
-        sleepAndIncrement(tclass,index);
-    }
-
-    private void sleepAndIncrement(Class tclass, int index){
-        try {
-            Thread.sleep(500L);
-            this.dependencyCheck(tclass, index + 1);
-        } catch (InterruptedException e) {
-            Log.error(e);
-        }
-    }
-
-    public void regService(short moduleId, Class serviceInterface, Object service) {
-        if (serviceInterface == null) {
-            serviceInterface = service.getClass();
-        }
-        if (INTF_MAP.keySet().contains(serviceInterface)) {
+    public void regService(short moduleId, Class serviceClass ) {
+        AssertUtil.canNotEmpty(serviceClass,ErrorCode.NULL_PARAMETER);
+        if (MODULE_ID_MAP.containsKey(serviceClass)) {
             throw new NulsRuntimeException(ErrorCode.INTF_REPETITION);
         }
-        INTF_MAP.put(serviceInterface, service);
+        SpringLiteContext.putBean(serviceClass);
         Set<Class> set = MODULE_INTF_MAP.get(moduleId);
         if (null == set) {
             set = new HashSet<>();
         }
-        set.add(serviceInterface);
+        set.add(serviceClass);
         MODULE_INTF_MAP.put(moduleId, set);
-        MODULE_ID_MAP.put(serviceInterface, moduleId);
+        MODULE_ID_MAP.put(serviceClass, moduleId);
     }
 
-    public void removeService(short moduleId, Object service) {
-        Class key = service.getClass().getSuperclass();
-        if (key.equals(Object.class)) {
-            key = service.getClass();
-        }
-        if (null == key || key.equals(Object.class)) {
-            key = service.getClass();
-        }
-        removeService(moduleId, key);
-    }
 
     public void removeService(short moduleId, Class clazz) {
-        INTF_MAP.remove(clazz);
+        MODULE_ID_MAP.remove(clazz);
         Set<Class> set = MODULE_INTF_MAP.get(moduleId);
         if (null != set) {
             set.remove(clazz);
             MODULE_INTF_MAP.put(moduleId, set);
         }
+        SpringLiteContext.removeBean(clazz);
     }
 
     public void removeService(short moduleId) {

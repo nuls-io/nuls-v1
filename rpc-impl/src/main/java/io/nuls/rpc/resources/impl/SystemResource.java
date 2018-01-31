@@ -38,8 +38,6 @@ import javax.ws.rs.core.MediaType;
  */
 @Path("/sys")
 public class SystemResource {
-    private NulsContext context = NulsContext.getInstance();
-
 
     @GET
     @Path("/version")
@@ -63,7 +61,7 @@ public class SystemResource {
     public RpcResult startModule(@FormParam("moduleName") String moduleName, @FormParam("moduleClass") String moduleClass) {
         RpcResult result = null;
         do {
-            ModuleService service = context.getService(ModuleService.class);
+            ModuleService service = NulsContext.getServiceBean(ModuleService.class);
             AssertUtil.canNotEmpty(service, "System module service error!");
             try {
                 service.startModule(moduleName, moduleClass);

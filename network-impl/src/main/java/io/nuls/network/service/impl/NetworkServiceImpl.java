@@ -63,13 +63,13 @@ public class NetworkServiceImpl implements NetworkService {
     private Broadcaster broadcaster;
 
 
-    public NetworkServiceImpl(AbstractNetworkModule module) {
+    public NetworkServiceImpl() {
         this.network = getNetworkInstance();
         NulsMessageFilter messageFilter = DefaultMessageFilter.getInstance();
         network.setMessageFilter(messageFilter);
 
-        this.connectionManager = new ConnectionManager(module, network);
-        this.nodesManager = new NodesManager(network, NulsContext.getInstance().getService(NodeDataService.class));
+        this.connectionManager = new ConnectionManager( network);
+        this.nodesManager = new NodesManager(network, NulsContext.getServiceBean(NodeDataService.class));
         this.broadcaster = new BroadcasterImpl(nodesManager, network);
 
         nodesManager.setConnectionManager(connectionManager);

@@ -64,11 +64,11 @@ public class BlockBatchDownloadUtils {
     private static final long DOWNLOAD_IDLE_TIME_OUT = 1000;
 
     private static final BlockBatchDownloadUtils INSTANCE = new BlockBatchDownloadUtils();
-    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
-    private QueueService<String> queueService = NulsContext.getInstance().getService(QueueService.class);
-    private BlockCacheManager blockCacheManager = NulsContext.getInstance().getService(BlockCacheManager.class);
-    private NetworkService networkService = NulsContext.getInstance().getService(NetworkService.class);
-    private BlockService blockService = NulsContext.getInstance().getService(BlockService.class);
+    private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
+    private QueueService<String> queueService = NulsContext.getServiceBean(QueueService.class);
+    private BlockCacheManager blockCacheManager = NulsContext.getServiceBean(BlockCacheManager.class);
+    private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
+    private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
 
 
     private ReceivedTxCacheManager receivedTxCacheManager = ReceivedTxCacheManager.getInstance();

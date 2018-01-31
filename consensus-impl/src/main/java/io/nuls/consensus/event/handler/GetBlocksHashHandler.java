@@ -42,8 +42,8 @@ import java.util.List;
  */
 public class GetBlocksHashHandler extends AbstractEventHandler<GetBlocksHashRequest> {
 
-    private BlockService blockService = NulsContext.getInstance().getService(BlockService.class);
-    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
+    private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
+    private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
 
     @Override
     public void onEvent(GetBlocksHashRequest event, String fromId) {

@@ -25,16 +25,12 @@ package io.nuls.db.module.impl;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.utils.aop.AopUtils;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.constant.DBConstant;
-import io.nuls.db.dao.*;
-import io.nuls.db.dao.filter.TransactionalAopFilterImpl;
 import io.nuls.db.dao.impl.mybatis.*;
 import io.nuls.db.dao.impl.mybatis.session.SessionManager;
 import io.nuls.db.exception.DBException;
 import io.nuls.db.module.AbstractDBModule;
-import io.nuls.db.transactional.TransactionalAopFilter;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
@@ -79,24 +75,22 @@ public class MybatisDBModuleBootstrap extends AbstractDBModule {
 
 
     private void initService() {
-        TransactionalAopFilterImpl transactionalFilter = new TransactionalAopFilterImpl();
-        this.registerService(TransactionalAopFilter.class,transactionalFilter);
-        this.registerService(BlockHeaderService.class, AopUtils.createProxy(BlockDaoImpl.class, transactionalFilter));
-        this.registerService(AliasDataService.class, AopUtils.createProxy(AliasDaoImpl.class, transactionalFilter));
-        this.registerService(AccountDataService.class, AopUtils.createProxy(AccountDaoImpl.class, transactionalFilter));
-        this.registerService(DelegateDataService.class, AopUtils.createProxy(DelegateDaoImpl.class, transactionalFilter));
-        this.registerService(DelegateAccountDataService.class, AopUtils.createProxy(DelegateAccountDaoImpl.class, transactionalFilter));
-        this.registerService(NodeDataService.class, AopUtils.createProxy(NodeDaoImpl.class, transactionalFilter));
-        this.registerService(NodeGroupDataService.class, AopUtils.createProxy(NodeGroupDaoImpl.class, transactionalFilter));
-        this.registerService(NodeGroupRelationDataService.class, AopUtils.createProxy(NodeGroupRelationDaoImpl.class, transactionalFilter));
-        this.registerService(TransactionDataService.class, AopUtils.createProxy(TransactionDaoImpl.class, transactionalFilter));
-        this.registerService(TransactionLocalDataService.class, AopUtils.createProxy(TransactionLocalDaoImpl.class, transactionalFilter));
-        this.registerService(TxAccountRelationDataService.class, AopUtils.createProxy(TxAccountRelationDaoImpl.class, transactionalFilter));
-        this.registerService(UtxoOutputDataService.class, AopUtils.createProxy(UtxoOutputDaoImpl.class, transactionalFilter));
-        this.registerService(UtxoInputDataService.class, AopUtils.createProxy(UtxoInputDaoImpl.class, transactionalFilter));
-        this.registerService(SubChainDataService.class, AopUtils.createProxy(SubChainDaoImpl.class, transactionalFilter));
-        this.registerService(AccountAliasDataService.class, AopUtils.createProxy(AccountTxDaoImpl.class, transactionalFilter));
-        this.registerService(UtxoTransactionDataService.class, AopUtils.createProxy(UtxoTransactionDaoImpl.class, transactionalFilter));
+        this.registerService(BlockDaoImpl.class);
+        this.registerService(AliasDaoImpl.class );
+        this.registerService(AccountDaoImpl.class );
+        this.registerService(DelegateDaoImpl.class );
+        this.registerService(DelegateAccountDaoImpl.class );
+        this.registerService(NodeDaoImpl.class );
+        this.registerService(NodeGroupDaoImpl.class );
+        this.registerService(NodeGroupRelationDaoImpl.class );
+        this.registerService(TransactionDaoImpl.class );
+        this.registerService(TransactionLocalDaoImpl.class );
+        this.registerService(TxAccountRelationDaoImpl.class );
+        this.registerService(UtxoOutputDaoImpl.class );
+        this.registerService(UtxoInputDaoImpl.class );
+        this.registerService(SubChainDaoImpl.class );
+        this.registerService(AccountTxDaoImpl.class );
+        this.registerService(UtxoTransactionDaoImpl.class );
     }
 
     @Override

@@ -25,8 +25,8 @@ package io.nuls.db.dao.impl.mybatis;
 
 import io.nuls.core.chain.entity.Result;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.db.dao.AccountDataService;
 import io.nuls.db.dao.AccountAliasDataService;
 import io.nuls.db.dao.AliasDataService;
@@ -34,7 +34,7 @@ import io.nuls.db.dao.TransactionLocalDataService;
 import io.nuls.db.entity.AccountPo;
 import io.nuls.db.entity.AliasPo;
 import io.nuls.db.entity.TransactionLocalPo;
-import io.nuls.db.transactional.annotation.TransactionalAnnotation;
+import io.nuls.db.transactional.annotation.DbSession;
 
 import java.util.List;
 
@@ -44,13 +44,14 @@ import java.util.List;
  */
 public class AccountTxDaoImpl implements AccountAliasDataService {
 
-    private AccountDataService accountDao = NulsContext.getInstance().getService(AccountDataService.class);
+    @Autowired
+    private AccountDataService accountDao ;
+    @Autowired
+    private AliasDataService aliasDao ;
+    @Autowired
+    private TransactionLocalDataService txDao;
 
-    private AliasDataService aliasDao = NulsContext.getInstance().getService(AliasDataService.class);
-
-    private TransactionLocalDataService txDao = NulsContext.getInstance().getService(TransactionLocalDataService.class);
-
-    @TransactionalAnnotation
+    @DbSession
     @Override
     public Result saveAlias(AliasPo alias) {
         try {
@@ -69,7 +70,7 @@ public class AccountTxDaoImpl implements AccountAliasDataService {
         return new Result(true, "OK");
     }
 
-    @TransactionalAnnotation
+    @DbSession
     @Override
     public void importAccount(List<AccountPo> accountPoList) {
         for (AccountPo account : accountPoList) {

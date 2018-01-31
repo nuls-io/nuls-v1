@@ -51,8 +51,8 @@ public class BlockCacheManager {
     private static final String HEIGHT_HASH_CACHE = "blocks-height-hash";
     private static final BlockCacheManager INSTANCE = new BlockCacheManager();
 
-    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
-    private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
+    private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
+    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
 
     private CacheMap<String, BlockHeader> headerCacheMap;
     private CacheMap<String, Block> blockCacheMap;

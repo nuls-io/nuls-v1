@@ -263,7 +263,7 @@ public final class QueueManager {
     public static void start() {
         ScheduledExecutorService service = TaskManager.createScheduledThreadPool(new NulsThreadFactory(NulsConstant.MODULE_ID_MICROKERNEL, "queueStatusLogPool"));
         service.scheduleAtFixedRate(new StatusLogThread(), 0, QueueManager.getLatelySecond(), TimeUnit.SECONDS);
-        ServiceManager.getInstance().regService((short) 0, QueueService.class, QueueService.getInstance());
+        ServiceManager.getInstance().regService((short) 0, QueueService.class);
         Running = true;
     }
 }

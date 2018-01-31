@@ -41,7 +41,7 @@ import java.util.List;
  */
 public class AccountCreditValidator implements NulsDataValidator<RegisterAgentTransaction> {
 
-    private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
+    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     @Override
     public ValidateResult validate(RegisterAgentTransaction data) {
         List<Transaction> list = null;

@@ -46,7 +46,7 @@ import io.nuls.ledger.service.intf.LedgerService;
 public class RegisterAgentTxService implements TransactionService<RegisterAgentTransaction> {
     private ConsensusCacheManager manager = ConsensusCacheManager.getInstance();
     private ConsensusManager consensusManager = ConsensusManager.getInstance();
-    private DelegateAccountDataService delegateAccountService = NulsContext.getInstance().getService(DelegateAccountDataService.class);
+    private DelegateAccountDataService delegateAccountService = NulsContext.getServiceBean(DelegateAccountDataService.class);
 
     @Override
     public void onRollback(RegisterAgentTransaction tx) throws NulsException {

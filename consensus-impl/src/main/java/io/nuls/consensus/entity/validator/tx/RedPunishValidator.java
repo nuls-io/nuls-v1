@@ -38,7 +38,7 @@ public class RedPunishValidator implements NulsDataValidator<RedPunishTransactio
 
     private static final RedPunishValidator INSTANCE = new RedPunishValidator();
 
-    private CoinDataProvider coinDataProvider = NulsContext.getInstance().getService(CoinDataProvider.class);
+    private CoinDataProvider coinDataProvider = NulsContext.getServiceBean(CoinDataProvider.class);
 
     private RedPunishValidator() {
     }

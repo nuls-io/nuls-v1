@@ -49,9 +49,9 @@ import java.util.Map;
  */
 public class GetTxGroupHandler extends AbstractEventHandler<GetTxGroupRequest> {
 
-    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
-    private BlockService blockService =NulsContext.getInstance().getService(BlockService.class);
-    private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
+    private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
+    private BlockService blockService =NulsContext.getServiceBean(BlockService.class);
+    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
 
     @Override
     public void onEvent(GetTxGroupRequest event, String fromId) {

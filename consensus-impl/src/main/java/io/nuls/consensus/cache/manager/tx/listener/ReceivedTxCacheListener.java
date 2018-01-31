@@ -38,7 +38,7 @@ import io.nuls.ledger.service.intf.LedgerService;
  */
 public class ReceivedTxCacheListener implements NulsCacheListener<String, Transaction> {
 
-    private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
+    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
 
     @Override
     public void onCreate(CacheListenerItem<String, Transaction> item) {

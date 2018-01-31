@@ -64,16 +64,17 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
     @Override
     public void init() {
         cacheService = LedgerCacheService.getInstance();
-        ledgerService = UtxoLedgerServiceImpl.getInstance();
+        registerService();
+        ledgerService = NulsContext.getServiceBean(LedgerService.class);
         coinManager = UtxoCoinManager.getInstance();
-        UtxoOutputDataService outputDataService = NulsContext.getInstance().getService(UtxoOutputDataService.class);
+        UtxoOutputDataService outputDataService = NulsContext. getServiceBean(UtxoOutputDataService.class);
         coinManager.setOutputDataService(outputDataService);
         ledgerService.init();
         addNormalTxValidator();
+        UtxoCoinDataProvider provider = NulsContext.getServiceBean(UtxoCoinDataProvider.class);
+        provider.setInputDataService(NulsContext.getServiceBean(UtxoInputDataService.class));
+        provider.setOutputDataService(outputDataService);
 
-        UtxoCoinDataProvider.getInstance().setInputDataService(NulsContext.getInstance().getService(UtxoInputDataService.class));
-        UtxoCoinDataProvider.getInstance().setOutputDataService(outputDataService);
-        registerService();
 
         this.registerTransaction(TransactionConstant.TX_TYPE_COIN_BASE, CoinBaseTransaction.class, CoinDataTxService.getInstance());
         this.registerTransaction(TransactionConstant.TX_TYPE_TRANSFER, TransferTransaction.class, CoinDataTxService.getInstance());
@@ -92,10 +93,8 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
     }
 
     private void registerService() {
-        this.registerService(LedgerService.class,ledgerService);
-
-
-        this.registerService(CoinDataProvider.class, UtxoCoinDataProvider.getInstance());
+        this.registerService(UtxoLedgerServiceImpl.class);
+        this.registerService(UtxoCoinDataProvider.class );
     }
 
     @Override

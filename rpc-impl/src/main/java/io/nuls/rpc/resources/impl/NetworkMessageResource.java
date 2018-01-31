@@ -42,7 +42,7 @@ import javax.ws.rs.core.MediaType;
 @Path("/broadcast")
 public class NetworkMessageResource  {
 
-    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
+    private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
 
     
     @PUT

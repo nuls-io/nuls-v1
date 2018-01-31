@@ -24,7 +24,6 @@
 package io.nuls.consensus.service.impl;
 
 import io.nuls.consensus.cache.manager.block.BlockCacheManager;
-import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
@@ -33,8 +32,7 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
-import io.nuls.db.transactional.annotation.TransactionalAnnotation;
-import io.nuls.db.entity.BlockHeaderPo;
+import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.ledger.service.intf.LedgerService;
 
 import java.io.IOException;
@@ -48,7 +46,7 @@ public class BlockServiceImpl implements io.nuls.consensus.service.intf.BlockSer
 
     private BlockStorageService blockStorageService = BlockStorageService.getInstance();
     private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
-    private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
+    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
 
     @Override
     public Block getGengsisBlock() {
@@ -123,7 +121,7 @@ public class BlockServiceImpl implements io.nuls.consensus.service.intf.BlockSer
 
 
     @Override
-    @TransactionalAnnotation
+    @DbSession
     public void saveBlock(Block block) throws IOException {
         for (int x = 0; x < block.getHeader().getTxCount(); x++) {
             Transaction tx = block.getTxs().get(x);
@@ -142,7 +140,7 @@ public class BlockServiceImpl implements io.nuls.consensus.service.intf.BlockSer
 
 
     @Override
-    @TransactionalAnnotation
+    @DbSession
     public void rollbackBlock(long height) {
         Block block = this.getBlock(height);
         if (null == block) {

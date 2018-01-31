@@ -26,7 +26,9 @@ package io.nuls.network.service.impl;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.module.service.ModuleService;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.constant.NetworkConstant;
@@ -67,9 +69,9 @@ public class ConnectionManager implements Runnable {
     private volatile boolean running;
     //The storage will be connected
 
-    public ConnectionManager(AbstractNetworkModule module, AbstractNetworkParam network) {
+    public ConnectionManager(  AbstractNetworkParam network) {
         this.network = network;
-        this.networkModule = module;
+        this.networkModule = (AbstractNetworkModule) ModuleService.getInstance().getModule(NulsConstant.MODULE_ID_NETWORK);
         lock = new ReentrantLock();
     }
 

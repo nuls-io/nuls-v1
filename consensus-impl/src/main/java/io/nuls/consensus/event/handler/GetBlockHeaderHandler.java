@@ -38,8 +38,8 @@ import io.nuls.event.bus.service.intf.EventBroadcaster;
  */
 public class GetBlockHeaderHandler extends AbstractEventHandler<GetBlockHeaderEvent> {
 
-    private BlockService blockService = NulsContext.getInstance().getService(BlockService.class);
-    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
+    private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
+    private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
     @Override
     public void onEvent(GetBlockHeaderEvent event, String fromId)   {
         BlockHeader header ;

@@ -60,7 +60,7 @@ public class UtxoTxInputsValidator implements NulsDataValidator<UtxoData> {
 
     private AccountService getAccountService() {
         if (accountService == null) {
-            accountService = NulsContext.getInstance().getService(AccountService.class);
+            accountService = NulsContext.getServiceBean(AccountService.class);
         }
         return accountService;
     }

@@ -60,9 +60,9 @@ public class ConsensusCacheManager {
 
     private static final ConsensusCacheManager INSTANCE = new ConsensusCacheManager();
 
-    private DelegateDataService delegateDao = NulsContext.getInstance().getService(DelegateDataService.class);
-    private DelegateAccountDataService delegateAccountDao = NulsContext.getInstance().getService(DelegateAccountDataService.class);
-    private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
+    private DelegateDataService delegateDao = NulsContext.getServiceBean(DelegateDataService.class);
+    private DelegateAccountDataService delegateAccountDao = NulsContext.getServiceBean(DelegateAccountDataService.class);
+    private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
 
     private CacheMap<String, Consensus<Agent>> inAgentCache = new CacheMap<>(IN_AGENT_LIST, 512);
     private CacheMap<String, Consensus<Agent>> outAgentCache = new CacheMap<>(OUT_AGENT_LIST, 512);

@@ -47,7 +47,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class DistributedBlockInfoRequestUtils {
     private static final DistributedBlockInfoRequestUtils INSTANCE = new DistributedBlockInfoRequestUtils();
-    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
+    private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
     private List<String> nodeIdList;
     private Map<String, BlockHashResponse> hashesMap = new HashMap<>();
     /**

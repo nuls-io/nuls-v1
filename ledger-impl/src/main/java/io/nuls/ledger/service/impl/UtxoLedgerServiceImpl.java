@@ -37,11 +37,12 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.tx.serivce.TransactionService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
+import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.db.dao.UtxoTransactionDataService;
 import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.entity.TransactionPo;
 import io.nuls.db.entity.UtxoOutputPo;
-import io.nuls.db.transactional.annotation.TransactionalAnnotation;
+import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.entity.UtxoBalance;
@@ -68,35 +69,23 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class UtxoLedgerServiceImpl implements LedgerService {
 
-    private static final LedgerService INSTANCE = new UtxoLedgerServiceImpl();
 
     private LedgerCacheService ledgerCacheService = LedgerCacheService.getInstance();
-
+    @Autowired
     private UtxoTransactionDataService txDao;
-
+    @Autowired
     private EventBroadcaster eventBroadcaster;
 
     private static final String RECEIVE_TX_CACHE = "Received-tx-cache";
 
     private static final String CONFIRM_TX_CACHE = "Confirming-tx-cache";
-
+    @Autowired
     private CacheService<String, Transaction> txCacheService;
 
     private Lock lock = new ReentrantLock();
 
-    private UtxoLedgerServiceImpl() {
-
-    }
-
-    public static LedgerService getInstance() {
-        return INSTANCE;
-    }
-
     @Override
     public void init() {
-        txDao = NulsContext.getInstance().getService(UtxoTransactionDataService.class);
-        eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
-        txCacheService = NulsContext.getInstance().getService(CacheService.class);
     }
 
     @Override
@@ -300,7 +289,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    @TransactionalAnnotation
+    @DbSession
     public boolean saveTxList(List<Transaction> txList) throws IOException {
         lock.lock();
         try {
@@ -337,7 +326,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     public void rollbackTx(Transaction tx) throws NulsException {
         AssertUtil.canNotEmpty(tx, ErrorCode.NULL_PARAMETER);
-        if (tx.getStatus() == TxStatusEnum.CACHED ) {
+        if (tx.getStatus() == TxStatusEnum.CACHED) {
             return;
         }
         List<TransactionService> serviceList = getServiceList(tx.getClass());

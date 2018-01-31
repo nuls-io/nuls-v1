@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,49 +24,42 @@
 package io.nuls.db.dao.filter;
 
 
+import io.nuls.core.utils.spring.lite.annotation.Interceptor;
+import io.nuls.core.utils.spring.lite.core.interceptor.BeanMethodInterceptorChain;
 import io.nuls.core.utils.str.StringUtils;
-import io.nuls.db.transactional.TransactionalAopFilter;
-import io.nuls.db.transactional.annotation.PROPAGATION;
-import io.nuls.db.transactional.annotation.TransactionalAnnotation;
 import io.nuls.db.dao.impl.mybatis.session.SessionManager;
-import net.sf.cglib.proxy.MethodInterceptor;
-import net.sf.cglib.proxy.MethodProxy;
+import io.nuls.db.transactional.TransactionalInterceptor;
+import io.nuls.db.transactional.annotation.PROPAGATION;
+import io.nuls.db.transactional.annotation.DbSession;
 import org.apache.ibatis.session.SqlSession;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 /**
  * @author zhouwei
  * @date 2017/10/13
  */
-public class TransactionalAopFilterImpl implements TransactionalAopFilter {
-
+@Interceptor(DbSession.class)
+public class TransactionalInterceptorImpl implements TransactionalInterceptor {
     @Override
-    public Object intercept(Object obj, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
-
+    public Object intercept(Annotation annotation, Object obj, Method method, Object[] args, BeanMethodInterceptorChain interceptorChain) throws Throwable {
         String lastId = SessionManager.getId();
         String id = lastId;
-        if(id ==null){
+        if (id == null) {
             id = StringUtils.getNewUUID();
         }
         Object result;
         boolean isSessionBeginning = false;
         boolean isCommit = false;
-        if (method.isAnnotationPresent(TransactionalAnnotation.class)) {
-            TransactionalAnnotation annotation = method.getAnnotation(TransactionalAnnotation.class);
-            if (annotation.value() == PROPAGATION.REQUIRED && !SessionManager.getTxState(id)) {
-                isCommit = true;
-            }
-//            else if (annotation.value() == PROPAGATION.INDEPENDENT) {
-//                id = StringUtils.getNewUUID();
-//            }
+        DbSession ann = method.getAnnotation(DbSession.class);
+        if (ann.transactional() == PROPAGATION.REQUIRED && !SessionManager.getTxState(id)) {
+            isCommit = true;
         }
-
         SqlSession session = SessionManager.getSession(id);
         if (session == null) {
             isSessionBeginning = true;
             session = SessionManager.sqlSessionFactory.openSession(false);
-
             SessionManager.setConnection(id, session);
             SessionManager.setId(id);
         } else {
@@ -74,7 +67,7 @@ public class TransactionalAopFilterImpl implements TransactionalAopFilter {
         }
         try {
             SessionManager.startTransaction(id);
-            result = methodProxy.invokeSuper(obj, args);
+            result = interceptorChain.execute(annotation, obj, method, args);
             if (isCommit) {
                 session.commit();
                 SessionManager.endTransaction(id);
@@ -97,4 +90,6 @@ public class TransactionalAopFilterImpl implements TransactionalAopFilter {
     private boolean isFilterMethod(Method method) {
         return false;
     }
+
+
 }

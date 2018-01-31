@@ -40,8 +40,7 @@ import java.util.List;
  */
 @Path("/tx")
 public class TransactionResource {
-    private NulsContext nulsContext = NulsContext.getInstance();
-    private LedgerService ledgerService = nulsContext.getService(LedgerService.class);
+    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
 
 
     @GET

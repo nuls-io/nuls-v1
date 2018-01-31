@@ -81,13 +81,13 @@ public class ConsensusMeetingRunner implements Runnable {
     private NulsContext context = NulsContext.getInstance();
     public static final String THREAD_NAME = "Consensus-Meeting";
     private static final ConsensusMeetingRunner INSTANCE = new ConsensusMeetingRunner();
-    private AccountService accountService = context.getService(AccountService.class);
-    private LedgerService ledgerService = context.getService(LedgerService.class);
+    private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
+    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     private ConsensusCacheManager consensusCacheManager = ConsensusCacheManager.getInstance();
     private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
     private PocBlockService pocBlockService = PocBlockService.getInstance();
     private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
-    private EventBroadcaster eventBroadcaster = context.getService(EventBroadcaster.class);
+    private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
     private boolean running = false;
     private ConsensusManager consensusManager = ConsensusManager.getInstance();
     private ConfirmingTxCacheManager confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
@@ -193,6 +193,7 @@ public class ConsensusMeetingRunner implements Runnable {
     }
 
     private double calcCreditVal() {
+        //todo 需要修改
         long roundStart = consensusManager.getCurrentRound().getIndex() - 1 - PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT;
         if (roundStart < 0) {
             roundStart = 0;

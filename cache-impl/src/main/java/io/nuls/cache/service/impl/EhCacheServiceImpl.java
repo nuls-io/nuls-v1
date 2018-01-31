@@ -41,15 +41,7 @@ import java.util.*;
  * @date 2017/10/27
  */
 public class EhCacheServiceImpl<K, T> implements CacheService<K, T> {
-    private static final CacheService INSTANCE = new EhCacheServiceImpl();
     private final EhCacheManager cacheManager = EhCacheManager.getInstance();
-
-    private EhCacheServiceImpl() {
-    }
-
-    public static CacheService getInstance() {
-        return INSTANCE;
-    }
 
     @Override
     public void createCache(String cacheName, int heapMb, int timeToLiveSeconds, int timeToIdleSeconds, NulsCacheListener listener) {

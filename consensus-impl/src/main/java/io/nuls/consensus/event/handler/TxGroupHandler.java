@@ -50,7 +50,7 @@ import java.util.List;
 public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
     private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
     private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
-    private NetworkService networkService = NulsContext.getInstance().getService(NetworkService.class);
+    private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
     private DownloadDataUtils downloadDataUtils = DownloadDataUtils.getInstance();
 
     @Override

@@ -36,7 +36,7 @@ import io.nuls.db.dao.UtxoInputDataService;
 import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.db.entity.UtxoInputPo;
 import io.nuls.db.entity.UtxoOutputPo;
-import io.nuls.db.transactional.annotation.TransactionalAnnotation;
+import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.ledger.entity.*;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
@@ -54,23 +54,13 @@ import java.util.Map;
  */
 public class UtxoCoinDataProvider implements CoinDataProvider {
 
-    private static final UtxoCoinDataProvider INSTANCE = new UtxoCoinDataProvider();
-
     private LedgerCacheService cacheService = LedgerCacheService.getInstance();
 
     private UtxoOutputDataService outputDataService;
 
     private UtxoInputDataService inputDataService;
 
-    private UtxoCoinDataProvider() {
-
-    }
-
     private UtxoCoinManager coinManager = UtxoCoinManager.getInstance();
-
-    public static UtxoCoinDataProvider getInstance() {
-        return INSTANCE;
-    }
 
     @Override
     public CoinData parse(NulsByteBuffer byteBuffer) throws NulsException {
@@ -109,7 +99,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
     }
 
     @Override
-    @TransactionalAnnotation
+    @DbSession
     public void save(CoinData coinData, Transaction tx) {
         UtxoData utxoData = (UtxoData) coinData;
 
@@ -222,7 +212,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
     }
 
     @Override
-    @TransactionalAnnotation
+    @DbSession
     public void rollback(CoinData coinData, Transaction tx) {
         UtxoData utxoData = (UtxoData) coinData;
         if(utxoData==null){

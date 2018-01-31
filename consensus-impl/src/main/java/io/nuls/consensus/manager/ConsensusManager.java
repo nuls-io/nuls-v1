@@ -98,7 +98,7 @@ public class ConsensusManager implements Runnable {
 
     public void init() {
         loadConfigration();
-        accountService = NulsContext.getInstance().getService(AccountService.class);
+        accountService = NulsContext.getServiceBean(AccountService.class);
         List<Account> list = this.accountService.getAccountList();
         boolean noneAccount = list == null || list.isEmpty();
         if (this.partakePacking && noneAccount) {

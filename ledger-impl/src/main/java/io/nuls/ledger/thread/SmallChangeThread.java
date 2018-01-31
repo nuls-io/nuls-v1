@@ -33,8 +33,8 @@ import io.nuls.ledger.service.intf.LedgerService;
  * @date 2017/11/13
  */
 public class SmallChangeThread implements Runnable {
-    private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
-    private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
+    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
+    private AccountService accountService =NulsContext.getServiceBean(AccountService.class);
     private static final SmallChangeThread INSTANCE = new SmallChangeThread();
 
     private SmallChangeThread( ) {

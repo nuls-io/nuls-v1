@@ -80,7 +80,7 @@ public class VersionEventHandler implements NetWorkEventHandler {
 
     private NodeDataService getNodeDao() {
         if (nodeDao == null) {
-            nodeDao = NulsContext.getInstance().getService(NodeDataService.class);
+            nodeDao = NulsContext.getServiceBean(NodeDataService.class);
         }
         return nodeDao;
     }

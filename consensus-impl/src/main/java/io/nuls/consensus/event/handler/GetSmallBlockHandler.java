@@ -38,8 +38,8 @@ import io.nuls.ledger.service.intf.LedgerService;
  */
 public class GetSmallBlockHandler extends AbstractEventHandler<GetSmallBlockRequest> {
 
-    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
-    private BlockService blockService = NulsContext.getInstance().getService(BlockService.class);
+    private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
+    private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
 
     @Override
     public void onEvent(GetSmallBlockRequest event, String fromId) {

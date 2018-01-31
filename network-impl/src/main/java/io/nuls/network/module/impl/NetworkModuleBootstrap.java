@@ -25,6 +25,7 @@ package io.nuls.network.module.impl;
 
 
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.event.EventManager;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.TaskManager;
@@ -58,10 +59,11 @@ public class NetworkModuleBootstrap extends AbstractNetworkModule {
             Log.error(e);
             throw new NulsRuntimeException(ErrorCode.IO_ERROR);
         }
-        networkService = new NetworkServiceImpl(this);
+        this.registerService(NetworkServiceImpl.class);
+        networkService = NulsContext.getServiceBean(NetworkService.class);
         networkService.init();
         this.registerEvent();
-        this.registerService(NetworkService.class,networkService);
+
     }
 
     private void registerEvent() {

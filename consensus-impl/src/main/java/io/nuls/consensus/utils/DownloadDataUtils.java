@@ -58,7 +58,7 @@ public class DownloadDataUtils {
         return INSTANCE;
     }
 
-    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
+    private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
     private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
     private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
 

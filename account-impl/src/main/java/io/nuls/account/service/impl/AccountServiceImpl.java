@@ -58,8 +58,7 @@ import io.nuls.db.dao.AliasDataService;
 import io.nuls.db.entity.AccountPo;
 import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.entity.TransactionPo;
-import io.nuls.db.transactional.annotation.TransactionalAnnotation;
-import io.nuls.db.util.TransactionPoTool;
+import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.event.TransactionEvent;
@@ -79,8 +78,6 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class AccountServiceImpl implements AccountService {
 
-    private static AccountServiceImpl instance = new AccountServiceImpl();
-
     private Lock locker = new ReentrantLock();
 
     private AccountCacheService accountCacheService = AccountCacheService.getInstance();
@@ -91,25 +88,16 @@ public class AccountServiceImpl implements AccountService {
 
     private AliasDataService aliasDataService;
 
-
     private EventBroadcaster eventBroadcaster;
 
     private boolean isLockNow = true;
 
-    private AccountServiceImpl() {
-
-    }
-
-    public static AccountServiceImpl getInstance() {
-        return instance;
-    }
-
     @Override
     public void init() {
-        accountDao = NulsContext.getInstance().getService(AccountDataService.class);
-        accountAliasDBService = NulsContext.getInstance().getService(AccountAliasDataService.class);
-        aliasDataService = NulsContext.getInstance().getService(AliasDataService.class);
-        eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
+        accountDao = NulsContext.getServiceBean(AccountDataService.class);
+        accountAliasDBService = NulsContext.getServiceBean(AccountAliasDataService.class);
+        aliasDataService = NulsContext.getServiceBean(AliasDataService.class);
+        eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
 
         AliasValidator.getInstance().setAliasDataService(aliasDataService);
         AliasTxService.getInstance().setDataService(accountAliasDBService);
@@ -139,7 +127,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    @TransactionalAnnotation
+    @DbSession
     public Account createAccount() {
         locker.lock();
         try {
@@ -160,7 +148,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    @TransactionalAnnotation
+    @DbSession
     public Result<List<String>> createAccount(int count) {
         if (count <= 0 || count > AccountTool.CREATE_MAX_SIZE) {
             return new Result<>(false, "between 0 and 100 can be created at once");

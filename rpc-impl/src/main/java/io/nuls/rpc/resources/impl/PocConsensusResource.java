@@ -39,8 +39,7 @@ import javax.ws.rs.core.MediaType;
  */
 @Path("/consensus")
 public class PocConsensusResource {
-    private NulsContext context = NulsContext.getInstance();
-    private ConsensusService consensusService = context.getService(ConsensusService.class);
+    private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
 
 
     @GET

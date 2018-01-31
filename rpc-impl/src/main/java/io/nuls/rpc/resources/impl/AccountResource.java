@@ -45,9 +45,8 @@ import java.util.List;
 @Path("/account")
 public class AccountResource {
 
-    private NulsContext context = NulsContext.getInstance();
-    private AccountService accountService = context.getService(AccountService.class);
-    private LedgerService ledgerService = context.getService(LedgerService.class);
+    private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
+    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)

@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,14 +21,29 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.db.transactional;
 
+package io.nuls.core.utils.spring.lite.core;
+
+import io.nuls.core.utils.spring.lite.core.interceptor.BeanMethodInterceptorManager;
 import net.sf.cglib.proxy.MethodInterceptor;
+import net.sf.cglib.proxy.MethodProxy;
+
+import java.lang.reflect.Method;
 
 /**
  * @author Niels
- * @date 2018/1/9
+ * @date 2018/1/31
  */
-public interface TransactionalAopFilter extends MethodInterceptor {
+public class ModularServiceMethodInterceptor implements MethodInterceptor {
+    @Override
+    public Object intercept(Object obj, Method method, Object[] params, MethodProxy methodProxy) throws Throwable {
+        // todo 判断是哪个模块 ，该模块是否运行中
+
+        if (null == method.getDeclaredAnnotations() || method.getDeclaredAnnotations().length == 0) {
+            return methodProxy.invokeSuper(obj, params);
+        }
+        return BeanMethodInterceptorManager.doFilter(method.getDeclaredAnnotations(), obj, method, params,methodProxy);
+    }
 }

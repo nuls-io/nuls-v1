@@ -47,8 +47,8 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
 
     private ReceivedTxCacheManager cacheManager = ReceivedTxCacheManager.getInstance();
 
-    private NetworkService networkService = NulsContext.getInstance().getService(NetworkService.class);
-    private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
+    private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
+    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
 
     private NewTxEventHandler() {
     }

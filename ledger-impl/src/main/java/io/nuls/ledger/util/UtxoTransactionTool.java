@@ -39,6 +39,9 @@ import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.entity.tx.TransferTransaction;
 import io.nuls.ledger.service.impl.LedgerCacheService;
 
+/**
+ * @author Niels
+ */
 public class UtxoTransactionTool {
 
     private static UtxoTransactionTool instance = new UtxoTransactionTool();
@@ -116,7 +119,7 @@ public class UtxoTransactionTool {
 
     private AccountService getAccountService() {
         if (accountService == null) {
-            accountService = NulsContext.getInstance().getService(AccountService.class);
+            accountService = NulsContext.getServiceBean(AccountService.class);
         }
         return accountService;
     }

@@ -39,8 +39,8 @@ import java.util.List;
  */
 public class GetBlockHandler extends AbstractEventHandler<GetBlockRequest> {
 
-    private BlockService blockService = NulsContext.getInstance().getService(BlockService.class);
-    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
+    private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
+    private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
 
     @Override
     public void onEvent(GetBlockRequest event, String fromId) {

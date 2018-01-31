@@ -44,7 +44,7 @@ import java.util.List;
 public class CreditThresholdValidator implements NulsDataValidator<PocJoinConsensusTransaction> {
 
     private static final CreditThresholdValidator INSTANCE = new CreditThresholdValidator();
-    private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
+    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
 
     private CreditThresholdValidator() {
     }

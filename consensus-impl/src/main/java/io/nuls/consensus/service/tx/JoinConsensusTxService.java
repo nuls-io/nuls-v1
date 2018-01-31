@@ -43,7 +43,7 @@ import io.nuls.ledger.service.intf.LedgerService;
  */
 public class JoinConsensusTxService implements TransactionService<PocJoinConsensusTransaction> {
     private ConsensusCacheManager manager = ConsensusCacheManager.getInstance();
-    private DelegateDataService delegateDataService = NulsContext.getInstance().getService(DelegateDataService.class);
+    private DelegateDataService delegateDataService = NulsContext.getServiceBean(DelegateDataService.class);
 
     @Override
     public void onRollback(PocJoinConsensusTransaction tx) throws NulsException {

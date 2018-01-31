@@ -38,16 +38,6 @@ import io.nuls.core.utils.queue.manager.QueueManager;
  */
 public class QueueService<T> {
 
-    private static final QueueService INSTANCE = new QueueService();
-
-    private QueueService() {
-    }
-
-    public static QueueService getInstance() {
-        return INSTANCE;
-    }
-
-
     /**
      * 创建一个持久化队列
      *

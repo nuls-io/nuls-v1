@@ -48,8 +48,8 @@ public class WalletResouce {
 
     private static final int MAX_UNLOCK_TIME = 60;
     private NulsContext context = NulsContext.getInstance();
-    private AccountService accountService = context.getService(AccountService.class);
-    private LedgerService ledgerService = context.getService(LedgerService.class);
+    private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
+    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
 
     @POST
     @Path("/unlock")

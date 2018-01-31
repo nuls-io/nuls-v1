@@ -12,7 +12,7 @@ public class EhCacheManagerTest {
     EhCacheManager manager = EhCacheManager.getInstance();
     @Test
     public void test() throws Exception {
-        CacheService<String,String> cache = EhCacheServiceImpl.getInstance();
+        CacheService<String,String> cache = new EhCacheServiceImpl();
         String cacheName = "test1";
         cache.createCache(cacheName,100,0,0);
         cache.putElement(cacheName,"x","adsfasdglauwerg");

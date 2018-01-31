@@ -33,6 +33,6 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface TransactionalAnnotation {
-    PROPAGATION value() default PROPAGATION.REQUIRED;
+public @interface DbSession {
+    PROPAGATION transactional() default PROPAGATION.REQUIRED;
 }

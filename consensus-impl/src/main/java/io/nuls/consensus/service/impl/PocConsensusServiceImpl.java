@@ -67,10 +67,10 @@ import java.util.Map;
 public class PocConsensusServiceImpl implements ConsensusService {
 
     private static final ConsensusService INSTANCE = new PocConsensusServiceImpl();
-    private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
-    private EventBroadcaster eventBroadcaster = NulsContext.getInstance().getService(EventBroadcaster.class);
-    private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
-    private BlockService blockService = NulsContext.getInstance().getService(BlockService.class);
+    private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
+    private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
+    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
+    private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
     private ConsensusCacheManager consensusCacheManager = ConsensusCacheManager.getInstance();
 
     private PocConsensusServiceImpl() {

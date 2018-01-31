@@ -44,7 +44,6 @@ import io.nuls.core.thread.BaseThread;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.aop.AopUtils;
 import io.nuls.core.utils.log.Log;
-import io.nuls.db.transactional.TransactionalAopFilter;
 import io.nuls.event.bus.service.intf.EventBusService;
 import io.nuls.ledger.event.TransactionEvent;
 
@@ -56,7 +55,7 @@ import java.util.List;
  */
 public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
 
-    private EventBusService eventBusService = NulsContext.getInstance().getService(EventBusService.class);
+    private EventBusService eventBusService = NulsContext.getServiceBean(EventBusService.class);
 
     private ConsensusManager consensusManager = ConsensusManager.getInstance();
 
@@ -65,6 +64,8 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
         PocBlockValidatorManager.initHeaderValidators();
         PocBlockValidatorManager.initBlockValidators();
         initTransactions();
+        this.registerService(BlockServiceImpl.class );
+        this.registerService(PocConsensusServiceImpl.class );
         consensusManager.init();
     }
 
@@ -78,10 +79,8 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
 
     @Override
     public void start() {
-        this.registerService(BlockService.class, AopUtils.createProxy(BlockServiceImpl.class,
-                NulsContext.getInstance().getService(TransactionalAopFilter.class)));
-         this.registerService(ConsensusService.class,PocConsensusServiceImpl.getInstance());
-        NulsContext.getInstance().setBestBlock(NulsContext.getInstance().getService(BlockService.class).getLocalBestBlock());
+
+        NulsContext.getInstance().setBestBlock(NulsContext.getServiceBean(BlockService.class).getLocalBestBlock());
         this.consensusManager.startMaintenanceWork();
         ConsensusStatusInfo statusInfo = consensusManager.getConsensusStatusInfo();
         if (null!=statusInfo&&statusInfo.getStatus() != ConsensusStatusEnum.NOT_IN.getCode()) {

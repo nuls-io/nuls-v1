@@ -37,7 +37,7 @@ import io.nuls.core.validate.ValidateResult;
 public class HeaderSignValidator implements NulsDataValidator<BlockHeader> {
     private static final String ERROR_MESSAGE = "block header sign check failed";
     public static final HeaderSignValidator INSTANCE = new HeaderSignValidator();
-    private AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
+    private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
     private HeaderSignValidator(){}
     public static HeaderSignValidator getInstance(){
         return INSTANCE;

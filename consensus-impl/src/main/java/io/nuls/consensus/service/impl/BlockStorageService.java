@@ -46,8 +46,8 @@ import java.util.Map;
 public class BlockStorageService {
     private static final BlockStorageService INSTANCE = new BlockStorageService();
 
-    private BlockHeaderService headerDao = NulsContext.getInstance().getService(BlockHeaderService.class);
-    private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
+    private BlockHeaderService headerDao = NulsContext.getServiceBean(BlockHeaderService.class);
+    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
 
     private BlockStorageService() {
     }

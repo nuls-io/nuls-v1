@@ -57,9 +57,9 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
 
     private ConsensusCacheManager manager = ConsensusCacheManager.getInstance();
 
-    private LedgerService ledgerService = NulsContext.getInstance().getService(LedgerService.class);
-    private DelegateAccountDataService delegateAccountService = NulsContext.getInstance().getService(DelegateAccountDataService.class);
-    private DelegateDataService delegateDataService = NulsContext.getInstance().getService(DelegateDataService.class);
+    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
+    private DelegateAccountDataService delegateAccountService = NulsContext.getServiceBean(DelegateAccountDataService.class);
+    private DelegateDataService delegateDataService = NulsContext.getServiceBean(DelegateDataService.class);
     private ConsensusManager consensusManager = ConsensusManager.getInstance();
     @Override
     public void onRollback(PocExitConsensusTransaction tx) throws NulsException {

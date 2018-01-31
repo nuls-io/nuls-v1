@@ -45,7 +45,7 @@ public class ModuleService {
     private static final ModuleService INSTANCE = new ModuleService();
 
     private ModuleService() {
-        ServiceManager.getInstance().regService((short) 0, ModuleService.class, this);
+        ServiceManager.getInstance().regService((short) 0, ModuleService.class);
     }
 
     public static ModuleService getInstance() {
@@ -82,5 +82,9 @@ public class ModuleService {
                 throw new NulsRuntimeException(e);
             }
         }
+    }
+
+    public BaseModuleBootstrap getModule(short moduleId) {
+        return moduleManager.getModule(moduleId);
     }
 }

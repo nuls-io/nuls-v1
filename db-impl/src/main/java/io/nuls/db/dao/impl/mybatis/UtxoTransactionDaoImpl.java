@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,9 +24,10 @@
 package io.nuls.db.dao.impl.mybatis;
 
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.db.dao.*;
 import io.nuls.db.entity.*;
-import io.nuls.db.transactional.annotation.TransactionalAnnotation;
+import io.nuls.db.transactional.annotation.DbSession;
 
 import java.util.List;
 
@@ -36,15 +37,16 @@ import java.util.List;
  */
 public class UtxoTransactionDaoImpl implements UtxoTransactionDataService {
 
-    private TransactionDataService txDao = NulsContext.getInstance().getService(TransactionDataService.class);
-
-    private TransactionLocalDataService txLocalDao = NulsContext.getInstance().getService(TransactionLocalDataService.class);
-
-    private UtxoInputDataService inputDao = NulsContext.getInstance().getService(UtxoInputDataService.class);
-
-    private UtxoOutputDataService outputDao = NulsContext.getInstance().getService(UtxoOutputDataService.class);
-
-    private BlockHeaderService blockHeaderDao = NulsContext.getInstance().getService(BlockHeaderService.class);
+    @Autowired
+    private TransactionDataService txDao;
+    @Autowired
+    private TransactionLocalDataService txLocalDao;
+    @Autowired
+    private UtxoInputDataService inputDao;
+    @Autowired
+    private UtxoOutputDataService outputDao;
+    @Autowired
+    private BlockHeaderService blockHeaderDao;
 
     @Override
     public TransactionPo gettx(String hash) {
@@ -125,25 +127,25 @@ public class UtxoTransactionDaoImpl implements UtxoTransactionDataService {
     }
 
     @Override
-    @TransactionalAnnotation
+    @DbSession
     public int save(TransactionPo po) {
         return txDao.save(po);
     }
 
     @Override
-    @TransactionalAnnotation
+    @DbSession
     public int save(TransactionLocalPo localPo) {
         return txLocalDao.save(localPo);
     }
 
     @Override
-    @TransactionalAnnotation
+    @DbSession
     public int saveTxList(List<TransactionPo> poList) {
         return txDao.save(poList);
     }
 
     @Override
-    @TransactionalAnnotation
+    @DbSession
     public int saveLocalList(List<TransactionLocalPo> poList) {
         return txLocalDao.save(poList);
     }

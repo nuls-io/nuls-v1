@@ -21,17 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.core.utils.spring.lite.annotation;
+package io.nuls.db.transactional;
 
-import java.lang.annotation.*;
+import io.nuls.core.utils.spring.lite.core.interceptor.BeanMethodInterceptor;
 
 /**
- * @author Niels Wang
- * @date 2018/1/30
+ * @author Niels
+ * @date 2018/1/9
  */
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-public @interface Component {
-    String value() default "";
+public interface TransactionalInterceptor extends BeanMethodInterceptor {
 }

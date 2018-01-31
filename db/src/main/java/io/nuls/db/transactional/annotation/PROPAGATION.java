@@ -29,7 +29,7 @@ package io.nuls.db.transactional.annotation;
  * @date 2017/10/26
  */
 public enum  PROPAGATION {
-
+    NONE("none"),
     REQUIRED("required"),
     INDEPENDENT("independent");
 

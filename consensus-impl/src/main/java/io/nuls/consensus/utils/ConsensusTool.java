@@ -53,7 +53,7 @@ import java.util.List;
  */
 public class ConsensusTool {
 
-    private static AccountService accountService = NulsContext.getInstance().getService(AccountService.class);
+    private static AccountService accountService = NulsContext.getServiceBean(AccountService.class);
 
     public static final BlockHeaderPo toPojo(BlockHeader header) {
         BlockHeaderPo po = new BlockHeaderPo();

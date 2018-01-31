@@ -44,7 +44,7 @@ public class BlockPersistenceThread implements Runnable {
     public static final String THREAD_NAME = "block-persistence-thread";
     private static final BlockPersistenceThread INSTANCE = new BlockPersistenceThread();
     private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
-    private BlockService blockService = NulsContext.getInstance().getService(BlockService.class);
+    private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
     private ConfirmingTxCacheManager txCacheManager = ConfirmingTxCacheManager.getInstance();
     private boolean running;
 

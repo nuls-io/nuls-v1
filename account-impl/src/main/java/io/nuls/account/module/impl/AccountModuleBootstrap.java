@@ -44,10 +44,9 @@ public class AccountModuleBootstrap extends AbstractAccountModule {
     @Override
     public void init() {
         cacheService = AccountCacheService.getInstance();
-        accountService = AccountServiceImpl.getInstance();
+        this.registerService(AccountServiceImpl.class);
         accountService.init();
 
-        this.registerService(AccountService.class,accountService);
         this.registerTransaction(TransactionConstant.TX_TYPE_SET_ALIAS, AliasTransaction.class,AliasTxService.getInstance());
     }
 

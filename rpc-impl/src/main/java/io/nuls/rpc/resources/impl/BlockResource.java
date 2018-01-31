@@ -41,7 +41,7 @@ import javax.ws.rs.core.MediaType;
 @Path("/block")
 public class BlockResource  {
 
-    private BlockService blockService = NulsContext.getInstance().getService(BlockService.class);
+    private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
 
     @GET
     @Path("/{hash}")

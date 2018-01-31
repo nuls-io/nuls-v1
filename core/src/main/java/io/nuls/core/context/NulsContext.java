@@ -27,6 +27,8 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.module.manager.ServiceManager;
 import io.nuls.core.utils.cfg.IniEntity;
+import io.nuls.core.utils.log.Log;
+import io.nuls.core.utils.spring.lite.core.SpringLiteContext;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -79,18 +81,6 @@ public class NulsContext {
         this.genesisBlock = block;
     }
 
-    /**
-     * get Service by interface
-     *
-     * @param tClass
-     * @param <T>
-     * @return
-     */
-    public <T> T getService(Class<T> tClass) {
-        return ServiceManager.getInstance().getService(tClass);
-    }
-
-
     public String getModuleVersion(String module) {
         return "";
     }
@@ -125,6 +115,11 @@ public class NulsContext {
     }
 
     public static final <T> T getServiceBean(Class<T> tClass) {
-        return getInstance().getService(tClass);
+        try {
+            return SpringLiteContext.getBean(tClass);
+        } catch (Exception e) {
+            Log.error(e);
+            return null;
+        }
     }
 }
