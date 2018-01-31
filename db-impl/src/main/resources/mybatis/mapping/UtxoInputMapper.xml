@@ -43,7 +43,7 @@
     insert into utxo_input (tx_hash,from_index,in_index,sign)
     values
     <foreach collection="list" item="item" index="index" separator="," >
-      (#{item.txHash,jdbcType=VARCHAR}, #{item.fromIndex,jdbcType=INTEGER}, #{item.inIndex,jdbcType=INTEGER}, #{item.sign,jdbcType=VARBINARY})
+      ( #{item.txHash,jdbcType=VARCHAR}, #{item.fromIndex,jdbcType=INTEGER}, #{item.inIndex,jdbcType=INTEGER}, #{item.sign,jdbcType=VARBINARY})
     </foreach>
   </insert>
 

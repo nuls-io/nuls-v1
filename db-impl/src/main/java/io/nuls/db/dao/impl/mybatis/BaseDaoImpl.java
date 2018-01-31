@@ -65,6 +65,9 @@ public abstract class BaseDaoImpl<T extends BaseMapper<K, V>, K, V> implements B
     @Override
     @TransactionalAnnotation
     public int save(List<V> list) {
+        if(null==list||list.isEmpty()){
+            return 0;
+        }
         return getMapper().batchInsert(list);
     }
 

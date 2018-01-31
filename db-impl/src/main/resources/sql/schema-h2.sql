@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS `delegate` (
   `id` varchar(32) NOT NULL,
   `address` varchar(40) NOT NULL,
   `agent_address` varchar(40) NOT NULL,
-  `deposit` decimal(19,8) NOT NULL,
+  `deposit` bigint(18) NOT NULL,
   `status` int(1) DEFAULT NULL,
   `time` bigint(14) DEFAULT NULL,
   `block_height` bigint(20) DEFAULT NULL,
@@ -125,7 +125,7 @@ CREATE TABLE IF NOT EXISTS `utxo_input` (
 CREATE TABLE IF NOT EXISTS `utxo_output` (
   `tx_hash` varchar(70) NOT NULL,
   `out_index` int(5) NOT NULL,
-  `value` decimal(19,8) NOT NULL,
+  `value` bigint(18) NOT NULL,
   `lock_time` bigint(20) DEFAULT NULL,
   `status` tinyint(1) NOT NULL,
   `script` varbinary(1024) NOT NULL,
