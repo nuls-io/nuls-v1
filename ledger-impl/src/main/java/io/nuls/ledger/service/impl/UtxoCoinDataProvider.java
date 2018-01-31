@@ -28,7 +28,6 @@ import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TxStatusEnum;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -201,20 +200,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         }
     }
 
-    private void rollBackProcessDataOutput(UtxoData utxoData) {
-        for (int i = 0; i < utxoData.getOutputs().size(); i++) {
-            UtxoOutput output = utxoData.getOutputs().get(i);
-            cacheService.removeUtxo(output.getKey());
-
-            //todo address format
-            String address = new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), output.getAddress()).getBase58();
-            UtxoBalance balance = (UtxoBalance) cacheService.getBalance(address);
-            balance.setUseable(balance.getUseable().subtract(Na.valueOf(output.getValue())));
-            balance.setBalance(balance.getBalance().subtract(Na.valueOf(output.getValue())));
-            balance.addUnSpend(output);
-        }
-    }
-
     @Override
     @TransactionalAnnotation
     public void rollback(CoinData coinData, Transaction tx) {
@@ -226,8 +211,8 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             for (UtxoInput input : utxoData.getInputs()) {
                 cacheService.updateUtxoStatus(input.getKey(), UtxoOutput.USEABLE, UtxoOutput.LOCKED);
             }
+
         } else if (tx.getStatus().equals(TxStatusEnum.CONFIRMED)) {
-            String address;
             Map<String, Object> keyMap = new HashMap<>();
             //process output
             for (UtxoOutput output : utxoData.getOutputs()) {
@@ -237,21 +222,16 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 UtxoOutputPo outputPo = outputDataService.get(keyMap);
 
                 outputDataService.delete(keyMap);
-                // if utxo not spent,should calc balance and clear cache
-                if (outputPo.getStatus() != UtxoOutput.SPENT) {
-                    cacheService.removeUtxo(output.getKey());
 
-                    //todo address format
-                    address = new Address((short) 1, output.getAddress()).getBase58();
-                    UtxoBalance balance = (UtxoBalance) cacheService.getBalance(address);
-                    if (outputPo.getStatus().equals(UtxoOutput.USEABLE)) {
-                        balance.setBalance(balance.getBalance().subtract(Na.valueOf(outputPo.getValue())));
-                        balance.setUseable(balance.getUseable().subtract(Na.valueOf(outputPo.getValue())));
-                    } else {
-                        balance.setBalance(balance.getBalance().subtract(Na.valueOf(outputPo.getValue())));
-                        balance.setLocked(balance.getLocked().subtract(Na.valueOf(outputPo.getValue())));
-                    }
+                cacheService.removeUtxo(output.getKey());
+
+                // if utxo not spent,should calc balance and clear cache
+                UtxoBalance balance = (UtxoBalance) cacheService.getBalance(outputPo.getAddress());
+                if (balance != null) {
+                    balance.removeUnSpend(output.getKey());
                 }
+
+                UtxoTransactionTool.getInstance().calcBalance(outputPo.getAddress());
             }
 
             //process input
@@ -269,15 +249,16 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 UtxoOutput output = UtxoTransferTool.toOutput(outputPo);
                 cacheService.putUtxo(output.getKey(), output);
 
-                //calc balance
-                address = new Address((short) 1, output.getAddress()).getBase58();
-                UtxoBalance balance = (UtxoBalance) cacheService.getBalance(address);
+                UtxoBalance balance = (UtxoBalance) cacheService.getBalance(outputPo.getAddress());
                 if (balance == null) {
                     balance = new UtxoBalance(Na.valueOf(output.getValue()), Na.ZERO);
-                    balance.addUnSpend(output);
                 }
+                balance.addUnSpend(output);
+
+                UtxoTransactionTool.getInstance().calcBalance(outputPo.getAddress());
             }
         }
+
     }
 
     @Override
