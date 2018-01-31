@@ -104,10 +104,8 @@ public class UtxoInput extends BaseNulsData {
     }
 
     public NulsDigestData getTxHash() {
-        if (txHash == null) {
-            if (parent != null) {
-                txHash = parent.getHash();
-            }
+        if(txHash == null && parent != null) {
+            this.txHash = parent.getHash();
         }
         return txHash;
     }

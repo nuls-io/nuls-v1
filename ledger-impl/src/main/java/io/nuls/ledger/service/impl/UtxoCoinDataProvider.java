@@ -283,9 +283,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                     balance.addUnSpend(output);
                 }
             }
-
         }
-
     }
 
     @Override
@@ -344,6 +342,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             output.setAddress(inputs.get(0).getFrom().getAddress());
             output.setValue(balance);
             output.setIndex(i);
+            output.setParent(tx);
             outputs.add(output);
         }
 
