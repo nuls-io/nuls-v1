@@ -30,6 +30,7 @@ import io.nuls.db.dao.impl.mybatis.params.BlockSearchParams;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import io.nuls.db.entity.BlockHeaderPo;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -107,16 +108,13 @@ public class BlockDaoImpl extends BaseDaoImpl<BlockHeaderMapper, String, BlockHe
     }
 
     @Override
-    public long getSumOfRoundIndexOfYellowPunish(String address, long endRoundIndex) {
+    public List<Long> getListOfRoundIndexOfYellowPunish(String address, long startRoundIndex, long endRoundIndex) {
         Map<String, Object> params = new HashMap<>();
         params.put("address", address);
+        params.put("startRoundIndex",startRoundIndex);
         params.put("endRoundIndex", endRoundIndex);
         params.put("txType", TransactionConstant.TX_TYPE_YELLOW_PUNISH);
-        Long value = this.getMapper().getSumOfRoundIndexOfYellowPunish(params);
-        if (null == value) {
-            value = 0L;
-        }
-        return value.longValue();
+        return this.getMapper().getSumOfRoundIndexOfYellowPunish(params);
     }
 
 }

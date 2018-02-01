@@ -81,12 +81,14 @@
         ]]>
     </select>
     <select id="getSumOfRoundIndexOfYellowPunish" resultType="long" parameterType="java.util.Map">
-        select sum(b.round_index)
+        select  b.round_index
         from block_header b
         INNER JOIN transaction t on t.block_height=b.height
         INNER JOIN tx_account_relation r on r.tx_hash = t.hash
         <![CDATA[
-        where r.address=#{address ,jdbcType=VARCHAR } and b.round_index <=#{endRoundIndex,jdbcType=BIGINT}
+        where r.address=#{address ,jdbcType=VARCHAR }
+         and b.round_index>=#{startRoundIndex,jdbcType=BIGINT}
+         and b.round_index <=#{endRoundIndex,jdbcType=BIGINT}
         ]]>
     </select>
 
