@@ -39,10 +39,13 @@ import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.entity.TransactionPo;
 import io.nuls.db.entity.UtxoInputPo;
 import io.nuls.db.entity.UtxoOutputPo;
+import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.UtxoInput;
 import io.nuls.ledger.entity.UtxoOutput;
+import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 
 import java.io.IOException;
+import java.util.List;
 
 public class UtxoTransferTool {
 
@@ -68,6 +71,15 @@ public class UtxoTransferTool {
         po.setScript(output.getScriptBytes());
         po.setStatus((byte) output.getStatus());
         return po;
+    }
+
+    public static UtxoInput toInput(UtxoInputPo po) {
+        UtxoInput input = new UtxoInput();
+        input.setTxHash(new NulsDigestData(Hex.decode(po.getTxHash())));
+        input.setFromIndex(po.getFromIndex());
+        input.setIndex(po.getInIndex());
+        input.setSign(new NulsSignData(po.getSign()));
+        return input;
     }
 
     public static UtxoInputPo toInputPojo(UtxoInput input) {
@@ -149,6 +161,7 @@ public class UtxoTransferTool {
             tx.parseTxData(new NulsByteBuffer(po.getTxData()));
         }
         tx.setStatus(TxStatusEnum.CONFIRMED);
+        transferCoinData(tx, po.getInputs(), po.getOutputs());
         return tx;
     }
 
@@ -172,7 +185,26 @@ public class UtxoTransferTool {
             tx.parseTxData(new NulsByteBuffer(po.getTxData()));
         }
         tx.setStatus(TxStatusEnum.CONFIRMED);
+        transferCoinData(tx, po.getInputs(), po.getOutputs());
         return tx;
+    }
+
+
+    private static void transferCoinData(Transaction tx, List<UtxoInputPo> inputPoList, List<UtxoOutputPo> outputPoList) {
+        if (tx instanceof AbstractCoinTransaction) {
+            AbstractCoinTransaction coinTx = (AbstractCoinTransaction) tx;
+
+            UtxoData utxoData = new UtxoData();
+
+            for (UtxoInputPo inputPo : inputPoList) {
+                utxoData.getInputs().add(toInput(inputPo));
+            }
+
+            for (UtxoOutputPo outputPo : outputPoList) {
+                utxoData.getOutputs().add(toOutput(outputPo));
+            }
+            coinTx.setCoinData(utxoData);
+        }
     }
 
 }

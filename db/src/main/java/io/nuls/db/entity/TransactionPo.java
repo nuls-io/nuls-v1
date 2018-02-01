@@ -23,6 +23,8 @@
  */
 package io.nuls.db.entity;
 
+import java.util.List;
+
 /**
  * @author Niels
  * @date 2017/11/20
@@ -46,6 +48,10 @@ public class TransactionPo {
     private byte[] txData;
 
     private byte[] sign;
+
+    private List<UtxoInputPo> inputs;
+
+    private List<UtxoOutputPo> outputs;
 
     public String getHash() {
         return hash;
@@ -118,5 +124,21 @@ public class TransactionPo {
 
     public void setSign(byte[] sign) {
         this.sign = sign;
+    }
+
+    public List<UtxoInputPo> getInputs() {
+        return inputs;
+    }
+
+    public void setInputs(List<UtxoInputPo> inputs) {
+        this.inputs = inputs;
+    }
+
+    public List<UtxoOutputPo> getOutputs() {
+        return outputs;
+    }
+
+    public void setOutputs(List<UtxoOutputPo> outputs) {
+        this.outputs = outputs;
     }
 }

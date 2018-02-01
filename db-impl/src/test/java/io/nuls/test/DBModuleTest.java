@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,13 +25,9 @@ package io.nuls.test;
 
 import io.nuls.core.module.manager.ServiceManager;
 import io.nuls.core.utils.log.Log;
-import io.nuls.db.dao.AccountDataService;
-import io.nuls.db.dao.BlockHeaderService;
-import io.nuls.db.dao.NodeDataService;
+import io.nuls.db.dao.*;
 import io.nuls.db.dao.impl.mybatis.BlockDaoImpl;
-import io.nuls.db.entity.AccountPo;
-import io.nuls.db.entity.BlockHeaderPo;
-import io.nuls.db.entity.NodePo;
+import io.nuls.db.entity.*;
 import io.nuls.db.module.impl.MybatisDBModuleBootstrap;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -55,6 +51,16 @@ public class DBModuleTest {
 
     private static AccountDataService accountDao;
 
+    private static TransactionDataService txService;
+
+    private static TransactionLocalDataService txLocalService;
+
+    private static UtxoInputDataService inputService;
+
+    private static UtxoOutputDataService outputService;
+
+    private static TxAccountRelationDataService relationDataService;
+
     @BeforeClass
     public static void init() {
         dbModule = new MybatisDBModuleBootstrap();
@@ -62,6 +68,11 @@ public class DBModuleTest {
         blockDao = ServiceManager.getInstance().getService(BlockHeaderService.class);
         nodeDao = ServiceManager.getInstance().getService(NodeDataService.class);
         accountDao = ServiceManager.getInstance().getService(AccountDataService.class);
+        txService = ServiceManager.getInstance().getService(TransactionDataService.class);
+        txLocalService = ServiceManager.getInstance().getService(TransactionLocalDataService.class);
+        inputService = ServiceManager.getInstance().getService(UtxoInputDataService.class);
+        outputService = ServiceManager.getInstance().getService(UtxoOutputDataService.class);
+        relationDataService = ServiceManager.getInstance().getService(TxAccountRelationDataService.class);
     }
 
     @AfterClass
@@ -183,8 +194,77 @@ public class DBModuleTest {
     }
 
     @Test
-    public void testAlias() {
-        String alias = "zoro";
-        String id = "abcd";
+    public void testInsertTransaction() {
+        TransactionPo tx = new TransactionPo();
+        tx.setHash("aa123");
+        tx.setType(1);
+        tx.setTxIndex(1);
+        tx.setBlockHeight(1L);
+        tx.setCreateTime(System.currentTimeMillis());
+        tx.setFee(10L);
+        tx.setRemark("test insert");
+        tx.setTxData(new byte[]{1, 2, 3, 4, 5, 6, 7, 8});
+        tx.setSign(new byte[]{1, 2, 3, 4, 5, 6, 7, 8});
+
+        txService.save(tx);
+    }
+
+    @Test
+    public void testInsertTransactionLocal() {
+        TransactionLocalPo tx = new TransactionLocalPo();
+        tx.setHash("aa123");
+        tx.setType(1);
+        tx.setTxIndex(1);
+        tx.setBlockHeight(1L);
+        tx.setCreateTime(System.currentTimeMillis());
+        tx.setFee(10L);
+        tx.setRemark("test insert");
+        tx.setTxData(new byte[]{1, 2, 3, 4, 5, 6, 7, 8});
+        tx.setSign(new byte[]{1, 2, 3, 4, 5, 6, 7, 8});
+
+        txLocalService.save(tx);
+    }
+
+    @Test
+    public void testGetTx() {
+        String hash = "aa123";
+//        TransactionPo tx = txService.get(hash);
+//
+//        List<TransactionPo> list = txService.getTxs("ABCDEFJG",1);
+//        TransactionLocalPo po = txLocalService.get(hash);
+        List<TransactionLocalPo> list = txLocalService.getTxs("ABCDEFJG",1);
+    }
+
+    @Test
+    public void testInsertInput() {
+        UtxoInputPo inputPo = new UtxoInputPo();
+        inputPo.setTxHash("aa123");
+        inputPo.setInIndex(5);
+        inputPo.setFromIndex(0);
+        inputPo.setSign(new byte[]{16, 2, 3, 4, 5, 6, 7, 8});
+        inputService.save(inputPo);
+    }
+
+    @Test
+    public void testInsertOutput() {
+        UtxoOutputPo outputPo = new UtxoOutputPo();
+        outputPo.setTxHash("aa123");
+        outputPo.setOutIndex(0);
+        outputPo.setStatus((byte) 3);
+        outputPo.setValue(1000000L);
+        outputPo.setLockTime(0L);
+        outputPo.setAddress("ABCDEFJG");
+        outputPo.setScript(new byte[]{1, 2, 3, 4, 3, 76, 7, 7, 3});
+
+        outputService.save(outputPo);
+
+    }
+
+    @Test
+    public void testInsertRelation() {
+        TxAccountRelationPo relationPo = new TxAccountRelationPo();
+        relationPo.setAddress("ABCDEFJG");
+        relationPo.setTxHash("aa123");
+        relationDataService.save(relationPo);
     }
 }
