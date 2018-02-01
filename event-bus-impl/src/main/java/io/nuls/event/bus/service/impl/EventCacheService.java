@@ -53,7 +53,7 @@ public class EventCacheService {
     }
 
     public void cacheSendedEvent(BaseEvent event) {
-        this.cacheService.putElement(CACHE_OF_SENDED, event.getHash().getDigestHex(), event);
+         this.cacheService.putElement(CACHE_OF_SENDED, event.getHash().getDigestHex(), event);
     }
 
     public void cacheRecievedEventHash(String hashHex) {

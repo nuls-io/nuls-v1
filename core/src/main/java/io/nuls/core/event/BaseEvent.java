@@ -115,10 +115,14 @@ public abstract class BaseEvent<T extends BaseNulsData> extends BaseNulsData imp
     }
 
     public NulsDigestData getHash() {
+        if(hash==null){
+            try {
+                this.hash = NulsDigestData.calcDigestData(this.serialize());
+            } catch (IOException e) {
+                Log.error(e);
+            }
+        }
         return hash;
     }
 
-    public void setHash(NulsDigestData hash) {
-        this.hash = hash;
-    }
 }
