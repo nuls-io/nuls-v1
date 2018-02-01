@@ -73,14 +73,14 @@ public class BlockHashResponse extends BaseNulsData {
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        int heightListSize = byteBuffer.readInt32LE();
+        long heightListSize = byteBuffer.readVarInt();
         if (heightListSize > 0) {
             this.heightList = new ArrayList<>();
             for (int i = 0; i < heightListSize; i++) {
                 heightList.add(byteBuffer.readVarInt());
             }
         }
-        int hashListSize = byteBuffer.readInt32LE();
+        long hashListSize = byteBuffer.readVarInt();
         if (hashListSize <= 0) {
             return;
         }
