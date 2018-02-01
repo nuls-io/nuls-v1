@@ -104,30 +104,41 @@ public class NodeDiscoverHandler implements Runnable {
             }
 
             NodeGroup outNodes = nodesManager.getNodeGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP);
-            if (outNodes.size() == 0) {
-                //  The seedNodes should be connected immediately
+            if(outNodes.size() == 0) {
                 List<Node> nodes = getSeedNodes();
-
                 for (Node newNode : nodes) {
                     if (outNodes.getNodes().values().contains(newNode)) {
                         continue;
                     }
                     nodesManager.addNodeToGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP, newNode);
                 }
-            } else if (outNodes.size() < network.maxOutCount()) {
-                List<Node> nodes = getLocalNodes(network.maxOutCount() - outNodes.size());
-                if (nodes.isEmpty()) {
-//                    // find other node from connected nodes
-                    findOtherNode(network.maxOutCount() - outNodes.size());
-                } else {
-                    for (Node newNode : nodes) {
-                        if (outNodes.getNodes().values().contains(newNode)) {
-                            continue;
-                        }
-                        nodesManager.addNodeToGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP, newNode);
-                    }
-                }
             }
+
+//            NodeGroup outNodes = nodesManager.getNodeGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP);
+//            if (outNodes.size() == 0) {
+//                //  The seedNodes should be connected immediately
+//                List<Node> nodes = getSeedNodes();
+//
+//                for (Node newNode : nodes) {
+//                    if (outNodes.getNodes().values().contains(newNode)) {
+//                        continue;
+//                    }
+//                    nodesManager.addNodeToGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP, newNode);
+//                }
+//            } else if (outNodes.size() < network.maxOutCount()) {
+//                List<Node> nodes = getLocalNodes(network.maxOutCount() - outNodes.size());
+//                if (nodes.isEmpty()) {
+////                    // find other node from connected nodes
+//                    findOtherNode(network.maxOutCount() - outNodes.size());
+//                } else {
+//                    for (Node newNode : nodes) {
+//                        if (outNodes.getNodes().values().contains(newNode)) {
+//                            continue;
+//                        }
+//                        nodesManager.addNodeToGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP, newNode);
+//                    }
+//                }
+//            }
 
             try {
                 Thread.sleep(500);

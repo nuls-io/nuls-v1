@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -59,7 +59,7 @@ public class NodesManager implements Runnable {
 
     private ConnectionManager connectionManager;
 
-    private static Map<String,Map<String,NodeGroup>> nodeArea = new ConcurrentHashMap<>();
+    private static Map<String, Map<String, NodeGroup>> nodeArea = new ConcurrentHashMap<>();
 
     private static Map<String, NodeGroup> nodeGroups = new ConcurrentHashMap<>();
 
@@ -92,7 +92,7 @@ public class NodesManager implements Runnable {
         nodeGroups.put(outNodes.getName(), outNodes);
         nodeGroups.put(consensusNodes.getName(), consensusNodes);
 
-        nodeArea.put(NulsContext.CHAIN_ID,nodeGroups);
+        nodeArea.put(NulsContext.CHAIN_ID, nodeGroups);
 
         this.discovery = new NodeDiscoverHandler(this, network, nodeDao);
     }
@@ -107,10 +107,12 @@ public class NodesManager implements Runnable {
      */
     public void start() {
         running = true;
-        List<Node> nodes = discovery.getLocalNodes(10);
-        if (nodes.isEmpty()) {
-            nodes = getSeedNodes();
-        }
+//        List<Node> nodes = discovery.getLocalNodes(10);
+//        if (nodes.isEmpty()) {
+//            nodes = getSeedNodes();
+//        }
+
+        List<Node> nodes = getSeedNodes();
 
         for (Node node : nodes) {
             node.setType(Node.OUT);
@@ -184,7 +186,7 @@ public class NodesManager implements Runnable {
         }
     }
 
-    public void addNodeToGroup(String areaName,String groupName,Node node){
+    public void addNodeToGroup(String areaName, String groupName, Node node) {
         lock.lock();
         try {
             if (!nodeArea.containsKey(areaName)) {
@@ -212,7 +214,7 @@ public class NodesManager implements Runnable {
 
 
     public void addNodeToGroup(String groupName, Node node) {
-        addNodeToGroup(DEFAULT_AREA,groupName,node);
+        addNodeToGroup(DEFAULT_AREA, groupName, node);
     }
 
     public void removeNode(String nodeHash) {
@@ -230,7 +232,8 @@ public class NodesManager implements Runnable {
                 if (!isSeed(nodeHash)) {
                     Node node = nodes.get(nodeHash);
                     node.setFailCount(node.getFailCount() + 1);
-                    nodeDao.saveChange(NodeTransferTool.toPojo(node));
+                    if (node.getType() != Node.IN)
+                        nodeDao.saveChange(NodeTransferTool.toPojo(node));
                 }
                 nodes.remove(nodeHash);
             }
@@ -265,10 +268,10 @@ public class NodesManager implements Runnable {
         }
     }
 
-    public void removeNodeFromGroup(String areaName,String groupName, String nodeId) {
+    public void removeNodeFromGroup(String areaName, String groupName, String nodeId) {
         lock.lock();
         try {
-            if(!nodeArea.containsKey(areaName)){
+            if (!nodeArea.containsKey(areaName)) {
                 throw new NulsRuntimeException(ErrorCode.NODE_AREA_NOT_FOUND);
             }
 
@@ -286,32 +289,32 @@ public class NodesManager implements Runnable {
     }
 
     public void removeNodeFromGroup(String groupName, String nodeId) {
-        removeNodeFromGroup(DEFAULT_AREA,groupName,nodeId);
+        removeNodeFromGroup(DEFAULT_AREA, groupName, nodeId);
     }
 
 
     public boolean hasNodeGroup(String groupName) {
-        return hasNodeGroup(DEFAULT_AREA,groupName);
+        return hasNodeGroup(DEFAULT_AREA, groupName);
     }
 
-    public boolean hasNodeGroup(String areaName,String groupName){
+    public boolean hasNodeGroup(String areaName, String groupName) {
         return nodeArea.containsKey(areaName) && nodeArea.get(areaName).containsKey(groupName);
     }
 
-    public void addNodeGroup(String areaName,NodeGroup nodeGroup){
-        if(!nodeArea.containsKey(areaName)){
+    public void addNodeGroup(String areaName, NodeGroup nodeGroup) {
+        if (!nodeArea.containsKey(areaName)) {
             throw new NulsRuntimeException(ErrorCode.NODE_AREA_NOT_FOUND);
         }
 
-        if(nodeArea.get(areaName).containsKey(nodeGroup.getName())){
+        if (nodeArea.get(areaName).containsKey(nodeGroup.getName())) {
             throw new NulsRuntimeException(ErrorCode.NODE_GROUP_ALREADY_EXISTS);
         }
 
-        nodeArea.get(areaName).put(nodeGroup.getName(),nodeGroup);
+        nodeArea.get(areaName).put(nodeGroup.getName(), nodeGroup);
     }
 
     public void addNodeGroup(NodeGroup nodeGroup) {
-        addNodeGroup(DEFAULT_AREA,nodeGroup);
+        addNodeGroup(DEFAULT_AREA, nodeGroup);
     }
 
     public void destroyNodeGroup(String groupName) {
@@ -350,8 +353,8 @@ public class NodesManager implements Runnable {
         return nodes;
     }
 
-    public NodeGroup getNodeGroup(String areaName, String groupName){
-        if(!nodeArea.containsKey(areaName)){
+    public NodeGroup getNodeGroup(String areaName, String groupName) {
+        if (!nodeArea.containsKey(areaName)) {
             throw new NulsRuntimeException(ErrorCode.NODE_AREA_NOT_FOUND);
         }
         return nodeArea.get(areaName).get(groupName);
@@ -364,8 +367,8 @@ public class NodesManager implements Runnable {
 
     public List<Node> getAvailableNodesByGroup(String areaName, String groupName) {
         List<Node> availableNodes = new ArrayList<>();
-        if (hasNodeGroup(areaName,groupName)) {
-            for (Node node : getNodeGroup(areaName,groupName).getNodes().values()) {
+        if (hasNodeGroup(areaName, groupName)) {
+            for (Node node : getNodeGroup(areaName, groupName).getNodes().values()) {
                 if (node.getStatus() == Node.HANDSHAKE) {
                     availableNodes.add(node);
                 }
@@ -375,7 +378,7 @@ public class NodesManager implements Runnable {
     }
 
     public List<Node> getAvailableNodesByGroup(String groupName) {
-        return  getAvailableNodesByGroup(DEFAULT_AREA, groupName);
+        return getAvailableNodesByGroup(DEFAULT_AREA, groupName);
     }
 
     public List<Node> getAvailableNodes(String excludeNodeId) {
@@ -414,13 +417,12 @@ public class NodesManager implements Runnable {
     }
 
 
-
-    public List<Node> getGroupAvailableNodes(String areaName,String groupName, String excludeNodeId) {
-        if(areaName == null){
+    public List<Node> getGroupAvailableNodes(String areaName, String groupName, String excludeNodeId) {
+        if (areaName == null) {
             areaName = DEFAULT_AREA;
         }
 
-        if(!nodeArea.containsKey(areaName)){
+        if (!nodeArea.containsKey(areaName)) {
             throw new NulsRuntimeException(ErrorCode.NODE_AREA_NOT_FOUND);
         }
 
@@ -438,7 +440,7 @@ public class NodesManager implements Runnable {
     }
 
     public List<Node> getGroupAvailableNodes(String groupName, String excludeNodeId) {
-        return getGroupAvailableNodes(DEFAULT_AREA,groupName,excludeNodeId);
+        return getGroupAvailableNodes(DEFAULT_AREA, groupName, excludeNodeId);
     }
 
     public void setConnectionManager(ConnectionManager connectionManager) {
