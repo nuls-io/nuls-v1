@@ -133,7 +133,7 @@ public class DistributedBlockInfoRequestUtils {
 
         int size = nodeIdList.size();
         int halfSize = (size + 1) / 2;
-        if (hashesMap.size() < halfSize) {
+        if (hashesMap.size() <= halfSize) {
             return;
         }
         BlockInfo result = null;
