@@ -25,11 +25,13 @@ package io.nuls.ledger.util;
 
 import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
+import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.str.StringUtils;
+import io.nuls.ledger.entity.UtxoBalance;
 import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.UtxoInput;
 import io.nuls.ledger.entity.UtxoOutput;
@@ -115,6 +117,30 @@ public class UtxoTransactionTool {
             }
         }
         return false;
+    }
+
+    public void calcBalance(String address) {
+        UtxoBalance balance = (UtxoBalance) ledgerCacheService.getBalance(address);
+        if (balance == null) {
+            return;
+        }
+
+        long useable = 0;
+        long lock = 0;
+        for (UtxoOutput output : balance.getUnSpends()) {
+            if (output.getStatus() == UtxoOutput.USEABLE) {
+                useable += output.getValue();
+            } else if (output.getStatus() == UtxoOutput.LOCKED) {
+                lock += output.getValue();
+            }
+        }
+        balance.setLocked(Na.valueOf(lock));
+        balance.setUseable(Na.valueOf(useable));
+        balance.setBalance(balance.getUseable().add(balance.getLocked()));
+    }
+
+    public void calcBalance(Address address) {
+        calcBalance(address.getBase58());
     }
 
     private AccountService getAccountService() {
