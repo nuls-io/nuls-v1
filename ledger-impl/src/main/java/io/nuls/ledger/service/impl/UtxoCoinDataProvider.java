@@ -23,11 +23,14 @@
  */
 package io.nuls.ledger.service.impl;
 
+import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
+import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TxStatusEnum;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.script.Script;
 import io.nuls.core.crypto.script.ScriptBuilder;
@@ -46,6 +49,7 @@ import io.nuls.ledger.service.intf.CoinDataProvider;
 import io.nuls.ledger.util.UtxoTransactionTool;
 import io.nuls.ledger.util.UtxoTransferTool;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -64,6 +68,8 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
     private UtxoOutputDataService outputDataService;
 
     private UtxoInputDataService inputDataService;
+
+    private AccountService accountService;
 
     private UtxoCoinDataProvider() {
 
@@ -279,6 +285,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             return utxoData;
         }
 
+        //create inputs
         long inputValue = 0;
         if (!coinParam.getFrom().isEmpty()) {
             //find unSpends to create inputs for this tx
@@ -295,11 +302,19 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             }
         }
 
+        //get EcKey for output's script
+        byte[] priKey = null;
+        if (coinParam.getPriKey() != null) {
+            priKey = coinParam.getPriKey();
+        } else {
+            Account account = getAccountService().getDefaultAccount();
+            priKey = account.getPriSeed();
+        }
 
+        //create outputs
         int i = 0;
         long outputValue = 0;
         for (Map.Entry<String, Coin> entry : coinParam.getToMap().entrySet()) {
-            //todo script
             UtxoOutput output = new UtxoOutput();
             String address = entry.getKey();
             Coin coin = entry.getValue();
@@ -307,12 +322,15 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             output.setValue(coin.getNa().getValue());
             output.setStatus(UtxoOutput.USEABLE);
             output.setIndex(i);
-            output.setScript(ScriptBuilder.createOutputScript(new ECKey()));
+
+            output.setScript(ScriptBuilder.createOutputScript(ECKey.fromPrivate(new BigInteger(priKey))));
             output.setScriptBytes(output.getScript().getProgram());
             if (coin.getUnlockHeight() > 0) {
                 output.setLockTime(coin.getUnlockHeight());
-            } else {
+            } else if (coin.getUnlockTime() > 0) {
                 output.setLockTime(coin.getUnlockTime());
+            } else {
+                output.setLockTime(0L);
             }
             output.setParent(tx);
             outputValue += output.getValue();
@@ -346,5 +364,12 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 
     public void setInputDataService(UtxoInputDataService inputDataService) {
         this.inputDataService = inputDataService;
+    }
+
+    public AccountService getAccountService() {
+        if (accountService == null) {
+            accountService = NulsContext.getInstance().getService(AccountService.class);
+        }
+        return accountService;
     }
 }
