@@ -39,9 +39,10 @@ public class EventCacheService {
     private CacheService cacheService;
 
     private EventCacheService() {
+        init();
     }
 
-    public void init(){
+    private void init(){
         this.cacheService = NulsContext.getServiceBean(CacheService.class);
         this.cacheService.createCache(CACHE_OF_SENDED,100, 0, TIME_OF_IDLE_SECONDS);
         this.cacheService.createCache(CACHE_OF_RECIEVED,100, 0, TIME_OF_IDLE_SECONDS);

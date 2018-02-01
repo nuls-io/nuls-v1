@@ -50,7 +50,6 @@ public class EventBusModuleBootstrap extends AbstractEventBusModule {
     public void init() {
         this.registerService(EventBusServiceImpl.class);
         this.registerService(EventBroadcasterImpl.class);
-        EventCacheService.getInstance().init();
     }
 
     @Override
