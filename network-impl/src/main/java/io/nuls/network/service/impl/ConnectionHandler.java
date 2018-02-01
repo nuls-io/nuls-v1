@@ -89,7 +89,9 @@ public class ConnectionHandler implements MessageWriter {
             Iterator<ByteBuffer> bytesIterator = bytesToWrite.iterator();
             while (bytesIterator.hasNext()) {
                 ByteBuffer buff = bytesIterator.next();
-                channel.write(buff);
+                if (channel != null) {
+                    channel.write(buff);
+                }
                 if (!buff.hasRemaining()) {
                     bytesIterator.remove();
                 } else {
