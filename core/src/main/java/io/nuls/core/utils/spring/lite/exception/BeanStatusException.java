@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,40 +21,36 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.db.dao.impl.mybatis;
 
-import io.nuls.db.dao.UtxoInputDataService;
-import io.nuls.db.dao.impl.mybatis.mapper.UtxoInputMapper;
-import io.nuls.db.dao.impl.mybatis.util.SearchOperator;
-import io.nuls.db.dao.impl.mybatis.util.Searchable;
-import io.nuls.db.entity.UtxoInputPo;
-import io.nuls.db.transactional.annotation.DbSession;
-import io.nuls.db.transactional.annotation.PROPAGATION;
+package io.nuls.core.utils.spring.lite.exception;
 
-import java.util.List;
-import java.util.Map;
+import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.exception.NulsRuntimeException;
 
 /**
  * @author Niels
- * @date 2017/11/22
+ * @date 2018/2/1
  */
-@DbSession(transactional = PROPAGATION.NONE)
-public class UtxoInputDaoImpl extends BaseDaoImpl<UtxoInputMapper, Map<String,Object>, UtxoInputPo> implements UtxoInputDataService {
-    public UtxoInputDaoImpl() {
-        super(UtxoInputMapper.class);
+public class BeanStatusException extends NulsRuntimeException {
+    public BeanStatusException(ErrorCode message) {
+        super(message);
     }
 
-    @Override
-    protected Searchable getSearchable(Map<String, Object> params) {
-        //todo
-        return null;
+    public BeanStatusException(ErrorCode message, Throwable cause) {
+        super(message, cause);
     }
 
-    @Override
-    public List<UtxoInputPo> getTxInputs(String txHash) {
-        Searchable searchable = new Searchable();
-        searchable.addCondition("tx_hash", SearchOperator.eq, txHash);
-        return getMapper().selectList(searchable);
+    public BeanStatusException(Throwable cause) {
+        super(cause);
+    }
+
+    protected BeanStatusException(ErrorCode message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
+    }
+
+    public BeanStatusException(ErrorCode errorCode, String msg) {
+        super(errorCode, msg);
     }
 }

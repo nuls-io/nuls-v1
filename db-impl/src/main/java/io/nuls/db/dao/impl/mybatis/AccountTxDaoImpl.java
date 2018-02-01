@@ -35,6 +35,7 @@ import io.nuls.db.entity.AccountPo;
 import io.nuls.db.entity.AliasPo;
 import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.transactional.annotation.DbSession;
+import io.nuls.db.transactional.annotation.PROPAGATION;
 
 import java.util.List;
 
@@ -42,6 +43,7 @@ import java.util.List;
  * @author vivi
  * @date 2017/12/22.
  */
+@DbSession(transactional = PROPAGATION.NONE)
 public class AccountTxDaoImpl implements AccountAliasDataService {
 
     @Autowired

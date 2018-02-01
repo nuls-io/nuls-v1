@@ -31,11 +31,15 @@ import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.module.BaseModuleBootstrap;
 import io.nuls.core.module.manager.ServiceManager;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.spring.lite.core.interceptor.BeanMethodInterceptorManager;
+import io.nuls.core.utils.spring.lite.exception.BeanStatusException;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.*;
 
 /**
  * @author Niels
@@ -47,12 +51,13 @@ public class ModularServiceMethodInterceptor implements MethodInterceptor {
 
     @Override
     public Object intercept(Object obj, Method method, Object[] params, MethodProxy methodProxy) throws Throwable {
+        Log.debug(method.toString());
         threadLocal.set(0);
         Throwable throwable = null;
         while (threadLocal.get() < 10) {
             try {
                 return this.doIntercept(obj, method, params, methodProxy);
-            } catch (Throwable e) {
+            } catch (BeanStatusException e) {
                 threadLocal.set(threadLocal.get() + 1);
                 throwable = e;
                 Thread.sleep(100L);
@@ -62,27 +67,46 @@ public class ModularServiceMethodInterceptor implements MethodInterceptor {
     }
 
     private Object doIntercept(Object obj, Method method, Object[] params, MethodProxy methodProxy) throws Throwable {
+        List<Annotation> annotationList = new ArrayList<>();
         if (!method.getDeclaringClass().equals(Object.class)) {
             String className = obj.getClass().getCanonicalName();
             className = className.substring(0, className.indexOf("$$"));
             Class clazz = Class.forName(className);
-
+            fillAnnotationList(annotationList,clazz,method);
             BaseModuleBootstrap module = ServiceManager.getInstance().getModule(clazz);
             if (module == null) {
-                throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "Access to a service of an un start module!" + method.toString());
+                throw new BeanStatusException(ErrorCode.DATA_ERROR, "Access to a service of an un start module!" + method.toString());
             }
             if (module.getStatus() != ModuleStatusEnum.STARTING && module.getStatus() != ModuleStatusEnum.RUNNING) {
-                throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "Access to a service of an un start module!" + method.toString());
+                throw new BeanStatusException(ErrorCode.DATA_ERROR, "Access to a service of an un start module!" + method.toString());
             }
             boolean isOk = SpringLiteContext.checkBeanOk(obj);
             if (!isOk) {
-                throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "Service has not autowired");
+                throw new BeanStatusException(ErrorCode.DATA_ERROR, "Service has not autowired");
             }
         }
-        if (null == method.getDeclaredAnnotations() || method.getDeclaredAnnotations().length == 0) {
+        if (annotationList.isEmpty()) {
             return methodProxy.invokeSuper(obj, params);
         }
-        return BeanMethodInterceptorManager.doFilter(method.getDeclaredAnnotations(), obj, method, params, methodProxy);
+        return BeanMethodInterceptorManager.doFilter(annotationList.toArray(new Annotation[annotationList.size()]), obj, method, params, methodProxy);
 
+    }
+
+    private void fillAnnotationList(List<Annotation> annotationList, Class clazz, Method method) {
+        Set<Class> classSet = new HashSet<>();
+       for(Annotation ann:method.getDeclaredAnnotations()){
+           annotationList.add(ann);
+           classSet.add(ann.annotationType());
+       }
+        for(Annotation ann:clazz.getDeclaredAnnotations()){
+            if(classSet.add(ann.annotationType())){
+                annotationList.add(0,ann);
+            }
+        }
+        for(Annotation ann:clazz.getAnnotations()){
+            if(classSet.add(ann.annotationType())){
+                annotationList.add(0,ann);
+            }
+        }
     }
 }

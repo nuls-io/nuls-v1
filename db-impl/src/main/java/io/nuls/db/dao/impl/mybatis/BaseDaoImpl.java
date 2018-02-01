@@ -41,6 +41,7 @@ import java.util.Map;
  * K : the type of primary key of Object
  * V : the type of Object
  */
+@DbSession(transactional = PROPAGATION.NONE)
 public abstract class BaseDaoImpl<T extends BaseMapper<K, V>, K, V> implements BaseDataService<K, V> {
     private Class<T> mapperClass;
 
@@ -52,9 +53,9 @@ public abstract class BaseDaoImpl<T extends BaseMapper<K, V>, K, V> implements B
         return SessionManager.getSession();
     }
 
-    @DbSession(transactional = PROPAGATION.NONE)
     protected T getMapper() {
-        return getSession().getMapper(mapperClass);
+        SqlSession session = getSession();
+        return session.getMapper(mapperClass);
     }
 
     @Override

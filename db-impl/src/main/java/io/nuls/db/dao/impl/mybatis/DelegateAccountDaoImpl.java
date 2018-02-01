@@ -27,6 +27,8 @@ import io.nuls.db.dao.DelegateAccountDataService;
 import io.nuls.db.dao.impl.mybatis.mapper.DelegateAccountMapper;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import io.nuls.db.entity.DelegateAccountPo;
+import io.nuls.db.transactional.annotation.DbSession;
+import io.nuls.db.transactional.annotation.PROPAGATION;
 
 import java.util.Map;
 
@@ -34,6 +36,7 @@ import java.util.Map;
  * @author Niels
  * @date 2017/11/22
  */
+@DbSession(transactional = PROPAGATION.NONE)
 public class DelegateAccountDaoImpl extends BaseDaoImpl<DelegateAccountMapper, String, DelegateAccountPo> implements DelegateAccountDataService {
     public DelegateAccountDaoImpl() {
         super(DelegateAccountMapper.class);

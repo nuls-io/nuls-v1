@@ -28,6 +28,7 @@ import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.db.dao.*;
 import io.nuls.db.entity.*;
 import io.nuls.db.transactional.annotation.DbSession;
+import io.nuls.db.transactional.annotation.PROPAGATION;
 
 import java.util.List;
 
@@ -35,6 +36,7 @@ import java.util.List;
  * @author vivi
  * @date 2017/12/23.
  */
+@DbSession(transactional = PROPAGATION.NONE)
 public class UtxoTransactionDaoImpl implements UtxoTransactionDataService {
 
     @Autowired

@@ -68,7 +68,6 @@ public class Bootstrap {
             } catch (InterruptedException e) {
                 Log.error(e);
             }
-            SpringLiteContext.debug();
 //            Log.info(ModuleManager.getInstance().getInfo());
             if(null!=NulsContext.getInstance().getBestBlock()){
                 Log.info("--------------------------------------------" + NulsContext.getInstance().getBestBlock().getHeader().getHeight());

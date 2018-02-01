@@ -61,7 +61,8 @@ public class SessionManager {
     }
 
     public static SqlSession getSession() {
-        return getSession(idHolder.get());
+        SqlSession session = getSession(idHolder.get());
+        return session;
     }
 
     public static SqlSession getSession(String id) {

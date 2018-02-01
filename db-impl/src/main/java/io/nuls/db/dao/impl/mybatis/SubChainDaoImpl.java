@@ -27,6 +27,8 @@ import io.nuls.db.dao.SubChainDataService;
 import io.nuls.db.dao.impl.mybatis.mapper.SubChainMapper;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import io.nuls.db.entity.SubChainPo;
+import io.nuls.db.transactional.annotation.DbSession;
+import io.nuls.db.transactional.annotation.PROPAGATION;
 
 import java.util.Map;
 
@@ -34,6 +36,7 @@ import java.util.Map;
  * @author Niels
  * @date 2017/11/22
  */
+@DbSession(transactional = PROPAGATION.NONE)
 public class SubChainDaoImpl extends BaseDaoImpl<SubChainMapper, String, SubChainPo> implements SubChainDataService {
     public SubChainDaoImpl() {
         super(SubChainMapper.class);

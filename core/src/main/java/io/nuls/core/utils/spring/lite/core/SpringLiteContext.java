@@ -257,12 +257,4 @@ public class SpringLiteContext {
        return BEAN_OK_MAP.containsValue(bean);
     }
 
-    //todo
-    public static void debug() {
-        for(Object obj :BEAN_TEMP_MAP.values()){
-            System.out.println(obj);
-        }
-
-
-    }
 }

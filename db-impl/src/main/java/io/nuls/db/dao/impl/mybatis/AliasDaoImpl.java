@@ -27,6 +27,8 @@ import io.nuls.db.dao.AliasDataService;
 import io.nuls.db.dao.impl.mybatis.mapper.AliasMapper;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import io.nuls.db.entity.AliasPo;
+import io.nuls.db.transactional.annotation.DbSession;
+import io.nuls.db.transactional.annotation.PROPAGATION;
 
 import java.util.Map;
 
@@ -34,6 +36,7 @@ import java.util.Map;
  * @author vivi
  * @date 2017/12/13.
  */
+@DbSession(transactional = PROPAGATION.NONE)
 public class AliasDaoImpl extends BaseDaoImpl<AliasMapper, String, AliasPo> implements AliasDataService {
 
     public AliasDaoImpl() {

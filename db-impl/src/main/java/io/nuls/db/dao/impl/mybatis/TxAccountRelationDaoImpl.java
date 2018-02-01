@@ -27,6 +27,8 @@ import io.nuls.db.dao.TxAccountRelationDataService;
 import io.nuls.db.dao.impl.mybatis.mapper.TxAccountRelationMapper;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import io.nuls.db.entity.TxAccountRelationPo;
+import io.nuls.db.transactional.annotation.DbSession;
+import io.nuls.db.transactional.annotation.PROPAGATION;
 
 import java.util.Map;
 
@@ -34,6 +36,7 @@ import java.util.Map;
  * @author Niels
  * @date 2017/11/22
  */
+@DbSession(transactional = PROPAGATION.NONE)
 public class TxAccountRelationDaoImpl extends BaseDaoImpl<TxAccountRelationMapper, String, TxAccountRelationPo> implements TxAccountRelationDataService {
     public TxAccountRelationDaoImpl() {
         super(TxAccountRelationMapper.class);

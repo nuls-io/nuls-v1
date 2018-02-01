@@ -27,6 +27,8 @@ import io.nuls.db.dao.NodeGroupRelationDataService;
 import io.nuls.db.dao.impl.mybatis.mapper.NodeGroupRelationMapper;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import io.nuls.db.entity.NodeGroupRelationPo;
+import io.nuls.db.transactional.annotation.DbSession;
+import io.nuls.db.transactional.annotation.PROPAGATION;
 
 import java.util.Map;
 
@@ -34,6 +36,7 @@ import java.util.Map;
  * @author Niels
  * @date 2017/11/22
  */
+@DbSession(transactional = PROPAGATION.NONE)
 public class NodeGroupRelationDaoImpl extends BaseDaoImpl<NodeGroupRelationMapper, String, NodeGroupRelationPo> implements NodeGroupRelationDataService {
     public NodeGroupRelationDaoImpl() {
         super(NodeGroupRelationMapper.class);

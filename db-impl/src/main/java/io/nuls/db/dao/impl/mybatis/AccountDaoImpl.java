@@ -30,6 +30,8 @@ import io.nuls.db.dao.impl.mybatis.mapper.AccountMapper;
 import io.nuls.db.dao.impl.mybatis.params.AccountSearchParams;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import io.nuls.db.entity.AccountPo;
+import io.nuls.db.transactional.annotation.DbSession;
+import io.nuls.db.transactional.annotation.PROPAGATION;
 
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +41,7 @@ import java.util.Map;
  * @author Niels
  * @date 2017/11/21
  */
+@DbSession(transactional = PROPAGATION.NONE)
 public class AccountDaoImpl extends BaseDaoImpl<AccountMapper, String, AccountPo> implements AccountDataService {
 
     public AccountDaoImpl() {
@@ -60,6 +63,7 @@ public class AccountDaoImpl extends BaseDaoImpl<AccountMapper, String, AccountPo
     }
 
     @Override
+    @DbSession
     public int updateAlias(AccountPo po) {
         return getMapper().updateAlias(po);
     }

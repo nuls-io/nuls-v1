@@ -31,6 +31,8 @@ import io.nuls.db.dao.impl.mybatis.mapper.TransactionLocalMapper;
 import io.nuls.db.dao.impl.mybatis.util.SearchOperator;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import io.nuls.db.entity.TransactionLocalPo;
+import io.nuls.db.transactional.annotation.DbSession;
+import io.nuls.db.transactional.annotation.PROPAGATION;
 
 import java.util.List;
 import java.util.Map;
@@ -39,6 +41,7 @@ import java.util.Map;
  * @author Niels
  * @date 2017/11/22
  */
+@DbSession(transactional = PROPAGATION.NONE)
 public class TransactionLocalDaoImpl extends BaseDaoImpl<TransactionLocalMapper, String, TransactionLocalPo> implements TransactionLocalDataService {
     public TransactionLocalDaoImpl() {
         super(TransactionLocalMapper.class);

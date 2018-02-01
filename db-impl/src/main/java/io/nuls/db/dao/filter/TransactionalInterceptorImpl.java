@@ -52,8 +52,11 @@ public class TransactionalInterceptorImpl implements TransactionalInterceptor {
         Object result;
         boolean isSessionBeginning = false;
         boolean isCommit = false;
-        DbSession ann = method.getAnnotation(DbSession.class);
+        DbSession ann = (DbSession) annotation;
         if (ann.transactional() == PROPAGATION.REQUIRED && !SessionManager.getTxState(id)) {
+            isCommit = true;
+        } else if (ann.transactional() == PROPAGATION.INDEPENDENT) {
+            id = StringUtils.getNewUUID();
             isCommit = true;
         }
         SqlSession session = SessionManager.getSession(id);
@@ -66,7 +69,9 @@ public class TransactionalInterceptorImpl implements TransactionalInterceptor {
             isSessionBeginning = false;
         }
         try {
-            SessionManager.startTransaction(id);
+            if (isCommit) {
+                SessionManager.startTransaction(id);
+            }
             result = interceptorChain.execute(annotation, obj, method, args);
             if (isCommit) {
                 session.commit();
