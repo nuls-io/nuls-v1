@@ -76,7 +76,7 @@ public interface AccountService {
 
     NulsSignData signData(byte[] bytes, String password);
 
-    NulsSignData signDataUsePriKey(byte[] bytes, String priKey);
+    NulsSignData signData(byte[] bytes, byte[] priKey);
 
     NulsSignData signData(NulsDigestData digestData, String password);
 

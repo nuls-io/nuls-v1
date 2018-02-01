@@ -30,6 +30,7 @@ import io.nuls.core.chain.entity.*;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.json.JSONUtils;
 import io.nuls.core.utils.log.Log;
@@ -95,7 +96,7 @@ public final class GenesisBlock extends Block {
             throw new NulsRuntimeException(ErrorCode.CONFIG_ERROR);
         }
         CoinTransferData data = new CoinTransferData();
-        data.setPriKey(priKey);
+        data.setPriKey(Hex.decode(priKey));
         data.setFee(Na.ZERO);
         Na total = Na.ZERO;
         for (Map<String, Object> map : list) {

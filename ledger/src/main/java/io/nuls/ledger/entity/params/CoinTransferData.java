@@ -37,7 +37,7 @@ import java.util.Map;
  */
 public class CoinTransferData {
 
-    private String priKey;
+    private byte[] priKey;
 
     private List from;
 
@@ -120,11 +120,11 @@ public class CoinTransferData {
         this.toMap.put(address, coin);
     }
 
-    public String getPriKey() {
+    public byte[] getPriKey() {
         return priKey;
     }
 
-    public void setPriKey(String priKey) {
+    public void setPriKey(byte[] priKey) {
         this.priKey = priKey;
     }
 }
