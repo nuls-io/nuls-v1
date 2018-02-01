@@ -506,4 +506,7 @@ public class Node extends BaseNulsData {
     public void setLastFailTime(Long lastFailTime) {
         this.lastFailTime = lastFailTime;
     }
+
+
+
 }

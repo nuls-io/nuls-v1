@@ -100,7 +100,7 @@ public class NodeDiscoverHandler implements Runnable {
                 if (node.getStatus() == Node.CLOSE) {
                     nodesManager.removeNode(node.getHash());
                 }
-                System.out.println("-------------ip:" + node.getIp() + ", port:" + node.getPort() + "-------status:" + node.getStatus());
+                System.out.println("-------------hash:" + node.getHash() + "-------status:" + node.getStatus());
             }
             System.out.println("------------华丽的分割线----------------");
 
