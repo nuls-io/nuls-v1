@@ -198,7 +198,7 @@ public class ConsensusMeetingRunner implements Runnable {
             roundStart = 0;
         }
         long blockCount = pocBlockService.getBlockCount(consensusManager.getConsensusStatusInfo().getAddress(), roundStart, consensusManager.getCurrentRound().getIndex() - 1);
-        long sumRoundVal = pocBlockService.getSumOfRoundIndexOfYellowPunish(consensusManager.getConsensusStatusInfo().getAddress(),consensusManager.getCurrentRound().getIndex()-PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT ,consensusManager.getCurrentRound().getIndex() - 1);
+        long sumRoundVal = pocBlockService.getSumOfRoundIndexOfYellowPunish(consensusManager.getConsensusStatusInfo().getAddress(), consensusManager.getCurrentRound().getIndex() - PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT, consensusManager.getCurrentRound().getIndex() - 1);
         double ability = blockCount / PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT;
         if (consensusManager.getCurrentRound().getIndex() == 0) {
             return 1;
@@ -332,14 +332,12 @@ public class ConsensusMeetingRunner implements Runnable {
     }
 
     private void punishTx(Block bestBlock, List<Transaction> txList, PocMeetingMember self) {
-        boolean b = redPunishTx(bestBlock, txList);
-        if (!b) {
-            yellowPunishTx(bestBlock, txList, self);
-        }
+        redPunishTx(bestBlock, txList);
+        yellowPunishTx(bestBlock, txList, self);
     }
 
-    private boolean redPunishTx(Block bestBlock, List<Transaction> txList) {
-        boolean punish = false;
+    private void redPunishTx(Block bestBlock, List<Transaction> txList) {
+        //todo check it
         for (long height : punishMap.keySet()) {
             RedPunishData data = punishMap.get(height);
             punishMap.remove(height);
@@ -353,12 +351,11 @@ public class ConsensusMeetingRunner implements Runnable {
             tx.setHash(NulsDigestData.calcDigestData(tx));
             tx.setSign(accountService.signData(tx.getHash()));
             txList.add(tx);
-            punish = true;
         }
-        return punish;
     }
 
     private void yellowPunishTx(Block bestBlock, List<Transaction> txList, PocMeetingMember self) {
+        //todo check it
         BlockRoundData lastBlockRoundData = new BlockRoundData();
         try {
             lastBlockRoundData.parse(bestBlock.getHeader().getExtend());
