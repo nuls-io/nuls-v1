@@ -232,7 +232,7 @@ public class Node extends BaseNulsData {
 //            if (checkBroadcastExist(message.getData())) {
 //                return;
 //            }
-            eventBusService.publishNetworkEvent(message.getData(), this.getHash());
+            eventBusService.publishNetworkEvent(event, this.getHash());
         }
     }
 
