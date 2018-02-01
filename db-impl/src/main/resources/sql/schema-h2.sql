@@ -109,12 +109,14 @@ CREATE TABLE IF NOT EXISTS `transaction_local` (
   `sign` varbinary(255) ,
   PRIMARY KEY (`hash`)
 );
+
 CREATE TABLE IF NOT EXISTS `tx_account_relation` (
-  `id` varchar(40) NOT NULL,
+  `id` bigint(19) NOT NULL AUTO_INCREMENT,
   `tx_hash` varchar(70) NOT NULL,
   `address` varchar(40) NOT NULL,
   PRIMARY KEY (`id`)
 );
+
 CREATE TABLE IF NOT EXISTS `utxo_input` (
   `tx_hash` varchar(70) NOT NULL,
   `from_index` int(5) NOT NULL,
@@ -122,6 +124,7 @@ CREATE TABLE IF NOT EXISTS `utxo_input` (
   `sign` varbinary(255) NOT NULL,
   PRIMARY KEY (`tx_hash`,`from_index`)
 );
+
 CREATE TABLE IF NOT EXISTS `utxo_output` (
   `tx_hash` varchar(70) NOT NULL,
   `out_index` int(5) NOT NULL,
@@ -132,7 +135,6 @@ CREATE TABLE IF NOT EXISTS `utxo_output` (
   `address` varchar(40) NOT NULL,
   PRIMARY KEY (`tx_hash`,`out_index`)
 );
-
 
 CREATE TABLE IF NOT EXISTS `alias` (
   `alias` VARCHAR(20) NOT NULL,

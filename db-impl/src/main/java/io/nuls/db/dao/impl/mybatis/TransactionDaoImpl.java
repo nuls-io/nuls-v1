@@ -88,10 +88,10 @@ public class TransactionDaoImpl extends BaseDaoImpl<TransactionMapper, String, T
     public List<TransactionPo> getTxs(String address, int type, Integer start, Integer limit) {
         Searchable searchable = new Searchable();
         if (type != 0) {
-            searchable.addCondition("b.type", SearchOperator.eq, type);
+            searchable.addCondition("a.type", SearchOperator.eq, type);
         }
         if (StringUtils.isNotBlank(address)) {
-            searchable.addCondition("a.address", SearchOperator.eq, address);
+            searchable.addCondition("d.address", SearchOperator.eq, address);
         }
 
         if (start != null && limit != null) {

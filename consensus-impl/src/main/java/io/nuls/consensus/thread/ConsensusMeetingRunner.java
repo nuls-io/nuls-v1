@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -199,12 +199,12 @@ public class ConsensusMeetingRunner implements Runnable {
             roundStart = 0;
         }
         long blockCount = pocBlockService.getBlockCount(consensusManager.getConsensusStatusInfo().getAddress(), roundStart, consensusManager.getCurrentRound().getIndex() - 1);
-        long sumRoundVal = pocBlockService.getSumOfRoundIndexOfYellowPunish(consensusManager.getConsensusStatusInfo().getAddress(), consensusManager.getCurrentRound().getIndex() - 1);
+        long sumRoundVal = pocBlockService.getSumOfRoundIndexOfYellowPunish(consensusManager.getConsensusStatusInfo().getAddress(), consensusManager.getCurrentRound().getIndex() - PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT, consensusManager.getCurrentRound().getIndex() - 1);
         double ability = blockCount / PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT;
         if (consensusManager.getCurrentRound().getIndex() == 0) {
             return 1;
         }
-        double penalty = (PocConsensusConstant.CREDIT_MAGIC_NUM * sumRoundVal) / (consensusManager.getCurrentRound().getIndex() * consensusManager.getCurrentRound().getIndex());
+        double penalty = (PocConsensusConstant.CREDIT_MAGIC_NUM * sumRoundVal) / (PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT * PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT);
         return ability - penalty;
     }
 
@@ -333,14 +333,12 @@ public class ConsensusMeetingRunner implements Runnable {
     }
 
     private void punishTx(Block bestBlock, List<Transaction> txList, PocMeetingMember self) {
-        boolean b = redPunishTx(bestBlock, txList);
-        if (!b) {
-            yellowPunishTx(bestBlock, txList, self);
-        }
+        redPunishTx(bestBlock, txList);
+        yellowPunishTx(bestBlock, txList, self);
     }
 
-    private boolean redPunishTx(Block bestBlock, List<Transaction> txList) {
-        boolean punish = false;
+    private void redPunishTx(Block bestBlock, List<Transaction> txList) {
+        //todo check it
         for (long height : punishMap.keySet()) {
             RedPunishData data = punishMap.get(height);
             punishMap.remove(height);
@@ -354,12 +352,11 @@ public class ConsensusMeetingRunner implements Runnable {
             tx.setHash(NulsDigestData.calcDigestData(tx));
             tx.setSign(accountService.signData(tx.getHash()));
             txList.add(tx);
-            punish = true;
         }
-        return punish;
     }
 
     private void yellowPunishTx(Block bestBlock, List<Transaction> txList, PocMeetingMember self) {
+        //todo check it
         BlockRoundData lastBlockRoundData = new BlockRoundData();
         try {
             lastBlockRoundData.parse(bestBlock.getHeader().getExtend());
@@ -392,14 +389,14 @@ public class ConsensusMeetingRunner implements Runnable {
         Block bestBlock = context.getBestBlock();
         BlockRoundData lastRoundData;
         try {
-            lastRoundData = new BlockRoundData( bestBlock.getHeader().getExtend());
+            lastRoundData = new BlockRoundData(bestBlock.getHeader().getExtend());
         } catch (NulsException e) {
             Log.error(e);
             throw new NulsRuntimeException(e);
         }
         if (round.getPreviousRound() == null) {
-            while (true){
-                if(lastRoundData.getPackingIndexOfRound()==lastRoundData.getConsensusMemberCount()){
+            while (true) {
+                if (lastRoundData.getPackingIndexOfRound() == lastRoundData.getConsensusMemberCount()) {
                     break;
                 }
                 try {
@@ -421,11 +418,11 @@ public class ConsensusMeetingRunner implements Runnable {
             preRound.setMemberCount(lastRoundData.getConsensusMemberCount());
             round.setPreviousRound(preRound);
         }
-        long addTime = PocConsensusConstant.BLOCK_TIME_INTERVAL*1000L;
-        if (round.getPreviousRound().getEndTime() <  bestBlock.getHeader().getTime()) {
-            round.setStartTime( bestBlock.getHeader().getTime()+addTime);
-        }else{
-            round.setStartTime(round.getPreviousRound().getEndTime()+addTime);
+        long addTime = PocConsensusConstant.BLOCK_TIME_INTERVAL * 1000L;
+        if (round.getPreviousRound().getEndTime() < bestBlock.getHeader().getTime()) {
+            round.setStartTime(bestBlock.getHeader().getTime() + addTime);
+        } else {
+            round.setStartTime(round.getPreviousRound().getEndTime() + addTime);
         }
         round.setIndex(lastRoundData.getRoundIndex() + 1);
         return round;

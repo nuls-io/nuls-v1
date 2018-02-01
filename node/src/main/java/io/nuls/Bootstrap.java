@@ -47,7 +47,6 @@ public class Bootstrap {
         Thread.currentThread().setName("Nuls");
         try {
             sysStart();
-//            webStart();
         } catch (Exception e) {
             Log.error(e);
             System.exit(1);
@@ -68,15 +67,10 @@ public class Bootstrap {
             } catch (InterruptedException e) {
                 Log.error(e);
             }
-//            Log.info(ModuleManager.getInstance().getInfo());
             if(null!=NulsContext.getInstance().getBestBlock()){
                 Log.info("--------------------------------------------" + NulsContext.getInstance().getBestBlock().getHeader().getHeight());
             }
         }
-    }
-
-    private static void webStart() {
-        JettyServer.init();
     }
 
     private static void initModules() {

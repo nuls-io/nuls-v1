@@ -88,15 +88,17 @@ public class TransactionLocalDaoImpl extends BaseDaoImpl<TransactionLocalMapper,
     public List<TransactionLocalPo> getTxs(String address, int type, Integer start, Integer limit) {
         Searchable searchable = new Searchable();
         if (type != 0) {
-            searchable.addCondition("b.type", SearchOperator.eq, type);
+            searchable.addCondition("a.type", SearchOperator.eq, type);
         }
         if (StringUtils.isNotBlank(address)) {
-            searchable.addCondition("a.address", SearchOperator.eq, address);
+            searchable.addCondition("d.address", SearchOperator.eq, address);
         }
 
+        if (start != null && limit != null) {
+            PageHelper.offsetPage(start, limit);
+        }
         PageHelper.orderBy("block_height asc, create_time asc");
-
-        return getMapper().selectByAddress(address, type, start, limit);
+        return getMapper().selectByAddress(searchable);
     }
 
     @Override

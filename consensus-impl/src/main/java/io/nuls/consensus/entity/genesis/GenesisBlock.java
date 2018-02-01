@@ -30,6 +30,7 @@ import io.nuls.core.chain.entity.*;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.json.JSONUtils;
 import io.nuls.core.utils.log.Log;
@@ -54,6 +55,8 @@ public final class GenesisBlock extends Block {
     private static final String CONFIG_FILED_ADDRESS = "address";
     private static final String CONFIG_FILED_NULS = "nuls";
     private static final String CONFIG_FILED_UNLOCK_HEIGHT = "unlockHeight";
+
+    public static final String priKey = "009cf05b6b3fe8c09b84c13783140c0f1958e8841f8b6f894ef69431522bc65712";
 
     private static GenesisBlock INSTANCE;
 
@@ -93,6 +96,7 @@ public final class GenesisBlock extends Block {
             throw new NulsRuntimeException(ErrorCode.CONFIG_ERROR);
         }
         CoinTransferData data = new CoinTransferData();
+        data.setPriKey(Hex.decode(priKey));
         data.setFee(Na.ZERO);
         Na total = Na.ZERO;
         for (Map<String, Object> map : list) {
@@ -129,7 +133,7 @@ public final class GenesisBlock extends Block {
             Log.error(e);
             throw new NulsRuntimeException(e);
         }
-        //todo
+        //todo 用prikey
         tx.setSign(NulsSignData.EMPTY_SIGN);
         List<Transaction> txlist = new ArrayList<>();
         txlist.add(tx);
@@ -166,6 +170,7 @@ public final class GenesisBlock extends Block {
         header.setPackingAddress("00000");
         header.setHash(NulsDigestData.calcDigestData(header));
         //todo change to real address & signature
+        //todo 用prikey
         header.setSign(NulsSignData.EMPTY_SIGN);
     }
 

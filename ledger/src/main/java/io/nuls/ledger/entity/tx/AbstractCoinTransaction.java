@@ -96,4 +96,8 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
         return coinData;
     }
 
+    public void setCoinData(CoinData coinData) {
+        this.coinData = coinData;
+    }
+
 }
