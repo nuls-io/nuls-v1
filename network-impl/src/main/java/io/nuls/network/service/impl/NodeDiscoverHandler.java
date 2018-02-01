@@ -102,6 +102,7 @@ public class NodeDiscoverHandler implements Runnable {
                 }
                 System.out.println("-------------ip:" + node.getIp() + ", port:" + node.getPort() + "-------status:" + node.getStatus());
             }
+            System.out.println("------------华丽的分割线----------------");
 
             NodeGroup outNodes = nodesManager.getNodeGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP);
             if(outNodes.size() == 0) {
@@ -141,7 +142,7 @@ public class NodeDiscoverHandler implements Runnable {
 //            }
 
             try {
-                Thread.sleep(100);
+                Thread.sleep(7000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
