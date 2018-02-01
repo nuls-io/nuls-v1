@@ -24,15 +24,9 @@
 package io.nuls.network.message;
 
 import io.nuls.core.event.BaseEvent;
-import io.nuls.network.message.entity.GetNodeEvent;
-import io.nuls.network.message.entity.GetVersionEvent;
-import io.nuls.network.message.entity.NodeEvent;
-import io.nuls.network.message.entity.VersionEvent;
+import io.nuls.network.message.entity.*;
 import io.nuls.network.message.handler.NetWorkEventHandler;
-import io.nuls.network.message.impl.GetNodeEventHandler;
-import io.nuls.network.message.impl.GetVersionEventHandler;
-import io.nuls.network.message.impl.NodeEventHandler;
-import io.nuls.network.message.impl.VersionEventHandler;
+import io.nuls.network.message.impl.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -52,6 +46,8 @@ public class DefaultNetWorkEventHandlerFactory extends NetworkEventHandlerFactor
         handlerMap.put(GetVersionEvent.class.getName(), GetVersionEventHandler.getInstance());
         handlerMap.put(GetNodeEvent.class.getName(), GetNodeEventHandler.getInstance());
         handlerMap.put(NodeEvent.class.getName(), NodeEventHandler.getInstance());
+        handlerMap.put(PingEvent.class.getName(), PingEventHandler.getInstance());
+        handlerMap.put(PongEvent.class.getName(), PongEventHandler.getInstance());
     }
 
     public static NetworkEventHandlerFactory getInstance() {
