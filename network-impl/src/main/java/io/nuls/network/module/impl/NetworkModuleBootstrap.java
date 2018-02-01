@@ -33,10 +33,7 @@ import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.NetworkContext;
 import io.nuls.network.constant.NetworkConstant;
-import io.nuls.network.message.entity.GetNodeEvent;
-import io.nuls.network.message.entity.GetVersionEvent;
-import io.nuls.network.message.entity.NodeEvent;
-import io.nuls.network.message.entity.VersionEvent;
+import io.nuls.network.message.entity.*;
 import io.nuls.network.module.AbstractNetworkModule;
 import io.nuls.network.service.NetworkService;
 import io.nuls.network.service.impl.NetworkServiceImpl;
@@ -53,15 +50,17 @@ public class NetworkModuleBootstrap extends AbstractNetworkModule {
 
     @Override
     public void init() {
+        this.registerEvent();
         try {
             NetworkContext.setNetworkConfig(ConfigLoader.loadProperties(NetworkConstant.NETWORK_PROPERTIES));
         } catch (IOException e) {
             Log.error(e);
             throw new NulsRuntimeException(ErrorCode.IO_ERROR);
         }
+
         this.registerService(NetworkServiceImpl.class);
         networkService = NulsContext.getServiceBean(NetworkService.class);
-        this.registerEvent();
+
 
     }
 
@@ -70,6 +69,8 @@ public class NetworkModuleBootstrap extends AbstractNetworkModule {
         EventManager.putEvent(VersionEvent.class);
         EventManager.putEvent(GetNodeEvent.class);
         EventManager.putEvent(NodeEvent.class);
+        EventManager.putEvent(PingEvent.class);
+        EventManager.putEvent(PongEvent.class);
     }
 
     @Override
