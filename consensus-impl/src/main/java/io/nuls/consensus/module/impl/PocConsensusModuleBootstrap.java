@@ -114,6 +114,13 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
 
         NewTxEventHandler newTxEventHandler = NewTxEventHandler.getInstance();
         eventBusService.subscribeEvent(TransactionEvent.class, newTxEventHandler);
+
+
+
+        eventBusService.subscribeEvent(BlocksHashEvent.class,new BlocksHashHandler());
+        eventBusService.subscribeEvent(GetBlocksHashRequest.class,new GetBlocksHashHandler());
+        eventBusService.subscribeEvent(GetSmallBlockRequest.class,new GetSmallBlockHandler());
+        eventBusService.subscribeEvent(SmallBlockEvent.class,new SmallBlockHandler());
     }
 
 
