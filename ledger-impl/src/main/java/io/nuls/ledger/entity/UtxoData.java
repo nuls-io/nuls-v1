@@ -43,9 +43,9 @@ public class UtxoData extends CoinData {
         this.registerValidator(UtxoTxOutputsValidator.getInstance());
     }
 
-    private List<UtxoInput> inputs;
+    private List<UtxoInput> inputs = new ArrayList<>();
 
-    private List<UtxoOutput> outputs;
+    private List<UtxoOutput> outputs = new ArrayList<>();;
 
     public List<UtxoInput> getInputs() {
         return inputs;
