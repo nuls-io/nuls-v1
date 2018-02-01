@@ -101,7 +101,7 @@ public class TimeService implements Runnable {
             long newTime = System.currentTimeMillis();
 
             if (Math.abs(newTime - lastTime) > TIME_OFFSET_BOUNDARY) {
-                Log.info("local time changed ：{}", newTime - lastTime);
+                Log.debug("local time changed ：{}", newTime - lastTime);
                 syncWebTime();
 
             } else if (currentTimeMillis() - lastSyncTime > NET_REFRESH_TIME) {

@@ -75,8 +75,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
     private LedgerService ledgerService;
     @Autowired
     private BlockService blockService;
-    @Autowired
-    private ConsensusCacheManager consensusCacheManager;
+    private ConsensusCacheManager consensusCacheManager = ConsensusCacheManager.getInstance();
 
     private void registerAgent(Agent agent, Account account, String password) throws IOException {
         TransactionEvent event = new TransactionEvent();

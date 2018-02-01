@@ -45,8 +45,7 @@ import java.util.List;
  * @date 2017/12/11
  */
 public class BlockServiceImpl implements BlockService {
-    @Autowired
-    private BlockStorageService blockStorageService;
+    private BlockStorageService blockStorageService = BlockStorageService.getInstance();
     private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
     @Autowired
     private LedgerService ledgerService;

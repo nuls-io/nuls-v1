@@ -42,15 +42,33 @@ import java.lang.reflect.Method;
  * @date 2018/1/31
  */
 public class ModularServiceMethodInterceptor implements MethodInterceptor {
+
+    private ThreadLocal<Integer> threadLocal = new ThreadLocal<>();
+
     @Override
     public Object intercept(Object obj, Method method, Object[] params, MethodProxy methodProxy) throws Throwable {
-        if(!method.getDeclaringClass().equals(Object.class)){
+        threadLocal.set(0);
+        Throwable throwable = null;
+        while (threadLocal.get() < 10) {
+            try {
+                return this.doIntercept(obj, method, params, methodProxy);
+            } catch (Throwable e) {
+                threadLocal.set(threadLocal.get() + 1);
+                throwable = e;
+                Thread.sleep(100L);
+            }
+        }
+        throw throwable;
+    }
+
+    private Object doIntercept(Object obj, Method method, Object[] params, MethodProxy methodProxy) throws Throwable {
+        if (!method.getDeclaringClass().equals(Object.class)) {
             String className = obj.getClass().getCanonicalName();
-            className = className.substring(0,className.indexOf("$$"));
+            className = className.substring(0, className.indexOf("$$"));
             Class clazz = Class.forName(className);
 
             BaseModuleBootstrap module = ServiceManager.getInstance().getModule(clazz);
-            if(module==null){
+            if (module == null) {
                 throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "Access to a service of an un start module!" + method.toString());
             }
             if (module.getStatus() != ModuleStatusEnum.STARTING && module.getStatus() != ModuleStatusEnum.RUNNING) {
@@ -65,5 +83,6 @@ public class ModularServiceMethodInterceptor implements MethodInterceptor {
             return methodProxy.invokeSuper(obj, params);
         }
         return BeanMethodInterceptorManager.doFilter(method.getDeclaredAnnotations(), obj, method, params, methodProxy);
+
     }
 }
