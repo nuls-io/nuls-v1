@@ -215,7 +215,15 @@ public class Node extends BaseNulsData {
      * @param message
      */
     public void processMessage(NulsMessage message) throws IOException, NulsException {
-        BaseEvent event = EventManager.getInstance(message.getData());
+        BaseEvent event = null;
+        try {
+            event = EventManager.getInstance(message.getData());
+        } catch (Exception e) {
+            event = null;
+        }
+        if (event == null) {
+            return;
+        }
 
         if (isNetworkEvent(event)) {
             if (this.status != Node.HANDSHAKE && !isHandShakeMessage(event)) {
@@ -245,8 +253,8 @@ public class Node extends BaseNulsData {
                     NetworkEventResult messageResult = handler.process(networkEvent, Node.this);
                     processMessageResult(messageResult);
                 } catch (Exception e) {
+                    e.printStackTrace();
                     Log.error("process message error", e);
-                    //e.printStackTrace();
                     Node.this.destroy();
                 }
             }
