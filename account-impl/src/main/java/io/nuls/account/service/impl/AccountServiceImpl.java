@@ -420,6 +420,12 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public NulsSignData signDataUsePriKey(byte[] bytes, String priKey) {
+        //todo
+        return NulsSignData.EMPTY_SIGN;
+    }
+
+    @Override
     public NulsSignData signData(NulsDigestData digestData, String password) {
         return this.signData(digestData, this.getDefaultAccount(), password);
     }
