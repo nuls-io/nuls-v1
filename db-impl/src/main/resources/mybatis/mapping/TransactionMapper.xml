@@ -13,14 +13,39 @@
         <result column="sign" jdbcType="VARBINARY" property="sign" />
     </resultMap>
 
+    <resultMap id="UtxoTxResultMap"  type="io.nuls.db.entity.TransactionPo" extends="BaseResultMap">
+        <collection property="inputs" javaType="java.util.List" ofType="io.nuls.db.entity.UtxoInputPo">
+            <id column="in_tx_hash" jdbcType="VARCHAR" property="txHash" />
+            <id column="from_index" jdbcType="INTEGER" property="fromIndex" />
+            <result column="in_index" jdbcType="INTEGER" property="inIndex" />
+            <result column="in_sign" jdbcType="VARBINARY" property="sign" />
+        </collection>
+        <collection property="outputs" javaType="java.util.List" ofType="io.nuls.db.entity.UtxoOutputPo">
+            <id column="out_tx_hash" jdbcType="VARCHAR" property="txHash"/>
+            <id column="out_index" jdbcType="INTEGER" property="outIndex"/>
+            <result column="value" jdbcType="BIGINT" property="value"/>
+            <result column="lock_time" jdbcType="BIGINT" property="lockTime"/>
+            <result column="status" jdbcType="TINYINT" property="status"/>
+            <result column="address" jdbcType="VARCHAR" property="address"/>
+            <result column="script" jdbcType="VARBINARY" property="script"/>
+        </collection>
+    </resultMap>
+
     <sql id="Base_Column_List">
         hash, type, tx_index, block_height, create_time, fee, remark, txData, sign
     </sql>
+    <sql id="Utxo_Column_List">
+         a.hash, a.type, a.tx_index, a.block_height, a.create_time, a.fee, a.remark, a.txData, a.sign,
+         b.tx_hash as in_tx_hash, b.from_index, b.in_index,b.sign as in_sign,
+         c.tx_hash as out_tx_hash, c.out_index, c.value, c.lock_time, c.status, c.address, c.script
+    </sql>
 
-    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="UtxoTxResultMap">
         select
-        <include refid="Base_Column_List" />
-        from transaction
+        <include refid="Utxo_Column_List"/>
+        from transaction a
+        left join utxo_input b on a.hash = b.tx_hash
+        left join utxo_output c on a.hash = c.tx_hash
         where hash = #{hash,jdbcType=VARCHAR}
     </select>
 
@@ -70,10 +95,12 @@
         select count(hash) from transaction
     </select>
 
-    <select id="selectList" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultMap="BaseResultMap">
+    <select id="selectList" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultMap="UtxoTxResultMap">
         select
-        <include refid="Base_Column_List"/>
-        from transaction
+        <include refid="Utxo_Column_List"/>
+        from transaction a
+        left join utxo_input b on a.hash = b.tx_hash
+        left join utxo_output c on a.hash = c.tx_hash
         <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
     </select>
     <select id="selectCount" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultType="java.lang.Long">
@@ -81,10 +108,13 @@
         <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
     </select>
 
-    <select id="selectByAddress" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultMap="BaseResultMap">
-        select b.*
-        from tx_account_relation a
-        join `transaction` b on a.tx_hash = b.`hash`
+    <select id="selectByAddress" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultMap="UtxoTxResultMap">
+        select
+        <include refid="Utxo_Column_List"/>
+        from tx_account_relation d
+        join transaction a on d.tx_hash = a.hash
+        left join utxo_input b on a.hash = b.tx_hash
+        left join utxo_output c on a.hash = c.tx_hash
         <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
     </select>
 </mapper>

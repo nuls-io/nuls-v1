@@ -12,7 +12,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        tx_hash, out_index, value, lock_time, status, address,  script
+        tx_hash, out_index, value, lock_time, status, address, script
     </sql>
 
     <select id="selectByPrimaryKey" parameterType="map" resultMap="BaseResultMap">
