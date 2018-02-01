@@ -63,9 +63,9 @@ import java.util.Map;
 public class UtxoCoinDataProvider implements CoinDataProvider {
 
     private LedgerCacheService cacheService = LedgerCacheService.getInstance();
-@Autowired
+    @Autowired
     private UtxoOutputDataService outputDataService;
-@Autowired
+    @Autowired
     private UtxoInputDataService inputDataService;
     @Autowired
     private AccountService accountService;
@@ -297,7 +297,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         if (coinParam.getPriKey() != null) {
             priKey = coinParam.getPriKey();
         } else {
-            Account account = getAccountService().getDefaultAccount();
+            Account account = accountService.getDefaultAccount();
             priKey = account.getPriSeed();
         }
 
@@ -356,10 +356,4 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         this.inputDataService = inputDataService;
     }
 
-    public AccountService getAccountService() {
-        if (accountService == null) {
-            accountService = NulsContext.getInstance().getService(AccountService.class);
-        }
-        return accountService;
-    }
 }

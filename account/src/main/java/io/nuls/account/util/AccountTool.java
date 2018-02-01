@@ -60,7 +60,6 @@ public final class AccountTool {
         return Address.fromHashs(Utils.sha256hash160(key.getPubKey(false)));
     }
 
-
     public static Account createAccount() {
         ECKey key = new ECKey();
         Address address = new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), Utils.sha256hash160(key.getPubKey(false)));
