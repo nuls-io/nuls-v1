@@ -88,6 +88,7 @@ public class EventManager {
         try {
             event = clazz.newInstance();
         } catch (Exception e) {
+            System.out.println(header.getModuleId()+"==="+header.getEventType());
             Log.error(e);
             throw new NulsException(ErrorCode.DATA_PARSE_ERROR);
         }
