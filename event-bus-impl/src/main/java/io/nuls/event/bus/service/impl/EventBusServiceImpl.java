@@ -26,6 +26,7 @@ package io.nuls.event.bus.service.impl;
 import io.nuls.core.event.BaseEvent;
 import io.nuls.core.event.EventManager;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.constant.EventCategoryEnum;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.event.bus.handler.AbstractEventHandler;
@@ -78,12 +79,18 @@ public class EventBusServiceImpl implements EventBusService {
 
     @Override
     public void publishNetworkEvent(byte[] bytes, String fromId) {
-        networkService.publish(bytes, fromId);
+        try{
+            networkService.publish(bytes, fromId);
+        }catch (Exception e){
+            Log.error(e);
+        }
     }
 
     @Override
     public void publishNetworkEvent(BaseEvent event, String fromId) {
-        networkService.publish(event, fromId);
+        try{networkService.publish(event, fromId);}catch (Exception e){
+            Log.error(e);
+        }
     }
 
     @Override
