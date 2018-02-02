@@ -175,8 +175,8 @@ public class NodesManager implements Runnable {
     public void addNode(Node node) {
         lock.lock();
         try {
-            if (!nodes.containsKey(node.getHash().toString())) {
-                nodes.put(node.getHash(), node);
+            if (!nodes.containsKey(node.getIp().toString())) {
+                nodes.put(node.getIp(), node);
                 if (!node.isHandShake() && node.getType() == Node.OUT) {
                     connectionManager.openConnection(node);
                 }
@@ -454,24 +454,24 @@ public class NodesManager implements Runnable {
     @Override
     public void run() {
 
-        while (running) {
-            for (Node node : nodes.values()) {
-                if (node.getStatus() == Node.HANDSHAKE) {
-                    PingEvent ping = new PingEvent();
-                    try {
-                        node.sendNetworkEvent(ping);
-                    } catch (IOException e) {
-                        Log.error(e);
-                        node.destroy();
-                    }
-                }
-            }
-
-            try {
-                Thread.sleep(6000);
-            } catch (InterruptedException e) {
-
-            }
-        }
+//        while (running) {
+//            for (Node node : nodes.values()) {
+//                if (node.getStatus() == Node.HANDSHAKE) {
+//                    PingEvent ping = new PingEvent();
+//                    try {
+//                        node.sendNetworkEvent(ping);
+//                    } catch (IOException e) {
+//                        Log.error(e);
+//                        node.destroy();
+//                    }
+//                }
+//            }
+//
+//            try {
+//                Thread.sleep(6000);
+//            } catch (InterruptedException e) {
+//
+//            }
+//        }
     }
 }
