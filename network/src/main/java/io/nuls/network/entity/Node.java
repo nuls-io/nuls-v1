@@ -204,9 +204,14 @@ public class Node extends BaseNulsData {
 
 //        buffer.compact();
         buffer.clear();
-        if (MessageFilterChain.getInstance().doFilter(message)) {
-            processMessage(message);
+        try {
+            if (MessageFilterChain.getInstance().doFilter(message)) {
+                processMessage(message);
+            }
+        } catch (Exception e) {
+
         }
+
     }
 
     /**
@@ -293,17 +298,17 @@ public class Node extends BaseNulsData {
     }
 
     public void destroy() {
-        lock.lock();
-        try {
-            this.lastFailTime = TimeService.currentTimeMillis();
-            this.status = Node.CLOSE;
-            if (this.writeTarget != null) {
-                this.writeTarget.closeConnection();
-                this.writeTarget = null;
-            }
-        } finally {
-            lock.unlock();
-        }
+//        lock.lock();
+//        try {
+//            this.lastFailTime = TimeService.currentTimeMillis();
+//            this.status = Node.CLOSE;
+//            if (this.writeTarget != null) {
+//                this.writeTarget.closeConnection();
+//                this.writeTarget = null;
+//            }
+//        } finally {
+//            lock.unlock();
+//        }
     }
 
     @Override
@@ -506,7 +511,6 @@ public class Node extends BaseNulsData {
     public void setLastFailTime(Long lastFailTime) {
         this.lastFailTime = lastFailTime;
     }
-
 
 
 }
