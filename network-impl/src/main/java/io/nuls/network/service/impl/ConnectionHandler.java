@@ -24,11 +24,13 @@
 package io.nuls.network.service.impl;
 
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Node;
 import io.nuls.network.service.MessageWriter;
+import io.nuls.network.service.NetworkService;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -175,6 +177,7 @@ public class ConnectionHandler implements MessageWriter {
             Log.warn("Error handling SelectionKey: {}", e);
             key.cancel();
             handler.node.destroy();
+            NulsContext.getServiceBean(NetworkService.class).removeNode(handler.node.getHash());
         }
     }
 }

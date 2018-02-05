@@ -110,7 +110,7 @@ public class NetworkServiceImpl implements NetworkService {
     public void removeNode(String nodeId) {
         Node node = nodesManager.getNode(nodeId);
         if(node != null) {
-            node.destroy();
+            //node.destroy();
             nodesManager.removeNode(nodeId);
         }
     }

@@ -445,4 +445,39 @@ public class ECKey {
     public void setEncryptedPrivateKey(EncryptedData encryptedPrivateKey) {
         this.encryptedPrivateKey = encryptedPrivateKey;
     }
+
+    public static void main(String[] args) throws InterruptedException {
+        while (true) {
+            ECKey ecKey = new ECKey();
+            String testString = "1234567890123456";
+
+            String pubKeyHex = ecKey.getPublicKeyAsHex();
+            System.out.println("pubKeyHex    : " + pubKeyHex);
+
+            ECKey ecKeyFromPubHex = ECKey.fromPublicOnly(Hex.decode(pubKeyHex));
+            System.out.println("pubKeyHex_new: " + ecKeyFromPubHex.getPublicKeyAsHex());
+
+            Sha256Hash hash = Sha256Hash.twiceOf(testString.getBytes());
+            ECDSASignature ecdsaSignature = ecKey.sign(hash);
+
+
+            //验证方式一，正确的公钥，验证应该通过
+            boolean bool = ecKeyFromPubHex.verify(hash.getBytes(), ecdsaSignature.encodeToDER());
+            System.out.println(bool);
+
+            //验证方式二， 正确的公钥，验证应该通过
+            bool = ECKey.verify(hash.getBytes(), ecdsaSignature.encodeToDER(), Hex.decode(pubKeyHex));
+            System.out.println(bool);
+
+
+            //任意赋值一个公钥，验证应该不能通过
+            pubKeyHex = "038b65fd3114133e40d4cd21764f53fb5cba6fe70e65786a5a1795c0eeba6f9e9b";
+            bool = ECKey.verify(hash.getBytes(), ecdsaSignature.encodeToDER(), Hex.decode(pubKeyHex));
+            System.out.println(bool);
+
+            System.out.println("der sign: " + Hex.encode(ecdsaSignature.encodeToDER()));
+
+            Thread.sleep(3*500);
+        }
+    }
 }

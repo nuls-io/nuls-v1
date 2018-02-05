@@ -53,6 +53,7 @@ import io.nuls.network.message.filter.MessageFilterChain;
 import io.nuls.network.message.handler.NetWorkEventHandler;
 import io.nuls.network.module.AbstractNetworkModule;
 import io.nuls.network.service.MessageWriter;
+import io.nuls.network.service.NetworkService;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -298,6 +299,7 @@ public class Node extends BaseNulsData {
     }
 
     public void destroy() {
+//        NulsContext.getServiceBean(NetworkService.class).removeNode(this.getHash());
 //        lock.lock();
 //        try {
 //            this.lastFailTime = TimeService.currentTimeMillis();
@@ -511,6 +513,4 @@ public class Node extends BaseNulsData {
     public void setLastFailTime(Long lastFailTime) {
         this.lastFailTime = lastFailTime;
     }
-
-
 }

@@ -221,14 +221,11 @@ public class NodesManager implements Runnable {
         lock.lock();
         try {
             if (nodes.containsKey(nodeHash)) {
-                for (NodeGroup group : nodeGroups.values()) {
-                    for (Node node : group.getNodes().values()) {
-                        if (node.getHash().equals(nodeHash)) {
-                            group.removeNode(node);
-                            break;
-                        }
-                    }
+                Node n = nodes.get(nodeHash);
+                for(NodeGroup group : n.getGroupSet()){
+                    group.removeNode(n);
                 }
+
                 if (!isSeed(nodeHash)) {
                     Node node = nodes.get(nodeHash);
                     node.setFailCount(node.getFailCount() + 1);
