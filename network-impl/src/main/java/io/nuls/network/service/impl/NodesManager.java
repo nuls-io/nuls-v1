@@ -175,8 +175,8 @@ public class NodesManager implements Runnable {
     public void addNode(Node node) {
         lock.lock();
         try {
-            if (!nodes.containsKey(node.getIp().toString())) {
-                nodes.put(node.getIp(), node);
+            if (!nodes.containsKey(node.getHash())) {
+                nodes.put(node.getHash(), node);
                 if (!node.isHandShake() && node.getType() == Node.OUT) {
                     connectionManager.openConnection(node);
                 }
