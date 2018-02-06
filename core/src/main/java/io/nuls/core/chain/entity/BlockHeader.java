@@ -72,7 +72,7 @@ public class BlockHeader extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size +=  2;
+        size += 2;
         size += Utils.sizeOfSerialize(preHash);
         size += Utils.sizeOfSerialize(merkleHash);
         size += Utils.sizeOfSerialize(time);
