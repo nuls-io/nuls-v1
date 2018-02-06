@@ -53,20 +53,20 @@ public class EventCacheService {
     }
 
     public void cacheSendedEvent(BaseEvent event) {
-         this.cacheService.putElement(CACHE_OF_SENDED, event.getHash().getDigestHex(), event);
+         this.cacheService.putElement(CACHE_OF_SENDED, event.getHash().getDigestHex()+"="+event.getSign().getSignHex(), event);
     }
 
-    public void cacheRecievedEventHash(String hashHex) {
-        this.cacheService.putElement(CACHE_OF_SENDED, hashHex, 1);
+    public void cacheRecievedEventHash(String hashHex,String signHex) {
+        this.cacheService.putElement(CACHE_OF_SENDED, hashHex+"="+signHex, 1);
     }
 
-    public boolean isKnown(String hashHex) {
-        return this.cacheService.containsKey(CACHE_OF_RECIEVED, hashHex) ||
-                this.cacheService.containsKey(CACHE_OF_SENDED, hashHex);
+    public boolean isKnown(String hashHex,String signHex) {
+        return this.cacheService.containsKey(CACHE_OF_RECIEVED, hashHex+"="+signHex) ||
+                this.cacheService.containsKey(CACHE_OF_SENDED, hashHex+"="+signHex);
     }
 
-    public BaseEvent getEvent(String hashHex) {
-        return (BaseEvent) this.cacheService.getElement(CACHE_OF_SENDED, hashHex);
+    public BaseEvent getEvent(String hashHex,String signHex) {
+        return (BaseEvent) this.cacheService.getElement(CACHE_OF_SENDED, hashHex+"="+signHex);
     }
 
     public void destroy() {

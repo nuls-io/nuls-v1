@@ -41,7 +41,7 @@ public class CommonDigestHandler extends AbstractEventHandler<CommonDigestEvent>
 
     @Override
     public void onEvent(CommonDigestEvent event, String fromId) {
-        boolean exist = eventCacheService.isKnown(event.getEventBody().getDigestHex());
+        boolean exist = eventCacheService.isKnown(event.getEventBody().getDigestHex(),event.getSign().getSignHex());
         if (exist) {
             return;
         }

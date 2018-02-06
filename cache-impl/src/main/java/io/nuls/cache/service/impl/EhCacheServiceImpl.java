@@ -170,7 +170,8 @@ public class EhCacheServiceImpl<K, T> implements CacheService<K, T> {
 
     @Override
     public boolean containsKey(String cacheTitle, K key) {
-        return this.cacheManager.getCache(cacheTitle).containsKey(key);
+        boolean result = this.cacheManager.getCache(cacheTitle).containsKey(key);
+        return result;
     }
 
     @Override
