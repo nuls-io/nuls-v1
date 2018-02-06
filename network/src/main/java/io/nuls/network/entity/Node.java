@@ -147,7 +147,7 @@ public class Node extends BaseNulsData {
     public void connectionOpened() throws IOException {
         GetVersionEvent event = new GetVersionEvent(AbstractNetworkModule.ExternalPort);
         sendNetworkEvent(event);
-        this.status = Node.CONNECTING;
+        this.status = Node.HANDSHAKE;
     }
 
     public void sendMessage(NulsMessage message) throws IOException {

@@ -88,7 +88,6 @@ public class EventBusServiceImpl implements EventBusService {
 
     @Override
     public void publishNetworkEvent(BaseEvent event, String fromId) {
-        System.out.println("===============recieve message:"+event.getClass().toString());
         try {
             networkService.publish(event, fromId);
         } catch (Exception e) {

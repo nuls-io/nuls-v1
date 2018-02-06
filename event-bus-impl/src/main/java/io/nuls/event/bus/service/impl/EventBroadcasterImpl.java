@@ -112,7 +112,6 @@ public class EventBroadcasterImpl implements EventBroadcaster {
     @Override
     public boolean sendToNode(BaseEvent event, String nodeId) {
         BroadcastResult result = networkService.sendToNode(event, nodeId);
-        System.out.println("============send event:"+event.getClass());
         return result.isSuccess();
     }
 

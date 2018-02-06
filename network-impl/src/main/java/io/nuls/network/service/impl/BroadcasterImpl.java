@@ -206,7 +206,6 @@ public class BroadcasterImpl implements Broadcaster {
         } catch (IOException e) {
             return new BroadcastResult(false, "event.serialize() error");
         }
-        System.out.println("===================send event:"+event.getClass());
         return broadcast(message, excludeNodeId);
     }
 
