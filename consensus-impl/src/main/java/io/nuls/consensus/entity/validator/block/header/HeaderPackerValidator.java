@@ -55,11 +55,11 @@ public class HeaderPackerValidator implements NulsDataValidator<BlockHeader> {
     @Override
     public ValidateResult validate(BlockHeader header) {
         BlockHeader preHeader = NulsContext.getServiceBean(BlockService.class).getBlockHeader(header.getPreHash());
-        if(preHeader==null){
-            return ValidateResult.getFailedResult("local data not exist");
-        }
+
         PocMeetingRound currentRound = consensusManager.getCurrentRound();
         if (header.getHeight() == 0) {
+            return ValidateResult.getSuccessResult();
+        }if(preHeader==null){
             return ValidateResult.getSuccessResult();
         }
         BlockRoundData roundData = null;
