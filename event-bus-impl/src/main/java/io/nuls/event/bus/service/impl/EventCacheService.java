@@ -61,8 +61,9 @@ public class EventCacheService {
     }
 
     public boolean isKnown(String hashHex,String signHex) {
-        return this.cacheService.containsKey(CACHE_OF_RECIEVED, hashHex+"="+signHex) ||
-                this.cacheService.containsKey(CACHE_OF_SENDED, hashHex+"="+signHex);
+        return false;
+//todo        return this.cacheService.containsKey(CACHE_OF_RECIEVED, hashHex+"="+signHex) ||
+//                this.cacheService.containsKey(CACHE_OF_SENDED, hashHex+"="+signHex);
     }
 
     public BaseEvent getEvent(String hashHex,String signHex) {

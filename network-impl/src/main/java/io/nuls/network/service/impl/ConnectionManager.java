@@ -217,8 +217,8 @@ public class ConnectionManager implements Runnable {
         if (!inAble && !outAble) {
             return false;
         }
-        //check myself
-        if (network.getLocalIps().contains(socketAddress.getAddress().getHostAddress())) {
+        //todo check myself
+        if (network.getLocalIps().contains(socketAddress.getAddress().getHostAddress())&&socketAddress.getPort()==network.port()) {
             return false;
         }
         //check it already connected
