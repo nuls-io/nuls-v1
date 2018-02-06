@@ -72,7 +72,7 @@ public class BlockHeader extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += this.getVersion().size();
+        size +=  2;
         size += Utils.sizeOfSerialize(preHash);
         size += Utils.sizeOfSerialize(merkleHash);
         size += Utils.sizeOfSerialize(time);
@@ -100,7 +100,6 @@ public class BlockHeader extends BaseNulsData {
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.version = new NulsVersion(byteBuffer.readShort());
-        this.hash= byteBuffer.readHash();
         this.preHash = byteBuffer.readHash();
         this.merkleHash = byteBuffer.readHash();
         this.time = byteBuffer.readVarInt();
