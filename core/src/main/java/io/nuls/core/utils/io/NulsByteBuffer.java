@@ -211,7 +211,7 @@ public class NulsByteBuffer {
         }
         int length = payload.length - cursor;
         byte[] bytes = new byte[length];
-        System.arraycopy(payload, cursor, bytes, 0, length);
+        System.arraycopy(payload, cursor, bytes, cursor, length);
         nulsData.parse(bytes);
         cursor += nulsData.size();
         return nulsData;
