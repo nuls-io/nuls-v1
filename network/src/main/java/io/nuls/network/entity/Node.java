@@ -159,7 +159,6 @@ public class Node extends BaseNulsData {
         }
         lock.lock();
         try {
-            System.out.println("---send message:" + Hex.encode(message.serialize()));
             this.writeTarget.write(message.serialize());
         } finally {
             lock.unlock();

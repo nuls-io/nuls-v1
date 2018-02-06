@@ -54,14 +54,12 @@ public class DevNetworkParam extends AbstractNetworkParam {
             Log.error(e);
         }
 
-//        InetSocketAddress address0 = new InetSocketAddress("192.168.1.249", port);
         InetSocketAddress address1 = new InetSocketAddress("127.0.0.1", 8003);
 //        InetSocketAddress address2 = new InetSocketAddress("192.168.1.131", port);
-//        InetSocketAddress address3 = new InetSocketAddress("192.168.1.102", 8003);
-//        seedNodes.add(address0);
+        InetSocketAddress address3 = new InetSocketAddress("192.168.1.102", 8003);
         seedNodes.add(address1);
 //        seedNodes.add(address2);
-//        seedNodes.add(address3);
+        seedNodes.add(address3);
 
 
         this.messageFilter = DefaultMessageFilter.getInstance();
