@@ -95,7 +95,12 @@ public class EventManager {
             Log.error(e);
             throw new NulsException(ErrorCode.DATA_PARSE_ERROR);
         }
-        event.parse(new NulsByteBuffer(bytes));
+        try {
+            event.parse(new NulsByteBuffer(bytes));
+        } catch (Exception e) {
+            Log.error(e);
+            throw e;
+        }
         return event;
     }
 

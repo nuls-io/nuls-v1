@@ -47,7 +47,7 @@ public class GetBlockHeaderEvent extends BaseConsensusEvent<BasicTypeData<Long>>
         if (byteBuffer.isFinished()) {
             return null;
         }
-        return new BasicTypeData(byteBuffer);
+        return byteBuffer.readNulsData(new BasicTypeData());
     }
 
 }
