@@ -92,12 +92,13 @@ public class DistributedBlockInfoRequestUtils {
             lock.unlock();
             return null;
         }
+
         return this.getBlockInfo();
     }
 
 
     public boolean addBlockHashResponse(String nodeId, BlockHashResponse response) {
-        if (!hashesMap.containsKey(nodeId)) {
+        if (!this.nodeIdList.contains(nodeId)) {
             return false;
         }
         if (!requesting) {

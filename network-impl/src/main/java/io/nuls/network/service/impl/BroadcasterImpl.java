@@ -95,7 +95,7 @@ public class BroadcasterImpl implements Broadcaster {
             count++;
         }
 
-        Log.debug("成功广播给{}个节点，消息{}", successCount, message);
+        Log.info("成功广播给{}个节点，消息{}", successCount, message);
         result.setBroadcastNodes(successNodes);
         return result;
     }
@@ -194,6 +194,7 @@ public class BroadcasterImpl implements Broadcaster {
 
     @Override
     public BroadcastResult broadcast(BaseEvent event) {
+
         return broadcast(event, null);
     }
 
@@ -205,7 +206,7 @@ public class BroadcasterImpl implements Broadcaster {
         } catch (IOException e) {
             return new BroadcastResult(false, "event.serialize() error");
         }
-
+        System.out.println("===================send event:"+event.getClass());
         return broadcast(message, excludeNodeId);
     }
 
