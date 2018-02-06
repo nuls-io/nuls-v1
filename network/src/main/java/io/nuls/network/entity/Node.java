@@ -224,6 +224,8 @@ public class Node extends BaseNulsData {
         try {
             event = EventManager.getInstance(message.getData());
         } catch (Exception e) {
+            //todo
+            Log.error(e);
             event = null;
         }
         if (event == null) {

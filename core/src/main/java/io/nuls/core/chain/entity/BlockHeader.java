@@ -100,11 +100,9 @@ public class BlockHeader extends BaseNulsData {
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.version = new NulsVersion(byteBuffer.readShort());
-        this.hash.parse(byteBuffer);
-        this.preHash = new NulsDigestData();
-        this.preHash.parse(byteBuffer);
-        this.merkleHash = new NulsDigestData();
-        this.merkleHash.parse(byteBuffer);
+        this.hash= byteBuffer.readHash();
+        this.preHash = byteBuffer.readHash();
+        this.merkleHash = byteBuffer.readHash();
         this.time = byteBuffer.readVarInt();
         this.height = byteBuffer.readVarInt();
         this.txCount = byteBuffer.readVarInt();
