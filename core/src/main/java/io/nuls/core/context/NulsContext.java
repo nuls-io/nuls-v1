@@ -45,6 +45,16 @@ public class NulsContext {
     public static IniEntity NULS_CONFIG;
     public static IniEntity MODULES_CONFIG;
 
+    public static byte[] getMagicNumber() {
+        return MAGIC_NUMBER;
+    }
+
+    public static void setMagicNumber(byte[] magicNumber) {
+        MAGIC_NUMBER = magicNumber;
+    }
+
+    public static byte[] MAGIC_NUMBER;
+
     private NulsContext() {
         CHAIN_ID = "NULS";
         CHAIN_ID_MAP.put(CHAIN_ID, Short.parseShort("1"));

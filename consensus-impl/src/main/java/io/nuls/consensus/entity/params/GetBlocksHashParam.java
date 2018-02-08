@@ -28,6 +28,7 @@ package io.nuls.consensus.entity.params;
 
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -95,5 +96,11 @@ public class GetBlocksHashParam extends BaseNulsData {
 
     public void setSplit(long split) {
         this.split = split;
+    }
+
+    public static void main(String []args)throws Exception{
+        GetBlocksHashParam param = new GetBlocksHashParam();
+        param.parse(new NulsByteBuffer(Hex.decode("ffff1d50746101000000000100000100")));
+
     }
 }

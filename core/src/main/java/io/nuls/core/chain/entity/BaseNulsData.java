@@ -37,6 +37,7 @@ import io.nuls.core.validate.ValidatorManager;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * @author Niels
@@ -94,7 +95,7 @@ public abstract class BaseNulsData implements Serializable,Cloneable {
     }
 
     public final void parse(byte[] bytes) throws NulsException {
-        if (bytes == null || bytes.length == 0 || NulsConstant.PLACE_HOLDER == bytes[0]) {
+        if (bytes == null || bytes.length == 0 || ((bytes.length ==4)&& Arrays.equals(NulsConstant.PLACE_HOLDER,bytes))){
             return;
         }
         this.parse(new NulsByteBuffer(bytes));

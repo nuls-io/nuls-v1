@@ -29,6 +29,7 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.event.BaseEvent;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.TaskManager;
+import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.NodeDataService;
 import io.nuls.network.NetworkContext;
@@ -82,6 +83,9 @@ public class NetworkServiceImpl implements NetworkService {
     @Override
     public void init() {
         connectionManager.init();
+        byte[] magicNumber = new byte[4];
+        Utils.int32ToByteArrayLE(this.getNetworkParam().packetMagic(), magicNumber, 0);
+        NulsContext.setMagicNumber(magicNumber);
     }
 
     @Override

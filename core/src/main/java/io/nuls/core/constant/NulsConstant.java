@@ -23,6 +23,8 @@
  */
 package io.nuls.core.constant;
 
+import io.nuls.core.context.NulsContext;
+
 /**
  * SYSTEM CONSTANT
  *
@@ -30,7 +32,7 @@ package io.nuls.core.constant;
  * @date 2017/9/26
  */
 public interface NulsConstant {
-    byte PLACE_HOLDER = (byte) 0xFF;
+    byte[] PLACE_HOLDER = NulsContext.getMagicNumber();
 
     String USER_CONFIG_FILE = "nuls.ini";
     String MODULES_CONFIG_FILE = "modules.ini";
