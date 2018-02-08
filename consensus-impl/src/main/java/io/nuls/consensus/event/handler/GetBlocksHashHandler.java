@@ -48,14 +48,14 @@ public class GetBlocksHashHandler extends AbstractEventHandler<GetBlocksHashRequ
     @Override
     public void onEvent(GetBlocksHashRequest event, String fromId) {
 
-        boolean b = event.getStart() == event.getEnd();
+        boolean b = event.getEventBody().getStart() == event.getEventBody().getEnd();
         if (b) {
             BlockHashResponse response = new BlockHashResponse();
             Block block;
-            if (event.getEnd() == 0) {
+            if (event.getEventBody().getEnd() == 0) {
                 block = blockService.getLocalBestBlock();
             } else {
-                block = blockService.getBlock(event.getEnd());
+                block = blockService.getBlock(event.getEventBody().getEnd());
             }
             if (null == block) {
                 return;
@@ -63,12 +63,12 @@ public class GetBlocksHashHandler extends AbstractEventHandler<GetBlocksHashRequ
             response.put(block.getHeader().getHeight(), block.getHeader().getHash());
             sendResponse(response,fromId);
         } else {
-            List<NulsDigestData> list = this.blockService.getBlockHashList(event.getStart(), event.getEnd(), event.getSplit());
+            List<NulsDigestData> list = this.blockService.getBlockHashList(event.getEventBody().getStart(), event.getEventBody().getEnd(), event.getEventBody().getSplit());
             List<Long> resultHeightList = new ArrayList<>();
             List<NulsDigestData> resultHashList = new ArrayList<>();
             for (int i = 0; i < list.size(); i++) {
-                long height = i + event.getStart();
-                if (i % event.getSplit() == 0) {
+                long height = i + event.getEventBody().getStart();
+                if (i % event.getEventBody().getSplit() == 0) {
                     resultHeightList.add(height);
                     resultHashList.add(list.get(i));
                 }
