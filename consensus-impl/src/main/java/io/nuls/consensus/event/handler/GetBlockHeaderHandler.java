@@ -43,13 +43,13 @@ public class GetBlockHeaderHandler extends AbstractEventHandler<GetBlockHeaderEv
     @Override
     public void onEvent(GetBlockHeaderEvent event, String fromId)   {
         BlockHeader header ;
-        if(null==event.getEventBody()||event.getEventBody().getVal()==0){
+        if(null==event.getEventBody()||event.getEventBody().getHeight()==0){
             header = blockService.getLocalBestBlock().getHeader();
         }else{
-            Block block = blockService.getBlock(event.getEventBody().getVal());
+            Block block = blockService.getBlock(event.getEventBody().getHeight());
             if(null==block){
                 header = new BlockHeader();
-                header.setHeight(event.getEventBody().getVal());
+                header.setHeight(event.getEventBody().getHeight());
             }else{
                 header = block.getHeader();
             }

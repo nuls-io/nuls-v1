@@ -61,11 +61,11 @@ public class NetworkEventService {
     }
 
     public void publish(BaseEvent event, String nodeId) {
-        boolean exist = eventCacheService.isKnown(event.getHash().getDigestHex(),event.getSign().getSignHex());
+        boolean exist = eventCacheService.isKnown(event.getHash().getDigestHex() );
         if (exist) {
             return;
         }
-        eventCacheService.cacheRecievedEventHash(event.getHash().getDigestHex(),event.getSign().getSignHex());
+        eventCacheService.cacheRecievedEventHash(event.getHash().getDigestHex() );
         processorManager.offer(new ProcessData(event, nodeId));
 
     }

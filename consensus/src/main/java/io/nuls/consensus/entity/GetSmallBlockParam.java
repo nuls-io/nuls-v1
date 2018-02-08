@@ -1,18 +1,19 @@
-/**
+/*
+ *
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,47 +21,63 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.consensus.event;
+package io.nuls.consensus.entity;
 
-import io.nuls.consensus.constant.ConsensusEventType;
-import io.nuls.consensus.entity.GetBlockParam;
-import io.nuls.core.chain.entity.BasicTypeData;
+import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.crypto.Utils;
+import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.io.NulsOutputStreamBuffer;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * get block by height.
- *
  * @author Niels
- * @date 2017/11/13
+ * @date 2017/12/18
  */
-public class GetBlockRequest extends BaseConsensusEvent<GetBlockParam> {
+public class GetSmallBlockParam extends BaseNulsData {
 
+    private long time;
+    private NulsDigestData blockHash;
 
-    public GetBlockRequest() {
-        super(ConsensusEventType.GET_BLOCK);
-    }
-
-    public GetBlockRequest(long start, long end) {
-        this();
-        GetBlockParam param = new GetBlockParam();
-        param.setEnd(end);
-        param.setStart(start);
-        this.setEventBody(param);
+    public GetSmallBlockParam() {
+        this.time = TimeService.currentTimeMillis();
     }
 
     @Override
-    protected GetBlockParam parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
-        return byteBuffer.readNulsData(new GetBlockParam());
+    public int size() {
+        int size = 0;
+        size += Utils.sizeOfSerialize(time);
+        size += Utils.sizeOfSerialize(blockHash);
+        return size;
     }
 
-    public long getStart() {
-        return this.getEventBody().getStart();
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeVarInt(time);
+        stream.writeNulsData(blockHash);
     }
 
-    public long getEnd() {
-        return this.getEventBody().getEnd();
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.time = byteBuffer.readVarInt();
+        this.blockHash = byteBuffer.readHash();
     }
+
+
+    public NulsDigestData getBlockHash() {
+        return blockHash;
+    }
+
+    public void setBlockHash(NulsDigestData blockHash) {
+        this.blockHash = blockHash;
+    }
+
 }

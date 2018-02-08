@@ -25,7 +25,8 @@ package io.nuls.consensus.utils;
 
 import io.nuls.consensus.cache.manager.block.BlockCacheManager;
 import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
-import io.nuls.consensus.entity.TxHashData;
+import io.nuls.consensus.entity.GetSmallBlockParam;
+import io.nuls.consensus.entity.GetTxGroupParam;
 import io.nuls.consensus.event.GetSmallBlockRequest;
 import io.nuls.consensus.event.GetTxGroupRequest;
 import io.nuls.consensus.thread.DataDownloadThread;
@@ -69,7 +70,9 @@ public class DownloadDataUtils {
 
     public void requestSmallBlock(NulsDigestData blockHash, String nodeId) {
         GetSmallBlockRequest request = new GetSmallBlockRequest();
-        request.setEventBody(blockHash);
+        GetSmallBlockParam param = new GetSmallBlockParam();
+        param.setBlockHash(blockHash);
+        request.setEventBody(param);
         if (StringUtils.isBlank(nodeId)) {
             eventBroadcaster.broadcastAndCache(request, false);
         } else {
@@ -85,7 +88,7 @@ public class DownloadDataUtils {
 
     public void requestTxGroup(NulsDigestData blockHash, String nodeId) {
         GetTxGroupRequest request = new GetTxGroupRequest();
-        TxHashData data = new TxHashData();
+        GetTxGroupParam data = new GetTxGroupParam();
         data.setBlockHash(blockHash);
         List<NulsDigestData> txHashList = new ArrayList<>();
         SmallBlock smb = blockCacheManager.getSmallBlock(blockHash.getDigestHex());

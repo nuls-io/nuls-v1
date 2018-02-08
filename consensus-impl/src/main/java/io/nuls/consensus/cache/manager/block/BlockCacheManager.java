@@ -26,6 +26,7 @@ package io.nuls.consensus.cache.manager.block;
 import io.nuls.cache.util.CacheMap;
 import io.nuls.consensus.constant.ConsensusCacheConstant;
 import io.nuls.consensus.constant.PocConsensusConstant;
+import io.nuls.consensus.entity.GetBlockHeaderParam;
 import io.nuls.consensus.entity.block.BifurcateProcessor;
 import io.nuls.consensus.entity.block.BlockHeaderChain;
 import io.nuls.consensus.entity.block.HeaderDigest;
@@ -93,7 +94,7 @@ public class BlockCacheManager {
             if (height > nextHeight) {
                 headerCacheMap.put(header.getHash().getDigestHex(), header);
                 GetBlockHeaderEvent event = new GetBlockHeaderEvent();
-                event.setEventBody(new BasicTypeData<>(height - 1));
+                event.setEventBody(new GetBlockHeaderParam(height - 1));
                 if (null != sender) {
                     eventBroadcaster.sendToNode(event, sender);
                 }

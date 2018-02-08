@@ -247,6 +247,8 @@ public class Node extends BaseNulsData {
 //            if (checkBroadcastExist(message.getData())) {
 //                return;
 //            }
+            //todo debug
+            Log.info("==recieve:"+event.getClass());
             eventBusService.publishNetworkEvent(event, this.getHash());
         }
     }
