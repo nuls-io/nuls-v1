@@ -69,7 +69,7 @@ public class GetBlocksHashHandler extends AbstractEventHandler<GetBlocksHashRequ
             List<NulsDigestData> resultHashList = new ArrayList<>();
             for (int i = 0; i < list.size(); i++) {
                 long height = i + event.getEventBody().getStart();
-                if (i % event.getEventBody().getSplit() == 0) {
+                if (height % event.getEventBody().getSplit() == 0) {
                     resultHeightList.add(height);
                     resultHashList.add(list.get(i));
                 }
