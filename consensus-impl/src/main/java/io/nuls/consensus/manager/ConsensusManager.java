@@ -151,15 +151,9 @@ public class ConsensusManager implements Runnable {
                 }
             }
         }
-        if (info.getAddress() == null) {
-            try {
-                Thread.sleep(5000L);
-            } catch (InterruptedException e) {
-                Log.error(e);
-            }
-            return;
+        if (info.getAddress() != null) {
+            this.consensusStatusInfo = info;
         }
-        this.consensusStatusInfo = info;
     }
 
     public void joinMeeting() {

@@ -50,12 +50,13 @@ public class BlockMaintenanceThread implements Runnable {
 
     public static final String THREAD_NAME = "block-maintenance";
 
-    private static BlockMaintenanceThread instance  = new BlockMaintenanceThread();;
+    private static BlockMaintenanceThread instance = new BlockMaintenanceThread();
+    ;
 
     private final BlockService blockService = NulsContext.getServiceBean(BlockService.class);
     private boolean success = false;
 
-    private BlockMaintenanceThread(){
+    private BlockMaintenanceThread() {
     }
 
     public static synchronized BlockMaintenanceThread getInstance() {
@@ -68,7 +69,7 @@ public class BlockMaintenanceThread implements Runnable {
         try {
             checkGenesisBlock();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.error(e);
         }
         while (true) {
             try {
@@ -161,13 +162,13 @@ public class BlockMaintenanceThread implements Runnable {
 
     private Block getLocalBestCorrectBlock() {
         Block localBestBlock = this.blockService.getLocalBestBlock();
-        BlockInfo blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(0);
-        if (null == blockInfo || blockInfo.getBestHash() == null) {
-            return localBestBlock;
-        }
         do {
             if (null == localBestBlock || localBestBlock.getHeader().getHeight() <= 1) {
                 break;
+            }
+            BlockInfo blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(0);
+            if (null == blockInfo || blockInfo.getBestHash() == null) {
+                return localBestBlock;
             }
             blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(localBestBlock.getHeader().getHeight());
             if (null == blockInfo || blockInfo.getBestHash() == null) {
