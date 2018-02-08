@@ -98,7 +98,7 @@ public class DistributedBlockInfoRequestUtils {
 
 
     public boolean addBlockHashResponse(String nodeId, BlockHashResponse response) {
-        if (!this.nodeIdList.contains(nodeId)) {
+        if (this.nodeIdList==null||!this.nodeIdList.contains(nodeId)) {
             return false;
         }
         if (!requesting) {
