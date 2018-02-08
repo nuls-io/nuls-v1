@@ -28,6 +28,8 @@ package io.nuls.core.utils.spring.lite.core;
 
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.ModuleStatusEnum;
+import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.module.BaseModuleBootstrap;
 import io.nuls.core.module.manager.ServiceManager;
@@ -77,7 +79,7 @@ public class ModularServiceMethodInterceptor implements MethodInterceptor {
             if (module == null) {
                 throw new BeanStatusException(ErrorCode.DATA_ERROR, "Access to a service of an un start module!" + method.toString());
             }
-            if (module.getStatus() != ModuleStatusEnum.STARTING && module.getStatus() != ModuleStatusEnum.RUNNING) {
+            if (module.getModuleId()!= NulsConstant.MODULE_ID_MICROKERNEL&&module.getStatus() != ModuleStatusEnum.STARTING && module.getStatus() != ModuleStatusEnum.RUNNING) {
                 throw new BeanStatusException(ErrorCode.DATA_ERROR, "Access to a service of an un start module!" + method.toString());
             }
             boolean isOk = SpringLiteContext.checkBeanOk(obj);
