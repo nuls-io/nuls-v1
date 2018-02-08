@@ -54,7 +54,7 @@ public class ModularServiceMethodInterceptor implements MethodInterceptor {
         Log.debug(method.toString());
         threadLocal.set(0);
         Throwable throwable = null;
-        while (threadLocal.get() < 30) {
+        while (threadLocal.get() < 100) {
             try {
                 return this.doIntercept(obj, method, params, methodProxy);
             } catch (BeanStatusException e) {

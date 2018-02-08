@@ -37,6 +37,7 @@ import io.nuls.consensus.service.impl.PocConsensusServiceImpl;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.service.intf.ConsensusService;
 import io.nuls.consensus.service.tx.*;
+import io.nuls.consensus.thread.BlockMaintenanceThread;
 import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
@@ -63,18 +64,14 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
     public void init() {
         PocBlockValidatorManager.initHeaderValidators();
         PocBlockValidatorManager.initBlockValidators();
-        initTransactions();
-        this.registerService(BlockServiceImpl.class );
-        this.registerService(PocConsensusServiceImpl.class );
-
-    }
-
-    private void initTransactions() {
         this.registerTransaction(TransactionConstant.TX_TYPE_REGISTER_AGENT, RegisterAgentTransaction.class, new RegisterAgentTxService());
         this.registerTransaction(TransactionConstant.TX_TYPE_RED_PUNISH, RedPunishTransaction.class, new RedPunishTxService());
         this.registerTransaction(TransactionConstant.TX_TYPE_YELLOW_PUNISH, YellowPunishTransaction.class, new YellowPunishTxService());
         this.registerTransaction(TransactionConstant.TX_TYPE_JOIN_CONSENSUS, PocJoinConsensusTransaction.class, new JoinConsensusTxService());
         this.registerTransaction(TransactionConstant.TX_TYPE_EXIT_CONSENSUS, PocExitConsensusTransaction.class, new ExitConsensusTxService());
+        this.registerService(BlockServiceImpl.class );
+        this.registerService(PocConsensusServiceImpl.class );
+
     }
 
     @Override
@@ -82,6 +79,18 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
         consensusManager.init();
         NulsContext.getInstance().setBestBlock(NulsContext.getServiceBean(BlockService.class).getLocalBestBlock());
         this.consensusManager.startMaintenanceWork();
+        while (true){
+            if(BlockMaintenanceThread.getInstance().isSuccess()){
+                break;
+            }
+            try {
+                Log.info("synchronization blocks5 is not completed");
+                Thread.sleep(1000L);
+            } catch (InterruptedException e) {
+                Log.error(e);
+            }
+        }
+
         ConsensusStatusInfo statusInfo = consensusManager.getConsensusStatusInfo();
         if (null!=statusInfo&&statusInfo.getStatus() != ConsensusStatusEnum.NOT_IN.getCode()) {
             consensusManager.joinMeeting();
