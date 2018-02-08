@@ -72,7 +72,6 @@ public abstract class BaseNulsData implements Serializable,Cloneable {
      */
     public final byte[] serialize() throws IOException {
         ByteArrayOutputStream bos = null;
-
         try {
             int size = size();
             bos = new UnsafeByteArrayOutputStream(size);

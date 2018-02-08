@@ -27,6 +27,7 @@ import io.nuls.core.event.BaseEvent;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeGroup;
+import io.nuls.network.entity.param.AbstractNetworkParam;
 
 /**
  * @author vivi
@@ -97,5 +98,7 @@ public interface NetworkService {
     BroadcastResult sendToGroup(byte[] data, String groupName, String excludeNodeId);
 
     BroadcastResult sendToGroup(String area, byte[] data, String groupName, String excludeNodeId);
+
+    AbstractNetworkParam getNetworkParam();
 
 }

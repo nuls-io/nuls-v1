@@ -43,6 +43,7 @@ public class DevNetworkParam extends AbstractNetworkParam {
     private static DevNetworkParam instance;
 
     private DevNetworkParam() {
+        this.type = NetworkType.DEV;
         this.maxInCount = NetworkContext.getNetworkConfig().getPropValue(NetworkConstant.NETWORK_NODE_MAX_IN, 20);
         this.maxOutCount = NetworkContext.getNetworkConfig().getPropValue(NetworkConstant.NETWORK_NODE_MAX_OUT, 10);
         try {

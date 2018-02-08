@@ -266,5 +266,9 @@ public class NetworkServiceImpl implements NetworkService {
         return MainNetworkParam.get();
     }
 
+    @Override
+    public AbstractNetworkParam getNetworkParam() {
+        return network;
+    }
 }
 
