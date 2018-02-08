@@ -77,7 +77,7 @@
         <![CDATA[
         where height >=#{startHeight,jdbcType=BIGINT}
         and height <= #{endHeight,jdbcType=BIGINT}
-        and mod((height-startHeight),#{split,jdbcType=BIGINT})=0
+        and mod((height-#{startHeight,jdbcType=BIGINT}),#{split,jdbcType=BIGINT})=0
         ]]>
     </select>
     <select id="getSumOfRoundIndexOfYellowPunish" resultType="long" parameterType="java.util.Map">

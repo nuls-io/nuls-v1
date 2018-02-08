@@ -80,17 +80,17 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
         consensusManager.init();
         NulsContext.getInstance().setBestBlock(NulsContext.getServiceBean(BlockService.class).getLocalBestBlock());
         this.consensusManager.startMaintenanceWork();
-        while (true) {
-            if (BlockMaintenanceThread.getInstance().isSuccess()) {
-                break;
-            }
-            try {
-                Log.info("synchronization blocks5 is not completed");
-                Thread.sleep(1000L);
-            } catch (InterruptedException e) {
-                Log.error(e);
-            }
-        }
+//        while (true) {
+//            if (BlockMaintenanceThread.getInstance().isSuccess()) {
+//                break;
+//            }
+//            try {
+//                Log.info("synchronization blocks5 is not completed");
+//                Thread.sleep(1000L);
+//            } catch (InterruptedException e) {
+//                Log.error(e);
+//            }
+//        }
         consensusManager.joinMeeting();
         consensusManager.startPersistenceWork();
 
