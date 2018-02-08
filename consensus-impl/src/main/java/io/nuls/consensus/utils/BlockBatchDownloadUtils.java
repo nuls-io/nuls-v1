@@ -66,7 +66,7 @@ public class BlockBatchDownloadUtils {
     private static final BlockBatchDownloadUtils INSTANCE = new BlockBatchDownloadUtils();
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
     private QueueService<String> queueService = NulsContext.getServiceBean(QueueService.class);
-    private BlockCacheManager blockCacheManager = NulsContext.getServiceBean(BlockCacheManager.class);
+    private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
 

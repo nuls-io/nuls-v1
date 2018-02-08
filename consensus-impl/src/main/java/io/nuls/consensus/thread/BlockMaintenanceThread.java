@@ -101,7 +101,7 @@ public class BlockMaintenanceThread implements Runnable {
             }
             startHeight = localBestBlock.getHeader().getHeight() + 1;
             long interval = TimeService.currentTimeMillis() - localBestBlock.getHeader().getTime();
-            if (interval < (PocConsensusConstant.BLOCK_TIME_INTERVAL * 2)) {
+            if (interval < (PocConsensusConstant.BLOCK_TIME_INTERVAL * 2000)) {
                 doit = false;
                 try {
                     Thread.sleep(10000L);
