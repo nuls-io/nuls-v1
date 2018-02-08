@@ -110,7 +110,7 @@ public class BlockMaintenanceThread implements Runnable {
                 }
                 break;
             }
-            blockInfo = BEST_HEIGHT_FROM_NET.request(-1);
+            blockInfo = BEST_HEIGHT_FROM_NET.request(0);
             if (null == blockInfo) {
                 this.success = false;
                 break;
@@ -125,7 +125,6 @@ public class BlockMaintenanceThread implements Runnable {
             throw new NulsRuntimeException(ErrorCode.NET_MESSAGE_ERROR, "cannot get best block info!");
         }
         if (doit) {
-
             downloadBlocks(blockInfo.getNodeIdList(), startHeight, blockInfo.getBestHeight(), blockInfo.getBestHash().getDigestHex());
         }
         this.success = true;

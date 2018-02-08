@@ -88,6 +88,8 @@ public class BlockBatchDownloadUtils {
 
     private Lock lock = new ReentrantLock();
 
+    private boolean working = false;
+
     private BlockBatchDownloadUtils() {
     }
 
@@ -107,6 +109,10 @@ public class BlockBatchDownloadUtils {
 
     public void request(List<String> nodeIdList, long startHeight, long endHeight) throws InterruptedException {
         lock.lock();
+        if(working){
+            return;
+        }
+        working = true;
         this.init(nodeIdList);
         blocksHash = DistributedBlockInfoRequestUtils.getInstance().request(startHeight, endHeight, DOWNLOAD_BLOCKS_PER_TIME);
         request(startHeight, endHeight);
@@ -281,10 +287,15 @@ public class BlockBatchDownloadUtils {
             roundList.remove(0);
             startDownload();
         }
+        working = false;
         lock.unlock();
     }
 
     public boolean isFinished() {
         return finished;
+    }
+
+    public boolean isWorking() {
+        return working;
     }
 }

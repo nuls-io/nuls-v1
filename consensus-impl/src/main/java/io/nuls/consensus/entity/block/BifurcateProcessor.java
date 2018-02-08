@@ -98,7 +98,7 @@ public class BifurcateProcessor {
 
 
     public long getBestHeight() {
-        if(bestHeight==0){
+        if(bestHeight==0&&null!=NulsContext.getInstance().getBestBlock()){
             bestHeight = NulsContext.getInstance().getBestBlock().getHeader().getHeight();
         }
         return bestHeight;
