@@ -114,7 +114,12 @@ public class BlockBatchDownloadUtils {
         }
         working = true;
         this.init(nodeIdList);
-        blocksHash = DistributedBlockInfoRequestUtils.getInstance().request(startHeight, endHeight, DOWNLOAD_BLOCKS_PER_TIME);
+        try{
+            blocksHash = DistributedBlockInfoRequestUtils.getInstance().request(startHeight, endHeight, DOWNLOAD_BLOCKS_PER_TIME);
+        }catch (Exception e){
+            working = false;
+            return;
+        }
         request(startHeight, endHeight);
     }
 
