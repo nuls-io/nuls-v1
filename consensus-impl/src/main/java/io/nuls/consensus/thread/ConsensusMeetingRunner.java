@@ -111,13 +111,13 @@ public class ConsensusMeetingRunner implements Runnable {
         }
         this.running = true;
         while (running) {
-            while (!BlockMaintenanceThread.getInstance().isSuccess()){
-                try {
-                    Thread.sleep(1000L);
-                } catch (InterruptedException e) {
-                    Log.error(e);
-                }
-            }
+//todo            while (!BlockMaintenanceThread.getInstance().isSuccess()){
+//                try {
+//                    Thread.sleep(1000L);
+//                } catch (InterruptedException e) {
+//                    Log.error(e);
+//                }
+//            }
             try {
                 nextRound();
             } catch (Exception e) {
@@ -129,7 +129,7 @@ public class ConsensusMeetingRunner implements Runnable {
     }
 
     private void nextRound() {
-        if (this.consensusManager.getConsensusStatusInfo() == null || this.consensusManager.getConsensusStatusInfo().getAddress() == null) {
+        if (this.consensusManager.getConsensusStatusInfo() == null) {
             return;
         }
         PocMeetingRound currentRound = calcRound();
@@ -178,7 +178,9 @@ public class ConsensusMeetingRunner implements Runnable {
         currentRound.setEndTime(currentRound.getStartTime() + currentRound.getMemberCount() * PocConsensusConstant.BLOCK_TIME_INTERVAL * 1000L);
         cg.setDelegateList(myDelegateList);
         currentRound.setConsensusGroup(cg);
-        startMeeting();
+        if (ConsensusStatusEnum.IN.getCode() == consensusManager.getConsensusStatusInfo().getStatus()){
+            startMeeting();
+        }
     }
 
     private void startMeeting() {

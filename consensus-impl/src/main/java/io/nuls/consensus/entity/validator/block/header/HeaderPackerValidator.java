@@ -69,6 +69,9 @@ public class HeaderPackerValidator implements NulsDataValidator<BlockHeader> {
             Log.error(e);
             return ValidateResult.getFailedResult(e.getMessage());
         }
+        if(null==currentRound){
+            return ValidateResult.getFailedResult("wait for consensus meeting!");
+        }
         if (currentRound.getIndex() == roundData.getRoundIndex() && currentRound.getMemberCount() > (roundData.getPackingIndexOfRound() + 1)) {
             if (currentRound.indexOf(header.getPackingAddress()) <= roundData.getPackingIndexOfRound()) {
                 return ValidateResult.getFailedResult(ERROR_MESSAGE);

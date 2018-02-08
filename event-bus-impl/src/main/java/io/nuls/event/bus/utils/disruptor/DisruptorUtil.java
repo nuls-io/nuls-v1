@@ -74,12 +74,12 @@ public class DisruptorUtil<T extends DisruptorEvent> {
         Disruptor<DisruptorEvent> disruptor = new Disruptor<DisruptorEvent>(EVENT_FACTORY,
                 ringBufferSize, new NulsThreadFactory(ModuleService.getInstance().getModuleId(EventBusModuleBootstrap.class),name), ProducerType.SINGLE,
                 new SleepingWaitStrategy());
-        disruptor.handleEventsWith(new EventHandler<DisruptorEvent>() {
-            @Override
-            public void onEvent(DisruptorEvent disruptorEvent, long l, boolean b) throws Exception {
-                Log.debug(disruptorEvent.getData() + "");
-            }
-        });
+//        disruptor.handleEventsWith(new EventHandler<DisruptorEvent>() {
+//            @Override
+//            public void onEvent(DisruptorEvent disruptorEvent, long l, boolean b) throws Exception {
+//                Log.debug(disruptorEvent.getData() + "");
+//            }
+//        });
         DISRUPTOR_MAP.put(name, disruptor);
     }
 

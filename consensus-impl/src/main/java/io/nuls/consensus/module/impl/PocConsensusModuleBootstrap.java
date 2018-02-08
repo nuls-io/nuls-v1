@@ -91,11 +91,7 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
                 Log.error(e);
             }
         }
-
-        ConsensusStatusInfo statusInfo = consensusManager.getConsensusStatusInfo();
-        if (null != statusInfo && statusInfo.getStatus() != ConsensusStatusEnum.NOT_IN.getCode()) {
-            consensusManager.joinMeeting();
-        }
+        consensusManager.joinMeeting();
         consensusManager.startPersistenceWork();
 
         Log.info("the POC consensus module is started!");
