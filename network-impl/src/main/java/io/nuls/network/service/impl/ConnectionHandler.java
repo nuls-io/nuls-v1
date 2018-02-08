@@ -122,7 +122,7 @@ public class ConnectionHandler implements MessageWriter {
             bytesToWrite.offer(ByteBuffer.wrap(message));
             setWriteOps();
         } catch (Exception e){
-            Log.warn("Error handling SelectionKey: {}", e);
+//            Log.warn("Error handling SelectionKey: {}", e);
             key.cancel();
             node.destroy();
             NulsContext.getServiceBean(NetworkService.class).removeNode(node.getHash());
@@ -180,7 +180,7 @@ public class ConnectionHandler implements MessageWriter {
         } catch (Exception e) {
             // This can happen eg if the channel closes while the thread is about to get killed
             // (ClosedByInterruptException), or if handler.connection.receiveBytes throws something
-            Log.warn("Error handling SelectionKey: {}", e);
+//            Log.warn("Error handling SelectionKey: {}", e);
             key.cancel();
             handler.node.destroy();
             NulsContext.getServiceBean(NetworkService.class).removeNode(handler.node.getHash());

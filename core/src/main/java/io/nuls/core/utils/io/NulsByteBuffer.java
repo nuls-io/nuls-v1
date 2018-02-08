@@ -38,6 +38,7 @@ import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.log.Log;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 
 /**
  * @author Niels
@@ -207,8 +208,17 @@ public class NulsByteBuffer {
     }
 
     public <T extends BaseNulsData> T readNulsData(T nulsData) throws NulsException {
-        if (payload == null || payload.length == 0 || NulsConstant.PLACE_HOLDER == payload[0]) {
+
+        if (payload == null || payload.length == 0 ) {
             return null;
+        }
+        if(payload.length>=4){
+            byte[] byte4 = new byte[4];
+            System.arraycopy(payload,0,byte4,0,4);
+            if(Arrays.equals(NulsConstant.PLACE_HOLDER,byte4)){
+                return null;
+            }
+
         }
         int length = payload.length - cursor;
         byte[] bytes = new byte[length];
