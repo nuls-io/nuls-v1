@@ -264,4 +264,9 @@ public final class QueueManager {
         service.scheduleAtFixedRate(new StatusLogThread(), 0, QueueManager.getLatelySecond(), TimeUnit.SECONDS);
         Running = true;
     }
+
+    public static boolean exist(String queueName) {
+        AbstractNulsQueue queue = QUEUES_MAP.get(queueName);
+        return null != queue;
+    }
 }

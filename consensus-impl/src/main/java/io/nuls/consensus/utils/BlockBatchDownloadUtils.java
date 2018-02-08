@@ -29,15 +29,11 @@ import io.nuls.consensus.entity.DownloadRound;
 import io.nuls.consensus.entity.NodeDownloadingStatus;
 import io.nuls.consensus.event.GetBlockRequest;
 import io.nuls.consensus.cache.manager.block.BlockCacheManager;
-import io.nuls.consensus.service.impl.BlockServiceImpl;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Result;
-import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.queue.service.impl.QueueService;
 import io.nuls.core.utils.str.StringUtils;
@@ -99,7 +95,9 @@ public class BlockBatchDownloadUtils {
 
     private void init(List<String> nodeIdList) {
         this.nodeIdList = nodeIdList;
-        this.queueService.createQueue(queueId, (long) nodeIdList.size(), false);
+        if(!this.queueService.exist(queueId)){
+            this.queueService.createQueue(queueId, (long) nodeIdList.size(), false);
+        }
         for (String nodeId : nodeIdList) {
             this.queueService.offer(queueId, nodeId);
         }
