@@ -83,9 +83,10 @@ public class NetworkServiceImpl implements NetworkService {
     @Override
     public void init() {
         connectionManager.init();
-        byte[] magicNumber = new byte[4];
+        /*byte[] magicNumber = new byte[4];
         Utils.int32ToByteArrayLE(this.getNetworkParam().packetMagic(), magicNumber, 0);
         NulsContext.setMagicNumber(magicNumber);
+        */
     }
 
     @Override

@@ -32,7 +32,7 @@ import io.nuls.core.context.NulsContext;
  * @date 2017/9/26
  */
 public interface NulsConstant {
-    byte[] PLACE_HOLDER = NulsContext.getMagicNumber();
+    byte[] PLACE_HOLDER = new byte[]{(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF}; //NulsContext.getMagicNumber();
 
     String USER_CONFIG_FILE = "nuls.ini";
     String MODULES_CONFIG_FILE = "modules.ini";
