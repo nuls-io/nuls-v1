@@ -111,6 +111,13 @@ public class ConsensusMeetingRunner implements Runnable {
         }
         this.running = true;
         while (running) {
+            while (!BlockMaintenanceThread.getInstance().isSuccess()){
+                try {
+                    Thread.sleep(1000L);
+                } catch (InterruptedException e) {
+                    Log.error(e);
+                }
+            }
             try {
                 nextRound();
             } catch (Exception e) {

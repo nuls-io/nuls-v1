@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -53,6 +53,7 @@ public class BlockMaintenanceThread implements Runnable {
     private static BlockMaintenanceThread instance;
 
     private final BlockService blockService = NulsContext.getServiceBean(BlockService.class);
+    private boolean success = false;
 
     public static synchronized BlockMaintenanceThread getInstance() {
         if (instance == null) {
@@ -84,6 +85,7 @@ public class BlockMaintenanceThread implements Runnable {
     }
 
     public synchronized void syncBlock() {
+
         Block localBestBlock = getLocalBestCorrectBlock();
         boolean doit = false;
         long startHeight = 0;
@@ -91,6 +93,7 @@ public class BlockMaintenanceThread implements Runnable {
         do {
             if (null == localBestBlock) {
                 doit = true;
+                this.success = false;
                 blockInfo = BEST_HEIGHT_FROM_NET.request(-1);
                 break;
             }
@@ -107,9 +110,11 @@ public class BlockMaintenanceThread implements Runnable {
             }
             blockInfo = BEST_HEIGHT_FROM_NET.request(-1);
             if (null == blockInfo) {
+                this.success = false;
                 break;
             }
             if (blockInfo.getBestHeight() > localBestBlock.getHeader().getHeight()) {
+                this.success = false;
                 doit = true;
                 break;
             }
@@ -118,8 +123,10 @@ public class BlockMaintenanceThread implements Runnable {
             throw new NulsRuntimeException(ErrorCode.NET_MESSAGE_ERROR, "cannot get best block info!");
         }
         if (doit) {
+
             downloadBlocks(blockInfo.getNodeIdList(), startHeight, blockInfo.getBestHeight(), blockInfo.getBestHash().getDigestHex());
         }
+        this.success = true;
     }
 
 
@@ -154,7 +161,7 @@ public class BlockMaintenanceThread implements Runnable {
     private Block getLocalBestCorrectBlock() {
         Block localBestBlock = this.blockService.getLocalBestBlock();
         BlockInfo blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(0);
-        if(null == blockInfo || blockInfo.getBestHash() == null){
+        if (null == blockInfo || blockInfo.getBestHash() == null) {
             return localBestBlock;
         }
         do {
@@ -200,5 +207,9 @@ public class BlockMaintenanceThread implements Runnable {
         if (previousRb) {
             rollbackBlock(height);
         }
+    }
+
+    public boolean isSuccess() {
+        return success;
     }
 }

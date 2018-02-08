@@ -172,7 +172,9 @@ public class PocConsensusServiceImpl implements ConsensusService {
     public Na getTxFee(int txType) {
         long blockHeight = blockService.getLocalHeight();
         if (txType == TransactionConstant.TX_TYPE_COIN_BASE ||
-                txType == TransactionConstant.TX_TYPE_SMALL_CHANGE) {
+                txType == TransactionConstant.TX_TYPE_SMALL_CHANGE ||
+                txType == TransactionConstant.TX_TYPE_EXIT_CONSENSUS
+                ) {
             return Na.ZERO;
         }
         long x = blockHeight / PocConsensusConstant.BLOCK_COUNT_OF_YEAR + 1;

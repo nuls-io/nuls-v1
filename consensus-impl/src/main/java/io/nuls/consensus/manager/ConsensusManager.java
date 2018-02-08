@@ -187,6 +187,7 @@ public class ConsensusManager implements Runnable {
         try {
             blockMaintenanceThread.checkGenesisBlock();
             blockMaintenanceThread.syncBlock();
+
         } catch (Exception e) {
             Log.error(e.getMessage());
         } finally {
