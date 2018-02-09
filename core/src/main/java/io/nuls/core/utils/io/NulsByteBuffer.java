@@ -214,8 +214,9 @@ public class NulsByteBuffer {
         }
         if(payload.length>=4){
             byte[] byte4 = new byte[4];
-            System.arraycopy(payload,0,byte4,0,4);
+            System.arraycopy(payload,cursor,byte4,0,4);
             if(Arrays.equals(NulsConstant.PLACE_HOLDER,byte4)){
+                cursor+=4;
                 return null;
             }
 
