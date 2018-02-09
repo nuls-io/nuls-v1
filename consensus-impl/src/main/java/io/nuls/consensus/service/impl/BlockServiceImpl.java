@@ -154,7 +154,7 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public List<NulsDigestData> getBlockHashList(long startHeight, long endHeight, long split) {
+    public List<BlockHeader> getBlockHashList(long startHeight, long endHeight, long split) {
         return blockStorageService.getBlockHashList(startHeight, endHeight, split);
     }
 
