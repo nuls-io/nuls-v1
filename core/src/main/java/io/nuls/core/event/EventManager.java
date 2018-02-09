@@ -55,10 +55,8 @@ public class EventManager {
             }
             BaseEvent event = clazz.newInstance();
             putEvent(event.getHeader().getModuleId(), event.getHeader().getEventType(), clazz);
-        } catch (InstantiationException e) {
-            Log.error(e);
-        } catch (IllegalAccessException e) {
-            Log.error(e);
+        } catch (Exception e) {
+            Log.warn(e.getMessage());
         }
     }
 
