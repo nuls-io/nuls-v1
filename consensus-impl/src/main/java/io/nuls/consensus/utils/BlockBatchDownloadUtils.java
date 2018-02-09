@@ -126,7 +126,11 @@ public class BlockBatchDownloadUtils {
         roundList.clear();
         for (long i = startHeight; i <= endHeight; ) {
             long start = i;
-            long end = i + DOWNLOAD_BLOCKS_PER_TIME * DOWNLOAD_NODE_COUNT;
+            int nodeCount = DOWNLOAD_NODE_COUNT;
+            if(this.nodeIdList.size()<DOWNLOAD_NODE_COUNT){
+                nodeCount = nodeIdList.size();
+            }
+            long end = i + DOWNLOAD_BLOCKS_PER_TIME * nodeCount;
             if (end > endHeight) {
                 end = endHeight;
             }
