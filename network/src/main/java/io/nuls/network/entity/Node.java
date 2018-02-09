@@ -224,14 +224,12 @@ public class Node extends BaseNulsData {
         try {
             event = EventManager.getInstance(message.getData());
         } catch (Exception e) {
-            //todo
-            Log.error(e);
+            Log.error(e.getMessage());
             event = null;
         }
         if (event == null) {
             return;
         }
-        System.out.println(event.getClass()+"=="+event.getEventBody());
         if (isNetworkEvent(event)) {
             if (this.status != Node.HANDSHAKE && !isHandShakeMessage(event)) {
                 return;
@@ -244,11 +242,6 @@ public class Node extends BaseNulsData {
             if (this.status != Node.HANDSHAKE) {
                 return;
             }
-//            if (checkBroadcastExist(message.getData())) {
-//                return;
-//            }
-            //todo debug
-            Log.info("==recieve:"+event.getClass());
             eventBusService.publishNetworkEvent(event, this.getHash());
         }
     }
