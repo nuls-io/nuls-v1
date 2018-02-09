@@ -75,7 +75,8 @@ public class BlockMaintenanceThread implements Runnable {
             try {
                 syncBlock();
             } catch (Exception e) {
-                Log.error(e.getMessage());
+                //todo  temporary
+                Log.error(e);
                 try {
                     Thread.sleep(10000L);
                 } catch (InterruptedException e1) {

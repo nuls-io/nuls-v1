@@ -94,7 +94,7 @@ public class BlockCacheManager {
             if (height > nextHeight) {
                 headerCacheMap.put(header.getHash().getDigestHex(), header);
                 GetBlockHeaderEvent event = new GetBlockHeaderEvent();
-                event.setEventBody(new GetBlockHeaderParam(height - 1));
+                event.setEventBody(new GetBlockHeaderParam(nextHeight));
                 if (null != sender) {
                     eventBroadcaster.sendToNode(event, sender);
                 }
