@@ -231,7 +231,7 @@ public class Node extends BaseNulsData {
         if (event == null) {
             return;
         }
-
+        System.out.println(event.getClass()+"=="+event.getEventBody());
         if (isNetworkEvent(event)) {
             if (this.status != Node.HANDSHAKE && !isHandShakeMessage(event)) {
                 return;

@@ -72,6 +72,11 @@ public class GetBlocksHashHandler extends AbstractEventHandler<GetBlocksHashRequ
                 resultHeightList.add(list.get(i).getHeight());
                 resultHashList.add(list.get(i).getHash());
             }
+            if(resultHeightList.get(list.size()-1)<event.getEventBody().getEnd()){
+                Block block = this.blockService.getBlock(event.getEventBody().getEnd());
+                resultHeightList.add(block.getHeader().getHeight());
+                resultHashList.add(block.getHeader().getHash());
+            }
             final int size = 50000;
             for (int i = 0; i < resultHashList.size(); i += size) {
                 BlockHashResponse response = new BlockHashResponse();
@@ -83,6 +88,7 @@ public class GetBlocksHashHandler extends AbstractEventHandler<GetBlocksHashRequ
                 response.setHashList(resultHashList.subList(i, end));
                 sendResponse(response, fromId);
             }
+            System.out.println();
         }
     }
 
