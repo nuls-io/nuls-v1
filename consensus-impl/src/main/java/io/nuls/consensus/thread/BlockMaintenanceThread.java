@@ -123,7 +123,8 @@ public class BlockMaintenanceThread implements Runnable {
             }
         } while (false);
         if (null == blockInfo) {
-            throw new NulsRuntimeException(ErrorCode.NET_MESSAGE_ERROR, "cannot get best block info!");
+            Log.error("cannot get best block info!");
+            return;
         }
         if (doit) {
             downloadBlocks(blockInfo.getNodeIdList(), startHeight, blockInfo.getBestHeight(), blockInfo.getBestHash().getDigestHex());

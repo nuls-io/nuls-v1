@@ -52,7 +52,7 @@ public class GetBlocksHashHandler extends AbstractEventHandler<GetBlocksHashRequ
         if (b) {
             BlockHashResponse response = new BlockHashResponse();
             Block block;
-            if (event.getEventBody().getEnd() == 0) {
+            if (event.getEventBody().getEnd() <= 0) {
                 block = blockService.getLocalBestBlock();
             } else {
                 block = blockService.getBlock(event.getEventBody().getEnd());
