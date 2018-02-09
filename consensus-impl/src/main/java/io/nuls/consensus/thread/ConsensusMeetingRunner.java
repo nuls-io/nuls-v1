@@ -263,6 +263,28 @@ public class ConsensusMeetingRunner implements Runnable {
         BlockHeaderEvent event = new BlockHeaderEvent();
         event.setEventBody(newBlock.getHeader());
         eventBroadcaster.broadcastAndCache(event, false);
+
+        test(newBlock);
+    }
+
+    private void test(Block newBlock) {
+        try {
+//            byte[] bytes = newBlock.serialize();
+//            Block block = new Block();
+//            block.parse(bytes);
+//            System.out.println(newBlock.getHeader().getHash());
+//            System.out.println(block.getHeader().getHash());
+            byte[] bytes = newBlock.getTxs().get(0).serialize();
+            CoinBaseTransaction tx = new CoinBaseTransaction();
+            tx.parse(bytes);
+            System.out.println(newBlock.getTxs().get(0).getHash().getDigestHex());
+            System.out.println(tx.getHash().getDigestHex());
+        } catch (IOException e) {
+            Log.error(e);
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+
     }
 
     /**

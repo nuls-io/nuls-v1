@@ -212,16 +212,18 @@ public class NulsByteBuffer {
         if (payload == null || payload.length == 0 ) {
             return null;
         }
-        if(payload.length>=4){
-            byte[] byte4 = new byte[4];
-            System.arraycopy(payload,cursor,byte4,0,4);
+        int length = payload.length - cursor;
+       int placeHolderLength = NulsConstant.PLACE_HOLDER.length;
+        if(length>=placeHolderLength){
+            byte[] byte4 = new byte[placeHolderLength];
+            System.arraycopy(payload,cursor,byte4,0,placeHolderLength);
             if(Arrays.equals(NulsConstant.PLACE_HOLDER,byte4)){
-                cursor+=4;
+                cursor+=placeHolderLength;
                 return null;
             }
 
         }
-        int length = payload.length - cursor;
+
         byte[] bytes = new byte[length];
         System.arraycopy(payload, cursor, bytes, 0, length);
         nulsData.parse(bytes);
