@@ -126,7 +126,11 @@ public class BlockBatchDownloadUtils {
         roundList.clear();
         for (long i = startHeight; i <= endHeight; ) {
             long start = i;
-            long end = i + DOWNLOAD_BLOCKS_PER_TIME * DOWNLOAD_NODE_COUNT;
+            int nodeCount = DOWNLOAD_NODE_COUNT;
+            if(this.nodeIdList.size()<DOWNLOAD_NODE_COUNT){
+                nodeCount = nodeIdList.size();
+            }
+            long end = i + DOWNLOAD_BLOCKS_PER_TIME * nodeCount;
             if (end > endHeight) {
                 end = endHeight;
             }
@@ -148,13 +152,17 @@ public class BlockBatchDownloadUtils {
         while (true) {
             try {
                 Set<String> nodeSet = new HashSet<>();
-                Random random = new Random();
-                while (true) {
-                    if (nodeSet.size() >= DOWNLOAD_NODE_COUNT) {
-                        break;
+                if (this.nodeIdList.size() <= DOWNLOAD_NODE_COUNT) {
+                    nodeSet.addAll(this.nodeIdList);
+                } else {
+                    Random random = new Random();
+                    while (true) {
+                        if (nodeSet.size() >= DOWNLOAD_NODE_COUNT) {
+                            break;
+                        }
+                        int index = random.nextInt(nodeIdList.size());
+                        nodeSet.add(this.nodeIdList.get(index));
                     }
-                    int index = random.nextInt(nodeIdList.size() - 1) % (nodeIdList.size());
-                    nodeSet.add(this.nodeIdList.get(index));
                 }
                 List<String> roundNodeList = new ArrayList<>(nodeSet);
                 long end = 0;
