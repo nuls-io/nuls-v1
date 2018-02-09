@@ -88,7 +88,7 @@ public class DistributedBlockInfoRequestUtils {
         this.startTime = TimeService.currentTimeMillis();
         nodeIdList = this.eventBroadcaster.broadcastAndCache(event, false);
         if (nodeIdList.isEmpty()) {
-            Log.error("get best height from net faild!");
+//            Log.error("get best height from net faild!");
             lock.unlock();
             return null;
         }

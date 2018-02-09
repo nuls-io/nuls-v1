@@ -82,7 +82,7 @@ public class Block extends BaseNulsData implements NulsCloneable {
         header = new BlockHeader();
         header.parse(byteBuffer);
         try {
-            txs = TransactionManager.getInstances(byteBuffer);
+            txs = TransactionManager.getInstances(byteBuffer,header.getTxCount());
         } catch (Exception e) {
             throw new NulsRuntimeException(ErrorCode.PARSE_OBJECT_ERROR);
         }
