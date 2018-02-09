@@ -110,7 +110,9 @@ public class UtxoOutput extends BaseNulsData {
         address = byteBuffer.readByLengthByte();
         lockTime = byteBuffer.readInt64();
         scriptBytes = byteBuffer.readByLengthByte();
-        script = new Script(scriptBytes);
+        if(null!=scriptBytes){
+            script = new Script(scriptBytes);
+        }
     }
 
 

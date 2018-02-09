@@ -53,7 +53,8 @@ import java.util.concurrent.locks.ReentrantLock;
 public class BlockBatchDownloadUtils {
 
     private static final int DOWNLOAD_NODE_COUNT = 10;
-    private static final int DOWNLOAD_BLOCKS_PER_TIME = 10;
+    //todo
+    private static final int DOWNLOAD_BLOCKS_PER_TIME = 1;
     /**
      * unit:ms
      */
