@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -28,6 +28,7 @@ import io.nuls.consensus.event.BlocksHashEvent;
 import io.nuls.consensus.event.GetBlocksHashRequest;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
+import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.context.NulsContext;
 import io.nuls.event.bus.handler.AbstractEventHandler;
@@ -61,18 +62,15 @@ public class GetBlocksHashHandler extends AbstractEventHandler<GetBlocksHashRequ
                 return;
             }
             response.put(block.getHeader().getHeight(), block.getHeader().getHash());
-            sendResponse(response,fromId);
+            sendResponse(response, fromId);
         } else {
             //todo 检查逻辑
-            List<NulsDigestData> list = this.blockService.getBlockHashList(event.getEventBody().getStart(), event.getEventBody().getEnd(), event.getEventBody().getSplit());
+            List<BlockHeader> list = this.blockService.getBlockHashList(event.getEventBody().getStart(), event.getEventBody().getEnd(), event.getEventBody().getSplit());
             List<Long> resultHeightList = new ArrayList<>();
             List<NulsDigestData> resultHashList = new ArrayList<>();
             for (int i = 0; i < list.size(); i++) {
-                long height = i + event.getEventBody().getStart();
-                if (height % event.getEventBody().getSplit() == 0) {
-                    resultHeightList.add(height);
-                    resultHashList.add(list.get(i));
-                }
+                resultHeightList.add(list.get(i).getHeight());
+                resultHashList.add(list.get(i).getHash());
             }
             final int size = 50000;
             for (int i = 0; i < resultHashList.size(); i += size) {
@@ -83,7 +81,7 @@ public class GetBlocksHashHandler extends AbstractEventHandler<GetBlocksHashRequ
                 }
                 response.setHeightList(resultHeightList.subList(i, end));
                 response.setHashList(resultHashList.subList(i, end));
-                sendResponse(response,fromId);
+                sendResponse(response, fromId);
             }
         }
     }
@@ -91,6 +89,6 @@ public class GetBlocksHashHandler extends AbstractEventHandler<GetBlocksHashRequ
     private void sendResponse(BlockHashResponse response, String fromId) {
         BlocksHashEvent event = new BlocksHashEvent();
         event.setEventBody(response);
-        eventBroadcaster.sendToNode(event,fromId);
+        eventBroadcaster.sendToNode(event, fromId);
     }
 }

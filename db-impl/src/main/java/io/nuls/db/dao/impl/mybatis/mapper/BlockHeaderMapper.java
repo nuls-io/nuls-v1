@@ -37,7 +37,7 @@ public interface BlockHeaderMapper extends BaseMapper<String, BlockHeaderPo> {
 
     Long getMaxHeight();
 
-    List<String> getSplitHashList(Map<String, Object> params);
+    List<BlockHeaderPo> getSplitHashList(Map<String, Object> params);
 
     List<Long> getSumOfRoundIndexOfYellowPunish(Map<String, Object> params);
 }

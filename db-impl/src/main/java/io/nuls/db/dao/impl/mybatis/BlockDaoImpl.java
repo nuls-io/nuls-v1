@@ -93,7 +93,7 @@ public class BlockDaoImpl extends BaseDaoImpl<BlockHeaderMapper, String, BlockHe
     }
 
     @Override
-    public List<String> getHashList(long startHeight, long endHeight, long split) {
+    public List<BlockHeaderPo> getHashList(long startHeight, long endHeight, long split) {
         Map<String, Object> params = new HashMap<>();
         params.put("startHeight", startHeight);
         params.put("endHeight", endHeight);

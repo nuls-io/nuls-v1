@@ -67,7 +67,7 @@ public interface BlockService {
 
     void rollbackBlock(long height) throws NulsException;
 
-    List<NulsDigestData> getBlockHashList(long start, long end, long split);
+    List<BlockHeader> getBlockHashList(long start, long end, long split);
 
     BlockHeader getBlockHeader(NulsDigestData hash);
 }

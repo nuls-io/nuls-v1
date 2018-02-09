@@ -141,11 +141,14 @@ public class BlockStorageService {
         headerDao.delete(hash);
     }
 
-    public List<NulsDigestData> getBlockHashList(long startHeight, long endHeight, long split) {
-        List<String> strList = this.headerDao.getHashList(startHeight, endHeight, split);
-        List<NulsDigestData> hashList = new ArrayList<>();
-        for (String hash : strList) {
-            hashList.add(NulsDigestData.fromDigestHex(hash));
+    public List<BlockHeader> getBlockHashList(long startHeight, long endHeight, long split) {
+        List<BlockHeaderPo> strList = this.headerDao.getHashList(startHeight, endHeight, split);
+        List<BlockHeader> hashList = new ArrayList<>();
+        for (BlockHeaderPo po : strList) {
+            BlockHeader header = new BlockHeader();
+            header.setHash(NulsDigestData.fromDigestHex(po.getHash()));
+            header.setHeight(po.getHeight());
+            hashList.add(header);
         }
         return hashList;
     }

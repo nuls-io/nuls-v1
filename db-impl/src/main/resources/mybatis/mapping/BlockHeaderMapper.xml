@@ -72,8 +72,8 @@
     <select id="getMaxHeight" resultType="long">
         select max(height) from block_header
     </select>
-    <select id="getSplitHashList" resultType="java.lang.String" parameterType="java.util.Map">
-        SELECT hash from block_header
+    <select id="getSplitHashList" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT height, hash from block_header
         <![CDATA[
         where height >=#{startHeight,jdbcType=BIGINT}
         and height <= #{endHeight,jdbcType=BIGINT}
