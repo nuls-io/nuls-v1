@@ -145,7 +145,7 @@ public class NulsContext {
                 Log.error(e);
                 return null;
             }
-            return getServiceBean(tClass,l+100L);
+            return getServiceBean(tClass,l+10L);
         }
 
     }
