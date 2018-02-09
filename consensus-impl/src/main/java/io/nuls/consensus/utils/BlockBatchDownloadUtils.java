@@ -148,13 +148,17 @@ public class BlockBatchDownloadUtils {
         while (true) {
             try {
                 Set<String> nodeSet = new HashSet<>();
-                Random random = new Random();
-                while (true) {
-                    if (nodeSet.size() >= DOWNLOAD_NODE_COUNT) {
-                        break;
+                if (this.nodeIdList.size() <= DOWNLOAD_NODE_COUNT) {
+                    nodeSet.addAll(this.nodeIdList);
+                } else {
+                    Random random = new Random();
+                    while (true) {
+                        if (nodeSet.size() >= DOWNLOAD_NODE_COUNT) {
+                            break;
+                        }
+                        int index = random.nextInt(nodeIdList.size());
+                        nodeSet.add(this.nodeIdList.get(index));
                     }
-                    int index = random.nextInt(nodeIdList.size() - 1) % (nodeIdList.size());
-                    nodeSet.add(this.nodeIdList.get(index));
                 }
                 List<String> roundNodeList = new ArrayList<>(nodeSet);
                 long end = 0;
