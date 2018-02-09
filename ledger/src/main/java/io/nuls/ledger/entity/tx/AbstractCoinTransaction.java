@@ -74,14 +74,14 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        super.serializeToStream(stream);
         stream.writeNulsData(coinData);
+        super.serializeToStream(stream);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        super.parse(byteBuffer);
         this.coinData = coinDataProvider.parse(byteBuffer);
+        super.parse(byteBuffer);
     }
 
     public CoinDataProvider getCoinDataProvider() {
