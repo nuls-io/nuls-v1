@@ -81,6 +81,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
     @Override
     public CoinTransferData getTransferData(CoinData coinData) {
         UtxoData utxoData = (UtxoData) coinData;
+        //todo
         return null;
     }
 
