@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -52,8 +52,8 @@ public class BlockCacheManager {
     private static final String HEIGHT_HASH_CACHE = "blocks-height-hash";
     private static final BlockCacheManager INSTANCE = new BlockCacheManager();
 
-    private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
-    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
+    private EventBroadcaster eventBroadcaster;
+    private LedgerService ledgerService;
 
     private CacheMap<String, BlockHeader> headerCacheMap;
     private CacheMap<String, Block> blockCacheMap;
@@ -72,6 +72,8 @@ public class BlockCacheManager {
     }
 
     public void init() {
+        eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
+        ledgerService = NulsContext.getServiceBean(LedgerService.class);
         smallBlockCacheMap = new CacheMap<>(ConsensusCacheConstant.SMALL_BLOCK_CACHE_NAME, 32, ConsensusCacheConstant.LIVE_TIME, 0);
         blockCacheMap = new CacheMap<>(ConsensusCacheConstant.BLOCK_CACHE_NAME, 64, ConsensusCacheConstant.LIVE_TIME, 0);
         headerCacheMap = new CacheMap<>(ConsensusCacheConstant.BLOCK_HEADER_CACHE_NAME, 32, ConsensusCacheConstant.LIVE_TIME, 0);
@@ -250,7 +252,7 @@ public class BlockCacheManager {
 
     public Block getBlock(long height) {
         String hash = getDigestHex(height);
-        if(hash==null){
+        if (hash == null) {
             return null;
         }
         return blockCacheMap.get(hash);
@@ -258,15 +260,15 @@ public class BlockCacheManager {
 
     public BlockHeader getBlockHeader(long height) {
         String hash = getDigestHex(height);
-        if(hash==null){
+        if (hash == null) {
             return null;
         }
         return headerCacheMap.get(hash);
     }
 
-    public String getDigestHex(long height){
+    public String getDigestHex(long height) {
         List<String> hashList = bifurcateProcessor.getHashList(height);
-        if (null == hashList||hashList.isEmpty()||hashList.size()>1) {
+        if (null == hashList || hashList.isEmpty() || hashList.size() > 1) {
             return null;
         }
         return (hashList.get(0));

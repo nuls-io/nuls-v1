@@ -75,10 +75,9 @@ public class BlockMaintenanceThread implements Runnable {
             try {
                 syncBlock();
             } catch (Exception e) {
-                //todo  temporary
-                Log.error(e);
+                Log.error(e.getMessage());
                 try {
-                    Thread.sleep(10000L);
+                    Thread.sleep(PocConsensusConstant.BLOCK_TIME_INTERVAL*1000L);
                 } catch (InterruptedException e1) {
                     Log.error(e1);
                 }
@@ -123,7 +122,11 @@ public class BlockMaintenanceThread implements Runnable {
             }
         } while (false);
         if (null == blockInfo) {
-            Log.error("cannot get best block info!");
+            try {
+                Thread.sleep(100L);
+            } catch (InterruptedException e) {
+                Log.error(e);
+            }
             return;
         }
         if (doit) {
