@@ -28,6 +28,7 @@ import io.nuls.consensus.entity.BlockHashResponse;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.event.BaseEvent;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
 /**
@@ -42,6 +43,7 @@ public class BlocksHashEvent extends BaseEvent<BlockHashResponse> {
 
     @Override
     protected BlockHashResponse parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
+        System.out.println("recieved::::::"+ Hex.encode(byteBuffer.getPayloadByCursor()));
         return byteBuffer.readNulsData(new BlockHashResponse());
     }
 }
