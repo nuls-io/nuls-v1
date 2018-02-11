@@ -198,7 +198,7 @@ public class BlockBatchDownloadUtils {
         if (null == status) {
             return false;
         }
-        if (status.containsHeight(block.getHeader().getHeight())) {
+        if (!status.containsHeight(block.getHeader().getHeight())) {
             return false;
         }
         blockMap.put(block.getHeader().getHeight(), block);
