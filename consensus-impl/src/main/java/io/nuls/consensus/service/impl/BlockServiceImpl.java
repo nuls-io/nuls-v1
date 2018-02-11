@@ -25,10 +25,7 @@ package io.nuls.consensus.service.impl;
 
 import io.nuls.consensus.cache.manager.block.BlockCacheManager;
 import io.nuls.consensus.service.intf.BlockService;
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.BlockHeader;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.chain.entity.*;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -138,6 +135,12 @@ public class BlockServiceImpl implements BlockService {
         }
         blockStorageService.save(block.getHeader());
         ledgerService.saveTxList(block.getTxs());
+        Block bblock = null;
+        try {
+            bblock = blockStorageService.getBlock(block.getHeader().getHash().getDigestHex());
+        } catch (Exception e) {
+            Log.error(e);
+        }
     }
 
 
