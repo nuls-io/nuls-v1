@@ -52,10 +52,13 @@ public class GetBlockHandler extends AbstractEventHandler<GetBlockRequest> {
     public void onEvent(GetBlockRequest event, String fromId) {
         List<Block> blockList = blockService.getBlockList(event.getStart(), event.getEnd());
         for (Block block : blockList) {
+            if(block==null){
+                //todo 排查原因
+                continue;
+            }
             BlockEvent blockEvent = new BlockEvent();
             blockEvent.setEventBody(block);
             eventBroadcaster.sendToNode(blockEvent, fromId);
-            System.out.println("send-height::::::" + block.getHeader().getHeight() + "::::::" + block.getHeader().getHash().getDigestHex());
         }
     }
 
