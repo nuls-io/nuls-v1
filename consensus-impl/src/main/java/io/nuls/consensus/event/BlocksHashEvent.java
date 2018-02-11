@@ -43,7 +43,6 @@ public class BlocksHashEvent extends BaseEvent<BlockHashResponse> {
 
     @Override
     protected BlockHashResponse parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
-        System.out.println("recieved::::::"+ Hex.encode(byteBuffer.getPayloadByCursor()));
         return byteBuffer.readNulsData(new BlockHashResponse());
     }
 }

@@ -90,7 +90,7 @@ public class BlockMaintenanceThread implements Runnable {
 
         Block localBestBlock = getLocalBestCorrectBlock();
         boolean doit = false;
-        long startHeight = 0;
+        long startHeight = 1;
         BlockInfo blockInfo = null;
         do {
             if (null == localBestBlock) {

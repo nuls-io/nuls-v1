@@ -54,7 +54,7 @@ public class BlockBatchDownloadUtils {
 
     private static final int DOWNLOAD_NODE_COUNT = 10;
     //todo
-    private static final int DOWNLOAD_BLOCKS_PER_TIME = 100;
+    private static final int DOWNLOAD_BLOCKS_PER_TIME = 2;
     /**
      * unit:ms
      */
@@ -125,13 +125,14 @@ public class BlockBatchDownloadUtils {
     private void request(long startHeight, long endHeight) throws InterruptedException {
         finished = false;
         roundList.clear();
-        for (long i = startHeight; i <= endHeight; ) {
+        long i = startHeight;
+        while (true) {
             long start = i;
             int nodeCount = DOWNLOAD_NODE_COUNT;
-            if(this.nodeIdList.size()<DOWNLOAD_NODE_COUNT){
+            if (this.nodeIdList.size() < DOWNLOAD_NODE_COUNT) {
                 nodeCount = nodeIdList.size();
             }
-            long end = i + DOWNLOAD_BLOCKS_PER_TIME * nodeCount;
+            long end = i + DOWNLOAD_BLOCKS_PER_TIME * nodeCount - 1;
             if (end > endHeight) {
                 end = endHeight;
             }
@@ -145,39 +146,42 @@ public class BlockBatchDownloadUtils {
                 roundList.add(round);
             }
             i = end;
+            if (i == endHeight) {
+                break;
+            }
         }
 
     }
 
     private void startDownload() {
-        while (true) {
-            try {
-                Set<String> nodeSet = new HashSet<>();
-                if (this.nodeIdList.size() <= DOWNLOAD_NODE_COUNT) {
-                    nodeSet.addAll(this.nodeIdList);
-                } else {
-                    Random random = new Random();
-                    while (true) {
-                        if (nodeSet.size() >= DOWNLOAD_NODE_COUNT) {
-                            break;
-                        }
-                        int index = random.nextInt(nodeIdList.size());
-                        nodeSet.add(this.nodeIdList.get(index));
+        try {
+            Set<String> nodeSet = new HashSet<>();
+            if (this.nodeIdList.size() <= DOWNLOAD_NODE_COUNT) {
+                nodeSet.addAll(this.nodeIdList);
+            } else {
+                Random random = new Random();
+                while (true) {
+                    if (nodeSet.size() >= DOWNLOAD_NODE_COUNT) {
+                        break;
                     }
+                    int index = random.nextInt(nodeIdList.size());
+                    nodeSet.add(this.nodeIdList.get(index));
                 }
-                List<String> roundNodeList = new ArrayList<>(nodeSet);
-                long end = 0;
-                for (int i = 0; end < currentRound.getEnd(); i++) {
-                    long start = currentRound.getStart() + i * DOWNLOAD_BLOCKS_PER_TIME;
-                    end = start + DOWNLOAD_BLOCKS_PER_TIME;
-                    if (end > currentRound.getEnd()) {
-                        end = currentRound.getEnd();
-                    }
-                    this.sendRequest(start, end, roundNodeList.get(i));
-                }
-            } catch (Exception e) {
-                Log.error(e);
             }
+            List<String> roundNodeList = new ArrayList<>(nodeSet);
+            currentRound.setNodeIdList(roundNodeList);
+            long end = 0;
+            for (int i = 0; end < currentRound.getEnd(); i++) {
+                long start = currentRound.getStart() + i * DOWNLOAD_BLOCKS_PER_TIME;
+                end = start + DOWNLOAD_BLOCKS_PER_TIME - 1;
+                if (end > currentRound.getEnd()) {
+                    end = currentRound.getEnd();
+                }
+                String nodeId = roundNodeList.get(i);
+                this.sendRequest(start, end, nodeId);
+            }
+        } catch (Exception e) {
+            Log.error(e);
         }
     }
 
@@ -291,16 +295,31 @@ public class BlockBatchDownloadUtils {
     }
 
     private void finished() {
-        this.finished = true;
-        this.queueService.destroyQueue(queueId);
-        this.nodeStatusMap.clear();
+        if (!roundFinished()) {
+            return;
+        }
         if (!roundList.isEmpty()) {
             currentRound = roundList.get(0);
             roundList.remove(0);
             startDownload();
+            return;
         }
+        this.finished = true;
+        this.queueService.destroyQueue(queueId);
+        this.nodeStatusMap.clear();
         working = false;
         lock.unlock();
+    }
+
+    private boolean roundFinished() {
+        boolean result = true;
+        for (String nodeId : currentRound.getNodeIdList()) {
+            if (!result) {
+                break;
+            }
+            result = nodeStatusMap.get(nodeId).finished();
+        }
+        return result;
     }
 
     public boolean isFinished() {
