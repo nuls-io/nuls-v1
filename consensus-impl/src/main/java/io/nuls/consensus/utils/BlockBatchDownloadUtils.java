@@ -33,7 +33,9 @@ import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Result;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.queue.service.impl.QueueService;
 import io.nuls.core.utils.str.StringUtils;
@@ -120,6 +122,9 @@ public class BlockBatchDownloadUtils {
             return;
         }
         request(startHeight, endHeight);
+        while (!finished){
+            Thread.sleep(100L);
+        }
     }
 
     private void request(long startHeight, long endHeight) throws InterruptedException {
@@ -145,8 +150,8 @@ public class BlockBatchDownloadUtils {
             } else {
                 roundList.add(round);
             }
-            i = end;
-            if (i == endHeight) {
+            i = end+1;
+            if (i >= endHeight) {
                 break;
             }
         }
@@ -191,6 +196,7 @@ public class BlockBatchDownloadUtils {
         status.setStart(start);
         status.setEnd(end);
         status.setNodeId(nodeId);
+        Log.info("send ask:start:"+start+",end:"+end+",node:"+nodeId);
         this.eventBroadcaster.sendToNode(new GetBlockRequest(start, end), nodeId);
         status.setUpdateTime(System.currentTimeMillis());
         nodeStatusMap.put(nodeId, status);
@@ -198,6 +204,7 @@ public class BlockBatchDownloadUtils {
 
 
     public boolean downloadedBlock(String nodeId, Block block) {
+        System.out.println("downloaded:"+block.getHeader().getHeight());
         NodeDownloadingStatus status = nodeStatusMap.get(nodeId);
         if (null == status) {
             return false;
@@ -218,10 +225,10 @@ public class BlockBatchDownloadUtils {
     private void verify() {
         boolean done = true;
         for (NodeDownloadingStatus status : nodeStatusMap.values()) {
-            if (done && status.finished()) {
-                continue;
+            if (!done  ) {
+                break;
             }
-            done = false;
+            done = status.finished();
         }
         if (!done) {
             return;
@@ -240,6 +247,7 @@ public class BlockBatchDownloadUtils {
             Block block = blockMap.get(i);
             ValidateResult result1 = block.verify();
             if (result1.isFailed()) {
+                Log.info(result1.getMessage());
                 try {
                     failedExecute(block.getHeader().getHeight());
                 } catch (InterruptedException e) {
@@ -267,7 +275,11 @@ public class BlockBatchDownloadUtils {
         networkService.blackNode(nodeStatus.getNodeId(), NodePo.YELLOW);
         this.nodeIdList.remove(nodeIdList);
         this.queueService.remove(queueId, nodeStatus.getNodeId());
-        this.sendRequest(nodeStatus.getStart(), nodeStatus.getEnd(), this.queueService.take(queueId));
+        if(this.queueService.size(queueId)>0){
+            this.sendRequest(nodeStatus.getStart(), nodeStatus.getEnd(), this.queueService.take(queueId));
+        }else{
+            throw new NulsRuntimeException(ErrorCode.FAILED,"download block error!");
+        }
     }
 
     private Result checkHash() throws InterruptedException {
