@@ -23,7 +23,6 @@
  */
 package io.nuls.ledger.entity.tx;
 
-import com.sun.deploy.util.ArrayUtil;
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
@@ -33,7 +32,6 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.ledger.entity.params.CoinTransferData;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
 
 /**
