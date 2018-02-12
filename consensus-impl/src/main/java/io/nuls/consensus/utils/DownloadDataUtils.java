@@ -61,7 +61,7 @@ public class DownloadDataUtils {
 
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
     private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
-    private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
+    private   BlockCacheManager blockCacheManager;
 
     private final Map<String, Long> smbRequest = new HashMap<>();
     private final Map<String, Long> tgRequest = new HashMap<>();
@@ -91,6 +91,9 @@ public class DownloadDataUtils {
         GetTxGroupParam data = new GetTxGroupParam();
         data.setBlockHash(blockHash);
         List<NulsDigestData> txHashList = new ArrayList<>();
+        if(null==blockCacheManager){
+            blockCacheManager  = BlockCacheManager.getInstance();
+        }
         SmallBlock smb = blockCacheManager.getSmallBlock(blockHash.getDigestHex());
         for (NulsDigestData txHash : smb.getTxHashList()) {
             boolean exist = txCacheManager.txExist(txHash);
