@@ -27,6 +27,7 @@ import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.event.BaseEvent;
 import io.nuls.core.event.CommonStringEvent;
+import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.event.bus.event.CommonDigestEvent;
 import io.nuls.event.bus.service.intf.EventBusService;
@@ -99,6 +100,7 @@ public class EventBroadcasterImpl implements EventBroadcaster {
 
     @Override
     public List<String> broadcastAndCache(BaseEvent event, boolean needToSelf) {
+        long broadstart = TimeService.currentTimeMillis();
         BroadcastResult result = networkService.sendToAllNode(event);
         if (needToSelf) {
             eventBusService.publishLocalEvent(event);
@@ -106,6 +108,8 @@ public class EventBroadcasterImpl implements EventBroadcaster {
         if (result.isSuccess()) {
             eventCacheService.cacheSendedEvent(event);
         }
+        long broadend = TimeService.currentTimeMillis();
+        System.out.println("it takes "+ (broadend-broadstart) +" to broadcast");
         return getNodeIdList(result);
     }
 

@@ -186,7 +186,9 @@ public class DistributedBlockInfoRequestUtils {
             } catch (InterruptedException e) {
                 Log.error(e);
             }
-            if ((TimeService.currentTimeMillis() - startTime) > 10000L) {
+            long now = TimeService.currentTimeMillis();
+            if (( now - startTime) > 100000L) {
+                System.out.println(now - startTime);
                 lock.unlock();
                 throw new NulsRuntimeException(ErrorCode.TIME_OUT);
             }

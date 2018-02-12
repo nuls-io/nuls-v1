@@ -60,7 +60,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.NotYetConnectedException;
-import java.util.*;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -158,6 +160,7 @@ public class Node extends BaseNulsData {
         lock.lock();
         try {
             this.writeTarget.write(message.serialize());
+            System.out.println("send to "+ this.getHash()+" "+ Hex.encode(message.serialize()));
         } finally {
             lock.unlock();
         }
@@ -197,24 +200,18 @@ public class Node extends BaseNulsData {
             buffer.clear();
             throw new NulsVerificationException(ErrorCode.DATA_ERROR);
         }
-        List<NulsMessage> list = new ArrayList<>();
-        while (buffer.hasRemaining()) {
-            NulsMessage message = new NulsMessage(buffer);
-            list.add(message);
-        }
+
+        NulsMessage message = new NulsMessage(buffer);
+        System.out.println("recv from "+ this.getHash()+" "+ Hex.encode(message.serialize()));
 //        buffer.compact();
         buffer.clear();
-
-        for (NulsMessage message : list) {
-            try {
-                if (MessageFilterChain.getInstance().doFilter(message)) {
-                    processMessage(message);
-                }
-            } catch (Exception e) {
-                Log.error(e);
+        try {
+            if (MessageFilterChain.getInstance().doFilter(message)) {
+                processMessage(message);
             }
-        }
+        } catch (Exception e) {
 
+        }
 
     }
 
