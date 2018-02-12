@@ -45,7 +45,6 @@ public class BlockEventHandler extends AbstractEventHandler<BlockEvent> {
 
     @Override
     public void onEvent(BlockEvent event, String fromId) {
-        System.out.println("block recieve:"+event.getEventBody().getHeader().getHeight()+"::::::"+event.getEventBody().getHeader().getHash().getDigestHex());
         Block block = event.getEventBody();
         ValidateResult result = block.verify();
         if (result.isFailed()) {

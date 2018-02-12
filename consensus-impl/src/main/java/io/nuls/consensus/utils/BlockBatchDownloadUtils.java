@@ -207,7 +207,6 @@ public class BlockBatchDownloadUtils {
 
 
     public boolean downloadedBlock(String nodeId, Block block) {
-        System.out.println("downloaded:" + block.getHeader().getHeight());
         NodeDownloadingStatus status = nodeStatusMap.get(nodeId);
         if (null == status) {
             return false;
