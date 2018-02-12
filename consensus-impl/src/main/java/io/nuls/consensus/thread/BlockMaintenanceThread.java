@@ -89,7 +89,7 @@ public class BlockMaintenanceThread implements Runnable {
     public synchronized void syncBlock() {
 
         Block localBestBlock = getLocalBestCorrectBlock();
-        boolean doit = false;
+         boolean doit = false;
         long startHeight = 1;
         BlockInfo blockInfo = null;
         do {
