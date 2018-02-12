@@ -122,8 +122,11 @@ public class BlockBatchDownloadUtils {
             return;
         }
         request(startHeight, endHeight);
-        while (!finished){
+        while (working) {
             Thread.sleep(100L);
+        }
+        if(!working){
+            lock.unlock();
         }
     }
 
@@ -150,7 +153,7 @@ public class BlockBatchDownloadUtils {
             } else {
                 roundList.add(round);
             }
-            i = end+1;
+            i = end + 1;
             if (i >= endHeight) {
                 break;
             }
@@ -196,7 +199,7 @@ public class BlockBatchDownloadUtils {
         status.setStart(start);
         status.setEnd(end);
         status.setNodeId(nodeId);
-        Log.info("send ask:start:"+start+",end:"+end+",node:"+nodeId);
+        Log.info("send ask:start:" + start + ",end:" + end + ",node:" + nodeId);
         this.eventBroadcaster.sendToNode(new GetBlockRequest(start, end), nodeId);
         status.setUpdateTime(System.currentTimeMillis());
         nodeStatusMap.put(nodeId, status);
@@ -204,7 +207,7 @@ public class BlockBatchDownloadUtils {
 
 
     public boolean downloadedBlock(String nodeId, Block block) {
-        System.out.println("downloaded:"+block.getHeader().getHeight());
+        System.out.println("downloaded:" + block.getHeader().getHeight());
         NodeDownloadingStatus status = nodeStatusMap.get(nodeId);
         if (null == status) {
             return false;
@@ -225,7 +228,7 @@ public class BlockBatchDownloadUtils {
     private void verify() {
         boolean done = true;
         for (NodeDownloadingStatus status : nodeStatusMap.values()) {
-            if (!done  ) {
+            if (!done) {
                 break;
             }
             done = status.finished();
@@ -275,11 +278,7 @@ public class BlockBatchDownloadUtils {
         networkService.blackNode(nodeStatus.getNodeId(), NodePo.YELLOW);
         this.nodeIdList.remove(nodeIdList);
         this.queueService.remove(queueId, nodeStatus.getNodeId());
-        if(this.queueService.size(queueId)>0){
-            this.sendRequest(nodeStatus.getStart(), nodeStatus.getEnd(), this.queueService.take(queueId));
-        }else{
-            throw new NulsRuntimeException(ErrorCode.FAILED,"download block error!");
-        }
+        this.sendRequest(nodeStatus.getStart(), nodeStatus.getEnd(), this.queueService.take(queueId));
     }
 
     private Result checkHash() throws InterruptedException {
@@ -320,7 +319,6 @@ public class BlockBatchDownloadUtils {
         this.queueService.destroyQueue(queueId);
         this.nodeStatusMap.clear();
         working = false;
-        lock.unlock();
     }
 
     private boolean roundFinished() {

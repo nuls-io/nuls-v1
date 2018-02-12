@@ -135,6 +135,7 @@ public class BlockCacheManager {
 
     public void cacheBlock(Block block) {
         blockCacheMap.put(block.getHeader().getHash().getDigestHex(), block);
+        this.bifurcateProcessor.addHeader(block.getHeader());
         //txs approval
         BlockHeader header = this.getBlockHeader(block.getHeader().getHeight());
         if (null == header) {
