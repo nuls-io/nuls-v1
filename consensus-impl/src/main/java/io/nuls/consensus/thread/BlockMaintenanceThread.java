@@ -75,7 +75,7 @@ public class BlockMaintenanceThread implements Runnable {
             try {
                 syncBlock();
             } catch (Exception e) {
-                Log.error(e.getMessage());
+//todo                Log.error(e.getMessage());
                 try {
                     Thread.sleep(PocConsensusConstant.BLOCK_TIME_INTERVAL*1000L);
                 } catch (InterruptedException e1) {
