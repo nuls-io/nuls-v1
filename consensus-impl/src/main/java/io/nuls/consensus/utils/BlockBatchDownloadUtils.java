@@ -199,7 +199,6 @@ public class BlockBatchDownloadUtils {
         status.setStart(start);
         status.setEnd(end);
         status.setNodeId(nodeId);
-        Log.info("send ask:start:" + start + ",end:" + end + ",node:" + nodeId);
         this.eventBroadcaster.sendToNode(new GetBlockRequest(start, end), nodeId);
         status.setUpdateTime(System.currentTimeMillis());
         nodeStatusMap.put(nodeId, status);
