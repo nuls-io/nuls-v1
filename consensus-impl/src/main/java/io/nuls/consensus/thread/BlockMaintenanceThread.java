@@ -153,7 +153,11 @@ public class BlockMaintenanceThread implements Runnable {
         }
         Block localGenesisBlock = this.blockService.getGengsisBlock();
         if (null == localGenesisBlock) {
-            this.blockService.saveBlock(genesisBlock);
+            try{
+                this.blockService.saveBlock(genesisBlock);
+            }catch (Exception e){
+                Log.debug(e.getMessage(),e);
+            }
             return;
         }
         localGenesisBlock.verify();
