@@ -51,7 +51,6 @@ public class BlockEventHandler extends AbstractEventHandler<BlockEvent> {
             if (result.getLevel() == SeverityLevelEnum.FLAGRANT_FOUL) {
                 networkService.blackNode(fromId, NodePo.YELLOW);
             }
-            System.out.println("block filter:"+event.getEventBody().getHeader().getHeight());
             return;
         }
         if (BlockBatchDownloadUtils.getInstance().downloadedBlock(fromId, block)) {

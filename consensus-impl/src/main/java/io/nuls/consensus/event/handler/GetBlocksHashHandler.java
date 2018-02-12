@@ -88,7 +88,6 @@ public class GetBlocksHashHandler extends AbstractEventHandler<GetBlocksHashRequ
                 response.setHashList(resultHashList.subList(i, end));
                 sendResponse(response, fromId);
             }
-            System.out.println();
         }
     }
 
