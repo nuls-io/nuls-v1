@@ -49,10 +49,10 @@ public class BifurcateProcessor {
         return INSTANCE;
     }
 
-    public void addHeader(BlockHeader header) {
+    public boolean addHeader(BlockHeader header) {
         for (BlockHeaderChain chain : chainList) {
             if (chain.contains(header)) {
-                return;
+                return false;
             }
         }
         for (BlockHeaderChain chain : chainList) {
@@ -60,22 +60,22 @@ public class BifurcateProcessor {
             if (index == chain.size() - 1) {
                 chain.addHeader(header);
                 setBestHeight(header);
-                return;
+                return true;
             } else if (index >= 0) {
                 BlockHeaderChain newChain = chain.getBifurcateChain(header);
                 chainList.add(newChain);
                 setBestHeight(header);
-                return;
+                return true;
             }
         }
         if ((bestHeight + 1) != header.getHeight()) {
-            return;
+            return false;
         }
         BlockHeaderChain chain = new BlockHeaderChain();
         chain.addHeader(header);
         chainList.add(chain);
         setBestHeight(header);
-
+        return true;
     }
 
     private void setBestHeight(BlockHeader header) {

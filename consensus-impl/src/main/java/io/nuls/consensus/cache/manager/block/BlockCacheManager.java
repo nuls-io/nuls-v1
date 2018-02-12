@@ -135,7 +135,10 @@ public class BlockCacheManager {
 
     public void cacheBlock(Block block) {
         blockCacheMap.put(block.getHeader().getHash().getDigestHex(), block);
-        this.bifurcateProcessor.addHeader(block.getHeader());
+        boolean b = this.bifurcateProcessor.addHeader(block.getHeader());
+        if(b){
+            NulsContext.getInstance().setBestBlock(block);
+        }
         //txs approval
         BlockHeader header = this.getBlockHeader(block.getHeader().getHeight());
         if (null == header) {
