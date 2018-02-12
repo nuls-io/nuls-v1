@@ -95,7 +95,7 @@ public class BroadcasterImpl implements Broadcaster {
             count++;
         }
 
-        Log.info("成功广播给{}个节点，消息{}", successCount, message);
+        Log.debug("成功广播给{}个节点，消息{}", successCount, message);
         result.setBroadcastNodes(successNodes);
         return result;
     }
