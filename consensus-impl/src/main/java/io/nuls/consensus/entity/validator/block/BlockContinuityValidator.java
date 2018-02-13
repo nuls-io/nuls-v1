@@ -63,7 +63,11 @@ public class BlockContinuityValidator implements NulsDataValidator<Block> {
             if(failed){
                 break;
             }
-            failed = preBlock.getHeader().getTime()>(block.getHeader().getTime()- PocConsensusConstant.BLOCK_TIME_INTERVAL*1000);
+            //todo 3 seconds error
+            failed = (block.getHeader().getTime()- preBlock.getHeader().getTime())<=PocConsensusConstant.BLOCK_TIME_INTERVAL*1000-3000;
+            if(failed){
+                break;
+            }
         } while (false);
 
         if (failed) {

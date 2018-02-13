@@ -111,13 +111,6 @@ public class ConsensusMeetingRunner implements Runnable {
         }
         this.running = true;
         while (running) {
-//todo            while (!BlockMaintenanceThread.getInstance().isSuccess()){
-//                try {
-//                    Thread.sleep(1000L);
-//                } catch (InterruptedException e) {
-//                    Log.error(e);
-//                }
-//            }
             try {
                 nextRound();
             } catch (Exception e) {
@@ -202,7 +195,6 @@ public class ConsensusMeetingRunner implements Runnable {
     }
 
     private double calcCreditVal() {
-        //todo 需要修改
         long roundStart = consensusManager.getCurrentRound().getIndex() - 1 - PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT;
         if (roundStart < 0) {
             roundStart = 0;
@@ -263,20 +255,8 @@ public class ConsensusMeetingRunner implements Runnable {
         BlockHeaderEvent event = new BlockHeaderEvent();
         event.setEventBody(newBlock.getHeader());
         eventBroadcaster.broadcastAndCache(event, false);
-//        test(newBlock);
     }
 
-//    private void test(Block newBlock) {
-//        try {
-//            byte[] bytes = newBlock. serialize();
-//            Block block = new Block();
-//            block.parse(bytes);
-//        } catch (IOException e) {
-//            Log.error(e);
-//        } catch (NulsException e) {
-//            Log.error(e);
-//        }
-//    }
 
     /**
      * CoinBase transaction & Punish transaction
@@ -444,7 +424,7 @@ public class ConsensusMeetingRunner implements Runnable {
         if (round.getPreviousRound().getEndTime() < bestBlock.getHeader().getTime()) {
             round.setStartTime(bestBlock.getHeader().getTime() + addTime);
         } else {
-            round.setStartTime(round.getPreviousRound().getEndTime() + addTime);
+            round.setStartTime(round.getPreviousRound().getEndTime());
         }
         round.setIndex(lastRoundData.getRoundIndex() + 1);
         return round;
