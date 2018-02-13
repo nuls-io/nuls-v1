@@ -271,9 +271,6 @@ public class ConsensusMeetingRunner implements Runnable {
 //            byte[] bytes = newBlock. serialize();
 //            Block block = new Block();
 //            block.parse(bytes);
-//            System.out.println("=============================================="+newBlock.getHeader().getHeight());
-//            System.out.println(newBlock.getHeader().getMerkleHash().getDigestHex());
-//            System.out.println(block.getHeader().getMerkleHash().getDigestHex());
 //        } catch (IOException e) {
 //            Log.error(e);
 //        } catch (NulsException e) {

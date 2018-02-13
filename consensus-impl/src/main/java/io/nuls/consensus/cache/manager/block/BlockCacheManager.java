@@ -49,7 +49,6 @@ import java.util.List;
  * @date 2017/12/12
  */
 public class BlockCacheManager {
-    private static final String HEIGHT_HASH_CACHE = "blocks-height-hash";
     private static final BlockCacheManager INSTANCE = new BlockCacheManager();
 
     private EventBroadcaster eventBroadcaster;

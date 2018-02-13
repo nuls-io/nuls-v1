@@ -75,9 +75,9 @@ public class BlockMaintenanceThread implements Runnable {
             try {
                 syncBlock();
             } catch (Exception e) {
-                Log.error(e.getMessage());
+//todo                Log.error(e.getMessage());
                 try {
-                    Thread.sleep(PocConsensusConstant.BLOCK_TIME_INTERVAL*1000L);
+                    Thread.sleep(PocConsensusConstant.BLOCK_TIME_INTERVAL * 1000L);
                 } catch (InterruptedException e1) {
                     Log.error(e1);
                 }
@@ -89,7 +89,7 @@ public class BlockMaintenanceThread implements Runnable {
     public synchronized void syncBlock() {
 
         Block localBestBlock = getLocalBestCorrectBlock();
-         boolean doit = false;
+        boolean doit = false;
         long startHeight = 1;
         BlockInfo blockInfo = null;
         do {
@@ -175,15 +175,15 @@ public class BlockMaintenanceThread implements Runnable {
                 return localBestBlock;
             }
             blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(localBestBlock.getHeader().getHeight());
-            if (null == blockInfo || blockInfo.getBestHash() == null) {
+            if (null != blockInfo && blockInfo.getBestHeight() < localBestBlock.getHeader().getHeight()) {
                 //本地高度最高，查询网络最新高度，并回退
-                rollbackBlock(localBestBlock.getHeader().getHeight());
+                rollbackBlock(localBestBlock.getHeader().getHeight(), blockInfo);
                 localBestBlock = this.blockService.getLocalBestBlock();
                 break;
             }
             if (!blockInfo.getBestHash().equals(localBestBlock.getHeader().getHash())) {
                 //本地分叉，回退
-                rollbackBlock(blockInfo.getBestHeight());
+                rollbackBlock(blockInfo.getBestHeight(), blockInfo);
                 localBestBlock = this.blockService.getLocalBestBlock();
                 break;
             }
@@ -191,7 +191,7 @@ public class BlockMaintenanceThread implements Runnable {
         return localBestBlock;
     }
 
-    private void rollbackBlock(long startHeight) {
+    private void rollbackBlock(long startHeight, BlockInfo blockInfo) {
         try {
             this.blockService.rollbackBlock(startHeight);
         } catch (NulsException e) {
@@ -202,7 +202,6 @@ public class BlockMaintenanceThread implements Runnable {
         if (height < 0) {
             return;
         }
-        BlockInfo blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(height);
         Block localBlock = this.blockService.getBlock(height);
         boolean previousRb = false;
         if (null == blockInfo || blockInfo.getBestHash() == null || localBlock == null || localBlock.getHeader().getHash() == null) {
@@ -211,7 +210,7 @@ public class BlockMaintenanceThread implements Runnable {
             previousRb = true;
         }
         if (previousRb) {
-            rollbackBlock(height);
+            rollbackBlock(height, blockInfo);
         }
     }
 

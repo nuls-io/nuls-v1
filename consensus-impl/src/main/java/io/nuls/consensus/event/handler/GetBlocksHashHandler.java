@@ -59,7 +59,7 @@ public class GetBlocksHashHandler extends AbstractEventHandler<GetBlocksHashRequ
                 block = blockService.getBlock(event.getEventBody().getEnd());
             }
             if (null == block) {
-                return;
+                block = blockService.getLocalBestBlock();
             }
             response.put(block.getHeader().getHeight(), block.getHeader().getHash());
             sendResponse(response, fromId);
@@ -88,7 +88,6 @@ public class GetBlocksHashHandler extends AbstractEventHandler<GetBlocksHashRequ
                 response.setHashList(resultHashList.subList(i, end));
                 sendResponse(response, fromId);
             }
-            System.out.println();
         }
     }
 

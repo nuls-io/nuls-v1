@@ -199,7 +199,6 @@ public class BlockBatchDownloadUtils {
         status.setStart(start);
         status.setEnd(end);
         status.setNodeId(nodeId);
-        Log.info("send ask:start:" + start + ",end:" + end + ",node:" + nodeId);
         this.eventBroadcaster.sendToNode(new GetBlockRequest(start, end), nodeId);
         status.setUpdateTime(System.currentTimeMillis());
         nodeStatusMap.put(nodeId, status);
@@ -207,7 +206,6 @@ public class BlockBatchDownloadUtils {
 
 
     public boolean downloadedBlock(String nodeId, Block block) {
-        System.out.println("downloaded:" + block.getHeader().getHeight());
         NodeDownloadingStatus status = nodeStatusMap.get(nodeId);
         if (null == status) {
             return false;
