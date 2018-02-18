@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -27,6 +27,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.event.BaseEvent;
 import io.nuls.core.utils.date.TimeService;
+import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.NodeDataService;
 import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeTransferTool;
@@ -35,6 +36,7 @@ import io.nuls.network.message.NetworkCacheService;
 import io.nuls.network.message.NetworkEventResult;
 import io.nuls.network.message.entity.VersionEvent;
 import io.nuls.network.message.handler.NetWorkEventHandler;
+import io.nuls.network.service.NetworkService;
 
 /**
  * @author vivi
@@ -48,6 +50,8 @@ public class VersionEventHandler implements NetWorkEventHandler {
 
     private NetworkCacheService cacheService;
 
+    private NetworkService networkService;
+
     private VersionEventHandler() {
         cacheService = NetworkCacheService.getInstance();
     }
@@ -60,21 +64,25 @@ public class VersionEventHandler implements NetWorkEventHandler {
     public NetworkEventResult process(BaseEvent networkEvent, Node node) {
         VersionEvent event = (VersionEvent) networkEvent;
 
-        String key = event.getHeader().getEventType() + "-" + node.getIp() + "-" + node.getPort();
+        String key = event.getHeader().getEventType() + "-" + node.getId();
         if (cacheService.existEvent(key)) {
-            node.destroy();
+            Log.info("----------VersionEventHandler  cacheService  existEvent--------");
+            getNetworkService().removeNode(node.getId());
             return null;
         }
-        cacheService.putEvent(key, event, false);
+        cacheService.putEvent(key, event, true);
 
         if (event.getBestBlockHeight() < 0) {
             throw new NetworkMessageException(ErrorCode.NET_MESSAGE_ERROR);
         }
         node.setVersionMessage(event);
-        node.setStatus(Node.HANDSHAKE);
-        node.setLastTime(TimeService.currentTimeMillis());
 
-        getNodeDao().saveChange(NodeTransferTool.toPojo(node));
+        if (!node.isHandShake()) {
+            node.setStatus(Node.HANDSHAKE);
+            node.setPort(event.getExternalPort());
+            node.setLastTime(TimeService.currentTimeMillis());
+            getNodeDao().saveChange(NodeTransferTool.toPojo(node));
+        }
         return null;
     }
 
@@ -83,5 +91,12 @@ public class VersionEventHandler implements NetWorkEventHandler {
             nodeDao = NulsContext.getServiceBean(NodeDataService.class);
         }
         return nodeDao;
+    }
+
+    private NetworkService getNetworkService() {
+        if (networkService == null) {
+            networkService = NulsContext.getServiceBean(NetworkService.class);
+        }
+        return networkService;
     }
 }

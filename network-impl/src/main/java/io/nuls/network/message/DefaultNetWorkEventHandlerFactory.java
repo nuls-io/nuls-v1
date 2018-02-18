@@ -42,12 +42,10 @@ public class DefaultNetWorkEventHandlerFactory extends NetworkEventHandlerFactor
     private Map<String, NetWorkEventHandler> handlerMap = new HashMap<>();
 
     private DefaultNetWorkEventHandlerFactory() {
-        handlerMap.put(VersionEvent.class.getName(), VersionEventHandler.getInstance());
         handlerMap.put(GetVersionEvent.class.getName(), GetVersionEventHandler.getInstance());
+        handlerMap.put(VersionEvent.class.getName(), VersionEventHandler.getInstance());
         handlerMap.put(GetNodeEvent.class.getName(), GetNodeEventHandler.getInstance());
         handlerMap.put(NodeEvent.class.getName(), NodeEventHandler.getInstance());
-        handlerMap.put(PingEvent.class.getName(), PingEventHandler.getInstance());
-        handlerMap.put(PongEvent.class.getName(), PongEventHandler.getInstance());
     }
 
     public static NetworkEventHandlerFactory getInstance() {

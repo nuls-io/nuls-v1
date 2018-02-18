@@ -46,6 +46,8 @@ public abstract class AbstractNetworkParam {
 
     protected int maxOutCount;
 
+    protected int externalPort;
+
     protected NulsMessageFilter messageFilter;
 
     protected NetworkEventHandlerFactory messageHandlerFactory;
@@ -80,6 +82,14 @@ public abstract class AbstractNetworkParam {
 
     public void maxOutCount(int count) {
         this.maxOutCount = count;
+    }
+
+    public int getExternalPort() {
+        return externalPort;
+    }
+
+    public void setExternalPort(int externalPort) {
+        this.externalPort = externalPort;
     }
 
     public void setMessageFilter(NulsMessageFilter messageFilter) {

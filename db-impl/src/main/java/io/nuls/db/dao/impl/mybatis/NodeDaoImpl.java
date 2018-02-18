@@ -53,9 +53,9 @@ public class NodeDaoImpl extends BaseDaoImpl<NodeMapper, String, NodePo> impleme
     }
 
     @Override
-    public List<NodePo> getRandomNodePoList(int size, Set<String> keys) {
+    public List<NodePo> getNodePoList(int size, Set<String> keys) {
         Searchable searchable = new Searchable();
-        PageHelper.startPage(1, 100);
+        PageHelper.startPage(1, size);
         PageHelper.orderBy("last_fail_time asc");
         if (!keys.isEmpty()) {
             searchable.addCondition("id", SearchOperator.notIn, keys);
@@ -63,13 +63,7 @@ public class NodeDaoImpl extends BaseDaoImpl<NodeMapper, String, NodePo> impleme
         searchable.addCondition("status", SearchOperator.eq, 0);
         searchable.addCondition("last_fail_time", SearchOperator.lt, TimeService.currentTimeMillis() - TimeService.ONE_HOUR);
         List<NodePo> list = getMapper().selectList(searchable);
-        if (list.size() <= size) {
-            return list;
-        } else {
-            Collections.shuffle(list);
-        }
-
-        return list.subList(0, size - 1);
+        return list;
     }
 
     @Override
@@ -78,7 +72,6 @@ public class NodeDaoImpl extends BaseDaoImpl<NodeMapper, String, NodePo> impleme
         try {
             Searchable searchable = new Searchable();
             searchable.addCondition("ip", SearchOperator.eq, po.getIp());
-            searchable.addCondition("port", SearchOperator.eq, po.getPort());
             if (getMapper().selectCount(searchable) > 0) {
                 if (po.getFailCount() >= 3) {
                     getMapper().deleteByPrimaryKey(po.getId());

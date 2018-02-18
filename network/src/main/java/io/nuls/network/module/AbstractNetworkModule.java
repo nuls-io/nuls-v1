@@ -34,10 +34,7 @@ import io.nuls.network.constant.NetworkConstant;
  */
 public abstract class AbstractNetworkModule extends BaseModuleBootstrap {
 
-    public static int ExternalPort;
-
     protected AbstractNetworkModule() {
         super(NulsConstant.MODULE_ID_NETWORK);
-        ExternalPort = NulsContext.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_EXTER_PORT, 8632);
     }
 }

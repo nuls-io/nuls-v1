@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -27,6 +27,10 @@ import io.nuls.core.event.BaseEvent;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeGroup;
+import io.nuls.network.entity.param.AbstractNetworkParam;
+
+import java.nio.ByteBuffer;
+import java.util.List;
 
 /**
  * @author vivi
@@ -40,62 +44,36 @@ public interface NetworkService {
 
     void shutdown();
 
-    void addNode(Node node);
-
     void removeNode(String nodeId);
+
+    Node getNode(String nodeId);
+
+    List<Node> getAvailableNodes();
 
     void blackNode(String nodeId, int status);
 
     void addNodeToGroup(String groupName, Node node);
 
-    void addNodeToGroup(String area,String groupName,Node node);
-
     void removeNodeFromGroup(String groupName, String nodeId);
-
-    void removeNodeFromGroup(String area,String groupName,Node node);
 
     void addNodeGroup(NodeGroup nodeGroup);
 
-    void addNodeGroup(String area,NodeGroup nodeGroup);
+    void removeNodeGroup(String groupName);
 
-    BroadcastResult sendToAllNode(BaseEvent event);
+    NodeGroup getNodeGroup(String groupName);
 
-    BroadcastResult sendToAllNode(String area, BaseEvent event);
+    AbstractNetworkParam getNetworkParam();
 
-    BroadcastResult sendToAllNode(BaseEvent event, String excludeNodeId);
+    BroadcastResult sendToAllNode(BaseEvent event, boolean asyn);
 
-    BroadcastResult sendToAllNode(String area, BaseEvent event, String excludeNodeId);
+    BroadcastResult sendToAllNode(BaseEvent event, String excludeNodeId, boolean asyn);
 
-    BroadcastResult sendToAllNode(byte[] data);
+    BroadcastResult sendToNode(BaseEvent event, String nodeId, boolean asyn);
 
-    BroadcastResult sendToAllNode(String area, byte[] data);
+    BroadcastResult sendToGroup(BaseEvent event, String groupName, boolean asyn);
 
-    BroadcastResult sendToAllNode(byte[] data, String excludeNodeId);
+    BroadcastResult sendToGroup(BaseEvent event, String groupName, String excludeNodeId, boolean asyn);
 
-    BroadcastResult sendToAllNode(String area, byte[] data, String excludeNodeId);
-
-    BroadcastResult sendToNode(BaseEvent event, String nodeId);
-
-    BroadcastResult sendToNode(String area, BaseEvent event, String nodeId);
-
-    BroadcastResult sendToNode(byte[] data, String nodeId);
-
-    BroadcastResult sendToNode(String area, byte[] data, String nodeId);
-
-    BroadcastResult sendToGroup(BaseEvent event, String groupName);
-
-    BroadcastResult sendToGroup(String area,BaseEvent event,String groupName);
-
-    BroadcastResult sendToGroup(BaseEvent event, String groupName, String excludeNodeId);
-
-    BroadcastResult sendToGroup(String area, BaseEvent event, String groupName, String excludeNodeId);
-
-    BroadcastResult sendToGroup(byte[] data, String groupName);
-
-    BroadcastResult sendToGroup(String area, byte[] data, String groupName);
-
-    BroadcastResult sendToGroup(byte[] data, String groupName, String excludeNodeId);
-
-    BroadcastResult sendToGroup(String area, byte[] data, String groupName, String excludeNodeId);
+    void receiveMessage(ByteBuffer buffer, Node node);
 
 }

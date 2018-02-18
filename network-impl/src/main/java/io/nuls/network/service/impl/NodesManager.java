@@ -23,27 +23,23 @@
  */
 package io.nuls.network.service.impl;
 
-
+import io.netty.channel.socket.SocketChannel;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.TaskManager;
-import io.nuls.core.utils.log.Log;
-import io.nuls.core.utils.network.IpUtil;
 import io.nuls.core.utils.str.StringUtils;
-import io.nuls.db.dao.NodeDataService;
-import io.nuls.db.entity.NodePo;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeGroup;
-import io.nuls.network.entity.NodeTransferTool;
 import io.nuls.network.entity.param.AbstractNetworkParam;
-import io.nuls.network.message.entity.PingEvent;
+import io.nuls.network.service.impl.netty.NioChannelMap;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -53,425 +49,211 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class NodesManager implements Runnable {
 
-    private AbstractNetworkParam network;
+    private Map<String, NodeGroup> nodeGroups = new ConcurrentHashMap<>();
 
-    private NodeDiscoverHandler discovery;
+    private Map<String, Node> nodes = new ConcurrentHashMap<>();
 
-    private ConnectionManager connectionManager;
-
-    private static Map<String, Map<String, NodeGroup>> nodeArea = new ConcurrentHashMap<>();
-
-    private static Map<String, NodeGroup> nodeGroups = new ConcurrentHashMap<>();
-
-    private static String DEFAULT_AREA;
-
-    private static Map<String, Node> nodes = new ConcurrentHashMap<>();
-
-    private static String DEFAULT_GROUP;
-
-    private NodeDataService nodeDao;
-
-    private ReentrantLock lock;
+    private ReentrantLock lock = new ReentrantLock();
 
     private List<Node> seedNodes;
 
+    private AbstractNetworkParam network;
+
+    private NodeDiscoverHandler discoverHandler;
+
+    private ConnectionManager connectionManager;
+
     private boolean running;
 
-    public NodesManager(AbstractNetworkParam network, NodeDataService nodeDao) {
-        DEFAULT_AREA = NulsContext.CHAIN_ID;
-        DEFAULT_GROUP = NetworkConstant.NETWORK_NODE_DEFAULT_GROUP;
-        this.network = network;
-        this.nodeDao = nodeDao;
-        lock = new ReentrantLock();
-        // the default nodeGroups
-        NodeGroup inNodes = new NodeGroup(NetworkConstant.NETWORK_NODE_IN_GROUP);
-        NodeGroup outNodes = new NodeGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP);
-        NodeGroup consensusNodes = new NodeGroup(NetworkConstant.NETWORK_NODE_CONSENSUS_GROUP);
+    private static NodesManager instance = new NodesManager();
 
-        nodeGroups.put(inNodes.getName(), inNodes);
-        nodeGroups.put(outNodes.getName(), outNodes);
-        nodeGroups.put(consensusNodes.getName(), consensusNodes);
+    private NodesManager() {
+    }
 
-        nodeArea.put(NulsContext.CHAIN_ID, nodeGroups);
-
-        this.discovery = new NodeDiscoverHandler(this, network, nodeDao);
+    public static NodesManager getInstance() {
+        return instance;
     }
 
     /**
-     * 1. get nodes from database
-     * start p2p discovery thread
-     * start a nodes server
-     * query config find original nodes
-     * query database find cached nodes
-     * find other nodes from connetcted nodes
+     * Check if is a consensus node，add consensusNodeGroup
      */
-    public void start() {
-        running = true;
-//        List<Node> nodes = discovery.getLocalNodes(10);
-//        if (nodes.isEmpty()) {
-//            nodes = getSeedNodes();
-//        }
+    public void init() {
 
-        List<Node> nodes = getSeedNodes();
-
-        for (Node node : nodes) {
-            node.setType(Node.OUT);
-            addNodeToGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP, node);
-        }
+        // init default NodeGroup
+        NodeGroup inNodes = new NodeGroup(NetworkConstant.NETWORK_NODE_IN_GROUP);
+        NodeGroup outNodes = new NodeGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP);
+        nodeGroups.put(inNodes.getName(), inNodes);
+        nodeGroups.put(outNodes.getName(), outNodes);
 
         boolean isConsensus = NulsContext.MODULES_CONFIG.getCfgValue(PocConsensusConstant.CFG_CONSENSUS_SECTION, PocConsensusConstant.PROPERTY_PARTAKE_PACKING, false);
         if (isConsensus) {
-            network.maxOutCount(network.maxOutCount() * 2);
-            network.maxInCount(network.maxInCount() * 2);
+            NodeGroup consensusNodes = new NodeGroup(NetworkConstant.NETWORK_NODE_CONSENSUS_GROUP);
+            nodeGroups.put(consensusNodes.getName(), consensusNodes);
         }
-
-        System.out.println("-----------nodeManager start");
-        //start  heart beat thread
-        TaskManager.createAndRunThread(NulsConstant.MODULE_ID_NETWORK, "nodeManager", this);
-        TaskManager.createAndRunThread(NulsConstant.MODULE_ID_NETWORK, "nodeDiscovery", this.discovery);
     }
 
-    public void stop() {
-        running = false;
-    }
-
-    public void destory() {
-        stop();
+    /**
+     * get nodes from database
+     * connect other nodes
+     * running ping/pong thread
+     * running node discovery thread
+     */
+    public void start() {
+        List<Node> nodes = discoverHandler.getLocalNodes(network.maxOutCount());
+        if (nodes == null && nodes.isEmpty()) {
+            nodes = getSeedNodes();
+        }
+        for (Node node : nodes) {
+            node.setType(Node.OUT);
+            node.setStatus(Node.WAIT);
+            addNodeToGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP, node);
+        }
+        running = true;
+        TaskManager.createAndRunThread(NulsConstant.MODULE_ID_NETWORK, "NetworkNodeManager", this);
+        discoverHandler.start();
     }
 
     public List<Node> getSeedNodes() {
         if (seedNodes == null) {
-            seedNodes = discovery.getSeedNodes();
+            seedNodes = discoverHandler.getSeedNodes();
         }
-        return seedNodes;
-    }
-
-    /**
-     * when nodeId is null, check myself
-     *
-     * @param nodeId
-     * @return
-     */
-    public boolean isSeed(String nodeId) {
-        if (StringUtils.isBlank(nodeId)) {
-            Set<String> ips = IpUtil.getIps();
-            for (String self : ips) {
-                for (Node node : getSeedNodes()) {
-                    if (node.getHash().equals(self)) {
-                        return true;
-                    }
-                }
-            }
+        if (nodes.isEmpty()) {
+            return seedNodes;
         } else {
-            for (Node node : getSeedNodes()) {
-                if (node.getHash().equals(nodeId)) {
-                    return true;
+            List<Node> nodeList = new ArrayList<>();
+            for (Node node : seedNodes) {
+                if (!nodes.containsKey(node.getId())) {
+                    nodeList.add(node);
                 }
             }
+            return nodeList;
         }
-        return false;
-    }
-
-    public void addNode(Node node) {
-        lock.lock();
-        try {
-            if (!nodes.containsKey(node.getIp().toString())) {
-                nodes.put(node.getIp(), node);
-                if (!node.isHandShake() && node.getType() == Node.OUT) {
-                    connectionManager.openConnection(node);
-                }
-            }
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    public void addNodeToGroup(String areaName, String groupName, Node node) {
-        lock.lock();
-        try {
-            if (!nodeArea.containsKey(areaName)) {
-                throw new NulsRuntimeException(ErrorCode.NODE_AREA_NOT_FOUND);
-            }
-
-            if (!nodeArea.get(areaName).containsKey(groupName)) {
-                throw new NulsRuntimeException(ErrorCode.NODE_GROUP_NOT_FOUND);
-            }
-            addNode(node);
-            if (areaName.equals(DEFAULT_AREA) && groupName.equals(NetworkConstant.NETWORK_NODE_OUT_GROUP) &&
-                    nodeGroups.get(groupName).size() >= network.maxOutCount()) {
-                return;
-            }
-            if (areaName.equals(DEFAULT_AREA) && groupName.equals(NetworkConstant.NETWORK_NODE_IN_GROUP) &&
-                    nodeGroups.get(groupName).size() >= network.maxInCount()) {
-                return;
-            }
-
-            nodeArea.get(areaName).get(groupName).addNode(node);
-        } finally {
-            lock.unlock();
-        }
-    }
-
-
-    public void addNodeToGroup(String groupName, Node node) {
-        addNodeToGroup(DEFAULT_AREA, groupName, node);
-    }
-
-    public void removeNode(String nodeHash) {
-        lock.lock();
-        try {
-            if (nodes.containsKey(nodeHash)) {
-                for (NodeGroup group : nodeGroups.values()) {
-                    for (Node node : group.getNodes().values()) {
-                        if (node.getHash().equals(nodeHash)) {
-                            group.removeNode(node);
-                            break;
-                        }
-                    }
-                }
-                if (!isSeed(nodeHash)) {
-                    Node node = nodes.get(nodeHash);
-                    node.setFailCount(node.getFailCount() + 1);
-                    if (node.getType() != Node.IN)
-                        nodeDao.saveChange(NodeTransferTool.toPojo(node));
-                }
-                nodes.remove(nodeHash);
-            }
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    public void blackNode(String nodeHash, int status) {
-        lock.lock();
-        try {
-            if (nodes.containsKey(nodeHash)) {
-                for (NodeGroup group : nodeGroups.values()) {
-                    for (Node node : group.getNodes().values()) {
-                        if (node.getHash().equals(nodeHash)) {
-                            group.removeNode(node);
-                            break;
-                        }
-                    }
-                }
-                if (!isSeed(nodeHash)) {
-                    Node node = nodes.get(nodeHash);
-                    node.setFailCount(node.getFailCount() + 1);
-                    NodePo po = NodeTransferTool.toPojo(node);
-                    po.setStatus(status);
-                    nodeDao.saveChange(po);
-                }
-                nodes.remove(nodeHash);
-            }
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    public void removeNodeFromGroup(String areaName, String groupName, String nodeId) {
-        lock.lock();
-        try {
-            if (!nodeArea.containsKey(areaName)) {
-                throw new NulsRuntimeException(ErrorCode.NODE_AREA_NOT_FOUND);
-            }
-
-            if (!nodeArea.get(areaName).containsKey(groupName)) {
-                throw new NulsRuntimeException(ErrorCode.NODE_GROUP_NOT_FOUND);
-            }
-            Node node = getNode(nodeId);
-            if (node == null) {
-                throw new NulsRuntimeException(ErrorCode.NODE_NOT_FOUND);
-            }
-            nodeArea.get(areaName).get(groupName).removeNode(node);
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    public void removeNodeFromGroup(String groupName, String nodeId) {
-        removeNodeFromGroup(DEFAULT_AREA, groupName, nodeId);
-    }
-
-
-    public boolean hasNodeGroup(String groupName) {
-        return hasNodeGroup(DEFAULT_AREA, groupName);
-    }
-
-    public boolean hasNodeGroup(String areaName, String groupName) {
-        return nodeArea.containsKey(areaName) && nodeArea.get(areaName).containsKey(groupName);
-    }
-
-    public void addNodeGroup(String areaName, NodeGroup nodeGroup) {
-        if (!nodeArea.containsKey(areaName)) {
-            throw new NulsRuntimeException(ErrorCode.NODE_AREA_NOT_FOUND);
-        }
-
-        if (nodeArea.get(areaName).containsKey(nodeGroup.getName())) {
-            throw new NulsRuntimeException(ErrorCode.NODE_GROUP_ALREADY_EXISTS);
-        }
-
-        nodeArea.get(areaName).put(nodeGroup.getName(), nodeGroup);
-    }
-
-    public void addNodeGroup(NodeGroup nodeGroup) {
-        addNodeGroup(DEFAULT_AREA, nodeGroup);
-    }
-
-    public void destroyNodeGroup(String groupName) {
-        lock.lock();
-        try {
-            if (!nodeGroups.containsKey(groupName)) {
-                return;
-            }
-
-            NodeGroup group = nodeGroups.get(groupName);
-            for (Node p : group.getNodes().values()) {
-                p.destroy();
-                group.removeNode(p);
-            }
-            nodeGroups.remove(groupName);
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    /**
-     * remove from database
-     *
-     * @param node
-     */
-    public void deleteNode(Node node) {
-        node.destroy();
-        nodeDao.delete(node.getHash());
     }
 
     public Node getNode(String nodeId) {
         return nodes.get(nodeId);
     }
 
+    public void addNode(Node node) {
+        lock.lock();
+        try {
+            if (!nodes.containsKey(node.getId())) {
+                nodes.put(node.getId(), node);
+                if (node.getStatus() == Node.WAIT) {
+                    connectionManager.connectionNode(node);
+                }
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void removeNode(String nodeId) {
+        if (nodes.containsKey(nodeId)) {
+            Node node = nodes.get(nodeId);
+            //When other modules call the interface,  close channel first
+            if (StringUtils.isNotBlank(node.getChannelId())) {
+                SocketChannel channel = NioChannelMap.get(node.getChannelId());
+                if (channel != null) {
+                    channel.close();
+                    return;
+                }
+            }
+
+            node.destroy();
+            for (String groupName : node.getGroupSet()) {
+                removeNodeFromGroup(groupName, nodeId);
+            }
+            nodes.remove(nodeId);
+        }
+        //todo delete node
+    }
+
+    public void addNodeToGroup(String groupName, Node node) {
+        if (!nodeGroups.containsKey(groupName)) {
+            throw new NulsRuntimeException(ErrorCode.NET_NODE_GROUP_NOT_FOUND);
+        }
+        NodeGroup group = nodeGroups.get(groupName);
+        if (groupName.equals(NetworkConstant.NETWORK_NODE_OUT_GROUP) &&
+                group.size() >= network.maxOutCount()) {
+            return;
+        }
+
+        if (groupName.equals(NetworkConstant.NETWORK_NODE_IN_GROUP) &&
+                group.size() >= network.maxInCount()) {
+            return;
+        }
+        node.getGroupSet().add(group.getName());
+        addNode(node);
+        group.addNode(node);
+    }
+
+    public void removeNodeFromGroup(String groupName, String nodeId) {
+        if (!nodeGroups.containsKey(groupName)) {
+            return;
+        }
+        NodeGroup group = nodeGroups.get(groupName);
+        group.removeNode(nodeId);
+    }
+
+    /**
+     * check the nodes when closed try to connect other one
+     */
+    @Override
+    public void run() {
+        while (running) {
+            Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+            for (Node node : nodes.values()) {
+                System.out.println("-------------ip:" + node.getIp() + "-------status:" + node.getStatus() + "----------type:" + node.getType());
+            }
+
+            if (nodes.isEmpty()) {
+                List<Node> nodes = getSeedNodes();
+                for (Node node : nodes) {
+                    node.setType(Node.OUT);
+                    node.setStatus(Node.WAIT);
+                    addNodeToGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP, node);
+                }
+            }
+
+            NodeGroup group = nodeGroups.get(NetworkConstant.NETWORK_NODE_OUT_GROUP);
+            if (group.size() < network.maxOutCount()) {
+                List<Node> nodes = discoverHandler.getLocalNodes(network.maxOutCount() - group.size());
+                if (!nodes.isEmpty()) {
+                    for (Node node : nodes) {
+                        node.setType(Node.OUT);
+                        node.setStatus(Node.WAIT);
+                        addNodeToGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP, node);
+                    }
+                } else {
+                   discoverHandler.findOtherNode(network.maxOutCount() - group.size());
+                }
+            }
+            try {
+                Thread.sleep(6000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public Map<String, Node> getNodes() {
         return nodes;
     }
 
-    public NodeGroup getNodeGroup(String areaName, String groupName) {
-        if (!nodeArea.containsKey(areaName)) {
-            throw new NulsRuntimeException(ErrorCode.NODE_AREA_NOT_FOUND);
-        }
-        return nodeArea.get(areaName).get(groupName);
-    }
-
     public NodeGroup getNodeGroup(String groupName) {
-        return getNodeGroup(DEFAULT_AREA, groupName);
+        return nodeGroups.get(groupName);
     }
 
-
-    public List<Node> getAvailableNodesByGroup(String areaName, String groupName) {
-        List<Node> availableNodes = new ArrayList<>();
-        if (hasNodeGroup(areaName, groupName)) {
-            for (Node node : getNodeGroup(areaName, groupName).getNodes().values()) {
-                if (node.getStatus() == Node.HANDSHAKE) {
-                    availableNodes.add(node);
-                }
-            }
-        }
-        return availableNodes;
-    }
-
-    public List<Node> getAvailableNodesByGroup(String groupName) {
-        return getAvailableNodesByGroup(DEFAULT_AREA, groupName);
-    }
-
-    public List<Node> getAvailableNodes(String excludeNodeId) {
-        List<Node> availableNodes = new ArrayList<>();
-        Collection<Node> collection = nodes.values();
-        for (Node node : collection) {
-            if (node.getStatus() == Node.HANDSHAKE && !node.getIp().equals(excludeNodeId)) {
-                availableNodes.add(node);
-            }
-        }
-        return availableNodes;
-    }
-
-    public List<Node> getAvailableNodes(int size, Node excludeNode) {
-        List<Node> availableNodes = getAvailableNodes(excludeNode.getHash());
-        if (availableNodes.size() <= size) {
-            return availableNodes;
-        }
-        Collections.shuffle(availableNodes);
-        return availableNodes.subList(0, size);
-    }
-
-    public int getBroadcasterMinConnectionCount() {
-        int count = 0;
-        Collection<Node> collection = nodes.values();
-        for (Node node : collection) {
-            if (node.getStatus() == Node.HANDSHAKE) {
-                count++;
-            }
-        }
-        if (count <= 1) {
-            return count;
-        } else {
-            return Math.max(1, (int) (count * 0.8));
-        }
-    }
-
-
-    public List<Node> getGroupAvailableNodes(String areaName, String groupName, String excludeNodeId) {
-        if (areaName == null) {
-            areaName = DEFAULT_AREA;
-        }
-
-        if (!nodeArea.containsKey(areaName)) {
-            throw new NulsRuntimeException(ErrorCode.NODE_AREA_NOT_FOUND);
-        }
-
-        if (!nodeArea.get(areaName).containsKey(groupName)) {
-            throw new NulsRuntimeException(ErrorCode.NODE_GROUP_NOT_FOUND);
-        }
-        List<Node> availableNodes = new ArrayList<>();
-        NodeGroup group = nodeArea.get(areaName).get(groupName);
-        for (Node node : group.getNodes().values()) {
-            if (node.getStatus() == Node.HANDSHAKE && !node.getIp().equals(excludeNodeId)) {
-                availableNodes.add(node);
-            }
-        }
-        return availableNodes;
-    }
-
-    public List<Node> getGroupAvailableNodes(String groupName, String excludeNodeId) {
-        return getGroupAvailableNodes(DEFAULT_AREA, groupName, excludeNodeId);
+    public void setNetwork(AbstractNetworkParam network) {
+        this.network = network;
     }
 
     public void setConnectionManager(ConnectionManager connectionManager) {
         this.connectionManager = connectionManager;
     }
 
-    public ConnectionManager getConnectionManager() {
-        return connectionManager;
-    }
-
-    @Override
-    public void run() {
-
-//        while (running) {
-//            for (Node node : nodes.values()) {
-//                if (node.getStatus() == Node.HANDSHAKE) {
-//                    PingEvent ping = new PingEvent();
-//                    try {
-//                        node.sendNetworkEvent(ping);
-//                    } catch (IOException e) {
-//                        Log.error(e);
-//                        node.destroy();
-//                    }
-//                }
-//            }
-//
-//            try {
-//                Thread.sleep(6000);
-//            } catch (InterruptedException e) {
-//
-//            }
-//        }
+    public void setDiscoverHandler(NodeDiscoverHandler discoverHandler) {
+        this.discoverHandler = discoverHandler;
     }
 }

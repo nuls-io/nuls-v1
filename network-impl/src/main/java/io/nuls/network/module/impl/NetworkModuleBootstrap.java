@@ -23,12 +23,10 @@
  */
 package io.nuls.network.module.impl;
 
-
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.event.EventManager;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.NetworkContext;
@@ -37,6 +35,7 @@ import io.nuls.network.message.entity.*;
 import io.nuls.network.module.AbstractNetworkModule;
 import io.nuls.network.service.NetworkService;
 import io.nuls.network.service.impl.NetworkServiceImpl;
+import io.nuls.network.service.impl.netty.NettyClient;
 
 import java.io.IOException;
 
@@ -60,8 +59,6 @@ public class NetworkModuleBootstrap extends AbstractNetworkModule {
 
         this.registerService(NetworkServiceImpl.class);
         networkService = NulsContext.getServiceBean(NetworkService.class);
-
-
     }
 
     private void registerEvent() {
@@ -69,8 +66,6 @@ public class NetworkModuleBootstrap extends AbstractNetworkModule {
         EventManager.putEvent(VersionEvent.class);
         EventManager.putEvent(GetNodeEvent.class);
         EventManager.putEvent(NodeEvent.class);
-        EventManager.putEvent(PingEvent.class);
-        EventManager.putEvent(PongEvent.class);
     }
 
     @Override
@@ -82,6 +77,7 @@ public class NetworkModuleBootstrap extends AbstractNetworkModule {
     @Override
     public void shutdown() {
         networkService.shutdown();
+        NettyClient.worker.shutdownGracefully();
     }
 
     @Override
