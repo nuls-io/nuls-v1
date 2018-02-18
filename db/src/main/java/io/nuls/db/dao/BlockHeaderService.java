@@ -76,7 +76,7 @@ public interface BlockHeaderService extends BaseDataService<String, BlockHeaderP
      * @param split
      * @return
      */
-    List<String> getHashList(long startHeight, long endHeight, long split);
+    List<BlockHeaderPo> getHashList(long startHeight, long endHeight, long split);
 
     /**
      * calc count of roundIndex between start and end;

@@ -25,6 +25,7 @@ package io.nuls.consensus.entity.block;
 
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.intf.NulsCloneable;
 
 import java.util.ArrayList;
@@ -129,5 +130,9 @@ public class BlockHeaderChain implements NulsCloneable {
             }
         }
         return null;
+    }
+
+    public boolean contains(BlockHeader header) {
+        return headerDigestList.contains(new HeaderDigest(header.getHash().getDigestHex(),header.getHeight()));
     }
 }

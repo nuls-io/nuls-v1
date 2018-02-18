@@ -85,4 +85,8 @@ public class ModuleService {
     public BaseModuleBootstrap getModule(short moduleId) {
         return moduleManager.getModule(moduleId);
     }
+
+    public List<BaseModuleBootstrap> getModuleList(){
+        return moduleManager.getModuleList();
+    }
 }

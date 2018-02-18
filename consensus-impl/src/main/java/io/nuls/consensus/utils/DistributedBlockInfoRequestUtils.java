@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -78,7 +78,6 @@ public class DistributedBlockInfoRequestUtils {
 
     public BlockInfo request(long start, long end, long split) {
         lock.lock();
-        this.startTime = TimeService.currentTimeMillis();
         requesting = true;
         hashesMap.clear();
         calcMap.clear();
@@ -86,18 +85,20 @@ public class DistributedBlockInfoRequestUtils {
         this.end = end;
         this.split = split;
         GetBlocksHashRequest event = new GetBlocksHashRequest(start, end, split);
+        this.startTime = TimeService.currentTimeMillis();
         nodeIdList = this.eventBroadcaster.broadcastAndCache(event, false);
         if (nodeIdList.isEmpty()) {
-            Log.error("get best height from net faild!");
+//            Log.error("get best height from net faild!");
             lock.unlock();
             return null;
         }
+
         return this.getBlockInfo();
     }
 
 
     public boolean addBlockHashResponse(String nodeId, BlockHashResponse response) {
-        if (!hashesMap.containsKey(nodeId)) {
+        if (this.nodeIdList==null||!this.nodeIdList.contains(nodeId)) {
             return false;
         }
         if (!requesting) {
@@ -133,15 +134,17 @@ public class DistributedBlockInfoRequestUtils {
 
         int size = nodeIdList.size();
         int halfSize = (size + 1) / 2;
-        if (hashesMap.size() <= halfSize) {
+        //todo 临时去掉=号
+        if (hashesMap.size() < halfSize) {
             return;
         }
         BlockInfo result = null;
         for (String key : calcMap.keySet()) {
             List<String> nodes = calcMap.get(key);
-            if (nodes.size() > halfSize) {
+            //todo 临时加上=号
+            if (nodes.size() >= halfSize) {
                 result = new BlockInfo();
-                BlockHashResponse response = hashesMap.get(result.getNodeIdList().get(0));
+                BlockHashResponse response = hashesMap.get(nodes.get(0));
                 Long bestHeight = 0L;
                 NulsDigestData bestHash = null;
                 for (int i = 0; i < response.getHeightList().size(); i++) {

@@ -55,10 +55,8 @@ public class EventManager {
             }
             BaseEvent event = clazz.newInstance();
             putEvent(event.getHeader().getModuleId(), event.getHeader().getEventType(), clazz);
-        } catch (InstantiationException e) {
-            Log.error(e);
-        } catch (IllegalAccessException e) {
-            Log.error(e);
+        } catch (Exception e) {
+            Log.warn(e.getMessage());
         }
     }
 
@@ -91,11 +89,15 @@ public class EventManager {
         try {
             event = clazz.newInstance();
         } catch (Exception e) {
-            System.out.println(header.getModuleId() + "===" + header.getEventType());
             Log.error(e);
             throw new NulsException(ErrorCode.DATA_PARSE_ERROR);
         }
-        event.parse(new NulsByteBuffer(bytes));
+        try {
+            event.parse(new NulsByteBuffer(bytes));
+        } catch (Exception e) {
+            Log.error(e);
+            throw e;
+        }
         return event;
     }
 

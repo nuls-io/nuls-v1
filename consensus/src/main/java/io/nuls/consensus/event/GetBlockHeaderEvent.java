@@ -24,7 +24,7 @@
 package io.nuls.consensus.event;
 
 import io.nuls.consensus.constant.ConsensusEventType;
-import io.nuls.core.chain.entity.BasicTypeData;
+import io.nuls.consensus.entity.GetBlockHeaderParam;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
@@ -32,22 +32,22 @@ import io.nuls.core.utils.io.NulsByteBuffer;
  * @author Niels
  * @date 2017/12/11
  */
-public class GetBlockHeaderEvent extends BaseConsensusEvent<BasicTypeData<Long>> {
+public class GetBlockHeaderEvent extends BaseConsensusEvent<GetBlockHeaderParam> {
     public GetBlockHeaderEvent() {
         super(ConsensusEventType.GET_BLOCK_HEADER);
     }
 
     public GetBlockHeaderEvent(long height) {
         this();
-        this.setEventBody(new BasicTypeData<>(height));
+        this.setEventBody(new GetBlockHeaderParam(height));
     }
 
     @Override
-    protected BasicTypeData<Long> parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
+    protected GetBlockHeaderParam parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
         if (byteBuffer.isFinished()) {
             return null;
         }
-        return new BasicTypeData(byteBuffer);
+        return byteBuffer.readNulsData(new GetBlockHeaderParam(null));
     }
 
 }

@@ -191,5 +191,6 @@ public class ConsensusTool {
         header.setSign(accountService.signData(header.getHash(), null));
         return block;
     }
+
 }
 

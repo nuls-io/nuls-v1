@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -123,16 +123,6 @@ public class ConsensusManager implements Runnable {
     }
 
     public void initConsensusStatusInfo() {
-
-        if (null == NulsContext.LOCAL_ADDRESS_LIST || NulsContext.LOCAL_ADDRESS_LIST.isEmpty()) {
-            try {
-                Thread.sleep(5000L);
-            } catch (InterruptedException e) {
-                Log.error(e);
-            }
-            initConsensusStatusInfo();
-            return;
-        }
         List<Consensus<Agent>> agentList = consensusCacheManager.getCachedAgentList();
         ConsensusStatusInfo info = new ConsensusStatusInfo();
         for (String address : NulsContext.LOCAL_ADDRESS_LIST) {
@@ -152,20 +142,12 @@ public class ConsensusManager implements Runnable {
             }
         }
         if (info.getAddress() == null) {
-            try {
-                Thread.sleep(5000L);
-            } catch (InterruptedException e) {
-                Log.error(e);
-            }
-            return;
+            info.setStatus(ConsensusStatusEnum.NOT_IN.getCode());
         }
         this.consensusStatusInfo = info;
     }
 
     public void joinMeeting() {
-        if (null == this.consensusStatusInfo) {
-            return;
-        }
         TaskManager.createAndRunThread(NulsConstant.MODULE_ID_CONSENSUS,
                 ConsensusMeetingRunner.THREAD_NAME,
                 ConsensusMeetingRunner.getInstance());
@@ -187,6 +169,7 @@ public class ConsensusManager implements Runnable {
         try {
             blockMaintenanceThread.checkGenesisBlock();
             blockMaintenanceThread.syncBlock();
+
         } catch (Exception e) {
             Log.error(e.getMessage());
         } finally {

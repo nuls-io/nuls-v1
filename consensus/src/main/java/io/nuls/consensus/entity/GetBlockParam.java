@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,48 +21,71 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.ledger.entity.tx;
+package io.nuls.consensus.entity;
 
 import io.nuls.core.chain.entity.BaseNulsData;
-import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.crypto.Utils;
+import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.NulsByteBuffer;
-import io.nuls.ledger.entity.params.CoinTransferData;
+import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
-import java.util.Arrays;
+import java.io.IOException;
 
 /**
  * @author Niels
- * @date 2017/12/4
+ * @date 2017/12/18
  */
-public class CoinBaseTransaction<T extends BaseNulsData> extends AbstractCoinTransaction<T> {
+public class GetBlockParam extends BaseNulsData {
 
-    public CoinBaseTransaction() {
-        this(TransactionConstant.TX_TYPE_COIN_BASE);
-    }
+    private long time;
+    private long start;
+    private long end;
 
-    public CoinBaseTransaction(CoinTransferData params, String password) throws NulsException {
-        this(TransactionConstant.TX_TYPE_COIN_BASE, params, password);
-    }
-
-    protected CoinBaseTransaction(int type, CoinTransferData params, String password) throws NulsException {
-        super(type, params, password);
-    }
-
-    protected CoinBaseTransaction(int type) {
-        super(type);
+    public GetBlockParam() {
+        this.time = TimeService.currentTimeMillis();
     }
 
     @Override
-    public T parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
-        byte[] bytes = byteBuffer.readBytes(NulsConstant.PLACE_HOLDER.length);
-        if(Arrays.equals(NulsConstant.PLACE_HOLDER,bytes)){
-            return null;
-        }
-        throw new NulsRuntimeException(ErrorCode.DATA_ERROR,"The transaction never provided the method:parseTxData");
+    public int size() {
+        int size = 0;
+        size += NulsConstant.TIME_VALUE_LENGTH;
+        size += Utils.sizeOfSerialize(start);
+        size += Utils.sizeOfSerialize(end);
+        return size;
+    }
+
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeTime(time);
+        stream.writeVarInt(start);
+        stream.writeVarInt(end);
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.time = byteBuffer.readTime();
+        this.start = byteBuffer.readVarInt();
+        this.end = byteBuffer.readVarInt();
+    }
+
+    public long getStart() {
+        return start;
+    }
+
+    public void setStart(long start) {
+        this.start = start;
+    }
+
+    public long getEnd() {
+        return end;
+    }
+
+    public void setEnd(long end) {
+        this.end = end;
     }
 }

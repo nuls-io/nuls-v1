@@ -140,9 +140,6 @@ public class SM2Utils {
 
         SM2Result sm2Result = new SM2Result();
         sm2.sm2Sign(md, userD, userKey, sm2Result);
-        System.out.println("r: " + sm2Result.r.toString(16));
-        System.out.println("s: " + sm2Result.s.toString(16));
-        System.out.println("");
 
         DERInteger dR = new DERInteger(sm2Result.r);
         DERInteger dS = new DERInteger(sm2Result.s);
@@ -172,8 +169,6 @@ public class SM2Utils {
         sm3.update(sourceData, 0, sourceData.length);
         byte[] md = new byte[32];
         sm3.doFinal(md, 0);
-        System.out.println("SM3" + Util.getHexString(md));
-        System.out.println("");
 
         ByteArrayInputStream bis = new ByteArrayInputStream(signData);
         ASN1InputStream dis = new ASN1InputStream(bis);
@@ -184,57 +179,8 @@ public class SM2Utils {
         SM2Result sm2Result = new SM2Result();
         sm2Result.r = r;
         sm2Result.s = s;
-
-        /*
-        * debug
-         */
-        System.out.println("r: " + sm2Result.r.toString(16));
-        System.out.println("s: " + sm2Result.s.toString(16));
-        System.out.println("");
-
-
         sm2.sm2Verify(md, userKey, sm2Result.r, sm2Result.s, sm2Result);
         return sm2Result.r.equals(sm2Result.R);
     }
 
-    public static void main(String[] args) throws Exception {
-        String plainText = "message digest";
-        byte[] sourceData = plainText.getBytes();
-
-
-        String prik = "128B2FA8BD433C6C068C8D803DFF79792A519A55171B1B650C23661D15897263";
-        String prikS = new String(Base64.encode(Util.hexToByte(prik)));
-        System.out.println("prikS: " + prikS);
-        System.out.println("");
-
-
-        String userId = "NULS";
-
-        System.out.println("ID: " + Util.getHexString(userId.getBytes()));
-        System.out.println("");
-
-
-        byte[] c = SM2Utils.sign(userId.getBytes(), Base64.decode(prikS.getBytes()), sourceData);
-        System.out.println("sign: " + Util.getHexString(c));
-        System.out.println("");
-
-
-        String pubk = "040AE4C7798AA0F119471BEE11825BE46202BB79E2A5844495E97C04FF4DF2548A7C0240F88F1CD4E16352A73C17B7F16F07353E53A176D684A9FE0C6BB798E857";
-        String pubkS = new String(Base64.encode(Util.hexToByte(pubk)));
-        System.out.println("pubkS: " + pubkS);
-        System.out.println("");
-
-
-        boolean vs = SM2Utils.verifySign(userId.getBytes(), Base64.decode(pubkS.getBytes()), sourceData, c);
-        System.out.println("vs: " + vs);
-        System.out.println("");
-
-
-        byte[] cipherText = SM2Utils.encrypt(Base64.decode(pubkS.getBytes()), sourceData);
-        System.out.println(new String(Base64.encode(cipherText)));
-        System.out.println("");
-
-        plainText = new String(SM2Utils.decrypt(Base64.decode(prikS.getBytes()), cipherText));
-        System.out.println(plainText);
-    }
 }

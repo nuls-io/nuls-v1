@@ -157,16 +157,9 @@ public class SM2 {
             return;
         } else {
             ECPoint x1y1 = ecc_point_g.multiply(sm2Result.s);
-            System.out.println("X0: " + x1y1.getX().toBigInteger().toString(16));
-            System.out.println("Y0: " + x1y1.getY().toBigInteger().toString(16));
-            System.out.println("");
 
             x1y1 = x1y1.add(userKey.multiply(t));
-            System.out.println("X1: " + x1y1.getX().toBigInteger().toString(16));
-            System.out.println("Y1: " + x1y1.getY().toBigInteger().toString(16));
-            System.out.println("");
             sm2Result.R = e.add(x1y1.getX().toBigInteger()).mod(ecc_n);
-            System.out.println("R: " + sm2Result.R.toString(16));
             return;
         }
     }

@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,80 +21,61 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
 package io.nuls.consensus.entity;
 
 import io.nuls.core.chain.entity.BaseNulsData;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.crypto.VarInt;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
+import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Niels
  * @date 2017/12/18
  */
-public class TxHashData extends BaseNulsData {
+public class GetBlockHeaderParam extends BaseNulsData {
 
-    private NulsDigestData blockHash;
+    private long time;
+    private long height;
 
-    private List<NulsDigestData> txHashList;
+    public GetBlockHeaderParam(Long height) {
+        this.time = TimeService.currentTimeMillis();
+        if(null!=height){
+            this.height = height;
+        }
+    }
 
     @Override
     public int size() {
         int size = 0;
-        size += Utils.sizeOfSerialize(blockHash);
-        size += VarInt.sizeOf(txHashList.size());
-        size += this.getTxHashBytesLength();
+        size += NulsConstant.TIME_VALUE_LENGTH;
+        size += Utils.sizeOfSerialize(height);
         return size;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(blockHash);
-        stream.writeVarInt(txHashList.size());
-        for (NulsDigestData data : txHashList) {
-            stream.writeNulsData(data);
-        }
+        stream.writeTime(time);
+        stream.writeVarInt(height);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.blockHash = byteBuffer.readHash();
-        long txCount = byteBuffer.readVarInt();
-        this.txHashList = new ArrayList<>();
-        for (int i = 0; i < txCount; i++) {
-            this.txHashList.add(byteBuffer.readHash());
-        }
+        this.time = byteBuffer.readTime();
+        this.height = byteBuffer.readVarInt();
     }
 
-    private int getTxHashBytesLength() {
-        int size = 0;
-        for (NulsDigestData hash : txHashList) {
-            size += Utils.sizeOfSerialize(hash);
-        }
-        return size;
+    public long getHeight() {
+        return height;
     }
 
-    public NulsDigestData getBlockHash() {
-        return blockHash;
-    }
-
-    public void setBlockHash(NulsDigestData blockHash) {
-        this.blockHash = blockHash;
-    }
-
-    public List<NulsDigestData> getTxHashList() {
-        return txHashList;
-    }
-
-    public void setTxHashList(List<NulsDigestData> txHashList) {
-        this.txHashList = txHashList;
+    public void setHeight(long height) {
+        this.height = height;
     }
 }

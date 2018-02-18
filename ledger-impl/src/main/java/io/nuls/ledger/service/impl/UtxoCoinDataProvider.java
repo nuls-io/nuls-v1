@@ -74,13 +74,14 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 
     @Override
     public CoinData parse(NulsByteBuffer byteBuffer) throws NulsException {
-
-        return byteBuffer.readNulsData(new UtxoData());
+        CoinData coinData= byteBuffer.readNulsData(new UtxoData());
+        return coinData;
     }
 
     @Override
     public CoinTransferData getTransferData(CoinData coinData) {
         UtxoData utxoData = (UtxoData) coinData;
+        //todo
         return null;
     }
 

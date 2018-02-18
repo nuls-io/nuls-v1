@@ -184,7 +184,6 @@ public class ModuleManager {
         }
     }
 
-
     private Thread.State getProcessState(short moduleId) {
         ModuleProcess process = PROCCESS_MAP.get(moduleId);
         if (null != process) {
@@ -208,5 +207,9 @@ public class ModuleManager {
 
     public void setModulesCfg(Map<String, String> modulesCfg) {
         this.modulesCfg = modulesCfg;
+    }
+
+    public List<BaseModuleBootstrap> getModuleList() {
+        return new ArrayList<>(MODULE_MAP.values());
     }
 }

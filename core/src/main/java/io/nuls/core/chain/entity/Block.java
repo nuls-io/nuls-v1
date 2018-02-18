@@ -63,7 +63,6 @@ public class Block extends BaseNulsData implements NulsCloneable {
     @Override
     public int size() {
         int size = header.size();
-
         for (Transaction tx : txs) {
             size += tx.size();
         }
@@ -73,7 +72,6 @@ public class Block extends BaseNulsData implements NulsCloneable {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         header.serializeToStream(stream);
-
         for (Transaction tx : txs) {
             stream.write(tx.serialize());
         }
@@ -84,7 +82,7 @@ public class Block extends BaseNulsData implements NulsCloneable {
         header = new BlockHeader();
         header.parse(byteBuffer);
         try {
-            txs = TransactionManager.getInstances(byteBuffer);
+            txs = TransactionManager.getInstances(byteBuffer,header.getTxCount());
         } catch (Exception e) {
             throw new NulsRuntimeException(ErrorCode.PARSE_OBJECT_ERROR);
         }

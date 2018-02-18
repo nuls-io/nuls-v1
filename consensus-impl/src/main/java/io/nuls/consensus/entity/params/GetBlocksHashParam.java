@@ -1,18 +1,19 @@
-/**
+/*
+ *
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,90 +21,87 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.core.chain.entity;
 
-import io.nuls.core.crypto.VarInt;
+package io.nuls.consensus.entity.params;
+
+import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
+import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
-import io.nuls.core.utils.log.Log;
 
 import java.io.IOException;
-import java.io.OutputStream;
 
 /**
- * @author facjas
- * @date 2017/11/20
+ * @author Niels
+ * @date 2018/2/8
  */
-public class NulsSignData extends BaseNulsData {
+public class GetBlocksHashParam extends BaseNulsData {
+    private long time;
+    private long start;
+    private long end;
+    private long split;
 
-    public static final NulsSignData EMPTY_SIGN = new NulsSignData(new byte[]{0, 0, 1, 0});
-
-    protected short signAlgType;
-    protected byte[] signBytes;
-
-    public int getSignAlgType() {
-        return signAlgType;
+    public GetBlocksHashParam(){
+        this.time = TimeService.currentTimeMillis();
     }
-
-    public void setSignAlgType(short signAlgType) {
-        this.signAlgType = signAlgType;
-    }
-
-    public NulsSignData() {
-    }
-
-    public NulsSignData(byte[] bytes) {
-        this();
-        try {
-            this.parse(bytes);
-        } catch (NulsException e) {
-            Log.error(e);
-        }
-    }
-
     @Override
     public int size() {
-        return Utils.sizeOfSerialize(signBytes) + 2;
+        int size = NulsConstant.TIME_VALUE_LENGTH;
+        size += Utils.sizeOfSerialize(start);
+        size +=Utils.sizeOfSerialize(end);
+        size += Utils.sizeOfSerialize(split);
+        return size;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeShort(signAlgType);
-        stream.writeBytesWithLength(signBytes);
+         stream.writeTime(time);
+         stream.writeVarInt(start);
+         stream.writeVarInt(end);
+         stream.writeVarInt(split);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.signAlgType = byteBuffer.readShort();
-        this.signBytes = byteBuffer.readByLengthByte();
+       this.time = byteBuffer.readTime();
+       this.start = byteBuffer.readVarInt();
+       this.end = byteBuffer.readVarInt();
+       this.split = byteBuffer.readVarInt();
     }
 
-    public int getSignLength() {
-        //todo
-        if (null == this.signBytes) {
-            return 0;
-        }
-        return this.signBytes.length;
+    public long getStart() {
+        return start;
     }
 
-    public byte[] getSignBytes() {
-        return signBytes;
+    public void setStart(long start) {
+        this.start = start;
     }
 
-    public void setSignBytes(byte[] signBytes) {
-        this.signBytes = signBytes;
+    public long getEnd() {
+        return end;
     }
 
-    public String getSignHex() {
-        try {
-            return Hex.encode(serialize());
-        } catch (IOException e) {
-            Log.error(e);
-            return null;
-        }
+    public void setEnd(long end) {
+        this.end = end;
+    }
+
+    public long getSplit() {
+        return split;
+    }
+
+    public void setSplit(long split) {
+        this.split = split;
+    }
+
+    public static void main(String []args)throws Exception{
+        GetBlocksHashParam param = new GetBlocksHashParam();
+        param.parse(new NulsByteBuffer(Hex.decode("ffff1d50746101000000000100000100")));
+
     }
 }

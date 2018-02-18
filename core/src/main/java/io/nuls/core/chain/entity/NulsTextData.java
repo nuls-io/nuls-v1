@@ -29,6 +29,7 @@ import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
+import io.nuls.core.utils.log.Log;
 
 import java.io.IOException;
 
@@ -65,7 +66,7 @@ public class NulsTextData extends BaseNulsData{
         try {
             text = new String(byteBuffer.readBytes((int) len), NulsContext.DEFAULT_ENCODING);
         }catch (Exception e){
-            System.out.println("encoding error!");
+            Log.error(e);
         }
     }
 }

@@ -445,4 +445,5 @@ public class ECKey {
     public void setEncryptedPrivateKey(EncryptedData encryptedPrivateKey) {
         this.encryptedPrivateKey = encryptedPrivateKey;
     }
+
 }

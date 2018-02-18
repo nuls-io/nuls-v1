@@ -127,8 +127,4 @@ public class NetworkDataHeader {
         this.extend = extend;
     }
 
-    public static void main(String [] args){
-         NetworkDataHeader header = new NetworkDataHeader((short)1,(short)1);
-         System.out.println(Hex.encode(header.serialize()));
-    }
 }

@@ -49,7 +49,9 @@ public class NulsEventCall<T extends io.nuls.core.event.BaseEvent> implements Ru
             //todo filter&handler is the same level
             boolean ok = handler.getFilterChain().startDoFilter(data.getData());
             if (ok) {
+                long start = System.currentTimeMillis();
                 handler.onEvent(data.getData(), data.getNodeId());
+                Log.debug(data.getData().getClass()+",use:"+(System.currentTimeMillis()-start));
             }
         } catch (Exception e) {
             Log.error(e);

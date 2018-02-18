@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -38,6 +38,7 @@ import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.log.Log;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 
 /**
  * @author Niels
@@ -164,7 +165,7 @@ public class NulsByteBuffer {
 
     public short readShort() throws NulsException {
         byte[] bytes = this.readBytes(2);
-        if(null==bytes){
+        if (null == bytes) {
             return 0;
         }
         return Utils.bytes2Short(bytes);
@@ -173,7 +174,7 @@ public class NulsByteBuffer {
     public String readString() throws NulsException {
         try {
             byte[] bytes = this.readByLengthByte();
-            if(null==bytes){
+            if (null == bytes) {
                 return null;
             }
             return new String(bytes, NulsContext.DEFAULT_ENCODING);
@@ -184,8 +185,9 @@ public class NulsByteBuffer {
 
     }
 
-    public double readDouble() throws NulsException { byte[] bytes = this.readByLengthByte();
-        if(null==bytes){
+    public double readDouble() throws NulsException {
+        byte[] bytes = this.readByLengthByte();
+        if (null == bytes) {
             return 0;
         }
         return Utils.bytes2Double(bytes);
@@ -206,10 +208,22 @@ public class NulsByteBuffer {
     }
 
     public <T extends BaseNulsData> T readNulsData(T nulsData) throws NulsException {
-        if (payload == null || payload.length == 0 || NulsConstant.PLACE_HOLDER == payload[0]) {
+
+        if (payload == null || payload.length == 0 ) {
             return null;
         }
         int length = payload.length - cursor;
+       int placeHolderLength = NulsConstant.PLACE_HOLDER.length;
+        if(length>=placeHolderLength){
+            byte[] byte4 = new byte[placeHolderLength];
+            System.arraycopy(payload,cursor,byte4,0,placeHolderLength);
+            if(Arrays.equals(NulsConstant.PLACE_HOLDER,byte4)){
+                cursor+=placeHolderLength;
+                return null;
+            }
+
+        }
+
         byte[] bytes = new byte[length];
         System.arraycopy(payload, cursor, bytes, 0, length);
         nulsData.parse(bytes);
@@ -219,6 +233,12 @@ public class NulsByteBuffer {
 
     public NulsSignData readSign() throws NulsException {
         return this.readNulsData(new NulsSignData());
+    }
+
+    public long readTime() {
+        long value = Utils.readInt64LE(payload, cursor);
+        cursor += 8;
+        return value;
     }
 
     public Transaction readTransaction() throws NulsException {

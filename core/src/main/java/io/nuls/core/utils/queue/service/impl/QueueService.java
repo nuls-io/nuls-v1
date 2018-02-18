@@ -121,4 +121,8 @@ public class QueueService<T> {
         QueueManager.remove(queueName, item);
 
     }
+
+    public boolean exist(String queueName) {
+        return  QueueManager.exist(queueName);
+    }
 }

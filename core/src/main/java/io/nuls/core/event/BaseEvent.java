@@ -48,6 +48,8 @@ public abstract class BaseEvent<T extends BaseNulsData> extends BaseNulsData imp
 
     public BaseEvent(short moduleId, short eventType) {
         this.header = new EventHeader(moduleId, eventType);
+        //todo 临时处理事件签名
+        sign = NulsSignData.EMPTY_SIGN;
     }
 
     @Override

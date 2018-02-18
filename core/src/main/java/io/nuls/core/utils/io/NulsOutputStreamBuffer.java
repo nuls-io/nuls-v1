@@ -118,4 +118,10 @@ public class NulsOutputStreamBuffer {
             this.write(data.serialize());
         }
     }
+
+    public void writeTime(long time) throws IOException {
+        byte[] bytes = new byte[NulsConstant.TIME_VALUE_LENGTH];
+        Utils.uint64ToByteArrayLE(time,bytes,0);
+        this.write(bytes);
+    }
 }

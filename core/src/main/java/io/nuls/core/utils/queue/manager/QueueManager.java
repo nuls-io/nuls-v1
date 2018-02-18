@@ -33,7 +33,6 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.queue.entity.StatInfo;
 import io.nuls.core.utils.queue.fqueue.exception.FileFormatException;
 import io.nuls.core.utils.queue.intf.AbstractNulsQueue;
-import io.nuls.core.utils.queue.service.impl.QueueService;
 import io.nuls.core.utils.queue.thread.StatusLogThread;
 
 import java.io.IOException;
@@ -263,7 +262,11 @@ public final class QueueManager {
     public static void start() {
         ScheduledExecutorService service = TaskManager.createScheduledThreadPool(new NulsThreadFactory(NulsConstant.MODULE_ID_MICROKERNEL, "queueStatusLogPool"));
         service.scheduleAtFixedRate(new StatusLogThread(), 0, QueueManager.getLatelySecond(), TimeUnit.SECONDS);
-        ServiceManager.getInstance().regService((short) 0, QueueService.class);
         Running = true;
+    }
+
+    public static boolean exist(String queueName) {
+        AbstractNulsQueue queue = QUEUES_MAP.get(queueName);
+        return null != queue;
     }
 }

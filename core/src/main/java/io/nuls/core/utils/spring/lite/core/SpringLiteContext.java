@@ -76,10 +76,6 @@ public class SpringLiteContext {
     }
 
     private static void injectionBeanFields(Object obj, Class objType) throws Exception {
-        //todo debug
-        if(objType.getSimpleName().equals("UtxoLedgerServiceImpl")){
-            System.out.println();
-        }
         Set<Field> fieldSet = getFieldSet(objType);
         for (Field field : fieldSet) {
             injectionBeanField(obj, field);

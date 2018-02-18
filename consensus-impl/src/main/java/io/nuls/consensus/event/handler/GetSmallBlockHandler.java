@@ -43,7 +43,7 @@ public class GetSmallBlockHandler extends AbstractEventHandler<GetSmallBlockRequ
 
     @Override
     public void onEvent(GetSmallBlockRequest event, String fromId) {
-        Block block = blockService.getBlock(event.getEventBody().getDigestHex());
+        Block block = blockService.getBlock(event.getEventBody().getBlockHash().getDigestHex());
         SmallBlockEvent smallBlockEvent = new SmallBlockEvent();
         SmallBlock smallBlock = new SmallBlock();
         smallBlock.setBlockHash(block.getHeader().getHash());

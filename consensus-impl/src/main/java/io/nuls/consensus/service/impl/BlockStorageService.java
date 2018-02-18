@@ -99,9 +99,23 @@ public class BlockStorageService {
             Log.error(e);
         }
         Map<Long, List<Transaction>> txListGroup = txListGrouping(txList);
+        List <Long> heightList = new ArrayList<>();
         for (BlockHeaderPo po : poList) {
             BlockHeader header = ConsensusTool.fromPojo(po);
+            heightList.add(header.getHeight());
             blockList.add(fillBlock(header, txListGroup.get(header.getHeight())));
+        }
+        if((endHeight-startHeight+1)>blockList.size()){
+            for(long i=startHeight;i<=endHeight;i++){
+                if(heightList.contains(i)){
+                    continue;
+                }
+                try {
+                    blockList.add(this.getBlock(i));
+                } catch (Exception e) {
+                    Log.error(e);
+                }
+            }
         }
         return blockList;
     }
@@ -141,11 +155,14 @@ public class BlockStorageService {
         headerDao.delete(hash);
     }
 
-    public List<NulsDigestData> getBlockHashList(long startHeight, long endHeight, long split) {
-        List<String> strList = this.headerDao.getHashList(startHeight, endHeight, split);
-        List<NulsDigestData> hashList = new ArrayList<>();
-        for (String hash : strList) {
-            hashList.add(NulsDigestData.fromDigestHex(hash));
+    public List<BlockHeader> getBlockHashList(long startHeight, long endHeight, long split) {
+        List<BlockHeaderPo> strList = this.headerDao.getHashList(startHeight, endHeight, split);
+        List<BlockHeader> hashList = new ArrayList<>();
+        for (BlockHeaderPo po : strList) {
+            BlockHeader header = new BlockHeader();
+            header.setHash(NulsDigestData.fromDigestHex(po.getHash()));
+            header.setHeight(po.getHeight());
+            hashList.add(header);
         }
         return hashList;
     }

@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -29,13 +29,11 @@ import io.nuls.consensus.entity.DownloadRound;
 import io.nuls.consensus.entity.NodeDownloadingStatus;
 import io.nuls.consensus.event.GetBlockRequest;
 import io.nuls.consensus.cache.manager.block.BlockCacheManager;
-import io.nuls.consensus.service.impl.BlockServiceImpl;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Result;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
@@ -57,7 +55,8 @@ import java.util.concurrent.locks.ReentrantLock;
 public class BlockBatchDownloadUtils {
 
     private static final int DOWNLOAD_NODE_COUNT = 10;
-    private static final int DOWNLOAD_BLOCKS_PER_TIME = 10;
+    //todo
+    private static final int DOWNLOAD_BLOCKS_PER_TIME = 2;
     /**
      * unit:ms
      */
@@ -65,8 +64,8 @@ public class BlockBatchDownloadUtils {
 
     private static final BlockBatchDownloadUtils INSTANCE = new BlockBatchDownloadUtils();
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
-    private QueueService<String> queueService = NulsContext.getServiceBean(QueueService.class);
-    private BlockCacheManager blockCacheManager = NulsContext.getServiceBean(BlockCacheManager.class);
+    private QueueService<String> queueService = new QueueService<>();
+    private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
 
@@ -88,6 +87,8 @@ public class BlockBatchDownloadUtils {
 
     private Lock lock = new ReentrantLock();
 
+    private boolean working = false;
+
     private BlockBatchDownloadUtils() {
     }
 
@@ -97,7 +98,9 @@ public class BlockBatchDownloadUtils {
 
     private void init(List<String> nodeIdList) {
         this.nodeIdList = nodeIdList;
-        this.queueService.createQueue(queueId, (long) nodeIdList.size(), false);
+        if (!this.queueService.exist(queueId)) {
+            this.queueService.createQueue(queueId, (long) nodeIdList.size(), false);
+        }
         for (String nodeId : nodeIdList) {
             this.queueService.offer(queueId, nodeId);
         }
@@ -107,17 +110,37 @@ public class BlockBatchDownloadUtils {
 
     public void request(List<String> nodeIdList, long startHeight, long endHeight) throws InterruptedException {
         lock.lock();
+        if (working) {
+            return;
+        }
+        working = true;
         this.init(nodeIdList);
-        blocksHash = DistributedBlockInfoRequestUtils.getInstance().request(startHeight, endHeight, DOWNLOAD_BLOCKS_PER_TIME);
+        try {
+            blocksHash = DistributedBlockInfoRequestUtils.getInstance().request(startHeight, endHeight, DOWNLOAD_BLOCKS_PER_TIME);
+        } catch (Exception e) {
+            working = false;
+            return;
+        }
         request(startHeight, endHeight);
+        while (working) {
+            Thread.sleep(100L);
+        }
+        if(!working){
+            lock.unlock();
+        }
     }
 
     private void request(long startHeight, long endHeight) throws InterruptedException {
         finished = false;
         roundList.clear();
-        for (long i = startHeight; i <= endHeight; ) {
+        long i = startHeight;
+        while (true) {
             long start = i;
-            long end = i + DOWNLOAD_BLOCKS_PER_TIME * DOWNLOAD_NODE_COUNT;
+            int nodeCount = DOWNLOAD_NODE_COUNT;
+            if (this.nodeIdList.size() < DOWNLOAD_NODE_COUNT) {
+                nodeCount = nodeIdList.size();
+            }
+            long end = i + DOWNLOAD_BLOCKS_PER_TIME * nodeCount - 1;
             if (end > endHeight) {
                 end = endHeight;
             }
@@ -130,36 +153,43 @@ public class BlockBatchDownloadUtils {
             } else {
                 roundList.add(round);
             }
-            i = end;
+            i = end + 1;
+            if (i >= endHeight) {
+                break;
+            }
         }
 
     }
 
     private void startDownload() {
-        while (true) {
-            try {
-                Set<String> nodeSet = new HashSet<>();
+        try {
+            Set<String> nodeSet = new HashSet<>();
+            if (this.nodeIdList.size() <= DOWNLOAD_NODE_COUNT) {
+                nodeSet.addAll(this.nodeIdList);
+            } else {
                 Random random = new Random();
                 while (true) {
                     if (nodeSet.size() >= DOWNLOAD_NODE_COUNT) {
                         break;
                     }
-                    int index = random.nextInt(nodeIdList.size() - 1) % (nodeIdList.size());
+                    int index = random.nextInt(nodeIdList.size());
                     nodeSet.add(this.nodeIdList.get(index));
                 }
-                List<String> roundNodeList = new ArrayList<>(nodeSet);
-                long end = 0;
-                for (int i = 0; end < currentRound.getEnd(); i++) {
-                    long start = currentRound.getStart() + i * DOWNLOAD_BLOCKS_PER_TIME;
-                    end = start + DOWNLOAD_BLOCKS_PER_TIME;
-                    if (end > currentRound.getEnd()) {
-                        end = currentRound.getEnd();
-                    }
-                    this.sendRequest(start, end, roundNodeList.get(i));
-                }
-            } catch (Exception e) {
-                Log.error(e);
             }
+            List<String> roundNodeList = new ArrayList<>(nodeSet);
+            currentRound.setNodeIdList(roundNodeList);
+            long end = 0;
+            for (int i = 0; end < currentRound.getEnd(); i++) {
+                long start = currentRound.getStart() + i * DOWNLOAD_BLOCKS_PER_TIME;
+                end = start + DOWNLOAD_BLOCKS_PER_TIME - 1;
+                if (end > currentRound.getEnd()) {
+                    end = currentRound.getEnd();
+                }
+                String nodeId = roundNodeList.get(i);
+                this.sendRequest(start, end, nodeId);
+            }
+        } catch (Exception e) {
+            Log.error(e);
         }
     }
 
@@ -180,7 +210,7 @@ public class BlockBatchDownloadUtils {
         if (null == status) {
             return false;
         }
-        if (status.containsHeight(block.getHeader().getHeight())) {
+        if (!status.containsHeight(block.getHeader().getHeight())) {
             return false;
         }
         blockMap.put(block.getHeader().getHeight(), block);
@@ -196,12 +226,12 @@ public class BlockBatchDownloadUtils {
     private void verify() {
         boolean done = true;
         for (NodeDownloadingStatus status : nodeStatusMap.values()) {
-            if (done && status.finished()) {
-                continue;
+            if (!done) {
+                break;
             }
-            done = false;
+            done = status.finished();
         }
-        if(!done){
+        if (!done) {
             return;
         }
         Result result;
@@ -218,6 +248,7 @@ public class BlockBatchDownloadUtils {
             Block block = blockMap.get(i);
             ValidateResult result1 = block.verify();
             if (result1.isFailed()) {
+                Log.info(result1.getMessage());
                 try {
                     failedExecute(block.getHeader().getHeight());
                 } catch (InterruptedException e) {
@@ -273,18 +304,37 @@ public class BlockBatchDownloadUtils {
     }
 
     private void finished() {
-        this.finished = true;
-        this.queueService.destroyQueue(queueId);
-        this.nodeStatusMap.clear();
+        if (!roundFinished()) {
+            return;
+        }
         if (!roundList.isEmpty()) {
             currentRound = roundList.get(0);
             roundList.remove(0);
             startDownload();
+            return;
         }
-        lock.unlock();
+        this.finished = true;
+        this.queueService.destroyQueue(queueId);
+        this.nodeStatusMap.clear();
+        working = false;
+    }
+
+    private boolean roundFinished() {
+        boolean result = true;
+        for (String nodeId : currentRound.getNodeIdList()) {
+            if (!result) {
+                break;
+            }
+            result = nodeStatusMap.get(nodeId).finished();
+        }
+        return result;
     }
 
     public boolean isFinished() {
         return finished;
+    }
+
+    public boolean isWorking() {
+        return working;
     }
 }
