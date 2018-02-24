@@ -23,320 +23,172 @@
  */
 package io.nuls.network.service.impl;
 
-import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.module.service.ModuleService;
+import io.nuls.core.event.BaseEvent;
+import io.nuls.core.event.EventManager;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.mesasge.NulsMessage;
 import io.nuls.core.thread.manager.TaskManager;
-import io.nuls.core.utils.log.Log;
+import io.nuls.event.bus.service.intf.EventBusService;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Node;
-import io.nuls.network.entity.NodeGroup;
 import io.nuls.network.entity.param.AbstractNetworkParam;
-import io.nuls.network.module.AbstractNetworkModule;
+import io.nuls.network.message.NetworkEventHandlerFactory;
+import io.nuls.network.message.NetworkEventResult;
+import io.nuls.network.message.filter.MessageFilterChain;
+import io.nuls.network.message.handler.NetWorkEventHandler;
+import io.nuls.network.service.NetworkService;
+import io.nuls.network.service.impl.netty.NettyClient;
+import io.nuls.network.service.impl.netty.NettyServer;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
-import java.nio.channels.spi.SelectorProvider;
-import java.util.Iterator;
-import java.util.concurrent.locks.ReentrantLock;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author vivi
  * @date 2017-11-10
  */
-public class ConnectionManager implements Runnable {
+public class ConnectionManager {
 
     private AbstractNetworkParam network;
+    private NetworkService networkService;
+    private NettyServer nettyServer;
+    private EventBusService eventBusService;
+    private NetworkEventHandlerFactory messageHandlerFactory;
 
-    private AbstractNetworkModule networkModule;
+    private static ConnectionManager instance = new ConnectionManager();
 
-    private NodesManager nodesManager;
-
-    private ServerSocketChannel serverSocketChannel;
-
-    private Selector selector;
-
-    private ReentrantLock lock;
-
-    private volatile boolean running;
-    //The storage will be connected
-
-    public ConnectionManager(  AbstractNetworkParam network) {
-        this.network = network;
-        this.networkModule = (AbstractNetworkModule) ModuleService.getInstance().getModule(NulsConstant.MODULE_ID_NETWORK);
-        lock = new ReentrantLock();
+    private ConnectionManager() {
     }
 
-    /**
-     * open the serverSocketChannel and register accept action
-     */
+    public static ConnectionManager getInstance() {
+        return instance;
+    }
+
     public void init() {
-        lock.lock();
-        try {
-            if (!running) {
-                selector = SelectorProvider.provider().openSelector();
-                serverSocketChannel = ServerSocketChannel.open();
-                serverSocketChannel.configureBlocking(false);
-                serverSocketChannel.bind(new InetSocketAddress(network.port()));
-                serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
-            }
-        } catch (IOException e) {
-            serverClose();
-            throw new NulsRuntimeException(ErrorCode.NET_SERVER_START_ERROR, e);
-        } finally {
-            lock.unlock();
-        }
+        nettyServer = new NettyServer(network.port());
+        nettyServer.init();
+//        eventBusService = NulsContext.getServiceBean(EventBusService.class);
+        messageHandlerFactory = network.getMessageHandlerFactory();
     }
 
-    public void start() {
-        Log.info("----------- network connectionManager start -------------");
-        running = true;
-        TaskManager.createAndRunThread(NulsConstant.MODULE_ID_NETWORK, "connectionManager", this);
-    }
-
-    public void restart() {
-        init();
-        start();
-    }
-
-    @Override
-    public void run() {
-        Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-        try {
-            while (running) {
-                if (selector.select(1000) > 0) {
-                    Iterator<SelectionKey> keyIterator = selector.selectedKeys().iterator();
-                    while (keyIterator.hasNext()) {
-                        SelectionKey key = keyIterator.next();
-                        keyIterator.remove();
-                        handleKey(key);
-                    }
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-//        finally {
-//            serverClose();
-//        }
-    }
-
-    public void serverClose() {
-        lock.lock();
-        try {
-            running = false;
-            for (SelectionKey key : selector.keys()) {
+    public void start() throws InterruptedException {
+        TaskManager.createAndRunThread(NulsConstant.MODULE_ID_NETWORK, "node connection", new Runnable() {
+            @Override
+            public void run() {
                 try {
-                    key.channel().close();
-                } catch (IOException e) {
-                    Log.warn("Error closing channel", e);
-                }
-                if (key.attachment() instanceof ConnectionHandler) {
-                    // Close connection if relevant
-                    ConnectionHandler.handleKey(key);
-                }
-                key.cancel();
-            }
-            try {
-                selector.close();
-                selector = null;
-                serverSocketChannel.close();
-                serverSocketChannel = null;
-            } catch (IOException e) {
-                Log.warn("Error closing manager selector and serverChannel", e);
-            }
-            Log.info("---------------------------Network closing connectManager---------------------");
-
-            //todo sent a event to other module
-            networkModule.setStatus(ModuleStatusEnum.DESTROYED);
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    /**
-     * out node try to connect
-     *
-     * @param node
-     */
-    public void openConnection(Node node) {
-
-        SocketChannel channel = null;
-        SelectionKey key = null;
-        try {
-            channel = SocketChannel.open();
-            channel.configureBlocking(false);
-            channel.socket().setReuseAddress(true);
-            InetSocketAddress socketAddress = new InetSocketAddress(node.getIp(), node.getPort());
-            channel.connect(socketAddress);
-            PendingConnect data = new PendingConnect(channel, node);
-            if (channel == null) {
-                System.out.println("----------------channel is null");
-            }
-            if (selector == null) {
-                System.out.println("----------------selector is null");
-            }
-            key = channel.register(selector, SelectionKey.OP_CONNECT);
-            key.attach(data);
-            selector.wakeup();
-        } catch (IOException e) {
-            e.printStackTrace();
-            if (channel != null) {
-                try {
-                    channel.close();
-                } catch (IOException e1) {
-                    e1.printStackTrace();
+                    nettyServer.start();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
-            if (key != null) {
-                key.cancel();
-            }
-            node.destroy();
-        }
+        }, false);
+
     }
 
-
-    public boolean allowConnection(InetSocketAddress socketAddress) {
-        //check the connecting nodes count
-        boolean inAble = true;
-        boolean outAble = true;
-        NodeGroup inNodes = nodesManager.getNodeGroup(NetworkConstant.NETWORK_NODE_IN_GROUP);
-        if (inNodes.size() >= network.maxInCount()) {
-            inAble = false;
-        }
-        NodeGroup outNodes = nodesManager.getNodeGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP);
-        if (outNodes.size() >= network.maxOutCount()) {
-            outAble = false;
-        }
-        if (!inAble && !outAble) {
-            return false;
-        }
-        //todo check myself
-        if (network.getLocalIps().contains(socketAddress.getAddress().getHostAddress())&&socketAddress.getPort()==network.port()) {
-            return false;
-        }
-        //check it already connected
-        for (Node node : inNodes.getNodes().values()) {
-            if (node.getIp().equals(socketAddress.getAddress().getHostAddress()) &&
-                    node.getPort() == socketAddress.getPort()) {
-                return false;
+    public void connectionNode(Node node) {
+        TaskManager.createAndRunThread(NulsConstant.MODULE_ID_NETWORK, "node connection", new Runnable() {
+            @Override
+            public void run() {
+                NettyClient client = new NettyClient(node);
+                client.start();
             }
-        }
-
-        for (Node node : outNodes.getNodes().values()) {
-            if (node.getIp().equals(socketAddress.getAddress().getHostAddress()) &&
-                    node.getPort() == socketAddress.getPort()) {
-                return false;
-            }
-        }
-        return true;
+        }, false);
     }
 
-
-    public void handleKey(SelectionKey key) {
-
-        if (key.isValid() && key.isConnectable()) {
-            //out node
-            addOutNode(key);
-        } else if (key.isValid() && key.isAcceptable()) {
-            // in Node
-            addInNode(key);
-        } else {
-            // read or write
-            ConnectionHandler handler = (ConnectionHandler) key.attachment();
-            if (handler != null) {
-                ConnectionHandler.handleKey(key);
-            }
-        }
-    }
-
-    private void addOutNode(SelectionKey key) {
-        PendingConnect data = (PendingConnect) key.attachment();
-        if (data == null || data.node == null) {
-            return;
-        }
-        Node node = data.node;
-        node.setType(Node.OUT);
-        SocketChannel channel = (SocketChannel) key.channel();
-        ConnectionHandler handler = new ConnectionHandler(node, channel, key);
-        //Must be connected after the completion of registration to other events
+    public void receiveMessage(ByteBuffer buffer, Node node) {
         try {
-            if (channel.finishConnect()) {
-                key.interestOps((key.interestOps() | SelectionKey.OP_READ) & ~SelectionKey.OP_CONNECT);
-                key.attach(handler);
-                node.setWriteTarget(handler);
-                node.connectionOpened();
-            } else {
-                // Failed to connect for some reason
-                throw new RuntimeException();
-            }
-        } catch (Exception e) {
-            Log.warn("out node Failed to connect:" + node.getIp() + ":" + node.getPort() + ",message:" + e.getMessage());
-            key.cancel();
-            node.destroy();
-        }
-    }
-
-    private void addInNode(SelectionKey key) {
-        SocketChannel socketChannel = null;
-        Node node = null;
-        SelectionKey newKey = null;
-        try {
-            socketChannel = serverSocketChannel.accept();
-            InetSocketAddress socketAddress = (InetSocketAddress) socketChannel.getRemoteAddress();
-            if (!allowConnection(socketAddress)) {
-                socketChannel.close();
+            buffer.flip();
+            if (!node.isAlive()) {
+                buffer.clear();
                 return;
             }
-            socketChannel.configureBlocking(false);
-            newKey = socketChannel.register(selector, SelectionKey.OP_READ);
-
-            node = new Node(network, Node.IN, socketAddress);
-            nodesManager.addNodeToGroup(NetworkConstant.NETWORK_NODE_IN_GROUP, node);
-            ConnectionHandler handler = new ConnectionHandler(node, socketChannel, newKey);
-            node.setWriteTarget(handler);
-            newKey.attach(handler);
-            node.connectionOpened();
-        } catch (Exception e) {
-            Log.error(e);
-            if (socketChannel != null) {
-                Log.warn("-------------in node Failed to connect" + node.getIp() + "--------------");
-                try {
-                    socketChannel.close();
-                } catch (IOException e1) {
-                    e1.printStackTrace();
+            List<NulsMessage> list = new ArrayList<>();
+            while (buffer.hasRemaining()) {
+                NulsMessage message = new NulsMessage(buffer);
+                list.add(message);
+            }
+            for (NulsMessage message : list) {
+                if (MessageFilterChain.getInstance().doFilter(message)) {
+                    BaseEvent event = EventManager.getInstance(message.getData());
+                    processMessage(event, node);
                 }
             }
-            if (key != null) {
-                key.cancel();
-            }
-            if (newKey != null) {
-                key.cancel();
-            }
-            if (node != null) {
-                node.destroy();
-            }
+        } catch (NulsException e) {
+            //todo
+            e.printStackTrace();
+        } catch (Exception e) {
+            //todo
+            e.printStackTrace();
+            return;
+        } finally {
+            buffer.clear();
         }
     }
 
-    public void setNodesManager(NodesManager nodesManager) {
-        this.nodesManager = nodesManager;
+    private void processMessage(BaseEvent event, Node node) {
+        if (isNetworkEvent(event)) {
+            if (node.getStatus() != Node.HANDSHAKE && !isHandShakeMessage(event)) {
+                return;
+            }
+            asynExecute(event, node);
+        } else {
+            if (!node.isHandShake()) {
+                return;
+            }
+            eventBusService.publishNetworkEvent(event, node.getId());
+        }
     }
 
-    class PendingConnect {
-        SocketChannel channel;
-        Node node;
+    private void asynExecute(BaseEvent networkEvent, Node node) {
+        NetWorkEventHandler handler = messageHandlerFactory.getHandler(networkEvent);
+        TaskManager.asynExecuteRunnable(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    NetworkEventResult messageResult = handler.process(networkEvent, node);
+                    processMessageResult(messageResult, node);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
 
-        PendingConnect(SocketChannel channel, Node node) {
-            this.channel = channel;
-            this.node = node;
+    public void processMessageResult(NetworkEventResult eventResult, Node node) throws IOException {
+        if (node.getStatus() == Node.CLOSE) {
+            return;
         }
+        if (eventResult == null || !eventResult.isSuccess()) {
+            return;
+        }
+        if (eventResult.getReplyMessage() != null) {
+            networkService.sendToNode(eventResult.getReplyMessage(), node.getId(), true);
+        }
+    }
+
+    private boolean isNetworkEvent(BaseEvent event) {
+        return event.getHeader().getModuleId() == NulsConstant.MODULE_ID_NETWORK;
+    }
+
+    private boolean isHandShakeMessage(BaseEvent event) {
+        if (isNetworkEvent(event)) {
+            if (event.getHeader().getEventType() == NetworkConstant.NETWORK_GET_VERSION_EVENT
+                    || event.getHeader().getEventType() == NetworkConstant.NETWORK_VERSION_EVENT) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void setNetwork(AbstractNetworkParam network) {
+        this.network = network;
+    }
+
+    public void setNetworkService(NetworkService networkService) {
+        this.networkService = networkService;
     }
 
 }

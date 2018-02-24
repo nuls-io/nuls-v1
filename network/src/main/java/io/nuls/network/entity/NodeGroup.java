@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,7 +24,7 @@
 package io.nuls.network.entity;
 
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author vivi
@@ -37,8 +37,8 @@ public class NodeGroup {
 
     public NodeGroup(String groupName) {
         this.groupName = groupName;
-        nodeMap = new HashMap<>();
-        areaSet = new HashSet<>();
+        nodeMap = new ConcurrentHashMap<>();
+        areaSet = ConcurrentHashMap.newKeySet();
     }
 
     public Map<String, Node> getNodes() {
@@ -46,18 +46,19 @@ public class NodeGroup {
     }
 
     public void addNode(Node p) {
-        for (Node node : nodeMap.values()) {
-            if (node.getHash().toString().equals(p.getHash().toString())) {
-                return;
-            }
+        if (nodeMap.containsKey(p.getId())) {
+            return;
         }
-        this.nodeMap.put(p.getHash(),p);
+        this.nodeMap.put(p.getId(), p);
         p.addToGroup(this);
     }
 
     public void removeNode(Node node) {
-        this.nodeMap.remove(node.getHash());
-        node.removeFromGroup(this);
+        this.nodeMap.remove(node.getId());
+    }
+
+    public void removeNode(String nodeId) {
+        this.nodeMap.remove(nodeId);
     }
 
     public int size() {
@@ -65,9 +66,7 @@ public class NodeGroup {
     }
 
     public void removeAll() {
-       for(Node n : nodeMap.values()){
-           removeNode(n);
-       }
+        nodeMap = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -75,16 +74,16 @@ public class NodeGroup {
         StringBuilder sb = new StringBuilder();
         sb.append("{NodeGroup:{groupName:'").append(this.getName()).append("',");
         sb.append("nodeMap:[");
-        for (Node n : nodeMap.values()){
+        for (Node n : nodeMap.values()) {
             sb.append(n.toString()).append(",");
         }
-        sb.deleteCharAt(sb.length()-1);
+        sb.deleteCharAt(sb.length() - 1);
 
         sb.append("],areaSet:[");
-        for(NodeArea na : areaSet) {
+        for (NodeArea na : areaSet) {
             sb.append(na.toString()).append(",");
         }
-        sb.deleteCharAt(sb.length()-1);
+        sb.deleteCharAt(sb.length() - 1);
         sb.append("]}");
 
         return sb.toString();
@@ -99,22 +98,22 @@ public class NodeGroup {
         return groupName;
     }
 
-    public Set<NodeArea> getAreaSet(){
+    public Set<NodeArea> getAreaSet() {
         return this.areaSet;
     }
 
-    public int getAreaCount(){
+    public int getAreaCount() {
         return this.areaSet.size();
     }
 
-    public void addtoArea(NodeArea nodeArea){
-        if(nodeArea != null) {
+    public void addtoArea(NodeArea nodeArea) {
+        if (nodeArea != null) {
             this.areaSet.add(nodeArea);
         }
     }
 
-    public void removeFromArea(NodeArea nodeArea){
-        if(nodeArea != null) {
+    public void removeFromArea(NodeArea nodeArea) {
+        if (nodeArea != null) {
             this.areaSet.remove(nodeArea);
         }
     }

@@ -23,6 +23,9 @@
  */
 package io.nuls.network.service.impl;
 
+import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.context.NulsContext;
+import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.db.dao.NodeDataService;
 import io.nuls.db.entity.NodePo;
 import io.nuls.network.constant.NetworkConstant;
@@ -30,6 +33,8 @@ import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeGroup;
 import io.nuls.network.entity.NodeTransferTool;
 import io.nuls.network.entity.param.AbstractNetworkParam;
+import io.nuls.network.message.entity.GetNodeEvent;
+import io.nuls.network.message.entity.GetVersionEvent;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -48,20 +53,29 @@ public class NodeDiscoverHandler implements Runnable {
 
     private NodeDataService nodeDao;
 
+    private BroadcastHandler broadcaster;
+
     private boolean running;
 
+    private NodeDiscoverHandler() {
 
-    public NodeDiscoverHandler(NodesManager nodesManager, AbstractNetworkParam network, NodeDataService nodeDao) {
-        this.nodesManager = nodesManager;
-        this.network = network;
-        this.running = true;
-        this.nodeDao = nodeDao;
+    }
+
+    private static NodeDiscoverHandler instance = new NodeDiscoverHandler();
+
+    public static NodeDiscoverHandler getInstance() {
+        return instance;
+    }
+
+    public void start() {
+        running = true;
+        TaskManager.createAndRunThread(NulsConstant.MODULE_ID_NETWORK, "NetworkNodeDiscover", this);
     }
 
     // get nodes from local database
     public List<Node> getLocalNodes(int size) {
         Set<String> keys = nodesManager.getNodes().keySet();
-        List<NodePo> nodePos = nodeDao.getRandomNodePoList(size, keys);
+        List<NodePo> nodePos = getNodeDao().getNodePoList(size, keys);
 
         List<Node> nodes = new ArrayList<>();
         if (nodePos == null || nodePos.isEmpty()) {
@@ -79,8 +93,8 @@ public class NodeDiscoverHandler implements Runnable {
     public List<Node> getSeedNodes() {
         List<Node> seedNodes = new ArrayList<>();
         for (InetSocketAddress socketAddress : network.getSeedNodes()) {
-            //todo remove myself
-            if (network.getLocalIps().contains(socketAddress.getAddress().getHostAddress())&&socketAddress.getPort()==network.port()) {
+            // remove myself
+            if (network.getLocalIps().contains(socketAddress.getHostString())) {
                 continue;
             }
             seedNodes.add(new Node(network, Node.OUT, socketAddress));
@@ -89,98 +103,71 @@ public class NodeDiscoverHandler implements Runnable {
     }
 
     /**
-     * check the nodes when closed try to connect other one
+     * Inquire more of the other nodes to the connected nodes
+     *
+     * @param size
+     */
+    public void findOtherNode(int size) {
+        NodeGroup group = nodesManager.getNodeGroup(NetworkConstant.NETWORK_NODE_IN_GROUP);
+        if (group.getNodes().size() > 0) {
+            for(Node node : group.getNodes().values()) {
+                if(node.isHandShake()) {
+                    GetNodeEvent event = new GetNodeEvent(size);
+                    broadcaster.broadcastToNode(event, node, true);
+                    break;
+                }
+            }
+        }
+
+        group = nodesManager.getNodeGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP);
+        if (group.getNodes().size() > 0) {
+            for(Node node : group.getNodes().values()) {
+                if(node.isHandShake()) {
+                    GetNodeEvent event = new GetNodeEvent(size);
+                    broadcaster.broadcastToNode(event, node, true);
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
+     * do ping/pong and ask versionMessage
      */
     @Override
     public void run() {
         while (running) {
             Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-
             for (Node node : nodesManager.getNodes().values()) {
-                if (node.getStatus() == Node.CLOSE) {
-                    nodesManager.removeNode(node.getHash());
-                }
-                System.out.println("-------------hash:" + node.getHash() + "-------status:" + node.getStatus());
-            }
-            System.out.println("------------华丽的分割线----------------");
-
-            NodeGroup outNodes = nodesManager.getNodeGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP);
-            if(outNodes.size() == 0) {
-                List<Node> nodes = getSeedNodes();
-                for (Node newNode : nodes) {
-                    if (outNodes.getNodes().values().contains(newNode)) {
-                        continue;
-                    }
-                    nodesManager.addNodeToGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP, newNode);
+                if (node.isAlive()) {
+                    GetVersionEvent event = new GetVersionEvent(network.getExternalPort());
+                    broadcaster.broadcastToNode(event, node, true);
                 }
             }
-
-//            NodeGroup outNodes = nodesManager.getNodeGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP);
-//            if (outNodes.size() == 0) {
-//                //  The seedNodes should be connected immediately
-//                List<Node> nodes = getSeedNodes();
-//
-//                for (Node newNode : nodes) {
-//                    if (outNodes.getNodes().values().contains(newNode)) {
-//                        continue;
-//                    }
-//                    nodesManager.addNodeToGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP, newNode);
-//                }
-//            } else if (outNodes.size() < network.maxOutCount()) {
-//                List<Node> nodes = getLocalNodes(network.maxOutCount() - outNodes.size());
-//                if (nodes.isEmpty()) {
-////                    // find other node from connected nodes
-//                    findOtherNode(network.maxOutCount() - outNodes.size());
-//                } else {
-//                    for (Node newNode : nodes) {
-//                        if (outNodes.getNodes().values().contains(newNode)) {
-//                            continue;
-//                        }
-//                        nodesManager.addNodeToGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP, newNode);
-//                    }
-//                }
-//            }
-
             try {
-                Thread.sleep(7000);
+                Thread.sleep(6000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    /**
-     * Inquire more of the other nodes to the connected nodes
-     *
-     * @param size
-     */
-    private void findOtherNode(int size) {
-//        NodeGroup group = nodesManager.getNodeGroup(NetworkConstant.NETWORK_NODE_IN_GROUP);
-//        if (group.getNodes().size() > 0) {
-//            Node node = group.getNodes().get(0);
-//            if (node.isHandShake()) {
-//                try {
-//                    GetNodeEvent data = new GetNodeEvent(size);
-//                    node.sendNetworkData(data);
-//                } catch (Exception e) {
-//                    Log.warn("send getNodeData error", e);
-//                    node.destroy();
-//                }
-//            }
-//        }
-//
-//        group = nodesManager.getNodeGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP);
-//        if (group.getNodes().size() > 0) {
-//            Node node = group.getNodes().get(0);
-//            if (node.isHandShake()) {
-//                try {
-//                    GetNodeEvent data = new GetNodeEvent(size);
-//                    node.sendNetworkData(data);
-//                } catch (Exception e) {
-//                    Log.warn("send getNodeData error", e);
-//                    node.destroy();
-//                }
-//            }
-//        }
+    public void setNetwork(AbstractNetworkParam network) {
+        this.network = network;
+    }
+
+    public void setNodesManager(NodesManager nodesManager) {
+        this.nodesManager = nodesManager;
+    }
+
+    public void setBroadcaster(BroadcastHandler broadcaster) {
+        this.broadcaster = broadcaster;
+    }
+
+    private NodeDataService getNodeDao() {
+        if (nodeDao == null) {
+            nodeDao = NulsContext.getServiceBean(NodeDataService.class);
+        }
+        return nodeDao;
     }
 }

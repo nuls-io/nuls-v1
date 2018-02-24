@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -41,25 +41,19 @@ import java.util.List;
  */
 public class NodeEventBody extends BaseNulsData {
 
-    public static final short OWN_MAIN_VERSION = 1;
-
-    public static final short OWN_SUB_VERSION = 1001;
-
     private List<Node> nodes;
 
     public NodeEventBody() {
-        //  super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.nodes = new ArrayList<>();
     }
 
     public NodeEventBody(List nodes) {
-      //  super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
         this.nodes = nodes;
     }
 
     @Override
     public int size() {
-        int s = 2;   //version size;
+        int s = 0;
         s += VarInt.sizeOf(nodes.size());
         for (Node node : nodes) {
             s += node.size();
@@ -69,7 +63,6 @@ public class NodeEventBody extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeShort(version.getVersion());
         stream.write(new VarInt(nodes.size()).encode());
         for (Node node : nodes) {
             stream.writeNulsData(node);
@@ -78,11 +71,19 @@ public class NodeEventBody extends BaseNulsData {
 
     @Override
     protected void parse(NulsByteBuffer buffer) throws NulsException {
-        version = new NulsVersion(buffer.readShort());
         int size = (int) buffer.readVarInt();
         for (int i = 0; i < size; i++) {
             nodes.add(buffer.readNulsData(new Node()));
         }
+    }
+
+    @Override
+    public String toString() {
+        StringBuffer buffer = new StringBuffer();
+        for (Node node : nodes) {
+            buffer.append(node.toString() + ",");
+        }
+        return buffer.toString();
     }
 
     public List<Node> getNodes() {
