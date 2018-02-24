@@ -23,6 +23,8 @@
  */
 package io.nuls.core.utils.spring.lite.utils;
 
+import io.nuls.core.utils.log.Log;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
@@ -84,9 +86,13 @@ public class ScanUtil {
     private static void findClassJar(final String packageName, String pathName, List<Class> list) {
         JarFile jarFile;
         try {
-            URL url = classLoader.getResource(pathName);
-            JarURLConnection jarURLConnection = (JarURLConnection) url.openConnection();
-            jarFile = jarURLConnection.getJarFile();
+            int index = pathName.indexOf("!");
+            if(index>0){
+                pathName = pathName .substring(0,index);
+            }
+            Log.error("==============" + pathName);
+            URL url =new URL(pathName);
+            jarFile = new JarFile(url.getFile());
         } catch (IOException e) {
             throw new RuntimeException("could not be parsed as a URI reference");
         }
