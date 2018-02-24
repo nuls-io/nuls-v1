@@ -23,7 +23,6 @@
  */
 package io.nuls.rpc.sdk.utils;
 
-import io.nuls.rpc.sdk.entity.RpcClientResult;
 import org.junit.Before;
 import org.junit.Test;
 
