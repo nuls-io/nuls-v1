@@ -82,7 +82,7 @@ public class ConnectionManager {
                 try {
                     nettyServer.start();
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    Log.error(e);
                 }
             }
         }, false);
@@ -119,10 +119,10 @@ public class ConnectionManager {
             }
         } catch (NulsException e) {
             //todo
-            e.printStackTrace();
+            Log.error(e);
         } catch (Exception e) {
             //todo
-            e.printStackTrace();
+            Log.error(e);
             return;
         } finally {
             buffer.clear();
@@ -152,7 +152,7 @@ public class ConnectionManager {
                     NetworkEventResult messageResult = handler.process(networkEvent, node);
                     processMessageResult(messageResult, node);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Log.error(e);
                 }
             }
         });

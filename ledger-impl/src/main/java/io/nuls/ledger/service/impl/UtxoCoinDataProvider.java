@@ -141,7 +141,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             }
         } catch (Exception e) {
             //rollback
-            e.printStackTrace();
+            Log.error(e);
             for (UtxoOutput output : utxoData.getOutputs()) {
                 cacheService.removeUtxo(output.getKey());
                 UtxoBalance balance = (UtxoBalance) cacheService.getBalance(Address.fromHashs(output.getAddress()).getBase58());

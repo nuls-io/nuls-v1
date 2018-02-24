@@ -242,7 +242,7 @@ public class NodesManager implements Runnable {
             try {
                 Thread.sleep(6000);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.error(e);
             }
         }
     }

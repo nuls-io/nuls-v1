@@ -83,7 +83,7 @@ public class NodeDaoImpl extends BaseDaoImpl<NodeMapper, String, NodePo> impleme
                 getMapper().insert(po);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
         }
     }
 }

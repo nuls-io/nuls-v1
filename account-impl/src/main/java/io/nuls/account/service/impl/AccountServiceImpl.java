@@ -382,7 +382,7 @@ public class AccountServiceImpl implements AccountService {
                         try {
                             Thread.sleep(1001L);
                         } catch (InterruptedException e) {
-                            e.printStackTrace();
+                            Log.error(e);
                         }
                     }
                 }
@@ -578,7 +578,7 @@ public class AccountServiceImpl implements AccountService {
                 try {
                     fos.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.error(e);
                 }
             }
         }
@@ -667,7 +667,7 @@ public class AccountServiceImpl implements AccountService {
                 try {
                     fis.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.error(e);
                 }
             }
         }

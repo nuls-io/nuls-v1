@@ -156,7 +156,7 @@ public class BroadcastHandler {
 ////                try {
 ////                    Thread.sleep(3000);
 ////                } catch (InterruptedException e) {
-////                    e.printStackTrace();
+////                    Log.error(e);
 ////                }
 ////                broadNodes = nodesManager.getAvailableNodes(excludeNodeId);
 ////            }
@@ -379,7 +379,7 @@ public class BroadcastHandler {
         } catch (IOException e) {
             throw e;
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
             return new BroadcastResult(false, "send message failed");
         }
         return new BroadcastResult(true, "OK");

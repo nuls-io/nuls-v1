@@ -48,7 +48,7 @@ public class JettyServer {
         try {
             rootPath = JettyServer.class.getResource("/").toURI().getPath();
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            Log.error(e);
         }
 
 

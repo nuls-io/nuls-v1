@@ -139,7 +139,7 @@ public class Node extends BaseNulsData {
         try {
             s += ip.getBytes(NulsContext.DEFAULT_ENCODING).length;
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            Log.error(e);
         }
         return s;
     }
