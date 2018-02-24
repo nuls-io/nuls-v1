@@ -39,25 +39,16 @@ public class NetworkCacheService {
 
     private static final String PING_EVENT_CACHE = "ping-event-cache";
 
-
     private static final NetworkCacheService INSTANCE = new NetworkCacheService();
 
     private NetworkCacheService() {
         this.cacheService = NulsContext .getServiceBean(CacheService.class);
-        this.cacheService.createCache(PING_EVENT_CACHE,5, 6, 0);
-        this.cacheService.createCache(NETWORK_EVENT_CACHE,10, 60, 0);
+        this.cacheService.createCache(PING_EVENT_CACHE,5, 4, 0);
+        this.cacheService.createCache(NETWORK_EVENT_CACHE,10, 4, 0);
     }
 
     public static NetworkCacheService getInstance() {
         return INSTANCE;
-    }
-
-    public void putEvent(BaseEvent event, boolean isPingPong) {
-        if (isPingPong) {
-            cacheService.putElement(PING_EVENT_CACHE, event.getHash().getDigestHex(), event);
-        } else {
-            cacheService.putElement(NETWORK_EVENT_CACHE, event.getHash().getDigestHex(), event);
-        }
     }
 
     public void putEvent(Object key, BaseEvent event, boolean isPingPong) {
@@ -82,5 +73,4 @@ public class NetworkCacheService {
         }
         return cacheService.containsKey(PING_EVENT_CACHE, key);
     }
-
 }

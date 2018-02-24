@@ -43,24 +43,20 @@ public class DevNetworkParam extends AbstractNetworkParam {
     private static DevNetworkParam instance;
 
     private DevNetworkParam() {
-        this.type = NetworkType.DEV;
         this.maxInCount = NetworkContext.getNetworkConfig().getPropValue(NetworkConstant.NETWORK_NODE_MAX_IN, 20);
         this.maxOutCount = NetworkContext.getNetworkConfig().getPropValue(NetworkConstant.NETWORK_NODE_MAX_OUT, 10);
-        try {
-            String value = NulsContext.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_EXTER_PORT);
-            this.port = Integer.parseInt(value);
-            String magic = NulsContext.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_MAGIC);
-            this.packetMagic = Integer.parseInt(magic);
-        } catch (NulsException e) {
-            Log.error(e);
-        }
+        this.port = NulsContext.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_SERVER_PORT, 8003);
+        this.externalPort = NulsContext.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_EXTER_PORT, 8003);
+        this.packetMagic = NulsContext.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_MAGIC, 123456789);
 
-        InetSocketAddress address1 = new InetSocketAddress("192.168.1.103", 8003);
-//        InetSocketAddress address2 = new InetSocketAddress("192.168.1.131", port);
-//        InetSocketAddress address3 = new InetSocketAddress("192.168.1.102", 8003);
-        seedNodes.add(address1);
-//        seedNodes.add(address2);
-//        seedNodes.add(address3);
+        InetSocketAddress address0 = new InetSocketAddress("192.168.1.203", port);
+       // InetSocketAddress address1 = new InetSocketAddress("192.168.1.103", port);
+        InetSocketAddress address2 = new InetSocketAddress("192.168.1.131", port);
+      //  InetSocketAddress address3 = new InetSocketAddress("192.168.1.102", port);
+        seedNodes.add(address0);
+       // seedNodes.add(address1);
+        seedNodes.add(address2);
+       // seedNodes.add(address3);
 
 
         this.messageFilter = DefaultMessageFilter.getInstance();

@@ -24,6 +24,7 @@
 package io.nuls.network.message.entity;
 
 import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
@@ -49,20 +50,26 @@ public class VersionEvent extends io.nuls.core.event.BaseEvent {
 
     public static final short OWN_SUB_VERSION = 1001;
 
+    private int externalPort;
+
     private long bestBlockHeight;
 
     private String bestBlockHash;
 
     private String nulsVersion;
 
+
     public VersionEvent() {
         super(NulsConstant.MODULE_ID_NETWORK, NetworkConstant.NETWORK_VERSION_EVENT);
+        version = new NulsVersion(OWN_MAIN_VERSION, OWN_SUB_VERSION);
     }
 
-    public VersionEvent(long bestBlockHeight, String bestBlockHash) {
+    public VersionEvent(int externalPort, long bestBlockHeight, String bestBlockHash) {
         this();
+        this.externalPort = externalPort;
         this.bestBlockHeight = bestBlockHeight;
         this.bestBlockHash = bestBlockHash;
+        this.nulsVersion = NulsContext.nulsVersion;
     }
 
 
@@ -70,9 +77,9 @@ public class VersionEvent extends io.nuls.core.event.BaseEvent {
     public int size() {
         int s = 0;
         s += EventHeader.EVENT_HEADER_LENGTH;
+        s += VarInt.sizeOf(getVersion().getVersion());
+        s += VarInt.sizeOf(externalPort);
         s += VarInt.sizeOf(bestBlockHeight);
-        // put the bestBlockHash.length
-        s += 1;
         s += Utils.sizeOfSerialize(bestBlockHash);
         s += Utils.sizeOfSerialize(nulsVersion);
         return s;
@@ -81,8 +88,9 @@ public class VersionEvent extends io.nuls.core.event.BaseEvent {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeNulsData(getHeader());
-//        stream.writeShort(version.getVersion());
-        stream.write(new VarInt(bestBlockHeight).encode());
+        stream.writeShort(version.getVersion());
+        stream.writeVarInt(externalPort);
+        stream.writeVarInt(bestBlockHeight);
         stream.writeString(bestBlockHash);
         stream.writeString(nulsVersion);
     }
@@ -90,7 +98,8 @@ public class VersionEvent extends io.nuls.core.event.BaseEvent {
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.setHeader(byteBuffer.readNulsData(new EventHeader()));
-//        version = new NulsVersion(byteBuffer.readShort());
+        version = new NulsVersion(byteBuffer.readShort());
+        externalPort = (int) byteBuffer.readVarInt();
         bestBlockHeight = byteBuffer.readVarInt();
         bestBlockHash = byteBuffer.readString();
         nulsVersion = byteBuffer.readString();
@@ -104,9 +113,10 @@ public class VersionEvent extends io.nuls.core.event.BaseEvent {
     @Override
     public String toString() {
         StringBuffer buffer = new StringBuffer();
-        buffer.append("versionData:{");
+        buffer.append("versionEvent:{");
         buffer.append(getHeader().toString());
-//        buffer.append("version:" + version.getStringVersion() + ", ");
+        buffer.append("version:" + version.getStringVersion() + ", ");
+        buffer.append("externalPort:" + externalPort + ", ");
         buffer.append("bestBlockHeight:" + bestBlockHeight + ", ");
         buffer.append("bestBlockHash:" + bestBlockHash + ", ");
         buffer.append("nulsVersion:" + nulsVersion + "}");
@@ -136,6 +146,24 @@ public class VersionEvent extends io.nuls.core.event.BaseEvent {
 
     public void setNulsVersion(String nulsVersion) {
         this.nulsVersion = nulsVersion;
+    }
+
+    public int getExternalPort() {
+        return externalPort;
+    }
+
+    public void setExternalPort(int externalPort) {
+        this.externalPort = externalPort;
+    }
+
+    public static void main(String[] args) throws IOException, NulsException {
+        VersionEvent event = new VersionEvent(1234,0, "Test123456789");
+        System.out.println(event);
+        byte[] bytes = event.serialize();
+
+        VersionEvent versionEvent = new VersionEvent();
+        versionEvent.parse(new NulsByteBuffer(bytes));
+        System.out.println(versionEvent);
     }
 
 }

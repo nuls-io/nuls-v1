@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,35 +24,73 @@
 package io.nuls.network.message.entity;
 
 import io.nuls.core.chain.entity.BasicTypeData;
+import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.crypto.VarInt;
+import io.nuls.core.event.BaseEvent;
+import io.nuls.core.event.EventHeader;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.network.constant.NetworkConstant;
+
+import java.io.IOException;
 
 /**
  * @author vivi
  * @date 2017/12/1.
  */
-public class GetNodeEvent extends io.nuls.core.event.BaseEvent<BasicTypeData<Integer>> {
+public class GetNodeEvent extends BaseEvent {
 
     public static final short OWN_MAIN_VERSION = 1;
 
     public static final short OWN_SUB_VERSION = 1001;
 
+    private int length;
+
     public GetNodeEvent() {
         super(NulsConstant.MODULE_ID_NETWORK, NetworkConstant.NETWORK_GET_NODE_EVENT);
-//        this.version = new NulsVersion(OWN_MAIN_VERSION, OWN_SUB_VERSION);
+        this.version = new NulsVersion(OWN_MAIN_VERSION, OWN_SUB_VERSION);
     }
 
     public GetNodeEvent(int length) {
-        super(NulsConstant.MODULE_ID_NETWORK, NetworkConstant.NETWORK_GET_NODE_EVENT);
-//        this.version = new NulsVersion(OWN_MAIN_VERSION, OWN_SUB_VERSION);
-        this.setEventBody(new BasicTypeData<>(length));
+        this();
+        this.length = length;
     }
 
     @Override
-    protected BasicTypeData<Integer> parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
-        return byteBuffer.readNulsData(new BasicTypeData<>());
+    public int size() {
+        int s = 0;
+        s += EventHeader.EVENT_HEADER_LENGTH;
+        s += VarInt.sizeOf(getVersion().getVersion());
+        s += VarInt.sizeOf(length);
+        return s;
     }
 
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeNulsData(getHeader());
+        stream.writeShort(version.getVersion());
+        stream.writeVarInt(length);
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.setHeader(byteBuffer.readNulsData(new EventHeader()));
+        version = new NulsVersion(byteBuffer.readShort());
+        length = (int) byteBuffer.readVarInt();
+    }
+
+    @Override
+    protected BaseEvent parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
+        return null;
+    }
+
+    public int getLength() {
+        return length;
+    }
+
+    public void setLength(int length) {
+        this.length = length;
+    }
 }
