@@ -30,7 +30,6 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.i18n.I18nUtils;
 import io.nuls.core.module.BaseModuleBootstrap;
-import io.nuls.core.module.manager.ServiceManager;
 import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.queue.manager.QueueManager;
@@ -60,8 +59,8 @@ public class MicroKernelBootstrap extends BaseModuleBootstrap {
             NulsContext.NULS_CONFIG = ConfigLoader.loadIni(NulsConstant.USER_CONFIG_FILE);
             NulsContext.MODULES_CONFIG = ConfigLoader.loadIni(NulsConstant.MODULES_CONFIG_FILE);
         } catch (IOException e) {
-            Log.error("Client start faild", e);
-            throw new NulsRuntimeException(ErrorCode.FAILED, "Client start faild");
+            Log.error("Client start failed", e);
+            throw new NulsRuntimeException(ErrorCode.FAILED, "Client start failed");
         }
         //set system language
         try {

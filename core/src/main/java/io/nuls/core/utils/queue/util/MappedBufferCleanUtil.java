@@ -24,6 +24,11 @@
 package io.nuls.core.utils.queue.util;
 
 
+import sun.nio.ch.FileChannelImpl;
+
+import java.lang.reflect.Method;
+import java.nio.MappedByteBuffer;
+
 /**
  *
  * @author Niels
@@ -39,10 +44,10 @@ public class MappedBufferCleanUtil {
         }
         try {
             //unmap
-//            Method m = FileChannelImpl.class.getDeclaredMethod("unmap",
-//                    MappedByteBuffer.class);
-//            m.setAccessible(true);
-//            m.invoke(FileChannelImpl.class, buffer);
+            Method m = FileChannelImpl.class.getDeclaredMethod("unmap",
+                    MappedByteBuffer.class);
+            m.setAccessible(true);
+            m.invoke(FileChannelImpl.class, buffer);
             //Another way of implementation
             //            Method getCleanerMethod = buffer.getClass().getMethod("cleaner", new Class[0]);
             //            getCleanerMethod.setAccessible(true);

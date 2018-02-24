@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,7 +25,6 @@ package io.nuls.core.context;
 
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.Na;
-import io.nuls.core.module.manager.ServiceManager;
 import io.nuls.core.utils.cfg.IniEntity;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.spring.lite.core.SpringLiteContext;
@@ -126,26 +125,27 @@ public class NulsContext {
 
     public static final <T> T getServiceBean(Class<T> tClass) {
         try {
+
             return SpringLiteContext.getBean(tClass);
         } catch (Exception e) {
-            return getServiceBean(tClass,0L);
+            return getServiceBean(tClass, 0L);
         }
     }
 
     private static <T> T getServiceBean(Class<T> tClass, long l) {
         try {
-            Thread.sleep(100L);
+            Thread.sleep(300L);
         } catch (InterruptedException e1) {
             Log.error(e1);
         }
         try {
             return SpringLiteContext.getBean(tClass);
         } catch (Exception e) {
-            if(l>60000){
+            if (l > 20000) {
                 Log.error(e);
                 return null;
             }
-            return getServiceBean(tClass,l+10L);
+            return getServiceBean(tClass, l + 10L);
         }
 
     }

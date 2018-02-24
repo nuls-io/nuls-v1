@@ -108,7 +108,6 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public void shutdown() {
-        //todo
         TaskManager.shutdownByModuleId(NulsConstant.MODULE_ID_NETWORK);
     }
 

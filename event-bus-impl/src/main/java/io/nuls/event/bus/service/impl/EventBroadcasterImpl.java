@@ -23,8 +23,6 @@
  */
 package io.nuls.event.bus.service.impl;
 
-import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.event.BaseEvent;
 import io.nuls.core.event.CommonStringEvent;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
@@ -51,7 +49,7 @@ public class EventBroadcasterImpl implements EventBroadcaster {
 
     @Override
     public List<String> broadcastHashAndCache(BaseEvent event, boolean needToSelf) {
-        BroadcastResult result = this.networkService.sendToAllNode(new CommonDigestEvent(event.getHash()),true);
+        BroadcastResult result = this.networkService.sendToAllNode(new CommonDigestEvent(event.getHash()),false);
         if (needToSelf) {
             eventBusService.publishLocalEvent(event);
         }
@@ -63,7 +61,7 @@ public class EventBroadcasterImpl implements EventBroadcaster {
 
     @Override
     public List<String> broadcastHashAndCache(BaseEvent event, boolean needToSelf, String excludeNodeId) {
-        BroadcastResult result = this.networkService.sendToAllNode(new CommonDigestEvent(event.getHash()), excludeNodeId, true);
+        BroadcastResult result = this.networkService.sendToAllNode(new CommonDigestEvent(event.getHash()), excludeNodeId, false);
         if (needToSelf) {
             eventBusService.publishLocalEvent(event);
         }
@@ -87,7 +85,7 @@ public class EventBroadcasterImpl implements EventBroadcaster {
 
     @Override
     public List<String> broadcastAndCache(BaseEvent event, boolean needToSelf, String excludeNodeId) {
-        BroadcastResult result = networkService.sendToAllNode(event, excludeNodeId, true);
+        BroadcastResult result = networkService.sendToAllNode(event, excludeNodeId, false);
         if (needToSelf) {
             eventBusService.publishLocalEvent(event);
         }
@@ -99,7 +97,7 @@ public class EventBroadcasterImpl implements EventBroadcaster {
 
     @Override
     public List<String> broadcastAndCache(BaseEvent event, boolean needToSelf) {
-        BroadcastResult result = networkService.sendToAllNode(event, true);
+        BroadcastResult result = networkService.sendToAllNode(event, false);
         if (needToSelf) {
             eventBusService.publishLocalEvent(event);
         }
@@ -111,29 +109,44 @@ public class EventBroadcasterImpl implements EventBroadcaster {
 
     @Override
     public boolean sendToNode(BaseEvent event, String nodeId) {
+        BroadcastResult result = networkService.sendToNode(event, nodeId, false);
+        return result.isSuccess();
+    }
+
+    @Override
+    public boolean broadcastHashAndCacheAysn(BaseEvent event, boolean needToSelf, String excludeNodeId) {
+        BroadcastResult result = this.networkService.sendToAllNode(new CommonDigestEvent(event.getHash()), excludeNodeId, true);
+        if (needToSelf) {
+            eventBusService.publishLocalEvent(event);
+        }
+        if (result.isSuccess()) {
+            eventCacheService.cacheSendedEvent(event);
+        }
+        return result.isSuccess();
+    }
+
+    @Override
+    public boolean broadcastAndCacheAysn(BaseEvent event, boolean needToSelf) {
+        BroadcastResult result = networkService.sendToAllNode(event, true);
+        if (needToSelf) {
+            eventBusService.publishLocalEvent(event);
+        }
+        if (result.isSuccess()) {
+            eventCacheService.cacheSendedEvent(event);
+        }
+        return result.isSuccess();
+    }
+
+    @Override
+    public boolean sendToNodeAysn(BaseEvent event, String nodeId) {
         BroadcastResult result = networkService.sendToNode(event, nodeId, true);
         return result.isSuccess();
     }
 
     @Override
-    public void broadcastHashAndCacheAysn(BaseEvent event, boolean needToSelf, String excludeNodeId) {
-        //todo
+    public boolean sendToGroupAysn(BaseEvent event, String groupName) {
+        BroadcastResult result = networkService.sendToGroup(event, groupName, true);
+        return result.isSuccess();
     }
 
-    @Override
-    public void broadcastAndCacheAysn(BaseEvent event, boolean needToSelf) {
-        // todo auto-generated method stub
-    }
-
-    @Override
-    public void sendToNodeAysn(CommonStringEvent event, String nodeId) {
-        // todo auto-generated method stub(niels)
-
-    }
-
-    @Override
-    public void sendToGroupAysn(CommonStringEvent event, String groupName) {
-        // todo auto-generated method stub(niels)
-
-    }
 }

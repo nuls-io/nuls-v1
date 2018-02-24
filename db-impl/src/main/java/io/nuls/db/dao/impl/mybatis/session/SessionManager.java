@@ -24,6 +24,7 @@
 package io.nuls.db.dao.impl.mybatis.session;
 
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.exception.DBException;
 import org.apache.ibatis.session.SqlSession;
@@ -61,7 +62,8 @@ public class SessionManager {
     }
 
     public static SqlSession getSession() {
-        SqlSession session = getSession(idHolder.get());
+        String id = idHolder.get();
+        SqlSession session = getSession(id);
         return session;
     }
 

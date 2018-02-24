@@ -36,6 +36,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Niels Wang
@@ -43,10 +44,10 @@ import java.util.*;
  */
 public class SpringLiteContext {
 
-    private static final Map<String, Object> BEAN_OK_MAP = new HashMap<>();
-    private static final Map<String, Object> BEAN_TEMP_MAP = new HashMap<>();
-    private static final Map<String, Class> BEAN_TYPE_MAP = new HashMap<>();
-    private static final Map<Class, Set<String>> CLASS_NAME_SET_MAP = new HashMap<>();
+    private static final Map<String, Object> BEAN_OK_MAP = new ConcurrentHashMap<>();
+    private static final Map<String, Object> BEAN_TEMP_MAP = new ConcurrentHashMap<>();
+    private static final Map<String, Class> BEAN_TYPE_MAP = new ConcurrentHashMap<>();
+    private static final Map<Class, Set<String>> CLASS_NAME_SET_MAP = new ConcurrentHashMap<>();
 
     private static MethodInterceptor interceptor;
 
@@ -214,10 +215,6 @@ public class SpringLiteContext {
         }
     }
 
-//    public static Object getBean(String beanName) {
-//        return BEAN_MAP.get(beanName);
-//    }
-
     public static <T> T getBean(Class<T> beanClass) throws Exception {
         Set<String> nameSet = CLASS_NAME_SET_MAP.get(beanClass);
         if (null == nameSet || nameSet.isEmpty()) {
@@ -245,7 +242,15 @@ public class SpringLiteContext {
     }
 
     public static void removeBean(Class clazz) {
-        // todo auto-generated method stub(niels)
+        Set<String> nameSet = CLASS_NAME_SET_MAP.get(clazz);
+        if(null==nameSet||nameSet.isEmpty()){
+            return;
+        }
+        for(String name:nameSet){
+            BEAN_OK_MAP.remove(name);
+            BEAN_TEMP_MAP.remove(name);
+            BEAN_TYPE_MAP.remove(name);
+        }
 
     }
 

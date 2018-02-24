@@ -64,7 +64,6 @@ public class GetBlocksHashHandler extends AbstractEventHandler<GetBlocksHashRequ
             response.put(block.getHeader().getHeight(), block.getHeader().getHash());
             sendResponse(response, fromId);
         } else {
-            //todo 检查逻辑
             List<BlockHeader> list = this.blockService.getBlockHashList(event.getEventBody().getStart(), event.getEventBody().getEnd(), event.getEventBody().getSplit());
             List<Long> resultHeightList = new ArrayList<>();
             List<NulsDigestData> resultHashList = new ArrayList<>();
