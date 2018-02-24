@@ -64,13 +64,13 @@ public class VersionEventHandler implements NetWorkEventHandler {
     public NetworkEventResult process(BaseEvent networkEvent, Node node) {
         VersionEvent event = (VersionEvent) networkEvent;
 
-        String key = event.getHeader().getEventType() + "-" + node.getId();
-        if (cacheService.existEvent(key)) {
-            Log.info("----------VersionEventHandler  cacheService  existEvent--------");
-            getNetworkService().removeNode(node.getId());
-            return null;
-        }
-        cacheService.putEvent(key, event, true);
+//        String key = event.getHeader().getEventType() + "-" + node.getId();
+//        if (cacheService.existEvent(key)) {
+//            Log.info("----------VersionEventHandler  cacheService  existEvent--------");
+//            getNetworkService().removeNode(node.getId());
+//            return null;
+//        }
+//        cacheService.putEvent(key, event, true);
 
         if (event.getBestBlockHeight() < 0) {
             throw new NetworkMessageException(ErrorCode.NET_MESSAGE_ERROR);
