@@ -332,6 +332,7 @@ public class BroadcastHandler {
 
     private BroadcastResult broadcastToList(Map<String, Node> nodeMap, BaseEvent event, String excludeNodeId, boolean asyn) {
         NulsMessage message;
+        BroadcastResult result = new BroadcastResult();
         try {
             message = new NulsMessage(network.packetMagic(), event.serialize());
             int successCount = 0;
@@ -339,9 +340,10 @@ public class BroadcastHandler {
                 if (excludeNodeId != null && node.getId().equals(excludeNodeId)) {
                     continue;
                 }
-                BroadcastResult result = broadcast(message, node, asyn);
-                if (result.isSuccess()) {
+                BroadcastResult br = broadcast(message, node, asyn);
+                if (br.isSuccess()) {
                     successCount++;
+                    result.getBroadcastNodes().add(node);
                 }
             }
             if (successCount == 0) {
@@ -350,7 +352,9 @@ public class BroadcastHandler {
         } catch (IOException e) {
             return new BroadcastResult(false, "event.serialize() error");
         }
-        return new BroadcastResult(true, "OK");
+        result.setSuccess(true);
+        result.setMessage("OK");
+        return result;
     }
 
     private BroadcastResult broadcast(NulsMessage message, Node node, boolean asyn) throws IOException {
