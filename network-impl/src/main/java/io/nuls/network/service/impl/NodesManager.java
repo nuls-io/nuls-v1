@@ -134,7 +134,7 @@ public class NodesManager implements Runnable {
         List<Node> nodeList = new ArrayList<>(nodes.values());
         for (int i = nodeList.size() - 1; i >= 0; i--) {
             Node node = nodeList.get(i);
-            if (node.isHandShake()) {
+            if (!node.isHandShake()) {
                 nodeList.remove(node);
             }
         }
