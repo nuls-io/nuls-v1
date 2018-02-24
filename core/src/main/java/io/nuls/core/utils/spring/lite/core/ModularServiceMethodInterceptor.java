@@ -62,7 +62,7 @@ public class ModularServiceMethodInterceptor implements MethodInterceptor {
             } catch (BeanStatusException e) {
                 threadLocal.set(threadLocal.get() + 1);
                 throwable = e;
-                Thread.sleep(100L);
+                Thread.sleep(200L);
             }
         }
         throw throwable;
@@ -74,12 +74,14 @@ public class ModularServiceMethodInterceptor implements MethodInterceptor {
             String className = obj.getClass().getCanonicalName();
             className = className.substring(0, className.indexOf("$$"));
             Class clazz = Class.forName(className);
-            fillAnnotationList(annotationList,clazz,method);
+            fillAnnotationList(annotationList, clazz, method);
             BaseModuleBootstrap module = ServiceManager.getInstance().getModule(clazz);
             if (module == null) {
                 throw new BeanStatusException(ErrorCode.DATA_ERROR, "Access to a service of an un start module!" + method.toString());
             }
-            if (module.getModuleId()!= NulsConstant.MODULE_ID_MICROKERNEL&&module.getStatus() != ModuleStatusEnum.STARTING && module.getStatus() != ModuleStatusEnum.RUNNING) {
+            if (module.getModuleId() != NulsConstant.MODULE_ID_MICROKERNEL &&
+                    module.getStatus() != ModuleStatusEnum.STARTING &&
+                    module.getStatus() != ModuleStatusEnum.RUNNING) {
                 throw new BeanStatusException(ErrorCode.DATA_ERROR, "Access to a service of an un start module!" + method.toString());
             }
             boolean isOk = SpringLiteContext.checkBeanOk(obj);
@@ -96,18 +98,18 @@ public class ModularServiceMethodInterceptor implements MethodInterceptor {
 
     private void fillAnnotationList(List<Annotation> annotationList, Class clazz, Method method) {
         Set<Class> classSet = new HashSet<>();
-       for(Annotation ann:method.getDeclaredAnnotations()){
-           annotationList.add(ann);
-           classSet.add(ann.annotationType());
-       }
-        for(Annotation ann:clazz.getDeclaredAnnotations()){
-            if(classSet.add(ann.annotationType())){
-                annotationList.add(0,ann);
+        for (Annotation ann : method.getDeclaredAnnotations()) {
+            annotationList.add(ann);
+            classSet.add(ann.annotationType());
+        }
+        for (Annotation ann : clazz.getDeclaredAnnotations()) {
+            if (classSet.add(ann.annotationType())) {
+                annotationList.add(0, ann);
             }
         }
-        for(Annotation ann:clazz.getAnnotations()){
-            if(classSet.add(ann.annotationType())){
-                annotationList.add(0,ann);
+        for (Annotation ann : clazz.getAnnotations()) {
+            if (classSet.add(ann.annotationType())) {
+                annotationList.add(0, ann);
             }
         }
     }
