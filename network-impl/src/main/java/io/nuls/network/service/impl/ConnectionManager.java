@@ -24,6 +24,7 @@
 package io.nuls.network.service.impl;
 
 import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.event.BaseEvent;
 import io.nuls.core.event.EventManager;
 import io.nuls.core.exception.NulsException;
@@ -70,7 +71,7 @@ public class ConnectionManager {
     public void init() {
         nettyServer = new NettyServer(network.port());
         nettyServer.init();
-//        eventBusService = NulsContext.getServiceBean(EventBusService.class);
+        eventBusService = NulsContext.getServiceBean(EventBusService.class);
         messageHandlerFactory = network.getMessageHandlerFactory();
     }
 
