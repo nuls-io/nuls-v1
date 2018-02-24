@@ -130,6 +130,16 @@ public class NodesManager implements Runnable {
         }
     }
 
+    public List<Node> getAvailableNodes() {
+        List<Node> nodeList = new ArrayList<>(nodes.values());
+        for (Node node : nodeList) {
+            if (node.isHandShake()) {
+                nodeList.remove(node);
+            }
+        }
+        return nodeList;
+    }
+
     public Node getNode(String nodeId) {
         return nodes.get(nodeId);
     }

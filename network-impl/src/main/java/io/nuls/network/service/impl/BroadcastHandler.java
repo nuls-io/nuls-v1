@@ -62,14 +62,14 @@ public class BroadcastHandler {
         if (nodesManager.getNodes().isEmpty()) {
             return new BroadcastResult(false, "no node can be broadcast");
         }
-        return broadcastToList(nodesManager.getNodes(), event, null, asyn);
+        return broadcastToList(nodesManager.getAvailableNodes(), event, null, asyn);
     }
 
     public BroadcastResult broadcast(BaseEvent event, String excludeNodeId, boolean asyn) {
         if (nodesManager.getNodes().isEmpty()) {
             return new BroadcastResult(false, "no node can be broadcast");
         }
-        return broadcastToList(nodesManager.getNodes(), event, excludeNodeId, asyn);
+        return broadcastToList(nodesManager.getAvailableNodes(), event, excludeNodeId, asyn);
     }
 
     public BroadcastResult broadcastToGroup(BaseEvent event, String groupName, boolean asyn) {
@@ -81,7 +81,8 @@ public class BroadcastHandler {
             return new BroadcastResult(false, "no node can be broadcast");
         }
 
-        return broadcastToList(group.getNodes(), event, null, asyn);
+        List<Node> nodeList = new ArrayList<>(group.getNodes().values());
+        return broadcastToList(nodeList, event, null, asyn);
     }
 
     public BroadcastResult broadcastToGroup(BaseEvent event, String groupName, String excludeNodeId, boolean asyn) {
@@ -92,8 +93,8 @@ public class BroadcastHandler {
         if (group.size() == 0) {
             return new BroadcastResult(false, "no node can be broadcast");
         }
-
-        return broadcastToList(group.getNodes(), event, excludeNodeId, asyn);
+        List<Node> nodeList = new ArrayList<>(group.getNodes().values());
+        return broadcastToList(nodeList, event, excludeNodeId, asyn);
     }
 
     public BroadcastResult broadcastToNode(BaseEvent event, String nodeId, boolean asyn) {
@@ -332,14 +333,12 @@ public class BroadcastHandler {
 //        return broadcastToGroup(event,null ,groupName, excludeNodeId);
 //    }
 
-    private BroadcastResult broadcastToList(Map<String, Node> nodeMap, BaseEvent event, String excludeNodeId, boolean asyn) {
+    private BroadcastResult broadcastToList(List<Node> nodeList, BaseEvent event, String excludeNodeId, boolean asyn) {
         NulsMessage message;
         BroadcastResult result = new BroadcastResult();
         try {
             message = new NulsMessage(network.packetMagic(), event.serialize());
             int successCount = 0;
-            List<Node> nodeList = new ArrayList<>(nodeMap.values());
-
             for (Node node : nodeList) {
                 if (excludeNodeId != null && node.getId().equals(excludeNodeId)) {
                     continue;
@@ -363,6 +362,9 @@ public class BroadcastHandler {
 
     private BroadcastResult broadcast(NulsMessage message, Node node, boolean asyn) throws IOException {
         try {
+            if(!node.isHandShake()) {
+                return new BroadcastResult(false, "node not found");
+            }
             SocketChannel channel = NioChannelMap.get(node.getChannelId());
             if (channel == null) {
                 return new BroadcastResult(false, "node not found");

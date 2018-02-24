@@ -124,13 +124,7 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public List<Node> getAvailableNodes() {
-        List<Node> nodeList = new ArrayList<>(nodesManager.getNodes().values());
-        for (Node node : nodeList) {
-            if (node.isHandShake()) {
-                nodeList.remove(node);
-            }
-        }
-        return nodeList;
+        return nodesManager.getAvailableNodes();
     }
 
     @Override
