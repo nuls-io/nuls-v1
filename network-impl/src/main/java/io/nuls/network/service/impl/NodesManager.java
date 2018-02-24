@@ -203,9 +203,9 @@ public class NodesManager implements Runnable {
     public void run() {
         while (running) {
             Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-            for (Node node : nodes.values()) {
-                System.out.println("-------------ip:" + node.getIp() + "-------status:" + node.getStatus() + "----------type:" + node.getType());
-            }
+//            for (Node node : nodes.values()) {
+//                System.out.println("-------------ip:" + node.getIp() + "-------status:" + node.getStatus() + "----------type:" + node.getType());
+//            }
 
             if (nodes.isEmpty()) {
                 List<Node> nodes = getSeedNodes();
