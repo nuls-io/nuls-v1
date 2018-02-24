@@ -35,6 +35,8 @@ import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.service.impl.netty.NioChannelMap;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -336,7 +338,9 @@ public class BroadcastHandler {
         try {
             message = new NulsMessage(network.packetMagic(), event.serialize());
             int successCount = 0;
-            for (Node node : nodeMap.values()) {
+            List<Node> nodeList = new ArrayList<>(nodeMap.values());
+
+            for (Node node : nodeList) {
                 if (excludeNodeId != null && node.getId().equals(excludeNodeId)) {
                     continue;
                 }
