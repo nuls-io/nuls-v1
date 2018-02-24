@@ -23,6 +23,8 @@
  */
 package io.nuls.core.crypto;
 
+import io.nuls.core.utils.log.Log;
+
 import java.util.Base64;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

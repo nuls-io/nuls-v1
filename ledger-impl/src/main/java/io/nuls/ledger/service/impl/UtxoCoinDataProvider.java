@@ -37,6 +37,7 @@ import io.nuls.core.crypto.script.ScriptBuilder;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.db.dao.UtxoInputDataService;
 import io.nuls.db.dao.UtxoOutputDataService;
@@ -141,7 +142,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             }
         } catch (Exception e) {
             //rollback
-            Log.error(e);
+            Log.warn(e.getMessage(),e);
             for (UtxoOutput output : utxoData.getOutputs()) {
                 cacheService.removeUtxo(output.getKey());
                 UtxoBalance balance = (UtxoBalance) cacheService.getBalance(Address.fromHashs(output.getAddress()).getBase58());

@@ -26,6 +26,7 @@ package io.nuls.network.service.impl;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.thread.manager.TaskManager;
+import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.NodeDataService;
 import io.nuls.db.entity.NodePo;
 import io.nuls.network.constant.NetworkConstant;

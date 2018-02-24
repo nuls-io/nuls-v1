@@ -28,6 +28,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.socket.SocketChannel;
 import io.nuls.core.event.BaseEvent;
 import io.nuls.core.mesasge.NulsMessage;
+import io.nuls.core.utils.log.Log;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeGroup;

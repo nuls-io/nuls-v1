@@ -70,7 +70,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        causLog.error(e);
+        Log.error(cause);
         ctx.channel().close();
     }
 
