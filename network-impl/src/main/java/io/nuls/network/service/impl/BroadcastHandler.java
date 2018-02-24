@@ -373,6 +373,7 @@ public class BroadcastHandler {
         } catch (IOException e) {
             throw e;
         } catch (Exception e) {
+            e.printStackTrace();
             return new BroadcastResult(false, "send message failed");
         }
         return new BroadcastResult(true, "OK");

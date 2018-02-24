@@ -130,13 +130,13 @@ public class BlockMaintenanceThread implements Runnable {
             return;
         }
         if (doit) {
-            downloadBlocks(blockInfo.getNodeIdList(), startHeight, blockInfo.getBestHeight(), blockInfo.getBestHash().getDigestHex());
+            downloadBlocks(blockInfo.getNodeIdList(), startHeight, blockInfo.getBestHeight() );
         }
         this.success = true;
     }
 
 
-    private void downloadBlocks(List<String> nodeIdList, long startHeight, long endHeight, String endHash) {
+    private void downloadBlocks(List<String> nodeIdList, long startHeight, long endHeight ) {
         BlockBatchDownloadUtils utils = BlockBatchDownloadUtils.getInstance();
         try {
             utils.request(nodeIdList, startHeight, endHeight);

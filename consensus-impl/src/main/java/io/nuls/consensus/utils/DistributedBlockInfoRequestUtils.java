@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -59,6 +59,7 @@ public class DistributedBlockInfoRequestUtils {
     private Lock lock = new ReentrantLock();
     private boolean requesting;
     private long startTime;
+    private boolean askHighest = false;
 
     private DistributedBlockInfoRequestUtils() {
     }
@@ -84,6 +85,7 @@ public class DistributedBlockInfoRequestUtils {
         this.start = start;
         this.end = end;
         this.split = split;
+        askHighest = start == end && start <= 0;
         GetBlocksHashRequest event = new GetBlocksHashRequest(start, end, split);
         this.startTime = TimeService.currentTimeMillis();
         nodeIdList = this.eventBroadcaster.broadcastAndCache(event, false);
@@ -98,7 +100,7 @@ public class DistributedBlockInfoRequestUtils {
 
 
     public boolean addBlockHashResponse(String nodeId, BlockHashResponse response) {
-        if (this.nodeIdList==null||!this.nodeIdList.contains(nodeId)) {
+        if (this.nodeIdList == null || !this.nodeIdList.contains(nodeId)) {
             return false;
         }
         if (!requesting) {
@@ -186,7 +188,33 @@ public class DistributedBlockInfoRequestUtils {
             } catch (InterruptedException e) {
                 Log.error(e);
             }
-            if ((TimeService.currentTimeMillis() - startTime) > 10000L) {
+            long timeout = 10000L;
+
+            if ((TimeService.currentTimeMillis() - startTime) > (timeout - 1000L) && hashesMap.size() > ((nodeIdList.size() + 1) / 2) && askHighest) {
+                long localHeight = NulsContext.getInstance().getBestBlock().getHeader().getHeight();
+                long minHeight = 0;
+                NulsDigestData minHash = null;
+                try {
+                    for (BlockHashResponse response : hashesMap.values()) {
+                        long height = response.getHeightList().get(0);
+                        NulsDigestData hash = response.getHashList().get(0);
+                        if (height > localHeight && height < minHeight) {
+                            minHeight = height;
+                            minHash = hash;
+                        }
+                    }
+                } catch (Exception e) {
+                    break;
+                }
+                BlockInfo result = new BlockInfo();
+                result.putHash(minHeight, minHash);
+                result.setBestHash(minHash);
+                result.setBestHeight(minHeight);
+                result.setNodeIdList(this.nodeIdList);
+                result.setFinished(true);
+                bestBlockInfo = result;
+            }
+            if ((TimeService.currentTimeMillis() - startTime) > timeout) {
                 lock.unlock();
                 throw new NulsRuntimeException(ErrorCode.TIME_OUT);
             }
