@@ -215,10 +215,6 @@ public class SpringLiteContext {
         }
     }
 
-//    public static Object getBean(String beanName) {
-//        return BEAN_MAP.get(beanName);
-//    }
-
     public static <T> T getBean(Class<T> beanClass) throws Exception {
         Set<String> nameSet = CLASS_NAME_SET_MAP.get(beanClass);
         if (null == nameSet || nameSet.isEmpty()) {
@@ -246,7 +242,15 @@ public class SpringLiteContext {
     }
 
     public static void removeBean(Class clazz) {
-        // todo auto-generated method stub(niels)
+        Set<String> nameSet = CLASS_NAME_SET_MAP.get(clazz);
+        if(null==nameSet||nameSet.isEmpty()){
+            return;
+        }
+        for(String name:nameSet){
+            BEAN_OK_MAP.remove(name);
+            BEAN_TEMP_MAP.remove(name);
+            BEAN_TYPE_MAP.remove(name);
+        }
 
     }
 

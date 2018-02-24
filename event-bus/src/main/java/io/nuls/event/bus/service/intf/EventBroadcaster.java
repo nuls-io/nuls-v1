@@ -45,7 +45,7 @@ public interface EventBroadcaster {
 
     List<String> broadcastHashAndCache(BaseEvent event, boolean needToSelf, String excludeNodeId);
 
-    void broadcastHashAndCacheAysn(BaseEvent event, boolean needToSelf, String excludeNodeId);
+    boolean broadcastHashAndCacheAysn(BaseEvent event, boolean needToSelf, String excludeNodeId);
 
     /**
      * broadcast to nodes except "excludeNodeId"
@@ -64,7 +64,7 @@ public interface EventBroadcaster {
     List<String> broadcastAndCache(BaseEvent event, boolean needToSelf);
 
 
-    void broadcastAndCacheAysn(BaseEvent event, boolean needToSelf);
+    boolean broadcastAndCacheAysn(BaseEvent event, boolean needToSelf);
 
     /**
      * send msg to one node
@@ -73,6 +73,6 @@ public interface EventBroadcaster {
      */
     boolean sendToNode(BaseEvent event, String nodeId);
 
-    void sendToNodeAysn(CommonStringEvent event, String nodeId);
-    void sendToGroupAysn(CommonStringEvent event, String groupName);
+    boolean sendToNodeAysn(BaseEvent event, String nodeId);
+    boolean sendToGroupAysn(BaseEvent event, String groupName);
 }

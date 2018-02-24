@@ -56,7 +56,7 @@ public class BlockBatchDownloadUtils {
 
     private static final int DOWNLOAD_NODE_COUNT = 10;
     //todo
-    private static final int DOWNLOAD_BLOCKS_PER_TIME = 2;
+    private static final int DOWNLOAD_BLOCKS_PER_TIME = 100;
     /**
      * unit:ms
      */

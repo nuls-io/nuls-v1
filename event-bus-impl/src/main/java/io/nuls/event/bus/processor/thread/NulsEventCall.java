@@ -46,7 +46,7 @@ public class NulsEventCall<T extends io.nuls.core.event.BaseEvent> implements Ru
             return;
         }
         try {
-            //todo filter&handler is the same level
+            //filter&handler is the same level
             boolean ok = handler.getFilterChain().startDoFilter(data.getData());
             if (ok) {
                 long start = System.currentTimeMillis();
