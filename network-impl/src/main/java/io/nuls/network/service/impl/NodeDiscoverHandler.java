@@ -110,8 +110,9 @@ public class NodeDiscoverHandler implements Runnable {
     public void findOtherNode(int size) {
         NodeGroup group = nodesManager.getNodeGroup(NetworkConstant.NETWORK_NODE_IN_GROUP);
         if (group.getNodes().size() > 0) {
-            for(Node node : group.getNodes().values()) {
-                if(node.isHandShake()) {
+            List<Node> nodeList = new ArrayList<>(group.getNodes().values());
+            for (Node node : nodeList) {
+                if (node.isHandShake()) {
                     GetNodeEvent event = new GetNodeEvent(size);
                     broadcaster.broadcastToNode(event, node, true);
                     break;
@@ -121,8 +122,9 @@ public class NodeDiscoverHandler implements Runnable {
 
         group = nodesManager.getNodeGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP);
         if (group.getNodes().size() > 0) {
-            for(Node node : group.getNodes().values()) {
-                if(node.isHandShake()) {
+            List<Node> nodeList = new ArrayList<>(group.getNodes().values());
+            for (Node node : nodeList) {
+                if (node.isHandShake()) {
                     GetNodeEvent event = new GetNodeEvent(size);
                     broadcaster.broadcastToNode(event, node, true);
                     break;
@@ -138,7 +140,9 @@ public class NodeDiscoverHandler implements Runnable {
     public void run() {
         while (running) {
             Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-            for (Node node : nodesManager.getNodes().values()) {
+            List<Node> nodeList = new ArrayList<>(nodesManager.getNodes().values());
+
+            for (Node node : nodeList) {
                 if (node.isAlive()) {
                     GetVersionEvent event = new GetVersionEvent(network.getExternalPort());
                     broadcaster.broadcastToNode(event, node, true);
