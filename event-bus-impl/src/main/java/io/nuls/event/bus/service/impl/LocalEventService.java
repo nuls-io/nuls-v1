@@ -24,6 +24,7 @@
 package io.nuls.event.bus.service.impl;
 
 import io.nuls.core.event.BaseEvent;
+import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.constant.EventBusConstant;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.event.bus.processor.manager.ProcessData;
