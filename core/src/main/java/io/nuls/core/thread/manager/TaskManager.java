@@ -34,7 +34,6 @@ import java.util.concurrent.*;
  * @author Niels
  */
 public class TaskManager {
-    private static final int DEFAULT_QUEUE_MAX_SIZE = Integer.MAX_VALUE;
 
     private static final TaskTable THREAD_DATA_CACHE = TaskTable.getInstance();
 
@@ -61,13 +60,15 @@ public class TaskManager {
         if (factory == null) {
             throw new RuntimeException("thread factory cannot be null!");
         }
-        if (queueSize == 0) {
-            queueSize = DEFAULT_QUEUE_MAX_SIZE;
-        }
-
         Class[] paramClasses = new Class[]{int.class, int.class, long.class, TimeUnit.class, BlockingQueue.class, ThreadFactory.class};
-        Object[] paramArgs = new Object[]{threadCount, threadCount, 0L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>(queueSize), factory};
+        Object[] paramArgs = null;
+        if(queueSize>0) {
+            paramArgs = new Object[]{threadCount, threadCount, 0L, TimeUnit.MILLISECONDS,
+                    new LinkedBlockingQueue<>(queueSize), factory};
+        }else{
+            paramArgs = new Object[]{threadCount, threadCount, 0L, TimeUnit.MILLISECONDS,
+                    new LinkedBlockingQueue<>(), factory};
+        }
         ThreadPoolExecutor pool = AopUtils.createProxy(ThreadPoolExecutor.class, paramClasses, paramArgs, new ThreadPoolInterceiptor());
         THREAD_DATA_CACHE.putPool(factory.getModuleId(), factory.getPoolName(), pool);
         return pool;

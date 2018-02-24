@@ -133,8 +133,9 @@ public class NodesManager implements Runnable {
 
     public List<Node> getAvailableNodes() {
         List<Node> nodeList = new ArrayList<>(nodes.values());
-        for (Node node : nodeList) {
-            if (node.isHandShake()) {
+        for (int i = nodeList.size() - 1; i >= 0; i--) {
+            Node node = nodeList.get(i);
+            if (!node.isHandShake()) {
                 nodeList.remove(node);
             }
         }
@@ -215,7 +216,9 @@ public class NodesManager implements Runnable {
         while (running) {
             Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
             for (Node node : nodes.values()) {
-                System.out.println("-------------ip:" + node.getIp() + "-------status:" + node.getStatus() + "----------type:" + node.getType());
+                if(node.getStatus()==2){
+                    System.out.println("-------------ip:" + node.getIp() + "-------status:" + node.getStatus() + "----------type:" + node.getType());
+                }
             }
 
             if (nodes.isEmpty()) {
@@ -237,7 +240,7 @@ public class NodesManager implements Runnable {
                         addNodeToGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP, node);
                     }
                 } else {
-                   discoverHandler.findOtherNode(network.maxOutCount() - group.size());
+                    discoverHandler.findOtherNode(network.maxOutCount() - group.size());
                 }
             }
             try {

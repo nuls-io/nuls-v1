@@ -25,6 +25,7 @@ package io.nuls.network.entity;
 
 import io.nuls.core.chain.intf.NulsCloneable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,7 +40,7 @@ public class BroadcastResult implements NulsCloneable {
 
     private String hash;
 
-    private List<Node> broadcastNodes;
+    private List<Node> broadcastNodes = new ArrayList<>();
 
     private int waitReplyCount;
 

@@ -46,6 +46,9 @@ public class BlockEventHandler extends AbstractEventHandler<BlockEvent> {
     @Override
     public void onEvent(BlockEvent event, String fromId) {
         Block block = event.getEventBody();
+        if(null==event){
+            System.out.println();
+        }
         ValidateResult result = block.verify();
         if (result.isFailed()) {
             if (result.getLevel() == SeverityLevelEnum.FLAGRANT_FOUL) {

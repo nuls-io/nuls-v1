@@ -363,7 +363,7 @@ public class BroadcastHandler {
 
     private BroadcastResult broadcast(NulsMessage message, Node node, boolean asyn) throws IOException {
         try {
-            if(!node.isHandShake()) {
+            if(!node.isAlive() && node.getChannelId() == null) {
                 return new BroadcastResult(false, "node not found");
             }
             SocketChannel channel = NioChannelMap.get(node.getChannelId());
