@@ -36,6 +36,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Niels Wang
@@ -43,10 +44,10 @@ import java.util.*;
  */
 public class SpringLiteContext {
 
-    private static final Map<String, Object> BEAN_OK_MAP = new HashMap<>();
-    private static final Map<String, Object> BEAN_TEMP_MAP = new HashMap<>();
-    private static final Map<String, Class> BEAN_TYPE_MAP = new HashMap<>();
-    private static final Map<Class, Set<String>> CLASS_NAME_SET_MAP = new HashMap<>();
+    private static final Map<String, Object> BEAN_OK_MAP = new ConcurrentHashMap<>();
+    private static final Map<String, Object> BEAN_TEMP_MAP = new ConcurrentHashMap<>();
+    private static final Map<String, Class> BEAN_TYPE_MAP = new ConcurrentHashMap<>();
+    private static final Map<Class, Set<String>> CLASS_NAME_SET_MAP = new ConcurrentHashMap<>();
 
     private static MethodInterceptor interceptor;
 
