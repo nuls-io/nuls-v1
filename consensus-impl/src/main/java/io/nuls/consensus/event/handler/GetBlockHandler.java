@@ -54,7 +54,6 @@ public class GetBlockHandler extends AbstractEventHandler<GetBlockRequest> {
         for (Block block : blockList) {
             BlockEvent blockEvent = new BlockEvent();
             blockEvent.setEventBody(block);
-            Log.error("临时：+++++send block:"+block.getHeader().getHeight());
             eventBroadcaster.sendToNode(blockEvent, fromId);
         }
     }
