@@ -24,6 +24,7 @@
 package io.nuls.db.dao.filter;
 
 
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.spring.lite.annotation.Interceptor;
 import io.nuls.core.utils.spring.lite.core.interceptor.BeanMethodInterceptorChain;
 import io.nuls.core.utils.str.StringUtils;
@@ -42,6 +43,7 @@ import java.lang.reflect.Method;
  */
 @Interceptor(DbSession.class)
 public class TransactionalInterceptorImpl implements TransactionalInterceptor {
+
     @Override
     public Object intercept(Annotation annotation, Object obj, Method method, Object[] args, BeanMethodInterceptorChain interceptorChain) throws Throwable {
         String lastId = SessionManager.getId();

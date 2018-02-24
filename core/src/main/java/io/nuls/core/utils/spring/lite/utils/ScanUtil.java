@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -28,7 +28,6 @@ import io.nuls.core.utils.log.Log;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
-import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -83,39 +82,33 @@ public class ScanUtil {
     /**
      * @param packageName
      */
-    private static void findClassJar(final String packageName, String pathName, List<Class> list) {
+    private static void findClassJar(String packageName, String pathName, List<Class> list) {
         JarFile jarFile;
         try {
             int index = pathName.indexOf("!");
-            if(index>0){
-                pathName = pathName .substring(0,index);
+            if (index > 0) {
+                pathName = pathName.substring(0, index);
             }
-            Log.error("==============" + pathName);
-            URL url =new URL(pathName);
+            URL url = new URL(pathName);
             jarFile = new JarFile(url.getFile());
         } catch (IOException e) {
             throw new RuntimeException("could not be parsed as a URI reference");
         }
-
+        packageName = packageName.replace(".", "/");
         Enumeration<JarEntry> jarEntries = jarFile.entries();
         while (jarEntries.hasMoreElements()) {
             JarEntry jarEntry = jarEntries.nextElement();
             String jarEntryName = jarEntry.getName();
-            if (!jarEntryName.contains(pathName) || jarEntryName.equals(pathName + "/")) {
+            if (!jarEntryName.contains(packageName) || jarEntryName.equals(packageName + "/")) {
                 continue;
             }
             if (jarEntry.isDirectory()) {
-                String clazzName = jarEntry.getName().replace("/", ".");
-                int endIndex = clazzName.lastIndexOf(".");
-                String prefix = null;
-                if (endIndex > 0) {
-                    prefix = clazzName.substring(0, endIndex);
-                }
-                findClassJar(prefix,jarEntry.getName(), list);
-            } else if (jarEntry.getName().endsWith(CLASS_TYPE)) {
+                continue;
+            } else if (jarEntryName.endsWith(CLASS_TYPE)) {
                 Class<?> clazz;
                 try {
-                    clazz = classLoader.loadClass(jarEntry.getName().replace("/", ".").replace(CLASS_TYPE, ""));
+                    String className = jarEntry.getName().replace("/", ".").replace(CLASS_TYPE, "");
+                    clazz = classLoader.loadClass(className);
                 } catch (ClassNotFoundException e) {
                     continue;
                 }
@@ -139,7 +132,7 @@ public class ScanUtil {
         @Override
         public boolean accept(File file) {
             if (file.isDirectory()) {
-                findClassLocal(packageName+"."+file.getName(), file.getPath(), list);
+                findClassLocal(packageName + "." + file.getName(), file.getPath(), list);
                 return true;
             }
             if (file.getName().endsWith(CLASS_TYPE)) {

@@ -23,6 +23,7 @@
  */
 package io.nuls.db.dao.impl.mybatis;
 
+import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.BaseDataService;
 import io.nuls.db.dao.impl.mybatis.common.BaseMapper;
 import io.nuls.db.transactional.annotation.DbSession;
