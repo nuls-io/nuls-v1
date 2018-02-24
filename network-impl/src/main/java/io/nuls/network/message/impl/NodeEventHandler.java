@@ -58,17 +58,14 @@ public class NodeEventHandler implements NetWorkEventHandler {
     public NetworkEventResult process(BaseEvent networkEvent, Node node) {
         NodeEvent event = (NodeEvent) networkEvent;
 
-        String key = event.getHeader().getEventType() + "-" + node.getIp();
-        if (cacheService.existEvent(key)) {
-            networkService.removeNode(node.getId());
-            return null;
-        }
-        cacheService.putEvent(key, event, false);
-        System.out.println("-----------------NodeEventHandler-------------------- ");
-        System.out.println(event.toString());
-        for (Node newNode : event.getEventBody().getNodes()) {
+//        String key = event.getHeader().getEventType() + "-" + node.getIp();
+//        if (cacheService.existEvent(key)) {
+//            networkService.removeNode(node.getId());
+//            return null;
+//        }
+//        cacheService.putEvent(key, event, false);
 
-            System.out.println();
+        for (Node newNode : event.getEventBody().getNodes()) {
             newNode.setType(Node.OUT);
             newNode.setStatus(Node.WAIT);
             getNetworkService().addNodeToGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP, newNode);
