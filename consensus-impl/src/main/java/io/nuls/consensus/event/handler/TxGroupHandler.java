@@ -89,6 +89,9 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
             }
             return;
         }
+        if(block.getHeader().getHeight()<blockCacheManager.getRecievedMaxHeight()){
+            blockCacheManager.askNextHeader(1+block.getHeader().getHeight(),fromId);
+        }
         blockCacheManager.cacheBlock(block);
         downloadDataUtils.removeTxGroup(block.getHeader().getHash().getDigestHex());
     }
