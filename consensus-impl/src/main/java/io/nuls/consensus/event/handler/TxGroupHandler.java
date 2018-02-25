@@ -56,7 +56,6 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
 
     @Override
     public void onEvent(TxGroupEvent event, String fromId) {
-
         TxGroup txGroup = event.getEventBody();
         BlockHeader header = blockCacheManager.getBlockHeader(event.getEventBody().getBlockHash().getDigestHex());
         if (header == null) {

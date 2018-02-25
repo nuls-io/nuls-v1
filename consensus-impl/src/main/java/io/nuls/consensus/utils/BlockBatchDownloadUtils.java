@@ -55,10 +55,9 @@ import java.util.concurrent.locks.ReentrantLock;
 public class BlockBatchDownloadUtils {
 
     private static final int DOWNLOAD_NODE_COUNT = 10;
-    //todo
     private static final int DOWNLOAD_BLOCKS_PER_TIME = 100;
     /**
-     * unit:ms
+     * todo unit:ms
      */
     private static final long DOWNLOAD_IDLE_TIME_OUT = 1000;
 
@@ -110,7 +109,7 @@ public class BlockBatchDownloadUtils {
 
     public void request(List<String> nodeIdList, long startHeight, long endHeight) throws InterruptedException {
         lock.lock();
-        if (working) {
+         if (working) {
             return;
         }
         working = true;
@@ -199,6 +198,7 @@ public class BlockBatchDownloadUtils {
         status.setStart(start);
         status.setEnd(end);
         status.setNodeId(nodeId);
+        System.out.println("ask++++++++++++++++++++++++++++++++:"+start+"--"+end+",from:"+nodeId);
         this.eventBroadcaster.sendToNode(new GetBlockRequest(start, end), nodeId);
         status.setUpdateTime(System.currentTimeMillis());
         nodeStatusMap.put(nodeId, status);
@@ -206,6 +206,7 @@ public class BlockBatchDownloadUtils {
 
 
     public boolean downloadedBlock(String nodeId, Block block) {
+        System.out.println(block.getHeader().getHeight()+"===============================================");
         NodeDownloadingStatus status = nodeStatusMap.get(nodeId);
         if (null == status) {
             return false;

@@ -1,4 +1,4 @@
-/**
+/*
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,26 +20,32 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.consensus.event.handler;
 
-import io.nuls.consensus.cache.manager.block.BlockCacheManager;
-import io.nuls.consensus.event.BlockHeaderEvent;
-import io.nuls.core.chain.entity.BlockHeader;
+package io.nuls.notify.handler;
+
+import io.nuls.core.event.BaseEvent;
+import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.handler.AbstractEventHandler;
+import io.nuls.notify.controller.NulsEventDelegate;
 
 /**
- * @author facjas
- * @date 2017/11/16
+ * @author daviyang35
+ * @date 2018/1/19
  */
-public class BlockHeaderHandler extends AbstractEventHandler<BlockHeaderEvent> {
+public class NulsEventHandler extends AbstractEventHandler<BaseEvent> {
+    public NulsEventDelegate getEventDelegate() {
+        return eventDelegate;
+    }
 
-    private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
+    public void setEventDelegate(NulsEventDelegate eventDelegate) {
+        this.eventDelegate = eventDelegate;
+    }
 
+    private NulsEventDelegate eventDelegate;
     @Override
-    public void onEvent(BlockHeaderEvent event, String fromId) {
-        //todo
-//        BlockHeader header = event.getEventBody();
-//        blockCacheManager.cacheBlockHeader(header, fromId);
+    public void onEvent(BaseEvent event, String fromId) {
+        Log.info(event.toString());
     }
 }

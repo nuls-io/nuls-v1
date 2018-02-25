@@ -1,4 +1,4 @@
-/**
+/*
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,26 +20,21 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.consensus.event.handler;
 
-import io.nuls.consensus.cache.manager.block.BlockCacheManager;
-import io.nuls.consensus.event.BlockHeaderEvent;
-import io.nuls.core.chain.entity.BlockHeader;
-import io.nuls.event.bus.handler.AbstractEventHandler;
+package io.nuls.notify.controller;
+
+import org.java_websocket.WebSocket;
 
 /**
- * @author facjas
- * @date 2017/11/16
+ * @author daviyang35
+ * @date 2018/2/25
  */
-public class BlockHeaderHandler extends AbstractEventHandler<BlockHeaderEvent> {
+public interface WebSocketDelegate {
+    void onConnected(WebSocket sock);
 
-    private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
+    void onDisconnected(WebSocket sock);
 
-    @Override
-    public void onEvent(BlockHeaderEvent event, String fromId) {
-        //todo
-//        BlockHeader header = event.getEventBody();
-//        blockCacheManager.cacheBlockHeader(header, fromId);
-    }
+    void onMessage(WebSocket sock, String msg);
 }

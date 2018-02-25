@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Niels
@@ -42,8 +43,8 @@ import java.util.Set;
  */
 public class ServiceManager {
     private static final ServiceManager INSTANCE = new ServiceManager();
-    private static final Map<Short, Set<Class>> MODULE_INTF_MAP = new HashMap<>();
-    private static final Map<Class, Short> MODULE_ID_MAP = new HashMap<>();
+    private static final Map<Short, Set<Class>> MODULE_INTF_MAP = new ConcurrentHashMap<>();
+    private static final Map<Class, Short> MODULE_ID_MAP = new ConcurrentHashMap<>();
 
     private ServiceManager() {
     }

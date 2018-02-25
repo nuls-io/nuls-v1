@@ -36,6 +36,7 @@
         <module>node</module>
         <module>event-bus</module>
         <module>event-bus-impl</module>
+        <module>notify</module>
     </modules>
     <build>
         <finalName>nuls</finalName>
