@@ -349,7 +349,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Result unlockAccounts(String password, int seconds) {
+    public Result unlockAccounts(final String password, int seconds) {
         List<Account> accounts = this.getAccountList();
         if (accounts == null || accounts.isEmpty()) {
             return new Result(false, "No account was found");
@@ -370,7 +370,7 @@ public class AccountServiceImpl implements AccountService {
         }
 
         isLockNow = false;
-        long unlockTime = TimeService.currentTimeSeconds() + seconds;
+        final long unlockTime = TimeService.currentTimeSeconds() + seconds;
         TaskManager.createAndRunThread(NulsConstant.MODULE_ID_ACCOUNT, "unlockAccountThread", new Runnable() {
             @Override
             public void run() {

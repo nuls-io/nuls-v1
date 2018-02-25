@@ -98,9 +98,7 @@ public class ProcessorManager<E extends io.nuls.core.event.BaseEvent, H extends 
     }
 
     private void cacheHandlerMapping(Class<E> eventClass, String handlerId) {
-        if (eventClass.equals(BaseEvent.class)) {
-            return;
-        }
+
         Set<String> ids = eventHandlerMapping.get(eventClass);
         if (null == ids) {
             ids = new HashSet<>();
@@ -119,9 +117,6 @@ public class ProcessorManager<E extends io.nuls.core.event.BaseEvent, H extends 
     }
 
     private Set<NulsEventHandler> getHandlerList(Class<E> clazz) {
-        if (clazz.equals(BaseEvent.class)) {
-            return new HashSet<>(handlerMap.values());
-        }
         Set<String> ids = eventHandlerMapping.get(clazz);
         Set<NulsEventHandler> set = new HashSet<>();
         do {
@@ -139,7 +134,7 @@ public class ProcessorManager<E extends io.nuls.core.event.BaseEvent, H extends 
                 set.add(handler);
             }
         } while (false);
-        if (!clazz.getSuperclass().equals(BaseEvent.class)) {
+        if (!clazz .equals(BaseEvent.class)) {
             set.addAll(getHandlerList((Class<E>) clazz.getSuperclass()));
         }
         return set;

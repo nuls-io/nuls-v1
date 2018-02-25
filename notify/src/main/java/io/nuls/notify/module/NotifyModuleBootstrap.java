@@ -31,6 +31,7 @@ import io.nuls.core.module.BaseModuleBootstrap;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.service.intf.EventBusService;
 import io.nuls.notify.controller.NotificationController;
+import io.nuls.notify.handler.NulsEventHandler;
 
 /**
  * @author daviyang35
@@ -68,6 +69,12 @@ public class NotifyModuleBootstrap extends BaseModuleBootstrap {
 
         notificationController.setListenPort(port);
         notificationController.start();
+
+
+        NulsEventHandler handler = new NulsEventHandler();
+
+        String subscribeId = NulsContext.getServiceBean(EventBusService.class).subscribeEvent(BaseEvent.class,handler);
+        Log.debug("subscribe base event:"+subscribeId);
     }
 
     @Override

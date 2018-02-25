@@ -38,7 +38,8 @@ public class BlockHeaderHandler extends AbstractEventHandler<BlockHeaderEvent> {
 
     @Override
     public void onEvent(BlockHeaderEvent event, String fromId) {
-        BlockHeader header = event.getEventBody();
-        blockCacheManager.cacheBlockHeader(header, fromId);
+        //todo
+//        BlockHeader header = event.getEventBody();
+//        blockCacheManager.cacheBlockHeader(header, fromId);
     }
 }
