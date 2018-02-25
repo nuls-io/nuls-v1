@@ -173,4 +173,9 @@ public class NulsDigestData extends BaseNulsData {
         }
         return this.getDigestHex().equals(((NulsDigestData) obj).getDigestHex());
     }
+
+    @Override
+    public String toString() {
+        return getDigestHex();
+    }
 }

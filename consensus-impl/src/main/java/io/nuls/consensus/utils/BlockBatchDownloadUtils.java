@@ -192,7 +192,6 @@ public class BlockBatchDownloadUtils {
         }
     }
 
-
     private void sendRequest(long start, long end, String nodeId) {
         NodeDownloadingStatus status = new NodeDownloadingStatus();
         status.setStart(start);
