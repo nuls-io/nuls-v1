@@ -46,6 +46,6 @@ public class NulsEventHandler extends AbstractEventHandler<BaseEvent> {
     private NulsEventDelegate eventDelegate;
     @Override
     public void onEvent(BaseEvent event, String fromId) {
-        Log.info(event.toString());
+        Log.debug(event.toString());
     }
 }
