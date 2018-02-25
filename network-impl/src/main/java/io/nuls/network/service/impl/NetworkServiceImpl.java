@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,6 +25,7 @@ package io.nuls.network.service.impl;
 
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.event.BaseEvent;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.TaskManager;
@@ -43,7 +44,6 @@ import io.nuls.network.param.TestNetworkParam;
 import io.nuls.network.service.NetworkService;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -62,6 +62,8 @@ public class NetworkServiceImpl implements NetworkService {
 
     public NetworkServiceImpl() {
         this.network = getNetworkInstance();
+        NulsContext.setMagicNumber(network.packetMagic());
+
         NulsMessageFilter messageFilter = DefaultMessageFilter.getInstance();
         network.setMessageFilter(messageFilter);
 
@@ -129,7 +131,7 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public void blackNode(String nodeId, int status) {
-        //todo
+        nodesManager.blackNode(nodeId, status);
     }
 
     @Override
@@ -201,8 +203,8 @@ public class NetworkServiceImpl implements NetworkService {
         if ("test".equals(networkType)) {
             return TestNetworkParam.get();
         }
+
         return MainNetworkParam.get();
     }
-
 }
 

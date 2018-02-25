@@ -35,8 +35,9 @@ import java.util.Set;
  */
 public interface NodeDataService extends BaseDataService< String,NodePo> {
 
-
     List<NodePo> getNodePoList(int size, Set<String> keys);
 
     void saveChange(NodePo po);
+
+    void removeNode(NodePo po);
 }

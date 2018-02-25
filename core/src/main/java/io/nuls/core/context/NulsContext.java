@@ -44,15 +44,15 @@ public class NulsContext {
     public static IniEntity NULS_CONFIG;
     public static IniEntity MODULES_CONFIG;
 
-    public static byte[] getMagicNumber() {
+    public static int getMagicNumber() {
         return MAGIC_NUMBER;
     }
 
-    public static void setMagicNumber(byte[] magicNumber) {
+    public static void setMagicNumber(int magicNumber) {
         MAGIC_NUMBER = magicNumber;
     }
 
-    public static byte[] MAGIC_NUMBER;
+    public static int MAGIC_NUMBER;
 
     private NulsContext() {
         CHAIN_ID = "NULS";

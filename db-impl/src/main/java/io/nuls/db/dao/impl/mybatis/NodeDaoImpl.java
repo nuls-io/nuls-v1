@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -47,7 +47,6 @@ public class NodeDaoImpl extends BaseDaoImpl<NodeMapper, String, NodePo> impleme
         super(NodeMapper.class);
     }
 
-
     @Override
     protected Searchable getSearchable(Map<String, Object> params) {
         return new NodeSearchParams(params);
@@ -73,18 +72,30 @@ public class NodeDaoImpl extends BaseDaoImpl<NodeMapper, String, NodePo> impleme
     public void saveChange(NodePo po) {
         try {
             Searchable searchable = new Searchable();
-            searchable.addCondition("ip", SearchOperator.eq, po.getIp());
+            searchable.addCondition("id", SearchOperator.eq, po.getId());
             if (getMapper().selectCount(searchable) > 0) {
-                if (po.getFailCount() >= 3) {
-                    getMapper().deleteByPrimaryKey(po.getId());
-                } else {
-                    getMapper().updateByPrimaryKey(po);
-                }
+                getMapper().updateByPrimaryKey(po);
             } else {
                 getMapper().insert(po);
             }
         } catch (Exception e) {
             Log.error(e);
+        }
+    }
+
+    @Override
+    @DbSession
+    public void removeNode(NodePo po) {
+        NodePo nodePo = getMapper().selectByPrimaryKey(po.getId());
+        if(nodePo != null && nodePo.getStatus() == NodePo.BLACK) {
+            return;
+        }
+        if (nodePo != null) {
+            if (po.getStatus() == NodePo.BLACK || po.getFailCount() <= 1) {
+                getMapper().updateByPrimaryKey(po);
+            } else {
+                getMapper().deleteByPrimaryKey(po.getId());
+            }
         }
     }
 }

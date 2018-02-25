@@ -32,9 +32,11 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
+import io.nuls.db.dao.NodeDataService;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeGroup;
+import io.nuls.network.entity.NodeTransferTool;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.service.impl.netty.NioChannelMap;
 
@@ -63,6 +65,8 @@ public class NodesManager implements Runnable {
     private NodeDiscoverHandler discoverHandler;
 
     private ConnectionManager connectionManager;
+
+    private NodeDataService nodeDao;
 
     private boolean running;
 
@@ -177,8 +181,19 @@ public class NodesManager implements Runnable {
                 removeNodeFromGroup(groupName, nodeId);
             }
             nodes.remove(nodeId);
+
+            getNodeDao().removeNode(NodeTransferTool.toPojo(node));
         }
-        //todo delete node
+    }
+
+    public void blackNode(String nodeId, int status) {
+        if (nodes.containsKey(nodeId)) {
+            Node node = nodes.get(nodeId);
+            node.setStatus(status);
+            getNodeDao().removeNode(NodeTransferTool.toPojo(node));
+
+            removeNode(node.getId());
+        }
     }
 
     public void addNodeToGroup(String groupName, Node node) {
@@ -269,5 +284,12 @@ public class NodesManager implements Runnable {
 
     public void setDiscoverHandler(NodeDiscoverHandler discoverHandler) {
         this.discoverHandler = discoverHandler;
+    }
+
+    private NodeDataService getNodeDao() {
+        if (nodeDao == null) {
+            nodeDao = NulsContext.getServiceBean(NodeDataService.class);
+        }
+        return nodeDao;
     }
 }
