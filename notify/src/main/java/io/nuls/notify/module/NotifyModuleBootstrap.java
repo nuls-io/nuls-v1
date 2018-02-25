@@ -36,11 +36,11 @@ import io.nuls.notify.controller.NotificationController;
  * @author daviyang35
  * @date 2018/1/19
  */
-public class NotifyModule extends BaseModuleBootstrap {
+public class NotifyModuleBootstrap extends BaseModuleBootstrap {
     private NotificationController notificationController;
     short port;
 
-    public NotifyModule() {
+    public NotifyModuleBootstrap() {
         super((short) 10);
     }
 

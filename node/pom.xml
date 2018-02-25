@@ -118,6 +118,11 @@
             <artifactId>jetty-webapp</artifactId>
             <version>9.4.7.v20170914</version>
         </dependency>
+        <dependency>
+            <groupId>io.nuls</groupId>
+            <artifactId>notify</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
     <build>
         <finalName>nuls-node</finalName>

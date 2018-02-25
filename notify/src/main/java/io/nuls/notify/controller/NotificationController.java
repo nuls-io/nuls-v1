@@ -91,4 +91,9 @@ public class NotificationController implements WebSocketDelegate, NulsEventDeleg
     public void setListenPort(short listenPort) {
         this.listenPort = listenPort;
     }
+
+    @Override
+    public void onEventFire() {
+        
+    }
 }
