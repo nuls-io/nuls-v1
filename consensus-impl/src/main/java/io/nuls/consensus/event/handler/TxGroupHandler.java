@@ -35,6 +35,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.entity.NodePo;
 import io.nuls.event.bus.handler.AbstractEventHandler;
@@ -55,6 +56,7 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
 
     @Override
     public void onEvent(TxGroupEvent event, String fromId) {
+
         TxGroup txGroup = event.getEventBody();
         BlockHeader header = blockCacheManager.getBlockHeader(event.getEventBody().getBlockHash().getDigestHex());
         if (header == null) {
@@ -86,6 +88,9 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
                 ConsensusMeetingRunner.putPunishData(data);
             }
             return;
+        }
+        if(block.getHeader().getHeight()<blockCacheManager.getRecievedMaxHeight()){
+            blockCacheManager.askNextHeader(1+block.getHeader().getHeight(),fromId);
         }
         blockCacheManager.cacheBlock(block);
         downloadDataUtils.removeTxGroup(block.getHeader().getHash().getDigestHex());

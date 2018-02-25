@@ -158,7 +158,7 @@ public class Account extends BaseNulsData implements NulsCloneable {
         try {
             s += address.getBase58().getBytes(NulsContext.DEFAULT_ENCODING).length;
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            Log.error(e);
         }
         if (null != priSeed) {
             s += priSeed.length + 1;

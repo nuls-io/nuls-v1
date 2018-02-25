@@ -25,6 +25,7 @@ package io.nuls.network.service.impl;
 
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.event.BaseEvent;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.TaskManager;
@@ -43,7 +44,6 @@ import io.nuls.network.param.TestNetworkParam;
 import io.nuls.network.service.NetworkService;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -62,6 +62,8 @@ public class NetworkServiceImpl implements NetworkService {
 
     public NetworkServiceImpl() {
         this.network = getNetworkInstance();
+        NulsContext.setMagicNumber(network.packetMagic());
+
         NulsMessageFilter messageFilter = DefaultMessageFilter.getInstance();
         network.setMessageFilter(messageFilter);
 
@@ -129,7 +131,7 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public void blackNode(String nodeId, int status) {
-        //todo
+        nodesManager.blackNode(nodeId, status);
     }
 
     @Override
@@ -201,8 +203,8 @@ public class NetworkServiceImpl implements NetworkService {
         if ("test".equals(networkType)) {
             return TestNetworkParam.get();
         }
+
         return MainNetworkParam.get();
     }
-
 }
 

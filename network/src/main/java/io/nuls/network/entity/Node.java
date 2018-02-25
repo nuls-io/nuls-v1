@@ -34,6 +34,7 @@ import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.param.AbstractNetworkParam;
@@ -126,6 +127,7 @@ public class Node extends BaseNulsData {
 
     public void destroy() {
         this.lastFailTime = TimeService.currentTimeMillis();
+        this.setFailCount(this.getFailCount() + 1);
         this.status = Node.CLOSE;
     }
 
@@ -139,7 +141,7 @@ public class Node extends BaseNulsData {
         try {
             s += ip.getBytes(NulsContext.DEFAULT_ENCODING).length;
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            Log.error(e);
         }
         return s;
     }

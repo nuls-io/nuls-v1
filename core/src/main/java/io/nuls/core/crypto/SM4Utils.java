@@ -23,6 +23,8 @@
  */
 package io.nuls.core.crypto;
 
+import io.nuls.core.utils.log.Log;
+
 import java.util.Base64;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -67,7 +69,7 @@ public class SM4Utils {
             }
             return cipherText;
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
             return null;
         }
     }
@@ -91,7 +93,7 @@ public class SM4Utils {
             byte[] decrypted = sm4.sm4_crypt_ecb(ctx, decoder.decode(cipherText));
             return new String(decrypted, "UTF-8");
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
             return null;
         }
     }
@@ -123,7 +125,7 @@ public class SM4Utils {
             }
             return cipherText;
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
             return null;
         }
     }
@@ -149,7 +151,7 @@ public class SM4Utils {
             byte[] decrypted = sm4.sm4_crypt_cbc(ctx, ivBytes, decoder.decode(cipherText));
             return new String(decrypted, "UTF-8");
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
             return null;
         }
     }

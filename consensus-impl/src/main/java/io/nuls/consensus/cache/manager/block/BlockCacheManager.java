@@ -62,6 +62,7 @@ public class BlockCacheManager {
     private BifurcateProcessor bifurcateProcessor = BifurcateProcessor.getInstance();
 
     private long storedHeight;
+    private long recievedMaxHeight;
 
     private BlockCacheManager() {
     }
@@ -94,11 +95,11 @@ public class BlockCacheManager {
             long nextHeight = 1 + bifurcateProcessor.getBestHeight();
             if (height > nextHeight) {
                 headerCacheMap.put(header.getHash().getDigestHex(), header);
-                GetBlockHeaderEvent event = new GetBlockHeaderEvent();
-                event.setEventBody(new GetBlockHeaderParam(nextHeight));
-                if (null != sender) {
-                    eventBroadcaster.sendToNode(event, sender);
+                if (header.getHeight() > this.recievedMaxHeight) {
+                    this.recievedMaxHeight = header.getHeight();
                 }
+                askNextHeader(nextHeight, sender);
+
                 discard = true;
                 break;
             }
@@ -135,7 +136,7 @@ public class BlockCacheManager {
     public void cacheBlock(Block block) {
         blockCacheMap.put(block.getHeader().getHash().getDigestHex(), block);
         boolean b = this.bifurcateProcessor.addHeader(block.getHeader());
-        if(b){
+        if (b) {
             NulsContext.getInstance().setBestBlock(block);
         }
         //txs approval
@@ -279,5 +280,18 @@ public class BlockCacheManager {
 
     public boolean canPersistence() {
         return null != bifurcateProcessor.getLongestChain() && bifurcateProcessor.getLongestChain().size() > PocConsensusConstant.CONFIRM_BLOCK_COUNT;
+    }
+
+    public long getRecievedMaxHeight() {
+        return recievedMaxHeight;
+    }
+
+    public void askNextHeader(long nextHeight, String nodeId) {
+        if (null == nodeId) {
+            return;
+        }
+        GetBlockHeaderEvent event = new GetBlockHeaderEvent();
+        event.setEventBody(new GetBlockHeaderParam(nextHeight));
+        eventBroadcaster.sendToNode(event, nodeId);
     }
 }

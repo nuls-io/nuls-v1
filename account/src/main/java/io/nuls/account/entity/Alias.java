@@ -66,7 +66,7 @@ public class Alias extends BaseNulsData {
             s += address.getBytes(NulsContext.DEFAULT_ENCODING).length + 1;
             s += alias.getBytes(NulsContext.DEFAULT_ENCODING).length + 1;
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            Log.error(e);
         }
         return s;
     }

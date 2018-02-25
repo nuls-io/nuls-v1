@@ -8,6 +8,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.utils.log.Log;
 import io.nuls.network.entity.Node;
 import io.nuls.network.service.NetworkService;
 
@@ -44,6 +45,7 @@ public class NettyClient {
             }
             future.channel().closeFuture().sync();
         } catch (Exception e) {
+            Log.error(e);
             //maybe time out or refused or something
             if (socketChannel != null) {
                 socketChannel.close();
