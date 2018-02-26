@@ -69,12 +69,6 @@ public class NotifyModuleBootstrap extends BaseModuleBootstrap {
 
         notificationController.setListenPort(port);
         notificationController.start();
-
-
-        NulsEventHandler handler = new NulsEventHandler();
-
-        String subscribeId = NulsContext.getServiceBean(EventBusService.class).subscribeEvent(BaseEvent.class,handler);
-        Log.debug("subscribe base event:"+subscribeId);
     }
 
     @Override

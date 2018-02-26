@@ -185,7 +185,7 @@ public class DistributedBlockInfoRequestUtils {
                 break;
             }
             try {
-                Thread.sleep(100L);
+                Thread.sleep(10L);
             } catch (InterruptedException e) {
                 Log.error(e);
             }

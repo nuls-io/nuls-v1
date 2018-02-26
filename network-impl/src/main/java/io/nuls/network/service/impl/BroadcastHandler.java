@@ -372,6 +372,7 @@ public class BroadcastHandler {
             }
             ChannelFuture future = channel.writeAndFlush(Unpooled.wrappedBuffer(message.serialize()));
             if (!asyn) {
+                future.await();
                 boolean success = future.isSuccess();
                 if (!success) {
                     return new BroadcastResult(false, "send message failed");

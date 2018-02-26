@@ -96,17 +96,6 @@ public class GetVersionEvent extends BaseEvent {
         return buffer.toString();
     }
 
-
-    public static void main(String[] args) throws IOException, NulsException {
-        GetVersionEvent event = new GetVersionEvent(3131);
-        System.out.println(event);
-        byte[] bytes = event.serialize();
-
-        GetVersionEvent versionEvent = new GetVersionEvent();
-        versionEvent.parse(new NulsByteBuffer(bytes));
-        System.out.println(versionEvent);
-    }
-
     public int getExternalPort() {
         return externalPort;
     }

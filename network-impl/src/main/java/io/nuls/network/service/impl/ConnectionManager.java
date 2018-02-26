@@ -30,6 +30,7 @@ import io.nuls.core.event.EventManager;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.mesasge.NulsMessage;
 import io.nuls.core.thread.manager.TaskManager;
+import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.service.intf.EventBusService;
 import io.nuls.network.constant.NetworkConstant;
