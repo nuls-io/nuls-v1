@@ -28,27 +28,12 @@
         </dependency>
         <dependency>
             <groupId>io.nuls</groupId>
-            <artifactId>account</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>io.nuls</groupId>
             <artifactId>account-impl</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>io.nuls</groupId>
-            <artifactId>cache</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>io.nuls</groupId>
             <artifactId>cache-impl</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>io.nuls</groupId>
-            <artifactId>consensus</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
@@ -63,22 +48,7 @@
         </dependency>
         <dependency>
             <groupId>io.nuls</groupId>
-            <artifactId>event-bus</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>io.nuls</groupId>
-            <artifactId>db</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>io.nuls</groupId>
             <artifactId>db-impl</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>io.nuls</groupId>
-            <artifactId>ledger</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
@@ -88,27 +58,12 @@
         </dependency>
         <dependency>
             <groupId>io.nuls</groupId>
-            <artifactId>network</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>io.nuls</groupId>
             <artifactId>network-impl</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>io.nuls</groupId>
-            <artifactId>rpc</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>io.nuls</groupId>
             <artifactId>rpc-impl</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>io.nuls</groupId>
-            <artifactId>notify</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
