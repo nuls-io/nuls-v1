@@ -44,7 +44,7 @@ public class TransactionResource {
 
 
     @GET
-    @Path("/{hash}")
+    @Path("/hash/{hash}")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult load(@PathParam("hash") String hash) {
         RpcResult result = RpcResult.getSuccess();
@@ -57,11 +57,11 @@ public class TransactionResource {
     @Produces(MediaType.APPLICATION_JSON)
 
     public RpcResult list(@QueryParam("address") String address, @QueryParam("type") int type
-            , @QueryParam("pageNum") int pageNum, @QueryParam("pageSize") int pageSize) {
+            , @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
         RpcResult result = RpcResult.getSuccess();
         List<Transaction> txList = null;
         try {
-            txList = ledgerService.getTxList(address, type, pageNum, pageSize);
+            txList = ledgerService.getTxList(address, type, pageNumber, pageSize);
             result.setData(txList);
         } catch (Exception e) {
             Log.error(e);

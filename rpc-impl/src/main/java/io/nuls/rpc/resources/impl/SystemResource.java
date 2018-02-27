@@ -49,7 +49,7 @@ public class SystemResource {
     @PUT
     @Path("/version")
     @Produces(MediaType.APPLICATION_JSON)
-    public io.nuls.rpc.entity.RpcResult updateVersion() {
+    public RpcResult updateVersion() {
         return null;
     }
 
