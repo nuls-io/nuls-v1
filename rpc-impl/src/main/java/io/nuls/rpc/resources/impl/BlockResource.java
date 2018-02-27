@@ -44,12 +44,23 @@ public class BlockResource  {
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
 
     @GET
-    @Path("/{hash}")
+    @Path("/hash/{hash}")
     @Produces(MediaType.APPLICATION_JSON)
     
     public RpcResult loadBlock(@PathParam("hash") String hash) {
         RpcResult result = RpcResult.getSuccess();
         result.setData(blockService.getBlock(hash));
+        return result;
+    }
+
+    @GET
+    @Path("/height/{height}")
+    @Produces(MediaType.APPLICATION_JSON)
+
+    public RpcResult getBlock(@PathParam("height") Integer height) {
+        RpcResult result = RpcResult.getSuccess();
+        Block block = blockService.getBlock(height);
+        result.setData(block);
         return result;
     }
 
@@ -67,7 +78,7 @@ public class BlockResource  {
     @Path("/bestheight")
     @Produces(MediaType.APPLICATION_JSON)
     
-    public RpcResult getBestBlockHeiht() {
+    public RpcResult getBestBlockHeight() {
         RpcResult result = RpcResult.getSuccess();
         result.setData(blockService.getLocalHeight());
         return result;
@@ -84,7 +95,7 @@ public class BlockResource  {
     }
 
     @GET
-    @Path("/height/{height}/hash")
+    @Path("/hash/height/{height}")
     @Produces(MediaType.APPLICATION_JSON)
     
     public RpcResult getHashByHeight(@PathParam("height") Integer height) {
@@ -97,7 +108,7 @@ public class BlockResource  {
     }
 
     @GET
-    @Path("/height/{height}/header")
+    @Path("/header/height/{height}")
     @Produces(MediaType.APPLICATION_JSON)
     
     public RpcResult getHeaderByHeight(@PathParam("height") Integer height) {
@@ -110,7 +121,7 @@ public class BlockResource  {
     }
 
     @GET
-    @Path("/{hash}/header")
+    @Path("/header/hash/{hash}")
     @Produces(MediaType.APPLICATION_JSON)
     
     public RpcResult getHeader(@PathParam("hash") String hash) {
@@ -122,14 +133,5 @@ public class BlockResource  {
         return result;
     }
 
-    @GET
-    @Path("/height/{height}")
-    @Produces(MediaType.APPLICATION_JSON)
-    
-    public RpcResult getBlock(@PathParam("height") Integer height) {
-        RpcResult result = RpcResult.getSuccess();
-        Block block = blockService.getBlock(height);
-        result.setData(block);
-        return result;
-    }
+
 }

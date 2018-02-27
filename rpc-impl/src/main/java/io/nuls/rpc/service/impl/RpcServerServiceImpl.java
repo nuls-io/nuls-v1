@@ -31,6 +31,7 @@ import io.nuls.rpc.service.intf.RpcServerService;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 
 import javax.ws.rs.core.UriBuilder;
+import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,7 +53,11 @@ public class RpcServerServiceImpl implements RpcServerService {
         NulsResourceConfig rc = new NulsResourceConfig();
         rc.addProperties(initParams);
         httpServer = GrizzlyHttpServerFactory.createHttpServer(serverURI, rc);
-
+        try {
+            httpServer.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         Log.info("http restFul server is started!url is " + serverURI.toString());
     }
 

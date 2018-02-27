@@ -31,6 +31,7 @@ import io.nuls.core.constant.ErrorCode;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Niels
@@ -38,16 +39,16 @@ import java.util.Map;
  */
 public class ValidatorManager {
 
-    private static Map<Class, DataValidatorChain> chainMap = new HashMap<>();
+    private static Map<Class, DataValidatorChain> chainMap = new ConcurrentHashMap<>();
 
 
     public static void addValidator(Class<? extends BaseNulsData> clazz, NulsDataValidator<? extends BaseNulsData> validator) {
         DataValidatorChain chain = chainMap.get(clazz);
         if (null == chain) {
             chain = new DataValidatorChain();
+            chainMap.put(clazz, chain);
         }
         chain.addValidator(validator);
-        chainMap.put(clazz, chain);
     }
 
     public static ValidateResult startDoValidator(BaseNulsData data) {

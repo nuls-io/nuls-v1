@@ -4,7 +4,7 @@ rootdir=$PWD
 
 LIBS=$rootdir/libs
 PUB_LIB=""
-MAIN_CLASS=io.nuls.client.CommandHandle
+MAIN_CLASS=io.nuls.client.CommandHandler
 
 for jar in `find $LIBS -name "*.jar"`
 

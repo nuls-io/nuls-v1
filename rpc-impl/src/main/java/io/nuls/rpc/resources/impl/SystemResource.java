@@ -23,10 +23,12 @@
  */
 package io.nuls.rpc.resources.impl;
 
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.module.service.ModuleService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.rpc.entity.RpcResult;
+import io.nuls.rpc.entity.RpcVersion;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -42,16 +44,20 @@ public class SystemResource {
     @Path("/version")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getVersion() {
-        return null;
+        RpcVersion rpcVersion = new RpcVersion();
+        rpcVersion.setMyVersion(NulsContext.nulsVersion);
+        rpcVersion.setNewVersion(NulsContext.nulsVersion);
+        System.out.println("---------------------------get version ");
+        return RpcResult.getSuccess().setData(rpcVersion);
     }
 
 
-    @PUT
-    @Path("/version")
-    @Produces(MediaType.APPLICATION_JSON)
-    public io.nuls.rpc.entity.RpcResult updateVersion() {
-        return null;
-    }
+//    @PUT
+//    @Path("/version")
+//    @Produces(MediaType.APPLICATION_JSON)
+//    public RpcResult updateVersion() {
+//        return null;
+//    }
 
     @POST
     @Path("/module/load")
