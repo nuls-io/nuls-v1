@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -49,11 +50,11 @@ public class DistributedBlockInfoRequestUtils {
     private static final DistributedBlockInfoRequestUtils INSTANCE = new DistributedBlockInfoRequestUtils();
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
     private List<String> nodeIdList;
-    private Map<String, BlockHashResponse> hashesMap = new HashMap<>();
+    private Map<String, BlockHashResponse> hashesMap = new ConcurrentHashMap<>();
     /**
      * list order by answered time
      */
-    private Map<String, List<String>> calcMap = new HashMap<>();
+    private Map<String, List<String>> calcMap = new ConcurrentHashMap<>();
     private BlockInfo bestBlockInfo;
     private long start, end, split;
     private Lock lock = new ReentrantLock();
@@ -184,7 +185,7 @@ public class DistributedBlockInfoRequestUtils {
                 break;
             }
             try {
-                Thread.sleep(100L);
+                Thread.sleep(10L);
             } catch (InterruptedException e) {
                 Log.error(e);
             }

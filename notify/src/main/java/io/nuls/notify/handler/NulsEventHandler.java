@@ -1,4 +1,4 @@
-/**
+/*
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,22 +20,32 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.consensus.event.handler;
 
-import io.nuls.consensus.event.BlocksHashEvent;
-import io.nuls.consensus.utils.DistributedBlockInfoRequestUtils;
+package io.nuls.notify.handler;
+
+import io.nuls.core.event.BaseEvent;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.handler.AbstractEventHandler;
+import io.nuls.notify.controller.NulsEventDelegate;
 
 /**
- * @author Niels
- * @date 2018/1/16
+ * @author daviyang35
+ * @date 2018/1/19
  */
-public class BlocksHashHandler extends AbstractEventHandler<BlocksHashEvent> {
+public class NulsEventHandler extends AbstractEventHandler<BaseEvent> {
+    public NulsEventDelegate getEventDelegate() {
+        return eventDelegate;
+    }
 
+    public void setEventDelegate(NulsEventDelegate eventDelegate) {
+        this.eventDelegate = eventDelegate;
+    }
+
+    private NulsEventDelegate eventDelegate;
     @Override
-    public void onEvent(BlocksHashEvent event, String fromId) {
-        DistributedBlockInfoRequestUtils.getInstance().addBlockHashResponse(fromId, event.getEventBody());
+    public void onEvent(BaseEvent event, String fromId) {
+        Log.debug(event.toString());
     }
 }

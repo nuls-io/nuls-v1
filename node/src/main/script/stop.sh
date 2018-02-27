@@ -1,3 +1,3 @@
 #!/bin/sh
-rootdir=$(dirname "$PWD")
+rootdir=$PWD
 kill -9 `cat ${rootdir}/pid/pid`

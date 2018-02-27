@@ -155,15 +155,4 @@ public class VersionEvent extends io.nuls.core.event.BaseEvent {
     public void setExternalPort(int externalPort) {
         this.externalPort = externalPort;
     }
-
-    public static void main(String[] args) throws IOException, NulsException {
-        VersionEvent event = new VersionEvent(1234,0, "Test123456789");
-        System.out.println(event);
-        byte[] bytes = event.serialize();
-
-        VersionEvent versionEvent = new VersionEvent();
-        versionEvent.parse(new NulsByteBuffer(bytes));
-        System.out.println(versionEvent);
-    }
-
 }

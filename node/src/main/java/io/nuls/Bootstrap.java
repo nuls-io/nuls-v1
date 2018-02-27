@@ -29,8 +29,6 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.module.service.ModuleService;
 import io.nuls.core.utils.log.Log;
-import io.nuls.core.utils.spring.lite.core.SpringLiteContext;
-import io.nuls.jettyserver.JettyServer;
 
 import java.util.HashMap;
 import java.util.List;

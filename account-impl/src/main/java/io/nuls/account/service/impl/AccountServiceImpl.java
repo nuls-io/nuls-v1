@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -349,7 +349,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Result unlockAccounts(String password, int seconds) {
+    public Result unlockAccounts(final String password, int seconds) {
         List<Account> accounts = this.getAccountList();
         if (accounts == null || accounts.isEmpty()) {
             return new Result(false, "No account was found");
@@ -402,7 +402,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public NulsSignData signData(byte[] bytes, byte[] priKey) {
+    public NulsSignData signData (byte[] bytes, byte[] priKey) {
         //todo
         return NulsSignData.EMPTY_SIGN;
     }
