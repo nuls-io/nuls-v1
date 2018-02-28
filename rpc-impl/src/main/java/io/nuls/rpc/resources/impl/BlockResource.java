@@ -102,7 +102,7 @@ public class BlockResource {
 
     public RpcResult getBestBlockHash() {
         RpcResult result = RpcResult.getSuccess();
-        result.setData(blockService.getLocalBestBlock().getHeader().getHash());
+        result.setData(blockService.getLocalBestBlock().getHeader().getHash().getDigestHex());
         return result;
     }
 
@@ -114,7 +114,7 @@ public class BlockResource {
         RpcResult result = RpcResult.getSuccess();
         Block block = blockService.getBlock(height);
         if (block != null) {
-            result.setData(block.getHeader().getHash());
+            result.setData(block.getHeader().getHash().getDigestHex());
         }
         return result;
     }

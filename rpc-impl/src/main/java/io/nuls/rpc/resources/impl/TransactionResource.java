@@ -42,7 +42,6 @@ import java.util.List;
 public class TransactionResource {
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
 
-
     @GET
     @Path("/hash/{hash}")
     @Produces(MediaType.APPLICATION_JSON)

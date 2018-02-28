@@ -75,10 +75,10 @@ public class UtxoTransferTool {
 
     public static UtxoInput toInput(UtxoInputPo po) {
         UtxoInput input = new UtxoInput();
-        input.setTxHash(new NulsDigestData(Hex.decode(po.getTxHash())));
-        input.setFromIndex(po.getFromIndex());
-        input.setIndex(po.getInIndex());
-        input.setSign(new NulsSignData(po.getSign()));
+//        input.setTxHash(new NulsDigestData(Hex.decode(po.getTxHash())));
+//        input.setFromIndex(po.getFromIndex());
+//        input.setIndex(po.getInIndex());
+//        input.setSign(new NulsSignData(po.getSign()));
         return input;
     }
 

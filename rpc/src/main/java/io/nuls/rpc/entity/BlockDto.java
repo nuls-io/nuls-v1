@@ -2,11 +2,7 @@ package io.nuls.rpc.entity;
 
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
-import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.utils.crypto.Hex;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class BlockDto {
 
@@ -28,8 +24,6 @@ public class BlockDto {
 
     private String extend;
 
-    private List<String> txs;
-
     public BlockDto(Block block) {
         BlockHeader header = block.getHeader();
         this.hash = header.getHash().getDigestHex();
@@ -41,15 +35,7 @@ public class BlockDto {
         this.packingAddress = header.getPackingAddress();
         this.sign = header.getSign().getSignHex();
         this.extend = Hex.encode(header.getExtend());
-
-        List<String> txs = new ArrayList<>();
-        for (NulsDigestData hash : block.getTxHashList()) {
-            txs.add(hash.getDigestHex());
-        }
-        this.txs = txs;
     }
-
-    private List<TransactionDto> txList;
 
     public String getHash() {
         return hash;
@@ -123,19 +109,4 @@ public class BlockDto {
         this.extend = extend;
     }
 
-    public List<TransactionDto> getTxList() {
-        return txList;
-    }
-
-    public void setTxList(List<TransactionDto> txList) {
-        this.txList = txList;
-    }
-
-    public List<String> getTxs() {
-        return txs;
-    }
-
-    public void setTxs(List<String> txs) {
-        this.txs = txs;
-    }
 }
