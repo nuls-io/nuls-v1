@@ -46,6 +46,7 @@ public class NulsThreadFactory implements ThreadFactory {
     public final Thread newThread(Runnable r) {
         String threadName;
         if (threadNo.get() == 1) {
+            threadNo.incrementAndGet();
             threadName = "[" + poolName + "]";
         } else {
             threadName = "[" + poolName + "-" + threadNo.getAndIncrement() + "]";

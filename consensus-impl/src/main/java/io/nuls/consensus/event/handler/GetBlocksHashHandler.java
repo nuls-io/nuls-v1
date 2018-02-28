@@ -49,6 +49,9 @@ public class GetBlocksHashHandler extends AbstractEventHandler<GetBlocksHashRequ
 
     @Override
     public void onEvent(GetBlocksHashRequest event, String fromId) {
+        if (event.getEventBody().getEnd() > NulsContext.getInstance().getBestBlock().getHeader().getHeight()) {
+            return;
+        }
         boolean b = event.getEventBody().getStart() == event.getEventBody().getEnd();
         if (b) {
             BlockHashResponse response = new BlockHashResponse();
@@ -71,7 +74,7 @@ public class GetBlocksHashHandler extends AbstractEventHandler<GetBlocksHashRequ
                 resultHeightList.add(list.get(i).getHeight());
                 resultHashList.add(list.get(i).getHash());
             }
-            if(resultHeightList.isEmpty()||resultHeightList.get(resultHeightList.size()-1)<event.getEventBody().getEnd()){
+            if (resultHeightList.isEmpty() || resultHeightList.get(resultHeightList.size() - 1) < event.getEventBody().getEnd()) {
                 Block block = this.blockService.getBlock(event.getEventBody().getEnd());
                 resultHeightList.add(block.getHeader().getHeight());
                 resultHashList.add(block.getHeader().getHash());
