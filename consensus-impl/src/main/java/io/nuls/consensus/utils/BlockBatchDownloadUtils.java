@@ -280,6 +280,9 @@ public class BlockBatchDownloadUtils {
     private Result checkHash() throws InterruptedException {
         for (long i = currentRound.getStart(); i >= currentRound.getEnd(); i++) {
             Block block = blockMap.get(i);
+            if(null==block){
+                return Result.getFailed("data error");
+            }
             if ((i - currentRound.getStart()) % DOWNLOAD_BLOCKS_PER_TIME == 0) {
                 NulsDigestData mustHash = blocksHash.getHash(block.getHeader().getHeight());
                 NulsDigestData hash = block.getHeader().getHash();
