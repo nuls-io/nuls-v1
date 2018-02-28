@@ -36,4 +36,6 @@ import java.util.Map;
 public interface UtxoInputDataService extends BaseDataService<Map<String, Object>, UtxoInputPo> {
 
     List<UtxoInputPo> getTxInputs(String txHash);
+
+
 }

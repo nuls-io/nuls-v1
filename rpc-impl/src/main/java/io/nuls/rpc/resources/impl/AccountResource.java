@@ -52,9 +52,8 @@ public class AccountResource {
     @Path("/create/{count}")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult create(@QueryParam("count") Integer count) {
-        RpcResult result = RpcResult.getSuccess();
         Result<List<String>> accountResult = accountService.createAccount(count);
-        result.setData(accountResult.getObject());
+        RpcResult result = new RpcResult(accountResult);
         return result;
     }
 

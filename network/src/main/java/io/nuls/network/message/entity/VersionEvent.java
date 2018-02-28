@@ -69,7 +69,7 @@ public class VersionEvent extends io.nuls.core.event.BaseEvent {
         this.externalPort = externalPort;
         this.bestBlockHeight = bestBlockHeight;
         this.bestBlockHash = bestBlockHash;
-        this.nulsVersion = NulsContext.nulsVersion;
+        this.nulsVersion = NulsContext.myVersion;
     }
 
 
@@ -155,4 +155,5 @@ public class VersionEvent extends io.nuls.core.event.BaseEvent {
     public void setExternalPort(int externalPort) {
         this.externalPort = externalPort;
     }
+
 }

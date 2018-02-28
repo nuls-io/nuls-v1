@@ -30,12 +30,12 @@ import io.nuls.core.utils.json.JSONUtils;
 import io.nuls.core.utils.log.Log;
 
 /**
- *
  * @author Niels
  * @date 2017/9/27
  */
 public class RpcResult<T> {
 
+    private boolean success;
     private String code;
     private String msg;
     private T data;
@@ -43,23 +43,27 @@ public class RpcResult<T> {
     public RpcResult() {
     }
 
-    public RpcResult(String code, String msg) {
+    public RpcResult(boolean success, String code, String msg) {
+        this.success = success;
         this.code = code;
         this.msg = msg;
     }
 
-    public RpcResult(String code, String msg, T data) {
+    public RpcResult(boolean success, String code, String msg, T data) {
+        this.success = success;
         this.code = code;
         this.msg = msg;
         this.data = data;
     }
 
-    public RpcResult(ErrorCode ec) {
+    public RpcResult(boolean success, ErrorCode ec) {
+        this.success = success;
         this.code = ec.getCode() + "";
         this.msg = ec.getMsg();
     }
 
     public RpcResult(Result result) {
+        this.success = result.isSuccess();
         if (result.isSuccess()) {
             this.code = ErrorCode.SUCCESS.getCode();
         } else {
@@ -97,19 +101,19 @@ public class RpcResult<T> {
     }
 
     public static RpcResult getSuccess() {
-        return new RpcResult(ErrorCode.SUCCESS);
+        return new RpcResult(true, ErrorCode.SUCCESS);
     }
 
     public static RpcResult getFailed() {
-        return new RpcResult(ErrorCode.FAILED);
+        return new RpcResult(false, ErrorCode.FAILED);
     }
 
     public static RpcResult getFailed(String msg) {
-        return new RpcResult(ErrorCode.FAILED.getCode(), msg);
+        return new RpcResult(false, ErrorCode.FAILED.getCode(), msg);
     }
 
     public static RpcResult getFailed(ErrorCode errorCode) {
-        return new RpcResult(errorCode);
+        return new RpcResult(false, errorCode);
     }
 
     @Override
@@ -120,5 +124,13 @@ public class RpcResult<T> {
             Log.error(e);
         }
         return null;
+    }
+
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public void setSuccess(boolean success) {
+        this.success = success;
     }
 }

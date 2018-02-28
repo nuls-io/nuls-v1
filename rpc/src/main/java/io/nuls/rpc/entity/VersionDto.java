@@ -1,10 +1,10 @@
 package io.nuls.rpc.entity;
 
-public class RpcVersion {
+public class VersionDto {
 
     private String myVersion;
 
-    private String newVersion;
+    private String newestVersion;
 
     public String getMyVersion() {
         return myVersion;
@@ -14,11 +14,11 @@ public class RpcVersion {
         this.myVersion = myVersion;
     }
 
-    public String getNewVersion() {
-        return newVersion;
+    public String getNewestVersion() {
+        return newestVersion;
     }
 
-    public void setNewVersion(String newVersion) {
-        this.newVersion = newVersion;
+    public void setNewestVersion(String newestVersion) {
+        this.newestVersion = newestVersion;
     }
 }

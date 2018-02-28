@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -76,6 +76,7 @@ public class VersionEventHandler implements NetWorkEventHandler {
             throw new NetworkMessageException(ErrorCode.NET_MESSAGE_ERROR);
         }
         node.setVersionMessage(event);
+        checkVersion(event.getNulsVersion());
 
         if (!node.isHandShake()) {
             node.setStatus(Node.HANDSHAKE);
@@ -85,6 +86,16 @@ public class VersionEventHandler implements NetWorkEventHandler {
         }
         return null;
     }
+
+
+    private void checkVersion(String version) {
+        int newVersion = Integer.parseInt(version.replace(".", ""));
+        int myVersion = Integer.parseInt(NulsContext.myVersion.replace(".", ""));
+        if (newVersion > myVersion) {
+            NulsContext.newestVersion = version;
+        }
+    }
+
 
     private NodeDataService getNodeDao() {
         if (nodeDao == null) {
@@ -99,4 +110,5 @@ public class VersionEventHandler implements NetWorkEventHandler {
         }
         return networkService;
     }
+
 }

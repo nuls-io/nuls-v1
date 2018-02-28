@@ -28,7 +28,7 @@ import io.nuls.core.module.service.ModuleService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.rpc.entity.RpcResult;
-import io.nuls.rpc.entity.RpcVersion;
+import io.nuls.rpc.entity.VersionDto;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -44,10 +44,9 @@ public class SystemResource {
     @Path("/version")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getVersion() {
-        RpcVersion rpcVersion = new RpcVersion();
-        rpcVersion.setMyVersion(NulsContext.nulsVersion);
-        rpcVersion.setNewVersion(NulsContext.nulsVersion);
-        System.out.println("---------------------------get version ");
+        VersionDto rpcVersion = new VersionDto();
+        rpcVersion.setMyVersion(NulsContext.myVersion);
+        rpcVersion.setNewestVersion(NulsContext.newestVersion);
         return RpcResult.getSuccess().setData(rpcVersion);
     }
 
