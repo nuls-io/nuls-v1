@@ -1,6 +1,6 @@
 #!/bin/sh
 
-rootdir=$(dirname "$PWD")
+rootdir=$PWD
 export logdir="$rootdir/logs"
 
 LIBS=$rootdir/libs
@@ -22,7 +22,7 @@ if [ ! -d "$logdir" ]; then
   mkdir "$logdir"
 fi
 1>${rootdir}/logs/stdout.log 0>${rootdir}/logs/stderr.log &
-#nohup java -server -DLANG="zh_CN.GBK" -Dlog.dir=${logdir} $MAIN_CLASS 1>${rootdir}/stdout.log 0>${rootdir}/stderr.log 2>&1 &
+#nohup java -server -DLANG="zh_CN.UTF-8" -Dlog.dir=${logdir} $MAIN_CLASS 1>${rootdir}/stdout.log 0>${rootdir}/stderr.log 2>&1 &
 nohup java -Xms1024m -Xmx4096m  -XX:NewSize=256m -XX:MaxNewSize=256m -XX:PermSize=256M -XX:MaxPermSize=256M  -classpath $CLASSPATH $MAIN_CLASS 1>${rootdir}/logs/stdout.log 0>${rootdir}/logs/stderr.log 2>&1 &
 
 [ ! -d "${rootdir}/pid" ] && { mkdir "${rootdir}/pid";}

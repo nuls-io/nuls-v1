@@ -55,10 +55,9 @@ import java.util.concurrent.locks.ReentrantLock;
 public class BlockBatchDownloadUtils {
 
     private static final int DOWNLOAD_NODE_COUNT = 10;
-    //todo
     private static final int DOWNLOAD_BLOCKS_PER_TIME = 100;
     /**
-     * unit:ms
+     * todo unit:ms
      */
     private static final long DOWNLOAD_IDLE_TIME_OUT = 1000;
 
@@ -110,7 +109,7 @@ public class BlockBatchDownloadUtils {
 
     public void request(List<String> nodeIdList, long startHeight, long endHeight) throws InterruptedException {
         lock.lock();
-        if (working) {
+         if (working) {
             return;
         }
         working = true;
@@ -192,7 +191,6 @@ public class BlockBatchDownloadUtils {
             Log.error(e);
         }
     }
-
 
     private void sendRequest(long start, long end, String nodeId) {
         NodeDownloadingStatus status = new NodeDownloadingStatus();

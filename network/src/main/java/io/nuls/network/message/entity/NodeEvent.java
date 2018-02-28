@@ -69,27 +69,4 @@ public class NodeEvent extends BaseEvent<NodeEventBody> {
         return buffer.toString();
     }
 
-    public static void main(String[] args) throws IOException, NulsException {
-        List<Node> nodes = new ArrayList<>();
-        Node node1 = new Node();
-        node1.setIp("192.168.1.111");
-        node1.setPort(8003);
-        node1.setMagicNumber(123456789);
-        nodes.add(node1);
-
-        Node node2 = new Node();
-        node2.setIp("192.168.1.222");
-        node2.setPort(8005);
-        node2.setMagicNumber(1234567339);
-        nodes.add(node2);
-
-        NodeEvent nodeEvent = new NodeEvent(nodes);
-        System.out.println(nodeEvent);
-
-        byte[] bytes = nodeEvent.serialize();
-        NodeEvent event = new NodeEvent();
-        event.parse(new NulsByteBuffer(bytes));
-        System.out.println(event);
-    }
-
 }

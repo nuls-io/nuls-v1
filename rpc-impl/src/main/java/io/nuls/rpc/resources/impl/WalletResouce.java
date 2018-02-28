@@ -54,18 +54,18 @@ public class WalletResouce {
     @POST
     @Path("/unlock")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult unlock(@FormParam("password") String password, @FormParam("unlockSeconds") Integer unlockSeconds) {
+    public RpcResult unlock(@FormParam("password") String password, @FormParam("unlockTime") Integer unlockTime) {
         AssertUtil.canNotEmpty(password, ErrorCode.NULL_PARAMETER);
-        AssertUtil.canNotEmpty(unlockSeconds);
-        if (unlockSeconds > MAX_UNLOCK_TIME) {
+        AssertUtil.canNotEmpty(unlockTime);
+        if (unlockTime > MAX_UNLOCK_TIME) {
             return RpcResult.getFailed("Unlock time should in a minute!");
         }
-        Result result = accountService.unlockAccounts(password, unlockSeconds);
+        Result result = accountService.unlockAccounts(password, unlockTime);
         return new RpcResult(result);
     }
 
     @POST
-    @Path("/password")
+    @Path("/encrypt")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult password(@FormParam("password") String password) {
         AssertUtil.canNotEmpty(password);
@@ -78,7 +78,7 @@ public class WalletResouce {
     }
 
     @PUT
-    @Path("/password")
+    @Path("/reset")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult password(@FormParam("password") String password, @FormParam("newPassword") String newPassword) {
         AssertUtil.canNotEmpty(newPassword);
@@ -90,23 +90,13 @@ public class WalletResouce {
         return new RpcResult(result);
     }
 
-    @GET
-    @Path("/account/list")
-    @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult accountList() {
-        RpcResult<List<Account>> result = RpcResult.getSuccess();
-        List<Account> list = accountService.getAccountList();
-        result.setData(list);
-        return result;
-    }
 
     @POST
-    @Path("/account/{address}/transfer")
+    @Path("/transfer")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult transfer(@PathParam("address") String address, @FormParam("password") String password,
+    public RpcResult transfer(@FormParam("address") String address, @FormParam("password") String password,
                               @FormParam("toAddress") String toAddress, @FormParam("amount") Double amount,
                               @FormParam("remark") String remark) {
-        AssertUtil.canNotEmpty(address);
         AssertUtil.canNotEmpty(toAddress);
         AssertUtil.canNotEmpty(amount);
         Result result = this.ledgerService.transfer(address, password, toAddress, Na.parseNuls(amount), remark);

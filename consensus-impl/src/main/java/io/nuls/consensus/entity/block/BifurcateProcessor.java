@@ -28,7 +28,9 @@ import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.context.NulsContext;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Niels
@@ -130,13 +132,13 @@ public class BifurcateProcessor {
     }
 
     public List<String> getHashList(long height) {
-        List<String> list = new ArrayList<>();
+        Set<String> set = new HashSet<>();
         for (BlockHeaderChain chain : this.chainList) {
             HeaderDigest headerDigest = chain.getHeaderDigest(height);
             if (null != headerDigest) {
-                list.add(headerDigest.getHash());
+                set.add(headerDigest.getHash());
             }
         }
-        return list;
+        return new ArrayList<>(set);
     }
 }

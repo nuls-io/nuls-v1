@@ -31,6 +31,7 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 
@@ -48,7 +49,6 @@ public class GetBlocksHashHandler extends AbstractEventHandler<GetBlocksHashRequ
 
     @Override
     public void onEvent(GetBlocksHashRequest event, String fromId) {
-
         boolean b = event.getEventBody().getStart() == event.getEventBody().getEnd();
         if (b) {
             BlockHashResponse response = new BlockHashResponse();
@@ -93,6 +93,6 @@ public class GetBlocksHashHandler extends AbstractEventHandler<GetBlocksHashRequ
     private void sendResponse(BlockHashResponse response, String fromId) {
         BlocksHashEvent event = new BlocksHashEvent();
         event.setEventBody(response);
-        eventBroadcaster.sendToNode(event, fromId);
+        boolean result = eventBroadcaster.sendToNode(event, fromId);
     }
 }

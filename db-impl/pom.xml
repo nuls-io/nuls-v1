@@ -34,7 +34,7 @@
       <artifactId>h2</artifactId>
       <version>1.4.196</version>
     </dependency>
-    <!-- mybatis工具 -->
+    <!-- mybatis -->
     <dependency>
       <groupId>org.mybatis</groupId>
       <artifactId>mybatis</artifactId>

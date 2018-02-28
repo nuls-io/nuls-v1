@@ -60,6 +60,21 @@ nuls>mvn clean package
 ```
 > You may be need add command line argument "-Dmaven.test.skip=true" at this stage.
 
+### Running
+
+```shell
+$ mvn clean package
+$ cd node/target
+$ tar zxvf nuls-node.tar.gz
+$ cd bin
+```
+Using start.sh running the nuls process.  
+Using stop.sh stop the nuls process.
+
+### Process EntryPoint
+
+> nuls/node/src/main/java/io/nuls/Bootstrap.java
+
 ## License
 
 Nuls is released under the [MIT](http://opensource.org/licenses/MIT) license.  

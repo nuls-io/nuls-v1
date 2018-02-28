@@ -200,6 +200,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
             delegate.setDeposit(Na.parseNuls(params.getDeposit()));
             delegate.setIntroduction(params.getIntroduction());
             delegate.setSeed(params.isSeed());
+            delegate.setCommissionRate(params.getCommissionRate());
             try {
                 this.registerAgent(delegate, account, password);
             } catch (IOException e) {

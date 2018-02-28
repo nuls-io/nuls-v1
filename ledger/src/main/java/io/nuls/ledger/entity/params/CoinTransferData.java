@@ -41,7 +41,7 @@ public class CoinTransferData {
 
     private List from;
 
-    private Map<String, Coin> toMap;
+    private Map<String, List<Coin>> toMap;
 
     private Na totalNa;
 
@@ -88,11 +88,11 @@ public class CoinTransferData {
         return from;
     }
 
-    public Map<String, Coin> getToMap() {
+    public Map<String, List<Coin>> getToMap() {
         return toMap;
     }
 
-    public void setToMap(Map<String, Coin> toMap) {
+    public void setToMap(Map<String, List<Coin>> toMap) {
         this.toMap = toMap;
     }
 
@@ -117,7 +117,12 @@ public class CoinTransferData {
     }
 
     public void addTo(String address, Coin coin) {
-        this.toMap.put(address, coin);
+        List<Coin> coinList = toMap.get(address);
+        if(null==coinList){
+            coinList = new ArrayList<>();
+        }
+        coinList.add(coin);
+        this.toMap.put(address, coinList);
     }
 
     public byte[] getPriKey() {

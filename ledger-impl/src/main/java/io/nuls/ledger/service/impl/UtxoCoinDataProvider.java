@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -39,8 +39,10 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
+import io.nuls.db.dao.TxAccountRelationDataService;
 import io.nuls.db.dao.UtxoInputDataService;
 import io.nuls.db.dao.UtxoOutputDataService;
+import io.nuls.db.entity.TxAccountRelationPo;
 import io.nuls.db.entity.UtxoInputPo;
 import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.db.transactional.annotation.DbSession;
@@ -52,10 +54,7 @@ import io.nuls.ledger.util.UtxoTransactionTool;
 import io.nuls.ledger.util.UtxoTransferTool;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Niels
@@ -69,13 +68,15 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
     @Autowired
     private UtxoInputDataService inputDataService;
     @Autowired
+    private TxAccountRelationDataService relationDataService;
+    @Autowired
     private AccountService accountService;
 
     private UtxoCoinManager coinManager = UtxoCoinManager.getInstance();
 
     @Override
     public CoinData parse(NulsByteBuffer byteBuffer) throws NulsException {
-        CoinData coinData= byteBuffer.readNulsData(new UtxoData());
+        CoinData coinData = byteBuffer.readNulsData(new UtxoData());
         return coinData;
     }
 
@@ -113,25 +114,45 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 
     @Override
     @DbSession
+    /**
+     * 1. change spending output status
+     * 2. save new input
+     * 3. save new unspend output
+     * 4. calc balance
+     */
     public void save(CoinData coinData, Transaction tx) {
         UtxoData utxoData = (UtxoData) coinData;
 
         List<UtxoInputPo> inputPoList = new ArrayList<>();
         List<UtxoOutput> spends = new ArrayList<>();
         List<UtxoOutputPo> spendPoList = new ArrayList<>();
+        List<TxAccountRelationPo> txRelations = new ArrayList<>();
+        Set<String> addressSet = new HashSet<>();
 
         try {
-            processDataInput(utxoData, inputPoList, spends, spendPoList);
+            processDataInput(utxoData, inputPoList, spends, spendPoList, addressSet);
 
             List<UtxoOutputPo> outputPoList = new ArrayList<>();
             for (int i = 0; i < utxoData.getOutputs().size(); i++) {
                 UtxoOutput output = utxoData.getOutputs().get(i);
                 outputPoList.add(UtxoTransferTool.toOutputPojo(output));
+                addressSet.add(Address.fromHashs(output.getAddress()).getBase58());
+            }
+
+            for (String address : addressSet) {
+                TxAccountRelationPo relationPo = new TxAccountRelationPo();
+                relationPo.setTxHash(tx.getHash().getDigestHex());
+                relationPo.setAddress(address);
+                txRelations.add(relationPo);
             }
 
             outputDataService.updateStatus(spendPoList);
+
             inputDataService.save(inputPoList);
+
             outputDataService.save(outputPoList);
+
+            relationDataService.save(txRelations);
 
             processDataOutput(utxoData);
 
@@ -142,7 +163,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             }
         } catch (Exception e) {
             //rollback
-            Log.warn(e.getMessage(),e);
+            Log.warn(e.getMessage(), e);
             for (UtxoOutput output : utxoData.getOutputs()) {
                 cacheService.removeUtxo(output.getKey());
                 UtxoBalance balance = (UtxoBalance) cacheService.getBalance(Address.fromHashs(output.getAddress()).getBase58());
@@ -170,13 +191,15 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         }
     }
 
-    private void processDataInput(UtxoData utxoData, List<UtxoInputPo> inputPoList, List<UtxoOutput> spends, List<UtxoOutputPo> spendPoList) {
+    //Check if the input referenced output has been spent
+    private void processDataInput(UtxoData utxoData, List<UtxoInputPo> inputPoList,
+                                  List<UtxoOutput> spends, List<UtxoOutputPo> spendPoList, Set<String> addressSet) {
         boolean update;
         for (int i = 0; i < utxoData.getInputs().size(); i++) {
             UtxoInput input = utxoData.getInputs().get(i);
             inputPoList.add(UtxoTransferTool.toInputPojo(input));
 
-            //change utxo status
+            //change utxo status,
             UtxoOutput spend = cacheService.getUtxo(input.getKey());
             update = cacheService.updateUtxoStatus(input.getKey(), UtxoOutput.SPENT, UtxoOutput.LOCKED);
             if (!update) {
@@ -184,11 +207,13 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             }
             spends.add(spend);
             spendPoList.add(UtxoTransferTool.toOutputPojo(spend));
+            addressSet.add(Address.fromHashs(spend.getAddress()).getBase58());
         }
     }
 
+
+    // cache new unSpends and calc balance
     private void processDataOutput(UtxoData utxoData) {
-        // cache new unSpends and calc balance
         for (int i = 0; i < utxoData.getOutputs().size(); i++) {
             UtxoOutput output = utxoData.getOutputs().get(i);
 
@@ -306,28 +331,30 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         //create outputs
         int i = 0;
         long outputValue = 0;
-        for (Map.Entry<String, Coin> entry : coinParam.getToMap().entrySet()) {
-            UtxoOutput output = new UtxoOutput();
+        for (Map.Entry<String, List<Coin>> entry : coinParam.getToMap().entrySet()) {
             String address = entry.getKey();
-            Coin coin = entry.getValue();
-            output.setAddress(new Address(address).getHash());
-            output.setValue(coin.getNa().getValue());
-            output.setStatus(UtxoOutput.USEABLE);
-            output.setIndex(i);
+            List<Coin> coinList = entry.getValue();
+            for(Coin coin:coinList) {
+                UtxoOutput output = new UtxoOutput();
+                output.setAddress(new Address(address).getHash());
+                output.setValue(coin.getNa().getValue());
+                output.setStatus(UtxoOutput.USEABLE);
+                output.setIndex(i);
 
-            output.setScript(ScriptBuilder.createOutputScript(ECKey.fromPrivate(new BigInteger(priKey))));
-            output.setScriptBytes(output.getScript().getProgram());
-            if (coin.getUnlockHeight() > 0) {
-                output.setLockTime(coin.getUnlockHeight());
-            } else if (coin.getUnlockTime() > 0) {
-                output.setLockTime(coin.getUnlockTime());
-            } else {
-                output.setLockTime(0L);
+                output.setScript(ScriptBuilder.createOutputScript(ECKey.fromPrivate(new BigInteger(priKey))));
+                output.setScriptBytes(output.getScript().getProgram());
+                if (coin.getUnlockHeight() > 0) {
+                    output.setLockTime(coin.getUnlockHeight());
+                } else if (coin.getUnlockTime() > 0) {
+                    output.setLockTime(coin.getUnlockTime());
+                } else {
+                    output.setLockTime(0L);
+                }
+                output.setParent(tx);
+                outputValue += output.getValue();
+                outputs.add(output);
+                i++;
             }
-            output.setParent(tx);
-            outputValue += output.getValue();
-            outputs.add(output);
-            i++;
         }
 
         //the balance leave to myself

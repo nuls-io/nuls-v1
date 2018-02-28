@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -48,18 +48,18 @@ public class AccountResource {
     private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
 
-    @POST
+    @GET
+    @Path("/create/{count}")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult create(@QueryParam("count") Integer count) {
-        RpcResult result = RpcResult.getSuccess();
-        Result<List<String>> accountReslut = accountService.createAccount(count);
-        result.setData(accountReslut.getObject());
+        Result<List<String>> accountResult = accountService.createAccount(count);
+        RpcResult result = new RpcResult(accountResult);
         return result;
     }
 
 
     @GET
-    @Path("/{address}")
+    @Path("/load/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult load(@PathParam("address") String address) {
         RpcResult result = RpcResult.getSuccess();
@@ -68,8 +68,30 @@ public class AccountResource {
         return result;
     }
 
+    @POST
+    @Path("/alias")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult alias(@FormParam("alias") String alias,
+                           @FormParam("address") String address,
+                           @FormParam("password") String password) {
+        RpcResult rpcResult = RpcResult.getSuccess();
+        Result result = accountService.setAlias(address, password, alias);
+        rpcResult.setData(result);
+        return rpcResult;
+    }
+
     @GET
-    @Path("/{address}/balance")
+    @Path("/list")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult accountList() {
+        RpcResult<List<Account>> result = RpcResult.getSuccess();
+        List<Account> list = accountService.getAccountList();
+        result.setData(list);
+        return result;
+    }
+
+    @GET
+    @Path("/balance/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getBalance(@PathParam("address") String address) {
         Balance balance = ledgerService.getBalance(address);
@@ -79,7 +101,7 @@ public class AccountResource {
     }
 
     @GET
-    @Path("/{address}/prikey")
+    @Path("/prikey/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getPrikey(@PathParam("address") String address, @QueryParam("password") String password) {
         RpcResult result = RpcResult.getSuccess();
@@ -92,7 +114,7 @@ public class AccountResource {
     @Path("/address")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getAddress(@QueryParam("publicKey") String publicKey, @QueryParam("subChainId") Integer subChainId) {
-        Address address = new Address((short)subChainId.intValue(), Hex.decode(publicKey));
+        Address address = new Address((short) subChainId.intValue(), Hex.decode(publicKey));
         RpcResult result = RpcResult.getSuccess();
         result.setData(address.toString());
         return result;

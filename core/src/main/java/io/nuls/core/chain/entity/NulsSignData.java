@@ -23,7 +23,6 @@
  */
 package io.nuls.core.chain.entity;
 
-import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
@@ -32,7 +31,6 @@ import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
 
 import java.io.IOException;
-import java.io.OutputStream;
 
 /**
  * @author facjas
@@ -105,5 +103,10 @@ public class NulsSignData extends BaseNulsData {
             Log.error(e);
             return null;
         }
+    }
+
+    @Override
+    public String toString() {
+        return getSignHex();
     }
 }

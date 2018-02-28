@@ -90,7 +90,7 @@ public class AccountServiceImpl implements AccountService {
 
     private EventBroadcaster eventBroadcaster;
 
-    private boolean isLockNow = true;
+    private volatile boolean isLockNow = true;
 
     @Override
     public void init() {
@@ -349,7 +349,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Result unlockAccounts(String password, int seconds) {
+    public Result unlockAccounts(final String password, int seconds) {
         List<Account> accounts = this.getAccountList();
         if (accounts == null || accounts.isEmpty()) {
             return new Result(false, "No account was found");
@@ -370,23 +370,17 @@ public class AccountServiceImpl implements AccountService {
         }
 
         isLockNow = false;
-        long unlockTime = TimeService.currentTimeSeconds() + seconds;
         TaskManager.createAndRunThread(NulsConstant.MODULE_ID_ACCOUNT, "unlockAccountThread", new Runnable() {
             @Override
             public void run() {
-                while (!isLockNow) {
-                    if (TimeService.currentTimeSeconds() > unlockTime) {
-                        isLockNow = true;
-                        break;
-                    } else {
-                        try {
-                            Thread.sleep(1001L);
-                        } catch (InterruptedException e) {
-                            Log.error(e);
-                        }
-                    }
+                isLockNow = true;
+                try {
+                    Thread.sleep(seconds * 1000);
+                } catch (InterruptedException e) {
+                    Log.error(e);
                 }
                 resetKeys(password);
+                isLockNow = false;
             }
         });
         return new Result(true, "OK");

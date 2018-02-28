@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -30,12 +30,12 @@ import io.nuls.core.utils.json.JSONUtils;
 import io.nuls.core.utils.log.Log;
 
 /**
- *
  * @author Niels
  * @date 2017/9/27
  */
 public class RpcResult<T> {
 
+    private boolean success;
     private String code;
     private String msg;
     private T data;
@@ -43,23 +43,27 @@ public class RpcResult<T> {
     public RpcResult() {
     }
 
-    public RpcResult(String code, String msg) {
+    public RpcResult(boolean success, String code, String msg) {
+        this.success = success;
         this.code = code;
         this.msg = msg;
     }
 
-    public RpcResult(String code, String msg, T data) {
+    public RpcResult(boolean success, String code, String msg, T data) {
+        this.success = success;
         this.code = code;
         this.msg = msg;
         this.data = data;
     }
 
-    public RpcResult(ErrorCode ec) {
+    public RpcResult(boolean success, ErrorCode ec) {
+        this.success = success;
         this.code = ec.getCode() + "";
         this.msg = ec.getMsg();
     }
 
     public RpcResult(Result result) {
+        this.success = result.isSuccess();
         if (result.isSuccess()) {
             this.code = ErrorCode.SUCCESS.getCode();
         } else {
@@ -97,19 +101,19 @@ public class RpcResult<T> {
     }
 
     public static RpcResult getSuccess() {
-        return new RpcResult(ErrorCode.SUCCESS);
+        return new RpcResult(true, ErrorCode.SUCCESS);
     }
 
     public static RpcResult getFailed() {
-        return new RpcResult(ErrorCode.FAILED);
+        return new RpcResult(false, ErrorCode.FAILED);
     }
 
     public static RpcResult getFailed(String msg) {
-        return new RpcResult(ErrorCode.FAILED.getCode(), msg);
+        return new RpcResult(false, ErrorCode.FAILED.getCode(), msg);
     }
 
     public static RpcResult getFailed(ErrorCode errorCode) {
-        return new RpcResult(errorCode);
+        return new RpcResult(false, errorCode);
     }
 
     @Override
@@ -120,5 +124,13 @@ public class RpcResult<T> {
             Log.error(e);
         }
         return null;
+    }
+
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public void setSuccess(boolean success) {
+        this.success = success;
     }
 }

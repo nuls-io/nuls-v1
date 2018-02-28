@@ -50,15 +50,15 @@ public class BlockService {
     }
 
     public RpcClientResult getBestBlockHash() {
-        return restFul.get("/block/bestgasg", null);
+        return restFul.get("/block/besthash", null);
     }
 
     public RpcClientResult getBlockHashByHeight(int height) {
-        return restFul.get("/block/height/" + height + "/hash", null);
+        return restFul.get("/block/hash/height/" + height + "", null);
     }
 
     public RpcClientResult getBlockHeaderByHeight(int height) {
-        return restFul.get("/block/height/" + height + "/header", null);
+        return restFul.get("/block/header/height/" + height + "", null);
     }
 
     public RpcClientResult getBlockHeaderByHash(int hash) {
