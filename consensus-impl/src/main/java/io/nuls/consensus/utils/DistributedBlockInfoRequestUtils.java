@@ -174,7 +174,11 @@ public class DistributedBlockInfoRequestUtils {
             } catch (InterruptedException e) {
                 Log.error(e);
             }
-            this.request(start, end, split);
+            try{
+                this.request(start, end, split);
+            }catch (Exception e){
+                Log.error(e.getMessage());
+            }
         }
 
     }

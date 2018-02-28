@@ -331,28 +331,30 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         //create outputs
         int i = 0;
         long outputValue = 0;
-        for (Map.Entry<String, Coin> entry : coinParam.getToMap().entrySet()) {
-            UtxoOutput output = new UtxoOutput();
+        for (Map.Entry<String, List<Coin>> entry : coinParam.getToMap().entrySet()) {
             String address = entry.getKey();
-            Coin coin = entry.getValue();
-            output.setAddress(new Address(address).getHash());
-            output.setValue(coin.getNa().getValue());
-            output.setStatus(UtxoOutput.USEABLE);
-            output.setIndex(i);
+            List<Coin> coinList = entry.getValue();
+            for(Coin coin:coinList) {
+                UtxoOutput output = new UtxoOutput();
+                output.setAddress(new Address(address).getHash());
+                output.setValue(coin.getNa().getValue());
+                output.setStatus(UtxoOutput.USEABLE);
+                output.setIndex(i);
 
-            output.setScript(ScriptBuilder.createOutputScript(ECKey.fromPrivate(new BigInteger(priKey))));
-            output.setScriptBytes(output.getScript().getProgram());
-            if (coin.getUnlockHeight() > 0) {
-                output.setLockTime(coin.getUnlockHeight());
-            } else if (coin.getUnlockTime() > 0) {
-                output.setLockTime(coin.getUnlockTime());
-            } else {
-                output.setLockTime(0L);
+                output.setScript(ScriptBuilder.createOutputScript(ECKey.fromPrivate(new BigInteger(priKey))));
+                output.setScriptBytes(output.getScript().getProgram());
+                if (coin.getUnlockHeight() > 0) {
+                    output.setLockTime(coin.getUnlockHeight());
+                } else if (coin.getUnlockTime() > 0) {
+                    output.setLockTime(coin.getUnlockTime());
+                } else {
+                    output.setLockTime(0L);
+                }
+                output.setParent(tx);
+                outputValue += output.getValue();
+                outputs.add(output);
+                i++;
             }
-            output.setParent(tx);
-            outputValue += output.getValue();
-            outputs.add(output);
-            i++;
         }
 
         //the balance leave to myself
