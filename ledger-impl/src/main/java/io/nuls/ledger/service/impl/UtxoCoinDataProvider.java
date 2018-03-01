@@ -312,10 +312,12 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 UtxoOutput output = unSpends.get(i);
                 UtxoInput input = new UtxoInput();
                 input.setFrom(output);
-                inputs.add(input);
+                input.setFromHash(output.getTxHash());
                 input.setParent(tx);
                 input.setIndex(i);
                 inputValue += output.getValue();
+
+                inputs.add(input);
             }
         }
 
@@ -334,7 +336,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         for (Map.Entry<String, List<Coin>> entry : coinParam.getToMap().entrySet()) {
             String address = entry.getKey();
             List<Coin> coinList = entry.getValue();
-            for(Coin coin:coinList) {
+            for (Coin coin : coinList) {
                 UtxoOutput output = new UtxoOutput();
                 output.setAddress(new Address(address).getHash());
                 output.setValue(coin.getNa().getValue());

@@ -3,13 +3,14 @@
 <mapper namespace="io.nuls.db.dao.impl.mybatis.mapper.UtxoInputMapper">
   <resultMap id="BaseResultMap" type="io.nuls.db.entity.UtxoInputPo">
     <id column="tx_hash" jdbcType="VARCHAR" property="txHash" />
-    <id column="from_index" jdbcType="INTEGER" property="fromIndex" />
-    <result column="in_index" jdbcType="INTEGER" property="inIndex" />
+    <id column="in_index" jdbcType="INTEGER" property="inIndex" />
+    <result column="from_hash" jdbcType="VARCHAR" property="fromIndex" />
+    <result column="from_index" jdbcType="INTEGER" property="fromIndex" />
     <result column="sign" jdbcType="VARBINARY" property="sign" />
   </resultMap>
 
   <sql id="Base_Column_List">
-    tx_hash, from_index, in_index, sign
+    tx_hash, in_index, from_hash, from_index, sign
   </sql>
 
   <select id="selectByPrimaryKey" parameterType="map" resultMap="BaseResultMap">
@@ -17,38 +18,39 @@
     <include refid="Base_Column_List" />
     from utxo_input
     where tx_hash = #{txHash,jdbcType=VARCHAR}
-    and from_index = #{fromIndex,jdbcType=INTEGER}
+    and in_index = #{inIndex,jdbcType=INTEGER}
   </select>
 
   <delete id="deleteByPrimaryKey" parameterType="map">
     delete from utxo_input
     where tx_hash = #{txHash,jdbcType=VARCHAR}
-    and from_index = #{fromIndex,jdbcType=INTEGER}
+    and in_index = #{inIndex,jdbcType=INTEGER}
   </delete>
 
   <insert id="insert" parameterType="io.nuls.db.entity.UtxoInputPo">
-    insert into utxo_input (tx_hash, from_index, in_index, sign)
-    values (#{txHash,jdbcType=VARCHAR}, #{fromIndex,jdbcType=INTEGER}, #{inIndex,jdbcType=INTEGER}, #{sign,jdbcType=VARBINARY})
+    insert into utxo_input (tx_hash, in_index, from_hash, from_index, sign)
+    values (#{txHash,jdbcType=VARCHAR}, #{inIndex,jdbcType=INTEGER}, #{fromHash,jdbcType=VARCHAR}, #{fromIndex,jdbcType=INTEGER}, #{sign,jdbcType=VARBINARY})
   </insert>
 
   <update id="updateByPrimaryKey" parameterType="io.nuls.db.entity.UtxoInputPo">
     update utxo_input
-    set in_index = #{inIndex,jdbcType=INTEGER},
+    set from_hash = #{fromHash,jdbcType=VARCHAR},
+    set from_index = #{inIndex,jdbcType=INTEGER},
     sign = #{sign,jdbcType=VARBINARY}
     where tx_hash = #{txHash,jdbcType=VARCHAR}
-    and from_index = #{fromIndex,jdbcType=INTEGER}
+    and in_index = #{inIndex,jdbcType=INTEGER}
   </update>
 
   <insert id="batchInsert" parameterType="java.util.List">
-    insert into utxo_input (tx_hash,from_index,in_index,sign)
+    insert into utxo_input (tx_hash, in_index, from_hash, from_index, sign)
     values
     <foreach collection="list" item="item" index="index" separator="," >
-      ( #{item.txHash,jdbcType=VARCHAR}, #{item.fromIndex,jdbcType=INTEGER}, #{item.inIndex,jdbcType=INTEGER}, #{item.sign,jdbcType=VARBINARY})
+      ( #{item.txHash,jdbcType=VARCHAR}, #{item.inIndex,jdbcType=INTEGER},#{item.fromHash,jdbcType=VARCHAR}, #{item.fromIndex,jdbcType=INTEGER}, #{item.sign,jdbcType=VARBINARY})
     </foreach>
   </insert>
 
   <select id="countAll"  resultType="java.lang.Long">
-    select count(hash) from utxo_input
+    select count(txHash) from utxo_input
   </select>
 
   <select id="selectList" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultMap="BaseResultMap">
@@ -58,7 +60,7 @@
     <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
   </select>
   <select id="selectCount" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultType="java.lang.Long">
-    select count(hash) from utxo_input
+    select count(txHash) from utxo_input
     <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
   </select>
 </mapper>

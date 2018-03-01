@@ -50,6 +50,8 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
 
     protected CoinData coinData;
 
+
+
     public AbstractCoinTransaction(int type) {
         super(type);
         initCoinDataProvider();

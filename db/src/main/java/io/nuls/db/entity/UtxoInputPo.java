@@ -33,9 +33,13 @@ public class UtxoInputPo {
 
     private Integer inIndex;
 
+    private String fromHash;
+
     private Integer fromIndex;
 
     private byte[] sign;
+
+    private UtxoOutputPo fromOutPut;
 
     public String getTxHash() {
         return txHash;
@@ -67,5 +71,21 @@ public class UtxoInputPo {
 
     public void setSign(byte[] sign) {
         this.sign = sign;
+    }
+
+    public String getFromHash() {
+        return fromHash;
+    }
+
+    public void setFromHash(String fromHash) {
+        this.fromHash = fromHash;
+    }
+
+    public UtxoOutputPo getFromOutPut() {
+        return fromOutPut;
+    }
+
+    public void setFromOutPut(UtxoOutputPo fromOutPut) {
+        this.fromOutPut = fromOutPut;
     }
 }
