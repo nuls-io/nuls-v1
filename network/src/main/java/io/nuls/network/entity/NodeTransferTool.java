@@ -23,7 +23,6 @@
  */
 package io.nuls.network.entity;
 
-import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.db.entity.NodePo;
 
@@ -42,7 +41,6 @@ public class NodeTransferTool {
         node.setLastTime(po.getLastTime());
         node.setMagicNumber(po.getMagicNum());
         node.setFailCount(po.getFailCount());
-        node.setVersion(new NulsVersion(po.getVersion()));
     }
 
 
@@ -54,7 +52,6 @@ public class NodeTransferTool {
         po.setPort(node.getPort());
         po.setLastTime(node.getLastTime());
         po.setMagicNum(node.getMagicNumber());
-        po.setVersion(node.getVersion().getVersion());
         po.setStatus(0);
         po.setLastFailTime(node.getLastFailTime());
         if (po.getLastTime() == null) {

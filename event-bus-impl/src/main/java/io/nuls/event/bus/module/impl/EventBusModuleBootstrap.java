@@ -78,9 +78,4 @@ public class EventBusModuleBootstrap extends AbstractEventBusModule {
         return null;
     }
 
-    @Override
-    public int getVersion() {
-        return EventBusConstant.EVENT_BUS_MODULE_VERSION;
-    }
-
 }

@@ -24,7 +24,6 @@
 package io.nuls.account.entity;
 
 import io.nuls.core.chain.entity.BaseNulsData;
-import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.chain.intf.NulsCloneable;
 import io.nuls.core.context.NulsContext;
@@ -178,7 +177,6 @@ public class Account extends BaseNulsData implements NulsCloneable {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeShort(version.getVersion());
         stream.writeString(alias);
         stream.writeString(address.getBase58());
         stream.writeBytesWithLength(priSeed);
@@ -189,7 +187,6 @@ public class Account extends BaseNulsData implements NulsCloneable {
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        version = new NulsVersion(byteBuffer.readShort());
         alias = new String(byteBuffer.readByLengthByte());
         address = new Address(new String(byteBuffer.readByLengthByte()));
         priSeed = byteBuffer.readByLengthByte();

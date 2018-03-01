@@ -28,7 +28,6 @@ import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.db.dao.UtxoOutputDataService;
-import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.entity.listener.CoinDataTxService;
 import io.nuls.ledger.entity.tx.CoinBaseTransaction;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
@@ -115,8 +114,4 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
         return null;
     }
 
-    @Override
-    public int getVersion() {
-        return LedgerConstant.LEDGER_MODULE_VERSION;
-    }
 }

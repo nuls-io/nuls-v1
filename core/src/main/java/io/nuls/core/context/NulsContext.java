@@ -53,23 +53,6 @@ public class NulsContext {
     }
 
     public static int MAGIC_NUMBER;
-
-    private NulsContext() {
-        CHAIN_ID = "NULS";
-        CHAIN_ID_MAP.put(CHAIN_ID, Short.parseShort("1"));
-    }
-
-    private static final NulsContext NC = new NulsContext();
-
-    /**
-     * get zhe only instance of NulsContext
-     *
-     * @return
-     */
-    public static final NulsContext getInstance() {
-        return NC;
-    }
-
     private Na txFee;
     /**
      * cache the best block
@@ -79,9 +62,8 @@ public class NulsContext {
 
     public static Set<String> LOCAL_ADDRESS_LIST = new HashSet<>();
     public static String DEFAULT_ACCOUNT_ID;
-    //todo  how to save version
-    public static String myVersion = "1.0";
-    public static String newestVersion = "1.0";
+    public static String VERSION;
+    public static String NEWEST_VERSION;
 
     public Block getGenesisBlock() {
         return genesisBlock;
@@ -103,6 +85,23 @@ public class NulsContext {
         }
         return bestBlock;
     }
+
+    private NulsContext() {
+        CHAIN_ID = "NULS";
+        CHAIN_ID_MAP.put(CHAIN_ID, Short.parseShort("1"));
+    }
+
+    private static final NulsContext NC = new NulsContext();
+
+    /**
+     * get zhe only instance of NulsContext
+     *
+     * @return
+     */
+    public static final NulsContext getInstance() {
+        return NC;
+    }
+
 
     public void setBestBlock(Block bestBlock) {
         this.bestBlock = bestBlock;

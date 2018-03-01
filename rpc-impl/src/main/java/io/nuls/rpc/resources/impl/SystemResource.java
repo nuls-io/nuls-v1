@@ -45,8 +45,8 @@ public class SystemResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getVersion() {
         VersionDto rpcVersion = new VersionDto();
-        rpcVersion.setMyVersion(NulsContext.myVersion);
-        rpcVersion.setNewestVersion(NulsContext.newestVersion);
+        rpcVersion.setMyVersion(NulsContext.VERSION);
+        rpcVersion.setNewestVersion(NulsContext.NEWEST_VERSION);
         return RpcResult.getSuccess().setData(rpcVersion);
     }
 

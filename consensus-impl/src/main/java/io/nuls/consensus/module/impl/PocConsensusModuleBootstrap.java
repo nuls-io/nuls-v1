@@ -24,7 +24,6 @@
 package io.nuls.consensus.module.impl;
 
 import io.nuls.consensus.constant.ConsensusStatusEnum;
-import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.consensus.entity.tx.*;
 import io.nuls.consensus.entity.validator.PocBlockValidatorManager;
@@ -35,15 +34,12 @@ import io.nuls.consensus.module.AbstractConsensusModule;
 import io.nuls.consensus.service.impl.BlockServiceImpl;
 import io.nuls.consensus.service.impl.PocConsensusServiceImpl;
 import io.nuls.consensus.service.intf.BlockService;
-import io.nuls.consensus.service.intf.ConsensusService;
 import io.nuls.consensus.service.tx.*;
-import io.nuls.consensus.thread.BlockMaintenanceThread;
 import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.thread.BaseThread;
 import io.nuls.core.thread.manager.TaskManager;
-import io.nuls.core.utils.aop.AopUtils;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.service.intf.EventBusService;
 import io.nuls.ledger.event.TransactionEvent;
@@ -169,11 +165,6 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
             }
         }
         return str.toString();
-    }
-
-    @Override
-    public int getVersion() {
-        return PocConsensusConstant.POC_CONSENSUS_MODULE_VERSION;
     }
 
 }

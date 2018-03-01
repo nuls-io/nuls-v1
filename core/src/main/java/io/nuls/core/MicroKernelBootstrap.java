@@ -35,6 +35,7 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.queue.manager.QueueManager;
 import io.nuls.core.utils.spring.lite.core.ModularServiceMethodInterceptor;
 import io.nuls.core.utils.spring.lite.core.SpringLiteContext;
+import io.nuls.module.version.CoreMavenInfo;
 
 import java.io.IOException;
 
@@ -92,8 +93,4 @@ public class MicroKernelBootstrap extends BaseModuleBootstrap {
         return null;
     }
 
-    @Override
-    public int getVersion() {
-        return 0;
-    }
 }

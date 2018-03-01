@@ -24,7 +24,6 @@
 package io.nuls.network.message.entity;
 
 import io.nuls.core.chain.entity.BasicTypeData;
-import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.event.BaseEvent;
@@ -50,7 +49,6 @@ public class GetVersionEvent extends BaseEvent {
 
     public GetVersionEvent() {
         super(NulsConstant.MODULE_ID_NETWORK, NetworkConstant.NETWORK_GET_VERSION_EVENT);
-        this.version = new NulsVersion(OWN_MAIN_VERSION, OWN_SUB_VERSION);
     }
 
     public GetVersionEvent(int externalPort) {
@@ -63,7 +61,6 @@ public class GetVersionEvent extends BaseEvent {
     public int size() {
         int s = 0;
         s += EventHeader.EVENT_HEADER_LENGTH;
-        s += VarInt.sizeOf(getVersion().getVersion());
         s += VarInt.sizeOf(externalPort);
         return s;
     }
@@ -71,14 +68,12 @@ public class GetVersionEvent extends BaseEvent {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeNulsData(getHeader());
-        stream.writeShort(version.getVersion());
         stream.writeVarInt(externalPort);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.setHeader(byteBuffer.readNulsData(new EventHeader()));
-        version = new NulsVersion(byteBuffer.readShort());
         externalPort = (int) byteBuffer.readVarInt();
     }
 
@@ -91,7 +86,6 @@ public class GetVersionEvent extends BaseEvent {
     public String toString() {
         StringBuffer buffer = new StringBuffer();
         buffer.append("getVersionEvent:{");
-        buffer.append("version:" + version.getVersion() + ", ");
         buffer.append("externalPort:" + externalPort + "}");
         return buffer.toString();
     }

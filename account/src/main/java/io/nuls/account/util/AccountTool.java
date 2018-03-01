@@ -26,13 +26,10 @@ package io.nuls.account.util;
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.account.entity.Alias;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
@@ -40,7 +37,6 @@ import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.db.entity.AccountPo;
 import io.nuls.db.entity.AliasPo;
 
-import java.io.IOException;
 import java.math.BigInteger;
 
 /**
@@ -65,7 +61,6 @@ public final class AccountTool {
         Address address = new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), Utils.sha256hash160(key.getPubKey(false)));
         Account account = new Account();
         account.setPriSeed(key.getPrivKeyBytes());
-        account.setVersion(new NulsVersion((short) 0));
         account.setAddress(address);
         account.setPubKey(key.getPubKey(true));
         account.setEcKey(key);
@@ -96,7 +91,6 @@ public final class AccountTool {
         AssertUtil.canNotEmpty(src, "Object type conversion failed!");
         AssertUtil.canNotEmpty(desc, "Object type conversion failed!");
         desc.setCreateTime(src.getCreateTime());
-        desc.setVersion(new NulsVersion(src.getVersion()));
         try {
             desc.setAddress(Address.fromHashs(src.getAddress()));
         } catch (NulsException e) {
@@ -117,7 +111,6 @@ public final class AccountTool {
         desc.setAddress(src.getAddress().toString());
         desc.setAlias(src.getAlias());
         desc.setCreateTime(src.getCreateTime());
-        desc.setVersion(src.getVersion().getVersion());
         desc.setExtend(src.getExtend());
         desc.setPriKey(src.getPriKey());
         desc.setPubKey(src.getPubKey());

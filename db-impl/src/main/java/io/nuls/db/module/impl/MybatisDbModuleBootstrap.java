@@ -26,11 +26,11 @@ package io.nuls.db.module.impl;
 import com.alibaba.druid.pool.DruidDataSource;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.utils.log.Log;
-import io.nuls.db.constant.DBConstant;
 import io.nuls.db.dao.impl.mybatis.*;
 import io.nuls.db.dao.impl.mybatis.session.SessionManager;
 import io.nuls.db.exception.DBException;
 import io.nuls.db.module.AbstractDBModule;
+import io.nuls.module.version.DbMavenInfo;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
@@ -115,11 +115,6 @@ public class MybatisDbModuleBootstrap extends AbstractDBModule {
         str.append(getStatus());
         str.append(",ThreadCount:");
         return str.toString();
-    }
-
-    @Override
-    public int getVersion() {
-        return DBConstant.DB_MODULE_VERSION;
     }
 
     public SqlSessionFactory getSqlSessionFactory() {

@@ -4,7 +4,7 @@
 
   <groupId>io.nuls</groupId>
   <artifactId>rpc-impl</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <packaging>jar</packaging>
 
   <name>rpc-impl</name>
@@ -27,7 +27,7 @@
       <dependency>
           <groupId>io.nuls</groupId>
           <artifactId>rpc</artifactId>
-          <version>1.0-SNAPSHOT</version>
+          <version>1.0.0</version>
       </dependency>
     <dependency>
       <groupId>org.glassfish.jersey.containers</groupId>
@@ -42,32 +42,32 @@
     <dependency>
       <groupId>io.nuls</groupId>
       <artifactId>core</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>1.0.0</version>
     </dependency>
       <dependency>
           <groupId>io.nuls</groupId>
           <artifactId>event-bus</artifactId>
-          <version>1.0-SNAPSHOT</version>
+          <version>1.0.0</version>
       </dependency>
     <dependency>
       <groupId>io.nuls</groupId>
       <artifactId>account</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>1.0.0</version>
     </dependency>
       <dependency>
           <groupId>io.nuls</groupId>
           <artifactId>consensus</artifactId>
-          <version>1.0-SNAPSHOT</version>
+          <version>1.0.0</version>
       </dependency>
       <dependency>
           <groupId>io.nuls</groupId>
           <artifactId>ledger</artifactId>
-          <version>1.0-SNAPSHOT</version>
+          <version>1.0.0</version>
       </dependency>
       <dependency>
           <groupId>io.nuls</groupId>
           <artifactId>network</artifactId>
-          <version>1.0-SNAPSHOT</version>
+          <version>1.0.0</version>
       </dependency>
   </dependencies>
     <build>
