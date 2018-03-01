@@ -35,6 +35,7 @@ import io.nuls.rpc.entity.TransactionDto;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -74,11 +75,29 @@ public class TransactionResource {
 
     public RpcResult list(@QueryParam("address") String address, @QueryParam("type") int type
             , @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
-        RpcResult result = RpcResult.getSuccess();
-        List<Transaction> txList = null;
+        RpcResult result;
+        if (StringUtils.isBlank(address) || address.length() > 30 || pageNumber < 0 || pageSize < 0) {
+            result = RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+            return result;
+        }
+        if(pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if(pageSize == 0) {
+            pageSize = 10;
+        }
+
         try {
-            txList = ledgerService.getTxList(address, type, pageNumber, pageSize);
-            result.setData(txList);
+            List<Transaction> txList = ledgerService.getTxList(address, type, pageNumber, pageSize);
+            if (txList == null || txList.isEmpty()) {
+                return RpcResult.getSuccess();
+            }
+            List<TransactionDto> dtoList = new ArrayList<>();
+            for (Transaction tx : txList) {
+                dtoList.add(new TransactionDto(tx, address));
+            }
+            result = RpcResult.getSuccess();
+            result.setData(dtoList);
         } catch (Exception e) {
             Log.error(e);
             return RpcResult.getFailed(e.getMessage());
