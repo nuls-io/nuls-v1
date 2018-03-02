@@ -24,9 +24,11 @@
 package io.nuls.db.dao.impl.mybatis.mapper;
 
 import io.nuls.db.dao.impl.mybatis.common.BaseMapper;
+import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import io.nuls.db.entity.UtxoOutputPo;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -36,4 +38,6 @@ import java.util.Map;
 public interface UtxoOutputMapper extends BaseMapper<Map<String, Object>, UtxoOutputPo> {
 
     int updateStatus(UtxoOutputPo po);
+
+    List<UtxoOutputPo> selectAccountOutput(Searchable searchable);
 }

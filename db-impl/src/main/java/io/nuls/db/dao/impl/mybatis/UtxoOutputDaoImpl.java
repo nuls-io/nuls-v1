@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -67,6 +67,20 @@ public class UtxoOutputDaoImpl extends BaseDaoImpl<UtxoOutputMapper, Map<String,
         searchable.addCondition("address", SearchOperator.eq, address);
         PageHelper.orderBy("value asc");
         return getMapper().selectList(searchable);
+    }
+
+    @Override
+    public List<UtxoOutputPo> getAccountOutputs(int txType, String address, Long beginTime, Long endTime) {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("a.txType", SearchOperator.eq, txType);
+        searchable.addCondition("b.address", SearchOperator.eq, address);
+        if (beginTime != null) {
+            searchable.addCondition("a.createTime", SearchOperator.gte, beginTime);
+        }
+        if (endTime != null) {
+            searchable.addCondition("a.createTime", SearchOperator.lte, endTime);
+        }
+        return getMapper().selectAccountOutput(searchable);
     }
 
     @Override
