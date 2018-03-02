@@ -25,12 +25,14 @@ package io.nuls.core.context;
 
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.Na;
+import io.nuls.core.chain.intf.NulsVersion;
 import io.nuls.core.utils.cfg.IniEntity;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.spring.lite.core.SpringLiteContext;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -95,8 +97,6 @@ public class NulsContext {
 
     /**
      * get zhe only instance of NulsContext
-     *
-     * @return
      */
     public static final NulsContext getInstance() {
         return NC;
@@ -147,5 +147,14 @@ public class NulsContext {
             }
             return getServiceBean(tClass, l + 10L);
         }
+    }
+
+    public static <T> List<T> getServiceBeanList(Class<T> tClass) {
+        try {
+            return SpringLiteContext.getBeanList(tClass);
+        } catch (Exception e) {
+            Log.error(e);
+        }
+        return null;
     }
 }
