@@ -25,7 +25,9 @@ package io.nuls.rpc.resources.impl;
 
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.utils.str.StringUtils;
 import io.nuls.rpc.entity.BlockDto;
 import io.nuls.rpc.entity.RpcResult;
 
@@ -50,9 +52,12 @@ public class BlockResource {
 
     public RpcResult loadBlock(@PathParam("hash") String hash) {
         RpcResult result;
+        if (!StringUtils.validHash(hash)) {
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
         Block block = blockService.getBlock(hash);
         if (block == null) {
-            result = RpcResult.getFailed("not found");
+            result = RpcResult.getFailed(ErrorCode.DATA_NOT_FOUND);
         } else {
             result = RpcResult.getSuccess();
             result.setData(new BlockDto(block));
@@ -64,11 +69,15 @@ public class BlockResource {
     @Path("/height/{height}")
     @Produces(MediaType.APPLICATION_JSON)
 
-    public RpcResult getBlock(@PathParam("height") Integer height) {
+    public RpcResult getBlock(@PathParam("height") Long height) {
         RpcResult result;
+        if (height < 0) {
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+
         Block block = blockService.getBlock(height);
         if (block == null) {
-            result = RpcResult.getFailed("not found");
+            result = RpcResult.getFailed(ErrorCode.DATA_NOT_FOUND);
         } else {
             result = RpcResult.getSuccess();
             result.setData(new BlockDto(block));
@@ -110,11 +119,17 @@ public class BlockResource {
     @Path("/hash/height/{height}")
     @Produces(MediaType.APPLICATION_JSON)
 
-    public RpcResult getHashByHeight(@PathParam("height") Integer height) {
-        RpcResult result = RpcResult.getSuccess();
+    public RpcResult getHashByHeight(@PathParam("height") Long height) {
+        if (height < 0) {
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+        RpcResult result;
         Block block = blockService.getBlock(height);
         if (block != null) {
+            result = RpcResult.getSuccess();
             result.setData(block.getHeader().getHash().getDigestHex());
+        } else {
+            result = RpcResult.getFailed(ErrorCode.DATA_NOT_FOUND);
         }
         return result;
     }

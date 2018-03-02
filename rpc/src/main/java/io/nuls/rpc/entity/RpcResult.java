@@ -70,7 +70,9 @@ public class RpcResult<T> {
             this.code = ErrorCode.FAILED.getCode();
         }
         this.msg = result.getMessage();
-        this.data = (T) result.getObject();
+        if (result.getObject() != null) {
+            this.data = (T) result.getObject();
+        }
     }
 
     public String getCode() {

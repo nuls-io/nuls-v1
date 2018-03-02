@@ -76,7 +76,8 @@ public class TransactionResource {
     public RpcResult list(@QueryParam("address") String address, @QueryParam("type") int type
             , @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
         RpcResult result;
-        if (StringUtils.isBlank(address) || address.length() > 30 || pageNumber < 0 || pageSize < 0) {
+        System.out.println(address.length());
+        if (StringUtils.isBlank(address) || address.length() > 35 || pageNumber < 0 || pageSize < 0) {
             result = RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
             return result;
         }

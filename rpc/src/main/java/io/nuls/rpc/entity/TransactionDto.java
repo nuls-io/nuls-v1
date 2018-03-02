@@ -32,6 +32,7 @@ public class TransactionDto {
 
     private List<OutputDto> outputs;
 
+    // -1 transfer,  1 receiver
     private Integer transferType;
 
     private String remark;
@@ -83,17 +84,23 @@ public class TransactionDto {
             }
         }
         for (OutputDto output : outputs) {
-            if (address.equals(output.getAddress())) {
-                if (!isTransfer) isTransfer = true;
-                value -= output.getValue();
+            if (isTransfer) {
+                if (address.equals(output.getAddress())) {
+                    value -= output.getValue();
+                }
+            } else {
+                if (!address.equals(output.getAddress())) {
+                    value += output.getValue();
+                }
             }
         }
+
         value = Math.abs(value);
         this.value = value;
         if (isTransfer) {
-            this.transferType = Transaction.TRANSFER_SEND;
+            this.transferType = -1;
         } else {
-            this.transferType = Transaction.TRANSFER_RECEIVE;
+            this.transferType = 1;
         }
     }
 

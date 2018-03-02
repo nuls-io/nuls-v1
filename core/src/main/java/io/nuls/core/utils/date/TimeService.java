@@ -91,7 +91,7 @@ public class TimeService implements Runnable {
             long localEndTime = System.currentTimeMillis();
 
             netTimeOffset = (netTime + (localEndTime - localBeforeTime) / 2) - localEndTime;
-
+            System.out.println("-------------------netTimeOffset:" + netTimeOffset);
             lastSyncTime = localEndTime;
         } catch (IOException e) {
             // 1 minute later try again
@@ -137,6 +137,9 @@ public class TimeService implements Runnable {
         return currentTimeMillis() / 1000;
     }
 
+    public static long getNetTimeOffset() {
+        return netTimeOffset;
+    }
 
     public void shutdown() {
         this.running = false;
