@@ -76,6 +76,7 @@ public class NulsContext {
      */
     private Block bestBlock;
     private Block genesisBlock;
+    private Long netBestBlockHeight;
 
     public static Set<String> LOCAL_ADDRESS_LIST = new HashSet<>();
     public static String DEFAULT_ACCOUNT_ID;
@@ -148,5 +149,16 @@ public class NulsContext {
             }
             return getServiceBean(tClass, l + 10L);
         }
+    }
+
+    public Long getNetBestBlockHeight() {
+        if(netBestBlockHeight == null) {
+            netBestBlockHeight = 0L;
+        }
+        return netBestBlockHeight;
+    }
+
+    public void setNetBestBlockHeight(Long netBestBlockHeight) {
+        this.netBestBlockHeight = netBestBlockHeight;
     }
 }
