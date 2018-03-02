@@ -1,0 +1,19 @@
+{
+  "list": [
+    {
+      "appId": "",
+      "appName": "",
+      "auther": "",
+      "desc": "",
+      "mainVersion": "",
+      "groupId": "",
+      "artifactId": "",
+      "version": "",
+      "libs": [
+        "",
+        ""
+      ]
+    },
+    {}
+  ]
+}

@@ -31,6 +31,7 @@ import io.nuls.core.utils.spring.lite.core.SpringLiteContext;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -96,8 +97,6 @@ public class NulsContext {
 
     /**
      * get zhe only instance of NulsContext
-     *
-     * @return
      */
     public static final NulsContext getInstance() {
         return NC;
@@ -159,5 +158,14 @@ public class NulsContext {
 
     public void setNetBestBlockHeight(Long netBestBlockHeight) {
         this.netBestBlockHeight = netBestBlockHeight;
+    }
+
+    public static <T> List<T> getServiceBeanList(Class<T> tClass) {
+        try {
+            return SpringLiteContext.getBeanList(tClass);
+        } catch (Exception e) {
+            Log.error(e);
+        }
+        return null;
     }
 }
