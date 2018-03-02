@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,11 +24,8 @@
 package io.nuls.network.entity;
 
 import io.nuls.core.chain.entity.BaseNulsData;
-import io.nuls.core.chain.entity.NulsVersion;
-import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
-import io.nuls.core.event.BaseEvent;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.date.TimeService;
@@ -36,30 +33,21 @@ import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
-import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.param.AbstractNetworkParam;
-import io.nuls.network.message.NetworkEventHandlerFactory;
 import io.nuls.network.message.entity.VersionEvent;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author vivi
  * @Date 2017.11.01
  */
 public class Node extends BaseNulsData {
-
-    public static final short OWN_MAIN_VERSION = 1;
-
-    public static final short OWN_SUB_VERSION = 1001;
 
     private int magicNumber;
 
@@ -98,7 +86,7 @@ public class Node extends BaseNulsData {
     private VersionEvent versionMessage;
 
     public Node() {
-        super(OWN_MAIN_VERSION, OWN_SUB_VERSION);
+        super();
     }
 
     public Node(AbstractNetworkParam network) {
@@ -148,7 +136,6 @@ public class Node extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeShort(version.getVersion());
         stream.write(new VarInt(magicNumber).encode());
         stream.write(new VarInt(port).encode());
         stream.writeString(ip);
@@ -156,7 +143,6 @@ public class Node extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer buffer) throws NulsException {
-        version = new NulsVersion(buffer.readShort());
         magicNumber = (int) buffer.readVarInt();
         port = (int) buffer.readVarInt();
         ip = new String(buffer.readByLengthByte());

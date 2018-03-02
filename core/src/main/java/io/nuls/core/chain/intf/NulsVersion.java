@@ -21,18 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.db.constant;
+package io.nuls.core.chain.intf;
 
 /**
- *
- * @author zhouwei
- * @date 2017/9/30
+ * @author vivi
+ * @date 2017/11/23.
  */
-public interface DBConstant {
-    //version
-    int DB_MODULE_VERSION = 1111;
-    //Minimum version supported
-    int MINIMUM_VERSION_SUPPORTED = 0;
+public interface NulsVersion {
 
-    int DB_SAVE_LIMIT = 100;
+    String getVersion();
+
+    String getArtifactId();
+
+    String getGroupId();
 }

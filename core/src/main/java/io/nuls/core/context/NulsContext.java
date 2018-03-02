@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -31,6 +31,7 @@ import io.nuls.core.utils.spring.lite.core.SpringLiteContext;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -53,23 +54,6 @@ public class NulsContext {
     }
 
     public static int MAGIC_NUMBER;
-
-    private NulsContext() {
-        CHAIN_ID = "NULS";
-        CHAIN_ID_MAP.put(CHAIN_ID, Short.parseShort("1"));
-    }
-
-    private static final NulsContext NC = new NulsContext();
-
-    /**
-     * get zhe only instance of NulsContext
-     *
-     * @return
-     */
-    public static final NulsContext getInstance() {
-        return NC;
-    }
-
     private Na txFee;
     /**
      * cache the best block
@@ -80,9 +64,8 @@ public class NulsContext {
 
     public static Set<String> LOCAL_ADDRESS_LIST = new HashSet<>();
     public static String DEFAULT_ACCOUNT_ID;
-    //todo  how to save version
-    public static String myVersion = "1.0";
-    public static String newestVersion = "1.0";
+    public static String VERSION;
+    public static String NEWEST_VERSION;
 
     public Block getGenesisBlock() {
         return genesisBlock;
@@ -104,6 +87,21 @@ public class NulsContext {
         }
         return bestBlock;
     }
+
+    private NulsContext() {
+        CHAIN_ID = "NULS";
+        CHAIN_ID_MAP.put(CHAIN_ID, Short.parseShort("1"));
+    }
+
+    private static final NulsContext NC = new NulsContext();
+
+    /**
+     * get zhe only instance of NulsContext
+     */
+    public static final NulsContext getInstance() {
+        return NC;
+    }
+
 
     public void setBestBlock(Block bestBlock) {
         this.bestBlock = bestBlock;
@@ -160,5 +158,14 @@ public class NulsContext {
 
     public void setNetBestBlockHeight(Long netBestBlockHeight) {
         this.netBestBlockHeight = netBestBlockHeight;
+    }
+
+    public static <T> List<T> getServiceBeanList(Class<T> tClass) {
+        try {
+            return SpringLiteContext.getBeanList(tClass);
+        } catch (Exception e) {
+            Log.error(e);
+        }
+        return null;
     }
 }

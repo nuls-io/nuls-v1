@@ -77,13 +77,6 @@ public abstract class BaseModuleBootstrap {
     public abstract String getInfo();
 
     /**
-     * get the version of the module
-     *
-     * @return
-     */
-    public abstract int getVersion();
-
-    /**
      * get the status of the module
      *
      * @return

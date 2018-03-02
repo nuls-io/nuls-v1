@@ -24,7 +24,6 @@
 package io.nuls.network.message.entity;
 
 import io.nuls.core.chain.entity.BaseNulsData;
-import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;

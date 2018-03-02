@@ -26,7 +26,6 @@ package io.nuls.consensus.utils;
 import io.nuls.account.entity.Account;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
-import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.block.BlockData;
 import io.nuls.consensus.entity.block.BlockRoundData;
@@ -169,7 +168,6 @@ public class ConsensusTool {
         Block block = new Block();
         block.setTxs(blockData.getTxList());
         BlockHeader header = new BlockHeader();
-        header.setVersion(new NulsVersion(PocConsensusConstant.POC_CONSENSUS_MODULE_VERSION));
         block.setHeader(header);
         try {
             block.getHeader().setExtend(blockData.getRoundData().serialize());

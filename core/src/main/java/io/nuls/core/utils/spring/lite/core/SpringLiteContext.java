@@ -26,6 +26,7 @@ package io.nuls.core.utils.spring.lite.core;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.core.utils.spring.lite.annotation.Interceptor;
+import io.nuls.core.utils.spring.lite.annotation.MavenInfo;
 import io.nuls.core.utils.spring.lite.core.interceptor.BeanMethodInterceptor;
 import io.nuls.core.utils.spring.lite.core.interceptor.BeanMethodInterceptorManager;
 import io.nuls.core.utils.spring.lite.utils.ScanUtil;
@@ -138,15 +139,15 @@ public class SpringLiteContext {
         if (anns == null || anns.length == 0) {
             return;
         }
-//        Annotation ann = getFromArray(anns, Component.class);
-//        String beanName = null;
-//        if (ann != null) {
-//            beanName = ((Component) ann).value();
-//            if (beanName == null || beanName.trim().length() == 0) {
-//                beanName = getBeanName(clazz);
-//            }
-//            loadBean(beanName, clazz);
-//        }
+        Annotation ann = getFromArray(anns, MavenInfo.class);
+        String beanName = null;
+        if (ann != null) {
+            beanName = ((MavenInfo) ann).value();
+            if (beanName == null || beanName.trim().length() == 0) {
+                beanName = getBeanName(clazz);
+            }
+            loadBean(beanName, clazz,false);
+        }
         Annotation interceptorAnn = getFromArray(anns, Interceptor.class);
         if (null != interceptorAnn) {
             BeanMethodInterceptor interceptor = null;
@@ -180,12 +181,23 @@ public class SpringLiteContext {
         return null;
     }
 
-    private static void loadBean(String beanName, Class clazz) {
+    private static void loadBean(String beanName, Class clazz,boolean proxy) {
         if (BEAN_OK_MAP.containsKey(beanName) || BEAN_TEMP_MAP.containsKey(beanName)) {
             Log.error("bean name repetition (" + beanName + "):" + clazz.getName());
             return;
         }
-        Object bean = createProxy(clazz, interceptor);
+        Object bean = null;
+        if(proxy){
+            bean = createProxy(clazz, interceptor);
+        }else{
+            try {
+                bean = clazz.newInstance();
+            } catch (InstantiationException e) {
+                Log.error(e);
+            } catch (IllegalAccessException e) {
+                Log.error(e);
+            }
+        }
         BEAN_TEMP_MAP.put(beanName, bean);
         BEAN_TYPE_MAP.put(beanName, clazz);
         addClassNameMap(clazz, beanName);
@@ -237,7 +249,7 @@ public class SpringLiteContext {
     }
 
     public static void putBean(Class clazz) {
-        loadBean(getBeanName(clazz), clazz);
+        loadBean(getBeanName(clazz), clazz,true);
         autowireFields();
     }
 
@@ -258,4 +270,21 @@ public class SpringLiteContext {
        return BEAN_OK_MAP.containsValue(bean);
     }
 
+    public static <T> List<T> getBeanList(Class<T> beanClass) throws Exception {
+        Set<String> nameSet = CLASS_NAME_SET_MAP.get(beanClass);
+        if (null == nameSet || nameSet.isEmpty()) {
+            throw new Exception("Can't find bean of " + beanClass.getName());
+        }
+        List<T> tlist = new ArrayList<>();
+        for (String name : nameSet) {
+            T value = (T) BEAN_OK_MAP.get(name);
+           if(value==null){
+               value = (T) BEAN_TEMP_MAP.get(name);
+           }
+           if(null!=value){
+               tlist.add(value);
+           }
+        }
+        return tlist;
+    }
 }

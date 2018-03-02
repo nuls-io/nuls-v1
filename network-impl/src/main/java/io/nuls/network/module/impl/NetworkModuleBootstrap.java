@@ -31,7 +31,10 @@ import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.NetworkContext;
 import io.nuls.network.constant.NetworkConstant;
-import io.nuls.network.message.entity.*;
+import io.nuls.network.message.entity.GetNodeEvent;
+import io.nuls.network.message.entity.GetVersionEvent;
+import io.nuls.network.message.entity.NodeEvent;
+import io.nuls.network.message.entity.VersionEvent;
 import io.nuls.network.module.AbstractNetworkModule;
 import io.nuls.network.service.NetworkService;
 import io.nuls.network.service.impl.NetworkServiceImpl;
@@ -94,11 +97,4 @@ public class NetworkModuleBootstrap extends AbstractNetworkModule {
         str.append("here is info");
         return str.toString();
     }
-
-    @Override
-    public int getVersion() {
-        return 0;
-    }
-
-
 }

@@ -23,7 +23,6 @@
  */
 package io.nuls.network.message.entity;
 
-import io.nuls.core.chain.entity.NulsVersion;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.event.BaseEvent;
 import io.nuls.core.exception.NulsException;
@@ -31,8 +30,6 @@ import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Node;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**

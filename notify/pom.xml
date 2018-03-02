@@ -6,7 +6,7 @@
 
     <groupId>io.nuls</groupId>
     <artifactId>notify</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -19,13 +19,13 @@
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>core</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency>
 
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>event-bus-impl</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency>
 
         <dependency>
@@ -37,8 +37,34 @@
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>ledger</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.nuls</groupId>
+            <artifactId>event-bus</artifactId>
+            <version>1.0.0</version>
         </dependency>
     </dependencies>
-
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>templating-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <executions>
+                    <execution>
+                        <id>filter-src</id>
+                        <goals>
+                            <goal>filter-sources</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirectory>${basedir}/src/main/java-templates</sourceDirectory>
+                            <outputDirectory>${project.build.directory}/generated-sources/java-templates
+                            </outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

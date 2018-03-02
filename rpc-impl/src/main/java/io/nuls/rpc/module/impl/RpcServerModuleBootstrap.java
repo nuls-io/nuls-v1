@@ -87,10 +87,4 @@ public class RpcServerModuleBootstrap extends AbstractRpcServerModule {
         }
         return str.toString();
     }
-
-    @Override
-    public int getVersion() {
-        return RpcConstant.RPC_MODULE_VERSION;
-    }
-
 }

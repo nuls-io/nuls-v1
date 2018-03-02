@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS `account` (
   `address` varchar(40) NOT NULL,
   `create_time` bigint(14) NOT NULL,
   `alias` varchar(100) DEFAULT NULL,
-  `version` int(11) NOT NULL,
+  `version` int(11)  ,
   `pub_key` varbinary(100) DEFAULT NULL,
   `pri_key` varbinary(100) DEFAULT NULL,
   `pri_seed` varbinary(100) DEFAULT NULL,
@@ -34,7 +34,6 @@ CREATE TABLE IF NOT EXISTS `delegate_account` (
   `remark` varchar(255) NOT NULL,
   `start_time` bigint(14) NOT NULL,
   `commission_rate` decimal(14) NOT NULL,
-
   PRIMARY KEY (`id`)
 );
 CREATE TABLE IF NOT EXISTS `delegate` (
@@ -57,12 +56,12 @@ CREATE TABLE IF NOT EXISTS `node` (
   `fail_count` int(1) NOT NULL,
   `status` int(1) NOT NULL,
   `magic_num` int(11) NOT NULL,
-  `version` int(11) NOT NULL,
+  `version` int(11) ,
   PRIMARY KEY (`id`)
 );
 CREATE TABLE IF NOT EXISTS `node_group` (
   `name` varchar(30) NOT NULL,
-  `version` int(11) NOT NULL,
+  `version` int(11)  ,
   PRIMARY KEY (`name`)
 );
 CREATE TABLE IF NOT EXISTS `node_group_relation` (

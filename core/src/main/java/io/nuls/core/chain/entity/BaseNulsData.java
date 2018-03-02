@@ -43,11 +43,9 @@ import java.util.Arrays;
  * @author Niels
  * @date 2017/10/30
  */
-public abstract class BaseNulsData implements Serializable,Cloneable {
+public abstract class BaseNulsData implements Serializable, Cloneable {
 
     protected NulsDataType dataType;
-
-    protected NulsVersion version;
 
     public BaseNulsData() {
     }
@@ -56,12 +54,9 @@ public abstract class BaseNulsData implements Serializable,Cloneable {
         this.parse(buffer);
     }
 
-    public BaseNulsData(short mainVersion, short subVersion) {
-        this.version = new NulsVersion(mainVersion, subVersion);
-    }
 
     protected void registerValidator(NulsDataValidator<? extends BaseNulsData> validator) {
-        ValidatorManager.addValidator(this.getClass(),validator);
+        ValidatorManager.addValidator(this.getClass(), validator);
     }
 
     public abstract int size();
@@ -95,7 +90,7 @@ public abstract class BaseNulsData implements Serializable,Cloneable {
     }
 
     public final void parse(byte[] bytes) throws NulsException {
-        if (bytes == null || bytes.length == 0 || ((bytes.length ==4)&& Arrays.equals(NulsConstant.PLACE_HOLDER,bytes))){
+        if (bytes == null || bytes.length == 0 || ((bytes.length == 4) && Arrays.equals(NulsConstant.PLACE_HOLDER, bytes))) {
             return;
         }
         this.parse(new NulsByteBuffer(bytes));
@@ -133,20 +128,5 @@ public abstract class BaseNulsData implements Serializable,Cloneable {
         this.dataType = dataType;
     }
 
-
-    public NulsVersion getVersion() {
-        if (null == version) {
-            version = new NulsVersion((short) 1, (short) 1);
-        }
-        return version;
-    }
-
-    public void setVersion(NulsVersion version) {
-        this.version = version;
-    }
-
-    public void setVersionBy(short main, short sub) {
-        version.setVersionBy(main, sub);
-    }
 
 }

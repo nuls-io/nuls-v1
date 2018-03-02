@@ -88,8 +88,4 @@ public class NotifyModuleBootstrap extends BaseModuleBootstrap {
         return null;
     }
 
-    @Override
-    public int getVersion() {
-        return 0;
-    }
 }

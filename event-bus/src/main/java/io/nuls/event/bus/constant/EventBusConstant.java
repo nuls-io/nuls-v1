@@ -28,11 +28,6 @@ package io.nuls.event.bus.constant;
  *
  */
 public interface EventBusConstant {
-    //version
-    int EVENT_BUS_MODULE_VERSION = 1111;
-    //Minimum version supported
-    int MINIMUM_VERSION_SUPPORTED = 0;
-
 
     String DISRUPTOR_NAME_LOCAL = "nuls-processing-local";
     String DISRUPTOR_NAME_NETWORK = "nuls-processing-network";
