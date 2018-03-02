@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,13 +23,10 @@
  */
 package io.nuls.core.utils.str;
 
-import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 
 import java.io.UnsupportedEncodingException;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Created by Niels on 2017/10/9.
@@ -94,10 +91,22 @@ public class StringUtils {
         return true;
     }
 
+    public static boolean validAddress(String address) {
+        if (isBlank(address)) return false;
+        if (address.length() > 35) return false;
+        return true;
+    }
+
+    public static boolean validHash(String hash) {
+        if (isBlank(hash)) return false;
+        if (hash.length() > 73) return false;
+        return true;
+    }
+
 
     public static byte caculateXor(byte[] data) {
         byte xor = 0x00;
-        if(data == null || data.length == 0) {
+        if (data == null || data.length == 0) {
             return xor;
         }
         for (int i = 0; i < data.length; i++) {

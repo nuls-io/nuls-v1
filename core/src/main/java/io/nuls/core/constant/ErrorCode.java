@@ -54,6 +54,7 @@ public enum ErrorCode {
     CONFIG_ERROR("SYS016", 10016),
     MODULE_LOAD_TIME_OUT("SYS017", 10017),
     PARAMETER_ERROR("SYS018", 10018),
+    DATA_NOT_FOUND("SYS019", 10019),
     /**
      * ----------  Consensus Network code   ---------
      */

@@ -28,10 +28,13 @@ import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.Result;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.crypto.Hex;
+import io.nuls.core.utils.str.StringUtils;
 import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.service.intf.LedgerService;
+import io.nuls.rpc.entity.AccountDto;
 import io.nuls.rpc.entity.RpcResult;
 
 import javax.ws.rs.*;
@@ -57,14 +60,23 @@ public class AccountResource {
         return result;
     }
 
-
     @GET
     @Path("/load/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult load(@PathParam("address") String address) {
-        RpcResult result = RpcResult.getSuccess();
+        RpcResult result;
+        if (!StringUtils.validAddress(address)) {
+            result = RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+            return result;
+        }
+
         Account account = accountService.getAccount(address);
-        result.setData(account);
+        if (account == null) {
+            result = RpcResult.getFailed(ErrorCode.DATA_NOT_FOUND);
+        } else {
+            result = RpcResult.getSuccess();
+            result.setData(new AccountDto(account));
+        }
         return result;
     }
 
@@ -74,9 +86,9 @@ public class AccountResource {
     public RpcResult alias(@FormParam("alias") String alias,
                            @FormParam("address") String address,
                            @FormParam("password") String password) {
-        RpcResult rpcResult = RpcResult.getSuccess();
+
         Result result = accountService.setAlias(address, password, alias);
-        rpcResult.setData(result);
+        RpcResult rpcResult = new RpcResult(result);
         return rpcResult;
     }
 
