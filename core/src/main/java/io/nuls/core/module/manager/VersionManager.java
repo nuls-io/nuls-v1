@@ -12,6 +12,9 @@ import java.util.List;
 public class VersionManager {
 
     public static void start() {
+        //todo
+        NulsContext.NEWEST_VERSION = "1.0.0";
+        NulsContext.VERSION = "1.0.0";
         List<NulsVersion> versionList = NulsContext.getServiceBeanList(NulsVersion.class);
         //todo
         //获取网络上/下载中心最新版本号

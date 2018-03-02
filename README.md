@@ -71,6 +71,8 @@ $ cd bin
 Using start.sh running the nuls process.  
 Using stop.sh stop the nuls process.
 
+> Using IDE run or debug need execute command "mvn install" first.
+
 ### Process EntryPoint
 
 > nuls/node/src/main/java/io/nuls/Bootstrap.java
