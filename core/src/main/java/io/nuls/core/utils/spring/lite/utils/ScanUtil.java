@@ -24,6 +24,7 @@
 package io.nuls.core.utils.spring.lite.utils;
 
 import io.nuls.core.utils.log.Log;
+import io.nuls.core.utils.str.StringUtils;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -47,7 +48,10 @@ public class ScanUtil {
 
     public static final String CLASS_TYPE = ".class";
 
-    public static List<Class> scan(final String packageName) {
+    public static List<Class> scan(String packageName) {
+        if(StringUtils.isBlank(packageName)){
+            packageName = "io.nuls";
+        }
         List<Class> list = new ArrayList<>();
         Enumeration<URL> dirs;
         try {
@@ -83,6 +87,9 @@ public class ScanUtil {
      * @param packageName
      */
     private static void findClassJar(String packageName, String pathName, List<Class> list) {
+        if(StringUtils.isBlank(pathName)||list==null){
+            return;
+        }
         JarFile jarFile;
         try {
             int index = pathName.indexOf("!");
