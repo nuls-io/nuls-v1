@@ -23,7 +23,6 @@
  */
 package io.nuls.rpc.resources.impl;
 
-import io.nuls.account.entity.Account;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.Result;
@@ -37,7 +36,6 @@ import io.nuls.rpc.entity.RpcResult;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.io.File;
-import java.util.List;
 
 /**
  * @author Niels
@@ -68,11 +66,6 @@ public class WalletResouce {
     @Path("/encrypt")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult password(@FormParam("password") String password) {
-        AssertUtil.canNotEmpty(password);
-        boolean formatCheck = StringUtils.validPassword(password);
-        if (!formatCheck) {
-            return RpcResult.getFailed("Password format must conform to specification");
-        }
         Result result = this.accountService.encryptAccount(password);
         return new RpcResult(result);
     }
@@ -81,11 +74,6 @@ public class WalletResouce {
     @Path("/reset")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult password(@FormParam("password") String password, @FormParam("newPassword") String newPassword) {
-        AssertUtil.canNotEmpty(newPassword);
-        boolean formatCheck = StringUtils.validPassword(newPassword);
-        if (!formatCheck) {
-            return RpcResult.getFailed("New password format must conform to specification");
-        }
         Result result = this.accountService.changePassword(password, newPassword);
         return new RpcResult(result);
     }

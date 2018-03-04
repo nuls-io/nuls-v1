@@ -2,6 +2,7 @@ package io.nuls.rpc.entity;
 
 import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.Na;
+import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.ledger.entity.UtxoOutput;
 
 public class OutputDto {
@@ -12,10 +13,28 @@ public class OutputDto {
 
     private Double value;
 
+    private Long createTime;
+
+    private Long lockTime;
+    //tx.type
+    private Integer type;
+
     public OutputDto(UtxoOutput output) {
         this.index = output.getIndex();
         this.address = Address.fromHashs(output.getAddress()).getBase58();
         this.value = Na.valueOf(output.getValue()).toDouble();
+        this.createTime = output.getCreateTime();
+        this.lockTime = output.getLockTime();
+        this.type = output.getType();
+    }
+
+    public OutputDto(UtxoOutputPo output) {
+        this.index = output.getOutIndex();
+        this.address = output.getAddress();
+        this.value = Na.valueOf(output.getValue()).toDouble();
+        this.createTime = output.getCreateTime();
+        this.lockTime = output.getLockTime();
+        this.type = output.getType();
     }
 
     public Integer getIndex() {
@@ -40,5 +59,29 @@ public class OutputDto {
 
     public void setValue(Double value) {
         this.value = value;
+    }
+
+    public Long getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Long createTime) {
+        this.createTime = createTime;
+    }
+
+    public Long getLockTime() {
+        return lockTime;
+    }
+
+    public void setLockTime(Long lockTime) {
+        this.lockTime = lockTime;
+    }
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
     }
 }

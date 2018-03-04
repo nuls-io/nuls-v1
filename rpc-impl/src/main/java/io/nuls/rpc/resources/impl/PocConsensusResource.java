@@ -23,10 +23,12 @@
  */
 package io.nuls.rpc.resources.impl;
 
+import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.consensus.service.intf.ConsensusService;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.date.TimeService;
@@ -38,8 +40,6 @@ import io.nuls.rpc.entity.RpcResult;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.sql.Time;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +52,7 @@ import java.util.Map;
 public class PocConsensusResource {
     private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
     private UtxoOutputDataService outputDataService = NulsContext.getServiceBean(UtxoOutputDataService.class);
+    private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -87,30 +88,35 @@ public class PocConsensusResource {
         return RpcResult.getSuccess();
     }
 
-    @Path("/myPoc")
+    @GET
+    @Path("/profit")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult myPoc(@FormParam("address") String address, @FormParam("txType") int txType) {
+    public RpcResult profit(@QueryParam("address") String address) {
         Map<String, Object> map = new HashMap<>();
-        if (!StringUtils.validAddress(address) || txType < 0) {
+        if ((address != null && !StringUtils.validAddress(address))) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
+        if (address == null) {
+            address = accountService.getDefaultAccount().getAddress().getBase58();
+        }
+
         // get all reward
-        List<UtxoOutputPo> outputList = outputDataService.getAccountOutputs(txType, address, null, null);
+        List<UtxoOutputPo> outputList = outputDataService.getAccountOutputs(TransactionConstant.TX_TYPE_COIN_BASE, address, null, null);
         long value = 0;
         for (UtxoOutputPo output : outputList) {
             value += output.getValue();
         }
-        map.put("reward", Na.valueOf(value).toDouble());
+        map.put("profit", Na.valueOf(value).toDouble());
 
-        // get 24 hours reward
+        // get last 24 hours reward
         long nowTime = TimeService.currentTimeMillis();
         nowTime = nowTime - DateUtil.DATE_TIME;
-        outputList = outputDataService.getAccountOutputs(txType, address, nowTime, null);
+        outputList = outputDataService.getAccountOutputs(TransactionConstant.TX_TYPE_COIN_BASE, address, nowTime, null);
         value = 0;
         for (UtxoOutputPo output : outputList) {
             value += output.getValue();
         }
-        map.put("yesterdayReward", Na.valueOf(value).toDouble());
+        map.put("lastProfit", Na.valueOf(value).toDouble());
         map.put("investment", NulsContext.INVESTMENT.toDouble());
         RpcResult rpcResult = RpcResult.getSuccess();
         rpcResult.setData(map);

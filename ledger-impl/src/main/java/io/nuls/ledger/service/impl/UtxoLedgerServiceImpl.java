@@ -23,6 +23,7 @@
  */
 package io.nuls.ledger.service.impl;
 
+import io.nuls.account.entity.Address;
 import io.nuls.cache.service.intf.CacheService;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
@@ -198,34 +199,26 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         Balance balance = ledgerCacheService.getBalance(address);
         if (null == balance) {
             balance = calcBalance(address);
-            ledgerCacheService.putBalance(address, balance);
         }
         return balance;
     }
 
     private Balance calcBalance(String address) {
+
         UtxoBalance balance = new UtxoBalance();
-        List<UtxoOutputPo> unSpendList = txDao.getAccountOutputs(address, TransactionConstant.TX_OUTPUT_UNSPEND);
+        List<UtxoOutputPo> unSpendList = txDao.getAccountUnSpend(address);
         if (unSpendList == null || unSpendList.isEmpty()) {
-            return null;
+            return balance;
         }
         List<UtxoOutput> unSpends = new ArrayList<>();
 
-        long useable = 0;
-        long locked = 0;
         for (UtxoOutputPo po : unSpendList) {
             UtxoOutput output = UtxoTransferTool.toOutput(po);
-            if (output.getStatus() == 0) {
-                useable += output.getValue();
-            } else {
-                locked += output.getValue();
-            }
             unSpends.add(output);
         }
-        balance.setUseable(Na.valueOf(useable));
-        balance.setLocked(Na.valueOf(locked));
-        balance.setBalance(balance.getLocked().add(balance.getUseable()));
-        balance.setUnSpends(unSpends);
+        ledgerCacheService.putBalance(address, balance);
+        UtxoTransactionTool.getInstance().calcBalance(address);
+
         return balance;
     }
 

@@ -40,13 +40,13 @@ public class UtxoBalance extends Balance {
         super();
     }
 
-    public UtxoBalance(Na useable, Na locked) {
-        super(useable, locked);
+    public UtxoBalance(Na usable, Na locked) {
+        super(usable, locked);
         this.unSpends = new ArrayList<>();
     }
 
-    public UtxoBalance(Na useable, Na locked, List<UtxoOutput> unSpends) {
-        this(useable, locked);
+    public UtxoBalance(Na usable, Na locked, List<UtxoOutput> unSpends) {
+        this(usable, locked);
         this.unSpends = unSpends;
     }
 

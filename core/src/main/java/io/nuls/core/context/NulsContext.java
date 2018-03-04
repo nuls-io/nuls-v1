@@ -64,7 +64,7 @@ public class NulsContext {
 
     public static Set<String> LOCAL_ADDRESS_LIST = new HashSet<>();
     public static String DEFAULT_ACCOUNT_ID;
-    public static String VERSION;
+    public static String VERSION = "1.0.0";
     public static String NEWEST_VERSION;
     public static Na INVESTMENT = Na.ZERO;
 

@@ -150,5 +150,4 @@ public class VersionEvent extends io.nuls.core.event.BaseEvent {
     public void setExternalPort(int externalPort) {
         this.externalPort = externalPort;
     }
-
 }

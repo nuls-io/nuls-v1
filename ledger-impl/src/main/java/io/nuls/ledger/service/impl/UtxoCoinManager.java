@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,16 +23,20 @@
  */
 package io.nuls.ledger.service.impl;
 
+import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.ledger.entity.UtxoBalance;
 import io.nuls.ledger.entity.UtxoOutput;
+import io.nuls.ledger.util.UtxoTransactionTool;
 import io.nuls.ledger.util.UtxoTransferTool;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -60,9 +64,8 @@ public class UtxoCoinManager {
     public void cacheAllUnSpendOutPut() {
         List<UtxoOutputPo> utxoOutputPos = outputDataService.getAllUnSpend();
         String address = null;
-        long useAble = 0;
-        long lock = 0;
-        List<UtxoOutput> list = new ArrayList<>();
+        List<UtxoOutput> list = null;
+        Set<String> addressSet = new HashSet<>();
 
         for (int i = 0; i < utxoOutputPos.size(); i++) {
             UtxoOutputPo po = utxoOutputPos.get(i);
@@ -71,36 +74,30 @@ public class UtxoCoinManager {
 
             if (i == 0) {
                 address = po.getAddress();
-            } else if (!address.equals(po.getAddress())) {
+                list = new ArrayList<>();
+                addressSet.add(address);
 
+            } else if (!address.equals(po.getAddress())) {
                 UtxoBalance balance = new UtxoBalance();
-                balance.setUseable(Na.valueOf(useAble));
-                balance.setLocked(Na.valueOf(lock));
-                balance.setBalance(balance.getUseable().add(balance.getLocked()));
                 balance.setUnSpends(list);
                 cacheService.putBalance(address, balance);
 
-                useAble = 0;
-                lock = 0;
                 list = new ArrayList<>();
                 address = po.getAddress();
+                addressSet.add(address);
             }
 
-            if (po.getStatus() == UtxoOutput.USEABLE) {
-                useAble += po.getValue();
-            } else if (po.getStatus() == UtxoOutput.LOCKED) {
-                lock += po.getValue();
-            }
             list.add(output);
 
             if (i == utxoOutputPos.size() - 1) {
                 UtxoBalance balance = new UtxoBalance();
-                balance.setUseable(Na.valueOf(useAble));
-                balance.setLocked(Na.valueOf(lock));
-                balance.setBalance(balance.getUseable().add(balance.getLocked()));
                 balance.setUnSpends(list);
                 cacheService.putBalance(address, balance);
             }
+        }
+
+        for(String str : addressSet) {
+            UtxoTransactionTool.getInstance().calcBalance(str);
         }
     }
 
@@ -116,7 +113,7 @@ public class UtxoCoinManager {
         List<UtxoOutput> unSpends = new ArrayList<>();
         try {
             UtxoBalance balance = (UtxoBalance) cacheService.getBalance(address);
-            if (balance == null || balance.getUseable().isLessThan(value)) {
+            if (balance == null || balance.getUsable().isLessThan(value)) {
                 return unSpends;
             }
 

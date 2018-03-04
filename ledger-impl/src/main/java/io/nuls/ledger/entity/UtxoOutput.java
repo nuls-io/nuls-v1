@@ -57,14 +57,19 @@ public class UtxoOutput extends BaseNulsData {
 
     private Script script;
 
-    //0: useable, 1:locked， 2：spent
+    //0: usable, 1:locked， 2：spent
     private int status;
 
     public static final int USEABLE = 0;
     public static final int LOCKED = 1;
     public static final int SPENT = 2;
 
+    /** ------ redundancy ------  */
     private Transaction parent;
+
+    private long createTime;
+
+    private int type;
 
     // key = txHash + "-" + index, a key that will not be serialized, only used for caching
     private String key;
@@ -208,5 +213,21 @@ public class UtxoOutput extends BaseNulsData {
 
     public void setKey(String key) {
         this.key = key;
+    }
+
+    public long getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(long createTime) {
+        this.createTime = createTime;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
     }
 }

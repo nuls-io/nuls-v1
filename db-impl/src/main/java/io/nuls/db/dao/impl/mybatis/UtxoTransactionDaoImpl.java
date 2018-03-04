@@ -125,7 +125,7 @@ public class UtxoTransactionDaoImpl implements UtxoTransactionDataService {
 
     @Override
     public List<UtxoOutputPo> getAccountUnSpend(String address) {
-        return null;
+        return outputDao.getAccountUnSpend(address);
     }
 
     @Override

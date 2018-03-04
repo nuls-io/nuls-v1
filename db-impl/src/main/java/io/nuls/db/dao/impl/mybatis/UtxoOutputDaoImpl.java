@@ -72,13 +72,13 @@ public class UtxoOutputDaoImpl extends BaseDaoImpl<UtxoOutputMapper, Map<String,
     @Override
     public List<UtxoOutputPo> getAccountOutputs(int txType, String address, Long beginTime, Long endTime) {
         Searchable searchable = new Searchable();
-        searchable.addCondition("a.txType", SearchOperator.eq, txType);
+        searchable.addCondition("a.type", SearchOperator.eq, txType);
         searchable.addCondition("b.address", SearchOperator.eq, address);
         if (beginTime != null) {
-            searchable.addCondition("a.createTime", SearchOperator.gte, beginTime);
+            searchable.addCondition("a.create_time", SearchOperator.gte, beginTime);
         }
         if (endTime != null) {
-            searchable.addCondition("a.createTime", SearchOperator.lte, endTime);
+            searchable.addCondition("a.create_time", SearchOperator.lte, endTime);
         }
         return getMapper().selectAccountOutput(searchable);
     }
@@ -89,6 +89,16 @@ public class UtxoOutputDaoImpl extends BaseDaoImpl<UtxoOutputMapper, Map<String,
         searchable.addCondition("status", SearchOperator.ne, 2);
         PageHelper.orderBy("address asc, status asc, value asc");
         return getMapper().selectList(searchable);
+    }
+
+    @Override
+    public List<UtxoOutputPo> getLockUtxo(String address, Long beginTime, Integer pageNumber, Integer pageSize) {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("b.address", SearchOperator.eq, address);
+        searchable.addCondition("b.lock_time", SearchOperator.gt, beginTime);
+        PageHelper.startPage(pageNumber, pageSize);
+
+        return getMapper().selectAccountOutput(searchable);
     }
 
     @Override

@@ -31,6 +31,12 @@
     delete from tx_account_relation
     where id = #{id,jdbcType=BIGINT}
   </delete>
+
+  <delete id="deleteRelation" parameterType="io.nuls.db.entity.TxAccountRelationPo">
+    delete from tx_account_relation
+    where tx_hash = #{txHash,jdbcType=VARCHAR} and address = #{address,jdbcType=VARCHAR}
+  </delete>
+
   <insert id="insert" parameterType="io.nuls.db.entity.TxAccountRelationPo">
     <!--
       WARNING - @mbg.generated
