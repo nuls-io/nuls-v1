@@ -58,6 +58,13 @@ public class UtxoTransferTool {
         output.setAddress(new Address(po.getAddress()).getHash());
         output.setScript(new Script(po.getScript()));
         output.setStatus(po.getStatus());
+
+        if(po.getCreateTime() != null) {
+            output.setCreateTime(po.getCreateTime());
+        }
+        if(po.getType() != null) {
+            output.setType(po.getType());
+        }
         return output;
     }
 

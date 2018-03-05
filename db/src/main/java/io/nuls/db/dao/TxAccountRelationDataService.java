@@ -25,9 +25,13 @@ package io.nuls.db.dao;
 
 import io.nuls.db.entity.TxAccountRelationPo;
 
+import java.util.Set;
+
 /**
  * @author Niels
  * @date 2017/11/23
  */
 public interface TxAccountRelationDataService extends BaseDataService<String,TxAccountRelationPo> {
+
+    void deleteRelation(String txHash, Set<String> addressSet);
 }

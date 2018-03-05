@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -37,16 +37,16 @@ public class Balance implements Serializable {
 
     private Na locked;
 
-    private Na useable;
+    private Na usable;
 
     public Balance() {
 
     }
 
-    public Balance(Na useable, Na locked) {
-        this.useable = useable;
+    public Balance(Na usable, Na locked) {
+        this.usable = usable;
         this.locked = locked;
-        this.balance = locked.add(useable);
+        this.balance = locked.add(usable);
     }
 
     public Na getBalance() {
@@ -65,12 +65,11 @@ public class Balance implements Serializable {
         this.locked = locked;
     }
 
-    public Na getUseable() {
-        return useable;
+    public Na getUsable() {
+        return usable;
     }
 
-    public void setUseable(Na useable) {
-        this.useable = useable;
+    public void setUsable(Na usable) {
+        this.usable = usable;
     }
-
 }

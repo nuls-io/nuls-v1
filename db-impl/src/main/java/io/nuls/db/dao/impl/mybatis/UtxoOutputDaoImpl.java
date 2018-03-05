@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -70,11 +70,35 @@ public class UtxoOutputDaoImpl extends BaseDaoImpl<UtxoOutputMapper, Map<String,
     }
 
     @Override
+    public List<UtxoOutputPo> getAccountOutputs(int txType, String address, Long beginTime, Long endTime) {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("a.type", SearchOperator.eq, txType);
+        searchable.addCondition("b.address", SearchOperator.eq, address);
+        if (beginTime != null) {
+            searchable.addCondition("a.create_time", SearchOperator.gte, beginTime);
+        }
+        if (endTime != null) {
+            searchable.addCondition("a.create_time", SearchOperator.lte, endTime);
+        }
+        return getMapper().selectAccountOutput(searchable);
+    }
+
+    @Override
     public List<UtxoOutputPo> getAllUnSpend() {
         Searchable searchable = new Searchable();
         searchable.addCondition("status", SearchOperator.ne, 2);
         PageHelper.orderBy("address asc, status asc, value asc");
         return getMapper().selectList(searchable);
+    }
+
+    @Override
+    public List<UtxoOutputPo> getLockUtxo(String address, Long beginTime, Integer pageNumber, Integer pageSize) {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("b.address", SearchOperator.eq, address);
+        searchable.addCondition("b.lock_time", SearchOperator.gt, beginTime);
+        PageHelper.startPage(pageNumber, pageSize);
+
+        return getMapper().selectAccountOutput(searchable);
     }
 
     @Override

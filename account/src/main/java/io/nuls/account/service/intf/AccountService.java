@@ -94,5 +94,7 @@ public interface AccountService {
 
     Result exportAccounts(String filePath);
 
+    Result importAccount(String priKey);
+
     Result importAccountsFile(String walletFilePath);
 }

@@ -69,6 +69,8 @@ public interface LedgerService {
 
     boolean saveTxList(List<Transaction> txList) throws IOException;
 
+    void saveTxInLocal(String address);
+
     boolean checkTxIsMine(Transaction tx) throws NulsException;
 
     void rollbackTx(Transaction tx) throws NulsException;

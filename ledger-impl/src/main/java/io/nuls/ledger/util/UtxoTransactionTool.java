@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -30,6 +30,7 @@ import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.ledger.entity.UtxoBalance;
 import io.nuls.ledger.entity.UtxoData;
@@ -125,18 +126,24 @@ public class UtxoTransactionTool {
             return;
         }
 
-        long useable = 0;
+        long usable = 0;
         long lock = 0;
+        long currentTime = TimeService.currentTimeMillis();
         for (UtxoOutput output : balance.getUnSpends()) {
             if (output.getStatus() == UtxoOutput.USEABLE) {
-                useable += output.getValue();
+                if (output.getLockTime() > currentTime) {
+                    lock += output.getValue();
+                }else {
+                    usable += output.getValue();
+                }
+
             } else if (output.getStatus() == UtxoOutput.LOCKED) {
                 lock += output.getValue();
             }
         }
         balance.setLocked(Na.valueOf(lock));
-        balance.setUseable(Na.valueOf(useable));
-        balance.setBalance(balance.getUseable().add(balance.getLocked()));
+        balance.setUsable(Na.valueOf(usable));
+        balance.setBalance(balance.getUsable().add(balance.getLocked()));
     }
 
     public void calcBalance(Address address) {

@@ -45,6 +45,7 @@
     <sql id="Base_Column_List">
         hash, type, tx_index, block_height, create_time, fee, remark, txData, sign
     </sql>
+
     <sql id="Utxo_Column_List">
          a.hash, a.type, a.tx_index, a.block_height, a.create_time, a.fee, a.remark, a.txData, a.sign,
          b.tx_hash as in_tx_hash, b.from_index, b.in_index,b.sign as in_sign,
@@ -60,7 +61,7 @@
         left join utxo_input b on a.hash = b.tx_hash
         left join utxo_output c on a.hash = c.tx_hash
         left join utxo_output d on b.from_hash = d.tx_hash and b.from_index = d.out_index
-        where hash = #{hash,jdbcType=VARCHAR}
+        where a.hash = #{hash,jdbcType=VARCHAR}
     </select>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
@@ -118,6 +119,7 @@
         left join utxo_output d on b.from_hash = d.tx_hash and b.from_index = d.out_index
         <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
     </select>
+
     <select id="selectCount" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultType="java.lang.Long">
         select count(hash) from transaction
         <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
