@@ -1,88 +1,136 @@
 {
   "version": "1.0.1",
+  "sign": "abcdefghigklmn",
   "defaultModules": [
     {
       "groupId": "io.nuls",
       "artifactId": "account",
-      "version": "1.0.0"
-    },{
+      "version": "1.0.0",
+      "sign": "abcdefghigklmn"
+    },
+    {
       "groupId": "io.nuls",
       "artifactId": "account-impl",
-      "version": "1.0.1"
-    },{
+      "version": "1.0.1",
+      "sign": "abcdefghigklmn"
+    },
+    {
       "groupId": "io.nuls",
       "artifactId": "cache",
-      "version": "1.0.0"
-    },{
+      "version": "1.0.0",
+      "sign": "abcdefghigklmn"
+    },
+    {
       "groupId": "io.nuls",
       "artifactId": "cache-impl",
-      "version": "1.0.0"
-    },{
+      "version": "1.0.0",
+      "sign": "abcdefghigklmn"
+    },
+    {
       "groupId": "io.nuls",
       "artifactId": "consensus",
-      "version": "1.0.0"
-    },{
+      "version": "1.0.0",
+      "sign": "abcdefghigklmn"
+    },
+    {
       "groupId": "io.nuls",
       "artifactId": "consensus-impl",
-      "version": "1.0.0"
-    },{
+      "version": "1.0.0",
+      "sign": "abcdefghigklmn"
+    },
+    {
       "groupId": "io.nuls",
       "artifactId": "core",
-      "version": "1.0.0"
-    },{
+      "version": "1.0.0",
+      "sign": "abcdefghigklmn"
+    },
+    {
       "groupId": "io.nuls",
       "artifactId": "db",
-      "version": "1.0.0"
-    },{
+      "version": "1.0.0",
+      "sign": "abcdefghigklmn"
+    },
+    {
       "groupId": "io.nuls",
       "artifactId": "db-impl",
-      "version": "1.0.0"
-    },{
+      "version": "1.0.0",
+      "sign": "abcdefghigklmn"
+    },
+    {
       "groupId": "io.nuls",
       "artifactId": "event-bus",
-      "version": "1.0.0"
-    },{
+      "version": "1.0.0",
+      "sign": "abcdefghigklmn"
+    },
+    {
       "groupId": "io.nuls",
       "artifactId": "event-bus-impl",
-      "version": "1.0.0"
-    },{
+      "version": "1.0.0",
+      "sign": "abcdefghigklmn"
+    },
+    {
       "groupId": "io.nuls",
       "artifactId": "ledger",
-      "version": "1.0.0"
-    },{
+      "version": "1.0.0",
+      "sign": "abcdefghigklmn"
+    },
+    {
       "groupId": "io.nuls",
       "artifactId": "ledger-impl",
-      "version": "1.0.0"
-    },{
+      "version": "1.0.0",
+      "sign": "abcdefghigklmn"
+    },
+    {
       "groupId": "io.nuls",
       "artifactId": "network",
-      "version": "1.0.0"
-    },{
+      "version": "1.0.0",
+      "sign": "abcdefghigklmn"
+    },
+    {
       "groupId": "io.nuls",
       "artifactId": "network-impl",
-      "version": "1.0.0"
-    },{
+      "version": "1.0.0",
+      "sign": "abcdefghigklmn"
+    },
+    {
       "groupId": "io.nuls",
       "artifactId": "node",
-      "version": "1.0.0"
-    },{
+      "version": "1.0.0",
+      "sign": "abcdefghigklmn"
+    },
+    {
       "groupId": "io.nuls",
       "artifactId": "rpc",
-      "version": "1.0.0"
-    },{
+      "version": "1.0.0",
+      "sign": "abcdefghigklmn"
+    },
+    {
       "groupId": "io.nuls",
       "artifactId": "notify",
-      "version": "1.0.0"
-    },{
+      "version": "1.0.0",
+      "sign": "abcdefghigklmn"
+    },
+    {
       "groupId": "io.nuls",
       "artifactId": "rpc-impl",
-      "version": "1.0.0"
-    },{
+      "version": "1.0.0",
+      "sign": "abcdefghigklmn"
+    },
+    {
       "groupId": "io.nuls",
       "artifactId": "rpc-sdk",
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "sign": "abcdefghigklmn"
     }
   ],
-  "libs":[""],
-  "sign":"asdfasfdsadfsadfsdfsdfsdf"
+  "libs": [
+    {
+      "file": "cglib-3.2.5.jar",
+      "sign": "abcdefghigklmn"
+    },
+    {
+      "file": "logback-access-1.1.2.jar",
+      "sign": "abcdefghigklmn"
+    }
+  ]
 }

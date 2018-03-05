@@ -8,7 +8,6 @@
         <result column="merkle_hash" jdbcType="VARCHAR" property="merkleHash"/>
         <result column="create_time" jdbcType="BIGINT" property="createTime"/>
         <result column="consensus_address" jdbcType="VARCHAR" property="consensusAddress"/>
-        <result column="version" jdbcType="INTEGER" property="version"/>
         <result column="tx_count" jdbcType="BIGINT" property="txCount"/>
         <result column="round_index" jdbcType="BIGINT" property="roundIndex"/>
         <result column="sign" jdbcType="VARBINARY" property="sign"/>
@@ -16,7 +15,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        hash, height, pre_hash, merkle_hash, create_time, consensus_address, version, tx_count, round_index, sign, extend
+        hash, height, pre_hash, merkle_hash, create_time, consensus_address, tx_count, round_index, sign, extend
     </sql>
 
     <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
@@ -33,10 +32,10 @@
     <insert id="insert" parameterType="io.nuls.db.entity.BlockHeaderPo">
         insert into block_header (hash, height, pre_hash,
         merkle_hash, create_time, consensus_address,
-        version, tx_count, sign, round_index,extend)
+        tx_count, sign, round_index,extend)
         values (#{hash,jdbcType=VARCHAR}, #{height,jdbcType=BIGINT}, #{preHash,jdbcType=VARCHAR},
-        #{merkleHash,jdbcType=VARCHAR}, #{createTime,jdbcType=BIGINT}, #{consensusAddress,jdbcType=VARCHAR},
-        #{version,jdbcType=INTEGER}, #{txCount,jdbcType=BIGINT},
+        #{merkleHash,jdbcType=VARCHAR}, #{createTime,jdbcType=BIGINT},
+        #{consensusAddress,jdbcType=VARCHAR},#{txCount,jdbcType=BIGINT},
         #{sign,jdbcType=VARBINARY}, #{roundIndex,jdbcType=BIGINT}, #{extend,jdbcType=VARBINARY})
     </insert>
 
@@ -47,7 +46,6 @@
         merkle_hash = #{merkleHash,jdbcType=VARCHAR},
         create_time = #{createTime,jdbcType=BIGINT},
         consensus_address = #{consensusAddress,jdbcType=VARCHAR},
-        version = #{version,jdbcType=INTEGER},
         tx_count = #{txCount,jdbcType=BIGINT},
         round_index = #{roundIndex,jdbcType=BIGINT},
         extend = #{extend,jdbcType=VARBINARY},

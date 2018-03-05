@@ -14,12 +14,23 @@
         <result column="sign" jdbcType="VARBINARY" property="sign" />
     </resultMap>
 
-    <resultMap id="UtxoTxResultMap"  type="io.nuls.db.entity.TransactionLocalPo" extends="BaseResultMap">
+    <resultMap id="UtxoTxResultMap"  type="io.nuls.db.entity.TransactionPo" extends="BaseResultMap">
         <collection property="inputs" javaType="java.util.List" ofType="io.nuls.db.entity.UtxoInputPo">
             <id column="in_tx_hash" jdbcType="VARCHAR" property="txHash" />
-            <id column="from_index" jdbcType="INTEGER" property="fromIndex" />
-            <result column="in_index" jdbcType="INTEGER" property="inIndex" />
+            <id column="in_index" jdbcType="INTEGER" property="inIndex" />
+            <id column="from_hash" jdbcType="VARCHAR" property="fromHash" />
+            <result column="from_index" jdbcType="INTEGER" property="fromIndex" />
             <result column="in_sign" jdbcType="VARBINARY" property="sign" />
+
+            <association property="fromOutPut" javaType="io.nuls.db.entity.UtxoOutputPo">
+                <id column="from_hash" jdbcType="VARCHAR" property="txHash" />
+                <id column="from_out_index" jdbcType="INTEGER" property="outIndex" />
+                <result column="from_value" jdbcType="BIGINT" property="value"/>
+                <result column="from_lock_time" jdbcType="BIGINT" property="lockTime"/>
+                <result column="from_address" jdbcType="VARCHAR" property="address"/>
+                <result column="from_status" jdbcType="INTEGER" property="status"/>
+                <result column="from_script" jdbcType="VARBINARY" property="script"/>
+            </association>
         </collection>
         <collection property="outputs" javaType="java.util.List" ofType="io.nuls.db.entity.UtxoOutputPo">
             <id column="out_tx_hash" jdbcType="VARCHAR" property="txHash"/>

@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -43,6 +43,11 @@ import java.util.Arrays;
 public class AESEncrypt {
 
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
+    public static byte[] encrypt(byte[] plainBytes, String password) {
+        EncryptedData ed = encrypt(plainBytes, new KeyParameter(Sha256Hash.hash(password.getBytes())));
+        return ed.getEncryptedBytes();
+    }
 
     /**
      * 加密
@@ -88,6 +93,11 @@ public class AESEncrypt {
         }
     }
 
+    public static byte[] decrypt(byte[] dataToDecrypt,String password){
+        EncryptedData data = new EncryptedData(null,dataToDecrypt);
+        return decrypt(data,new KeyParameter(Sha256Hash.hash(password.getBytes())));
+    }
+
     /**
      * 解密
      *
@@ -124,7 +134,7 @@ public class AESEncrypt {
         String pw = "sssssfds";
 
         EncryptedData data = encrypt(str.getBytes(), new KeyParameter(Sha256Hash.hash(pw.getBytes())));
-        Log.debug(data+"");
+        Log.debug(data.toString());
 
         Log.debug(new String(decrypt(data, new KeyParameter(Sha256Hash.hash(pw.getBytes())))));
 

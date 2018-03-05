@@ -38,13 +38,8 @@ import java.util.List;
  */
 public class NodeEvent extends BaseEvent<NodeEventBody> {
 
-    public static final short OWN_MAIN_VERSION = 1;
-
-    public static final short OWN_SUB_VERSION = 1001;
-
     public NodeEvent() {
         super(NulsConstant.MODULE_ID_NETWORK, NetworkConstant.NETWORK_NODE_EVENT);
-//        this.version = new NulsVersion(OWN_MAIN_VERSION, OWN_SUB_VERSION);
     }
 
     public NodeEvent(List<Node> nodes) {

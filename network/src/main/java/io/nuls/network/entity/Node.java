@@ -122,7 +122,6 @@ public class Node extends BaseNulsData {
     @Override
     public int size() {
         int s = 0;
-        s += 2;   //version size;
         s += VarInt.sizeOf(magicNumber);
         s += VarInt.sizeOf(port);
         s += 1;

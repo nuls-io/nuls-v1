@@ -143,7 +143,6 @@ public class Account extends BaseNulsData implements NulsCloneable {
     @Override
     public int size() {
         int s = 0;
-        s += 2;    //version size
 
         if (StringUtils.isNotBlank(alias)) {
             try {

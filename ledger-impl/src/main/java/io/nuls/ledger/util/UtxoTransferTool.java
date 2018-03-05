@@ -62,8 +62,8 @@ public class UtxoTransferTool {
         if(po.getCreateTime() != null) {
             output.setCreateTime(po.getCreateTime());
         }
-        if(po.getType() != null) {
-            output.setType(po.getType());
+        if(po.getTxType() != null) {
+            output.setTxType(po.getTxType());
         }
         return output;
     }

@@ -48,7 +48,7 @@ public class UtxoOutputPo {
     //tx.create_time
     private Long createTime;
     //tx.type
-    private Integer type;
+    private Integer txType;
 
     public String getTxHash() {
         return txHash;
@@ -114,11 +114,11 @@ public class UtxoOutputPo {
         this.createTime = createTime;
     }
 
-    public Integer getType() {
-        return type;
+    public Integer getTxType() {
+        return txType;
     }
 
-    public void setType(Integer type) {
-        this.type = type;
+    public void setTxType(Integer txType) {
+        this.txType = txType;
     }
 }
