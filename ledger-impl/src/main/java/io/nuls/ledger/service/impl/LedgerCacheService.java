@@ -63,7 +63,6 @@ public class LedgerCacheService {
         this.utxoCacheService.removeCache(LedgerConstant.UTXO);
     }
 
-
     public void putBalance(String address, Balance balance) {
         if (null == balance || StringUtils.isBlank(address)) {
             return;

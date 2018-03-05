@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -50,18 +50,21 @@ import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
+import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.dao.AccountDataService;
 import io.nuls.db.dao.AccountAliasDataService;
 import io.nuls.db.dao.AliasDataService;
 import io.nuls.db.entity.AccountPo;
+import io.nuls.db.entity.AliasPo;
 import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.entity.TransactionPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.event.TransactionEvent;
+import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.ledger.util.UtxoTransferTool;
 
 import java.io.File;
@@ -81,24 +84,21 @@ public class AccountServiceImpl implements AccountService {
     private Lock locker = new ReentrantLock();
 
     private AccountCacheService accountCacheService = AccountCacheService.getInstance();
-
+    @Autowired
     private AccountDataService accountDao;
-
+    @Autowired
     private AccountAliasDataService accountAliasDBService;
-
+    @Autowired
     private AliasDataService aliasDataService;
-
+    @Autowired
     private EventBroadcaster eventBroadcaster;
+    @Autowired
+    private LedgerService ledgerService;
 
     private volatile boolean isLockNow = true;
 
     @Override
     public void init() {
-        accountDao = NulsContext.getServiceBean(AccountDataService.class);
-        accountAliasDBService = NulsContext.getServiceBean(AccountAliasDataService.class);
-        aliasDataService = NulsContext.getServiceBean(AliasDataService.class);
-        eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
-
         AliasValidator.getInstance().setAliasDataService(aliasDataService);
         AliasTxService.getInstance().setDataService(accountAliasDBService);
     }
@@ -402,7 +402,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public NulsSignData signData (byte[] bytes, byte[] priKey) {
+    public NulsSignData signData(byte[] bytes, byte[] priKey) {
         //todo
         return NulsSignData.EMPTY_SIGN;
     }
@@ -523,6 +523,7 @@ public class AccountServiceImpl implements AccountService {
         return exportAccounts(accounts, (File) result.getObject());
     }
 
+
     private Result<File> backUpFile(String filePath) {
         File backupFile = new File(filePath);
         //Does the superior directory exist
@@ -555,15 +556,7 @@ public class AccountServiceImpl implements AccountService {
             fos = new FileOutputStream(backupFile);
             fos.write(1);   //account length
             fos.write(account.serialize());
-//todo 服务是否应该提供po的查询接口
-//            List<TransactionPo> txList = ledgerService.queryPoListByAccount(account.getAddress().getBase58(), 0, 0);
-//            fos.write(new VarInt(txList.size()).encode());
-//
-//            TransactionPo tx;
-//            for (int i = 0; i < txList.size(); i++) {
-//                tx = txList.get(i);
-//                fos.write(tx.getTxdata());
-//            }
+
         } catch (Exception e) {
             Log.error(e);
             return new Result(false, "export failed");
@@ -586,17 +579,6 @@ public class AccountServiceImpl implements AccountService {
         try {
             fos = new FileOutputStream(backupFile);
             fos.write(new VarInt(accounts.size()).encode());   //account length
-//todo 服务是否应该提供po的查询接口
-//            for (Account account : accounts) {
-//                fos.write(account.serialize());
-//                txList = ledgerService.queryPoListByAccount(account.getAddress().getBase58(), 0, 0);
-//                fos.write(new VarInt(txList.size()).encode());
-//
-//                for (int i = 0; i < txList.size(); i++) {
-//                    tx = txList.get(i);
-//                    fos.write(tx.getTxdata());
-//                }
-//            }
         } catch (Exception e) {
             Log.error(e);
             return new Result(false, "export failed");
@@ -610,6 +592,26 @@ public class AccountServiceImpl implements AccountService {
             }
         }
         return new Result(true, "OK");
+    }
+
+    @Override
+    public Result importAccount(String priKey) {
+        String address = new ECKey().getPublicKeyAsHex(true);
+
+        AccountPo accountPo = accountDao.get(address);
+        if (accountPo != null) {
+            return Result.getSuccess();
+        }
+        ledgerService.saveTxInLocal(address);
+        AliasPo aliasPo = aliasDataService.getByAddress(address);
+        if (aliasPo != null) {
+            accountPo.setAlias(aliasPo.getAlias());
+            accountDao.updateAlias(accountPo);
+        }
+
+        ledgerService.getBalance(address);
+        NulsContext.LOCAL_ADDRESS_LIST.add(address);
+        return Result.getSuccess();
     }
 
     @Override
