@@ -77,6 +77,7 @@ public class DataValidatorChain {
         if (null == validator) {
             return;
         }
+
         if (classSet.add(validator.getClass())) {
             list.add(validator);
         }

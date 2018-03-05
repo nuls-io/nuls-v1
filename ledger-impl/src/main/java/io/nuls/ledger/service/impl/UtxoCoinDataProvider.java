@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -89,6 +89,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 
     @Override
     public void approve(CoinData coinData, Transaction tx) {
+        //Lock the transaction specified output in the cache when the newly received transaction is approved.
         UtxoData utxoData = (UtxoData) coinData;
         List<UtxoOutput> outputs = new ArrayList<>();
         try {
@@ -97,7 +98,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 UtxoOutput unSpend = cacheService.getUtxo(input.getKey());
                 unSpend.setStatus(UtxoOutput.LOCKED);
                 outputs.add(unSpend);
-                //todo db change status
             }
         } catch (Exception e) {
             for (UtxoOutput output : outputs) {
@@ -115,10 +115,10 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
     @Override
     @DbSession
     /**
-     * 1. change spending output status
+     * 1. change spending output status  (cache and database)
      * 2. save new input
-     * 3. save new unspend output
-     * 4. calc balance
+     * 3. save new unSpend output (cache and database)
+     * 4. finally, calc balance
      */
     public void save(CoinData coinData, Transaction tx) {
         UtxoData utxoData = (UtxoData) coinData;
@@ -140,9 +140,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             }
 
             for (String address : addressSet) {
-                TxAccountRelationPo relationPo = new TxAccountRelationPo();
-                relationPo.setTxHash(tx.getHash().getDigestHex());
-                relationPo.setAddress(address);
+                TxAccountRelationPo relationPo = new TxAccountRelationPo(tx.getHash().getDigestHex(), address);
                 txRelations.add(relationPo);
             }
 
@@ -174,7 +172,8 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 
             for (UtxoOutput spend : spends) {
                 cacheService.putUtxo(spend.getKey(), spend);
-                cacheService.updateUtxoStatus(spend.getKey(), UtxoOutput.SPENT, UtxoOutput.LOCKED);
+//                cacheService.updateUtxoStatus(spend.getKey(), UtxoOutput.SPENT, UtxoOutput.LOCKED);
+                spend.setStatus(UtxoOutput.LOCKED);
                 UtxoBalance balance = (UtxoBalance) cacheService.getBalance(Address.fromHashs(spend.getAddress()).getBase58());
                 if (balance != null && !balance.getUnSpends().contains(spend)) {
                     balance.getUnSpends().add(spend);
@@ -211,8 +210,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         }
     }
 
-
-    // cache new unSpends and calc balance
+    // cache new unSpends
     private void processDataOutput(UtxoData utxoData) {
         for (int i = 0; i < utxoData.getOutputs().size(); i++) {
             UtxoOutput output = utxoData.getOutputs().get(i);
@@ -241,40 +239,45 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             for (UtxoInput input : utxoData.getInputs()) {
                 cacheService.updateUtxoStatus(input.getKey(), UtxoOutput.USEABLE, UtxoOutput.LOCKED);
             }
-
         } else if (tx.getStatus().equals(TxStatusEnum.CONFIRMED)) {
             Map<String, Object> keyMap = new HashMap<>();
+            Set<String> addressSet = new HashSet<>();
             //process output
             for (UtxoOutput output : utxoData.getOutputs()) {
                 keyMap.clear();
                 keyMap.put("txHash", output.getTxHash().getDigestHex());
                 keyMap.put("outIndex", output.getIndex());
-                UtxoOutputPo outputPo = outputDataService.get(keyMap);
 
                 outputDataService.delete(keyMap);
-
                 cacheService.removeUtxo(output.getKey());
 
                 // if utxo not spent,should calc balance and clear cache
-                UtxoBalance balance = (UtxoBalance) cacheService.getBalance(outputPo.getAddress());
+                Address address = Address.fromHashs(output.getAddress());
+                UtxoBalance balance = (UtxoBalance) cacheService.getBalance(address.getBase58());
                 if (balance != null) {
                     balance.removeUnSpend(output.getKey());
                 }
 
-                UtxoTransactionTool.getInstance().calcBalance(outputPo.getAddress());
+                UtxoTransactionTool.getInstance().calcBalance(address.getBase58());
+                addressSet.add(address.getBase58());
             }
 
             //process input
+            //1. delete input (database)
+            //2. change input referenced output status (database)
+            //3. cache and calc balance
             for (UtxoInput input : utxoData.getInputs()) {
                 keyMap.clear();
                 keyMap.put("txHash", input.getTxHash().getDigestHex());
-                keyMap.put("fromIndex", input.getFromIndex());
-                keyMap.put("outIndex", input.getFromIndex());
+                keyMap.put("inIndex", input.getIndex());
                 inputDataService.delete(keyMap);
 
+                keyMap.put("txHash", input.getFromHash().getDigestHex());
+                keyMap.put("outIndex", input.getFromIndex());
                 UtxoOutputPo outputPo = outputDataService.get(keyMap);
                 outputPo.setStatus((byte) UtxoOutput.USEABLE);
                 outputDataService.updateStatus(outputPo);
+                addressSet.add(outputPo.getAddress());
 
                 UtxoOutput output = UtxoTransferTool.toOutput(outputPo);
                 cacheService.putUtxo(output.getKey(), output);
@@ -284,9 +287,10 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                     balance = new UtxoBalance(Na.valueOf(output.getValue()), Na.ZERO);
                 }
                 balance.addUnSpend(output);
-
                 UtxoTransactionTool.getInstance().calcBalance(outputPo.getAddress());
             }
+
+            relationDataService.deleteRelation(tx.getHash().getDigestHex(), addressSet);
         }
 
     }
@@ -377,14 +381,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         utxoData.setInputs(inputs);
         utxoData.setOutputs(outputs);
         return utxoData;
-    }
-
-    public void setOutputDataService(UtxoOutputDataService outputDataService) {
-        this.outputDataService = outputDataService;
-    }
-
-    public void setInputDataService(UtxoInputDataService inputDataService) {
-        this.inputDataService = inputDataService;
     }
 
 }

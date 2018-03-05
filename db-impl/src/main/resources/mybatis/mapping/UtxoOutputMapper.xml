@@ -78,4 +78,11 @@
         select count(id) from utxo_output
         <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
     </select>
+
+    <select id="selectAccountOutput" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultMap="BaseResultMap">
+        select a.type, a.create_time as createTime, b.*
+        from transaction a
+        join utxo_output b on a.`hash` = b.tx_hash
+        <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
+    </select>
 </mapper>

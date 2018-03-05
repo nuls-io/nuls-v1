@@ -39,7 +39,11 @@ public interface UtxoOutputDataService extends BaseDataService<Map<String, Objec
 
     List<UtxoOutputPo> getAccountOutputs(String address, byte status);
 
+    List<UtxoOutputPo> getAccountOutputs(int txType, String address, Long beginTime, Long endTime);
+
     List<UtxoOutputPo> getAllUnSpend();
+
+    List<UtxoOutputPo> getLockUtxo(String address, Long beginTime, Integer pageNumber, Integer pageSize);
 
     List<UtxoOutputPo> getAccountUnSpend(String address);
 

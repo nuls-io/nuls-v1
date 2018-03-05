@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,12 +23,12 @@
  */
 package io.nuls.rpc.resources.impl;
 
-import io.nuls.account.entity.Account;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.Result;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.crypto.ECKey;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.ledger.service.intf.LedgerService;
@@ -37,7 +37,6 @@ import io.nuls.rpc.entity.RpcResult;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.io.File;
-import java.util.List;
 
 /**
  * @author Niels
@@ -68,11 +67,6 @@ public class WalletResouce {
     @Path("/encrypt")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult password(@FormParam("password") String password) {
-        AssertUtil.canNotEmpty(password);
-        boolean formatCheck = StringUtils.validPassword(password);
-        if (!formatCheck) {
-            return RpcResult.getFailed("Password format must conform to specification");
-        }
         Result result = this.accountService.encryptAccount(password);
         return new RpcResult(result);
     }
@@ -81,11 +75,6 @@ public class WalletResouce {
     @Path("/reset")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult password(@FormParam("password") String password, @FormParam("newPassword") String newPassword) {
-        AssertUtil.canNotEmpty(newPassword);
-        boolean formatCheck = StringUtils.validPassword(newPassword);
-        if (!formatCheck) {
-            return RpcResult.getFailed("New password format must conform to specification");
-        }
         Result result = this.accountService.changePassword(password, newPassword);
         return new RpcResult(result);
     }
