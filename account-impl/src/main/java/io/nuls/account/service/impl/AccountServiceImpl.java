@@ -39,7 +39,9 @@ import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.crypto.AESEncrypt;
 import io.nuls.core.crypto.ECKey;
+import io.nuls.core.crypto.EncryptedData;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -414,11 +416,10 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public NulsSignData signData(byte[] bytes, Account account, String password) {
-        //todo
         if (null == bytes || bytes.length == 0) {
             return null;
         }
-        return NulsSignData.EMPTY_SIGN;
+        return this.signData(bytes, AESEncrypt.decrypt(account.getPriKey(),password));
     }
 
     @Override

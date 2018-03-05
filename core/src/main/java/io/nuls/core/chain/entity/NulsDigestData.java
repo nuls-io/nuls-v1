@@ -133,8 +133,11 @@ public class NulsDigestData extends BaseNulsData {
     public static NulsDigestData calcDigestData(byte[] data, short digestAlgType) {
         NulsDigestData digestData = new NulsDigestData();
         digestData.setDigestAlgType(digestAlgType);
-        byte[] content = Sha256Hash.hashTwice(data);
-        digestData.digestBytes = content;
+        if((short)0==digestAlgType) {
+            byte[] content = Sha256Hash.hashTwice(data);
+            digestData.digestBytes = content;
+        }
+        //todo extend other algType
         return digestData;
     }
 
