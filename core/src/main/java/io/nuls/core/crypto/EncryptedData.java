@@ -40,6 +40,8 @@ public final class EncryptedData {
         this.encryptedBytes = Arrays.copyOf(encryptedBytes, encryptedBytes.length);
     }
 
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
