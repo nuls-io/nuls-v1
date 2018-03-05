@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,7 +25,6 @@ package io.nuls.core.chain.entity;
 
 
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 
 import java.io.Serializable;
@@ -44,10 +43,13 @@ public final class Na implements Comparable<Na>, Serializable {
 
     public static final long NA_VALUE = (long) Math.pow(10, SMALLEST_UNIT_EXPONENT);
 
+    private static final long TOTAL_VALUE = 100000000L;
+    private static final long MAX_NA_VALUE = TOTAL_VALUE*((long) Math.pow(10, SMALLEST_UNIT_EXPONENT));
+
     /**
      * Total amount of token
      */
-    public static final Na MAX = Na.valueOf(100000000).multiply(NA_VALUE);
+    public static final Na MAX = Na.valueOf(TOTAL_VALUE).multiply(NA_VALUE);
 
     /**
      * 0 Nuls
@@ -84,7 +86,7 @@ public final class Na implements Comparable<Na>, Serializable {
     }
 
     public static Na valueOf(final long na) {
-        if(Na.MAX.getValue()<na){
+        if (MAX_NA_VALUE < na) {
             throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
         }
         return new Na(na);
