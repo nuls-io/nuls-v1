@@ -61,9 +61,10 @@
         alias, status, pub_key, pri_key, pri_seed, extend)
         values
         <foreach collection="list" item="item" index="index" separator=",">
-            (#{item.id,jdbcType=VARCHAR}, #{item.address,jdbcType=VARCHAR}, #{item.createTime,jdbcType=BIGINT},
+            (#{item.address,jdbcType=VARCHAR}, #{item.createTime,jdbcType=BIGINT},
             #{item.alias,jdbcType=VARCHAR}, #{item.status,jdbcType=INTEGER},
-            #{item.pubKey,jdbcType=VARBINARY}, #{item.priKey,jdbcType=VARBINARY}, #{item.priSeed,jdbcType=VARBINARY}, #{item.extend,jdbcType=VARBINARY})
+            #{item.pubKey,jdbcType=VARBINARY}, #{item.priKey,jdbcType=VARBINARY},
+            #{item.priSeed,jdbcType=VARBINARY}, #{item.extend,jdbcType=VARBINARY})
         </foreach>
     </insert>
 
