@@ -62,6 +62,7 @@ public class ScanUtil {
         if (null == dirs) {
             return list;
         }
+        //todo OS
         while (dirs.hasMoreElements()) {
             URL url = dirs.nextElement();
             String protocol = url.getProtocol();

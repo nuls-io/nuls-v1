@@ -72,7 +72,12 @@ public class MicroKernelBootstrap extends BaseModuleBootstrap {
             Log.error(e);
         }
         SpringLiteContext.init("io.nuls", new ModularServiceMethodInterceptor());
-        VersionManager.start();
+        try {
+            VersionManager.start();
+        } catch (NulsException e) {
+            Log.error(e);
+            //todo 当获取版本失败时，发送通知
+        }
     }
 
     @Override
