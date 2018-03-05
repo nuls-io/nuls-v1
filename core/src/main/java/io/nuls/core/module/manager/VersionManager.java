@@ -2,8 +2,11 @@ package io.nuls.core.module.manager;
 
 import io.nuls.core.chain.intf.NulsVersion;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.utils.str.StringUtils;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author: Niels Wang
@@ -16,6 +19,9 @@ public class VersionManager {
         NulsContext.NEWEST_VERSION = "1.0.0";
         NulsContext.VERSION = "1.0.0";
         List<NulsVersion> versionList = NulsContext.getServiceBeanList(NulsVersion.class);
+        //生成当前版本的version.json文件
+        Map<String,Object> versionJson = new HashMap<>();
+
         //todo
         //获取网络上/下载中心最新版本号
             // 验证版本号是否合法
