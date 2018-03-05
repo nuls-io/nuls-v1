@@ -25,7 +25,7 @@ public class OutputDto {
         this.value = Na.valueOf(output.getValue()).toDouble();
         this.createTime = output.getCreateTime();
         this.lockTime = output.getLockTime();
-        this.type = output.getType();
+        this.type = output.getTxType();
     }
 
     public OutputDto(UtxoOutputPo output) {
@@ -34,7 +34,7 @@ public class OutputDto {
         this.value = Na.valueOf(output.getValue()).toDouble();
         this.createTime = output.getCreateTime();
         this.lockTime = output.getLockTime();
-        this.type = output.getType();
+        this.type = output.getTxType();
     }
 
     public Integer getIndex() {

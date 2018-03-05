@@ -69,7 +69,7 @@ public class UtxoOutput extends BaseNulsData {
 
     private long createTime;
 
-    private int type;
+    private int txType;
 
     // key = txHash + "-" + index, a key that will not be serialized, only used for caching
     private String key;
@@ -223,11 +223,11 @@ public class UtxoOutput extends BaseNulsData {
         this.createTime = createTime;
     }
 
-    public int getType() {
-        return type;
+    public int getTxType() {
+        return txType;
     }
 
-    public void setType(int type) {
-        this.type = type;
+    public void setTxType(int txType) {
+        this.txType = txType;
     }
 }

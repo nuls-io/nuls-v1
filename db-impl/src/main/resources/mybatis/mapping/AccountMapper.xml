@@ -6,7 +6,6 @@
         <id column="address" jdbcType="VARCHAR" property="address"/>
         <result column="create_time" jdbcType="BIGINT" property="createTime"/>
         <result column="alias" jdbcType="VARCHAR" property="alias"/>
-        <result column="version" jdbcType="INTEGER" property="version"/>
         <result column="status" javaType="Integer" property="status"/>
         <result column="pub_key" jdbcType="VARBINARY" property="pubKey"/>
         <result column="pri_key" jdbcType="VARBINARY" property="priKey"/>
@@ -15,7 +14,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        address, create_time, alias, version, status, pub_key, pri_key, pri_seed, extend
+        address, create_time, alias, status, pub_key, pri_key, pri_seed, extend
     </sql>
 
     <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
@@ -31,9 +30,9 @@
     </delete>
     <insert id="insert" parameterType="io.nuls.db.entity.AccountPo">
         insert into account (address, create_time,
-        alias, version, status, pub_key, pri_key, pri_seed, extend)
+        alias, status, pub_key, pri_key, pri_seed, extend)
         values (#{address,jdbcType=VARCHAR}, #{createTime,jdbcType=BIGINT},
-        #{alias,jdbcType=VARCHAR}, #{version,jdbcType=INTEGER},#{status,jdbcType=INTEGER},
+        #{alias,jdbcType=VARCHAR},#{status,jdbcType=INTEGER},
         #{pubKey,jdbcType=VARBINARY}, #{priKey,jdbcType=VARBINARY},
         #{priSeed,jdbcType=VARBINARY}, #{extend,jdbcType=VARBINARY})
     </insert>
@@ -43,7 +42,6 @@
         set address = #{address,jdbcType=VARCHAR},
         create_time = #{createTime,jdbcType=BIGINT},
         alias = #{alias,jdbcType=VARCHAR},
-        version = #{version,jdbcType=INTEGER},
         status = #{status,jdbcType=INTEGER},
         pubKey = #{pubKey,jdbcType=VARBINARY},
         pri_key = #{priKey,jdbcType=VARBINARY},
@@ -60,11 +58,11 @@
 
     <insert id="batchInsert" parameterType="java.util.List">
         insert into account (address, create_time,
-        alias, version, status, pub_key, pri_key, pri_seed, extend)
+        alias, status, pub_key, pri_key, pri_seed, extend)
         values
         <foreach collection="list" item="item" index="index" separator=",">
             (#{item.id,jdbcType=VARCHAR}, #{item.address,jdbcType=VARCHAR}, #{item.createTime,jdbcType=BIGINT},
-            #{item.alias,jdbcType=VARCHAR}, #{item.version,jdbcType=INTEGER}, #{item.status,jdbcType=INTEGER},
+            #{item.alias,jdbcType=VARCHAR}, #{item.status,jdbcType=INTEGER},
             #{item.pubKey,jdbcType=VARBINARY}, #{item.priKey,jdbcType=VARBINARY}, #{item.priSeed,jdbcType=VARBINARY}, #{item.extend,jdbcType=VARBINARY})
         </foreach>
     </insert>

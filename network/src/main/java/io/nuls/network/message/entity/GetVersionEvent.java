@@ -41,10 +41,6 @@ import java.io.IOException;
  */
 public class GetVersionEvent extends BaseEvent {
 
-    public static final short OWN_MAIN_VERSION = 1;
-
-    public static final short OWN_SUB_VERSION = 1001;
-
     private int externalPort;
 
     public GetVersionEvent() {

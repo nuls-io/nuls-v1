@@ -46,10 +46,6 @@ import java.io.UnsupportedEncodingException;
  */
 public class VersionEvent extends io.nuls.core.event.BaseEvent {
 
-    public static final short OWN_MAIN_VERSION = 1;
-
-    public static final short OWN_SUB_VERSION = 1001;
-
     private int externalPort;
 
     private long bestBlockHeight;
