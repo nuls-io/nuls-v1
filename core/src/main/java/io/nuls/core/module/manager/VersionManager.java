@@ -9,9 +9,12 @@ import io.nuls.core.utils.json.JSONUtils;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.VersionUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 /**
  * @author: Niels Wang
@@ -72,7 +75,7 @@ public class VersionManager {
         // 获取详细版本描述文件
         String jsonStr = null;
         try {
-            jsonStr = new String(HttpDownloadUtils.download(HIGHEST_VERDION_FILE_URL), NulsContext.DEFAULT_ENCODING);
+            jsonStr = new String(HttpDownloadUtils.download(VERDION_JSON_URL), NulsContext.DEFAULT_ENCODING);
         } catch (IOException e) {
             Log.error(e);
             throw new NulsException(ErrorCode.FAILED, "Download version json faild!");
@@ -92,18 +95,13 @@ public class VersionManager {
             start();
             return;
         }
-        Map<String, URL> jarMap = new HashMap<>();
+        Map<String, String> jarMap = new HashMap<>();
+
         try {
-            Enumeration<URL> urls = VersionUtils.class.getClassLoader().getResources("");
-            while (urls.hasMoreElements()) {
+            Enumeration<URL> urls = VersionUtils.class.getClassLoader().getResources("libs");
+            if (urls.hasMoreElements()) {
                 URL url = urls.nextElement();
-                if (url.getPath().endsWith(".jar")) {
-                    //todo test the code
-                    String protocol = url.getProtocol();
-                    if ("jar".equals(protocol)) {
-                        jarMap.put(url.getFile(), url);
-                    }
-                }
+                fillJarMap(url, jarMap);
             }
         } catch (IOException e) {
             Log.error(e);
@@ -112,30 +110,46 @@ public class VersionManager {
         if (jarMap.isEmpty()) {
             return;
         }
-//            下载本次新增文件到特定目录，当存在验证不通过的jar文件，记录日志并停止更新
+//      下载本次新增文件到特定目录，当存在验证不通过的jar文件，记录日志并停止更新
         List<Map<String, Object>> libList = (List<Map<String, Object>>) map.get("libs");
+        //check the temp folder exist,and delete
+        URL rootUrl = VersionManager.class.getResource("");
+        File tempFolder = new File(rootUrl.getPath() + "/temp");
+        if (tempFolder.exists()) {
+            deleteFile(tempFolder);
+        }
         for (Map<String, Object> lib : libList) {
             String file = (String) lib.get("file");
             String libSign = (String) lib.get("sign");
             if (jarMap.get(file) == null) {
-                downloadLib(file,sign);
-
+                downloadLib(file, sign);
             }
         }
-//            备份本地应删除的文件、并删除
-//            将下载完的文件移动到正确位置
+//        备份本地应删除的文件、并删除
+//        将下载完的文件移动到正确位置
 //        重启动
 
     }
 
-    private static void downloadLib(String file, String sign) {
+    private static void deleteFile(File file) {
+        if (file.isDirectory()) {
+            for (File sub : file.listFiles()) {
+                deleteFile(sub);
+            }
+        }
+        file.delete();
+    }
+
+    private static void fillJarMap(URL url, Map<String, String> jarMap) throws IOException {
+        File folder = new File(url.getPath());
+        for (File file : folder.listFiles()) {
+            jarMap.put(file.getName(), file.getPath());
+        }
+    }
+
+    private static void downloadLib(String file, String sign) throws NulsException {
         // todo auto-generated method stub(niels)
 
     }
-
-    public static void check() {
-
-    }
-
 
 }

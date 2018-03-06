@@ -1,3 +1,3 @@
 #!/bin/sh
-rootdir=$PWD
-kill -9 `cat ${rootdir}/pid/pid`
+file=$PWD/pid/pid
+kill -9 `cat ${file}`
