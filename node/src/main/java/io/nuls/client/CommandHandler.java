@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,24 +24,30 @@
 package io.nuls.client;
 
 import io.nuls.client.constant.CommandConstant;
+import io.nuls.client.handler.SysCommandHandler;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 
 import java.io.IOException;
-import java.net.URL;
-import java.util.Enumeration;
 import java.util.Scanner;
 
 /**
- *
  * @author Niels
  * @date 2017/10/26
  */
 public class CommandHandler {
 
-    private static CommandHandler instance = new CommandHandler();
+    private SysCommandHandler sysHandler;
+
+    private void init() {
+        sysHandler = new SysCommandHandler();
+
+    }
 
     public static void main(String[] args) throws IOException {
+        CommandHandler instance = new CommandHandler();
+        instance.init();
+
         System.out.print(CommandConstant.COMMAND_PS1);
         Scanner scan = new Scanner(System.in);
         while (scan.hasNextLine()) {
@@ -57,40 +63,20 @@ public class CommandHandler {
 
     private String processCommand(String[] args) {
         if (args.length == 1) {
-            return processSys(args[0]);
+            return CommandConstant.COMMAND_ERROR;
         }
         String command = args[0];
         switch (command) {
+            case CommandConstant.CMD_SYS:
+                return sysHandler.processCommand(args);
             case CommandConstant.CMD_ACCT:
                 return "";
         }
         return "command error";
     }
 
-    private String processSys(String command) {
-        switch (command) {
-            case CommandConstant.CMD_EXIT:
-                return stop();
-            case CommandConstant.CMD_HELP:
-                return printHelp();
-        }
-        return "command error";
-    }
 
-    private String printHelp() {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("Rpc Command List\n");
-        printSysHelp(buffer);
-        return buffer.toString();
-    }
 
-    private void printSysHelp(StringBuffer buffer) {
-        buffer.append("\n");
-        buffer.append("---- sys command ----\n");
-        buffer.append("\n");
-        buffer.append("sys exit\n");
-        buffer.append("sys help                              Get help information\n");
-    }
 
     private String stop() {
         Log.debug("stoping...");
