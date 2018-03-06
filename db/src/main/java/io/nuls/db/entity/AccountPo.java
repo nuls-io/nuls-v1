@@ -41,7 +41,7 @@ public class AccountPo {
 
     private byte[] priKey;
 
-    private byte[] priSeed;
+    private byte[] encryptedPriKey;
 
     private byte[] extend;
 
@@ -169,11 +169,11 @@ public class AccountPo {
         this.pubKey = pubKey;
     }
 
-    public byte[] getPriSeed() {
-        return priSeed;
+    public byte[] getEncryptedPriKey() {
+        return encryptedPriKey;
     }
 
-    public void setPriSeed(byte[] priSeed) {
-        this.priSeed = priSeed;
+    public void setEncryptedPriKey(byte[] encryptedPriKey) {
+        this.encryptedPriKey = encryptedPriKey;
     }
 }

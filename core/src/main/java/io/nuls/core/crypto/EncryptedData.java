@@ -32,6 +32,9 @@ import java.util.Objects;
  *
  */
 public final class EncryptedData {
+    //todo  maybe the default iv is not proper
+    //todo  need to support mutiple algs
+    public static byte[] DEFAULT_IV = new byte[16];
     private byte[] initialisationVector;		//iv
     private byte[] encryptedBytes;			//加密结果
 
@@ -40,6 +43,9 @@ public final class EncryptedData {
         this.encryptedBytes = Arrays.copyOf(encryptedBytes, encryptedBytes.length);
     }
 
+    public EncryptedData(byte[] encryptedBytes) {
+        this(DEFAULT_IV,encryptedBytes);
+    }
 
 
     @Override

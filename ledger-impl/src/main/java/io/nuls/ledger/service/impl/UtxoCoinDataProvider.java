@@ -30,9 +30,7 @@ import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TxStatusEnum;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.ECKey;
-import io.nuls.core.crypto.script.Script;
 import io.nuls.core.crypto.script.ScriptBuilder;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -331,7 +329,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             priKey = coinParam.getPriKey();
         } else {
             Account account = accountService.getDefaultAccount();
-            priKey = account.getPriSeed();
+            priKey = account.getEncryptedPriKey();
         }
 
         //create outputs

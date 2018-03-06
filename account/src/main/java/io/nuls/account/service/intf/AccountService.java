@@ -44,9 +44,9 @@ public interface AccountService {
 
     void destroy();
 
-    Account createAccount();
+    Account createAccount(String passwd);
 
-    Result<List<String>> createAccount(int count);
+    Result<List<String>> createAccount(int count,String passwd);
 
     Result<List<String>> createAccount(String password, int count);
 

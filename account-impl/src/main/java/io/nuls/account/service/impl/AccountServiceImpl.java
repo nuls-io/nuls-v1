@@ -41,7 +41,6 @@ import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.AESEncrypt;
 import io.nuls.core.crypto.ECKey;
-import io.nuls.core.crypto.EncryptedData;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -130,7 +129,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @DbSession
-    public Account createAccount() {
+    public Account createAccount(String passwd) {
         locker.lock();
         try {
             Account account = AccountTool.createAccount();
@@ -151,9 +150,21 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @DbSession
-    public Result<List<String>> createAccount(int count) {
+    public Result<List<String>> createAccount(int count, String passwd) {
         if (count <= 0 || count > AccountTool.CREATE_MAX_SIZE) {
             return new Result<>(false, "between 0 and 100 can be created at once");
+        }
+
+        if (!StringUtils.validPassword(passwd)) {
+            return new Result(false, "Length between 8 and 20, the combination of characters and numbers");
+        }
+
+        Account defaultAccount = getDefaultAccount();
+        if(defaultAccount != null) {
+            defaultAccount.decrypt(passwd);
+            if(!defaultAccount.isEncrypted()){
+                return new Result(false, "incorrect password");
+            }
         }
 
         locker.lock();
@@ -164,6 +175,7 @@ public class AccountServiceImpl implements AccountService {
             for (int i = 0; i < count; i++) {
                 Account account = AccountTool.createAccount();
                 signAccount(account);
+                account.encrypt(passwd);
                 AccountPo po = new AccountPo();
                 AccountTool.toPojo(account, po);
 
@@ -355,7 +367,7 @@ public class AccountServiceImpl implements AccountService {
                     return new Result(false, "old password error");
                 }
 
-                account.resetKey(oldPassword);
+                account.lock(oldPassword);
                 account.encrypt(newPassword);
 
                 AccountPo po = new AccountPo();

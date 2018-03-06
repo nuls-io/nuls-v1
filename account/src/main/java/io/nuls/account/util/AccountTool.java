@@ -60,7 +60,7 @@ public final class AccountTool {
         ECKey key = new ECKey();
         Address address = new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), Utils.sha256hash160(key.getPubKey(false)));
         Account account = new Account();
-        account.setPriSeed(key.getPrivKeyBytes());
+        account.setEncryptedPriKey(new byte[0]);
         account.setAddress(address);
         account.setPubKey(key.getPubKey(true));
         account.setEcKey(key);
@@ -72,9 +72,9 @@ public final class AccountTool {
     /**
      * Generate the corresponding account management private key or transaction private key according to the seed private key and password
      */
-    public static BigInteger genPrivKey(byte[] priSeed, byte[] pw) {
-        byte[] privSeedSha256 = Sha256Hash.hash(priSeed);
-        //get sha256 of priSeed and  sha256 of pw，
+    public static BigInteger genPrivKey(byte[] encryptedPriKey, byte[] pw) {
+        byte[] privSeedSha256 = Sha256Hash.hash(encryptedPriKey);
+        //get sha256 of encryptedPriKey and  sha256 of pw，
         byte[] pwSha256 = Sha256Hash.hash(pw);
         //privSeedSha256 + pwPwSha256
         byte[] pwPriBytes = new byte[privSeedSha256.length + pwSha256.length];
@@ -100,7 +100,7 @@ public final class AccountTool {
         desc.setExtend(src.getExtend());
         desc.setPriKey(src.getPriKey());
         desc.setPubKey(src.getPubKey());
-        desc.setPriSeed(src.getPriSeed());
+        desc.setEncryptedPriKey(src.getEncryptedPriKey());
         desc.setEcKey(ECKey.fromPrivate(new BigInteger(desc.getPriKey())));
         desc.setStatus(src.getStatus());
     }
@@ -114,7 +114,7 @@ public final class AccountTool {
         desc.setExtend(src.getExtend());
         desc.setPriKey(src.getPriKey());
         desc.setPubKey(src.getPubKey());
-        desc.setPriSeed(src.getPriSeed());
+        desc.setEncryptedPriKey(src.getEncryptedPriKey());
         desc.setStatus(src.getStatus());
     }
 
