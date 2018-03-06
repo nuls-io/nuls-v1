@@ -186,6 +186,41 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public Result<List<String>> createAccount(String password, int count) {
+        if (count <= 0 || count > AccountTool.CREATE_MAX_SIZE) {
+            return new Result<>(false, "between 0 and 100 can be created at once");
+        }
+
+        locker.lock();
+        try {
+            List<Account> accounts = new ArrayList<>();
+            List<AccountPo> accountPos = new ArrayList<>();
+            List<String> resultList = new ArrayList<>();
+            for (int i = 0; i < count; i++) {
+                Account account = AccountTool.createAccount();
+                signAccount(account);
+                AccountPo po = new AccountPo();
+                AccountTool.toPojo(account, po);
+
+                accounts.add(account);
+                accountPos.add(po);
+                resultList.add(account.getAddress().getBase58());
+            }
+
+            accountDao.save(accountPos);
+            accountCacheService.putAccountList(accounts);
+            NulsContext.LOCAL_ADDRESS_LIST.addAll(resultList);
+
+            return new Result<>(true, "OK", resultList);
+        } catch (Exception e) {
+            Log.error(e);
+            throw new NulsRuntimeException(ErrorCode.FAILED, "create account failed!");
+        } finally {
+            locker.unlock();
+        }
+    }
+
+    @Override
     public Account getDefaultAccount() {
         if (NulsContext.DEFAULT_ACCOUNT_ID == null) {
             return null;
@@ -419,7 +454,7 @@ public class AccountServiceImpl implements AccountService {
         if (null == bytes || bytes.length == 0) {
             return null;
         }
-        return this.signData(bytes, AESEncrypt.decrypt(account.getPriKey(),password));
+        return this.signData(bytes, AESEncrypt.decrypt(account.getPriKey(), password));
     }
 
     @Override
@@ -469,7 +504,7 @@ public class AccountServiceImpl implements AccountService {
         return new Result(true, "OK");
     }
 
-    @Override
+//    @Override
     public Result exportAccount(String filePath) {
         if (StringUtils.isBlank(filePath)) {
             return new Result(false, "filePath is required");
@@ -485,7 +520,7 @@ public class AccountServiceImpl implements AccountService {
         return exportAccount(account, (File) result.getObject());
     }
 
-    @Override
+//    @Override
     public Result exportAccount(String address, String filePath) {
         if (StringUtils.isBlank(filePath)) {
             return new Result(false, "filePath is required");
@@ -505,23 +540,14 @@ public class AccountServiceImpl implements AccountService {
         return exportAccount(account, (File) result.getObject());
     }
 
-    @Override
-    public Result exportAccounts(String filePath) {
-        if (StringUtils.isBlank(filePath)) {
-            return new Result(false, "filePath is required");
+//    @Override
+    public Result exportAccounts() {
+
+        List<AccountPo> poList = this.accountDao.getList();
+        if (null == poList || poList.isEmpty()) {
+            return Result.getFailed("no account can export");
         }
-        List<Account> accounts = getAccountList();
-        if (accounts == null || accounts.isEmpty()) {
-            return new Result(false, "no account can export");
-        }
-        if (accounts.size() == 1) {
-            return exportAccount(accounts.get(0).getAddress().getBase58(), filePath);
-        }
-        Result result = backUpFile(filePath);
-        if (!result.isSuccess()) {
-            return result;
-        }
-        return exportAccounts(accounts, (File) result.getObject());
+        return new Result(true, "OK", poList);
     }
 
 
@@ -611,11 +637,14 @@ public class AccountServiceImpl implements AccountService {
         }
 
         ledgerService.getBalance(address);
+        Account account = new Account();
+        AccountTool.toBean(accountPo, account);
+        accountCacheService.putAccount(account);
         NulsContext.LOCAL_ADDRESS_LIST.add(address);
         return Result.getSuccess();
     }
 
-    @Override
+//    @Override
     public Result importAccountsFile(String walletFilePath) {
         if (StringUtils.isBlank(walletFilePath)) {
             return new Result(false, "walletFilePath is required");
