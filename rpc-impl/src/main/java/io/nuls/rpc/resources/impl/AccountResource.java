@@ -51,19 +51,19 @@ public class AccountResource {
     private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
 
-    @GET
-    @Path("/create/{count}")
+    @POST
+    @Path("/create")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult create(@PathParam("count") int count) {
+    public RpcResult create(@FormParam("password") String password, @FormParam("count") int count) {
         Result<List<String>> accountResult = accountService.createAccount(count);
         RpcResult result = new RpcResult(accountResult);
         return result;
     }
 
     @GET
-    @Path("/load/{address}")
+    @Path("/get/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult load(@PathParam("address") String address) {
+    public RpcResult get(@PathParam("address") String address) {
         RpcResult result;
         if (!StringUtils.validAddress(address)) {
             result = RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);

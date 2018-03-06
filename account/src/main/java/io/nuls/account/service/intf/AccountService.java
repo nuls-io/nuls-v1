@@ -48,6 +48,8 @@ public interface AccountService {
 
     Result<List<String>> createAccount(int count);
 
+    Result<List<String>> createAccount(String password, int count);
+
     Account getDefaultAccount();
 
     Account getAccount(String address);
@@ -88,13 +90,11 @@ public interface AccountService {
 
     Result verifySign(byte[] bytes, NulsSignData data);
 
-    Result exportAccount(String filePath);
-
-    Result exportAccount(String address, String filePath);
-
-    Result exportAccounts(String filePath);
+//    Result exportAccount(String address, String filePath);
+//
+//    Result exportAccounts();
 
     Result importAccount(String priKey);
 
-    Result importAccountsFile(String walletFilePath);
+//    Result importAccountsFile(String walletFilePath);
 }
