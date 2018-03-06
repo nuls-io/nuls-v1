@@ -150,18 +150,18 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @DbSession
-    public Result<List<String>> createAccount(int count, String passwd) {
+    public Result<List<String>> createAccount(int count, String password) {
         if (count <= 0 || count > AccountTool.CREATE_MAX_SIZE) {
             return new Result<>(false, "between 0 and 100 can be created at once");
         }
 
-        if (!StringUtils.validPassword(passwd)) {
+        if (!StringUtils.validPassword(password)) {
             return new Result(false, "Length between 8 and 20, the combination of characters and numbers");
         }
 
         Account defaultAccount = getDefaultAccount();
         if(defaultAccount != null) {
-            defaultAccount.decrypt(passwd);
+            defaultAccount.decrypt(password);
             if(!defaultAccount.isEncrypted()){
                 return new Result(false, "incorrect password");
             }
@@ -175,7 +175,7 @@ public class AccountServiceImpl implements AccountService {
             for (int i = 0; i < count; i++) {
                 Account account = AccountTool.createAccount();
                 signAccount(account);
-                account.encrypt(passwd);
+                account.encrypt(password);
                 AccountPo po = new AccountPo();
                 AccountTool.toPojo(account, po);
 
@@ -197,40 +197,6 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
-    @Override
-    public Result<List<String>> createAccount(String password, int count) {
-        if (count <= 0 || count > AccountTool.CREATE_MAX_SIZE) {
-            return new Result<>(false, "between 0 and 100 can be created at once");
-        }
-
-        locker.lock();
-        try {
-            List<Account> accounts = new ArrayList<>();
-            List<AccountPo> accountPos = new ArrayList<>();
-            List<String> resultList = new ArrayList<>();
-            for (int i = 0; i < count; i++) {
-                Account account = AccountTool.createAccount();
-                signAccount(account);
-                AccountPo po = new AccountPo();
-                AccountTool.toPojo(account, po);
-
-                accounts.add(account);
-                accountPos.add(po);
-                resultList.add(account.getAddress().getBase58());
-            }
-
-            accountDao.save(accountPos);
-            accountCacheService.putAccountList(accounts);
-            NulsContext.LOCAL_ADDRESS_LIST.addAll(resultList);
-
-            return new Result<>(true, "OK", resultList);
-        } catch (Exception e) {
-            Log.error(e);
-            throw new NulsRuntimeException(ErrorCode.FAILED, "create account failed!");
-        } finally {
-            locker.unlock();
-        }
-    }
 
     @Override
     public Account getDefaultAccount() {

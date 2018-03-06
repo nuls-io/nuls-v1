@@ -46,9 +46,7 @@ public interface AccountService {
 
     Account createAccount(String passwd);
 
-    Result<List<String>> createAccount(int count,String passwd);
-
-    Result<List<String>> createAccount(String password, int count);
+    Result<List<String>> createAccount(int count,String password);
 
     Account getDefaultAccount();
 
