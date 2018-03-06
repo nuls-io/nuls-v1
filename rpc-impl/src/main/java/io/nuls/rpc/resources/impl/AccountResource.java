@@ -55,7 +55,7 @@ public class AccountResource {
     @Path("/create")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult create(@FormParam("password") String password, @FormParam("count") int count) {
-        Result<List<String>> accountResult = accountService.createAccount(count);
+        Result<List<String>> accountResult = accountService.createAccount(count,password);
         RpcResult result = new RpcResult(accountResult);
         return result;
     }

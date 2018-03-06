@@ -94,7 +94,8 @@ public class AESEncrypt {
     }
 
     public static byte[] decrypt(byte[] dataToDecrypt,String password){
-        EncryptedData data = new EncryptedData(null,dataToDecrypt);
+        byte [] defaultiv = new byte[16];
+        EncryptedData data = new EncryptedData(defaultiv,dataToDecrypt);
         return decrypt(data,new KeyParameter(Sha256Hash.hash(password.getBytes())));
     }
 

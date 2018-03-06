@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS `account` (
   `alias` varchar(100) DEFAULT NULL,
   `pub_key` varbinary(100) DEFAULT NULL,
   `pri_key` varbinary(100) DEFAULT NULL,
-  `pri_seed` varbinary(100) DEFAULT NULL,
+  `encrypted_pri_key` varbinary(100) DEFAULT NULL,
   `extend` varbinary(1024) DEFAULT NULL,
   `status` INT DEFAULT 0,
   PRIMARY KEY (`address`)

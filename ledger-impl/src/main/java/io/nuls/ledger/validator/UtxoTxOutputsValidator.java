@@ -36,7 +36,7 @@ import java.util.List;
  * @date 2017/11/20
  */
 public class UtxoTxOutputsValidator implements NulsDataValidator <UtxoData>  {
-    private static final int MAX_OUTPUT_COUNT = 200;
+    private static final int MAX_OUTPUT_COUNT = 256;
     private static final String ERROR_MESSAGE = "the output is too much!";
     private static final UtxoTxOutputsValidator INSTANCE = new UtxoTxOutputsValidator();
 
@@ -54,6 +54,8 @@ public class UtxoTxOutputsValidator implements NulsDataValidator <UtxoData>  {
         if (null != outputs && outputs.size() > MAX_OUTPUT_COUNT) {
             return ValidateResult.getFailedResult(ERROR_MESSAGE);
         }
+
+
         return ValidateResult.getSuccessResult();
     }
 }
