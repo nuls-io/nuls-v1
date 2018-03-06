@@ -28,7 +28,6 @@ import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.Result;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.crypto.ECKey;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.ledger.service.intf.LedgerService;
@@ -46,7 +45,6 @@ import java.io.File;
 public class WalletResouce {
 
     private static final int MAX_UNLOCK_TIME = 60;
-    private NulsContext context = NulsContext.getInstance();
     private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
 
@@ -71,7 +69,7 @@ public class WalletResouce {
         return new RpcResult(result);
     }
 
-    @PUT
+    @POST
     @Path("/reset")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult password(@FormParam("password") String password, @FormParam("newPassword") String newPassword) {
@@ -105,8 +103,18 @@ public class WalletResouce {
     @Path("/import")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult importWallet(File file) {
-        AssertUtil.canNotEmpty(file);
         //todo
+        return RpcResult.getSuccess();
+    }
+
+    @POST
+    @Path("/import")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult importAccount(String priKey) {
+        if(StringUtils.isBlank(priKey) || priKey.length() > 100) {
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+        accountService.importAccount(priKey);
         return RpcResult.getSuccess();
     }
 
