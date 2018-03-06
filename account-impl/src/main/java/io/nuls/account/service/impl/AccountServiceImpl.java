@@ -367,7 +367,7 @@ public class AccountServiceImpl implements AccountService {
                     return new Result(false, "old password error");
                 }
 
-                account.lock(oldPassword);
+                account.decrypt(oldPassword);
                 account.encrypt(newPassword);
 
                 AccountPo po = new AccountPo();

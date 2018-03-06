@@ -102,7 +102,7 @@ public class ConsensusManager implements Runnable {
         List<Account> list = this.accountService.getAccountList();
         boolean noneAccount = list == null || list.isEmpty();
         if (this.partakePacking && noneAccount) {
-            Account account = this.accountService.createAccount();
+            Account account = this.accountService.createAccount("nuls123456");
             this.accountService.setDefaultAccount(account.getAddress().getBase58());
             NulsContext.LOCAL_ADDRESS_LIST.add(account.getAddress().getBase58());
         }
