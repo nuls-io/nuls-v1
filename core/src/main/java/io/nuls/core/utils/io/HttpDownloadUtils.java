@@ -26,6 +26,8 @@
 
 package io.nuls.core.utils.io;
 
+import io.nuls.core.utils.log.Log;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,9 +41,11 @@ import java.net.URL;
 public class HttpDownloadUtils {
 
     public static byte[] download(String urlStr) throws IOException {
+        Log.info("Get the version info file from "+urlStr);
+        Log.info("......");
         URL url = new URL(urlStr);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setConnectTimeout(10 * 1000);
+        conn.setConnectTimeout(60 * 1000);
         conn.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
         InputStream inputStream = conn.getInputStream();
         byte[] getData = readInputStream(inputStream);
