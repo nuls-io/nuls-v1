@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,29 +21,40 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- */
-package io.nuls.rpc.sdk.utils;
-
-import io.nuls.rpc.sdk.SdkManager;
-import io.nuls.rpc.sdk.service.BlockService;
-import org.junit.Before;
-import org.junit.Test;
-
-/**
- * Created by Niels on 2017/10/31.
  *
  */
-public class RestFulUtilsTest {
 
-    @Before
-    public void init() {
-        SdkManager.init("http://127.0.0.1:8001/nuls");
+package io.nuls.rpc.sdk.entity;
+
+import java.util.Map;
+
+/**
+ * @author Vive
+ */
+public class VersionDto {
+
+    public VersionDto(Map<String, Object> map) {
+        myVersion = (String) map.get("myVersion");
+        newestVersion = (String) map.get("newestVersion");
     }
 
-    @Test
-    public void test() {
-        BlockService blockService = new BlockService();
-        Object obj = blockService.getBlock(0);
-        System.out.println(obj);
+    private String myVersion;
+
+    private String newestVersion;
+
+    public String getMyVersion() {
+        return myVersion;
+    }
+
+    public void setMyVersion(String myVersion) {
+        this.myVersion = myVersion;
+    }
+
+    public String getNewestVersion() {
+        return newestVersion;
+    }
+
+    public void setNewestVersion(String newestVersion) {
+        this.newestVersion = newestVersion;
     }
 }

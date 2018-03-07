@@ -49,7 +49,7 @@ public class RestFulUtils {
     private RestFulUtils() {
     }
 
-    public void init(String serverUri) {
+    public void setServerUri(String serverUri) {
         this.serverUri = serverUri;
     }
 

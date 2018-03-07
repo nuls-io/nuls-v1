@@ -41,6 +41,9 @@ public final class AssertUtil {
         }
         throw new RuntimeException(msg);
     }
+    public static void canNotEmpty(Object val ) {
+        canNotEmpty(val,"parameter cannot be null");
+    }
 
     public static void canNotEmpty(Object val, String msg) {
         boolean b = false;

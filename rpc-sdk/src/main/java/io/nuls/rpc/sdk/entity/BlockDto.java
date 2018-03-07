@@ -26,6 +26,10 @@
 
 package io.nuls.rpc.sdk.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 /**
  * @author Vive
  */
@@ -47,7 +51,33 @@ public class BlockDto {
 
     private String sign;
 
-    private String extend;
+    private Long roundIndex;
+    private Integer consensusMemberCount;
+    private Long roundStartTime;
+    private Integer packingIndexOfRound;
+    private ArrayList<TransactionDto> txList;
+
+    public BlockDto(Map<String, Object> map, boolean all) {
+        this.hash = (String) map.get("hash");
+        this.preHash = (String) map.get("preHash");
+        this.merkleHash = (String) map.get("merkleHash");
+        this.time = Long.parseLong(""+ map.get("time"));
+        this.height = Long.parseLong(""+  map.get("height"));
+        this.txCount = Long.parseLong(""+ map.get("txCount"));
+        this.packingAddress = (String) map.get("packingAddress");
+        this.sign = (String) map.get("sign");
+        roundIndex = Long.parseLong(""+  map.get("roundIndex"));
+        consensusMemberCount = (Integer) map.get("consensusMemberCount");
+        roundStartTime = Long.parseLong(""+  map.get("roundStartTime"));
+        packingIndexOfRound = (Integer) map.get("packingIndexOfRound");
+        if (all) {
+            this.txList = new ArrayList<>();
+            for (Map<String, Object> tx : (List<Map<String, Object>>) map.get("txList")) {
+                this.txList.add(new TransactionDto(tx));
+            }
+        }
+    }
+
 
     public String getHash() {
         return hash;
@@ -113,12 +143,35 @@ public class BlockDto {
         this.sign = sign;
     }
 
-    public String getExtend() {
-        return extend;
+    public Long getRoundIndex() {
+        return roundIndex;
     }
 
-    public void setExtend(String extend) {
-        this.extend = extend;
+    public void setRoundIndex(Long roundIndex) {
+        this.roundIndex = roundIndex;
     }
 
+    public Integer getConsensusMemberCount() {
+        return consensusMemberCount;
+    }
+
+    public void setConsensusMemberCount(Integer consensusMemberCount) {
+        this.consensusMemberCount = consensusMemberCount;
+    }
+
+    public Long getRoundStartTime() {
+        return roundStartTime;
+    }
+
+    public void setRoundStartTime(Long roundStartTime) {
+        this.roundStartTime = roundStartTime;
+    }
+
+    public Integer getPackingIndexOfRound() {
+        return packingIndexOfRound;
+    }
+
+    public void setPackingIndexOfRound(Integer packingIndexOfRound) {
+        this.packingIndexOfRound = packingIndexOfRound;
+    }
 }

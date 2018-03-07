@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,29 +21,25 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- */
-package io.nuls.rpc.sdk.utils;
-
-import io.nuls.rpc.sdk.SdkManager;
-import io.nuls.rpc.sdk.service.BlockService;
-import org.junit.Before;
-import org.junit.Test;
-
-/**
- * Created by Niels on 2017/10/31.
  *
  */
-public class RestFulUtilsTest {
 
-    @Before
-    public void init() {
-        SdkManager.init("http://127.0.0.1:8001/nuls");
-    }
+package io.nuls.client.processor.intf;
 
-    @Test
-    public void test() {
-        BlockService blockService = new BlockService();
-        Object obj = blockService.getBlock(0);
-        System.out.println(obj);
-    }
+import io.nuls.client.entity.CommandResult;
+import io.nuls.core.exception.NulsRuntimeException;
+
+/**
+ * @author Niels
+ * @date 2018/3/7
+ */
+public interface CommandProcessor {
+
+    String getCommand();
+
+    String getCommandDescription();
+
+    boolean argsValidate(String[] args);
+
+    CommandResult execute(String[] args);
 }

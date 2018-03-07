@@ -24,12 +24,13 @@
 package io.nuls.client;
 
 import io.nuls.client.constant.CommandConstant;
-import io.nuls.client.handler.SysCommandHandler;
-import io.nuls.core.utils.log.Log;
+import io.nuls.client.processor.AccountProcessors;
+import io.nuls.client.processor.SystemProcessors;
+import io.nuls.client.processor.intf.CommandProcessor;
 import io.nuls.core.utils.str.StringUtils;
 
 import java.io.IOException;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * @author Niels
@@ -37,10 +38,17 @@ import java.util.Scanner;
  */
 public class CommandHandler {
 
-    private SysCommandHandler sysHandler;
+    public static final Map<String,CommandProcessor> PROCESSOR_MAP = new HashMap<>();
 
     private void init() {
-        sysHandler = new SysCommandHandler();
+        //todo 在这里注册所有的命令处理器
+        register(new SystemProcessors.Exit());
+        register(new SystemProcessors.Help());
+        register(new SystemProcessors.Version());
+        register(new AccountProcessors.CreateAccount());
+
+
+
     }
 
     public static void main(String[] args) throws IOException {
@@ -64,18 +72,20 @@ public class CommandHandler {
             return CommandConstant.COMMAND_ERROR;
         }
         String command = args[0];
-        switch (command) {
-            case CommandConstant.CMD_SYS:
-                return sysHandler.processCommand(args);
-            case CommandConstant.CMD_ACCT:
-                return "";
+        CommandProcessor processor = PROCESSOR_MAP.get(command);
+        if(processor==null){
+            return command+" not a nuls command!";
         }
-        return "command error";
+        boolean result = processor.argsValidate(args);
+        if(!result){
+            return "args not right:::"+processor.getCommandDescription();
+        }
+        return processor.execute(args).toString();
     }
 
-    private String stop() {
-        Log.debug("stoping...");
-        System.exit(0);
-        return "bye!";
+
+
+    private void register(CommandProcessor processor) {
+        PROCESSOR_MAP.put(processor.getCommand(),processor);
     }
 }

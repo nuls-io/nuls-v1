@@ -50,19 +50,11 @@ public class SystemResource {
         return RpcResult.getSuccess().setData(rpcVersion);
     }
 
-
-//    @PUT
-//    @Path("/version")
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public RpcResult updateVersion() {
-//        return null;
-//    }
-
     @POST
     @Path("/module/load")
     @Produces(MediaType.APPLICATION_JSON)
-
     public RpcResult startModule(@FormParam("moduleName") String moduleName, @FormParam("moduleClass") String moduleClass) {
+       //todo change the params to a form entity
         RpcResult result = null;
         do {
             ModuleService service = ModuleService.getInstance();
@@ -87,17 +79,14 @@ public class SystemResource {
     @POST
     @Path("/module/stop")
     @Produces(MediaType.APPLICATION_JSON)
-
     public RpcResult shutdownModule(Short moduleId) {
         AssertUtil.canNotEmpty(moduleId, "ModuleName can not empty");
-
         return RpcResult.getSuccess();
     }
 
     @POST
     @Path("/module/distroy")
     @Produces(MediaType.APPLICATION_JSON)
-
     public RpcResult distroyModule(Short moduleId) {
 //        AssertUtil.canNotEmpty(moduleName, "ModuleName can not empty");
 //        BaseModuleBootstrap module = context.getModule(moduleName);
@@ -109,7 +98,6 @@ public class SystemResource {
     @POST
     @Path("/module/restart")
     @Produces(MediaType.APPLICATION_JSON)
-
     public RpcResult restartModule(Short moduleId) {
 //        AssertUtil.canNotEmpty(moduleName, "ModuleName can not empty");
 //        BaseModuleBootstrap module = context.getModule(moduleName);

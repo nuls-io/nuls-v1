@@ -67,6 +67,7 @@ public class AccountResource {
     @GET
     @Path("/get/{address}")
     @Produces(MediaType.APPLICATION_JSON)
+    //todo path中去掉get
     public RpcResult get(@PathParam("address") String address) {
         RpcResult result;
         if (!StringUtils.validAddress(address)) {
@@ -86,10 +87,10 @@ public class AccountResource {
     @POST
     @Path("/alias")
     @Produces(MediaType.APPLICATION_JSON)
+    //修改参数传递方式为json
     public RpcResult alias(@FormParam("alias") String alias,
                            @FormParam("address") String address,
                            @FormParam("password") String password) {
-
         Result result = accountService.setAlias(address, password, alias);
         RpcResult rpcResult = new RpcResult(result);
         return rpcResult;

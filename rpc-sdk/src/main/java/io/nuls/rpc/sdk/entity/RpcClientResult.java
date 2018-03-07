@@ -25,12 +25,11 @@ package io.nuls.rpc.sdk.entity;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.nuls.rpc.sdk.constant.RpcCmdConstant;
 
 /**
- *
  * @author Niels
  * @date 2017/10/31
- *
  */
 public class RpcClientResult {
     private boolean success;
@@ -78,5 +77,13 @@ public class RpcClientResult {
 
     public void setSuccess(boolean success) {
         this.success = success;
+    }
+
+    public static RpcClientResult getFailed(String message) {
+        RpcClientResult result = new RpcClientResult();
+        result.setSuccess(false);
+        result.setMsg(message);
+        result.setCode(RpcCmdConstant.RESULT_CODE_FAILED);
+        return result;
     }
 }

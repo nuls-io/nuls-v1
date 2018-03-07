@@ -2,7 +2,14 @@ package io.nuls.rpc.entity;
 
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Hex;
+import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.log.Log;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Vive
@@ -24,10 +31,14 @@ public class BlockDto {
     private String packingAddress;
 
     private String sign;
+    private Long roundIndex;
+    private Integer consensusMemberCount;
+    private Long roundStartTime;
+    private Integer packingIndexOfRound;
 
-    private String extend;
+    private List<TransactionDto> txList;
 
-    public BlockDto(Block block) {
+    public BlockDto(Block block,boolean all) {
         BlockHeader header = block.getHeader();
         this.hash = header.getHash().getDigestHex();
         this.preHash = header.getPreHash().getDigestHex();
@@ -37,7 +48,33 @@ public class BlockDto {
         this.txCount = header.getTxCount();
         this.packingAddress = header.getPackingAddress();
         this.sign = header.getSign().getSignHex();
-        this.extend = Hex.encode(header.getExtend());
+        NulsByteBuffer byteBuffer = new NulsByteBuffer(header.getExtend());
+        try {
+            this.roundIndex = byteBuffer.readVarInt();
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+        try {
+            this.consensusMemberCount = (int) byteBuffer.readVarInt();
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+        try {
+            this.roundStartTime = byteBuffer.readVarInt();
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+        try {
+            this.packingIndexOfRound = (int) byteBuffer.readVarInt();
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+        if(all){
+            this.txList = new ArrayList<>();
+            for(Transaction tx:block.getTxs()){
+                this.txList.add(new TransactionDto(tx));
+            }
+        }
     }
 
     public String getHash() {
@@ -104,12 +141,43 @@ public class BlockDto {
         this.sign = sign;
     }
 
-    public String getExtend() {
-        return extend;
+    public Long getRoundIndex() {
+        return roundIndex;
     }
 
-    public void setExtend(String extend) {
-        this.extend = extend;
+    public void setRoundIndex(Long roundIndex) {
+        this.roundIndex = roundIndex;
     }
 
+    public Integer getConsensusMemberCount() {
+        return consensusMemberCount;
+    }
+
+    public void setConsensusMemberCount(Integer consensusMemberCount) {
+        this.consensusMemberCount = consensusMemberCount;
+    }
+
+    public Long getRoundStartTime() {
+        return roundStartTime;
+    }
+
+    public void setRoundStartTime(Long roundStartTime) {
+        this.roundStartTime = roundStartTime;
+    }
+
+    public Integer getPackingIndexOfRound() {
+        return packingIndexOfRound;
+    }
+
+    public void setPackingIndexOfRound(Integer packingIndexOfRound) {
+        this.packingIndexOfRound = packingIndexOfRound;
+    }
+
+    public List<TransactionDto> getTxList() {
+        return txList;
+    }
+
+    public void setTxList(List<TransactionDto> txList) {
+        this.txList = txList;
+    }
 }

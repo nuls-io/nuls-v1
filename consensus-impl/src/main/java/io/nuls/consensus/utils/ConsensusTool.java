@@ -26,6 +26,7 @@ package io.nuls.consensus.utils;
 import io.nuls.account.entity.Account;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
+import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.block.BlockData;
 import io.nuls.consensus.entity.block.BlockRoundData;
@@ -186,7 +187,7 @@ public class ConsensusTool {
         header.setPackingAddress(account.getAddress().toString());
         header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
         header.setHash(NulsDigestData.calcDigestData(block.getHeader()));
-        header.setSign(accountService.signData(header.getHash(), null));
+        header.setSign(accountService.signData(header.getHash(), PocConsensusConstant.DEFAULT_WALLET_PASSWORD));
         return block;
     }
 
