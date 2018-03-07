@@ -41,13 +41,11 @@ public class CommandHandler {
 
     private void init() {
         sysHandler = new SysCommandHandler();
-
     }
 
     public static void main(String[] args) throws IOException {
         CommandHandler instance = new CommandHandler();
         instance.init();
-
         System.out.print(CommandConstant.COMMAND_PS1);
         Scanner scan = new Scanner(System.in);
         while (scan.hasNextLine()) {
@@ -74,9 +72,6 @@ public class CommandHandler {
         }
         return "command error";
     }
-
-
-
 
     private String stop() {
         Log.debug("stoping...");

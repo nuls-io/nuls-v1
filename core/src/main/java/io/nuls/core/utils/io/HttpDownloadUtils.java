@@ -42,7 +42,6 @@ public class HttpDownloadUtils {
 
     public static byte[] download(String urlStr) throws IOException {
         Log.info("Get the version info file from "+urlStr);
-        Log.info("......");
         URL url = new URL(urlStr);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setConnectTimeout(60 * 1000);
