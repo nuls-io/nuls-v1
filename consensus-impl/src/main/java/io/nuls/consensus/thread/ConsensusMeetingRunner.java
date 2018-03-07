@@ -291,7 +291,7 @@ public class ConsensusMeetingRunner implements Runnable {
         }
         tx.setFee(Na.ZERO);
         tx.setHash(NulsDigestData.calcDigestData(tx));
-        tx.setSign(accountService.signData(tx.getHash()));
+        tx.setSign(accountService.signData(tx.getHash(),PocConsensusConstant.DEFAULT_WALLET_PASSWORD));
         ValidateResult validateResult = tx.verify();
         tx.setStatus(TxStatusEnum.AGREED);
         confirmingTxCacheManager.putTx(tx);
@@ -352,7 +352,7 @@ public class ConsensusMeetingRunner implements Runnable {
             tx.setTime(TimeService.currentTimeMillis());
             tx.setFee(Na.ZERO);
             tx.setHash(NulsDigestData.calcDigestData(tx));
-            tx.setSign(accountService.signData(tx.getHash()));
+            tx.setSign(accountService.signData(tx.getHash(),PocConsensusConstant.DEFAULT_WALLET_PASSWORD));
             txList.add(tx);
         }
     }
@@ -382,7 +382,7 @@ public class ConsensusMeetingRunner implements Runnable {
         punishTx.setTime(TimeService.currentTimeMillis());
         punishTx.setFee(Na.ZERO);
         punishTx.setHash(NulsDigestData.calcDigestData(punishTx));
-        punishTx.setSign(accountService.signData(punishTx.getHash()));
+        punishTx.setSign(accountService.signData(punishTx.getHash(),PocConsensusConstant.DEFAULT_WALLET_PASSWORD));
         txList.add(punishTx);
     }
 
