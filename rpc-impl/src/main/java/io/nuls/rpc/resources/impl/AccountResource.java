@@ -31,11 +31,13 @@ import io.nuls.core.chain.entity.Result;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.crypto.Hex;
+import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.rpc.entity.AccountDto;
 import io.nuls.rpc.entity.RpcResult;
+import io.nuls.rpc.resources.form.AccountCreateForm;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -53,10 +55,11 @@ public class AccountResource {
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
 
     @POST
-    @Path("/create")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult create(@FormParam("password") String password, @FormParam("count") int count) {
-        Result<List<String>> accountResult = accountService.createAccount(count, password);
+    public RpcResult create(AccountCreateForm form) {
+        AssertUtil.canNotEmpty(form.getCount());
+        AssertUtil.canNotEmpty(form.getPassword());
+        Result<List<String>> accountResult = accountService.createAccount(form.getCount(), form.getPassword());
         RpcResult result = new RpcResult(accountResult);
         return result;
     }
@@ -70,7 +73,6 @@ public class AccountResource {
             result = RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
             return result;
         }
-
         Account account = accountService.getAccount(address);
         if (account == null) {
             result = RpcResult.getFailed(ErrorCode.DATA_NOT_FOUND);
