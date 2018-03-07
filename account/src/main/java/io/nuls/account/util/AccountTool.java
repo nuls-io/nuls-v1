@@ -28,6 +28,7 @@ import io.nuls.account.entity.Address;
 import io.nuls.account.entity.Alias;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.ECKey;
+import io.nuls.core.crypto.EncryptedData;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
@@ -101,7 +102,12 @@ public final class AccountTool {
         desc.setPriKey(src.getPriKey());
         desc.setPubKey(src.getPubKey());
         desc.setEncryptedPriKey(src.getEncryptedPriKey());
-        desc.setEcKey(ECKey.fromPrivate(new BigInteger(desc.getPriKey())));
+        if(src.getPriKey()!=null && src.getPriKey().length>1) {
+            desc.setEcKey(ECKey.fromPrivate(new BigInteger(desc.getPriKey())));
+        }else {
+            desc.setEcKey(ECKey.fromEncrypted(new EncryptedData(src.getEncryptedPriKey()), src.getPubKey()));
+        }
+
         desc.setStatus(src.getStatus());
     }
 
