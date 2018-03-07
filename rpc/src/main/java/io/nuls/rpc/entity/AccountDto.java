@@ -19,7 +19,7 @@ public class AccountDto {
     public AccountDto(Account account) {
         this.address = account.getAddress().getBase58();
         this.alias = account.getAlias();
-        this.pubKey = Hex.encode(account.getPriKey());
+        this.pubKey = Hex.encode(account.getPubKey());
         this.createTime = account.getCreateTime();
         if (account.getExtend() != null)
             this.extend = Hex.encode(account.getExtend());
