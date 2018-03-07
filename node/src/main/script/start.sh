@@ -12,12 +12,10 @@ do
      PUB_LIB="$PUB_LIB:""$jar"
 done
 
-MAIN_LIB=$rootdir/dist_lib/nuls-node.jar
-
 CONF_PATH=$rootdir/conf
 
 #project class path
-export CLASSPATH=$CLASSPATH:$CONF_PATH:$MAIN_LIB:.:$PUB_LIB
+export CLASSPATH=$CLASSPATH:$CONF_PATH:.:$PUB_LIB
 if [ ! -d "$logdir" ]; then
   mkdir "$logdir"
 fi

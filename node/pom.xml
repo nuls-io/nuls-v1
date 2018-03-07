@@ -90,7 +90,6 @@
         </dependency>
     </dependencies>
     <build>
-        <finalName>nuls-node</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
