@@ -110,15 +110,4 @@ public class WalletResouce {
         return rpcResult;
     }
 
-    @POST
-    @Path("/import")
-    @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult importAccount(String priKey) {
-        if(StringUtils.isBlank(priKey) || priKey.length() > 100) {
-            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
-        }
-        accountService.importAccount(priKey);
-        return RpcResult.getSuccess();
-    }
-
 }

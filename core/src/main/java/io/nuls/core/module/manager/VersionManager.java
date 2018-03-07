@@ -100,7 +100,9 @@ public class VersionManager {
         URL libsUrl = null;
         try {
             libsUrl = VersionUtils.class.getClassLoader().getResource("libs");
-            fillJarMap(libsUrl, jarMap);
+            if (null != libsUrl) {
+                fillJarMap(libsUrl, jarMap);
+            }
         } catch (IOException e) {
             Log.error(e);
         }
@@ -215,5 +217,6 @@ public class VersionManager {
             }
         }
     }
+
 
 }
