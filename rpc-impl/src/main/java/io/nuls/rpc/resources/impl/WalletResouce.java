@@ -104,7 +104,10 @@ public class WalletResouce {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult importWallet(File file) {
         //todo
-        return RpcResult.getSuccess();
+        String name = file.getName();
+        RpcResult rpcResult = RpcResult.getSuccess();
+        rpcResult.setData(name);
+        return rpcResult;
     }
 
     @POST
