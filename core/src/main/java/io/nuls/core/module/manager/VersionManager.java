@@ -9,12 +9,9 @@ import io.nuls.core.utils.json.JSONUtils;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.VersionUtils;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.util.*;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 
 /**
  * @author: Niels Wang
@@ -66,11 +63,15 @@ public class VersionManager {
         if (VersionUtils.equalsWith(version, localVersion)) {
             return;
         } else if (autoUpdate) {
-            updateFile(localVersion, version, versionList);
+            try {
+                updateFile(localVersion, version, versionList);
+            } catch (IOException e) {
+                throw new NulsException(e);
+            }
         }
     }
 
-    private static void updateFile(String oldVersion, String newVersion, List<NulsVersion> versionList) throws NulsException {
+    private static void updateFile(String oldVersion, String newVersion, List<NulsVersion> versionList) throws NulsException, IOException {
         //todo
         // 获取详细版本描述文件
         String jsonStr = null;
@@ -96,12 +97,11 @@ public class VersionManager {
             return;
         }
         Map<String, String> jarMap = new HashMap<>();
-
+        URL libsUrl = null;
         try {
-            Enumeration<URL> urls = VersionUtils.class.getClassLoader().getResources("libs");
-            if (urls.hasMoreElements()) {
-                URL url = urls.nextElement();
-                fillJarMap(url, jarMap);
+            libsUrl = VersionUtils.class.getClassLoader().getResource("libs");
+            if (null != libsUrl) {
+                fillJarMap(libsUrl, jarMap);
             }
         } catch (IOException e) {
             Log.error(e);
@@ -118,17 +118,63 @@ public class VersionManager {
         if (tempFolder.exists()) {
             deleteFile(tempFolder);
         }
+        tempFolder.mkdir();
+        List<String> newVersionJarList = new ArrayList<>();
         for (Map<String, Object> lib : libList) {
             String file = (String) lib.get("file");
+            newVersionJarList.add(file);
             String libSign = (String) lib.get("sign");
+            //todo check sign
             if (jarMap.get(file) == null) {
-                downloadLib(file, sign);
+                downloadLib(tempFolder.getPath(), file, sign);
             }
         }
 //        备份本地应删除的文件、并删除
+        File bakFolder = new File(rootUrl.getPath() + "/bak");
+        if (bakFolder.exists()) {
+            deleteFile(bakFolder);
+        }
+        bakFolder.mkdir();
+        List<String> removeList = new ArrayList<>();
+        for (String key : jarMap.keySet()) {
+            if (newVersionJarList.contains(key)) {
+                continue;
+            }
+            File jar = new File(jarMap.get(key));
+            boolean b = jar.renameTo(new File(bakFolder.getPath() + "/" + key));
+            if (!b) {
+                throw new NulsException(ErrorCode.FAILED, "move the file fiald:" + key);
+            }
+        }
 //        将下载完的文件移动到正确位置
-//        重启动
-
+        File[] files = tempFolder.listFiles();
+        List<String> moved = new ArrayList<>();
+        try {
+            for (File file : files) {
+                boolean b = file.renameTo(new File(libsUrl.getPath() + "/" + file.getName()));
+                if (!b) {
+                    throw new NulsException(ErrorCode.FAILED, "move the file fiald:" + file.getPath());
+                }
+                moved.add(file.getName());
+            }
+        } catch (NulsException e) {
+            //移走的挪回来
+            for (String fileName : moved) {
+                File newFile = new File(libsUrl.getPath() + "/" + fileName);
+                if (newFile.exists()) {
+                    newFile.delete();
+                }
+            }
+            File[] bakFiles = bakFolder.listFiles();
+            for (File file : bakFiles) {
+                boolean b = file.renameTo(new File(libsUrl.getPath() + "/" + file.getName()));
+                if (!b) {
+                    Log.error("move the file fiald:" + file.getPath());
+                }
+            }
+            throw e;
+        }
+//todo 重启动
     }
 
     private static void deleteFile(File file) {
@@ -147,9 +193,30 @@ public class VersionManager {
         }
     }
 
-    private static void downloadLib(String file, String sign) throws NulsException {
-        // todo auto-generated method stub(niels)
+    private static void downloadLib(String folderPath, String file, String sign) throws NulsException {
+        byte[] bytes;
+        try {
+            bytes = HttpDownloadUtils.download(DOWNLOAD_FILE_FOLDER_URL + file);
+        } catch (IOException e) {
+            throw new NulsException(e);
+        }
+        //验证签名
 
+        OutputStream outputStream = null;
+        try {
+            outputStream = new FileOutputStream(new File(folderPath + "/" + file));
+            outputStream.write(bytes);
+            outputStream.flush();
+        } catch (Exception e) {
+            throw new NulsException(e);
+        } finally {
+            try {
+                outputStream.close();
+            } catch (IOException e) {
+                throw new NulsException(e);
+            }
+        }
     }
+
 
 }
