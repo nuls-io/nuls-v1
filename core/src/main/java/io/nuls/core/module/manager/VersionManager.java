@@ -9,8 +9,7 @@ import io.nuls.core.utils.json.JSONUtils;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.VersionUtils;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.util.*;
 
@@ -64,11 +63,15 @@ public class VersionManager {
         if (VersionUtils.equalsWith(version, localVersion)) {
             return;
         } else if (autoUpdate) {
-            updateFile(localVersion, version, versionList);
+            try {
+                updateFile(localVersion, version, versionList);
+            } catch (IOException e) {
+                throw new NulsException(e);
+            }
         }
     }
 
-    private static void updateFile(String oldVersion, String newVersion, List<NulsVersion> versionList) throws NulsException {
+    private static void updateFile(String oldVersion, String newVersion, List<NulsVersion> versionList) throws NulsException, IOException {
         //todo
         // 获取详细版本描述文件
         String jsonStr = null;
@@ -121,7 +124,7 @@ public class VersionManager {
             String libSign = (String) lib.get("sign");
             //todo check sign
             if (jarMap.get(file) == null) {
-                downloadLib(file, sign);
+                downloadLib(tempFolder.getPath(), file, sign);
             }
         }
 //        备份本地应删除的文件、并删除
@@ -169,7 +172,7 @@ public class VersionManager {
             }
             throw e;
         }
-//todo        重启动
+//todo 重启动
     }
 
     private static void deleteFile(File file) {
@@ -188,9 +191,29 @@ public class VersionManager {
         }
     }
 
-    private static void downloadLib(String file, String sign) throws NulsException {
-        // todo auto-generated method stub(niels)
+    private static void downloadLib(String folderPath, String file, String sign) throws NulsException {
+        byte[] bytes;
+        try {
+            bytes = HttpDownloadUtils.download(DOWNLOAD_FILE_FOLDER_URL + file);
+        } catch (IOException e) {
+            throw new NulsException(e);
+        }
+        //验证签名
 
+        OutputStream outputStream = null;
+        try {
+            outputStream = new FileOutputStream(new File(folderPath + "/" + file));
+            outputStream.write(bytes);
+            outputStream.flush();
+        } catch (Exception e) {
+            throw new NulsException(e);
+        } finally {
+            try {
+                outputStream.close();
+            } catch (IOException e) {
+                throw new NulsException(e);
+            }
+        }
     }
 
 }
