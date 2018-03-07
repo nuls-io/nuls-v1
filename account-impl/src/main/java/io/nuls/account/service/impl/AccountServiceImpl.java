@@ -133,6 +133,7 @@ public class AccountServiceImpl implements AccountService {
         locker.lock();
         try {
             Account account = AccountTool.createAccount();
+            account.encrypt(passwd);
             signAccount(account);
             AccountPo po = new AccountPo();
             AccountTool.toPojo(account, po);
