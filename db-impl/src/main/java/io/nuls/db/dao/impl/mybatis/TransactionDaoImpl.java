@@ -57,7 +57,7 @@ public class TransactionDaoImpl extends BaseDaoImpl<TransactionMapper, String, T
     public List<TransactionPo> getTxs(Long blockHeight) {
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.eq, blockHeight);
-        PageHelper.orderBy("block_height asc, create_time asc");
+        PageHelper.orderBy("create_time asc");
         return getMapper().selectList(searchable);
     }
 
@@ -68,20 +68,6 @@ public class TransactionDaoImpl extends BaseDaoImpl<TransactionMapper, String, T
         searchable.addCondition("block_height", SearchOperator.lte, endHeight);
         PageHelper.orderBy("block_height asc, create_time asc");
         return getMapper().selectList(searchable);
-    }
-
-    @Override
-    public List<TransactionPo> getTxs(String blockHash) {
-        Searchable searchable = new Searchable();
-        searchable.addCondition("block_hash", SearchOperator.eq, blockHash);
-        PageHelper.orderBy("block_height asc, create_time asc");
-        return getMapper().selectList(searchable);
-    }
-
-    @Override
-    public List<TransactionPo> getTxs(byte[] blockHash) {
-        String hash = Hex.encode(blockHash);
-        return getTxs(hash);
     }
 
     @Override

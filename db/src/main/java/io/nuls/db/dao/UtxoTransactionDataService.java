@@ -75,4 +75,6 @@ public interface UtxoTransactionDataService {
     int saveTxList(List<TransactionPo> poList);
 
     int saveLocalList(List<TransactionLocalPo> poList);
+
+    void deleteTx(String txHash);
 }

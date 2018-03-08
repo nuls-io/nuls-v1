@@ -57,7 +57,7 @@ public class TransactionLocalDaoImpl extends BaseDaoImpl<TransactionLocalMapper,
     public List<TransactionLocalPo> getTxs(Long blockHeight) {
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.eq, blockHeight);
-        PageHelper.orderBy("block_height asc, create_time asc");
+        PageHelper.orderBy("create_time asc");
         return getMapper().selectList(searchable);
     }
 
@@ -71,27 +71,13 @@ public class TransactionLocalDaoImpl extends BaseDaoImpl<TransactionLocalMapper,
     }
 
     @Override
-    public List<TransactionLocalPo> getTxs(String blockHash) {
-        Searchable searchable = new Searchable();
-        searchable.addCondition("block_hash", SearchOperator.eq, blockHash);
-        PageHelper.orderBy("block_height asc, create_time asc");
-        return getMapper().selectList(searchable);
-    }
-
-    @Override
-    public List<TransactionLocalPo> getTxs(byte[] blockHash) {
-        String hash = Hex.encode(blockHash);
-        return getTxs(hash);
-    }
-
-    @Override
     public List<TransactionLocalPo> getTxs(String address, int type, Integer start, Integer limit) {
         Searchable searchable = new Searchable();
         if (type != 0) {
             searchable.addCondition("a.type", SearchOperator.eq, type);
         }
         if (StringUtils.isNotBlank(address)) {
-            searchable.addCondition("d.address", SearchOperator.eq, address);
+            searchable.addCondition("e.address", SearchOperator.eq, address);
         }
 
         if (start != null && limit != null) {

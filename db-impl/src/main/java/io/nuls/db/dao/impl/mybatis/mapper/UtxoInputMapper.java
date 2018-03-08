@@ -24,6 +24,7 @@
 package io.nuls.db.dao.impl.mybatis.mapper;
 
 import io.nuls.db.dao.impl.mybatis.common.BaseMapper;
+import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import io.nuls.db.entity.UtxoInputPo;
 
 import java.util.Map;
@@ -34,4 +35,5 @@ import java.util.Map;
  */
 public interface UtxoInputMapper extends BaseMapper<Map<String, Object>, UtxoInputPo> {
 
+    void deleteBySearchable(Searchable searchable);
 }

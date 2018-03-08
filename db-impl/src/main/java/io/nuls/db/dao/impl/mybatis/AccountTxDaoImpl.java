@@ -85,6 +85,7 @@ public class AccountTxDaoImpl implements AccountAliasDataService {
     }
 
     @Override
+    @DbSession
     public void rollbackAlias(AliasPo aliasPo) {
         try {
             aliasDao.delete(aliasPo.getAlias());

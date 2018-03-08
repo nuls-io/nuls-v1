@@ -63,4 +63,9 @@
     select count(txHash) from utxo_input
     <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
   </select>
+
+  <delete id="deleteBySearchable" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable">
+    delete from utxo_input
+    <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
+  </delete>
 </mapper>

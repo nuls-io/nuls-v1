@@ -11,9 +11,15 @@ public class BalanceDto {
     private Double locked;
 
     public BalanceDto(Balance balance) {
-        this.balance = balance.getBalance().toDouble();
-        this.usable = balance.getUsable().toDouble();
-        this.locked = balance.getLocked().toDouble();
+        if (balance == null) {
+            this.balance = 0d;
+            this.usable = 0d;
+            this.locked = 0d;
+        } else {
+            this.balance = balance.getBalance().toDouble();
+            this.usable = balance.getUsable().toDouble();
+            this.locked = balance.getLocked().toDouble();
+        }
     }
 
 

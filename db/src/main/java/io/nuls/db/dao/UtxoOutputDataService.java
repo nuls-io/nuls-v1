@@ -50,4 +50,6 @@ public interface UtxoOutputDataService extends BaseDataService<Map<String, Objec
     int updateStatus(List<UtxoOutputPo> list);
 
     int updateStatus(UtxoOutputPo po);
+
+    void deleteByHash(String txHash);
 }

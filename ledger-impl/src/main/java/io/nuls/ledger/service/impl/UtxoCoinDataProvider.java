@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -243,25 +243,18 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 cacheService.updateUtxoStatus(input.getKey(), UtxoOutput.USEABLE, UtxoOutput.LOCKED);
             }
         } else if (tx.getStatus().equals(TxStatusEnum.CONFIRMED)) {
-            Map<String, Object> keyMap = new HashMap<>();
             Set<String> addressSet = new HashSet<>();
             //process output
+            outputDataService.deleteByHash(tx.getHash().getDigestHex());
+
             for (UtxoOutput output : utxoData.getOutputs()) {
-                keyMap.clear();
-                keyMap.put("txHash", output.getTxHash().getDigestHex());
-                keyMap.put("outIndex", output.getIndex());
-
-                outputDataService.delete(keyMap);
-                cacheService.removeUtxo(output.getKey());
-
                 // if utxo not spent,should calc balance and clear cache
+                cacheService.removeUtxo(output.getKey());
                 Address address = Address.fromHashs(output.getAddress());
                 UtxoBalance balance = (UtxoBalance) cacheService.getBalance(address.getBase58());
                 if (balance != null) {
                     balance.removeUnSpend(output.getKey());
                 }
-
-                UtxoTransactionTool.getInstance().calcBalance(address.getBase58());
                 addressSet.add(address.getBase58());
             }
 
@@ -269,12 +262,10 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             //1. delete input (database)
             //2. change input referenced output status (database)
             //3. cache and calc balance
+            inputDataService.deleteByHash(tx.getHash().getDigestHex());
+            Map<String, Object> keyMap = new HashMap<>();
             for (UtxoInput input : utxoData.getInputs()) {
                 keyMap.clear();
-                keyMap.put("txHash", input.getTxHash().getDigestHex());
-                keyMap.put("inIndex", input.getIndex());
-                inputDataService.delete(keyMap);
-
                 keyMap.put("txHash", input.getFromHash().getDigestHex());
                 keyMap.put("outIndex", input.getFromIndex());
                 UtxoOutputPo outputPo = outputDataService.get(keyMap);
@@ -290,7 +281,10 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                     balance = new UtxoBalance(Na.valueOf(output.getValue()), Na.ZERO);
                 }
                 balance.addUnSpend(output);
-                UtxoTransactionTool.getInstance().calcBalance(outputPo.getAddress());
+            }
+
+            for (String address : addressSet) {
+                UtxoTransactionTool.getInstance().calcBalance(address);
             }
 
             relationDataService.deleteRelation(tx.getHash().getDigestHex(), addressSet);
@@ -348,7 +342,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 output.setValue(coin.getNa().getValue());
                 output.setStatus(UtxoOutput.USEABLE);
                 output.setIndex(i);
-                P2PKHScript p2PKHScript = new P2PKHScript(NulsDigestData.calcDigestData(ECKey.fromPrivate(new BigInteger(priKey)).getPubKey(),NulsDigestData.DIGEST_ALG_SHA160));
+                P2PKHScript p2PKHScript = new P2PKHScript(NulsDigestData.calcDigestData(ECKey.fromPrivate(new BigInteger(priKey)).getPubKey(), NulsDigestData.DIGEST_ALG_SHA160));
                 output.setScript(p2PKHScript);
                 output.setScriptBytes(output.getScript().getBytes());
                 if (coin.getUnlockHeight() > 0) {
@@ -375,7 +369,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             output.setIndex(i);
             output.setParent(tx);
             output.setStatus(UtxoOutput.USEABLE);
-            P2PKHScript p2PKHScript = new P2PKHScript(NulsDigestData.calcDigestData(ECKey.fromPrivate(new BigInteger(priKey)).getPubKey(),NulsDigestData.DIGEST_ALG_SHA160));
+            P2PKHScript p2PKHScript = new P2PKHScript(NulsDigestData.calcDigestData(ECKey.fromPrivate(new BigInteger(priKey)).getPubKey(), NulsDigestData.DIGEST_ALG_SHA160));
             output.setScript(p2PKHScript);
             output.setScriptBytes(output.getScript().getBytes());
             outputs.add(output);

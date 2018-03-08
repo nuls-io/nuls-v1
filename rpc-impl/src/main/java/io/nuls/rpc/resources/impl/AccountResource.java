@@ -37,10 +37,7 @@ import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.entity.UtxoBalance;
 import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.service.intf.LedgerService;
-import io.nuls.rpc.entity.AccountDto;
-import io.nuls.rpc.entity.BalanceDto;
-import io.nuls.rpc.entity.OutputDto;
-import io.nuls.rpc.entity.RpcResult;
+import io.nuls.rpc.entity.*;
 import io.nuls.rpc.resources.form.AccountParamForm;
 
 import javax.ws.rs.*;
@@ -181,7 +178,14 @@ public class AccountResource {
     @Path("/assets/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getAssets(@QueryParam("address") String address) {
-        return RpcResult.getSuccess();
+        if (!StringUtils.validPassword(address)) {
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+
+        Balance balance = ledgerService.getBalance(address);
+        RpcResult result = RpcResult.getSuccess();
+        result.setData(new AssetDto("Nuls", balance));
+        return result;
     }
 
     @GET

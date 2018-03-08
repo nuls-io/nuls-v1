@@ -128,4 +128,11 @@ public class UtxoOutputDaoImpl extends BaseDaoImpl<UtxoOutputMapper, Map<String,
         return getMapper().updateStatus(po);
     }
 
+    @Override
+    public void deleteByHash(String txHash) {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("tx_hash", SearchOperator.eq, txHash);
+        getMapper().deleteBySearchable(searchable);
+    }
+
 }

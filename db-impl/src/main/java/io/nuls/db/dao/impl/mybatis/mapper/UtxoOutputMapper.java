@@ -40,4 +40,6 @@ public interface UtxoOutputMapper extends BaseMapper<Map<String, Object>, UtxoOu
     int updateStatus(UtxoOutputPo po);
 
     List<UtxoOutputPo> selectAccountOutput(Searchable searchable);
+
+    void deleteBySearchable(Searchable searchable);
 }
