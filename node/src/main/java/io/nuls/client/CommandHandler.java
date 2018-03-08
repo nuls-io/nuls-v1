@@ -68,7 +68,7 @@ public class CommandHandler {
     }
 
     private String processCommand(String[] args) {
-        if (args.length == 1) {
+        if (args.length == 0) {
             return CommandConstant.COMMAND_ERROR;
         }
         String command = args[0];
