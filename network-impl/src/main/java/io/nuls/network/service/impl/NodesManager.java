@@ -105,7 +105,7 @@ public class NodesManager implements Runnable {
      */
     public void start() {
         List<Node> nodes = discoverHandler.getLocalNodes(network.maxOutCount());
-        if (nodes == null && nodes.isEmpty()) {
+        if (nodes == null || nodes.isEmpty()) {
             nodes = getSeedNodes();
         }
         for (Node node : nodes) {
