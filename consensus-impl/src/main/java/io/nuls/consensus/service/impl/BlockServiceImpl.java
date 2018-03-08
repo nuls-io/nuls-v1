@@ -139,12 +139,6 @@ public class BlockServiceImpl implements BlockService {
         }
         blockStorageService.save(block.getHeader());
         ledgerService.saveTxList(block.getTxs());
-        Block bblock = null;
-        try {
-            bblock = blockStorageService.getBlock(block.getHeader().getHash().getDigestHex());
-        } catch (Exception e) {
-            Log.error(e);
-        }
     }
 
 
@@ -159,6 +153,7 @@ public class BlockServiceImpl implements BlockService {
         this.ledgerService.deleteTx(block.getHeader().getHeight());
         blockStorageService.delete(block.getHeader().getHash().getDigestHex());
     }
+
 
     @Override
     public List<BlockHeader> getBlockHashList(long startHeight, long endHeight, long split) {
