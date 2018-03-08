@@ -32,6 +32,8 @@ import io.nuls.consensus.entity.tx.PocExitConsensusTransaction;
 import io.nuls.consensus.entity.tx.PocJoinConsensusTransaction;
 import io.nuls.consensus.entity.tx.RedPunishTransaction;
 import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
+import io.nuls.consensus.event.notice.CancelConsensusNotice;
+import io.nuls.consensus.event.notice.StopConsensusNotice;
 import io.nuls.consensus.manager.ConsensusManager;
 import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.core.chain.entity.Transaction;
@@ -43,6 +45,7 @@ import io.nuls.db.dao.DelegateAccountDataService;
 import io.nuls.db.dao.DelegateDataService;
 import io.nuls.db.entity.DelegateAccountPo;
 import io.nuls.db.entity.DelegatePo;
+import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.service.intf.LedgerService;
 
 import java.util.HashMap;
@@ -78,6 +81,9 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
             dpo.setStatus(ConsensusStatusEnum.IN.getCode());
             this.delegateDataService.updateSelectiveByAgentAddress(dpo);
             consensusManager.joinMeeting();
+            CancelConsensusNotice notice = new CancelConsensusNotice();
+            notice.setEventBody(tx);
+            NulsContext.getServiceBean(EventBroadcaster.class).publishToLocal(notice);
             return;
         }
         PocJoinConsensusTransaction pjcTx = (PocJoinConsensusTransaction) joinTx;
@@ -89,6 +95,9 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
             dPo = ConsensusTool.delegateToPojo(cd);
             this.delegateDataService.save(dPo);
         }
+        StopConsensusNotice notice = new StopConsensusNotice();
+        notice.setEventBody(tx);
+        NulsContext.getServiceBean(EventBroadcaster.class).publishToLocal(notice);
     }
 
     @Override

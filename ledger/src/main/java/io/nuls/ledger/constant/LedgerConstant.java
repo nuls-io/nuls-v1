@@ -28,10 +28,6 @@ package io.nuls.ledger.constant;
  * @date 2017/11/8
  */
 public interface LedgerConstant {
-    //version
-    int LEDGER_MODULE_VERSION = 0;
-    //Minimum version supported
-    int MINIMUM_VERSION_SUPPORTED = 0;
 
     int SMALL_CHANGE_COUNT = 500;
 
@@ -40,5 +36,6 @@ public interface LedgerConstant {
     String UTXO = "UTXO";
 
     short EVENT_TYPE_TRANSACTION = 1;
+    short NOTICE_BALANCE_CHANGE = 2;
 
 }

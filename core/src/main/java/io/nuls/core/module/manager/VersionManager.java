@@ -26,7 +26,11 @@ public class VersionManager {
 
 
     public static void start() throws NulsException {
-        //todo
+        URL libsUrl = VersionUtils.class.getClassLoader().getResource("libs");
+        if (null == libsUrl) {
+            //devlopment
+            return;
+        }
         List<NulsVersion> versionList = NulsContext.getServiceBeanList(NulsVersion.class);
         String localVersion = null;
         for (NulsVersion version : versionList) {
@@ -64,16 +68,14 @@ public class VersionManager {
             return;
         } else if (autoUpdate) {
             try {
-                updateFile(localVersion, version, versionList);
+                updateFile(localVersion, version, versionList, libsUrl);
             } catch (IOException e) {
                 throw new NulsException(e);
             }
         }
     }
 
-    private static void updateFile(String oldVersion, String newVersion, List<NulsVersion> versionList) throws NulsException, IOException {
-        //todo
-        // 获取详细版本描述文件
+    private static void updateFile(String oldVersion, String newVersion, List<NulsVersion> versionList, URL libsUrl) throws NulsException, IOException {
         String jsonStr = null;
         try {
             jsonStr = new String(HttpDownloadUtils.download(VERDION_JSON_URL), NulsContext.DEFAULT_ENCODING);
@@ -97,20 +99,11 @@ public class VersionManager {
             return;
         }
         Map<String, String> jarMap = new HashMap<>();
-        URL libsUrl = null;
-        try {
-            libsUrl = VersionUtils.class.getClassLoader().getResource("libs");
-            if (null != libsUrl) {
-                fillJarMap(libsUrl, jarMap);
-            }
-        } catch (IOException e) {
-            Log.error(e);
-        }
+        fillJarMap(libsUrl, jarMap);
         // jarMap is empty means it's development environment
         if (jarMap.isEmpty()) {
             return;
         }
-//      下载本次新增文件到特定目录，当存在验证不通过的jar文件，记录日志并停止更新
         List<Map<String, Object>> libList = (List<Map<String, Object>>) map.get("libs");
         //check the temp folder exist,and delete
         URL rootUrl = VersionManager.class.getResource("");
@@ -129,24 +122,35 @@ public class VersionManager {
                 downloadLib(tempFolder.getPath(), file, sign);
             }
         }
-//        备份本地应删除的文件、并删除
         File bakFolder = new File(rootUrl.getPath() + "/bak");
         if (bakFolder.exists()) {
             deleteFile(bakFolder);
         }
         bakFolder.mkdir();
         List<String> removeList = new ArrayList<>();
-        for (String key : jarMap.keySet()) {
-            if (newVersionJarList.contains(key)) {
-                continue;
+        try {
+            for (String key : jarMap.keySet()) {
+                if (newVersionJarList.contains(key)) {
+                    continue;
+                }
+                File jar = new File(jarMap.get(key));
+                boolean b = jar.renameTo(new File(bakFolder.getPath() + "/" + key));
+                if (!b) {
+                    throw new NulsException(ErrorCode.FAILED, "move the file fiald:" + key);
+                }
+                removeList.add(jar.getName());
             }
-            File jar = new File(jarMap.get(key));
-            boolean b = jar.renameTo(new File(bakFolder.getPath() + "/" + key));
-            if (!b) {
-                throw new NulsException(ErrorCode.FAILED, "move the file fiald:" + key);
+        } catch (NulsException e) {
+            List<String> failedList = new ArrayList<>();
+            for (String fileName : removeList) {
+                File file = new File(bakFolder.getPath() + "/" + fileName);
+                boolean b = file.renameTo(new File(libsUrl.getPath() + "/" + fileName));
+                if (!b) {
+                    failedList.add(bakFolder.getPath() + "/" + fileName);
+                }
             }
+            failedOpration(failedList);
         }
-//        将下载完的文件移动到正确位置
         File[] files = tempFolder.listFiles();
         List<String> moved = new ArrayList<>();
         try {
@@ -158,7 +162,6 @@ public class VersionManager {
                 moved.add(file.getName());
             }
         } catch (NulsException e) {
-            //移走的挪回来
             for (String fileName : moved) {
                 File newFile = new File(libsUrl.getPath() + "/" + fileName);
                 if (newFile.exists()) {
@@ -166,15 +169,27 @@ public class VersionManager {
                 }
             }
             File[] bakFiles = bakFolder.listFiles();
+            List<String> failedList = new ArrayList<>();
             for (File file : bakFiles) {
                 boolean b = file.renameTo(new File(libsUrl.getPath() + "/" + file.getName()));
                 if (!b) {
-                    Log.error("move the file fiald:" + file.getPath());
+                    failedList.add(file.getPath());
                 }
             }
-            throw e;
+            failedOpration(failedList);
         }
-//todo 重启动
+//todo 重启动，或者发送通知
+    }
+
+    private static void failedOpration(List<String> failedList) throws NulsException {
+        if (!failedList.isEmpty()) {
+            StringBuilder str = new StringBuilder();
+            for (String fileName : failedList) {
+                str.append(fileName);
+                str.append(";");
+            }
+            throw new NulsException(ErrorCode.FAILED, "move the file fiald:" + str.toString());
+        }
     }
 
     private static void deleteFile(File file) {

@@ -30,6 +30,7 @@ import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TxStatusEnum;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.script.ScriptBuilder;
 import io.nuls.core.exception.NulsException;
@@ -44,9 +45,11 @@ import io.nuls.db.entity.TxAccountRelationPo;
 import io.nuls.db.entity.UtxoInputPo;
 import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.db.transactional.annotation.DbSession;
+import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.*;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
+import io.nuls.ledger.event.notice.BalanceChangeNotice;
 import io.nuls.ledger.service.intf.CoinDataProvider;
 import io.nuls.ledger.util.UtxoTransactionTool;
 import io.nuls.ledger.util.UtxoTransferTool;
@@ -290,7 +293,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 
             relationDataService.deleteRelation(tx.getHash().getDigestHex(), addressSet);
         }
-
     }
 
     @Override
@@ -380,5 +382,4 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         utxoData.setOutputs(outputs);
         return utxoData;
     }
-
 }

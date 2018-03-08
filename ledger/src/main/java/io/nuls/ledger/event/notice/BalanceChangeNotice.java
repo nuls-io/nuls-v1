@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,40 +21,38 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.consensus.event;
 
-import io.nuls.consensus.constant.ConsensusEventType;
-import io.nuls.consensus.entity.GetBlockHeaderParam;
+package io.nuls.ledger.event.notice;
+
+import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.event.BaseEvent;
 import io.nuls.core.event.NoticeData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.ledger.constant.LedgerConstant;
 
 /**
  * @author Niels
- * @date 2017/12/11
+ * @date 2018/3/8
  */
-public class GetBlockHeaderEvent extends BaseConsensusEvent<GetBlockHeaderParam> {
-    public GetBlockHeaderEvent() {
-        super(ConsensusEventType.GET_BLOCK_HEADER);
-    }
-
-    public GetBlockHeaderEvent(long height) {
-        this();
-        this.setEventBody(new GetBlockHeaderParam(height));
+public class BalanceChangeNotice extends BaseEvent<BalanceChangeData> {
+    public BalanceChangeNotice() {
+        super(NulsConstant.MODULE_ID_LEDGER, LedgerConstant.NOTICE_BALANCE_CHANGE);
     }
 
     @Override
-    protected GetBlockHeaderParam parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
-        if (byteBuffer.isFinished()) {
-            return null;
-        }
-        return byteBuffer.readNulsData(new GetBlockHeaderParam(null));
+    protected BalanceChangeData parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new BalanceChangeData());
     }
 
     @Override
     public NoticeData getNotice() {
-        return null;
+        NoticeData data = new NoticeData();
+        data.setData(this.getEventBody());
+        data.setMessage(ErrorCode.BALANCE_CHANGE);
+        return data;
     }
-
 }

@@ -44,6 +44,7 @@ import io.nuls.consensus.entity.member.Delegate;
 import io.nuls.consensus.entity.tx.RedPunishTransaction;
 import io.nuls.consensus.entity.tx.YellowPunishTransaction;
 import io.nuls.consensus.event.BlockHeaderEvent;
+import io.nuls.consensus.event.notice.PackedBlockNotice;
 import io.nuls.consensus.manager.ConsensusManager;
 import io.nuls.consensus.service.impl.PocBlockService;
 import io.nuls.consensus.service.intf.BlockService;
@@ -255,6 +256,9 @@ public class ConsensusMeetingRunner implements Runnable {
         BlockHeaderEvent event = new BlockHeaderEvent();
         event.setEventBody(newBlock.getHeader());
         eventBroadcaster.broadcastAndCache(event, false);
+        PackedBlockNotice notice = new PackedBlockNotice();
+        notice.setEventBody(newBlock.getHeader());
+        eventBroadcaster.publishToLocal(notice);
     }
 
 

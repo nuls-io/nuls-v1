@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,40 +21,19 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.consensus.event;
 
-import io.nuls.consensus.constant.ConsensusEventType;
-import io.nuls.consensus.entity.GetBlockHeaderParam;
-import io.nuls.core.event.NoticeData;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.io.NulsByteBuffer;
+package io.nuls.account.constant;
 
 /**
  * @author Niels
- * @date 2017/12/11
+ * @date 2018/3/8
  */
-public class GetBlockHeaderEvent extends BaseConsensusEvent<GetBlockHeaderParam> {
-    public GetBlockHeaderEvent() {
-        super(ConsensusEventType.GET_BLOCK_HEADER);
-    }
-
-    public GetBlockHeaderEvent(long height) {
-        this();
-        this.setEventBody(new GetBlockHeaderParam(height));
-    }
-
-    @Override
-    protected GetBlockHeaderParam parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
-        if (byteBuffer.isFinished()) {
-            return null;
-        }
-        return byteBuffer.readNulsData(new GetBlockHeaderParam(null));
-    }
-
-    @Override
-    public NoticeData getNotice() {
-        return null;
-    }
-
+public interface EventType {
+   short ACCOUNT_CREATE_NOTICE = 1;
+   short ACCOUNT_IMPORTED_NOTICE = 2;
+   short DEFAULT_ACCOUNT_CHANGE_NOTICE = 3;
+   short PASSWORD_CHANGE_NOTICE  = 4;
+   short SET_ALIAS_NOTICE = 5;
 }

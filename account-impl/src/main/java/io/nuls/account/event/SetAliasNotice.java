@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,40 +21,46 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.consensus.event;
 
-import io.nuls.consensus.constant.ConsensusEventType;
-import io.nuls.consensus.entity.GetBlockHeaderParam;
+package io.nuls.account.event;
+
+import io.nuls.account.constant.EventType;
+import io.nuls.account.entity.tx.AliasTransaction;
+import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.event.BaseEvent;
 import io.nuls.core.event.NoticeData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author Niels
- * @date 2017/12/11
+ * @date 2018/3/8
  */
-public class GetBlockHeaderEvent extends BaseConsensusEvent<GetBlockHeaderParam> {
-    public GetBlockHeaderEvent() {
-        super(ConsensusEventType.GET_BLOCK_HEADER);
-    }
+public class SetAliasNotice extends AccountNotice<AliasTransaction> {
 
-    public GetBlockHeaderEvent(long height) {
-        this();
-        this.setEventBody(new GetBlockHeaderParam(height));
+    public SetAliasNotice() {
+        super(EventType.SET_ALIAS_NOTICE);
     }
 
     @Override
-    protected GetBlockHeaderParam parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
-        if (byteBuffer.isFinished()) {
-            return null;
-        }
-        return byteBuffer.readNulsData(new GetBlockHeaderParam(null));
+    protected AliasTransaction parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
+        return null;
     }
 
     @Override
     public NoticeData getNotice() {
-        return null;
+        NoticeData data = new NoticeData();
+        Map<String, String> map = new HashMap<>();
+        map.put("address", this.getEventBody().getTxData().getAddress());
+        map.put("alias", this.getEventBody().getTxData().getAlias());
+        data.setData(map);
+        data.setMessage(ErrorCode.SET_AN_ALIAS);
+        return data;
     }
-
 }

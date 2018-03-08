@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,40 +21,40 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.consensus.event;
 
-import io.nuls.consensus.constant.ConsensusEventType;
-import io.nuls.consensus.entity.GetBlockHeaderParam;
-import io.nuls.core.event.NoticeData;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.io.NulsByteBuffer;
+package io.nuls.core.event;
+
+import io.nuls.core.constant.ErrorCode;
 
 /**
  * @author Niels
- * @date 2017/12/11
+ * @date 2018/3/8
  */
-public class GetBlockHeaderEvent extends BaseConsensusEvent<GetBlockHeaderParam> {
-    public GetBlockHeaderEvent() {
-        super(ConsensusEventType.GET_BLOCK_HEADER);
+public class NoticeData{
+
+    private String message;
+
+    private Object data;
+
+    public String getMessage() {
+        return message;
     }
 
-    public GetBlockHeaderEvent(long height) {
-        this();
-        this.setEventBody(new GetBlockHeaderParam(height));
+    public void setMessage(String message) {
+        this.message = message;
     }
 
-    @Override
-    protected GetBlockHeaderParam parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
-        if (byteBuffer.isFinished()) {
-            return null;
-        }
-        return byteBuffer.readNulsData(new GetBlockHeaderParam(null));
+    public Object getData() {
+        return data;
     }
 
-    @Override
-    public NoticeData getNotice() {
-        return null;
+    public void setData(Object data) {
+        this.data = data;
     }
 
+    public void setMessage(ErrorCode code) {
+        this.message = code.getMsg();
+    }
 }

@@ -27,6 +27,7 @@ import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.BlockHashResponse;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.event.BaseEvent;
+import io.nuls.core.event.NoticeData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -44,5 +45,10 @@ public class BlocksHashEvent extends BaseEvent<BlockHashResponse> {
     @Override
     protected BlockHashResponse parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
         return byteBuffer.readNulsData(new BlockHashResponse());
+    }
+
+    @Override
+    public NoticeData getNotice() {
+        return null;
     }
 }

@@ -27,15 +27,22 @@ import io.nuls.consensus.cache.manager.block.BlockCacheManager;
 import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.consensus.entity.GetSmallBlockParam;
 import io.nuls.consensus.entity.GetTxGroupParam;
+import io.nuls.consensus.entity.RedPunishData;
 import io.nuls.consensus.event.GetSmallBlockRequest;
 import io.nuls.consensus.event.GetTxGroupRequest;
+import io.nuls.consensus.event.notice.AssembledBlockNotice;
+import io.nuls.consensus.thread.ConsensusMeetingRunner;
 import io.nuls.consensus.thread.DataDownloadThread;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.SmallBlock;
+import io.nuls.core.chain.entity.*;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.str.StringUtils;
+import io.nuls.core.validate.ValidateResult;
+import io.nuls.db.entity.NodePo;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 
 import java.util.ArrayList;
@@ -100,6 +107,36 @@ public class DownloadDataUtils {
             if (!exist) {
                 txHashList.add(txHash);
             }
+        }
+        if(txHashList.isEmpty()){
+            BlockHeader header = blockCacheManager.getBlockHeader(smb.getBlockHash().getDigestHex());
+            if(null==header){
+                return;
+            }
+            Block block = new Block();
+            block.setHeader(header);
+            List<Transaction> txs = new ArrayList<>();
+            for (NulsDigestData txHash : smb.getTxHashList()) {
+                Transaction tx = txCacheManager.getTx(txHash);
+                if (null == tx) {
+                    throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
+                }
+                txs.add(tx);
+            }
+            block.setTxs(txs);
+            ValidateResult<RedPunishData> vResult = block.verify();
+            if (null == vResult || vResult.isFailed()) {
+                if (vResult.getLevel() == SeverityLevelEnum.FLAGRANT_FOUL) {
+                    RedPunishData redPunishData = vResult.getObject();
+                    ConsensusMeetingRunner.putPunishData(redPunishData);
+                }
+                return;
+            }
+            blockCacheManager.cacheBlock(block);
+            AssembledBlockNotice notice = new AssembledBlockNotice();
+            notice.setEventBody(header);
+            eventBroadcaster.publishToLocal(notice);
+            return;
         }
         data.setTxHashList(txHashList);
         request.setEventBody(data);

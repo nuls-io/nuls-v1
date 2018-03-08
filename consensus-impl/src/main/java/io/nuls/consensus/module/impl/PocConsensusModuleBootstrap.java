@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -29,6 +29,7 @@ import io.nuls.consensus.entity.tx.*;
 import io.nuls.consensus.entity.validator.PocBlockValidatorManager;
 import io.nuls.consensus.event.*;
 import io.nuls.consensus.event.handler.*;
+import io.nuls.consensus.event.notice.*;
 import io.nuls.consensus.manager.ConsensusManager;
 import io.nuls.consensus.module.AbstractConsensusModule;
 import io.nuls.consensus.service.impl.BlockServiceImpl;
@@ -38,6 +39,7 @@ import io.nuls.consensus.service.tx.*;
 import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.event.EventManager;
 import io.nuls.core.thread.BaseThread;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
@@ -58,6 +60,12 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
 
     @Override
     public void init() {
+        EventManager.putEvent(AssembledBlockNotice.class);
+        EventManager.putEvent(CancelConsensusNotice.class);
+        EventManager.putEvent(EntrustConsensusNotice.class);
+        EventManager.putEvent(PackedBlockNotice.class);
+        EventManager.putEvent(RegisterAgentNotice.class);
+        EventManager.putEvent(StopConsensusNotice.class);
         PocBlockValidatorManager.initHeaderValidators();
         PocBlockValidatorManager.initBlockValidators();
         this.registerTransaction(TransactionConstant.TX_TYPE_REGISTER_AGENT, RegisterAgentTransaction.class, new RegisterAgentTxService());
@@ -120,7 +128,7 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
 
         eventBusService.subscribeEvent(BlocksHashEvent.class, new BlocksHashHandler());
         eventBusService.subscribeEvent(GetBlocksHashRequest.class, new GetBlocksHashHandler());
-        eventBusService.subscribeEvent(GetSmallBlockRequest.class,new GetSmallBlockHandler());
+        eventBusService.subscribeEvent(GetSmallBlockRequest.class, new GetSmallBlockHandler());
         eventBusService.subscribeEvent(SmallBlockEvent.class, new SmallBlockHandler());
     }
 

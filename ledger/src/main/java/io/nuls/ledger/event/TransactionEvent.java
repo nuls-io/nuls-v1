@@ -25,7 +25,9 @@ package io.nuls.ledger.event;
 
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.chain.manager.TransactionManager;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.event.NoticeData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.ledger.constant.LedgerConstant;
@@ -47,5 +49,13 @@ public class TransactionEvent extends io.nuls.core.event.BaseEvent<Transaction> 
         } catch (Exception e) {
             throw new NulsException(e);
         }
+    }
+
+    @Override
+    public NoticeData getNotice() {
+        NoticeData data = new NoticeData();
+        data.setMessage(ErrorCode.NEW_TX_RECIEVED);
+        data.setData(this.getEventBody().getHash().getDigestHex());
+        return data;
     }
 }

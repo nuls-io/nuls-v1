@@ -25,6 +25,7 @@ package io.nuls.network.message;
 
 import io.nuls.core.chain.entity.BasicTypeData;
 import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.event.NoticeData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
@@ -42,6 +43,11 @@ public class ReplyNotice extends io.nuls.core.event.BaseEvent<BasicTypeData<byte
     protected BasicTypeData<byte[]> parseEventBody(NulsByteBuffer byteBuffer) throws NulsException{
         BasicTypeData<byte[]> typeData = new BasicTypeData(byteBuffer);
         return typeData;
+    }
+
+    @Override
+    public NoticeData getNotice() {
+        return null;
     }
 
     @Override

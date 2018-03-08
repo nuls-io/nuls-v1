@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -44,6 +44,12 @@ public interface PocConsensusConstant {
     short EVENT_TYPE_GET_BLOCKS_HASH = 20;
     short EVENT_TYPE_BLOCKS_HASH = 21;
 
+    short NOTICE_PACKED_BLOCK = 22;
+    short NOTICE_REGISTER_AGENT = 23;
+    short NOTICE_ASSEMBLED_BLOCK = 24;
+    short NOTICE_JOIN_CONSENSUS = 25;
+    short NOTICE_EXIT_CONSENSUS = 26;
+    short NOTICE_CANCEL_CONSENSUS = 27;
     /**
      *   THE PARAMETERS OF CONSENSUS,bellow
      */

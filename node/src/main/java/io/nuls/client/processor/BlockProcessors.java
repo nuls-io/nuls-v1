@@ -28,9 +28,8 @@ package io.nuls.client.processor;
 
 import io.nuls.client.entity.CommandResult;
 import io.nuls.client.processor.intf.CommandProcessor;
-import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.rpc.sdk.entity.RpcClientResult;
-import io.nuls.rpc.sdk.service.AccountService;
+import io.nuls.rpc.sdk.service.BlockService;
 
 /**
  * @author Niels
@@ -38,10 +37,10 @@ import io.nuls.rpc.sdk.service.AccountService;
  */
 public abstract class BlockProcessors implements CommandProcessor {
 
-    protected AccountService accountService = new AccountService();
+    protected BlockService blockService = new BlockService();
 
     /**
-     * create accounts processor
+     * Get the best height of blocks
      */
     public static class BestHeight extends BlockProcessors {
 
@@ -62,8 +61,11 @@ public abstract class BlockProcessors implements CommandProcessor {
 
         @Override
         public CommandResult execute(String[] args) {
-
-            return null;
+            RpcClientResult result = this.blockService.getBestBlockHeight();
+            return CommandResult.getResult(result);
         }
     }
+
+
+
 }

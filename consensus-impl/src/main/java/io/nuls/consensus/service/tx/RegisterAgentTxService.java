@@ -28,6 +28,7 @@ import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
+import io.nuls.consensus.event.notice.RegisterAgentNotice;
 import io.nuls.consensus.manager.ConsensusManager;
 import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.core.context.NulsContext;
@@ -37,6 +38,7 @@ import io.nuls.db.dao.DelegateAccountDataService;
 import io.nuls.db.dao.DelegateDataService;
 import io.nuls.db.entity.DelegateAccountPo;
 import io.nuls.db.entity.DelegatePo;
+import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.service.intf.LedgerService;
 
 /**
@@ -63,6 +65,9 @@ public class RegisterAgentTxService implements TransactionService<RegisterAgentT
         po.setStatus(ConsensusStatusEnum.IN.getCode());
         delegateAccountService.updateSelective(po);
         consensusManager.joinMeeting();
+        RegisterAgentNotice notice = new RegisterAgentNotice();
+        notice.setEventBody(tx);
+        NulsContext.getServiceBean(EventBroadcaster.class).publishToLocal(notice);
     }
 
 

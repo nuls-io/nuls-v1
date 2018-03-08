@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,40 +21,41 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.consensus.event;
 
-import io.nuls.consensus.constant.ConsensusEventType;
-import io.nuls.consensus.entity.GetBlockHeaderParam;
+package io.nuls.consensus.event.notice;
+
+import io.nuls.consensus.constant.PocConsensusConstant;
+import io.nuls.consensus.entity.block.BlockHeaderChain;
+import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
+import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.event.BaseEvent;
 import io.nuls.core.event.NoticeData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
 /**
  * @author Niels
- * @date 2017/12/11
+ * @date 2018/3/8
  */
-public class GetBlockHeaderEvent extends BaseConsensusEvent<GetBlockHeaderParam> {
-    public GetBlockHeaderEvent() {
-        super(ConsensusEventType.GET_BLOCK_HEADER);
-    }
-
-    public GetBlockHeaderEvent(long height) {
-        this();
-        this.setEventBody(new GetBlockHeaderParam(height));
+public class AssembledBlockNotice extends BaseEvent<BlockHeader> {
+    public AssembledBlockNotice() {
+        super(NulsConstant.MODULE_ID_CONSENSUS, PocConsensusConstant.NOTICE_ASSEMBLED_BLOCK);
     }
 
     @Override
-    protected GetBlockHeaderParam parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
-        if (byteBuffer.isFinished()) {
-            return null;
-        }
-        return byteBuffer.readNulsData(new GetBlockHeaderParam(null));
+    protected BlockHeader parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
+        return null;
     }
 
     @Override
     public NoticeData getNotice() {
-        return null;
+        NoticeData data = new NoticeData();
+        data.setMessage(ErrorCode.ASSEMBLED_BLOCK);
+        data.setData(this.getEventBody().getHeight());
+        return data;
     }
-
 }

@@ -26,6 +26,7 @@
 package io.nuls.notify.handler;
 
 import io.nuls.core.event.BaseEvent;
+import io.nuls.core.utils.json.JSONUtils;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.notify.controller.NulsEventDelegate;
@@ -44,8 +45,13 @@ public class NulsEventHandler extends AbstractEventHandler<BaseEvent> {
     }
 
     private NulsEventDelegate eventDelegate;
+
     @Override
     public void onEvent(BaseEvent event, String fromId) {
-        Log.debug(event.toString());
+        try {
+            Log.debug(JSONUtils.obj2json(event.getNotice()));
+        } catch (Exception e) {
+            Log.error(e);
+        }
     }
 }

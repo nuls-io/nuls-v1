@@ -27,6 +27,7 @@ import io.nuls.consensus.constant.ConsensusEventType;
 import io.nuls.consensus.entity.GetBlockParam;
 import io.nuls.core.chain.entity.BasicTypeData;
 import io.nuls.core.crypto.VarInt;
+import io.nuls.core.event.NoticeData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
@@ -37,7 +38,6 @@ import io.nuls.core.utils.io.NulsByteBuffer;
  * @date 2017/11/13
  */
 public class GetBlockRequest extends BaseConsensusEvent<GetBlockParam> {
-
 
     public GetBlockRequest() {
         super(ConsensusEventType.GET_BLOCK);
@@ -54,6 +54,11 @@ public class GetBlockRequest extends BaseConsensusEvent<GetBlockParam> {
     @Override
     protected GetBlockParam parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
         return byteBuffer.readNulsData(new GetBlockParam());
+    }
+
+    @Override
+    public NoticeData getNotice() {
+        return null;
     }
 
     public long getStart() {

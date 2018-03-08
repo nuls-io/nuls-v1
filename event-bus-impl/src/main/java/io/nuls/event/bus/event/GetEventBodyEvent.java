@@ -25,6 +25,7 @@ package io.nuls.event.bus.event;
 
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.event.NoticeData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.event.bus.constant.EventConstant;
@@ -42,6 +43,11 @@ public class GetEventBodyEvent extends io.nuls.core.event.BaseEvent<NulsDigestDa
     @Override
     protected NulsDigestData parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
         return byteBuffer.readHash();
+    }
+
+    @Override
+    public NoticeData getNotice() {
+        return null;
     }
 
     @Override

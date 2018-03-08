@@ -25,6 +25,7 @@ package io.nuls.consensus.event;
 
 import io.nuls.consensus.constant.ConsensusEventType;
 import io.nuls.consensus.entity.GetTxGroupParam;
+import io.nuls.core.event.NoticeData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
@@ -45,6 +46,11 @@ public class GetTxGroupRequest extends BaseConsensusEvent<GetTxGroupParam> {
     @Override
     protected GetTxGroupParam parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
         return byteBuffer.readNulsData(new GetTxGroupParam());
+    }
+
+    @Override
+    public NoticeData getNotice() {
+        return null;
     }
 
 }

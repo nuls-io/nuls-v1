@@ -97,10 +97,6 @@ public abstract class BaseEvent<T extends BaseNulsData> extends BaseNulsData imp
     }
 
     public void setEventBody(T eventBody) {
-        //todo
-        if(this.getHeader().getEventType()==(short)6&&eventBody==null){
-            System.out.println();
-        }
         this.eventBody = eventBody;
     }
 
@@ -131,4 +127,5 @@ public abstract class BaseEvent<T extends BaseNulsData> extends BaseNulsData imp
         return hash;
     }
 
+    public abstract NoticeData getNotice();
 }

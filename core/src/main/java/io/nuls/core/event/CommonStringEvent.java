@@ -22,6 +22,11 @@ public class CommonStringEvent extends BaseEvent<BasicTypeData<String>> {
         return byteBuffer.readNulsData(new BasicTypeData<String>());
     }
 
+    @Override
+    public NoticeData getNotice() {
+        return null;
+    }
+
     public void setMessage(String message) {
         if (StringUtils.isBlank(message)) {
             return;

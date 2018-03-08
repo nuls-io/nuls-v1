@@ -75,4 +75,6 @@ public interface EventBroadcaster {
 
     boolean sendToNodeAysn(BaseEvent event, String nodeId);
     boolean sendToGroupAysn(BaseEvent event, String groupName);
+
+    boolean publishToLocal(BaseEvent event);
 }

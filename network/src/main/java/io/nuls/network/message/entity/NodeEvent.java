@@ -25,6 +25,7 @@ package io.nuls.network.message.entity;
 
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.event.BaseEvent;
+import io.nuls.core.event.NoticeData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.network.constant.NetworkConstant;
@@ -51,6 +52,12 @@ public class NodeEvent extends BaseEvent<NodeEventBody> {
     protected NodeEventBody parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
 
         return byteBuffer.readNulsData(new NodeEventBody());
+    }
+
+    @Override
+    public NoticeData getNotice() {
+        // todo auto-generated method stub(niels)
+        return null;
     }
 
     @Override

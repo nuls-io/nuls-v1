@@ -24,14 +24,13 @@
 package io.nuls.db.dao.filter;
 
 
-import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.spring.lite.annotation.Interceptor;
 import io.nuls.core.utils.spring.lite.core.interceptor.BeanMethodInterceptorChain;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.impl.mybatis.session.SessionManager;
 import io.nuls.db.transactional.TransactionalInterceptor;
-import io.nuls.db.transactional.annotation.PROPAGATION;
 import io.nuls.db.transactional.annotation.DbSession;
+import io.nuls.db.transactional.annotation.PROPAGATION;
 import org.apache.ibatis.session.SqlSession;
 
 import java.lang.annotation.Annotation;

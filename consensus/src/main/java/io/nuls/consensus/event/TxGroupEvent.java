@@ -25,6 +25,7 @@ package io.nuls.consensus.event;
 
 import io.nuls.consensus.constant.ConsensusEventType;
 import io.nuls.consensus.entity.TxGroup;
+import io.nuls.core.event.NoticeData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
@@ -41,6 +42,11 @@ public class TxGroupEvent extends BaseConsensusEvent<TxGroup> {
     @Override
     protected TxGroup parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
         return byteBuffer.readNulsData(new TxGroup());
+    }
+
+    @Override
+    public NoticeData getNotice() {
+        return null;
     }
 
 

@@ -28,6 +28,7 @@ import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.event.BaseEvent;
 import io.nuls.core.event.EventHeader;
+import io.nuls.core.event.NoticeData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
@@ -75,6 +76,11 @@ public class GetVersionEvent extends BaseEvent {
 
     @Override
     protected BaseEvent parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
+        return null;
+    }
+
+    @Override
+    public NoticeData getNotice() {
         return null;
     }
 

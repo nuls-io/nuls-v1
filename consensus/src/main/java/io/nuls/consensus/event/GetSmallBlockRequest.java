@@ -27,6 +27,7 @@ import io.nuls.consensus.constant.ConsensusEventType;
 import io.nuls.consensus.entity.GetSmallBlockParam;
 import io.nuls.core.chain.entity.BasicTypeData;
 import io.nuls.core.chain.entity.NulsDigestData;
+import io.nuls.core.event.NoticeData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
@@ -45,6 +46,11 @@ public class GetSmallBlockRequest extends BaseConsensusEvent<GetSmallBlockParam>
     @Override
     protected GetSmallBlockParam parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
         return byteBuffer.readNulsData(new GetSmallBlockParam());
+    }
+
+    @Override
+    public NoticeData getNotice() {
+        return null;
     }
 
 }

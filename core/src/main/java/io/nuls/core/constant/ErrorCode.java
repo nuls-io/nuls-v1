@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -116,18 +116,35 @@ public enum ErrorCode {
     TIME_OUT("CS001", 60001),
     DEPOSIT_ERROR("CS002", 60002),
     DEPOSIT_NOT_ENOUGH("CS003", 60003),
-    CONSENSUS_EXCEPTION("CS004", 60004 ),
+    CONSENSUS_EXCEPTION("CS004", 60004),
     COMMISSION_RATE_OUT_OF_RANGE("cs005", 60005),
     LACK_OF_CREDIT("cs006", 60006),
-    DELEGATE_OVER_COUNT("cs007", 60007 ),
-    DEPOSIT_TOO_MUCH("cs008", 60008 ),
+    DELEGATE_OVER_COUNT("cs007", 60007),
+    DEPOSIT_TOO_MUCH("cs008", 60008),
 
     /**
      * ------------  Ledger Exception code   --------------
      */
     BALANCE_NOT_ENOUGH("LED001", 70001),
-    UTXO_STATUS_CHANGE("LED002", 700002);
+    UTXO_STATUS_CHANGE("LED002", 700002),
 
+    /**
+     * messages
+     */
+    NEW_TX_RECIEVED("MSG001", 80001),
+    NEW_BLOCK_HEADER_RECIEVED("MSG002", 80002),
+    CREATE_AN_ACCOUNT("MSG003", 80003),
+    CHANGE_DEFAULT_ACCOUNT("MSG004", 80004),
+    WALLET_PASSWORD_CHANGED("MSG005", 80005),
+    SET_AN_ALIAS("MSG006",80006 ),
+    IMPORTED_AN_ACCOUNT("MSG007",80007),
+    START_PACKED_BLOCK("MSG008",80008 ),
+    REGISTER_AGENT("MSG009",80009),
+    ASSEMBLED_BLOCK("MSG010",80010),
+    JOIN_CONSENSUS("MSG011",80011 ),
+    EXIT_CONSENSUS("MSG012",80012 ),
+    CANCEL_CONSENSUS("MSG013",80013 ),
+    BALANCE_CHANGE("MSG014",80014 );
     private final int msg;
     private final String code;
 

@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -28,6 +28,7 @@ import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.account.entity.tx.AliasTransaction;
 import io.nuls.account.entity.validator.AliasValidator;
+import io.nuls.account.event.*;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.account.service.tx.AliasTxService;
 import io.nuls.account.util.AccountTool;
@@ -140,6 +141,9 @@ public class AccountServiceImpl implements AccountService {
             this.accountDao.save(po);
             this.accountCacheService.putAccount(account);
             NulsContext.LOCAL_ADDRESS_LIST.add(account.getAddress().getBase58());
+            AccountCreateNotice notice = new AccountCreateNotice();
+            notice.setEventBody(account);
+            eventBroadcaster.publishToLocal(notice);
             return account;
         } catch (Exception e) {
             Log.error(e);
@@ -161,9 +165,9 @@ public class AccountServiceImpl implements AccountService {
         }
 
         Account defaultAccount = getDefaultAccount();
-        if(defaultAccount != null) {
+        if (defaultAccount != null) {
             defaultAccount.decrypt(password);
-            if(!defaultAccount.isEncrypted()){
+            if (!defaultAccount.isEncrypted()) {
                 return new Result(false, "incorrect password");
             }
         }
@@ -188,7 +192,11 @@ public class AccountServiceImpl implements AccountService {
             accountDao.save(accountPos);
             accountCacheService.putAccountList(accounts);
             NulsContext.LOCAL_ADDRESS_LIST.addAll(resultList);
-
+            for (Account account : accounts) {
+                AccountCreateNotice notice = new AccountCreateNotice();
+                notice.setEventBody(account);
+                eventBroadcaster.publishToLocal(notice);
+            }
             return new Result<>(true, "OK", resultList);
         } catch (Exception e) {
             Log.error(e);
@@ -271,7 +279,9 @@ public class AccountServiceImpl implements AccountService {
         } else {
             throw new NulsRuntimeException(ErrorCode.FAILED, "The account not exist,id:" + id);
         }
-        //todo send notice to other module
+        DefaultAccountChangeNotice notice = new DefaultAccountChangeNotice();
+        notice.setEventBody(account);
+        eventBroadcaster.publishToLocal(notice);
     }
 
     @Override
@@ -347,7 +357,7 @@ public class AccountServiceImpl implements AccountService {
             Log.error(e);
             return new Result(false, "change password failed");
         }
-
+        this.eventBroadcaster.publishToLocal(new PasswordChangeNotice());
         return new Result(true, "OK");
     }
 
@@ -423,9 +433,9 @@ public class AccountServiceImpl implements AccountService {
         if (null == bytes || bytes.length == 0) {
             return null;
         }
-        if(account.isEncrypted()) {
+        if (account.isEncrypted()) {
             return this.signData(bytes, AESEncrypt.decrypt(account.getEncryptedPriKey(), password));
-        }else {
+        } else {
             return this.signData(bytes, account.getPriKey());
         }
     }
@@ -470,14 +480,18 @@ public class AccountServiceImpl implements AccountService {
 
             event.setEventBody(aliasTx);
             eventBroadcaster.broadcastAndCache(event, true);
+            SetAliasNotice notice = new SetAliasNotice();
+            notice.setEventBody(aliasTx);
+            eventBroadcaster.publishToLocal(notice);
         } catch (Exception e) {
             Log.error(e);
             return new Result(false, e.getMessage());
         }
+
         return new Result(true, "OK");
     }
 
-//    @Override
+    //    @Override
     public Result exportAccount(String filePath) {
         if (StringUtils.isBlank(filePath)) {
             return new Result(false, "filePath is required");
@@ -493,7 +507,7 @@ public class AccountServiceImpl implements AccountService {
         return exportAccount(account, (File) result.getObject());
     }
 
-//    @Override
+    //    @Override
     public Result exportAccount(String address, String filePath) {
         if (StringUtils.isBlank(filePath)) {
             return new Result(false, "filePath is required");
@@ -513,7 +527,7 @@ public class AccountServiceImpl implements AccountService {
         return exportAccount(account, (File) result.getObject());
     }
 
-//    @Override
+    //    @Override
     public Result exportAccounts() {
 
         List<AccountPo> poList = this.accountDao.getList();
@@ -614,10 +628,13 @@ public class AccountServiceImpl implements AccountService {
         AccountTool.toBean(accountPo, account);
         accountCacheService.putAccount(account);
         NulsContext.LOCAL_ADDRESS_LIST.add(address);
+        AccountImportedNotice notice = new AccountImportedNotice();
+        notice.setEventBody(account);
+        eventBroadcaster.publishToLocal(notice);
         return Result.getSuccess();
     }
 
-//    @Override
+    //    @Override
     public Result importAccountsFile(String walletFilePath) {
         if (StringUtils.isBlank(walletFilePath)) {
             return new Result(false, "walletFilePath is required");
@@ -657,6 +674,9 @@ public class AccountServiceImpl implements AccountService {
 
             for (Account account : accounts) {
                 accountCacheService.putAccount(account);
+                AccountImportedNotice notice = new AccountImportedNotice();
+                notice.setEventBody(account);
+                eventBroadcaster.publishToLocal(notice);
             }
         } catch (Exception e) {
             Log.error(e);

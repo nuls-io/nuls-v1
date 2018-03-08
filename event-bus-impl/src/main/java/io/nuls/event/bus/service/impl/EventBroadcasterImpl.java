@@ -149,4 +149,10 @@ public class EventBroadcasterImpl implements EventBroadcaster {
         return result.isSuccess();
     }
 
+    @Override
+    public boolean publishToLocal(BaseEvent event) {
+        this.eventBusService.publishLocalEvent(event);
+        return true;
+    }
+
 }
