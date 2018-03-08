@@ -4,40 +4,40 @@ import io.nuls.ledger.entity.Balance;
 
 public class BalanceDto {
 
-    private String balance;
+    private Double balance;
 
-    private String usable;
+    private Double usable;
 
-    private String locked;
+    private Double locked;
 
     public BalanceDto(Balance balance) {
-        this.balance = balance.getBalance().toDouble() + "";
-        this.usable = balance.getUsable().toDouble() + "";
-        this.locked = balance.getLocked().toDouble() + "";
+        this.balance = balance.getBalance().toDouble();
+        this.usable = balance.getUsable().toDouble();
+        this.locked = balance.getLocked().toDouble();
     }
 
 
-    public String getBalance() {
+    public Double getBalance() {
         return balance;
     }
 
-    public void setBalance(String balance) {
+    public void setBalance(Double balance) {
         this.balance = balance;
     }
 
-    public String getUsable() {
+    public Double getUsable() {
         return usable;
     }
 
-    public void setUsable(String usable) {
+    public void setUsable(Double usable) {
         this.usable = usable;
     }
 
-    public String getLocked() {
+    public Double getLocked() {
         return locked;
     }
 
-    public void setLocked(String locked) {
+    public void setLocked(Double locked) {
         this.locked = locked;
     }
 }
