@@ -162,14 +162,26 @@ public class AccountResource {
     @Path("/prikey")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getPrikey(AccountParamForm form) {
-        RpcResult result = RpcResult.getSuccess();
+        if (!StringUtils.validAddress(form.getAddress()) || !StringUtils.validPassword(form.getPassword())) {
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+        RpcResult result;
         try {
             byte[] prikey = accountService.getPrivateKey(form.getAddress(), form.getPassword());
+            result = RpcResult.getSuccess();
             result.setData(Hex.encode(prikey));
-        }catch (Exception e) {
+        } catch (Exception e) {
             result = RpcResult.getFailed(e.getMessage());
         }
         return result;
+    }
+
+
+    @GET
+    @Path("/assets/{address}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult getAssets(@QueryParam("address") String address) {
+        return RpcResult.getSuccess();
     }
 
     @GET

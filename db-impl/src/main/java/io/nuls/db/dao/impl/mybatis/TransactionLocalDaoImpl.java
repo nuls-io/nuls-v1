@@ -97,7 +97,7 @@ public class TransactionLocalDaoImpl extends BaseDaoImpl<TransactionLocalMapper,
         if (start != null && limit != null) {
             PageHelper.offsetPage(start, limit);
         }
-        PageHelper.orderBy("block_height asc, create_time asc");
+        PageHelper.orderBy("a.create_time desc");
         return getMapper().selectByAddress(searchable);
     }
 
@@ -119,7 +119,7 @@ public class TransactionLocalDaoImpl extends BaseDaoImpl<TransactionLocalMapper,
         if (type != 0) {
             searchable.addCondition("a.type", SearchOperator.eq, type);
         }
-        searchable.addCondition("d.address", SearchOperator.eq, address);
+        searchable.addCondition("e.address", SearchOperator.eq, address);
         return getMapper().selectCountByAddress(searchable);
     }
 
