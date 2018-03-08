@@ -25,6 +25,7 @@ package io.nuls.client;
 
 import io.nuls.client.constant.CommandConstant;
 import io.nuls.client.processor.AccountProcessors;
+import io.nuls.client.processor.BlockProcessors;
 import io.nuls.client.processor.SystemProcessors;
 import io.nuls.client.processor.intf.CommandProcessor;
 import io.nuls.core.utils.str.StringUtils;
@@ -46,6 +47,7 @@ public class CommandHandler {
         register(new SystemProcessors.Help());
         register(new SystemProcessors.Version());
         register(new AccountProcessors.CreateAccount());
+        register(new BlockProcessors.BestHeight());
 
 
 
