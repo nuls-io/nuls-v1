@@ -48,6 +48,9 @@ public class NulsEventHandler extends AbstractEventHandler<BaseEvent> {
 
     @Override
     public void onEvent(BaseEvent event, String fromId) {
+        if(null==event||event.getNotice()==null){
+            return;
+        }
         try {
             Log.debug(JSONUtils.obj2json(event.getNotice()));
         } catch (Exception e) {
