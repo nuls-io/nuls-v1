@@ -43,7 +43,7 @@ public final class Na implements Comparable<Na>, Serializable {
 
     public static final long NA_VALUE = (long) Math.pow(10, SMALLEST_UNIT_EXPONENT);
 
-    private static final long TOTAL_VALUE = 100000000L;
+    public static final long TOTAL_VALUE = 100000000L;
     private static final long MAX_NA_VALUE = TOTAL_VALUE*((long) Math.pow(10, SMALLEST_UNIT_EXPONENT));
 
     /**

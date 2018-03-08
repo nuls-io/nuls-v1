@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -85,25 +85,50 @@ public class TransactionDaoImpl extends BaseDaoImpl<TransactionMapper, String, T
     }
 
     @Override
-    public List<TransactionPo> getTxs(String address, int type, Integer start, Integer limit) {
+    public List<TransactionPo> getTxs(String address, int type, Integer pageNumber, Integer pageSize) {
         Searchable searchable = new Searchable();
+        if (StringUtils.isBlank(address)) {
+            if (type != 0) {
+                searchable.addCondition("a.type", SearchOperator.eq, type);
+            }
+            if (pageNumber != null && pageSize != null) {
+                PageHelper.startPage(pageNumber, pageSize);
+            }
+            PageHelper.orderBy("a.create_time desc");
+            return getMapper().selectList(searchable);
+        }
+
         if (type != 0) {
             searchable.addCondition("a.type", SearchOperator.eq, type);
         }
-        if (StringUtils.isNotBlank(address)) {
-            searchable.addCondition("d.address", SearchOperator.eq, address);
+        searchable.addCondition("e.address", SearchOperator.eq, address);
+        if (pageNumber != null && pageSize != null) {
+            PageHelper.startPage(pageNumber, pageSize);
         }
-
-        if (start != null && limit != null) {
-            PageHelper.startPage(start, limit);
-        }
-        PageHelper.orderBy("block_height asc, create_time asc");
+        PageHelper.orderBy("a.create_time desc");
         return getMapper().selectByAddress(searchable);
     }
 
     @Override
     public List<TransactionPo> getTxs(String address, int type) {
         return getTxs(address, type, null, null);
+    }
+
+    @Override
+    public long getTxsCount(String address, int type) {
+        Searchable searchable = new Searchable();
+        if (StringUtils.isBlank(address)) {
+            if (type != 0) {
+                searchable.addCondition("type", SearchOperator.eq, type);
+            }
+            return getMapper().selectCount(searchable);
+        }
+
+        if (type != 0) {
+            searchable.addCondition("a.type", SearchOperator.eq, type);
+        }
+        searchable.addCondition("e.address", SearchOperator.eq, address);
+        return getMapper().selectCountByAddress(searchable);
     }
 
 }

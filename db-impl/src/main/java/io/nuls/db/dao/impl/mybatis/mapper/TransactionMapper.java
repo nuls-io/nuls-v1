@@ -35,4 +35,6 @@ import java.util.List;
  */
 public interface TransactionMapper  extends BaseMapper<String,TransactionPo> {
     List<TransactionPo> selectByAddress(Searchable searchable);
+
+    Long selectCountByAddress(Searchable searchable);
 }

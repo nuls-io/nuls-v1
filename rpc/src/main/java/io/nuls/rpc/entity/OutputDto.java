@@ -19,6 +19,8 @@ public class OutputDto {
     //tx.type
     private Integer type;
 
+    private Integer status;
+
     public OutputDto(UtxoOutput output) {
         this.index = output.getIndex();
         this.address = Address.fromHashs(output.getAddress()).getBase58();
@@ -26,6 +28,7 @@ public class OutputDto {
         this.createTime = output.getCreateTime();
         this.lockTime = output.getLockTime();
         this.type = output.getTxType();
+        this.status = output.getStatus();
     }
 
     public OutputDto(UtxoOutputPo output) {
@@ -35,6 +38,7 @@ public class OutputDto {
         this.createTime = output.getCreateTime();
         this.lockTime = output.getLockTime();
         this.type = output.getTxType();
+        this.status = output.getStatus().intValue();
     }
 
     public Integer getIndex() {
@@ -83,5 +87,13 @@ public class OutputDto {
 
     public void setType(Integer type) {
         this.type = type;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 }
