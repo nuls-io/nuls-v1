@@ -95,11 +95,10 @@ public class Account extends BaseNulsData implements NulsCloneable {
     }
 
     public boolean isEncrypted() {
-        //todo check logic
-        if(getEncryptedPriKey()!=null && getEncryptedPriKey().length>0) {
-            return true;
+        if(getPriKey()!=null && getPriKey().length>0) {
+            return false;
         }
-        return false;
+        return true;
     }
 
 
