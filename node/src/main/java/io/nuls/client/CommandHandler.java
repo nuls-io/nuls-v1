@@ -25,9 +25,11 @@ package io.nuls.client;
 
 import io.nuls.client.constant.CommandConstant;
 import io.nuls.client.processor.AccountProcessors;
+import io.nuls.client.processor.BlockProcessors;
 import io.nuls.client.processor.SystemProcessors;
 import io.nuls.client.processor.intf.CommandProcessor;
 import io.nuls.core.utils.str.StringUtils;
+import io.nuls.rpc.sdk.SdkManager;
 
 import java.io.IOException;
 import java.util.*;
@@ -46,7 +48,9 @@ public class CommandHandler {
         register(new SystemProcessors.Help());
         register(new SystemProcessors.Version());
         register(new AccountProcessors.CreateAccount());
-
+        register(new BlockProcessors.BestHeight());
+        //todo 修改为配置
+        SdkManager.init("http://127.0.0.1:8001/nuls");
 
 
     }
@@ -68,7 +72,7 @@ public class CommandHandler {
     }
 
     private String processCommand(String[] args) {
-        if (args.length == 1) {
+        if (args.length == 0) {
             return CommandConstant.COMMAND_ERROR;
         }
         String command = args[0];
