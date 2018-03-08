@@ -26,7 +26,6 @@ package io.nuls.db.dao.impl.mybatis.mapper;
 import io.nuls.db.dao.impl.mybatis.common.BaseMapper;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import io.nuls.db.entity.TransactionLocalPo;
-import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -36,4 +35,6 @@ import java.util.List;
  */
 public interface TransactionLocalMapper extends BaseMapper<String, TransactionLocalPo> {
     List<TransactionLocalPo> selectByAddress(Searchable searchable);
+
+    Long selectCountByAddress(Searchable searchable);
 }

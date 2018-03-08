@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -487,7 +487,6 @@ public class AccountServiceImpl implements AccountService {
             Log.error(e);
             return new Result(false, e.getMessage());
         }
-
         return new Result(true, "OK");
     }
 
@@ -507,20 +506,20 @@ public class AccountServiceImpl implements AccountService {
         return exportAccount(account, (File) result.getObject());
     }
 
-    //    @Override
-    public Result exportAccount(String address, String filePath) {
-        if (StringUtils.isBlank(filePath)) {
-            return new Result(false, "filePath is required");
+    @Override
+    public Result exportAccount(String address, String password) {
+        Account account = null;
+        if(!StringUtils.isBlank(address)) {
+            account = accountCacheService.getAccountByAddress(address);
+            if (account == null) {
+                return Result.getFailed(ErrorCode.DATA_NOT_FOUND);
+            }
         }
-        if (StringUtils.isBlank(address)) {
-            return new Result(false, "address is required");
-        }
-        Account account = getAccount(address);
-        if (account == null) {
-            return new Result(false, "account not found");
+        if(!account.decrypt(password)) {
+            return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
         }
 
-        Result result = backUpFile(filePath);
+        Result result = backUpFile("");
         if (!result.isSuccess()) {
             return result;
         }

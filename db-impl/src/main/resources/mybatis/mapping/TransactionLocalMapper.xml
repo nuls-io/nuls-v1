@@ -137,4 +137,13 @@
         left join utxo_output d on b.from_hash = d.tx_hash and b.from_index = d.out_index
         <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
     </select>
+
+
+    <select id="selectCountByAddress" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultType="java.lang.Long">
+        select count(e.tx_hash) as txCount
+        from tx_account_relation e
+        join transaction a on e.tx_hash = a.hash
+        <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
+    </select>
+
 </mapper>
