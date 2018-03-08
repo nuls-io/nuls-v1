@@ -81,7 +81,7 @@ public class UtxoTransactionDaoImpl implements UtxoTransactionDataService {
 
     @Override
     public List<TransactionPo> getTxs(String address, int type, Integer pageNumber, Integer pageSize) {
-        return txDao.getTxs(address, type, pageNumber, pageNumber);
+        return txDao.getTxs(address, type, pageNumber, pageSize);
     }
 
     @Override
