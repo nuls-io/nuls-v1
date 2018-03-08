@@ -23,6 +23,7 @@
  */
 package io.nuls.core.utils.spring.lite.core.interceptor;
 
+import io.nuls.core.utils.log.Log;
 import net.sf.cglib.proxy.MethodProxy;
 
 import java.lang.annotation.Annotation;
@@ -60,9 +61,11 @@ public class MultipleBeanMethodInterceptorChain extends BeanMethodInterceptorCha
     public Object startFilter(Annotation ann, Object obj, Method method, Object[] params, MethodProxy methodProxy) throws Throwable {
         this.methodProxy = methodProxy;
         index = -1;
-        Object result;
+        Object result = null;
         try {
             result = execute(null, obj, method, params);
+        } catch (Exception e) {
+            Log.error(e);
         } finally {
             index = -1;
             this.methodProxy = null;

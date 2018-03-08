@@ -46,6 +46,9 @@ public class BlockEvent extends BaseConsensusEvent<Block> {
 
     @Override
     public NoticeData getNotice() {
+        if(this.getEventBody()==null){
+            return null;
+        }
         NoticeData data = new NoticeData();
         data.setData(this.getEventBody().getHeader().getHeight());
         return data;
