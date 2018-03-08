@@ -36,6 +36,7 @@ import io.nuls.core.utils.str.StringUtils;
 import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.rpc.entity.AccountDto;
+import io.nuls.rpc.entity.BalanceDto;
 import io.nuls.rpc.entity.RpcResult;
 import io.nuls.rpc.resources.form.AccountCreateForm;
 
@@ -115,7 +116,8 @@ public class AccountResource {
     public RpcResult getBalance(@PathParam("address") String address) {
         Balance balance = ledgerService.getBalance(address);
         RpcResult result = RpcResult.getSuccess();
-        result.setData(balance);
+
+        result.setData(new BalanceDto(balance));
         return result;
     }
 
