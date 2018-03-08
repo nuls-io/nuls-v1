@@ -24,11 +24,20 @@
 package io.nuls.ledger.validator;
 
 import io.nuls.account.service.intf.AccountService;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.ledger.entity.UtxoData;
+import io.nuls.ledger.entity.UtxoInput;
+import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
+import io.nuls.ledger.script.P2PKHScript;
+import io.nuls.ledger.script.P2PKHScriptSig;
+import io.nuls.ledger.script.Script;
+import io.nuls.ledger.script.TransferScript;
 
 /**
  * @author Niels
@@ -52,7 +61,20 @@ public class UtxoTxInputsValidator implements NulsDataValidator<UtxoData> {
     public ValidateResult validate(UtxoData data) {
 
         for (int i = 0; i < data.getInputs().size(); i++) {
-
+            UtxoInput input = data.getInputs().get(i);
+            UtxoOutput output = input.getFrom();
+            try {
+                P2PKHScriptSig scriptSig = new P2PKHScriptSig();
+                scriptSig.parse(input.getScriptSig());
+                Script script = output.getScript();
+                if(!(script instanceof P2PKHScript)){
+                    return ValidateResult.getFailedResult(ErrorCode.DATA_ERROR);
+                }
+                TransferScript txScript = new TransferScript(scriptSig, (P2PKHScript)output.getScript());
+                txScript.verifyScript();
+            }catch (NulsException e){
+                return ValidateResult.getFailedResult(ErrorCode.DATA_ERROR);
+            }
         }
         return ValidateResult.getSuccessResult();
     }

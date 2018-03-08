@@ -43,8 +43,11 @@ import java.util.List;
 public class NulsDigestData extends BaseNulsData {
 
     public static final NulsDigestData EMPTY_HASH = new NulsDigestData(new byte[]{0, 0,1, 0});
-    protected short digestAlgType = 0;
+    protected short digestAlgType = DIGEST_ALG_SHA256;
     protected byte[] digestBytes;
+
+    public static short DIGEST_ALG_SHA256=0;
+    public static short DIGEST_ALG_SHA160=1;
 
     public NulsDigestData() {
     }
@@ -133,12 +136,19 @@ public class NulsDigestData extends BaseNulsData {
     public static NulsDigestData calcDigestData(byte[] data, short digestAlgType) {
         NulsDigestData digestData = new NulsDigestData();
         digestData.setDigestAlgType(digestAlgType);
-        if((short)0==digestAlgType) {
+        if((short)0 == digestAlgType) {
             byte[] content = Sha256Hash.hashTwice(data);
             digestData.digestBytes = content;
+            return digestData;
         }
         //todo extend other algType
-        return digestData;
+
+        if((short)1 == digestAlgType){
+            byte[] content = Utils.sha256hash160(data);
+            return digestData;
+        }
+
+        return null;
     }
 
     public static NulsDigestData calcMerkleDigestData(List<NulsDigestData> ddList) {

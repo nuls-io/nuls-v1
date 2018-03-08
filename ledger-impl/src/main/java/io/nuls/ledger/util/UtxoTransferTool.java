@@ -31,7 +31,6 @@ import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.crypto.script.Script;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.str.StringUtils;
@@ -43,6 +42,7 @@ import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.UtxoInput;
 import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
+import io.nuls.ledger.script.P2PKHScript;
 
 import java.io.IOException;
 import java.util.List;
@@ -56,7 +56,11 @@ public class UtxoTransferTool {
         output.setLockTime(po.getLockTime());
         output.setValue(po.getValue());
         output.setAddress(new Address(po.getAddress()).getHash());
-        output.setScript(new Script(po.getScript()));
+        try {
+            output.setScript(new P2PKHScript(po.getScript()));
+        }catch (Exception e){
+            //todo
+        }
         output.setStatus(po.getStatus());
 
         if(po.getCreateTime() != null) {
@@ -86,7 +90,7 @@ public class UtxoTransferTool {
         input.setIndex(po.getInIndex());
         input.setFromHash(new NulsDigestData(Hex.decode(po.getFromHash())));
         input.setFromIndex(po.getFromIndex());
-        input.setSign(new NulsSignData(po.getSign()));
+        input.setScriptSig(po.getSign());
 
         UtxoOutput output = new UtxoOutput();
         output.setTxHash(new NulsDigestData(Hex.decode(po.getFromOutPut().getTxHash())));
@@ -103,7 +107,7 @@ public class UtxoTransferTool {
         po.setTxHash(input.getTxHash().getDigestHex());
         po.setInIndex(input.getIndex());
         po.setFromIndex(input.getFromIndex());
-        po.setSign(input.getSign().getSignBytes());
+        po.setSign(input.getScriptSig());
         return po;
     }
 

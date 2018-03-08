@@ -69,13 +69,13 @@ public class NulsSignData extends BaseNulsData {
     }
 
     @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeShort(signAlgType);
         stream.writeBytesWithLength(signBytes);
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.signAlgType = byteBuffer.readShort();
         this.signBytes = byteBuffer.readByLengthByte();
     }

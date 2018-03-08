@@ -27,7 +27,8 @@ import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.crypto.VarInt;
-import io.nuls.core.crypto.script.Script;
+import io.nuls.ledger.script.P2PKHScript;
+import io.nuls.ledger.script.Script;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -116,7 +117,7 @@ public class UtxoOutput extends BaseNulsData {
         lockTime = byteBuffer.readInt64();
         scriptBytes = byteBuffer.readByLengthByte();
         if(null!=scriptBytes){
-            script = new Script(scriptBytes);
+            script = new P2PKHScript(new NulsDigestData(scriptBytes));
         }
     }
 

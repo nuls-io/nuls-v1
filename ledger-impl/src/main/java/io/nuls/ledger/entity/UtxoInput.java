@@ -50,7 +50,7 @@ public class UtxoInput extends BaseNulsData {
 
     private int fromIndex;
 
-    private NulsSignData sign;
+    private byte[] scriptSig;
 
     private UtxoOutput from;
 
@@ -85,7 +85,7 @@ public class UtxoInput extends BaseNulsData {
         size += Utils.sizeOfSerialize(txHash);
         size += VarInt.sizeOf(index);
         size += VarInt.sizeOf(fromIndex);
-        size += Utils.sizeOfSerialize(sign);
+        size += Utils.sizeOfSerialize(scriptSig);
         return size;
     }
 
@@ -94,7 +94,7 @@ public class UtxoInput extends BaseNulsData {
         stream.writeNulsData(txHash);
         stream.writeVarInt(index);
         stream.writeVarInt(fromIndex);
-        stream.writeNulsData(sign);
+        stream.writeBytesWithLength(scriptSig);
     }
 
     @Override
@@ -102,7 +102,7 @@ public class UtxoInput extends BaseNulsData {
         txHash = byteBuffer.readHash();
         index = (int) byteBuffer.readVarInt();
         fromIndex = (int) byteBuffer.readVarInt();
-        sign = byteBuffer.readSign();
+        scriptSig = byteBuffer.readByLengthByte();
     }
 
     public NulsDigestData getTxHash() {
@@ -116,12 +116,12 @@ public class UtxoInput extends BaseNulsData {
         this.txHash = txHash;
     }
 
-    public NulsSignData getSign() {
-        return sign;
+    public byte[] getScriptSig() {
+        return scriptSig;
     }
 
-    public void setSign(NulsSignData sign) {
-        this.sign = sign;
+    public void setScriptSig(byte[] scriptSig) {
+        this.scriptSig = scriptSig;
     }
 
     public UtxoOutput getFrom() {

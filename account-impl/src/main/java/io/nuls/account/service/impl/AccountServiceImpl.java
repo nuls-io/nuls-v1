@@ -271,6 +271,9 @@ public class AccountServiceImpl implements AccountService {
             return account.getPriKey();
         } else{
             account.unlock(password);
+            if(account.isEncrypted()){
+                throw new NulsRuntimeException(ErrorCode.PASSWORD_IS_WRONG );
+            }
             byte[] publicKeyBytes = account.getPriKey();
             account.lock();
             return publicKeyBytes;

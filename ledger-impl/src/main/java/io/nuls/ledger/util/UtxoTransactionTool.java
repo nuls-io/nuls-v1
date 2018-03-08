@@ -43,6 +43,7 @@ import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.entity.tx.TransferTransaction;
 import io.nuls.ledger.event.notice.BalanceChangeData;
 import io.nuls.ledger.event.notice.BalanceChangeNotice;
+import io.nuls.ledger.script.TransferScript;
 import io.nuls.ledger.service.impl.LedgerCacheService;
 
 /**
@@ -186,6 +187,12 @@ public class UtxoTransactionTool {
             accountService = NulsContext.getServiceBean(AccountService.class);
         }
         return accountService;
+    }
+
+    public TransferScript createTTransferScript(UtxoInput input,UtxoOutput output){
+        TransferScript transferScript = new TransferScript();
+
+        return transferScript;
     }
 
 }

@@ -27,12 +27,13 @@ import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.chain.entity.Na;
+import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.ECKey;
-import io.nuls.core.crypto.script.ScriptBuilder;
+
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -50,6 +51,7 @@ import io.nuls.ledger.entity.*;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.event.notice.BalanceChangeNotice;
+import io.nuls.ledger.script.P2PKHScript;
 import io.nuls.ledger.service.intf.CoinDataProvider;
 import io.nuls.ledger.util.UtxoTransactionTool;
 import io.nuls.ledger.util.UtxoTransferTool;
@@ -346,9 +348,9 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 output.setValue(coin.getNa().getValue());
                 output.setStatus(UtxoOutput.USEABLE);
                 output.setIndex(i);
-
-                output.setScript(ScriptBuilder.createOutputScript(ECKey.fromPrivate(new BigInteger(priKey))));
-                output.setScriptBytes(output.getScript().getProgram());
+                P2PKHScript p2PKHScript = new P2PKHScript(NulsDigestData.calcDigestData(ECKey.fromPrivate(new BigInteger(priKey)).getPubKey(),NulsDigestData.DIGEST_ALG_SHA160));
+                output.setScript(p2PKHScript);
+                output.setScriptBytes(output.getScript().getBytes());
                 if (coin.getUnlockHeight() > 0) {
                     output.setLockTime(coin.getUnlockHeight());
                 } else if (coin.getUnlockTime() > 0) {
@@ -373,8 +375,9 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             output.setIndex(i);
             output.setParent(tx);
             output.setStatus(UtxoOutput.USEABLE);
-            output.setScript(ScriptBuilder.createOutputScript(new ECKey()));
-            output.setScriptBytes(output.getScript().getProgram());
+            P2PKHScript p2PKHScript = new P2PKHScript(NulsDigestData.calcDigestData(ECKey.fromPrivate(new BigInteger(priKey)).getPubKey(),NulsDigestData.DIGEST_ALG_SHA160));
+            output.setScript(p2PKHScript);
+            output.setScriptBytes(output.getScript().getBytes());
             outputs.add(output);
         }
 

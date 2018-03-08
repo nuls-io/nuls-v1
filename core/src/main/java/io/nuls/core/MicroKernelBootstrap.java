@@ -78,6 +78,7 @@ public class MicroKernelBootstrap extends BaseModuleBootstrap {
             Log.error(e);
             //todo 当获取版本失败时，发送通知
         }
+
     }
 
     @Override
