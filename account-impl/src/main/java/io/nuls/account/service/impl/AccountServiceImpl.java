@@ -267,8 +267,14 @@ public class AccountServiceImpl implements AccountService {
         if (account == null) {
             return null;
         }
-        //todo decode by password
-        return account.getEcKey().getPrivKeyBytes();
+        if(!account.isEncrypted()) {
+            return account.getPriKey();
+        } else{
+            account.unlock(password);
+            byte[] publicKeyBytes = account.getPriKey();
+            account.lock();
+            return publicKeyBytes;
+        }
     }
 
     @Override
