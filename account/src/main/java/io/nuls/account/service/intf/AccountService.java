@@ -70,10 +70,6 @@ public interface AccountService {
 
     Result unlockAccounts(String password, int seconds);
 
-    NulsSignData signData(byte[] bytes);
-
-    NulsSignData signData(NulsDigestData digestData);
-
     NulsSignData signData(byte[] bytes, String password);
 
     NulsSignData signData(byte[] bytes, byte[] priKey);

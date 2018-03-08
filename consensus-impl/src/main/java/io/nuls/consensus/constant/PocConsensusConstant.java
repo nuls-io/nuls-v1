@@ -107,4 +107,5 @@ public interface PocConsensusConstant {
      * Penalty coefficient,greater than 4.
      */
     int CREDIT_MAGIC_NUM = 4;
+    String DEFAULT_WALLET_PASSWORD = "nuls123456";
 }

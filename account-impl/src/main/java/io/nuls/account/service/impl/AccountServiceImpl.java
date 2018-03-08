@@ -403,16 +403,6 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public NulsSignData signData(byte[] bytes) {
-        return this.signData(bytes, this.getDefaultAccount(), null);
-    }
-
-    @Override
-    public NulsSignData signData(NulsDigestData digestData) {
-        return this.signData(digestData, this.getDefaultAccount(), null);
-    }
-
-    @Override
     public NulsSignData signData(byte[] bytes, String password) {
         return this.signData(bytes, this.getDefaultAccount(), password);
     }
@@ -433,7 +423,11 @@ public class AccountServiceImpl implements AccountService {
         if (null == bytes || bytes.length == 0) {
             return null;
         }
-        return this.signData(bytes, AESEncrypt.decrypt(account.getPriKey(), password));
+        if(account.isEncrypted()) {
+            return this.signData(bytes, AESEncrypt.decrypt(account.getEncryptedPriKey(), password));
+        }else {
+            return this.signData(bytes, account.getPriKey());
+        }
     }
 
     @Override
