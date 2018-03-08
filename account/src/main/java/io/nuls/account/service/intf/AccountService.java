@@ -84,7 +84,7 @@ public interface AccountService {
 
     Result verifySign(byte[] bytes, NulsSignData data);
 
-//    Result exportAccount(String address, String filePath);
+    Result exportAccount(String address, String password);
 //
 //    Result exportAccounts();
 

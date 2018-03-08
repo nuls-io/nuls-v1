@@ -40,7 +40,9 @@ public class Balance implements Serializable {
     private Na usable;
 
     public Balance() {
-
+        this.balance = Na.ZERO;
+        this.locked = Na.ZERO;
+        this.usable = Na.ZERO;
     }
 
     public Balance(Na usable, Na locked) {

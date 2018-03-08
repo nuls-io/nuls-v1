@@ -30,7 +30,7 @@ package io.nuls.rpc.resources.form;
  * @author Niels
  * @date 2018/3/7
  */
-public class AccountCreateForm {
+public class AccountParamForm {
 
     private String password;
     private int count;

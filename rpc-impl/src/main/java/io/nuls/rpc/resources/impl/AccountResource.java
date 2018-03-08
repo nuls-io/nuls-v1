@@ -34,10 +34,14 @@ import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.ledger.entity.Balance;
+import io.nuls.ledger.entity.UtxoBalance;
+import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.rpc.entity.AccountDto;
+import io.nuls.rpc.entity.BalanceDto;
+import io.nuls.rpc.entity.OutputDto;
 import io.nuls.rpc.entity.RpcResult;
-import io.nuls.rpc.resources.form.AccountCreateForm;
+import io.nuls.rpc.resources.form.AccountParamForm;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -56,7 +60,7 @@ public class AccountResource {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult create(AccountCreateForm form) {
+    public RpcResult create(AccountParamForm form) {
         AssertUtil.canNotEmpty(form.getCount());
         AssertUtil.canNotEmpty(form.getPassword());
         Result<List<String>> accountResult = accountService.createAccount(form.getCount(), form.getPassword());
@@ -115,8 +119,42 @@ public class AccountResource {
     public RpcResult getBalance(@PathParam("address") String address) {
         Balance balance = ledgerService.getBalance(address);
         RpcResult result = RpcResult.getSuccess();
-        result.setData(balance);
+
+        result.setData(new BalanceDto(balance));
         return result;
+    }
+
+    @GET
+    @Path("/utxo/")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult getUtxo(@QueryParam("address") String address,
+                             @QueryParam("amount") double amount) {
+        if (!StringUtils.validAddress(address) || amount < 0 || amount > Na.TOTAL_VALUE) {
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+        UtxoBalance balance = (UtxoBalance) ledgerService.getBalance(address);
+        amount += NulsContext.getInstance().getTxFee().toDouble();
+
+        double usable = 0d;
+        boolean enough = false;
+        List<OutputDto> dtoList = new ArrayList<>();
+        for (int i = 0; i < balance.getUnSpends().size(); i++) {
+            UtxoOutput output = balance.getUnSpends().get(i);
+            if (output.getStatus() == UtxoOutput.USEABLE) {
+                usable += Na.valueOf(output.getValue()).toDouble();
+                dtoList.add(new OutputDto(output));
+            }
+            if (usable > amount) {
+                enough = true;
+                break;
+            }
+        }
+
+        if (!enough) {
+            return RpcResult.getFailed("balance not enough");
+        }
+
+        return RpcResult.getSuccess().setData(dtoList);
     }
 
     @GET

@@ -94,7 +94,6 @@ public class WalletResouce {
     @Path("/backup")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult backup(@FormParam("address") String address, @FormParam("password") String password) {
-        AssertUtil.canNotEmpty(address);
         //todo Result result = this.accountService.exportAccount(address);
         return new RpcResult();
     }

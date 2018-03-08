@@ -493,20 +493,20 @@ public class AccountServiceImpl implements AccountService {
         return exportAccount(account, (File) result.getObject());
     }
 
-//    @Override
-    public Result exportAccount(String address, String filePath) {
-        if (StringUtils.isBlank(filePath)) {
-            return new Result(false, "filePath is required");
+    @Override
+    public Result exportAccount(String address, String password) {
+        Account account = null;
+        if(!StringUtils.isBlank(address)) {
+            account = accountCacheService.getAccountByAddress(address);
+            if (account == null) {
+                return Result.getFailed(ErrorCode.DATA_NOT_FOUND);
+            }
         }
-        if (StringUtils.isBlank(address)) {
-            return new Result(false, "address is required");
-        }
-        Account account = getAccount(address);
-        if (account == null) {
-            return new Result(false, "account not found");
+        if(!account.decrypt(password)) {
+            return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
         }
 
-        Result result = backUpFile(filePath);
+        Result result = backUpFile("");
         if (!result.isSuccess()) {
             return result;
         }
