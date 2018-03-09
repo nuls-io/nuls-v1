@@ -11,7 +11,7 @@ public class OutputDto {
 
     private String address;
 
-    private Double value;
+    private Long value;
 
     private Long createTime;
 
@@ -24,7 +24,7 @@ public class OutputDto {
     public OutputDto(UtxoOutput output) {
         this.index = output.getIndex();
         this.address = Address.fromHashs(output.getAddress()).getBase58();
-        this.value = Na.valueOf(output.getValue()).toDouble();
+        this.value = output.getValue();
         this.createTime = output.getCreateTime();
         this.lockTime = output.getLockTime();
         this.type = output.getTxType();
@@ -34,7 +34,7 @@ public class OutputDto {
     public OutputDto(UtxoOutputPo output) {
         this.index = output.getOutIndex();
         this.address = output.getAddress();
-        this.value = Na.valueOf(output.getValue()).toDouble();
+        this.value = output.getValue();
         this.createTime = output.getCreateTime();
         this.lockTime = output.getLockTime();
         this.type = output.getTxType();
@@ -57,11 +57,11 @@ public class OutputDto {
         this.address = address;
     }
 
-    public Double getValue() {
+    public Long getValue() {
         return value;
     }
 
-    public void setValue(Double value) {
+    public void setValue(Long value) {
         this.value = value;
     }
 

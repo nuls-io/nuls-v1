@@ -107,7 +107,6 @@ public class NulsMessage {
         NulsMessageHeader header = new NulsMessageHeader(new NulsByteBuffer(headers));
         byte[] data = new byte[header.getLength()];
         byteBuffer.get(data, 0, data.length);
-
         this.header = header;
         this.data = data;
     }

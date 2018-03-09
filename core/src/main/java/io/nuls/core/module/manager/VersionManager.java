@@ -152,6 +152,9 @@ public class VersionManager {
             failedOpration(failedList);
         }
         File[] files = tempFolder.listFiles();
+        if(files==null||files.length==0){
+            return;
+        }
         List<String> moved = new ArrayList<>();
         try {
             for (File file : files) {

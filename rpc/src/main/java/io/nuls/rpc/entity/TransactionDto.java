@@ -24,9 +24,9 @@ public class TransactionDto {
 
     private Long blockHeight;
 
-    private Double fee;
+    private Long fee;
 
-    private Double value;
+    private Long value;
 
     private List<InputDto> inputs;
 
@@ -44,7 +44,7 @@ public class TransactionDto {
         this.type = tx.getType();
         this.time = tx.getTime();
         this.blockHeight = tx.getBlockHeight();
-        this.setFee(tx.getFee().toDouble());
+        this.setFee(tx.getFee().getValue());
         this.setTransferType(tx.getTransferType());
         if (tx.getRemark() != null) {
             try {
@@ -76,7 +76,7 @@ public class TransactionDto {
     public TransactionDto(Transaction tx, String address) {
         this(tx);
         boolean isTransfer = false;
-        double value = 0d;
+        long value = 0;
         for (InputDto input : inputs) {
             if (address.equals(input.getAddress())) {
                 if (!isTransfer) isTransfer = true;
@@ -144,19 +144,19 @@ public class TransactionDto {
         this.blockHeight = blockHeight;
     }
 
-    public Double getFee() {
+    public Long getFee() {
         return fee;
     }
 
-    public void setFee(Double fee) {
+    public void setFee(Long fee) {
         this.fee = fee;
     }
 
-    public Double getValue() {
+    public Long getValue() {
         return value;
     }
 
-    public void setValue(Double value) {
+    public void setValue(Long value) {
         this.value = value;
     }
 

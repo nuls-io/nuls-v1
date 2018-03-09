@@ -27,6 +27,9 @@ import io.nuls.core.event.BaseEvent;
 import io.nuls.core.exception.NulsException;
 import io.nuls.event.bus.constant.EventCategoryEnum;
 import io.nuls.event.bus.handler.intf.NulsEventHandler;
+import io.nuls.event.bus.service.entity.EventItem;
+
+import java.util.List;
 
 /**
  * @author Niels
@@ -47,4 +50,6 @@ public interface EventBusService {
     void publishNetworkEvent(BaseEvent event, String fromId);
 
     void publishLocalEvent(BaseEvent event);
+
+    List<EventItem> getEventList();
 }

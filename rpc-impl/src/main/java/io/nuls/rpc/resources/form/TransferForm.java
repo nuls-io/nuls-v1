@@ -28,33 +28,14 @@ package io.nuls.rpc.resources.form;
 
 /**
  * @author Niels
- * @date 2018/3/7
+ * @date 2018/3/9
  */
-public class AccountParamForm {
-
+public class TransferForm {
     private String address;
-
     private String password;
-
-    private String alias;
-
-    private int count;
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public int getCount() {
-        return count;
-    }
-
-    public void setCount(int count) {
-        this.count = count;
-    }
+    private String toAddress;
+    private Long amount;
+    private String remark;
 
     public String getAddress() {
         return address;
@@ -64,11 +45,35 @@ public class AccountParamForm {
         this.address = address;
     }
 
-    public String getAlias() {
-        return alias;
+    public String getPassword() {
+        return password;
     }
 
-    public void setAlias(String alias) {
-        this.alias = alias;
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getToAddress() {
+        return toAddress;
+    }
+
+    public void setToAddress(String toAddress) {
+        this.toAddress = toAddress;
+    }
+
+    public Long getAmount() {
+        return amount;
+    }
+
+    public void setAmount(Long amount) {
+        this.amount = amount;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 }

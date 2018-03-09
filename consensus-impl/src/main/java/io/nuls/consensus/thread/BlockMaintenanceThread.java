@@ -51,7 +51,6 @@ public class BlockMaintenanceThread implements Runnable {
     public static final String THREAD_NAME = "block-maintenance";
 
     private static BlockMaintenanceThread instance = new BlockMaintenanceThread();
-    ;
 
     private final BlockService blockService = NulsContext.getServiceBean(BlockService.class);
     private boolean success = false;
@@ -77,7 +76,7 @@ public class BlockMaintenanceThread implements Runnable {
             } catch (Exception e) {
             Log.error(e.getMessage());
                 try {
-                    Thread.sleep(PocConsensusConstant.BLOCK_TIME_INTERVAL * 1000L);
+                    Thread.sleep(PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000L);
                 } catch (InterruptedException e1) {
                     Log.error(e1);
                 }
@@ -101,7 +100,7 @@ public class BlockMaintenanceThread implements Runnable {
             }
             startHeight = localBestBlock.getHeader().getHeight() + 1;
             long interval = TimeService.currentTimeMillis() - localBestBlock.getHeader().getTime();
-            if (interval < (PocConsensusConstant.BLOCK_TIME_INTERVAL * 2000)) {
+            if (interval < (PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 2000)) {
                 doit = false;
                 try {
                     Thread.sleep(10000L);

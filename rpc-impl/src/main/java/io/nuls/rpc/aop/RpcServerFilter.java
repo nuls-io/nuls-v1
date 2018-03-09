@@ -71,6 +71,7 @@ public class RpcServerFilter implements ContainerRequestFilter, ContainerRespons
 
     @Override
     public Response toResponse(Exception e) {
+        e.printStackTrace();
         RpcResult result = RpcResult.getFailed().setData(e.getMessage());
         return Response.ok(result, MediaType.APPLICATION_JSON).build();
     }

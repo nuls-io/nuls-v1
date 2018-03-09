@@ -30,7 +30,6 @@ import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.Result;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
@@ -59,17 +58,14 @@ public class AccountResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult create(AccountParamForm form) {
-        AssertUtil.canNotEmpty(form.getCount());
-        AssertUtil.canNotEmpty(form.getPassword());
         Result<List<String>> accountResult = accountService.createAccount(form.getCount(), form.getPassword());
         RpcResult result = new RpcResult(accountResult);
         return result;
     }
 
     @GET
-    @Path("/get/{address}")
+    @Path("/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    //todo path中去掉get
     public RpcResult get(@PathParam("address") String address) {
         RpcResult result;
         if (!StringUtils.validAddress(address)) {
@@ -89,11 +85,8 @@ public class AccountResource {
     @POST
     @Path("/alias")
     @Produces(MediaType.APPLICATION_JSON)
-    //修改参数传递方式为json
-    public RpcResult alias(@FormParam("alias") String alias,
-                           @FormParam("address") String address,
-                           @FormParam("password") String password) {
-        Result result = accountService.setAlias(address, password, alias);
+    public RpcResult alias(AccountParamForm form) {
+        Result result = accountService.setAlias(form.getAddress(), form.getPassword(), form.getAlias());
         RpcResult rpcResult = new RpcResult(result);
         return rpcResult;
     }
@@ -127,20 +120,20 @@ public class AccountResource {
     @Path("/utxo/")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getUtxo(@QueryParam("address") String address,
-                             @QueryParam("amount") double amount) {
-        if (!StringUtils.validAddress(address) || amount < 0 || amount > Na.TOTAL_VALUE) {
+                             @QueryParam("amount") long amount) {
+        if (!StringUtils.validAddress(address) || amount < 0 || amount > Na.MAX_NA_VALUE) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         UtxoBalance balance = (UtxoBalance) ledgerService.getBalance(address);
-        amount += NulsContext.getInstance().getTxFee().toDouble();
+        amount += NulsContext.getInstance().getTxFee().getValue();
 
-        double usable = 0d;
+        long usable = 0;
         boolean enough = false;
         List<OutputDto> dtoList = new ArrayList<>();
         for (int i = 0; i < balance.getUnSpends().size(); i++) {
             UtxoOutput output = balance.getUnSpends().get(i);
             if (output.getStatus() == UtxoOutput.USEABLE) {
-                usable += Na.valueOf(output.getValue()).toDouble();
+                usable += output.getValue();
                 dtoList.add(new OutputDto(output));
             }
             if (usable > amount) {
@@ -171,8 +164,8 @@ public class AccountResource {
     @GET
     @Path("/assets/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult getAssets(@QueryParam("address") String address) {
-        if (!StringUtils.validPassword(address)) {
+    public RpcResult getAssets(@PathParam("address") String address) {
+        if (!StringUtils.validAddress(address)) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
 
@@ -196,7 +189,7 @@ public class AccountResource {
     @Path("/lock")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult lock(@QueryParam("address") String address, @QueryParam("password") String password,
-                          @QueryParam("amount") Double amount, @QueryParam("remark") String remark,
+                          @QueryParam("amount") long amount, @QueryParam("remark") String remark,
                           @QueryParam("unlockTime") Long unlockTime) {
         Result lockResult = ledgerService.lock(address, password, Na.parseNuls(amount), unlockTime, remark);
         RpcResult result;

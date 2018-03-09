@@ -24,51 +24,50 @@
  *
  */
 
-package io.nuls.rpc.resources.form;
+package io.nuls.event.bus.service.entity;
+
+import io.nuls.core.event.BaseEvent;
 
 /**
  * @author Niels
- * @date 2018/3/7
+ * @date 2018/3/9
  */
-public class AccountParamForm {
+public class EventItem {
 
-    private String address;
+    private String name;
+    private short moduleId;
+    private short eventType;
+    private Class<? extends BaseEvent> clazz;
 
-    private String password;
-
-    private String alias;
-
-    private int count;
-
-    public String getPassword() {
-        return password;
+    public String getName() {
+        return name;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public int getCount() {
-        return count;
+    public short getModuleId() {
+        return moduleId;
     }
 
-    public void setCount(int count) {
-        this.count = count;
+    public void setModuleId(short moduleId) {
+        this.moduleId = moduleId;
     }
 
-    public String getAddress() {
-        return address;
+    public short getEventType() {
+        return eventType;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public void setEventType(short eventType) {
+        this.eventType = eventType;
     }
 
-    public String getAlias() {
-        return alias;
+    public Class<? extends BaseEvent> getClazz() {
+        return clazz;
     }
 
-    public void setAlias(String alias) {
-        this.alias = alias;
+    public void setClazz(Class<? extends BaseEvent> clazz) {
+        this.clazz = clazz;
     }
 }

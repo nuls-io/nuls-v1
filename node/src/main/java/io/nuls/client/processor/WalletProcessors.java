@@ -24,51 +24,48 @@
  *
  */
 
-package io.nuls.rpc.resources.form;
+package io.nuls.client.processor;
+
+import io.nuls.client.entity.CommandResult;
+import io.nuls.client.processor.intf.CommandProcessor;
+import io.nuls.rpc.sdk.entity.RpcClientResult;
+import io.nuls.rpc.sdk.service.WalletService;
 
 /**
  * @author Niels
  * @date 2018/3/7
  */
-public class AccountParamForm {
+public abstract class WalletProcessors implements CommandProcessor {
 
-    private String address;
+    protected WalletService walletService = new WalletService();
+    /**
+     * nuls transfer
+     */
+    public static class Transfer extends WalletProcessors {
 
-    private String password;
+        @Override
+        public String getCommand() {
+            return "transfer";
+        }
 
-    private String alias;
+        @Override
+        public String getCommandDescription() {
+            return "transfer <address> <password> <toAddress> <amount> <remark> --";
+        }
 
-    private int count;
+        @Override
+        public boolean argsValidate(String[] args) {
+            return true;
+        }
 
-    public String getPassword() {
-        return password;
+        @Override
+        public CommandResult execute(String[] args) {
+//            RpcClientResult result = this.walletService.transfer();
+//            return CommandResult.getResult(result);
+            return null;
+        }
     }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
 
-    public int getCount() {
-        return count;
-    }
 
-    public void setCount(int count) {
-        this.count = count;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public String getAlias() {
-        return alias;
-    }
-
-    public void setAlias(String alias) {
-        this.alias = alias;
-    }
 }

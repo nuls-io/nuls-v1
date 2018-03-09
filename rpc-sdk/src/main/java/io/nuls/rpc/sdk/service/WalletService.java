@@ -23,52 +23,32 @@
  * SOFTWARE.
  *
  */
+package io.nuls.rpc.sdk.service;
 
-package io.nuls.rpc.resources.form;
+import io.nuls.rpc.sdk.entity.BlockDto;
+import io.nuls.rpc.sdk.entity.RpcClientResult;
+import io.nuls.rpc.sdk.utils.AssertUtil;
+import io.nuls.rpc.sdk.utils.JSONUtils;
+import io.nuls.rpc.sdk.utils.RestFulUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Niels
- * @date 2018/3/7
+ * @date 2017/11/1
  */
-public class AccountParamForm {
+public class WalletService {
+    private RestFulUtils restFul = RestFulUtils.getInstance();
 
-    private String address;
-
-    private String password;
-
-    private String alias;
-
-    private int count;
-
-    public String getPassword() {
-        return password;
+    public RpcClientResult transfer(String address, String password, String toAddress, Double amount, String remark) {
+        Map<String,String> params = new HashMap<>();
+    params.put("address",address);
+    params.put("password",password);
+    params.put("toAddress",toAddress);
+    params.put("amount",amount+"");
+    params.put("remark",remark);
+        return this.restFul.post("/wallet/transfer", params);
     }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public int getCount() {
-        return count;
-    }
-
-    public void setCount(int count) {
-        this.count = count;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public String getAlias() {
-        return alias;
-    }
-
-    public void setAlias(String alias) {
-        this.alias = alias;
-    }
 }

@@ -47,7 +47,7 @@ public class BlockRoundData extends BaseNulsData {
     protected int packingIndexOfRound;
 
     public long getRoundEndTime() {
-        return roundStartTime + consensusMemberCount * PocConsensusConstant.BLOCK_TIME_INTERVAL * 1000L;
+        return roundStartTime + consensusMemberCount * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000L;
     }
 
     public BlockRoundData(byte[] extend) throws NulsException {

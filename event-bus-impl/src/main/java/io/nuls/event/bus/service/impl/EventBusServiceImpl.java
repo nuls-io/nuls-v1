@@ -31,7 +31,13 @@ import io.nuls.event.bus.constant.EventCategoryEnum;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.event.bus.handler.intf.NulsEventHandler;
+import io.nuls.event.bus.service.entity.EventItem;
 import io.nuls.event.bus.service.intf.EventBusService;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Niels
@@ -98,6 +104,24 @@ public class EventBusServiceImpl implements EventBusService {
     @Override
     public void publishLocalEvent(BaseEvent event) {
         localService.publish(event);
+    }
+
+    @Override
+    public List<EventItem> getEventList() {
+        List<EventItem> list = new ArrayList<>();
+        Set<String> keySet = new HashSet<>(EventManager.getEventMap().keySet());
+        for(String key:keySet){
+            EventItem item = new EventItem();
+            item.setClazz(EventManager.getEventMap().get(key));
+            item.setName(item.getClazz().getSimpleName());
+            String[] array = key.split(EventManager.KEY_SPLIT);
+            short moduleId = Short.parseShort(array[0]);
+            short eventType = Short.parseShort(array[1]);
+            item.setEventType(moduleId);
+            item.setModuleId(eventType);
+            list.add(item);
+        }
+        return list;
     }
 
 }
