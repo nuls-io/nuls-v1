@@ -34,7 +34,7 @@ public class TransferForm {
     private String address;
     private String password;
     private String toAddress;
-    private Double amount;
+    private Long amount;
     private String remark;
 
     public String getAddress() {
@@ -61,11 +61,11 @@ public class TransferForm {
         this.toAddress = toAddress;
     }
 
-    public Double getAmount() {
+    public Long getAmount() {
         return amount;
     }
 
-    public void setAmount(Double amount) {
+    public void setAmount(Long amount) {
         this.amount = amount;
     }
 
