@@ -25,10 +25,7 @@
  */
 package io.nuls.rpc.sdk.service;
 
-import io.nuls.rpc.sdk.entity.BlockDto;
 import io.nuls.rpc.sdk.entity.RpcClientResult;
-import io.nuls.rpc.sdk.utils.AssertUtil;
-import io.nuls.rpc.sdk.utils.JSONUtils;
 import io.nuls.rpc.sdk.utils.RestFulUtils;
 
 import java.util.HashMap;
@@ -41,13 +38,13 @@ import java.util.Map;
 public class WalletService {
     private RestFulUtils restFul = RestFulUtils.getInstance();
 
-    public RpcClientResult transfer(String address, String password, String toAddress, Double amount, String remark) {
-        Map<String,String> params = new HashMap<>();
-    params.put("address",address);
-    params.put("password",password);
-    params.put("toAddress",toAddress);
-    params.put("amount",amount+"");
-    params.put("remark",remark);
+    public RpcClientResult transfer(String address, String password, String toAddress, Long amount, String remark) {
+        Map<String, String> params = new HashMap<>();
+        params.put("address", address);
+        params.put("password", password);
+        params.put("toAddress", toAddress);
+        params.put("amount", amount + "");
+        params.put("remark", remark);
         return this.restFul.post("/wallet/transfer", params);
     }
 
