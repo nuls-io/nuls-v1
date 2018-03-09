@@ -27,6 +27,7 @@ import io.nuls.client.constant.CommandConstant;
 import io.nuls.client.processor.AccountProcessors;
 import io.nuls.client.processor.BlockProcessors;
 import io.nuls.client.processor.SystemProcessors;
+import io.nuls.client.processor.WalletProcessors;
 import io.nuls.client.processor.intf.CommandProcessor;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.rpc.sdk.SdkManager;
@@ -49,10 +50,9 @@ public class CommandHandler {
         register(new SystemProcessors.Version());
         register(new AccountProcessors.CreateAccount());
         register(new BlockProcessors.BestHeight());
+        register(new WalletProcessors.Transfer());
         //todo 修改为配置
         SdkManager.init("http://127.0.0.1:8001/nuls");
-
-
     }
 
     public static void main(String[] args) throws IOException {
@@ -66,8 +66,7 @@ public class CommandHandler {
                 System.out.print(CommandConstant.COMMAND_PS1);
                 continue;
             }
-            System.out.println(CommandConstant.COMMAND_PS1 + instance.processCommand(read.split(" ")));
-            System.out.print(CommandConstant.COMMAND_PS1);
+            System.out.print(CommandConstant.COMMAND_PS1 + instance.processCommand(read.split(" "))+"\n"+CommandConstant.COMMAND_PS1);
         }
     }
 

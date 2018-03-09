@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,36 +21,59 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.event.bus.service.intf;
 
-import io.nuls.core.event.BaseEvent;
-import io.nuls.core.exception.NulsException;
-import io.nuls.event.bus.constant.EventCategoryEnum;
-import io.nuls.event.bus.handler.intf.NulsEventHandler;
-import io.nuls.event.bus.service.entity.EventItem;
-
-import java.util.List;
+package io.nuls.rpc.resources.form;
 
 /**
  * @author Niels
- * @date 2018/1/5
+ * @date 2018/3/9
  */
-public interface EventBusService {
+public class TransferForm {
+    private String address;
+    private String password;
+    private String toAddress;
+    private Double amount;
+    private String remark;
 
-    String subscribeEvent( Class<? extends BaseEvent> eventClass, NulsEventHandler<? extends BaseEvent> eventHandler);
+    public String getAddress() {
+        return address;
+    }
 
-    void unsubscribeEvent(String subcribeId);
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
-    void publishEvent(EventCategoryEnum category, byte[] bytes, String fromId) throws IllegalAccessException, NulsException, InstantiationException;
+    public String getPassword() {
+        return password;
+    }
 
-    void publishEvent(EventCategoryEnum category, BaseEvent event, String fromId);
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
-    void publishNetworkEvent(byte[] bytes, String fromId);
+    public String getToAddress() {
+        return toAddress;
+    }
 
-    void publishNetworkEvent(BaseEvent event, String fromId);
+    public void setToAddress(String toAddress) {
+        this.toAddress = toAddress;
+    }
 
-    void publishLocalEvent(BaseEvent event);
+    public Double getAmount() {
+        return amount;
+    }
 
-    List<EventItem> getEventList();
+    public void setAmount(Double amount) {
+        this.amount = amount;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
 }

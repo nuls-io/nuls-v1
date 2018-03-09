@@ -38,6 +38,7 @@ import java.util.*;
  * @date 2017/11/7
  */
 public class EventManager {
+    public static final String KEY_SPLIT = "_";
     private static final Map<String, Class<? extends BaseEvent>> EVENT_MAP = new HashMap<>();
     private static final Set<Class<? extends BaseEvent>> EVENT_CLASSES = new HashSet<>();
 
@@ -64,7 +65,7 @@ public class EventManager {
         if (type == 0) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "the event type cannot be 0!,module:" + moduleId + ",eventType:" + type);
         }
-        if (EVENT_MAP.containsKey(moduleId + "_" + type)) {
+        if (EVENT_MAP.containsKey(moduleId + KEY_SPLIT + type)) {
             return;
         }
         EVENT_MAP.put(moduleId + "_" + type, clazz);
@@ -101,4 +102,7 @@ public class EventManager {
         return event;
     }
 
+    public static Map<String,Class<? extends BaseEvent>> getEventMap(){
+        return EVENT_MAP;
+    }
 }

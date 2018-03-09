@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,36 +21,34 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.event.bus.service.intf;
+package io.nuls.rpc.sdk.service;
 
-import io.nuls.core.event.BaseEvent;
-import io.nuls.core.exception.NulsException;
-import io.nuls.event.bus.constant.EventCategoryEnum;
-import io.nuls.event.bus.handler.intf.NulsEventHandler;
-import io.nuls.event.bus.service.entity.EventItem;
+import io.nuls.rpc.sdk.entity.BlockDto;
+import io.nuls.rpc.sdk.entity.RpcClientResult;
+import io.nuls.rpc.sdk.utils.AssertUtil;
+import io.nuls.rpc.sdk.utils.JSONUtils;
+import io.nuls.rpc.sdk.utils.RestFulUtils;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Niels
- * @date 2018/1/5
+ * @date 2017/11/1
  */
-public interface EventBusService {
+public class WalletService {
+    private RestFulUtils restFul = RestFulUtils.getInstance();
 
-    String subscribeEvent( Class<? extends BaseEvent> eventClass, NulsEventHandler<? extends BaseEvent> eventHandler);
+    public RpcClientResult transfer(String address, String password, String toAddress, Double amount, String remark) {
+        Map<String,String> params = new HashMap<>();
+    params.put("address",address);
+    params.put("password",password);
+    params.put("toAddress",toAddress);
+    params.put("amount",amount+"");
+    params.put("remark",remark);
+        return this.restFul.post("/wallet/transfer", params);
+    }
 
-    void unsubscribeEvent(String subcribeId);
-
-    void publishEvent(EventCategoryEnum category, byte[] bytes, String fromId) throws IllegalAccessException, NulsException, InstantiationException;
-
-    void publishEvent(EventCategoryEnum category, BaseEvent event, String fromId);
-
-    void publishNetworkEvent(byte[] bytes, String fromId);
-
-    void publishNetworkEvent(BaseEvent event, String fromId);
-
-    void publishLocalEvent(BaseEvent event);
-
-    List<EventItem> getEventList();
 }

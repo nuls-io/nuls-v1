@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,36 +21,53 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.event.bus.service.intf;
+
+package io.nuls.event.bus.service.entity;
 
 import io.nuls.core.event.BaseEvent;
-import io.nuls.core.exception.NulsException;
-import io.nuls.event.bus.constant.EventCategoryEnum;
-import io.nuls.event.bus.handler.intf.NulsEventHandler;
-import io.nuls.event.bus.service.entity.EventItem;
-
-import java.util.List;
 
 /**
  * @author Niels
- * @date 2018/1/5
+ * @date 2018/3/9
  */
-public interface EventBusService {
+public class EventItem {
 
-    String subscribeEvent( Class<? extends BaseEvent> eventClass, NulsEventHandler<? extends BaseEvent> eventHandler);
+    private String name;
+    private short moduleId;
+    private short eventType;
+    private Class<? extends BaseEvent> clazz;
 
-    void unsubscribeEvent(String subcribeId);
+    public String getName() {
+        return name;
+    }
 
-    void publishEvent(EventCategoryEnum category, byte[] bytes, String fromId) throws IllegalAccessException, NulsException, InstantiationException;
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    void publishEvent(EventCategoryEnum category, BaseEvent event, String fromId);
+    public short getModuleId() {
+        return moduleId;
+    }
 
-    void publishNetworkEvent(byte[] bytes, String fromId);
+    public void setModuleId(short moduleId) {
+        this.moduleId = moduleId;
+    }
 
-    void publishNetworkEvent(BaseEvent event, String fromId);
+    public short getEventType() {
+        return eventType;
+    }
 
-    void publishLocalEvent(BaseEvent event);
+    public void setEventType(short eventType) {
+        this.eventType = eventType;
+    }
 
-    List<EventItem> getEventList();
+    public Class<? extends BaseEvent> getClazz() {
+        return clazz;
+    }
+
+    public void setClazz(Class<? extends BaseEvent> clazz) {
+        this.clazz = clazz;
+    }
 }

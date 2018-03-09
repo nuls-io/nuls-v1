@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,36 +21,51 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.event.bus.service.intf;
 
-import io.nuls.core.event.BaseEvent;
-import io.nuls.core.exception.NulsException;
-import io.nuls.event.bus.constant.EventCategoryEnum;
-import io.nuls.event.bus.handler.intf.NulsEventHandler;
-import io.nuls.event.bus.service.entity.EventItem;
+package io.nuls.client.processor;
 
-import java.util.List;
+import io.nuls.client.entity.CommandResult;
+import io.nuls.client.processor.intf.CommandProcessor;
+import io.nuls.rpc.sdk.entity.RpcClientResult;
+import io.nuls.rpc.sdk.service.WalletService;
 
 /**
  * @author Niels
- * @date 2018/1/5
+ * @date 2018/3/7
  */
-public interface EventBusService {
+public abstract class WalletProcessors implements CommandProcessor {
 
-    String subscribeEvent( Class<? extends BaseEvent> eventClass, NulsEventHandler<? extends BaseEvent> eventHandler);
+    protected WalletService walletService = new WalletService();
+    /**
+     * nuls transfer
+     */
+    public static class Transfer extends WalletProcessors {
 
-    void unsubscribeEvent(String subcribeId);
+        @Override
+        public String getCommand() {
+            return "transfer";
+        }
 
-    void publishEvent(EventCategoryEnum category, byte[] bytes, String fromId) throws IllegalAccessException, NulsException, InstantiationException;
+        @Override
+        public String getCommandDescription() {
+            return "transfer <address> <password> <toAddress> <amount> <remark> --";
+        }
 
-    void publishEvent(EventCategoryEnum category, BaseEvent event, String fromId);
+        @Override
+        public boolean argsValidate(String[] args) {
+            return true;
+        }
 
-    void publishNetworkEvent(byte[] bytes, String fromId);
+        @Override
+        public CommandResult execute(String[] args) {
+//            RpcClientResult result = this.walletService.transfer();
+//            return CommandResult.getResult(result);
+            return null;
+        }
+    }
 
-    void publishNetworkEvent(BaseEvent event, String fromId);
 
-    void publishLocalEvent(BaseEvent event);
 
-    List<EventItem> getEventList();
 }

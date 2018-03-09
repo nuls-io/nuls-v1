@@ -96,11 +96,12 @@ public class HeaderPackerValidator implements NulsDataValidator<BlockHeader> {
     }
 
     private boolean isAdjacent(BlockRoundData roundData, BlockRoundData nowRoundData) {
-        if (roundData.getRoundIndex() == nowRoundData.getRoundIndex()) {
-            return roundData.getPackingIndexOfRound() + 1 == nowRoundData.getPackingIndexOfRound();
-        } else if (roundData.getRoundIndex() + 1 == nowRoundData.getRoundIndex()) {
-            return 1 == nowRoundData.getPackingIndexOfRound();
-        }
-        return false;
+//        if (roundData.getRoundIndex() == nowRoundData.getRoundIndex()) {
+//            return roundData.getPackingIndexOfRound() + 1 == nowRoundData.getPackingIndexOfRound();
+//        } else if (roundData.getRoundIndex() + 1 == nowRoundData.getRoundIndex()) {
+//            return 1 == nowRoundData.getPackingIndexOfRound();
+//        }
+//        return false;
+        return true;
     }
 }
