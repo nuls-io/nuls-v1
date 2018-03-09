@@ -33,7 +33,11 @@ package io.nuls.rpc.resources.form;
 public class AccountParamForm {
 
     private String address;
+
     private String password;
+
+    private String alias;
+
     private int count;
 
     public String getPassword() {
@@ -58,5 +62,13 @@ public class AccountParamForm {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 }

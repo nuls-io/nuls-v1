@@ -81,12 +81,13 @@ public class EventManager {
 
     public static BaseEvent getInstance(byte[] bytes) throws NulsException {
         EventHeader header = new EventHeader();
+
         header.parse(new NulsByteBuffer(bytes));
         Class<? extends BaseEvent> clazz = EVENT_MAP.get(header.getModuleId() + "_" + header.getEventType());
         if (null == clazz) {
             return null;
         }
-        BaseEvent event = null;
+        BaseEvent event;
         try {
             event = clazz.newInstance();
         } catch (Exception e) {
