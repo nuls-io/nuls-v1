@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -133,20 +133,32 @@ public class UtxoTransactionTool {
         long usable = 0;
         long lock = 0;
         long currentTime = TimeService.currentTimeMillis();
+        long genesisTime = NulsContext.getInstance().getGenesisBlock().getHeader().getTime();
+        long bestHeight = NulsContext.getInstance().getNetBestBlockHeight();
+
         for (UtxoOutput output : balance.getUnSpends()) {
             if (output.getStatus() == UtxoOutput.USEABLE) {
-                if (output.getLockTime() > currentTime) {
-                    lock += output.getValue();
-                } else {
-                    usable += output.getValue();
+                if (output.getLockTime() > 0) {
+                    if (output.getLockTime() > genesisTime) {
+                        if (output.getLockTime() > currentTime) {
+                            lock += output.getValue();
+                        } else {
+                            usable += output.getValue();
+                        }
+                    } else {
+                        if (output.getLockTime() > bestHeight) {
+                            lock += output.getValue();
+                        } else {
+                            usable += output.getValue();
+                        }
+                    }
                 }
-
             } else if (output.getStatus() == UtxoOutput.LOCKED) {
                 lock += output.getValue();
             }
         }
         Na oldNa = balance.getBalance();
-        if(null==oldNa){
+        if (null == oldNa) {
             oldNa = Na.ZERO;
         }
         long oldBalance = oldNa.getValue();
@@ -189,7 +201,7 @@ public class UtxoTransactionTool {
         return accountService;
     }
 
-    public TransferScript createTTransferScript(UtxoInput input,UtxoOutput output){
+    public TransferScript createTTransferScript(UtxoInput input, UtxoOutput output) {
         TransferScript transferScript = new TransferScript();
 
         return transferScript;
