@@ -63,6 +63,7 @@ public class NetworkServiceImpl implements NetworkService {
 
     public NetworkServiceImpl() {
         this.network = getNetworkInstance();
+        DefaultMessageFilter.getInstance().addMagicNum(network.packetMagic());
         MessageFilterChain.getInstance().addFilter(DefaultMessageFilter.getInstance());
         NulsContext.setMagicNumber(network.packetMagic());
 

@@ -28,6 +28,7 @@ import io.nuls.core.mesasge.NulsMessageHeader;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.message.filter.NulsMessageFilter;
 
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -37,7 +38,7 @@ import java.util.Set;
  */
 public class DefaultMessageFilter implements NulsMessageFilter {
 
-    private Set<Integer> magicSet = new LinkedHashSet<>();
+    private Set<Integer> magicSet = new HashSet<>();
 
     private static DefaultMessageFilter instance = new DefaultMessageFilter();
 
