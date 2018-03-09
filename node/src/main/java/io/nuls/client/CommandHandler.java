@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -41,7 +41,7 @@ import java.util.*;
  */
 public class CommandHandler {
 
-    public static final Map<String,CommandProcessor> PROCESSOR_MAP = new HashMap<>();
+    public static final Map<String, CommandProcessor> PROCESSOR_MAP = new HashMap<>();
 
     private void init() {
         //todo 在这里注册所有的命令处理器
@@ -66,7 +66,7 @@ public class CommandHandler {
                 System.out.print(CommandConstant.COMMAND_PS1);
                 continue;
             }
-            System.out.print(CommandConstant.COMMAND_PS1 + instance.processCommand(read.split(" "))+"\n"+CommandConstant.COMMAND_PS1);
+            System.out.print(CommandConstant.COMMAND_PS1 + instance.processCommand(read.split(" ")) + "\n" + CommandConstant.COMMAND_PS1);
         }
     }
 
@@ -76,19 +76,22 @@ public class CommandHandler {
         }
         String command = args[0];
         CommandProcessor processor = PROCESSOR_MAP.get(command);
-        if(processor==null){
-            return command+" not a nuls command!";
+        if (processor == null) {
+            return command + " not a nuls command!";
         }
-        boolean result = processor.argsValidate(args);
-        if(!result){
-            return "args not right:::"+processor.getCommandDescription();
+        try {
+            boolean result = processor.argsValidate(args);
+            if (!result) {
+                return "args not right:::" + processor.getCommandDescription();
+            }
+            return processor.execute(args).toString();
+        } catch (Exception e) {
+            return CommandConstant.COMMAND_ERROR + ":" + e.getMessage();
         }
-        return processor.execute(args).toString();
     }
 
 
-
     private void register(CommandProcessor processor) {
-        PROCESSOR_MAP.put(processor.getCommand(),processor);
+        PROCESSOR_MAP.put(processor.getCommand(), processor);
     }
 }
