@@ -30,6 +30,7 @@ import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.Result;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
@@ -162,15 +163,8 @@ public class AccountResource {
         if (!StringUtils.validAddress(form.getAddress()) || !StringUtils.validPassword(form.getPassword())) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
-        RpcResult result;
-        try {
-            byte[] prikey = accountService.getPrivateKey(form.getAddress(), form.getPassword());
-            result = RpcResult.getSuccess();
-            result.setData(Hex.encode(prikey));
-        } catch (Exception e) {
-            result = RpcResult.getFailed(e.getMessage());
-        }
-        return result;
+        Result result = accountService.getPrivateKey(form.getAddress(), form.getPassword());
+        return new RpcResult(result);
     }
 
 
