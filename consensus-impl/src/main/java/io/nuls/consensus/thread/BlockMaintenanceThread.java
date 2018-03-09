@@ -51,7 +51,6 @@ public class BlockMaintenanceThread implements Runnable {
     public static final String THREAD_NAME = "block-maintenance";
 
     private static BlockMaintenanceThread instance = new BlockMaintenanceThread();
-    ;
 
     private final BlockService blockService = NulsContext.getServiceBean(BlockService.class);
     private boolean success = false;
