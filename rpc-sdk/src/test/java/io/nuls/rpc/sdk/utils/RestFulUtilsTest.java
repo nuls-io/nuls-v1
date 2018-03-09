@@ -41,8 +41,8 @@ public class RestFulUtilsTest {
 
     @Test
     public void test() {
-        BlockService blockService = new BlockService();
-        Object obj = blockService.getBlock(0);
-        System.out.println(obj);
+//        BlockService blockService = new BlockService();
+//        Object obj = blockService.getBlock(0);
+//        System.out.println(obj);
     }
 }
