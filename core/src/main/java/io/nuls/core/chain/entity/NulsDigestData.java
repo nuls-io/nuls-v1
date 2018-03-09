@@ -145,6 +145,7 @@ public class NulsDigestData extends BaseNulsData {
 
         if((short)1 == digestAlgType){
             byte[] content = Utils.sha256hash160(data);
+            digestData.digestBytes = content;
             return digestData;
         }
 
