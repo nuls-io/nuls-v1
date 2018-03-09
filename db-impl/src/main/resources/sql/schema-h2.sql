@@ -135,6 +135,7 @@ CREATE TABLE IF NOT EXISTS `utxo_output` (
 CREATE TABLE IF NOT EXISTS `alias` (
   `alias` VARCHAR(20) NOT NULL,
   `address` varchar(30) NOT NULL,
+  `status` tinyint(1),
   PRIMARY KEY (`alias`)
 );
  -- alias index
