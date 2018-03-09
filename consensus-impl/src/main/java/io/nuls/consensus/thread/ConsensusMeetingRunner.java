@@ -146,9 +146,10 @@ public class ConsensusMeetingRunner implements Runnable {
                 if (blockInfo == null) {
                     break;
                 }
+                Block localBlock = blockService.getBlock(blockInfo.getBestHeight());
                 result = blockInfo.getBestHeight() <= context.getBestBlock().getHeader().getHeight() &&
                         blockInfo.getBestHash().getDigestHex()
-                                .equals(blockService.getBlock(blockInfo.getBestHeight()).getHeader().getHash().getDigestHex());
+                                .equals(localBlock.getHeader().getHash().getDigestHex());
             }
             if (!result) {
                 break;
@@ -174,9 +175,12 @@ public class ConsensusMeetingRunner implements Runnable {
         }
         List<Consensus<Agent>> list = calcConsensusAgentList();
         currentRound.setMemberCount(list.size());
-        if (currentRound.getEndTime() < TimeService.currentTimeMillis()) {
-            nextRound();
-            return;
+        while (currentRound.getEndTime() < TimeService.currentTimeMillis()) {
+            long time = TimeService.currentTimeMillis() - currentRound.getStartTime();
+            long roundTime = currentRound.getEndTime() - currentRound.getStartTime();
+            long index = time / roundTime;
+            long startTime = currentRound.getStartTime() + index * roundTime;
+            currentRound.setStartTime(startTime);
         }
         List<PocMeetingMember> memberList = new ArrayList<>();
         ConsensusGroup cg = new ConsensusGroup();

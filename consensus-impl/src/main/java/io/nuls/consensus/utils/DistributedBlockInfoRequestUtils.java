@@ -153,7 +153,7 @@ public class DistributedBlockInfoRequestUtils {
                 for (int i = 0; i < response.getHeightList().size(); i++) {
                     Long height = response.getHeightList().get(i);
                     NulsDigestData hash = response.getHashList().get(i);
-                    if (height > bestHeight) {
+                    if (height >= bestHeight) {
                         bestHash = hash;
                         bestHeight = height;
                     }

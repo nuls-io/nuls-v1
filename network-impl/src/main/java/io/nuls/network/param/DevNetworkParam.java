@@ -57,7 +57,6 @@ public class DevNetworkParam extends AbstractNetworkParam {
         seedNodes.add(address0);
         seedNodes.add(address1);
         seedNodes.add(address2);
-        //seedNodes.add(address3);
 
 
         this.messageFilter = DefaultMessageFilter.getInstance();
