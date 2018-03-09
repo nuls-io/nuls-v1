@@ -23,7 +23,6 @@
  */
 package io.nuls.db.dao.impl.mybatis;
 
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.db.dao.*;
 import io.nuls.db.entity.*;

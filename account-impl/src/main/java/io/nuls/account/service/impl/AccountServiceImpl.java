@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -261,22 +261,23 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public byte[] getPrivateKey(String address, String password) {
+    public Result getPrivateKey(String address, String password) {
         AssertUtil.canNotEmpty(address, "");
         Account account = accountCacheService.getAccountByAddress(address);
         if (account == null) {
-            return null;
+            return Result.getFailed(ErrorCode.ACCOUNT_NOT_EXIST);
         }
-        if(!account.isEncrypted()) {
-            return account.getPriKey();
-        } else{
+        if (!account.isEncrypted()) {
+            Result result = new Result(true, "OK", Hex.encode(account.getPriKey()));
+            return result;
+        } else {
             account.unlock(password);
-            if(account.isEncrypted()){
-                throw new NulsRuntimeException(ErrorCode.PASSWORD_IS_WRONG );
+            if (account.isEncrypted()) {
+                return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
             }
             byte[] publicKeyBytes = account.getPriKey();
             account.lock();
-            return publicKeyBytes;
+            return new Result(true, "OK", Hex.encode(publicKeyBytes));
         }
     }
 
@@ -518,13 +519,13 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Result exportAccount(String address, String password) {
         Account account = null;
-        if(!StringUtils.isBlank(address)) {
+        if (!StringUtils.isBlank(address)) {
             account = accountCacheService.getAccountByAddress(address);
             if (account == null) {
                 return Result.getFailed(ErrorCode.DATA_NOT_FOUND);
             }
         }
-        if(!account.decrypt(password)) {
+        if (!account.decrypt(password)) {
             return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
         }
 
