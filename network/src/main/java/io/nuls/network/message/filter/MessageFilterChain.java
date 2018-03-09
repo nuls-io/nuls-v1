@@ -48,11 +48,11 @@ public class MessageFilterChain {
     }
 
 
-    void addFilter(NulsMessageFilter filter) {
+    public void addFilter(NulsMessageFilter filter) {
         filters.add(filter);
     }
 
-    void deleteFilter(NulsMessageFilter filter) {
+    public void deleteFilter(NulsMessageFilter filter) {
         if (filters.contains(filter)) {
             filters.remove(filter);
         }

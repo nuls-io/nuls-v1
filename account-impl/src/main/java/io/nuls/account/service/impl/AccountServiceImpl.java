@@ -564,7 +564,11 @@ public class AccountServiceImpl implements AccountService {
                 return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
             }
             prikeyList.add(Hex.encode(account.getPriKey()));
-            account.encrypt(password);
+            try {
+                account.encrypt(password);
+            } catch (NulsException e) {
+                e.printStackTrace();
+            }
         }
 
         Map<String, Object> map = new HashMap<>();

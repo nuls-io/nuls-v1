@@ -35,6 +35,7 @@ import io.nuls.network.message.entity.GetNodeEvent;
 import io.nuls.network.message.entity.GetVersionEvent;
 import io.nuls.network.message.entity.NodeEvent;
 import io.nuls.network.message.entity.VersionEvent;
+import io.nuls.network.message.filter.MessageFilterChain;
 import io.nuls.network.module.AbstractNetworkModule;
 import io.nuls.network.service.NetworkService;
 import io.nuls.network.service.impl.NetworkServiceImpl;

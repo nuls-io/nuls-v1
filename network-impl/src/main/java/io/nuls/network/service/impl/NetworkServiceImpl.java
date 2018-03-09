@@ -37,6 +37,7 @@ import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeGroup;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.filter.impl.DefaultMessageFilter;
+import io.nuls.network.message.filter.MessageFilterChain;
 import io.nuls.network.message.filter.NulsMessageFilter;
 import io.nuls.network.param.DevNetworkParam;
 import io.nuls.network.param.MainNetworkParam;
@@ -62,6 +63,7 @@ public class NetworkServiceImpl implements NetworkService {
 
     public NetworkServiceImpl() {
         this.network = getNetworkInstance();
+        MessageFilterChain.getInstance().addFilter(DefaultMessageFilter.getInstance());
         NulsContext.setMagicNumber(network.packetMagic());
 
         NulsMessageFilter messageFilter = DefaultMessageFilter.getInstance();
