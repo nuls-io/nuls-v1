@@ -49,7 +49,7 @@ public class VersionManager {
             jsonStr = new String(HttpDownloadUtils.download(HIGHEST_VERDION_FILE_URL), NulsContext.DEFAULT_ENCODING);
         } catch (IOException e) {
             Log.error(e);
-            throw new NulsException(ErrorCode.FAILED, "Download version json faild!");
+            return;
         }
         Map<String, Object> map = null;
         try {
@@ -152,7 +152,7 @@ public class VersionManager {
             failedOpration(failedList);
         }
         File[] files = tempFolder.listFiles();
-        if(files==null||files.length==0){
+        if (files == null || files.length == 0) {
             return;
         }
         List<String> moved = new ArrayList<>();
