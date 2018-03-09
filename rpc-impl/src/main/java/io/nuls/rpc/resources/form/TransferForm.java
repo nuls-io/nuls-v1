@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,29 +21,59 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- */
-package io.nuls.rpc.sdk.utils;
-
-import io.nuls.rpc.sdk.SdkManager;
-import io.nuls.rpc.sdk.service.BlockService;
-import org.junit.Before;
-import org.junit.Test;
-
-/**
- * Created by Niels on 2017/10/31.
  *
  */
-public class RestFulUtilsTest {
 
-    @Before
-    public void init() {
-        SdkManager.init("http://127.0.0.1:8001/nuls");
+package io.nuls.rpc.resources.form;
+
+/**
+ * @author Niels
+ * @date 2018/3/9
+ */
+public class TransferForm {
+    private String address;
+    private String password;
+    private String toAddress;
+    private Double amount;
+    private String remark;
+
+    public String getAddress() {
+        return address;
     }
 
-    @Test
-    public void test() {
-//        BlockService blockService = new BlockService();
-//        Object obj = blockService.getBlock(0);
-//        System.out.println(obj);
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getToAddress() {
+        return toAddress;
+    }
+
+    public void setToAddress(String toAddress) {
+        this.toAddress = toAddress;
+    }
+
+    public Double getAmount() {
+        return amount;
+    }
+
+    public void setAmount(Double amount) {
+        this.amount = amount;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 }

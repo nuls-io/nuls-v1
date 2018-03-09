@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,29 +21,51 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- */
-package io.nuls.rpc.sdk.utils;
-
-import io.nuls.rpc.sdk.SdkManager;
-import io.nuls.rpc.sdk.service.BlockService;
-import org.junit.Before;
-import org.junit.Test;
-
-/**
- * Created by Niels on 2017/10/31.
  *
  */
-public class RestFulUtilsTest {
 
-    @Before
-    public void init() {
-        SdkManager.init("http://127.0.0.1:8001/nuls");
+package io.nuls.client.processor;
+
+import io.nuls.client.entity.CommandResult;
+import io.nuls.client.processor.intf.CommandProcessor;
+import io.nuls.rpc.sdk.entity.RpcClientResult;
+import io.nuls.rpc.sdk.service.WalletService;
+
+/**
+ * @author Niels
+ * @date 2018/3/7
+ */
+public abstract class WalletProcessors implements CommandProcessor {
+
+    protected WalletService walletService = new WalletService();
+    /**
+     * nuls transfer
+     */
+    public static class Transfer extends WalletProcessors {
+
+        @Override
+        public String getCommand() {
+            return "transfer";
+        }
+
+        @Override
+        public String getCommandDescription() {
+            return "transfer <address> <password> <toAddress> <amount> <remark> --";
+        }
+
+        @Override
+        public boolean argsValidate(String[] args) {
+            return true;
+        }
+
+        @Override
+        public CommandResult execute(String[] args) {
+//            RpcClientResult result = this.walletService.transfer();
+//            return CommandResult.getResult(result);
+            return null;
+        }
     }
 
-    @Test
-    public void test() {
-//        BlockService blockService = new BlockService();
-//        Object obj = blockService.getBlock(0);
-//        System.out.println(obj);
-    }
+
+
 }

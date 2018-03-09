@@ -168,7 +168,7 @@ public class AccountServiceImpl implements AccountService {
         Account defaultAccount = getDefaultAccount();
         if (defaultAccount != null) {
             defaultAccount.decrypt(password);
-            if (!defaultAccount.isEncrypted()) {
+            if (defaultAccount.isEncrypted()) {
                 return new Result(false, "incorrect password");
             }
         }

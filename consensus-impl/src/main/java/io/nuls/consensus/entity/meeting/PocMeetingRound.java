@@ -48,7 +48,6 @@ public class PocMeetingRound {
     private Na agentTotalDeposit;
     private long index;
     private long startTime;
-    private long endTime;
     private int memberCount;
     private List<PocMeetingMember> memberList;
     private Map<String, Integer> addressOrderMap = new HashMap<>();
@@ -63,11 +62,7 @@ public class PocMeetingRound {
     }
 
     public long getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(long endTime) {
-        this.endTime = endTime;
+        return startTime + memberCount * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000L;
     }
 
     public int getMemberCount() {
@@ -94,7 +89,7 @@ public class PocMeetingRound {
         for (int i = 0; i < memberList.size(); i++) {
             PocMeetingMember pmm = memberList.get(i);
             pmm.setIndexOfRound(i + 1);
-            pmm.setPackTime(pmm.getRoundStartTime() + PocConsensusConstant.BLOCK_TIME_INTERVAL * 1000 * pmm.getIndexOfRound());
+            pmm.setPackTime(pmm.getRoundStartTime() + PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000 * pmm.getIndexOfRound());
             addressOrderMap.put(pmm.getPackerAddress(), i);
         }
     }

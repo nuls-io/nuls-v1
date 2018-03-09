@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,29 +21,34 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- */
-package io.nuls.rpc.sdk.utils;
-
-import io.nuls.rpc.sdk.SdkManager;
-import io.nuls.rpc.sdk.service.BlockService;
-import org.junit.Before;
-import org.junit.Test;
-
-/**
- * Created by Niels on 2017/10/31.
  *
  */
-public class RestFulUtilsTest {
+package io.nuls.rpc.sdk.service;
 
-    @Before
-    public void init() {
-        SdkManager.init("http://127.0.0.1:8001/nuls");
+import io.nuls.rpc.sdk.entity.BlockDto;
+import io.nuls.rpc.sdk.entity.RpcClientResult;
+import io.nuls.rpc.sdk.utils.AssertUtil;
+import io.nuls.rpc.sdk.utils.JSONUtils;
+import io.nuls.rpc.sdk.utils.RestFulUtils;
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * @author Niels
+ * @date 2017/11/1
+ */
+public class WalletService {
+    private RestFulUtils restFul = RestFulUtils.getInstance();
+
+    public RpcClientResult transfer(String address, String password, String toAddress, Double amount, String remark) {
+        Map<String,String> params = new HashMap<>();
+    params.put("address",address);
+    params.put("password",password);
+    params.put("toAddress",toAddress);
+    params.put("amount",amount+"");
+    params.put("remark",remark);
+        return this.restFul.post("/wallet/transfer", params);
     }
 
-    @Test
-    public void test() {
-//        BlockService blockService = new BlockService();
-//        Object obj = blockService.getBlock(0);
-//        System.out.println(obj);
-    }
 }

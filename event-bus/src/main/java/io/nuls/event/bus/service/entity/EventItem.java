@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,29 +21,53 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- */
-package io.nuls.rpc.sdk.utils;
-
-import io.nuls.rpc.sdk.SdkManager;
-import io.nuls.rpc.sdk.service.BlockService;
-import org.junit.Before;
-import org.junit.Test;
-
-/**
- * Created by Niels on 2017/10/31.
  *
  */
-public class RestFulUtilsTest {
 
-    @Before
-    public void init() {
-        SdkManager.init("http://127.0.0.1:8001/nuls");
+package io.nuls.event.bus.service.entity;
+
+import io.nuls.core.event.BaseEvent;
+
+/**
+ * @author Niels
+ * @date 2018/3/9
+ */
+public class EventItem {
+
+    private String name;
+    private short moduleId;
+    private short eventType;
+    private Class<? extends BaseEvent> clazz;
+
+    public String getName() {
+        return name;
     }
 
-    @Test
-    public void test() {
-//        BlockService blockService = new BlockService();
-//        Object obj = blockService.getBlock(0);
-//        System.out.println(obj);
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public short getModuleId() {
+        return moduleId;
+    }
+
+    public void setModuleId(short moduleId) {
+        this.moduleId = moduleId;
+    }
+
+    public short getEventType() {
+        return eventType;
+    }
+
+    public void setEventType(short eventType) {
+        this.eventType = eventType;
+    }
+
+    public Class<? extends BaseEvent> getClazz() {
+        return clazz;
+    }
+
+    public void setClazz(Class<? extends BaseEvent> clazz) {
+        this.clazz = clazz;
     }
 }
