@@ -152,6 +152,8 @@ public class UtxoTransactionTool {
                             usable += output.getValue();
                         }
                     }
+                }else {
+                    usable += output.getValue();
                 }
             } else if (output.getStatus() == UtxoOutput.LOCKED) {
                 lock += output.getValue();

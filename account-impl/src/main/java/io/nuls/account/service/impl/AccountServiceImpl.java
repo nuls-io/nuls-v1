@@ -671,6 +671,8 @@ public class AccountServiceImpl implements AccountService {
         AccountPo accountPo = accountDao.get(account.getAddress().getBase58());
         if (accountPo != null) {
             return Result.getSuccess();
+        }else {
+            accountPo = new AccountPo();
         }
 
         Account defaultAcct = getDefaultAccount();
@@ -690,8 +692,8 @@ public class AccountServiceImpl implements AccountService {
         if (aliasPo != null) {
             account.setAlias(aliasPo.getAlias());
             accountPo.setAlias(aliasPo.getAlias());
-            accountDao.save(accountPo);
         }
+        accountDao.save(accountPo);
         ledgerService.saveTxInLocal(accountPo.getAddress());
 
         // save cache
