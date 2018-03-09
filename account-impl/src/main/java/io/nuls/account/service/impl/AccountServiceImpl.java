@@ -26,7 +26,6 @@ package io.nuls.account.service.impl;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
-import io.nuls.account.entity.Alias;
 import io.nuls.account.entity.tx.AliasTransaction;
 import io.nuls.account.entity.validator.AliasValidator;
 import io.nuls.account.event.*;
@@ -43,6 +42,7 @@ import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.AESEncrypt;
 import io.nuls.core.crypto.ECKey;
+import io.nuls.core.crypto.MD5Util;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -538,9 +538,11 @@ public class AccountServiceImpl implements AccountService {
             if (account == null) {
                 return Result.getFailed(ErrorCode.DATA_NOT_FOUND);
             }
-        }
-        if (!account.decrypt(password)) {
-            return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
+            if (account.isEncrypted()) {
+                if (!StringUtils.validPassword(password) || !account.decrypt(password)) {
+                    return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
+                }
+            }
         }
 
         Result result = backUpFile("");
@@ -550,14 +552,26 @@ public class AccountServiceImpl implements AccountService {
         return exportAccount(account, (File) result.getObject());
     }
 
-    //    @Override
-    public Result exportAccounts() {
-
-        List<AccountPo> poList = this.accountDao.getList();
-        if (null == poList || poList.isEmpty()) {
+    @Override
+    public Result exportAccounts(String password) {
+        List<Account> accounts = accountCacheService.getAccountList();
+        if (null == accounts || accounts.isEmpty()) {
             return Result.getFailed("no account can export");
         }
-        return new Result(true, "OK", poList);
+        List<String> prikeyList = new ArrayList<>();
+        for (Account account : accounts) {
+            account.decrypt(password);
+            if (account.isEncrypted()) {
+                return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
+            }
+            prikeyList.add(Hex.encode(account.getPriKey()));
+            account.encrypt(password);
+        }
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("prikeys", prikeyList);
+        map.put("password", MD5Util.md5(password));
+        return new Result(true, "OK", prikeyList);
     }
 
 

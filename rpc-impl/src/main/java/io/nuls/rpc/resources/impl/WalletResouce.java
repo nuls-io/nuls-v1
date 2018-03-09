@@ -32,6 +32,7 @@ import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.rpc.entity.RpcResult;
+import io.nuls.rpc.resources.form.AccountParamForm;
 import io.nuls.rpc.resources.form.TransferForm;
 
 import javax.ws.rs.*;
@@ -93,9 +94,9 @@ public class WalletResouce {
     @POST
     @Path("/backup")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult backup(@FormParam("address") String address, @FormParam("password") String password) {
-        //todo Result result = this.accountService.exportAccount(address);
-        return new RpcResult();
+    public RpcResult backup(AccountParamForm form) {
+        Result result = this.accountService.exportAccounts(form.getPassword());
+        return new RpcResult(result);
     }
 
     @POST
