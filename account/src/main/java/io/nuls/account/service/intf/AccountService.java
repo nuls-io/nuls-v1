@@ -88,7 +88,7 @@ public interface AccountService {
 
     Result exportAccounts(String password);
 
-    Result importAccount(String priKey);
+    Result importAccount(String priKey, String password);
 
-//    Result importAccountsFile(String walletFilePath);
+    Result importAccountsFile(String walletFilePath);
 }

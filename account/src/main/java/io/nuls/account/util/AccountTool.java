@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -26,15 +26,19 @@ package io.nuls.account.util;
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.account.entity.Alias;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.EncryptedData;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
+import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.entity.AccountPo;
 import io.nuls.db.entity.AliasPo;
 
@@ -57,8 +61,17 @@ public final class AccountTool {
         return Address.fromHashs(Utils.sha256hash160(key.getPubKey(false)));
     }
 
-    public static Account createAccount() {
-        ECKey key = new ECKey();
+    public static Account createAccount(String prikey) throws NulsException {
+        ECKey key = null;
+        if (StringUtils.isBlank(prikey)) {
+            key = new ECKey();
+        } else {
+            try {
+                key = ECKey.fromPrivate(new BigInteger(Hex.decode(prikey)));
+            } catch (Exception e) {
+                throw new NulsException(ErrorCode.DATA_PARSE_ERROR);
+            }
+        }
         Address address = new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), Utils.sha256hash160(key.getPubKey(false)));
         Account account = new Account();
         account.setEncryptedPriKey(new byte[0]);
@@ -68,6 +81,10 @@ public final class AccountTool {
         account.setPriKey(key.getPrivKeyBytes());
         account.setCreateTime(TimeService.currentTimeMillis());
         return account;
+    }
+
+    public static Account createAccount() throws NulsException {
+        return createAccount(null);
     }
 
     /**
@@ -102,9 +119,9 @@ public final class AccountTool {
         desc.setPriKey(src.getPriKey());
         desc.setPubKey(src.getPubKey());
         desc.setEncryptedPriKey(src.getEncryptedPriKey());
-        if(src.getPriKey()!=null && src.getPriKey().length>1) {
+        if (src.getPriKey() != null && src.getPriKey().length > 1) {
             desc.setEcKey(ECKey.fromPrivate(new BigInteger(desc.getPriKey())));
-        }else {
+        } else {
             desc.setEcKey(ECKey.fromEncrypted(new EncryptedData(src.getEncryptedPriKey()), src.getPubKey()));
         }
 

@@ -100,9 +100,9 @@ public class WalletResouce {
     }
 
     @POST
-    @Path("/import")
+    @Path("/imports")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult importWallet(File file) {
+    public RpcResult importAccountFile(File file) {
         //todo
         String name = file.getName();
         RpcResult rpcResult = RpcResult.getSuccess();
@@ -110,4 +110,16 @@ public class WalletResouce {
         return rpcResult;
     }
 
+    @POST
+    @Path("/import")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult importAccount(AccountParamForm form) {
+        if (!StringUtils.validPassword(form.getPassword()) ||
+                StringUtils.isBlank(form.getPrikey()) ||
+                form.getPrikey().length() > 100) {
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+        Result result = accountService.importAccount(form.getPrikey(), form.getPassword());
+        return new RpcResult(result);
+    }
 }

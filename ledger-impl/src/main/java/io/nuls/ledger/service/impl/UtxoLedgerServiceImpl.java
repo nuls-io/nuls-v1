@@ -321,6 +321,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
+    @DbSession
     public void saveTxInLocal(String address) {
         List<TransactionPo> poList = txDao.getTxs(address, 0, null, null);
         if (poList.isEmpty()) {

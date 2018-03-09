@@ -40,6 +40,8 @@ public class AccountParamForm {
 
     private int count;
 
+    private String prikey;
+
     public String getPassword() {
         return password;
     }
@@ -70,5 +72,13 @@ public class AccountParamForm {
 
     public void setAlias(String alias) {
         this.alias = alias;
+    }
+
+    public String getPrikey() {
+        return prikey;
+    }
+
+    public void setPrikey(String prikey) {
+        this.prikey = prikey;
     }
 }

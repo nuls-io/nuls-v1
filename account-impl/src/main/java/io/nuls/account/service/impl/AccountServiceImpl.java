@@ -23,6 +23,7 @@
  */
 package io.nuls.account.service.impl;
 
+import com.sun.org.apache.regexp.internal.RE;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
@@ -74,6 +75,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -175,6 +177,7 @@ public class AccountServiceImpl implements AccountService {
 
         locker.lock();
         try {
+            defaultAccount.encrypt(password);
             List<Account> accounts = new ArrayList<>();
             List<AccountPo> accountPos = new ArrayList<>();
             List<String> resultList = new ArrayList<>();
@@ -285,7 +288,7 @@ public class AccountServiceImpl implements AccountService {
             Result result = new Result(true, "OK", Hex.encode(account.getPriKey()));
             return result;
         } else {
-            if(!account.unlock(password)){
+            if (!account.unlock(password)) {
                 return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
             }
             byte[] publicKeyBytes = account.getPriKey();
@@ -326,13 +329,13 @@ public class AccountServiceImpl implements AccountService {
                     account.encrypt(password);
                     AccountPo po = new AccountPo();
                     AccountTool.toPojo(account, po);
-                    accountDao.update(po);
+                    accountPoList.add(po);
                 }
             }
+
             if (accountPoList.size() > 0) {
                 accountDao.update(accountPoList);
             }
-
             accountCacheService.putAccountList(accounts);
         } catch (Exception e) {
             Log.error(e);
@@ -374,7 +377,10 @@ public class AccountServiceImpl implements AccountService {
                 AccountTool.toPojo(account, po);
                 accountPoList.add(po);
             }
-            accountDao.update(accountPoList);
+
+            if (accountPoList.size() > 0) {
+                accountDao.update(accountPoList);
+            }
             accountCacheService.putAccountList(accounts);
         } catch (Exception e) {
             Log.error(e);
@@ -428,7 +434,11 @@ public class AccountServiceImpl implements AccountService {
                 } catch (InterruptedException e) {
                     Log.error(e);
                 }
-                resetKeys(password);
+                try {
+                    resetKeys(password);
+                } catch (NulsException e) {
+                    Log.error("unlockAccounts resetKey error", e);
+                }
                 isLockNow = false;
             }
         });
@@ -567,7 +577,7 @@ public class AccountServiceImpl implements AccountService {
             try {
                 account.encrypt(password);
             } catch (NulsException e) {
-                e.printStackTrace();
+                return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
             }
         }
 
@@ -649,32 +659,52 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Result importAccount(String priKey) {
-        String address = new ECKey().getPublicKeyAsHex(true);
+    @DbSession
+    public Result importAccount(String priKey, String password) {
+        Account account = null;
+        try {
+            account = AccountTool.createAccount(priKey);
+        } catch (NulsException e) {
+            return Result.getFailed("invalid prikey");
+        }
 
-        AccountPo accountPo = accountDao.get(address);
+        AccountPo accountPo = accountDao.get(account.getAddress().getBase58());
         if (accountPo != null) {
             return Result.getSuccess();
         }
-        ledgerService.saveTxInLocal(address);
-        AliasPo aliasPo = aliasDataService.getByAddress(address);
-        if (aliasPo != null) {
-            accountPo.setAlias(aliasPo.getAlias());
-            accountDao.updateAlias(accountPo);
+
+        Account defaultAcct = getDefaultAccount();
+        if (!defaultAcct.decrypt(password)) {
+            return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
         }
 
-        ledgerService.getBalance(address);
-        Account account = new Account();
-        AccountTool.toBean(accountPo, account);
+        try {
+            defaultAcct.encrypt(password);
+            account.encrypt(password);
+        } catch (NulsException e) {
+
+        }
+        // save db
+        AccountTool.toPojo(account, accountPo);
+        AliasPo aliasPo = aliasDataService.getByAddress(accountPo.getAddress());
+        if (aliasPo != null) {
+            account.setAlias(aliasPo.getAlias());
+            accountPo.setAlias(aliasPo.getAlias());
+            accountDao.save(accountPo);
+        }
+        ledgerService.saveTxInLocal(accountPo.getAddress());
+
+        // save cache
         accountCacheService.putAccount(account);
-        NulsContext.LOCAL_ADDRESS_LIST.add(address);
+        NulsContext.LOCAL_ADDRESS_LIST.add(accountPo.getAddress());
+        ledgerService.getBalance(accountPo.getAddress());
         AccountImportedNotice notice = new AccountImportedNotice();
         notice.setEventBody(account);
         eventBroadcaster.publishToLocal(notice);
         return Result.getSuccess();
     }
 
-    //    @Override
+    @Override
     public Result importAccountsFile(String walletFilePath) {
         if (StringUtils.isBlank(walletFilePath)) {
             return new Result(false, "walletFilePath is required");
@@ -755,8 +785,11 @@ public class AccountServiceImpl implements AccountService {
         accountAliasDBService.importAccount(accountPoList);
     }
 
-    private void resetKeys(String password) {
-        //todo
+    private void resetKeys(String password) throws NulsException {
+        List<Account> accounts = this.getAccountList();
+        for (Account account : accounts) {
+            account.encrypt(password);
+        }
     }
 
     private void signAccount(Account account) {
