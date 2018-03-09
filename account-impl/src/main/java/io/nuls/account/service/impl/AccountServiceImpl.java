@@ -267,12 +267,11 @@ public class AccountServiceImpl implements AccountService {
         if (account == null) {
             return Result.getFailed(ErrorCode.ACCOUNT_NOT_EXIST);
         }
-        if (!account.isEncrypted()) {
+        if (!account.isLocked()) {
             Result result = new Result(true, "OK", Hex.encode(account.getPriKey()));
             return result;
         } else {
-            account.unlock(password);
-            if (account.isEncrypted()) {
+            if(!account.unlock(password)){
                 return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
             }
             byte[] publicKeyBytes = account.getPriKey();

@@ -27,6 +27,7 @@ import io.nuls.account.util.AccountTool;
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.chain.intf.NulsCloneable;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.*;
 import io.nuls.core.exception.NulsException;
@@ -95,10 +96,10 @@ public class Account extends BaseNulsData implements NulsCloneable {
     }
 
     public boolean isEncrypted() {
-        if(getPriKey()!=null && getPriKey().length>0) {
-            return false;
+        if(getEncryptedPriKey()!=null && getEncryptedPriKey().length>0) {
+            return true;
         }
-        return true;
+        return false;
     }
 
 
@@ -114,8 +115,16 @@ public class Account extends BaseNulsData implements NulsCloneable {
         }
     }
 
-    public void unlock(String password) {
+    public boolean unlock(String password) {
         decrypt(password);
+        if(isLocked()){
+            return false;
+        }
+        return true;
+    }
+
+    public boolean isLocked(){
+        return (this.getPriKey()== null) || (this.getPriKey().length==0);
     }
 
     public boolean validatePassword(String password) {
@@ -125,9 +134,11 @@ public class Account extends BaseNulsData implements NulsCloneable {
     /**
      * @param password
      */
-    public void encrypt(String password) {
+    public void encrypt(String password) throws NulsException{
         if(this.isEncrypted()){
-            return;
+            if(!unlock(password)) {
+                throw new NulsException(ErrorCode.ACCOUNT_IS_ALREADY_ENCRYPTED);
+            }
         }
         ECKey eckey = this.getEcKey();
         byte [] privKeyBytes = eckey.getPrivKeyBytes();
@@ -288,7 +299,7 @@ public class Account extends BaseNulsData implements NulsCloneable {
     }
 
 
-    public static void main(String[] args){
+    public static void main(String[] args)throws NulsException{
         System.out.println("***  create a new account  ***************************");
         Account testAccount = AccountTool.createAccount();
         showAccount(testAccount);
