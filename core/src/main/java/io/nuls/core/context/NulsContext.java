@@ -54,7 +54,8 @@ public class NulsContext {
     }
 
     public static int MAGIC_NUMBER;
-    private Na txFee;
+    //todo
+    private Na txFee = Na.valueOf(1000000);
     /**
      * cache the best block
      */

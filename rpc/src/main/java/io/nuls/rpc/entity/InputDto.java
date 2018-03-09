@@ -14,14 +14,14 @@ public class InputDto {
 
     private String address;
 
-    private Double value;
+    private Long value;
 
     public InputDto(UtxoInput input) {
         this.index = input.getIndex();
         this.fromHash = input.getFromHash().getDigestHex();
         this.fromIndex = input.getFromIndex();
         this.address = Address.fromHashs(input.getFrom().getAddress()).getBase58();
-        this.value = Na.valueOf(input.getFrom().getValue()).toDouble();
+        this.value = input.getFrom().getValue();
     }
 
     public Integer getIndex() {
@@ -40,11 +40,11 @@ public class InputDto {
         this.address = address;
     }
 
-    public Double getValue() {
+    public Long getValue() {
         return value;
     }
 
-    public void setValue(Double value) {
+    public void setValue(Long value) {
         this.value = value;
     }
 

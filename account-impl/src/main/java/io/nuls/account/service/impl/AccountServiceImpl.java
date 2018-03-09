@@ -26,6 +26,7 @@ package io.nuls.account.service.impl;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
+import io.nuls.account.entity.Alias;
 import io.nuls.account.entity.tx.AliasTransaction;
 import io.nuls.account.entity.validator.AliasValidator;
 import io.nuls.account.event.*;
@@ -218,7 +219,20 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Account getAccount(String address) {
         AssertUtil.canNotEmpty(address, "");
-        return accountCacheService.getAccountByAddress(address);
+        Account account = accountCacheService.getAccountByAddress(address);
+        if (account == null) {
+            AliasPo aliasPo = aliasDataService.getByAddress(address);
+            if (aliasPo != null) {
+                try {
+                    account = new Account();
+                    account.setAddress(Address.fromHashs(address));
+                    account.setAlias(aliasPo.getAlias());
+                } catch (NulsException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return account;
     }
 
     @Override
