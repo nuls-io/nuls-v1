@@ -119,6 +119,7 @@ public class WalletResouce {
                 form.getPrikey().length() > 100) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
+
         Result result = accountService.importAccount(form.getPrikey(), form.getPassword());
         return new RpcResult(result);
     }
