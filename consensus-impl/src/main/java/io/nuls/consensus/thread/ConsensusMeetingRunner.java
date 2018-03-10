@@ -126,9 +126,12 @@ public class ConsensusMeetingRunner implements Runnable {
                     Thread.sleep(1000L);
                 }
             } catch (Exception e) {
-                Log.error(e);
-                Log.info("meeting exception&restart meeting");
-                startMeeting();
+                Log.error(e.getMessage());
+                try {
+                    startMeeting();
+                }catch (Exception e1){
+                    Log.error(e1.getMessage());
+                }
             }
         }
     }
