@@ -212,16 +212,15 @@ public class NulsByteBuffer {
         if (payload == null || payload.length == 0 ) {
             return null;
         }
-        if(payload.length>=4){
+        int length = payload.length - cursor;
+        if(length>=4){
             byte[] byte4 = new byte[4];
             System.arraycopy(payload,cursor,byte4,0,4);
             if(Arrays.equals(NulsConstant.PLACE_HOLDER,byte4)){
                 cursor += 4;
                 return null;
             }
-
         }
-        int length = payload.length - cursor;
         byte[] bytes = new byte[length];
         System.arraycopy(payload, cursor, bytes, 0, length);
         nulsData.parse(bytes);
