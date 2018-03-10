@@ -27,8 +27,11 @@ import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
@@ -39,6 +42,7 @@ import io.nuls.ledger.entity.validator.CoinDataValidator;
 import io.nuls.ledger.service.intf.CoinDataProvider;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * @author Niels
@@ -113,4 +117,12 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
         this.coinData = coinData;
     }
 
+    @Override
+    public T parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
+        byte[] bytes = byteBuffer.readBytes(NulsConstant.PLACE_HOLDER.length);
+        if(Arrays.equals(NulsConstant.PLACE_HOLDER,bytes)){
+            return null;
+        }
+        throw new NulsRuntimeException(ErrorCode.DATA_ERROR,"The transaction never provided the method:parseTxData");
+    }
 }
