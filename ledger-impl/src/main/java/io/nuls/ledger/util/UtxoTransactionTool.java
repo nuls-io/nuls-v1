@@ -69,7 +69,6 @@ public class UtxoTransactionTool {
         TransferTransaction tx = new TransferTransaction(transferData, password);
         tx.setRemark(remark.getBytes(NulsContext.DEFAULT_ENCODING));
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
-
         tx.setSign(getAccountService().signData(tx.getHash(), password));
         return tx;
     }

@@ -31,9 +31,7 @@ import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TxStatusEnum;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.ECKey;
-
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -46,11 +44,9 @@ import io.nuls.db.entity.TxAccountRelationPo;
 import io.nuls.db.entity.UtxoInputPo;
 import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.db.transactional.annotation.DbSession;
-import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.*;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
-import io.nuls.ledger.event.notice.BalanceChangeNotice;
 import io.nuls.ledger.script.P2PKHScript;
 import io.nuls.ledger.service.intf.CoinDataProvider;
 import io.nuls.ledger.util.UtxoTransactionTool;
@@ -94,23 +90,31 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
     public void approve(CoinData coinData, Transaction tx) {
         //Lock the transaction specified output in the cache when the newly received transaction is approved.
         UtxoData utxoData = (UtxoData) coinData;
+        for (UtxoInput input : utxoData.getInputs()) {
+            input.setTxHash(tx.getHash());
+        }
+        for (UtxoOutput output : utxoData.getOutputs()) {
+            output.setTxHash(tx.getHash());
+        }
+
         List<UtxoOutput> outputs = new ArrayList<>();
         try {
             for (int i = 0; i < utxoData.getInputs().size(); i++) {
                 UtxoInput input = utxoData.getInputs().get(i);
+                input.setTxHash(tx.getHash());
                 UtxoOutput unSpend = cacheService.getUtxo(input.getKey());
                 unSpend.setStatus(UtxoOutput.LOCKED);
                 outputs.add(unSpend);
             }
+
         } catch (Exception e) {
             for (UtxoOutput output : outputs) {
                 cacheService.updateUtxoStatus(output.getKey(), UtxoOutput.USEABLE, UtxoOutput.LOCKED);
             }
             throw e;
         } finally {
-            for (UtxoInput input : utxoData.getInputs()) {
-                UtxoOutput unSpend = cacheService.getUtxo(input.getKey());
-                UtxoTransactionTool.getInstance().calcBalance(Address.fromHashs(unSpend.getAddress()));
+            for (UtxoOutput output : outputs) {
+                UtxoTransactionTool.getInstance().calcBalance(Address.fromHashs(output.getAddress()));
             }
         }
     }
