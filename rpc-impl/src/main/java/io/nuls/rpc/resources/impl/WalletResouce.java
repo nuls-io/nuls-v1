@@ -87,7 +87,7 @@ public class WalletResouce {
         AssertUtil.canNotEmpty(form.getToAddress());
         AssertUtil.canNotEmpty(form.getAmount());
         Result result = this.ledgerService.transfer(form.getAddress(), form.getPassword(),
-                form.getToAddress(), Na.parseNuls(form.getAmount()), form.getRemark());
+                form.getToAddress(), Na.valueOf(form.getAmount()), form.getRemark());
         return new RpcResult(result);
     }
 
