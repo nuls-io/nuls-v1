@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -208,15 +208,17 @@ public class NulsByteBuffer {
     }
 
     public <T extends BaseNulsData> T readNulsData(T nulsData) throws NulsException {
-
-        if (payload == null || payload.length == 0 ) {
+        if (payload == null) {
             return null;
         }
         int length = payload.length - cursor;
-        if(length>=4){
+        if (length <= 0) {
+            return null;
+        }
+        if (length >= 4) {
             byte[] byte4 = new byte[4];
-            System.arraycopy(payload,cursor,byte4,0,4);
-            if(Arrays.equals(NulsConstant.PLACE_HOLDER,byte4)){
+            System.arraycopy(payload, cursor, byte4, 0, 4);
+            if (Arrays.equals(NulsConstant.PLACE_HOLDER, byte4)) {
                 cursor += 4;
                 return null;
             }
