@@ -115,9 +115,10 @@ public class ConnectionManager {
                 list.add(message);
             }
             for (NulsMessage message : list) {
+                MsgLog.info("-----------------------receiveMessage:"+ Hex.encode(message.serialize()));
                 if (MessageFilterChain.getInstance().doFilter(message)) {
                     BaseEvent event = EventManager.getInstance(message.getData());
-                    MsgLog.info("-----------------------receiveMessage:"+ Hex.encode(event.serialize()));
+
                     processMessage(event, node);
                 }
             }
