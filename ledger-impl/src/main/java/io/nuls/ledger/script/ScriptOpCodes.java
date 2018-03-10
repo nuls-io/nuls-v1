@@ -37,7 +37,7 @@
  * limitations under the License.
  */
 
-package io.nuls.core.crypto.script;
+package io.nuls.ledger.script;
 
 import java.util.HashMap;
 import java.util.Map;
