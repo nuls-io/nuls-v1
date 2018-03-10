@@ -91,6 +91,7 @@ public class UtxoInput extends BaseNulsData {
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeVarInt(index);
+        stream.writeNulsData(fromHash);
         stream.writeVarInt(fromIndex);
         stream.writeBytesWithLength(scriptSig);
     }
@@ -98,6 +99,7 @@ public class UtxoInput extends BaseNulsData {
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         index = (int) byteBuffer.readVarInt();
+        fromHash = byteBuffer.readNulsData(new NulsDigestData());
         fromIndex = (int) byteBuffer.readVarInt();
         scriptSig = byteBuffer.readByLengthByte();
     }
