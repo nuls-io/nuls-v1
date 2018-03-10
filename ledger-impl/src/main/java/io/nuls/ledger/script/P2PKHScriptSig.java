@@ -26,6 +26,7 @@ package io.nuls.ledger.script;
 import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.exception.NulsException;
 
+import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
@@ -46,7 +47,7 @@ public class P2PKHScriptSig extends Script {
 
     @Override
     public int size() {
-        return signData.size()+publicKey.length;
+        return signData.size()+ Utils.sizeOfSerialize(publicKey.length);
     }
 
     public P2PKHScriptSig(byte[] signBytes, byte[] publicKey){
