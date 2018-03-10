@@ -123,8 +123,7 @@ public final class MsgLog {
      * @param msg 需要显示的消息
      */
     public static void info(String msg) {
-        //String logContent = isStringBlank(getId()) ? (getLogTrace() + ":" + msg): (getLogTrace() + "[" + getId() + "]" + ":" + msg);
-        String logContent = isStringBlank(getId()) ? (":" + msg)
+        String logContent = isStringBlank(getId()) ? (getLogTrace() + ":" + msg)
                 : (getLogTrace() + "[" + getId() + "]" + ":" + msg);
         LOG.info(logContent);
     }

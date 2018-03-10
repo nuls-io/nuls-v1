@@ -60,6 +60,7 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
         this(type);
         initCoinDataProvider();
         this.coinData = coinDataProvider.createByTransferData(this, coinParam, password);
+
     }
 
     private void initCoinDataProvider() {

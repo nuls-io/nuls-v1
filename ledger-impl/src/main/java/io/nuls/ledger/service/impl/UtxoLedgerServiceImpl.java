@@ -251,11 +251,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             eventBroadcaster.broadcastAndCacheAysn(event, true);
         } catch (Exception e) {
             Log.error(e);
-            try {
-                rollbackTx(tx);
-            } catch (NulsException e1) {
-                Log.error(e1);
-            }
             return new Result(false, e.getMessage());
         }
         return new Result(true, "OK", tx.getHash().getDigestHex());

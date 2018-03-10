@@ -28,9 +28,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.socket.SocketChannel;
 import io.nuls.core.event.BaseEvent;
 import io.nuls.core.mesasge.NulsMessage;
-import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.log.Log;
-import io.nuls.core.utils.log.MsgLog;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeGroup;
@@ -372,8 +370,6 @@ public class BroadcastHandler {
             if (channel == null) {
                 return new BroadcastResult(false, "node not found");
             }
-
-            MsgLog.info("send("+node.getId()+"):\n"+ Hex.encode(message.getHeader().serialize())+"--"+Hex.encode(message.getData()));
             ChannelFuture future = channel.writeAndFlush(Unpooled.wrappedBuffer(message.serialize()));
             if (!asyn) {
                 future.await();
