@@ -155,11 +155,11 @@ public class ConsensusMeetingRunner implements Runnable {
                         blockInfo.getBestHash().getDigestHex()
                                 .equals(localBlock.getHeader().getHash().getDigestHex());
             }
-            if (!result) {
-                break;
-            }
-            result = this.consensusManager.getConsensusStatusInfo() != null;
-            result = result && ConsensusStatusEnum.IN.getCode() == consensusManager.getConsensusStatusInfo().getStatus();
+//            if (!result) {
+//                break;
+//            }
+//            result = this.consensusManager.getConsensusStatusInfo() != null;
+//            result = result && ConsensusStatusEnum.IN.getCode() == consensusManager.getConsensusStatusInfo().getStatus();
         } while (false);
         return result;
     }

@@ -95,32 +95,32 @@ public abstract class WalletProcessors implements CommandProcessor {
         private TransferForm getTransferForm(String[] args) {
             TransferForm form = new TransferForm();
             switch (args.length) {
-                case 3:
-                    form.setToAddress(args[0]);
-                    form.setAmount(Na.parseNuls(args[1]).getValue());
-                    form.setPassword(args[2]);
-                    break;
                 case 4:
-                    Double amount = getDoubleAmount(args[1]);
-                    if (null == amount) {
-                        form.setAddress(args[0]);
-                        form.setToAddress(args[1]);
-                        amount = getDoubleAmount(args[2]);
-                        form.setAmount(Na.parseNuls(amount).getValue());
-                        form.setPassword(args[3]);
-                    } else {
-                        form.setToAddress(args[0]);
-                        form.setAmount(Na.parseNuls(amount).getValue());
-                        form.setPassword(args[2]);
-                        form.setRemark(args[3]);
-                    }
-                    break;
-                case 5:
-                    form.setAddress(args[0]);
                     form.setToAddress(args[1]);
                     form.setAmount(Na.parseNuls(args[2]).getValue());
                     form.setPassword(args[3]);
-                    form.setRemark(args[4]);
+                    break;
+                case 5:
+                    Double amount = getDoubleAmount(args[2]);
+                    if (null == amount) {
+                        form.setAddress(args[1]);
+                        form.setToAddress(args[2]);
+                        amount = getDoubleAmount(args[3]);
+                        form.setAmount(Na.parseNuls(amount).getValue());
+                        form.setPassword(args[4]);
+                    } else {
+                        form.setToAddress(args[1]);
+                        form.setAmount(Na.parseNuls(amount).getValue());
+                        form.setPassword(args[3]);
+                        form.setRemark(args[4]);
+                    }
+                    break;
+                case 6:
+                    form.setAddress(args[1]);
+                    form.setToAddress(args[2]);
+                    form.setAmount(Na.parseNuls(args[3]).getValue());
+                    form.setPassword(args[4]);
+                    form.setRemark(args[5]);
                     break;
             }
             return form;
