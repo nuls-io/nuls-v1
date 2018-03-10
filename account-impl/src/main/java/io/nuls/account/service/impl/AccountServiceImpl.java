@@ -163,21 +163,20 @@ public class AccountServiceImpl implements AccountService {
             return new Result<>(false, "between 0 and 100 can be created at once");
         }
 
+        //todo need to recover the status of the wallet.
         if (!StringUtils.validPassword(password)) {
             return new Result(false, "Length between 8 and 20, the combination of characters and numbers");
         }
 
         Account defaultAccount = getDefaultAccount();
-        if (defaultAccount != null) {
-            defaultAccount.decrypt(password);
-            if (defaultAccount.isEncrypted()) {
+        if (defaultAccount != null && defaultAccount.isEncrypted()) {
+            if(!defaultAccount.unlock(password)) {
                 return new Result(false, "incorrect password");
             }
         }
 
         locker.lock();
         try {
-            defaultAccount.encrypt(password);
             List<Account> accounts = new ArrayList<>();
             List<AccountPo> accountPos = new ArrayList<>();
             List<String> resultList = new ArrayList<>();
@@ -201,11 +200,14 @@ public class AccountServiceImpl implements AccountService {
                 notice.setEventBody(account);
                 eventBroadcaster.publishToLocal(notice);
             }
+
             return new Result<>(true, "OK", resultList);
         } catch (Exception e) {
             Log.error(e);
+            //todo remove newaccounts
             throw new NulsRuntimeException(ErrorCode.FAILED, "create account failed!");
         } finally {
+
             locker.unlock();
         }
     }
