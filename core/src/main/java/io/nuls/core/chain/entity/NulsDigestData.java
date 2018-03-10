@@ -34,6 +34,7 @@ import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.List;
 
 /**
@@ -84,7 +85,11 @@ public class NulsDigestData extends BaseNulsData {
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.setDigestAlgType(byteBuffer.readShort());
-        this.digestBytes = byteBuffer.readByLengthByte();
+        try{
+            this.digestBytes = byteBuffer.readByLengthByte();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public String getDigestHex() {
@@ -142,13 +147,11 @@ public class NulsDigestData extends BaseNulsData {
             return digestData;
         }
         //todo extend other algType
-
         if((short)1 == digestAlgType){
             byte[] content = Utils.sha256hash160(data);
             digestData.digestBytes = content;
             return digestData;
         }
-
         return null;
     }
 
@@ -160,7 +163,11 @@ public class NulsDigestData extends BaseNulsData {
                 int right = Math.min(left + 1, levelSize - 1);
                 byte[] leftBytes = Utils.reverseBytes(ddList.get(levelOffset + left).getDigestBytes());
                 byte[] rightBytes = Utils.reverseBytes(ddList.get(levelOffset + right).getDigestBytes());
-                ddList.add(new NulsDigestData(Utils.reverseBytes(Sha256Hash.hashTwice(leftBytes, 0, 32, rightBytes, 0, 32))));
+                byte[] whole = new byte[leftBytes.length+rightBytes.length];
+                System.arraycopy(leftBytes,0,whole,0,leftBytes.length);
+                System.arraycopy(rightBytes,0,whole,leftBytes.length,rightBytes.length);
+                NulsDigestData digest = NulsDigestData.calcDigestData(whole);
+                ddList.add( digest);
             }
             levelOffset += levelSize;
         }

@@ -46,7 +46,7 @@ import java.util.Properties;
 public class I18nUtils {
 
     private static final Map<String, Properties> ALL_MAPPING = new HashMap<>();
-    private static Properties nowMapping;
+    private static Properties nowMapping = new Properties();
     /**
      * default language is English
      */

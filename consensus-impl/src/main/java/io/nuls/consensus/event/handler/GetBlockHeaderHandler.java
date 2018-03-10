@@ -29,6 +29,7 @@ import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 
@@ -53,6 +54,10 @@ public class GetBlockHeaderHandler extends AbstractEventHandler<GetBlockHeaderEv
             }else{
                 header = block.getHeader();
             }
+        }
+        if(header ==null){
+            Log.error("header cannot be null");
+            return;
         }
         this.eventBroadcaster.sendToNode(new BlockHeaderEvent(header),fromId);
     }

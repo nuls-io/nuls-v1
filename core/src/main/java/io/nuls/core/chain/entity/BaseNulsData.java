@@ -27,6 +27,7 @@ import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.crypto.UnsafeByteArrayOutputStream;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsVerificationException;
+import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.validate.DataValidatorChain;
@@ -77,7 +78,8 @@ public abstract class BaseNulsData implements Serializable, Cloneable {
             } else {
                 serializeToStream(buffer);
             }
-            return bos.toByteArray();
+            byte[] bytes = bos.toByteArray();
+            return bytes;
         } finally {
             if (bos != null) {
                 try {

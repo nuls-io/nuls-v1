@@ -133,6 +133,14 @@ public class UtxoTransactionTool {
         long usable = 0;
         long lock = 0;
         long currentTime = TimeService.currentTimeMillis();
+        if (NulsContext.getInstance().getGenesisBlock() == null) {
+            try {
+                Thread.sleep(100L);
+            } catch (InterruptedException e) {
+            }
+            calcBalance(address);
+            return;
+        }
         long genesisTime = NulsContext.getInstance().getGenesisBlock().getHeader().getTime();
         long bestHeight = NulsContext.getInstance().getNetBestBlockHeight();
 
@@ -152,7 +160,7 @@ public class UtxoTransactionTool {
                             usable += output.getValue();
                         }
                     }
-                }else {
+                } else {
                     usable += output.getValue();
                 }
             } else if (output.getStatus() == UtxoOutput.LOCKED) {

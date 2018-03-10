@@ -481,7 +481,7 @@ public class Utils {
 
     public static int sizeOfSerialize(Object val) {
         if (null == val) {
-            return 1;
+            return 4;
         }
         if (val instanceof String) {
            return sizeOfString((String) val);

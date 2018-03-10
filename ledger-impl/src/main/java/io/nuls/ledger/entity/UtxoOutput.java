@@ -26,6 +26,7 @@ package io.nuls.ledger.entity;
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.ledger.script.P2PKHScript;
 import io.nuls.ledger.script.Script;
@@ -76,7 +77,6 @@ public class UtxoOutput extends BaseNulsData {
     private String key;
 
     public UtxoOutput() {
-
     }
 
     public UtxoOutput(NulsDigestData txHash) {
@@ -86,22 +86,20 @@ public class UtxoOutput extends BaseNulsData {
     @Override
     public int size() {
         int s = 0;
-        s += Utils.sizeOfSerialize(txHash);
         s += VarInt.sizeOf(index);
-        s += VarInt.sizeOf(value);
+        s += NulsConstant.TIME_VALUE_LENGTH;
         s += Utils.sizeOfSerialize(address);
-        s += VarInt.sizeOf(lockTime);
+        s += NulsConstant.TIME_VALUE_LENGTH;
         s += Utils.sizeOfSerialize(scriptBytes);
         return s;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(txHash);
         stream.writeVarInt(index);
-        stream.writeInt64(value);
+        stream.writeTime(value);
         stream.writeBytesWithLength(address);
-        stream.writeInt64(lockTime);
+        stream.writeTime(lockTime);
         stream.writeBytesWithLength(scriptBytes);
     }
 
@@ -110,11 +108,10 @@ public class UtxoOutput extends BaseNulsData {
         if (byteBuffer == null) {
             return;
         }
-        txHash = byteBuffer.readHash();
         index = (int) byteBuffer.readVarInt();
-        value = byteBuffer.readInt64();
+        value = byteBuffer.readTime();
         address = byteBuffer.readByLengthByte();
-        lockTime = byteBuffer.readInt64();
+        lockTime = byteBuffer.readTime();
         scriptBytes = byteBuffer.readByLengthByte();
         if(null!=scriptBytes){
             script = new P2PKHScript(new NulsDigestData(scriptBytes));

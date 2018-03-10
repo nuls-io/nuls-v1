@@ -72,6 +72,7 @@ import io.nuls.ledger.entity.tx.CoinBaseTransaction;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.network.entity.Node;
 import io.nuls.network.service.NetworkService;
+import org.spongycastle.util.Times;
 
 import java.io.IOException;
 import java.util.*;
@@ -445,7 +446,8 @@ public class ConsensusMeetingRunner implements Runnable {
         }
         if (round.getPreviousRound() == null) {
             while (true) {
-                if (lastRoundData.getPackingIndexOfRound() == lastRoundData.getConsensusMemberCount()) {
+                if (lastRoundData.getPackingIndexOfRound() == lastRoundData.getConsensusMemberCount()||
+                        lastRoundData.getRoundEndTime()<= TimeService.currentTimeMillis()) {
                     break;
                 }
                 try {
