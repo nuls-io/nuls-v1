@@ -117,7 +117,7 @@ public class ConnectionManager {
             for (NulsMessage message : list) {
                 if (MessageFilterChain.getInstance().doFilter(message)) {
                     BaseEvent event = EventManager.getInstance(message.getData());
-                    MsgLog.info("get("+ node.getId()+":)"+Hex.encode(event.serialize()).substring(8));
+                    MsgLog.info("get("+ node.getId()+"):\n"+Hex.encode(message.getHeader().serialize())+"--"+Hex.encode(message.getData()));
                     processMessage(event, node);
                 }
             }

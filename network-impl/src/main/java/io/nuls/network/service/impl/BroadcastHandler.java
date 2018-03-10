@@ -372,7 +372,8 @@ public class BroadcastHandler {
             if (channel == null) {
                 return new BroadcastResult(false, "node not found");
             }
-            MsgLog.info("send("+node.getId()+"):"+ Hex.encode(message.serialize()));
+
+            MsgLog.info("send("+node.getId()+"):\n"+ Hex.encode(message.getHeader().serialize())+"--"+Hex.encode(message.getData()));
             ChannelFuture future = channel.writeAndFlush(Unpooled.wrappedBuffer(message.serialize()));
             if (!asyn) {
                 future.await();

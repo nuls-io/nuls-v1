@@ -125,7 +125,7 @@ public final class MsgLog {
     public static void info(String msg) {
         //String logContent = isStringBlank(getId()) ? (getLogTrace() + ":" + msg): (getLogTrace() + "[" + getId() + "]" + ":" + msg);
         String logContent = isStringBlank(getId()) ? (":" + msg)
-                : (":" + msg);
+                : (getLogTrace() + "[" + getId() + "]" + ":" + msg);
         LOG.info(logContent);
     }
 
