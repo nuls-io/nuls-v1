@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -27,11 +27,13 @@ import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.utils.StringFileLoader;
 import io.nuls.core.chain.entity.*;
+import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.date.DateUtil;
+import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.json.JSONUtils;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
@@ -55,7 +57,7 @@ public final class GenesisBlock extends Block {
     private static final String CONFIG_FILED_ADDRESS = "address";
     private static final String CONFIG_FILED_NULS = "nuls";
     private static final String CONFIG_FILED_UNLOCK_HEIGHT = "unlockHeight";
-
+    private static final String address = "2CjGt6mMMwZpp1ajcfyEdUP5sQv9p2D";
     public static final String priKey = "009cf05b6b3fe8c09b84c13783140c0f1958e8841f8b6f894ef69431522bc65712";
 
     private static GenesisBlock INSTANCE;
@@ -167,7 +169,7 @@ public final class GenesisBlock extends Block {
         } catch (IOException e) {
             Log.error(e);
         }
-        header.setPackingAddress("00000");
+        header.setPackingAddress(address);
         header.setHash(NulsDigestData.calcDigestData(header));
         //todo change to real address & signature
         //todo 用prikey
