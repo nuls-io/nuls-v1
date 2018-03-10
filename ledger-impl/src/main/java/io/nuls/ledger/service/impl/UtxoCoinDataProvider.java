@@ -26,12 +26,11 @@ package io.nuls.ledger.service.impl;
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
-import io.nuls.core.chain.entity.Na;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.chain.entity.*;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.crypto.ECKey;
+import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -48,10 +47,12 @@ import io.nuls.ledger.entity.*;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.script.P2PKHScript;
+import io.nuls.ledger.script.P2PKHScriptSig;
 import io.nuls.ledger.service.intf.CoinDataProvider;
 import io.nuls.ledger.util.UtxoTransactionTool;
 import io.nuls.ledger.util.UtxoTransferTool;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -330,8 +331,33 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         if (coinParam.getPriKey() != null) {
             priKey = coinParam.getPriKey();
         } else {
-            Account account = accountService.getDefaultAccount();
-            priKey = account.getEncryptedPriKey();
+            Account account = accountService.getAccount(coinParam.getFrom().get(0));
+            if(account.isEncrypted() && account.isLocked()){
+                if(!account.unlock(password)){
+                   throw new NulsException(ErrorCode.PASSWORD_IS_WRONG );
+
+                }
+                priKey = account.getPriKey();
+                account.lock();
+            }
+            else{
+                priKey = account.getPriKey();
+            }
+        }
+
+        //create scriptSig foreach input
+        for(int i = 0; i< inputs.size();i++) {
+            P2PKHScriptSig scriptSig = new P2PKHScriptSig();
+            ECKey ecKey = ECKey.fromPrivate(new BigInteger(priKey));
+            scriptSig.setPublicKey(ecKey.getPubKey());
+            NulsSignData signData = new NulsSignData();
+            signData.setSignAlgType((short) 1);
+            signData.setSignBytes(ecKey.sign(Sha256Hash.twiceOf(ecKey.getPubKey())).encodeToDER());
+            try {
+                inputs.get(i).setScriptSig(signData.serialize());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         //create outputs
