@@ -82,7 +82,6 @@ public class UtxoInput extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += Utils.sizeOfSerialize(txHash);
         size += VarInt.sizeOf(index);
         size += VarInt.sizeOf(fromIndex);
         size += Utils.sizeOfSerialize(scriptSig);
@@ -91,7 +90,6 @@ public class UtxoInput extends BaseNulsData {
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(txHash);
         stream.writeVarInt(index);
         stream.writeVarInt(fromIndex);
         stream.writeBytesWithLength(scriptSig);
@@ -99,7 +97,6 @@ public class UtxoInput extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        txHash = byteBuffer.readHash();
         index = (int) byteBuffer.readVarInt();
         fromIndex = (int) byteBuffer.readVarInt();
         scriptSig = byteBuffer.readByLengthByte();
