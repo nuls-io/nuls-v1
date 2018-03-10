@@ -34,6 +34,7 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.log.Log;
 
@@ -246,5 +247,11 @@ public class NulsByteBuffer {
             Log.error(e);
             throw new NulsException(ErrorCode.DATA_PARSE_ERROR);
         }
+    }
+
+    public static void main(String[] args)throws Exception{
+        String hex = "0000206822c1fe289f3b96b5741a8fd74328614decc167b21d22cdd03736e2ac012b1c0201ff240dff0a620100000000ffffffff0000010000005dff240dff0a6201000000000a1f324361694a68704c425852534a41666d654d4e6d45514b35764a697870716a0000010000000100";
+        NulsByteBuffer byteBuffer = new NulsByteBuffer(Hex.decode(hex));
+        byteBuffer.readTransaction();
     }
 }

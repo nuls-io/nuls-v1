@@ -49,6 +49,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 椭圆曲线加密
@@ -444,6 +446,22 @@ public class ECKey {
 
     public void setEncryptedPrivateKey(EncryptedData encryptedPrivateKey) {
         this.encryptedPrivateKey = encryptedPrivateKey;
+    }
+
+    public static void main(String [] args){
+        List<ECKey> ecKeys= new ArrayList<>();
+        int count = 10;
+
+        for(int i = 0; i< count ; i++){
+            ECKey ecKey = new ECKey();
+            ecKeys.add(ecKey);
+        }
+
+        for(int i = 0; i< count ; i++){
+            System.out.println("--------- eck_"+i+"------------");
+            System.out.println(ecKeys.get(i).getPrivateKeyAsHex());
+            System.out.println(Hex.encode(ecKeys.get(i).getPubKey()));
+        }
     }
 
 }
