@@ -42,14 +42,13 @@ public class PocBlockValidatorManager {
         BlockHeaderValidatorManager.addBlockDefValitor(HeaderHashValidator.getInstance());
         BlockHeaderValidatorManager.addBlockDefValitor(HeaderPackerValidator.getInstance());
         BlockHeaderValidatorManager.addBlockDefValitor(HeaderSignValidator.getInstance());
+        BlockHeaderValidatorManager.addBlockDefValitor(HeaderContinuityValidator.getInstance());
     }
 
     public static void initBlockValidators() {
         BlockValidatorManager.addBlockDefValitor(BlockHeaderValidator.getInstance());
 
         BlockValidatorManager.addBlockDefValitor(BlockFieldValidator.getInstance());
-
-        BlockValidatorManager.addBlockDefValitor(BlockContinuityValidator.getInstance());
 
         BlockValidatorManager.addBlockDefValitor(BlockPackerValidator.getInstance());
 

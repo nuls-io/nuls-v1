@@ -146,19 +146,7 @@ public class ConsensusMeetingRunner implements Runnable {
             }
             result = (TimeService.currentTimeMillis() - context.getBestBlock().getHeader().getTime()) <= 1000L;
             if (!result) {
-                BlockInfo blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(0);
-                if (blockInfo == null||blockInfo.getBestHash()==null) {
-                    break;
-                }
-                result = blockInfo.getBestHeight() <= context.getBestBlock().getHeader().getHeight();
-
-                if (!result) {
-                    break;
-                }
-                Block localBlock = blockService.getBlock(blockInfo.getBestHeight());
-                result = null != localBlock &&
-                        blockInfo.getBestHash().getDigestHex()
-                                .equals(localBlock.getHeader().getHash().getDigestHex());
+                result = checkBestHash();
             }
 //            if (!result) {
 //                break;
@@ -169,8 +157,39 @@ public class ConsensusMeetingRunner implements Runnable {
         return result;
     }
 
+    private BlockInfo lastBlockInfo;
+
+    private boolean checkBestHash() {
+        boolean result = true;
+        if (null != lastBlockInfo) {
+            result = checkBestHash(lastBlockInfo);
+        }
+        if (!result) {
+            return result;
+        }
+        BlockInfo blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(-1);
+        if (blockInfo == null || blockInfo.getBestHash() == null) {
+            return false;
+        }
+        result = checkBestHash(blockInfo);
+        lastBlockInfo = blockInfo;
+        return result;
+    }
+
+    private boolean checkBestHash(BlockInfo blockInfo) {
+        boolean result = blockInfo.getBestHeight() <= context.getBestBlock().getHeader().getHeight();
+        if (!result) {
+            return result;
+        }
+        Block localBlock = blockService.getBlock(blockInfo.getBestHeight());
+        result = null != localBlock &&
+                blockInfo.getBestHash().getDigestHex()
+                        .equals(localBlock.getHeader().getHash().getDigestHex());
+        return result;
+    }
+
     private void nextRound() {
-        if (this.consensusManager.getConsensusStatusInfo() == null) {
+        if (this.consensusManager.getConsensusStatusInfo() == null || this.consensusManager.getConsensusStatusInfo().getAddress() == null) {
             return;
         }
         PocMeetingRound currentRound = calcRound();

@@ -110,8 +110,9 @@ public class BlockHeader extends BaseNulsData {
             Log.error(e);
         }
         this.sign = byteBuffer.readSign();
-
     }
+
+
 
     public NulsDigestData getHash() {
         return hash;

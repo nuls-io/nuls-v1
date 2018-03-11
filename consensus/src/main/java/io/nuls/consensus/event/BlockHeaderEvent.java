@@ -29,6 +29,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.event.NoticeData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.log.Log;
 
 /**
  * @author Niels
@@ -51,6 +52,10 @@ public class BlockHeaderEvent extends BaseConsensusEvent<BlockHeader> {
 
     @Override
     public NoticeData getNotice() {
+        if(null==this.getEventBody()){
+            Log.warn("recieved a null blockHeader!");
+            return null;
+        }
         NoticeData data = new NoticeData();
         data.setMessage(ErrorCode.NEW_BLOCK_HEADER_RECIEVED);
         data.setData(this.getEventBody().getHeight());
