@@ -349,10 +349,13 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         for(int i = 0; i< inputs.size();i++) {
             P2PKHScriptSig scriptSig = new P2PKHScriptSig();
             ECKey ecKey = ECKey.fromPrivate(new BigInteger(priKey));
+
             scriptSig.setPublicKey(ecKey.getPubKey());
+
             NulsSignData signData = new NulsSignData();
             signData.setSignAlgType((short) 1);
             signData.setSignBytes(ecKey.sign(Sha256Hash.twiceOf(ecKey.getPubKey())).encodeToDER());
+            scriptSig.setSignData(signData);
             try {
                 inputs.get(i).setScriptSig(signData.serialize());
             } catch (IOException e) {
