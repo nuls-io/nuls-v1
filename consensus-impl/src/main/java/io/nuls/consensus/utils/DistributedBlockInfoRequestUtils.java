@@ -195,13 +195,13 @@ public class DistributedBlockInfoRequestUtils {
 
             if ((TimeService.currentTimeMillis() - startTime) > (timeout - 1000L) && hashesMap.size() > ((nodeIdList.size() + 1) / 2) && askHighest) {
                 long localHeight = NulsContext.getInstance().getBestBlock().getHeader().getHeight();
-                long minHeight = 0;
+                long minHeight = Long.MAX_VALUE;
                 NulsDigestData minHash = null;
                 try {
                     for (BlockHashResponse response : hashesMap.values()) {
                         long height = response.getHeightList().get(0);
                         NulsDigestData hash = response.getHashList().get(0);
-                        if (height > localHeight && height < minHeight) {
+                        if (height >= localHeight && height <= minHeight) {
                             minHeight = height;
                             minHash = hash;
                         }
