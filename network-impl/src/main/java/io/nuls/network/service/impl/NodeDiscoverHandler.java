@@ -149,7 +149,10 @@ public class NodeDiscoverHandler implements Runnable {
                    str.append(node.getIp());
                }
             }
-            Log.error("nodes:"+str.toString().substring(1));
+            if(str.toString().length()==0){
+                str.append(",");
+            }
+            Log.info("nodes:"+str.toString().substring(1));
             for (Node node : nodeList) {
                 if (node.isAlive()) {
                     GetVersionEvent event = new GetVersionEvent(network.getExternalPort());
