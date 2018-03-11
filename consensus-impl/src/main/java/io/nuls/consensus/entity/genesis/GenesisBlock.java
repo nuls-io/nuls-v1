@@ -30,6 +30,7 @@ import io.nuls.consensus.utils.StringFileLoader;
 import io.nuls.core.chain.entity.*;
 import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -147,6 +148,7 @@ public final class GenesisBlock extends Block {
             Log.error(e);
         }
         List<Transaction> txlist = new ArrayList<>();
+        tx.setStatus(TxStatusEnum.AGREED);
         txlist.add(tx);
         setTxs(txlist);
     }

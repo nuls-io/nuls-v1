@@ -373,7 +373,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     public void commitTx(Transaction tx) throws NulsException {
         AssertUtil.canNotEmpty(tx, ErrorCode.NULL_PARAMETER);
-        if (tx.getStatus() == TxStatusEnum.AGREED) {
+        if (tx.getStatus() != TxStatusEnum.AGREED) {
             return;
         }
         List<TransactionService> serviceList = getServiceList(tx.getClass());
