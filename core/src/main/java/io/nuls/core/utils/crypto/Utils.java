@@ -25,6 +25,7 @@ package io.nuls.core.utils.crypto;
 
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.VarInt;
@@ -481,7 +482,7 @@ public class Utils {
 
     public static int sizeOfSerialize(Object val) {
         if (null == val) {
-            return 4;
+            return NulsConstant.PLACE_HOLDER.length;
         }
         if (val instanceof String) {
            return sizeOfString((String) val);
@@ -499,7 +500,7 @@ public class Utils {
             return VarInt.sizeOf(((byte[]) val).length) + ((byte[]) val).length;
         } else if (val instanceof BaseNulsData) {
             int size = ((BaseNulsData) val).size();
-            return size == 0 ? 4 : size;
+            return size == 0 ? 1 : size;
         }
         throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "instance of unkown");
     }
