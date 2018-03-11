@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,6 +24,8 @@
 package io.nuls.consensus.cache.manager.block;
 
 import io.nuls.cache.util.CacheMap;
+import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
+import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.consensus.constant.ConsensusCacheConstant;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.GetBlockHeaderParam;
@@ -60,6 +62,8 @@ public class BlockCacheManager {
 
     private DownloadDataUtils downloadDataUtils = DownloadDataUtils.getInstance();
     private BifurcateProcessor bifurcateProcessor = BifurcateProcessor.getInstance();
+    private ConfirmingTxCacheManager confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
+    private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
 
     private long storedHeight;
     private long recievedMaxHeight;
@@ -130,7 +134,7 @@ public class BlockCacheManager {
     }
 
     public BlockHeader getBlockHeader(String hash) {
-        if(headerCacheMap ==null){
+        if (headerCacheMap == null) {
             return null;
         }
         return headerCacheMap.get(hash);
@@ -153,11 +157,13 @@ public class BlockCacheManager {
             if (tx.getStatus() == TxStatusEnum.CACHED) {
                 try {
                     this.ledgerService.approvalTx(tx);
+                    confirmingTxCacheManager.putTx(tx);
                 } catch (NulsException e) {
                     Log.error(e);
                 }
             }
         }
+        txCacheManager.removeTx(block.getTxHashList());
         Block block1 = this.getBlock(block.getHeader().getHeight());
         if (null != block1 && block1.getHeader().getHeight() > NulsContext.getInstance().getBestBlock().getHeader().getHeight()) {
             NulsContext.getInstance().setBestBlock(block1);

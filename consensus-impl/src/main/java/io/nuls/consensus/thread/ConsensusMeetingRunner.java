@@ -295,6 +295,7 @@ public class ConsensusMeetingRunner implements Runnable {
         roundData.setRoundStartTime(consensusManager.getCurrentRound().getStartTime());
         bd.setRoundData(roundData);
         List<Integer> outTxList = new ArrayList<>();
+        List<NulsDigestData> hashList = new ArrayList<>();
         for (int i = 0; i < txList.size(); i++) {
             Transaction tx = txList.get(i);
             ValidateResult result = tx.verify();
@@ -311,6 +312,7 @@ public class ConsensusMeetingRunner implements Runnable {
             }
             confirmingTxCacheManager.putTx(tx);
         }
+        txCacheManager.removeTx(hashList);
         for (int i = outTxList.size() - 1; i >= 0; i--) {
             txList.remove(i);
         }
