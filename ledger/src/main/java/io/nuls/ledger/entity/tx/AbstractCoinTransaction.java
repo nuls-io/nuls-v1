@@ -23,6 +23,7 @@
  */
 package io.nuls.ledger.entity.tx;
 
+import io.nuls.consensus.service.intf.ConsensusService;
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.NulsSignData;
@@ -62,7 +63,9 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
 
     public AbstractCoinTransaction(int type, CoinTransferData coinParam, String password) throws NulsException {
         this(type);
+        this.fee = NulsContext.getServiceBean(ConsensusService.class).getTxFee(this.getType());
         initCoinDataProvider();
+        coinParam.setFee(fee);
         this.coinData = coinDataProvider.createByTransferData(this, coinParam, password);
 
     }

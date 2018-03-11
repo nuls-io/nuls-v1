@@ -137,15 +137,13 @@ public class DistributedBlockInfoRequestUtils {
 
         int size = nodeIdList.size();
         int halfSize = (size + 1) / 2;
-        //todo 临时去掉=号
-        if (hashesMap.size() < halfSize) {
+        if (hashesMap.size() <= halfSize) {
             return;
         }
         BlockInfo result = null;
         for (String key : calcMap.keySet()) {
             List<String> nodes = calcMap.get(key);
-            //todo 临时加上=号
-            if (nodes.size() >= halfSize) {
+            if (nodes.size() > halfSize) {
                 result = new BlockInfo();
                 BlockHashResponse response = hashesMap.get(nodes.get(0));
                 Long bestHeight = 0L;

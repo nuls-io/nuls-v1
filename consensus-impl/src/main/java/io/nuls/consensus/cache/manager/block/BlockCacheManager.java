@@ -130,6 +130,9 @@ public class BlockCacheManager {
     }
 
     public BlockHeader getBlockHeader(String hash) {
+        if(headerCacheMap ==null){
+            return null;
+        }
         return headerCacheMap.get(hash);
     }
 

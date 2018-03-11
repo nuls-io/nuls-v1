@@ -26,9 +26,15 @@ package io.nuls.consensus.entity.validator.block.header;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.core.chain.entity.NulsSignData;
+import io.nuls.core.chain.entity.Result;
+import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
+
+import java.io.IOException;
 
 /**
  * @author Niels
@@ -44,7 +50,18 @@ public class HeaderSignValidator implements NulsDataValidator<BlockHeader> {
     }
     @Override
     public ValidateResult validate(BlockHeader data) {
-         //todo
-        return ValidateResult.getSuccessResult();
+        Result result = null;
+        try {
+            result = accountService.verifySign(data.getHash().serialize(),data.getSign());
+        } catch (IOException e) {
+            Log.error(e);
+        }
+        ValidateResult validateResult = new ValidateResult();
+        validateResult.setMessage(ERROR_MESSAGE);
+        validateResult.setLevel(SeverityLevelEnum.NORMAL_FOUL);
+        validateResult.setErrorCode(result.getErrorCode());
+        validateResult.setSuccess(result.isSuccess());
+        validateResult.setObject(result.getObject());
+        return validateResult;
     }
 }

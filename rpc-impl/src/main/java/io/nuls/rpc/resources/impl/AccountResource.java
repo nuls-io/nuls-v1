@@ -26,6 +26,7 @@ package io.nuls.rpc.resources.impl;
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
+import io.nuls.consensus.service.intf.ConsensusService;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.Result;
 import io.nuls.core.constant.ErrorCode;
@@ -54,6 +55,7 @@ public class AccountResource {
 
     private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
+    private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
@@ -125,7 +127,7 @@ public class AccountResource {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         UtxoBalance balance = (UtxoBalance) ledgerService.getBalance(address);
-        amount += NulsContext.getInstance().getTxFee().getValue();
+        amount += consensusService.getTxFee(Integer.MAX_VALUE).getValue();
 
         long usable = 0;
         boolean enough = false;
