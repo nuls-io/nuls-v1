@@ -304,7 +304,7 @@ public class ConsensusMeetingRunner implements Runnable {
             }
             try {
                 ledgerService.approvalTx(tx);
-            } catch (NulsException e) {
+            } catch (Exception e) {
                 Log.error(e);
                 outTxList.add(i);
                 continue;
