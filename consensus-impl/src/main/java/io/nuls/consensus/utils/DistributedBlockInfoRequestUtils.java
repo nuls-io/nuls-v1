@@ -144,6 +144,7 @@ public class DistributedBlockInfoRequestUtils {
         BlockInfo result = null;
         for (String key : calcMap.keySet()) {
             List<String> nodes = calcMap.get(key);
+            //todo 临时加上=
             if (nodes.size() >= halfSize) {
                 result = new BlockInfo();
                 BlockHashResponse response = hashesMap.get(nodes.get(0));

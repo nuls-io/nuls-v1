@@ -50,6 +50,9 @@ public class HeaderSignValidator implements NulsDataValidator<BlockHeader> {
     }
     @Override
     public ValidateResult validate(BlockHeader data) {
+        if(data.getSign()==null){
+            return ValidateResult.getFailedResult(ERROR_MESSAGE);
+        }
         Result result = null;
         try {
             result = accountService.verifySign(data.getHash().serialize(),data.getSign());

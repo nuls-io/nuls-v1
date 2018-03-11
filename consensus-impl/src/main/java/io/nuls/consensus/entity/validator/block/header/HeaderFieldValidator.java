@@ -45,10 +45,6 @@ public class HeaderFieldValidator implements NulsDataValidator<BlockHeader> {
         ValidateResult result = ValidateResult.getSuccessResult();
         boolean failed = false;
         do {
-            if (data.getSign() == null) {
-                failed = true;
-                break;
-            }
             if (data.getHash() == null) {
                 failed = true;
                 break;
