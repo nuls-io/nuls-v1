@@ -119,7 +119,25 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public List<Block> getBlockList(long startHeight, long endHeight) {
-        return blockStorageService.getBlockList(startHeight, endHeight);
+        List<Block> blockList = blockStorageService.getBlockList(startHeight, endHeight);
+        if(blockList.size()<(endHeight-startHeight+1)){
+            long currentMaxHeight = blockList.get(blockList.size()-1).getHeader().getHeight();
+            while (currentMaxHeight<endHeight){
+                long next = currentMaxHeight+1;
+                Block block = blockCacheManager.getBlock(next);
+                if(null==block){
+                    try {
+                        block = blockStorageService.getBlock(next);
+                    } catch (Exception e) {
+                        Log.error(e);
+                    }
+                }
+                if(null!=block){
+                    blockList.add(block);
+                }
+            }
+        }
+        return blockList;
     }
 
 
