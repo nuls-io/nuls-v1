@@ -66,7 +66,7 @@ public class TransactionDaoImpl extends BaseDaoImpl<TransactionMapper, String, T
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.gte, startHeight);
         searchable.addCondition("block_height", SearchOperator.lte, endHeight);
-        PageHelper.orderBy("block_height asc, create_time asc");
+        PageHelper.orderBy("block_height asc, tx_index asc");
         return getMapper().selectList(searchable);
     }
 
