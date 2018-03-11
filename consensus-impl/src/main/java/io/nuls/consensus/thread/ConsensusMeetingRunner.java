@@ -129,7 +129,7 @@ public class ConsensusMeetingRunner implements Runnable {
                 Log.error(e.getMessage());
                 try {
                     startMeeting();
-                }catch (Exception e1){
+                } catch (Exception e1) {
                     Log.error(e1.getMessage());
                 }
             }
@@ -147,11 +147,16 @@ public class ConsensusMeetingRunner implements Runnable {
             result = (TimeService.currentTimeMillis() - context.getBestBlock().getHeader().getTime()) <= 1000L;
             if (!result) {
                 BlockInfo blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(0);
-                if (blockInfo == null) {
+                if (blockInfo == null||blockInfo.getBestHash()==null) {
+                    break;
+                }
+                result = blockInfo.getBestHeight() <= context.getBestBlock().getHeader().getHeight();
+
+                if (!result) {
                     break;
                 }
                 Block localBlock = blockService.getBlock(blockInfo.getBestHeight());
-                result = blockInfo.getBestHeight() <= context.getBestBlock().getHeader().getHeight() &&
+                result = null != localBlock &&
                         blockInfo.getBestHash().getDigestHex()
                                 .equals(localBlock.getHeader().getHash().getDigestHex());
             }
@@ -449,8 +454,8 @@ public class ConsensusMeetingRunner implements Runnable {
         }
         if (round.getPreviousRound() == null) {
             while (true) {
-                if (lastRoundData.getPackingIndexOfRound() == lastRoundData.getConsensusMemberCount()||
-                        lastRoundData.getRoundEndTime()<= TimeService.currentTimeMillis()) {
+                if (lastRoundData.getPackingIndexOfRound() == lastRoundData.getConsensusMemberCount() ||
+                        lastRoundData.getRoundEndTime() <= TimeService.currentTimeMillis()) {
                     break;
                 }
                 try {
