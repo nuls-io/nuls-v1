@@ -357,7 +357,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             signData.setSignBytes(ecKey.sign(Sha256Hash.twiceOf(ecKey.getPubKey())).encodeToDER());
             scriptSig.setSignData(signData);
             try {
-                inputs.get(i).setScriptSig(signData.serialize());
+                inputs.get(i).setScriptSig(scriptSig.serialize());
             } catch (IOException e) {
                 e.printStackTrace();
             }
