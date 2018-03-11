@@ -499,7 +499,7 @@ public class Utils {
             return VarInt.sizeOf(((byte[]) val).length) + ((byte[]) val).length;
         } else if (val instanceof BaseNulsData) {
             int size = ((BaseNulsData) val).size();
-            return size == 0 ? 1 : size;
+            return size == 0 ? 4 : size;
         }
         throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "instance of unkown");
     }
