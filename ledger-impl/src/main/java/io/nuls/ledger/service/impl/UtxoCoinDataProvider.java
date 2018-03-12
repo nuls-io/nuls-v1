@@ -330,12 +330,11 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         byte[] priKey = null;
         if (coinParam.getPriKey() != null) {
             priKey = coinParam.getPriKey();
-        } else {
+        } else if(!coinParam.getFrom().isEmpty()){
             Account account = accountService.getAccount(coinParam.getFrom().get(0));
             if(account.isEncrypted() && account.isLocked()){
                 if(!account.unlock(password)){
                    throw new NulsException(ErrorCode.PASSWORD_IS_WRONG );
-
                 }
                 priKey = account.getPriKey();
                 account.lock();
