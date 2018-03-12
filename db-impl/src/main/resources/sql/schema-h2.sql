@@ -108,7 +108,7 @@ CREATE TABLE IF NOT EXISTS `transaction_local` (
 CREATE TABLE IF NOT EXISTS `tx_account_relation` (
   `tx_hash` varchar(70) NOT NULL,
   `address` varchar(40) NOT NULL,
-  PRIMARY KEY (`tx_hash`, 'address')
+  PRIMARY KEY (`tx_hash`, `address`)
 );
 
 CREATE TABLE IF NOT EXISTS `utxo_input` (
