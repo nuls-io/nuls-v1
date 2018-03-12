@@ -91,7 +91,7 @@ public interface AccountService {
 
     Result importAccount(String priKey, String password);
 
-    Result importAccountsFile(String walletFilePath);
+    Result importAccounts(List<String> keys, String password);
 
     Alias getAlias(String address);
 }
