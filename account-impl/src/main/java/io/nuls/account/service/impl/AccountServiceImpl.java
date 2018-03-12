@@ -637,6 +637,7 @@ public class AccountServiceImpl implements AccountService {
             return Result.getFailed("invalid prikey");
         }
 
+        //maybe account has been imported
         AccountPo accountPo = accountDao.get(account.getAddress().getBase58());
         if (accountPo != null) {
             return Result.getSuccess();
@@ -645,16 +646,17 @@ public class AccountServiceImpl implements AccountService {
         }
 
         Account defaultAcct = getDefaultAccount();
-        if (!defaultAcct.decrypt(password)) {
-            return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
+        if (defaultAcct != null) {
+            if (!defaultAcct.decrypt(password)) {
+                return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
+            }
+            try {
+                defaultAcct.encrypt(password);
+            } catch (NulsException e) {
+
+            }
         }
 
-        try {
-            defaultAcct.encrypt(password);
-            account.encrypt(password);
-        } catch (NulsException e) {
-
-        }
         // save db
         AccountTool.toPojo(account, accountPo);
         AliasPo aliasPo = aliasDataService.getByAddress(accountPo.getAddress());
@@ -676,62 +678,50 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Result importAccountsFile(String walletFilePath) {
-        if (StringUtils.isBlank(walletFilePath)) {
-            return new Result(false, "walletFilePath is required");
-        }
-        File walletFile = new File(walletFilePath);
-        if (!walletFile.exists()) {
-            return new Result(false, "file not found");
-        }
-
-        FileInputStream fis = null;
-        try {
-            fis = new FileInputStream(walletFile);
-            byte[] datas = new byte[fis.available()];
-            fis.read(datas);
-
-            NulsByteBuffer buffer = new NulsByteBuffer(datas);
-            int accountSize = (int) buffer.readVarInt();
-            List<Account> accounts = new ArrayList<>();
-
-            for (int i = 0; i < accountSize; i++) {
-                Account account = new Account(buffer);
-                if (accountExist(account)) {
-                    continue;
-                }
-                int txSize = (int) buffer.readVarInt();
-                List<Transaction> txList = new ArrayList<>();
-                for (int j = 0; j < txSize; j++) {
-                    Transaction tx = TransactionManager.getInstance(buffer);
-                    txList.add(tx);
-                }
-                account.setMyTxs(txList);
-                accounts.add(account);
+    @DbSession
+    public Result importAccounts(List<String> keys, String password) {
+        Account account = null;
+        AccountPo accountPo = null;
+        AliasPo aliasPo = null;
+        Account defaultAcct = getDefaultAccount();
+        if (defaultAcct != null) {
+            if (!defaultAcct.decrypt(password)) {
+                return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
             }
-
-            //save database
-            importSave(accounts);
-
-            for (Account account : accounts) {
-                accountCacheService.putAccount(account);
-                AccountImportedNotice notice = new AccountImportedNotice();
-                notice.setEventBody(account);
-                eventBroadcaster.publishToLocal(notice);
-            }
-        } catch (Exception e) {
-            Log.error(e);
-            return new Result(false, "import failed, file is broken");
-        } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException e) {
-                    Log.error(e);
-                }
+            try {
+                defaultAcct.encrypt(password);
+            } catch (NulsException e) {
             }
         }
-        return new Result(true, "OK");
+
+        for (String priKey : keys) {
+            try {
+                account = AccountTool.createAccount(priKey);
+            } catch (NulsException e) {
+                return Result.getFailed("invalid prikey");
+            }
+            accountPo = accountDao.get(account.getAddress().getBase58());
+            if (accountPo != null) {
+                continue;
+            }else {
+                accountPo = new AccountPo();
+            }
+            // save db
+            AccountTool.toPojo(account, accountPo);
+            aliasPo = aliasDataService.getByAddress(accountPo.getAddress());
+            if (aliasPo != null) {
+                account.setAlias(aliasPo.getAlias());
+                accountPo.setAlias(aliasPo.getAlias());
+            }
+            accountDao.save(accountPo);
+            ledgerService.saveTxInLocal(accountPo.getAddress());
+
+            // save cache
+            accountCacheService.putAccount(account);
+            NulsContext.LOCAL_ADDRESS_LIST.add(accountPo.getAddress());
+            ledgerService.getBalance(accountPo.getAddress());
+        }
+        return Result.getSuccess();
     }
 
     @Override
