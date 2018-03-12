@@ -218,17 +218,17 @@ public class ConsensusMeetingRunner implements Runnable {
         List<PocMeetingMember> memberList = new ArrayList<>();
         Na totalDeposit = Na.ZERO;
         for (Consensus<Agent> ca : list) {
-            if(ca.getExtend().getDeposit().isLessThan(PocConsensusConstant.AGENT_DEPOSIT_LOWER_LIMIT)){
+            if (ca.getExtend().getDeposit().isLessThan(PocConsensusConstant.AGENT_DEPOSIT_LOWER_LIMIT)) {
                 continue;
             }
             PocMeetingMember mm = new PocMeetingMember();
             mm.setAgentConsensus(ca);
             mm.setDelegateList(delegateMap.get(ca.getAddress()));
-            if(mm.getDelegateList()==null||mm.getDelegateList().size()>PocConsensusConstant.MAX_ACCEPT_NUM_OF_DELEGATE){
+            if (mm.getDelegateList() == null || mm.getDelegateList().size() > PocConsensusConstant.MAX_ACCEPT_NUM_OF_DELEGATE) {
                 continue;
             }
             mm.calcDeposit();
-            if(mm.getTotolEntrustDeposit().isLessThan(PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT)){
+            if (mm.getTotolEntrustDeposit().isLessThan(PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT)) {
                 continue;
             }
             mm.setRoundIndex(currentRound.getIndex());
@@ -343,13 +343,13 @@ public class ConsensusMeetingRunner implements Runnable {
      */
     private void addConsensusTx(Block bestBlock, List<Transaction> txList, PocMeetingMember self) {
         punishTx(bestBlock, txList, self);
-        coinBaseTx(txList,self);
+        coinBaseTx(txList, self);
     }
 
-    private void coinBaseTx(List<Transaction> txList,PocMeetingMember self) {
+    private void coinBaseTx(List<Transaction> txList, PocMeetingMember self) {
         CoinTransferData data = new CoinTransferData();
         data.setFee(Na.ZERO);
-        List<ConsensusReward> rewardList = calcReward(txList,self);
+        List<ConsensusReward> rewardList = calcReward(txList, self);
         Na total = Na.ZERO;
         for (ConsensusReward reward : rewardList) {
             Coin coin = new Coin();
@@ -414,8 +414,9 @@ public class ConsensusMeetingRunner implements Runnable {
         rewardList.add(agentReword);
         for (Consensus<Delegate> cd : self.getDelegateList()) {
             double reward = total *
-                    (cd.getExtend().getDeposit().getValue() / this.consensusManager.getCurrentRound().getTotalDeposit().getValue()) *
-                    (1 - ca.getExtend().getCommissionRate());
+                    (cd.getExtend().getDeposit().getValue() /
+                            this.consensusManager.getCurrentRound().getTotalDeposit().getValue())
+                    * (1 - ca.getExtend().getCommissionRate());
             ConsensusReward delegateReword = new ConsensusReward();
             delegateReword.setAddress(cd.getAddress());
             delegateReword.setReward(Na.valueOf((long) reward));
