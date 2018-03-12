@@ -106,11 +106,16 @@ public class WalletResouce {
     @Path("/imports")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public RpcResult importAccountFile(@FormDataParam("file") InputStream in, @FormDataParam("file") FormDataContentDisposition disposition) {
-
+    public RpcResult importAccountFile(@FormDataParam("file") InputStream in,
+                                       @FormDataParam("file") FormDataContentDisposition disposition,
+                                       @FormDataParam("password") String password) {
         String fileName = disposition.getFileName();
         if (!fileName.endsWith(".nuls")) {
             return RpcResult.getFailed("File suffix name is wrong");
+        }
+
+        if(!StringUtils.validPassword(password)) {
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
 
         InputStreamReader read = null;
