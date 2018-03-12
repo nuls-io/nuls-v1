@@ -30,5 +30,5 @@ package io.nuls.notify.controller;
  * @date 2018/2/25
  */
 public interface NulsEventDelegate {
-    void onEventFire();
+    void onEventFire(short moduleID,String eventName,String payload);
 }

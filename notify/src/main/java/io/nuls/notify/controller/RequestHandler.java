@@ -26,6 +26,7 @@
 package io.nuls.notify.controller;
 
 import io.nuls.core.utils.log.Log;
+import org.java_websocket.WebSocket;
 
 import java.util.Map;
 
@@ -34,11 +35,21 @@ import java.util.Map;
  * @date 2018/3/11
  */
 public class RequestHandler {
+    public SubscriptionContext getContext() {
+        return context;
+    }
+
+    public void setContext(SubscriptionContext context) {
+        this.context = context;
+    }
+
+    private SubscriptionContext context;
+
     public String method() {
         Log.error("You must implement this method.");
         return null;
     }
 
-    public void handleRequest(Map<String, Object> request, Map<String, Object> response) {
+    public void handleRequest(WebSocket sock, Map<String, Object> request, Map<String, Object> response) {
     }
 }

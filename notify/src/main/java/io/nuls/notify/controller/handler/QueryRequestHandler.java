@@ -26,6 +26,7 @@
 package io.nuls.notify.controller.handler;
 
 import io.nuls.notify.controller.RequestHandler;
+import org.java_websocket.WebSocket;
 
 import java.util.Map;
 
@@ -40,7 +41,7 @@ public class QueryRequestHandler extends RequestHandler {
     }
 
     @Override
-    public void handleRequest(Map<String, Object> request, Map<String, Object> response) {
+    public void handleRequest(WebSocket sock, Map<String, Object> request, Map<String, Object> response) {
 
     }
 }

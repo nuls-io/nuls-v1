@@ -31,7 +31,6 @@ import io.nuls.core.module.BaseModuleBootstrap;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.service.intf.EventBusService;
 import io.nuls.notify.controller.NotificationController;
-import io.nuls.notify.handler.NulsEventHandler;
 
 /**
  * @author daviyang35

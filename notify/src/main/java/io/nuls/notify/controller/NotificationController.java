@@ -35,10 +35,7 @@ import io.nuls.notify.handler.WebSocketHandler;
 import org.java_websocket.WebSocket;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author daviyang35
@@ -49,6 +46,7 @@ public class NotificationController implements WebSocketDelegate, NulsEventDeleg
     private NulsEventHandler nulsEventHandler = new NulsEventHandler();
     private WebSocketHandler webSocketHandler;
     private Map<String, RequestHandler> dispatcherMap = new HashMap<>();
+    private SubscriptionContext subscriptionContext = new SubscriptionContext();
     private short listenPort;
 
     public NotificationController() {
@@ -60,6 +58,7 @@ public class NotificationController implements WebSocketDelegate, NulsEventDeleg
     private void addRequestHandler(RequestHandler handler) {
         String method = handler.method().toLowerCase();
         if (!dispatcherMap.containsKey(method)) {
+            handler.setContext(subscriptionContext);
             dispatcherMap.put(method, handler);
         } else {
             Log.error("Duplicate request method handler. {} {}", method, handler.getClass().getName());
@@ -114,7 +113,7 @@ public class NotificationController implements WebSocketDelegate, NulsEventDeleg
 
         // dispatch handler
         if (request != null) {
-            this.handleRequest(request, response);
+            this.handleRequest(sock, request, response);
         }
 
         // encode response
@@ -140,22 +139,31 @@ public class NotificationController implements WebSocketDelegate, NulsEventDeleg
     }
 
     @Override
-    public void onEventFire() {
-
+    public void onEventFire(short moduleID, String eventName, String payload) {
+        Set<WebSocket> subscribedSource = subscriptionContext.findSubscribedSource((int) moduleID, eventName);
+        for (WebSocket sock : subscribedSource) {
+            sock.send(payload);
+        }
     }
 
-    private void handleRequest(Map<String, Object> request, Map<String, Object> response) {
+    private void handleRequest(WebSocket sock, Map<String, Object> request, Map<String, Object> response) {
         String method = (String) request.get("method");
         if (method == null) {
             response.put("status", 400);
             return;
         }
 
+        if (!request.containsKey("data")) {
+            response.put("status", 400);
+            return;
+        }
+
         method = method.toLowerCase();
+        Map<String, Object> data = (Map<String, Object>) request.get("data");
 
         if (dispatcherMap.containsKey(method)) {
             RequestHandler handler = dispatcherMap.get(method);
-            handler.handleRequest(request, response);
+            handler.handleRequest(sock, data, response);
         } else {
             response.put("status", 404);
         }

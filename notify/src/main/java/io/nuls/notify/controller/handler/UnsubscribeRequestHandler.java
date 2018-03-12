@@ -26,7 +26,9 @@
 package io.nuls.notify.controller.handler;
 
 import io.nuls.notify.controller.RequestHandler;
+import org.java_websocket.WebSocket;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -40,7 +42,16 @@ public class UnsubscribeRequestHandler extends RequestHandler {
     }
 
     @Override
-    public void handleRequest(Map<String, Object> request, Map<String, Object> response) {
+    public void handleRequest(WebSocket sock, Map<String, Object> request, Map<String, Object> response) {
 
+        List<Integer> moduleArray = (List<Integer>) request.get("module");
+        for (Integer moduleID : moduleArray) {
+            this.getContext().unsubscribeModule(moduleID, sock);
+        }
+
+        List<String> eventArray = (List<String>) request.get("event");
+        for (String eventName : eventArray) {
+            this.getContext().unsubscribeEvent(eventName, sock);
+        }
     }
 }
