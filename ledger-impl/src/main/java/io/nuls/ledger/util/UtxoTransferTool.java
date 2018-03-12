@@ -79,7 +79,7 @@ public class UtxoTransferTool {
         po.setValue(output.getValue());
         po.setLockTime(output.getLockTime());
         po.setAddress(Address.fromHashs(output.getAddress()).getBase58());
-        if(null==output.getScript()){
+        if(null!=output.getScript()){
             po.setScript(output.getScript().getBytes());
         }
         po.setStatus((byte) output.getStatus());
