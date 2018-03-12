@@ -41,54 +41,74 @@ public class SubscriptionContext {
     private Map<String, Set<WebSocket>> eventMap = new HashMap<>();
 
     public void subscribeModule(Integer moduleID, WebSocket sock) {
-        Set<WebSocket> moduleSubscriber = moduleMap.get(moduleID);
-        if (moduleSubscriber != null) {
-            moduleSubscriber.add(sock);
-        } else {
-            moduleSubscriber = new HashSet<>();
-            moduleSubscriber.add(sock);
-            moduleMap.put(moduleID, moduleSubscriber);
+        synchronized (this) {
+            Set<WebSocket> moduleSubscriber = moduleMap.get(moduleID);
+            if (moduleSubscriber != null) {
+                moduleSubscriber.add(sock);
+            } else {
+                moduleSubscriber = new HashSet<>();
+                moduleSubscriber.add(sock);
+                moduleMap.put(moduleID, moduleSubscriber);
+            }
         }
     }
 
     public void unsubscribeModule(Integer moduleID, WebSocket sock) {
-        Set<WebSocket> moduleSubscriber = moduleMap.get(moduleID);
-        if (moduleSubscriber != null) {
-            moduleSubscriber.remove(sock);
+        synchronized (this) {
+            Set<WebSocket> moduleSubscriber = moduleMap.get(moduleID);
+            if (moduleSubscriber != null) {
+                moduleSubscriber.remove(sock);
+            }
         }
     }
 
     public void subscribeEvent(String eventName, WebSocket sock) {
-        String eventInternalName = eventName.toUpperCase();
-        Set<WebSocket> eventSubscriber = eventMap.get(eventInternalName);
-        if (eventSubscriber != null) {
-            eventSubscriber.add(sock);
-        } else {
-            eventSubscriber = new HashSet<>();
-            eventSubscriber.add(sock);
-            eventMap.put(eventInternalName, eventSubscriber);
+        synchronized (this) {
+            String eventInternalName = eventName.toUpperCase();
+            Set<WebSocket> eventSubscriber = eventMap.get(eventInternalName);
+            if (eventSubscriber != null) {
+                eventSubscriber.add(sock);
+            } else {
+                eventSubscriber = new HashSet<>();
+                eventSubscriber.add(sock);
+                eventMap.put(eventInternalName, eventSubscriber);
+            }
         }
     }
 
     public void unsubscribeEvent(String eventName, WebSocket sock) {
-        String eventInternalName = eventName.toUpperCase();
-        Set<WebSocket> eventSubscriber = eventMap.get(eventInternalName);
-        if (eventSubscriber != null) {
-            eventSubscriber.remove(sock);
+        synchronized (this) {
+            String eventInternalName = eventName.toUpperCase();
+            Set<WebSocket> eventSubscriber = eventMap.get(eventInternalName);
+            if (eventSubscriber != null) {
+                eventSubscriber.remove(sock);
+            }
         }
     }
 
     public Set<WebSocket> findSubscribedSource(Integer moduleID, String eventName) {
         Set<WebSocket> result = new HashSet<>();
+        synchronized (this) {
+            // 1st, find out subscribe the moduleID
+            Set moduleSubscriber = moduleMap.get(moduleID);
+            result.addAll(moduleSubscriber);
 
-        // 1st, find out subscribe the moduleID
-        Set moduleSubscriber = moduleMap.get(moduleID);
-        result.addAll(moduleSubscriber);
-
-        // 2nd, find out subscribe the event
-        Set eventSubscriber =  eventMap.get(eventName.toLowerCase());
-        result.addAll(eventSubscriber);
-
+            // 2nd, find out subscribe the event
+            Set eventSubscriber = eventMap.get(eventName.toLowerCase());
+            result.addAll(eventSubscriber);
+        }
         return result;
+    }
+
+    public void removeSubscriber(WebSocket sock) {
+        synchronized (this) {
+            for (Set<WebSocket> moduleSubscriber : moduleMap.values()) {
+                moduleSubscriber.remove(sock);
+            }
+
+            for (Set<WebSocket> moduleSubscriber : eventMap.values()) {
+                moduleSubscriber.remove(sock);
+            }
+        }
     }
 }

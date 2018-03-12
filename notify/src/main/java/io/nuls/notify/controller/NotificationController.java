@@ -82,7 +82,7 @@ public class NotificationController implements WebSocketDelegate, NulsEventDeleg
         }
 
         webSocketHandler = null;
-        nulsEventHandler = null;
+        nulsEventHandler.setEventDelegate(null);
     }
 
     @Override
@@ -96,6 +96,9 @@ public class NotificationController implements WebSocketDelegate, NulsEventDeleg
     public void onDisconnected(WebSocket sock) {
         synchronized (connectionsList) {
             connectionsList.remove(sock);
+
+            // remove all subscriber
+            subscriptionContext.removeSubscriber(sock);
         }
     }
 
