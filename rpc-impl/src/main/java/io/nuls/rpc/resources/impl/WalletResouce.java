@@ -28,16 +28,19 @@ import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.Result;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.utils.json.JSONUtils;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.rpc.entity.RpcResult;
 import io.nuls.rpc.resources.form.AccountParamForm;
 import io.nuls.rpc.resources.form.TransferForm;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.io.File;
+import java.io.*;
 
 /**
  * @author Niels
@@ -102,11 +105,55 @@ public class WalletResouce {
     @POST
     @Path("/imports")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult importAccountFile(File file) {
-        //todo
-        String name = file.getName();
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public RpcResult importAccountFile(@FormDataParam("file") InputStream in, @FormDataParam("file") FormDataContentDisposition disposition) {
+
+        String fileName = disposition.getFileName();
+        if (!fileName.endsWith(".nuls")) {
+            return RpcResult.getFailed("File suffix name is wrong");
+        }
+
+        InputStreamReader read = null;
+        BufferedReader bufferedReader = null;
+        try {
+            read = new InputStreamReader(in, NulsContext.DEFAULT_ENCODING);
+            bufferedReader = new BufferedReader(read);
+            String lineTxt;
+            StringBuffer buffer = new StringBuffer();
+            while ((lineTxt = bufferedReader.readLine()) != null) {
+                buffer.append(lineTxt);
+            }
+            String content = buffer.toString();
+            System.out.println(content);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (read != null) {
+                try {
+                    read.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (bufferedReader != null) {
+                try {
+                    bufferedReader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
         RpcResult rpcResult = RpcResult.getSuccess();
-        rpcResult.setData(name);
+        rpcResult.setData(fileName);
+
         return rpcResult;
     }
 

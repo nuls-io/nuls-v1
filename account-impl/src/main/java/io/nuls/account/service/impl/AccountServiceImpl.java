@@ -23,7 +23,6 @@
  */
 package io.nuls.account.service.impl;
 
-import com.sun.org.apache.regexp.internal.RE;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
@@ -57,8 +56,8 @@ import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.core.validate.ValidateResult;
-import io.nuls.db.dao.AccountDataService;
 import io.nuls.db.dao.AccountAliasDataService;
+import io.nuls.db.dao.AccountDataService;
 import io.nuls.db.dao.AliasDataService;
 import io.nuls.db.entity.AccountPo;
 import io.nuls.db.entity.AliasPo;
@@ -75,7 +74,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -368,11 +366,9 @@ public class AccountServiceImpl implements AccountService {
 
             List<AccountPo> accountPoList = new ArrayList<>();
             for (Account account : accounts) {
-                if (!account.decrypt(oldPassword)) {
+                if (!account.unlock(oldPassword)) {
                     return new Result(false, "old password error");
                 }
-
-                account.decrypt(oldPassword);
                 account.encrypt(newPassword);
 
                 AccountPo po = new AccountPo();
@@ -421,7 +417,7 @@ public class AccountServiceImpl implements AccountService {
         }
 
         for (Account account : accounts) {
-            if (!account.decrypt(password)) {
+            if (!account.unlock(password)) {
                 return new Result(false, "password error");
             }
         }
@@ -571,10 +567,10 @@ public class AccountServiceImpl implements AccountService {
         }
         List<String> prikeyList = new ArrayList<>();
         for (Account account : accounts) {
-            account.decrypt(password);
-            if (account.isEncrypted()) {
-                return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
-            }
+            account.unlock(password);
+//            if (account.isEncrypted()) {
+//                return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
+//            }
             prikeyList.add(Hex.encode(account.getPriKey()));
             try {
                 account.encrypt(password);
@@ -586,7 +582,7 @@ public class AccountServiceImpl implements AccountService {
         Map<String, Object> map = new HashMap<>();
         map.put("prikeys", prikeyList);
         map.put("password", MD5Util.md5(password));
-        return new Result(true, "OK", prikeyList);
+        return new Result(true, "OK", map);
     }
 
 

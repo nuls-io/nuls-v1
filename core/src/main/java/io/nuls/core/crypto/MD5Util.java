@@ -6,7 +6,7 @@ public class MD5Util {
 
     public static String md5(String s) {
         try {
-            MessageDigest md = MessageDigest.getInstance("MD5Util");
+            MessageDigest md = MessageDigest.getInstance("MD5");
             byte[] bytes = md.digest(s.getBytes("utf-8"));
             return toHex(bytes);
         } catch (Exception e) {
