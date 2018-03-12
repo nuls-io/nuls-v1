@@ -61,6 +61,10 @@ public final class AccountTool {
         return Address.fromHashs(Utils.sha256hash160(key.getPubKey(false)));
     }
 
+    public static Address newAddress(byte[] publicKey) throws NulsException {
+        return Address.fromHashs(Utils.sha256hash160(publicKey));
+    }
+
     public static Account createAccount(String prikey) throws NulsException {
         ECKey key = null;
         if (StringUtils.isBlank(prikey)) {
@@ -76,7 +80,7 @@ public final class AccountTool {
         Account account = new Account();
         account.setEncryptedPriKey(new byte[0]);
         account.setAddress(address);
-        account.setPubKey(key.getPubKey(true));
+        account.setPubKey(key.getPubKey(false));
         account.setEcKey(key);
         account.setPriKey(key.getPrivKeyBytes());
         account.setCreateTime(TimeService.currentTimeMillis());
