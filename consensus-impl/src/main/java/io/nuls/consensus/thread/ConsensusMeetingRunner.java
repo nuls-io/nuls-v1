@@ -225,7 +225,7 @@ public class ConsensusMeetingRunner implements Runnable {
             PocMeetingMember mm = new PocMeetingMember();
             mm.setAgentConsensus(ca);
             mm.setDelegateList(delegateMap.get(ca.getAddress()));
-            if (!isSeed&&mm.getDelegateList() == null || mm.getDelegateList().size() > PocConsensusConstant.MAX_ACCEPT_NUM_OF_DELEGATE) {
+            if (!isSeed&&(mm.getDelegateList() == null || mm.getDelegateList().size() > PocConsensusConstant.MAX_ACCEPT_NUM_OF_DELEGATE)) {
                 continue;
             }
             mm.calcDeposit();
