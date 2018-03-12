@@ -86,8 +86,15 @@ public class TransactionResource {
         if (!StringUtils.isBlank(address) && !StringUtils.validAddress(address)) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
-        if (pageNumber <= 0 || pageSize <= 0 || pageSize > 100) {
+
+        if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+        if(pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if(pageSize == 0) {
+            pageSize = 10;
         }
 
         RpcResult result;
