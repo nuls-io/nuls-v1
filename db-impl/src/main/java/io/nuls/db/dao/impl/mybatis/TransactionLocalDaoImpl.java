@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -74,13 +74,8 @@ public class TransactionLocalDaoImpl extends BaseDaoImpl<TransactionLocalMapper,
     @Override
     public List<TransactionLocalPo> getTxs(String address, int type, Integer start, Integer limit) {
         Searchable searchable = new Searchable();
-        Condition c1 = new Condition("e.address", SearchOperator.eq, "c.address");
-        c1.setPrefix("(");
-        searchable.addCondition(c1);
-
-        Condition c2 = new Condition(Condition.OR,"e.address", SearchOperator.eq, "d.address");
-        c2.setEndfix(")");
-        searchable.addCondition(c2);
+        Condition condition = Condition.custom("(e.address = c.address or e.address = d.address)");
+        searchable.addCondition(condition);
         if (type != 0) {
             searchable.addCondition("a.type", SearchOperator.eq, type);
         }

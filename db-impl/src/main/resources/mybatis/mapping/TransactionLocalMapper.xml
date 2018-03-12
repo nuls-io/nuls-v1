@@ -14,7 +14,7 @@
         <result column="sign" jdbcType="VARBINARY" property="sign" />
     </resultMap>
 
-    <resultMap id="UtxoTxResultMap"  type="io.nuls.db.entity.TransactionPo" extends="BaseResultMap">
+    <resultMap id="UtxoTxResultMap"  type="io.nuls.db.entity.TransactionLocalPo" extends="BaseResultMap">
         <collection property="inputs" javaType="java.util.List" ofType="io.nuls.db.entity.UtxoInputPo">
             <id column="in_tx_hash" jdbcType="VARCHAR" property="txHash" />
             <id column="in_index" jdbcType="INTEGER" property="inIndex" />

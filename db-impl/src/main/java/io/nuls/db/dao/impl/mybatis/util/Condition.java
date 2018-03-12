@@ -77,7 +77,15 @@ public class Condition {
 		this.operator = operator;
 		this.value = valueFromOperator(operator, value);
 	}
-	
+
+	public static Condition custom(String sql) {
+		Condition condition = new Condition();
+
+		condition.operator = SearchOperator.custom;
+		condition.value = sql;
+		return condition;
+	}
+
 	/**根据运算逻辑符，校验value值*/
 	public Object valueFromOperator(SearchOperator operator, Object value) {
 		if(value == null) {
