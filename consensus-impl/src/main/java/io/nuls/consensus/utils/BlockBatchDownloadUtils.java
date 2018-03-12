@@ -253,7 +253,8 @@ public class BlockBatchDownloadUtils {
             Block block = blockMap.get(i);
             if(null==block){
                 //todo
-                System.out.println(block);
+                Log.error("cache block is null");
+               break;
             }
             ValidateResult result1 = block.verify();
             if (result1.isFailed()) {
