@@ -25,6 +25,7 @@ package io.nuls.rpc.resources.impl;
 
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
+import io.nuls.account.entity.Alias;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.service.intf.ConsensusService;
 import io.nuls.core.chain.entity.Na;
@@ -76,10 +77,18 @@ public class AccountResource {
         }
         Account account = accountService.getAccount(address);
         if (account == null) {
-            result = RpcResult.getFailed(ErrorCode.DATA_NOT_FOUND);
+            Alias alias = accountService.getAlias(address);
+            if (alias == null) {
+                result = RpcResult.getFailed(ErrorCode.DATA_NOT_FOUND);
+            } else {
+                AccountDto dto = new AccountDto();
+                dto.setAddress(address);
+                dto.setAlias(alias.getAlias());
+                result = RpcResult.getSuccess().setData(dto);
+
+            }
         } else {
-            result = RpcResult.getSuccess();
-            result.setData(new AccountDto(account));
+            result = RpcResult.getSuccess().setData(new AccountDto(account));
         }
         return result;
     }
@@ -173,7 +182,9 @@ public class AccountResource {
 
         Balance balance = ledgerService.getBalance(address);
         RpcResult result = RpcResult.getSuccess();
-        result.setData(new AssetDto("Nuls", balance));
+        List<AssetDto> dtoList = new ArrayList<>();
+        dtoList.add(new AssetDto("Nuls", balance));
+        result.setData(dtoList);
         return result;
     }
 

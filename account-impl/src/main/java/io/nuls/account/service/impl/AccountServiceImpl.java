@@ -26,6 +26,7 @@ package io.nuls.account.service.impl;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
+import io.nuls.account.entity.Alias;
 import io.nuls.account.entity.tx.AliasTransaction;
 import io.nuls.account.entity.validator.AliasValidator;
 import io.nuls.account.event.*;
@@ -168,7 +169,7 @@ public class AccountServiceImpl implements AccountService {
 
         Account defaultAccount = getDefaultAccount();
         if (defaultAccount != null && defaultAccount.isEncrypted()) {
-            if(!defaultAccount.unlock(password)) {
+            if (!defaultAccount.unlock(password)) {
                 return new Result(false, "incorrect password");
             }
         }
@@ -223,18 +224,6 @@ public class AccountServiceImpl implements AccountService {
     public Account getAccount(String address) {
         AssertUtil.canNotEmpty(address, "");
         Account account = accountCacheService.getAccountByAddress(address);
-        if (account == null) {
-            AliasPo aliasPo = aliasDataService.getByAddress(address);
-            if (aliasPo != null) {
-                try {
-                    account = new Account();
-                    account.setAddress(Address.fromHashs(address));
-                    account.setAlias(aliasPo.getAlias());
-                } catch (NulsException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
         return account;
     }
 
@@ -669,7 +658,7 @@ public class AccountServiceImpl implements AccountService {
         AccountPo accountPo = accountDao.get(account.getAddress().getBase58());
         if (accountPo != null) {
             return Result.getSuccess();
-        }else {
+        } else {
             accountPo = new AccountPo();
         }
 
@@ -761,6 +750,16 @@ public class AccountServiceImpl implements AccountService {
             }
         }
         return new Result(true, "OK");
+    }
+
+    @Override
+    public Alias getAlias(String address) {
+        AliasPo aliasPo = aliasDataService.getByAddress(address);
+        if (aliasPo == null) {
+            return null;
+        }
+        Alias alias = new Alias(aliasPo.getAddress(), aliasPo.getAlias());
+        return alias;
     }
 
     private boolean accountExist(Account account) {
