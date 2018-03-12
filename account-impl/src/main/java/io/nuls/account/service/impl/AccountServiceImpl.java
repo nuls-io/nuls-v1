@@ -109,15 +109,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public void start() {
-        List<Account> accounts = getAccountList();
-        Set<String> addressList = new HashSet<>();
-        if (accounts != null && !accounts.isEmpty()) {
-            NulsContext.DEFAULT_ACCOUNT_ID = accounts.get(0).getAddress().getBase58();
-            for (Account account : accounts) {
-                addressList.add(account.getAddress().getBase58());
-            }
-            NulsContext.LOCAL_ADDRESS_LIST = addressList;
-        }
+        getAccountList();
     }
 
     @Override

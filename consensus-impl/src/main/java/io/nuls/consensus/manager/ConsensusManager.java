@@ -104,7 +104,6 @@ public class ConsensusManager implements Runnable {
         if (this.partakePacking && noneAccount) {
             Account account = this.accountService.createAccount(PocConsensusConstant.DEFAULT_WALLET_PASSWORD);
             this.accountService.setDefaultAccount(account.getAddress().getBase58());
-            NulsContext.LOCAL_ADDRESS_LIST.add(account.getAddress().getBase58());
         }
         blockCacheManager = BlockCacheManager.getInstance();
         blockCacheManager.init();

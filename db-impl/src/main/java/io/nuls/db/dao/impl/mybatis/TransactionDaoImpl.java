@@ -74,14 +74,6 @@ public class TransactionDaoImpl extends BaseDaoImpl<TransactionMapper, String, T
     @Override
     public List<TransactionPo> getTxs(String address, int type, Integer pageNumber, Integer pageSize) {
         Searchable searchable = new Searchable();
-        Condition c1 = new Condition("e.address", SearchOperator.eq, "c.address");
-        c1.setPrefix("(");
-        searchable.addCondition(c1);
-
-        Condition c2 = new Condition(Condition.OR,"e.address", SearchOperator.eq, "d.address");
-        c2.setEndfix(")");
-        searchable.addCondition(c2);
-
         if (StringUtils.isBlank(address)) {
             if (type != 0) {
                 searchable.addCondition("a.type", SearchOperator.eq, type);
@@ -93,6 +85,8 @@ public class TransactionDaoImpl extends BaseDaoImpl<TransactionMapper, String, T
             return getMapper().selectList(searchable);
         }
 
+        Condition condition = Condition.custom("(e.address = c.address or e.address = d.address)");
+        searchable.addCondition(condition);
         if (type != 0) {
             searchable.addCondition("a.type", SearchOperator.eq, type);
         }
