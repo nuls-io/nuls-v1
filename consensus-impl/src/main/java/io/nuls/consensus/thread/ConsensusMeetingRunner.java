@@ -124,7 +124,8 @@ public class ConsensusMeetingRunner implements Runnable {
                 if (b) {
                     nextRound();
                 } else {
-                    Thread.sleep(1000L);
+                    //todo 将本类分为两个路线，参与&旁观
+                    Thread.sleep(10000L);
                 }
             } catch (Exception e) {
                 Log.error(e.getMessage());
