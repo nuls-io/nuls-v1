@@ -100,7 +100,7 @@ public class ConsensusCacheManager {
             return;
         }
         ConsensusStatusInfo info = new ConsensusStatusInfo();
-        info.setAddress(self.getAddress().getBase58());
+        info.setAccount(self);
         if (null == mine) {
             info.setStatus(ConsensusStatusEnum.NOT_IN.getCode());
         } else if (mine.getExtend() instanceof Agent) {
@@ -118,7 +118,7 @@ public class ConsensusCacheManager {
     }
 
     public void updateConsensusStatusInfo(ConsensusStatusInfo info) {
-        this.consensusStatusCache.put(info.getAddress(), info);
+        this.consensusStatusCache.put(info.getAccount().getAddress().toString(), info);
     }
 
 

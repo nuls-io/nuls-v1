@@ -134,7 +134,6 @@ public class DistributedBlockInfoRequestUtils {
         if (null == nodeIdList || nodeIdList.isEmpty()) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "success list of nodes is empty!");
         }
-
         int size = nodeIdList.size();
         int halfSize = (size + 1) / 2;
         //todo =号
