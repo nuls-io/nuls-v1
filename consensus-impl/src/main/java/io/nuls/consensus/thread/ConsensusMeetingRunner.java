@@ -124,7 +124,8 @@ public class ConsensusMeetingRunner implements Runnable {
                 if (b) {
                     nextRound();
                 } else {
-                    Thread.sleep(1000L);
+                    //todo 将本类分为两个路线，参与&旁观
+                    Thread.sleep(10000L);
                 }
             } catch (Exception e) {
                 Log.error(e.getMessage());
@@ -190,7 +191,7 @@ public class ConsensusMeetingRunner implements Runnable {
     }
 
     private void nextRound() {
-        if (this.consensusManager.getConsensusStatusInfo() == null || this.consensusManager.getConsensusStatusInfo().getAddress() == null) {
+        if (this.consensusManager.getConsensusStatusInfo() == null || this.consensusManager.getConsensusStatusInfo().getAccount() == null) {
             return;
         }
         PocMeetingRound currentRound = calcRound();
@@ -222,7 +223,7 @@ public class ConsensusMeetingRunner implements Runnable {
             mm.setPackerAddress(ca.getExtend().getDelegateAddress());
             mm.setRoundStartTime(currentRound.getStartTime());
             memberList.add(mm);
-            if (ca.getAddress().equals(consensusManager.getConsensusStatusInfo().getAddress())) {
+            if (ca.getAddress().equals(consensusManager.getConsensusStatusInfo().getAccount().getAddress().toString())) {
                 cg.setAgentConsensus(ca);
                 agentTotalDeposit = agentTotalDeposit.add(ca.getExtend().getDeposit());
             }
@@ -234,7 +235,7 @@ public class ConsensusMeetingRunner implements Runnable {
         List<Consensus<Delegate>> myDelegateList = new ArrayList<>();
         for (Consensus<Delegate> cd : delegateList) {
             totalDeposit = totalDeposit.add(cd.getExtend().getDeposit());
-            if (cd.getExtend().getDelegateAddress().equals(consensusManager.getConsensusStatusInfo().getAddress())) {
+            if (cd.getExtend().getDelegateAddress().equals(consensusManager.getConsensusStatusInfo().getAccount().getAddress().toString())) {
                 myDelegateList.add(cd);
                 agentTotalDeposit = agentTotalDeposit.add(cd.getExtend().getDeposit());
             }
@@ -250,11 +251,11 @@ public class ConsensusMeetingRunner implements Runnable {
 
     private void startMeeting() {
         PocMeetingRound current = consensusManager.getCurrentRound();
-        if (null == current || current.getMember(consensusManager.getConsensusStatusInfo().getAddress()) == null) {
+        if (null == current || current.getMember(consensusManager.getConsensusStatusInfo().getAccount().getAddress().toString()) == null) {
             this.nextRound();
             return;
         }
-        PocMeetingMember self = current.getMember(consensusManager.getConsensusStatusInfo().getAddress());
+        PocMeetingMember self = current.getMember(consensusManager.getConsensusStatusInfo().getAccount().getAddress().toString());
         self.setCreditVal(calcCreditVal());
         long timeUnit = 100L;
         while (TimeService.currentTimeMillis() <= (self.getPackTime() - timeUnit)) {
@@ -272,8 +273,8 @@ public class ConsensusMeetingRunner implements Runnable {
         if (roundStart < 0) {
             roundStart = 0;
         }
-        long blockCount = pocBlockService.getBlockCount(consensusManager.getConsensusStatusInfo().getAddress(), roundStart, consensusManager.getCurrentRound().getIndex() - 1);
-        long sumRoundVal = pocBlockService.getSumOfRoundIndexOfYellowPunish(consensusManager.getConsensusStatusInfo().getAddress(), consensusManager.getCurrentRound().getIndex() - PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT, consensusManager.getCurrentRound().getIndex() - 1);
+        long blockCount = pocBlockService.getBlockCount(consensusManager.getConsensusStatusInfo().getAccount().getAddress().toString(), roundStart, consensusManager.getCurrentRound().getIndex() - 1);
+        long sumRoundVal = pocBlockService.getSumOfRoundIndexOfYellowPunish(consensusManager.getConsensusStatusInfo().getAccount().getAddress().toString(), consensusManager.getCurrentRound().getIndex() - PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT, consensusManager.getCurrentRound().getIndex() - 1);
         double ability = blockCount / PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT;
         if (consensusManager.getCurrentRound().getIndex() == 0) {
             return 1;
@@ -319,7 +320,7 @@ public class ConsensusMeetingRunner implements Runnable {
         }
         addConsensusTx(bestBlock, txList, self);
         bd.setTxList(txList);
-        Block newBlock = ConsensusTool.createBlock(bd);
+        Block newBlock = ConsensusTool.createBlock(bd, consensusManager.getConsensusStatusInfo().getAccount());
         ValidateResult result = newBlock.verify();
         if (result.isFailed()) {
             Log.error("packing block error" + result.getMessage());
@@ -369,7 +370,7 @@ public class ConsensusMeetingRunner implements Runnable {
         }
         tx.setFee(Na.ZERO);
         tx.setHash(NulsDigestData.calcDigestData(tx));
-        tx.setSign(accountService.signData(tx.getHash(), PocConsensusConstant.DEFAULT_WALLET_PASSWORD));
+        tx.setSign(accountService.signData(tx.getHash(), consensusManager.getConsensusStatusInfo().getAccount(), PocConsensusConstant.DEFAULT_WALLET_PASSWORD));
         ValidateResult validateResult = tx.verify();
         tx.setStatus(TxStatusEnum.AGREED);
         confirmingTxCacheManager.putTx(tx);
@@ -387,10 +388,10 @@ public class ConsensusMeetingRunner implements Runnable {
             for (Transaction tx : txList) {
                 totalFee += tx.getFee().getValue();
             }
-            if(totalFee==0L){
+            if (totalFee == 0L) {
                 return rewardList;
             }
-            double caReward = totalFee ;
+            double caReward = totalFee;
             Consensus<Agent> ca = cg.getAgentConsensus();
             ConsensusReward agentReword = new ConsensusReward();
             agentReword.setAddress(ca.getAddress());
@@ -444,7 +445,7 @@ public class ConsensusMeetingRunner implements Runnable {
             tx.setTime(TimeService.currentTimeMillis());
             tx.setFee(Na.ZERO);
             tx.setHash(NulsDigestData.calcDigestData(tx));
-            tx.setSign(accountService.signData(tx.getHash(), PocConsensusConstant.DEFAULT_WALLET_PASSWORD));
+            tx.setSign(accountService.signData(tx.getHash(), consensusManager.getConsensusStatusInfo().getAccount(), PocConsensusConstant.DEFAULT_WALLET_PASSWORD));
             txList.add(tx);
         }
     }
@@ -474,7 +475,7 @@ public class ConsensusMeetingRunner implements Runnable {
         punishTx.setTime(TimeService.currentTimeMillis());
         punishTx.setFee(Na.ZERO);
         punishTx.setHash(NulsDigestData.calcDigestData(punishTx));
-        punishTx.setSign(accountService.signData(punishTx.getHash(), PocConsensusConstant.DEFAULT_WALLET_PASSWORD));
+        punishTx.setSign(accountService.signData(punishTx.getHash(), consensusManager.getConsensusStatusInfo().getAccount(), PocConsensusConstant.DEFAULT_WALLET_PASSWORD));
         txList.add(punishTx);
     }
 

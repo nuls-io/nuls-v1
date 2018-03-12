@@ -126,13 +126,13 @@ public class ConsensusManager implements Runnable {
         ConsensusStatusInfo info = new ConsensusStatusInfo();
         for (String address : NulsContext.LOCAL_ADDRESS_LIST) {
             if (this.seedNodeList.contains(address)) {
-                info.setAddress(address);
+                info.setAccount(accountService.getAccount(address));
                 info.setStatus(ConsensusStatusEnum.IN.getCode());
                 break;
             }
             for (Consensus<Agent> agent : agentList) {
                 if (agent.getExtend().getDelegateAddress().equals(address)) {
-                    info.setAddress(address);
+                    info.setAccount(accountService.getAccount(address));
                     info.setStatus(agent.getExtend().getStatus());
                     if (ConsensusStatusEnum.IN.getCode() == info.getStatus()) {
                         break;
@@ -140,7 +140,7 @@ public class ConsensusManager implements Runnable {
                 }
             }
         }
-        if (info.getAddress() == null) {
+        if (info.getAccount() == null) {
             info.setStatus(ConsensusStatusEnum.NOT_IN.getCode());
         }
         this.consensusStatusInfo = info;

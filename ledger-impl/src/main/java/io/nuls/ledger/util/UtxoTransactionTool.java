@@ -23,13 +23,16 @@
  */
 package io.nuls.ledger.util;
 
+import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
@@ -69,7 +72,12 @@ public class UtxoTransactionTool {
         TransferTransaction tx = new TransferTransaction(transferData, password);
         tx.setRemark(remark.getBytes(NulsContext.DEFAULT_ENCODING));
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
-        tx.setSign(getAccountService().signData(tx.getHash(), password));
+        AccountService accountService = getAccountService();
+        if (transferData.getFrom().isEmpty()) {
+            throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
+        }
+        Account account = accountService.getAccount(transferData.getFrom().get(0));
+        tx.setSign(accountService.signData(tx.getHash(), account, password));
         return tx;
     }
 
@@ -79,7 +87,12 @@ public class UtxoTransactionTool {
             tx.setRemark(remark.getBytes(NulsContext.DEFAULT_ENCODING));
         }
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
-        tx.setSign(getAccountService().signData(tx.getHash(), password));
+        AccountService accountService = getAccountService();
+        if (transferData.getFrom().isEmpty()) {
+            throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
+        }
+        Account account = accountService.getAccount(transferData.getFrom().get(0));
+        tx.setSign(accountService.signData(tx.getHash(), account, password));
         return tx;
     }
 

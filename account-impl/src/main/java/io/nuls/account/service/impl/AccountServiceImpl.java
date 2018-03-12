@@ -425,19 +425,9 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public NulsSignData signData(byte[] bytes, String password) {
-        return this.signData(bytes, this.getDefaultAccount(), password);
-    }
-
-    @Override
     public NulsSignData signData(byte[] bytes, byte[] priKey) {
         //todo
         return NulsSignData.EMPTY_SIGN;
-    }
-
-    @Override
-    public NulsSignData signData(NulsDigestData digestData, String password) {
-        return this.signData(digestData, this.getDefaultAccount(), password);
     }
 
     @Override
