@@ -28,6 +28,8 @@ import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
+import io.nuls.consensus.entity.ConsensusAgentImpl;
+import io.nuls.consensus.entity.ConsensusDelegateImpl;
 import io.nuls.consensus.entity.block.BlockData;
 import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.entity.member.Agent;
@@ -112,7 +114,7 @@ public class ConsensusTool {
         agent.setIntroduction(po.getRemark());
         agent.setStartTime(po.getStartTime());
         agent.setStatus(po.getStatus());
-        Consensus<Agent> ca = new Consensus<>();
+        Consensus<Agent> ca = new ConsensusAgentImpl();
         ca.setAddress(po.getAddress());
         ca.setExtend(agent);
         return ca;
@@ -122,7 +124,7 @@ public class ConsensusTool {
         if (null == po) {
             return null;
         }
-        Consensus<Delegate> ca = new Consensus<>();
+        Consensus<Delegate> ca = new ConsensusDelegateImpl();
         ca.setAddress(po.getAddress());
         Delegate delegate = new Delegate();
         delegate.setDelegateAddress(po.getAgentAddress());

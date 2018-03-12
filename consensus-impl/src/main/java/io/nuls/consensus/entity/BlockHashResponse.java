@@ -56,14 +56,14 @@ public class BlockHashResponse extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += NulsConstant.TIME_VALUE_LENGTH;
-        size += Utils.sizeOfSerialize(heightList.size());
+        size += Utils.sizeOfTime();
+        size += Utils.sizeOfInt(heightList.size());
         for (Long height : heightList) {
-            size += Utils.sizeOfSerialize(height);
+            size += Utils.sizeOfLong(height);
         }
-        size += Utils.sizeOfSerialize(hashList.size());
+        size += Utils.sizeOfInt(hashList.size());
         for (NulsDigestData hash : hashList) {
-            size += Utils.sizeOfSerialize(hash);
+            size += Utils.sizeOfNulsData(hash);
         }
         return size;
     }

@@ -149,6 +149,38 @@ public final class GenesisBlock extends Block {
         }
         List<Transaction> txlist = new ArrayList<>();
         tx.setStatus(TxStatusEnum.AGREED);
+        long start = System.currentTimeMillis();
+        System.out.println(start);
+        int index = 0;
+        while (index<100000){
+            index++;
+            tx.size();
+        }
+        System.out.print("size use:");
+        System.out.println(System.currentTimeMillis()-start);
+        start = System.currentTimeMillis();
+        System.out.println(start);
+        index = 0;
+        while (index<100000){
+            index++;
+            try {
+                tx.serialize();
+            } catch (IOException e) {
+                Log.error(e);
+            }
+        }
+        System.out.print("serialize use:");
+        System.out.println(System.currentTimeMillis()-start);
+        System.out.println();
+
+
+
+
+
+
+
+
+
         txlist.add(tx);
         setTxs(txlist);
     }

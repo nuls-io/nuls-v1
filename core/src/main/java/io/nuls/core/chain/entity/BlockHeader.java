@@ -72,14 +72,14 @@ public class BlockHeader extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += Utils.sizeOfSerialize(preHash);
-        size += Utils.sizeOfSerialize(merkleHash);
-        size += Utils.sizeOfSerialize(time);
-        size += Utils.sizeOfSerialize(height);
-        size += Utils.sizeOfSerialize(txCount);
-        size += Utils.sizeOfSerialize(packingAddress);
-        size += Utils.sizeOfSerialize(extend);
-        size += Utils.sizeOfSerialize(sign);
+        size += Utils.sizeOfNulsData(preHash);
+        size += Utils.sizeOfNulsData(merkleHash);
+        size += Utils.sizeOfLong(time);
+        size += Utils.sizeOfLong(height);
+        size += Utils.sizeOfLong(txCount);
+        size += Utils.sizeOfString(packingAddress);
+        size += Utils.sizeOfBytes(extend);
+        size += Utils.sizeOfNulsData(sign);
         return size;
     }
 

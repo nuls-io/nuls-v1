@@ -53,6 +53,9 @@ public class NulsEventHandler extends AbstractEventHandler<BaseEvent> {
         }
         try {
             Log.debug(JSONUtils.obj2json(event.getNotice()));
+//            event.getHeader()
+//                    event.getNotice()
+//                            event.getClass().getSimpleName()
         } catch (Exception e) {
             Log.error(e);
         }

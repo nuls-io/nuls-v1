@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,35 +21,23 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.consensus.event;
 
-import io.nuls.consensus.constant.ConsensusEventType;
-import io.nuls.consensus.entity.GetSmallBlockParam;
-import io.nuls.core.event.NoticeData;
+package io.nuls.consensus.entity;
+
+import io.nuls.consensus.entity.member.Agent;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
 /**
- * get block by height.
- *
  * @author Niels
- * @date 2017/11/13
+ * @date 2018/3/12
  */
-public class GetSmallBlockRequest extends BaseConsensusEvent<GetSmallBlockParam> {
-
-    public GetSmallBlockRequest() {
-        super(ConsensusEventType.GET_SMALL_BLOCK);
-    }
+public class ConsensusAgentImpl extends Consensus<Agent> {
 
     @Override
-    protected GetSmallBlockParam parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
-        return byteBuffer.readNulsData(new GetSmallBlockParam());
+    protected Agent parseExtend(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new Agent());
     }
-
-    @Override
-    public NoticeData getNotice() {
-        return null;
-    }
-
 }

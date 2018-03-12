@@ -87,10 +87,10 @@ public class UtxoOutput extends BaseNulsData {
     public int size() {
         int s = 0;
         s += VarInt.sizeOf(index);
-        s += NulsConstant.TIME_VALUE_LENGTH;
-        s += Utils.sizeOfSerialize(address);
-        s += NulsConstant.TIME_VALUE_LENGTH;
-        s += Utils.sizeOfSerialize(scriptBytes);
+        s += Utils.sizeOfTime();
+        s += Utils.sizeOfBytes(address);
+        s += Utils.sizeOfTime();
+        s += Utils.sizeOfBytes(scriptBytes);
         return s;
     }
 

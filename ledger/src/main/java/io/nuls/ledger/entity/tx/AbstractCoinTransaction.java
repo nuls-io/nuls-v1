@@ -80,7 +80,7 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
     @Override
     public int size() {
         int size = super.size();
-        size += Utils.sizeOfSerialize(coinData);
+        size += Utils.sizeOfNulsData(coinData);
         return size;
     }
 

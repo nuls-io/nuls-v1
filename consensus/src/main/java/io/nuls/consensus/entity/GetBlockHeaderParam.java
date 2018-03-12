@@ -54,8 +54,8 @@ public class GetBlockHeaderParam extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += NulsConstant.TIME_VALUE_LENGTH;
-        size += Utils.sizeOfSerialize(height);
+        size += Utils.sizeOfTime();
+        size += Utils.sizeOfLong(height);
         return size;
     }
 

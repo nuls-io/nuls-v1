@@ -87,9 +87,9 @@ public class UtxoInput extends BaseNulsData {
     public int size() {
         int size = 0;
         size += VarInt.sizeOf(index);
-        size += Utils.sizeOfSerialize(fromHash);
+        size += Utils.sizeOfNulsData(fromHash);
         size += VarInt.sizeOf(fromIndex);
-        size += Utils.sizeOfSerialize(scriptSig);
+        size += Utils.sizeOfBytes(scriptSig);
         return size;
     }
 

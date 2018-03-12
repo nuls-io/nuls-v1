@@ -47,7 +47,7 @@ public class P2PKHScriptSig extends Script {
 
     @Override
     public int size() {
-        return signData.size()+ Utils.sizeOfSerialize(publicKey);
+        return signData.size()+ Utils.sizeOfBytes(publicKey);
     }
 
     public P2PKHScriptSig(byte[] signBytes, byte[] publicKey){

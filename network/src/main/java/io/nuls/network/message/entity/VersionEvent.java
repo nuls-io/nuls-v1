@@ -75,8 +75,8 @@ public class VersionEvent extends io.nuls.core.event.BaseEvent {
         s += EventHeader.EVENT_HEADER_LENGTH;
         s += VarInt.sizeOf(externalPort);
         s += VarInt.sizeOf(bestBlockHeight);
-        s += Utils.sizeOfSerialize(bestBlockHash);
-        s += Utils.sizeOfSerialize(nulsVersion);
+        s += Utils.sizeOfString(bestBlockHash);
+        s += Utils.sizeOfString(nulsVersion);
         return s;
     }
 

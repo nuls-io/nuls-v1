@@ -53,9 +53,9 @@ public class GetBlockParam extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += NulsConstant.TIME_VALUE_LENGTH;
-        size += Utils.sizeOfSerialize(start);
-        size += Utils.sizeOfSerialize(end);
+        size += Utils.sizeOfTime();
+        size += Utils.sizeOfLong(start);
+        size += Utils.sizeOfLong(end);
         return size;
     }
 

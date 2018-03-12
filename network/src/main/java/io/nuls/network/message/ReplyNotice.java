@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,7 +23,7 @@
  */
 package io.nuls.network.message;
 
-import io.nuls.core.chain.entity.BasicTypeData;
+import io.nuls.core.chain.entity.basic.NulsBytesData;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.event.NoticeData;
 import io.nuls.core.exception.NulsException;
@@ -33,16 +33,15 @@ import io.nuls.core.utils.io.NulsByteBuffer;
  * @author vivi
  * @date 2017/12/10.
  */
-public class ReplyNotice extends io.nuls.core.event.BaseEvent<BasicTypeData<byte[]>> {
+public class ReplyNotice extends io.nuls.core.event.BaseEvent<NulsBytesData> {
 
     public ReplyNotice() {
         super(NulsConstant.MODULE_ID_NETWORK, (short) 1);
     }
 
     @Override
-    protected BasicTypeData<byte[]> parseEventBody(NulsByteBuffer byteBuffer) throws NulsException{
-        BasicTypeData<byte[]> typeData = new BasicTypeData(byteBuffer);
-        return typeData;
+    protected NulsBytesData parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new NulsBytesData());
     }
 
     @Override
@@ -53,7 +52,7 @@ public class ReplyNotice extends io.nuls.core.event.BaseEvent<BasicTypeData<byte
     @Override
     public Object copy() {
         ReplyNotice event = new ReplyNotice();
-        BasicTypeData<byte[]> typeData = new BasicTypeData(this.getEventBody().getVal());
+        NulsBytesData typeData = new NulsBytesData(this.getEventBody().getVal());
         event.setEventBody(typeData);
         return event;
     }

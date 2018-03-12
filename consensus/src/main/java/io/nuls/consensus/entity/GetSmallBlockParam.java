@@ -55,8 +55,8 @@ public class GetSmallBlockParam extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += NulsConstant.TIME_VALUE_LENGTH;
-        size += Utils.sizeOfSerialize(blockHash);
+        size += Utils.sizeOfTime();
+        size += Utils.sizeOfNulsData(blockHash);
         return size;
     }
 

@@ -46,7 +46,7 @@ public class YellowPunishData extends BaseNulsData {
     public int size() {
         int size = 0;
         size += VarInt.sizeOf(height);
-        size += Utils.sizeOfSerialize(address);
+        size += Utils.sizeOfString(address);
         return size;
     }
 

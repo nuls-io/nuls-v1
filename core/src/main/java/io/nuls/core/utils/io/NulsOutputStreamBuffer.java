@@ -120,7 +120,7 @@ public class NulsOutputStreamBuffer {
     }
 
     public void writeTime(long time) throws IOException {
-        byte[] bytes = new byte[NulsConstant.TIME_VALUE_LENGTH];
+        byte[] bytes = new byte[Utils.sizeOfTime()];
         Utils.uint64ToByteArrayLE(time,bytes,0);
         this.write(bytes);
     }

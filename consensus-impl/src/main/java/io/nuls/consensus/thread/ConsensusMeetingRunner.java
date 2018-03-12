@@ -31,6 +31,7 @@ import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
+import io.nuls.consensus.entity.ConsensusAgentImpl;
 import io.nuls.consensus.entity.RedPunishData;
 import io.nuls.consensus.entity.YellowPunishData;
 import io.nuls.consensus.entity.block.BlockData;
@@ -508,7 +509,7 @@ public class ConsensusMeetingRunner implements Runnable {
             return seedList;
         }
         for (String address : consensusManager.getSeedNodeList()) {
-            Consensus<Agent> member = new Consensus<>();
+            Consensus<Agent> member = new ConsensusAgentImpl();
             member.setAddress(address);
             Agent agent = new Agent();
             agent.setDelegateAddress(address);

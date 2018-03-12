@@ -25,9 +25,7 @@ package io.nuls.consensus.event;
 
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.params.GetBlocksHashParam;
-import io.nuls.core.chain.entity.BasicTypeData;
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.crypto.VarInt;
 import io.nuls.core.event.BaseEvent;
 import io.nuls.core.event.NoticeData;
 import io.nuls.core.exception.NulsException;

@@ -28,6 +28,8 @@ import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
+import io.nuls.consensus.entity.ConsensusAgentImpl;
+import io.nuls.consensus.entity.ConsensusDelegateImpl;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.member.Delegate;
@@ -100,7 +102,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
             Log.error(e);
             throw new NulsRuntimeException(e);
         }
-        Consensus<Agent> con = new Consensus<>();
+        Consensus<Agent> con = new ConsensusAgentImpl();
         con.setAddress(account.getAddress().toString());
         con.setExtend(agent);
         tx.setTxData(con);
@@ -114,7 +116,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
     private void joinTheConsensus(Account account, String password, double amount, String agentAddress) throws IOException {
         TransactionEvent event = new TransactionEvent();
         PocJoinConsensusTransaction tx = new PocJoinConsensusTransaction();
-        Consensus<Delegate> ca = new Consensus<>();
+        Consensus<Delegate> ca = new ConsensusDelegateImpl();
         ca.setAddress(account.getAddress().toString());
         Delegate delegate = new Delegate();
         delegate.setDelegateAddress(agentAddress);

@@ -24,14 +24,11 @@
  *
  */
 
-package io.nuls.consensus.entity.params;
+package io.nuls.core.chain.entity.basic;
 
-import io.nuls.core.chain.entity.BaseNulsData;
-import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.chain.entity.BasicTypeData;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
-import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
@@ -39,69 +36,29 @@ import java.io.IOException;
 
 /**
  * @author Niels
- * @date 2018/2/8
+ * @date 2018/3/12
  */
-public class GetBlocksHashParam extends BaseNulsData {
-    private long time;
-    private long start;
-    private long end;
-    private long split;
-
-    public GetBlocksHashParam(){
-        this.time = TimeService.currentTimeMillis();
+public class NulsLongData extends BasicTypeData<Long> {
+    public NulsLongData() {
+        this(null);
     }
+
+    public NulsLongData(Long val) {
+        super(val);
+    }
+
     @Override
     public int size() {
-        int size = Utils.sizeOfTime();
-        size += Utils.sizeOfLong(start);
-        size +=Utils.sizeOfLong(end);
-        size += Utils.sizeOfLong(split);
-        return size;
+        return Utils.sizeOfLong(getVal());
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-         stream.writeTime(time);
-         stream.writeVarInt(start);
-         stream.writeVarInt(end);
-         stream.writeVarInt(split);
+        stream.writeVarInt(getVal());
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-       this.time = byteBuffer.readTime();
-       this.start = byteBuffer.readVarInt();
-       this.end = byteBuffer.readVarInt();
-       this.split = byteBuffer.readVarInt();
-    }
-
-    public long getStart() {
-        return start;
-    }
-
-    public void setStart(long start) {
-        this.start = start;
-    }
-
-    public long getEnd() {
-        return end;
-    }
-
-    public void setEnd(long end) {
-        this.end = end;
-    }
-
-    public long getSplit() {
-        return split;
-    }
-
-    public void setSplit(long split) {
-        this.split = split;
-    }
-
-    public static void main(String []args)throws Exception{
-        GetBlocksHashParam param = new GetBlocksHashParam();
-        param.parse(new NulsByteBuffer(Hex.decode("ffff1d50746101000000000100000100")));
-
+        this.setVal(byteBuffer.readVarInt());
     }
 }

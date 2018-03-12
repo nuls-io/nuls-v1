@@ -24,6 +24,7 @@
 package io.nuls.consensus.entity.tx;
 
 import io.nuls.consensus.entity.Consensus;
+import io.nuls.consensus.entity.ConsensusAgentImpl;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.validator.consensus.AccountCreditValidator;
 import io.nuls.consensus.entity.validator.consensus.AgentDepositValidator;
@@ -58,7 +59,7 @@ public class RegisterAgentTransaction extends AbstractCoinTransaction<Consensus<
 
     @Override
     public Consensus<Agent> parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
-        Consensus<Agent> consensus = byteBuffer.readNulsData(new Consensus<>());
+        Consensus<Agent> consensus = byteBuffer.readNulsData(new ConsensusAgentImpl());
         Agent delegate = byteBuffer.readNulsData(new Agent());
         consensus.setExtend(delegate);
         return consensus;

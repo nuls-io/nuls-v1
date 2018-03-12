@@ -153,11 +153,4 @@ public class VarInt {
                 return bytes;
         }
     }
-
-    public static void main(String[] args){
-        byte[] bytes= new byte[32];
-        System.out.println(Utils.sizeOfSerialize(bytes));
-        System.out.println(Utils.sizeOfSerialize(32));
-
-    }
 }

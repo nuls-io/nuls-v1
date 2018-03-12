@@ -50,8 +50,8 @@ public abstract class BaseEvent<T extends BaseNulsData> extends BaseNulsData imp
 
     @Override
     public int size() {
-        int size = Utils.sizeOfSerialize(header);
-        size += Utils.sizeOfSerialize(eventBody);
+        int size = Utils.sizeOfNulsData(header);
+        size += Utils.sizeOfNulsData(eventBody);
         return size;
     }
 

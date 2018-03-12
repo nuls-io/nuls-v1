@@ -55,8 +55,8 @@ public class GetTxGroupParam extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += NulsConstant.TIME_VALUE_LENGTH;
-        size += Utils.sizeOfSerialize(blockHash);
+        size += Utils.sizeOfTime();
+        size += Utils.sizeOfNulsData(blockHash);
         size += VarInt.sizeOf(txHashList.size());
         size += this.getTxHashBytesLength();
         return size;
@@ -86,7 +86,7 @@ public class GetTxGroupParam extends BaseNulsData {
     private int getTxHashBytesLength() {
         int size = 0;
         for (NulsDigestData hash : txHashList) {
-            size += Utils.sizeOfSerialize(hash);
+            size += Utils.sizeOfNulsData(hash);
         }
         return size;
     }

@@ -93,9 +93,9 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
         size += VarInt.sizeOf(type);
         size += VarInt.sizeOf(time);
         size += VarInt.sizeOf(fee.getValue());
-        size += Utils.sizeOfSerialize(remark);
-        size += Utils.sizeOfSerialize(txData);
-        size += Utils.sizeOfSerialize(sign);
+        size += Utils.sizeOfBytes(remark);
+        size += Utils.sizeOfNulsData(txData);
+        size += Utils.sizeOfNulsData(sign);
         return size;
     }
 
