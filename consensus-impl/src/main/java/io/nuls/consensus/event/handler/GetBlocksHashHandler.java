@@ -76,6 +76,10 @@ public class GetBlocksHashHandler extends AbstractEventHandler<GetBlocksHashRequ
             }
             if (resultHeightList.isEmpty() || resultHeightList.get(resultHeightList.size() - 1) < event.getEventBody().getEnd()) {
                 Block block = this.blockService.getBlock(event.getEventBody().getEnd());
+                if(block==null){
+                    //todo why?
+                    return ;
+                }
                 resultHeightList.add(block.getHeader().getHeight());
                 resultHashList.add(block.getHeader().getHash());
             }

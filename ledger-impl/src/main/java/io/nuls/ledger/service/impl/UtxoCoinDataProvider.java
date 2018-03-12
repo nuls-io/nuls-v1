@@ -377,7 +377,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 output.setIndex(i);
                 P2PKHScript p2PKHScript = new P2PKHScript(NulsDigestData.calcDigestData(ECKey.fromPrivate(new BigInteger(priKey)).getPubKey(), NulsDigestData.DIGEST_ALG_SHA160));
                 output.setScript(p2PKHScript);
-                output.setScriptBytes(output.getScript().getBytes());
                 if (coin.getUnlockHeight() > 0) {
                     output.setLockTime(coin.getUnlockHeight());
                 } else if (coin.getUnlockTime() > 0) {
@@ -404,7 +403,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             output.setStatus(UtxoOutput.USEABLE);
             P2PKHScript p2PKHScript = new P2PKHScript(NulsDigestData.calcDigestData(ECKey.fromPrivate(new BigInteger(priKey)).getPubKey(), NulsDigestData.DIGEST_ALG_SHA160));
             output.setScript(p2PKHScript);
-            output.setScriptBytes(output.getScript().getBytes());
             outputs.add(output);
         }
 

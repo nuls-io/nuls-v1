@@ -55,8 +55,6 @@ public class UtxoOutput extends BaseNulsData {
 
     private long lockTime;
 
-    private byte[] scriptBytes;
-
     private Script script;
 
     //0: usable, 1:locked， 2：spent
@@ -90,7 +88,7 @@ public class UtxoOutput extends BaseNulsData {
         s += Utils.sizeOfTime();
         s += Utils.sizeOfBytes(address);
         s += Utils.sizeOfTime();
-        s += Utils.sizeOfBytes(scriptBytes);
+        s += Utils.sizeOfNulsData(script);
         return s;
     }
 
@@ -100,7 +98,7 @@ public class UtxoOutput extends BaseNulsData {
         stream.writeTime(value);
         stream.writeBytesWithLength(address);
         stream.writeTime(lockTime);
-        stream.writeBytesWithLength(scriptBytes);
+        stream.writeNulsData(script);
     }
 
     @Override
@@ -112,10 +110,7 @@ public class UtxoOutput extends BaseNulsData {
         value = byteBuffer.readTime();
         address = byteBuffer.readByLengthByte();
         lockTime = byteBuffer.readTime();
-        scriptBytes = byteBuffer.readByLengthByte();
-        if(null!=scriptBytes){
-            script = new P2PKHScript(new NulsDigestData(scriptBytes));
-        }
+        script = byteBuffer.readNulsData(new P2PKHScript());
     }
 
 
@@ -152,14 +147,6 @@ public class UtxoOutput extends BaseNulsData {
 
     public void setLockTime(long lockTime) {
         this.lockTime = lockTime;
-    }
-
-    public byte[] getScriptBytes() {
-        return scriptBytes;
-    }
-
-    public void setScriptBytes(byte[] scriptBytes) {
-        this.scriptBytes = scriptBytes;
     }
 
     public Script getScript() {
