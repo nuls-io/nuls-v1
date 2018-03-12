@@ -49,6 +49,9 @@ public class Alias extends BaseNulsData {
 
     public static final int LOCKED = 0;
     public static final int CONFIRM = 1;
+    public Alias() {
+
+    }
 
     public Alias(String address, String alias) {
         this.address = address;
