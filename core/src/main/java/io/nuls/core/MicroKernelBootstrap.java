@@ -76,7 +76,6 @@ public class MicroKernelBootstrap extends BaseModuleBootstrap {
             VersionManager.start();
         } catch (NulsException e) {
             Log.error(e);
-            //todo 当获取版本失败时，发送通知
         }
 
     }

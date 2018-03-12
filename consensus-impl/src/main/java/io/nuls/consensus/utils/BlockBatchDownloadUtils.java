@@ -45,6 +45,7 @@ import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.network.service.NetworkService;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -76,7 +77,7 @@ public class BlockBatchDownloadUtils {
 
     private Map<String, NodeDownloadingStatus> nodeStatusMap = new HashMap<>();
 
-    private Map<Long, Block> blockMap = new HashMap<>();
+    private Map<Long, Block> blockMap = Collections.synchronizedMap(new HashMap<>());
 
     private boolean finished = true;
     private List<DownloadRound> roundList = new ArrayList<>();
@@ -122,6 +123,7 @@ public class BlockBatchDownloadUtils {
         }
         request(startHeight, endHeight);
         while (working) {
+            verify();
             Thread.sleep(100L);
         }
         if(!working){
@@ -204,20 +206,25 @@ public class BlockBatchDownloadUtils {
 
 
     public boolean downloadedBlock(String nodeId, Block block) {
-        NodeDownloadingStatus status = nodeStatusMap.get(nodeId);
-        if (null == status) {
-            return false;
+        try {
+            NodeDownloadingStatus status = nodeStatusMap.get(nodeId);
+            if (null == status) {
+                return false;
+            }
+            if (!status.containsHeight(block.getHeader().getHeight())) {
+                return false;
+            }
+            blockMap.put(block.getHeader().getHeight(), block);
+            status.downloaded(block.getHeader().getHeight());
+            status.setUpdateTime(System.currentTimeMillis());
+            if (status.finished()) {
+                this.queueService.offer(queueId, nodeId);
+            }
+            verify();
+        }catch (Exception e){
+            //todo
+            e.printStackTrace();
         }
-        if (!status.containsHeight(block.getHeader().getHeight())) {
-            return false;
-        }
-        blockMap.put(block.getHeader().getHeight(), block);
-        status.downloaded(block.getHeader().getHeight());
-        status.setUpdateTime(System.currentTimeMillis());
-        if (status.finished()) {
-            this.queueService.offer(queueId, nodeId);
-        }
-        verify();
         return true;
     }
 
@@ -244,9 +251,15 @@ public class BlockBatchDownloadUtils {
         }
         for (long i = currentRound.getStart(); i <= currentRound.getEnd(); i++) {
             Block block = blockMap.get(i);
+            if(null==block){
+                //todo
+                System.out.println(block);
+            }
             ValidateResult result1 = block.verify();
             if (result1.isFailed()) {
-                Log.info(result1.getMessage());
+                if(null!=result1.getMessage()){
+                    Log.info(result1.getMessage());
+                }
                 try {
                     failedExecute(block.getHeader().getHeight());
                 } catch (InterruptedException e) {
@@ -308,6 +321,8 @@ public class BlockBatchDownloadUtils {
         if (!roundFinished()) {
             return;
         }
+        blockMap.clear();
+        nodeStatusMap.clear();
         if (!roundList.isEmpty()) {
             currentRound = roundList.get(0);
             roundList.remove(0);

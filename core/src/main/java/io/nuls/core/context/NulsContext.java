@@ -54,8 +54,6 @@ public class NulsContext {
     }
 
     public static int MAGIC_NUMBER;
-    //todo
-    private Na txFee = Na.valueOf(1000000);
     /**
      * cache the best block
      */
@@ -115,14 +113,6 @@ public class NulsContext {
 
     public void addChainId(String chainName, Short id) {
         CHAIN_ID_MAP.put(chainName, id);
-    }
-
-    public Na getTxFee() {
-        return txFee;
-    }
-
-    public void setTxFee(Na txFee) {
-        this.txFee = txFee;
     }
 
     public static final <T> T getServiceBean(Class<T> tClass) {

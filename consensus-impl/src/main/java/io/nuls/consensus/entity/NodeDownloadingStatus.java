@@ -62,14 +62,6 @@ public class NodeDownloadingStatus {
         this.end = end;
     }
 
-    public Set<Long> getDownloadedSet() {
-        return downloadedSet;
-    }
-
-    public void setDownloadedSet(Set<Long> downloadedSet) {
-        this.downloadedSet = downloadedSet;
-    }
-
     public long getUpdateTime() {
         return updateTime;
     }

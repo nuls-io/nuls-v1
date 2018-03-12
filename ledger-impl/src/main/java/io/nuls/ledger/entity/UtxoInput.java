@@ -27,12 +27,16 @@ import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.str.StringUtils;
+import io.nuls.db.dao.UtxoOutputDataService;
+import io.nuls.db.entity.UtxoOutputPo;
+import io.nuls.ledger.util.UtxoTransferTool;
 
 import java.io.IOException;
 
@@ -82,8 +86,8 @@ public class UtxoInput extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += Utils.sizeOfSerialize(txHash);
         size += VarInt.sizeOf(index);
+        size += Utils.sizeOfSerialize(fromHash);
         size += VarInt.sizeOf(fromIndex);
         size += Utils.sizeOfSerialize(scriptSig);
         return size;
@@ -91,18 +95,21 @@ public class UtxoInput extends BaseNulsData {
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(txHash);
         stream.writeVarInt(index);
+        stream.writeNulsData(fromHash);
         stream.writeVarInt(fromIndex);
         stream.writeBytesWithLength(scriptSig);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        txHash = byteBuffer.readHash();
         index = (int) byteBuffer.readVarInt();
+        fromHash = byteBuffer.readNulsData(new NulsDigestData());
         fromIndex = (int) byteBuffer.readVarInt();
         scriptSig = byteBuffer.readByLengthByte();
+        UtxoOutputDataService utxoOutputDataService =  NulsContext.getServiceBean(UtxoOutputDataService.class );
+        UtxoOutputPo outputPo = utxoOutputDataService.getTxOutputs(fromHash.getDigestHex()).get(fromIndex);
+        from = UtxoTransferTool.toOutput(outputPo);
     }
 
     public NulsDigestData getTxHash() {

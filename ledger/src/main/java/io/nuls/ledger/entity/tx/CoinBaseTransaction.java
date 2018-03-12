@@ -56,12 +56,4 @@ public class CoinBaseTransaction<T extends BaseNulsData> extends AbstractCoinTra
         super(type);
     }
 
-    @Override
-    public T parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
-        byte[] bytes = byteBuffer.readBytes(NulsConstant.PLACE_HOLDER.length);
-        if(Arrays.equals(NulsConstant.PLACE_HOLDER,bytes)){
-            return null;
-        }
-        throw new NulsRuntimeException(ErrorCode.DATA_ERROR,"The transaction never provided the method:parseTxData");
-    }
 }

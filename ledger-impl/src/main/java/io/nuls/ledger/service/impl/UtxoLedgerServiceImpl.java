@@ -36,10 +36,12 @@ import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.tx.serivce.TransactionService;
+import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.core.utils.str.StringUtils;
+import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.dao.UtxoTransactionDataService;
 import io.nuls.db.entity.*;
 import io.nuls.db.transactional.annotation.DbSession;
@@ -245,7 +247,16 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         TransferTransaction tx = null;
         try {
             tx = UtxoTransactionTool.getInstance().createTransferTx(coinData, password, remark);
-            tx.verify();
+            byte[] txbytes = tx.serialize();
+            TransferTransaction new_tx = new NulsByteBuffer(txbytes).readNulsData(new TransferTransaction());
+            ValidateResult result = tx.verify();
+            if(! result.getErrorCode().getCode().equals(ErrorCode.SUCCESS.getCode() ) ){
+                throw new NulsException(ErrorCode.FAILED);
+            }
+            result = new_tx.verify();
+            if(! result.getErrorCode().getCode().equals(ErrorCode.SUCCESS.getCode() ) ){
+                throw new NulsException(ErrorCode.FAILED);
+            }
             TransactionEvent event = new TransactionEvent();
             event.setEventBody(tx);
             eventBroadcaster.broadcastAndCacheAysn(event, true);
@@ -362,7 +373,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     public void commitTx(Transaction tx) throws NulsException {
         AssertUtil.canNotEmpty(tx, ErrorCode.NULL_PARAMETER);
-        if (tx.getStatus() == TxStatusEnum.AGREED) {
+        if (tx.getStatus() != TxStatusEnum.AGREED) {
             return;
         }
         List<TransactionService> serviceList = getServiceList(tx.getClass());

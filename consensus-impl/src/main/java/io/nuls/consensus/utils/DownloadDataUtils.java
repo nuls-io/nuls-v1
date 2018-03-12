@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -68,7 +68,7 @@ public class DownloadDataUtils {
 
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
     private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
-    private   BlockCacheManager blockCacheManager;
+    private BlockCacheManager blockCacheManager;
 
     private final Map<String, Long> smbRequest = new HashMap<>();
     private final Map<String, Long> tgRequest = new HashMap<>();
@@ -80,16 +80,16 @@ public class DownloadDataUtils {
         GetSmallBlockParam param = new GetSmallBlockParam();
         param.setBlockHash(blockHash);
         request.setEventBody(param);
+        smbRequest.put(blockHash.getDigestHex(), System.currentTimeMillis());
+        Integer value = smbRequestCount.get(blockHash.getDigestHex());
+        if(value==null){
+            value = 0;
+        }
+        smbRequestCount.put(blockHash.getDigestHex(), 1 + value);
         if (StringUtils.isBlank(nodeId)) {
             eventBroadcaster.broadcastAndCache(request, false);
         } else {
             eventBroadcaster.sendToNode(request, nodeId);
-        }
-        smbRequest.put(blockHash.getDigestHex(), System.currentTimeMillis());
-        if (null == smbRequestCount.get(blockHash.getDigestHex())) {
-            smbRequestCount.put(blockHash.getDigestHex(), 1);
-        } else {
-            smbRequestCount.put(blockHash.getDigestHex(), 1 + smbRequestCount.get(blockHash.getDigestHex()));
         }
     }
 
@@ -98,8 +98,8 @@ public class DownloadDataUtils {
         GetTxGroupParam data = new GetTxGroupParam();
         data.setBlockHash(blockHash);
         List<NulsDigestData> txHashList = new ArrayList<>();
-        if(null==blockCacheManager){
-            blockCacheManager  = BlockCacheManager.getInstance();
+        if (null == blockCacheManager) {
+            blockCacheManager = BlockCacheManager.getInstance();
         }
         SmallBlock smb = blockCacheManager.getSmallBlock(blockHash.getDigestHex());
         for (NulsDigestData txHash : smb.getTxHashList()) {
@@ -108,9 +108,9 @@ public class DownloadDataUtils {
                 txHashList.add(txHash);
             }
         }
-        if(txHashList.isEmpty()){
+        if (txHashList.isEmpty()) {
             BlockHeader header = blockCacheManager.getBlockHeader(smb.getBlockHash().getDigestHex());
-            if(null==header){
+            if (null == header) {
                 return;
             }
             Block block = new Block();
@@ -140,16 +140,16 @@ public class DownloadDataUtils {
         }
         data.setTxHashList(txHashList);
         request.setEventBody(data);
+        tgRequest.put(blockHash.getDigestHex(), System.currentTimeMillis());
+        Integer value = tgRequestCount.get(blockHash.getDigestHex());
+        if (null == value) {
+            value = 0;
+        }
+        tgRequestCount.put(blockHash.getDigestHex(), 1 + value);
         if (StringUtils.isBlank(nodeId)) {
             eventBroadcaster.broadcastAndCache(request, false);
         } else {
             eventBroadcaster.sendToNode(request, nodeId);
-        }
-        tgRequest.put(blockHash.getDigestHex(), System.currentTimeMillis());
-        if (null == tgRequestCount.get(blockHash.getDigestHex())) {
-            tgRequestCount.put(blockHash.getDigestHex(), 1);
-        } else {
-            tgRequestCount.put(blockHash.getDigestHex(), 1 + tgRequestCount.get(blockHash.getDigestHex()));
         }
     }
 
@@ -191,9 +191,10 @@ public class DownloadDataUtils {
     private void reRequestSmallBlock() {
         for (String hash : this.tgRequest.keySet()) {
             Long time = tgRequest.get(hash);
-            if (null != time && (System.currentTimeMillis() - time)  >= 1000L) {
+            if (null != time && (System.currentTimeMillis() - time) >= 1000L) {
                 this.requestSmallBlock(NulsDigestData.fromDigestHex(hash), null);
-            }if (smbRequestCount.get(hash) >= 10) {
+            }
+            if (smbRequestCount.get(hash) >= 10) {
                 this.removeTxGroup(hash);
             }
         }

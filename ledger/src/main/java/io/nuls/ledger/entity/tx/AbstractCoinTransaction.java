@@ -23,12 +23,16 @@
  */
 package io.nuls.ledger.entity.tx;
 
+import io.nuls.consensus.service.intf.ConsensusService;
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -40,6 +44,7 @@ import io.nuls.ledger.entity.validator.CoinDataValidator;
 import io.nuls.ledger.service.intf.CoinDataProvider;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * @author Niels
@@ -59,7 +64,9 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
 
     public AbstractCoinTransaction(int type, CoinTransferData coinParam, String password) throws NulsException {
         this(type);
+        this.fee = NulsContext.getServiceBean(ConsensusService.class).getTxFee(this.getType());
         initCoinDataProvider();
+        coinParam.setFee(fee);
         this.coinData = coinDataProvider.createByTransferData(this, coinParam, password);
         this.time = TimeService.currentTimeMillis();
     }
@@ -114,4 +121,12 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
         this.coinData = coinData;
     }
 
+    @Override
+    public T parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
+        byte[] bytes = byteBuffer.readBytes(NulsConstant.PLACE_HOLDER.length);
+        if(Arrays.equals(NulsConstant.PLACE_HOLDER,bytes)){
+            return null;
+        }
+        throw new NulsRuntimeException(ErrorCode.DATA_ERROR,"The transaction never provided the method:parseTxData");
+    }
 }

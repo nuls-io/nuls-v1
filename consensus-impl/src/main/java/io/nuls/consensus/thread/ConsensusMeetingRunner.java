@@ -129,7 +129,7 @@ public class ConsensusMeetingRunner implements Runnable {
                 Log.error(e.getMessage());
                 try {
                     startMeeting();
-                }catch (Exception e1){
+                } catch (Exception e1) {
                     Log.error(e1.getMessage());
                 }
             }
@@ -146,26 +146,50 @@ public class ConsensusMeetingRunner implements Runnable {
             }
             result = (TimeService.currentTimeMillis() - context.getBestBlock().getHeader().getTime()) <= 1000L;
             if (!result) {
-                BlockInfo blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(0);
-                if (blockInfo == null) {
-                    break;
-                }
-                Block localBlock = blockService.getBlock(blockInfo.getBestHeight());
-                result = blockInfo.getBestHeight() <= context.getBestBlock().getHeader().getHeight() &&
-                        blockInfo.getBestHash().getDigestHex()
-                                .equals(localBlock.getHeader().getHash().getDigestHex());
+                result = checkBestHash();
             }
-            if (!result) {
-                break;
-            }
-            result = this.consensusManager.getConsensusStatusInfo() != null;
-            result = result && ConsensusStatusEnum.IN.getCode() == consensusManager.getConsensusStatusInfo().getStatus();
+//            if (!result) {
+//                break;
+//            }
+//            result = this.consensusManager.getConsensusStatusInfo() != null;
+//            result = result && ConsensusStatusEnum.IN.getCode() == consensusManager.getConsensusStatusInfo().getStatus();
         } while (false);
         return result;
     }
 
+    private BlockInfo lastBlockInfo;
+
+    private boolean checkBestHash() {
+        boolean result = true;
+        if (null != lastBlockInfo) {
+            result = checkBestHash(lastBlockInfo);
+        }
+        if (!result) {
+            return result;
+        }
+        BlockInfo blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(-1);
+        if (blockInfo == null || blockInfo.getBestHash() == null) {
+            return false;
+        }
+        result = checkBestHash(blockInfo);
+        lastBlockInfo = blockInfo;
+        return result;
+    }
+
+    private boolean checkBestHash(BlockInfo blockInfo) {
+        boolean result = blockInfo.getBestHeight() <= context.getBestBlock().getHeader().getHeight();
+        if (!result) {
+            return result;
+        }
+        Block localBlock = blockService.getBlock(blockInfo.getBestHeight());
+        result = null != localBlock &&
+                blockInfo.getBestHash().getDigestHex()
+                        .equals(localBlock.getHeader().getHash().getDigestHex());
+        return result;
+    }
+
     private void nextRound() {
-        if (this.consensusManager.getConsensusStatusInfo() == null) {
+        if (this.consensusManager.getConsensusStatusInfo() == null || this.consensusManager.getConsensusStatusInfo().getAddress() == null) {
             return;
         }
         PocMeetingRound currentRound = calcRound();
@@ -271,6 +295,7 @@ public class ConsensusMeetingRunner implements Runnable {
         roundData.setRoundStartTime(consensusManager.getCurrentRound().getStartTime());
         bd.setRoundData(roundData);
         List<Integer> outTxList = new ArrayList<>();
+        List<NulsDigestData> hashList = new ArrayList<>();
         for (int i = 0; i < txList.size(); i++) {
             Transaction tx = txList.get(i);
             ValidateResult result = tx.verify();
@@ -280,13 +305,14 @@ public class ConsensusMeetingRunner implements Runnable {
             }
             try {
                 ledgerService.approvalTx(tx);
-            } catch (NulsException e) {
+            } catch (Exception e) {
                 Log.error(e);
                 outTxList.add(i);
                 continue;
             }
             confirmingTxCacheManager.putTx(tx);
         }
+        txCacheManager.removeTx(hashList);
         for (int i = outTxList.size() - 1; i >= 0; i--) {
             txList.remove(i);
         }
@@ -449,8 +475,8 @@ public class ConsensusMeetingRunner implements Runnable {
         }
         if (round.getPreviousRound() == null) {
             while (true) {
-                if (lastRoundData.getPackingIndexOfRound() == lastRoundData.getConsensusMemberCount()||
-                        lastRoundData.getRoundEndTime()<= TimeService.currentTimeMillis()) {
+                if (lastRoundData.getPackingIndexOfRound() == lastRoundData.getConsensusMemberCount() ||
+                        lastRoundData.getRoundEndTime() <= TimeService.currentTimeMillis()) {
                     break;
                 }
                 try {

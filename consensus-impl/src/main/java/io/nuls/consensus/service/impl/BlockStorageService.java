@@ -90,7 +90,6 @@ public class BlockStorageService {
 
 
     public List<Block> getBlockList(long startHeight, long endHeight) {
-        //todo 这里有可能出现空的block
         List<Block> blockList = new ArrayList<>();
         List<BlockHeaderPo> poList = headerDao.getHeaderList(startHeight, endHeight);
         List<Transaction> txList = null;

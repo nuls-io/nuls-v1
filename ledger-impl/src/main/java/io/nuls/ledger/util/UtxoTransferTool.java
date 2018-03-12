@@ -106,6 +106,7 @@ public class UtxoTransferTool {
         UtxoInputPo po = new UtxoInputPo();
         po.setTxHash(input.getTxHash().getDigestHex());
         po.setInIndex(input.getIndex());
+        po.setFromHash(input.getFromHash().getDigestHex());
         po.setFromIndex(input.getFromIndex());
         po.setSign(input.getScriptSig());
         return po;

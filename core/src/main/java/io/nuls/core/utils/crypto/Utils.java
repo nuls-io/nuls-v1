@@ -25,6 +25,7 @@ package io.nuls.core.utils.crypto;
 
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.VarInt;
@@ -481,7 +482,7 @@ public class Utils {
 
     public static int sizeOfSerialize(Object val) {
         if (null == val) {
-            return 4;
+            return NulsConstant.PLACE_HOLDER.length;
         }
         if (val instanceof String) {
            return sizeOfString((String) val);
