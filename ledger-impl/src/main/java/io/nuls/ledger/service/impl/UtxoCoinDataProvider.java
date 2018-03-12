@@ -374,7 +374,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 output.setValue(coin.getNa().getValue());
                 output.setStatus(UtxoOutput.USEABLE);
                 output.setIndex(i);
-                P2PKHScript p2PKHScript = new P2PKHScript(NulsDigestData.calcDigestData(ECKey.fromPrivate(new BigInteger(priKey)).getPubKey(), NulsDigestData.DIGEST_ALG_SHA160));
+                 P2PKHScript p2PKHScript = new P2PKHScript(NulsDigestData.calcDigestData(ECKey.fromPrivate(new BigInteger(priKey)).getPubKey(), NulsDigestData.DIGEST_ALG_SHA160));
                 output.setScript(p2PKHScript);
                 if (coin.getUnlockHeight() > 0) {
                     output.setLockTime(coin.getUnlockHeight());

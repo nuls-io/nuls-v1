@@ -36,7 +36,6 @@ import io.nuls.consensus.entity.RedPunishData;
 import io.nuls.consensus.entity.YellowPunishData;
 import io.nuls.consensus.entity.block.BlockData;
 import io.nuls.consensus.entity.block.BlockRoundData;
-import io.nuls.consensus.entity.meeting.ConsensusGroup;
 import io.nuls.consensus.entity.meeting.ConsensusReward;
 import io.nuls.consensus.entity.meeting.PocMeetingMember;
 import io.nuls.consensus.entity.meeting.PocMeetingRound;
@@ -47,7 +46,6 @@ import io.nuls.consensus.entity.tx.YellowPunishTransaction;
 import io.nuls.consensus.event.BlockHeaderEvent;
 import io.nuls.consensus.event.notice.PackedBlockNotice;
 import io.nuls.consensus.manager.ConsensusManager;
-import io.nuls.consensus.service.impl.BlockServiceImpl;
 import io.nuls.consensus.service.impl.PocBlockService;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.utils.BlockInfo;
@@ -73,7 +71,6 @@ import io.nuls.ledger.entity.tx.CoinBaseTransaction;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.network.entity.Node;
 import io.nuls.network.service.NetworkService;
-import org.spongycastle.util.Times;
 
 import java.io.IOException;
 import java.util.*;
@@ -150,11 +147,6 @@ public class ConsensusMeetingRunner implements Runnable {
             if (!result) {
                 result = checkBestHash();
             }
-//            if (!result) {
-//                break;
-//            }
-//            result = this.consensusManager.getConsensusStatusInfo() != null;
-//            result = result && ConsensusStatusEnum.IN.getCode() == consensusManager.getConsensusStatusInfo().getStatus();
         } while (false);
         return result;
     }
@@ -191,9 +183,7 @@ public class ConsensusMeetingRunner implements Runnable {
     }
 
     private void nextRound() {
-        if (this.consensusManager.getConsensusStatusInfo() == null || this.consensusManager.getConsensusStatusInfo().getAccount() == null) {
-            return;
-        }
+
         PocMeetingRound currentRound = calcRound();
         consensusManager.setCurrentRound(currentRound);
         while (TimeService.currentTimeMillis() < (currentRound.getStartTime())) {
@@ -203,6 +193,8 @@ public class ConsensusMeetingRunner implements Runnable {
                 Log.error(e);
             }
         }
+        boolean imIn = this.consensusManager.getConsensusStatusInfo() != null && this.consensusManager.getConsensusStatusInfo().getAccount() != null;
+        imIn = imIn && ConsensusStatusEnum.IN.getCode() == consensusManager.getConsensusStatusInfo().getStatus();
         List<Consensus<Agent>> list = calcConsensusAgentList();
         currentRound.setMemberCount(list.size());
         while (currentRound.getEndTime() < TimeService.currentTimeMillis()) {
@@ -212,39 +204,44 @@ public class ConsensusMeetingRunner implements Runnable {
             long startTime = currentRound.getStartTime() + index * roundTime;
             currentRound.setStartTime(startTime);
         }
+
+        Map<String, List<Consensus<Delegate>>> delegateMap = new HashMap<>();
+        List<Consensus<Delegate>> delegateList = consensusCacheManager.getCachedDelegateList();
+        for (Consensus<Delegate> cd : delegateList) {
+            List<Consensus<Delegate>> sonList = delegateMap.get(cd.getExtend().getDelegateAddress());
+            if (null == sonList) {
+                sonList = new ArrayList<>();
+            }
+            sonList.add(cd);
+            delegateMap.put(cd.getExtend().getDelegateAddress(), sonList);
+        }
         List<PocMeetingMember> memberList = new ArrayList<>();
-        ConsensusGroup cg = new ConsensusGroup();
         Na totalDeposit = Na.ZERO;
-        Na agentTotalDeposit = Na.ZERO;
         for (Consensus<Agent> ca : list) {
+            if(ca.getExtend().getDeposit().isLessThan(PocConsensusConstant.AGENT_DEPOSIT_LOWER_LIMIT)){
+                continue;
+            }
             PocMeetingMember mm = new PocMeetingMember();
+            mm.setAgentConsensus(ca);
+            mm.setDelegateList(delegateMap.get(ca.getAddress()));
+            if(mm.getDelegateList()==null||mm.getDelegateList().size()>PocConsensusConstant.MAX_ACCEPT_NUM_OF_DELEGATE){
+                continue;
+            }
+            mm.calcDeposit();
+            if(mm.getTotolEntrustDeposit().isLessThan(PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT)){
+                continue;
+            }
             mm.setRoundIndex(currentRound.getIndex());
             mm.setAddress(ca.getAddress());
             mm.setPackerAddress(ca.getExtend().getDelegateAddress());
             mm.setRoundStartTime(currentRound.getStartTime());
             memberList.add(mm);
-            if (ca.getAddress().equals(consensusManager.getConsensusStatusInfo().getAccount().getAddress().toString())) {
-                cg.setAgentConsensus(ca);
-                agentTotalDeposit = agentTotalDeposit.add(ca.getExtend().getDeposit());
-            }
             totalDeposit = totalDeposit.add(ca.getExtend().getDeposit());
         }
         Collections.sort(memberList);
         currentRound.setMemberList(memberList);
-        List<Consensus<Delegate>> delegateList = consensusCacheManager.getCachedDelegateList();
-        List<Consensus<Delegate>> myDelegateList = new ArrayList<>();
-        for (Consensus<Delegate> cd : delegateList) {
-            totalDeposit = totalDeposit.add(cd.getExtend().getDeposit());
-            if (cd.getExtend().getDelegateAddress().equals(consensusManager.getConsensusStatusInfo().getAccount().getAddress().toString())) {
-                myDelegateList.add(cd);
-                agentTotalDeposit = agentTotalDeposit.add(cd.getExtend().getDeposit());
-            }
-        }
         currentRound.setTotalDeposit(totalDeposit);
-        currentRound.setAgentTotalDeposit(agentTotalDeposit);
-        cg.setDelegateList(myDelegateList);
-        currentRound.setConsensusGroup(cg);
-        if (ConsensusStatusEnum.IN.getCode() == consensusManager.getConsensusStatusInfo().getStatus()) {
+        if (imIn) {
             startMeeting();
         }
     }
@@ -346,13 +343,13 @@ public class ConsensusMeetingRunner implements Runnable {
      */
     private void addConsensusTx(Block bestBlock, List<Transaction> txList, PocMeetingMember self) {
         punishTx(bestBlock, txList, self);
-        coinBaseTx(txList);
+        coinBaseTx(txList,self);
     }
 
-    private void coinBaseTx(List<Transaction> txList) {
+    private void coinBaseTx(List<Transaction> txList,PocMeetingMember self) {
         CoinTransferData data = new CoinTransferData();
         data.setFee(Na.ZERO);
-        List<ConsensusReward> rewardList = calcReward(txList);
+        List<ConsensusReward> rewardList = calcReward(txList,self);
         Na total = Na.ZERO;
         for (ConsensusReward reward : rewardList) {
             Coin coin = new Coin();
@@ -380,10 +377,9 @@ public class ConsensusMeetingRunner implements Runnable {
         txList.add(0, tx);
     }
 
-    private List<ConsensusReward> calcReward(List<Transaction> txList) {
+    private List<ConsensusReward> calcReward(List<Transaction> txList, PocMeetingMember self) {
         List<ConsensusReward> rewardList = new ArrayList<>();
         if (this.consensusManager.getCurrentRound().getTotalDeposit().getValue() == 0) {
-            ConsensusGroup cg = this.consensusManager.getCurrentRound().getConsensusGroup();
             long totalFee = 0;
             for (Transaction tx : txList) {
                 totalFee += tx.getFee().getValue();
@@ -392,22 +388,23 @@ public class ConsensusMeetingRunner implements Runnable {
                 return rewardList;
             }
             double caReward = totalFee;
-            Consensus<Agent> ca = cg.getAgentConsensus();
+            Consensus<Agent> ca = self.getAgentConsensus();
             ConsensusReward agentReword = new ConsensusReward();
             agentReword.setAddress(ca.getAddress());
             agentReword.setReward(Na.valueOf((long) caReward));
             rewardList.add(agentReword);
             return rewardList;
         }
-        ConsensusGroup cg = this.consensusManager.getCurrentRound().getConsensusGroup();
         long totalFee = 0;
         for (Transaction tx : txList) {
             totalFee += tx.getFee().getValue();
         }
+        Consensus<Agent> ca = self.getAgentConsensus();
+        Na agentTotalDeposit = self.getTotolEntrustDeposit().add(ca.getExtend().getDeposit());
         double total = totalFee + PocConsensusConstant.ANNUAL_INFLATION.getValue() *
                 (PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * this.consensusManager.getCurrentRound().getMemberCount()) / PocConsensusConstant.BLOCK_COUNT_OF_YEAR
-                * (this.consensusManager.getCurrentRound().getAgentTotalDeposit().getValue() / this.consensusManager.getCurrentRound().getTotalDeposit().getValue());
-        Consensus<Agent> ca = cg.getAgentConsensus();
+                * (agentTotalDeposit.getValue() / this.consensusManager.getCurrentRound().getTotalDeposit().getValue());
+
         double caReward = total * ((ca.getExtend().getDeposit().getValue() / this.consensusManager.getCurrentRound().getTotalDeposit().getValue())
                 + (((this.consensusManager.getCurrentRound().getTotalDeposit().getValue() - ca.getExtend().getDeposit().getValue()) / this.consensusManager.getCurrentRound().getTotalDeposit().getValue()
         ) * ca.getExtend().getCommissionRate()));
@@ -415,7 +412,7 @@ public class ConsensusMeetingRunner implements Runnable {
         agentReword.setAddress(ca.getAddress());
         agentReword.setReward(Na.valueOf((long) caReward));
         rewardList.add(agentReword);
-        for (Consensus<Delegate> cd : cg.getDelegateList()) {
+        for (Consensus<Delegate> cd : self.getDelegateList()) {
             double reward = total *
                     (cd.getExtend().getDeposit().getValue() / this.consensusManager.getCurrentRound().getTotalDeposit().getValue()) *
                     (1 - ca.getExtend().getCommissionRate());
