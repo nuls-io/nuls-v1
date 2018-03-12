@@ -28,6 +28,7 @@ import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.TransactionLocalDataService;
 import io.nuls.db.dao.impl.mybatis.mapper.TransactionLocalMapper;
+import io.nuls.db.dao.impl.mybatis.util.Condition;
 import io.nuls.db.dao.impl.mybatis.util.SearchOperator;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import io.nuls.db.entity.TransactionLocalPo;
@@ -73,6 +74,13 @@ public class TransactionLocalDaoImpl extends BaseDaoImpl<TransactionLocalMapper,
     @Override
     public List<TransactionLocalPo> getTxs(String address, int type, Integer start, Integer limit) {
         Searchable searchable = new Searchable();
+        Condition c1 = new Condition("e.address", SearchOperator.eq, "c.address");
+        c1.setPrefix("(");
+        searchable.addCondition(c1);
+
+        Condition c2 = new Condition(Condition.OR,"e.address", SearchOperator.eq, "d.address");
+        c2.setEndfix(")");
+        searchable.addCondition(c2);
         if (type != 0) {
             searchable.addCondition("a.type", SearchOperator.eq, type);
         }

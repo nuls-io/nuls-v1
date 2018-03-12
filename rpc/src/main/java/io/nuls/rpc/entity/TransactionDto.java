@@ -1,6 +1,7 @@
 package io.nuls.rpc.entity;
 
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.ledger.entity.UtxoData;
@@ -38,6 +39,8 @@ public class TransactionDto {
     private String remark;
 
     private String sign;
+    // 0, unConfirm  1, confirm
+    private Integer status;
 
     public TransactionDto(Transaction tx) {
         this.hash = tx.getHash().getDigestHex();
@@ -46,6 +49,12 @@ public class TransactionDto {
         this.blockHeight = tx.getBlockHeight();
         this.setFee(tx.getFee().getValue());
         this.setTransferType(tx.getTransferType());
+        if (TxStatusEnum.CONFIRMED.equals(tx.getStatus())) {
+            this.status = 1;
+        } else {
+            this.status = 0;
+        }
+
         if (tx.getRemark() != null) {
             try {
                 this.setRemark(new String(tx.getRemark(), NulsContext.DEFAULT_ENCODING));
@@ -200,4 +209,11 @@ public class TransactionDto {
         this.sign = sign;
     }
 
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
 }
