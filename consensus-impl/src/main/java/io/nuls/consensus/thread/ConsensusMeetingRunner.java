@@ -382,6 +382,20 @@ public class ConsensusMeetingRunner implements Runnable {
     private List<ConsensusReward> calcReward(List<Transaction> txList) {
         List<ConsensusReward> rewardList = new ArrayList<>();
         if (this.consensusManager.getCurrentRound().getTotalDeposit().getValue() == 0) {
+            ConsensusGroup cg = this.consensusManager.getCurrentRound().getConsensusGroup();
+            long totalFee = 0;
+            for (Transaction tx : txList) {
+                totalFee += tx.getFee().getValue();
+            }
+            if(totalFee==0L){
+                return rewardList;
+            }
+            double caReward = totalFee ;
+            Consensus<Agent> ca = cg.getAgentConsensus();
+            ConsensusReward agentReword = new ConsensusReward();
+            agentReword.setAddress(ca.getAddress());
+            agentReword.setReward(Na.valueOf((long) caReward));
+            rewardList.add(agentReword);
             return rewardList;
         }
         ConsensusGroup cg = this.consensusManager.getCurrentRound().getConsensusGroup();
