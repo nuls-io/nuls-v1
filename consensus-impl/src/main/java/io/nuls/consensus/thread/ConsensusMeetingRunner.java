@@ -218,17 +218,18 @@ public class ConsensusMeetingRunner implements Runnable {
         List<PocMeetingMember> memberList = new ArrayList<>();
         Na totalDeposit = Na.ZERO;
         for (Consensus<Agent> ca : list) {
-            if (ca.getExtend().getDeposit().isLessThan(PocConsensusConstant.AGENT_DEPOSIT_LOWER_LIMIT)) {
+            boolean isSeed = ca.getExtend().getSeed();
+            if (!isSeed&&ca.getExtend().getDeposit().isLessThan(PocConsensusConstant.AGENT_DEPOSIT_LOWER_LIMIT)) {
                 continue;
             }
             PocMeetingMember mm = new PocMeetingMember();
             mm.setAgentConsensus(ca);
             mm.setDelegateList(delegateMap.get(ca.getAddress()));
-            if (mm.getDelegateList() == null || mm.getDelegateList().size() > PocConsensusConstant.MAX_ACCEPT_NUM_OF_DELEGATE) {
+            if (!isSeed&&mm.getDelegateList() == null || mm.getDelegateList().size() > PocConsensusConstant.MAX_ACCEPT_NUM_OF_DELEGATE) {
                 continue;
             }
             mm.calcDeposit();
-            if (mm.getTotolEntrustDeposit().isLessThan(PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT)) {
+            if (!isSeed&&mm.getTotolEntrustDeposit().isLessThan(PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT)) {
                 continue;
             }
             mm.setRoundIndex(currentRound.getIndex());
