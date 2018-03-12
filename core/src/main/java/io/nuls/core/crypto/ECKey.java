@@ -241,7 +241,7 @@ public class ECKey {
      * @return String
      */
     public String getPublicKeyAsHex() {
-        return getPublicKeyAsHex(true);
+        return getPublicKeyAsHex(false);
     }
 
     /**
@@ -446,4 +446,8 @@ public class ECKey {
         this.encryptedPrivateKey = encryptedPrivateKey;
     }
 
+    public static void main(String[] args){
+        ECKey ecKey = ECKey.fromPrivate(new BigInteger(Hex.decode("39e9a6cbfc515a68f312a928342050940c2874d3b9e0cd733b56f992ee5cd996")));
+        System.out.print(ecKey.getPublicKeyAsHex());
+    }
 }
