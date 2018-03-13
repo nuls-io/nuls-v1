@@ -332,22 +332,21 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         byte[] priKey = null;
         if (coinParam.getPriKey() != null) {
             priKey = coinParam.getPriKey();
-        } else if(!coinParam.getFrom().isEmpty()){
+        } else if (!coinParam.getFrom().isEmpty()) {
             Account account = accountService.getAccount(coinParam.getFrom().get(0));
-            if(account.isEncrypted() && account.isLocked()){
-                if(!account.unlock(password)){
-                   throw new NulsException(ErrorCode.PASSWORD_IS_WRONG );
+            if (account.isEncrypted() && account.isLocked()) {
+                if (!account.unlock(password)) {
+                    throw new NulsException(ErrorCode.PASSWORD_IS_WRONG);
                 }
                 priKey = account.getPriKey();
                 account.lock();
-            }
-            else{
+            } else {
                 priKey = account.getPriKey();
             }
         }
 
         //create scriptSig foreach input
-        for(int i = 0; i< inputs.size();i++) {
+        for (int i = 0; i < inputs.size(); i++) {
             P2PKHScriptSig scriptSig = new P2PKHScriptSig();
             ECKey ecKey = ECKey.fromPrivate(new BigInteger(priKey));
 
@@ -377,7 +376,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 output.setValue(coin.getNa().getValue());
                 output.setStatus(UtxoOutput.USEABLE);
                 output.setIndex(i);
-                P2PKHScript p2PKHScript = new P2PKHScript(NulsDigestData.calcDigestData((new Address(address).getHash160()) , NulsDigestData.DIGEST_ALG_SHA160));
+                P2PKHScript p2PKHScript = new P2PKHScript(NulsDigestData.calcDigestData((new Address(address).getHash160()), NulsDigestData.DIGEST_ALG_SHA160));
                 output.setScript(p2PKHScript);
                 if (coin.getUnlockHeight() > 0) {
                     output.setLockTime(coin.getUnlockHeight());
@@ -411,5 +410,16 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         utxoData.setInputs(inputs);
         utxoData.setOutputs(outputs);
         return utxoData;
+    }
+
+    @Override
+    public void setTxHash(CoinData coinData, Transaction tx) {
+        UtxoData utxoData = (UtxoData) coinData;
+        for (UtxoInput input : utxoData.getInputs()) {
+            input.setTxHash(tx.getHash());
+        }
+        for(UtxoOutput output:utxoData.getOutputs()){
+            output.setTxHash(tx.getHash());
+        }
     }
 }

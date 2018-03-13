@@ -46,4 +46,6 @@ public interface CoinDataProvider {
     void rollback(CoinData coinData, Transaction tx);
 
     CoinData createByTransferData(Transaction tx, CoinTransferData coinParam, String password) throws NulsException;
+
+     void setTxHash(CoinData coinData, Transaction tx);
 }
