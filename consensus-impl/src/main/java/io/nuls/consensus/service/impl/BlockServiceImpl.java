@@ -175,8 +175,8 @@ public class BlockServiceImpl implements BlockService {
 
 
     @Override
-    public List<BlockHeader> getBlockHashList(long startHeight, long endHeight, long split) {
-        return blockStorageService.getBlockHashList(startHeight, endHeight, split);
+    public List<BlockHeader> getBlockHeaderList(long startHeight, long endHeight, long split) {
+        return blockStorageService.getBlockHeaderList(startHeight, endHeight, split);
     }
 
     @Override

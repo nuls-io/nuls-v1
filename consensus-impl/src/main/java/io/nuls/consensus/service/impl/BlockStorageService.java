@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -50,6 +50,7 @@ public class BlockStorageService {
     private BlockHeaderService headerDao = NulsContext.getServiceBean(BlockHeaderService.class);
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
+
     private BlockStorageService() {
     }
 
@@ -59,7 +60,7 @@ public class BlockStorageService {
 
     public Block getBlock(long height) throws Exception {
         Block block = blockCacheManager.getBlock(height);
-        if(null!=block){
+        if (null != block) {
             return block;
         }
         BlockHeader header = getBlockHeader(height);
@@ -76,6 +77,10 @@ public class BlockStorageService {
     }
 
     public Block getBlock(String hash) throws Exception {
+        Block block = blockCacheManager.getBlock(hash);
+        if (null != block) {
+            return block;
+        }
         BlockHeader header = getBlockHeader(hash);
         List<Transaction> txList = null;
         try {
@@ -98,7 +103,7 @@ public class BlockStorageService {
         List<Block> blockList = new ArrayList<>();
         List<BlockHeaderPo> poList = headerDao.getHeaderList(startHeight, endHeight);
         List<Long> heightList = new ArrayList<>();
-        if(!poList.isEmpty()) {
+        if (!poList.isEmpty()) {
             List<Transaction> txList = null;
             try {
                 txList = ledgerService.getTxList(startHeight, endHeight);
@@ -112,9 +117,9 @@ public class BlockStorageService {
                 blockList.add(fillBlock(header, txListGroup.get(header.getHeight())));
             }
         }
-        if((endHeight-startHeight+1)>blockList.size()){
-            for(long i=startHeight;i<=endHeight;i++){
-                if(heightList.contains(i)){
+        if ((endHeight - startHeight + 1) > blockList.size()) {
+            for (long i = startHeight; i <= endHeight; i++) {
+                if (heightList.contains(i)) {
                     continue;
                 }
                 try {
@@ -142,7 +147,7 @@ public class BlockStorageService {
 
     public BlockHeader getBlockHeader(long height) {
         BlockHeader header = blockCacheManager.getBlockHeader(height);
-        if(null!=header){
+        if (null != header) {
             return header;
         }
         BlockHeaderPo po = this.headerDao.getHeader(height);
@@ -150,12 +155,21 @@ public class BlockStorageService {
     }
 
     public BlockHeader getBlockHeader(String hash) {
+        BlockHeader header = blockCacheManager.getBlockHeader(hash);
+        if (null != header) {
+            return header;
+        }
         BlockHeaderPo po = this.headerDao.getHeader(hash);
         return ConsensusTool.fromPojo(po);
     }
 
     public long getBestHeight() {
-        return headerDao.getBestHeight();
+        long height = headerDao.getBestHeight();
+        long memoryHeight = NulsContext.getInstance().getBestBlock().getHeader().getHeight();
+        if(height<memoryHeight){
+            return memoryHeight;
+        }
+        return height;
     }
 
     public void save(BlockHeader header) {
@@ -166,24 +180,38 @@ public class BlockStorageService {
         headerDao.delete(hash);
     }
 
-    public List<BlockHeader> getBlockHashList(long startHeight, long endHeight, long split) {
+    public List<BlockHeader> getBlockHeaderList(long startHeight, long endHeight, long split) {
         List<BlockHeaderPo> strList = this.headerDao.getHashList(startHeight, endHeight, split);
-        List<BlockHeader> hashList = new ArrayList<>();
+        List<BlockHeader> headerList = new ArrayList<>();
+        List<Long> heightList = new ArrayList<>();
         for (BlockHeaderPo po : strList) {
             BlockHeader header = new BlockHeader();
             header.setHash(NulsDigestData.fromDigestHex(po.getHash()));
             header.setHeight(po.getHeight());
-            hashList.add(header);
+            headerList.add(header);
+            heightList.add(header.getHeight());
         }
-        return hashList;
+        if ((endHeight - startHeight + 1) == headerList.size()) {
+            return headerList;
+        }
+        for (long i = startHeight; i <= endHeight; i++) {
+            if (heightList.contains(i)) {
+                continue;
+            }
+            BlockHeader header = blockCacheManager.getBlockHeader(i);
+            if(null!=header){
+                headerList.add(header);
+            }
+        }
+        return headerList;
     }
 
     public long getBlockCount(String address, long roundStart, long roundEnd) {
-
         return this.headerDao.getCount(address, roundStart, roundEnd);
     }
 
     public long getSumOfRoundIndexOfYellowPunish(String address, long startRoundIndex, long endRoundIndex) {
+        //todo 是否需要查询内存
         List<Long> indexList = this.headerDao.getListOfRoundIndexOfYellowPunish(address, startRoundIndex, endRoundIndex);
         if (null == indexList || indexList.isEmpty()) {
             return 0L;
