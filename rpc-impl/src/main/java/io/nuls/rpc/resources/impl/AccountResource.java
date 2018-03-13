@@ -33,7 +33,6 @@ import io.nuls.core.chain.entity.Result;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.crypto.Hex;
-import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.entity.UtxoBalance;
