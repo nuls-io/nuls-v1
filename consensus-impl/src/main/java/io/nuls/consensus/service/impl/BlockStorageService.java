@@ -23,6 +23,7 @@
  */
 package io.nuls.consensus.service.impl;
 
+import io.nuls.consensus.cache.manager.block.BlockCacheManager;
 import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
@@ -48,7 +49,7 @@ public class BlockStorageService {
 
     private BlockHeaderService headerDao = NulsContext.getServiceBean(BlockHeaderService.class);
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
-
+    private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
     private BlockStorageService() {
     }
 
@@ -57,6 +58,10 @@ public class BlockStorageService {
     }
 
     public Block getBlock(long height) throws Exception {
+        Block block = blockCacheManager.getBlock(height);
+        if(null!=block){
+            return block;
+        }
         BlockHeader header = getBlockHeader(height);
         if (null == header) {
             return null;
@@ -92,18 +97,20 @@ public class BlockStorageService {
     public List<Block> getBlockList(long startHeight, long endHeight) {
         List<Block> blockList = new ArrayList<>();
         List<BlockHeaderPo> poList = headerDao.getHeaderList(startHeight, endHeight);
-        List<Transaction> txList = null;
-        try {
-            txList = ledgerService.getTxList(startHeight, endHeight);
-        } catch (Exception e) {
-            Log.error(e);
-        }
-        Map<Long, List<Transaction>> txListGroup = txListGrouping(txList);
-        List <Long> heightList = new ArrayList<>();
-        for (BlockHeaderPo po : poList) {
-            BlockHeader header = ConsensusTool.fromPojo(po);
-            heightList.add(header.getHeight());
-            blockList.add(fillBlock(header, txListGroup.get(header.getHeight())));
+        List<Long> heightList = new ArrayList<>();
+        if(!poList.isEmpty()) {
+            List<Transaction> txList = null;
+            try {
+                txList = ledgerService.getTxList(startHeight, endHeight);
+            } catch (Exception e) {
+                Log.error(e);
+            }
+            Map<Long, List<Transaction>> txListGroup = txListGrouping(txList);
+            for (BlockHeaderPo po : poList) {
+                BlockHeader header = ConsensusTool.fromPojo(po);
+                heightList.add(header.getHeight());
+                blockList.add(fillBlock(header, txListGroup.get(header.getHeight())));
+            }
         }
         if((endHeight-startHeight+1)>blockList.size()){
             for(long i=startHeight;i<=endHeight;i++){
@@ -134,6 +141,10 @@ public class BlockStorageService {
     }
 
     public BlockHeader getBlockHeader(long height) {
+        BlockHeader header = blockCacheManager.getBlockHeader(height);
+        if(null!=header){
+            return header;
+        }
         BlockHeaderPo po = this.headerDao.getHeader(height);
         return ConsensusTool.fromPojo(po);
     }
