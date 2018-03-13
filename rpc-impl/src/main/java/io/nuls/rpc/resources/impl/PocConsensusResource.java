@@ -64,7 +64,6 @@ public class PocConsensusResource {
         return result;
     }
 
-
     @GET
     @Path("/condition")
     @Produces(MediaType.APPLICATION_JSON)

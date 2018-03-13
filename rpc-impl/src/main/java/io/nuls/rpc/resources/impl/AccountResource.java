@@ -135,6 +135,9 @@ public class AccountResource {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         UtxoBalance balance = (UtxoBalance) ledgerService.getBalance(address);
+        if(balance == null || balance.getUnSpends() == null) {
+            return RpcResult.getFailed("balance not enough");
+        }
         amount += consensusService.getTxFee(Integer.MAX_VALUE).getValue();
 
         long usable = 0;
