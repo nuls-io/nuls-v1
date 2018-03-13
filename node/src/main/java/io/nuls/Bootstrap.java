@@ -24,6 +24,7 @@
 package io.nuls;
 
 import io.nuls.core.MicroKernelBootstrap;
+import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
@@ -51,12 +52,14 @@ public class Bootstrap {
         }
     }
 
-    private static void sysStart() {
+    private static void sysStart() throws Exception {
         do {
             MicroKernelBootstrap mk = MicroKernelBootstrap.getInstance();
             mk.init();
             mk.start();
             initModules();
+            Thread.sleep(3000);
+            TransactionManager.main(null);
         } while (false);
         while (true) {
             try {
