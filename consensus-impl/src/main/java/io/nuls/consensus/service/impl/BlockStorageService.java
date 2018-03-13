@@ -165,9 +165,12 @@ public class BlockStorageService {
 
     public long getBestHeight() {
         long height = headerDao.getBestHeight();
+        if (NulsContext.getInstance().getBestBlock() == null) {
+            return height;
+        }
         long memoryHeight = NulsContext.getInstance().getBestBlock().getHeader().getHeight();
-        if(height<memoryHeight){
-            return memoryHeight;
+        if (height < memoryHeight) {
+            height = memoryHeight;
         }
         return height;
     }
@@ -199,7 +202,7 @@ public class BlockStorageService {
                 continue;
             }
             BlockHeader header = blockCacheManager.getBlockHeader(i);
-            if(null!=header){
+            if (null != header) {
                 headerList.add(header);
             }
         }
