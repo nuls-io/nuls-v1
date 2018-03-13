@@ -413,7 +413,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
     }
 
     @Override
-    public void setTxHash(CoinData coinData, Transaction tx) {
+    public void afterParse(CoinData coinData, Transaction tx) {
         UtxoData utxoData = (UtxoData) coinData;
         for (UtxoInput input : utxoData.getInputs()) {
             input.setTxHash(tx.getHash());

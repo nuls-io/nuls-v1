@@ -102,7 +102,7 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
             Log.error(e);
         }
         sign = cache;
-        coinDataProvider.setTxHash(coinData,this);
+        coinDataProvider.afterParse(coinData,this);
     }
 
     public CoinDataProvider getCoinDataProvider() {

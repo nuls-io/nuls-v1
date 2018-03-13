@@ -47,5 +47,5 @@ public interface CoinDataProvider {
 
     CoinData createByTransferData(Transaction tx, CoinTransferData coinParam, String password) throws NulsException;
 
-     void setTxHash(CoinData coinData, Transaction tx);
+     void afterParse(CoinData coinData, Transaction tx);
 }
