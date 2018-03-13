@@ -342,7 +342,11 @@ public class BlockBatchDownloadUtils {
             if (!result) {
                 break;
             }
-            result = nodeStatusMap.get(nodeId).finished();
+            try{
+                result = nodeStatusMap.get(nodeId).finished();
+            }catch (Exception e){
+                Log.error(e);
+            }
         }
         return result;
     }
