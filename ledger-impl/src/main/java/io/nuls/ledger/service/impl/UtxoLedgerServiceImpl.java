@@ -247,16 +247,16 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         TransferTransaction tx = null;
         try {
             tx = UtxoTransactionTool.getInstance().createTransferTx(coinData, password, remark);
-            byte[] txbytes = tx.serialize();
-            TransferTransaction new_tx = new NulsByteBuffer(txbytes).readNulsData(new TransferTransaction());
             ValidateResult result = tx.verify();
             if(! result.getErrorCode().getCode().equals(ErrorCode.SUCCESS.getCode() ) ){
                 throw new NulsException(ErrorCode.FAILED);
             }
-            result = new_tx.verify();
-            if(! result.getErrorCode().getCode().equals(ErrorCode.SUCCESS.getCode() ) ){
-                throw new NulsException(ErrorCode.FAILED);
-            }
+//            byte[] txbytes = tx.serialize();
+//            TransferTransaction new_tx = new NulsByteBuffer(txbytes).readNulsData(new TransferTransaction());
+//            result = new_tx.verify();
+//            if(! result.getErrorCode().getCode().equals(ErrorCode.SUCCESS.getCode() ) ){
+//                throw new NulsException(ErrorCode.FAILED);
+//            }
             TransactionEvent event = new TransactionEvent();
             event.setEventBody(tx);
             eventBroadcaster.broadcastAndCacheAysn(event, true);
