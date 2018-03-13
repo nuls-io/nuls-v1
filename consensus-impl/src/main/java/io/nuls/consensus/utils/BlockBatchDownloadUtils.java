@@ -292,7 +292,7 @@ public class BlockBatchDownloadUtils {
     }
 
     private Result checkHash() throws InterruptedException {
-        for (long i = currentRound.getStart(); i >= currentRound.getEnd(); i++) {
+        for (long i = currentRound.getStart(); i <= currentRound.getEnd(); i++) {
             Block block = blockMap.get(i);
             if(null==block){
                 return Result.getFailed("data error");
