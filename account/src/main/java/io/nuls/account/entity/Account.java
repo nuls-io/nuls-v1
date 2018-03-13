@@ -162,7 +162,7 @@ public class Account extends BaseNulsData implements NulsCloneable {
         ECKey key = ECKey.fromPrivate(newPriv);
 
         //todo  pub key compress?
-        if (!Arrays.equals(key.getPubKey(true), getPubKey())) {
+        if (!Arrays.equals(key.getPubKey(false), getPubKey())) {
             return false;
         }
         key.setEncryptedPrivateKey(new EncryptedData(this.getEncryptedPriKey()));

@@ -42,13 +42,17 @@ public class TransactionDto {
     // 0, unConfirm  1, confirm
     private Integer status;
 
+    private Long confirmCount;
+
     public TransactionDto(Transaction tx) {
+        long bestBlockHeight = NulsContext.getInstance().getBestBlock().getHeader().getHeight();
         this.hash = tx.getHash().getDigestHex();
         this.type = tx.getType();
         this.time = tx.getTime();
         this.blockHeight = tx.getBlockHeight();
         this.setFee(tx.getFee().getValue());
         this.setTransferType(tx.getTransferType());
+        this.confirmCount = bestBlockHeight - this.blockHeight;
         if (TxStatusEnum.CONFIRMED.equals(tx.getStatus())) {
             this.status = 1;
         } else {
@@ -215,5 +219,13 @@ public class TransactionDto {
 
     public void setStatus(Integer status) {
         this.status = status;
+    }
+
+    public Long getConfirmCount() {
+        return confirmCount;
+    }
+
+    public void setConfirmCount(Long confirmCount) {
+        this.confirmCount = confirmCount;
     }
 }

@@ -109,7 +109,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public void start() {
-        getAccountList();
+        List<Account> accounts = getAccountList();
     }
 
     @Override
@@ -203,13 +203,20 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
-
     @Override
     public Account getDefaultAccount() {
-        if (NulsContext.DEFAULT_ACCOUNT_ID == null) {
-            return null;
+        Account account = null;
+        if (NulsContext.DEFAULT_ACCOUNT_ID != null) {
+            account = getAccount(NulsContext.DEFAULT_ACCOUNT_ID);
         }
-        return getAccount(NulsContext.DEFAULT_ACCOUNT_ID);
+        if (account == null) {
+            List<Account> accounts = getAccountList();
+            if (accounts != null && !accounts.isEmpty()) {
+                account = accounts.get(0);
+                NulsContext.DEFAULT_ACCOUNT_ID = account.getAddress().getBase58();
+            }
+        }
+        return account;
     }
 
     @Override
@@ -703,7 +710,7 @@ public class AccountServiceImpl implements AccountService {
             accountPo = accountDao.get(account.getAddress().getBase58());
             if (accountPo != null) {
                 continue;
-            }else {
+            } else {
                 accountPo = new AccountPo();
             }
             // save db

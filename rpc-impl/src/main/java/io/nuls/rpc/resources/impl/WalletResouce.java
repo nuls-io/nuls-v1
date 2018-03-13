@@ -23,6 +23,7 @@
  */
 package io.nuls.rpc.resources.impl;
 
+import com.sun.org.apache.regexp.internal.RE;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.Result;
@@ -152,10 +153,9 @@ public class WalletResouce {
             return RpcResult.getFailed(ErrorCode.PASSWORD_IS_WRONG);
         }
 
-        accountService.importAccounts(keys, password);
+        Result result = accountService.importAccounts(keys, password);
 
-        RpcResult rpcResult = RpcResult.getSuccess();
-        rpcResult.setData(fileName);
+        RpcResult rpcResult = new RpcResult(result);
 
         return rpcResult;
     }
