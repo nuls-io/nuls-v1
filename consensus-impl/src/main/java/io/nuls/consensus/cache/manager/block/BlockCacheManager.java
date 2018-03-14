@@ -141,7 +141,7 @@ public class BlockCacheManager {
     }
 
     public void cacheBlock(Block block) {
-        blockCacheMap.put(block.getHeader().getHash().getDigestHex(), block);
+
         boolean b = this.bifurcateProcessor.addHeader(block.getHeader());
         if (b) {
             NulsContext.getInstance().setBestBlock(block);
@@ -154,7 +154,7 @@ public class BlockCacheManager {
             return;
         }
         for (Transaction tx : block.getTxs()) {
-            if (tx.getStatus() == TxStatusEnum.CACHED) {
+            if (tx.getStatus()==null||tx.getStatus() == TxStatusEnum.CACHED) {
                 try {
                     this.ledgerService.approvalTx(tx);
                     confirmingTxCacheManager.putTx(tx);
@@ -164,6 +164,7 @@ public class BlockCacheManager {
             }
         }
         txCacheManager.removeTx(block.getTxHashList());
+        blockCacheMap.put(block.getHeader().getHash().getDigestHex(), block);
         Block block1 = this.getBlock(block.getHeader().getHeight());
         if (null != block1 && block1.getHeader().getHeight() > NulsContext.getInstance().getBestBlock().getHeader().getHeight()) {
             NulsContext.getInstance().setBestBlock(block1);
