@@ -60,6 +60,7 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
     @Override
     public void onEvent(TransactionEvent event, String fromId) {
         Transaction tx = event.getEventBody();
+
         if (null == tx) {
             return;
         }
