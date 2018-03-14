@@ -106,6 +106,9 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 UtxoInput input = utxoData.getInputs().get(i);
                 input.setTxHash(tx.getHash());
                 UtxoOutput unSpend = cacheService.getUtxo(input.getKey());
+                if(null==unSpend){
+                    throw new NulsRuntimeException(ErrorCode.DATA_ERROR,"the output is not exist!");
+                }
                 unSpend.setStatus(UtxoOutput.LOCKED);
                 outputs.add(unSpend);
             }
