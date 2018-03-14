@@ -46,12 +46,14 @@ import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.service.intf.ConsensusService;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
+import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
+import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.core.validate.ValidateResult;
@@ -80,13 +82,13 @@ public class PocConsensusServiceImpl implements ConsensusService {
     private LedgerService ledgerService;
     @Autowired
     private BlockService blockService;
+
     private ConsensusCacheManager consensusCacheManager = ConsensusCacheManager.getInstance();
 
     private void registerAgent(Agent agent, Account account, String password) throws IOException {
         TransactionEvent event = new TransactionEvent();
         CoinTransferData data = new CoinTransferData();
         data.setFee(this.getTxFee(TransactionConstant.TX_TYPE_REGISTER_AGENT));
-
         data.setTotalNa(agent.getDeposit());
         data.addFrom(account.getAddress().toString(), agent.getDeposit());
         Coin coin = new Coin();
@@ -113,14 +115,20 @@ public class PocConsensusServiceImpl implements ConsensusService {
         eventBroadcaster.broadcastHashAndCache(event, true);
     }
 
-    private void joinTheConsensus(Account account, String password, double amount, String agentAddress) throws IOException {
+    private void joinTheConsensus(Account account, String password, long amount, String agentAddress) throws IOException {
+        AssertUtil.canNotEmpty(account);
+        AssertUtil.canNotEmpty(password);
+        if(amount<PocConsensusConstant.ENTRUSTER_DEPOSIT_LOWER_LIMIT.getValue()){
+            throw new NulsRuntimeException(ErrorCode.NULL_PARAMETER);
+        }
+        AssertUtil.canNotEmpty(agentAddress);
         TransactionEvent event = new TransactionEvent();
         PocJoinConsensusTransaction tx = new PocJoinConsensusTransaction();
         Consensus<Delegate> ca = new ConsensusDelegateImpl();
         ca.setAddress(account.getAddress().toString());
         Delegate delegate = new Delegate();
         delegate.setDelegateAddress(agentAddress);
-        delegate.setDeposit(Na.parseNuls(amount));
+        delegate.setDeposit(Na.valueOf(amount));
         ca.setExtend(delegate);
         tx.setTxData(ca);
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
@@ -131,7 +139,27 @@ public class PocConsensusServiceImpl implements ConsensusService {
     }
 
     @Override
-    public void stopConsensus(NulsDigestData joinTxHash, String password) {
+    public void stopConsensus(String address, String password) {
+
+        try {
+            List<Transaction> list = ledgerService.getTxList(address,TransactionConstant.TX_TYPE_REGISTER_AGENT);
+        } catch (Exception e) {
+            Log.error(e);
+        }
+
+        NulsDigestData joinTxHash = null;
+        //todo
+
+
+
+
+
+
+
+
+
+
+
         PocJoinConsensusTransaction joinTx = (PocJoinConsensusTransaction) ledgerService.getTx(joinTxHash);
         if (null == joinTx) {
             throw new NulsRuntimeException(ErrorCode.ACCOUNT_NOT_EXIST, "address:" + joinTx.getTxData().getAddress().toString());
@@ -200,14 +228,15 @@ public class PocConsensusServiceImpl implements ConsensusService {
         }
         JoinConsensusParam params = new JoinConsensusParam(paramsMap);
         if (StringUtils.isNotBlank(params.getIntroduction())) {
-            Agent delegate = new Agent();
-            delegate.setDelegateAddress(params.getAgentAddress());
-            delegate.setDeposit(Na.parseNuls(params.getDeposit()));
-            delegate.setIntroduction(params.getIntroduction());
-            delegate.setSeed(params.isSeed());
-            delegate.setCommissionRate(params.getCommissionRate());
+            Agent agent = new Agent();
+            agent.setDelegateAddress(params.getAgentAddress());
+            agent.setDeposit(Na.valueOf(params.getDeposit()));
+            agent.setIntroduction(params.getIntroduction());
+            agent.setSeed(params.isSeed());
+            agent.setCommissionRate(params.getCommissionRate());
+            agent.setAgentName(params.getAgentName());
             try {
-                this.registerAgent(delegate, account, password);
+                this.registerAgent(agent, account, password);
             } catch (IOException e) {
                 throw new NulsRuntimeException(e);
             }

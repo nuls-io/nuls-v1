@@ -114,6 +114,7 @@ public class ConsensusTool {
         agent.setIntroduction(po.getRemark());
         agent.setStartTime(po.getStartTime());
         agent.setStatus(po.getStatus());
+        agent.setAgentName(po.getAgentName());
         Consensus<Agent> ca = new ConsensusAgentImpl();
         ca.setAddress(po.getAddress());
         ca.setExtend(agent);
@@ -147,6 +148,7 @@ public class ConsensusTool {
         po.setNodeAddress(bean.getExtend().getDelegateAddress());
         po.setId(bean.getAddress());
         po.setStatus(bean.getExtend().getStatus());
+        po.setAgentName(bean.getExtend().getAgentName());
         return po;
     }
 

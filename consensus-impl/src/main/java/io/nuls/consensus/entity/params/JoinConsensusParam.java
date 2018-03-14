@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -34,6 +34,7 @@ import java.util.Map;
  */
 public class JoinConsensusParam {
     public static final String DEPOSIT = "deposit";
+    public static final String AGENT_NAME = "agentName";
     public static final String AGENT_ADDRESS = "agentAddress";
     public static final String INTRODUCTION = "introduction";
     public static final String COMMISSION_RATE = "commissionRate";
@@ -44,6 +45,8 @@ public class JoinConsensusParam {
         AssertUtil.canNotEmpty(map, ErrorCode.NULL_PARAMETER.getMsg());
         AssertUtil.canNotEmpty(map.get(DEPOSIT), ErrorCode.NULL_PARAMETER.getMsg());
         AssertUtil.canNotEmpty(map.get(AGENT_ADDRESS), ErrorCode.NULL_PARAMETER.getMsg());
+        AssertUtil.canNotEmpty(map.get(AGENT_NAME), ErrorCode.NULL_PARAMETER.getMsg());
+        AssertUtil.canNotEmpty(map.get(COMMISSION_RATE), ErrorCode.NULL_PARAMETER.getMsg());
         this.params = map;
     }
 
@@ -51,8 +54,8 @@ public class JoinConsensusParam {
         return false;
     }
 
-    public Double getDeposit() {
-        return (Double) params.get(DEPOSIT);
+    public Long getDeposit() {
+        return (Long) params.get(DEPOSIT);
     }
 
     public String getAgentAddress() {
@@ -67,4 +70,7 @@ public class JoinConsensusParam {
         return (Double) params.get(COMMISSION_RATE);
     }
 
+    public String getAgentName() {
+        return (String) params.get(AGENT_NAME);
+    }
 }

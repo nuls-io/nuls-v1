@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,33 +21,38 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.db.entity;
 
-public class DelegateAccountPo {
+package io.nuls.rpc.resources.form;
 
-    private String id;
-
-    private String agentName;
-
+/**
+ * @author Niels
+ * @date 2018/3/14
+ */
+public class CreateAgentForm {
     private String address;
-
-    private String nodeAddress;
-
-    private Long deposit;
-
+    private String packingAddress;
+    private String commissionRate;
+    private long deposit;
     private String remark;
+    private String agentName;
+    private String password;
 
-    private Long startTime;
-    private Double commissionRate;
-    private int status;
-
-    public String getId() {
-        return id;
+    public String getCommissionRate() {
+        return commissionRate;
     }
 
-    public void setId(String id) {
-        this.id = id == null ? null : id.trim();
+    public void setCommissionRate(String commissionRate) {
+        this.commissionRate = commissionRate;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getAddress() {
@@ -54,22 +60,22 @@ public class DelegateAccountPo {
     }
 
     public void setAddress(String address) {
-        this.address = address == null ? null : address.trim();
+        this.address = address;
     }
 
-    public String getNodeAddress() {
-        return nodeAddress;
+    public String getPackingAddress() {
+        return packingAddress;
     }
 
-    public void setNodeAddress(String nodeAddress) {
-        this.nodeAddress = nodeAddress == null ? null : nodeAddress.trim();
+    public void setPackingAddress(String packingAddress) {
+        this.packingAddress = packingAddress;
     }
 
-    public Long getDeposit() {
+    public long getDeposit() {
         return deposit;
     }
 
-    public void setDeposit(Long deposit) {
+    public void setDeposit(long deposit) {
         this.deposit = deposit;
     }
 
@@ -78,31 +84,7 @@ public class DelegateAccountPo {
     }
 
     public void setRemark(String remark) {
-        this.remark = remark == null ? null : remark.trim();
-    }
-
-    public Long getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(Long startTime) {
-        this.startTime = startTime;
-    }
-
-    public Double getCommissionRate() {
-        return commissionRate;
-    }
-
-    public void setCommissionRate(Double commissionRate) {
-        this.commissionRate = commissionRate;
-    }
-
-    public void setStatus(int status) {
-        this.status = status;
-    }
-
-    public int getStatus() {
-        return status;
+        this.remark = remark;
     }
 
     public String getAgentName() {

@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,30 +21,47 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.consensus.service.intf;
 
-import io.nuls.consensus.entity.Consensus;
-import io.nuls.consensus.entity.ConsensusStatusInfo;
-import io.nuls.core.chain.entity.Na;
+package io.nuls.client.processor;
 
-import java.util.List;
-import java.util.Map;
+import io.nuls.client.entity.CommandResult;
+import io.nuls.client.processor.intf.CommandProcessor;
+import io.nuls.rpc.sdk.entity.RpcClientResult;
+import io.nuls.rpc.sdk.service.BlockService;
 
 /**
  * @author Niels
- * @date 2017/11/7
+ * @date 2018/3/7
  */
-public interface ConsensusService {
+public abstract class ConsensusProcessors implements CommandProcessor {
 
-    Na getTxFee(int txType);
+    /**
+     *
+     */
+    public static class GetAgentList extends ConsensusProcessors {
 
-    void startConsensus(String address, String password, Map<String, Object> paramsMap);
+        @Override
+        public String getCommand() {
+            return "agentlist";
+        }
 
-    void stopConsensus(String address, String password);
+        @Override
+        public String getCommandDescription() {
+            return "agentlist --get all agents";
+        }
 
-    List<Consensus> getConsensusAccountList();
+        @Override
+        public boolean argsValidate(String[] args) {
+            return true;
+        }
 
-    ConsensusStatusInfo getConsensusInfo(String address);
+        @Override
+        public CommandResult execute(String[] args) {
+            //todo
+            return null;
+        }
+    }
 
 }

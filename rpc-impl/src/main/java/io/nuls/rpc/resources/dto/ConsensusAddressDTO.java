@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,30 +21,17 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.consensus.service.intf;
 
-import io.nuls.consensus.entity.Consensus;
-import io.nuls.consensus.entity.ConsensusStatusInfo;
-import io.nuls.core.chain.entity.Na;
-
-import java.util.List;
-import java.util.Map;
+package io.nuls.rpc.resources.dto;
 
 /**
  * @author Niels
- * @date 2017/11/7
+ * @date 2018/3/14
  */
-public interface ConsensusService {
-
-    Na getTxFee(int txType);
-
-    void startConsensus(String address, String password, Map<String, Object> paramsMap);
-
-    void stopConsensus(String address, String password);
-
-    List<Consensus> getConsensusAccountList();
-
-    ConsensusStatusInfo getConsensusInfo(String address);
-
+public class ConsensusAddressDTO {
+    private String address;
+    private String status;
+//    private
 }
