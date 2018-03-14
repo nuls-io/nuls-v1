@@ -133,7 +133,7 @@ public class TransactionResource {
         if(height < 0) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
-        //todo
+     //   List<Transaction> txList = ledgerService.getTxList(height);
         return null;
     }
 
