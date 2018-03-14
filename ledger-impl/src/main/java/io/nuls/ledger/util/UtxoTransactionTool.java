@@ -73,7 +73,9 @@ public class UtxoTransactionTool {
             throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
         }
         TransferTransaction tx = new TransferTransaction(transferData, password);
-        tx.setRemark(remark.getBytes(NulsContext.DEFAULT_ENCODING));
+        if(StringUtils.isNotBlank(remark)) {
+            tx.setRemark(remark.getBytes(NulsContext.DEFAULT_ENCODING));
+        }
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
         AccountService accountService = getAccountService();
         Account account = accountService.getAccount(transferData.getFrom().get(0));

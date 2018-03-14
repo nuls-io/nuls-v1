@@ -119,7 +119,13 @@ public class WalletResouce {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
 
-        Result result = accountService.importAccount(form.getPrikey(), form.getPassword());
+        Result result = null;
+        try {
+            result = accountService.importAccount(form.getPrikey(), form.getPassword());
+        } catch (Exception e) {
+            return RpcResult.getFailed(ErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+
         return new RpcResult(result);
     }
 

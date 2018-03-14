@@ -349,7 +349,12 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         List<TransactionLocalPo> localPoList = new ArrayList<>();
 
         for (TransactionPo po : poList) {
-            TransactionLocalPo localPo = new TransactionLocalPo(po);
+            TransactionLocalPo localPo = txDao.getLocaltx(po.getHash());
+            if (localPo != null) {
+                continue;
+            }
+
+            localPo = new TransactionLocalPo(po);
             for (UtxoInputPo inputPo : po.getInputs()) {
                 if (inputPo.getFromOutPut().getAddress().equals(address)) {
                     localPo.setTransferType(Transaction.TRANSFER_SEND);
