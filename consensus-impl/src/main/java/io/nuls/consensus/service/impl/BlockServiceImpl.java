@@ -93,14 +93,17 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
+    public BlockHeader getBlockHeader(String hash) {
+        return blockStorageService.getBlockHeader(hash);
+    }
+
+    @Override
     public Block getBlock(String hash) {
-        Block block = blockCacheManager.getBlock(hash);
-        if (null == block) {
-            try {
-                block = blockStorageService.getBlock(hash);
-            } catch (Exception e) {
-                Log.error(e);
-            }
+        Block block = null;
+        try {
+            block = blockStorageService.getBlock(hash);
+        } catch (Exception e) {
+            Log.error(e);
         }
         return block;
     }

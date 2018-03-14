@@ -52,4 +52,6 @@ public interface UtxoOutputDataService extends BaseDataService<Map<String, Objec
     int updateStatus(UtxoOutputPo po);
 
     void deleteByHash(String txHash);
+
+    long getRewardByBlockHeight(long height);
 }

@@ -60,6 +60,11 @@ public class UtxoTransactionDaoImpl implements UtxoTransactionDataService {
     }
 
     @Override
+    public List<TransactionPo> getTxs(long blockHeight, int pageNum, int pageSize) {
+        return null;
+    }
+
+    @Override
     public List<TransactionPo> getTxs(long startHeight, long endHeight) {
         return txDao.getTxs(startHeight, endHeight);
     }
@@ -166,5 +171,15 @@ public class UtxoTransactionDaoImpl implements UtxoTransactionDataService {
     public void deleteTx(String txHash) {
         txDao.delete(txHash);
         txLocalDao.delete(txHash);
+    }
+
+    @Override
+    public long getBlockReward(long blockHeight) {
+        return outputDao.getRewardByBlockHeight(blockHeight);
+    }
+
+    @Override
+    public long getBlockFee(long blockHeight) {
+        return txDao.getFeeByHeight(blockHeight);
     }
 }

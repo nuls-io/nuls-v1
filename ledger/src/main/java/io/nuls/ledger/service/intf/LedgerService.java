@@ -57,6 +57,8 @@ public interface LedgerService {
 
     List<Transaction> getTxList(long height) throws Exception;
 
+    List<Transaction> getTxList(long height, int pageNum, int pageSize) throws Exception;
+
     Balance getBalance(String address);
 
     Result transfer(String address, String password, String toAddress, Na amount, String remark);
@@ -84,4 +86,8 @@ public interface LedgerService {
     void deleteTx(Transaction tx);
 
     void deleteTx(long blockHeight);
+
+    long getBlockReward(long blockHeight);
+
+    long getBlockFee(Long blockHeight);
 }

@@ -142,4 +142,10 @@
         join transaction a on e.tx_hash = a.hash
         <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
     </select>
+
+    <select id="getFeeByHeight" parameterType="java.lang.Long" resultType="java.lang.Long">
+        select sum(fee) as fee
+        from transaction
+        where block_height = #{height,jdbcType=BIGINT}
+    </select>
 </mapper>
