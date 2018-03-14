@@ -86,7 +86,7 @@ public enum ErrorCode {
      */
     PASSWORD_IS_WRONG("ACT000", 45000),
     ACCOUNT_NOT_EXIST("ACT001", 45001),
-    ACCOUNT_IS_ALREADY_ENCRYPTED("ACT002", 45001),
+    ACCOUNT_IS_ALREADY_ENCRYPTED("ACT002", 45002),
 
     /**
      * ----------  DB Exception code   ---------
@@ -127,7 +127,7 @@ public enum ErrorCode {
     /**
      * ------------  Ledger Exception code   --------------
      */
-    BALANCE_NOT_ENOUGH("LED001", 70001),
+    BALANCE_NOT_ENOUGH("LED003", 70003),
     UTXO_STATUS_CHANGE("LED002", 700002),
 
     /**
