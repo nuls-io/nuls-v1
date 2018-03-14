@@ -69,13 +69,13 @@ public class UtxoTransactionTool {
     private LedgerCacheService ledgerCacheService = LedgerCacheService.getInstance();
 
     public TransferTransaction createTransferTx(CoinTransferData transferData, String password, String remark) throws Exception {
+        if (transferData.getFrom().isEmpty()) {
+            throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
+        }
         TransferTransaction tx = new TransferTransaction(transferData, password);
         tx.setRemark(remark.getBytes(NulsContext.DEFAULT_ENCODING));
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
         AccountService accountService = getAccountService();
-        if (transferData.getFrom().isEmpty()) {
-            throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
-        }
         Account account = accountService.getAccount(transferData.getFrom().get(0));
         tx.setSign(accountService.signData(tx.getHash(), account, password));
         return tx;
