@@ -58,7 +58,7 @@ public class TransactionDaoImpl extends BaseDaoImpl<TransactionMapper, String, T
     public List<TransactionPo> getTxs(Long blockHeight) {
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.eq, blockHeight);
-        PageHelper.orderBy("create_time asc");
+        PageHelper.orderBy("tx_index,b.in_index asc,c.out_index asc");
         return getMapper().selectList(searchable);
     }
 
@@ -76,7 +76,7 @@ public class TransactionDaoImpl extends BaseDaoImpl<TransactionMapper, String, T
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.gte, startHeight);
         searchable.addCondition("block_height", SearchOperator.lte, endHeight);
-        PageHelper.orderBy("block_height asc, tx_index asc");
+        PageHelper.orderBy("block_height asc, tx_index asc,b.in_index asc,c.out_index asc");
         return getMapper().selectList(searchable);
     }
 
@@ -90,7 +90,7 @@ public class TransactionDaoImpl extends BaseDaoImpl<TransactionMapper, String, T
             if (pageNumber != null && pageSize != null) {
                 PageHelper.startPage(pageNumber, pageSize);
             }
-            PageHelper.orderBy("a.create_time desc");
+            PageHelper.orderBy("a.create_time desc,b.in_index asc,c.out_index asc");
             return getMapper().selectList(searchable);
         }
 
@@ -105,7 +105,7 @@ public class TransactionDaoImpl extends BaseDaoImpl<TransactionMapper, String, T
         if (pageNumber != null && pageSize != null) {
             PageHelper.startPage(pageNumber, pageSize);
         }
-        PageHelper.orderBy("a.create_time desc");
+        PageHelper.orderBy("a.create_time desc,b.in_index asc,c.out_index asc");
         return getMapper().selectByAddress(searchable);
     }
 
