@@ -295,6 +295,7 @@ public class ConsensusMeetingRunner implements Runnable {
         roundData.setRoundStartTime(consensusManager.getCurrentRound().getStartTime());
         bd.setRoundData(roundData);
         List<Integer> outTxList = new ArrayList<>();
+        List<NulsDigestData> outHashList = new ArrayList<>();
         List<NulsDigestData> hashList = new ArrayList<>();
         for (int i = 0; i < txList.size(); i++) {
             Transaction tx = txList.get(i);
@@ -308,6 +309,7 @@ public class ConsensusMeetingRunner implements Runnable {
             } catch (Exception e) {
                 Log.error(e);
                 outTxList.add(i);
+                outHashList.add(tx.getHash());
                 continue;
             }
             confirmingTxCacheManager.putTx(tx);
@@ -316,6 +318,7 @@ public class ConsensusMeetingRunner implements Runnable {
         for (int i = outTxList.size() - 1; i >= 0; i--) {
             txList.remove(i);
         }
+        txCacheManager.removeTx(outHashList);
         addConsensusTx(bestBlock, txList, self);
         bd.setTxList(txList);
         Block newBlock = ConsensusTool.createBlock(bd, consensusManager.getConsensusStatusInfo().getAccount());
