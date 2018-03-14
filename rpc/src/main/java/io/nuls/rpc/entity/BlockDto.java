@@ -3,8 +3,8 @@ package io.nuls.rpc.entity;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 
@@ -31,15 +31,34 @@ public class BlockDto {
     private String packingAddress;
 
     private String sign;
+
     private Long roundIndex;
+
     private Integer consensusMemberCount;
+
     private Long roundStartTime;
+
     private Integer packingIndexOfRound;
+
+    private Long reward;
+
+    private Long fee;
+
+    private Long confirmCount;
 
     private List<TransactionDto> txList;
 
-    public BlockDto(Block block,boolean all) {
-        BlockHeader header = block.getHeader();
+    public BlockDto(Block block, long reward, long fee) {
+        this(block.getHeader(), reward, fee);
+
+        this.txList = new ArrayList<>();
+        for (Transaction tx : block.getTxs()) {
+            this.txList.add(new TransactionDto(tx));
+        }
+    }
+
+    public BlockDto(BlockHeader header, long reward, long fee) {
+        long bestBlockHeight = NulsContext.getInstance().getBestBlock().getHeader().getHeight();
         this.hash = header.getHash().getDigestHex();
         this.preHash = header.getPreHash().getDigestHex();
         this.merkleHash = header.getMerkleHash().getDigestHex();
@@ -48,6 +67,9 @@ public class BlockDto {
         this.txCount = header.getTxCount();
         this.packingAddress = header.getPackingAddress();
         this.sign = header.getSign().getSignHex();
+        this.reward = reward;
+        this.fee = fee;
+        this.confirmCount = bestBlockHeight - this.height;
         NulsByteBuffer byteBuffer = new NulsByteBuffer(header.getExtend());
         try {
             this.roundIndex = byteBuffer.readVarInt();
@@ -69,13 +91,8 @@ public class BlockDto {
         } catch (NulsException e) {
             Log.error(e);
         }
-        if(all){
-            this.txList = new ArrayList<>();
-            for(Transaction tx:block.getTxs()){
-                this.txList.add(new TransactionDto(tx));
-            }
-        }
     }
+
 
     public String getHash() {
         return hash;
@@ -179,5 +196,29 @@ public class BlockDto {
 
     public void setTxList(List<TransactionDto> txList) {
         this.txList = txList;
+    }
+
+    public Long getReward() {
+        return reward;
+    }
+
+    public void setReward(Long reward) {
+        this.reward = reward;
+    }
+
+    public Long getFee() {
+        return fee;
+    }
+
+    public void setFee(Long fee) {
+        this.fee = fee;
+    }
+
+    public Long getConfirmCount() {
+        return confirmCount;
+    }
+
+    public void setConfirmCount(Long confirmCount) {
+        this.confirmCount = confirmCount;
     }
 }

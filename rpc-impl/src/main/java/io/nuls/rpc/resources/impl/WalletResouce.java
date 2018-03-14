@@ -23,11 +23,13 @@
  */
 package io.nuls.rpc.resources.impl;
 
+import com.sun.org.apache.regexp.internal.RE;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.Result;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.crypto.MD5Util;
 import io.nuls.core.utils.json.JSONUtils;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
@@ -35,12 +37,17 @@ import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.rpc.entity.RpcResult;
 import io.nuls.rpc.resources.form.AccountParamForm;
 import io.nuls.rpc.resources.form.TransferForm;
+import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.io.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Niels
@@ -103,6 +110,20 @@ public class WalletResouce {
     }
 
     @POST
+    @Path("/import")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult importAccount(AccountParamForm form) {
+        if (!StringUtils.validPassword(form.getPassword()) ||
+                StringUtils.isBlank(form.getPrikey()) ||
+                form.getPrikey().length() > 100) {
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+
+        Result result = accountService.importAccount(form.getPrikey(), form.getPassword());
+        return new RpcResult(result);
+    }
+
+    @POST
     @Path("/imports")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -114,12 +135,36 @@ public class WalletResouce {
             return RpcResult.getFailed("File suffix name is wrong");
         }
 
-        if(!StringUtils.validPassword(password)) {
+        if (!StringUtils.validPassword(password)) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
+        Map<String, Object> map = getFileContent(in);
+        if (map == null) {
+            return RpcResult.getFailed(ErrorCode.FILE_BROKEN);
+        }
 
+        List<String> keys = (List<String>) map.get("keys");
+        String md5 = (String) map.get("password");
+        if (keys == null || keys.isEmpty() || StringUtils.isBlank(md5)) {
+            return RpcResult.getFailed(ErrorCode.FILE_BROKEN);
+        }
+
+        if (!MD5Util.md5(password).equals(md5)) {
+            return RpcResult.getFailed(ErrorCode.PASSWORD_IS_WRONG);
+        }
+
+        Result result = accountService.importAccounts(keys, password);
+
+        RpcResult rpcResult = new RpcResult(result);
+
+        return rpcResult;
+    }
+
+
+    private Map<String, Object> getFileContent(InputStream in) {
         InputStreamReader read = null;
         BufferedReader bufferedReader = null;
+        Map<String, Object> map = null;
         try {
             read = new InputStreamReader(in, NulsContext.DEFAULT_ENCODING);
             bufferedReader = new BufferedReader(read);
@@ -128,10 +173,9 @@ public class WalletResouce {
             while ((lineTxt = bufferedReader.readLine()) != null) {
                 buffer.append(lineTxt);
             }
-            String content = buffer.toString();
-            System.out.println(content);
+            map = JSONUtils.json2map(buffer.toString());
         } catch (Exception e) {
-            e.printStackTrace();
+            return null;
         } finally {
             if (read != null) {
                 try {
@@ -155,24 +199,6 @@ public class WalletResouce {
                 }
             }
         }
-
-        RpcResult rpcResult = RpcResult.getSuccess();
-        rpcResult.setData(fileName);
-
-        return rpcResult;
-    }
-
-    @POST
-    @Path("/import")
-    @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult importAccount(AccountParamForm form) {
-        if (!StringUtils.validPassword(form.getPassword()) ||
-                StringUtils.isBlank(form.getPrikey()) ||
-                form.getPrikey().length() > 100) {
-            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
-        }
-
-        Result result = accountService.importAccount(form.getPrikey(), form.getPassword());
-        return new RpcResult(result);
+        return map;
     }
 }

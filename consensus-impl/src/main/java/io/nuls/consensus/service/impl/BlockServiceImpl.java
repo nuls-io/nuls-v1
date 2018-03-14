@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -52,6 +52,7 @@ public class BlockServiceImpl implements BlockService {
         try {
             return blockStorageService.getBlock(0);
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
         }
         return null;
@@ -92,14 +93,17 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
+    public BlockHeader getBlockHeader(String hash) {
+        return blockStorageService.getBlockHeader(hash);
+    }
+
+    @Override
     public Block getBlock(String hash) {
-        Block block = blockCacheManager.getBlock(hash);
-        if (null == block) {
-            try {
-                block = blockStorageService.getBlock(hash);
-            } catch (Exception e) {
-                Log.error(e);
-            }
+        Block block = null;
+        try {
+            block = blockStorageService.getBlock(hash);
+        } catch (Exception e) {
+            Log.error(e);
         }
         return block;
     }
@@ -120,19 +124,19 @@ public class BlockServiceImpl implements BlockService {
     @Override
     public List<Block> getBlockList(long startHeight, long endHeight) {
         List<Block> blockList = blockStorageService.getBlockList(startHeight, endHeight);
-        if(blockList.size()<(endHeight-startHeight+1)){
-            long currentMaxHeight = blockList.get(blockList.size()-1).getHeader().getHeight();
-            while (currentMaxHeight<endHeight){
-                long next = currentMaxHeight+1;
+        if (blockList.size() < (endHeight - startHeight + 1)) {
+            long currentMaxHeight = blockList.get(blockList.size() - 1).getHeader().getHeight();
+            while (currentMaxHeight < endHeight) {
+                long next = currentMaxHeight + 1;
                 Block block = blockCacheManager.getBlock(next);
-                if(null==block){
+                if (null == block) {
                     try {
                         block = blockStorageService.getBlock(next);
                     } catch (Exception e) {
                         Log.error(e);
                     }
                 }
-                if(null!=block){
+                if (null != block) {
                     blockList.add(block);
                 }
             }
@@ -155,8 +159,12 @@ public class BlockServiceImpl implements BlockService {
                 throw new NulsRuntimeException(e);
             }
         }
-        blockStorageService.save(block.getHeader());
+        for (int i = 0; i < block.getTxs().size(); i++) {
+            Transaction tx = block.getTxs().get(i);
+            tx.setIndex(i);
+        }
         ledgerService.saveTxList(block.getTxs());
+        blockStorageService.save(block.getHeader());
     }
 
 
@@ -174,8 +182,8 @@ public class BlockServiceImpl implements BlockService {
 
 
     @Override
-    public List<BlockHeader> getBlockHashList(long startHeight, long endHeight, long split) {
-        return blockStorageService.getBlockHashList(startHeight, endHeight, split);
+    public List<BlockHeader> getBlockHeaderList(long startHeight, long endHeight, long split) {
+        return blockStorageService.getBlockHeaderList(startHeight, endHeight, split);
     }
 
     @Override

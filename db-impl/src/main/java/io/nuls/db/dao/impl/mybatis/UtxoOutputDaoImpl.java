@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,6 +25,7 @@ package io.nuls.db.dao.impl.mybatis;
 
 import com.github.pagehelper.PageHelper;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.db.dao.impl.mybatis.mapper.UtxoOutputMapper;
@@ -133,6 +134,15 @@ public class UtxoOutputDaoImpl extends BaseDaoImpl<UtxoOutputMapper, Map<String,
         Searchable searchable = new Searchable();
         searchable.addCondition("tx_hash", SearchOperator.eq, txHash);
         getMapper().deleteBySearchable(searchable);
+    }
+
+    @Override
+    public long getRewardByBlockHeight(long height) {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("a.type", SearchOperator.eq, TransactionConstant.TX_TYPE_COIN_BASE);
+        searchable.addCondition("a.height", SearchOperator.eq, height);
+
+        return 0;
     }
 
 }

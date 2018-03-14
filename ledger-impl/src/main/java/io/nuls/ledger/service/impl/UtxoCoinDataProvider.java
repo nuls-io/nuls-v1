@@ -29,10 +29,12 @@ import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.chain.entity.*;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TxStatusEnum;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
@@ -330,30 +332,33 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         byte[] priKey = null;
         if (coinParam.getPriKey() != null) {
             priKey = coinParam.getPriKey();
-        } else if(!coinParam.getFrom().isEmpty()){
+        } else if (!coinParam.getFrom().isEmpty()) {
             Account account = accountService.getAccount(coinParam.getFrom().get(0));
-            if(account.isEncrypted() && account.isLocked()){
-                if(!account.unlock(password)){
-                   throw new NulsException(ErrorCode.PASSWORD_IS_WRONG );
+            if(account == null) {
+                throw new NulsException(ErrorCode.ACCOUNT_NOT_EXIST);
+            }
+            if (account.isEncrypted() && account.isLocked()) {
+                if (!account.unlock(password)) {
+                    throw new NulsException(ErrorCode.PASSWORD_IS_WRONG);
                 }
                 priKey = account.getPriKey();
                 account.lock();
-            }
-            else{
+            } else {
                 priKey = account.getPriKey();
             }
         }
 
         //create scriptSig foreach input
-        for(int i = 0; i< inputs.size();i++) {
+        for (int i = 0; i < inputs.size(); i++) {
             P2PKHScriptSig scriptSig = new P2PKHScriptSig();
             ECKey ecKey = ECKey.fromPrivate(new BigInteger(priKey));
 
-            scriptSig.setPublicKey(ecKey.getPubKey());
+            Address address = new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), Utils.sha256hash160(ecKey.getPubKey(false)));
+            scriptSig.setPublicKey(ecKey.getPubKey(false));
 
             NulsSignData signData = new NulsSignData();
             signData.setSignAlgType((short) 1);
-            signData.setSignBytes(ecKey.sign(Sha256Hash.twiceOf(ecKey.getPubKey())).encodeToDER());
+            signData.setSignBytes(ecKey.sign(Sha256Hash.twiceOf(address.getHash160())).encodeToDER());
             scriptSig.setSignData(signData);
             try {
                 inputs.get(i).setScriptSig(scriptSig.serialize());
@@ -374,7 +379,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 output.setValue(coin.getNa().getValue());
                 output.setStatus(UtxoOutput.USEABLE);
                 output.setIndex(i);
-                P2PKHScript p2PKHScript = new P2PKHScript(NulsDigestData.calcDigestData(ECKey.fromPrivate(new BigInteger(priKey)).getPubKey(), NulsDigestData.DIGEST_ALG_SHA160));
+                P2PKHScript p2PKHScript = new P2PKHScript(NulsDigestData.calcDigestData((new Address(address).getHash160()), NulsDigestData.DIGEST_ALG_SHA160));
                 output.setScript(p2PKHScript);
                 if (coin.getUnlockHeight() > 0) {
                     output.setLockTime(coin.getUnlockHeight());
@@ -408,5 +413,16 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         utxoData.setInputs(inputs);
         utxoData.setOutputs(outputs);
         return utxoData;
+    }
+
+    @Override
+    public void afterParse(CoinData coinData, Transaction tx) {
+        UtxoData utxoData = (UtxoData) coinData;
+        for (UtxoInput input : utxoData.getInputs()) {
+            input.setTxHash(tx.getHash());
+        }
+        for(UtxoOutput output:utxoData.getOutputs()){
+            output.setTxHash(tx.getHash());
+        }
     }
 }
