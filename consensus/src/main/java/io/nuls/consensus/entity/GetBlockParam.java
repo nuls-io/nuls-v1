@@ -26,8 +26,6 @@
 package io.nuls.consensus.entity;
 
 import io.nuls.core.chain.entity.BaseNulsData;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.date.TimeService;
@@ -53,7 +51,7 @@ public class GetBlockParam extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += Utils.sizeOfTime();
+        size += Utils.sizeOfInt6();
         size += Utils.sizeOfLong(start);
         size += Utils.sizeOfLong(end);
         return size;
@@ -61,14 +59,14 @@ public class GetBlockParam extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeTime(time);
+        stream.writeInt48(time);
         stream.writeVarInt(start);
         stream.writeVarInt(end);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.time = byteBuffer.readTime();
+        this.time = byteBuffer.readInt48();
         this.start = byteBuffer.readVarInt();
         this.end = byteBuffer.readVarInt();
     }
