@@ -46,6 +46,9 @@ public class Agent extends BaseNulsData {
     private double commissionRate;
 
     private String introduction;
+
+    private String agentName;
+
     /**
      * the following fields is for The account self(delegate Account)
      */
@@ -67,6 +70,7 @@ public class Agent extends BaseNulsData {
         size += Utils.double2Bytes(commissionRate).length;
         size += Utils.sizeOfString(this.introduction);
         size += Utils.sizeOfBoolean(seed);
+        size += Utils.sizeOfString(agentName);
         return size;
     }
 
@@ -77,6 +81,7 @@ public class Agent extends BaseNulsData {
         stream.writeDouble(this.commissionRate);
         stream.writeString(this.introduction);
         stream.writeBoolean(seed);
+        stream.writeString(agentName);
     }
 
     @Override
@@ -86,6 +91,7 @@ public class Agent extends BaseNulsData {
         this.commissionRate = byteBuffer.readDouble();
         this.introduction = byteBuffer.readString();
         this.seed = byteBuffer.readBoolean();
+        this.agentName = byteBuffer.readString();
     }
 
     public Na getDeposit() {
@@ -174,5 +180,13 @@ public class Agent extends BaseNulsData {
 
     public Boolean getSeed() {
         return seed;
+    }
+
+    public String getAgentName() {
+        return agentName;
+    }
+
+    public void setAgentName(String agentName) {
+        this.agentName = agentName;
     }
 }

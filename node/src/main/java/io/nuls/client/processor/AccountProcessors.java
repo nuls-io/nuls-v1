@@ -95,7 +95,7 @@ public abstract class AccountProcessors implements CommandProcessor {
             if (args.length != 2) {
                 return false;
             }
-            AssertUtil.canNotEmpty(args[2]);
+            AssertUtil.canNotEmpty(args[1]);
             return true;
         }
 

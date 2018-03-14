@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,30 +21,50 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.consensus.service.intf;
 
-import io.nuls.consensus.entity.Consensus;
-import io.nuls.consensus.entity.ConsensusStatusInfo;
-import io.nuls.core.chain.entity.Na;
-
-import java.util.List;
-import java.util.Map;
+package io.nuls.rpc.resources.form;
 
 /**
  * @author Niels
- * @date 2017/11/7
+ * @date 2018/3/14
  */
-public interface ConsensusService {
+public class EntrustForm {
+    private String address;
+    private String agentAddress;
+    private long deposit;
+    private String password;
 
-    Na getTxFee(int txType);
+    public String getAddress() {
+        return address;
+    }
 
-    void startConsensus(String address, String password, Map<String, Object> paramsMap);
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
-    void stopConsensus(String address, String password);
+    public String getAgentAddress() {
+        return agentAddress;
+    }
 
-    List<Consensus> getConsensusAccountList();
+    public void setAgentAddress(String agentAddress) {
+        this.agentAddress = agentAddress;
+    }
 
-    ConsensusStatusInfo getConsensusInfo(String address);
+    public long getDeposit() {
+        return deposit;
+    }
 
+    public void setDeposit(long deposit) {
+        this.deposit = deposit;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }
