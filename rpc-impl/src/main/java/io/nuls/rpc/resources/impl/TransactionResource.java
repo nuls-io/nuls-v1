@@ -79,16 +79,12 @@ public class TransactionResource {
     }
 
     @GET
-    @Path("/list")
+    @Path("/address/list")
     @Produces(MediaType.APPLICATION_JSON)
 
     public RpcResult list(@QueryParam("address") String address, @QueryParam("type") int type,
                           @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
-        if (!StringUtils.isBlank(address) && !StringUtils.validAddress(address)) {
-            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
-        }
-
-        if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
+        if (!StringUtils.validAddress(address) || pageNumber < 0 || pageSize < 0 || pageSize > 100) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         if (pageNumber == 0) {

@@ -659,6 +659,7 @@ public class AccountServiceImpl implements AccountService {
             }
             try {
                 defaultAcct.encrypt(password);
+                account.encrypt(password);
             } catch (NulsException e) {
 
             }
