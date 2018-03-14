@@ -82,6 +82,9 @@ public class BlockStorageService {
             return block;
         }
         BlockHeader header = getBlockHeader(hash);
+        if(null==header){
+            return null;
+        }
         List<Transaction> txList = null;
         try {
             txList = ledgerService.getTxList(header.getHeight());

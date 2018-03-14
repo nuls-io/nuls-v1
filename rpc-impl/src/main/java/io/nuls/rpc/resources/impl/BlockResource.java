@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,9 +25,11 @@ package io.nuls.rpc.resources.impl;
 
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
+import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.str.StringUtils;
+import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.rpc.entity.BlockDto;
 import io.nuls.rpc.entity.RpcResult;
 
@@ -46,6 +48,8 @@ public class BlockResource {
 
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
 
+    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
+
     @GET
     @Path("/hash/{hash}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -58,8 +62,10 @@ public class BlockResource {
         if (block == null) {
             result = RpcResult.getFailed(ErrorCode.DATA_NOT_FOUND);
         } else {
+            long reward = ledgerService.getBlockReward(block.getHeader().getHeight());
+            long fee = ledgerService.getBlockFee(block.getHeader().getHeight());
             result = RpcResult.getSuccess();
-            result.setData(new BlockDto(block,true));
+            result.setData(new BlockDto(block, reward, fee));
         }
         return result;
     }
@@ -78,7 +84,9 @@ public class BlockResource {
             result = RpcResult.getFailed(ErrorCode.DATA_NOT_FOUND);
         } else {
             result = RpcResult.getSuccess();
-            result.setData(new BlockDto(block,true));
+            long reward = ledgerService.getBlockReward(block.getHeader().getHeight());
+            long fee = ledgerService.getBlockFee(block.getHeader().getHeight());
+            result.setData(new BlockDto(block, reward, fee));
         }
         return result;
     }
@@ -133,10 +141,13 @@ public class BlockResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getHeaderByHeight(@PathParam("height") Integer height) {
         RpcResult result = RpcResult.getSuccess();
-        Block block = blockService.getBlock(height);
-        if (block != null) {
-            result.setData(new BlockDto(block,false));
+        BlockHeader blockHeader = blockService.getBlockHeader(height);
+        if (blockHeader == null) {
+            return RpcResult.getFailed(ErrorCode.DATA_NOT_FOUND);
         }
+        long reward = ledgerService.getBlockReward(blockHeader.getHeight());
+        long fee = ledgerService.getBlockFee(blockHeader.getHeight());
+        result.setData(new BlockDto(blockHeader, reward, fee));
         return result;
     }
 
@@ -145,10 +156,13 @@ public class BlockResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getHeader(@PathParam("hash") String hash) {
         RpcResult result = RpcResult.getSuccess();
-        Block block = blockService.getBlock(hash);
-        if (block != null) {
-            result.setData(new BlockDto(block,false));
+        BlockHeader blockHeader = blockService.getBlockHeader(hash);
+        if (blockHeader == null) {
+            return RpcResult.getFailed(ErrorCode.DATA_NOT_FOUND);
         }
+        long reward = ledgerService.getBlockReward(blockHeader.getHeight());
+        long fee = ledgerService.getBlockFee(blockHeader.getHeight());
+        result.setData(new BlockDto(blockHeader, reward, fee));
         return result;
     }
 

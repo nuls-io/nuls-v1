@@ -23,7 +23,6 @@
  */
 package io.nuls.ledger.service.impl;
 
-import io.nuls.account.entity.Account;
 import io.nuls.cache.service.intf.CacheService;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
@@ -31,19 +30,20 @@ import io.nuls.core.chain.entity.Result;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.tx.serivce.TransactionService;
-import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.dao.UtxoTransactionDataService;
-import io.nuls.db.entity.*;
+import io.nuls.db.entity.TransactionLocalPo;
+import io.nuls.db.entity.TransactionPo;
+import io.nuls.db.entity.UtxoInputPo;
+import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.Balance;
@@ -210,6 +210,11 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
+    public List<Transaction> getTxList(long height, int pageNum, int pageSize) throws Exception {
+        return null;
+    }
+
+    @Override
     public Balance getBalance(String address) {
         Balance balance = ledgerCacheService.getBalance(address);
         if (null == balance) {
@@ -248,7 +253,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         try {
             tx = UtxoTransactionTool.getInstance().createTransferTx(coinData, password, remark);
             ValidateResult result = tx.verify();
-            if(! result.getErrorCode().getCode().equals(ErrorCode.SUCCESS.getCode() ) ){
+            if (!result.getErrorCode().getCode().equals(ErrorCode.SUCCESS.getCode())) {
                 throw new NulsException(ErrorCode.FAILED);
             }
 //            byte[] txbytes = tx.serialize();
@@ -408,6 +413,16 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         for (TransactionPo tx : txList) {
             txDao.deleteTx(tx.getHash());
         }
+    }
+
+    @Override
+    public long getBlockReward(long blockHeight) {
+        return txDao.getBlockReward(blockHeight);
+    }
+
+    @Override
+    public long getBlockFee(Long blockHeight) {
+        return txDao.getBlockFee(blockHeight);
     }
 
     public List<TransactionService> getServiceList(Class<? extends Transaction> txClass) {

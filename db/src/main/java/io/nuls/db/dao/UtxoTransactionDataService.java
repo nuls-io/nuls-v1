@@ -42,6 +42,8 @@ public interface UtxoTransactionDataService {
 
     List<TransactionPo> getTxs(long blockHeight);
 
+    List<TransactionPo> getTxs(long blockHeight, int pageNum, int pageSize);
+
     List<TransactionPo> getTxs(String blockHash);
 
     List<TransactionPo> getTxs(long startHeight, long endHeight);
@@ -77,4 +79,8 @@ public interface UtxoTransactionDataService {
     int saveLocalList(List<TransactionLocalPo> poList);
 
     void deleteTx(String txHash);
+
+    long getBlockReward(long blockHeight);
+
+    long getBlockFee(long blockHeight);
 }

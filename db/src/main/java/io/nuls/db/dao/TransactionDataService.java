@@ -36,6 +36,8 @@ public interface TransactionDataService extends BaseDataService<String, Transact
 
     List<TransactionPo> getTxs(Long blockHeight);
 
+    List<TransactionPo> getTxs(Long blockHeight, int pageNum, int pageSize);
+
     List<TransactionPo> getTxs(Long startHeight, Long endHeight);
 
     List<TransactionPo> getTxs(String address, int type, Integer pageNumber, Integer pageSize);
@@ -44,4 +46,5 @@ public interface TransactionDataService extends BaseDataService<String, Transact
 
     long getTxsCount(String address, int type);
 
+    long getFeeByHeight(long blockHeight);
 }
