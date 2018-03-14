@@ -235,8 +235,13 @@ public class NulsByteBuffer {
     }
 
     public long readTime() {
-        long value = Utils.readInt64LE(payload, cursor);
-        cursor += 8;
+        long value = (payload[cursor +0] & 0xffL) |
+                ((payload[cursor +1] & 0xffL) << 8) |
+                ((payload[cursor +2] & 0xffL) << 16) |
+                ((payload[cursor +3] & 0xffL) << 24) |
+                ((payload[cursor +4] & 0xffL) << 32) |
+                ((payload[cursor +5] & 0xffL) << 40);
+        cursor += 6;
         return value;
     }
 

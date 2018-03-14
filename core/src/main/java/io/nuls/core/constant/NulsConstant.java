@@ -39,7 +39,7 @@ public interface NulsConstant {
     String MODULE_BOOTSTRAP_KEY = "bootstrap";
     long MODULE_LOAD_WAIT_TIME = 120000L;
 
-    int TIME_VALUE_LENGTH1 = 8;
+    int TIME_VALUE_LENGTH1 = 6;
 
     /**
      * ----[ System] ----
