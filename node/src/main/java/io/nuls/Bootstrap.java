@@ -58,8 +58,8 @@ public class Bootstrap {
             mk.init();
             mk.start();
             initModules();
-            Thread.sleep(3000);
-            TransactionManager.main(null);
+//todo            Thread.sleep(3000);
+//            TransactionManager.main(null);
         } while (false);
         while (true) {
             try {
@@ -69,7 +69,7 @@ public class Bootstrap {
                 Log.error(e);
             }
             if (null != NulsContext.getInstance().getBestBlock()) {
-                Log.info("address:"+NulsContext.DEFAULT_ACCOUNT_ID + "-height:(" + NulsContext.getInstance().getBestBlock().getHeader().getHeight() + "),threadCount:{}", Thread.activeCount());
+                Log.info("height:(" + NulsContext.getInstance().getBestBlock().getHeader().getHeight() + "),threadCount:{}", Thread.activeCount());
             }
         }
     }
