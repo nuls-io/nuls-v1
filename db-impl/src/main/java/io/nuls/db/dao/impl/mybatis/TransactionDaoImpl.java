@@ -24,6 +24,8 @@
 package io.nuls.db.dao.impl.mybatis;
 
 import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import io.nuls.core.dto.Page;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.TransactionDataService;
@@ -63,12 +65,21 @@ public class TransactionDaoImpl extends BaseDaoImpl<TransactionMapper, String, T
     }
 
     @Override
-    public List<TransactionPo> getTxs(Long blockHeight, int pageNum, int pageSize) {
+    public Page<TransactionPo> getTxs(Long blockHeight, int pageNum, int pageSize) {
         PageHelper.startPage(pageNum, pageSize);
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.eq, blockHeight);
-        PageHelper.orderBy("create_time asc");
-        return getMapper().selectList(searchable);
+        PageHelper.orderBy("tx_index,b.in_index asc,c.out_index asc");
+
+        List<TransactionPo> poList = getMapper().selectList(searchable);
+        PageInfo<TransactionPo> pageInfo = new PageInfo<>(poList);
+        Page<TransactionPo> page = new Page<>();
+        page.setTotal(pageInfo.getTotal());
+        page.setPageNumber(pageNum);
+        page.setPageSize(pageSize);
+        page.setPages(pageInfo.getPages());
+        page.setList(poList);
+        return page;
     }
 
     @Override

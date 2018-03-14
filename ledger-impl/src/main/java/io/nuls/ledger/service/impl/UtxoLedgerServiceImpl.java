@@ -32,6 +32,7 @@ import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.tx.serivce.TransactionService;
 import io.nuls.core.utils.log.Log;
@@ -210,8 +211,15 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public List<Transaction> getTxList(long height, int pageNum, int pageSize) throws Exception {
-        return null;
+    public Page<Transaction> getTxList(long height, int pageNum, int pageSize) throws Exception {
+        Page<TransactionPo> poPage = txDao.getTxs(height, pageNum, pageSize);
+        Page<Transaction> txPage = new Page<>(poPage);
+        List<Transaction> txList = new ArrayList<>();
+        for (TransactionPo po : poPage.getList()) {
+            txList.add(UtxoTransferTool.toTransaction(po));
+        }
+        txPage.setList(txList);
+        return txPage;
     }
 
     @Override

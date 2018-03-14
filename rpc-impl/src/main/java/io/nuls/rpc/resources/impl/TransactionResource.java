@@ -28,6 +28,7 @@ import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.dto.Page;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
@@ -129,12 +130,24 @@ public class TransactionResource {
     @GET
     @Path("/block/list")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult list(@QueryParam("height") long height) {
-        if(height < 0) {
+    public RpcResult list(@QueryParam("height") long height,
+                          @QueryParam("pageNumber") int pageNumber,
+                          @QueryParam("pageSize") int pageSize) {
+        if (height < 0) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
-     //   List<Transaction> txList = ledgerService.getTxList(height);
-        return null;
+
+        Page<Transaction> txPage = null;
+        try {
+            txPage = ledgerService.getTxList(height, pageNumber, pageSize);
+        } catch (Exception e) {
+            Log.error(e);
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+
+        RpcResult result = RpcResult.getSuccess();
+        result.setData(txPage);
+        return result;
     }
 
     @GET

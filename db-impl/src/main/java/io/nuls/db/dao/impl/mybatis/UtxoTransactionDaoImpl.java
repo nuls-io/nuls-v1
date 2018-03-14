@@ -23,6 +23,7 @@
  */
 package io.nuls.db.dao.impl.mybatis;
 
+import io.nuls.core.dto.Page;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.db.dao.*;
 import io.nuls.db.entity.*;
@@ -60,8 +61,8 @@ public class UtxoTransactionDaoImpl implements UtxoTransactionDataService {
     }
 
     @Override
-    public List<TransactionPo> getTxs(long blockHeight, int pageNum, int pageSize) {
-        return null;
+    public Page<TransactionPo> getTxs(long blockHeight, int pageNum, int pageSize) {
+        return txDao.getTxs(blockHeight, pageNum, pageSize);
     }
 
     @Override
