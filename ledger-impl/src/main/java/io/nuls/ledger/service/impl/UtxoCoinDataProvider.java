@@ -320,6 +320,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 UtxoInput input = new UtxoInput();
                 input.setFrom(output);
                 input.setFromHash(output.getTxHash());
+                input.setFromIndex(output.getIndex());
                 input.setParent(tx);
                 input.setIndex(i);
                 inputValue += output.getValue();
