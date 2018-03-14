@@ -133,20 +133,32 @@ public class TransactionResource {
     public RpcResult list(@QueryParam("height") long height,
                           @QueryParam("pageNumber") int pageNumber,
                           @QueryParam("pageSize") int pageSize) {
-        if (height < 0) {
+        if (height < 0 || pageNumber < 0 || pageSize < 0) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
+        if (pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if (pageSize == 0) {
+            pageSize = 20000;
+        }
 
-        Page<Transaction> txPage = null;
+        Page<TransactionDto> dtoPage = null;
         try {
-            txPage = ledgerService.getTxList(height, pageNumber, pageSize);
+            Page<Transaction> txPage = ledgerService.getTxList(height, pageNumber, pageSize);
+            List<TransactionDto> dtoList = new ArrayList<>();
+            dtoPage = new Page<>(txPage);
+            for (Transaction tx : txPage.getList()) {
+                dtoList.add(new TransactionDto(tx));
+            }
+            dtoPage.setList(dtoList);
         } catch (Exception e) {
             Log.error(e);
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
 
         RpcResult result = RpcResult.getSuccess();
-        result.setData(txPage);
+        result.setData(dtoPage);
         return result;
     }
 

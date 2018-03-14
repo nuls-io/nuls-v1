@@ -106,8 +106,8 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 UtxoInput input = utxoData.getInputs().get(i);
                 input.setTxHash(tx.getHash());
                 UtxoOutput unSpend = cacheService.getUtxo(input.getKey());
-                if(null==unSpend){
-                    throw new NulsRuntimeException(ErrorCode.DATA_ERROR,"the output is not exist!");
+                if (null == unSpend) {
+                    throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "the output is not exist!");
                 }
                 unSpend.setStatus(UtxoOutput.LOCKED);
                 outputs.add(unSpend);
@@ -317,6 +317,9 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         if (!coinParam.getFrom().isEmpty()) {
             //find unSpends to create inputs for this tx
             List<UtxoOutput> unSpends = coinManager.getAccountsUnSpend(coinParam.getFrom(), coinParam.getTotalNa().add(coinParam.getFee()));
+            if (unSpends.isEmpty()) {
+                throw new NulsException(ErrorCode.BALANCE_NOT_ENOUGH);
+            }
 
             for (int i = 0; i < unSpends.size(); i++) {
                 UtxoOutput output = unSpends.get(i);
@@ -332,13 +335,14 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             }
         }
 
+
         //get EcKey for output's script
         byte[] priKey = null;
         if (coinParam.getPriKey() != null) {
             priKey = coinParam.getPriKey();
         } else if (!coinParam.getFrom().isEmpty()) {
             Account account = accountService.getAccount(coinParam.getFrom().get(0));
-            if(account == null) {
+            if (account == null) {
                 throw new NulsException(ErrorCode.ACCOUNT_NOT_EXIST);
             }
             if (account.isEncrypted() && account.isLocked()) {
@@ -425,7 +429,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         for (UtxoInput input : utxoData.getInputs()) {
             input.setTxHash(tx.getHash());
         }
-        for(UtxoOutput output:utxoData.getOutputs()){
+        for (UtxoOutput output : utxoData.getOutputs()) {
             output.setTxHash(tx.getHash());
         }
     }
