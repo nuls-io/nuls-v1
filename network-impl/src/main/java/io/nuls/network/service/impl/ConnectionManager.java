@@ -135,6 +135,10 @@ public class ConnectionManager {
     }
 
     private void processMessage(BaseEvent event, Node node) {
+        if(event == null) {
+            Log.error("---------------------NulEvent is null--------------------------------");
+            return;
+        }
         if (isNetworkEvent(event)) {
             if (node.getStatus() != Node.HANDSHAKE && !isHandShakeMessage(event)) {
                 return;
