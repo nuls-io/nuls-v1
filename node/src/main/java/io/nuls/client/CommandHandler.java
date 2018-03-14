@@ -51,6 +51,7 @@ public class CommandHandler {
         register(new AccountProcessors.CreateAccount());
         register(new BlockProcessors.BestHeight());
         register(new WalletProcessors.Transfer());
+        register(new AccountProcessors.GetBalance());
         //todo 修改为配置
         SdkManager.init("http://127.0.0.1:8001/nuls");
     }

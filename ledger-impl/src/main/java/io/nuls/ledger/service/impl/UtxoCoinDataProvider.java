@@ -106,6 +106,9 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 UtxoInput input = utxoData.getInputs().get(i);
                 input.setTxHash(tx.getHash());
                 UtxoOutput unSpend = cacheService.getUtxo(input.getKey());
+                if(null==unSpend){
+                    throw new NulsRuntimeException(ErrorCode.DATA_ERROR,"the output is not exist!");
+                }
                 unSpend.setStatus(UtxoOutput.LOCKED);
                 outputs.add(unSpend);
             }
@@ -320,6 +323,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 UtxoInput input = new UtxoInput();
                 input.setFrom(output);
                 input.setFromHash(output.getTxHash());
+                input.setFromIndex(output.getIndex());
                 input.setParent(tx);
                 input.setIndex(i);
                 inputValue += output.getValue();
@@ -405,7 +409,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             output.setIndex(i);
             output.setParent(tx);
             output.setStatus(UtxoOutput.USEABLE);
-            P2PKHScript p2PKHScript = new P2PKHScript(NulsDigestData.calcDigestData(ECKey.fromPrivate(new BigInteger(priKey)).getPubKey(), NulsDigestData.DIGEST_ALG_SHA160));
+            P2PKHScript p2PKHScript = new P2PKHScript(NulsDigestData.calcDigestData(ECKey.fromPrivate(new BigInteger(priKey)).getPubKey(false), NulsDigestData.DIGEST_ALG_SHA160));
             output.setScript(p2PKHScript);
             outputs.add(output);
         }
