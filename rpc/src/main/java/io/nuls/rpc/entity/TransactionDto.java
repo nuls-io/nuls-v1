@@ -52,6 +52,7 @@ public class TransactionDto {
         this.blockHeight = tx.getBlockHeight();
         this.setFee(tx.getFee().getValue());
         this.setTransferType(tx.getTransferType());
+        this.setIndex(tx.getIndex());
         this.confirmCount = bestBlockHeight - this.blockHeight;
         if (TxStatusEnum.CONFIRMED.equals(tx.getStatus())) {
             this.status = 1;
