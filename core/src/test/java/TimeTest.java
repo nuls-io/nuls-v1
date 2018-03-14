@@ -43,7 +43,7 @@ public class TimeTest {
     }
 
     private byte[] getBytes(long time) {
-        byte[] bytes = new byte[Utils.sizeOfTime()];
+        byte[] bytes = new byte[Utils.sizeOfInt6()];
         bytes[0] = (byte) (0xFF & time);
         bytes[1] = (byte) (0xFF & (time >> 8));
         bytes[2] = (byte) (0xFF & (time >> 16));

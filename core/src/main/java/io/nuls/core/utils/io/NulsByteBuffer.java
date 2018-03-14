@@ -234,7 +234,7 @@ public class NulsByteBuffer {
         return this.readNulsData(new NulsSignData());
     }
 
-    public long readTime() {
+    public long readInt48() {
         long value = (payload[cursor +0] & 0xffL) |
                 ((payload[cursor +1] & 0xffL) << 8) |
                 ((payload[cursor +2] & 0xffL) << 16) |

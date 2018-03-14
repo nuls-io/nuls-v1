@@ -26,7 +26,6 @@ package io.nuls.ledger.entity;
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.ledger.script.P2PKHScript;
 import io.nuls.ledger.script.Script;
@@ -85,9 +84,9 @@ public class UtxoOutput extends BaseNulsData {
     public int size() {
         int s = 0;
         s += VarInt.sizeOf(index);
-        s += Utils.sizeOfTime();
+        s += 8;
         s += Utils.sizeOfBytes(address);
-        s += Utils.sizeOfTime();
+        s += Utils.sizeOfInt6();
         s += Utils.sizeOfNulsData(script);
         return s;
     }
@@ -95,9 +94,9 @@ public class UtxoOutput extends BaseNulsData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeVarInt(index);
-        stream.writeTime(value);
+        stream.writeInt64(value);
         stream.writeBytesWithLength(address);
-        stream.writeTime(lockTime);
+        stream.writeInt48(lockTime);
         stream.writeNulsData(script);
     }
 
@@ -107,9 +106,9 @@ public class UtxoOutput extends BaseNulsData {
             return;
         }
         index = (int) byteBuffer.readVarInt();
-        value = byteBuffer.readTime();
+        value = byteBuffer.readInt64();
         address = byteBuffer.readByLengthByte();
-        lockTime = byteBuffer.readTime();
+        lockTime = byteBuffer.readInt48();
         script = byteBuffer.readNulsData(new P2PKHScript());
     }
 
