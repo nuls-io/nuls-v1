@@ -84,8 +84,8 @@ public class WalletResouce {
     @POST
     @Path("/reset")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult password(@FormParam("password") String password, @FormParam("newPassword") String newPassword) {
-        Result result = this.accountService.changePassword(password, newPassword);
+    public RpcResult password(AccountParamForm form) {
+        Result result = this.accountService.changePassword(form.getPassword(), form.getNewPassword());
         return new RpcResult(result);
     }
 
@@ -96,6 +96,7 @@ public class WalletResouce {
     public RpcResult transfer(TransferForm form) {
         AssertUtil.canNotEmpty(form.getToAddress());
         AssertUtil.canNotEmpty(form.getAmount());
+
         Result result = this.ledgerService.transfer(form.getAddress(), form.getPassword(),
                 form.getToAddress(), Na.valueOf(form.getAmount()), form.getRemark());
         return new RpcResult(result);
