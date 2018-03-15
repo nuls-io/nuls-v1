@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,6 +25,7 @@ package io.nuls.consensus.service.impl;
 
 import io.nuls.account.entity.Account;
 import io.nuls.account.service.intf.AccountService;
+import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
@@ -34,14 +35,9 @@ import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.member.Delegate;
 import io.nuls.consensus.entity.params.JoinConsensusParam;
-import io.nuls.consensus.entity.params.QueryConsensusAccountParam;
 import io.nuls.consensus.entity.tx.PocExitConsensusTransaction;
 import io.nuls.consensus.entity.tx.PocJoinConsensusTransaction;
 import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
-import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
-import io.nuls.consensus.event.notice.EntrustConsensusNotice;
-import io.nuls.consensus.event.notice.RegisterAgentNotice;
-import io.nuls.consensus.event.notice.StopConsensusNotice;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.service.intf.ConsensusService;
 import io.nuls.core.chain.entity.Na;
@@ -49,14 +45,12 @@ import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TransactionConstant;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.core.utils.str.StringUtils;
-import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
@@ -65,7 +59,6 @@ import io.nuls.ledger.service.intf.LedgerService;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -119,7 +112,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
     private void joinTheConsensus(Account account, String password, long amount, String agentAddress) throws IOException {
         AssertUtil.canNotEmpty(account);
         AssertUtil.canNotEmpty(password);
-        if(amount<PocConsensusConstant.ENTRUSTER_DEPOSIT_LOWER_LIMIT.getValue()){
+        if (amount < PocConsensusConstant.ENTRUSTER_DEPOSIT_LOWER_LIMIT.getValue()) {
             throw new NulsRuntimeException(ErrorCode.NULL_PARAMETER);
         }
         AssertUtil.canNotEmpty(agentAddress);
@@ -140,42 +133,36 @@ public class PocConsensusServiceImpl implements ConsensusService {
     }
 
     @Override
-    public void stopConsensus(String address, String password) {
-        NulsDigestData joinTxHash = null;
-        try {
-            List<Transaction> list = ledgerService.getTxList(address,TransactionConstant.TX_TYPE_REGISTER_AGENT);
-//            Collections.sort(list,q);
-        } catch (Exception e) {
-            Log.error(e);
+    public void stopConsensus(String address, String password, Map<String, Object> paramsMap) {
+        Transaction joinTx = null;
+        if (null != paramsMap && StringUtils.isNotBlank((String) paramsMap.get("txHash"))) {
+            PocJoinConsensusTransaction tx = (PocJoinConsensusTransaction) ledgerService.getTx(NulsDigestData.fromDigestHex((String) paramsMap.get("txHash")));
+            address = tx.getTxData().getAddress();
+            joinTx = tx;
+        } else {
+            try {
+                List<Transaction> txlist = this.ledgerService.getTxList(address, TransactionConstant.TX_TYPE_REGISTER_AGENT);
+                if (null != txlist || !txlist.isEmpty()) {
+                    joinTx = txlist.get(0);
+                }
+            } catch (Exception e) {
+                Log.error(e);
+            }
+
         }
-
-
-        //todo
-
-
-
-
-
-
-
-
-
-
-
-        PocJoinConsensusTransaction joinTx = (PocJoinConsensusTransaction) ledgerService.getTx(joinTxHash);
         if (null == joinTx) {
-            throw new NulsRuntimeException(ErrorCode.ACCOUNT_NOT_EXIST, "address:" + joinTx.getTxData().getAddress().toString());
+            throw new NulsRuntimeException(ErrorCode.FAILED, "The related transaction is not exist!");
         }
-        Account account = this.accountService.getAccount(joinTx.getTxData().getAddress().toString());
+        Account account = this.accountService.getAccount(address);
         if (null == account) {
-            throw new NulsRuntimeException(ErrorCode.ACCOUNT_NOT_EXIST, "address:" + joinTx.getTxData().getAddress().toString());
+            throw new NulsRuntimeException(ErrorCode.ACCOUNT_NOT_EXIST, "address:" + address.toString());
         }
         if (!account.validatePassword(password)) {
             throw new NulsRuntimeException(ErrorCode.PASSWORD_IS_WRONG);
         }
         TransactionEvent event = new TransactionEvent();
         PocExitConsensusTransaction tx = new PocExitConsensusTransaction();
-        tx.setTxData(joinTxHash);
+        tx.setTxData(joinTx.getHash());
         try {
             tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
         } catch (IOException e) {

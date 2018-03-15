@@ -24,13 +24,13 @@
  *
  */
 
-package io.nuls.rpc.resources.form;
+package io.nuls.rpc.sdk.params;
 
 /**
  * @author Niels
  * @date 2018/3/14
  */
-public class EntrustCancelForm {
+public class EntrustCancelParams {
     private String txHash;
     private String password;
 
