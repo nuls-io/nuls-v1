@@ -33,17 +33,17 @@ package io.nuls.rpc.resources.form;
 public class CreateAgentForm {
     private String address;
     private String packingAddress;
-    private String commissionRate;
-    private long deposit;
+    private double commissionRate;
+    private long   deposit;
     private String remark;
     private String agentName;
     private String password;
 
-    public String getCommissionRate() {
+    public double getCommissionRate() {
         return commissionRate;
     }
 
-    public void setCommissionRate(String commissionRate) {
+    public void setCommissionRate(double commissionRate) {
         this.commissionRate = commissionRate;
     }
 
