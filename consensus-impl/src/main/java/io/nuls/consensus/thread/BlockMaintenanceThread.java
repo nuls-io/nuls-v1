@@ -70,7 +70,7 @@ public class BlockMaintenanceThread implements Runnable {
     public void run() {
         try {
             checkGenesisBlock();
-        } catch (IOException e) {
+        } catch (Exception e) {
             Log.error(e);
         }
         while (true) {
@@ -154,7 +154,7 @@ public class BlockMaintenanceThread implements Runnable {
         }
     }
 
-    public void checkGenesisBlock() throws IOException {
+    public void checkGenesisBlock() throws Exception {
         Block genesisBlock = NulsContext.getInstance().getGenesisBlock();
         ValidateResult result = genesisBlock.verify();
         if (result.isFailed()) {
@@ -163,7 +163,7 @@ public class BlockMaintenanceThread implements Runnable {
         Block localGenesisBlock = this.blockService.getGengsisBlock();
         if (null == localGenesisBlock) {
             for(Transaction tx:genesisBlock.getTxs()){
-
+                ledgerService.approvalTx(tx);
             }
             this.blockService.saveBlock(genesisBlock);
             return;
