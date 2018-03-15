@@ -30,6 +30,9 @@ public class ConsensusService {
     }
 
     public RpcClientResult entrust() {
+
+
+        
         return null;
     }
 

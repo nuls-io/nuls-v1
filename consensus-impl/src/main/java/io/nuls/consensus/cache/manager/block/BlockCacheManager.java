@@ -152,7 +152,10 @@ public class BlockCacheManager {
             rollbackBlocksTxs(blockHashList);
             return;
         }
-        for (Transaction tx : block.getTxs()) {
+        for (int i=0;i<block.getHeader().getTxCount();i++) {
+            Transaction tx = block.getTxs().get(i);
+            tx.setBlockHeight(block.getHeader().getHeight());tx.setIndex(i);
+            tx.setIndex(i);
             if (tx.getStatus() == null || tx.getStatus() == TxStatusEnum.CACHED) {
                 try {
                     this.ledgerService.approvalTx(tx);

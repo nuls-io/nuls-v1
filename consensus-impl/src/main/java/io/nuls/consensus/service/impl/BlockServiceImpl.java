@@ -150,10 +150,6 @@ public class BlockServiceImpl implements BlockService {
                 throw new NulsRuntimeException(e);
             }
         }
-        for (int i = 0; i < block.getTxs().size(); i++) {
-            Transaction tx = block.getTxs().get(i);
-            tx.setIndex(i);
-        }
         ledgerService.saveTxList(block.getTxs());
         blockStorageService.save(block.getHeader());
     }

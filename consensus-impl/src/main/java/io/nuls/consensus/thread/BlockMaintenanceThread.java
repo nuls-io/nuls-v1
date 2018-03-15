@@ -30,6 +30,7 @@ import io.nuls.consensus.utils.BlockInfo;
 import io.nuls.consensus.utils.DistributedBlockInfoRequestUtils;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
@@ -37,6 +38,7 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
+import io.nuls.ledger.service.intf.LedgerService;
 
 import java.io.IOException;
 import java.util.List;
@@ -52,7 +54,7 @@ public class BlockMaintenanceThread implements Runnable {
     public static final String THREAD_NAME = "block-maintenance";
 
     private static BlockMaintenanceThread instance = new BlockMaintenanceThread();
-
+    private LedgerService ledgerService  = NulsContext.getServiceBean(LedgerService.class);
     private final BlockService blockService = NulsContext.getServiceBean(BlockService.class);
     private boolean success = false;
 
@@ -160,6 +162,9 @@ public class BlockMaintenanceThread implements Runnable {
         }
         Block localGenesisBlock = this.blockService.getGengsisBlock();
         if (null == localGenesisBlock) {
+            for(Transaction tx:genesisBlock.getTxs()){
+
+            }
             this.blockService.saveBlock(genesisBlock);
             return;
         }
