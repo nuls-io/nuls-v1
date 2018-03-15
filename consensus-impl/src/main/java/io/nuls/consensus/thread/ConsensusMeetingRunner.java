@@ -362,6 +362,11 @@ public class ConsensusMeetingRunner implements Runnable {
         if (null == validateResult || validateResult.isFailed()) {
             throw new NulsRuntimeException(ErrorCode.CONSENSUS_EXCEPTION);
         }
+        try {
+            ledgerService.approvalTx(tx);
+        } catch (NulsException e) {
+            throw new NulsRuntimeException(e);
+        }
         txList.add(0, tx);
     }
 
