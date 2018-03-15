@@ -80,7 +80,7 @@ import java.util.*;
  * @date 2017/12/15
  */
 public class ConsensusMeetingRunner implements Runnable {
-    private static final int MIN_NODE_COUNT = 1;
+    private static final int MIN_NODE_COUNT = 2;
     private NulsContext context = NulsContext.getInstance();
     public static final String THREAD_NAME = "Consensus-Meeting";
     private static final ConsensusMeetingRunner INSTANCE = new ConsensusMeetingRunner();
