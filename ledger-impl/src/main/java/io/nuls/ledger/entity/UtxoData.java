@@ -50,7 +50,6 @@ public class UtxoData extends CoinData {
 
     private List<UtxoOutput> outputs = new ArrayList<>();
     ;
-
     public List<UtxoInput> getInputs() {
         return inputs;
     }

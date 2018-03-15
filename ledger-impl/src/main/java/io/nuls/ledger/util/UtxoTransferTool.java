@@ -183,8 +183,8 @@ public class UtxoTransferTool {
         if (null != po.getTxData()) {
             tx.parseTxData(new NulsByteBuffer(po.getTxData()));
         }
-        tx.setStatus(TxStatusEnum.CONFIRMED);
         transferCoinData(tx, po.getInputs(), po.getOutputs());
+        tx.setStatus(TxStatusEnum.CONFIRMED);
         return tx;
     }
 

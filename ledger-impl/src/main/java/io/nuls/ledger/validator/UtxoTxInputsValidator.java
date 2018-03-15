@@ -25,16 +25,15 @@ package io.nuls.ledger.validator;
 
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.UtxoInput;
 import io.nuls.ledger.entity.UtxoOutput;
-import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.ledger.script.P2PKHScript;
 import io.nuls.ledger.script.P2PKHScriptSig;
 import io.nuls.ledger.script.Script;
@@ -47,6 +46,7 @@ import io.nuls.ledger.script.TransferScript;
 public class UtxoTxInputsValidator implements NulsDataValidator<UtxoData> {
 
     private static final UtxoTxInputsValidator INSTANCE = new UtxoTxInputsValidator();
+
 
     private UtxoTxInputsValidator() {
     }
@@ -63,9 +63,17 @@ public class UtxoTxInputsValidator implements NulsDataValidator<UtxoData> {
         for (int i = 0; i < data.getInputs().size(); i++) {
             UtxoInput input = data.getInputs().get(i);
             UtxoOutput output = input.getFrom();
-            if (!output.isUsable()) {
-                throw new NulsRuntimeException(ErrorCode.UTXO_SPENT);
+
+            if (data.getTransaction().getStatus() == TxStatusEnum.CACHED) {
+                if (!output.isUsable()) {
+                    throw new NulsRuntimeException(ErrorCode.UTXO_STATUS_CHANGE);
+                }
+            } else if (data.getTransaction().getStatus() == TxStatusEnum.AGREED) {
+                if (!output.isLocked()) {
+                    throw new NulsRuntimeException(ErrorCode.UTXO_STATUS_CHANGE);
+                }
             }
+
             try {
                 P2PKHScriptSig scriptSig = new P2PKHScriptSig();
                 scriptSig.parse(input.getScriptSig());
