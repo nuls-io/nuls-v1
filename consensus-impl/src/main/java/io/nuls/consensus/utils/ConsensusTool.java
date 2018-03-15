@@ -190,7 +190,7 @@ public class ConsensusTool {
         header.setPackingAddress(account.getAddress().toString());
         header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
         header.setHash(NulsDigestData.calcDigestData(block.getHeader()));
-        header.setSign(accountService.signData(header.getHash(),account, PocConsensusConstant.DEFAULT_WALLET_PASSWORD));
+        header.setSign(accountService.signData(header.getHash(),account, NulsContext.CACHED_PASSWORD_OF_WALLET));
         return block;
     }
 

@@ -66,7 +66,6 @@ public class PocConsensusResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getInfo(@QueryParam("address") String address) {
-
         AssertUtil.canNotEmpty(address, ErrorCode.NULL_PARAMETER);
         RpcResult result = RpcResult.getSuccess();
         ConsensusStatusInfo status = consensusService.getConsensusInfo(address);
@@ -128,6 +127,10 @@ public class PocConsensusResource {
     @Path("/cancel")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult out(EntrustCancelForm form) {
+
+
+
+
         return RpcResult.getSuccess();
     }
 

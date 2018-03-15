@@ -65,6 +65,7 @@ import io.nuls.ledger.service.intf.LedgerService;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -140,14 +141,15 @@ public class PocConsensusServiceImpl implements ConsensusService {
 
     @Override
     public void stopConsensus(String address, String password) {
-
+        NulsDigestData joinTxHash = null;
         try {
             List<Transaction> list = ledgerService.getTxList(address,TransactionConstant.TX_TYPE_REGISTER_AGENT);
+//            Collections.sort(list,q);
         } catch (Exception e) {
             Log.error(e);
         }
 
-        NulsDigestData joinTxHash = null;
+
         //todo
 
 

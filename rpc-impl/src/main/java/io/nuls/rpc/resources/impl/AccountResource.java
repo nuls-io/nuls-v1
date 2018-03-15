@@ -60,6 +60,7 @@ public class AccountResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult create(AccountParamForm form) {
+        NulsContext.CACHED_PASSWORD_OF_WALLET = form.getPassword();
         Result<List<String>> accountResult = accountService.createAccount(form.getCount(), form.getPassword());
         RpcResult result = new RpcResult(accountResult);
         return result;

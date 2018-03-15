@@ -119,6 +119,7 @@ public class WalletResouce {
                 form.getPrikey().length() > 100) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
+        NulsContext.CACHED_PASSWORD_OF_WALLET = form.getPassword();
 
         Result result = null;
         try {

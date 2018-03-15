@@ -233,7 +233,7 @@ public class ConsensusMeetingRunner implements Runnable {
 
     private void startMeeting() {
         PocMeetingRound current = consensusManager.getCurrentRound();
-        if (null == current || current.getMember(consensusManager.getConsensusStatusInfo().getAccount().getAddress().toString()) == null) {
+        if (null == current || null==consensusManager.getConsensusStatusInfo().getAccount()||current.getMember(consensusManager.getConsensusStatusInfo().getAccount().getAddress().toString()) == null) {
             this.nextRound();
             return;
         }
@@ -355,7 +355,7 @@ public class ConsensusMeetingRunner implements Runnable {
         }
         tx.setFee(Na.ZERO);
         tx.setHash(NulsDigestData.calcDigestData(tx));
-        tx.setSign(accountService.signData(tx.getHash(), consensusManager.getConsensusStatusInfo().getAccount(), PocConsensusConstant.DEFAULT_WALLET_PASSWORD));
+        tx.setSign(accountService.signData(tx.getHash(), consensusManager.getConsensusStatusInfo().getAccount(),NulsContext.CACHED_PASSWORD_OF_WALLET));
         ValidateResult validateResult = tx.verify();
         tx.setStatus(TxStatusEnum.AGREED);
         confirmingTxCacheManager.putTx(tx);
@@ -431,7 +431,7 @@ public class ConsensusMeetingRunner implements Runnable {
             tx.setTime(TimeService.currentTimeMillis());
             tx.setFee(Na.ZERO);
             tx.setHash(NulsDigestData.calcDigestData(tx));
-            tx.setSign(accountService.signData(tx.getHash(), consensusManager.getConsensusStatusInfo().getAccount(), PocConsensusConstant.DEFAULT_WALLET_PASSWORD));
+            tx.setSign(accountService.signData(tx.getHash(), consensusManager.getConsensusStatusInfo().getAccount(),NulsContext.CACHED_PASSWORD_OF_WALLET));
             txList.add(tx);
         }
     }
@@ -461,7 +461,7 @@ public class ConsensusMeetingRunner implements Runnable {
         punishTx.setTime(TimeService.currentTimeMillis());
         punishTx.setFee(Na.ZERO);
         punishTx.setHash(NulsDigestData.calcDigestData(punishTx));
-        punishTx.setSign(accountService.signData(punishTx.getHash(), consensusManager.getConsensusStatusInfo().getAccount(), PocConsensusConstant.DEFAULT_WALLET_PASSWORD));
+        punishTx.setSign(accountService.signData(punishTx.getHash(), consensusManager.getConsensusStatusInfo().getAccount(),NulsContext.CACHED_PASSWORD_OF_WALLET));
         txList.add(punishTx);
     }
 
