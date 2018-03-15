@@ -110,6 +110,9 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                     throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "the output is not exist!");
                 }
                 unSpend.setStatus(UtxoOutput.LOCKED);
+                System.out.println("----------------------unSpend.status" + unSpend.getStatus());
+                UtxoOutput unSpend2 = cacheService.getUtxo(input.getKey());
+                System.out.println("----------------------unSpend2.status" + unSpend2.getStatus());
                 outputs.add(unSpend);
             }
 

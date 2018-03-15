@@ -53,7 +53,7 @@ public interface TransactionConstant {
     byte TX_OUTPUT_UNSPEND = 0;
     byte TX_OUTPUT_LOCKED = 1;
     byte TX_OUTPUT_SPENT = 2;
-
+    byte TX_OUTPUT_UNCONFIRM = -1;
 
     String TX_LIST = "TX_LIST";
 }
