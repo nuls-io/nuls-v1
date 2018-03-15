@@ -357,7 +357,6 @@ public class ConsensusMeetingRunner implements Runnable {
         tx.setHash(NulsDigestData.calcDigestData(tx));
         tx.setSign(accountService.signData(tx.getHash(), consensusManager.getConsensusStatusInfo().getAccount(),NulsContext.CACHED_PASSWORD_OF_WALLET));
         ValidateResult validateResult = tx.verify();
-        tx.setStatus(TxStatusEnum.AGREED);
         confirmingTxCacheManager.putTx(tx);
         if (null == validateResult || validateResult.isFailed()) {
             throw new NulsRuntimeException(ErrorCode.CONSENSUS_EXCEPTION);
