@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -129,8 +129,6 @@ public class UtxoCoinManager {
         lock.lock();
 
         List<UtxoOutput> unSpends = new ArrayList<>();
-        List<UtxoOutput> unConfirms = new ArrayList<>();
-        List<UtxoOutput> confirms = new ArrayList<>();
         try {
             //check use-able is enough , find unSpend utxo
             Na amount = Na.ZERO;
@@ -142,18 +140,10 @@ public class UtxoCoinManager {
                 }
                 for (int i = 0; i < balance.getUnSpends().size(); i++) {
                     UtxoOutput output = balance.getUnSpends().get(i);
-                    boolean update = ledgerCacheService.updateUtxoStatus(output.getKey(), UtxoOutput.UTXO_CONFIRM_LOCK, UtxoOutput.UTXO_CONFIRM_UNLOCK);
-                    if (update) {
-                        confirms.add(output);
-                    } else if (!update) {
-                        update = ledgerCacheService.updateUtxoStatus(output.getKey(), UtxoOutput.UTXO_UNCONFIRM_LOCK, UtxoOutput.UTXO_UNCONFIRM_UNLOCK);
-                    }
-                    if (update) {
-                        unConfirms.add(output);
-                    }
-                    if (!update) {
+                    if (!output.isUsable()) {
                         continue;
                     }
+                    unSpends.add(output);
                     amount = amount.add(Na.valueOf(output.getValue()));
                     if (amount.isGreaterThan(value)) {
                         enough = true;
@@ -165,28 +155,14 @@ public class UtxoCoinManager {
                 }
             }
             if (!enough) {
-                for (UtxoOutput output : unConfirms) {
-                    ledgerCacheService.updateUtxoStatus(output.getKey(), UtxoOutput.UTXO_CONFIRM_UNLOCK, UtxoOutput.UTXO_CONFIRM_LOCK);
-                }
-                for (UtxoOutput output : confirms) {
-                    ledgerCacheService.updateUtxoStatus(output.getKey(), UtxoOutput.UTXO_CONFIRM_UNLOCK, UtxoOutput.UTXO_CONFIRM_LOCK);
-                }
                 unSpends = new ArrayList<>();
             }
         } catch (Exception e) {
             Log.error(e);
-            for (UtxoOutput output : unConfirms) {
-                ledgerCacheService.updateUtxoStatus(output.getKey(), UtxoOutput.UTXO_CONFIRM_UNLOCK, UtxoOutput.UTXO_CONFIRM_LOCK);
-            }
-            for (UtxoOutput output : confirms) {
-                ledgerCacheService.updateUtxoStatus(output.getKey(), UtxoOutput.UTXO_CONFIRM_UNLOCK, UtxoOutput.UTXO_CONFIRM_LOCK);
-            }
             unSpends = new ArrayList<>();
         } finally {
             lock.unlock();
         }
-        unSpends.addAll(confirms);
-        unSpends.addAll(unConfirms);
         return unSpends;
     }
 

@@ -165,7 +165,7 @@ public class TransactionResource {
     }
 
     @GET
-    @Path("/locked")
+    @Path("/utxo/locked")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult list(@QueryParam("address") String address, @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
         if (address != null && !StringUtils.validAddress(address)) {

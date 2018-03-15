@@ -103,12 +103,13 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 
         List<UtxoOutput> unSpends = new ArrayList<>();
         Set<String> addressSet = new HashSet<>();
+        boolean update;
         try {
             //update inputs referenced utxo status
             for (int i = 0; i < utxoData.getInputs().size(); i++) {
                 UtxoInput input = utxoData.getInputs().get(i);
                 UtxoOutput unSpend = ledgerCacheService.getUtxo(input.getKey());
-                if (null == unSpend ) {
+                if (null == unSpend) {
                     throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "the output is not exist!");
                 }
                 if (!unSpend.isUsable()) {
