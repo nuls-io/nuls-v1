@@ -188,7 +188,8 @@ public class BlockMaintenanceThread implements Runnable {
             } else if (blockInfo.getBestHeight() <= localBestBlock.getHeader().getHeight()) {
                 //local height is highest
                 BlockHeader header = blockService.getBlockHeader(blockInfo.getBestHeight());
-                if (header.getHash().equals(blockInfo.getBestHash())) {
+
+                if (null!=header                &&header.getHash().equals(blockInfo.getBestHash())) {
                     break;
                 }
                 //bifurcation
