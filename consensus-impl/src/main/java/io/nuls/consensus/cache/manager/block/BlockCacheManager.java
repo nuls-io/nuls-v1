@@ -30,12 +30,12 @@ import io.nuls.consensus.constant.ConsensusCacheConstant;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.GetBlockHeaderParam;
 import io.nuls.consensus.entity.block.BifurcateProcessor;
-import io.nuls.consensus.entity.block.BlockHeaderChain;
-import io.nuls.consensus.entity.block.HeaderDigest;
 import io.nuls.consensus.event.GetBlockHeaderEvent;
 import io.nuls.consensus.utils.DownloadDataUtils;
-import io.nuls.core.chain.entity.*;
-import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.chain.entity.Block;
+import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.core.chain.entity.SmallBlock;
+import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
@@ -193,7 +193,7 @@ public class BlockCacheManager {
     }
 
     public Block getBlock(String hash) {
-        if(blockCacheMap==null){
+        if(null==blockCacheMap){
             return null;
         }
         return blockCacheMap.get(hash);
