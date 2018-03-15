@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -28,6 +28,7 @@ import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.chain.entity.*;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.ECKey;
@@ -106,9 +107,8 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             //update inputs referenced utxo status
             for (int i = 0; i < utxoData.getInputs().size(); i++) {
                 UtxoInput input = utxoData.getInputs().get(i);
-                input.setTxHash(tx.getHash());
                 UtxoOutput unSpend = ledgerCacheService.getUtxo(input.getKey());
-                if (null == unSpend) {
+                if (null == unSpend ) {
                     throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "the output is not exist!");
                 }
                 if (!unSpend.isUsable()) {
@@ -177,9 +177,11 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             List<UtxoOutputPo> outputPoList = new ArrayList<>();
             for (int i = 0; i < utxoData.getOutputs().size(); i++) {
                 UtxoOutput output = utxoData.getOutputs().get(i);
-                output = ledgerCacheService.getUtxo(output.getKey());
-                if (output == null || UtxoOutput.UTXO_UNCONFIRM_UNLOCK != output.getStatus()) {
-                    throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "use a not legal utxo");
+                if (tx.getBlockHeight() > 0 && tx.getType() == TransactionConstant.TX_TYPE_COIN_BASE) {
+                    output = ledgerCacheService.getUtxo(output.getKey());
+                    if (output == null || UtxoOutput.UTXO_UNCONFIRM_UNLOCK != output.getStatus()) {
+                        throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "use a not legal utxo");
+                    }
                 }
                 UtxoOutputPo outputPo = UtxoTransferTool.toOutputPojo(output);
                 outputPoList.add(outputPo);
@@ -199,7 +201,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 
             relationDataService.save(txRelations);
 
-            afterSaveDatabase(spends, utxoData);
+            afterSaveDatabase(spends, utxoData, tx);
 
         } catch (Exception e) {
             //rollback
@@ -243,13 +245,15 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         }
     }
 
-    private void afterSaveDatabase(List<UtxoOutput> spends, UtxoData utxoData) {
+    private void afterSaveDatabase(List<UtxoOutput> spends, UtxoData utxoData, Transaction tx) {
         for (int i = 0; i < spends.size(); i++) {
             ledgerCacheService.removeUtxo(spends.get(i).getKey());
         }
         for (int i = 0; i < utxoData.getOutputs().size(); i++) {
             UtxoOutput output = utxoData.getOutputs().get(i);
-            output = ledgerCacheService.getUtxo(output.getKey());
+            if (tx.getBlockHeight() > 0 && tx.getType() == TransactionConstant.TX_TYPE_COIN_BASE) {
+                output = ledgerCacheService.getUtxo(output.getKey());
+            }
             output.setStatus(UtxoOutput.UTXO_CONFIRM_UNLOCK);
         }
     }

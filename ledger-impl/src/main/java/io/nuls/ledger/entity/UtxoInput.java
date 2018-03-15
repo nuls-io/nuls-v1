@@ -108,10 +108,14 @@ public class UtxoInput extends BaseNulsData {
         fromHash = byteBuffer.readNulsData(new NulsDigestData());
         fromIndex = (int) byteBuffer.readVarInt();
         scriptSig = byteBuffer.readByLengthByte();
-//        UtxoOutputDataService utxoOutputDataService =  NulsContext.getServiceBean(UtxoOutputDataService.class );
-//        UtxoOutputPo outputPo = utxoOutputDataService.getTxOutputs(fromHash.getDigestHex()).get(fromIndex);
+
         LedgerCacheService ledgerCacheService = LedgerCacheService.getInstance();
         UtxoOutput output = ledgerCacheService.getUtxo(this.getKey());
+        if (output == null) {
+            UtxoOutputDataService utxoOutputDataService = NulsContext.getServiceBean(UtxoOutputDataService.class);
+            UtxoOutputPo outputPo = utxoOutputDataService.getTxOutputs(fromHash.getDigestHex()).get(fromIndex);
+            output = UtxoTransferTool.toOutput(outputPo);
+        }
         from = output;
     }
 
