@@ -151,26 +151,11 @@ public class ConsensusMeetingRunner implements Runnable {
         return result;
     }
 
-    private BlockInfo lastBlockInfo;
-
     private boolean checkBestHash() {
-        boolean result = true;
-        if (null != lastBlockInfo) {
-            result = checkBestHash(lastBlockInfo);
-        }
-        if (!result) {
-            return result;
-        }
         BlockInfo blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(-1);
         if (blockInfo == null || blockInfo.getBestHash() == null) {
             return false;
         }
-        result = checkBestHash(blockInfo);
-        lastBlockInfo = blockInfo;
-        return result;
-    }
-
-    private boolean checkBestHash(BlockInfo blockInfo) {
         boolean result = blockInfo.getBestHeight() <=context.getBestBlock().getHeader().getHeight();
         if (!result) {
             return result;
@@ -183,7 +168,6 @@ public class ConsensusMeetingRunner implements Runnable {
     }
 
     private void nextRound() {
-
         PocMeetingRound currentRound = calcRound();
         consensusManager.setCurrentRound(currentRound);
         while (TimeService.currentTimeMillis() < (currentRound.getStartTime())) {
