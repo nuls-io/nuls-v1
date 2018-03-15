@@ -145,7 +145,7 @@ public class AccountResource {
         List<OutputDto> dtoList = new ArrayList<>();
         for (int i = 0; i < balance.getUnSpends().size(); i++) {
             UtxoOutput output = balance.getUnSpends().get(i);
-            if (output.getStatus() == UtxoOutput.USEABLE) {
+            if (output.getStatus() == UtxoOutput.UTXO_CONFIRM_UNLOCK) {
                 usable += output.getValue();
                 dtoList.add(new OutputDto(output));
             }

@@ -73,7 +73,7 @@ public class UtxoTransactionTool {
             throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
         }
         TransferTransaction tx = new TransferTransaction(transferData, password);
-        if(StringUtils.isNotBlank(remark)) {
+        if (StringUtils.isNotBlank(remark)) {
             tx.setRemark(remark.getBytes(NulsContext.DEFAULT_ENCODING));
         }
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
@@ -159,7 +159,8 @@ public class UtxoTransactionTool {
         long bestHeight = NulsContext.getInstance().getNetBestBlockHeight();
 
         for (UtxoOutput output : balance.getUnSpends()) {
-            if (output.getStatus() == UtxoOutput.USEABLE) {
+            if (UtxoOutput.UTXO_CONFIRM_UNLOCK == output.getStatus() ||
+                    UtxoOutput.UTXO_UNCONFIRM_UNLOCK == output.getStatus()) {
                 if (output.getLockTime() > 0) {
                     if (output.getLockTime() > genesisTime) {
                         if (output.getLockTime() > currentTime) {
@@ -177,10 +178,12 @@ public class UtxoTransactionTool {
                 } else {
                     usable += output.getValue();
                 }
-            } else if (output.getStatus() == UtxoOutput.LOCKED) {
+            } else if (UtxoOutput.UTXO_CONFIRM_LOCK == output.getStatus() ||
+                    UtxoOutput.UTXO_UNCONFIRM_LOCK == output.getStatus()) {
                 lock += output.getValue();
             }
         }
+
         Na oldNa = balance.getBalance();
         if (null == oldNa) {
             oldNa = Na.ZERO;
@@ -212,6 +215,9 @@ public class UtxoTransactionTool {
             eventBroadcaster.publishToLocal(notice);
         }
 
+        if (balance.getUnSpends().isEmpty()) {
+            ledgerCacheService.removeBalance(address);
+        }
     }
 
     public void calcBalance(Address address) {

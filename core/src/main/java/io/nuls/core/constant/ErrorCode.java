@@ -127,8 +127,10 @@ public enum ErrorCode {
     /**
      * ------------  Ledger Exception code   --------------
      */
-    BALANCE_NOT_ENOUGH("LED003", 70003),
+    UTXO_SPENT("LED001", 70001),
     UTXO_STATUS_CHANGE("LED002", 70002),
+    BALANCE_NOT_ENOUGH("LED003", 70003),
+
     /**
      * messages
      */
