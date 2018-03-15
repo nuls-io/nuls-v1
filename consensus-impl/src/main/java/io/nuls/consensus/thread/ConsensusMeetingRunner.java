@@ -171,7 +171,7 @@ public class ConsensusMeetingRunner implements Runnable {
     }
 
     private boolean checkBestHash(BlockInfo blockInfo) {
-        boolean result = blockInfo.getBestHeight() <= context.getBestBlock().getHeader().getHeight();
+        boolean result = blockInfo.getBestHeight() <=context.getBestBlock().getHeader().getHeight();
         if (!result) {
             return result;
         }

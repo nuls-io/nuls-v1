@@ -228,7 +228,7 @@ public class BlockBatchDownloadUtils {
         return true;
     }
 
-    private void verify() {
+    private synchronized void verify() {
         boolean done = true;
         if (nodeStatusMap.isEmpty()) {
             working = false;
@@ -304,7 +304,7 @@ public class BlockBatchDownloadUtils {
         if (null == nodeStatus) {
             return;
         }
-        networkService.blackNode(nodeStatus.getNodeId(), NodePo.YELLOW);
+        networkService.removeNode(nodeStatus.getNodeId());
         this.nodeIdList.remove(nodeStatus.getNodeId());
         this.queueService.remove(queueId, nodeStatus.getNodeId());
         if (nodeIdList.isEmpty()) {
@@ -328,7 +328,7 @@ public class BlockBatchDownloadUtils {
                 }
             }
             String preHash = block.getHeader().getPreHash().getDigestHex();
-            Block preBlock = blockMap.get(preHash);
+            Block preBlock = blockMap.get(block.getHeader().getHeight()-1);
             if (preBlock == null) {
                 preBlock = blockService.getBlock(preHash);
             }
