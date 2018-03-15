@@ -24,15 +24,23 @@
  *
  */
 
-package io.nuls.rpc.resources.form;
+package io.nuls.rpc.sdk.params;
 
 /**
  * @author Niels
  * @date 2018/3/14
  */
-public class EntrustCancelForm {
-    private String txHash;
+public class StopAgentParams {
+    private String address;
     private String password;
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
     public String getPassword() {
         return password;
@@ -40,13 +48,5 @@ public class EntrustCancelForm {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public String getTxHash() {
-        return txHash;
-    }
-
-    public void setTxHash(String txHash) {
-        this.txHash = txHash;
     }
 }

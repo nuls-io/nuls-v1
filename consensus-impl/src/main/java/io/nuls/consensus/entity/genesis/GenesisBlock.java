@@ -148,7 +148,7 @@ public final class GenesisBlock extends Block {
             Log.error(e);
         }
         List<Transaction> txlist = new ArrayList<>();
-        tx.setStatus(TxStatusEnum.AGREED);
+//        tx.setStatus(TxStatusEnum.AGREED);
         txlist.add(tx);
         setTxs(txlist);
     }

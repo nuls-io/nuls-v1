@@ -40,7 +40,7 @@ public interface ConsensusService {
 
     void startConsensus(String address, String password, Map<String, Object> paramsMap);
 
-    void stopConsensus(String address, String password);
+    void stopConsensus(String address, String password,Map<String, Object> paramsMap);
 
     List<Consensus> getConsensusAccountList();
 
