@@ -149,6 +149,7 @@ public class ConsensusTool {
         po.setId(bean.getAddress());
         po.setStatus(bean.getExtend().getStatus());
         po.setAgentName(bean.getExtend().getAgentName());
+        po.setCommissionRate(bean.getExtend().getCommissionRate());
         return po;
     }
 
