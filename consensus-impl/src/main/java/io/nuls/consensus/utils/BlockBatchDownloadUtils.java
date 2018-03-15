@@ -123,6 +123,7 @@ public class BlockBatchDownloadUtils {
         }
         request(startHeight, endHeight);
         while (working) {
+            //todo 超时判断
             verify();
             Thread.sleep(100L);
         }
@@ -288,6 +289,10 @@ public class BlockBatchDownloadUtils {
         networkService.blackNode(nodeStatus.getNodeId(), NodePo.YELLOW);
         this.nodeIdList.remove(nodeIdList);
         this.queueService.remove(queueId, nodeStatus.getNodeId());
+        //todo 不应该一直阻塞
+        if(nodeIdList.isEmpty()){
+            //上面
+        }
         this.sendRequest(nodeStatus.getStart(), nodeStatus.getEnd(), this.queueService.take(queueId));
     }
 
