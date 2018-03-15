@@ -224,8 +224,8 @@ public class BlockCacheManager {
         if (null == header) {
             return;
         }
-        this.bifurcateProcessor.removeHeight(header.getHeight());
         String hash = header.getHash().getDigestHex();
+        this.bifurcateProcessor.removeHash(hash);
         this.blockCacheMap.remove(hash);
         this.smallBlockCacheMap.remove(hash);
         this.headerCacheMap.remove(hash);
@@ -305,5 +305,9 @@ public class BlockCacheManager {
         GetBlockHeaderEvent event = new GetBlockHeaderEvent();
         event.setEventBody(new GetBlockHeaderParam(nextHeight));
         eventBroadcaster.sendToNode(event, nodeId);
+    }
+
+    public void removeBlock(String hash) {
+
     }
 }

@@ -108,21 +108,21 @@ public class BifurcateProcessor {
         return bestHeight;
     }
 
-    public void removeHeight(long height) {
+    public void removeHash(String hash) {
         if (chainList.isEmpty()) {
             return;
         }
         List<BlockHeaderChain> tempList = new ArrayList<>(this.chainList);
-        tempList.forEach((BlockHeaderChain chain) -> removeBlock(chain, height));
+        tempList.forEach((BlockHeaderChain chain) -> removeBlock(chain, hash));
 
     }
 
-    private void removeBlock(BlockHeaderChain chain, long height) {
-        HeaderDigest hd = chain.getHeaderDigest(height);
+    private void removeBlock(BlockHeaderChain chain, String hashHex) {
+        HeaderDigest hd = chain.getHeaderDigest(hashHex);
         if (hd == null) {
             return;
         }
-        chain.removeHeaderDigest(height);
+        chain.removeHeaderDigest(hashHex);
         if (chain.size() == 0) {
             this.chainList.remove(chain);
         }

@@ -184,6 +184,7 @@ public class BlockStorageService {
     }
 
     public void delete(String hash) {
+        blockCacheManager.removeBlock(hash);
         headerDao.delete(hash);
     }
 
