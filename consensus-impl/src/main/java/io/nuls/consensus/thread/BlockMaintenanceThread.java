@@ -189,7 +189,7 @@ public class BlockMaintenanceThread implements Runnable {
                 //local height is highest
                 BlockHeader header = blockService.getBlockHeader(blockInfo.getBestHeight());
 
-                if (null!=header                &&header.getHash().equals(blockInfo.getBestHash())) {
+                if (null != header && header.getHash().equals(blockInfo.getBestHash())) {
                     break;
                 }
                 //bifurcation
@@ -217,17 +217,19 @@ public class BlockMaintenanceThread implements Runnable {
             return;
         }
         long height = startHeight - 1;
-        if (height < 0) {
-            return;
-        }
-        BlockHeader localHeader = this.blockService.getBlockHeader(height);
-        BlockInfo blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(height);
         boolean previousRb = false;
-        if (null != blockInfo && null != blockInfo.getBestHash() && !blockInfo.getBestHash().equals(localHeader.getHash())) {
-            previousRb = true;
+        if (height > 0) {
+            BlockHeader localHeader = this.blockService.getBlockHeader(height);
+            BlockInfo blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(height);
+
+            if (null != blockInfo && null != blockInfo.getBestHash() && !blockInfo.getBestHash().equals(localHeader.getHash())) {
+                previousRb = true;
+            }
         }
         if (previousRb) {
             rollbackBlock(height);
+        }else{
+            NulsContext.getInstance().setBestBlock(blockService.getLocalBestBlock());
         }
     }
 

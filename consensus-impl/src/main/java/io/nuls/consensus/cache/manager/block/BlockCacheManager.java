@@ -30,12 +30,12 @@ import io.nuls.consensus.constant.ConsensusCacheConstant;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.GetBlockHeaderParam;
 import io.nuls.consensus.entity.block.BifurcateProcessor;
-import io.nuls.consensus.entity.block.BlockHeaderChain;
-import io.nuls.consensus.entity.block.HeaderDigest;
 import io.nuls.consensus.event.GetBlockHeaderEvent;
 import io.nuls.consensus.utils.DownloadDataUtils;
-import io.nuls.core.chain.entity.*;
-import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.chain.entity.Block;
+import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.core.chain.entity.SmallBlock;
+import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
@@ -147,14 +147,13 @@ public class BlockCacheManager {
             NulsContext.getInstance().setBestBlock(block);
         }
         //txs approval
-        BlockHeader header = this.getBlockHeader(block.getHeader().getHeight());
-        if (null == header) {
-            List<String> blockHashList = bifurcateProcessor.getHashList(block.getHeader().getHeight());
+        List<String> blockHashList = bifurcateProcessor.getHashList(block.getHeader().getHeight());
+        if (blockHashList.size() > 1) {
             rollbackBlocksTxs(blockHashList);
             return;
         }
         for (Transaction tx : block.getTxs()) {
-            if (tx.getStatus()==null||tx.getStatus() == TxStatusEnum.CACHED) {
+            if (tx.getStatus() == null || tx.getStatus() == TxStatusEnum.CACHED) {
                 try {
                     this.ledgerService.approvalTx(tx);
                     confirmingTxCacheManager.putTx(tx);
@@ -194,6 +193,9 @@ public class BlockCacheManager {
     }
 
     public Block getBlock(String hash) {
+        if(null==blockCacheMap){
+            return null;
+        }
         return blockCacheMap.get(hash);
     }
 
@@ -222,8 +224,8 @@ public class BlockCacheManager {
         if (null == header) {
             return;
         }
-        this.bifurcateProcessor.removeHeight(header.getHeight());
         String hash = header.getHash().getDigestHex();
+        this.bifurcateProcessor.removeHash(hash);
         this.blockCacheMap.remove(hash);
         this.smallBlockCacheMap.remove(hash);
         this.headerCacheMap.remove(hash);
@@ -303,5 +305,9 @@ public class BlockCacheManager {
         GetBlockHeaderEvent event = new GetBlockHeaderEvent();
         event.setEventBody(new GetBlockHeaderParam(nextHeight));
         eventBroadcaster.sendToNode(event, nodeId);
+    }
+
+    public void removeBlock(String hash) {
+
     }
 }

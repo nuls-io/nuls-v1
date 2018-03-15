@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -110,6 +110,9 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public void start() {
         List<Account> accounts = getAccountList();
+        if(accounts.size()>0) {
+            setDefaultAccount(accounts.get(0).getAddress().getBase58());
+        }
     }
 
     @Override
@@ -161,8 +164,12 @@ public class AccountServiceImpl implements AccountService {
 
         Account defaultAccount = getDefaultAccount();
         if (defaultAccount != null && defaultAccount.isEncrypted()) {
-            if (!defaultAccount.unlock(password)) {
-                return new Result(false, "incorrect password");
+            try {
+                if (!defaultAccount.unlock(password)) {
+                    return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
+                }
+            }catch (NulsException e){
+                return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
             }
         }
 
@@ -191,7 +198,9 @@ public class AccountServiceImpl implements AccountService {
                 notice.setEventBody(account);
                 eventBroadcaster.publishToLocal(notice);
             }
-
+            if(getDefaultAccount() == null) {
+                setDefaultAccount(accounts.get(0).getAddress().getBase58());
+            }
             return new Result<>(true, "OK", resultList);
         } catch (Exception e) {
             Log.error(e);
@@ -276,17 +285,24 @@ public class AccountServiceImpl implements AccountService {
             Result result = new Result(true, "OK", Hex.encode(account.getPriKey()));
             return result;
         } else {
-            if (!account.unlock(password)) {
+            try {
+                if (!account.unlock(password)) {
+                    return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
+                }
+                byte[] publicKeyBytes = account.getPriKey();
+                account.lock();
+                return new Result(true, "OK", Hex.encode(publicKeyBytes));
+            }catch (NulsException e){
                 return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
             }
-            byte[] publicKeyBytes = account.getPriKey();
-            account.lock();
-            return new Result(true, "OK", Hex.encode(publicKeyBytes));
         }
     }
 
     @Override
     public void setDefaultAccount(String id) {
+        if(id == null){
+            return ;
+        }
         Account account = accountCacheService.getAccountById(id);
         if (null != account) {
             NulsContext.DEFAULT_ACCOUNT_ID = id;
@@ -357,7 +373,7 @@ public class AccountServiceImpl implements AccountService {
                 if (!account.unlock(oldPassword)) {
                     return new Result(false, "old password error");
                 }
-                account.encrypt(newPassword);
+                account.encrypt(newPassword,true);
 
                 AccountPo po = new AccountPo();
                 AccountTool.toPojo(account, po);
@@ -405,8 +421,12 @@ public class AccountServiceImpl implements AccountService {
         }
 
         for (Account account : accounts) {
-            if (!account.unlock(password)) {
-                return new Result(false, "password error");
+            try {
+                if (!account.unlock(password)) {
+                    return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
+                }
+            }catch (NulsException e){
+                return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
             }
         }
 
@@ -524,7 +544,11 @@ public class AccountServiceImpl implements AccountService {
                 return Result.getFailed(ErrorCode.DATA_NOT_FOUND);
             }
             if (account.isEncrypted()) {
-                if (!StringUtils.validPassword(password) || !account.decrypt(password)) {
+                try {
+                    if (!StringUtils.validPassword(password) || !account.decrypt(password)) {
+                        return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
+                    }
+                }catch (NulsException e){
                     return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
                 }
             }
@@ -545,12 +569,9 @@ public class AccountServiceImpl implements AccountService {
         }
         List<String> prikeyList = new ArrayList<>();
         for (Account account : accounts) {
-            account.unlock(password);
-//            if (account.isEncrypted()) {
-//                return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
-//            }
-            prikeyList.add(Hex.encode(account.getPriKey()));
             try {
+                account.unlock(password);
+                prikeyList.add(Hex.encode(account.getPriKey()));
                 account.encrypt(password);
             } catch (NulsException e) {
                 return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
@@ -654,15 +675,19 @@ public class AccountServiceImpl implements AccountService {
 
         Account defaultAcct = getDefaultAccount();
         if (defaultAcct != null) {
-            if (!defaultAcct.decrypt(password)) {
-                return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
-            }
             try {
+                if (!defaultAcct.decrypt(password)) {
+                    return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
+                }
                 defaultAcct.encrypt(password);
-                account.encrypt(password);
             } catch (NulsException e) {
-
+                e.printStackTrace();
             }
+        }
+        try {
+            account.encrypt(password);
+        } catch (NulsException e) {
+            e.printStackTrace();
         }
 
         // save db
@@ -693,10 +718,10 @@ public class AccountServiceImpl implements AccountService {
         AliasPo aliasPo = null;
         Account defaultAcct = getDefaultAccount();
         if (defaultAcct != null) {
-            if (!defaultAcct.decrypt(password)) {
-                return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
-            }
             try {
+                if (!defaultAcct.decrypt(password)) {
+                    return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
+                }
                 defaultAcct.encrypt(password);
             } catch (NulsException e) {
             }

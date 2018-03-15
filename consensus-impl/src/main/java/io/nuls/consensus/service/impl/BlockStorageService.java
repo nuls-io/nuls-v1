@@ -82,7 +82,7 @@ public class BlockStorageService {
             return block;
         }
         BlockHeader header = getBlockHeader(hash);
-        if(null==header){
+        if (null == header) {
             return null;
         }
         List<Transaction> txList = null;
@@ -153,6 +153,11 @@ public class BlockStorageService {
         if (null != header) {
             return header;
         }
+        Block block = blockCacheManager.getBlock(height);
+        if (null != block) {
+            header = block.getHeader();
+            return header;
+        }
         BlockHeaderPo po = this.headerDao.getHeader(height);
         return ConsensusTool.fromPojo(po);
     }
@@ -161,6 +166,10 @@ public class BlockStorageService {
         BlockHeader header = blockCacheManager.getBlockHeader(hash);
         if (null != header) {
             return header;
+        }
+        Block block = blockCacheManager.getBlock(hash);
+        if (null != block) {
+            return block.getHeader();
         }
         BlockHeaderPo po = this.headerDao.getHeader(hash);
         return ConsensusTool.fromPojo(po);
@@ -175,28 +184,35 @@ public class BlockStorageService {
     }
 
     public void delete(String hash) {
+        blockCacheManager.removeBlock(hash);
         headerDao.delete(hash);
     }
 
     public List<BlockHeader> getBlockHeaderList(long startHeight, long endHeight, long split) {
         List<BlockHeaderPo> strList = this.headerDao.getHashList(startHeight, endHeight, split);
-        List<BlockHeader> headerList = new ArrayList<>();
-        List<Long> heightList = new ArrayList<>();
+        Map<Long, BlockHeader> headerMap = new HashMap<>();
         for (BlockHeaderPo po : strList) {
             BlockHeader header = new BlockHeader();
             header.setHash(NulsDigestData.fromDigestHex(po.getHash()));
             header.setHeight(po.getHeight());
-            headerList.add(header);
-            heightList.add(header.getHeight());
+            headerMap.put(po.getHeight(), header);
         }
-        if ((endHeight - startHeight + 1) == headerList.size()) {
-            return headerList;
+        if ((endHeight - startHeight + 1) == headerMap.size()) {
+            return new ArrayList<>(headerMap.values());
         }
+        List<BlockHeader> headerList = new ArrayList<>();
         for (long i = startHeight; i <= endHeight; i++) {
-            if (heightList.contains(i)) {
+            if (headerMap.containsKey(i)) {
+                headerList.add(headerMap.get(i));
                 continue;
             }
             BlockHeader header = blockCacheManager.getBlockHeader(i);
+            if (null == header) {
+                Block block = blockCacheManager.getBlock(i);
+                if (null != block) {
+                    header = block.getHeader();
+                }
+            }
             if (null != header) {
                 headerList.add(header);
             }

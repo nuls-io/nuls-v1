@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -84,8 +84,8 @@ public class WalletResouce {
     @POST
     @Path("/reset")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult password(@FormParam("password") String password, @FormParam("newPassword") String newPassword) {
-        Result result = this.accountService.changePassword(password, newPassword);
+    public RpcResult password(AccountParamForm form) {
+        Result result = this.accountService.changePassword(form.getPassword(), form.getNewPassword());
         return new RpcResult(result);
     }
 
@@ -96,6 +96,7 @@ public class WalletResouce {
     public RpcResult transfer(TransferForm form) {
         AssertUtil.canNotEmpty(form.getToAddress());
         AssertUtil.canNotEmpty(form.getAmount());
+
         Result result = this.ledgerService.transfer(form.getAddress(), form.getPassword(),
                 form.getToAddress(), Na.valueOf(form.getAmount()), form.getRemark());
         return new RpcResult(result);
@@ -118,6 +119,7 @@ public class WalletResouce {
                 form.getPrikey().length() > 100) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
+        NulsContext.CACHED_PASSWORD_OF_WALLET = form.getPassword();
 
         Result result = null;
         try {

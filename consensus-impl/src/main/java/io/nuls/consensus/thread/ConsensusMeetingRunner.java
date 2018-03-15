@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -151,27 +151,12 @@ public class ConsensusMeetingRunner implements Runnable {
         return result;
     }
 
-    private BlockInfo lastBlockInfo;
-
     private boolean checkBestHash() {
-        boolean result = true;
-        if (null != lastBlockInfo) {
-            result = checkBestHash(lastBlockInfo);
-        }
-        if (!result) {
-            return result;
-        }
         BlockInfo blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(-1);
         if (blockInfo == null || blockInfo.getBestHash() == null) {
             return false;
         }
-        result = checkBestHash(blockInfo);
-        lastBlockInfo = blockInfo;
-        return result;
-    }
-
-    private boolean checkBestHash(BlockInfo blockInfo) {
-        boolean result = blockInfo.getBestHeight() <= context.getBestBlock().getHeader().getHeight();
+        boolean result = blockInfo.getBestHeight() <=context.getBestBlock().getHeader().getHeight();
         if (!result) {
             return result;
         }
@@ -183,7 +168,6 @@ public class ConsensusMeetingRunner implements Runnable {
     }
 
     private void nextRound() {
-
         PocMeetingRound currentRound = calcRound();
         consensusManager.setCurrentRound(currentRound);
         while (TimeService.currentTimeMillis() < (currentRound.getStartTime())) {
@@ -249,7 +233,7 @@ public class ConsensusMeetingRunner implements Runnable {
 
     private void startMeeting() {
         PocMeetingRound current = consensusManager.getCurrentRound();
-        if (null == current || current.getMember(consensusManager.getConsensusStatusInfo().getAccount().getAddress().toString()) == null) {
+        if (null == current || null==consensusManager.getConsensusStatusInfo().getAccount()||current.getMember(consensusManager.getConsensusStatusInfo().getAccount().getAddress().toString()) == null) {
             this.nextRound();
             return;
         }
@@ -371,7 +355,7 @@ public class ConsensusMeetingRunner implements Runnable {
         }
         tx.setFee(Na.ZERO);
         tx.setHash(NulsDigestData.calcDigestData(tx));
-        tx.setSign(accountService.signData(tx.getHash(), consensusManager.getConsensusStatusInfo().getAccount(), PocConsensusConstant.DEFAULT_WALLET_PASSWORD));
+        tx.setSign(accountService.signData(tx.getHash(), consensusManager.getConsensusStatusInfo().getAccount(),NulsContext.CACHED_PASSWORD_OF_WALLET));
         ValidateResult validateResult = tx.verify();
         tx.setStatus(TxStatusEnum.AGREED);
         confirmingTxCacheManager.putTx(tx);
@@ -447,7 +431,7 @@ public class ConsensusMeetingRunner implements Runnable {
             tx.setTime(TimeService.currentTimeMillis());
             tx.setFee(Na.ZERO);
             tx.setHash(NulsDigestData.calcDigestData(tx));
-            tx.setSign(accountService.signData(tx.getHash(), consensusManager.getConsensusStatusInfo().getAccount(), PocConsensusConstant.DEFAULT_WALLET_PASSWORD));
+            tx.setSign(accountService.signData(tx.getHash(), consensusManager.getConsensusStatusInfo().getAccount(),NulsContext.CACHED_PASSWORD_OF_WALLET));
             txList.add(tx);
         }
     }
@@ -477,7 +461,7 @@ public class ConsensusMeetingRunner implements Runnable {
         punishTx.setTime(TimeService.currentTimeMillis());
         punishTx.setFee(Na.ZERO);
         punishTx.setHash(NulsDigestData.calcDigestData(punishTx));
-        punishTx.setSign(accountService.signData(punishTx.getHash(), consensusManager.getConsensusStatusInfo().getAccount(), PocConsensusConstant.DEFAULT_WALLET_PASSWORD));
+        punishTx.setSign(accountService.signData(punishTx.getHash(), consensusManager.getConsensusStatusInfo().getAccount(),NulsContext.CACHED_PASSWORD_OF_WALLET));
         txList.add(punishTx);
     }
 
