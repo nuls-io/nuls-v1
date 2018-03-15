@@ -180,23 +180,29 @@ public class BlockStorageService {
 
     public List<BlockHeader> getBlockHeaderList(long startHeight, long endHeight, long split) {
         List<BlockHeaderPo> strList = this.headerDao.getHashList(startHeight, endHeight, split);
-        List<BlockHeader> headerList = new ArrayList<>();
-        List<Long> heightList = new ArrayList<>();
+        Map<Long,BlockHeader> headerMap = new HashMap<>();
         for (BlockHeaderPo po : strList) {
             BlockHeader header = new BlockHeader();
             header.setHash(NulsDigestData.fromDigestHex(po.getHash()));
             header.setHeight(po.getHeight());
-            headerList.add(header);
-            heightList.add(header.getHeight());
+            headerMap.put(po.getHeight(),header);
         }
-        if ((endHeight - startHeight + 1) == headerList.size()) {
-            return headerList;
+        if ((endHeight - startHeight + 1) == headerMap.size()) {
+            return new ArrayList<>(headerMap.values());
         }
+        List<BlockHeader> headerList = new ArrayList<>();
         for (long i = startHeight; i <= endHeight; i++) {
-            if (heightList.contains(i)) {
+            if (headerMap.containsKey(i)) {
+                headerList.add(headerMap.get(i));
                 continue;
             }
             BlockHeader header = blockCacheManager.getBlockHeader(i);
+            if(null==header){
+                Block block = blockCacheManager.getBlock(i);
+                if(null!=block){
+                    header = block.getHeader();
+                }
+            }
             if (null != header) {
                 headerList.add(header);
             }
