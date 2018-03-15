@@ -193,6 +193,9 @@ public class BlockCacheManager {
     }
 
     public Block getBlock(String hash) {
+        if(blockCacheMap==null){
+            return null;
+        }
         return blockCacheMap.get(hash);
     }
 
