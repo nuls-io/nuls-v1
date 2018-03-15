@@ -83,13 +83,7 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public BlockHeader getBlockHeader(long height) {
-        BlockHeader header;
-        if (height <= blockCacheManager.getStoredHeight()) {
-            header = blockStorageService.getBlockHeader(height);
-        } else {
-            header = blockCacheManager.getBlockHeader(height);
-        }
-        return header;
+         return blockStorageService.getBlockHeader(height);
     }
 
     @Override
