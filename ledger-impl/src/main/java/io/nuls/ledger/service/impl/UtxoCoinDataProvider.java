@@ -178,13 +178,14 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             List<UtxoOutputPo> outputPoList = new ArrayList<>();
             for (int i = 0; i < utxoData.getOutputs().size(); i++) {
                 UtxoOutput output = utxoData.getOutputs().get(i);
-                if (tx.getBlockHeight() > 0 && tx.getType() == TransactionConstant.TX_TYPE_COIN_BASE) {
-                    output = ledgerCacheService.getUtxo(output.getKey());
-                    if (output == null || UtxoOutput.UTXO_UNCONFIRM_UNLOCK != output.getStatus()) {
-                        throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "use a not legal utxo");
-                    }
+
+                output = ledgerCacheService.getUtxo(output.getKey());
+                if (output == null || UtxoOutput.UTXO_UNCONFIRM_UNLOCK != output.getStatus()) {
+                    throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "use a not legal utxo");
                 }
+
                 UtxoOutputPo outputPo = UtxoTransferTool.toOutputPojo(output);
+                outputPo.setStatus((byte) UtxoOutput.UTXO_CONFIRM_UNLOCK);
                 outputPoList.add(outputPo);
                 addressSet.add(Address.fromHashs(output.getAddress()).getBase58());
             }
@@ -252,9 +253,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         }
         for (int i = 0; i < utxoData.getOutputs().size(); i++) {
             UtxoOutput output = utxoData.getOutputs().get(i);
-            if (tx.getBlockHeight() > 0 && tx.getType() == TransactionConstant.TX_TYPE_COIN_BASE) {
-                output = ledgerCacheService.getUtxo(output.getKey());
-            }
+            output = ledgerCacheService.getUtxo(output.getKey());
             output.setStatus(UtxoOutput.UTXO_CONFIRM_UNLOCK);
         }
     }
