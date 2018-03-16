@@ -23,6 +23,7 @@
  */
 package io.nuls.ledger.service.impl;
 
+import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.UtxoOutputDataService;
@@ -68,6 +69,7 @@ public class UtxoCoinManager {
             UtxoOutputPo po = utxoOutputPos.get(i);
             UtxoOutput output = UtxoTransferTool.toOutput(po);
             ledgerCacheService.putUtxo(output.getKey(), output);
+            addressSet.add(po.getAddress());
         }
 
         for (String str : addressSet) {
