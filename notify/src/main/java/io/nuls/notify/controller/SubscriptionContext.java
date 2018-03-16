@@ -91,11 +91,15 @@ public class SubscriptionContext {
         synchronized (this) {
             // 1st, find out subscribe the moduleID
             Set moduleSubscriber = moduleMap.get(moduleID);
-            result.addAll(moduleSubscriber);
+            if (moduleSubscriber != null) {
+                result.addAll(moduleSubscriber);
+            }
 
             // 2nd, find out subscribe the event
             Set eventSubscriber = eventMap.get(eventName.toLowerCase());
-            result.addAll(eventSubscriber);
+            if (eventSubscriber != null) {
+                result.addAll(eventSubscriber);
+            }
         }
         return result;
     }
