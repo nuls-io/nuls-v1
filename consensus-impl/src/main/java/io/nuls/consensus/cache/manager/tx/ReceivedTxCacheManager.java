@@ -68,10 +68,8 @@ public class ReceivedTxCacheManager {
     }
 
     public List<Transaction> getTxList() {
-
         return txCache.values();
     }
-
 
     public void clear() {
         txCache.clear();

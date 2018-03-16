@@ -47,6 +47,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
@@ -106,6 +107,13 @@ public class PocConsensusServiceImpl implements ConsensusService {
         tx.setSign(accountService.signData(tx.getHash(), account, password));
         tx.verifyWithException();
         event.setEventBody(tx);
+        //todo
+        TransactionEvent te = new TransactionEvent();
+        try {
+            te.parse(event.serialize());
+        } catch (NulsException e) {
+            Log.error(e);
+        }
         eventBroadcaster.broadcastHashAndCache(event, true);
     }
 
@@ -124,6 +132,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
         delegate.setDelegateAddress(agentAddress);
         delegate.setDeposit(Na.valueOf(amount));
         ca.setExtend(delegate);
+        tx.setTime(TimeService.currentTimeMillis());
         tx.setTxData(ca);
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
         tx.setSign(accountService.signData(tx.getHash(), account, password));
