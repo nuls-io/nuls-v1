@@ -68,6 +68,7 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
         initCoinDataProvider();
         coinParam.setFee(fee);
         this.coinData = coinDataProvider.createByTransferData(this, coinParam, password);
+        this.coinData.setTransaction(this);
         this.time = TimeService.currentTimeMillis();
     }
 
@@ -94,6 +95,7 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         super.parse(byteBuffer);
         this.coinData = coinDataProvider.parse(byteBuffer);
+        this.coinData.setTransaction(this);
         NulsSignData cache = this.sign;
         this.sign = null;
         try {
@@ -102,7 +104,7 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
             Log.error(e);
         }
         sign = cache;
-        coinDataProvider.afterParse(coinData,this);
+        coinDataProvider.afterParse(coinData, this);
     }
 
     public CoinDataProvider getCoinDataProvider() {
@@ -124,9 +126,9 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
     @Override
     public T parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
         byte[] bytes = byteBuffer.readBytes(NulsConstant.PLACE_HOLDER.length);
-        if(Arrays.equals(NulsConstant.PLACE_HOLDER,bytes)){
+        if (Arrays.equals(NulsConstant.PLACE_HOLDER, bytes)) {
             return null;
         }
-        throw new NulsRuntimeException(ErrorCode.DATA_ERROR,"The transaction never provided the method:parseTxData");
+        throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "The transaction never provided the method:parseTxData");
     }
 }

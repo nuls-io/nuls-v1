@@ -114,6 +114,7 @@ public class ConsensusTool {
         agent.setIntroduction(po.getRemark());
         agent.setStartTime(po.getStartTime());
         agent.setStatus(po.getStatus());
+        agent.setAgentName(po.getAgentName());
         Consensus<Agent> ca = new ConsensusAgentImpl();
         ca.setAddress(po.getAddress());
         ca.setExtend(agent);
@@ -147,6 +148,8 @@ public class ConsensusTool {
         po.setNodeAddress(bean.getExtend().getDelegateAddress());
         po.setId(bean.getAddress());
         po.setStatus(bean.getExtend().getStatus());
+        po.setAgentName(bean.getExtend().getAgentName());
+        po.setCommissionRate(bean.getExtend().getCommissionRate());
         return po;
     }
 
@@ -188,7 +191,7 @@ public class ConsensusTool {
         header.setPackingAddress(account.getAddress().toString());
         header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
         header.setHash(NulsDigestData.calcDigestData(block.getHeader()));
-        header.setSign(accountService.signData(header.getHash(),account, PocConsensusConstant.DEFAULT_WALLET_PASSWORD));
+        header.setSign(accountService.signData(header.getHash(),account, NulsContext.CACHED_PASSWORD_OF_WALLET));
         return block;
     }
 

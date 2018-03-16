@@ -83,13 +83,7 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public BlockHeader getBlockHeader(long height) {
-        BlockHeader header;
-        if (height <= blockCacheManager.getStoredHeight()) {
-            header = blockStorageService.getBlockHeader(height);
-        } else {
-            header = blockCacheManager.getBlockHeader(height);
-        }
-        return header;
+         return blockStorageService.getBlockHeader(height);
     }
 
     @Override
@@ -110,15 +104,12 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public Block getBlock(long height) {
-        Block block = blockCacheManager.getBlock(height);
-        if (null == block) {
-            try {
-                block = blockStorageService.getBlock(height);
-            } catch (Exception e) {
-                Log.error(e);
-            }
+        try {
+            return blockStorageService.getBlock(height);
+        } catch (Exception e) {
+            Log.error(e);
+            return null;
         }
-        return block;
     }
 
     @Override
@@ -158,10 +149,6 @@ public class BlockServiceImpl implements BlockService {
                 rollback(block.getTxs(), x);
                 throw new NulsRuntimeException(e);
             }
-        }
-        for (int i = 0; i < block.getTxs().size(); i++) {
-            Transaction tx = block.getTxs().get(i);
-            tx.setIndex(i);
         }
         ledgerService.saveTxList(block.getTxs());
         blockStorageService.save(block.getHeader());

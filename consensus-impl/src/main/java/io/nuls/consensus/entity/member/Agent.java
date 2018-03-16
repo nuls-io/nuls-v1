@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -46,6 +46,9 @@ public class Agent extends BaseNulsData {
     private double commissionRate;
 
     private String introduction;
+
+    private String agentName;
+
     /**
      * the following fields is for The account self(delegate Account)
      */
@@ -67,6 +70,7 @@ public class Agent extends BaseNulsData {
         size += Utils.double2Bytes(commissionRate).length;
         size += Utils.sizeOfString(this.introduction);
         size += Utils.sizeOfBoolean(seed);
+        size += Utils.sizeOfString(agentName);
         return size;
     }
 
@@ -77,6 +81,7 @@ public class Agent extends BaseNulsData {
         stream.writeDouble(this.commissionRate);
         stream.writeString(this.introduction);
         stream.writeBoolean(seed);
+        stream.writeString(agentName);
     }
 
     @Override
@@ -86,6 +91,7 @@ public class Agent extends BaseNulsData {
         this.commissionRate = byteBuffer.readDouble();
         this.introduction = byteBuffer.readString();
         this.seed = byteBuffer.readBoolean();
+        this.agentName = byteBuffer.readString();
     }
 
     public Na getDeposit() {
@@ -174,5 +180,13 @@ public class Agent extends BaseNulsData {
 
     public Boolean getSeed() {
         return seed;
+    }
+
+    public String getAgentName() {
+        return agentName;
+    }
+
+    public void setAgentName(String agentName) {
+        this.agentName = agentName;
     }
 }

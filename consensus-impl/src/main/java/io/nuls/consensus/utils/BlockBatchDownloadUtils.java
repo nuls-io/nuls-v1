@@ -36,6 +36,7 @@ import io.nuls.core.chain.entity.Result;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.queue.service.impl.QueueService;
 import io.nuls.core.utils.str.StringUtils;
@@ -110,7 +111,7 @@ public class BlockBatchDownloadUtils {
 
     public void request(List<String> nodeIdList, long startHeight, long endHeight) throws InterruptedException {
         lock.lock();
-         if (working) {
+        if (working) {
             return;
         }
         working = true;
@@ -126,7 +127,7 @@ public class BlockBatchDownloadUtils {
             verify();
             Thread.sleep(100L);
         }
-        if(!working){
+        if (!working) {
             lock.unlock();
         }
     }
@@ -216,25 +217,37 @@ public class BlockBatchDownloadUtils {
             }
             blockMap.put(block.getHeader().getHeight(), block);
             status.downloaded(block.getHeader().getHeight());
-            status.setUpdateTime(System.currentTimeMillis());
+            status.setUpdateTime(TimeService.currentTimeMillis());
             if (status.finished()) {
                 this.queueService.offer(queueId, nodeId);
             }
             verify();
-        }catch (Exception e){
-            //todo
-            e.printStackTrace();
+        } catch (Exception e) {
+            Log.error(e);
         }
         return true;
     }
 
-    private void verify() {
+    private synchronized void verify() {
         boolean done = true;
+        if (nodeStatusMap.isEmpty()) {
+            working = false;
+            return;
+        }
         for (NodeDownloadingStatus status : nodeStatusMap.values()) {
             if (!done) {
                 break;
             }
             done = status.finished();
+            if (!done && status.getUpdateTime() < (TimeService.currentTimeMillis() - DOWNLOAD_IDLE_TIME_OUT)) {
+                nodeStatusMap.remove(status.getNodeId());
+                try {
+                    failedExecute(status);
+                } catch (InterruptedException e) {
+                    Log.error(e);
+                }
+
+            }
         }
         if (!done) {
             return;
@@ -251,14 +264,14 @@ public class BlockBatchDownloadUtils {
         }
         for (long i = currentRound.getStart(); i <= currentRound.getEnd(); i++) {
             Block block = blockMap.get(i);
-            if(null==block){
+            if (null == block) {
                 //todo
                 Log.error("cache block is null");
-               break;
+                break;
             }
             ValidateResult result1 = block.verify();
             if (result1.isFailed()) {
-                if(null!=result1.getMessage()){
+                if (null != result1.getMessage()) {
                     Log.info(result1.getMessage());
                 }
                 try {
@@ -275,26 +288,35 @@ public class BlockBatchDownloadUtils {
         finished();
     }
 
+
     private void failedExecute(long height) throws InterruptedException {
-        NodeDownloadingStatus nodeStatus = null;
-        for (NodeDownloadingStatus status : nodeStatusMap.values()) {
-            if (status.containsHeight(height)) {
-                nodeStatus = status;
+        NodeDownloadingStatus status = null;
+        for (NodeDownloadingStatus status1 : nodeStatusMap.values()) {
+            if (status1.containsHeight(height)) {
+                status = status1;
+                break;
             }
         }
+        this.failedExecute(status);
+    }
+
+    private void failedExecute(NodeDownloadingStatus nodeStatus) throws InterruptedException {
         if (null == nodeStatus) {
             return;
         }
-        networkService.blackNode(nodeStatus.getNodeId(), NodePo.YELLOW);
-        this.nodeIdList.remove(nodeIdList);
+        networkService.removeNode(nodeStatus.getNodeId());
+        this.nodeIdList.remove(nodeStatus.getNodeId());
         this.queueService.remove(queueId, nodeStatus.getNodeId());
+        if (nodeIdList.isEmpty()) {
+            return;
+        }
         this.sendRequest(nodeStatus.getStart(), nodeStatus.getEnd(), this.queueService.take(queueId));
     }
 
     private Result checkHash() throws InterruptedException {
         for (long i = currentRound.getStart(); i <= currentRound.getEnd(); i++) {
             Block block = blockMap.get(i);
-            if(null==block){
+            if (null == block) {
                 return Result.getFailed("data error");
             }
             if ((i - currentRound.getStart()) % DOWNLOAD_BLOCKS_PER_TIME == 0) {
@@ -306,7 +328,7 @@ public class BlockBatchDownloadUtils {
                 }
             }
             String preHash = block.getHeader().getPreHash().getDigestHex();
-            Block preBlock = blockMap.get(preHash);
+            Block preBlock = blockMap.get(block.getHeader().getHeight()-1);
             if (preBlock == null) {
                 preBlock = blockService.getBlock(preHash);
             }
@@ -342,9 +364,9 @@ public class BlockBatchDownloadUtils {
             if (!result) {
                 break;
             }
-            try{
+            try {
                 result = nodeStatusMap.get(nodeId).finished();
-            }catch (Exception e){
+            } catch (Exception e) {
                 Log.error(e);
             }
         }

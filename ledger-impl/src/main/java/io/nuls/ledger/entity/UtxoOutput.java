@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -26,7 +26,6 @@ package io.nuls.ledger.entity;
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.ledger.script.P2PKHScript;
 import io.nuls.ledger.script.Script;
@@ -41,7 +40,7 @@ import java.io.IOException;
 /**
  * Created by win10 on 2017/10/30.
  */
-public class UtxoOutput extends BaseNulsData {
+public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
 
     private NulsDigestData txHash;
 
@@ -57,14 +56,11 @@ public class UtxoOutput extends BaseNulsData {
 
     private Script script;
 
-    //0: usable, 1:locked， 2：spent
     private int status;
 
-    public static final int USEABLE = 0;
-    public static final int LOCKED = 1;
-    public static final int SPENT = 2;
-
-    /** ------ redundancy ------  */
+    /**
+     * ------ redundancy ------
+     */
     private Transaction parent;
 
     private long createTime;
@@ -73,6 +69,13 @@ public class UtxoOutput extends BaseNulsData {
 
     // key = txHash + "-" + index, a key that will not be serialized, only used for caching
     private String key;
+
+
+    public static final int UTXO_CONFIRM_UNLOCK = 0;
+    public static final int UTXO_CONFIRM_LOCK = 1;
+    public static final int UTXO_SPENT = 2;
+    public static final int UTXO_UNCONFIRM_UNLOCK = 3;
+    public static final int UTXO_UNCONFIRM_LOCK = 4;
 
     public UtxoOutput() {
     }
@@ -85,9 +88,9 @@ public class UtxoOutput extends BaseNulsData {
     public int size() {
         int s = 0;
         s += VarInt.sizeOf(index);
-        s += Utils.sizeOfTime();
+        s += 8;
         s += Utils.sizeOfBytes(address);
-        s += Utils.sizeOfTime();
+        s += Utils.sizeOfInt6();
         s += Utils.sizeOfNulsData(script);
         return s;
     }
@@ -95,9 +98,9 @@ public class UtxoOutput extends BaseNulsData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeVarInt(index);
-        stream.writeTime(value);
+        stream.writeInt64(value);
         stream.writeBytesWithLength(address);
-        stream.writeTime(lockTime);
+        stream.writeInt48(lockTime);
         stream.writeNulsData(script);
     }
 
@@ -107,15 +110,15 @@ public class UtxoOutput extends BaseNulsData {
             return;
         }
         index = (int) byteBuffer.readVarInt();
-        value = byteBuffer.readTime();
+        value = byteBuffer.readInt64();
         address = byteBuffer.readByLengthByte();
-        lockTime = byteBuffer.readTime();
+        lockTime = byteBuffer.readInt48();
         script = byteBuffer.readNulsData(new P2PKHScript());
     }
 
 
     public NulsDigestData getTxHash() {
-        if(txHash == null && parent != null) {
+        if (txHash == null && parent != null) {
             this.txHash = parent.getHash();
         }
         return txHash;
@@ -190,7 +193,7 @@ public class UtxoOutput extends BaseNulsData {
     }
 
     public String getKey() {
-        if(StringUtils.isBlank(key)) {
+        if (StringUtils.isBlank(key)) {
             key = this.getTxHash().getDigestHex() + "-" + index;
         }
         return key;
@@ -214,5 +217,27 @@ public class UtxoOutput extends BaseNulsData {
 
     public void setTxType(int txType) {
         this.txType = txType;
+    }
+
+    public boolean isUsable() {
+        return status == UTXO_CONFIRM_UNLOCK || status == UTXO_UNCONFIRM_UNLOCK;
+    }
+
+    public boolean isUnConfirm() {
+        return status == UTXO_UNCONFIRM_UNLOCK || status == UTXO_UNCONFIRM_LOCK;
+    }
+
+    public boolean isLocked() {
+        return status == UTXO_UNCONFIRM_LOCK || status == UTXO_CONFIRM_LOCK;
+    }
+
+    @Override
+    public int compareTo(UtxoOutput o) {
+        if (this.value < o.getValue())
+            return -1;
+        else if (this.value > o.getValue()) {
+            return 1;
+        }
+        return 0;
     }
 }

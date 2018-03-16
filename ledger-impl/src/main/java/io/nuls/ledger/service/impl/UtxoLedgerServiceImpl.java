@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -32,6 +32,7 @@ import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.tx.serivce.TransactionService;
 import io.nuls.core.utils.log.Log;
@@ -210,8 +211,15 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public List<Transaction> getTxList(long height, int pageNum, int pageSize) throws Exception {
-        return null;
+    public Page<Transaction> getTxList(long height, int pageNum, int pageSize) throws Exception {
+        Page<TransactionPo> poPage = txDao.getTxs(height, pageNum, pageSize);
+        Page<Transaction> txPage = new Page<>(poPage);
+        List<Transaction> txList = new ArrayList<>();
+        for (TransactionPo po : poPage.getList()) {
+            txList.add(UtxoTransferTool.toTransaction(po));
+        }
+        txPage.setList(txList);
+        return txPage;
     }
 
     @Override
@@ -341,7 +349,12 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         List<TransactionLocalPo> localPoList = new ArrayList<>();
 
         for (TransactionPo po : poList) {
-            TransactionLocalPo localPo = new TransactionLocalPo(po);
+            TransactionLocalPo localPo = txDao.getLocaltx(po.getHash());
+            if (localPo != null) {
+                continue;
+            }
+
+            localPo = new TransactionLocalPo(po);
             for (UtxoInputPo inputPo : po.getInputs()) {
                 if (inputPo.getFromOutPut().getAddress().equals(address)) {
                     localPo.setTransferType(Transaction.TRANSFER_SEND);

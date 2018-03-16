@@ -27,7 +27,6 @@
 package io.nuls.consensus.entity.params;
 
 import io.nuls.core.chain.entity.BaseNulsData;
-import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
@@ -52,7 +51,7 @@ public class GetBlocksHashParam extends BaseNulsData {
     }
     @Override
     public int size() {
-        int size = Utils.sizeOfTime();
+        int size = Utils.sizeOfInt6();
         size += Utils.sizeOfLong(start);
         size +=Utils.sizeOfLong(end);
         size += Utils.sizeOfLong(split);
@@ -61,7 +60,7 @@ public class GetBlocksHashParam extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-         stream.writeTime(time);
+         stream.writeInt48(time);
          stream.writeVarInt(start);
          stream.writeVarInt(end);
          stream.writeVarInt(split);
@@ -69,7 +68,7 @@ public class GetBlocksHashParam extends BaseNulsData {
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-       this.time = byteBuffer.readTime();
+       this.time = byteBuffer.readInt48();
        this.start = byteBuffer.readVarInt();
        this.end = byteBuffer.readVarInt();
        this.split = byteBuffer.readVarInt();

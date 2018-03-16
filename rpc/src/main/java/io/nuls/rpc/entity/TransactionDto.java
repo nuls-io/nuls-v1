@@ -4,6 +4,7 @@ import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.crypto.Hex;
+import io.nuls.core.utils.str.StringUtils;
 import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.UtxoInput;
 import io.nuls.ledger.entity.UtxoOutput;
@@ -52,6 +53,7 @@ public class TransactionDto {
         this.blockHeight = tx.getBlockHeight();
         this.setFee(tx.getFee().getValue());
         this.setTransferType(tx.getTransferType());
+        this.setIndex(tx.getIndex());
         this.confirmCount = bestBlockHeight - this.blockHeight;
         if (TxStatusEnum.CONFIRMED.equals(tx.getStatus())) {
             this.status = 1;
@@ -88,33 +90,36 @@ public class TransactionDto {
 
     public TransactionDto(Transaction tx, String address) {
         this(tx);
-        boolean isTransfer = false;
-        long value = 0;
-        for (InputDto input : inputs) {
-            if (address.equals(input.getAddress())) {
-                if (!isTransfer) isTransfer = true;
-                value += input.getValue();
+        if (StringUtils.isNotBlank(address)) {
+            boolean isTransfer = false;
+            long value = 0;
+            for (InputDto input : inputs) {
+                if (address.equals(input.getAddress())) {
+                    if (!isTransfer) isTransfer = true;
+                    value += input.getValue();
+                }
             }
-        }
-        for (OutputDto output : outputs) {
+            for (OutputDto output : outputs) {
+                if (isTransfer) {
+                    if (address.equals(output.getAddress())) {
+                        value -= output.getValue();
+                    }
+                } else {
+                    if (!address.equals(output.getAddress())) {
+                        value += output.getValue();
+                    }
+                }
+            }
+
+            value = Math.abs(value);
+            this.value = value;
             if (isTransfer) {
-                if (address.equals(output.getAddress())) {
-                    value -= output.getValue();
-                }
+                this.transferType = -1;
             } else {
-                if (!address.equals(output.getAddress())) {
-                    value += output.getValue();
-                }
+                this.transferType = 1;
             }
         }
 
-        value = Math.abs(value);
-        this.value = value;
-        if (isTransfer) {
-            this.transferType = -1;
-        } else {
-            this.transferType = 1;
-        }
     }
 
     public String getHash() {

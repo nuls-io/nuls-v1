@@ -23,6 +23,7 @@
  */
 package io.nuls.db.dao;
 
+import io.nuls.core.dto.Page;
 import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.entity.TransactionPo;
 import io.nuls.db.entity.UtxoInputPo;
@@ -42,7 +43,7 @@ public interface UtxoTransactionDataService {
 
     List<TransactionPo> getTxs(long blockHeight);
 
-    List<TransactionPo> getTxs(long blockHeight, int pageNum, int pageSize);
+    Page<TransactionPo> getTxs(long blockHeight, int pageNum, int pageSize);
 
     List<TransactionPo> getTxs(String blockHash);
 

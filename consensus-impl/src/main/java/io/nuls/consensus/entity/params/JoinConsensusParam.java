@@ -34,6 +34,7 @@ import java.util.Map;
  */
 public class JoinConsensusParam {
     public static final String DEPOSIT = "deposit";
+    public static final String AGENT_NAME = "agentName";
     public static final String AGENT_ADDRESS = "agentAddress";
     public static final String INTRODUCTION = "introduction";
     public static final String COMMISSION_RATE = "commissionRate";
@@ -44,6 +45,8 @@ public class JoinConsensusParam {
         AssertUtil.canNotEmpty(map, ErrorCode.NULL_PARAMETER.getMsg());
         AssertUtil.canNotEmpty(map.get(DEPOSIT), ErrorCode.NULL_PARAMETER.getMsg());
         AssertUtil.canNotEmpty(map.get(AGENT_ADDRESS), ErrorCode.NULL_PARAMETER.getMsg());
+        AssertUtil.canNotEmpty(map.get(AGENT_NAME), ErrorCode.NULL_PARAMETER.getMsg());
+        AssertUtil.canNotEmpty(map.get(COMMISSION_RATE), ErrorCode.NULL_PARAMETER.getMsg());
         this.params = map;
     }
 
@@ -51,8 +54,8 @@ public class JoinConsensusParam {
         return false;
     }
 
-    public Double getDeposit() {
-        return (Double) params.get(DEPOSIT);
+    public Long getDeposit() {
+        return (Long) params.get(DEPOSIT);
     }
 
     public String getAgentAddress() {
@@ -67,4 +70,7 @@ public class JoinConsensusParam {
         return (Double) params.get(COMMISSION_RATE);
     }
 
+    public String getAgentName() {
+        return (String) params.get(AGENT_NAME);
+    }
 }

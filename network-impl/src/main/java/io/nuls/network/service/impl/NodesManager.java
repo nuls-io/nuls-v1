@@ -164,9 +164,12 @@ public class NodesManager implements Runnable {
         }
     }
 
-    public void removeNode(String nodeId) {
+    public void removeNode(String nodeId,Integer type) {
         if (nodes.containsKey(nodeId)) {
             Node node = nodes.get(nodeId);
+            if(null!=type&&type!=node.getType()){
+                return;
+            }
             //When other modules call the interface,  close channel first
             if (StringUtils.isNotBlank(node.getChannelId())) {
                 SocketChannel channel = NioChannelMap.get(node.getChannelId());
@@ -192,7 +195,7 @@ public class NodesManager implements Runnable {
             node.setStatus(status);
             getNodeDao().removeNode(NodeTransferTool.toPojo(node));
 
-            removeNode(node.getId());
+            removeNode(node.getId(),null);
         }
     }
 

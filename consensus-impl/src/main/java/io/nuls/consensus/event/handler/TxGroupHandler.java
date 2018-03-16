@@ -85,10 +85,12 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
         block.setTxs(txs);
         ValidateResult<RedPunishData> vResult = block.verify();
         if (null == vResult || vResult.isFailed()) {
-            networkService.blackNode(fromId, NodePo.YELLOW);
             if (vResult.getLevel() == SeverityLevelEnum.FLAGRANT_FOUL) {
                 RedPunishData data = vResult.getObject();
                 ConsensusMeetingRunner.putPunishData(data);
+                networkService.blackNode(fromId, NodePo.BLACK);
+            }else{
+                networkService.blackNode(fromId, NodePo.YELLOW);
             }
             return;
         }

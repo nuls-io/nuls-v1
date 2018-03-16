@@ -96,7 +96,7 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
     public void start() {
         ledgerService.init();
         //cache the wallet's all accounts unSpend output
-        coinManager.cacheAllUnSpendOutPut();
+        coinManager.cacheAllUnSpendUtxo();
 
         SmallChangeThread smallChangeThread = SmallChangeThread.getInstance();
         TaskManager.createAndRunThread(this.getModuleId(), SmallChangeThread.class.getSimpleName(), smallChangeThread);

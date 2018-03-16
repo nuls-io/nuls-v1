@@ -81,4 +81,8 @@ public class NodeDownloadingStatus {
     public boolean finished() {
         return downloadedSet.size()==(end-start+1);
     }
+
+    public Set<Long> getDownloadedSet() {
+        return downloadedSet;
+    }
 }

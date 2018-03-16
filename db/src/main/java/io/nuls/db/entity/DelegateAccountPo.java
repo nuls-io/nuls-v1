@@ -27,6 +27,8 @@ public class DelegateAccountPo {
 
     private String id;
 
+    private String agentName;
+
     private String address;
 
     private String nodeAddress;
@@ -101,5 +103,13 @@ public class DelegateAccountPo {
 
     public int getStatus() {
         return status;
+    }
+
+    public String getAgentName() {
+        return agentName;
+    }
+
+    public void setAgentName(String agentName) {
+        this.agentName = agentName;
     }
 }

@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,6 +25,7 @@ package io.nuls.core.chain.entity;
 
 import io.nuls.core.chain.intf.NulsCloneable;
 import io.nuls.core.chain.manager.TransactionValidatorManager;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
@@ -71,7 +72,9 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
     // when localTx is true, should care transferType
     protected int transferType;
 
+
     public Transaction(int type) {
+        this.status = TxStatusEnum.CACHED;
         this.dataType = NulsDataType.TRANSACTION;
         this.time = TimeService.currentTimeMillis();
         this.type = type;
@@ -92,7 +95,7 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
         int size = 0;
         size += VarInt.sizeOf(type);
         size += VarInt.sizeOf(time);
-        size += VarInt.sizeOf(fee.getValue());
+        size += NulsConstant.INT48_VALUE_LENGTH1;
         size += Utils.sizeOfBytes(remark);
         size += Utils.sizeOfNulsData(txData);
         size += Utils.sizeOfNulsData(sign);
@@ -103,7 +106,7 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeVarInt(type);
         stream.writeVarInt(time);
-        stream.writeVarInt(fee.getValue());
+        stream.writeInt48(fee.getValue());
         stream.writeBytesWithLength(remark);
         stream.writeNulsData(txData);
         stream.writeNulsData(sign);
@@ -113,7 +116,7 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         type = (int) byteBuffer.readVarInt();
         time = byteBuffer.readVarInt();
-        long feeValue = byteBuffer.readVarInt();
+        long feeValue = byteBuffer.readInt48();
         this.fee = Na.valueOf(feeValue);
         this.remark = byteBuffer.readByLengthByte();
         txData = this.parseTxData(byteBuffer);

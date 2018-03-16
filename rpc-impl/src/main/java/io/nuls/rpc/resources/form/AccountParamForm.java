@@ -42,6 +42,8 @@ public class AccountParamForm {
 
     private String prikey;
 
+    private String newPassword;
+
     public String getPassword() {
         return password;
     }
@@ -80,5 +82,13 @@ public class AccountParamForm {
 
     public void setPrikey(String prikey) {
         this.prikey = prikey;
+    }
+
+    public String getNewPassword() {
+        return newPassword;
+    }
+
+    public void setNewPassword(String newPassword) {
+        this.newPassword = newPassword;
     }
 }

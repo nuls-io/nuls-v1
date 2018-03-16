@@ -26,7 +26,6 @@ package io.nuls.consensus.service.intf;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.core.chain.entity.Na;
-import io.nuls.core.chain.entity.NulsDigestData;
 
 import java.util.List;
 import java.util.Map;
@@ -41,7 +40,7 @@ public interface ConsensusService {
 
     void startConsensus(String address, String password, Map<String, Object> paramsMap);
 
-    void stopConsensus(NulsDigestData joinTxHash, String password);
+    void stopConsensus(String address, String password,Map<String, Object> paramsMap);
 
     List<Consensus> getConsensusAccountList();
 

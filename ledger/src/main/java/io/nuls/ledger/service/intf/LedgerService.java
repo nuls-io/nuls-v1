@@ -27,6 +27,7 @@ import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Result;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.ledger.entity.Balance;
 
@@ -57,7 +58,7 @@ public interface LedgerService {
 
     List<Transaction> getTxList(long height) throws Exception;
 
-    List<Transaction> getTxList(long height, int pageNum, int pageSize) throws Exception;
+    Page<Transaction> getTxList(long height, int pageNum, int pageSize) throws Exception;
 
     Balance getBalance(String address);
 
