@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,7 +23,6 @@
  */
 package io.nuls.ledger.service.impl;
 
-import io.nuls.account.entity.Account;
 import io.nuls.cache.service.intf.CacheService;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
@@ -31,17 +30,21 @@ import io.nuls.core.chain.entity.Result;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.tx.serivce.TransactionService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.core.utils.str.StringUtils;
+import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.dao.UtxoTransactionDataService;
-import io.nuls.db.entity.*;
+import io.nuls.db.entity.TransactionLocalPo;
+import io.nuls.db.entity.TransactionPo;
+import io.nuls.db.entity.UtxoInputPo;
+import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.Balance;
@@ -208,6 +211,18 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
+    public Page<Transaction> getTxList(long height, int pageNum, int pageSize) throws Exception {
+        Page<TransactionPo> poPage = txDao.getTxs(height, pageNum, pageSize);
+        Page<Transaction> txPage = new Page<>(poPage);
+        List<Transaction> txList = new ArrayList<>();
+        for (TransactionPo po : poPage.getList()) {
+            txList.add(UtxoTransferTool.toTransaction(po));
+        }
+        txPage.setList(txList);
+        return txPage;
+    }
+
+    @Override
     public Balance getBalance(String address) {
         Balance balance = ledgerCacheService.getBalance(address);
         if (null == balance) {
@@ -245,7 +260,16 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         TransferTransaction tx = null;
         try {
             tx = UtxoTransactionTool.getInstance().createTransferTx(coinData, password, remark);
-            tx.verify();
+            ValidateResult result = tx.verify();
+            if (!result.getErrorCode().getCode().equals(ErrorCode.SUCCESS.getCode())) {
+                throw new NulsException(ErrorCode.FAILED);
+            }
+//            byte[] txbytes = tx.serialize();
+//            TransferTransaction new_tx = new NulsByteBuffer(txbytes).readNulsData(new TransferTransaction());
+//            result = new_tx.verify();
+//            if(! result.getErrorCode().getCode().equals(ErrorCode.SUCCESS.getCode() ) ){
+//                throw new NulsException(ErrorCode.FAILED);
+//            }
             TransactionEvent event = new TransactionEvent();
             event.setEventBody(tx);
             eventBroadcaster.broadcastAndCacheAysn(event, true);
@@ -325,7 +349,12 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         List<TransactionLocalPo> localPoList = new ArrayList<>();
 
         for (TransactionPo po : poList) {
-            TransactionLocalPo localPo = new TransactionLocalPo(po);
+            TransactionLocalPo localPo = txDao.getLocaltx(po.getHash());
+            if (localPo != null) {
+                continue;
+            }
+
+            localPo = new TransactionLocalPo(po);
             for (UtxoInputPo inputPo : po.getInputs()) {
                 if (inputPo.getFromOutPut().getAddress().equals(address)) {
                     localPo.setTransferType(Transaction.TRANSFER_SEND);
@@ -362,7 +391,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     public void commitTx(Transaction tx) throws NulsException {
         AssertUtil.canNotEmpty(tx, ErrorCode.NULL_PARAMETER);
-        if (tx.getStatus() == TxStatusEnum.AGREED) {
+        if (tx.getStatus() != TxStatusEnum.AGREED) {
             return;
         }
         List<TransactionService> serviceList = getServiceList(tx.getClass());
@@ -397,6 +426,16 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         for (TransactionPo tx : txList) {
             txDao.deleteTx(tx.getHash());
         }
+    }
+
+    @Override
+    public long getBlockReward(long blockHeight) {
+        return txDao.getBlockReward(blockHeight);
+    }
+
+    @Override
+    public long getBlockFee(Long blockHeight) {
+        return txDao.getBlockFee(blockHeight);
     }
 
     public List<TransactionService> getServiceList(Class<? extends Transaction> txClass) {

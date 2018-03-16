@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,38 +21,45 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.consensus.entity.meeting;
 
-import io.nuls.consensus.entity.Consensus;
-import io.nuls.consensus.entity.member.Agent;
-import io.nuls.consensus.entity.member.Delegate;
-import io.nuls.core.chain.entity.Na;
-
-import java.util.List;
+import io.nuls.core.utils.crypto.Utils;
+import org.junit.Test;
 
 /**
  * @author Niels
- * @date 2017/12/29
+ * @date 2018/3/14
  */
-public class ConsensusGroup {
-    private Na allDepositNa;
-    private Consensus<Agent> agentConsensus;
-    private List<Consensus<Delegate>> delegateList;
+public class TimeTest {
 
-    public Consensus<Agent> getAgentConsensus() {
-        return agentConsensus;
+    @Test
+    public void test( ) {
+        long time = System.currentTimeMillis();
+        System.out.println(time);
+        byte[] array = getBytes(time);
+        long newTime = readTime(array);
+        System.out.println(newTime);
     }
 
-    public void setAgentConsensus(Consensus<Agent> agentConsensus) {
-        this.agentConsensus = agentConsensus;
+    private byte[] getBytes(long time) {
+        byte[] bytes = new byte[Utils.sizeOfInt6()];
+        bytes[0] = (byte) (0xFF & time);
+        bytes[1] = (byte) (0xFF & (time >> 8));
+        bytes[2] = (byte) (0xFF & (time >> 16));
+        bytes[3] = (byte) (0xFF & (time >> 24));
+        bytes[4] = (byte) (0xFF & (time >> 32));
+        bytes[5] = (byte) (0xFF & (time >> 40));
+        return bytes;
     }
 
-    public List<Consensus<Delegate>> getDelegateList() {
-        return delegateList;
-    }
-
-    public void setDelegateList(List<Consensus<Delegate>> delegateList) {
-        this.delegateList = delegateList;
+    private long readTime(byte[] bytes) {
+        long value = (bytes[0] & 0xffL) |
+                ((bytes[1] & 0xffL) << 8) |
+                ((bytes[2] & 0xffL) << 16) |
+                ((bytes[3] & 0xffL) << 24) |
+                ((bytes[4] & 0xffL) << 32) |
+                ((bytes[5] & 0xffL) << 40);
+        return value;
     }
 }

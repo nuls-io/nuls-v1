@@ -73,7 +73,7 @@ public class NulsDigestData extends BaseNulsData {
 
     @Override
     public int size() {
-        return Utils.sizeOfSerialize(digestBytes) + 2;
+        return Utils.sizeOfBytes(digestBytes) + 2;
     }
 
     @Override

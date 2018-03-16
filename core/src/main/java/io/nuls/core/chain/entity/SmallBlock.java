@@ -43,10 +43,10 @@ public class SmallBlock extends BaseNulsData {
 
     @Override
     public int size() {
-        int size = Utils.sizeOfSerialize(blockHash);
-        size += Utils.sizeOfSerialize(txCount);
+        int size = Utils.sizeOfNulsData(blockHash);
+        size += Utils.sizeOfLong(txCount);
         for (NulsDigestData hash : txHashList) {
-            size += Utils.sizeOfSerialize(hash);
+            size += Utils.sizeOfNulsData(hash);
         }
         return size;
     }

@@ -99,12 +99,8 @@ public class ConsensusManager implements Runnable {
     public void init() {
         loadConfigration();
         accountService = NulsContext.getServiceBean(AccountService.class);
-        List<Account> list = this.accountService.getAccountList();
-        boolean noneAccount = list == null || list.isEmpty();
-        if (this.partakePacking && noneAccount) {
-            Account account = this.accountService.createAccount(PocConsensusConstant.DEFAULT_WALLET_PASSWORD);
-            this.accountService.setDefaultAccount(account.getAddress().getBase58());
-            NulsContext.LOCAL_ADDRESS_LIST.add(account.getAddress().getBase58());
+        if (this.partakePacking) {
+            //todo
         }
         blockCacheManager = BlockCacheManager.getInstance();
         blockCacheManager.init();
@@ -127,13 +123,13 @@ public class ConsensusManager implements Runnable {
         ConsensusStatusInfo info = new ConsensusStatusInfo();
         for (String address : NulsContext.LOCAL_ADDRESS_LIST) {
             if (this.seedNodeList.contains(address)) {
-                info.setAddress(address);
+                info.setAccount(accountService.getAccount(address));
                 info.setStatus(ConsensusStatusEnum.IN.getCode());
                 break;
             }
             for (Consensus<Agent> agent : agentList) {
                 if (agent.getExtend().getDelegateAddress().equals(address)) {
-                    info.setAddress(address);
+                    info.setAccount(accountService.getAccount(address));
                     info.setStatus(agent.getExtend().getStatus());
                     if (ConsensusStatusEnum.IN.getCode() == info.getStatus()) {
                         break;
@@ -141,7 +137,7 @@ public class ConsensusManager implements Runnable {
                 }
             }
         }
-        if (info.getAddress() == null) {
+        if (info.getAccount() == null) {
             info.setStatus(ConsensusStatusEnum.NOT_IN.getCode());
         }
         this.consensusStatusInfo = info;

@@ -27,8 +27,6 @@ package io.nuls.consensus.entity;
 
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.date.TimeService;
@@ -36,8 +34,6 @@ import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Niels
@@ -55,20 +51,20 @@ public class GetSmallBlockParam extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += NulsConstant.TIME_VALUE_LENGTH;
-        size += Utils.sizeOfSerialize(blockHash);
+        size += Utils.sizeOfInt6();
+        size += Utils.sizeOfNulsData(blockHash);
         return size;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeTime(time);
+        stream.writeInt48(time);
         stream.writeNulsData(blockHash);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.time = byteBuffer.readTime();
+        this.time = byteBuffer.readInt48();
         this.blockHash = byteBuffer.readHash();
     }
 

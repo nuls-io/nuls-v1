@@ -24,6 +24,7 @@
 package io.nuls.consensus.entity.validator.block.header;
 
 import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.core.utils.str.StringUtils;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 
@@ -44,10 +45,6 @@ public class HeaderFieldValidator implements NulsDataValidator<BlockHeader> {
         ValidateResult result = ValidateResult.getSuccessResult();
         boolean failed = false;
         do {
-            if (data.getSign() == null) {
-                failed = true;
-                break;
-            }
             if (data.getHash() == null) {
                 failed = true;
                 break;
@@ -60,7 +57,7 @@ public class HeaderFieldValidator implements NulsDataValidator<BlockHeader> {
                 failed = true;
                 break;
             }
-            if (data.getPackingAddress() == null) {
+            if (StringUtils.isBlank(data.getPackingAddress())) {
                 failed = true;
                 break;
             }

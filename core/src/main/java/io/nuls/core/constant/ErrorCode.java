@@ -55,6 +55,7 @@ public enum ErrorCode {
     MODULE_LOAD_TIME_OUT("SYS017", 10017),
     PARAMETER_ERROR("SYS018", 10018),
     DATA_NOT_FOUND("SYS019", 10019),
+    FILE_BROKEN("SYS020", 20020),
     /**
      * ----------  Consensus Network code   ---------
      */
@@ -85,7 +86,7 @@ public enum ErrorCode {
      */
     PASSWORD_IS_WRONG("ACT000", 45000),
     ACCOUNT_NOT_EXIST("ACT001", 45001),
-    ACCOUNT_IS_ALREADY_ENCRYPTED("ACT002", 45001),
+    ACCOUNT_IS_ALREADY_ENCRYPTED("ACT002", 45002),
 
     /**
      * ----------  DB Exception code   ---------
@@ -126,8 +127,9 @@ public enum ErrorCode {
     /**
      * ------------  Ledger Exception code   --------------
      */
-    BALANCE_NOT_ENOUGH("LED001", 70001),
-    UTXO_STATUS_CHANGE("LED002", 700002),
+    UTXO_SPENT("LED001", 70001),
+    UTXO_STATUS_CHANGE("LED002", 70002),
+    BALANCE_NOT_ENOUGH("LED003", 70003),
 
     /**
      * messages

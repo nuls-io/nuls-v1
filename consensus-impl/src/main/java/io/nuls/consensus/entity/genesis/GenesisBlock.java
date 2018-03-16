@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,12 +23,15 @@
  */
 package io.nuls.consensus.entity.genesis;
 
+import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.utils.StringFileLoader;
 import io.nuls.core.chain.entity.*;
 import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.TxStatusEnum;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.crypto.Hex;
@@ -37,6 +40,7 @@ import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.json.JSONUtils;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
+import io.nuls.core.validate.ValidateResult;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.tx.CoinBaseTransaction;
@@ -87,9 +91,12 @@ public final class GenesisBlock extends Block {
         String time = (String) jsonMap.get(CONFIG_FILED_TIME);
         AssertUtil.canNotEmpty(time, ErrorCode.CONFIG_ERROR);
         blockTime = Long.parseLong(time);
-
         this.initGengsisTxs(jsonMap);
         this.fillHeader(jsonMap);
+        ValidateResult validateResult = this.verify();
+        if (validateResult.isFailed()) {
+            throw new NulsRuntimeException(validateResult.getErrorCode(), validateResult.getMessage());
+        }
     }
 
     private void initGengsisTxs(Map<String, Object> jsonMap) {
@@ -135,9 +142,13 @@ public final class GenesisBlock extends Block {
             Log.error(e);
             throw new NulsRuntimeException(e);
         }
-        //todo 用prikey
-        tx.setSign(NulsSignData.EMPTY_SIGN);
+        try {
+            tx.setSign(this.signature(tx.getHash().serialize()));
+        } catch (IOException e) {
+            Log.error(e);
+        }
         List<Transaction> txlist = new ArrayList<>();
+//        tx.setStatus(TxStatusEnum.AGREED);
         txlist.add(tx);
         setTxs(txlist);
     }
@@ -171,11 +182,16 @@ public final class GenesisBlock extends Block {
         }
         header.setPackingAddress(address);
         header.setHash(NulsDigestData.calcDigestData(header));
-        //todo change to real address & signature
-        //todo 用prikey
-        header.setSign(NulsSignData.EMPTY_SIGN);
+        try {
+            header.setSign(this.signature(header.getHash().serialize()));
+        } catch (IOException e) {
+            Log.error(e);
+        }
     }
 
-
+    private NulsSignData signature(byte[] bytes) {
+        AccountService service = NulsContext.getServiceBean(AccountService.class);
+        return service.signData(bytes, Hex.decode(priKey));
+    }
 }
 

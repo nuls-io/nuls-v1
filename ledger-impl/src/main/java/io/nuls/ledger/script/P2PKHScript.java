@@ -47,13 +47,17 @@ public class P2PKHScript extends Script {
         this.publicKeyDigest = publicKeyDigest;
     }
 
-    public P2PKHScript(byte[] bytes)throws NulsException{
+    public P2PKHScript() {
+    }
+
+    public P2PKHScript(byte[] bytes) throws NulsException {
+        this();
         NulsDigestData nulsDigestData = new NulsDigestData();
         nulsDigestData.parse(bytes);
         this.publicKeyDigest = nulsDigestData;
     }
 
-    public P2PKHScript(NulsDigestData publicKeyDigest){
+    public P2PKHScript(NulsDigestData publicKeyDigest) {
         this.publicKeyDigest = publicKeyDigest;
     }
 
@@ -73,11 +77,11 @@ public class P2PKHScript extends Script {
     }
 
     @Override
-    public byte[] getBytes(){
+    public byte[] getBytes() {
         try {
             return publicKeyDigest.serialize();
         } catch (IOException e) {
-            return  null;
+            return null;
         }
     }
 

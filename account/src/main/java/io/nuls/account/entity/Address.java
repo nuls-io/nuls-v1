@@ -71,7 +71,7 @@ public class Address {
         this.hash160 = hash160;
     }
 
-    private byte[] getHash160() {
+    public byte[] getHash160() {
         return hash160;
     }
 

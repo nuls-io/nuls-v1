@@ -28,6 +28,8 @@ import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
+import io.nuls.consensus.entity.ConsensusAgentImpl;
+import io.nuls.consensus.entity.ConsensusDelegateImpl;
 import io.nuls.consensus.entity.block.BlockData;
 import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.entity.member.Agent;
@@ -112,7 +114,8 @@ public class ConsensusTool {
         agent.setIntroduction(po.getRemark());
         agent.setStartTime(po.getStartTime());
         agent.setStatus(po.getStatus());
-        Consensus<Agent> ca = new Consensus<>();
+        agent.setAgentName(po.getAgentName());
+        Consensus<Agent> ca = new ConsensusAgentImpl();
         ca.setAddress(po.getAddress());
         ca.setExtend(agent);
         return ca;
@@ -122,7 +125,7 @@ public class ConsensusTool {
         if (null == po) {
             return null;
         }
-        Consensus<Delegate> ca = new Consensus<>();
+        Consensus<Delegate> ca = new ConsensusDelegateImpl();
         ca.setAddress(po.getAddress());
         Delegate delegate = new Delegate();
         delegate.setDelegateAddress(po.getAgentAddress());
@@ -145,6 +148,8 @@ public class ConsensusTool {
         po.setNodeAddress(bean.getExtend().getDelegateAddress());
         po.setId(bean.getAddress());
         po.setStatus(bean.getExtend().getStatus());
+        po.setAgentName(bean.getExtend().getAgentName());
+        po.setCommissionRate(bean.getExtend().getCommissionRate());
         return po;
     }
 
@@ -161,8 +166,7 @@ public class ConsensusTool {
         return po;
     }
 
-    public static Block createBlock(BlockData blockData) {
-        Account account = accountService.getDefaultAccount();
+    public static Block createBlock(BlockData blockData,Account account) {
         if (null == account) {
             throw new NulsRuntimeException(ErrorCode.ACCOUNT_NOT_EXIST);
         }
@@ -187,7 +191,7 @@ public class ConsensusTool {
         header.setPackingAddress(account.getAddress().toString());
         header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
         header.setHash(NulsDigestData.calcDigestData(block.getHeader()));
-        header.setSign(accountService.signData(header.getHash(), PocConsensusConstant.DEFAULT_WALLET_PASSWORD));
+        header.setSign(accountService.signData(header.getHash(),account, NulsContext.CACHED_PASSWORD_OF_WALLET));
         return block;
     }
 

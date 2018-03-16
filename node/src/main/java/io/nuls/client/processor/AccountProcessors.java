@@ -61,13 +61,83 @@ public abstract class AccountProcessors implements CommandProcessor {
                 return false;
             }
             AssertUtil.canNotEmpty(args[1]);
-            AssertUtil.canNotEmpty(args[2]);
             return true;
         }
 
         @Override
         public CommandResult execute(String[] args) {
             RpcClientResult result = accountService.create(args[1], Integer.parseInt(args[2]));
+            if (null == result) {
+                return CommandResult.getFailed("Failure to execute");
+            }
+            return CommandResult.getResult(result);
+        }
+    }
+
+
+    /**
+     * get the balance of a address
+     */
+    public static class GetBalance extends AccountProcessors {
+
+        @Override
+        public String getCommand() {
+            return "balance";
+        }
+
+        @Override
+        public String getCommandDescription() {
+            return "balance <address> --get the balance of a address";
+        }
+
+        @Override
+        public boolean argsValidate(String[] args) {
+            if (args.length != 2) {
+                return false;
+            }
+            AssertUtil.canNotEmpty(args[1]);
+            return true;
+        }
+
+        @Override
+        public CommandResult execute(String[] args) {
+            RpcClientResult result = accountService.getBalance(args[1]);
+            if (null == result) {
+                return CommandResult.getFailed("Failure to execute");
+            }
+            return CommandResult.getResult(result);
+        }
+    }
+
+
+    /**
+     * get the balance of a address
+     */
+    public static class ImportAccount extends AccountProcessors {
+
+        @Override
+        public String getCommand() {
+            return "import";
+        }
+
+        @Override
+        public String getCommandDescription() {
+            return "balance <prikey> <password> --import an account by prikey";
+        }
+
+        @Override
+        public boolean argsValidate(String[] args) {
+            if (args.length != 3) {
+                return false;
+            }
+            AssertUtil.canNotEmpty(args[1]);
+            AssertUtil.canNotEmpty(args[2]);
+            return true;
+        }
+
+        @Override
+        public CommandResult execute(String[] args) {
+            RpcClientResult result = accountService.importAccount(args[1],args[2]);
             if (null == result) {
                 return CommandResult.getFailed("Failure to execute");
             }

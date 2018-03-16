@@ -30,7 +30,6 @@ import io.nuls.db.dao.impl.mybatis.*;
 import io.nuls.db.dao.impl.mybatis.session.SessionManager;
 import io.nuls.db.exception.DBException;
 import io.nuls.db.module.AbstractDBModule;
-import io.nuls.module.version.DbMavenInfo;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;

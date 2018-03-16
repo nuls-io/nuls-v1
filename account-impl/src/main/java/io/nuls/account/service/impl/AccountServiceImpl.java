@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,10 +23,10 @@
  */
 package io.nuls.account.service.impl;
 
-import com.sun.org.apache.regexp.internal.RE;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
+import io.nuls.account.entity.Alias;
 import io.nuls.account.entity.tx.AliasTransaction;
 import io.nuls.account.entity.validator.AliasValidator;
 import io.nuls.account.event.*;
@@ -57,8 +57,8 @@ import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.core.validate.ValidateResult;
-import io.nuls.db.dao.AccountDataService;
 import io.nuls.db.dao.AccountAliasDataService;
+import io.nuls.db.dao.AccountDataService;
 import io.nuls.db.dao.AliasDataService;
 import io.nuls.db.entity.AccountPo;
 import io.nuls.db.entity.AliasPo;
@@ -75,7 +75,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -111,13 +110,8 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public void start() {
         List<Account> accounts = getAccountList();
-        Set<String> addressList = new HashSet<>();
-        if (accounts != null && !accounts.isEmpty()) {
-            NulsContext.DEFAULT_ACCOUNT_ID = accounts.get(0).getAddress().getBase58();
-            for (Account account : accounts) {
-                addressList.add(account.getAddress().getBase58());
-            }
-            NulsContext.LOCAL_ADDRESS_LIST = addressList;
+        if(accounts.size()>0) {
+            setDefaultAccount(accounts.get(0).getAddress().getBase58());
         }
     }
 
@@ -163,21 +157,24 @@ public class AccountServiceImpl implements AccountService {
             return new Result<>(false, "between 0 and 100 can be created at once");
         }
 
+        //todo need to recover the status of the wallet.
         if (!StringUtils.validPassword(password)) {
             return new Result(false, "Length between 8 and 20, the combination of characters and numbers");
         }
 
         Account defaultAccount = getDefaultAccount();
-        if (defaultAccount != null) {
-            defaultAccount.decrypt(password);
-            if (defaultAccount.isEncrypted()) {
-                return new Result(false, "incorrect password");
+        if (defaultAccount != null && defaultAccount.isEncrypted()) {
+            try {
+                if (!defaultAccount.unlock(password)) {
+                    return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
+                }
+            }catch (NulsException e){
+                return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
             }
         }
 
         locker.lock();
         try {
-            defaultAccount.encrypt(password);
             List<Account> accounts = new ArrayList<>();
             List<AccountPo> accountPos = new ArrayList<>();
             List<String> resultList = new ArrayList<>();
@@ -201,40 +198,40 @@ public class AccountServiceImpl implements AccountService {
                 notice.setEventBody(account);
                 eventBroadcaster.publishToLocal(notice);
             }
+            if(getDefaultAccount() == null) {
+                setDefaultAccount(accounts.get(0).getAddress().getBase58());
+            }
             return new Result<>(true, "OK", resultList);
         } catch (Exception e) {
             Log.error(e);
+            //todo remove newaccounts
             throw new NulsRuntimeException(ErrorCode.FAILED, "create account failed!");
         } finally {
+
             locker.unlock();
         }
     }
 
-
     @Override
     public Account getDefaultAccount() {
-        if (NulsContext.DEFAULT_ACCOUNT_ID == null) {
-            return null;
+        Account account = null;
+        if (NulsContext.DEFAULT_ACCOUNT_ID != null) {
+            account = getAccount(NulsContext.DEFAULT_ACCOUNT_ID);
         }
-        return getAccount(NulsContext.DEFAULT_ACCOUNT_ID);
+        if (account == null) {
+            List<Account> accounts = getAccountList();
+            if (accounts != null && !accounts.isEmpty()) {
+                account = accounts.get(0);
+                NulsContext.DEFAULT_ACCOUNT_ID = account.getAddress().getBase58();
+            }
+        }
+        return account;
     }
 
     @Override
     public Account getAccount(String address) {
         AssertUtil.canNotEmpty(address, "");
         Account account = accountCacheService.getAccountByAddress(address);
-        if (account == null) {
-            AliasPo aliasPo = aliasDataService.getByAddress(address);
-            if (aliasPo != null) {
-                try {
-                    account = new Account();
-                    account.setAddress(Address.fromHashs(address));
-                    account.setAlias(aliasPo.getAlias());
-                } catch (NulsException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
         return account;
     }
 
@@ -288,17 +285,24 @@ public class AccountServiceImpl implements AccountService {
             Result result = new Result(true, "OK", Hex.encode(account.getPriKey()));
             return result;
         } else {
-            if (!account.unlock(password)) {
+            try {
+                if (!account.unlock(password)) {
+                    return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
+                }
+                byte[] publicKeyBytes = account.getPriKey();
+                account.lock();
+                return new Result(true, "OK", Hex.encode(publicKeyBytes));
+            }catch (NulsException e){
                 return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
             }
-            byte[] publicKeyBytes = account.getPriKey();
-            account.lock();
-            return new Result(true, "OK", Hex.encode(publicKeyBytes));
         }
     }
 
     @Override
     public void setDefaultAccount(String id) {
+        if(id == null){
+            return ;
+        }
         Account account = accountCacheService.getAccountById(id);
         if (null != account) {
             NulsContext.DEFAULT_ACCOUNT_ID = id;
@@ -366,12 +370,10 @@ public class AccountServiceImpl implements AccountService {
 
             List<AccountPo> accountPoList = new ArrayList<>();
             for (Account account : accounts) {
-                if (!account.decrypt(oldPassword)) {
+                if (!account.unlock(oldPassword)) {
                     return new Result(false, "old password error");
                 }
-
-                account.decrypt(oldPassword);
-                account.encrypt(newPassword);
+                account.encrypt(newPassword,true);
 
                 AccountPo po = new AccountPo();
                 AccountTool.toPojo(account, po);
@@ -419,8 +421,12 @@ public class AccountServiceImpl implements AccountService {
         }
 
         for (Account account : accounts) {
-            if (!account.decrypt(password)) {
-                return new Result(false, "password error");
+            try {
+                if (!account.unlock(password)) {
+                    return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
+                }
+            }catch (NulsException e){
+                return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
             }
         }
 
@@ -446,19 +452,9 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public NulsSignData signData(byte[] bytes, String password) {
-        return this.signData(bytes, this.getDefaultAccount(), password);
-    }
-
-    @Override
     public NulsSignData signData(byte[] bytes, byte[] priKey) {
         //todo
         return NulsSignData.EMPTY_SIGN;
-    }
-
-    @Override
-    public NulsSignData signData(NulsDigestData digestData, String password) {
-        return this.signData(digestData, this.getDefaultAccount(), password);
     }
 
     @Override
@@ -548,7 +544,11 @@ public class AccountServiceImpl implements AccountService {
                 return Result.getFailed(ErrorCode.DATA_NOT_FOUND);
             }
             if (account.isEncrypted()) {
-                if (!StringUtils.validPassword(password) || !account.decrypt(password)) {
+                try {
+                    if (!StringUtils.validPassword(password) || !account.decrypt(password)) {
+                        return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
+                    }
+                }catch (NulsException e){
                     return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
                 }
             }
@@ -569,12 +569,9 @@ public class AccountServiceImpl implements AccountService {
         }
         List<String> prikeyList = new ArrayList<>();
         for (Account account : accounts) {
-            account.decrypt(password);
-            if (account.isEncrypted()) {
-                return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
-            }
-            prikeyList.add(Hex.encode(account.getPriKey()));
             try {
+                account.unlock(password);
+                prikeyList.add(Hex.encode(account.getPriKey()));
                 account.encrypt(password);
             } catch (NulsException e) {
                 return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
@@ -584,7 +581,7 @@ public class AccountServiceImpl implements AccountService {
         Map<String, Object> map = new HashMap<>();
         map.put("prikeys", prikeyList);
         map.put("password", MD5Util.md5(password));
-        return new Result(true, "OK", prikeyList);
+        return new Result(true, "OK", map);
     }
 
 
@@ -668,24 +665,31 @@ public class AccountServiceImpl implements AccountService {
             return Result.getFailed("invalid prikey");
         }
 
+        //maybe account has been imported
         AccountPo accountPo = accountDao.get(account.getAddress().getBase58());
         if (accountPo != null) {
             return Result.getSuccess();
-        }else {
+        } else {
             accountPo = new AccountPo();
         }
 
         Account defaultAcct = getDefaultAccount();
-        if (!defaultAcct.decrypt(password)) {
-            return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
+        if (defaultAcct != null) {
+            try {
+                if (!defaultAcct.decrypt(password)) {
+                    return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
+                }
+                defaultAcct.encrypt(password);
+            } catch (NulsException e) {
+                e.printStackTrace();
+            }
         }
-
         try {
-            defaultAcct.encrypt(password);
             account.encrypt(password);
         } catch (NulsException e) {
-
+            e.printStackTrace();
         }
+
         // save db
         AccountTool.toPojo(account, accountPo);
         AliasPo aliasPo = aliasDataService.getByAddress(accountPo.getAddress());
@@ -707,62 +711,60 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Result importAccountsFile(String walletFilePath) {
-        if (StringUtils.isBlank(walletFilePath)) {
-            return new Result(false, "walletFilePath is required");
-        }
-        File walletFile = new File(walletFilePath);
-        if (!walletFile.exists()) {
-            return new Result(false, "file not found");
-        }
-
-        FileInputStream fis = null;
-        try {
-            fis = new FileInputStream(walletFile);
-            byte[] datas = new byte[fis.available()];
-            fis.read(datas);
-
-            NulsByteBuffer buffer = new NulsByteBuffer(datas);
-            int accountSize = (int) buffer.readVarInt();
-            List<Account> accounts = new ArrayList<>();
-
-            for (int i = 0; i < accountSize; i++) {
-                Account account = new Account(buffer);
-                if (accountExist(account)) {
-                    continue;
+    @DbSession
+    public Result importAccounts(List<String> keys, String password) {
+        Account account = null;
+        AccountPo accountPo = null;
+        AliasPo aliasPo = null;
+        Account defaultAcct = getDefaultAccount();
+        if (defaultAcct != null) {
+            try {
+                if (!defaultAcct.decrypt(password)) {
+                    return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
                 }
-                int txSize = (int) buffer.readVarInt();
-                List<Transaction> txList = new ArrayList<>();
-                for (int j = 0; j < txSize; j++) {
-                    Transaction tx = TransactionManager.getInstance(buffer);
-                    txList.add(tx);
-                }
-                account.setMyTxs(txList);
-                accounts.add(account);
-            }
-
-            //save database
-            importSave(accounts);
-
-            for (Account account : accounts) {
-                accountCacheService.putAccount(account);
-                AccountImportedNotice notice = new AccountImportedNotice();
-                notice.setEventBody(account);
-                eventBroadcaster.publishToLocal(notice);
-            }
-        } catch (Exception e) {
-            Log.error(e);
-            return new Result(false, "import failed, file is broken");
-        } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException e) {
-                    Log.error(e);
-                }
+                defaultAcct.encrypt(password);
+            } catch (NulsException e) {
             }
         }
-        return new Result(true, "OK");
+
+        for (String priKey : keys) {
+            try {
+                account = AccountTool.createAccount(priKey);
+            } catch (NulsException e) {
+                return Result.getFailed("invalid prikey");
+            }
+            accountPo = accountDao.get(account.getAddress().getBase58());
+            if (accountPo != null) {
+                continue;
+            } else {
+                accountPo = new AccountPo();
+            }
+            // save db
+            AccountTool.toPojo(account, accountPo);
+            aliasPo = aliasDataService.getByAddress(accountPo.getAddress());
+            if (aliasPo != null) {
+                account.setAlias(aliasPo.getAlias());
+                accountPo.setAlias(aliasPo.getAlias());
+            }
+            accountDao.save(accountPo);
+            ledgerService.saveTxInLocal(accountPo.getAddress());
+
+            // save cache
+            accountCacheService.putAccount(account);
+            NulsContext.LOCAL_ADDRESS_LIST.add(accountPo.getAddress());
+            ledgerService.getBalance(accountPo.getAddress());
+        }
+        return Result.getSuccess();
+    }
+
+    @Override
+    public Alias getAlias(String address) {
+        AliasPo aliasPo = aliasDataService.getByAddress(address);
+        if (aliasPo == null) {
+            return null;
+        }
+        Alias alias = new Alias(aliasPo.getAddress(), aliasPo.getAlias());
+        return alias;
     }
 
     private boolean accountExist(Account account) {

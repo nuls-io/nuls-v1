@@ -52,6 +52,9 @@ public class GetBlockHandler extends AbstractEventHandler<GetBlockRequest> {
     public void onEvent(GetBlockRequest event, String fromId) {
         List<Block> blockList = blockService.getBlockList(event.getStart(), event.getEnd());
         for (Block block : blockList) {
+            if(null==block){
+                continue;
+            }
             BlockEvent blockEvent = new BlockEvent();
             blockEvent.setEventBody(block);
             eventBroadcaster.sendToNode(blockEvent, fromId);

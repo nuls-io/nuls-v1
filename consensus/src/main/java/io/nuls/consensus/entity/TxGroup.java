@@ -51,7 +51,7 @@ public class TxGroup extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += Utils.sizeOfSerialize(blockHash);
+        size += Utils.sizeOfNulsData(blockHash);
         size += VarInt.sizeOf(txList.size());
         size += this.getTxListLength();
         return size;
@@ -84,7 +84,7 @@ public class TxGroup extends BaseNulsData {
     private int getTxListLength() {
         int size = 0;
         for (Transaction tx : txList) {
-            size += Utils.sizeOfSerialize(tx);
+            size += Utils.sizeOfNulsData(tx);
         }
         return size;
     }

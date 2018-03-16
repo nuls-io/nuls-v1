@@ -65,7 +65,7 @@ public class NulsSignData extends BaseNulsData {
 
     @Override
     public int size() {
-        return Utils.sizeOfSerialize(signBytes) + 2;
+        return Utils.sizeOfBytes(signBytes) + 2;
     }
 
     @Override

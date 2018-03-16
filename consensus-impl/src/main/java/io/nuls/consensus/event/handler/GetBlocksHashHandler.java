@@ -31,7 +31,6 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 
@@ -62,12 +61,12 @@ public class GetBlocksHashHandler extends AbstractEventHandler<GetBlocksHashRequ
                 block = blockService.getBlock(event.getEventBody().getEnd());
             }
             if (null == block) {
-                block = blockService.getLocalBestBlock();
+                return;
             }
             response.put(block.getHeader().getHeight(), block.getHeader().getHash());
             sendResponse(response, fromId);
         } else {
-            List<BlockHeader> list = this.blockService.getBlockHashList(event.getEventBody().getStart(), event.getEventBody().getEnd(), event.getEventBody().getSplit());
+            List<BlockHeader> list = this.blockService.getBlockHeaderList(event.getEventBody().getStart(), event.getEventBody().getEnd(), event.getEventBody().getSplit());
             List<Long> resultHeightList = new ArrayList<>();
             List<NulsDigestData> resultHashList = new ArrayList<>();
             for (int i = 0; i < list.size(); i++) {
@@ -76,6 +75,10 @@ public class GetBlocksHashHandler extends AbstractEventHandler<GetBlocksHashRequ
             }
             if (resultHeightList.isEmpty() || resultHeightList.get(resultHeightList.size() - 1) < event.getEventBody().getEnd()) {
                 Block block = this.blockService.getBlock(event.getEventBody().getEnd());
+                if(block==null){
+                    //todo why?
+                    return ;
+                }
                 resultHeightList.add(block.getHeader().getHeight());
                 resultHashList.add(block.getHeader().getHash());
             }

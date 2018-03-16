@@ -77,7 +77,7 @@ public class Delegate extends BaseNulsData {
     public int size() {
         int size = 0;
         size += VarInt.sizeOf(deposit.getValue());
-        size += Utils.sizeOfSerialize(delegateAddress);
+        size += Utils.sizeOfString(delegateAddress);
         return size;
     }
 

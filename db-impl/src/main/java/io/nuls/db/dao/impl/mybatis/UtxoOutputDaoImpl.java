@@ -25,6 +25,7 @@ package io.nuls.db.dao.impl.mybatis;
 
 import com.github.pagehelper.PageHelper;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.db.dao.impl.mybatis.mapper.UtxoOutputMapper;
@@ -133,6 +134,15 @@ public class UtxoOutputDaoImpl extends BaseDaoImpl<UtxoOutputMapper, Map<String,
         Searchable searchable = new Searchable();
         searchable.addCondition("tx_hash", SearchOperator.eq, txHash);
         getMapper().deleteBySearchable(searchable);
+    }
+
+    @Override
+    public long getRewardByBlockHeight(long height) {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("a.type", SearchOperator.eq, TransactionConstant.TX_TYPE_COIN_BASE);
+        searchable.addCondition("a.height", SearchOperator.eq, height);
+
+        return 0;
     }
 
 }

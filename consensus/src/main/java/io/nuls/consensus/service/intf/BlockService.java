@@ -37,25 +37,17 @@ import java.util.List;
  */
 public interface BlockService {
 
-    /**
-     * @return
-     */
     Block getGengsisBlock();
 
-    /**
-     * @return
-     */
     long getLocalHeight();
 
     long getLocalSavedHeight();
 
     Block getLocalBestBlock();
 
-    /**
-     * @param height
-     * @return
-     */
     BlockHeader getBlockHeader(long height);
+
+    BlockHeader getBlockHeader(String hash);
 
     Block getBlock(String hash);
 
@@ -67,7 +59,7 @@ public interface BlockService {
 
     void rollbackBlock(long height) throws NulsException;
 
-    List<BlockHeader> getBlockHashList(long start, long end, long split);
+    List<BlockHeader> getBlockHeaderList(long start, long end, long split);
 
     BlockHeader getBlockHeader(NulsDigestData hash);
 }

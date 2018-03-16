@@ -87,10 +87,10 @@ public class BalanceChangeData extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += Utils.sizeOfSerialize(address);
+        size += Utils.sizeOfString(address);
         size += 1;
         size += 1;
-        size += Utils.sizeOfSerialize(amount.getValue());
+        size += Utils.sizeOfLong(amount.getValue());
         return size;
     }
 

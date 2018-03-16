@@ -25,6 +25,7 @@ package io.nuls.core.utils.crypto;
 
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.VarInt;
@@ -131,7 +132,7 @@ public class Utils {
     }
 
     /**
-     *Given a textual message, returns a byte buffer formatted as follows:</p>
+     * Given a textual message, returns a byte buffer formatted as follows:</p>
      *
      * <tt><p>[24] "Bitcoin Signed Message:\n" [message.length as a varint] message</p></tt>
      */
@@ -463,12 +464,15 @@ public class Utils {
         return (long) (Math.random() * Long.MAX_VALUE);
     }
 
-    private static int sizeOfDouble(Double val) {
+    public static int sizeOfDouble(Double val) {
         byte[] bytes = Utils.double2Bytes(val);
         return VarInt.sizeOf(bytes.length) + bytes.length;
     }
 
-    private static int sizeOfString(String val) {
+    public static int sizeOfString(String val) {
+        if(null==val){
+            return 1;
+        }
         byte[] bytes;
         try {
             bytes = val.getBytes(NulsContext.DEFAULT_ENCODING);
@@ -476,32 +480,42 @@ public class Utils {
             Log.error(e);
             throw new NulsRuntimeException(e);
         }
-        return VarInt.sizeOf(bytes.length) + bytes.length;
+        return sizeOfBytes(bytes);
     }
 
-    public static int sizeOfSerialize(Object val) {
+    public static int sizeOfLong(Long val) {
+        return VarInt.sizeOf(val);
+    }
+
+    public static int sizeOfInt6() {
+        return NulsConstant.INT48_VALUE_LENGTH1;
+    }
+
+    public static int sizeOfInt(Integer val) {
+        return VarInt.sizeOf(val);
+    }
+
+    public static int sizeOfShort(Short val) {
+        return 2;
+    }
+
+    public static int sizeOfBoolean(Boolean val) {
+        return 1;
+    }
+
+    public static int sizeOfBytes(byte[] val) {
         if (null == val) {
-            return 4;
-        }
-        if (val instanceof String) {
-           return sizeOfString((String) val);
-        } else if (val instanceof Long) {
-            return VarInt.sizeOf((Long) val);
-        } else if (val instanceof Integer) {
-            return VarInt.sizeOf((Integer) val);
-        } else if (val instanceof Double) {
-            return sizeOfDouble((Double) val);
-        } else if (val instanceof Short) {
-            return 2;
-        } else if (val instanceof Boolean) {
             return 1;
-        } else if (val instanceof byte[]) {
-            return VarInt.sizeOf(((byte[]) val).length) + ((byte[]) val).length;
-        } else if (val instanceof BaseNulsData) {
-            int size = ((BaseNulsData) val).size();
-            return size == 0 ? 1 : size;
         }
-        throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "instance of unkown");
+        return VarInt.sizeOf((val).length) + (val).length;
+    }
+
+    public static int sizeOfNulsData(BaseNulsData val) {
+        if (null == val) {
+            return NulsConstant.PLACE_HOLDER.length;
+        }
+        int size = val.size();
+        return size == 0 ? 1 : size;
     }
 
 }

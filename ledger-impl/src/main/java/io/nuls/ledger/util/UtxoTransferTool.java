@@ -79,7 +79,9 @@ public class UtxoTransferTool {
         po.setValue(output.getValue());
         po.setLockTime(output.getLockTime());
         po.setAddress(Address.fromHashs(output.getAddress()).getBase58());
-        po.setScript(output.getScriptBytes());
+        if(null!=output.getScript()){
+            po.setScript(output.getScript().getBytes());
+        }
         po.setStatus((byte) output.getStatus());
         return po;
     }
@@ -106,6 +108,7 @@ public class UtxoTransferTool {
         UtxoInputPo po = new UtxoInputPo();
         po.setTxHash(input.getTxHash().getDigestHex());
         po.setInIndex(input.getIndex());
+        po.setFromHash(input.getFromHash().getDigestHex());
         po.setFromIndex(input.getFromIndex());
         po.setSign(input.getScriptSig());
         return po;
@@ -180,8 +183,8 @@ public class UtxoTransferTool {
         if (null != po.getTxData()) {
             tx.parseTxData(new NulsByteBuffer(po.getTxData()));
         }
-        tx.setStatus(TxStatusEnum.CONFIRMED);
         transferCoinData(tx, po.getInputs(), po.getOutputs());
+        tx.setStatus(TxStatusEnum.CONFIRMED);
         return tx;
     }
 

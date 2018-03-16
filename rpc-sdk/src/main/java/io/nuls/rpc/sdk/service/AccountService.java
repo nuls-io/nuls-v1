@@ -98,12 +98,12 @@ public class AccountService {
      *
      * @return
      */
-    public RpcClientResult getAccountList(){
-        RpcClientResult result = restFul.get("/account/list",null);
-        if(result.isSuccess()){
-            List<Map<String ,Object> > list = (List<Map<String, Object>>) result.getData();
+    public RpcClientResult getAccountList() {
+        RpcClientResult result = restFul.get("/account/list", null);
+        if (result.isSuccess()) {
+            List<Map<String, Object>> list = (List<Map<String, Object>>) result.getData();
             List<AccountDto> accountDtoList = new ArrayList<>();
-            for(Map<String,Object> map:list){
+            for (Map<String, Object> map : list) {
                 accountDtoList.add(new AccountDto(map));
             }
             result.setData(accountDtoList);
@@ -113,13 +113,24 @@ public class AccountService {
 
     /**
      * get the balance items of the address
+     *
      * @param address can not null
      * @return
      */
-    public RpcClientResult getBalance(String address){
+    public RpcClientResult getBalance(String address) {
         AssertUtil.canNotEmpty(address);
-        RpcClientResult result = restFul.get("/account/balance/"+address,null);
+        RpcClientResult result = restFul.get("/account/balance/" + address, null);
         //todo 接口需要修改
         return null;
+    }
+
+    public RpcClientResult importAccount(String prikey, String password) {
+        AssertUtil.canNotEmpty(prikey);
+        AssertUtil.canNotEmpty(password);
+        Map<String, String> params = new HashMap<>();
+        params.put("prikey", prikey);
+        params.put("password", password);
+        RpcClientResult result = restFul.get("/wallet/import", params);
+        return result;
     }
 }

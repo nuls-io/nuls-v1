@@ -59,7 +59,8 @@ public class HeaderPackerValidator implements NulsDataValidator<BlockHeader> {
         PocMeetingRound currentRound = consensusManager.getCurrentRound();
         if (header.getHeight() == 0) {
             return ValidateResult.getSuccessResult();
-        }if(preHeader==null){
+        }
+        if (preHeader == null) {
             return ValidateResult.getSuccessResult();
         }
         BlockRoundData roundData = null;
@@ -69,8 +70,8 @@ public class HeaderPackerValidator implements NulsDataValidator<BlockHeader> {
             Log.error(e);
             return ValidateResult.getFailedResult(e.getMessage());
         }
-        if(null==currentRound){
-            return ValidateResult.getFailedResult("wait for consensus meeting!");
+        if (null == currentRound) {
+            return ValidateResult.getSuccessResult();
         }
         if (currentRound.getIndex() == roundData.getRoundIndex() && currentRound.getMemberCount() > (roundData.getPackingIndexOfRound() + 1)) {
             if (currentRound.indexOf(header.getPackingAddress()) <= roundData.getPackingIndexOfRound()) {

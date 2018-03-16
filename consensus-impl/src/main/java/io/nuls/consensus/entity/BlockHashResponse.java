@@ -25,7 +25,6 @@ package io.nuls.consensus.entity;
 
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.date.TimeService;
@@ -56,21 +55,21 @@ public class BlockHashResponse extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += NulsConstant.TIME_VALUE_LENGTH;
-        size += Utils.sizeOfSerialize(heightList.size());
+        size += Utils.sizeOfInt6();
+        size += Utils.sizeOfInt(heightList.size());
         for (Long height : heightList) {
-            size += Utils.sizeOfSerialize(height);
+            size += Utils.sizeOfLong(height);
         }
-        size += Utils.sizeOfSerialize(hashList.size());
+        size += Utils.sizeOfInt(hashList.size());
         for (NulsDigestData hash : hashList) {
-            size += Utils.sizeOfSerialize(hash);
+            size += Utils.sizeOfNulsData(hash);
         }
         return size;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeTime(time);
+        stream.writeInt48(time);
         stream.writeVarInt(heightList.size());
         for (Long height : heightList) {
             stream.writeVarInt(height);
@@ -83,7 +82,7 @@ public class BlockHashResponse extends BaseNulsData {
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.time = byteBuffer.readTime();
+        this.time = byteBuffer.readInt48();
         long heightListSize = byteBuffer.readVarInt();
         if (heightListSize > 0) {
             this.heightList = new ArrayList<>();

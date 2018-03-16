@@ -31,10 +31,15 @@ package io.nuls.rpc.resources.form;
  * @date 2018/3/9
  */
 public class TransferForm {
+
     private String address;
+
     private String password;
+
     private String toAddress;
+
     private Long amount;
+
     private String remark;
 
     public String getAddress() {

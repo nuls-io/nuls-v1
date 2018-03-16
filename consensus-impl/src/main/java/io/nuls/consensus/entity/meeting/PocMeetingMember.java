@@ -24,7 +24,13 @@
 package io.nuls.consensus.entity.meeting;
 
 import io.nuls.account.entity.Address;
+import io.nuls.consensus.entity.Consensus;
+import io.nuls.consensus.entity.member.Agent;
+import io.nuls.consensus.entity.member.Delegate;
+import io.nuls.core.chain.entity.Na;
 import io.nuls.core.crypto.Sha256Hash;
+
+import java.util.List;
 
 /**
  * @author Niels
@@ -41,18 +47,32 @@ public class PocMeetingMember implements Comparable<PocMeetingMember> {
     private double creditVal;
 
     private String sortValue;
+    private Consensus<Agent> agentConsensus;
+    private List<Consensus<Delegate>> delegateList;
+    private Na totolEntrustDeposit = Na.ZERO;
 
-    @Override
-    public int compareTo(PocMeetingMember o2) {
-        if (this.getSortValue() == null) {
-            String hashHex = new Address(this.getAddress()).hashHex();
-            this.setSortValue(Sha256Hash.twiceOf((roundStartTime + hashHex).getBytes()).toString());
-        }
-        if (o2.getSortValue() == null) {
-            String hashHex = new Address(o2.getAddress()).hashHex();
-            o2.setSortValue(Sha256Hash.twiceOf((o2.getRoundStartTime() + hashHex).getBytes()).toString());
-        }
-        return this.getSortValue().compareTo(o2.getSortValue());
+    public Consensus<Agent> getAgentConsensus() {
+        return agentConsensus;
+    }
+
+    public void setAgentConsensus(Consensus<Agent> agentConsensus) {
+        this.agentConsensus = agentConsensus;
+    }
+
+    public Na getTotolEntrustDeposit() {
+        return totolEntrustDeposit;
+    }
+
+    public void setTotolEntrustDeposit(Na totolEntrustDeposit) {
+        this.totolEntrustDeposit = totolEntrustDeposit;
+    }
+
+    public List<Consensus<Delegate>> getDelegateList() {
+        return delegateList;
+    }
+
+    public void setDelegateList(List<Consensus<Delegate>> delegateList) {
+        this.delegateList = delegateList;
     }
 
     public String getSortValue() {
@@ -117,5 +137,29 @@ public class PocMeetingMember implements Comparable<PocMeetingMember> {
 
     public void setCreditVal(double creditVal) {
         this.creditVal = creditVal;
+    }
+
+    @Override
+    public int compareTo(PocMeetingMember o2) {
+        if (this.getSortValue() == null) {
+            String hashHex = new Address(this.getAddress()).hashHex();
+            this.setSortValue(Sha256Hash.twiceOf((roundStartTime + hashHex).getBytes()).toString());
+        }
+        if (o2.getSortValue() == null) {
+            String hashHex = new Address(o2.getAddress()).hashHex();
+            o2.setSortValue(Sha256Hash.twiceOf((o2.getRoundStartTime() + hashHex).getBytes()).toString());
+        }
+        return this.getSortValue().compareTo(o2.getSortValue());
+    }
+
+    public void calcDeposit() {
+        Na totolEntrustDeposit = Na.ZERO;
+        if(delegateList==null){
+            return;
+        }
+        for(Consensus<Delegate> dc:delegateList){
+            totolEntrustDeposit .add(dc.getExtend().getDeposit());
+        }
+        this.totolEntrustDeposit = totolEntrustDeposit;
     }
 }

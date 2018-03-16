@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,13 +23,16 @@
  */
 package io.nuls.ledger.util;
 
+import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
@@ -66,10 +69,17 @@ public class UtxoTransactionTool {
     private LedgerCacheService ledgerCacheService = LedgerCacheService.getInstance();
 
     public TransferTransaction createTransferTx(CoinTransferData transferData, String password, String remark) throws Exception {
+        if (transferData.getFrom().isEmpty()) {
+            throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
+        }
         TransferTransaction tx = new TransferTransaction(transferData, password);
-        tx.setRemark(remark.getBytes(NulsContext.DEFAULT_ENCODING));
+        if (StringUtils.isNotBlank(remark)) {
+            tx.setRemark(remark.getBytes(NulsContext.DEFAULT_ENCODING));
+        }
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
-        tx.setSign(getAccountService().signData(tx.getHash(), password));
+        AccountService accountService = getAccountService();
+        Account account = accountService.getAccount(transferData.getFrom().get(0));
+        tx.setSign(accountService.signData(tx.getHash(), account, password));
         return tx;
     }
 
@@ -79,7 +89,12 @@ public class UtxoTransactionTool {
             tx.setRemark(remark.getBytes(NulsContext.DEFAULT_ENCODING));
         }
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
-        tx.setSign(getAccountService().signData(tx.getHash(), password));
+        AccountService accountService = getAccountService();
+        if (transferData.getFrom().isEmpty()) {
+            throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
+        }
+        Account account = accountService.getAccount(transferData.getFrom().get(0));
+        tx.setSign(accountService.signData(tx.getHash(), account, password));
         return tx;
     }
 
@@ -144,7 +159,8 @@ public class UtxoTransactionTool {
         long bestHeight = NulsContext.getInstance().getNetBestBlockHeight();
 
         for (UtxoOutput output : balance.getUnSpends()) {
-            if (output.getStatus() == UtxoOutput.USEABLE) {
+            if (UtxoOutput.UTXO_CONFIRM_UNLOCK == output.getStatus() ||
+                    UtxoOutput.UTXO_UNCONFIRM_UNLOCK == output.getStatus()) {
                 if (output.getLockTime() > 0) {
                     if (output.getLockTime() > genesisTime) {
                         if (output.getLockTime() > currentTime) {
@@ -162,10 +178,12 @@ public class UtxoTransactionTool {
                 } else {
                     usable += output.getValue();
                 }
-            } else if (output.getStatus() == UtxoOutput.LOCKED) {
+            } else if (UtxoOutput.UTXO_CONFIRM_LOCK == output.getStatus() ||
+                    UtxoOutput.UTXO_UNCONFIRM_LOCK == output.getStatus()) {
                 lock += output.getValue();
             }
         }
+
         Na oldNa = balance.getBalance();
         if (null == oldNa) {
             oldNa = Na.ZERO;
@@ -197,6 +215,9 @@ public class UtxoTransactionTool {
             eventBroadcaster.publishToLocal(notice);
         }
 
+        if (balance.getUnSpends().isEmpty()) {
+            ledgerCacheService.removeBalance(address);
+        }
     }
 
     public void calcBalance(Address address) {

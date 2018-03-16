@@ -119,9 +119,14 @@ public class NulsOutputStreamBuffer {
         }
     }
 
-    public void writeTime(long time) throws IOException {
-        byte[] bytes = new byte[NulsConstant.TIME_VALUE_LENGTH];
-        Utils.uint64ToByteArrayLE(time,bytes,0);
+    public void writeInt48(long time) throws IOException {
+        byte[] bytes = new byte[Utils.sizeOfInt6()];
+        bytes[0] = (byte) (0xFF & time);
+        bytes[1] = (byte) (0xFF & (time >> 8));
+        bytes[2] = (byte) (0xFF & (time >> 16));
+        bytes[3] = (byte) (0xFF & (time >> 24));
+        bytes[4] = (byte) (0xFF & (time >> 32));
+        bytes[5] = (byte) (0xFF & (time >> 40));
         this.write(bytes);
     }
 }

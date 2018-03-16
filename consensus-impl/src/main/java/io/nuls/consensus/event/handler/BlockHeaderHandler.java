@@ -26,6 +26,7 @@ package io.nuls.consensus.event.handler;
 import io.nuls.consensus.cache.manager.block.BlockCacheManager;
 import io.nuls.consensus.event.BlockHeaderEvent;
 import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 
 /**
@@ -39,6 +40,10 @@ public class BlockHeaderHandler extends AbstractEventHandler<BlockHeaderEvent> {
     @Override
     public void onEvent(BlockHeaderEvent event, String fromId) {
         BlockHeader header = event.getEventBody();
+        if(null==header){
+            Log.warn("recieved a null blockHeader!");
+            return;
+        }
         blockCacheManager.cacheBlockHeader(header, fromId);
     }
 }

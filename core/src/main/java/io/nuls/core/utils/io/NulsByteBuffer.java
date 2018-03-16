@@ -208,20 +208,21 @@ public class NulsByteBuffer {
     }
 
     public <T extends BaseNulsData> T readNulsData(T nulsData) throws NulsException {
-
-        if (payload == null || payload.length == 0 ) {
+        if (payload == null) {
             return null;
         }
-        if(payload.length>=4){
+        int length = payload.length - cursor;
+        if (length <= 0) {
+            return null;
+        }
+        if (length >= 4) {
             byte[] byte4 = new byte[4];
-            System.arraycopy(payload,cursor,byte4,0,4);
-            if(Arrays.equals(NulsConstant.PLACE_HOLDER,byte4)){
+            System.arraycopy(payload, cursor, byte4, 0, 4);
+            if (Arrays.equals(NulsConstant.PLACE_HOLDER, byte4)) {
                 cursor += 4;
                 return null;
             }
-
         }
-        int length = payload.length - cursor;
         byte[] bytes = new byte[length];
         System.arraycopy(payload, cursor, bytes, 0, length);
         nulsData.parse(bytes);
@@ -233,9 +234,14 @@ public class NulsByteBuffer {
         return this.readNulsData(new NulsSignData());
     }
 
-    public long readTime() {
-        long value = Utils.readInt64LE(payload, cursor);
-        cursor += 8;
+    public long readInt48() {
+        long value = (payload[cursor +0] & 0xffL) |
+                ((payload[cursor +1] & 0xffL) << 8) |
+                ((payload[cursor +2] & 0xffL) << 16) |
+                ((payload[cursor +3] & 0xffL) << 24) |
+                ((payload[cursor +4] & 0xffL) << 32) |
+                ((payload[cursor +5] & 0xffL) << 40);
+        cursor += 6;
         return value;
     }
 

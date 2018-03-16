@@ -25,6 +25,7 @@ package io.nuls.account.service.intf;
 
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
+import io.nuls.account.entity.Alias;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.chain.entity.Result;
@@ -70,11 +71,7 @@ public interface AccountService {
 
     Result unlockAccounts(String password, int seconds);
 
-    NulsSignData signData(byte[] bytes, String password);
-
     NulsSignData signData(byte[] bytes, byte[] priKey);
-
-    NulsSignData signData(NulsDigestData digestData, String password);
 
     NulsSignData signData(byte[] bytes, Account account, String password);
 
@@ -90,5 +87,7 @@ public interface AccountService {
 
     Result importAccount(String priKey, String password);
 
-    Result importAccountsFile(String walletFilePath);
+    Result importAccounts(List<String> keys, String password);
+
+    Alias getAlias(String address);
 }

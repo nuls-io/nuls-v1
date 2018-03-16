@@ -23,6 +23,7 @@
  */
 package io.nuls.db.dao;
 
+import io.nuls.core.dto.Page;
 import io.nuls.db.entity.TransactionPo;
 
 import java.util.List;
@@ -36,6 +37,8 @@ public interface TransactionDataService extends BaseDataService<String, Transact
 
     List<TransactionPo> getTxs(Long blockHeight);
 
+    Page<TransactionPo> getTxs(Long blockHeight, int pageNum, int pageSize);
+
     List<TransactionPo> getTxs(Long startHeight, Long endHeight);
 
     List<TransactionPo> getTxs(String address, int type, Integer pageNumber, Integer pageSize);
@@ -44,4 +47,5 @@ public interface TransactionDataService extends BaseDataService<String, Transact
 
     long getTxsCount(String address, int type);
 
+    long getFeeByHeight(long blockHeight);
 }
