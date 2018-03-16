@@ -60,10 +60,10 @@ public class RegisterAgentTxService implements TransactionService<RegisterAgentT
     @Override
     public void onCommit(RegisterAgentTransaction tx) throws NulsException {
         manager.changeAgentStatus(tx.getTxData().getAddress(), ConsensusStatusEnum.IN);
-        DelegateAccountPo po = new DelegateAccountPo();
-        po.setId(tx.getTxData().getAddress());
-        po.setStatus(ConsensusStatusEnum.IN.getCode());
-        delegateAccountService.updateSelective(po);
+        Consensus<Agent> ca = tx.getTxData();
+        ca.getExtend().setStatus(ConsensusStatusEnum.IN.getCode());
+        DelegateAccountPo po = ConsensusTool.agentToPojo(ca);
+        delegateAccountService.save(po);
         consensusManager.joinMeeting();
         RegisterAgentNotice notice = new RegisterAgentNotice();
         notice.setEventBody(tx);
@@ -76,7 +76,6 @@ public class RegisterAgentTxService implements TransactionService<RegisterAgentT
         Consensus<Agent> ca = tx.getTxData();
         ca.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
         manager.cacheAgent(ca);
-        DelegateAccountPo po = ConsensusTool.agentToPojo(ca);
-        delegateAccountService.save(po);
+
     }
 }

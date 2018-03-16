@@ -107,13 +107,6 @@ public class PocConsensusServiceImpl implements ConsensusService {
         tx.setSign(accountService.signData(tx.getHash(), account, password));
         tx.verifyWithException();
         event.setEventBody(tx);
-        //todo
-        TransactionEvent te = new TransactionEvent();
-        try {
-            te.parse(event.serialize());
-        } catch (NulsException e) {
-            Log.error(e);
-        }
         eventBroadcaster.broadcastHashAndCache(event, true);
     }
 

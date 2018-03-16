@@ -33,6 +33,7 @@ import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.entity.TransactionPo;
@@ -60,6 +61,7 @@ public class UtxoTransferTool {
             output.setScript(new P2PKHScript(po.getScript()));
         }catch (Exception e){
             //todo
+            Log.error(e);
         }
         output.setStatus(po.getStatus());
 
@@ -195,7 +197,6 @@ public class UtxoTransferTool {
         tx.setBlockHeight(po.getBlockHeight());
         tx.setFee(Na.valueOf(po.getFee()));
         tx.setIndex(po.getTxIndex());
-        tx.setLocalTx(true);
         tx.setTransferType(po.getTransferType());
 
         if (po.getSign() != null) {
