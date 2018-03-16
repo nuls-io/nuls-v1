@@ -60,8 +60,6 @@ public class PocJoinConsensusTransaction extends LockNulsTransaction<Consensus<D
     @Override
     public Consensus<Delegate> parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
         Consensus<Delegate> consensus = byteBuffer.readNulsData(new ConsensusDelegateImpl());
-        Delegate delegate = byteBuffer.readNulsData(new Delegate());
-        consensus.setExtend(delegate);
         return consensus;
     }
 }
