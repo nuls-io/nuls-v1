@@ -194,7 +194,7 @@ public class DistributedBlockInfoRequestUtils {
             }
             long timeout = 10000L;
 
-            if ((TimeService.currentTimeMillis() - startTime) > (timeout - 1000L) && hashesMap.size() > ((nodeIdList.size() + 1) / 2) && askHighest) {
+            if ((TimeService.currentTimeMillis() - startTime) > (timeout - 1000L) && hashesMap.size() >= ((nodeIdList.size() + 1) / 2) && askHighest) {
                 long localHeight = NulsContext.getInstance().getBestBlock().getHeader().getHeight();
                 long minHeight = Long.MAX_VALUE;
                 NulsDigestData minHash = null;
@@ -217,8 +217,7 @@ public class DistributedBlockInfoRequestUtils {
                 result.setNodeIdList(this.nodeIdList);
                 result.setFinished(true);
                 bestBlockInfo = result;
-            }
-            if ((TimeService.currentTimeMillis() - startTime) > timeout) {
+            }else if ((TimeService.currentTimeMillis() - startTime) > timeout) {
                 lock.unlock();
                 throw new NulsRuntimeException(ErrorCode.TIME_OUT);
             }
