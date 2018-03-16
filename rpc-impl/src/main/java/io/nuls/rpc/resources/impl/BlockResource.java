@@ -51,7 +51,7 @@ public class BlockResource {
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
 
     @GET
-    @Path("/hash/{hash}")
+    @Path("/{hash}")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult loadBlock(@PathParam("hash") String hash) {
         RpcResult result;
