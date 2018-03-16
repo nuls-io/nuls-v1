@@ -39,7 +39,6 @@
 
     <update id="updateByPrimaryKey" parameterType="io.nuls.db.entity.AccountPo">
         update account
-        set address = #{address,jdbcType=VARCHAR},
         create_time = #{createTime,jdbcType=BIGINT},
         alias = #{alias,jdbcType=VARCHAR},
         status = #{status,jdbcType=INTEGER},
@@ -47,7 +46,7 @@
         pri_key = #{priKey,jdbcType=VARBINARY},
         encryptedPriKey = #{encryptedPriKey,jdbcType=VARBINARY},
         extend = #{extend,jdbcType=VARBINARY}
-        where id = #{id,jdbcType=VARCHAR}
+        where address = #{address,jdbcType=VARCHAR}
     </update>
 
     <update id="updateAlias" parameterType="io.nuls.db.entity.AccountPo">
