@@ -56,6 +56,7 @@ public enum ErrorCode {
     PARAMETER_ERROR("SYS018", 10018),
     DATA_NOT_FOUND("SYS019", 10019),
     FILE_BROKEN("SYS020", 20020),
+    SIGNATURE_ERROR("SYS021", 20021),
     /**
      * ----------  Consensus Network code   ---------
      */

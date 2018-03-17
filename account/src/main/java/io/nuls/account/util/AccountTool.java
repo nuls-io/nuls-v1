@@ -58,7 +58,7 @@ public final class AccountTool {
     public static final int CREATE_MAX_SIZE = 100;
 
     public static Address newAddress(ECKey key) throws NulsException {
-        return Address.fromHashs(Utils.sha256hash160(key.getPubKey(false)));
+        return Address.fromHashs(Utils.sha256hash160(key.getPubKey()));
     }
 
     public static Address newAddress(byte[] publicKey) throws NulsException {
@@ -76,11 +76,11 @@ public final class AccountTool {
                 throw new NulsException(ErrorCode.DATA_PARSE_ERROR);
             }
         }
-        Address address = new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), Utils.sha256hash160(key.getPubKey(false)));
+        Address address = new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), Utils.sha256hash160(key.getPubKey()));
         Account account = new Account();
         account.setEncryptedPriKey(new byte[0]);
         account.setAddress(address);
-        account.setPubKey(key.getPubKey(false));
+        account.setPubKey(key.getPubKey());
         account.setEcKey(key);
         account.setPriKey(key.getPrivKeyBytes());
         account.setCreateTime(TimeService.currentTimeMillis());
@@ -157,6 +157,10 @@ public final class AccountTool {
         Alias alias = new Alias(po.getAddress(), po.getAlias());
         alias.setStatus(po.getStatus());
         return alias;
+    }
+
+    public static byte[] getHash160ByAddress(String address){
+        return new Address(address).getHash160();
     }
 
 }

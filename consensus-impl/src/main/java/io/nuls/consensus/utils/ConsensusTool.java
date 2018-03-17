@@ -26,7 +26,6 @@ package io.nuls.consensus.utils;
 import io.nuls.account.entity.Account;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
-import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.ConsensusAgentImpl;
 import io.nuls.consensus.entity.ConsensusDelegateImpl;
@@ -39,8 +38,11 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.script.P2PKHScriptSig;
 import io.nuls.core.utils.date.TimeService;
+import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
+import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.db.entity.DelegateAccountPo;
 import io.nuls.db.entity.DelegatePo;
@@ -65,9 +67,9 @@ public class ConsensusTool {
         po.setHeight(header.getHeight());
         po.setCreateTime(header.getTime());
         po.setHash(header.getHash().getDigestHex());
-        if (null != header.getSign()) {
+        if (null != header.getScriptSig()) {
             try {
-                po.setSign(header.getSign().serialize());
+                po.setScriptSig(header.getScriptSig().serialize());
             } catch (IOException e) {
                 Log.error(e);
             }
@@ -85,7 +87,7 @@ public class ConsensusTool {
         return po;
     }
 
-    public static final BlockHeader fromPojo(BlockHeaderPo po) {
+    public static final BlockHeader fromPojo(BlockHeaderPo po) throws NulsException {
         if (null == po) {
             return null;
         }
@@ -98,7 +100,7 @@ public class ConsensusTool {
         header.setTime(po.getCreateTime());
         header.setHeight(po.getHeight());
         header.setExtend(po.getExtend());
-        header.setSign(new NulsSignData(po.getSign()));
+        header.setScriptSig(( new NulsByteBuffer(po.getScriptSig()).readNulsData(new P2PKHScriptSig())));
         return header;
     }
 
@@ -162,11 +164,11 @@ public class ConsensusTool {
         po.setDeposit(bean.getExtend().getDeposit().getValue());
         po.setTime(bean.getExtend().getStartTime());
         po.setAgentAddress(bean.getExtend().getDelegateAddress());
-        po.setId(bean.getExtend().getHash());
+        po.setId(StringUtils.getNewUUID());
         return po;
     }
 
-    public static Block createBlock(BlockData blockData,Account account) {
+    public static Block createBlock(BlockData blockData,Account account) throws NulsException {
         if (null == account) {
             throw new NulsRuntimeException(ErrorCode.ACCOUNT_NOT_EXIST);
         }
@@ -191,7 +193,11 @@ public class ConsensusTool {
         header.setPackingAddress(account.getAddress().toString());
         header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
         header.setHash(NulsDigestData.calcDigestData(block.getHeader()));
-        header.setSign(accountService.signData(header.getHash(),account, NulsContext.CACHED_PASSWORD_OF_WALLET));
+        P2PKHScriptSig scriptSig = new P2PKHScriptSig();
+        NulsSignData signData = accountService.signDigest(header.getHash(),account,NulsContext.CACHED_PASSWORD_OF_WALLET);
+        scriptSig.setSignData(signData);
+        scriptSig.setPublicKey(account.getPubKey());
+        header.setScriptSig(scriptSig);
         return block;
     }
 

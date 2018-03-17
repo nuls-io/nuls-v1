@@ -43,7 +43,7 @@ import java.util.List;
  * @author Niels
  * @date 2017/10/30
  */
-public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData implements NulsCloneable {
+public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData  {
 
     protected NulsDigestData hash;
 
@@ -64,8 +64,6 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
     protected T txData;
 
     protected TxStatusEnum status;
-
-    protected boolean localTx;
 
     public static final int TRANSFER_RECEIVE = 1;
     public static final int TRANSFER_SEND = 0;
@@ -126,17 +124,6 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
             Log.error(e);
         }
         sign = byteBuffer.readSign();
-    }
-
-
-    @Override
-    public Object copy() {
-        try {
-            return this.clone();
-        } catch (Exception e) {
-            Log.error(e);
-            return null;
-        }
     }
 
     public long getTime() {
@@ -217,14 +204,6 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
 
     public void setStatus(TxStatusEnum status) {
         this.status = status;
-    }
-
-    public boolean isLocalTx() {
-        return localTx;
-    }
-
-    public void setLocalTx(boolean localTx) {
-        this.localTx = localTx;
     }
 
     public int getTransferType() {

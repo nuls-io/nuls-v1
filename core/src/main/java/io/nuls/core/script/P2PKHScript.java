@@ -21,12 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.ledger.script;
+package io.nuls.core.script;
 
-import io.nuls.core.chain.entity.NulsSignData;
+import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.exception.NulsException;
-
-import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
@@ -36,62 +34,55 @@ import java.io.IOException;
  * author Facjas
  * date 2018/3/8.
  */
-public class P2PKHScriptSig extends Script {
+public class P2PKHScript extends Script {
 
-    private NulsSignData signData;
-    private byte[] publicKey;
+    private NulsDigestData publicKeyDigest;
 
-    public P2PKHScriptSig(){
+    public NulsDigestData getPublicKeyDigest() {
+        return publicKeyDigest;
+    }
 
+    public void setPublicKeyDigest(NulsDigestData publicKeyDigest) {
+        this.publicKeyDigest = publicKeyDigest;
+    }
+
+    public P2PKHScript() {
+    }
+
+    public P2PKHScript(byte[] bytes) throws NulsException {
+        this();
+        NulsDigestData nulsDigestData = new NulsDigestData();
+        nulsDigestData.parse(bytes);
+        this.publicKeyDigest = nulsDigestData;
+    }
+
+    public P2PKHScript(NulsDigestData publicKeyDigest) {
+        this.publicKeyDigest = publicKeyDigest;
     }
 
     @Override
     public int size() {
-        return signData.size()+ Utils.sizeOfBytes(publicKey);
-    }
-
-    public P2PKHScriptSig(byte[] signBytes, byte[] publicKey){
-        this.signData = new NulsSignData(signBytes);
-        this.publicKey = publicKey;
-    }
-
-    public NulsSignData getSignData() {
-        return signData;
-    }
-
-    public void setSignData(NulsSignData signData) {
-        this.signData = signData;
-    }
-
-    public byte[] getPublicKey() {
-        return publicKey;
-    }
-
-    public void setPublicKey(byte[] publicKey) {
-        this.publicKey = publicKey;
-    }
-
-    public P2PKHScriptSig(NulsSignData signData, byte[] publicKey){
-        this.signData = signData;
-        this.publicKey = publicKey;
+        return publicKeyDigest.size();
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        signData.serializeToStream(stream);
-        stream.writeBytesWithLength(publicKey);
+        stream.writeNulsData(publicKeyDigest);
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer)throws NulsException {
-        signData = byteBuffer.readNulsData(new NulsSignData());
-        publicKey = byteBuffer.readByLengthByte();
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        publicKeyDigest = byteBuffer.readNulsData(new NulsDigestData());
     }
 
     @Override
     public byte[] getBytes() {
-
-        //todo
-        return new byte[0];
+        try {
+            return publicKeyDigest.serialize();
+        } catch (IOException e) {
+            return null;
+        }
     }
+
+    //todo  not finished
 }

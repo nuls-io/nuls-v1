@@ -47,6 +47,8 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.crypto.Hex;
+import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
@@ -79,7 +81,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
 
     private ConsensusCacheManager consensusCacheManager = ConsensusCacheManager.getInstance();
 
-    private void registerAgent(Agent agent, Account account, String password) throws IOException {
+    private void registerAgent(Agent agent, Account account, String password) throws IOException, NulsException {
         TransactionEvent event = new TransactionEvent();
         CoinTransferData data = new CoinTransferData();
         data.setFee(this.getTxFee(TransactionConstant.TX_TYPE_REGISTER_AGENT));
@@ -87,7 +89,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
         data.addFrom(account.getAddress().toString(), agent.getDeposit());
         Coin coin = new Coin();
         coin.setCanBeUnlocked(true);
-        coin.setUnlockHeight(0);
+        coin.setUnlockHeight(Long.MAX_VALUE);
         coin.setUnlockTime(0);
         coin.setNa(agent.getDeposit());
         data.addTo(account.getAddress().toString(), coin);
@@ -103,13 +105,13 @@ public class PocConsensusServiceImpl implements ConsensusService {
         con.setExtend(agent);
         tx.setTxData(con);
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
-        tx.setSign(accountService.signData(tx.getHash(), account, password));
+        tx.setSign(accountService.signDigest(tx.getHash(), account, password));
         tx.verifyWithException();
         event.setEventBody(tx);
         eventBroadcaster.broadcastHashAndCache(event, true);
     }
 
-    private void joinTheConsensus(Account account, String password, long amount, String agentAddress) throws IOException {
+    private void joinTheConsensus(Account account, String password, long amount, String agentAddress) throws IOException, NulsException {
         AssertUtil.canNotEmpty(account);
         AssertUtil.canNotEmpty(password);
         if (amount < PocConsensusConstant.ENTRUSTER_DEPOSIT_LOWER_LIMIT.getValue()) {
@@ -117,23 +119,48 @@ public class PocConsensusServiceImpl implements ConsensusService {
         }
         AssertUtil.canNotEmpty(agentAddress);
         TransactionEvent event = new TransactionEvent();
-        PocJoinConsensusTransaction tx = new PocJoinConsensusTransaction();
         Consensus<Delegate> ca = new ConsensusDelegateImpl();
         ca.setAddress(account.getAddress().toString());
         Delegate delegate = new Delegate();
         delegate.setDelegateAddress(agentAddress);
         delegate.setDeposit(Na.valueOf(amount));
+        delegate.setStartTime(TimeService.currentTimeMillis());
         ca.setExtend(delegate);
+        CoinTransferData data = new CoinTransferData();
+        data.setFee(this.getTxFee(TransactionConstant.TX_TYPE_REGISTER_AGENT));
+        data.setTotalNa(delegate.getDeposit());
+        data.addFrom(account.getAddress().toString(), delegate.getDeposit());
+        Coin coin = new Coin();
+        coin.setCanBeUnlocked(true);
+        coin.setUnlockHeight(Long.MAX_VALUE);
+        coin.setUnlockTime(0);
+        coin.setNa(delegate.getDeposit());
+        data.addTo(account.getAddress().toString(), coin);
+        PocJoinConsensusTransaction tx = null;
+        try {
+            tx = new PocJoinConsensusTransaction(data, password);
+        } catch (NulsException e) {
+            throw new NulsRuntimeException(e);
+        }
+        tx.setTime(TimeService.currentTimeMillis());
         tx.setTxData(ca);
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
-        tx.setSign(accountService.signData(tx.getHash(), account, password));
+        tx.setSign(accountService.signDigest(tx.getHash(), account, password));
         tx.verifyWithException();
         event.setEventBody(tx);
+
+//        TransactionEvent newEvent = new TransactionEvent();
+//        try {
+//            newEvent.parse(event.serialize());
+//            System.out.println(Hex.encode(newEvent.serialize()).equalsIgnoreCase(Hex.encode(event.serialize())));
+//        } catch (NulsException e) {
+//            Log.error(e);
+//        }
         eventBroadcaster.broadcastHashAndCache(event, true);
     }
 
     @Override
-    public void stopConsensus(String address, String password, Map<String, Object> paramsMap) {
+    public void stopConsensus(String address, String password, Map<String, Object> paramsMap) throws NulsException {
         Transaction joinTx = null;
         if (null != paramsMap && StringUtils.isNotBlank((String) paramsMap.get("txHash"))) {
             PocJoinConsensusTransaction tx = (PocJoinConsensusTransaction) ledgerService.getTx(NulsDigestData.fromDigestHex((String) paramsMap.get("txHash")));
@@ -169,7 +196,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
             Log.error(e);
             throw new NulsRuntimeException(ErrorCode.HASH_ERROR, e);
         }
-        tx.setSign(accountService.signData(tx.getHash(), account, password));
+        tx.setSign(accountService.signDigest(tx.getHash(), account, password));
         event.setEventBody(tx);
         eventBroadcaster.broadcastHashAndCache(event, true);
     }
@@ -204,7 +231,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
     }
 
     @Override
-    public void startConsensus(String address, String password, Map<String, Object> paramsMap) {
+    public void startConsensus(String address, String password, Map<String, Object> paramsMap) throws NulsException {
         Account account = this.accountService.getAccount(address);
         if (null == account) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "The account is not exist,address:" + address);

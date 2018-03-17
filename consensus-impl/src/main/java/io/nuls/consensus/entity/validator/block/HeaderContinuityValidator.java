@@ -29,6 +29,7 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 
@@ -56,7 +57,13 @@ public class HeaderContinuityValidator implements NulsDataValidator<BlockHeader>
                 failed = !header.getPreHash().equals(NulsDigestData.EMPTY_HASH);
                 break;
             }
-            BlockHeader preHeader = NulsContext.getServiceBean(BlockService.class).getBlockHeader(header.getHeight() - 1);
+            BlockHeader preHeader = null;
+            try {
+                preHeader = NulsContext.getServiceBean(BlockService.class).getBlockHeader(header.getHeight() - 1);
+            } catch (NulsException e) {
+                //todo
+                e.printStackTrace();
+            }
             if (null == preHeader) {
                 break;
             }

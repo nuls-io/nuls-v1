@@ -74,15 +74,21 @@ public interface AccountService {
 
     Result unlockAccounts(String password, int seconds);
 
+    NulsSignData signDigest(byte[] bytes, byte[] priKey);
+
     NulsSignData signData(byte[] bytes, byte[] priKey);
 
-    NulsSignData signData(byte[] bytes, Account account, String password);
+    NulsSignData signDigest(NulsDigestData digestData, Account account, String password) throws NulsException;
 
-    NulsSignData signData(NulsDigestData digestData, Account account, String password);
+    NulsSignData signDigest(byte [] digestBytes, Account account, String password) throws NulsException;
+
+    NulsSignData signData(byte[] data, Account account, String password) throws NulsException;
 
     Result setAlias(String address, String password, String alias);
 
-    Result verifySign(byte[] bytes, NulsSignData data);
+    Result verifySign(byte[] bytes, NulsSignData data, byte[] pubKey);
+
+    Result verifyDigestSign(NulsDigestData digestData, NulsSignData signData,byte[] pubKey);
 
     Result exportAccount(String address, String password);
 

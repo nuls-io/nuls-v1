@@ -58,8 +58,7 @@ public class Bootstrap {
             mk.init();
             mk.start();
             initModules();
-//todo            Thread.sleep(3000);
-//            TransactionManager.main(null);
+            Thread.sleep(3000);
         } while (false);
         while (true) {
             try {

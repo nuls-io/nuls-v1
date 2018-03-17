@@ -21,22 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.ledger.script;
-
-import io.nuls.core.chain.entity.BaseNulsData;
-
-
+package io.nuls.core.script;
 
 /**
- * author Facjas
- * date 2018/3/8.
+ * Created by win10 on 2017/10/30.
  */
-public abstract class Script extends BaseNulsData {
+public class ScriptException extends RuntimeException{
 
-    protected long creationTimeSeconds;
+    public ScriptException(String msg) {
+        super(msg);
+    }
 
-    public static final long MAX_SCRIPT_ELEMENT_SIZE = 520;  // bytes
-    public static final int SIG_SIZE = 75;
-
-    abstract public byte[] getBytes();
+    public ScriptException(String msg, Exception e) {
+        super(msg, e);
+    }
 }

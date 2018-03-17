@@ -84,12 +84,12 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public BlockHeader getBlockHeader(long height) {
-        return blockStorageService.getBlockHeader(height);
+    public BlockHeader getBlockHeader(long height) throws NulsException {
+         return blockStorageService.getBlockHeader(height);
     }
 
     @Override
-    public BlockHeader getBlockHeader(String hash) {
+    public BlockHeader getBlockHeader(String hash) throws NulsException {
         return blockStorageService.getBlockHeader(hash);
     }
 
@@ -115,7 +115,7 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public List<Block> getBlockList(long startHeight, long endHeight) {
+    public List<Block> getBlockList(long startHeight, long endHeight) throws NulsException {
         List<Block> blockList = blockStorageService.getBlockList(startHeight, endHeight);
         if (blockList.size() < (endHeight - startHeight + 1)) {
             long currentMaxHeight = blockList.get(blockList.size() - 1).getHeader().getHeight();
@@ -186,7 +186,7 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public BlockHeader getBlockHeader(NulsDigestData hash) {
+    public BlockHeader getBlockHeader(NulsDigestData hash) throws NulsException {
         String hashHex = hash.getDigestHex();
         BlockHeader header = blockCacheManager.getBlockHeader(hashHex);
         if (null == header) {

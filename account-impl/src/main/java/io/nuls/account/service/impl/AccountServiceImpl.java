@@ -37,21 +37,16 @@ import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.chain.entity.Result;
 import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.crypto.AESEncrypt;
-import io.nuls.core.crypto.ECKey;
-import io.nuls.core.crypto.MD5Util;
-import io.nuls.core.crypto.VarInt;
+import io.nuls.core.crypto.*;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.date.TimeService;
-import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
@@ -72,9 +67,9 @@ import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.ledger.util.UtxoTransferTool;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -471,33 +466,69 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public NulsSignData signData(byte[] bytes, byte[] priKey) {
-        //todo
-        return NulsSignData.EMPTY_SIGN;
+    public NulsSignData signDigest(byte[] digest, byte[] priKey) {
+        //todo need to support kinds of algs
+        ECKey ecKey = ECKey.fromPrivate(new BigInteger(priKey));
+        byte[] signbytes = ecKey.sign(digest);
+        NulsSignData nulsSignData = new NulsSignData();
+        nulsSignData.setSignAlgType(NulsSignData.SIGN_ALG_ECC);
+        nulsSignData.setSignBytes(signbytes);
+        return nulsSignData;
     }
 
     @Override
-    public NulsSignData signData(byte[] bytes, Account account, String password) {
-        if (null == bytes || bytes.length == 0) {
-            return null;
+    public NulsSignData signData(byte[] bytes, byte[] priKey){
+        return signDigest(NulsDigestData.calcDigestData(bytes).getDigestBytes(),priKey);
+    }
+
+    @Override
+    public NulsSignData signDigest(byte[] digest, Account account, String password) throws NulsException {
+        if (null == digest || digest.length == 0) {
+            throw new NulsException(ErrorCode.DATA_ERROR);
         }
         if (account.isEncrypted()) {
-            return this.signData(bytes, AESEncrypt.decrypt(account.getEncryptedPriKey(), password));
+            return this.signDigest(digest, AESEncrypt.decrypt(account.getEncryptedPriKey(), password));
         } else {
-            return this.signData(bytes, account.getPriKey());
+            return this.signDigest(digest, account.getPriKey());
         }
     }
 
     @Override
-    public NulsSignData signData(NulsDigestData digestData, Account account, String password) {
+    public NulsSignData signDigest(NulsDigestData digestData, Account account, String password) throws NulsException {
         if (null == digestData) {
-            return null;
+            throw new NulsException(ErrorCode.DATA_ERROR);
         }
-        return this.signData(digestData.getWholeBytes(), account, password);
+        if(account == null){
+            account = getDefaultAccount();
+            if (account == null){
+                throw new NulsException(ErrorCode.ACCOUNT_NOT_EXIST);
+            }
+        }
+        return this.signDigest(digestData.getDigestBytes(), account, password);
     }
 
     @Override
-    public Result verifySign(byte[] bytes, NulsSignData data) {
+    public NulsSignData signData(byte[] data, Account account, String password) throws NulsException {
+        if (null == data || data.length==0) {
+            throw new NulsException(ErrorCode.DATA_ERROR);
+        }
+        if(account == null){
+            account = getDefaultAccount();
+            if (account == null){
+                throw new NulsException(ErrorCode.ACCOUNT_NOT_EXIST);
+            }
+        }
+        return this.signDigest(NulsDigestData.calcDigestData(data).getDigestBytes(), account, password);
+    }
+
+    @Override
+    public Result verifySign(byte[] data, NulsSignData signData,byte[] pubKey) {
+        return verifyDigestSign(NulsDigestData.calcDigestData(data),signData,pubKey);
+    }
+
+    @Override
+    public Result verifyDigestSign(NulsDigestData digestData, NulsSignData signData,byte[] pubKey) {
+        ECKey.verify(digestData.getDigestBytes(),signData.getSignBytes(),pubKey);
         //todo
         return new Result(true, null);
     }
@@ -520,7 +551,7 @@ public class AccountServiceImpl implements AccountService {
             CoinTransferData coinData = new CoinTransferData(AccountConstant.ALIAS_NA, address, null);
             AliasTransaction aliasTx = new AliasTransaction(coinData, password);
             aliasTx.setHash(NulsDigestData.calcDigestData(aliasTx.serialize()));
-            aliasTx.setSign(signData(aliasTx.getHash(), account, password));
+            aliasTx.setSign(signDigest(aliasTx.getHash(), account, password));
             ValidateResult validate = aliasTx.verify();
             if (validate.isFailed()) {
                 return new Result(false, validate.getMessage());
@@ -823,5 +854,17 @@ public class AccountServiceImpl implements AccountService {
             return;
         }
         //todo
+    }
+
+    public void test(String[] args){
+        ECKey ecKey = ECKey.fromPrivate(new BigInteger(Hex.decode("39e9a6cbfc515a68f312a928342050940c2874d3b9e0cd733b56f992ee5cd996")));
+        System.out.print(ecKey.getPublicKeyAsHex());
+
+        byte[] testBytes = Sha256Hash.of("test sign & verify".getBytes()).getBytes();
+
+
+        byte[] sign = ecKey.sign(testBytes);
+        boolean suc = ecKey.verify(testBytes,sign);
+        System.out.println(suc);
     }
 }

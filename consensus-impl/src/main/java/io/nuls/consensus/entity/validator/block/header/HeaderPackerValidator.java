@@ -23,6 +23,8 @@
  */
 package io.nuls.consensus.entity.validator.block.header;
 
+import io.nuls.account.entity.Address;
+import io.nuls.account.util.AccountTool;
 import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.entity.meeting.PocMeetingMember;
 import io.nuls.consensus.entity.meeting.PocMeetingRound;
@@ -35,6 +37,8 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
+
+import java.util.Arrays;
 
 /**
  * @author Niels
@@ -54,7 +58,12 @@ public class HeaderPackerValidator implements NulsDataValidator<BlockHeader> {
 
     @Override
     public ValidateResult validate(BlockHeader header) {
-        BlockHeader preHeader = NulsContext.getServiceBean(BlockService.class).getBlockHeader(header.getPreHash());
+        BlockHeader preHeader = null;
+        try {
+            preHeader = NulsContext.getServiceBean(BlockService.class).getBlockHeader(header.getPreHash());
+        } catch (NulsException e) {
+            //todo
+        }
 
         PocMeetingRound currentRound = consensusManager.getCurrentRound();
         if (header.getHeight() == 0) {
@@ -78,11 +87,13 @@ public class HeaderPackerValidator implements NulsDataValidator<BlockHeader> {
                 return ValidateResult.getFailedResult(ERROR_MESSAGE);
             }
         }
-//TODO        else if (currentRound.getIndex() == (1 + roundData.getRoundIndex())) {
-//            if (currentRound.getPreviousRound().indexOf(header.getPackingAddress()) <= roundData.getPackingIndexOfRound()) {
-//                return ValidateResult.getFailedResult(ERROR_MESSAGE);
-//            }
-//        }
+
+        byte[] packingHash160 = AccountTool.getHash160ByAddress(header.getPackingAddress());
+        byte[] hash160InScriptSig = header.getScriptSig().getSignerHash160();
+
+        if(Arrays.equals(packingHash160,hash160InScriptSig)){
+            return ValidateResult.getFailedResult(ERROR_MESSAGE);
+        }
         BlockRoundData nowRoundData = null;
         try {
             nowRoundData = new BlockRoundData(header.getExtend());

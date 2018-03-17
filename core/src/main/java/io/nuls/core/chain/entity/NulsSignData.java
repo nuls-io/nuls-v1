@@ -23,6 +23,7 @@
  */
 package io.nuls.core.chain.entity;
 
+import io.nuls.core.crypto.ECKey;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
@@ -31,6 +32,7 @@ import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
 
 import java.io.IOException;
+import java.math.BigInteger;
 
 /**
  * @author facjas
@@ -39,6 +41,9 @@ import java.io.IOException;
 public class NulsSignData extends BaseNulsData {
 
     public static final NulsSignData EMPTY_SIGN = new NulsSignData(new byte[]{0, 0, 1, 0});
+
+    public static short SIGN_ALG_ECC = (short)0;
+    public static short SIGN_ALG_DEFAULT = NulsSignData.SIGN_ALG_ECC;
 
     protected short signAlgType;
     protected byte[] signBytes;
@@ -103,6 +108,24 @@ public class NulsSignData extends BaseNulsData {
             Log.error(e);
             return null;
         }
+    }
+
+    public NulsSignData sign(NulsDigestData nulsDigestData, short signAlgType, BigInteger privkey){
+        if(signAlgType == NulsSignData.SIGN_ALG_ECC){
+            ECKey ecKey = ECKey.fromPrivate(privkey);
+            byte[] signBytes =  ecKey.sign(nulsDigestData.getDigestBytes(),privkey);
+            return new NulsSignData(signBytes);
+        }
+        return null;
+    }
+
+    public NulsSignData sign(NulsDigestData nulsDigestData, BigInteger privkey){
+        short signAlgType = NulsSignData.SIGN_ALG_DEFAULT;
+        if(signAlgType == NulsSignData.SIGN_ALG_ECC){
+            ECKey ecKey = ECKey.fromPrivate(privkey);
+            return  sign(nulsDigestData, signAlgType, privkey);
+        }
+        return null;
     }
 
     @Override

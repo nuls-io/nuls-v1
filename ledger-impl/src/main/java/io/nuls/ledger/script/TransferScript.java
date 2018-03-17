@@ -25,6 +25,8 @@ package io.nuls.ledger.script;
 
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.crypto.Sha256Hash;
+import io.nuls.core.script.P2PKHScript;
+import io.nuls.core.script.P2PKHScriptSig;
 import io.nuls.core.utils.crypto.Utils;
 
 import java.lang.reflect.Array;
@@ -71,7 +73,7 @@ public class TransferScript {
     boolean verifyPublicKey(){
         //verify the public-KEY-hashes  are the same
         byte[] publicKey = scriptSig.getPublicKey();
-        byte[] reedmAccount = Utils.sha256hash160(Utils.sha256hash160(publicKey));
+        byte[] reedmAccount = Utils.sha256hash160(publicKey);
         if(Arrays.equals(reedmAccount,script.getPublicKeyDigest().getDigestBytes())){
             return true;
         }
