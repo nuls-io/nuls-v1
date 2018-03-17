@@ -31,8 +31,8 @@ import io.nuls.core.i18n.I18nUtils;
  */
 public enum ConsensusStatusEnum {
     NOT_IN(0, 69999),
-    IN(1, 69998),
-    WAITING(2, 69997);
+    IN(2, 69998),
+    WAITING(1, 69997);
     private final int code;
     private final int textCode;
 
