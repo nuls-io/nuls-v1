@@ -32,6 +32,7 @@ import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.param.AssertUtil;
@@ -79,7 +80,7 @@ public class PocConsensusResource {
     @POST
     @Path("/createAgent")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult createAgent(CreateAgentForm form) {
+    public RpcResult createAgent(CreateAgentForm form) throws NulsException {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getAddress());
         AssertUtil.canNotEmpty(form.getAgentName());
@@ -100,7 +101,7 @@ public class PocConsensusResource {
     @POST
     @Path("/entrust")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult in(EntrustForm form) {
+    public RpcResult in(EntrustForm form) throws NulsException {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getAddress());
         AssertUtil.canNotEmpty(form.getAgentAddress());
@@ -116,7 +117,7 @@ public class PocConsensusResource {
     @POST
     @Path("/stopAgent")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult stopAgent(StopAgentForm form) {
+    public RpcResult stopAgent(StopAgentForm form) throws NulsException {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getAddress());
         AssertUtil.canNotEmpty(form.getPassword());
@@ -127,7 +128,7 @@ public class PocConsensusResource {
     @POST
     @Path("/cancel")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult out(EntrustCancelForm form) {
+    public RpcResult out(EntrustCancelForm form) throws NulsException {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getTxHash());
         Map<String,Object> params  = new HashMap<>();

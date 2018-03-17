@@ -194,7 +194,7 @@ public class ECKey {
      *
      * @return byte[]
      */
-    public byte[] getPubKey(boolean compressed) {
+    protected byte[] getPubKey(boolean compressed) {
         return pub.getEncoded(compressed);
     }
 
@@ -391,37 +391,26 @@ public class ECKey {
      * @param hash
      * @return ECDSASignature
      */
-    public ECDSASignature sign(Sha256Hash hash) {
+    public byte[] sign(byte[] hash) {
         return sign(hash, null);
     }
 
-    public ECDSASignature sign(Sha256Hash hash, KeyParameter aesKey) {
+    public byte[] sign(Sha256Hash hash, BigInteger aesKey) {
+        return doSign(hash.getBytes(), priv);
+    }
+
+    public byte[] sign(byte [] hash, BigInteger aesKey) {
         return doSign(hash, priv);
     }
 
-    protected ECDSASignature doSign(Sha256Hash input, BigInteger privateKeyForSigning) {
+    protected byte[] doSign(byte[] input, BigInteger privateKeyForSigning) {
         Utils.checkNotNull(privateKeyForSigning);
         ECDSASigner signer = new ECDSASigner(new HMacDSAKCalculator(new SHA256Digest()));
         ECPrivateKeyParameters privKey = new ECPrivateKeyParameters(privateKeyForSigning, CURVE);
         signer.init(true, privKey);
-        BigInteger[] components = signer.generateSignature(input.getBytes());
-        return new ECDSASignature(components[0], components[1]).toCanonicalised();
+        BigInteger[] components = signer.generateSignature(input);
+        return new ECDSASignature(components[0], components[1]).toCanonicalised().encodeToDER();
     }
-
-    public NulsSignData doSignNulsDigest(NulsDigestData input, BigInteger privateKeyForSigning) {
-        Utils.checkNotNull(privateKeyForSigning);
-        ECDSASigner signer = new ECDSASigner(new HMacDSAKCalculator(new SHA256Digest()));
-        ECPrivateKeyParameters privKey = new ECPrivateKeyParameters(privateKeyForSigning, CURVE);
-        signer.init(true, privKey);
-        BigInteger[] components = signer.generateSignature(input.getDigestBytes());
-        ECDSASignature signature =  new ECDSASignature(components[0], components[1]).toCanonicalised();
-        NulsSignData signData = new NulsSignData();
-        signData.setSignAlgType(NulsSignData.SIGN_ALG_ECC);
-        signData.setSignBytes(signature.encodeToDER());
-        return signData;
-    }
-
-
 
     /**
      * 是否包含私匙
@@ -466,5 +455,12 @@ public class ECKey {
     public static void main(String[] args){
         ECKey ecKey = ECKey.fromPrivate(new BigInteger(Hex.decode("39e9a6cbfc515a68f312a928342050940c2874d3b9e0cd733b56f992ee5cd996")));
         System.out.print(ecKey.getPublicKeyAsHex());
+
+        byte[] testBytes = Sha256Hash.of("test sign & verify".getBytes()).getBytes();
+
+
+        byte[] sign = ecKey.sign(testBytes);
+        boolean suc = ecKey.verify(testBytes,sign);
+        System.out.println(suc);
     }
 }

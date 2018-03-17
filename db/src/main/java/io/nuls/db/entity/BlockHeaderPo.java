@@ -42,7 +42,7 @@ public class BlockHeaderPo {
 
     private Long txCount;
 
-    private byte[] sign;
+    private byte[] scriptSig;
 
     private long roundIndex;
 
@@ -104,12 +104,12 @@ public class BlockHeaderPo {
         this.txCount = txCount;
     }
 
-    public byte[] getSign() {
-        return sign;
+    public byte[] getScriptSig() {
+        return scriptSig;
     }
 
-    public void setSign(byte[] sign) {
-        this.sign = sign;
+    public void setScriptSig(byte[] scriptSig) {
+        this.scriptSig = scriptSig;
     }
 
     public long getRoundIndex() {

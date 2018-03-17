@@ -113,7 +113,8 @@ public class NulsSignData extends BaseNulsData {
     public NulsSignData sign(NulsDigestData nulsDigestData, short signAlgType, BigInteger privkey){
         if(signAlgType == NulsSignData.SIGN_ALG_ECC){
             ECKey ecKey = ECKey.fromPrivate(privkey);
-            return  ecKey.doSignNulsDigest(nulsDigestData,privkey);
+            byte[] signBytes =  ecKey.sign(nulsDigestData.getDigestBytes(),privkey);
+            return new NulsSignData(signBytes);
         }
         return null;
     }

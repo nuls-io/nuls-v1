@@ -30,6 +30,7 @@ import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.BlockHeaderService;
 import io.nuls.db.entity.BlockHeaderPo;
@@ -102,7 +103,7 @@ public class BlockStorageService {
     }
 
 
-    public List<Block> getBlockList(long startHeight, long endHeight) {
+    public List<Block> getBlockList(long startHeight, long endHeight) throws NulsException {
         List<Block> blockList = new ArrayList<>();
         List<BlockHeaderPo> poList = headerDao.getHeaderList(startHeight, endHeight);
         List<Long> heightList = new ArrayList<>();
@@ -115,7 +116,12 @@ public class BlockStorageService {
             }
             Map<Long, List<Transaction>> txListGroup = txListGrouping(txList);
             for (BlockHeaderPo po : poList) {
-                BlockHeader header = ConsensusTool.fromPojo(po);
+                BlockHeader header = null;
+                try {
+                    header = ConsensusTool.fromPojo(po);
+                } catch (NulsException e) {
+                    throw e;
+                }
                 heightList.add(header.getHeight());
                 blockList.add(fillBlock(header, txListGroup.get(header.getHeight())));
             }
@@ -148,7 +154,7 @@ public class BlockStorageService {
         return map;
     }
 
-    public BlockHeader getBlockHeader(long height) {
+    public BlockHeader getBlockHeader(long height) throws NulsException {
         BlockHeader header = blockCacheManager.getBlockHeader(height);
         if (null != header) {
             return header;
@@ -162,7 +168,7 @@ public class BlockStorageService {
         return ConsensusTool.fromPojo(po);
     }
 
-    public BlockHeader getBlockHeader(String hash) {
+    public BlockHeader getBlockHeader(String hash) throws NulsException {
         BlockHeader header = blockCacheManager.getBlockHeader(hash);
         if (null != header) {
             return header;

@@ -10,12 +10,12 @@
         <result column="consensus_address" jdbcType="VARCHAR" property="consensusAddress"/>
         <result column="tx_count" jdbcType="BIGINT" property="txCount"/>
         <result column="round_index" jdbcType="BIGINT" property="roundIndex"/>
-        <result column="sign" jdbcType="VARBINARY" property="sign"/>
+        <result column="scriptSig" jdbcType="VARBINARY" property="scriptSig"/>
         <result column="extend" jdbcType="VARBINARY" property="extend"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        hash, height, pre_hash, merkle_hash, create_time, consensus_address, tx_count, round_index, sign, extend
+        hash, height, pre_hash, merkle_hash, create_time, consensus_address, tx_count, round_index, scriptSig, extend
     </sql>
 
     <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
@@ -32,11 +32,11 @@
     <insert id="insert" parameterType="io.nuls.db.entity.BlockHeaderPo">
         insert into block_header (hash, height, pre_hash,
         merkle_hash, create_time, consensus_address,
-        tx_count, sign, round_index,extend)
+        tx_count, scriptSig, round_index,extend)
         values (#{hash,jdbcType=VARCHAR}, #{height,jdbcType=BIGINT}, #{preHash,jdbcType=VARCHAR},
         #{merkleHash,jdbcType=VARCHAR}, #{createTime,jdbcType=BIGINT},
         #{consensusAddress,jdbcType=VARCHAR},#{txCount,jdbcType=BIGINT},
-        #{sign,jdbcType=VARBINARY}, #{roundIndex,jdbcType=BIGINT}, #{extend,jdbcType=VARBINARY})
+        #{scriptSig,jdbcType=VARBINARY}, #{roundIndex,jdbcType=BIGINT}, #{extend,jdbcType=VARBINARY})
     </insert>
 
     <update id="updateByPrimaryKey" parameterType="io.nuls.db.entity.BlockHeaderPo">
@@ -49,7 +49,7 @@
         tx_count = #{txCount,jdbcType=BIGINT},
         round_index = #{roundIndex,jdbcType=BIGINT},
         extend = #{extend,jdbcType=VARBINARY},
-        sign = #{sign,jdbcType=VARBINARY}
+        scriptSig = #{scriptSig,jdbcType=VARBINARY}
         where hash = #{hash,jdbcType=VARCHAR}
     </update>
     <select id="selectList" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultMap="BaseResultMap">

@@ -26,6 +26,7 @@ package io.nuls.consensus.service.intf;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.core.chain.entity.Na;
+import io.nuls.core.exception.NulsException;
 
 import java.util.List;
 import java.util.Map;
@@ -38,9 +39,9 @@ public interface ConsensusService {
 
     Na getTxFee(int txType);
 
-    void startConsensus(String address, String password, Map<String, Object> paramsMap);
+    void startConsensus(String address, String password, Map<String, Object> paramsMap) throws NulsException;
 
-    void stopConsensus(String address, String password,Map<String, Object> paramsMap);
+    void stopConsensus(String address, String password,Map<String, Object> paramsMap) throws NulsException;
 
     List<Consensus> getConsensusAccountList();
 

@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.ledger.script;
+package io.nuls.core.script;
 
 /**
  * Created by win10 on 2017/10/30.

@@ -21,10 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.ledger.script;
+package io.nuls.core.script;
 
 import io.nuls.core.chain.entity.BaseNulsData;
-
 
 
 /**

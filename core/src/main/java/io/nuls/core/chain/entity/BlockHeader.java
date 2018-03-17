@@ -24,8 +24,8 @@
 package io.nuls.core.chain.entity;
 
 import io.nuls.core.chain.manager.BlockHeaderValidatorManager;
-import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.script.P2PKHScriptSig;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
@@ -33,7 +33,6 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.NulsDataValidator;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -54,7 +53,7 @@ public class BlockHeader extends BaseNulsData {
 
     private String packingAddress;
 
-    private NulsSignData sign;
+    private P2PKHScriptSig scriptSign;
 
     private byte[] extend;
 
@@ -79,7 +78,7 @@ public class BlockHeader extends BaseNulsData {
         size += Utils.sizeOfLong(txCount);
         size += Utils.sizeOfString(packingAddress);
         size += Utils.sizeOfBytes(extend);
-        size += Utils.sizeOfNulsData(sign);
+        size += Utils.sizeOfNulsData(scriptSign);
         return size;
     }
 
@@ -92,7 +91,7 @@ public class BlockHeader extends BaseNulsData {
         stream.writeVarInt(txCount);
         stream.writeString(packingAddress);
         stream.writeBytesWithLength(extend);
-        stream.writeNulsData(this.sign);
+        stream.writeNulsData(scriptSign);
     }
 
     @Override
@@ -109,7 +108,7 @@ public class BlockHeader extends BaseNulsData {
         } catch (IOException e) {
             Log.error(e);
         }
-        this.sign = byteBuffer.readSign();
+        this.scriptSign = byteBuffer.readNulsData(new P2PKHScriptSig());
     }
 
 
@@ -162,12 +161,12 @@ public class BlockHeader extends BaseNulsData {
         this.txCount = txCount;
     }
 
-    public NulsSignData getSign() {
-        return sign;
+    public P2PKHScriptSig getScriptSig() {
+        return scriptSign;
     }
 
-    public void setSign(NulsSignData sign) {
-        this.sign = sign;
+    public void setScriptSig(P2PKHScriptSig scriptSign) {
+        this.scriptSign = scriptSign;
     }
 
     public void setPackingAddress(String packingAddress) {

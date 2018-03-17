@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -166,7 +166,7 @@ public class ConsensusMeetingRunner implements Runnable {
         return result;
     }
 
-    private void nextRound() {
+    private void nextRound() throws NulsException {
         consensusManager.initConsensusStatusInfo();
         PocMeetingRound currentRound = calcRound();
         consensusManager.setCurrentRound(currentRound);
@@ -230,7 +230,7 @@ public class ConsensusMeetingRunner implements Runnable {
         }
     }
 
-    private void startMeeting() {
+    private void startMeeting() throws NulsException {
         PocMeetingRound current = consensusManager.getCurrentRound();
         if (null == current || null == consensusManager.getConsensusStatusInfo().getAccount() || current.getMember(consensusManager.getConsensusStatusInfo().getAccount().getAddress().toString()) == null) {
             this.nextRound();
@@ -264,7 +264,7 @@ public class ConsensusMeetingRunner implements Runnable {
         return ability - penalty;
     }
 
-    private void packing(PocMeetingMember self) {
+    private void packing(PocMeetingMember self) throws NulsException {
         Block bestBlock = context.getBestBlock();
         List<Transaction> txList = txCacheManager.getTxList();
         txList.sort(new TxComparator());
@@ -328,12 +328,12 @@ public class ConsensusMeetingRunner implements Runnable {
      * @param txList    all tx of block
      * @param self      agent meeting data
      */
-    private void addConsensusTx(Block bestBlock, List<Transaction> txList, PocMeetingMember self) {
+    private void addConsensusTx(Block bestBlock, List<Transaction> txList, PocMeetingMember self) throws NulsException {
         punishTx(bestBlock, txList, self);
         coinBaseTx(txList, self);
     }
 
-    private void coinBaseTx(List<Transaction> txList, PocMeetingMember self) {
+    private void coinBaseTx(List<Transaction> txList, PocMeetingMember self) throws NulsException {
         CoinTransferData data = new CoinTransferData();
         data.setFee(Na.ZERO);
         List<ConsensusReward> rewardList = calcReward(txList, self);
@@ -354,7 +354,7 @@ public class ConsensusMeetingRunner implements Runnable {
         }
         tx.setFee(Na.ZERO);
         tx.setHash(NulsDigestData.calcDigestData(tx));
-        tx.setSign(accountService.signData(tx.getHash(), consensusManager.getConsensusStatusInfo().getAccount(), NulsContext.CACHED_PASSWORD_OF_WALLET));
+        tx.setSign(accountService.signDigest(tx.getHash(), consensusManager.getConsensusStatusInfo().getAccount(),NulsContext.CACHED_PASSWORD_OF_WALLET));
         ValidateResult validateResult = tx.verify();
         confirmingTxCacheManager.putTx(tx);
         if (null == validateResult || validateResult.isFailed()) {
@@ -416,12 +416,12 @@ public class ConsensusMeetingRunner implements Runnable {
         return rewardList;
     }
 
-    private void punishTx(Block bestBlock, List<Transaction> txList, PocMeetingMember self) {
+    private void punishTx(Block bestBlock, List<Transaction> txList, PocMeetingMember self) throws NulsException {
         redPunishTx(bestBlock, txList);
         yellowPunishTx(bestBlock, txList, self);
     }
 
-    private void redPunishTx(Block bestBlock, List<Transaction> txList) {
+    private void redPunishTx(Block bestBlock, List<Transaction> txList) throws NulsException {
         //todo check it
         for (long height : punishMap.keySet()) {
             RedPunishData data = punishMap.get(height);
@@ -434,12 +434,12 @@ public class ConsensusMeetingRunner implements Runnable {
             tx.setTime(TimeService.currentTimeMillis());
             tx.setFee(Na.ZERO);
             tx.setHash(NulsDigestData.calcDigestData(tx));
-            tx.setSign(accountService.signData(tx.getHash(), consensusManager.getConsensusStatusInfo().getAccount(), NulsContext.CACHED_PASSWORD_OF_WALLET));
+            tx.setSign(accountService.signDigest(tx.getHash(), consensusManager.getConsensusStatusInfo().getAccount(),NulsContext.CACHED_PASSWORD_OF_WALLET));
             txList.add(tx);
         }
     }
 
-    private void yellowPunishTx(Block bestBlock, List<Transaction> txList, PocMeetingMember self) {
+    private void yellowPunishTx(Block bestBlock, List<Transaction> txList, PocMeetingMember self) throws NulsException {
         //todo check it
         BlockRoundData lastBlockRoundData = new BlockRoundData();
         try {
@@ -464,7 +464,7 @@ public class ConsensusMeetingRunner implements Runnable {
         punishTx.setTime(TimeService.currentTimeMillis());
         punishTx.setFee(Na.ZERO);
         punishTx.setHash(NulsDigestData.calcDigestData(punishTx));
-        punishTx.setSign(accountService.signData(punishTx.getHash(), consensusManager.getConsensusStatusInfo().getAccount(), NulsContext.CACHED_PASSWORD_OF_WALLET));
+        punishTx.setSign(accountService.signDigest(punishTx.getHash(), consensusManager.getConsensusStatusInfo().getAccount(),NulsContext.CACHED_PASSWORD_OF_WALLET));
         txList.add(punishTx);
     }
 

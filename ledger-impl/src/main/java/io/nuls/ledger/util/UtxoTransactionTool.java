@@ -79,7 +79,7 @@ public class UtxoTransactionTool {
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
         AccountService accountService = getAccountService();
         Account account = accountService.getAccount(transferData.getFrom().get(0));
-        tx.setSign(accountService.signData(tx.getHash(), account, password));
+        tx.setSign(accountService.signDigest(tx.getHash(), account, password));
         return tx;
     }
 
@@ -94,7 +94,7 @@ public class UtxoTransactionTool {
             throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
         }
         Account account = accountService.getAccount(transferData.getFrom().get(0));
-        tx.setSign(accountService.signData(tx.getHash(), account, password));
+        tx.setSign(accountService.signDigest(tx.getHash(), account, password));
         return tx;
     }
 

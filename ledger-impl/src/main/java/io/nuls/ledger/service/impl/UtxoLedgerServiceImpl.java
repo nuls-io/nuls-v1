@@ -36,6 +36,7 @@ import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.tx.serivce.TransactionService;
+import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
@@ -265,12 +266,12 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             if (!result.getErrorCode().getCode().equals(ErrorCode.SUCCESS.getCode())) {
                 throw new NulsException(ErrorCode.FAILED);
             }
-//            byte[] txbytes = tx.serialize();
-//            TransferTransaction new_tx = new NulsByteBuffer(txbytes).readNulsData(new TransferTransaction());
-//            result = new_tx.verify();
-//            if(! result.getErrorCode().getCode().equals(ErrorCode.SUCCESS.getCode() ) ){
-//                throw new NulsException(ErrorCode.FAILED);
-//            }
+            byte[] txbytes = tx.serialize();
+            TransferTransaction new_tx = new NulsByteBuffer(txbytes).readNulsData(new TransferTransaction());
+            result = new_tx.verify();
+            if(! result.getErrorCode().getCode().equals(ErrorCode.SUCCESS.getCode() ) ){
+                throw new NulsException(ErrorCode.FAILED);
+            }
             TransactionEvent event = new TransactionEvent();
             event.setEventBody(tx);
             eventBroadcaster.broadcastAndCacheAysn(event, true);

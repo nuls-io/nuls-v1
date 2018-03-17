@@ -35,6 +35,8 @@ import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.script.P2PKHScript;
+import io.nuls.core.script.P2PKHScriptSig;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
@@ -49,8 +51,6 @@ import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.ledger.entity.*;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
-import io.nuls.ledger.script.P2PKHScript;
-import io.nuls.ledger.script.P2PKHScriptSig;
 import io.nuls.ledger.service.intf.CoinDataProvider;
 import io.nuls.ledger.util.UtxoTransactionTool;
 import io.nuls.ledger.util.UtxoTransferTool;
@@ -344,11 +344,12 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 
 
         //get EcKey for output's script
+        Account account = null;
         byte[] priKey = null;
         if (coinParam.getPriKey() != null) {
             priKey = coinParam.getPriKey();
         } else if (!coinParam.getFrom().isEmpty()) {
-            Account account = accountService.getAccount(coinParam.getFrom().get(0));
+            account = accountService.getAccount(coinParam.getFrom().get(0));
             if (account == null) {
                 throw new NulsException(ErrorCode.ACCOUNT_NOT_EXIST);
             }
@@ -363,17 +364,14 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             }
         }
 
-        //create scriptSig foreach input
+        //create scriptSig foreach input // todo ,sign data must be different
         for (int i = 0; i < inputs.size(); i++) {
             P2PKHScriptSig scriptSig = new P2PKHScriptSig();
             ECKey ecKey = ECKey.fromPrivate(new BigInteger(priKey));
 
-            Address address = new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), Utils.sha256hash160(ecKey.getPubKey(false)));
-            scriptSig.setPublicKey(ecKey.getPubKey(false));
-
-            NulsSignData signData = new NulsSignData();
-            signData.setSignAlgType((short) 1);
-            signData.setSignBytes(ecKey.sign(Sha256Hash.twiceOf(address.getHash160())).encodeToDER());
+            Address address = new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), Utils.sha256hash160(ecKey.getPubKey()));
+            scriptSig.setPublicKey(ecKey.getPubKey());
+            NulsSignData signData = accountService.signDigest(new NulsDigestData(NulsDigestData.DIGEST_ALG_SHA160,address.getHash160()),account,password);
             scriptSig.setSignData(signData);
             try {
                 inputs.get(i).setScriptSig(scriptSig.serialize());
@@ -394,7 +392,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 output.setValue(coin.getNa().getValue());
                 output.setStatus(UtxoOutput.UTXO_CONFIRM_UNLOCK);
                 output.setIndex(i);
-                P2PKHScript p2PKHScript = new P2PKHScript(NulsDigestData.calcDigestData((new Address(address).getHash160()), NulsDigestData.DIGEST_ALG_SHA160));
+                P2PKHScript p2PKHScript = new P2PKHScript(new NulsDigestData( NulsDigestData.DIGEST_ALG_SHA160,new Address(address).getHash160()));
                 output.setScript(p2PKHScript);
                 if (coin.getUnlockHeight() > 0) {
                     output.setLockTime(coin.getUnlockHeight());
@@ -420,7 +418,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             output.setIndex(i);
             output.setParent(tx);
             output.setStatus(UtxoOutput.UTXO_CONFIRM_UNLOCK);
-            P2PKHScript p2PKHScript = new P2PKHScript(NulsDigestData.calcDigestData(ECKey.fromPrivate(new BigInteger(priKey)).getPubKey(false), NulsDigestData.DIGEST_ALG_SHA160));
+            P2PKHScript p2PKHScript = new P2PKHScript(new NulsDigestData( NulsDigestData.DIGEST_ALG_SHA160,account.getHash160()));
             output.setScript(p2PKHScript);
             outputs.add(output);
         }

@@ -21,11 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.ledger.script;
+package io.nuls.core.script;
 
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 

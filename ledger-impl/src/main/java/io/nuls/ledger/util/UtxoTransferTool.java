@@ -31,6 +31,7 @@ import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.script.P2PKHScript;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
@@ -43,7 +44,6 @@ import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.UtxoInput;
 import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
-import io.nuls.ledger.script.P2PKHScript;
 
 import java.io.IOException;
 import java.util.List;

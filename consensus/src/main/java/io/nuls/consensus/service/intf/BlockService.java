@@ -45,15 +45,15 @@ public interface BlockService {
 
     Block getLocalBestBlock();
 
-    BlockHeader getBlockHeader(long height);
+    BlockHeader getBlockHeader(long height) throws NulsException;
 
-    BlockHeader getBlockHeader(String hash);
+    BlockHeader getBlockHeader(String hash) throws NulsException;
 
     Block getBlock(String hash);
 
     Block getBlock(long height);
 
-    List<Block> getBlockList(long startHeight, long endHeight);
+    List<Block> getBlockList(long startHeight, long endHeight) throws NulsException;
 
     void saveBlock(Block block) throws IOException;
 
@@ -61,5 +61,5 @@ public interface BlockService {
 
     List<BlockHeader> getBlockHeaderList(long start, long end, long split);
 
-    BlockHeader getBlockHeader(NulsDigestData hash);
+    BlockHeader getBlockHeader(NulsDigestData hash) throws NulsException;
 }

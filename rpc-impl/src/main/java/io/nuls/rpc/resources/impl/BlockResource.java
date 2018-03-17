@@ -28,6 +28,7 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.rpc.entity.BlockDto;
@@ -38,6 +39,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import java.io.IOException;
 
 /**
  * @author Niels
@@ -65,7 +67,12 @@ public class BlockResource {
             long reward = ledgerService.getBlockReward(block.getHeader().getHeight());
             long fee = ledgerService.getBlockFee(block.getHeader().getHeight());
             result = RpcResult.getSuccess();
-            result.setData(new BlockDto(block, reward, fee));
+            try {
+                result.setData(new BlockDto(block, reward, fee));
+            } catch (IOException e) {
+                //todo
+                e.printStackTrace();
+            }
         }
         return result;
     }
@@ -86,7 +93,12 @@ public class BlockResource {
             result = RpcResult.getSuccess();
             long reward = ledgerService.getBlockReward(block.getHeader().getHeight());
             long fee = ledgerService.getBlockFee(block.getHeader().getHeight());
-            result.setData(new BlockDto(block, reward, fee));
+            try {
+                result.setData(new BlockDto(block, reward, fee));
+            } catch (IOException e) {
+                //todo
+                e.printStackTrace();
+            }
         }
         return result;
     }
@@ -141,13 +153,24 @@ public class BlockResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getHeaderByHeight(@PathParam("height") Integer height) {
         RpcResult result = RpcResult.getSuccess();
-        BlockHeader blockHeader = blockService.getBlockHeader(height);
+        BlockHeader blockHeader = null;
+        try {
+            blockHeader = blockService.getBlockHeader(height);
+        }catch (NulsException e){
+            //todo
+        }
+
         if (blockHeader == null) {
             return RpcResult.getFailed(ErrorCode.DATA_NOT_FOUND);
         }
         long reward = ledgerService.getBlockReward(blockHeader.getHeight());
         long fee = ledgerService.getBlockFee(blockHeader.getHeight());
-        result.setData(new BlockDto(blockHeader, reward, fee));
+        try {
+            result.setData(new BlockDto(blockHeader, reward, fee));
+        } catch (IOException e) {
+            //todo
+            e.printStackTrace();
+        }
         return result;
     }
 
@@ -156,13 +179,23 @@ public class BlockResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getHeader(@PathParam("hash") String hash) {
         RpcResult result = RpcResult.getSuccess();
-        BlockHeader blockHeader = blockService.getBlockHeader(hash);
+        BlockHeader blockHeader = null;
+        try {
+            blockHeader = blockService.getBlockHeader(hash);
+        } catch (NulsException e) {
+            //todo
+        }
         if (blockHeader == null) {
             return RpcResult.getFailed(ErrorCode.DATA_NOT_FOUND);
         }
         long reward = ledgerService.getBlockReward(blockHeader.getHeight());
         long fee = ledgerService.getBlockFee(blockHeader.getHeight());
-        result.setData(new BlockDto(blockHeader, reward, fee));
+        try {
+            result.setData(new BlockDto(blockHeader, reward, fee));
+        } catch (IOException e) {
+            //todo
+            e.printStackTrace();
+        }
         return result;
     }
 
