@@ -47,14 +47,15 @@ import io.nuls.ledger.service.intf.LedgerService;
  */
 public class RegisterAgentTxService implements TransactionService<RegisterAgentTransaction> {
     private ConsensusCacheManager manager = ConsensusCacheManager.getInstance();
-    private ConsensusManager consensusManager = ConsensusManager.getInstance();
     private DelegateAccountDataService delegateAccountService = NulsContext.getServiceBean(DelegateAccountDataService.class);
+    private DelegateDataService delegateService = NulsContext.getServiceBean(DelegateDataService.class);
 
     @Override
     public void onRollback(RegisterAgentTransaction tx) throws NulsException {
         this.manager.delAgent(tx.getTxData().getAddress());
+        manager.delDelegateByAgent(tx.getTxData().getAddress());
         this.delegateAccountService.delete(tx.getTxData().getAddress());
-        consensusManager.exitMeeting();
+        this.delegateService.deleteByAgentAddress(tx.getTxData().getAddress());
     }
 
     @Override
@@ -64,7 +65,6 @@ public class RegisterAgentTxService implements TransactionService<RegisterAgentT
         ca.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
         DelegateAccountPo po = ConsensusTool.agentToPojo(ca);
         delegateAccountService.save(po);
-        consensusManager.joinMeeting();
         RegisterAgentNotice notice = new RegisterAgentNotice();
         notice.setEventBody(tx);
         NulsContext.getServiceBean(EventBroadcaster.class).publishToLocal(notice);

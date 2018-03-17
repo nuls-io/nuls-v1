@@ -167,6 +167,7 @@ public class ConsensusMeetingRunner implements Runnable {
     }
 
     private void nextRound() {
+        consensusManager.initConsensusStatusInfo();
         PocMeetingRound currentRound = calcRound();
         consensusManager.setCurrentRound(currentRound);
         while (TimeService.currentTimeMillis() < (currentRound.getStartTime())) {
@@ -176,8 +177,7 @@ public class ConsensusMeetingRunner implements Runnable {
                 Log.error(e);
             }
         }
-        boolean imIn = this.consensusManager.getConsensusStatusInfo() != null && this.consensusManager.getConsensusStatusInfo().getAccount() != null;
-        imIn = imIn && ConsensusStatusEnum.IN.getCode() == consensusManager.getConsensusStatusInfo().getStatus();
+        boolean imIn = consensusManager.isPartakePacking();
         List<Consensus<Agent>> list = calcConsensusAgentList();
         currentRound.setMemberCount(list.size());
         while (currentRound.getEndTime() < TimeService.currentTimeMillis()) {

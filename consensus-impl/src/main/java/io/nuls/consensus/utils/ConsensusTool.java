@@ -41,6 +41,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
+import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.db.entity.DelegateAccountPo;
 import io.nuls.db.entity.DelegatePo;
@@ -162,7 +163,7 @@ public class ConsensusTool {
         po.setDeposit(bean.getExtend().getDeposit().getValue());
         po.setTime(bean.getExtend().getStartTime());
         po.setAgentAddress(bean.getExtend().getDelegateAddress());
-        po.setId(bean.getExtend().getHash());
+        po.setId(StringUtils.getNewUUID());
         return po;
     }
 
