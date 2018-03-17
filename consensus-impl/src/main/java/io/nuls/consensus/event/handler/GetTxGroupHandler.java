@@ -56,13 +56,11 @@ public class GetTxGroupHandler extends AbstractEventHandler<GetTxGroupRequest> {
 
     @Override
     public void onEvent(GetTxGroupRequest event, String fromId) {
-
         GetTxGroupParam eventBody = event.getEventBody();
         Block block = blockService.getBlock(eventBody.getBlockHash().getDigestHex());
         if (null == block) {
             return;
         }
-
         TxGroupEvent txGroupEvent = new TxGroupEvent();
         TxGroup txGroup = new TxGroup();
         txGroup.setBlockHash(block.getHeader().getHash());

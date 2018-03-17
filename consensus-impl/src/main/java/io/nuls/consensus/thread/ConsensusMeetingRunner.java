@@ -117,7 +117,7 @@ public class ConsensusMeetingRunner implements Runnable {
         this.running = true;
         while (running) {
             try {
-                boolean b = checkCondition();
+                boolean b = true;//checkCondition();
                 if (b) {
                     nextRound();
                 } else {
