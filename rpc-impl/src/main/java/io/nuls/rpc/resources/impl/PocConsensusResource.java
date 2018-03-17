@@ -49,6 +49,7 @@ import io.nuls.rpc.resources.form.StopAgentForm;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -117,7 +118,7 @@ public class PocConsensusResource {
     @POST
     @Path("/stopAgent")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult stopAgent(StopAgentForm form) throws NulsException {
+    public RpcResult stopAgent(StopAgentForm form) throws NulsException, IOException {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getAddress());
         AssertUtil.canNotEmpty(form.getPassword());
@@ -128,7 +129,7 @@ public class PocConsensusResource {
     @POST
     @Path("/cancel")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult out(EntrustCancelForm form) throws NulsException {
+    public RpcResult out(EntrustCancelForm form) throws NulsException, IOException {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getTxHash());
         Map<String,Object> params  = new HashMap<>();

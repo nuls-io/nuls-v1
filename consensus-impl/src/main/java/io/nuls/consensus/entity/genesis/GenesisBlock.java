@@ -142,7 +142,7 @@ public final class GenesisBlock extends Block {
             throw new NulsRuntimeException(e);
         }
 
-        tx.setSign(this.signature(tx.getHash().getDigestBytes()));
+        tx.setScriptSig(null);
 
         List<Transaction> txlist = new ArrayList<>();
 //        tx.setStatus(TxStatusEnum.AGREED);

@@ -94,14 +94,17 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         super.parse(byteBuffer);
         this.coinData = coinDataProvider.parse(byteBuffer);
-        NulsSignData cache = this.sign;
-        this.sign = null;
+        byte[] scriptsigCache = this.getScriptSig();
+        this.setCoinData(null);
+        //NulsSignData cache = this.sign;
+        //this.sign = null;
         try {
             hash = NulsDigestData.calcDigestData(this.serialize());
         } catch (IOException e) {
             Log.error(e);
         }
-        sign = cache;
+        this.setScriptSig(scriptsigCache);
+        //sign = cache;
         coinDataProvider.afterParse(coinData, this);
         this.coinData.setTransaction(this);
     }

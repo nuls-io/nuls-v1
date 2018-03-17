@@ -94,7 +94,7 @@ public class UtxoTransferTool {
         input.setIndex(po.getInIndex());
         input.setFromHash(new NulsDigestData(Hex.decode(po.getFromHash())));
         input.setFromIndex(po.getFromIndex());
-        input.setScriptSig(po.getSign());
+        //input.setScriptSig(po.getSign());
 
         UtxoOutput output = new UtxoOutput();
         output.setTxHash(new NulsDigestData(Hex.decode(po.getFromOutPut().getTxHash())));
@@ -112,7 +112,7 @@ public class UtxoTransferTool {
         po.setInIndex(input.getIndex());
         po.setFromHash(input.getFromHash().getDigestHex());
         po.setFromIndex(input.getFromIndex());
-        po.setSign(input.getScriptSig());
+        //po.setSign(input.getScriptSig());
         return po;
     }
 
@@ -126,9 +126,9 @@ public class UtxoTransferTool {
         po.setBlockHeight(tx.getBlockHeight());
         po.setTxIndex(tx.getIndex());
 
-        if (null != tx.getSign()) {
-            po.setSign(tx.getSign().serialize());
-        }
+//        if (null != tx.getSign()) {
+//            po.setSign(tx.getSign().serialize());
+//        }
         if (null != tx.getTxData()) {
             po.setTxData(tx.getTxData().serialize());
         }
@@ -152,9 +152,9 @@ public class UtxoTransferTool {
         po.setTxIndex(tx.getIndex());
         po.setTransferType(tx.getTransferType());
 
-        if (null != tx.getSign()) {
-            po.setSign(tx.getSign().serialize());
-        }
+//        if (null != tx.getSign()) {
+//            po.setSign(tx.getSign().serialize());
+//        }
         if (null != tx.getTxData()) {
             po.setTxData(tx.getTxData().serialize());
         }
@@ -176,9 +176,9 @@ public class UtxoTransferTool {
         tx.setFee(Na.valueOf(po.getFee()));
         tx.setIndex(po.getTxIndex());
 
-        if (po.getSign() != null) {
-            tx.setSign(new NulsSignData(po.getSign()));
-        }
+//        if (po.getSign() != null) {
+//            tx.setSign(new NulsSignData(po.getSign()));
+//        }
         if (StringUtils.isNotBlank(po.getRemark())) {
             tx.setRemark(po.getRemark().getBytes(NulsContext.DEFAULT_ENCODING));
         }
@@ -199,9 +199,9 @@ public class UtxoTransferTool {
         tx.setIndex(po.getTxIndex());
         tx.setTransferType(po.getTransferType());
 
-        if (po.getSign() != null) {
-            tx.setSign(new NulsSignData(po.getSign()));
-        }
+//        if (po.getSign() != null) {
+//            tx.setSign(new NulsSignData(po.getSign()));
+//        }
         if (StringUtils.isNotBlank(po.getRemark())) {
             tx.setRemark(po.getRemark().getBytes(NulsContext.DEFAULT_ENCODING));
         }

@@ -59,7 +59,7 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData  
 
     protected byte[] remark;
 
-    protected NulsSignData sign;
+    private byte[] scriptSig;
 
     protected T txData;
 
@@ -96,7 +96,8 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData  
         size += NulsConstant.INT48_VALUE_LENGTH1;
         size += Utils.sizeOfBytes(remark);
         size += Utils.sizeOfNulsData(txData);
-        size += Utils.sizeOfNulsData(sign);
+        //size += Utils.sizeOfNulsData(sign);
+        size += Utils.sizeOfBytes(scriptSig);
         return size;
     }
 
@@ -107,7 +108,8 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData  
         stream.writeInt48(fee.getValue());
         stream.writeBytesWithLength(remark);
         stream.writeNulsData(txData);
-        stream.writeNulsData(sign);
+        stream.writeBytesWithLength(scriptSig);
+        //stream.writeNulsData(sign);
     }
 
     @Override
@@ -123,7 +125,8 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData  
         } catch (IOException e) {
             Log.error(e);
         }
-        sign = byteBuffer.readSign();
+        scriptSig = byteBuffer.readByLengthByte();
+        //sign = byteBuffer.readSign();
     }
 
     public long getTime() {
@@ -158,12 +161,19 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData  
         this.hash = hash;
     }
 
-    public NulsSignData getSign() {
-        return sign;
+//    public NulsSignData getSign() {
+//        return sign;
+//    }
+//
+//    public void setSign(NulsSignData sign) {
+//        this.sign = sign;
+//    }
+    public byte[] getScriptSig() {
+       return scriptSig;
     }
 
-    public void setSign(NulsSignData sign) {
-        this.sign = sign;
+    public void setScriptSig(byte[] scriptSig) {
+        this.scriptSig = scriptSig;
     }
 
     public T getTxData() {

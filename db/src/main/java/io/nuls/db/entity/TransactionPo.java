@@ -47,7 +47,7 @@ public class TransactionPo {
 
     private byte[] txData;
 
-    private byte[] sign;
+    private byte[] scriptSig;
 
     private List<UtxoInputPo> inputs;
 
@@ -118,12 +118,12 @@ public class TransactionPo {
         this.txIndex = txIndex;
     }
 
-    public byte[] getSign() {
-        return sign;
+    public byte[] getScriptSig() {
+        return scriptSig;
     }
 
-    public void setSign(byte[] sign) {
-        this.sign = sign;
+    public void setScriptSig(byte[] scriptSig) {
+        this.scriptSig = scriptSig;
     }
 
     public List<UtxoInputPo> getInputs() {

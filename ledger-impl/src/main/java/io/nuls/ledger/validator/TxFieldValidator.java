@@ -56,7 +56,7 @@ public class TxFieldValidator implements NulsDataValidator<Transaction> {
                 break;
             }
             //todo legnth  || data.getSign().getSignLength() == 0
-            if (data.getSign() == null ) {
+            if (data.getScriptSig() == null ) {
                 result = false;
                 break;
             }

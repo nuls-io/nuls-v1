@@ -30,6 +30,7 @@ import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.chain.entity.Result;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.script.P2PKHScriptSig;
 
 import java.util.List;
 
@@ -81,6 +82,10 @@ public interface AccountService {
     NulsSignData signDigest(byte [] digestBytes, Account account, String password) throws NulsException;
 
     NulsSignData signData(byte[] data, Account account, String password) throws NulsException;
+
+    P2PKHScriptSig createP2PKHScriptSig(byte[] data, Account account, String password) throws NulsException;
+
+    P2PKHScriptSig createP2PKHScriptSigFromDigest(NulsDigestData nulsDigestData, Account account, String password) throws NulsException;
 
     Result setAlias(String address, String password, String alias);
 

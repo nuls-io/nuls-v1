@@ -39,11 +39,8 @@ public class NulsTest {
     @Test
     public void testAlias() {
         ECKey key = new ECKey();
-        Address address = new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), Utils.sha256hash160(key.getPubKey(false)));
-
+        Address address = new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), Utils.sha256hash160(key.getPubKey()));
         Alias alias = new Alias(address.getBase58(), "vivi");
-
-
         System.out.println(address.getBase58());
         System.out.println(address.getHash().length);
     }

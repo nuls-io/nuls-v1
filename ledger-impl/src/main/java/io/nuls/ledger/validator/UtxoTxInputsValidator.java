@@ -76,18 +76,15 @@ public class UtxoTxInputsValidator implements NulsDataValidator<UtxoData> {
                 }
             }
 
-            try {
-                P2PKHScriptSig scriptSig = new P2PKHScriptSig();
-                scriptSig.parse(input.getScriptSig());
-                Script script = output.getScript();
-                if (!(script instanceof P2PKHScript)) {
-                    return ValidateResult.getFailedResult(ErrorCode.DATA_ERROR);
-                }
-                TransferScript txScript = new TransferScript(scriptSig, (P2PKHScript) output.getScript());
-                txScript.verifyScript();
-            } catch (NulsException e) {
+
+            P2PKHScriptSig scriptSig = new P2PKHScriptSig();
+                //scriptSig.parse(input.getScriptSig());
+            Script script = output.getScript();
+            if (!(script instanceof P2PKHScript)) {
                 return ValidateResult.getFailedResult(ErrorCode.DATA_ERROR);
             }
+            TransferScript txScript = new TransferScript(scriptSig, (P2PKHScript) output.getScript());
+            txScript.verifyScript();
         }
         return ValidateResult.getSuccessResult();
     }

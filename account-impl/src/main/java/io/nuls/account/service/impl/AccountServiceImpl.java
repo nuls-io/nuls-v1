@@ -43,6 +43,7 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.*;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.script.P2PKHScriptSig;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.date.DateUtil;
@@ -503,6 +504,22 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public P2PKHScriptSig createP2PKHScriptSig(byte[] data, Account account, String password) throws NulsException {
+        P2PKHScriptSig p2PKHScriptSig = new P2PKHScriptSig();
+        p2PKHScriptSig.setSignData(signData(data,account,password));
+        p2PKHScriptSig.setPublicKey(account.getPubKey());
+        return p2PKHScriptSig;
+    }
+
+    @Override
+    public P2PKHScriptSig createP2PKHScriptSigFromDigest(NulsDigestData nulsDigestData, Account account, String password) throws NulsException{
+        P2PKHScriptSig p2PKHScriptSig = new P2PKHScriptSig();
+        p2PKHScriptSig.setSignData(signDigest(nulsDigestData,account,password));
+        p2PKHScriptSig.setPublicKey(account.getPubKey());
+        return p2PKHScriptSig;
+    }
+
+    @Override
     public Result verifySign(byte[] data, NulsSignData signData,byte[] pubKey) {
         return verifyDigestSign(NulsDigestData.calcDigestData(data),signData,pubKey);
     }
@@ -532,7 +549,7 @@ public class AccountServiceImpl implements AccountService {
             CoinTransferData coinData = new CoinTransferData(AccountConstant.ALIAS_NA, address, null);
             AliasTransaction aliasTx = new AliasTransaction(coinData, password);
             aliasTx.setHash(NulsDigestData.calcDigestData(aliasTx.serialize()));
-            aliasTx.setSign(signDigest(aliasTx.getHash(), account, password));
+            aliasTx.setScriptSig(createP2PKHScriptSigFromDigest(aliasTx.getHash(), account, password).serialize());
             ValidateResult validate = aliasTx.verify();
             if (validate.isFailed()) {
                 return new Result(false, validate.getMessage());

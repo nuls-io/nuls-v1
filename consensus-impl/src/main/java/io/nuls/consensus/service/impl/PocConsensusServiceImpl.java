@@ -105,7 +105,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
         con.setExtend(agent);
         tx.setTxData(con);
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
-        tx.setSign(accountService.signDigest(tx.getHash(), account, password));
+        tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(), account, password).serialize());
         tx.verifyWithException();
         event.setEventBody(tx);
         eventBroadcaster.broadcastHashAndCache(event, true);
@@ -145,7 +145,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
         tx.setTime(TimeService.currentTimeMillis());
         tx.setTxData(ca);
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
-        tx.setSign(accountService.signDigest(tx.getHash(), account, password));
+        tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(), account, password).serialize());
         tx.verifyWithException();
         event.setEventBody(tx);
 
@@ -160,7 +160,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
     }
 
     @Override
-    public void stopConsensus(String address, String password, Map<String, Object> paramsMap) throws NulsException {
+    public void stopConsensus(String address, String password, Map<String, Object> paramsMap) throws NulsException, IOException {
         Transaction joinTx = null;
         if (null != paramsMap && StringUtils.isNotBlank((String) paramsMap.get("txHash"))) {
             PocJoinConsensusTransaction tx = (PocJoinConsensusTransaction) ledgerService.getTx(NulsDigestData.fromDigestHex((String) paramsMap.get("txHash")));
@@ -196,7 +196,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
             Log.error(e);
             throw new NulsRuntimeException(ErrorCode.HASH_ERROR, e);
         }
-        tx.setSign(accountService.signDigest(tx.getHash(), account, password));
+        tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(), account, password).serialize());
         event.setEventBody(tx);
         eventBroadcaster.broadcastHashAndCache(event, true);
     }

@@ -28,6 +28,7 @@ import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.exception.NulsException;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -41,7 +42,7 @@ public interface ConsensusService {
 
     void startConsensus(String address, String password, Map<String, Object> paramsMap) throws NulsException;
 
-    void stopConsensus(String address, String password,Map<String, Object> paramsMap) throws NulsException;
+    void stopConsensus(String address, String password,Map<String, Object> paramsMap) throws NulsException, IOException;
 
     List<Consensus> getConsensusAccountList();
 

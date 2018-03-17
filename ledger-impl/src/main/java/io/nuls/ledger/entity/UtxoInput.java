@@ -57,7 +57,7 @@ public class UtxoInput extends BaseNulsData {
 
     private int fromIndex;
 
-    private byte[] scriptSig;
+    //private byte[] scriptSig;
 
     private UtxoOutput from;
 
@@ -92,7 +92,7 @@ public class UtxoInput extends BaseNulsData {
         size += VarInt.sizeOf(index);
         size += Utils.sizeOfNulsData(fromHash);
         size += VarInt.sizeOf(fromIndex);
-        size += Utils.sizeOfBytes(scriptSig);
+        //size += Utils.sizeOfBytes(scriptSig);
         return size;
     }
 
@@ -101,7 +101,7 @@ public class UtxoInput extends BaseNulsData {
         stream.writeVarInt(index);
         stream.writeNulsData(fromHash);
         stream.writeVarInt(fromIndex);
-        stream.writeBytesWithLength(scriptSig);
+        //stream.writeBytesWithLength(scriptSig);
     }
 
     @Override
@@ -109,7 +109,7 @@ public class UtxoInput extends BaseNulsData {
         index = (int) byteBuffer.readVarInt();
         fromHash = byteBuffer.readNulsData(new NulsDigestData());
         fromIndex = (int) byteBuffer.readVarInt();
-        scriptSig = byteBuffer.readByLengthByte();
+        //scriptSig = byteBuffer.readByLengthByte();
 
         LedgerCacheService ledgerCacheService = LedgerCacheService.getInstance();
         UtxoOutput output = ledgerCacheService.getUtxo(this.getKey());
@@ -135,13 +135,13 @@ public class UtxoInput extends BaseNulsData {
         this.txHash = txHash;
     }
 
-    public byte[] getScriptSig() {
-        return scriptSig;
-    }
+//    public byte[] getScriptSig() {
+//        return scriptSig;
+//    }
 
-    public void setScriptSig(byte[] scriptSig) {
-        this.scriptSig = scriptSig;
-    }
+//    public void setScriptSig(byte[] scriptSig) {
+//        this.scriptSig = scriptSig;
+//    }
 
     public UtxoOutput getFrom() {
         return from;

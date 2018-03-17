@@ -365,20 +365,20 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         }
 
         //create scriptSig foreach input // todo ,sign data must be different
-        for (int i = 0; i < inputs.size(); i++) {
-            P2PKHScriptSig scriptSig = new P2PKHScriptSig();
-            ECKey ecKey = ECKey.fromPrivate(new BigInteger(priKey));
-
-            Address address = new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), Utils.sha256hash160(ecKey.getPubKey()));
-            scriptSig.setPublicKey(ecKey.getPubKey());
-            NulsSignData signData = accountService.signDigest(new NulsDigestData(NulsDigestData.DIGEST_ALG_SHA160,address.getHash160()),account,password);
-            scriptSig.setSignData(signData);
-            try {
-                inputs.get(i).setScriptSig(scriptSig.serialize());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+//        for (int i = 0; i < inputs.size(); i++) {
+//            P2PKHScriptSig scriptSig = new P2PKHScriptSig();
+//            ECKey ecKey = ECKey.fromPrivate(new BigInteger(priKey));
+//
+//            Address address = new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), Utils.sha256hash160(ecKey.getPubKey()));
+//            scriptSig.setPublicKey(ecKey.getPubKey());
+//            NulsSignData signData = accountService.signDigest(new NulsDigestData(NulsDigestData.DIGEST_ALG_SHA160,address.getHash160()),account,password);
+//            scriptSig.setSignData(signData);
+//            try {
+//                inputs.get(i).setScriptSig(scriptSig.serialize());
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
 
         //create outputs
         int i = 0;

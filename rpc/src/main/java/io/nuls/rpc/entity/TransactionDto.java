@@ -39,7 +39,7 @@ public class TransactionDto {
 
     private String remark;
 
-    private String sign;
+    private String scriptSig;
     // 0, unConfirm  1, confirm
     private Integer status;
 
@@ -68,7 +68,7 @@ public class TransactionDto {
                 this.setRemark(Hex.encode(tx.getRemark()));
             }
         }
-        this.setSign(tx.getSign().getSignHex());
+        this.setScriptSig(Hex.encode(tx.getScriptSig()));
 
         List<InputDto> inputs = new ArrayList<>();
         List<OutputDto> outputs = new ArrayList<>();
@@ -95,7 +95,9 @@ public class TransactionDto {
             long value = 0;
             for (InputDto input : inputs) {
                 if (address.equals(input.getAddress())) {
-                    if (!isTransfer) isTransfer = true;
+                    if (!isTransfer) {
+                        isTransfer = true;
+                    }
                     value += input.getValue();
                 }
             }
@@ -210,12 +212,12 @@ public class TransactionDto {
         this.remark = remark;
     }
 
-    public String getSign() {
-        return sign;
+    public String getScriptSig() {
+        return scriptSig;
     }
 
-    public void setSign(String sign) {
-        this.sign = sign;
+    public void setScriptSig(String scriptSig) {
+        this.scriptSig = scriptSig;
     }
 
     public Integer getStatus() {
