@@ -95,7 +95,7 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
         super.parse(byteBuffer);
         this.coinData = coinDataProvider.parse(byteBuffer);
         byte[] scriptsigCache = this.getScriptSig();
-        this.setCoinData(null);
+        this.setScriptSig(null);
         //NulsSignData cache = this.sign;
         //this.sign = null;
         try {
