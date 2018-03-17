@@ -144,9 +144,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             txList = new ArrayList<>();
             List<Transaction> cacheTxList = txCacheService.getElementList(CONFIRM_TX_CACHE);
             for (Transaction tx : cacheTxList) {
-                if (tx.isLocalTx()) {
-                    txList.add(tx);
-                }
+                txList.add(tx);
             }
             List<TransactionPo> poList;
             if (pageNumber == null && pageSize == null) {
@@ -235,8 +233,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public Page<Transaction> getTxList(long height, int pageNum, int pageSize) throws Exception {
-        Page<TransactionPo> poPage = txDao.getTxs(height, pageNum, pageSize);
+    public Page<Transaction> getTxList(long height,int type, int pageNum, int pageSize) throws Exception {
+        Page<TransactionPo> poPage = txDao.getTxs(height, type, pageNum, pageSize);
         Page<Transaction> txPage = new Page<>(poPage);
         List<Transaction> txList = new ArrayList<>();
         for (TransactionPo po : poPage.getList()) {
@@ -291,7 +289,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             byte[] txbytes = tx.serialize();
             TransferTransaction new_tx = new NulsByteBuffer(txbytes).readNulsData(new TransferTransaction());
             result = new_tx.verify();
-            if(! result.getErrorCode().getCode().equals(ErrorCode.SUCCESS.getCode() ) ){
+            if (!result.getErrorCode().getCode().equals(ErrorCode.SUCCESS.getCode())) {
                 throw new NulsException(ErrorCode.FAILED);
             }
             TransactionEvent event = new TransactionEvent();

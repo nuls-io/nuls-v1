@@ -105,7 +105,7 @@ public class BlockDto {
         this.height = header.getHeight();
         this.txCount = header.getTxCount();
         this.packingAddress = header.getConsensusAddress();
-        this.sign = Hex.encode(header.getSign()) ;
+        this.scriptSign = Hex.encode(header.getScriptSig()) ;
         this.reward = reward;
         this.fee = fee;
         this.confirmCount = bestBlockHeight - this.height;

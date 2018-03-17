@@ -56,7 +56,7 @@ public class BlockResource {
     @GET
     @Path("/header/height/{height}")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult getHeaderByHeight(@PathParam("height") Integer height) {
+    public RpcResult getHeaderByHeight(@PathParam("height") Integer height) throws NulsException, IOException {
         RpcResult result = RpcResult.getSuccess();
         BlockHeader blockHeader = blockService.getBlockHeader(height);
         if (blockHeader == null) {
@@ -71,7 +71,7 @@ public class BlockResource {
     @GET
     @Path("/header/hash/{hash}")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult getHeader(@PathParam("hash") String hash) {
+    public RpcResult getHeader(@PathParam("hash") String hash) throws NulsException, IOException {
         RpcResult result = RpcResult.getSuccess();
         BlockHeader blockHeader = blockService.getBlockHeader(hash);
         if (blockHeader == null) {
@@ -137,7 +137,7 @@ public class BlockResource {
     @GET
     @Path("/newest")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult getBestBlockHash() {
+    public RpcResult getBestBlockHash() throws IOException {
         RpcResult result = RpcResult.getSuccess();
         result.setData(new BlockDto(blockService.getLocalBestBlock().getHeader(), 0, 0));
         return result;
