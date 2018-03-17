@@ -216,7 +216,9 @@ public class DistributedBlockInfoRequestUtils {
                 result.setBestHeight(minHeight);
                 result.setNodeIdList(this.nodeIdList);
                 result.setFinished(true);
-                bestBlockInfo = result;
+                if(result.getBestHeight()<Long.MAX_VALUE){
+                    bestBlockInfo = result;
+                }
             }else if ((TimeService.currentTimeMillis() - startTime) > timeout) {
                 lock.unlock();
                 throw new NulsRuntimeException(ErrorCode.TIME_OUT);
