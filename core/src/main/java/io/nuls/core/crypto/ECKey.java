@@ -23,6 +23,8 @@
  */
 package io.nuls.core.crypto;
 
+import io.nuls.core.chain.entity.NulsDigestData;
+import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.log.Log;
@@ -405,6 +407,21 @@ public class ECKey {
         BigInteger[] components = signer.generateSignature(input.getBytes());
         return new ECDSASignature(components[0], components[1]).toCanonicalised();
     }
+
+    public NulsSignData doSignNulsDigest(NulsDigestData input, BigInteger privateKeyForSigning) {
+        Utils.checkNotNull(privateKeyForSigning);
+        ECDSASigner signer = new ECDSASigner(new HMacDSAKCalculator(new SHA256Digest()));
+        ECPrivateKeyParameters privKey = new ECPrivateKeyParameters(privateKeyForSigning, CURVE);
+        signer.init(true, privKey);
+        BigInteger[] components = signer.generateSignature(input.getDigestBytes());
+        ECDSASignature signature =  new ECDSASignature(components[0], components[1]).toCanonicalised();
+        NulsSignData signData = new NulsSignData();
+        signData.setSignAlgType(NulsSignData.SIGN_ALG_ECC);
+        signData.setSignBytes(signature.encodeToDER());
+        return signData;
+    }
+
+
 
     /**
      * 是否包含私匙
