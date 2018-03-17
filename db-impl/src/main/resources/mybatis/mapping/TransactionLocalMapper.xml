@@ -107,7 +107,7 @@
             (#{item.hash,jdbcType=VARCHAR}, #{item.type,jdbcType=INTEGER}, #{item.txIndex,jdbcType=INTEGER},
             #{item.blockHeight,jdbcType=BIGINT}, #{item.createTime,jdbcType=BIGINT}, #{item.fee,jdbcType=BIGINT},
             #{item.transferType,jdbcType=INTEGER}, #{item.remark,jdbcType=VARCHAR}, #{item.txData,jdbcType=VARBINARY},
-            #{item.sign,jdbcType=VARBINARY}, #{item.size,jdbcType=INTEGER})
+            #{item.scriptSig,jdbcType=VARBINARY}, #{item.size,jdbcType=INTEGER})
         </foreach>
     </insert>
 
