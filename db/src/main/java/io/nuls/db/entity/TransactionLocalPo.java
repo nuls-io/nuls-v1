@@ -47,6 +47,8 @@ public class TransactionLocalPo {
 
     private String remark;
 
+    private Integer size;
+
     private int transferType;
 
     private byte[] txData;
@@ -168,5 +170,13 @@ public class TransactionLocalPo {
 
     public void setOutputs(List<UtxoOutputPo> outputs) {
         this.outputs = outputs;
+    }
+
+    public Integer getSize() {
+        return size;
+    }
+
+    public void setSize(Integer size) {
+        this.size = size;
     }
 }

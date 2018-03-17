@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -67,6 +67,7 @@ public class ConsensusTool {
         po.setHeight(header.getHeight());
         po.setCreateTime(header.getTime());
         po.setHash(header.getHash().getDigestHex());
+        po.setSize(header.getSize());
         if (null != header.getScriptSig()) {
             try {
                 po.setScriptSig(header.getScriptSig().serialize());
@@ -100,7 +101,8 @@ public class ConsensusTool {
         header.setTime(po.getCreateTime());
         header.setHeight(po.getHeight());
         header.setExtend(po.getExtend());
-        header.setScriptSig(( new NulsByteBuffer(po.getScriptSig()).readNulsData(new P2PKHScriptSig())));
+        header.setSize(po.getSize());
+        header.setScriptSig((new NulsByteBuffer(po.getScriptSig()).readNulsData(new P2PKHScriptSig())));
         return header;
     }
 
@@ -168,7 +170,7 @@ public class ConsensusTool {
         return po;
     }
 
-    public static Block createBlock(BlockData blockData,Account account) throws NulsException {
+    public static Block createBlock(BlockData blockData, Account account) throws NulsException {
         if (null == account) {
             throw new NulsRuntimeException(ErrorCode.ACCOUNT_NOT_EXIST);
         }
@@ -194,7 +196,7 @@ public class ConsensusTool {
         header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
         header.setHash(NulsDigestData.calcDigestData(block.getHeader()));
         P2PKHScriptSig scriptSig = new P2PKHScriptSig();
-        NulsSignData signData = accountService.signDigest(header.getHash(),account,NulsContext.CACHED_PASSWORD_OF_WALLET);
+        NulsSignData signData = accountService.signDigest(header.getHash(), account, NulsContext.CACHED_PASSWORD_OF_WALLET);
         scriptSig.setSignData(signData);
         scriptSig.setPublicKey(account.getPubKey());
         header.setScriptSig(scriptSig);

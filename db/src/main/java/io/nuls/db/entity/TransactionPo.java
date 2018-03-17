@@ -49,6 +49,8 @@ public class TransactionPo {
 
     private byte[] scriptSig;
 
+    private Integer size;
+
     private List<UtxoInputPo> inputs;
 
     private List<UtxoOutputPo> outputs;
@@ -140,5 +142,13 @@ public class TransactionPo {
 
     public void setOutputs(List<UtxoOutputPo> outputs) {
         this.outputs = outputs;
+    }
+
+    public Integer getSize() {
+        return size;
+    }
+
+    public void setSize(Integer size) {
+        this.size = size;
     }
 }

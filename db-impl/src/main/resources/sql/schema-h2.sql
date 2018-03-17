@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS `block_header` (
   `round_index` bigint(14) NOT NULL,
   `scriptSig` varbinary(1024) ,
   `extend` varbinary(1024) NOT NULL,
+  `size` int(9),
   PRIMARY KEY (`hash`)
 );
 CREATE TABLE IF NOT EXISTS `delegate_account` (
@@ -90,6 +91,7 @@ CREATE TABLE IF NOT EXISTS `transaction` (
   `fee` bigint(19) NOT NULL,
   `txData` varbinary(1024)  ,
   `scriptSig` varbinary(255) ,
+  `size` int(9),
   PRIMARY KEY (`hash`)
 );
 CREATE TABLE IF NOT EXISTS `transaction_local` (
@@ -103,6 +105,7 @@ CREATE TABLE IF NOT EXISTS `transaction_local` (
   `transferType` int(1),
   `txData` varbinary(1024)  ,
   `scriptSig` varbinary(255) ,
+  `size` int(9),
   PRIMARY KEY (`hash`)
 );
 

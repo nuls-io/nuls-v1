@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -59,16 +59,16 @@ public class UtxoTransferTool {
         output.setAddress(new Address(po.getAddress()).getHash());
         try {
             output.setScript(new P2PKHScript(po.getScript()));
-        }catch (Exception e){
+        } catch (Exception e) {
             //todo
             Log.error(e);
         }
         output.setStatus(po.getStatus());
 
-        if(po.getCreateTime() != null) {
+        if (po.getCreateTime() != null) {
             output.setCreateTime(po.getCreateTime());
         }
-        if(po.getTxType() != null) {
+        if (po.getTxType() != null) {
             output.setTxType(po.getTxType());
         }
         return output;
@@ -81,7 +81,7 @@ public class UtxoTransferTool {
         po.setValue(output.getValue());
         po.setLockTime(output.getLockTime());
         po.setAddress(Address.fromHashs(output.getAddress()).getBase58());
-        if(null!=output.getScript()){
+        if (null != output.getScript()) {
             po.setScript(output.getScript().getBytes());
         }
         po.setStatus((byte) output.getStatus());
@@ -125,6 +125,7 @@ public class UtxoTransferTool {
         po.setCreateTime(tx.getTime());
         po.setBlockHeight(tx.getBlockHeight());
         po.setTxIndex(tx.getIndex());
+        po.setSize(tx.getSize());
 
 //        if (null != tx.getSign()) {
 //            po.setSign(tx.getSign().serialize());
@@ -151,7 +152,7 @@ public class UtxoTransferTool {
         po.setBlockHeight(tx.getBlockHeight());
         po.setTxIndex(tx.getIndex());
         po.setTransferType(tx.getTransferType());
-
+        po.setSize(tx.getSize());
 //        if (null != tx.getSign()) {
 //            po.setSign(tx.getSign().serialize());
 //        }
@@ -175,7 +176,7 @@ public class UtxoTransferTool {
         tx.setBlockHeight(po.getBlockHeight());
         tx.setFee(Na.valueOf(po.getFee()));
         tx.setIndex(po.getTxIndex());
-
+        tx.setSize(po.getSize());
 //        if (po.getSign() != null) {
 //            tx.setSign(new NulsSignData(po.getSign()));
 //        }
@@ -198,7 +199,7 @@ public class UtxoTransferTool {
         tx.setFee(Na.valueOf(po.getFee()));
         tx.setIndex(po.getTxIndex());
         tx.setTransferType(po.getTransferType());
-
+        tx.setSize(po.getSize());
 //        if (po.getSign() != null) {
 //            tx.setSign(new NulsSignData(po.getSign()));
 //        }

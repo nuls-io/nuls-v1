@@ -153,7 +153,7 @@ public class BlockServiceImpl implements BlockService {
             }
         }
         ledgerService.saveTxList(block.getTxs());
-        blockStorageService.save(block.getHeader());
+        blockStorageService.save(block);
     }
 
 
