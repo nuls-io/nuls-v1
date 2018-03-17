@@ -56,7 +56,7 @@ public class GetBlocksHashHandler extends AbstractEventHandler<GetBlocksHashRequ
             BlockHashResponse response = new BlockHashResponse();
             Block block;
             if (event.getEventBody().getEnd() <= 0) {
-                block = blockService.getLocalBestBlock();
+                block = NulsContext.getInstance().getBestBlock();
             } else {
                 block = blockService.getBlock(event.getEventBody().getEnd());
             }
