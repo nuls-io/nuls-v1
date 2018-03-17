@@ -90,4 +90,11 @@
         ]]>
     </select>
 
+    <select id="getBlockByAddress" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultMap="BaseResultMap">
+        select b.*
+        from delegate_account a
+        join block_header b on a.node_address = b.consensus_address
+        <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
+    </select>
+
 </mapper>

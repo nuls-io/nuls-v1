@@ -27,10 +27,12 @@ import io.nuls.consensus.cache.manager.block.BlockCacheManager;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.*;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
+import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.ledger.service.intf.LedgerService;
 
@@ -83,7 +85,7 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public BlockHeader getBlockHeader(long height) {
-         return blockStorageService.getBlockHeader(height);
+        return blockStorageService.getBlockHeader(height);
     }
 
     @Override
@@ -171,6 +173,16 @@ public class BlockServiceImpl implements BlockService {
     @Override
     public List<BlockHeader> getBlockHeaderList(long startHeight, long endHeight, long split) {
         return blockStorageService.getBlockHeaderList(startHeight, endHeight, split);
+    }
+
+    @Override
+    public Page<BlockHeaderPo> getBlockHeaderList(String nodeAddress, int type, int pageNumber, int pageSize) {
+        return blockStorageService.getBlocListByAddress(nodeAddress, type, pageNumber, pageSize);
+    }
+
+    @Override
+    public Page<BlockHeaderPo> getBlockHeaderList(int pageNumber, int pageSize) {
+        return blockStorageService.getBlockHeaderList(pageNumber, pageSize);
     }
 
     @Override

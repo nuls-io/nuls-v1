@@ -29,6 +29,7 @@ import io.nuls.account.entity.Alias;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.chain.entity.Result;
+import io.nuls.core.exception.NulsException;
 
 import java.util.List;
 
@@ -48,6 +49,8 @@ public interface AccountService {
     Account createAccount(String passwd);
 
     Result<List<String>> createAccount(int count,String password);
+
+    Result removeAccount(String address, String password);
 
     Account getDefaultAccount();
 

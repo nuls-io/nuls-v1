@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,12 +23,17 @@
  */
 package io.nuls.db.dao.impl.mybatis;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import io.nuls.core.constant.TransactionConstant;
+import io.nuls.core.dto.Page;
 import io.nuls.db.dao.BlockHeaderService;
 import io.nuls.db.dao.impl.mybatis.mapper.BlockHeaderMapper;
 import io.nuls.db.dao.impl.mybatis.params.BlockSearchParams;
+import io.nuls.db.dao.impl.mybatis.util.SearchOperator;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import io.nuls.db.entity.BlockHeaderPo;
+import io.nuls.db.entity.TransactionPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.db.transactional.annotation.PROPAGATION;
 
@@ -102,6 +107,43 @@ public class BlockDaoImpl extends BaseDaoImpl<BlockHeaderMapper, String, BlockHe
     }
 
     @Override
+    public Page<BlockHeaderPo> getBlockListByAddress(String nodeAddress, int type, int pageNumber, int pageSize) {
+        Searchable searchable = new Searchable();
+        if (type == 1) {
+            searchable.addCondition("a.address", SearchOperator.eq, nodeAddress);
+        } else {
+            searchable.addCondition("a.node_address", SearchOperator.eq, nodeAddress);
+        }
+
+        PageHelper.startPage(pageNumber, pageSize);
+        PageHelper.orderBy("b.height desc");
+        List<BlockHeaderPo> blockList = getMapper().getBlockByAddress(searchable);
+        PageInfo<BlockHeaderPo> pageInfo = new PageInfo<>(blockList);
+        Page<BlockHeaderPo> page = new Page<>();
+        page.setTotal(pageInfo.getTotal());
+        page.setPageNumber(pageNumber);
+        page.setPageSize(pageSize);
+        page.setPages(pageInfo.getPages());
+        page.setList(blockList);
+        return page;
+    }
+
+    @Override
+    public Page<BlockHeaderPo> getBlockHeaderList(int pageNumber, int pageSize) {
+        PageHelper.startPage(pageNumber, pageSize);
+        PageHelper.orderBy("height desc");
+        List<BlockHeaderPo> blockList = getMapper().selectList(new Searchable());
+        PageInfo<BlockHeaderPo> pageInfo = new PageInfo<>(blockList);
+        Page<BlockHeaderPo> page = new Page<>();
+        page.setTotal(pageInfo.getTotal());
+        page.setPageNumber(pageNumber);
+        page.setPageSize(pageSize);
+        page.setPages(pageInfo.getPages());
+        page.setList(blockList);
+        return page;
+    }
+
+    @Override
     public long getCount(String address, long roundStart, long roundEnd) {
         Map<String, Object> map = new HashMap<>();
         map.put(BlockSearchParams.SEARCH_FIELD_ADDRESS, address);
@@ -114,7 +156,7 @@ public class BlockDaoImpl extends BaseDaoImpl<BlockHeaderMapper, String, BlockHe
     public List<Long> getListOfRoundIndexOfYellowPunish(String address, long startRoundIndex, long endRoundIndex) {
         Map<String, Object> params = new HashMap<>();
         params.put("address", address);
-        params.put("startRoundIndex",startRoundIndex);
+        params.put("startRoundIndex", startRoundIndex);
         params.put("endRoundIndex", endRoundIndex);
         params.put("txType", TransactionConstant.TX_TYPE_YELLOW_PUNISH);
         return this.getMapper().getSumOfRoundIndexOfYellowPunish(params);

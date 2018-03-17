@@ -132,7 +132,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getUtxo(@QueryParam("address") String address,
                              @QueryParam("amount") long amount) {
-        if (!StringUtils.validAddress(address) || amount < 0 || amount > Na.MAX_NA_VALUE) {
+        if (!StringUtils.validAddress(address) || amount <= 0 || amount > Na.MAX_NA_VALUE) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         UtxoBalance balance = (UtxoBalance) ledgerService.getBalance(address);
@@ -146,7 +146,7 @@ public class AccountResource {
         List<OutputDto> dtoList = new ArrayList<>();
         for (int i = 0; i < balance.getUnSpends().size(); i++) {
             UtxoOutput output = balance.getUnSpends().get(i);
-            if (output.getStatus() == UtxoOutput.UTXO_CONFIRM_UNLOCK) {
+            if (output.isUsable()) {
                 usable += output.getValue();
                 dtoList.add(new OutputDto(output));
             }
@@ -173,7 +173,6 @@ public class AccountResource {
         Result result = accountService.getPrivateKey(form.getAddress(), form.getPassword());
         return new RpcResult(result);
     }
-
 
     @GET
     @Path("/assets/{address}")

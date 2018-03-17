@@ -87,6 +87,7 @@ public enum ErrorCode {
     PASSWORD_IS_WRONG("ACT000", 45000),
     ACCOUNT_NOT_EXIST("ACT001", 45001),
     ACCOUNT_IS_ALREADY_ENCRYPTED("ACT002", 45002),
+    ACCOUNT_EXIST("ACT003",45003),
 
     /**
      * ----------  DB Exception code   ---------

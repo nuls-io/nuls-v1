@@ -5,8 +5,10 @@ import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
+import io.nuls.db.entity.BlockHeaderPo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,6 +69,42 @@ public class BlockDto {
         this.txCount = header.getTxCount();
         this.packingAddress = header.getPackingAddress();
         this.sign = header.getSign().getSignHex();
+        this.reward = reward;
+        this.fee = fee;
+        this.confirmCount = bestBlockHeight - this.height;
+        NulsByteBuffer byteBuffer = new NulsByteBuffer(header.getExtend());
+        try {
+            this.roundIndex = byteBuffer.readVarInt();
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+        try {
+            this.consensusMemberCount = (int) byteBuffer.readVarInt();
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+        try {
+            this.roundStartTime = byteBuffer.readVarInt();
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+        try {
+            this.packingIndexOfRound = (int) byteBuffer.readVarInt();
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+    }
+
+    public BlockDto(BlockHeaderPo header, long reward, long fee) {
+        long bestBlockHeight = NulsContext.getInstance().getBestBlock().getHeader().getHeight();
+        this.hash = header.getHash();
+        this.preHash = header.getPreHash();
+        this.merkleHash = header.getMerkleHash();
+        this.time = header.getCreateTime();
+        this.height = header.getHeight();
+        this.txCount = header.getTxCount();
+        this.packingAddress = header.getConsensusAddress();
+        this.sign = Hex.encode(header.getSign()) ;
         this.reward = reward;
         this.fee = fee;
         this.confirmCount = bestBlockHeight - this.height;

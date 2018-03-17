@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -120,21 +120,49 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     public long getTxCount(String address, int txType) throws Exception {
+        int count = 0;
+        List<Transaction> cacheTxList = txCacheService.getElementList(CONFIRM_TX_CACHE);
+        count += cacheTxList.size();
+
         boolean isLocal = NulsContext.LOCAL_ADDRESS_LIST.contains(address);
         if (isLocal) {
-            return txDao.getLocalTxsCount(address, txType);
+            count += txDao.getLocalTxsCount(address, txType);
         } else {
-            return txDao.getTxsCount(address, txType);
+            count += txDao.getTxsCount(address, txType);
         }
+        return count;
     }
 
     @Override
     public List<Transaction> getTxList(String address, int txType, Integer pageNumber, Integer pageSize) throws Exception {
-        List<Transaction> txList = new ArrayList<>();
-        if (StringUtils.isNotBlank(address) && NulsContext.LOCAL_ADDRESS_LIST.contains(address)) {
+        List<Transaction> txList = null;
+        if (NulsContext.LOCAL_ADDRESS_LIST.contains(address)) {
             txList = getLocalTxList(address, txType, pageNumber, pageSize);
         } else {
-            List<TransactionPo> poList = txDao.getTxs(address, txType, pageNumber, pageSize);
+            txList = new ArrayList<>();
+            List<Transaction> cacheTxList = txCacheService.getElementList(CONFIRM_TX_CACHE);
+            for (Transaction tx : cacheTxList) {
+                if (tx.isLocalTx()) {
+                    txList.add(tx);
+                }
+            }
+            List<TransactionPo> poList;
+            if (pageNumber == null && pageSize == null) {
+                poList = txDao.getTxs(address, txType, null, null);
+                for (TransactionPo po : poList) {
+                    txList.add(UtxoTransferTool.toTransaction(po));
+                }
+                return txList;
+            }
+
+            int start = (pageNumber - 1) * pageSize;
+            if (txList.size() >= start + pageSize) {
+                return txList.subList(start, start + pageSize);
+            }
+
+            start = start - txList.size();
+            poList = txDao.getTxs(address, txType, start, pageSize);
+            txList = new ArrayList<>();
             for (TransactionPo po : poList) {
                 txList.add(UtxoTransferTool.toTransaction(po));
             }
@@ -144,13 +172,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     public List<Transaction> getLocalTxList(String address, int txType, Integer pageNumber, Integer pageSize) throws Exception {
         List<Transaction> txList = new ArrayList<>();
-        List<Transaction> cacheTxList = txCacheService.getElementList(RECEIVE_TX_CACHE);
-        for (Transaction tx : cacheTxList) {
-            if (tx.isLocalTx()) {
-                txList.add(tx);
-            }
-        }
-        cacheTxList = txCacheService.getElementList(CONFIRM_TX_CACHE);
+        List<Transaction> cacheTxList = txCacheService.getElementList(CONFIRM_TX_CACHE);
         for (Transaction tx : cacheTxList) {
             if (tx.isLocalTx()) {
                 txList.add(tx);
@@ -211,8 +233,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public Page<Transaction> getTxList(long height, int pageNum, int pageSize) throws Exception {
-        Page<TransactionPo> poPage = txDao.getTxs(height, pageNum, pageSize);
+    public Page<Transaction> getTxList(long height, int type, int pageNum, int pageSize) throws Exception {
+        Page<TransactionPo> poPage = txDao.getTxs(height, type, pageNum, pageSize);
         Page<Transaction> txPage = new Page<>(poPage);
         List<Transaction> txList = new ArrayList<>();
         for (TransactionPo po : poPage.getList()) {

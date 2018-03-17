@@ -30,6 +30,7 @@ import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.dto.Page;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.BlockHeaderService;
 import io.nuls.db.entity.BlockHeaderPo;
@@ -218,6 +219,14 @@ public class BlockStorageService {
             }
         }
         return headerList;
+    }
+
+    public Page<BlockHeaderPo> getBlocListByAddress(String nodeAddress, int type, int pageNumber, int pageSize) {
+        return headerDao.getBlockListByAddress(nodeAddress, type, pageNumber, pageSize);
+    }
+
+    public Page<BlockHeaderPo> getBlockHeaderList(int pageNumber, int pageSize) {
+        return headerDao.getBlockHeaderList(pageNumber, pageSize);
     }
 
     public long getBlockCount(String address, long roundStart, long roundEnd) {
