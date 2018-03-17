@@ -79,7 +79,9 @@ public class DistributedBlockInfoRequestUtils {
     }
 
     public BlockInfo request(long start, long end, long split) {
+//        Log.error("==================wait it:"+Thread.currentThread().getName());
         lock.lock();
+//        Log.error("==================lock it:"+Thread.currentThread().getName());
         try {
             requesting = true;
             hashesMap.clear();
@@ -99,6 +101,7 @@ public class DistributedBlockInfoRequestUtils {
         } catch (Exception e) {
             throw e;
         } finally {
+//            Log.error("===============unlock it:"+Thread.currentThread().getName());
             lock.unlock();
         }
     }

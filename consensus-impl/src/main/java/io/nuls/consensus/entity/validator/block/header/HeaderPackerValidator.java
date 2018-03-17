@@ -91,7 +91,7 @@ public class HeaderPackerValidator implements NulsDataValidator<BlockHeader> {
         byte[] packingHash160 = AccountTool.getHash160ByAddress(header.getPackingAddress());
         byte[] hash160InScriptSig = header.getScriptSig().getSignerHash160();
 
-        if(Arrays.equals(packingHash160,hash160InScriptSig)){
+        if(!Arrays.equals(packingHash160,hash160InScriptSig)){
             return ValidateResult.getFailedResult(ERROR_MESSAGE);
         }
         BlockRoundData nowRoundData = null;
