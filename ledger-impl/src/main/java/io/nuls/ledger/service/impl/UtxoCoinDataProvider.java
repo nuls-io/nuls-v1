@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -392,7 +392,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 output.setValue(coin.getNa().getValue());
                 output.setStatus(UtxoOutput.UTXO_CONFIRM_UNLOCK);
                 output.setIndex(i);
-                P2PKHScript p2PKHScript = new P2PKHScript(new NulsDigestData( NulsDigestData.DIGEST_ALG_SHA160,new Address(address).getHash160()));
+                P2PKHScript p2PKHScript = new P2PKHScript(new NulsDigestData(NulsDigestData.DIGEST_ALG_SHA160, new Address(address).getHash160()));
                 output.setScript(p2PKHScript);
                 if (coin.getUnlockHeight() > 0) {
                     output.setLockTime(coin.getUnlockHeight());
@@ -418,7 +418,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             output.setIndex(i);
             output.setParent(tx);
             output.setStatus(UtxoOutput.UTXO_CONFIRM_UNLOCK);
-            P2PKHScript p2PKHScript = new P2PKHScript(new NulsDigestData( NulsDigestData.DIGEST_ALG_SHA160,account.getHash160()));
+            P2PKHScript p2PKHScript = new P2PKHScript(new NulsDigestData(NulsDigestData.DIGEST_ALG_SHA160, account.getHash160()));
             output.setScript(p2PKHScript);
             outputs.add(output);
         }
@@ -431,11 +431,15 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
     @Override
     public void afterParse(CoinData coinData, Transaction tx) {
         UtxoData utxoData = (UtxoData) coinData;
-        for (UtxoInput input : utxoData.getInputs()) {
-            input.setTxHash(tx.getHash());
+        if (null != utxoData.getInputs()) {
+            for (UtxoInput input : utxoData.getInputs()) {
+                input.setTxHash(tx.getHash());
+            }
         }
-        for (UtxoOutput output : utxoData.getOutputs()) {
-            output.setTxHash(tx.getHash());
+        if (null != utxoData.getOutputs()) {
+            for (UtxoOutput output : utxoData.getOutputs()) {
+                output.setTxHash(tx.getHash());
+            }
         }
     }
 }
