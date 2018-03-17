@@ -240,4 +240,8 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
         }
         return 0;
     }
+
+    public byte[] getOwner(){
+        return ((P2PKHScript)this.getScript()).getPublicKeyDigest().getDigestBytes();
+    }
 }

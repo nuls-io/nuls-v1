@@ -23,7 +23,9 @@
  */
 package io.nuls.ledger.validator;
 
+import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
+import io.nuls.account.util.AccountTool;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
@@ -40,6 +42,8 @@ import io.nuls.ledger.entity.UtxoInput;
 import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.ledger.script.TransferScript;
+
+import java.util.Arrays;
 
 /**
  * @author Niels
@@ -68,23 +72,28 @@ public class UtxoTxInputsValidator implements NulsDataValidator<UtxoData> {
 
             if (data.getTransaction().getStatus() == TxStatusEnum.CACHED) {
                 if (!output.isUsable()) {
-                    throw new NulsRuntimeException(ErrorCode.UTXO_STATUS_CHANGE);
+                    return ValidateResult.getFailedResult(ErrorCode.UTXO_STATUS_CHANGE);
                 }
             } else if (data.getTransaction().getStatus() == TxStatusEnum.AGREED) {
                 if (!output.isLocked()) {
-                    throw new NulsRuntimeException(ErrorCode.UTXO_STATUS_CHANGE);
+                    return ValidateResult.getFailedResult(ErrorCode.UTXO_STATUS_CHANGE);
                 }
             }
 
+            byte[] owner = output.getOwner();
 
-            P2PKHScriptSig scriptSig = new P2PKHScriptSig();
-                //scriptSig.parse(input.getScriptSig());
-            Script script = output.getScript();
-            if (!(script instanceof P2PKHScript)) {
-                return ValidateResult.getFailedResult(ErrorCode.DATA_ERROR);
+            P2PKHScriptSig p2PKHScriptSig = null;
+            try {
+                p2PKHScriptSig = P2PKHScriptSig.createFromBytes(data.getTransaction().getScriptSig());
+            } catch (NulsException e) {
+                return ValidateResult.getFailedResult(ErrorCode.DATA_ERROR );
             }
-            TransferScript txScript = new TransferScript(scriptSig, (P2PKHScript) output.getScript());
-            txScript.verifyScript();
+            byte[] user = p2PKHScriptSig.getSignerHash160();
+            if(!Arrays.equals(owner,user)){
+                return ValidateResult.getFailedResult(ErrorCode.INVALID_OUTPUT );
+            }
+
+            return ValidateResult.getSuccessResult();
         }
         return ValidateResult.getSuccessResult();
     }

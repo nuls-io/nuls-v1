@@ -23,6 +23,7 @@
  */
 package io.nuls.ledger.module.impl;
 
+import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.chain.manager.TransactionValidatorManager;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
@@ -42,10 +43,7 @@ import io.nuls.ledger.service.impl.UtxoCoinManager;
 import io.nuls.ledger.service.impl.UtxoLedgerServiceImpl;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.ledger.thread.SmallChangeThread;
-import io.nuls.ledger.validator.TxFieldValidator;
-import io.nuls.ledger.validator.TxMaxSizeValidator;
-import io.nuls.ledger.validator.TxRemarkValidator;
-import io.nuls.ledger.validator.TxSignValidator;
+import io.nuls.ledger.validator.*;
 
 
 /**

@@ -132,7 +132,8 @@ public enum ErrorCode {
     UTXO_SPENT("LED001", 70001),
     UTXO_STATUS_CHANGE("LED002", 70002),
     BALANCE_NOT_ENOUGH("LED003", 70003),
-
+    INVALID_OUTPUT("LED004",70004 ),
+    INVALID_AMOUNT("LED005",70005 ),
     /**
      * messages
      */

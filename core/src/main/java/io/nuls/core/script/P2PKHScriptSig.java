@@ -111,4 +111,8 @@ public class P2PKHScriptSig extends Script {
     public byte[] getSignerHash160(){
         return Utils.sha256hash160(getPublicKey());
     }
+
+    public static P2PKHScriptSig createFromBytes(byte[] bytes) throws NulsException {
+        return new NulsByteBuffer(bytes).readNulsData(new P2PKHScriptSig());
+    }
 }
