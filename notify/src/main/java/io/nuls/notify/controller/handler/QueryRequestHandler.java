@@ -41,7 +41,7 @@ public class QueryRequestHandler extends RequestHandler {
     }
 
     @Override
-    public void handleRequest(WebSocket sock, Map<String, Object> request, Map<String, Object> response) {
-
+    public Integer handleRequest(WebSocket sock, Map<String, Object> request, Map<String, Object> response) {
+        return 200;
     }
 }

@@ -35,21 +35,14 @@ import java.util.Map;
  * @date 2018/3/11
  */
 public class RequestHandler {
-    public SubscriptionContext getContext() {
-        return context;
-    }
-
-    public void setContext(SubscriptionContext context) {
-        this.context = context;
-    }
-
-    private SubscriptionContext context;
 
     public String method() {
         Log.error("You must implement this method.");
         return null;
     }
 
-    public void handleRequest(WebSocket sock, Map<String, Object> request, Map<String, Object> response) {
+    public Integer handleRequest(WebSocket sock, Map<String, Object> request, Map<String, Object> response) {
+        Log.info("You may need implement this method.");
+        return 500;
     }
 }

@@ -26,6 +26,7 @@
 package io.nuls.notify.controller.handler;
 
 import io.nuls.notify.controller.RequestHandler;
+import io.nuls.notify.controller.Subscriber;
 import org.java_websocket.WebSocket;
 
 import java.util.List;
@@ -42,15 +43,24 @@ public class SubscribeRequestHandler extends RequestHandler {
     }
 
     @Override
-    public void handleRequest(WebSocket sock, Map<String, Object> request, Map<String, Object> response) {
+    public Integer handleRequest(WebSocket sock, Map<String, Object> request, Map<String, Object> response) {
+        Subscriber subscriber = sock.getAttachment();
+        if (request.containsKey("monitor")) {
+            Boolean monitor = (Boolean) request.get("monitor");
+            subscriber.subscribeAsMonitor(monitor);
+            return 200;
+        }
+
         List<Integer> moduleArray = (List<Integer>) request.get("module");
         for (Integer moduleID : moduleArray) {
-            this.getContext().subscribeModule(moduleID, sock);
+            subscriber.subscribeModule(moduleID, true);
         }
 
         List<String> eventArray = (List<String>) request.get("event");
         for (String eventName : eventArray) {
-            this.getContext().subscribeEvent(eventName, sock);
+            subscriber.subscribeEvent(eventName, true);
         }
+
+        return 200;
     }
 }
