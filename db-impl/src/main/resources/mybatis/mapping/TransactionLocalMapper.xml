@@ -20,7 +20,6 @@
             <id column="in_index" jdbcType="INTEGER" property="inIndex" />
             <id column="from_hash" jdbcType="VARCHAR" property="fromHash" />
             <result column="from_index" jdbcType="INTEGER" property="fromIndex" />
-            <result column="in_scriptSig" jdbcType="VARBINARY" property="scriptSig" />
 
             <association property="fromOutPut" javaType="io.nuls.db.entity.UtxoOutputPo">
                 <id column="from_hash" jdbcType="VARCHAR" property="txHash" />
@@ -49,7 +48,7 @@
 
     <sql id="Utxo_Column_List">
          a.hash, a.type, a.tx_index, a.block_height, a.create_time, a.fee, a.remark, a.txData, a.scriptSig,
-         b.tx_hash as in_tx_hash, b.from_index, b.in_index,b.scriptSig as in_scriptSig,
+         b.tx_hash as in_tx_hash, b.from_index, b.in_index,
          c.tx_hash as out_tx_hash, c.out_index, c.value, c.lock_time, c.status, c.address, c.script,
          d.tx_hash as from_hash, d.out_index as from_out_index, d.value as from_value, d.lock_time as from_lock_time,
          d.address as from_address,d.status as from_status, d.script as from_script
@@ -72,12 +71,12 @@
 
     <insert id="insert" parameterType="io.nuls.db.entity.TransactionLocalPo">
         insert into transaction_local (hash, type, tx_index,
-        block_height, create_time, fee,transferType,
-        remark, txData, scriptSig
+            block_height, create_time, fee,transferType,
+            remark, txData, scriptSig
         )
         values (#{hash,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER}, #{txIndex,jdbcType=INTEGER},
-        #{blockHeight,jdbcType=BIGINT}, #{createTime,jdbcType=BIGINT}, #{fee,jdbcType=BIGINT},
-        #{transferType,jdbcType=INTEGER}, #{remark,jdbcType=VARCHAR}, #{txData,jdbcType=VARBINARY}, #{scriptSig,jdbcType=VARBINARY}
+            #{blockHeight,jdbcType=BIGINT}, #{createTime,jdbcType=BIGINT}, #{fee,jdbcType=BIGINT},
+            #{transferType,jdbcType=INTEGER}, #{remark,jdbcType=VARCHAR}, #{txData,jdbcType=VARBINARY}, #{scriptSig,jdbcType=VARBINARY}
         )
     </insert>
 
@@ -97,8 +96,8 @@
 
     <insert id="batchInsert" parameterType="java.util.List">
         insert into transaction_local (hash, type, tx_index,
-        block_height, create_time, fee,transferType,
-        remark, txData, scriptSig
+            block_height, create_time, fee,transferType,
+            remark, txData, scriptSig
         )
         values
         <foreach collection="list" item="item" index="index" separator=",">

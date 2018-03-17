@@ -23,7 +23,6 @@
  */
 package io.nuls.core.chain.entity;
 
-import io.nuls.core.chain.intf.NulsCloneable;
 import io.nuls.core.chain.manager.TransactionValidatorManager;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.constant.TxStatusEnum;

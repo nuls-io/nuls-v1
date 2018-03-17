@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS `block_header` (
   `consensus_address` varchar(40) DEFAULT NULL,
   `tx_count` int(5) NOT NULL,
   `round_index` bigint(14) NOT NULL,
-  `sign` varbinary(1024) ,
+  `scriptSig` varbinary(1024) ,
   `extend` varbinary(1024) NOT NULL,
   PRIMARY KEY (`hash`)
 );
@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS `transaction` (
   `remark` varchar(100) DEFAULT NULL,
   `fee` bigint(19) NOT NULL,
   `txData` varbinary(1024)  ,
-  `sign` varbinary(255) ,
+  `scriptSig` varbinary(255) ,
   PRIMARY KEY (`hash`)
 );
 CREATE TABLE IF NOT EXISTS `transaction_local` (
@@ -102,7 +102,7 @@ CREATE TABLE IF NOT EXISTS `transaction_local` (
   `fee` bigint(19) NOT NULL,
   `transferType` int(1),
   `txData` varbinary(1024)  ,
-  `sign` varbinary(255) ,
+  `scriptSig` varbinary(255) ,
   PRIMARY KEY (`hash`)
 );
 
@@ -117,7 +117,6 @@ CREATE TABLE IF NOT EXISTS `utxo_input` (
   `in_index` int(5) NOT NULL,
   `from_hash` varchar(70) NOT NULL,
   `from_index` int(5) NOT NULL,
-  `sign` varbinary(255) NOT NULL,
   PRIMARY KEY (`tx_hash`,`in_index`)
 );
 

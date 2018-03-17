@@ -6,11 +6,10 @@
     <id column="in_index" jdbcType="INTEGER" property="inIndex" />
     <result column="from_hash" jdbcType="VARCHAR" property="fromIndex" />
     <result column="from_index" jdbcType="INTEGER" property="fromIndex" />
-    <result column="sign" jdbcType="VARBINARY" property="sign" />
   </resultMap>
 
   <sql id="Base_Column_List">
-    tx_hash, in_index, from_hash, from_index, sign
+    tx_hash, in_index, from_hash, from_index
   </sql>
 
   <select id="selectByPrimaryKey" parameterType="map" resultMap="BaseResultMap">
@@ -28,24 +27,23 @@
   </delete>
 
   <insert id="insert" parameterType="io.nuls.db.entity.UtxoInputPo">
-    insert into utxo_input (tx_hash, in_index, from_hash, from_index, sign)
-    values (#{txHash,jdbcType=VARCHAR}, #{inIndex,jdbcType=INTEGER}, #{fromHash,jdbcType=VARCHAR}, #{fromIndex,jdbcType=INTEGER}, #{sign,jdbcType=VARBINARY})
+    insert into utxo_input (tx_hash, in_index, from_hash, from_index)
+    values (#{txHash,jdbcType=VARCHAR}, #{inIndex,jdbcType=INTEGER}, #{fromHash,jdbcType=VARCHAR}, #{fromIndex,jdbcType=INTEGER})
   </insert>
 
   <update id="updateByPrimaryKey" parameterType="io.nuls.db.entity.UtxoInputPo">
     update utxo_input
     set from_hash = #{fromHash,jdbcType=VARCHAR},
     set from_index = #{inIndex,jdbcType=INTEGER},
-    sign = #{sign,jdbcType=VARBINARY}
     where tx_hash = #{txHash,jdbcType=VARCHAR}
     and in_index = #{inIndex,jdbcType=INTEGER}
   </update>
 
   <insert id="batchInsert" parameterType="java.util.List">
-    insert into utxo_input (tx_hash, in_index, from_hash, from_index, sign)
+    insert into utxo_input (tx_hash, in_index, from_hash, from_index)
     values
     <foreach collection="list" item="item" index="index" separator="," >
-      ( #{item.txHash,jdbcType=VARCHAR}, #{item.inIndex,jdbcType=INTEGER},#{item.fromHash,jdbcType=VARCHAR}, #{item.fromIndex,jdbcType=INTEGER}, #{item.sign,jdbcType=VARBINARY})
+      ( #{item.txHash,jdbcType=VARCHAR}, #{item.inIndex,jdbcType=INTEGER},#{item.fromHash,jdbcType=VARCHAR}, #{item.fromIndex,jdbcType=INTEGER})
     </foreach>
   </insert>
 
