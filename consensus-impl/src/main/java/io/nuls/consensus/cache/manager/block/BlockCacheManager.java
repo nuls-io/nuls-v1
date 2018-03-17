@@ -39,6 +39,7 @@ import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
@@ -152,9 +153,10 @@ public class BlockCacheManager {
             rollbackBlocksTxs(blockHashList);
             return;
         }
-        for (int i=0;i<block.getHeader().getTxCount();i++) {
+        for (int i = 0; i < block.getHeader().getTxCount(); i++) {
             Transaction tx = block.getTxs().get(i);
-            tx.setBlockHeight(block.getHeader().getHeight());tx.setIndex(i);
+            tx.setBlockHeight(block.getHeader().getHeight());
+            tx.setIndex(i);
             tx.setIndex(i);
             if (tx.getStatus() == null || tx.getStatus() == TxStatusEnum.CACHED) {
                 try {
@@ -185,7 +187,16 @@ public class BlockCacheManager {
 
     private void rollbackTxs(List<Transaction> txs) {
         for (Transaction tx : txs) {
-            if (tx.getStatus() == TxStatusEnum.AGREED && !tx.isLocalTx()) {
+            boolean isMine;
+//            try {
+//                isMine = ledgerService.checkTxIsMine(tx);
+//            } catch (NulsException e) {
+//                Log.error(e);
+//                throw new NulsRuntimeException(e);
+//            }
+            if (tx.getStatus() == TxStatusEnum.AGREED
+//                    && !isMine
+                    ) {
                 try {
                     ledgerService.rollbackTx(tx);
                 } catch (NulsException e) {
@@ -196,7 +207,7 @@ public class BlockCacheManager {
     }
 
     public Block getBlock(String hash) {
-        if(null==blockCacheMap){
+        if (null == blockCacheMap) {
             return null;
         }
         return blockCacheMap.get(hash);
@@ -311,6 +322,6 @@ public class BlockCacheManager {
     }
 
     public void removeBlock(String hash) {
-
+        //todo
     }
 }

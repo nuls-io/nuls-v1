@@ -136,14 +136,14 @@ public class DistributedBlockInfoRequestUtils {
         }
         int size = nodeIdList.size();
         int halfSize = (size + 1) / 2;
-        //todo =号
-        if (hashesMap.size() < halfSize) {
+        //
+        if (hashesMap.size() <= halfSize) {
             return;
         }
         BlockInfo result = null;
         for (String key : calcMap.keySet()) {
             List<String> nodes = calcMap.get(key);
-            //todo 临时加上=
+            //todo =
             if (nodes.size() >= halfSize) {
                 result = new BlockInfo();
                 BlockHashResponse response = hashesMap.get(nodes.get(0));
@@ -194,7 +194,7 @@ public class DistributedBlockInfoRequestUtils {
             }
             long timeout = 10000L;
 
-            if ((TimeService.currentTimeMillis() - startTime) > (timeout - 1000L) && hashesMap.size() > ((nodeIdList.size() + 1) / 2) && askHighest) {
+            if ((TimeService.currentTimeMillis() - startTime) > (timeout - 1000L) && hashesMap.size() >= ((nodeIdList.size() + 1) / 2) && askHighest) {
                 long localHeight = NulsContext.getInstance().getBestBlock().getHeader().getHeight();
                 long minHeight = Long.MAX_VALUE;
                 NulsDigestData minHash = null;
@@ -216,9 +216,10 @@ public class DistributedBlockInfoRequestUtils {
                 result.setBestHeight(minHeight);
                 result.setNodeIdList(this.nodeIdList);
                 result.setFinished(true);
-                bestBlockInfo = result;
-            }
-            if ((TimeService.currentTimeMillis() - startTime) > timeout) {
+                if(result.getBestHeight()<Long.MAX_VALUE){
+                    bestBlockInfo = result;
+                }
+            }else if ((TimeService.currentTimeMillis() - startTime) > timeout) {
                 lock.unlock();
                 throw new NulsRuntimeException(ErrorCode.TIME_OUT);
             }

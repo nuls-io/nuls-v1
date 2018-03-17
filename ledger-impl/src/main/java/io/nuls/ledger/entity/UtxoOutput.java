@@ -227,6 +227,10 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
         return status == UTXO_UNCONFIRM_UNLOCK || status == UTXO_UNCONFIRM_LOCK;
     }
 
+    public boolean isLocked() {
+        return status == UTXO_UNCONFIRM_LOCK || status == UTXO_CONFIRM_LOCK;
+    }
+
     @Override
     public int compareTo(UtxoOutput o) {
         if (this.value < o.getValue())

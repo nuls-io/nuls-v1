@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS `delegate_account` (
   `node_address` varchar(40) NOT NULL,
   `deposit` bigint(18) NOT NULL,
   `remark` varchar(255) NOT NULL,
+  `status` INT DEFAULT 0,
   `start_time` bigint(14) NOT NULL,
   `commission_rate` decimal(14) NOT NULL,
   PRIMARY KEY (`id`)

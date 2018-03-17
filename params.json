@@ -1,0 +1,17 @@
+{
+  "createAgent": {
+    "address": "2CYsoYpzQAQhGSp4Bcc26kqrfzFvnpN",
+    "packingAddress": "2CYsoYpzQAQhGSp4Bcc26kqrfzFvnpN",
+    "commissionRate": 15,
+    "deposit": 5432100000000,
+    "remark": "哈哈哈哈哈哈哈哈哈哈",
+    "agentName": "创世节点",
+    "password": "nuls123456"
+  },
+  "entrust": {
+    "address": "2CYsoYpzQAQhGSp4Bcc26kqrfzFvnpN",
+    "agentAddress": "2CYsoYpzQAQhGSp4Bcc26kqrfzFvnpN",
+    "deposit": 25000000000000,
+    "password": "nuls123456"
+  }
+}

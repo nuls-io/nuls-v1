@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -143,7 +143,7 @@ public class ConsensusManager implements Runnable {
         this.consensusStatusInfo = info;
     }
 
-    public void joinMeeting() {
+    public void joinConsensusMeeting() {
         TaskManager.createAndRunThread(NulsConstant.MODULE_ID_CONSENSUS,
                 ConsensusMeetingRunner.THREAD_NAME,
                 ConsensusMeetingRunner.getInstance());
@@ -183,7 +183,6 @@ public class ConsensusManager implements Runnable {
 
     public void setCurrentRound(PocMeetingRound currentRound) {
         this.currentRound = currentRound;
-
     }
 
     public PocMeetingRound getCurrentRound() {
@@ -191,11 +190,9 @@ public class ConsensusManager implements Runnable {
     }
 
     public boolean isPartakePacking() {
-        return partakePacking;
-    }
-
-    public void exitMeeting() {
-        TaskManager.stopThread(NulsConstant.MODULE_ID_CONSENSUS, BlockMaintenanceThread.THREAD_NAME);
+        boolean imIn = this.getConsensusStatusInfo() != null && this.getConsensusStatusInfo().getAccount() != null;
+        imIn = imIn && partakePacking && this.getConsensusStatusInfo().getStatus() == ConsensusStatusEnum.IN.getCode();
+        return imIn;
     }
 
     public List<String> getSeedNodeList() {

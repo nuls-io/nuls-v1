@@ -47,6 +47,8 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.crypto.Hex;
+import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
@@ -87,7 +89,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
         data.addFrom(account.getAddress().toString(), agent.getDeposit());
         Coin coin = new Coin();
         coin.setCanBeUnlocked(true);
-        coin.setUnlockHeight(0);
+        coin.setUnlockHeight(Long.MAX_VALUE);
         coin.setUnlockTime(0);
         coin.setNa(agent.getDeposit());
         data.addTo(account.getAddress().toString(), coin);
@@ -117,18 +119,43 @@ public class PocConsensusServiceImpl implements ConsensusService {
         }
         AssertUtil.canNotEmpty(agentAddress);
         TransactionEvent event = new TransactionEvent();
-        PocJoinConsensusTransaction tx = new PocJoinConsensusTransaction();
         Consensus<Delegate> ca = new ConsensusDelegateImpl();
         ca.setAddress(account.getAddress().toString());
         Delegate delegate = new Delegate();
         delegate.setDelegateAddress(agentAddress);
         delegate.setDeposit(Na.valueOf(amount));
+        delegate.setStartTime(TimeService.currentTimeMillis());
         ca.setExtend(delegate);
+        CoinTransferData data = new CoinTransferData();
+        data.setFee(this.getTxFee(TransactionConstant.TX_TYPE_REGISTER_AGENT));
+        data.setTotalNa(delegate.getDeposit());
+        data.addFrom(account.getAddress().toString(), delegate.getDeposit());
+        Coin coin = new Coin();
+        coin.setCanBeUnlocked(true);
+        coin.setUnlockHeight(Long.MAX_VALUE);
+        coin.setUnlockTime(0);
+        coin.setNa(delegate.getDeposit());
+        data.addTo(account.getAddress().toString(), coin);
+        PocJoinConsensusTransaction tx = null;
+        try {
+            tx = new PocJoinConsensusTransaction(data, password);
+        } catch (NulsException e) {
+            throw new NulsRuntimeException(e);
+        }
+        tx.setTime(TimeService.currentTimeMillis());
         tx.setTxData(ca);
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
         tx.setSign(accountService.signData(tx.getHash(), account, password));
         tx.verifyWithException();
         event.setEventBody(tx);
+
+//        TransactionEvent newEvent = new TransactionEvent();
+//        try {
+//            newEvent.parse(event.serialize());
+//            System.out.println(Hex.encode(newEvent.serialize()).equalsIgnoreCase(Hex.encode(event.serialize())));
+//        } catch (NulsException e) {
+//            Log.error(e);
+//        }
         eventBroadcaster.broadcastHashAndCache(event, true);
     }
 

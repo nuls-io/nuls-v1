@@ -118,6 +118,7 @@ LedgerCacheService {
     }
 
     public boolean updateUtxoStatus(String key, int newStatus, int oldStatus) {
+
         if (!utxoCacheService.containsKey(LedgerConstant.UTXO, key)) {
             return false;
         }

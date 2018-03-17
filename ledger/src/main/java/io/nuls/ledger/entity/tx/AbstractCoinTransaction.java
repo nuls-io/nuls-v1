@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -65,9 +65,9 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
     public AbstractCoinTransaction(int type, CoinTransferData coinParam, String password) throws NulsException {
         this(type);
         this.fee = NulsContext.getServiceBean(ConsensusService.class).getTxFee(this.getType());
-        initCoinDataProvider();
         coinParam.setFee(fee);
         this.coinData = coinDataProvider.createByTransferData(this, coinParam, password);
+        this.coinData.setTransaction(this);
         this.time = TimeService.currentTimeMillis();
     }
 
@@ -102,7 +102,8 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
             Log.error(e);
         }
         sign = cache;
-        coinDataProvider.afterParse(coinData,this);
+        coinDataProvider.afterParse(coinData, this);
+        this.coinData.setTransaction(this);
     }
 
     public CoinDataProvider getCoinDataProvider() {
@@ -124,9 +125,9 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
     @Override
     public T parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
         byte[] bytes = byteBuffer.readBytes(NulsConstant.PLACE_HOLDER.length);
-        if(Arrays.equals(NulsConstant.PLACE_HOLDER,bytes)){
+        if (Arrays.equals(NulsConstant.PLACE_HOLDER, bytes)) {
             return null;
         }
-        throw new NulsRuntimeException(ErrorCode.DATA_ERROR,"The transaction never provided the method:parseTxData");
+        throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "The transaction never provided the method:parseTxData");
     }
 }

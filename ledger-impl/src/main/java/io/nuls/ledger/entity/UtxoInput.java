@@ -40,6 +40,8 @@ import io.nuls.ledger.service.impl.LedgerCacheService;
 import io.nuls.ledger.util.UtxoTransferTool;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author win10
@@ -113,7 +115,10 @@ public class UtxoInput extends BaseNulsData {
         UtxoOutput output = ledgerCacheService.getUtxo(this.getKey());
         if (output == null) {
             UtxoOutputDataService utxoOutputDataService = NulsContext.getServiceBean(UtxoOutputDataService.class);
-            UtxoOutputPo outputPo = utxoOutputDataService.getTxOutputs(fromHash.getDigestHex()).get(fromIndex);
+            Map<String, Object> map = new HashMap<>();
+            map.put("txHash", output.getTxHash().getDigestHex());
+            map.put("outIndex", output.getIndex());
+            UtxoOutputPo outputPo = utxoOutputDataService.get(map);
             output = UtxoTransferTool.toOutput(outputPo);
         }
         from = output;

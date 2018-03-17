@@ -106,9 +106,6 @@ public class UtxoTransactionTool {
      * @return
      */
     public boolean isMine(AbstractCoinTransaction tx) throws NulsException {
-        if (tx.isLocalTx()) {
-            return true;
-        }
         if (NulsContext.LOCAL_ADDRESS_LIST.isEmpty()) {
             return false;
         }
@@ -121,7 +118,6 @@ public class UtxoTransactionTool {
                 continue;
             }
             if (NulsContext.LOCAL_ADDRESS_LIST.contains(Address.fromHashs(unSpend.getAddress()).getBase58())) {
-                tx.setLocalTx(true);
                 tx.setTransferType(Transaction.TRANSFER_SEND);
                 return true;
             }
@@ -130,7 +126,6 @@ public class UtxoTransactionTool {
         // check output
         for (UtxoOutput output : coinData.getOutputs()) {
             if (NulsContext.LOCAL_ADDRESS_LIST.contains(Address.fromHashs(output.getAddress()).getBase58())) {
-                tx.setLocalTx(true);
                 tx.setTransferType(Transaction.TRANSFER_RECEIVE);
                 return true;
             }
