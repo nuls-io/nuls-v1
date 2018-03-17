@@ -47,6 +47,12 @@ public class Page<T> {
 
     public void setTotal(long total) {
         this.total = total;
+        if (pageSize != 0) {
+            this.pages = (int) (total / pageSize);
+            if (total % pageSize != 0) {
+                this.pages++;
+            }
+        }
     }
 
     public int getPages() {

@@ -26,7 +26,9 @@ package io.nuls.consensus.service.intf;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
+import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
+import io.nuls.db.entity.BlockHeaderPo;
 
 import java.io.IOException;
 import java.util.List;
@@ -60,6 +62,10 @@ public interface BlockService {
     void rollbackBlock(long height) throws NulsException;
 
     List<BlockHeader> getBlockHeaderList(long start, long end, long split);
+
+    Page<BlockHeaderPo> getBlockHeaderList(String nodeAddress, int type, int pageNumber, int pageSize);
+
+    Page<BlockHeaderPo> getBlockHeaderList(int pageNumber, int pageSize);
 
     BlockHeader getBlockHeader(NulsDigestData hash) throws NulsException;
 }

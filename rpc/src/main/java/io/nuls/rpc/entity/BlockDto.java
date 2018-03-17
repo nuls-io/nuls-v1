@@ -8,6 +8,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
+import io.nuls.db.entity.BlockHeaderPo;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -69,6 +70,42 @@ public class BlockDto {
         this.txCount = header.getTxCount();
         this.packingAddress = header.getPackingAddress();
         this.scriptSign = Hex.encode(header.getScriptSig().serialize());
+        this.reward = reward;
+        this.fee = fee;
+        this.confirmCount = bestBlockHeight - this.height;
+        NulsByteBuffer byteBuffer = new NulsByteBuffer(header.getExtend());
+        try {
+            this.roundIndex = byteBuffer.readVarInt();
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+        try {
+            this.consensusMemberCount = (int) byteBuffer.readVarInt();
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+        try {
+            this.roundStartTime = byteBuffer.readVarInt();
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+        try {
+            this.packingIndexOfRound = (int) byteBuffer.readVarInt();
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+    }
+
+    public BlockDto(BlockHeaderPo header, long reward, long fee) {
+        long bestBlockHeight = NulsContext.getInstance().getBestBlock().getHeader().getHeight();
+        this.hash = header.getHash();
+        this.preHash = header.getPreHash();
+        this.merkleHash = header.getMerkleHash();
+        this.time = header.getCreateTime();
+        this.height = header.getHeight();
+        this.txCount = header.getTxCount();
+        this.packingAddress = header.getConsensusAddress();
+        this.scriptSign = Hex.encode(header.getScriptSig()) ;
         this.reward = reward;
         this.fee = fee;
         this.confirmCount = bestBlockHeight - this.height;

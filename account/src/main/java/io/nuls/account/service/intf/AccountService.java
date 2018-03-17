@@ -51,6 +51,8 @@ public interface AccountService {
 
     Result<List<String>> createAccount(int count,String password);
 
+    Result removeAccount(String address, String password);
+
     Account getDefaultAccount();
 
     Account getAccount(String address);

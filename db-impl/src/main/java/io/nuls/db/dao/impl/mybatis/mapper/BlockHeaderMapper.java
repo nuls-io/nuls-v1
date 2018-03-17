@@ -24,6 +24,7 @@
 package io.nuls.db.dao.impl.mybatis.mapper;
 
 import io.nuls.db.dao.impl.mybatis.common.BaseMapper;
+import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import io.nuls.db.entity.BlockHeaderPo;
 
 import java.util.List;
@@ -40,4 +41,6 @@ public interface BlockHeaderMapper extends BaseMapper<String, BlockHeaderPo> {
     List<BlockHeaderPo> getSplitHashList(Map<String, Object> params);
 
     List<Long> getSumOfRoundIndexOfYellowPunish(Map<String, Object> params);
+
+    List<BlockHeaderPo> getBlockByAddress(Searchable searchable);
 }
