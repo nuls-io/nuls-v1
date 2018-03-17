@@ -23,7 +23,9 @@
  */
 package io.nuls.consensus.entity.genesis;
 
+import io.nuls.account.entity.Account;
 import io.nuls.account.service.intf.AccountService;
+import io.nuls.account.util.AccountTool;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.utils.StringFileLoader;
@@ -142,7 +144,26 @@ public final class GenesisBlock extends Block {
             throw new NulsRuntimeException(e);
         }
 
-        tx.setScriptSig(null);
+        P2PKHScriptSig p2PKHScriptSig = new P2PKHScriptSig();
+        Account account = null;
+        try {
+            account = AccountTool.createAccount(priKey);
+        } catch (NulsException e) {
+            e.printStackTrace();
+        }
+        AccountService accountService = NulsContext.getServiceBean(AccountService.class);
+        P2PKHScriptSig scriptSig = null;
+        try {
+            scriptSig = accountService.createP2PKHScriptSigFromDigest(tx.getHash(),account,"");
+        } catch (NulsException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            tx.setScriptSig(scriptSig.serialize());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         List<Transaction> txlist = new ArrayList<>();
 //        tx.setStatus(TxStatusEnum.AGREED);
