@@ -80,23 +80,27 @@ public class DistributedBlockInfoRequestUtils {
 
     public BlockInfo request(long start, long end, long split) {
         lock.lock();
-        requesting = true;
-        hashesMap.clear();
-        calcMap.clear();
-        this.start = start;
-        this.end = end;
-        this.split = split;
-        askHighest = start == end && start <= 0;
-        GetBlocksHashRequest event = new GetBlocksHashRequest(start, end, split);
-        this.startTime = TimeService.currentTimeMillis();
-        nodeIdList = this.eventBroadcaster.broadcastAndCache(event, false);
-        if (nodeIdList.isEmpty()) {
-//            Log.error("get best height from net faild!");
+        try {
+            requesting = true;
+            hashesMap.clear();
+            calcMap.clear();
+            this.start = start;
+            this.end = end;
+            this.split = split;
+            askHighest = start == end && start <= 0;
+            GetBlocksHashRequest event = new GetBlocksHashRequest(start, end, split);
+            this.startTime = TimeService.currentTimeMillis();
+            nodeIdList = this.eventBroadcaster.broadcastAndCache(event, false);
+            if (nodeIdList.isEmpty()) {
+                return null;
+            }
+            BlockInfo bi = this.getBlockInfo();
+            return bi;
+        } catch (Exception e) {
+            throw e;
+        } finally {
             lock.unlock();
-            return null;
         }
-
-        return this.getBlockInfo();
     }
 
 
@@ -173,9 +177,9 @@ public class DistributedBlockInfoRequestUtils {
             } catch (InterruptedException e) {
                 Log.error(e);
             }
-            try{
+            try {
                 this.request(start, end, split);
-            }catch (Exception e){
+            } catch (Exception e) {
                 Log.error(e.getMessage());
             }
         }
@@ -216,18 +220,17 @@ public class DistributedBlockInfoRequestUtils {
                 result.setBestHeight(minHeight);
                 result.setNodeIdList(this.nodeIdList);
                 result.setFinished(true);
-                if(result.getBestHeight()<Long.MAX_VALUE){
+                if (result.getBestHeight() < Long.MAX_VALUE) {
                     bestBlockInfo = result;
                 }
-            }else if ((TimeService.currentTimeMillis() - startTime) > timeout) {
-                lock.unlock();
+            } else if ((TimeService.currentTimeMillis() - startTime) > timeout) {
                 throw new NulsRuntimeException(ErrorCode.TIME_OUT);
             }
         }
         BlockInfo info = bestBlockInfo;
         bestBlockInfo = null;
         requesting = false;
-        lock.unlock();
         return info;
+
     }
 }

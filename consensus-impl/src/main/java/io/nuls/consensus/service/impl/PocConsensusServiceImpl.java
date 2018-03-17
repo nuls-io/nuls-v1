@@ -108,7 +108,10 @@ public class PocConsensusServiceImpl implements ConsensusService {
         tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(), account, password).serialize());
         tx.verifyWithException();
         event.setEventBody(tx);
-        eventBroadcaster.broadcastHashAndCache(event, true);
+       List<String> nodeList = eventBroadcaster.broadcastHashAndCache(event, true);
+       if(null==nodeList||nodeList.isEmpty()){
+           throw new NulsRuntimeException(ErrorCode.FAILED,"broadcast transaction failed!");
+       }
     }
 
     private void joinTheConsensus(Account account, String password, long amount, String agentAddress) throws IOException, NulsException {
@@ -156,7 +159,10 @@ public class PocConsensusServiceImpl implements ConsensusService {
 //        } catch (NulsException e) {
 //            Log.error(e);
 //        }
-        eventBroadcaster.broadcastHashAndCache(event, true);
+        List<String> nodeList = eventBroadcaster.broadcastHashAndCache(event, true);
+        if(null==nodeList||nodeList.isEmpty()){
+            throw new NulsRuntimeException(ErrorCode.FAILED,"broadcast transaction failed!");
+        }
     }
 
     @Override
