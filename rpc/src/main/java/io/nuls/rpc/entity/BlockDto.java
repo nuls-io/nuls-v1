@@ -49,6 +49,8 @@ public class BlockDto {
 
     private Long confirmCount;
 
+    private int size;
+
     private List<TransactionDto> txList;
 
     public BlockDto(Block block, long reward, long fee) throws IOException {
@@ -73,6 +75,7 @@ public class BlockDto {
         this.reward = reward;
         this.fee = fee;
         this.confirmCount = bestBlockHeight - this.height;
+        this.size = header.getSize();
         NulsByteBuffer byteBuffer = new NulsByteBuffer(header.getExtend());
         try {
             this.roundIndex = byteBuffer.readVarInt();
@@ -105,9 +108,10 @@ public class BlockDto {
         this.height = header.getHeight();
         this.txCount = header.getTxCount();
         this.packingAddress = header.getConsensusAddress();
-        this.scriptSign = Hex.encode(header.getScriptSig()) ;
+        this.scriptSign = Hex.encode(header.getScriptSig());
         this.reward = reward;
         this.fee = fee;
+        this.size = header.getSize();
         this.confirmCount = bestBlockHeight - this.height;
         NulsByteBuffer byteBuffer = new NulsByteBuffer(header.getExtend());
         try {
@@ -259,5 +263,13 @@ public class BlockDto {
 
     public void setConfirmCount(Long confirmCount) {
         this.confirmCount = confirmCount;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
     }
 }
