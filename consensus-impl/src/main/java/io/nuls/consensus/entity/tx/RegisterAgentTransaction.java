@@ -34,12 +34,13 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
+import io.nuls.ledger.entity.tx.LockNulsTransaction;
 
 /**
  * @author Niels
  * @date 2017/12/4
  */
-public class RegisterAgentTransaction extends AbstractCoinTransaction<Consensus<Agent>> {
+public class RegisterAgentTransaction extends LockNulsTransaction<Consensus<Agent>> {
 
     public RegisterAgentTransaction() {
         super(TransactionConstant.TX_TYPE_REGISTER_AGENT);

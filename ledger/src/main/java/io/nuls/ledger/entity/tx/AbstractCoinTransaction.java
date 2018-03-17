@@ -65,7 +65,6 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
     public AbstractCoinTransaction(int type, CoinTransferData coinParam, String password) throws NulsException {
         this(type);
         this.fee = NulsContext.getServiceBean(ConsensusService.class).getTxFee(this.getType());
-        initCoinDataProvider();
         coinParam.setFee(fee);
         this.coinData = coinDataProvider.createByTransferData(this, coinParam, password);
         this.coinData.setTransaction(this);

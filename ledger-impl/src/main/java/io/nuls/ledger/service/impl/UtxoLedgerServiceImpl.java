@@ -446,6 +446,15 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     public List<TransactionService> getServiceList(Class<? extends Transaction> txClass) {
-        return TransactionManager.getService(txClass);
+        List<TransactionService> list = new ArrayList<>();
+        Class clazz = txClass;
+        while (!clazz.equals(Transaction.class)) {
+            TransactionService txService = TransactionManager.getService(clazz);
+            if (null != txService) {
+                list.add(0, txService);
+            }
+            clazz = clazz.getSuperclass();
+        }
+        return list;
     }
 }
