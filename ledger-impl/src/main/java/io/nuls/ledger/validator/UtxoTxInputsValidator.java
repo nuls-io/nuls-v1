@@ -23,25 +23,15 @@
  */
 package io.nuls.ledger.validator;
 
-import io.nuls.account.entity.Address;
-import io.nuls.account.service.intf.AccountService;
-import io.nuls.account.util.AccountTool;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TxStatusEnum;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.script.P2PKHScript;
 import io.nuls.core.script.P2PKHScriptSig;
-import io.nuls.core.script.Script;
-import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.UtxoInput;
 import io.nuls.ledger.entity.UtxoOutput;
-import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
-import io.nuls.ledger.script.TransferScript;
 
 import java.util.Arrays;
 
@@ -61,8 +51,6 @@ public class UtxoTxInputsValidator implements NulsDataValidator<UtxoData> {
         return INSTANCE;
     }
 
-    private AccountService accountService;
-
     @Override
     public ValidateResult validate(UtxoData data) {
 
@@ -70,8 +58,12 @@ public class UtxoTxInputsValidator implements NulsDataValidator<UtxoData> {
             UtxoInput input = data.getInputs().get(i);
             UtxoOutput output = input.getFrom();
 
+            if (output == null && data.getTransaction().getStatus() == TxStatusEnum.CACHED) {
+                return ValidateResult.getFailedResult(ErrorCode.ORPHAN_TX);
+            }
+
             if (data.getTransaction().getStatus() == TxStatusEnum.CACHED) {
-                if (output != null && !output.isUsable()) {
+                if (!output.isUsable()) {
                     return ValidateResult.getFailedResult(ErrorCode.UTXO_STATUS_CHANGE);
                 }
             } else if (data.getTransaction().getStatus() == TxStatusEnum.AGREED) {
@@ -81,7 +73,6 @@ public class UtxoTxInputsValidator implements NulsDataValidator<UtxoData> {
             }
 
             byte[] owner = output.getOwner();
-
             P2PKHScriptSig p2PKHScriptSig = null;
             try {
                 p2PKHScriptSig = P2PKHScriptSig.createFromBytes(data.getTransaction().getScriptSig());
@@ -98,11 +89,4 @@ public class UtxoTxInputsValidator implements NulsDataValidator<UtxoData> {
         return ValidateResult.getSuccessResult();
     }
 
-
-    private AccountService getAccountService() {
-        if (accountService == null) {
-            accountService = NulsContext.getServiceBean(AccountService.class);
-        }
-        return accountService;
-    }
 }
