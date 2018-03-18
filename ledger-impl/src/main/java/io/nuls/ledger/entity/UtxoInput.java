@@ -116,8 +116,8 @@ public class UtxoInput extends BaseNulsData {
         if (output == null) {
             UtxoOutputDataService utxoOutputDataService = NulsContext.getServiceBean(UtxoOutputDataService.class);
             Map<String, Object> map = new HashMap<>();
-            map.put("txHash", output.getTxHash().getDigestHex());
-            map.put("outIndex", output.getIndex());
+            map.put("txHash", this.fromHash.getDigestHex());
+            map.put("outIndex", this.fromIndex);
             UtxoOutputPo outputPo = utxoOutputDataService.get(map);
             output = UtxoTransferTool.toOutput(outputPo);
         }
