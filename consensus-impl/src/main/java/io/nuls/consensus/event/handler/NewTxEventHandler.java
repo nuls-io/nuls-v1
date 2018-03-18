@@ -94,7 +94,7 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
                 ledgerService.approvalTx(tx);
             }
             cacheManager.putTx(tx);
-            eventBroadcaster.broadcastAndCacheAysn(event,false);
+            eventBroadcaster.broadcastHashAndCacheAysn(event,false,fromId);
         } catch (Exception e) {
             Log.error(e);
         }
