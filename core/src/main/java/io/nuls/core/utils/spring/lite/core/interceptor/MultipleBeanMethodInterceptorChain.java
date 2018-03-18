@@ -66,6 +66,7 @@ public class MultipleBeanMethodInterceptorChain extends BeanMethodInterceptorCha
             result = execute(null, obj, method, params);
         } catch (Exception e) {
             Log.error(e);
+            throw e;
         } finally {
             index = -1;
             this.methodProxy = null;
