@@ -318,6 +318,10 @@ public class ConsensusMeetingRunner implements Runnable {
         ValidateResult result = newBlock.verify();
         if (result.isFailed()) {
             Log.error("packing block error" + result.getMessage());
+            for(Transaction tx:newBlock.getTxs()){
+                ledgerService.rollbackTx(tx);
+                orphanTxCacheManager.putTx(tx);
+            }
             return;
         }
         blockCacheManager.cacheBlockHeader(newBlock.getHeader(), null);
