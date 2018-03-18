@@ -79,7 +79,7 @@ public class HeaderContinuityValidator implements NulsDataValidator<BlockHeader>
             } catch (NulsException e) {
                 Log.error(e);
             }
-            long shouldTime = roundData.getRoundStartTime() + roundData.getPackingIndexOfRound() * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND;
+            long shouldTime = roundData.getRoundStartTime() + roundData.getPackingIndexOfRound() * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND*1000;
             //todo 3 seconds error
             long difference = header.getTime() - shouldTime;
             failed = difference > 3000 || difference < -3000;
