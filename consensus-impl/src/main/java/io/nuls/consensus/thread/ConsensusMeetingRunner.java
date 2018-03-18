@@ -282,11 +282,10 @@ public class ConsensusMeetingRunner implements Runnable {
         List<NulsDigestData> outHashList = new ArrayList<>();
         List<NulsDigestData> hashList = new ArrayList<>();
         long totalSize = 0L;
-        long maxSize = PocConsensusConstant.MAX_BLOCK_SIZE;
         for (int i = 0; i < txList.size(); i++) {
             Transaction tx = txList.get(i);
             totalSize += tx.size();
-            if (totalSize >= maxSize) {
+            if (totalSize >= PocConsensusConstant.MAX_BLOCK_SIZE) {
                 break;
             }
             ValidateResult result = tx.verify();
@@ -310,7 +309,7 @@ public class ConsensusMeetingRunner implements Runnable {
             txList.remove(i);
         }
         txCacheManager.removeTx(outHashList);
-        if (totalSize < maxSize) {
+        if (totalSize < PocConsensusConstant.MAX_BLOCK_SIZE) {
             addOrphanTx(txList, totalSize);
         }
         addConsensusTx(bestBlock, txList, self);
@@ -339,6 +338,10 @@ public class ConsensusMeetingRunner implements Runnable {
         txList.sort(new TxTimeComparator());
         List<NulsDigestData> outHashList = new ArrayList<>();
         for (Transaction tx : orphanTxList) {
+            totalSize += tx.size();
+            if (totalSize >= PocConsensusConstant.MAX_BLOCK_SIZE) {
+                break;
+            }
             ValidateResult result = tx.verify();
             if (result.isFailed()) {
                 continue;
