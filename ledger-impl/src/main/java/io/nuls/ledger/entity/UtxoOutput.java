@@ -90,7 +90,7 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
         s += VarInt.sizeOf(index);
         s += 8;
         s += Utils.sizeOfBytes(address);
-        s += Utils.sizeOfInt6();
+        s += Utils.sizeOfInt48();
         s += Utils.sizeOfNulsData(script);
         return s;
     }

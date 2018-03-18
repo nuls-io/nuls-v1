@@ -57,7 +57,7 @@ public interface BlockService {
 
     List<Block> getBlockList(long startHeight, long endHeight) throws NulsException;
 
-    void saveBlock(Block block) throws IOException;
+    boolean saveBlock(Block block) throws IOException;
 
     void rollbackBlock(long height) throws NulsException;
 

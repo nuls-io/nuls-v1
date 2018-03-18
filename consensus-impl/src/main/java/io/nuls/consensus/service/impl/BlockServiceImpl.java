@@ -140,7 +140,7 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     @DbSession
-    public void saveBlock(Block block) throws IOException {
+    public boolean saveBlock(Block block) throws IOException {
         for (int x = 0; x < block.getHeader().getTxCount(); x++) {
             Transaction tx = block.getTxs().get(x);
             tx.setBlockHeight(block.getHeader().getHeight());
@@ -154,6 +154,7 @@ public class BlockServiceImpl implements BlockService {
         }
         ledgerService.saveTxList(block.getTxs());
         blockStorageService.save(block);
+        return true;
     }
 
 

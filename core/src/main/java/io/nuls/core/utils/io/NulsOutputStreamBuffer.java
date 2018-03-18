@@ -120,7 +120,7 @@ public class NulsOutputStreamBuffer {
     }
 
     public void writeInt48(long time) throws IOException {
-        byte[] bytes = new byte[Utils.sizeOfInt6()];
+        byte[] bytes = new byte[Utils.sizeOfInt48()];
         bytes[0] = (byte) (0xFF & time);
         bytes[1] = (byte) (0xFF & (time >> 8));
         bytes[2] = (byte) (0xFF & (time >> 16));

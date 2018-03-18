@@ -55,7 +55,7 @@ public class BlockHashResponse extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += Utils.sizeOfInt6();
+        size += Utils.sizeOfInt48();
         size += Utils.sizeOfInt(heightList.size());
         for (Long height : heightList) {
             size += Utils.sizeOfLong(height);
