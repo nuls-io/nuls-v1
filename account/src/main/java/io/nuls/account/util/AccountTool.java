@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -50,20 +50,32 @@ import java.math.BigInteger;
  */
 public final class AccountTool {
 
+    public static void main(String[] args) {
+        for (int i = 0; i < 10; i++) {
+            ECKey ecKey = new ECKey();
+            try {
+                Address address = newAddress(ecKey);
+                System.out.println("address:" + address.toString());
+                System.out.println("prikey:" + Hex.encode(ecKey.getPrivKeyBytes()));
+            } catch (NulsException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     /**
      * create a new address
      *
      * @return Address
      */
-
     public static final int CREATE_MAX_SIZE = 100;
 
     public static Address newAddress(ECKey key) throws NulsException {
-        return Address.fromHashs(Utils.sha256hash160(key.getPubKey()));
+        return newAddress(key.getPubKey());
     }
 
     public static Address newAddress(byte[] publicKey) throws NulsException {
-        return Address.fromHashs(Utils.sha256hash160(publicKey));
+        return new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), Utils.sha256hash160(publicKey));
     }
 
     public static Account createAccount(String prikey) throws NulsException {
@@ -160,7 +172,7 @@ public final class AccountTool {
         return alias;
     }
 
-    public static byte[] getHash160ByAddress(String address){
+    public static byte[] getHash160ByAddress(String address) {
         return new Address(address).getHash160();
     }
 }
