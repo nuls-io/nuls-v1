@@ -30,7 +30,7 @@ package io.nuls.client.constant;
 public interface CommandConstant {
 
     String COMMAND_PS1 = "nuls>>> ";
-    String COMMAND_ERROR = "comaand error! ";
+    String COMMAND_ERROR = "command error! ";
 
     String CMD_EXIT = "exit";
     String CMD_HELP = "help";
