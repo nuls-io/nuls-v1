@@ -27,6 +27,7 @@ import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.cache.manager.block.BlockCacheManager;
 import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
+import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.constant.PocConsensusConstant;
@@ -59,6 +60,7 @@ public class ConsensusManager implements Runnable {
     private ConsensusCacheManager consensusCacheManager;
     private ConfirmingTxCacheManager confirmingTxCacheManager;
     private ReceivedTxCacheManager receivedTxCacheManager;
+    private OrphanTxCacheManager orphanTxCacheManager;
     private AccountService accountService;
     private boolean partakePacking = false;
     private List<String> seedNodeList;
@@ -106,6 +108,8 @@ public class ConsensusManager implements Runnable {
         confirmingTxCacheManager.init();
         receivedTxCacheManager = ReceivedTxCacheManager.getInstance();
         receivedTxCacheManager.init();
+        orphanTxCacheManager = OrphanTxCacheManager.getInstance();
+        orphanTxCacheManager.init();
         TaskManager.createAndRunThread(NulsConstant.MODULE_ID_CONSENSUS, "consensus-status-manager", this);
     }
 
