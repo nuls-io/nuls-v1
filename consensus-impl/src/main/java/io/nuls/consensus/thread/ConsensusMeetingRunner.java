@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -27,6 +27,7 @@ import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.cache.manager.block.BlockCacheManager;
 import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
+import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.constant.PocConsensusConstant;
@@ -51,7 +52,7 @@ import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.utils.BlockInfo;
 import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.consensus.utils.DistributedBlockInfoRequestUtils;
-import io.nuls.consensus.utils.TxComparator;
+import io.nuls.consensus.utils.TxTimeComparator;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
@@ -91,6 +92,7 @@ public class ConsensusMeetingRunner implements Runnable {
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
     private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
+    private OrphanTxCacheManager orphanTxCacheManager = OrphanTxCacheManager.getInstance();
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
     private boolean running = false;
     private ConsensusManager consensusManager = ConsensusManager.getInstance();
@@ -266,7 +268,7 @@ public class ConsensusMeetingRunner implements Runnable {
     private void packing(PocMeetingMember self) throws NulsException, IOException {
         Block bestBlock = context.getBestBlock();
         List<Transaction> txList = txCacheManager.getTxList();
-        txList.sort(new TxComparator());
+        txList.sort(new TxTimeComparator());
         BlockData bd = new BlockData();
         bd.setHeight(bestBlock.getHeader().getHeight() + 1);
         bd.setPreHash(bestBlock.getHeader().getHash());
@@ -279,8 +281,14 @@ public class ConsensusMeetingRunner implements Runnable {
         List<Integer> outTxList = new ArrayList<>();
         List<NulsDigestData> outHashList = new ArrayList<>();
         List<NulsDigestData> hashList = new ArrayList<>();
+        long totalSize = 0L;
+        long maxSize = PocConsensusConstant.MAX_BLOCK_SIZE;
         for (int i = 0; i < txList.size(); i++) {
             Transaction tx = txList.get(i);
+            totalSize += tx.size();
+            if (totalSize >= maxSize) {
+                break;
+            }
             ValidateResult result = tx.verify();
             if (result.isFailed()) {
                 outTxList.add(i);
@@ -295,12 +303,16 @@ public class ConsensusMeetingRunner implements Runnable {
                 continue;
             }
             confirmingTxCacheManager.putTx(tx);
+
         }
         txCacheManager.removeTx(hashList);
         for (int i = outTxList.size() - 1; i >= 0; i--) {
             txList.remove(i);
         }
         txCacheManager.removeTx(outHashList);
+        if (totalSize < maxSize) {
+            addOrphanTx(txList, totalSize);
+        }
         addConsensusTx(bestBlock, txList, self);
         bd.setTxList(txList);
         Block newBlock = ConsensusTool.createBlock(bd, consensusManager.getConsensusStatusInfo().getAccount());
@@ -317,6 +329,31 @@ public class ConsensusMeetingRunner implements Runnable {
         PackedBlockNotice notice = new PackedBlockNotice();
         notice.setEventBody(newBlock.getHeader());
         eventBroadcaster.publishToLocal(notice);
+    }
+
+    private void addOrphanTx(List<Transaction> txList, long totalSize) {
+        List<Transaction> orphanTxList = orphanTxCacheManager.getTxList();
+        if (null == orphanTxList || orphanTxList.isEmpty()) {
+            return;
+        }
+        txList.sort(new TxTimeComparator());
+        List<NulsDigestData> outHashList = new ArrayList<>();
+        for (Transaction tx : orphanTxList) {
+            ValidateResult result = tx.verify();
+            if (result.isFailed()) {
+                continue;
+            }
+            try {
+                ledgerService.approvalTx(tx);
+            } catch (Exception e) {
+                Log.error(e);
+                continue;
+            }
+            confirmingTxCacheManager.putTx(tx);
+            txList.add(tx);
+            outHashList.add(tx.getHash());
+        }
+        orphanTxCacheManager.removeTx(outHashList);
     }
 
 
@@ -353,7 +390,7 @@ public class ConsensusMeetingRunner implements Runnable {
         }
         tx.setFee(Na.ZERO);
         tx.setHash(NulsDigestData.calcDigestData(tx));
-        tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(), consensusManager.getConsensusStatusInfo().getAccount(),NulsContext.CACHED_PASSWORD_OF_WALLET).serialize());
+        tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(), consensusManager.getConsensusStatusInfo().getAccount(), NulsContext.CACHED_PASSWORD_OF_WALLET).serialize());
         ValidateResult validateResult = tx.verify();
         confirmingTxCacheManager.putTx(tx);
         if (null == validateResult || validateResult.isFailed()) {
@@ -433,7 +470,7 @@ public class ConsensusMeetingRunner implements Runnable {
             tx.setTime(TimeService.currentTimeMillis());
             tx.setFee(Na.ZERO);
             tx.setHash(NulsDigestData.calcDigestData(tx));
-            tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(), consensusManager.getConsensusStatusInfo().getAccount(),NulsContext.CACHED_PASSWORD_OF_WALLET).serialize());
+            tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(), consensusManager.getConsensusStatusInfo().getAccount(), NulsContext.CACHED_PASSWORD_OF_WALLET).serialize());
             txList.add(tx);
         }
     }
@@ -463,7 +500,7 @@ public class ConsensusMeetingRunner implements Runnable {
         punishTx.setTime(TimeService.currentTimeMillis());
         punishTx.setFee(Na.ZERO);
         punishTx.setHash(NulsDigestData.calcDigestData(punishTx));
-        punishTx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(punishTx.getHash(), consensusManager.getConsensusStatusInfo().getAccount(),NulsContext.CACHED_PASSWORD_OF_WALLET).serialize());
+        punishTx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(punishTx.getHash(), consensusManager.getConsensusStatusInfo().getAccount(), NulsContext.CACHED_PASSWORD_OF_WALLET).serialize());
         txList.add(punishTx);
     }
 
