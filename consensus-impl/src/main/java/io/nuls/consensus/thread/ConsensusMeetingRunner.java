@@ -58,6 +58,7 @@ import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -143,10 +144,10 @@ public class ConsensusMeetingRunner implements Runnable {
             if (!result) {
                 break;
             }
-            result = (TimeService.currentTimeMillis() - context.getBestBlock().getHeader().getTime()) <= 1000L;
-            if (!result) {
-                result = checkBestHash();
-            }
+//            result = (TimeService.currentTimeMillis() - context.getBestBlock().getHeader().getTime()) <= 1000L;
+//            if (!result) {
+//                result = checkBestHash();
+//            }
         } while (false);
         return result;
     }
@@ -318,9 +319,11 @@ public class ConsensusMeetingRunner implements Runnable {
         ValidateResult result = newBlock.verify();
         if (result.isFailed()) {
             Log.error("packing block error" + result.getMessage());
-            for(Transaction tx:newBlock.getTxs()){
+            for (Transaction tx : newBlock.getTxs()) {
+                if (tx.getType() == TransactionConstant.TX_TYPE_COIN_BASE) {
+                    continue;
+                }
                 ledgerService.rollbackTx(tx);
-                orphanTxCacheManager.putTx(tx);
             }
             return;
         }
