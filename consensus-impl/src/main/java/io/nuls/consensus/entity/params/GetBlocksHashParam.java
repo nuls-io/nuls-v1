@@ -51,7 +51,7 @@ public class GetBlocksHashParam extends BaseNulsData {
     }
     @Override
     public int size() {
-        int size = Utils.sizeOfInt6();
+        int size = Utils.sizeOfInt48();
         size += Utils.sizeOfLong(start);
         size +=Utils.sizeOfLong(end);
         size += Utils.sizeOfLong(split);

@@ -487,7 +487,7 @@ public class Utils {
         return VarInt.sizeOf(val);
     }
 
-    public static int sizeOfInt6() {
+    public static int sizeOfInt48() {
         return NulsConstant.INT48_VALUE_LENGTH1;
     }
 

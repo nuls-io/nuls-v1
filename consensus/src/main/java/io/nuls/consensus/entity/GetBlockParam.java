@@ -51,7 +51,7 @@ public class GetBlockParam extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += Utils.sizeOfInt6();
+        size += Utils.sizeOfInt48();
         size += Utils.sizeOfLong(start);
         size += Utils.sizeOfLong(end);
         return size;

@@ -118,7 +118,6 @@ public class BlockBatchDownloadUtils {
         working = true;
         try {
             this.init(nodeIdList);
-
             blocksHash = DistributedBlockInfoRequestUtils.getInstance().request(startHeight, endHeight, DOWNLOAD_BLOCKS_PER_TIME);
             request(startHeight, endHeight);
             while (working) {

@@ -13,5 +13,9 @@
     "agentAddress": "2CYsoYpzQAQhGSp4Bcc26kqrfzFvnpN",
     "deposit": 25000000000000,
     "password": "nuls123456"
+  },
+  "import":{
+    "prikey":"39e9a6cbfc515a68f312a928342050940c2874d3b9e0cd733b56f992ee5cd996",
+    "password":"nuls123456"
   }
 }
