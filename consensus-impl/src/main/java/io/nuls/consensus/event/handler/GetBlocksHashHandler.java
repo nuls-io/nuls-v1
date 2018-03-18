@@ -31,6 +31,7 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 
@@ -61,6 +62,7 @@ public class GetBlocksHashHandler extends AbstractEventHandler<GetBlocksHashRequ
                 block = blockService.getBlock(event.getEventBody().getEnd());
             }
             if (null == block) {
+                Log.warn("block can not get:"+event.getEventBody().getEnd());
                 return;
             }
             response.put(block.getHeader().getHeight(), block.getHeader().getHash());
@@ -77,6 +79,7 @@ public class GetBlocksHashHandler extends AbstractEventHandler<GetBlocksHashRequ
                 Block block = this.blockService.getBlock(event.getEventBody().getEnd());
                 if(block==null){
                     //todo why?
+                    Log.warn("block can not get:"+event.getEventBody().getEnd());
                     return ;
                 }
                 resultHeightList.add(block.getHeader().getHeight());

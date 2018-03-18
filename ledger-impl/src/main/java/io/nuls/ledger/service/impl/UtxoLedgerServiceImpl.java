@@ -144,6 +144,12 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             txList = new ArrayList<>();
             List<Transaction> cacheTxList = txCacheService.getElementList(CONFIRM_TX_CACHE);
             for (Transaction tx : cacheTxList) {
+                if(tx.getType()!=txType){
+                    continue;
+                }
+                if(address!=null){
+                    //todo
+                }
                 txList.add(tx);
             }
             List<TransactionPo> poList;
@@ -154,7 +160,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 }
                 return txList;
             }
-
             int start = (pageNumber - 1) * pageSize;
             if (txList.size() >= start + pageSize) {
                 return txList.subList(start, start + pageSize);
