@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -65,6 +65,8 @@ public class UtxoInput extends BaseNulsData {
 
     // key = fromHash + "-" + fromIndex, a key that will not be serialized, only used for caching
     private String key;
+
+    private LedgerCacheService ledgerCacheService = LedgerCacheService.getInstance();
 
     public UtxoInput() {
 
@@ -119,7 +121,7 @@ public class UtxoInput extends BaseNulsData {
             map.put("txHash", this.fromHash.getDigestHex());
             map.put("outIndex", this.fromIndex);
             UtxoOutputPo outputPo = utxoOutputDataService.get(map);
-            if(outputPo != null) {
+            if (outputPo != null) {
                 output = UtxoTransferTool.toOutput(outputPo);
             }
         }
@@ -146,6 +148,9 @@ public class UtxoInput extends BaseNulsData {
 //    }
 
     public UtxoOutput getFrom() {
+        if (from == null && fromHash != null) {
+            from = ledgerCacheService.getUtxo(this.getKey());
+        }
         return from;
     }
 

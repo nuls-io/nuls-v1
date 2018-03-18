@@ -132,6 +132,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 addressSet.add(Address.fromHashs(output.getAddress()).getBase58());
             }
 
+
         } catch (Exception e) {
             //rollback
             for (UtxoOutput output : unSpends) {
