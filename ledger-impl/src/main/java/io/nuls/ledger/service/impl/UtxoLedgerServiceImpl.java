@@ -175,7 +175,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             if (txList.size() >= start + pageSize) {
                 return txList.subList(start, start + pageSize);
             }
-
             start = start - txList.size();
             poList = txDao.getTxs(address, txType, start, pageSize);
             txList = new ArrayList<>();
