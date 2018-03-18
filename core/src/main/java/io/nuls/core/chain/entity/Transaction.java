@@ -62,7 +62,7 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData {
 
     protected T txData;
 
-    protected TxStatusEnum status;
+    protected TxStatusEnum status = TxStatusEnum.CACHED;
 
     public static final int TRANSFER_RECEIVE = 1;
     public static final int TRANSFER_SEND = 0;
@@ -72,7 +72,6 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData {
     protected int size;
 
     public Transaction(int type) {
-        this.status = TxStatusEnum.CACHED;
         this.dataType = NulsDataType.TRANSACTION;
         this.time = TimeService.currentTimeMillis();
         this.type = type;

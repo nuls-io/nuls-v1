@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -71,7 +71,7 @@ public class UtxoTxInputsValidator implements NulsDataValidator<UtxoData> {
             UtxoOutput output = input.getFrom();
 
             if (data.getTransaction().getStatus() == TxStatusEnum.CACHED) {
-                if (!output.isUsable()) {
+                if (output != null && !output.isUsable()) {
                     return ValidateResult.getFailedResult(ErrorCode.UTXO_STATUS_CHANGE);
                 }
             } else if (data.getTransaction().getStatus() == TxStatusEnum.AGREED) {
@@ -86,11 +86,11 @@ public class UtxoTxInputsValidator implements NulsDataValidator<UtxoData> {
             try {
                 p2PKHScriptSig = P2PKHScriptSig.createFromBytes(data.getTransaction().getScriptSig());
             } catch (NulsException e) {
-                return ValidateResult.getFailedResult(ErrorCode.DATA_ERROR );
+                return ValidateResult.getFailedResult(ErrorCode.DATA_ERROR);
             }
             byte[] user = p2PKHScriptSig.getSignerHash160();
-            if(!Arrays.equals(owner,user)){
-                return ValidateResult.getFailedResult(ErrorCode.INVALID_OUTPUT );
+            if (!Arrays.equals(owner, user)) {
+                return ValidateResult.getFailedResult(ErrorCode.INVALID_OUTPUT);
             }
 
             return ValidateResult.getSuccessResult();
