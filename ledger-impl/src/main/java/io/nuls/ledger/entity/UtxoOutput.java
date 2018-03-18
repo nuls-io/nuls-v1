@@ -23,9 +23,11 @@
  */
 package io.nuls.ledger.entity;
 
+import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.script.P2PKHScript;
@@ -89,7 +91,6 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
         int s = 0;
         s += VarInt.sizeOf(index);
         s += 8;
-        s += Utils.sizeOfBytes(address);
         s += Utils.sizeOfInt48();
         s += Utils.sizeOfNulsData(script);
         return s;
@@ -99,7 +100,6 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeVarInt(index);
         stream.writeInt64(value);
-        stream.writeBytesWithLength(address);
         stream.writeInt48(lockTime);
         stream.writeNulsData(script);
     }
@@ -111,9 +111,12 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
         }
         index = (int) byteBuffer.readVarInt();
         value = byteBuffer.readInt64();
-        address = byteBuffer.readByLengthByte();
         lockTime = byteBuffer.readInt48();
         script = byteBuffer.readNulsData(new P2PKHScript());
+
+       Address addressObj = new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), script.getBytes());
+
+        this.address = addressObj.getHash();
     }
 
 
