@@ -60,7 +60,6 @@ public class AccountModuleBootstrap extends AbstractAccountModule {
     public void start() {
         accountService.init();
         accountService.start();
-        ((AccountServiceImpl)accountService).test(null);
     }
 
     @Override

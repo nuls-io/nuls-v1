@@ -316,31 +316,31 @@ public class Account extends BaseNulsData implements NulsCloneable {
     }
 
 
-    public static void main(String[] args)throws NulsException{
-        System.out.println("***  create a new account  ***************************");
-        Account testAccount = AccountTool.createAccount();
-        showAccount(testAccount);
-
-        System.out.println("***  encrypt the account   ***************************");
-        testAccount.encrypt("nuls123456");
-        showAccount(testAccount);
-
-        System.out.println("***  decrypt the account   ***************************");
-        testAccount.decrypt("nuls123456");
-        showAccount(testAccount);
-
-        testAccount.lock();
-        System.out.println("***  lock the account   ***************************");
-        showAccount(testAccount);
-
-        testAccount.unlock("nuls123456");
-        System.out.println("***  unlock the account   ***************************");
-        showAccount(testAccount);
-
-        String hash160Hex = Hex.encode(testAccount.getHash160());
-        System.out.println("hash160: "+hash160Hex);
-        System.out.println("hash160_1: "+ Hex.encode(Utils.sha256hash160(testAccount.getPubKey())));
-    }
+//    public static void main(String[] args)throws NulsException{
+//        System.out.println("***  create a new account  ***************************");
+//        Account testAccount = AccountTool.createAccount();
+//        showAccount(testAccount);
+//
+//        System.out.println("***  encrypt the account   ***************************");
+//        testAccount.encrypt("nuls123456");
+//        showAccount(testAccount);
+//
+//        System.out.println("***  decrypt the account   ***************************");
+//        testAccount.decrypt("nuls123456");
+//        showAccount(testAccount);
+//
+//        testAccount.lock();
+//        System.out.println("***  lock the account   ***************************");
+//        showAccount(testAccount);
+//
+//        testAccount.unlock("nuls123456");
+//        System.out.println("***  unlock the account   ***************************");
+//        showAccount(testAccount);
+//
+//        String hash160Hex = Hex.encode(testAccount.getHash160());
+//        System.out.println("hash160: "+hash160Hex);
+//        System.out.println("hash160_1: "+ Hex.encode(Utils.sha256hash160(testAccount.getPubKey())));
+//    }
 
     public static void  showAccount(Account account){
         System.out.println("---- account info ----");

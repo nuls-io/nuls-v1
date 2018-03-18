@@ -872,16 +872,4 @@ public class AccountServiceImpl implements AccountService {
         }
         //todo
     }
-
-    public void test(String[] args){
-        ECKey ecKey = ECKey.fromPrivate(new BigInteger(Hex.decode("39e9a6cbfc515a68f312a928342050940c2874d3b9e0cd733b56f992ee5cd996")));
-        System.out.print(ecKey.getPublicKeyAsHex());
-
-        byte[] testBytes = Sha256Hash.of("test sign & verify".getBytes()).getBytes();
-
-
-        byte[] sign = ecKey.sign(testBytes);
-        boolean suc = ecKey.verify(testBytes,sign);
-        System.out.println(suc);
-    }
 }

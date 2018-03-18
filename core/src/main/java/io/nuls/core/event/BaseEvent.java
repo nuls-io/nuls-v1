@@ -66,7 +66,6 @@ public abstract class BaseEvent<T extends BaseNulsData> extends BaseNulsData imp
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.header = byteBuffer.readNulsData(new EventHeader());
         this.eventBody = parseEventBody(byteBuffer);
-        System.out.println(Hex.encode(byteBuffer.getPayload()));
         try {
             this.hash = NulsDigestData.calcDigestData(this.serialize());
         } catch (IOException e) {

@@ -48,12 +48,6 @@ public class BlockEventHandler extends AbstractEventHandler<BlockEvent> {
     @Override
     public void onEvent(BlockEvent event, String fromId) {
         Block block = event.getEventBody();
-        try{
-            System.out.println(Hex.encode(block.serialize()));
-        }catch (Exception e){
-            System.out.println(e);
-        }
-
         if(null==block){
             Log.warn("recieved a null blockEvent form "+fromId);
             return;
