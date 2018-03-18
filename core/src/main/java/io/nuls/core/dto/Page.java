@@ -1,5 +1,6 @@
 package io.nuls.core.dto;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Page<T> {
@@ -15,7 +16,7 @@ public class Page<T> {
     private List<T> list;
 
     public Page() {
-
+        this.list = new ArrayList<>();
     }
 
     public Page(Page page) {
@@ -23,6 +24,7 @@ public class Page<T> {
         this.pageSize = page.getPageSize();
         this.total = page.getTotal();
         this.pages = page.getPages();
+        this.list = new ArrayList<>();
     }
 
     public int getPageNumber() {

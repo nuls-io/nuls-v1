@@ -141,7 +141,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     public long getTxCount(String address, int txType) throws Exception {
         int count = 0;
-        List<Transaction> cacheTxList = txCacheService.getElementList(CONFIRM_TX_CACHE);
+        List<Transaction> cacheTxList = getCacheTxList(address, txType);
         count += cacheTxList.size();
 
         boolean isLocal = NulsContext.LOCAL_ADDRESS_LIST.contains(address);
