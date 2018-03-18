@@ -50,19 +50,6 @@ import java.math.BigInteger;
  */
 public final class AccountTool {
 
-    public static void main(String[] args) {
-        for (int i = 0; i < 10; i++) {
-            ECKey ecKey = new ECKey();
-            try {
-                Address address = newAddress(ecKey);
-                System.out.println("address:" + address.toString());
-                System.out.println("prikey:" + Hex.encode(ecKey.getPrivKeyBytes()));
-            } catch (NulsException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
     /**
      * create a new address
      *
