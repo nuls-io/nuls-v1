@@ -27,6 +27,7 @@ import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
@@ -35,6 +36,7 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.entity.NodePo;
 import io.nuls.event.bus.handler.AbstractEventHandler;
+import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.event.TransactionEvent;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.network.service.NetworkService;
@@ -51,6 +53,7 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
     private OrphanTxCacheManager orphanTxCacheManager = OrphanTxCacheManager.getInstance();
 
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
+    private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
 
     private NewTxEventHandler() {
@@ -91,6 +94,7 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
                 ledgerService.approvalTx(tx);
             }
             cacheManager.putTx(tx);
+            eventBroadcaster.broadcastAndCacheAysn(event,false);
         } catch (Exception e) {
             Log.error(e);
         }
