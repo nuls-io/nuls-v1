@@ -119,7 +119,9 @@ public class UtxoInput extends BaseNulsData {
             map.put("txHash", this.fromHash.getDigestHex());
             map.put("outIndex", this.fromIndex);
             UtxoOutputPo outputPo = utxoOutputDataService.get(map);
-            output = UtxoTransferTool.toOutput(outputPo);
+            if(outputPo != null) {
+                output = UtxoTransferTool.toOutput(outputPo);
+            }
         }
         from = output;
     }
