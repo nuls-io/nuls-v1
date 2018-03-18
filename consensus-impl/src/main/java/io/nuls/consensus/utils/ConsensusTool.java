@@ -114,7 +114,7 @@ public class ConsensusTool {
         agent.setStatus(ConsensusStatusEnum.WAITING.getCode());
         agent.setDeposit(Na.valueOf(po.getDeposit()));
         agent.setCommissionRate(po.getCommissionRate());
-        agent.setDelegateAddress(po.getNodeAddress());
+        agent.setAgentAddress(po.getNodeAddress());
         agent.setIntroduction(po.getRemark());
         agent.setStartTime(po.getStartTime());
         agent.setStatus(po.getStatus());
@@ -149,7 +149,7 @@ public class ConsensusTool {
         po.setDeposit(bean.getExtend().getDeposit().getValue());
         po.setStartTime(bean.getExtend().getStartTime());
         po.setRemark(bean.getExtend().getIntroduction());
-        po.setNodeAddress(bean.getExtend().getDelegateAddress());
+        po.setNodeAddress(bean.getExtend().getAgentAddress());
         po.setId(bean.getAddress());
         po.setStatus(bean.getExtend().getStatus());
         po.setAgentName(bean.getExtend().getAgentName());

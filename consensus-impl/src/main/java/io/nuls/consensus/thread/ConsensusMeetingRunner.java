@@ -57,7 +57,6 @@ import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -217,7 +216,7 @@ public class ConsensusMeetingRunner implements Runnable {
             }
             mm.setRoundIndex(currentRound.getIndex());
             mm.setAddress(ca.getAddress());
-            mm.setPackerAddress(ca.getExtend().getDelegateAddress());
+            mm.setPackerAddress(ca.getExtend().getAgentAddress());
             mm.setRoundStartTime(currentRound.getStartTime());
             memberList.add(mm);
             totalDeposit = totalDeposit.add(ca.getExtend().getDeposit());
@@ -516,7 +515,7 @@ public class ConsensusMeetingRunner implements Runnable {
             Consensus<Agent> member = new ConsensusAgentImpl();
             member.setAddress(address);
             Agent agent = new Agent();
-            agent.setDelegateAddress(address);
+            agent.setAgentAddress(address);
             agent.setStartTime(0);
             agent.setIntroduction("seed");
             agent.setCommissionRate(0);

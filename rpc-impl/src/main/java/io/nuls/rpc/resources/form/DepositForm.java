@@ -30,7 +30,7 @@ package io.nuls.rpc.resources.form;
  * @author Niels
  * @date 2018/3/14
  */
-public class EntrustForm {
+public class DepositForm {
     private String address;
     private String agentAddress;
     private long deposit;

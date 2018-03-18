@@ -23,7 +23,6 @@
  */
 package io.nuls.consensus.manager;
 
-import io.nuls.account.entity.Account;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.cache.manager.block.BlockCacheManager;
 import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
@@ -39,11 +38,8 @@ import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.thread.BlockMaintenanceThread;
 import io.nuls.consensus.thread.BlockPersistenceThread;
 import io.nuls.consensus.thread.ConsensusMeetingRunner;
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.thread.BaseThread;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
@@ -128,7 +124,7 @@ public class ConsensusManager implements Runnable {
                 break;
             }
             for (Consensus<Agent> agent : agentList) {
-                if (agent.getExtend().getDelegateAddress().equals(address)) {
+                if (agent.getExtend().getAgentAddress().equals(address)) {
                     info.setAccount(accountService.getAccount(address));
                     info.setStatus(agent.getExtend().getStatus());
                     if (ConsensusStatusEnum.IN.getCode() == info.getStatus()) {

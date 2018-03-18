@@ -47,7 +47,6 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
@@ -251,7 +250,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
         JoinConsensusParam params = new JoinConsensusParam(paramsMap);
         if (StringUtils.isNotBlank(params.getIntroduction())) {
             Agent agent = new Agent();
-            agent.setDelegateAddress(params.getAgentAddress());
+            agent.setAgentAddress(params.getAgentAddress());
             agent.setDeposit(Na.valueOf(params.getDeposit()));
             agent.setIntroduction(params.getIntroduction());
             agent.setSeed(params.isSeed());
