@@ -180,7 +180,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 UtxoOutput output = utxoData.getOutputs().get(i);
 
                 output = ledgerCacheService.getUtxo(output.getKey());
-                if (output == null || UtxoOutput.UTXO_UNCONFIRM_UNLOCK != output.getStatus()) {
+                if (output == null || !output.isUsable()) {
                     throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "use a not legal utxo");
                 }
 
