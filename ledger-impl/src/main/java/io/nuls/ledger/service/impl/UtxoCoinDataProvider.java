@@ -91,7 +91,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
     }
 
     @Override
-    public void approve(CoinData coinData, Transaction tx) {
+    public void approve(CoinData coinData, Transaction tx) throws NulsException {
         //Lock the transaction specified output in the cache when the newly received transaction is approved.
         UtxoData utxoData = (UtxoData) coinData;
         for (UtxoInput input : utxoData.getInputs()) {
@@ -163,7 +163,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
      * 3. save new unSpend output (cache and database)
      * 4. finally, calc balance
      */
-    public void save(CoinData coinData, Transaction tx) {
+    public void save(CoinData coinData, Transaction tx) throws NulsException {
         UtxoData utxoData = (UtxoData) coinData;
 
         List<UtxoInputPo> inputPoList = new ArrayList<>();
@@ -243,7 +243,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             }
             spends.add(spend);
             spendPoList.add(UtxoTransferTool.toOutputPojo(spend));
-            addressSet.add(Address.fromHashs(spend.getAddress()).getBase58());
+            addressSet.add(spend.getAddress());
         }
     }
 
@@ -277,7 +277,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             for (int i = utxoData.getOutputs().size() - 1; i >= 0; i--) {
                 UtxoOutput output = utxoData.getOutputs().get(i);
                 ledgerCacheService.removeUtxo(output.getKey());
-                addressSet.add(Address.fromHashs(output.getAddress()).getBase58());
+                addressSet.add(output.getAddress());
             }
 
             //process input
@@ -388,7 +388,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             List<Coin> coinList = entry.getValue();
             for (Coin coin : coinList) {
                 UtxoOutput output = new UtxoOutput();
-                output.setAddress(new Address(address).getHash());
+                output.setAddress(address);
                 output.setValue(coin.getNa().getValue());
                 output.setStatus(UtxoOutput.UTXO_CONFIRM_UNLOCK);
                 output.setIndex(i);

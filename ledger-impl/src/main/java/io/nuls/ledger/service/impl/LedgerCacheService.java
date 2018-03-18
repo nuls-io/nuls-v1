@@ -88,7 +88,7 @@ LedgerCacheService {
     public void putUtxo(String key, UtxoOutput output) {
         utxoCacheService.putElement(LedgerConstant.UTXO, key, output);
 
-        String address = Address.fromHashs(output.getAddress()).getBase58();
+        String address = output.getAddress();
         UtxoBalance balance = (UtxoBalance) getBalance(address);
         if (balance == null) {
             balance = new UtxoBalance();
@@ -110,7 +110,7 @@ LedgerCacheService {
         UtxoOutput output = getUtxo(key);
         utxoCacheService.removeElement(LedgerConstant.UTXO, key);
         if (output != null) {
-            UtxoBalance balance = (UtxoBalance) getBalance(Address.fromHashs(output.getAddress()).getBase58());
+            UtxoBalance balance = (UtxoBalance) getBalance(output.getAddress());
             if (balance != null) {
                 balance.getUnSpends().remove(output);
             }

@@ -52,7 +52,7 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
 
     private UtxoInput spentBy;
 
-    private byte[] address;
+    private String address;
 
     private long lockTime;
 
@@ -116,7 +116,7 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
 
        Address addressObj = new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), script.getBytes());
 
-        this.address = addressObj.getHash();
+        this.address = addressObj.toString();
     }
 
 
@@ -171,11 +171,11 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
         this.index = index;
     }
 
-    public byte[] getAddress() {
+    public String getAddress() {
         return address;
     }
 
-    public void setAddress(byte[] address) {
+    public void setAddress(String address) {
         this.address = address;
     }
 
