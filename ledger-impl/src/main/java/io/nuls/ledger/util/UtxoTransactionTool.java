@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -112,22 +112,24 @@ public class UtxoTransactionTool {
 
         UtxoData coinData = (UtxoData) tx.getCoinData();
         //check input
-        for (UtxoInput input : coinData.getInputs()) {
-            UtxoOutput unSpend = ledgerCacheService.getUtxo(input.getKey());
-            if (unSpend == null) {
-                continue;
-            }
-            if (NulsContext.LOCAL_ADDRESS_LIST.contains(Address.fromHashs(unSpend.getAddress()).getBase58())) {
-                tx.setTransferType(Transaction.TRANSFER_SEND);
-                return true;
+        if (coinData.getInputs() != null && !coinData.getInputs().isEmpty()) {
+            for (UtxoInput input : coinData.getInputs()) {
+                if (input.getFrom() == null) {
+                    continue;
+                }
+                if (NulsContext.LOCAL_ADDRESS_LIST.contains(Address.fromHashs(input.getFrom().getAddress()).getBase58())) {
+                    tx.setTransferType(Transaction.TRANSFER_SEND);
+                    return true;
+                }
             }
         }
-
         // check output
-        for (UtxoOutput output : coinData.getOutputs()) {
-            if (NulsContext.LOCAL_ADDRESS_LIST.contains(Address.fromHashs(output.getAddress()).getBase58())) {
-                tx.setTransferType(Transaction.TRANSFER_RECEIVE);
-                return true;
+        if (coinData.getOutputs() != null && !coinData.getOutputs().isEmpty()) {
+            for (UtxoOutput output : coinData.getOutputs()) {
+                if (NulsContext.LOCAL_ADDRESS_LIST.contains(Address.fromHashs(output.getAddress()).getBase58())) {
+                    tx.setTransferType(Transaction.TRANSFER_RECEIVE);
+                    return true;
+                }
             }
         }
         return false;
