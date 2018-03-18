@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,6 +25,7 @@ package io.nuls.consensus.entity.validator.block;
 
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.core.chain.entity.Block;
+import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 
@@ -37,16 +38,22 @@ public class BlockMaxSizeValidator implements NulsDataValidator<Block> {
 
     private static final String ERROR_MESSAGE = "The block is too big!";
 
-    private BlockMaxSizeValidator(){}
-    public static BlockMaxSizeValidator getInstance(){
+    private BlockMaxSizeValidator() {
+    }
+
+    public static BlockMaxSizeValidator getInstance() {
         return INSTANCE;
     }
+
     @Override
     public ValidateResult validate(Block data) {
         if (data == null) {
             return ValidateResult.getFailedResult("Data is null!");
         }
-        int length = data.size();
+        long length = 0L;
+        for (Transaction tx : data.getTxs()) {
+            length += tx.size();
+        }
         if (length >= PocConsensusConstant.MAX_BLOCK_SIZE) {
             return ValidateResult.getFailedResult(ERROR_MESSAGE);
         }
