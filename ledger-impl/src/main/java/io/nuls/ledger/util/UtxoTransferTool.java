@@ -58,7 +58,7 @@ public class UtxoTransferTool {
         output.setValue(po.getValue());
         output.setAddress(po.getAddress());
         try {
-            output.setScript(new P2PKHScript(po.getScript()));
+            output.setP2PKHScript(new P2PKHScript(po.getScript()));
         } catch (Exception e) {
             //todo
             Log.error(e);
@@ -81,8 +81,8 @@ public class UtxoTransferTool {
         po.setValue(output.getValue());
         po.setLockTime(output.getLockTime());
         po.setAddress(output.getAddress());
-        if (null != output.getScript()) {
-            po.setScript(output.getScript().getBytes());
+        if (null != output.getP2PKHScript()) {
+            po.setScript(output.getP2PKHScript().getBytes());
         }
         po.setStatus((byte) output.getStatus());
         return po;

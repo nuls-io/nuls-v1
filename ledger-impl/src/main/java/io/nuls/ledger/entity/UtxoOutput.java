@@ -56,7 +56,7 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
 
     private long lockTime;
 
-    private Script script;
+    private P2PKHScript p2PKHScript;
 
     private int status;
 
@@ -92,7 +92,7 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
         s += VarInt.sizeOf(index);
         s += 8;
         s += Utils.sizeOfInt48();
-        s += Utils.sizeOfNulsData(script);
+        s += Utils.sizeOfNulsData(p2PKHScript);
         return s;
     }
 
@@ -101,7 +101,7 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
         stream.writeVarInt(index);
         stream.writeInt64(value);
         stream.writeInt48(lockTime);
-        stream.writeNulsData(script);
+        stream.writeNulsData(p2PKHScript);
     }
 
     @Override
@@ -112,9 +112,9 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
         index = (int) byteBuffer.readVarInt();
         value = byteBuffer.readInt64();
         lockTime = byteBuffer.readInt48();
-        script = byteBuffer.readNulsData(new P2PKHScript());
+        p2PKHScript = byteBuffer.readNulsData(new P2PKHScript());
 
-       Address addressObj = new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), script.getBytes());
+       Address addressObj = new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), this.getOwner());
 
         this.address = addressObj.toString();
     }
@@ -155,12 +155,12 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
         this.lockTime = lockTime;
     }
 
-    public Script getScript() {
-        return script;
+    public P2PKHScript getP2PKHScript() {
+        return p2PKHScript;
     }
 
-    public void setScript(Script script) {
-        this.script = script;
+    public void setP2PKHScript(P2PKHScript p2PKHScript) {
+        this.p2PKHScript = p2PKHScript;
     }
 
     public int getIndex() {
@@ -245,6 +245,6 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
     }
 
     public byte[] getOwner(){
-        return ((P2PKHScript)this.getScript()).getPublicKeyDigest().getDigestBytes();
+        return this.getP2PKHScript().getPublicKeyDigest().getDigestBytes();
     }
 }

@@ -27,8 +27,6 @@ import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.consensus.service.intf.ConsensusService;
 import io.nuls.core.chain.entity.Na;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
@@ -43,8 +41,8 @@ import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.rpc.entity.RpcResult;
 import io.nuls.rpc.resources.dto.ConsensusAddressDTO;
 import io.nuls.rpc.resources.form.CreateAgentForm;
-import io.nuls.rpc.resources.form.EntrustCancelForm;
-import io.nuls.rpc.resources.form.EntrustForm;
+import io.nuls.rpc.resources.form.withdrawForm;
+import io.nuls.rpc.resources.form.DepositForm;
 import io.nuls.rpc.resources.form.StopAgentForm;
 
 import javax.ws.rs.*;
@@ -100,9 +98,9 @@ public class PocConsensusResource {
     }
 
     @POST
-    @Path("/entrust")
+    @Path("/deposit")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult in(EntrustForm form) throws NulsException {
+    public RpcResult in(DepositForm form) throws NulsException {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getAddress());
         AssertUtil.canNotEmpty(form.getAgentAddress());
@@ -127,9 +125,9 @@ public class PocConsensusResource {
     }
 
     @POST
-    @Path("/cancel")
+    @Path("/withdraw")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult out(EntrustCancelForm form) throws NulsException, IOException {
+    public RpcResult out(withdrawForm form) throws NulsException, IOException {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getTxHash());
         Map<String,Object> params  = new HashMap<>();
