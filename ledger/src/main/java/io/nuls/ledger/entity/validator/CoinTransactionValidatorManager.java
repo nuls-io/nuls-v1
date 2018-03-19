@@ -21,32 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.ledger.entity.tx;
+package io.nuls.ledger.entity.validator;
 
-import io.nuls.core.chain.entity.BaseNulsData;
-import io.nuls.core.constant.TransactionConstant;
-import io.nuls.core.exception.NulsException;
-import io.nuls.ledger.entity.params.CoinTransferData;
+import io.nuls.core.validate.NulsDataValidator;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Niels
- * @date 2017/11/20
+ * @date 2017/12/7
  */
-public class TransferTransaction<T extends BaseNulsData> extends AbstractCoinTransaction<T> {
+public class CoinTransactionValidatorManager {
 
-    public TransferTransaction() {
-        this(TransactionConstant.TX_TYPE_TRANSFER);
+    private static final List<NulsDataValidator> ALL_LIST = new ArrayList<>();
+
+    /**
+     * the validator fit all transaction instances
+     * @param validator
+     */
+    public static void addTxDefValidator(NulsDataValidator validator) {
+        ALL_LIST.add(validator);
     }
 
-    public TransferTransaction(CoinTransferData params, String password) throws NulsException {
-        this(TransactionConstant.TX_TYPE_TRANSFER, params, password);
-    }
-
-    protected TransferTransaction(int type, CoinTransferData params, String password) throws NulsException {
-        super(type, params, password);
-    }
-
-    protected TransferTransaction(int type) {
-        super(type);
+    public static final List<NulsDataValidator> getValidators() {
+        List<NulsDataValidator> list = new ArrayList<>();
+        list.addAll(ALL_LIST);
+        return list;
     }
 }
