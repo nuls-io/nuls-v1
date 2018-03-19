@@ -47,6 +47,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
@@ -158,7 +159,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
 //        } catch (NulsException e) {
 //            Log.error(e);
 //        }
-        List<String> nodeList = eventBroadcaster.broadcastHashAndCache(event, true);
+        List<String> nodeList = eventBroadcaster.broadcastAndCache(event, true);
         if(null==nodeList||nodeList.isEmpty()){
             throw new NulsRuntimeException(ErrorCode.FAILED,"broadcast transaction failed!");
         }

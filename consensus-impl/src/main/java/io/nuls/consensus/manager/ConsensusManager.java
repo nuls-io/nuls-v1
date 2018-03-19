@@ -131,7 +131,7 @@ public class ConsensusManager implements Runnable {
                 if (agent.getExtend().getAgentAddress().equals(address)) {
                     info.setAccount(accountService.getAccount(address));
                     info.setStatus(agent.getExtend().getStatus());
-                    if (ConsensusStatusEnum.IN.getCode() == info.getStatus()) {
+                    if (ConsensusStatusEnum.NOT_IN.getCode() != info.getStatus()) {
                         break;
                     }
                 }
