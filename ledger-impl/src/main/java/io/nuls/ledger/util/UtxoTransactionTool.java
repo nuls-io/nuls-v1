@@ -36,10 +36,7 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
-import io.nuls.ledger.entity.UtxoBalance;
-import io.nuls.ledger.entity.UtxoData;
-import io.nuls.ledger.entity.UtxoInput;
-import io.nuls.ledger.entity.UtxoOutput;
+import io.nuls.ledger.entity.*;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
@@ -48,6 +45,7 @@ import io.nuls.ledger.event.notice.BalanceChangeData;
 import io.nuls.ledger.event.notice.BalanceChangeNotice;
 import io.nuls.ledger.service.impl.LedgerCacheService;
 
+import java.util.Collections;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -59,6 +57,12 @@ public class UtxoTransactionTool {
     private static UtxoTransactionTool instance = new UtxoTransactionTool();
 
     private Lock lock = new ReentrantLock();
+
+    public static final int APPROVE = 1;
+
+    public static final int COMMIT = 2;
+
+    public static final int ROLLBACK = 3;
 
     private UtxoTransactionTool() {
 
@@ -226,6 +230,47 @@ public class UtxoTransactionTool {
             }
         } finally {
             lock.unlock();
+        }
+    }
+
+
+    public void calcBalance(UtxoData utxoData, int type) throws NulsException {
+        String address;
+        Na value;
+        Balance balance;
+
+        for (UtxoInput input : utxoData.getInputs()) {
+            value = Na.valueOf(input.getFrom().getValue());
+            address = Address.fromHashs(input.getFrom().getAddress()).getBase58();
+            balance = ledgerCacheService.getBalance(address);
+
+            if (balance != null) {
+                if (type == APPROVE) {
+                    balance.setLocked(balance.getLocked().add(value));
+                    balance.setUsable(balance.getUsable().subtract(value));
+                } else if (type == COMMIT) {
+                    balance.setLocked(balance.getLocked().subtract(value));
+                } else if (type == ROLLBACK) {
+                    balance.setUsable(balance.getUsable().add(value));
+                }
+                balance.setBalance(balance.getLocked().add(balance.getUsable()));
+            }
+        }
+
+        long genesisTime = NulsContext.getInstance().getGenesisBlock().getHeader().getTime();
+        long bestHeight = NulsContext.getInstance().getNetBestBlockHeight();
+        for (UtxoOutput output : utxoData.getOutputs()) {
+            value = Na.valueOf(output.getValue());
+            address = Address.fromHashs(output.getAddress()).getBase58();
+            balance = ledgerCacheService.getBalance(address);
+
+            if (balance != null) {
+                if(type == APPROVE) {
+                    balance.setUsable(balance.getUsable().add(value));
+                }else if(type == ROLLBACK) {
+                    balance.setUsable(balance.getUsable().add(value));
+                }
+            }
         }
     }
 

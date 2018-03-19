@@ -129,7 +129,8 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 addressSet.add(Address.fromHashs(output.getAddress()).getBase58());
             }
 
-
+            //calc balance
+            UtxoTransactionTool.getInstance().calcBalance(utxoData, UtxoTransactionTool.APPROVE);
         } catch (Exception e) {
             //rollback
             for (UtxoOutput output : unSpends) {
@@ -145,11 +146,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 ledgerCacheService.removeUtxo(output.getKey());
             }
             throw e;
-        } finally {
-            //calc balance
-            for (String address : addressSet) {
-                UtxoTransactionTool.getInstance().calcBalance(address);
-            }
         }
     }
 
@@ -202,7 +198,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             relationDataService.save(txRelations);
 
             afterSaveDatabase(spends, utxoData, tx);
-
+            UtxoTransactionTool.getInstance().calcBalance(utxoData, UtxoTransactionTool.COMMIT);
         } catch (Exception e) {
             //rollback
             Log.warn(e.getMessage(), e);
@@ -213,10 +209,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 ledgerCacheService.updateUtxoStatus(spend.getKey(), UtxoOutput.UTXO_SPENT, UtxoOutput.UTXO_CONFIRM_LOCK);
             }
             throw e;
-        } finally {
-            for (String address : addressSet) {
-                UtxoTransactionTool.getInstance().calcBalance(address);
-            }
         }
     }
 
@@ -298,8 +290,10 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 ledgerCacheService.putUtxo(output.getKey(), output);
             }
 
-            for (String address : addressSet) {
-                UtxoTransactionTool.getInstance().calcBalance(address);
+            try {
+                UtxoTransactionTool.getInstance().calcBalance(utxoData, UtxoTransactionTool.ROLLBACK);
+            } catch (NulsException e) {
+                e.printStackTrace();
             }
 
             relationDataService.deleteRelation(tx.getHash().getDigestHex(), addressSet);

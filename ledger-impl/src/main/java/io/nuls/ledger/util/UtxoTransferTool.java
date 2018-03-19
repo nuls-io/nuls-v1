@@ -23,10 +23,8 @@
  */
 package io.nuls.ledger.util;
 
-import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.TxStatusEnum;

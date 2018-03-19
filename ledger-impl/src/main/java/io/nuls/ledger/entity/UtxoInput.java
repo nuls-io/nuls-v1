@@ -95,7 +95,6 @@ public class UtxoInput extends BaseNulsData {
         stream.writeVarInt(index);
         stream.writeNulsData(fromHash);
         stream.writeVarInt(fromIndex);
-        //stream.writeBytesWithLength(scriptSig);
     }
 
     @Override
@@ -103,7 +102,6 @@ public class UtxoInput extends BaseNulsData {
         index = (int) byteBuffer.readVarInt();
         fromHash = byteBuffer.readNulsData(new NulsDigestData());
         fromIndex = (int) byteBuffer.readVarInt();
-        //scriptSig = byteBuffer.readByLengthByte();
 
         LedgerCacheService ledgerCacheService = LedgerCacheService.getInstance();
         UtxoOutput output = ledgerCacheService.getUtxo(this.getKey());
@@ -127,14 +125,6 @@ public class UtxoInput extends BaseNulsData {
     public void setTxHash(NulsDigestData txHash) {
         this.txHash = txHash;
     }
-
-//    public byte[] getScriptSig() {
-//        return scriptSig;
-//    }
-
-//    public void setScriptSig(byte[] scriptSig) {
-//        this.scriptSig = scriptSig;
-//    }
 
     public UtxoOutput getFrom() {
         if (from == null && fromHash != null) {
