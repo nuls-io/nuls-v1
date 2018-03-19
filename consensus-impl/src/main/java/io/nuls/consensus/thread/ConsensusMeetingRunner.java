@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -117,6 +117,16 @@ public class ConsensusMeetingRunner implements Runnable {
             return;
         }
         this.running = true;
+        boolean result = (TimeService.currentTimeMillis() - context.getBestBlock().getHeader().getTime()) <= 1000L;
+        if (!result) {
+            while (checkBestHash()) {
+                try {
+                    Thread.sleep(10000L);
+                } catch (InterruptedException e) {
+                    Log.error(e);
+                }
+            }
+        }
         while (running) {
             try {
                 boolean b = checkCondition();
@@ -137,23 +147,18 @@ public class ConsensusMeetingRunner implements Runnable {
     }
 
     private boolean checkCondition() {
-        boolean result;
-        do {
-            List<Node> nodes = networkService.getAvailableNodes();
-            result = nodes != null && nodes.size() >= MIN_NODE_COUNT;
-            if (!result) {
-                break;
-            }
-//            result = (TimeService.currentTimeMillis() - context.getBestBlock().getHeader().getTime()) <= 1000L;
-//            if (!result) {
-//                result = checkBestHash();
-//            }
-        } while (false);
+        List<Node> nodes = networkService.getAvailableNodes();
+        boolean result = nodes != null && nodes.size() >= MIN_NODE_COUNT;
         return result;
     }
 
     private boolean checkBestHash() {
-        BlockInfo blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(-1);
+        BlockInfo blockInfo;
+        try {
+            blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(-1);
+        } catch (Exception e) {
+            return false;
+        }
         if (blockInfo == null || blockInfo.getBestHash() == null) {
             return false;
         }
@@ -283,14 +288,17 @@ public class ConsensusMeetingRunner implements Runnable {
         List<NulsDigestData> outHashList = new ArrayList<>();
         List<NulsDigestData> hashList = new ArrayList<>();
         long totalSize = 0L;
+        Log.error("txList.size:" + txList.size());
         for (int i = 0; i < txList.size(); i++) {
             Transaction tx = txList.get(i);
             totalSize += tx.size();
             if (totalSize >= PocConsensusConstant.MAX_BLOCK_SIZE) {
                 break;
             }
+            outHashList.add(tx.getHash());
             ValidateResult result = tx.verify();
             if (result.isFailed()) {
+                Log.error(result.getMessage());
                 outTxList.add(i);
                 continue;
             }
@@ -299,7 +307,6 @@ public class ConsensusMeetingRunner implements Runnable {
             } catch (Exception e) {
                 Log.error(e);
                 outTxList.add(i);
-                outHashList.add(tx.getHash());
                 continue;
             }
             confirmingTxCacheManager.putTx(tx);
@@ -351,11 +358,13 @@ public class ConsensusMeetingRunner implements Runnable {
             }
             ValidateResult result = tx.verify();
             if (result.isFailed()) {
+                Log.error(result.getMessage());
                 continue;
             }
             try {
                 ledgerService.approvalTx(tx);
             } catch (Exception e) {
+                Log.error(result.getMessage());
                 Log.error(e);
                 continue;
             }
