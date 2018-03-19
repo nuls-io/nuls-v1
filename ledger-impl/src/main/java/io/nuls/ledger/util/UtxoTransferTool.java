@@ -46,6 +46,9 @@ import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * @author Vive
+ */
 public class UtxoTransferTool {
 
     public static UtxoOutput toOutput(UtxoOutputPo po) {
