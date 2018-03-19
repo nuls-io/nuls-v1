@@ -245,7 +245,7 @@ public class ConsensusMeetingRunner implements Runnable {
         }
         PocMeetingMember self = current.getMember(consensusManager.getConsensusStatusInfo().getAccount().getAddress().toString());
         self.setCreditVal(calcCreditVal());
-        long timeUnit = 100L;
+        long timeUnit = 1000L;
         while (TimeService.currentTimeMillis() <= (self.getPackTime() - timeUnit)) {
             try {
                 Thread.sleep(timeUnit);
