@@ -54,7 +54,7 @@ public class BlockMaintenanceThread implements Runnable {
     public static final String THREAD_NAME = "block-maintenance";
 
     private static BlockMaintenanceThread instance = new BlockMaintenanceThread();
-    private LedgerService ledgerService  = NulsContext.getServiceBean(LedgerService.class);
+    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     private final BlockService blockService = NulsContext.getServiceBean(BlockService.class);
     private boolean success = false;
 
@@ -162,7 +162,7 @@ public class BlockMaintenanceThread implements Runnable {
         }
         Block localGenesisBlock = this.blockService.getGengsisBlock();
         if (null == localGenesisBlock) {
-            for(Transaction tx:genesisBlock.getTxs()){
+            for (Transaction tx : genesisBlock.getTxs()) {
                 ledgerService.approvalTx(tx);
             }
             this.blockService.saveBlock(genesisBlock);
@@ -191,6 +191,9 @@ public class BlockMaintenanceThread implements Runnable {
                     blockInfo.getBestHash().equals(localBestBlock.getHeader().getHash())) {
                 break;
             } else if (blockInfo.getBestHeight() <= localBestBlock.getHeader().getHeight()) {
+                if (blockInfo.getBestHeight() == 0) {
+                    break;
+                }
                 //local height is highest
                 BlockHeader header = null;
                 try {
@@ -244,7 +247,7 @@ public class BlockMaintenanceThread implements Runnable {
         }
         if (previousRb) {
             rollbackBlock(height);
-        }else{
+        } else {
             NulsContext.getInstance().setBestBlock(blockService.getLocalBestBlock());
         }
     }
