@@ -38,8 +38,8 @@ public class AccountToolTest {
     public void createAccount() throws Exception {
         for( int i=0;i<10;i++) {
             Account account = AccountTool.createAccount();
-            System.out.println("address:"+account.getAddress().getBase58());
-            System.out.println("priKey :"+Hex.encode(account.getPriKey()));
+//            System.out.println("address:"+account.getAddress().getBase58());
+//            System.out.println("priKey :"+Hex.encode(account.getPriKey()));
         }
     }
 
