@@ -25,9 +25,7 @@ package io.nuls.ledger.entity.tx;
 
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.constant.TransactionConstant;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.ledger.entity.params.CoinTransferData;
 
 /**
@@ -42,7 +40,6 @@ public class TransferTransaction<T extends BaseNulsData> extends AbstractCoinTra
 
     public TransferTransaction(CoinTransferData params, String password) throws NulsException {
         this(TransactionConstant.TX_TYPE_TRANSFER, params, password);
-        this.fee = NulsContext.getInstance().getTxFee();
     }
 
     protected TransferTransaction(int type, CoinTransferData params, String password) throws NulsException {
@@ -52,10 +49,4 @@ public class TransferTransaction<T extends BaseNulsData> extends AbstractCoinTra
     protected TransferTransaction(int type) {
         super(type);
     }
-
-    @Override
-    public T parseTxData(NulsByteBuffer byteBuffer) {
-        return null;
-    }
-
 }

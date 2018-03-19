@@ -42,4 +42,6 @@ public interface UtxoOutputMapper extends BaseMapper<Map<String, Object>, UtxoOu
     List<UtxoOutputPo> selectAccountOutput(Searchable searchable);
 
     void deleteBySearchable(Searchable searchable);
+
+    long getBlockReward(Searchable searchable);
 }

@@ -80,22 +80,11 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
 
     @Override
     public void start() {
-        this.registerHandlers();
         consensusManager.init();
         NulsContext.getInstance().setBestBlock(NulsContext.getServiceBean(BlockService.class).getLocalBestBlock());
+        this.registerHandlers();
         this.consensusManager.startMaintenanceWork();
-//        while (true) {
-//            if (BlockMaintenanceThread.getInstance().isSuccess()) {
-//                break;
-//            }
-//            try {
-//                Log.info("synchronization blocks5 is not completed");
-//                Thread.sleep(1000L);
-//            } catch (InterruptedException e) {
-//                Log.error(e);
-//            }
-//        }
-        consensusManager.joinMeeting();
+        consensusManager.joinConsensusMeeting();
         consensusManager.startPersistenceWork();
 
         Log.info("the POC consensus module is started!");

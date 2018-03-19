@@ -38,7 +38,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @date 2018/1/11
  */
 public class BlockHeaderChain implements NulsCloneable {
-    private List<HeaderDigest> headerDigestList =  Collections.synchronizedList(new ArrayList<>());
+    private List<HeaderDigest> headerDigestList = Collections.synchronizedList(new ArrayList<>());
     private final ReentrantLock lock = new ReentrantLock();
 
     public BlockHeaderChain getBifurcateChain(BlockHeader header) {
@@ -63,8 +63,8 @@ public class BlockHeaderChain implements NulsCloneable {
 
     public boolean addHeader(BlockHeader header) {
         lock.lock();
-        HeaderDigest hd = new HeaderDigest(header.getPreHash().getDigestHex(),header.getHeight()-1);
-        if (!headerDigestList.isEmpty() &&headerDigestList.indexOf(hd)!=(headerDigestList.size()-1)) {
+        HeaderDigest hd = new HeaderDigest(header.getPreHash().getDigestHex(), header.getHeight() - 1);
+        if (!headerDigestList.isEmpty() && headerDigestList.indexOf(hd) != (headerDigestList.size() - 1)) {
             return false;
         }
         headerDigestList.add(new HeaderDigest(header.getHash().getDigestHex(), header.getHeight()));
@@ -86,7 +86,16 @@ public class BlockHeaderChain implements NulsCloneable {
         return headerDigest;
     }
 
-    public void removeHeaderDigest(long height) {
+    public void removeHeaderDigest(String hashHex) {
+        for (HeaderDigest hd : headerDigestList) {
+            if (hd.getHash().equals(hashHex)) {
+                removeHeaderDigest(hd.getHeight());
+                return;
+            }
+        }
+    }
+
+    private void removeHeaderDigest(long height) {
         for (int i = headerDigestList.size() - 1; i >= 0; i--) {
             HeaderDigest headerDigest = headerDigestList.get(i);
             if (headerDigest.getHeight() <= height) {
@@ -131,6 +140,19 @@ public class BlockHeaderChain implements NulsCloneable {
                 continue;
             }
             if (hd.getHeight() == height) {
+                return hd;
+            }
+        }
+        return null;
+    }
+
+    public HeaderDigest getHeaderDigest(String hashHex) {
+        for (int i = 0; i < this.headerDigestList.size(); i++) {
+            HeaderDigest hd = this.headerDigestList.get(i);
+            if (null == hd) {
+                continue;
+            }
+            if (hd.getHash().equals(hashHex)) {
                 return hd;
             }
         }

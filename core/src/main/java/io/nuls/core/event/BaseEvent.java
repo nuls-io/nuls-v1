@@ -25,10 +25,10 @@ package io.nuls.core.event;
 
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.chain.intf.NulsCloneable;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
@@ -44,19 +44,15 @@ public abstract class BaseEvent<T extends BaseNulsData> extends BaseNulsData imp
     private NulsDigestData hash;
     private EventHeader header;
     private T eventBody;
-    private NulsSignData sign;
 
     public BaseEvent(short moduleId, short eventType) {
         this.header = new EventHeader(moduleId, eventType);
-        //todo 临时处理事件签名
-        sign = NulsSignData.EMPTY_SIGN;
     }
 
     @Override
     public int size() {
-        int size = Utils.sizeOfSerialize(header);
-        size += Utils.sizeOfSerialize(eventBody);
-        size += Utils.sizeOfSerialize(sign);
+        int size = Utils.sizeOfNulsData(header);
+        size += Utils.sizeOfNulsData(eventBody);
         return size;
     }
 
@@ -64,7 +60,6 @@ public abstract class BaseEvent<T extends BaseNulsData> extends BaseNulsData imp
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeNulsData(header);
         stream.writeNulsData(this.eventBody);
-        stream.writeNulsData(sign);
     }
 
     @Override
@@ -77,7 +72,6 @@ public abstract class BaseEvent<T extends BaseNulsData> extends BaseNulsData imp
             Log.error(e);
             throw new NulsException(ErrorCode.DATA_PARSE_ERROR);
         }
-        this.sign = byteBuffer.readSign();
     }
 
     @Override
@@ -106,14 +100,6 @@ public abstract class BaseEvent<T extends BaseNulsData> extends BaseNulsData imp
 
     public void setHeader(EventHeader header) {
         this.header = header;
-    }
-
-    public NulsSignData getSign() {
-        return sign;
-    }
-
-    public void setSign(NulsSignData sign) {
-        this.sign = sign;
     }
 
     public NulsDigestData getHash() {

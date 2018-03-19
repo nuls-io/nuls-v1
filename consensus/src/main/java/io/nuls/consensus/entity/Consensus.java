@@ -29,6 +29,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
+import org.apache.tools.ant.taskdefs.Basename;
 
 import java.io.IOException;
 
@@ -36,7 +37,7 @@ import java.io.IOException;
  * @author Niels
  * @date 2017/11/7
  */
-public class Consensus<T extends BaseNulsData> extends BaseNulsData implements NulsCloneable {
+public abstract class Consensus<T extends BaseNulsData> extends BaseNulsData implements NulsCloneable {
 
     private String address;
 
@@ -45,26 +46,24 @@ public class Consensus<T extends BaseNulsData> extends BaseNulsData implements N
     @Override
     public int size() {
         int size = 0;
-        size += Utils.sizeOfSerialize(address);
-        if (null != extend) {
-            size += extend.size();
-        }
+        size += Utils.sizeOfString(address);
+        size += Utils.sizeOfNulsData(extend);
         return size;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeString(address);
-        if (null != extend) {
-            stream.writeBytesWithLength(extend.serialize());
-        }
+        stream.writeNulsData(extend);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.address = byteBuffer.readString();
-
+       this.extend = this.parseExtend(byteBuffer);
     }
+
+    protected abstract T parseExtend(NulsByteBuffer byteBuffer) throws NulsException;
 
     public String getAddress() {
         return address;

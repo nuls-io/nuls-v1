@@ -68,10 +68,16 @@ public abstract class BaseDaoImpl<T extends BaseMapper<K, V>, K, V> implements B
     @Override
     @DbSession
     public int save(List<V> list) {
-        if (null == list || list.isEmpty()) {
-            return 0;
+        try {
+            if (null == list || list.isEmpty()) {
+                return 0;
+            }
+            return getMapper().batchInsert(list);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
         }
-        return getMapper().batchInsert(list);
+
     }
 
     @Override

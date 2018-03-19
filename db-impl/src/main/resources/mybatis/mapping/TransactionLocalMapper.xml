@@ -11,16 +11,16 @@
         <result column="transferType" jdbcType="INTEGER" property="transferType" />
         <result column="remark" jdbcType="VARCHAR" property="remark" />
         <result column="txData" jdbcType="VARBINARY" property="txData" />
-        <result column="sign" jdbcType="VARBINARY" property="sign" />
+        <result column="scriptSig" jdbcType="VARBINARY" property="scriptSig" />
+        <result column="size" jdbcType="INTEGER" property="size" />
     </resultMap>
 
-    <resultMap id="UtxoTxResultMap"  type="io.nuls.db.entity.TransactionPo" extends="BaseResultMap">
+    <resultMap id="UtxoTxResultMap"  type="io.nuls.db.entity.TransactionLocalPo" extends="BaseResultMap">
         <collection property="inputs" javaType="java.util.List" ofType="io.nuls.db.entity.UtxoInputPo">
             <id column="in_tx_hash" jdbcType="VARCHAR" property="txHash" />
             <id column="in_index" jdbcType="INTEGER" property="inIndex" />
             <id column="from_hash" jdbcType="VARCHAR" property="fromHash" />
             <result column="from_index" jdbcType="INTEGER" property="fromIndex" />
-            <result column="in_sign" jdbcType="VARBINARY" property="sign" />
 
             <association property="fromOutPut" javaType="io.nuls.db.entity.UtxoOutputPo">
                 <id column="from_hash" jdbcType="VARCHAR" property="txHash" />
@@ -44,12 +44,12 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        hash, type, tx_index, block_height, create_time, fee, transferType, remark, txData, sign
+        hash, type, tx_index, block_height, create_time, fee, transferType, remark, txData, scriptSig, size
     </sql>
 
     <sql id="Utxo_Column_List">
-         a.hash, a.type, a.tx_index, a.block_height, a.create_time, a.fee, a.remark, a.txData, a.sign,
-         b.tx_hash as in_tx_hash, b.from_index, b.in_index,b.sign as in_sign,
+         a.hash, a.type, a.tx_index, a.block_height, a.create_time, a.fee, a.remark, a.txData, a.scriptSig, a.size,
+         b.tx_hash as in_tx_hash, b.from_index, b.in_index,
          c.tx_hash as out_tx_hash, c.out_index, c.value, c.lock_time, c.status, c.address, c.script,
          d.tx_hash as from_hash, d.out_index as from_out_index, d.value as from_value, d.lock_time as from_lock_time,
          d.address as from_address,d.status as from_status, d.script as from_script
@@ -58,7 +58,7 @@
     <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="UtxoTxResultMap">
         select
         <include refid="Utxo_Column_List"/>
-        from transaction a
+        from transaction_local a
         left join utxo_input b on a.hash = b.tx_hash
         left join utxo_output c on a.hash = c.tx_hash
         left join utxo_output d on b.from_hash = d.tx_hash and b.from_index = d.out_index
@@ -72,12 +72,13 @@
 
     <insert id="insert" parameterType="io.nuls.db.entity.TransactionLocalPo">
         insert into transaction_local (hash, type, tx_index,
-        block_height, create_time, fee,transferType,
-        remark, txData, sign
+            block_height, create_time, fee,transferType,
+            remark, txData, scriptSig, size
         )
         values (#{hash,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER}, #{txIndex,jdbcType=INTEGER},
-        #{blockHeight,jdbcType=BIGINT}, #{createTime,jdbcType=BIGINT}, #{fee,jdbcType=BIGINT},
-        #{transferType,jdbcType=INTEGER}, #{remark,jdbcType=VARCHAR}, #{txData,jdbcType=VARBINARY}, #{sign,jdbcType=VARBINARY}
+            #{blockHeight,jdbcType=BIGINT}, #{createTime,jdbcType=BIGINT}, #{fee,jdbcType=BIGINT},
+            #{transferType,jdbcType=INTEGER}, #{remark,jdbcType=VARCHAR}, #{txData,jdbcType=VARBINARY},
+            #{scriptSig,jdbcType=VARBINARY}, #{size,jdbcType=INTEGER}
         )
     </insert>
 
@@ -91,20 +92,22 @@
         transferType = #{transferType,jdbcType=INTEGER},
         remark = #{remark,jdbcType=VARCHAR},
         txData = #{txData,jdbcType=VARBINARY},
-        sign = #{sign,jdbcType=VARBINARY}
+        scriptSig = #{scriptSig,jdbcType=VARBINARY},
+        size = #{size,jdbcType=INTEGER}
         where hash = #{hash,jdbcType=VARCHAR}
     </update>
 
     <insert id="batchInsert" parameterType="java.util.List">
         insert into transaction_local (hash, type, tx_index,
-        block_height, create_time, fee,transferType,
-        remark, txData, sign
+            block_height, create_time, fee,transferType,
+            remark, txData, scriptSig, size
         )
         values
         <foreach collection="list" item="item" index="index" separator=",">
             (#{item.hash,jdbcType=VARCHAR}, #{item.type,jdbcType=INTEGER}, #{item.txIndex,jdbcType=INTEGER},
             #{item.blockHeight,jdbcType=BIGINT}, #{item.createTime,jdbcType=BIGINT}, #{item.fee,jdbcType=BIGINT},
-            #{item.transferType,jdbcType=INTEGER}, #{item.remark,jdbcType=VARCHAR}, #{item.txData,jdbcType=VARBINARY}, #{item.sign,jdbcType=VARBINARY})
+            #{item.transferType,jdbcType=INTEGER}, #{item.remark,jdbcType=VARCHAR}, #{item.txData,jdbcType=VARBINARY},
+            #{item.scriptSig,jdbcType=VARBINARY}, #{item.size,jdbcType=INTEGER})
         </foreach>
     </insert>
 
@@ -115,7 +118,7 @@
     <select id="selectList" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultMap="UtxoTxResultMap">
         select
         <include refid="Utxo_Column_List"/>
-        from transaction a
+        from transaction_local a
         left join utxo_input b on a.hash = b.tx_hash
         left join utxo_output c on a.hash = c.tx_hash
         left join utxo_output d on b.from_hash = d.tx_hash and b.from_index = d.out_index
@@ -131,7 +134,7 @@
         select
         <include refid="Utxo_Column_List"/>
         from tx_account_relation e
-        join transaction a on e.tx_hash = a.hash
+        join transaction_local a on e.tx_hash = a.hash
         left join utxo_input b on a.hash = b.tx_hash
         left join utxo_output c on a.hash = c.tx_hash
         left join utxo_output d on b.from_hash = d.tx_hash and b.from_index = d.out_index
@@ -142,7 +145,7 @@
     <select id="selectCountByAddress" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultType="java.lang.Long">
         select count(e.tx_hash) as txCount
         from tx_account_relation e
-        join transaction a on e.tx_hash = a.hash
+        join transaction_local a on e.tx_hash = a.hash
         <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
     </select>
 

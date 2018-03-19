@@ -37,7 +37,7 @@
  * limitations under the License.
  */
 
-package io.nuls.ledger.script;
+package io.nuls.core.script;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,6 +23,7 @@
  */
 package io.nuls.ledger.module.impl;
 
+import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.chain.manager.TransactionValidatorManager;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
@@ -34,6 +35,7 @@ import io.nuls.ledger.entity.tx.CoinBaseTransaction;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.entity.tx.TransferTransaction;
 import io.nuls.ledger.entity.tx.UnlockNulsTransaction;
+import io.nuls.ledger.entity.validator.CoinTransactionValidatorManager;
 import io.nuls.ledger.event.notice.BalanceChangeNotice;
 import io.nuls.ledger.module.AbstractLedgerModule;
 import io.nuls.ledger.service.impl.LedgerCacheService;
@@ -42,10 +44,7 @@ import io.nuls.ledger.service.impl.UtxoCoinManager;
 import io.nuls.ledger.service.impl.UtxoLedgerServiceImpl;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.ledger.thread.SmallChangeThread;
-import io.nuls.ledger.validator.TxFieldValidator;
-import io.nuls.ledger.validator.TxMaxSizeValidator;
-import io.nuls.ledger.validator.TxRemarkValidator;
-import io.nuls.ledger.validator.TxSignValidator;
+import io.nuls.ledger.validator.*;
 
 
 /**
@@ -85,6 +84,11 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
         TransactionValidatorManager.addTxDefValidator(TxRemarkValidator.getInstance());
         TransactionValidatorManager.addTxDefValidator(TxFieldValidator.getInstance());
         TransactionValidatorManager.addTxDefValidator(TxSignValidator.getInstance());
+
+
+        CoinTransactionValidatorManager.addTxDefValidator(UtxoTxInputsValidator.getInstance());
+        CoinTransactionValidatorManager.addTxDefValidator(UtxoTxOutputsValidator.getInstance());
+        CoinTransactionValidatorManager.addTxDefValidator(AmountValidator.getInstance());
     }
 
     private void registerService() {
@@ -96,7 +100,7 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
     public void start() {
         ledgerService.init();
         //cache the wallet's all accounts unSpend output
-        coinManager.cacheAllUnSpendOutPut();
+        coinManager.cacheAllUnSpendUtxo();
 
         SmallChangeThread smallChangeThread = SmallChangeThread.getInstance();
         TaskManager.createAndRunThread(this.getModuleId(), SmallChangeThread.class.getSimpleName(), smallChangeThread);

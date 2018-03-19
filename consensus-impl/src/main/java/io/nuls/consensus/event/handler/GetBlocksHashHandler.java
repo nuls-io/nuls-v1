@@ -57,17 +57,18 @@ public class GetBlocksHashHandler extends AbstractEventHandler<GetBlocksHashRequ
             BlockHashResponse response = new BlockHashResponse();
             Block block;
             if (event.getEventBody().getEnd() <= 0) {
-                block = blockService.getLocalBestBlock();
+                block = NulsContext.getInstance().getBestBlock();
             } else {
                 block = blockService.getBlock(event.getEventBody().getEnd());
             }
             if (null == block) {
-                block = blockService.getLocalBestBlock();
+                Log.warn("block can not get:"+event.getEventBody().getEnd());
+                return;
             }
             response.put(block.getHeader().getHeight(), block.getHeader().getHash());
             sendResponse(response, fromId);
         } else {
-            List<BlockHeader> list = this.blockService.getBlockHashList(event.getEventBody().getStart(), event.getEventBody().getEnd(), event.getEventBody().getSplit());
+            List<BlockHeader> list = this.blockService.getBlockHeaderList(event.getEventBody().getStart(), event.getEventBody().getEnd(), event.getEventBody().getSplit());
             List<Long> resultHeightList = new ArrayList<>();
             List<NulsDigestData> resultHashList = new ArrayList<>();
             for (int i = 0; i < list.size(); i++) {
@@ -76,6 +77,11 @@ public class GetBlocksHashHandler extends AbstractEventHandler<GetBlocksHashRequ
             }
             if (resultHeightList.isEmpty() || resultHeightList.get(resultHeightList.size() - 1) < event.getEventBody().getEnd()) {
                 Block block = this.blockService.getBlock(event.getEventBody().getEnd());
+                if(block==null){
+                    //todo why?
+                    Log.warn("block can not get:"+event.getEventBody().getEnd());
+                    return ;
+                }
                 resultHeightList.add(block.getHeader().getHeight());
                 resultHashList.add(block.getHeader().getHash());
             }

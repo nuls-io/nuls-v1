@@ -20,8 +20,9 @@ CREATE TABLE IF NOT EXISTS `block_header` (
   `consensus_address` varchar(40) DEFAULT NULL,
   `tx_count` int(5) NOT NULL,
   `round_index` bigint(14) NOT NULL,
-  `sign` varbinary(1024) ,
+  `scriptSig` varbinary(1024) ,
   `extend` varbinary(1024) NOT NULL,
+  `size` int(9),
   PRIMARY KEY (`hash`)
 );
 CREATE TABLE IF NOT EXISTS `delegate_account` (
@@ -30,6 +31,7 @@ CREATE TABLE IF NOT EXISTS `delegate_account` (
   `node_address` varchar(40) NOT NULL,
   `deposit` bigint(18) NOT NULL,
   `remark` varchar(255) NOT NULL,
+  `status` INT DEFAULT 0,
   `start_time` bigint(14) NOT NULL,
   `commission_rate` decimal(14) NOT NULL,
   PRIMARY KEY (`id`)
@@ -88,7 +90,8 @@ CREATE TABLE IF NOT EXISTS `transaction` (
   `remark` varchar(100) DEFAULT NULL,
   `fee` bigint(19) NOT NULL,
   `txData` varbinary(1024)  ,
-  `sign` varbinary(255) ,
+  `scriptSig` varbinary(255) ,
+  `size` int(9),
   PRIMARY KEY (`hash`)
 );
 CREATE TABLE IF NOT EXISTS `transaction_local` (
@@ -101,15 +104,15 @@ CREATE TABLE IF NOT EXISTS `transaction_local` (
   `fee` bigint(19) NOT NULL,
   `transferType` int(1),
   `txData` varbinary(1024)  ,
-  `sign` varbinary(255) ,
+  `scriptSig` varbinary(255) ,
+  `size` int(9),
   PRIMARY KEY (`hash`)
 );
 
 CREATE TABLE IF NOT EXISTS `tx_account_relation` (
-  `id` bigint(19) NOT NULL AUTO_INCREMENT,
   `tx_hash` varchar(70) NOT NULL,
   `address` varchar(40) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`tx_hash`, `address`)
 );
 
 CREATE TABLE IF NOT EXISTS `utxo_input` (
@@ -117,7 +120,6 @@ CREATE TABLE IF NOT EXISTS `utxo_input` (
   `in_index` int(5) NOT NULL,
   `from_hash` varchar(70) NOT NULL,
   `from_index` int(5) NOT NULL,
-  `sign` varbinary(255) NOT NULL,
   PRIMARY KEY (`tx_hash`,`in_index`)
 );
 

@@ -45,13 +45,13 @@ public class PocMeetingRound {
 
     private PocMeetingRound previousRound;
     private Na totalDeposit;
-    private Na agentTotalDeposit;
+//    private Na agentTotalDeposit;
     private long index;
     private long startTime;
     private int memberCount;
     private List<PocMeetingMember> memberList;
     private Map<String, Integer> addressOrderMap = new HashMap<>();
-    private ConsensusGroup consensusGroup;
+//    private ConsensusGroup consensusGroup;
 
     public long getStartTime() {
         return startTime;
@@ -115,13 +115,7 @@ public class PocMeetingRound {
         this.previousRound = previousRound;
     }
 
-    public ConsensusGroup getConsensusGroup() {
-        return consensusGroup;
-    }
 
-    public void setConsensusGroup(ConsensusGroup consensusGroup) {
-        this.consensusGroup = consensusGroup;
-    }
 
     public long getIndex() {
         return index;
@@ -137,14 +131,6 @@ public class PocMeetingRound {
 
     public void setTotalDeposit(Na totalDeposit) {
         this.totalDeposit = totalDeposit;
-    }
-
-    public void setAgentTotalDeposit(Na agentTotalDeposit) {
-        this.agentTotalDeposit = agentTotalDeposit;
-    }
-
-    public Na getAgentTotalDeposit() {
-        return agentTotalDeposit;
     }
 
     public Integer indexOf(String address) {

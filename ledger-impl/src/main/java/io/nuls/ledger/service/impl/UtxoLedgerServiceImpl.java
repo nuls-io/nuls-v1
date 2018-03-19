@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,7 +23,6 @@
  */
 package io.nuls.ledger.service.impl;
 
-import io.nuls.account.entity.Account;
 import io.nuls.cache.service.intf.CacheService;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
@@ -31,17 +30,23 @@ import io.nuls.core.chain.entity.Result;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.tx.serivce.TransactionService;
+import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.core.utils.str.StringUtils;
+import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.dao.UtxoTransactionDataService;
-import io.nuls.db.entity.*;
+import io.nuls.db.entity.TransactionLocalPo;
+import io.nuls.db.entity.TransactionPo;
+import io.nuls.db.entity.UtxoInputPo;
+import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.Balance;
@@ -112,26 +117,20 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     public List<Transaction> getTxList(String address, int txType) throws Exception {
-        return getTxList(address, txType, null, null);
-    }
-
-    @Override
-    public long getTxCount(String address, int txType) throws Exception {
-        boolean isLocal = NulsContext.LOCAL_ADDRESS_LIST.contains(address);
-        if (isLocal) {
-            return txDao.getLocalTxsCount(address, txType);
-        } else {
-            return txDao.getTxsCount(address, txType);
+        if (StringUtils.isBlank(address) && txType == 0) {
+            throw new NulsRuntimeException(ErrorCode.PARAMETER_ERROR);
         }
-    }
-
-    @Override
-    public List<Transaction> getTxList(String address, int txType, Integer pageNumber, Integer pageSize) throws Exception {
         List<Transaction> txList = new ArrayList<>();
+        List<Transaction> cacheTxList = getCacheTxList(address, txType);
+        txList.addAll(cacheTxList);
+
         if (StringUtils.isNotBlank(address) && NulsContext.LOCAL_ADDRESS_LIST.contains(address)) {
-            txList = getLocalTxList(address, txType, pageNumber, pageSize);
+            List<TransactionLocalPo> poList = txDao.getLocalTxs(address, txType, null, null);
+            for (TransactionLocalPo po : poList) {
+                txList.add(UtxoTransferTool.toTransaction(po));
+            }
         } else {
-            List<TransactionPo> poList = txDao.getTxs(address, txType, pageNumber, pageSize);
+            List<TransactionPo> poList = txDao.getTxs(address, txType, null, null);
             for (TransactionPo po : poList) {
                 txList.add(UtxoTransferTool.toTransaction(po));
             }
@@ -139,20 +138,72 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         return txList;
     }
 
+    @Override
+    public long getTxCount(String address, int txType) throws Exception {
+        int count = 0;
+        List<Transaction> cacheTxList = getCacheTxList(address, txType);
+        count += cacheTxList.size();
+
+        boolean isLocal = NulsContext.LOCAL_ADDRESS_LIST.contains(address);
+        if (isLocal) {
+            count += txDao.getLocalTxsCount(address, txType);
+        } else {
+            count += txDao.getTxsCount(address, txType);
+        }
+        return count;
+    }
+
+    @Override
+    public List<Transaction> getTxList(String address, int txType, Integer pageNumber, Integer pageSize) throws Exception {
+        List<Transaction> txList = null;
+        if (StringUtils.isNotBlank(address) && NulsContext.LOCAL_ADDRESS_LIST.contains(address)) {
+            txList = getLocalTxList(address, txType, pageNumber, pageSize);
+        } else {
+            txList = new ArrayList<>();
+            List<Transaction> cacheTxList = getCacheTxList(address, txType);
+            txList.addAll(cacheTxList);
+
+            List<TransactionPo> poList;
+            if (pageNumber == null && pageSize == null) {
+                poList = txDao.getTxs(address, txType, null, null);
+                for (TransactionPo po : poList) {
+                    txList.add(UtxoTransferTool.toTransaction(po));
+                }
+                return txList;
+            }
+            int start = (pageNumber - 1) * pageSize;
+            if (txList.size() >= start + pageSize) {
+                return txList.subList(start, start + pageSize);
+            }
+            start = start - txList.size();
+            poList = txDao.getTxs(address, txType, start, pageSize);
+            txList = new ArrayList<>();
+            for (TransactionPo po : poList) {
+                txList.add(UtxoTransferTool.toTransaction(po));
+            }
+        }
+        return txList;
+    }
+
+    private List<Transaction> getCacheTxList(String address, int txType) throws NulsException {
+        List<Transaction> cacheTxList = new ArrayList<>(txCacheService.getElementList(CONFIRM_TX_CACHE));
+        for (int i = cacheTxList.size() - 1; i >= 0; i--) {
+            Transaction tx = cacheTxList.get(i);
+            if (txType > 0 && tx.getType() != txType) {
+                cacheTxList.remove(i);
+                continue;
+            }
+            if (StringUtils.isNotBlank(address) && !checkTxIsMine(tx)) {
+                cacheTxList.remove(i);
+            }
+        }
+        return cacheTxList;
+    }
+
     public List<Transaction> getLocalTxList(String address, int txType, Integer pageNumber, Integer pageSize) throws Exception {
         List<Transaction> txList = new ArrayList<>();
-        List<Transaction> cacheTxList = txCacheService.getElementList(RECEIVE_TX_CACHE);
-        for (Transaction tx : cacheTxList) {
-            if (tx.isLocalTx()) {
-                txList.add(tx);
-            }
-        }
-        cacheTxList = txCacheService.getElementList(CONFIRM_TX_CACHE);
-        for (Transaction tx : cacheTxList) {
-            if (tx.isLocalTx()) {
-                txList.add(tx);
-            }
-        }
+        List<Transaction> cacheTxList = getCacheTxList(address, txType);
+        txList.addAll(cacheTxList);
 
         List<TransactionLocalPo> poList;
         if (pageNumber == null && pageSize == null) {
@@ -208,6 +259,18 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
+    public Page<Transaction> getTxList(long height, int type, int pageNum, int pageSize) throws Exception {
+        Page<TransactionPo> poPage = txDao.getTxs(height, type, pageNum, pageSize);
+        Page<Transaction> txPage = new Page<>(poPage);
+        List<Transaction> txList = new ArrayList<>();
+        for (TransactionPo po : poPage.getList()) {
+            txList.add(UtxoTransferTool.toTransaction(po));
+        }
+        txPage.setList(txList);
+        return txPage;
+    }
+
+    @Override
     public Balance getBalance(String address) {
         Balance balance = ledgerCacheService.getBalance(address);
         if (null == balance) {
@@ -230,8 +293,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             unSpends.add(output);
         }
         ledgerCacheService.putBalance(address, balance);
-        UtxoTransactionTool.getInstance().calcBalance(address);
-
+        UtxoTransactionTool.getInstance().calcBalanceByUtxo(address);
         return balance;
     }
 
@@ -245,7 +307,16 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         TransferTransaction tx = null;
         try {
             tx = UtxoTransactionTool.getInstance().createTransferTx(coinData, password, remark);
-            tx.verify();
+            ValidateResult result = tx.verify();
+            if (!result.getErrorCode().getCode().equals(ErrorCode.SUCCESS.getCode())) {
+                throw new NulsException(ErrorCode.FAILED);
+            }
+            byte[] txbytes = tx.serialize();
+            TransferTransaction new_tx = new NulsByteBuffer(txbytes).readNulsData(new TransferTransaction());
+            result = new_tx.verify();
+            if (!result.getErrorCode().getCode().equals(ErrorCode.SUCCESS.getCode())) {
+                throw new NulsException(ErrorCode.FAILED);
+            }
             TransactionEvent event = new TransactionEvent();
             event.setEventBody(tx);
             eventBroadcaster.broadcastAndCacheAysn(event, true);
@@ -298,9 +369,15 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             List<TransactionLocalPo> localPoList = new ArrayList<>();
             for (int i = 0; i < txList.size(); i++) {
                 Transaction tx = txList.get(i);
+                boolean isMine = false;
+                try {
+                    isMine = this.checkTxIsMine(tx);
+                } catch (NulsException e) {
+                    throw new NulsRuntimeException(e);
+                }
                 TransactionPo po = UtxoTransferTool.toTransactionPojo(tx);
                 poList.add(po);
-                if (tx.isLocalTx()) {
+                if (isMine) {
                     TransactionLocalPo localPo = UtxoTransferTool.toLocalTransactionPojo(tx);
                     localPoList.add(localPo);
                 }
@@ -325,7 +402,12 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         List<TransactionLocalPo> localPoList = new ArrayList<>();
 
         for (TransactionPo po : poList) {
-            TransactionLocalPo localPo = new TransactionLocalPo(po);
+            TransactionLocalPo localPo = txDao.getLocaltx(po.getHash());
+            if (localPo != null) {
+                continue;
+            }
+
+            localPo = new TransactionLocalPo(po);
             for (UtxoInputPo inputPo : po.getInputs()) {
                 if (inputPo.getFromOutPut().getAddress().equals(address)) {
                     localPo.setTransferType(Transaction.TRANSFER_SEND);
@@ -362,7 +444,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     public void commitTx(Transaction tx) throws NulsException {
         AssertUtil.canNotEmpty(tx, ErrorCode.NULL_PARAMETER);
-        if (tx.getStatus() == TxStatusEnum.AGREED) {
+        if (tx.getStatus() != TxStatusEnum.AGREED) {
             return;
         }
         List<TransactionService> serviceList = getServiceList(tx.getClass());
@@ -397,6 +479,16 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         for (TransactionPo tx : txList) {
             txDao.deleteTx(tx.getHash());
         }
+    }
+
+    @Override
+    public long getBlockReward(long blockHeight) {
+        return txDao.getBlockReward(blockHeight);
+    }
+
+    @Override
+    public long getBlockFee(Long blockHeight) {
+        return txDao.getBlockFee(blockHeight);
     }
 
     public List<TransactionService> getServiceList(Class<? extends Transaction> txClass) {

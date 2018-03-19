@@ -23,6 +23,8 @@
  */
 package io.nuls.consensus.entity;
 
+import io.nuls.account.entity.Account;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,19 +34,19 @@ import java.util.Map;
  * @date 2017/11/7
  */
 public class ConsensusStatusInfo implements Serializable{
-    private String address;
+    private Account account;
     private int status;
     private long startTime;
     private int parkedCount;
     private double accumulativeReward;
     private Map<String, Object> extend = new HashMap<>();
 
-    public String getAddress() {
-        return address;
+    public Account getAccount() {
+        return account;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public void setAccount(Account account) {
+        this.account = account;
     }
 
     public void putExtend(String key, Object value) {

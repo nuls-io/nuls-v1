@@ -27,10 +27,12 @@ import io.nuls.consensus.cache.manager.block.BlockCacheManager;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.*;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
+import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.ledger.service.intf.LedgerService;
 
@@ -52,6 +54,7 @@ public class BlockServiceImpl implements BlockService {
         try {
             return blockStorageService.getBlock(0);
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
         }
         return null;
@@ -81,51 +84,63 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public BlockHeader getBlockHeader(long height) {
-        BlockHeader header;
-        if (height <= blockCacheManager.getStoredHeight()) {
-            header = blockStorageService.getBlockHeader(height);
-        } else {
-            header = blockCacheManager.getBlockHeader(height);
-        }
-        return header;
+    public BlockHeader getBlockHeader(long height) throws NulsException {
+         return blockStorageService.getBlockHeader(height);
+    }
+
+    @Override
+    public BlockHeader getBlockHeader(String hash) throws NulsException {
+        return blockStorageService.getBlockHeader(hash);
     }
 
     @Override
     public Block getBlock(String hash) {
-        Block block = blockCacheManager.getBlock(hash);
-        if (null == block) {
-            try {
-                block = blockStorageService.getBlock(hash);
-            } catch (Exception e) {
-                Log.error(e);
-            }
+        Block block = null;
+        try {
+            block = blockStorageService.getBlock(hash);
+        } catch (Exception e) {
+            Log.error(e);
         }
         return block;
     }
 
     @Override
     public Block getBlock(long height) {
-        Block block = blockCacheManager.getBlock(height);
-        if (null == block) {
-            try {
-                block = blockStorageService.getBlock(height);
-            } catch (Exception e) {
-                Log.error(e);
-            }
+        try {
+            return blockStorageService.getBlock(height);
+        } catch (Exception e) {
+            Log.error(e);
+            return null;
         }
-        return block;
     }
 
     @Override
-    public List<Block> getBlockList(long startHeight, long endHeight) {
-        return blockStorageService.getBlockList(startHeight, endHeight);
+    public List<Block> getBlockList(long startHeight, long endHeight) throws NulsException {
+        List<Block> blockList = blockStorageService.getBlockList(startHeight, endHeight);
+        if (blockList.size() < (endHeight - startHeight + 1)) {
+            long currentMaxHeight = blockList.get(blockList.size() - 1).getHeader().getHeight();
+            while (currentMaxHeight < endHeight) {
+                long next = currentMaxHeight + 1;
+                Block block = blockCacheManager.getBlock(next);
+                if (null == block) {
+                    try {
+                        block = blockStorageService.getBlock(next);
+                    } catch (Exception e) {
+                        Log.error(e);
+                    }
+                }
+                if (null != block) {
+                    blockList.add(block);
+                }
+            }
+        }
+        return blockList;
     }
 
 
     @Override
     @DbSession
-    public void saveBlock(Block block) throws IOException {
+    public boolean saveBlock(Block block) throws IOException {
         for (int x = 0; x < block.getHeader().getTxCount(); x++) {
             Transaction tx = block.getTxs().get(x);
             tx.setBlockHeight(block.getHeader().getHeight());
@@ -137,8 +152,9 @@ public class BlockServiceImpl implements BlockService {
                 throw new NulsRuntimeException(e);
             }
         }
-        blockStorageService.save(block.getHeader());
         ledgerService.saveTxList(block.getTxs());
+        blockStorageService.save(block);
+        return true;
     }
 
 
@@ -156,12 +172,22 @@ public class BlockServiceImpl implements BlockService {
 
 
     @Override
-    public List<BlockHeader> getBlockHashList(long startHeight, long endHeight, long split) {
-        return blockStorageService.getBlockHashList(startHeight, endHeight, split);
+    public List<BlockHeader> getBlockHeaderList(long startHeight, long endHeight, long split) {
+        return blockStorageService.getBlockHeaderList(startHeight, endHeight, split);
     }
 
     @Override
-    public BlockHeader getBlockHeader(NulsDigestData hash) {
+    public Page<BlockHeaderPo> getBlockHeaderList(String nodeAddress, int type, int pageNumber, int pageSize) {
+        return blockStorageService.getBlocListByAddress(nodeAddress, type, pageNumber, pageSize);
+    }
+
+    @Override
+    public Page<BlockHeaderPo> getBlockHeaderList(int pageNumber, int pageSize) {
+        return blockStorageService.getBlockHeaderList(pageNumber, pageSize);
+    }
+
+    @Override
+    public BlockHeader getBlockHeader(NulsDigestData hash) throws NulsException {
         String hashHex = hash.getDigestHex();
         BlockHeader header = blockCacheManager.getBlockHeader(hashHex);
         if (null == header) {

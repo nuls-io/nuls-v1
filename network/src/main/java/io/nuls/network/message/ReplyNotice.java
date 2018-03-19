@@ -23,7 +23,7 @@
  */
 package io.nuls.network.message;
 
-import io.nuls.core.chain.entity.BasicTypeData;
+import io.nuls.core.chain.entity.basic.NulsBytesData;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.event.NoticeData;
 import io.nuls.core.exception.NulsException;
@@ -33,16 +33,15 @@ import io.nuls.core.utils.io.NulsByteBuffer;
  * @author vivi
  * @date 2017/12/10.
  */
-public class ReplyNotice extends io.nuls.core.event.BaseEvent<BasicTypeData<byte[]>> {
+public class ReplyNotice extends io.nuls.core.event.BaseEvent<NulsBytesData> {
 
     public ReplyNotice() {
         super(NulsConstant.MODULE_ID_NETWORK, (short) 1);
     }
 
     @Override
-    protected BasicTypeData<byte[]> parseEventBody(NulsByteBuffer byteBuffer) throws NulsException{
-        BasicTypeData<byte[]> typeData = new BasicTypeData(byteBuffer);
-        return typeData;
+    protected NulsBytesData parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new NulsBytesData());
     }
 
     @Override
@@ -53,7 +52,7 @@ public class ReplyNotice extends io.nuls.core.event.BaseEvent<BasicTypeData<byte
     @Override
     public Object copy() {
         ReplyNotice event = new ReplyNotice();
-        BasicTypeData<byte[]> typeData = new BasicTypeData(this.getEventBody().getVal());
+        NulsBytesData typeData = new NulsBytesData(this.getEventBody().getVal());
         event.setEventBody(typeData);
         return event;
     }

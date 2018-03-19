@@ -25,6 +25,7 @@ package io.nuls.ledger.entity.params;
 
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.utils.str.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,7 +51,6 @@ public class CoinTransferData {
     public CoinTransferData() {
         this.from = new ArrayList();
         this.toMap = new HashMap<>();
-        this.fee = NulsContext.getInstance().getTxFee();
     }
 
     public CoinTransferData(Na totalNa) {
@@ -66,7 +66,9 @@ public class CoinTransferData {
     public CoinTransferData(Na totalNa, String from, String to) {
         this(totalNa);
         this.addFrom(from, totalNa);
-        this.addTo(to, new Coin(totalNa));
+        if (StringUtils.isNotBlank(to)) {
+            this.addTo(to, new Coin(totalNa));
+        }
     }
 
     public CoinTransferData(Na totalNa, List<String> from) {
@@ -77,7 +79,9 @@ public class CoinTransferData {
     public CoinTransferData(Na totalNa, List<String> from, String to) {
         this(totalNa);
         this.from = from;
-        this.addTo(to, new Coin(totalNa));
+        if (StringUtils.isNotBlank(to)) {
+            this.addTo(to, new Coin(totalNa));
+        }
     }
 
     public void setFrom(List<String> from) {
@@ -118,7 +122,7 @@ public class CoinTransferData {
 
     public void addTo(String address, Coin coin) {
         List<Coin> coinList = toMap.get(address);
-        if(null==coinList){
+        if (null == coinList) {
             coinList = new ArrayList<>();
         }
         coinList.add(coin);

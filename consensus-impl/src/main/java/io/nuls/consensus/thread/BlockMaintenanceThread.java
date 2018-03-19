@@ -29,6 +29,8 @@ import io.nuls.consensus.utils.BlockBatchDownloadUtils;
 import io.nuls.consensus.utils.BlockInfo;
 import io.nuls.consensus.utils.DistributedBlockInfoRequestUtils;
 import io.nuls.core.chain.entity.Block;
+import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
@@ -36,6 +38,7 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
+import io.nuls.ledger.service.intf.LedgerService;
 
 import java.io.IOException;
 import java.util.List;
@@ -51,7 +54,7 @@ public class BlockMaintenanceThread implements Runnable {
     public static final String THREAD_NAME = "block-maintenance";
 
     private static BlockMaintenanceThread instance = new BlockMaintenanceThread();
-
+    private LedgerService ledgerService  = NulsContext.getServiceBean(LedgerService.class);
     private final BlockService blockService = NulsContext.getServiceBean(BlockService.class);
     private boolean success = false;
 
@@ -67,18 +70,25 @@ public class BlockMaintenanceThread implements Runnable {
     public void run() {
         try {
             checkGenesisBlock();
-        } catch (IOException e) {
+        } catch (Exception e) {
             Log.error(e);
         }
         while (true) {
             try {
                 syncBlock();
-            } catch (Exception e) {
-            Log.error(e.getMessage());
+            } catch (NulsRuntimeException e1) {
+                Log.error(e1.getMessage());
                 try {
                     Thread.sleep(PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000L);
-                } catch (InterruptedException e1) {
-                    Log.error(e1);
+                } catch (InterruptedException e2) {
+                    Log.error(e2);
+                }
+            } catch (Exception e) {
+                Log.error(e);
+                try {
+                    Thread.sleep(PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000L);
+                } catch (InterruptedException e2) {
+                    Log.error(e2);
                 }
             }
 
@@ -129,13 +139,13 @@ public class BlockMaintenanceThread implements Runnable {
             return;
         }
         if (doit) {
-            downloadBlocks(blockInfo.getNodeIdList(), startHeight, blockInfo.getBestHeight() );
+            downloadBlocks(blockInfo.getNodeIdList(), startHeight, blockInfo.getBestHeight());
         }
         this.success = true;
     }
 
 
-    private void downloadBlocks(List<String> nodeIdList, long startHeight, long endHeight ) {
+    private void downloadBlocks(List<String> nodeIdList, long startHeight, long endHeight) {
         BlockBatchDownloadUtils utils = BlockBatchDownloadUtils.getInstance();
         try {
             utils.request(nodeIdList, startHeight, endHeight);
@@ -144,7 +154,7 @@ public class BlockMaintenanceThread implements Runnable {
         }
     }
 
-    public void checkGenesisBlock() throws IOException {
+    public void checkGenesisBlock() throws Exception {
         Block genesisBlock = NulsContext.getInstance().getGenesisBlock();
         ValidateResult result = genesisBlock.verify();
         if (result.isFailed()) {
@@ -152,6 +162,9 @@ public class BlockMaintenanceThread implements Runnable {
         }
         Block localGenesisBlock = this.blockService.getGengsisBlock();
         if (null == localGenesisBlock) {
+            for(Transaction tx:genesisBlock.getTxs()){
+                ledgerService.approvalTx(tx);
+            }
             this.blockService.saveBlock(genesisBlock);
             return;
         }
@@ -171,26 +184,42 @@ public class BlockMaintenanceThread implements Runnable {
             }
             BlockInfo blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(0);
             if (null == blockInfo || blockInfo.getBestHash() == null) {
-                return localBestBlock;
-            }
-            blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(localBestBlock.getHeader().getHeight());
-            if (null != blockInfo && blockInfo.getBestHeight() < localBestBlock.getHeader().getHeight()) {
-                //本地高度最高，查询网络最新高度，并回退
-                rollbackBlock(localBestBlock.getHeader().getHeight(), blockInfo);
-                localBestBlock = this.blockService.getLocalBestBlock();
                 break;
             }
-            if (!blockInfo.getBestHash().equals(localBestBlock.getHeader().getHash())) {
-                //本地分叉，回退
-                rollbackBlock(blockInfo.getBestHeight(), blockInfo);
+            //same to network nodes
+            if (blockInfo.getBestHeight() == localBestBlock.getHeader().getHeight() &&
+                    blockInfo.getBestHash().equals(localBestBlock.getHeader().getHash())) {
+                break;
+            } else if (blockInfo.getBestHeight() <= localBestBlock.getHeader().getHeight()) {
+                //local height is highest
+                BlockHeader header = null;
+                try {
+                    header = blockService.getBlockHeader(blockInfo.getBestHeight());
+                } catch (NulsException e) {
+                    break;
+                }
+
+                if (null != header && header.getHash().equals(blockInfo.getBestHash())) {
+                    break;
+                }
+                //bifurcation
+                rollbackBlock(localBestBlock.getHeader().getHeight());
                 localBestBlock = this.blockService.getLocalBestBlock();
                 break;
+            } else {
+                blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(localBestBlock.getHeader().getHeight());
+                if (blockInfo.getBestHash().equals(localBestBlock.getHeader().getHash())) {
+                    break;
+                }
+                //bifurcation
+                rollbackBlock(localBestBlock.getHeader().getHeight());
+                localBestBlock = this.blockService.getLocalBestBlock();
             }
         } while (false);
         return localBestBlock;
     }
 
-    private void rollbackBlock(long startHeight, BlockInfo blockInfo) {
+    private void rollbackBlock(long startHeight) {
         try {
             this.blockService.rollbackBlock(startHeight);
         } catch (NulsException e) {
@@ -198,18 +227,25 @@ public class BlockMaintenanceThread implements Runnable {
             return;
         }
         long height = startHeight - 1;
-        if (height < 0) {
-            return;
-        }
-        Block localBlock = this.blockService.getBlock(height);
         boolean previousRb = false;
-        if (null == blockInfo || blockInfo.getBestHash() == null || localBlock == null || localBlock.getHeader().getHash() == null) {
-            previousRb = true;
-        } else if (!blockInfo.getBestHash().getDigestHex().equals(localBlock.getHeader().getHash().getDigestHex())) {
-            previousRb = true;
+        if (height > 0) {
+            BlockHeader localHeader = null;
+            try {
+                localHeader = this.blockService.getBlockHeader(height);
+            } catch (NulsException e) {
+                System.out.println(e);
+                //todo
+            }
+            BlockInfo blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(height);
+
+            if (null != blockInfo && null != blockInfo.getBestHash() && !blockInfo.getBestHash().equals(localHeader.getHash())) {
+                previousRb = true;
+            }
         }
         if (previousRb) {
-            rollbackBlock(height, blockInfo);
+            rollbackBlock(height);
+        }else{
+            NulsContext.getInstance().setBestBlock(blockService.getLocalBestBlock());
         }
     }
 

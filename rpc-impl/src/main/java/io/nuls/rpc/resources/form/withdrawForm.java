@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,19 +21,32 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.ledger.script;
+
+package io.nuls.rpc.resources.form;
 
 /**
- * Created by win10 on 2017/10/30.
+ * @author Niels
+ * @date 2018/3/14
  */
-public class ScriptException extends RuntimeException{
+public class withdrawForm {
+    private String txHash;
+    private String password;
 
-    public ScriptException(String msg) {
-        super(msg);
+    public String getPassword() {
+        return password;
     }
 
-    public ScriptException(String msg, Exception e) {
-        super(msg, e);
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getTxHash() {
+        return txHash;
+    }
+
+    public void setTxHash(String txHash) {
+        this.txHash = txHash;
     }
 }

@@ -48,56 +48,32 @@ public class UtxoCoinManager {
     private static UtxoCoinManager instance = new UtxoCoinManager();
 
     private UtxoCoinManager() {
-        cacheService = LedgerCacheService.getInstance();
+        ledgerCacheService = LedgerCacheService.getInstance();
     }
 
     public static UtxoCoinManager getInstance() {
         return instance;
     }
 
-    private LedgerCacheService cacheService = LedgerCacheService.getInstance();
+    private LedgerCacheService ledgerCacheService = LedgerCacheService.getInstance();
 
     private UtxoOutputDataService outputDataService;
 
     private Lock lock = new ReentrantLock();
 
-    public void cacheAllUnSpendOutPut() {
+    public void cacheAllUnSpendUtxo() {
         List<UtxoOutputPo> utxoOutputPos = outputDataService.getAllUnSpend();
-        String address = null;
-        List<UtxoOutput> list = null;
         Set<String> addressSet = new HashSet<>();
 
         for (int i = 0; i < utxoOutputPos.size(); i++) {
             UtxoOutputPo po = utxoOutputPos.get(i);
             UtxoOutput output = UtxoTransferTool.toOutput(po);
-            cacheService.putUtxo(output.getKey(), output);
-
-            if (i == 0) {
-                address = po.getAddress();
-                list = new ArrayList<>();
-                addressSet.add(address);
-
-            } else if (!address.equals(po.getAddress())) {
-                UtxoBalance balance = new UtxoBalance();
-                balance.setUnSpends(list);
-                cacheService.putBalance(address, balance);
-
-                list = new ArrayList<>();
-                address = po.getAddress();
-                addressSet.add(address);
-            }
-
-            list.add(output);
-
-            if (i == utxoOutputPos.size() - 1) {
-                UtxoBalance balance = new UtxoBalance();
-                balance.setUnSpends(list);
-                cacheService.putBalance(address, balance);
-            }
+            ledgerCacheService.putUtxo(output.getKey(), output);
+            addressSet.add(po.getAddress());
         }
 
-        for(String str : addressSet) {
-            UtxoTransactionTool.getInstance().calcBalance(str);
+        for (String str : addressSet) {
+            UtxoTransactionTool.getInstance().calcBalanceByUtxo(str);
         }
     }
 
@@ -112,7 +88,7 @@ public class UtxoCoinManager {
         lock.lock();
         List<UtxoOutput> unSpends = new ArrayList<>();
         try {
-            UtxoBalance balance = (UtxoBalance) cacheService.getBalance(address);
+            UtxoBalance balance = (UtxoBalance) ledgerCacheService.getBalance(address);
             if (balance == null || balance.getUsable().isLessThan(value)) {
                 return unSpends;
             }
@@ -122,7 +98,7 @@ public class UtxoCoinManager {
             Na amount = Na.ZERO;
             for (int i = 0; i < balance.getUnSpends().size(); i++) {
                 UtxoOutput output = balance.getUnSpends().get(i);
-                boolean update = cacheService.updateUtxoStatus(output.getKey(), UtxoOutput.LOCKED, UtxoOutput.USEABLE);
+                boolean update = ledgerCacheService.updateUtxoStatus(output.getKey(), UtxoOutput.UTXO_CONFIRM_LOCK, UtxoOutput.UTXO_CONFIRM_UNLOCK);
                 //other tx locked this utxo
                 if (!update) {
                     continue;
@@ -136,14 +112,14 @@ public class UtxoCoinManager {
             }
             if (!enough) {
                 for (UtxoOutput output : unSpends) {
-                    cacheService.updateUtxoStatus(output.getKey(), UtxoOutput.USEABLE, UtxoOutput.LOCKED);
+                    ledgerCacheService.updateUtxoStatus(output.getKey(), UtxoOutput.UTXO_CONFIRM_UNLOCK, UtxoOutput.UTXO_CONFIRM_LOCK);
                 }
                 unSpends = new ArrayList<>();
             }
         } catch (Exception e) {
             Log.error(e);
             for (UtxoOutput output : unSpends) {
-                cacheService.updateUtxoStatus(output.getKey(), UtxoOutput.USEABLE, UtxoOutput.LOCKED);
+                ledgerCacheService.updateUtxoStatus(output.getKey(), UtxoOutput.UTXO_CONFIRM_UNLOCK, UtxoOutput.UTXO_CONFIRM_LOCK);
             }
         } finally {
             lock.unlock();
@@ -153,17 +129,20 @@ public class UtxoCoinManager {
 
     public List<UtxoOutput> getAccountsUnSpend(List<String> addressList, Na value) {
         lock.lock();
+
         List<UtxoOutput> unSpends = new ArrayList<>();
         try {
             //check use-able is enough , find unSpend utxo
             Na amount = Na.ZERO;
             boolean enough = false;
             for (String address : addressList) {
-                UtxoBalance balance = (UtxoBalance) cacheService.getBalance(address);
+                UtxoBalance balance = (UtxoBalance) ledgerCacheService.getBalance(address);
+                if (balance == null || balance.getUnSpends().isEmpty()) {
+                    continue;
+                }
                 for (int i = 0; i < balance.getUnSpends().size(); i++) {
                     UtxoOutput output = balance.getUnSpends().get(i);
-                    boolean update = cacheService.updateUtxoStatus(output.getKey(), UtxoOutput.LOCKED, UtxoOutput.USEABLE);
-                    if (!update) {
+                    if (!output.isUsable()) {
                         continue;
                     }
                     unSpends.add(output);
@@ -178,16 +157,10 @@ public class UtxoCoinManager {
                 }
             }
             if (!enough) {
-                for (UtxoOutput output : unSpends) {
-                    cacheService.updateUtxoStatus(output.getKey(), UtxoOutput.USEABLE, UtxoOutput.LOCKED);
-                }
                 unSpends = new ArrayList<>();
             }
         } catch (Exception e) {
             Log.error(e);
-            for (UtxoOutput output : unSpends) {
-                cacheService.updateUtxoStatus(output.getKey(), UtxoOutput.USEABLE, UtxoOutput.LOCKED);
-            }
             unSpends = new ArrayList<>();
         } finally {
             lock.unlock();

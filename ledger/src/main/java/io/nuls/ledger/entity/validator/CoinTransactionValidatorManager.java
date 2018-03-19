@@ -21,28 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.consensus.utils;
+package io.nuls.ledger.entity.validator;
 
-import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.validate.NulsDataValidator;
 
-import java.util.Comparator;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Niels
- * @date 2017/12/26
+ * @date 2017/12/7
  */
-public class TxComparator implements Comparator<Transaction> {
+public class CoinTransactionValidatorManager {
 
+    private static final List<NulsDataValidator> ALL_LIST = new ArrayList<>();
 
-    @Override
-    public int compare(Transaction o1, Transaction o2) {
-        long key = o1.size() - o2.size();
-        int val = 0;
-        if (key > 0) {
-            return 1;
-        } else if (key < 0) {
-            return -1;
-        }
-        return val;
+    /**
+     * the validator fit all transaction instances
+     * @param validator
+     */
+    public static void addTxDefValidator(NulsDataValidator validator) {
+        ALL_LIST.add(validator);
+    }
+
+    public static final List<NulsDataValidator> getValidators() {
+        List<NulsDataValidator> list = new ArrayList<>();
+        list.addAll(ALL_LIST);
+        return list;
     }
 }

@@ -25,6 +25,7 @@ package io.nuls.consensus.service.tx;
 
 import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
+import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.member.Delegate;
 import io.nuls.consensus.entity.tx.PocJoinConsensusTransaction;
@@ -38,6 +39,10 @@ import io.nuls.db.dao.DelegateDataService;
 import io.nuls.db.entity.DelegatePo;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.service.intf.LedgerService;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Niels
@@ -55,11 +60,23 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
 
     @Override
     public void onCommit(PocJoinConsensusTransaction tx) throws NulsException {
-        manager.changeDelegateStatus(tx.getTxData().getExtend().getHash(), ConsensusStatusEnum.IN);
-        DelegatePo po = new DelegatePo();
-        po.setId(tx.getTxData().getExtend().getHash());
-        po.setStatus(ConsensusStatusEnum.IN.getCode());
-        delegateDataService.updateSelective(po);
+        manager.changeDelegateStatus(tx.getTxData().getExtend().getHash(), ConsensusStatusEnum.WAITING);
+        Consensus<Delegate> cd = tx.getTxData();
+        cd.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
+        DelegatePo po = ConsensusTool.delegateToPojo(cd);
+        delegateDataService.save(po);
+        Map<String, Object> paramsMap = new HashMap<>();
+        paramsMap.put("agentAddress", cd.getExtend().getDelegateAddress());
+        List<DelegatePo> poList = delegateDataService.getList(paramsMap);
+        long sum = 0L;
+        for (DelegatePo delegatePo : poList) {
+            sum += delegatePo.getDeposit();
+        }
+        if (sum >= PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT.getValue()) {
+            manager.changeDelegateStatus(tx.getTxData().getExtend().getHash(), ConsensusStatusEnum.IN);
+        }
+
+
         EntrustConsensusNotice notice = new EntrustConsensusNotice();
         notice.setEventBody(tx);
         NulsContext.getServiceBean(EventBroadcaster.class).publishToLocal(notice);
@@ -68,9 +85,8 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
     @Override
     public void onApproval(PocJoinConsensusTransaction tx) throws NulsException {
         Consensus<Delegate> cd = tx.getTxData();
-        cd.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
+        cd.getExtend().setStatus(ConsensusStatusEnum.NOT_IN.getCode());
         manager.cacheDelegate(cd);
-        DelegatePo po = ConsensusTool.delegateToPojo(cd);
-        delegateDataService.save(po);
+
     }
 }

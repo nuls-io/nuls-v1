@@ -49,9 +49,12 @@ public class GetBlockHandler extends AbstractEventHandler<GetBlockRequest> {
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
 
     @Override
-    public void onEvent(GetBlockRequest event, String fromId) {
+    public void onEvent(GetBlockRequest event, String fromId) throws NulsException {
         List<Block> blockList = blockService.getBlockList(event.getStart(), event.getEnd());
         for (Block block : blockList) {
+            if(null==block){
+                continue;
+            }
             BlockEvent blockEvent = new BlockEvent();
             blockEvent.setEventBody(block);
             eventBroadcaster.sendToNode(blockEvent, fromId);

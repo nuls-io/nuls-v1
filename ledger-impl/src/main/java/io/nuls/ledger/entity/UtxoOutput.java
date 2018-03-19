@@ -23,14 +23,14 @@
  */
 package io.nuls.ledger.entity;
 
+import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
-import io.nuls.ledger.script.P2PKHScript;
-import io.nuls.ledger.script.Script;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.script.P2PKHScript;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
@@ -41,7 +41,7 @@ import java.io.IOException;
 /**
  * Created by win10 on 2017/10/30.
  */
-public class UtxoOutput extends BaseNulsData {
+public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
 
     private NulsDigestData txHash;
 
@@ -49,32 +49,30 @@ public class UtxoOutput extends BaseNulsData {
 
     private long value;
 
-    private UtxoInput spentBy;
-
-    private byte[] address;
+    private String address;
 
     private long lockTime;
 
-    private byte[] scriptBytes;
+    private P2PKHScript p2PKHScript;
 
-    private Script script;
-
-    //0: usable, 1:locked， 2：spent
     private int status;
 
-    public static final int USEABLE = 0;
-    public static final int LOCKED = 1;
-    public static final int SPENT = 2;
-
-    /** ------ redundancy ------  */
-    private Transaction parent;
-
+    /**
+     * ------ redundancy ------
+     */
     private long createTime;
 
     private int txType;
 
     // key = txHash + "-" + index, a key that will not be serialized, only used for caching
     private String key;
+
+
+    public static final int UTXO_CONFIRM_UNLOCK = 0;
+    public static final int UTXO_CONFIRM_LOCK = 1;
+    public static final int UTXO_SPENT = 2;
+    public static final int UTXO_UNCONFIRM_UNLOCK = 3;
+    public static final int UTXO_UNCONFIRM_LOCK = 4;
 
     public UtxoOutput() {
     }
@@ -87,20 +85,18 @@ public class UtxoOutput extends BaseNulsData {
     public int size() {
         int s = 0;
         s += VarInt.sizeOf(index);
-        s += NulsConstant.TIME_VALUE_LENGTH;
-        s += Utils.sizeOfSerialize(address);
-        s += NulsConstant.TIME_VALUE_LENGTH;
-        s += Utils.sizeOfSerialize(scriptBytes);
+        s += 8;
+        s += Utils.sizeOfInt48();
+        s += Utils.sizeOfNulsData(p2PKHScript);
         return s;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeVarInt(index);
-        stream.writeTime(value);
-        stream.writeBytesWithLength(address);
-        stream.writeTime(lockTime);
-        stream.writeBytesWithLength(scriptBytes);
+        stream.writeInt64(value);
+        stream.writeInt48(lockTime);
+        stream.writeNulsData(p2PKHScript);
     }
 
     @Override
@@ -109,33 +105,22 @@ public class UtxoOutput extends BaseNulsData {
             return;
         }
         index = (int) byteBuffer.readVarInt();
-        value = byteBuffer.readTime();
-        address = byteBuffer.readByLengthByte();
-        lockTime = byteBuffer.readTime();
-        scriptBytes = byteBuffer.readByLengthByte();
-        if(null!=scriptBytes){
-            script = new P2PKHScript(new NulsDigestData(scriptBytes));
-        }
+        value = byteBuffer.readInt64();
+        lockTime = byteBuffer.readInt48();
+        p2PKHScript = byteBuffer.readNulsData(new P2PKHScript());
+
+        Address addressObj = new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), this.getOwner());
+
+        this.address = addressObj.toString();
     }
 
 
     public NulsDigestData getTxHash() {
-        if(txHash == null && parent != null) {
-            this.txHash = parent.getHash();
-        }
         return txHash;
     }
 
     public void setTxHash(NulsDigestData txHash) {
         this.txHash = txHash;
-    }
-
-    public UtxoInput getSpentBy() {
-        return spentBy;
-    }
-
-    public void setSpentBy(UtxoInput spentBy) {
-        this.spentBy = spentBy;
     }
 
     public long getValue() {
@@ -154,20 +139,12 @@ public class UtxoOutput extends BaseNulsData {
         this.lockTime = lockTime;
     }
 
-    public byte[] getScriptBytes() {
-        return scriptBytes;
+    public P2PKHScript getP2PKHScript() {
+        return p2PKHScript;
     }
 
-    public void setScriptBytes(byte[] scriptBytes) {
-        this.scriptBytes = scriptBytes;
-    }
-
-    public Script getScript() {
-        return script;
-    }
-
-    public void setScript(Script script) {
-        this.script = script;
+    public void setP2PKHScript(P2PKHScript p2PKHScript) {
+        this.p2PKHScript = p2PKHScript;
     }
 
     public int getIndex() {
@@ -178,11 +155,11 @@ public class UtxoOutput extends BaseNulsData {
         this.index = index;
     }
 
-    public byte[] getAddress() {
+    public String getAddress() {
         return address;
     }
 
-    public void setAddress(byte[] address) {
+    public void setAddress(String address) {
         this.address = address;
     }
 
@@ -194,16 +171,8 @@ public class UtxoOutput extends BaseNulsData {
         this.status = status;
     }
 
-    public Transaction getParent() {
-        return parent;
-    }
-
-    public void setParent(Transaction parent) {
-        this.parent = parent;
-    }
-
     public String getKey() {
-        if(StringUtils.isBlank(key)) {
+        if (StringUtils.isBlank(key)) {
             key = this.getTxHash().getDigestHex() + "-" + index;
         }
         return key;
@@ -227,5 +196,31 @@ public class UtxoOutput extends BaseNulsData {
 
     public void setTxType(int txType) {
         this.txType = txType;
+    }
+
+    public boolean isUsable() {
+        return status == UTXO_CONFIRM_UNLOCK || status == UTXO_UNCONFIRM_UNLOCK;
+    }
+
+    public boolean isUnConfirm() {
+        return status == UTXO_UNCONFIRM_UNLOCK || status == UTXO_UNCONFIRM_LOCK;
+    }
+
+    public boolean isLocked() {
+        return status == UTXO_UNCONFIRM_LOCK || status == UTXO_CONFIRM_LOCK;
+    }
+
+    @Override
+    public int compareTo(UtxoOutput o) {
+        if (this.value < o.getValue()) {
+            return -1;
+        } else if (this.value > o.getValue()) {
+            return 1;
+        }
+        return 0;
+    }
+
+    public byte[] getOwner() {
+        return this.getP2PKHScript().getPublicKeyDigest().getDigestBytes();
     }
 }

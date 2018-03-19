@@ -23,9 +23,11 @@
  */
 package io.nuls.core.chain.entity;
 
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.crypto.UnsafeByteArrayOutputStream;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.exception.NulsVerificationException;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -79,6 +81,9 @@ public abstract class BaseNulsData implements Serializable, Cloneable {
                 serializeToStream(buffer);
             }
             byte[] bytes = bos.toByteArray();
+            if (bytes.length != this.size()) {
+                throw new NulsRuntimeException(ErrorCode.FAILED, "序列化和size长度不一致：" + this.getClass());
+            }
             return bytes;
         } finally {
             if (bos != null) {

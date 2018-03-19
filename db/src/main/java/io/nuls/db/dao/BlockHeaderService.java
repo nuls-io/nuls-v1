@@ -23,6 +23,7 @@
  */
 package io.nuls.db.dao;
 
+import io.nuls.core.dto.Page;
 import io.nuls.db.entity.BlockHeaderPo;
 
 import java.util.List;
@@ -36,6 +37,7 @@ public interface BlockHeaderService extends BaseDataService<String, BlockHeaderP
 
     /**
      * get blockheanderpo from block height
+     *
      * @param height
      * @return
      */
@@ -43,6 +45,7 @@ public interface BlockHeaderService extends BaseDataService<String, BlockHeaderP
 
     /**
      * get blockheanderpo from block hash
+     *
      * @param hash
      * @return
      */
@@ -50,18 +53,21 @@ public interface BlockHeaderService extends BaseDataService<String, BlockHeaderP
 
     /**
      * return highest height
+     *
      * @return
      */
     long getBestHeight();
 
     /**
      * blockheanderpo of highest height
+     *
      * @return
      */
     BlockHeaderPo getBestBlockHeader();
 
     /**
      * get blockheanderpo list from block height
+     *
      * @param startHeight
      * @param endHeight
      * @return
@@ -71,6 +77,7 @@ public interface BlockHeaderService extends BaseDataService<String, BlockHeaderP
 
     /**
      * Piecewise get the hashes of blocks;
+     *
      * @param startHeight
      * @param endHeight
      * @param split
@@ -78,8 +85,13 @@ public interface BlockHeaderService extends BaseDataService<String, BlockHeaderP
      */
     List<BlockHeaderPo> getHashList(long startHeight, long endHeight, long split);
 
+    Page<BlockHeaderPo> getBlockListByAddress(String nodeAddress, int type, int pageNumber, int pageSize);
+
+    Page<BlockHeaderPo> getBlockHeaderList(int pageNumber, int pageSize);
+
     /**
      * calc count of roundIndex between start and end;
+     *
      * @param address
      * @param roundStart
      * @param roundEnd
@@ -89,6 +101,7 @@ public interface BlockHeaderService extends BaseDataService<String, BlockHeaderP
 
     /**
      * use for POC consensus
+     *
      * @param address
      * @param endRoundIndex
      * @return

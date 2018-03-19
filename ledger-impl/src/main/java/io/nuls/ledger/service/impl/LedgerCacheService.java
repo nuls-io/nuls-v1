@@ -23,20 +23,27 @@
  */
 package io.nuls.ledger.service.impl;
 
+import io.nuls.account.entity.Address;
 import io.nuls.cache.service.intf.CacheService;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.entity.Balance;
+import io.nuls.ledger.entity.UtxoBalance;
 import io.nuls.ledger.entity.UtxoOutput;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 
 /**
  * @author Niels
  * @date 2017/11/17
  */
-public class LedgerCacheService {
+public class
+LedgerCacheService {
     private static LedgerCacheService instance = new LedgerCacheService();
     private CacheService<String, Balance> cacheService;
     private CacheService<String, UtxoOutput> utxoCacheService;
@@ -70,6 +77,9 @@ public class LedgerCacheService {
         cacheService.putElement(LedgerConstant.STANDING_BOOK, address, balance);
     }
 
+    public void removeBalance(String address) {
+        cacheService.removeElement(LedgerConstant.STANDING_BOOK, address);
+    }
 
     public Balance getBalance(String address) {
         return cacheService.getElement(LedgerConstant.STANDING_BOOK, address);
@@ -77,6 +87,19 @@ public class LedgerCacheService {
 
     public void putUtxo(String key, UtxoOutput output) {
         utxoCacheService.putElement(LedgerConstant.UTXO, key, output);
+
+        String address = output.getAddress();
+        UtxoBalance balance = (UtxoBalance) getBalance(address);
+        if (balance == null) {
+            balance = new UtxoBalance();
+            List<UtxoOutput> outputs = new ArrayList<>();
+            outputs.add(output);
+            balance.setUnSpends(outputs);
+            putBalance(address, balance);
+        } else {
+            balance.getUnSpends().add(output);
+            Collections.sort(balance.getUnSpends());
+        }
     }
 
     public UtxoOutput getUtxo(String key) {
@@ -84,10 +107,18 @@ public class LedgerCacheService {
     }
 
     public void removeUtxo(String key) {
+        UtxoOutput output = getUtxo(key);
         utxoCacheService.removeElement(LedgerConstant.UTXO, key);
+        if (output != null) {
+            UtxoBalance balance = (UtxoBalance) getBalance(output.getAddress());
+            if (balance != null) {
+                balance.getUnSpends().remove(output);
+            }
+        }
     }
 
     public boolean updateUtxoStatus(String key, int newStatus, int oldStatus) {
+
         if (!utxoCacheService.containsKey(LedgerConstant.UTXO, key)) {
             return false;
         }

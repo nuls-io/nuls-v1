@@ -24,10 +24,13 @@
 package io.nuls.db.dao.impl.mybatis;
 
 import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import io.nuls.core.dto.Page;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.TransactionDataService;
 import io.nuls.db.dao.impl.mybatis.mapper.TransactionMapper;
+import io.nuls.db.dao.impl.mybatis.util.Condition;
 import io.nuls.db.dao.impl.mybatis.util.SearchOperator;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import io.nuls.db.entity.TransactionPo;
@@ -57,8 +60,30 @@ public class TransactionDaoImpl extends BaseDaoImpl<TransactionMapper, String, T
     public List<TransactionPo> getTxs(Long blockHeight) {
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.eq, blockHeight);
-        PageHelper.orderBy("create_time asc");
+        PageHelper.orderBy("tx_index,b.in_index asc,c.out_index asc");
         return getMapper().selectList(searchable);
+    }
+
+    @Override
+    public Page<TransactionPo> getTxs(Long blockHeight, int type, int pageNum, int pageSize) {
+        Searchable searchable = new Searchable();
+        if (type != 0) {
+            searchable.addCondition("type", SearchOperator.eq, type);
+        }
+        if (blockHeight >= 0) {
+            searchable.addCondition("block_height", SearchOperator.eq, blockHeight);
+        }
+
+        long count = getMapper().selectCount(searchable);
+        PageHelper.startPage(pageNum, pageSize);
+        PageHelper.orderBy("a.create_time desc,b.in_index asc,c.out_index asc");
+        List<TransactionPo> poList = getMapper().selectList(searchable);
+        Page<TransactionPo> page = new Page<>();
+        page.setPageNumber(pageNum);
+        page.setPageSize(pageSize);
+        page.setTotal(count);
+        page.setList(poList);
+        return page;
     }
 
     @Override
@@ -66,30 +91,24 @@ public class TransactionDaoImpl extends BaseDaoImpl<TransactionMapper, String, T
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.gte, startHeight);
         searchable.addCondition("block_height", SearchOperator.lte, endHeight);
-        PageHelper.orderBy("block_height asc, create_time asc");
+        PageHelper.orderBy("block_height asc, tx_index asc,b.in_index asc,c.out_index asc");
         return getMapper().selectList(searchable);
     }
 
     @Override
-    public List<TransactionPo> getTxs(String address, int type, Integer pageNumber, Integer pageSize) {
+    public List<TransactionPo> getTxs(String address, int type, Integer start, Integer limit) {
         Searchable searchable = new Searchable();
-        if (StringUtils.isBlank(address)) {
-            if (type != 0) {
-                searchable.addCondition("a.type", SearchOperator.eq, type);
-            }
-            if (pageNumber != null && pageSize != null) {
-                PageHelper.startPage(pageNumber, pageSize);
-            }
-            PageHelper.orderBy("a.create_time desc");
-            return getMapper().selectList(searchable);
-        }
-
+        Condition condition = Condition.custom("(e.address = c.address or e.address = d.address)");
+        searchable.addCondition(condition);
         if (type != 0) {
             searchable.addCondition("a.type", SearchOperator.eq, type);
         }
-        searchable.addCondition("e.address", SearchOperator.eq, address);
-        if (pageNumber != null && pageSize != null) {
-            PageHelper.startPage(pageNumber, pageSize);
+        if (StringUtils.isNotBlank(address)) {
+            searchable.addCondition("e.address", SearchOperator.eq, address);
+        }
+
+        if (start != null && limit != null) {
+            PageHelper.offsetPage(start, limit);
         }
         PageHelper.orderBy("a.create_time desc");
         return getMapper().selectByAddress(searchable);
@@ -115,6 +134,11 @@ public class TransactionDaoImpl extends BaseDaoImpl<TransactionMapper, String, T
         }
         searchable.addCondition("e.address", SearchOperator.eq, address);
         return getMapper().selectCountByAddress(searchable);
+    }
+
+    @Override
+    public long getFeeByHeight(long blockHeight) {
+        return getMapper().getFeeByHeight(blockHeight);
     }
 
 }

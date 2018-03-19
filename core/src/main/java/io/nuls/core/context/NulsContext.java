@@ -38,6 +38,8 @@ import java.util.Set;
  * @author Niels
  */
 public class NulsContext {
+    //todo 临时使用
+    public static String CACHED_PASSWORD_OF_WALLET = "nuls123456";
 
     private static final HashMap<String, Short> CHAIN_ID_MAP = new HashMap<String, Short>();
     public static String DEFAULT_ENCODING = "UTF-8";
@@ -54,8 +56,6 @@ public class NulsContext {
     }
 
     public static int MAGIC_NUMBER;
-    //todo
-    private Na txFee = Na.valueOf(1000000);
     /**
      * cache the best block
      */
@@ -115,14 +115,6 @@ public class NulsContext {
 
     public void addChainId(String chainName, Short id) {
         CHAIN_ID_MAP.put(chainName, id);
-    }
-
-    public Na getTxFee() {
-        return txFee;
-    }
-
-    public void setTxFee(Na txFee) {
-        this.txFee = txFee;
     }
 
     public static final <T> T getServiceBean(Class<T> tClass) {

@@ -23,67 +23,71 @@
  */
 package io.nuls.ledger.validator;
 
-import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.context.NulsContext;
+import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.script.P2PKHScriptSig;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.UtxoInput;
 import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
-import io.nuls.ledger.script.P2PKHScript;
-import io.nuls.ledger.script.P2PKHScriptSig;
-import io.nuls.ledger.script.Script;
-import io.nuls.ledger.script.TransferScript;
+
+import java.util.Arrays;
 
 /**
  * @author Niels
  * @date 2017/11/20
  */
-public class UtxoTxInputsValidator implements NulsDataValidator<UtxoData> {
+public class UtxoTxInputsValidator implements NulsDataValidator<AbstractCoinTransaction> {
+
     private static final UtxoTxInputsValidator INSTANCE = new UtxoTxInputsValidator();
 
-    private UtxoTxInputsValidator() {
 
+    private UtxoTxInputsValidator() {
     }
 
     public static UtxoTxInputsValidator getInstance() {
         return INSTANCE;
     }
 
-    private AccountService accountService;
-
-
     @Override
-    public ValidateResult validate(UtxoData data) {
-
+    public ValidateResult validate(AbstractCoinTransaction tx) {
+        UtxoData data = (UtxoData) tx.getCoinData();
         for (int i = 0; i < data.getInputs().size(); i++) {
             UtxoInput input = data.getInputs().get(i);
             UtxoOutput output = input.getFrom();
-            try {
-                P2PKHScriptSig scriptSig = new P2PKHScriptSig();
-                scriptSig.parse(input.getScriptSig());
-                Script script = output.getScript();
-                if(!(script instanceof P2PKHScript)){
-                    return ValidateResult.getFailedResult(ErrorCode.DATA_ERROR);
+
+            if (output == null && tx.getStatus() == TxStatusEnum.CACHED) {
+                return ValidateResult.getFailedResult(ErrorCode.ORPHAN_TX);
+            }
+
+            if (tx.getStatus() == TxStatusEnum.CACHED) {
+                if (!output.isUsable()) {
+                    return ValidateResult.getFailedResult(ErrorCode.UTXO_STATUS_CHANGE);
                 }
-                TransferScript txScript = new TransferScript(scriptSig, (P2PKHScript)output.getScript());
-                txScript.verifyScript();
-            }catch (NulsException e){
+            } else if (tx.getStatus() == TxStatusEnum.AGREED) {
+                if (!output.isLocked()) {
+                    return ValidateResult.getFailedResult(ErrorCode.UTXO_STATUS_CHANGE);
+                }
+            }
+
+            byte[] owner = output.getOwner();
+            P2PKHScriptSig p2PKHScriptSig = null;
+            try {
+                p2PKHScriptSig = P2PKHScriptSig.createFromBytes(tx.getScriptSig());
+            } catch (NulsException e) {
                 return ValidateResult.getFailedResult(ErrorCode.DATA_ERROR);
             }
+            byte[] user = p2PKHScriptSig.getSignerHash160();
+            if (!Arrays.equals(owner, user)) {
+                return ValidateResult.getFailedResult(ErrorCode.INVALID_OUTPUT);
+            }
+
+            return ValidateResult.getSuccessResult();
         }
         return ValidateResult.getSuccessResult();
     }
 
-
-    private AccountService getAccountService() {
-        if (accountService == null) {
-            accountService = NulsContext.getServiceBean(AccountService.class);
-        }
-        return accountService;
-    }
 }

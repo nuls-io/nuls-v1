@@ -66,7 +66,12 @@ public class EventCacheService {
     }
 
     public BaseEvent getEvent(String hashHex) {
-        return (BaseEvent) this.cacheService.getElement(CACHE_OF_SENDED, hashHex);
+        Object obj = this.cacheService.getElement(CACHE_OF_SENDED, hashHex);
+        if(obj instanceof Integer){
+            this.cacheService.removeElement(CACHE_OF_SENDED,hashHex);
+            return null;
+        }
+        return (BaseEvent) obj;
     }
 
     public void destroy() {

@@ -27,6 +27,7 @@ import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 
@@ -42,8 +43,12 @@ public class BlockPackerValidator implements NulsDataValidator<Block> {
     }
     @Override
     public ValidateResult validate(Block block) {
-        BlockHeader preHeader = NulsContext.getServiceBean(BlockService.class).getBlockHeader(block.getHeader().getPreHash());
-        //todo
+        try {
+            BlockHeader preHeader = NulsContext.getServiceBean(BlockService.class).getBlockHeader(block.getHeader().getPreHash());
+        } catch (NulsException e) {
+            //todo
+            e.printStackTrace();
+        }
         return ValidateResult.getSuccessResult();
     }
 }

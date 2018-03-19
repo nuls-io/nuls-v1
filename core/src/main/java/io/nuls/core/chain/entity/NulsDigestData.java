@@ -63,6 +63,11 @@ public class NulsDigestData extends BaseNulsData {
         }
     }
 
+    public NulsDigestData(short alg_type,byte[] bytes){
+        this.digestBytes = bytes;
+        this.digestAlgType = alg_type;
+    }
+
     public short getDigestAlgType() {
         return digestAlgType;
     }
@@ -73,7 +78,7 @@ public class NulsDigestData extends BaseNulsData {
 
     @Override
     public int size() {
-        return Utils.sizeOfSerialize(digestBytes) + 2;
+        return Utils.sizeOfBytes(digestBytes) + 2;
     }
 
     @Override

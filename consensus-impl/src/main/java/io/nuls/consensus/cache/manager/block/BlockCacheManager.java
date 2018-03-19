@@ -24,19 +24,22 @@
 package io.nuls.consensus.cache.manager.block;
 
 import io.nuls.cache.util.CacheMap;
+import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
+import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.consensus.constant.ConsensusCacheConstant;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.GetBlockHeaderParam;
 import io.nuls.consensus.entity.block.BifurcateProcessor;
-import io.nuls.consensus.entity.block.BlockHeaderChain;
-import io.nuls.consensus.entity.block.HeaderDigest;
 import io.nuls.consensus.event.GetBlockHeaderEvent;
 import io.nuls.consensus.utils.DownloadDataUtils;
-import io.nuls.core.chain.entity.*;
-import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.chain.entity.Block;
+import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.core.chain.entity.SmallBlock;
+import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
@@ -60,6 +63,8 @@ public class BlockCacheManager {
 
     private DownloadDataUtils downloadDataUtils = DownloadDataUtils.getInstance();
     private BifurcateProcessor bifurcateProcessor = BifurcateProcessor.getInstance();
+    private ConfirmingTxCacheManager confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
+    private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
 
     private long storedHeight;
     private long recievedMaxHeight;
@@ -130,31 +135,40 @@ public class BlockCacheManager {
     }
 
     public BlockHeader getBlockHeader(String hash) {
+        if (headerCacheMap == null) {
+            return null;
+        }
         return headerCacheMap.get(hash);
     }
 
     public void cacheBlock(Block block) {
-        blockCacheMap.put(block.getHeader().getHash().getDigestHex(), block);
+
         boolean b = this.bifurcateProcessor.addHeader(block.getHeader());
         if (b) {
             NulsContext.getInstance().setBestBlock(block);
         }
         //txs approval
-        BlockHeader header = this.getBlockHeader(block.getHeader().getHeight());
-        if (null == header) {
-            List<String> blockHashList = bifurcateProcessor.getHashList(block.getHeader().getHeight());
+        List<String> blockHashList = bifurcateProcessor.getHashList(block.getHeader().getHeight());
+        if (blockHashList.size() > 1) {
             rollbackBlocksTxs(blockHashList);
             return;
         }
-        for (Transaction tx : block.getTxs()) {
-            if (tx.getStatus() == TxStatusEnum.CACHED) {
+        for (int i = 0; i < block.getHeader().getTxCount(); i++) {
+            Transaction tx = block.getTxs().get(i);
+            tx.setBlockHeight(block.getHeader().getHeight());
+            tx.setIndex(i);
+            tx.setIndex(i);
+            if (tx.getStatus() == null || tx.getStatus() == TxStatusEnum.CACHED) {
                 try {
                     this.ledgerService.approvalTx(tx);
+                    confirmingTxCacheManager.putTx(tx);
                 } catch (NulsException e) {
                     Log.error(e);
                 }
             }
         }
+        txCacheManager.removeTx(block.getTxHashList());
+        blockCacheMap.put(block.getHeader().getHash().getDigestHex(), block);
         Block block1 = this.getBlock(block.getHeader().getHeight());
         if (null != block1 && block1.getHeader().getHeight() > NulsContext.getInstance().getBestBlock().getHeader().getHeight()) {
             NulsContext.getInstance().setBestBlock(block1);
@@ -173,7 +187,16 @@ public class BlockCacheManager {
 
     private void rollbackTxs(List<Transaction> txs) {
         for (Transaction tx : txs) {
-            if (tx.getStatus() == TxStatusEnum.AGREED && !tx.isLocalTx()) {
+            boolean isMine;
+//            try {
+//                isMine = ledgerService.checkTxIsMine(tx);
+//            } catch (NulsException e) {
+//                Log.error(e);
+//                throw new NulsRuntimeException(e);
+//            }
+            if (tx.getStatus() == TxStatusEnum.AGREED
+//                    && !isMine
+                    ) {
                 try {
                     ledgerService.rollbackTx(tx);
                 } catch (NulsException e) {
@@ -184,6 +207,9 @@ public class BlockCacheManager {
     }
 
     public Block getBlock(String hash) {
+        if (null == blockCacheMap) {
+            return null;
+        }
         return blockCacheMap.get(hash);
     }
 
@@ -212,8 +238,8 @@ public class BlockCacheManager {
         if (null == header) {
             return;
         }
-        this.bifurcateProcessor.removeHeight(header.getHeight());
         String hash = header.getHash().getDigestHex();
+        this.bifurcateProcessor.removeHash(hash);
         this.blockCacheMap.remove(hash);
         this.smallBlockCacheMap.remove(hash);
         this.headerCacheMap.remove(hash);
@@ -293,5 +319,9 @@ public class BlockCacheManager {
         GetBlockHeaderEvent event = new GetBlockHeaderEvent();
         event.setEventBody(new GetBlockHeaderParam(nextHeight));
         eventBroadcaster.sendToNode(event, nodeId);
+    }
+
+    public void removeBlock(String hash) {
+        //todo
     }
 }

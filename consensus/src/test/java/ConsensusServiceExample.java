@@ -1,4 +1,5 @@
 import io.nuls.consensus.service.intf.ConsensusService;
+import io.nuls.core.exception.NulsException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,7 +10,7 @@ import java.util.Map;
  */
 public class ConsensusServiceExample {
 
-    public void joinConsensus(){
+    public void joinConsensus() throws NulsException {
         ConsensusService service = null;
         Map<String,Object> paramsMap = new HashMap<>();
         paramsMap.put("deposit",2000);
@@ -17,7 +18,7 @@ public class ConsensusServiceExample {
         service.startConsensus("address",null,paramsMap);
     }
 
-    public void createDelegate(){
+    public void createDelegate() throws NulsException {
         ConsensusService service = null;
         Map<String,Object> paramsMap = new HashMap<>();
         paramsMap.put("deposit",20000);//保证金

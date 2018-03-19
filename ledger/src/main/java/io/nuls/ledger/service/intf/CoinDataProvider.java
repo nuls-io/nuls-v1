@@ -39,11 +39,13 @@ public interface CoinDataProvider {
 
     CoinTransferData getTransferData(CoinData coinData);
 
-    void approve(CoinData coinData, Transaction tx);
+    void approve(CoinData coinData, Transaction tx) throws NulsException;
 
-    void save(CoinData coinData, Transaction tx);
+    void save(CoinData coinData, Transaction tx) throws NulsException;
 
     void rollback(CoinData coinData, Transaction tx);
 
     CoinData createByTransferData(Transaction tx, CoinTransferData coinParam, String password) throws NulsException;
+
+     void afterParse(CoinData coinData, Transaction tx);
 }

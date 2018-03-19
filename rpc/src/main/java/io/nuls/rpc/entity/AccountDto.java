@@ -16,6 +16,10 @@ public class AccountDto {
 
     private Long createTime;
 
+    public AccountDto() {
+
+    }
+
     public AccountDto(Account account) {
         this.address = account.getAddress().getBase58();
         this.alias = account.getAlias();

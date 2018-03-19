@@ -27,14 +27,21 @@ import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.str.StringUtils;
+import io.nuls.db.dao.UtxoOutputDataService;
+import io.nuls.db.entity.UtxoOutputPo;
+import io.nuls.ledger.service.impl.LedgerCacheService;
+import io.nuls.ledger.util.UtxoTransferTool;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author win10
@@ -50,14 +57,13 @@ public class UtxoInput extends BaseNulsData {
 
     private int fromIndex;
 
-    private byte[] scriptSig;
+    //private byte[] scriptSig;
 
     private UtxoOutput from;
 
-    private Transaction parent;
-
     // key = fromHash + "-" + fromIndex, a key that will not be serialized, only used for caching
     private String key;
+
 
     public UtxoInput() {
 
@@ -74,41 +80,45 @@ public class UtxoInput extends BaseNulsData {
         this.from = output;
     }
 
-    public UtxoInput(NulsDigestData txHash, UtxoOutput from, Transaction parent) {
-        this(txHash, from);
-        this.parent = parent;
-    }
-
     @Override
     public int size() {
         int size = 0;
-        size += Utils.sizeOfSerialize(txHash);
         size += VarInt.sizeOf(index);
+        size += Utils.sizeOfNulsData(fromHash);
         size += VarInt.sizeOf(fromIndex);
-        size += Utils.sizeOfSerialize(scriptSig);
+        //size += Utils.sizeOfBytes(scriptSig);
         return size;
     }
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(txHash);
         stream.writeVarInt(index);
+        stream.writeNulsData(fromHash);
         stream.writeVarInt(fromIndex);
-        stream.writeBytesWithLength(scriptSig);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        txHash = byteBuffer.readHash();
         index = (int) byteBuffer.readVarInt();
+        fromHash = byteBuffer.readNulsData(new NulsDigestData());
         fromIndex = (int) byteBuffer.readVarInt();
-        scriptSig = byteBuffer.readByLengthByte();
+
+        LedgerCacheService ledgerCacheService = LedgerCacheService.getInstance();
+        UtxoOutput output = ledgerCacheService.getUtxo(this.getKey());
+        if (output == null) {
+            UtxoOutputDataService utxoOutputDataService = NulsContext.getServiceBean(UtxoOutputDataService.class);
+            Map<String, Object> map = new HashMap<>();
+            map.put("txHash", this.fromHash.getDigestHex());
+            map.put("outIndex", this.fromIndex);
+            UtxoOutputPo outputPo = utxoOutputDataService.get(map);
+            if (outputPo != null) {
+                output = UtxoTransferTool.toOutput(outputPo);
+            }
+        }
+        from = output;
     }
 
     public NulsDigestData getTxHash() {
-        if (txHash == null && parent != null) {
-            this.txHash = parent.getHash();
-        }
         return txHash;
     }
 
@@ -116,28 +126,15 @@ public class UtxoInput extends BaseNulsData {
         this.txHash = txHash;
     }
 
-    public byte[] getScriptSig() {
-        return scriptSig;
-    }
-
-    public void setScriptSig(byte[] scriptSig) {
-        this.scriptSig = scriptSig;
-    }
-
     public UtxoOutput getFrom() {
+        if (from == null && fromHash != null) {
+            from = LedgerCacheService.getInstance().getUtxo(this.getKey());
+        }
         return from;
     }
 
     public void setFrom(UtxoOutput from) {
         this.from = from;
-    }
-
-    public Transaction getParent() {
-        return parent;
-    }
-
-    public void setParent(Transaction parent) {
-        this.parent = parent;
     }
 
     public int getIndex() {

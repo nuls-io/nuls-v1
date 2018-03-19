@@ -24,6 +24,7 @@
 package io.nuls.consensus.entity.tx;
 
 import io.nuls.consensus.entity.Consensus;
+import io.nuls.consensus.entity.ConsensusDelegateImpl;
 import io.nuls.consensus.entity.member.Delegate;
 import io.nuls.consensus.entity.validator.consensus.DelegateCountValidator;
 import io.nuls.consensus.entity.validator.consensus.DelegateDepositValidator;
@@ -58,9 +59,7 @@ public class PocJoinConsensusTransaction extends LockNulsTransaction<Consensus<D
 
     @Override
     public Consensus<Delegate> parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
-        Consensus<Delegate> consensus = byteBuffer.readNulsData(new Consensus<>());
-        Delegate delegate = byteBuffer.readNulsData(new Delegate());
-        consensus.setExtend(delegate);
+        Consensus<Delegate> consensus = byteBuffer.readNulsData(new ConsensusDelegateImpl());
         return consensus;
     }
 }

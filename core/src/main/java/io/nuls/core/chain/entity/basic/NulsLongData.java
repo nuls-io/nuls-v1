@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,77 +21,44 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.ledger.script;
 
-import io.nuls.core.chain.entity.NulsSignData;
+package io.nuls.core.chain.entity.basic;
+
+import io.nuls.core.chain.entity.BasicTypeData;
 import io.nuls.core.exception.NulsException;
-
+import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
 import java.io.IOException;
 
 /**
- * author Facjas
- * date 2018/3/8.
+ * @author Niels
+ * @date 2018/3/12
  */
-public class P2PKHScriptSig extends Script {
+public class NulsLongData extends BasicTypeData<Long> {
+    public NulsLongData() {
+        this(null);
+    }
 
-    private NulsSignData signData;
-    private byte[] publicKey;
-
-    public P2PKHScriptSig(){
-
+    public NulsLongData(Long val) {
+        super(val);
     }
 
     @Override
     public int size() {
-        return signData.size()+publicKey.length;
-    }
-
-    public P2PKHScriptSig(byte[] signBytes, byte[] publicKey){
-        this.signData = new NulsSignData(signBytes);
-        this.publicKey = publicKey;
-    }
-
-    public NulsSignData getSignData() {
-        return signData;
-    }
-
-    public void setSignData(NulsSignData signData) {
-        this.signData = signData;
-    }
-
-    public byte[] getPublicKey() {
-        return publicKey;
-    }
-
-    public void setPublicKey(byte[] publicKey) {
-        this.publicKey = publicKey;
-    }
-
-    public P2PKHScriptSig(NulsSignData signData, byte[] publicKey){
-        this.signData = signData;
-        this.publicKey = publicKey;
+        return Utils.sizeOfLong(getVal());
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        signData.serializeToStream(stream);
-        stream.writeBytesWithLength(publicKey);
+        stream.writeVarInt(getVal());
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer)throws NulsException {
-        signData = byteBuffer.readNulsData(new NulsSignData());
-        publicKey = byteBuffer.readByLengthByte();
-    }
-
-    @Override
-    public byte[] getBytes() {
-
-        //todo
-        return new byte[0];
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.setVal(byteBuffer.readVarInt());
     }
 }

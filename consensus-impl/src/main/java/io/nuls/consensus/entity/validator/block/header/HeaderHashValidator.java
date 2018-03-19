@@ -26,6 +26,8 @@ package io.nuls.consensus.entity.validator.block.header;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.NulsSignData;
+import io.nuls.core.script.P2PKHScriptSig;
+import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
@@ -48,16 +50,16 @@ public class HeaderHashValidator implements NulsDataValidator<BlockHeader> {
     public ValidateResult validate(BlockHeader data) {
         ValidateResult result = ValidateResult.getSuccessResult();
         NulsDigestData hash = data.getHash();
-        NulsSignData signData = data.getSign();
-        data.setSign(null);
+        P2PKHScriptSig scriptSig = data.getScriptSig();
         NulsDigestData cfmHash = null;
         try {
-            cfmHash = NulsDigestData.calcDigestData(data.serialize());
-
-        } catch (IOException e) {
+            BlockHeader newHeader = new BlockHeader();
+            newHeader.parse(data.serialize());
+            cfmHash = newHeader.getHash();
+        } catch (Exception e) {
             Log.error(e);
         }finally {
-            data.setSign(signData);
+            data.setScriptSig(scriptSig);
         }
         if (!cfmHash.getDigestHex().equals(hash.getDigestHex())) {
             result = ValidateResult.getFailedResult(ERROR_MESSAGE);

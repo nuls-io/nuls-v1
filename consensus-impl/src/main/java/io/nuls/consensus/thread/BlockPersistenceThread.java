@@ -77,19 +77,21 @@ public class BlockPersistenceThread implements Runnable {
     private void doPersistence() throws IOException {
         long height = blockCacheManager.getStoredHeight() + 1;
         if (height == 1) {
-            height = blockService.getLocalSavedHeight()+1;
+            height = blockService.getLocalSavedHeight() + 1;
         }
-        if((height+ PocConsensusConstant.CONFIRM_BLOCK_COUNT)>=blockCacheManager.getBestHeight()){
+        if ((height + PocConsensusConstant.CONFIRM_BLOCK_COUNT) >= blockCacheManager.getBestHeight()) {
             return;
         }
         Block block = blockCacheManager.getBlock(height);
         if (null == block) {
             return;
         }
-        blockService.saveBlock(block);
-        blockCacheManager.removeBlock(block.getHeader());
-        blockCacheManager.setStoredHeight(height);
-        txCacheManager.removeTxList(block.getTxHashList());
+        boolean isSuccess = blockService.saveBlock(block);
+        if (isSuccess) {
+            blockCacheManager.removeBlock(block.getHeader());
+            blockCacheManager.setStoredHeight(height);
+            txCacheManager.removeTxList(block.getTxHashList());
+        }
     }
 
 }

@@ -28,6 +28,8 @@ import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.dto.Page;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
@@ -35,7 +37,6 @@ import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.rpc.entity.OutputDto;
-import io.nuls.rpc.entity.PageDto;
 import io.nuls.rpc.entity.RpcResult;
 import io.nuls.rpc.entity.TransactionDto;
 
@@ -70,8 +71,12 @@ public class TransactionResource {
                 result = RpcResult.getSuccess();
                 result.setData(new TransactionDto(tx));
             }
+        } catch (NulsRuntimeException re) {
+            Log.error(re);
+            result = new RpcResult(false, re.getCode(), re.getMessage());
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
+            result = RpcResult.getFailed(ErrorCode.SYS_UNKOWN_EXCEPTION);
         }
 
         return result;
@@ -83,44 +88,89 @@ public class TransactionResource {
 
     public RpcResult list(@QueryParam("address") String address, @QueryParam("type") int type,
                           @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
-        if (!StringUtils.isBlank(address) && !StringUtils.validAddress(address)) {
+        if (type < 0 || pageNumber < 0 || pageSize < 0 || pageSize > 100) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
-        if (pageNumber <= 0 || pageSize <= 0 || pageSize > 100) {
-            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        if (pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if (pageSize == 0) {
+            pageSize = 10;
         }
 
-        RpcResult result;
         try {
-            PageDto pageDto = new PageDto();
-            pageDto.setPageNumber(pageNumber);
-            pageDto.setPageSize(pageSize);
+            RpcResult result = RpcResult.getSuccess();
 
-            long count = ledgerService.getTxCount(address, type);
-            pageDto.setTotal(count);
-
-            List<Transaction> txList = ledgerService.getTxList(address, type, pageNumber, pageSize);
-            if (txList == null || txList.isEmpty()) {
-                return RpcResult.getSuccess().setData(pageDto);
+            Page<Transaction> pages = new Page<>();
+            if (StringUtils.isBlank(address)) {
+                pages = ledgerService.getTxList(-1, type, pageNumber, pageSize);
+            } else if (StringUtils.validAddress(address)) {
+                pages.setPageNumber(pageNumber);
+                pages.setPageSize(pageSize);
+                long count = ledgerService.getTxCount(address, type);
+                pages.setTotal(count);
+                if (count == 0) {
+                    return RpcResult.getSuccess().setData(pages);
+                }
+                List<Transaction> txList = ledgerService.getTxList(address, type, pageNumber, pageSize);
+                pages.setList(txList);
+                List<TransactionDto> dtoList = new ArrayList<>();
+                for (Transaction tx : txList) {
+                    dtoList.add(new TransactionDto(tx, address));
+                }
             }
-
+            Page<TransactionDto> pageDto = new Page<>(pages);
             List<TransactionDto> dtoList = new ArrayList<>();
-            for (Transaction tx : txList) {
-                dtoList.add(new TransactionDto(tx, address));
+            for (Transaction tx : pages.getList()) {
+                dtoList.add(new TransactionDto(tx));
             }
             pageDto.setList(dtoList);
-
-            result = RpcResult.getSuccess();
-            result.setData(dtoList);
+            result.setData(pageDto);
+            return result;
         } catch (Exception e) {
             Log.error(e);
             return RpcResult.getFailed(e.getMessage());
         }
+
+    }
+
+    @GET
+    @Path("/block/list")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult list(@QueryParam("height") long height,
+                          @QueryParam("pageNumber") int pageNumber,
+                          @QueryParam("pageSize") int pageSize) {
+        if (height < 0 || pageNumber < 0 || pageSize < 0) {
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+        if (pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if (pageSize == 0) {
+            pageSize = 20000;
+        }
+
+        Page<TransactionDto> dtoPage = null;
+        try {
+            Page<Transaction> txPage = ledgerService.getTxList(height, 0, pageNumber, pageSize);
+            List<TransactionDto> dtoList = new ArrayList<>();
+            dtoPage = new Page<>(txPage);
+            for (Transaction tx : txPage.getList()) {
+                dtoList.add(new TransactionDto(tx));
+            }
+            dtoPage.setList(dtoList);
+        } catch (Exception e) {
+            Log.error(e);
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+
+        RpcResult result = RpcResult.getSuccess();
+        result.setData(dtoPage);
         return result;
     }
 
     @GET
-    @Path("/locked")
+    @Path("/utxo/locked")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult list(@QueryParam("address") String address, @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
         if (address != null && !StringUtils.validAddress(address)) {

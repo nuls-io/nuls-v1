@@ -52,7 +52,7 @@ public class NulsRuntimeException extends RuntimeException {
 
     /**
      * Constructs a new exception with the specified detail message and
-     * cause.  <p>Note that the detail message associated with
+     * cause.  Note that the detail message associated with
      * {@code cause} is <i>not</i> automatically incorporated in
      * this exception's detail message.
      *
@@ -114,14 +114,22 @@ public class NulsRuntimeException extends RuntimeException {
     public NulsRuntimeException(ErrorCode errorCode, String msg) {
         super(msg);
         this.code = errorCode.getCode();
-        this.message = errorCode.getMsg()+":"+msg;
+        this.message = errorCode.getMsg() + ":" + msg;
     }
 
     @Override
     public String getMessage() {
-        if(StringUtils.isBlank(message)){
+        if (StringUtils.isBlank(message)) {
             return super.getMessage();
         }
         return message;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 }

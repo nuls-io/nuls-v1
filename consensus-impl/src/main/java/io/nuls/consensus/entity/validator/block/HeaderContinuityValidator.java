@@ -24,10 +24,14 @@
 package io.nuls.consensus.entity.validator.block;
 
 import io.nuls.consensus.constant.PocConsensusConstant;
+import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
+import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 
@@ -35,41 +39,54 @@ import io.nuls.core.validate.ValidateResult;
  * @author Niels
  * @date 2017/11/17
  */
-public class BlockContinuityValidator implements NulsDataValidator<Block> {
+public class HeaderContinuityValidator implements NulsDataValidator<BlockHeader> {
     private static final String ERROR_MESSAGE = "block continuity check failed";
-    public static final BlockContinuityValidator INSTANCE = new BlockContinuityValidator();
+    public static final HeaderContinuityValidator INSTANCE = new HeaderContinuityValidator();
 
-    private BlockContinuityValidator() {
+    private HeaderContinuityValidator() {
     }
 
-    public static BlockContinuityValidator getInstance() {
+    public static HeaderContinuityValidator getInstance() {
         return INSTANCE;
     }
 
     @Override
-    public ValidateResult validate(Block block) {
+    public ValidateResult validate(BlockHeader header) {
         ValidateResult result = ValidateResult.getSuccessResult();
         boolean failed = false;
         do {
-            if (block.getHeader().getHeight() == 0) {
-                failed = !block.getHeader().getPreHash().equals(NulsDigestData.EMPTY_HASH);
+            if (header.getHeight() == 0) {
+                failed = !header.getPreHash().equals(NulsDigestData.EMPTY_HASH);
                 break;
             }
-            Block preBlock = NulsContext.getServiceBean(BlockService.class).getBlock(block.getHeader().getHeight()-1);
-            if(null==preBlock){
+            BlockHeader preHeader = null;
+            try {
+                preHeader = NulsContext.getServiceBean(BlockService.class).getBlockHeader(header.getHeight() - 1);
+            } catch (NulsException e) {
+                //todo
+                e.printStackTrace();
+            }
+            if (null == preHeader) {
                 break;
             }
-            failed = !preBlock.getHeader().getHash().equals(block.getHeader().getPreHash());
-            if(failed){
+            failed = !preHeader.getHash().equals(header.getPreHash());
+            if (failed) {
                 break;
             }
+            BlockRoundData roundData = new BlockRoundData();
+            try {
+                roundData.parse(header.getExtend());
+            } catch (NulsException e) {
+                Log.error(e);
+            }
+            long shouldTime = roundData.getRoundStartTime() + roundData.getPackingIndexOfRound() * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND*1000;
             //todo 3 seconds error
-            failed = (block.getHeader().getTime()- preBlock.getHeader().getTime())<=PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND *1000-3000;
-            if(failed){
+            long difference = header.getTime() - shouldTime;
+            failed = difference > 3000 || difference < -3000;
+            if (failed) {
                 break;
             }
         } while (false);
-
         if (failed) {
             result = ValidateResult.getFailedResult(ERROR_MESSAGE);
         }

@@ -23,9 +23,17 @@
  */
 package io.nuls.ledger.validator;
 
+import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.script.P2PKHScript;
+import io.nuls.core.script.P2PKHScriptSig;
+import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
+
+import java.util.Arrays;
 
 /**
  * @author Niels
@@ -42,8 +50,27 @@ public class TxSignValidator implements NulsDataValidator<Transaction> {
     }
 
     @Override
-    public ValidateResult validate(Transaction data) {
-        //todo verify sign
-        return ValidateResult.getSuccessResult();
+    public ValidateResult validate(Transaction tx) {
+        byte [] scriptSig = tx.getScriptSig();
+        tx.setScriptSig(null);
+        NulsDigestData nulsDigestData;
+        try {
+             nulsDigestData = NulsDigestData.calcDigestData(tx.serialize());
+        }catch (Exception e){
+            return ValidateResult.getFailedResult(ErrorCode.DATA_ERROR);
+        }finally {
+            tx.setScriptSig(scriptSig);
+        }
+        if(!Arrays.equals(nulsDigestData.getDigestBytes(),tx.getHash().getDigestBytes())){
+            return ValidateResult.getFailedResult(ErrorCode.DATA_ERROR );
+        }
+
+        P2PKHScriptSig p2PKHScriptSig = null;
+        try {
+            p2PKHScriptSig = new NulsByteBuffer(scriptSig).readNulsData(new P2PKHScriptSig());
+        } catch (NulsException e) {
+            return ValidateResult.getFailedResult(ErrorCode.SIGNATURE_ERROR );
+        }
+        return p2PKHScriptSig.verifySign(tx.getHash());
     }
 }

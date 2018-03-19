@@ -23,11 +23,11 @@
  */
 package io.nuls.consensus.manager;
 
-import io.nuls.account.entity.Account;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.cache.manager.block.BlockCacheManager;
 import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
+import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.constant.PocConsensusConstant;
@@ -39,11 +39,8 @@ import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.thread.BlockMaintenanceThread;
 import io.nuls.consensus.thread.BlockPersistenceThread;
 import io.nuls.consensus.thread.ConsensusMeetingRunner;
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.thread.BaseThread;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
@@ -63,6 +60,7 @@ public class ConsensusManager implements Runnable {
     private ConsensusCacheManager consensusCacheManager;
     private ConfirmingTxCacheManager confirmingTxCacheManager;
     private ReceivedTxCacheManager receivedTxCacheManager;
+    private OrphanTxCacheManager orphanTxCacheManager;
     private AccountService accountService;
     private boolean partakePacking = false;
     private List<String> seedNodeList;
@@ -99,12 +97,8 @@ public class ConsensusManager implements Runnable {
     public void init() {
         loadConfigration();
         accountService = NulsContext.getServiceBean(AccountService.class);
-        List<Account> list = this.accountService.getAccountList();
-        boolean noneAccount = list == null || list.isEmpty();
-        if (this.partakePacking && noneAccount) {
-            Account account = this.accountService.createAccount(PocConsensusConstant.DEFAULT_WALLET_PASSWORD);
-            this.accountService.setDefaultAccount(account.getAddress().getBase58());
-            NulsContext.LOCAL_ADDRESS_LIST.add(account.getAddress().getBase58());
+        if (this.partakePacking) {
+            //todo
         }
         blockCacheManager = BlockCacheManager.getInstance();
         blockCacheManager.init();
@@ -114,6 +108,8 @@ public class ConsensusManager implements Runnable {
         confirmingTxCacheManager.init();
         receivedTxCacheManager = ReceivedTxCacheManager.getInstance();
         receivedTxCacheManager.init();
+        orphanTxCacheManager = OrphanTxCacheManager.getInstance();
+        orphanTxCacheManager.init();
         TaskManager.createAndRunThread(NulsConstant.MODULE_ID_CONSENSUS, "consensus-status-manager", this);
     }
 
@@ -127,27 +123,27 @@ public class ConsensusManager implements Runnable {
         ConsensusStatusInfo info = new ConsensusStatusInfo();
         for (String address : NulsContext.LOCAL_ADDRESS_LIST) {
             if (this.seedNodeList.contains(address)) {
-                info.setAddress(address);
+                info.setAccount(accountService.getAccount(address));
                 info.setStatus(ConsensusStatusEnum.IN.getCode());
                 break;
             }
             for (Consensus<Agent> agent : agentList) {
-                if (agent.getExtend().getDelegateAddress().equals(address)) {
-                    info.setAddress(address);
+                if (agent.getExtend().getAgentAddress().equals(address)) {
+                    info.setAccount(accountService.getAccount(address));
                     info.setStatus(agent.getExtend().getStatus());
-                    if (ConsensusStatusEnum.IN.getCode() == info.getStatus()) {
+                    if (ConsensusStatusEnum.NOT_IN.getCode() != info.getStatus()) {
                         break;
                     }
                 }
             }
         }
-        if (info.getAddress() == null) {
+        if (info.getAccount() == null) {
             info.setStatus(ConsensusStatusEnum.NOT_IN.getCode());
         }
         this.consensusStatusInfo = info;
     }
 
-    public void joinMeeting() {
+    public void joinConsensusMeeting() {
         TaskManager.createAndRunThread(NulsConstant.MODULE_ID_CONSENSUS,
                 ConsensusMeetingRunner.THREAD_NAME,
                 ConsensusMeetingRunner.getInstance());
@@ -187,7 +183,6 @@ public class ConsensusManager implements Runnable {
 
     public void setCurrentRound(PocMeetingRound currentRound) {
         this.currentRound = currentRound;
-
     }
 
     public PocMeetingRound getCurrentRound() {
@@ -195,11 +190,9 @@ public class ConsensusManager implements Runnable {
     }
 
     public boolean isPartakePacking() {
-        return partakePacking;
-    }
-
-    public void exitMeeting() {
-        TaskManager.stopThread(NulsConstant.MODULE_ID_CONSENSUS, BlockMaintenanceThread.THREAD_NAME);
+        boolean imIn = this.getConsensusStatusInfo() != null && this.getConsensusStatusInfo().getAccount() != null;
+        imIn = imIn && partakePacking && this.getConsensusStatusInfo().getStatus() == ConsensusStatusEnum.IN.getCode();
+        return imIn;
     }
 
     public List<String> getSeedNodeList() {

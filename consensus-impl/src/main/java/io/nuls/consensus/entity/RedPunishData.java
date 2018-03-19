@@ -49,9 +49,9 @@ public class RedPunishData extends BaseNulsData {
     public int size() {
         int size = 0;
         size += VarInt.sizeOf(height);
-        size += Utils.sizeOfSerialize(address);
+        size += Utils.sizeOfString(address);
         size += 2;
-        size += Utils.sizeOfSerialize(evidence);
+        size += Utils.sizeOfBytes(evidence);
         return size;
     }
 

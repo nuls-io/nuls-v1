@@ -30,16 +30,24 @@ import io.nuls.core.chain.entity.Na;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.db.entity.UtxoOutputPo;
+import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.rpc.entity.RpcResult;
+import io.nuls.rpc.resources.dto.ConsensusAddressDTO;
+import io.nuls.rpc.resources.form.CreateAgentForm;
+import io.nuls.rpc.resources.form.withdrawForm;
+import io.nuls.rpc.resources.form.DepositForm;
+import io.nuls.rpc.resources.form.StopAgentForm;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +59,7 @@ import java.util.Map;
 @Path("/consensus")
 public class PocConsensusResource {
     private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
+    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     private UtxoOutputDataService outputDataService = NulsContext.getServiceBean(UtxoOutputDataService.class);
     private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
 
@@ -60,31 +69,70 @@ public class PocConsensusResource {
         AssertUtil.canNotEmpty(address, ErrorCode.NULL_PARAMETER);
         RpcResult result = RpcResult.getSuccess();
         ConsensusStatusInfo status = consensusService.getConsensusInfo(address);
-        result.setData(status);
+        ConsensusAddressDTO dto = new ConsensusAddressDTO();
+        //todo
+        result.setData(dto);
         return result;
     }
 
 
-    @GET
-    @Path("/condition")
+    @POST
+    @Path("/createAgent")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult getCondition() {
+    public RpcResult createAgent(CreateAgentForm form) throws NulsException {
+        AssertUtil.canNotEmpty(form);
+        AssertUtil.canNotEmpty(form.getAddress());
+        AssertUtil.canNotEmpty(form.getAgentName());
+        AssertUtil.canNotEmpty(form.getPackingAddress());
+        AssertUtil.canNotEmpty(form.getDeposit());
+        AssertUtil.canNotEmpty(form.getRemark());
+        AssertUtil.canNotEmpty(form.getPassword());
+        Map<String, Object> paramsMap = new HashMap<>();
+        paramsMap.put("deposit", form.getDeposit());
+        paramsMap.put("agentAddress", form.getPackingAddress());
+        paramsMap.put("introduction", form.getRemark());
+        paramsMap.put("commissionRate", form.getCommissionRate());
+        paramsMap.put("agentName", form.getAgentName());
+        consensusService.startConsensus(form.getAddress(), form.getPassword(), paramsMap);
         return RpcResult.getSuccess();
     }
 
-
     @POST
-    @Path("/in")
+    @Path("/deposit")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult in(@FormParam("address") String address, @FormParam("password") String password) {
+    public RpcResult in(DepositForm form) throws NulsException {
+        AssertUtil.canNotEmpty(form);
+        AssertUtil.canNotEmpty(form.getAddress());
+        AssertUtil.canNotEmpty(form.getAgentAddress());
+        AssertUtil.canNotEmpty(form.getDeposit());
+        AssertUtil.canNotEmpty(form.getPassword());
+        Map<String, Object> paramsMap = new HashMap<>();
+        paramsMap.put("deposit", form.getDeposit());
+        paramsMap.put("agentAddress", form.getAgentAddress());
+        consensusService.startConsensus(form.getAddress(), form.getPassword(), paramsMap);
         return RpcResult.getSuccess();
     }
 
+    @POST
+    @Path("/stopAgent")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult stopAgent(StopAgentForm form) throws NulsException, IOException {
+        AssertUtil.canNotEmpty(form);
+        AssertUtil.canNotEmpty(form.getAddress());
+        AssertUtil.canNotEmpty(form.getPassword());
+        consensusService.stopConsensus(form.getAddress(), form.getPassword(),null);
+        return RpcResult.getSuccess();
+    }
 
     @POST
-    @Path("/out")
+    @Path("/withdraw")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult out(@FormParam("address") String address, @FormParam("password") String password) {
+    public RpcResult out(withdrawForm form) throws NulsException, IOException {
+        AssertUtil.canNotEmpty(form);
+        AssertUtil.canNotEmpty(form.getTxHash());
+        Map<String,Object> params  = new HashMap<>();
+        params.put("txHash",form.getTxHash());
+        consensusService.stopConsensus(null,form.getPassword(),params);
         return RpcResult.getSuccess();
     }
 

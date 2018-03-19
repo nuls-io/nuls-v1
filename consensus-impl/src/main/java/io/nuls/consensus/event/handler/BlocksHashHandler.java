@@ -36,6 +36,12 @@ public class BlocksHashHandler extends AbstractEventHandler<BlocksHashEvent> {
 
     @Override
     public void onEvent(BlocksHashEvent event, String fromId) {
-        DistributedBlockInfoRequestUtils.getInstance().addBlockHashResponse(fromId, event.getEventBody());
+        try {
+            DistributedBlockInfoRequestUtils.getInstance().addBlockHashResponse(fromId, event.getEventBody());
+        }catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+
     }
 }

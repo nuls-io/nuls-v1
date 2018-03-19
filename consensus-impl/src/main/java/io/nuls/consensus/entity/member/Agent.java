@@ -25,7 +25,6 @@ package io.nuls.consensus.entity.member;
 
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.Na;
-import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -41,11 +40,14 @@ public class Agent extends BaseNulsData {
 
     private Na deposit;
 
-    public String delegateAddress;
+    public String agentAddress;
 
     private double commissionRate;
 
     private String introduction;
+
+    private String agentName;
+
     /**
      * the following fields is for The account self(delegate Account)
      */
@@ -55,36 +57,39 @@ public class Agent extends BaseNulsData {
     private long roundIndex;
     private long roundStartTime;
     private long roundEndTime;
+    //todo  Is it necessary
     private boolean seed;
 
     @Override
     public int size() {
         int size = 0;
-        size++;
-        size += VarInt.sizeOf(deposit.getValue());
-        size += Utils.sizeOfSerialize(this.delegateAddress);
-        size += Utils.double2Bytes(commissionRate).length;
-        size += Utils.sizeOfSerialize(this.introduction);
-        size += Utils.sizeOfSerialize(seed);
+        size += Utils.sizeOfLong(deposit.getValue());
+        size += Utils.sizeOfString(this.agentAddress);
+        size += Utils.sizeOfDouble(this.commissionRate);
+        size += Utils.sizeOfString(this.introduction);
+        size += Utils.sizeOfBoolean(seed);
+        size += Utils.sizeOfString(agentName);
         return size;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeVarInt(deposit.getValue());
-        stream.writeString(delegateAddress);
+        stream.writeString(agentAddress);
         stream.writeDouble(this.commissionRate);
         stream.writeString(this.introduction);
         stream.writeBoolean(seed);
+        stream.writeString(agentName);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.deposit = Na.valueOf(byteBuffer.readVarInt());
-        this.delegateAddress = byteBuffer.readString();
+        this.agentAddress = byteBuffer.readString();
         this.commissionRate = byteBuffer.readDouble();
         this.introduction = byteBuffer.readString();
         this.seed = byteBuffer.readBoolean();
+        this.agentName = byteBuffer.readString();
     }
 
     public Na getDeposit() {
@@ -95,12 +100,12 @@ public class Agent extends BaseNulsData {
         this.deposit = deposit;
     }
 
-    public String getDelegateAddress() {
-        return delegateAddress;
+    public String getAgentAddress() {
+        return agentAddress;
     }
 
-    public void setDelegateAddress(String delegateAddress) {
-        this.delegateAddress = delegateAddress;
+    public void setAgentAddress(String agentAddress) {
+        this.agentAddress = agentAddress;
     }
 
     public int getStatus() {
@@ -173,5 +178,13 @@ public class Agent extends BaseNulsData {
 
     public Boolean getSeed() {
         return seed;
+    }
+
+    public String getAgentName() {
+        return agentName;
+    }
+
+    public void setAgentName(String agentName) {
+        this.agentName = agentName;
     }
 }

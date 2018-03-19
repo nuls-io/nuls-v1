@@ -23,7 +23,7 @@ public class OutputDto {
 
     public OutputDto(UtxoOutput output) {
         this.index = output.getIndex();
-        this.address = Address.fromHashs(output.getAddress()).getBase58();
+        this.address =output.getAddress();
         this.value = output.getValue();
         this.createTime = output.getCreateTime();
         this.lockTime = output.getLockTime();

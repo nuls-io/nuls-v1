@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,66 +21,43 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.ledger.script;
 
-import io.nuls.core.chain.entity.NulsDigestData;
+package io.nuls.core.chain.entity.basic;
+
+import io.nuls.core.chain.entity.BasicTypeData;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.date.TimeService;
+import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
 import java.io.IOException;
 
 /**
- * author Facjas
- * date 2018/3/8.
+ * @author Niels
+ * @date 2018/3/12
  */
-public class P2PKHScript extends Script {
-
-    private NulsDigestData publicKeyDigest;
-
-    public NulsDigestData getPublicKeyDigest() {
-        return publicKeyDigest;
+public class NulsIntegerData extends BasicTypeData<Integer> {
+    public NulsIntegerData() {
+        this(null);
     }
 
-    public void setPublicKeyDigest(NulsDigestData publicKeyDigest) {
-        this.publicKeyDigest = publicKeyDigest;
+    public NulsIntegerData(Integer val) {
+        super(val);
     }
-
-    public P2PKHScript(byte[] bytes)throws NulsException{
-        NulsDigestData nulsDigestData = new NulsDigestData();
-        nulsDigestData.parse(bytes);
-        this.publicKeyDigest = nulsDigestData;
-    }
-
-    public P2PKHScript(NulsDigestData publicKeyDigest){
-        this.publicKeyDigest = publicKeyDigest;
-    }
-
     @Override
     public int size() {
-        return publicKeyDigest.size();
+        return Utils.sizeOfInt(getVal());
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(publicKeyDigest);
+        stream.writeVarInt(getVal());
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        publicKeyDigest = byteBuffer.readNulsData(new NulsDigestData());
+        this.setVal((int) byteBuffer.readVarInt());
     }
-
-    @Override
-    public byte[] getBytes(){
-        try {
-            return publicKeyDigest.serialize();
-        } catch (IOException e) {
-            return  null;
-        }
-    }
-
-    //todo  not finished
 }

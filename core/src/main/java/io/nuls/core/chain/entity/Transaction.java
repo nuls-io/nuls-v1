@@ -23,8 +23,8 @@
  */
 package io.nuls.core.chain.entity;
 
-import io.nuls.core.chain.intf.NulsCloneable;
 import io.nuls.core.chain.manager.TransactionValidatorManager;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
@@ -42,7 +42,7 @@ import java.util.List;
  * @author Niels
  * @date 2017/10/30
  */
-public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData implements NulsCloneable {
+public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData {
 
     protected NulsDigestData hash;
 
@@ -58,18 +58,18 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
 
     protected byte[] remark;
 
-    protected NulsSignData sign;
+    private byte[] scriptSig;
 
     protected T txData;
 
-    protected TxStatusEnum status;
-
-    protected boolean localTx;
+    protected TxStatusEnum status = TxStatusEnum.CACHED;
 
     public static final int TRANSFER_RECEIVE = 1;
     public static final int TRANSFER_SEND = 0;
     // when localTx is true, should care transferType
     protected int transferType;
+
+    protected int size;
 
     public Transaction(int type) {
         this.dataType = NulsDataType.TRANSACTION;
@@ -92,10 +92,11 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
         int size = 0;
         size += VarInt.sizeOf(type);
         size += VarInt.sizeOf(time);
-        size += VarInt.sizeOf(fee.getValue());
-        size += Utils.sizeOfSerialize(remark);
-        size += Utils.sizeOfSerialize(txData);
-        size += Utils.sizeOfSerialize(sign);
+        size += NulsConstant.INT48_VALUE_LENGTH1;
+        size += Utils.sizeOfBytes(remark);
+        size += Utils.sizeOfNulsData(txData);
+        //size += Utils.sizeOfNulsData(sign);
+        size += Utils.sizeOfBytes(scriptSig);
         return size;
     }
 
@@ -103,17 +104,18 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeVarInt(type);
         stream.writeVarInt(time);
-        stream.writeVarInt(fee.getValue());
+        stream.writeInt48(fee.getValue());
         stream.writeBytesWithLength(remark);
         stream.writeNulsData(txData);
-        stream.writeNulsData(sign);
+        stream.writeBytesWithLength(scriptSig);
+        //stream.writeNulsData(sign);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         type = (int) byteBuffer.readVarInt();
         time = byteBuffer.readVarInt();
-        long feeValue = byteBuffer.readVarInt();
+        long feeValue = byteBuffer.readInt48();
         this.fee = Na.valueOf(feeValue);
         this.remark = byteBuffer.readByLengthByte();
         txData = this.parseTxData(byteBuffer);
@@ -122,18 +124,8 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
         } catch (IOException e) {
             Log.error(e);
         }
-        sign = byteBuffer.readSign();
-    }
-
-
-    @Override
-    public Object copy() {
-        try {
-            return this.clone();
-        } catch (Exception e) {
-            Log.error(e);
-            return null;
-        }
+        scriptSig = byteBuffer.readByLengthByte();
+        //sign = byteBuffer.readSign();
     }
 
     public long getTime() {
@@ -168,12 +160,19 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
         this.hash = hash;
     }
 
-    public NulsSignData getSign() {
-        return sign;
+    //    public NulsSignData getSign() {
+//        return sign;
+//    }
+//
+//    public void setSign(NulsSignData sign) {
+//        this.sign = sign;
+//    }
+    public byte[] getScriptSig() {
+        return scriptSig;
     }
 
-    public void setSign(NulsSignData sign) {
-        this.sign = sign;
+    public void setScriptSig(byte[] scriptSig) {
+        this.scriptSig = scriptSig;
     }
 
     public T getTxData() {
@@ -216,19 +215,22 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
         this.status = status;
     }
 
-    public boolean isLocalTx() {
-        return localTx;
-    }
-
-    public void setLocalTx(boolean localTx) {
-        this.localTx = localTx;
-    }
-
     public int getTransferType() {
         return transferType;
     }
 
     public void setTransferType(int transferType) {
         this.transferType = transferType;
+    }
+
+    public int getSize() {
+        if (size == 0) {
+            size = size();
+        }
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
     }
 }

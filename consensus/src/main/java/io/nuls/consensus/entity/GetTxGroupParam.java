@@ -25,7 +25,6 @@ package io.nuls.consensus.entity;
 
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
@@ -55,8 +54,8 @@ public class GetTxGroupParam extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += NulsConstant.TIME_VALUE_LENGTH;
-        size += Utils.sizeOfSerialize(blockHash);
+        size += Utils.sizeOfInt48();
+        size += Utils.sizeOfNulsData(blockHash);
         size += VarInt.sizeOf(txHashList.size());
         size += this.getTxHashBytesLength();
         return size;
@@ -64,7 +63,7 @@ public class GetTxGroupParam extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeTime(time);
+        stream.writeInt48(time);
         stream.writeNulsData(blockHash);
         stream.writeVarInt(txHashList.size());
         for (NulsDigestData data : txHashList) {
@@ -74,7 +73,7 @@ public class GetTxGroupParam extends BaseNulsData {
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.time = byteBuffer.readTime();
+        this.time = byteBuffer.readInt48();
         this.blockHash = byteBuffer.readHash();
         long txCount = byteBuffer.readVarInt();
         this.txHashList = new ArrayList<>();
@@ -86,7 +85,7 @@ public class GetTxGroupParam extends BaseNulsData {
     private int getTxHashBytesLength() {
         int size = 0;
         for (NulsDigestData hash : txHashList) {
-            size += Utils.sizeOfSerialize(hash);
+            size += Utils.sizeOfNulsData(hash);
         }
         return size;
     }

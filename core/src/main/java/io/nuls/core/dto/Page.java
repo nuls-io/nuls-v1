@@ -1,8 +1,9 @@
-package io.nuls.rpc.entity;
+package io.nuls.core.dto;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class PageDto<T> {
+public class Page<T> {
 
     private int pageNumber;
 
@@ -13,6 +14,18 @@ public class PageDto<T> {
     private int pages;
 
     private List<T> list;
+
+    public Page() {
+        this.list = new ArrayList<>();
+    }
+
+    public Page(Page page) {
+        this.pageNumber = page.getPageNumber();
+        this.pageSize = page.getPageSize();
+        this.total = page.getTotal();
+        this.pages = page.getPages();
+        this.list = new ArrayList<>();
+    }
 
     public int getPageNumber() {
         return pageNumber;

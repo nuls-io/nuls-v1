@@ -32,6 +32,7 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.*;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Hex;
+import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
@@ -115,7 +116,11 @@ public class Account extends BaseNulsData implements NulsCloneable {
         }
     }
 
-    public boolean unlock(String password) {
+    public byte[] getHash160(){
+        return this.getAddress().getHash160();
+    }
+
+    public boolean unlock(String password) throws NulsException {
         decrypt(password);
         if(isLocked()){
             return false;
@@ -135,7 +140,14 @@ public class Account extends BaseNulsData implements NulsCloneable {
      * @param password
      */
     public void encrypt(String password) throws NulsException{
-        if(this.isEncrypted()){
+        encrypt( password, false);
+    }
+
+    /**
+     * @param password
+     */
+    public void encrypt(String password,boolean isForce) throws NulsException{
+        if(this.isEncrypted() && !isForce){
             if(!unlock(password)) {
                 throw new NulsException(ErrorCode.ACCOUNT_IS_ALREADY_ENCRYPTED);
             }
@@ -151,17 +163,22 @@ public class Account extends BaseNulsData implements NulsCloneable {
 
     }
 
-    public boolean decrypt(String password) {
-        byte[] unencryptedPrivateKey = AESEncrypt.decrypt(this.getEncryptedPriKey(),password);
-        BigInteger newPriv = new BigInteger(1, unencryptedPrivateKey);
-        ECKey key = ECKey.fromPrivate(newPriv);
+    public boolean decrypt(String password) throws NulsException{
+        try {
+            byte[] unencryptedPrivateKey = AESEncrypt.decrypt(this.getEncryptedPriKey(),password);
+            BigInteger newPriv = new BigInteger(1, unencryptedPrivateKey);
+            ECKey key = ECKey.fromPrivate(newPriv);
 
-        if (!Arrays.equals(key.getPubKey(), getPubKey())) {
-            return false;
+        //todo  pub key compress?
+            if (!Arrays.equals(key.getPubKey(), getPubKey())) {
+                return false;
+            }
+            key.setEncryptedPrivateKey(new EncryptedData(this.getEncryptedPriKey()));
+            this.setPriKey(key.getPrivKeyBytes());
+            this.setEcKey(key);
+        }catch (Exception e){
+            throw new NulsException(ErrorCode.PASSWORD_IS_WRONG);
         }
-        key.setEncryptedPrivateKey(new EncryptedData(this.getEncryptedPriKey()));
-        this.setPriKey(key.getPrivKeyBytes());
-        this.setEcKey(key);
         return true;
     }
 
@@ -299,27 +316,31 @@ public class Account extends BaseNulsData implements NulsCloneable {
     }
 
 
-    public static void main(String[] args)throws NulsException{
-        System.out.println("***  create a new account  ***************************");
-        Account testAccount = AccountTool.createAccount();
-        showAccount(testAccount);
-
-        System.out.println("***  encrypt the account   ***************************");
-        testAccount.encrypt("nuls123456");
-        showAccount(testAccount);
-
-        System.out.println("***  decrypt the account   ***************************");
-        testAccount.decrypt("nuls123456");
-        showAccount(testAccount);
-
-        testAccount.lock();
-        System.out.println("***  lock the account   ***************************");
-        showAccount(testAccount);
-
-        testAccount.unlock("nuls123456");
-        System.out.println("***  unlock the account   ***************************");
-        showAccount(testAccount);
-    }
+//    public static void main(String[] args)throws NulsException{
+//        System.out.println("***  create a new account  ***************************");
+//        Account testAccount = AccountTool.createAccount();
+//        showAccount(testAccount);
+//
+//        System.out.println("***  encrypt the account   ***************************");
+//        testAccount.encrypt("nuls123456");
+//        showAccount(testAccount);
+//
+//        System.out.println("***  decrypt the account   ***************************");
+//        testAccount.decrypt("nuls123456");
+//        showAccount(testAccount);
+//
+//        testAccount.lock();
+//        System.out.println("***  lock the account   ***************************");
+//        showAccount(testAccount);
+//
+//        testAccount.unlock("nuls123456");
+//        System.out.println("***  unlock the account   ***************************");
+//        showAccount(testAccount);
+//
+//        String hash160Hex = Hex.encode(testAccount.getHash160());
+//        System.out.println("hash160: "+hash160Hex);
+//        System.out.println("hash160_1: "+ Hex.encode(Utils.sha256hash160(testAccount.getPubKey())));
+//    }
 
     public static void  showAccount(Account account){
         System.out.println("---- account info ----");

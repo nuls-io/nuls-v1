@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,23 +21,23 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.ledger.script;
 
-import io.nuls.core.chain.entity.BaseNulsData;
+package io.nuls.consensus.entity;
 
-
+import io.nuls.consensus.entity.member.Agent;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.io.NulsByteBuffer;
 
 /**
- * author Facjas
- * date 2018/3/8.
+ * @author Niels
+ * @date 2018/3/12
  */
-public abstract class Script extends BaseNulsData {
+public class ConsensusAgentImpl extends Consensus<Agent> {
 
-    protected long creationTimeSeconds;
-
-    public static final long MAX_SCRIPT_ELEMENT_SIZE = 520;  // bytes
-    public static final int SIG_SIZE = 75;
-
-    abstract public byte[] getBytes();
+    @Override
+    protected Agent parseExtend(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new Agent());
+    }
 }

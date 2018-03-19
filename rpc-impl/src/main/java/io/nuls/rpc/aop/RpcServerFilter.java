@@ -65,7 +65,7 @@ public class RpcServerFilter implements ContainerRequestFilter, ContainerRespons
 
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
-        Log.info("url:{},IP:{},useTime:{}, params:{},result:{}", requestContext.getUriInfo().getRequestUri().getPath() + "?" + requestContext.getUriInfo().getRequestUri().getQuery(), grizzlyRequestProvider.get().getRemoteHost()
+        Log.info("url:{},IP:{},useTime:{}, params:{},result:{}", requestContext.getUriInfo().getRequestUri().getPath() + "?" + requestContext.getUriInfo().getRequestUri().getQuery(), grizzlyRequestProvider.get().getRemoteAddr()
                 , (System.currentTimeMillis() - Long.parseLong(requestContext.getProperty("start").toString())), null, responseContext.getEntity());
     }
 
@@ -97,6 +97,7 @@ public class RpcServerFilter implements ContainerRequestFilter, ContainerRespons
 //        Log.debug(request.getRemoteHost());
 //        Log.debug(request.getRemotePort());
 //        Log.debug(request.getRemoteUser());
-        return false;
+        //todo 临时处理
+        return true;
     }
 }

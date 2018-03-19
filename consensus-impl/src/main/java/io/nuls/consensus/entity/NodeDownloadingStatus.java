@@ -62,14 +62,6 @@ public class NodeDownloadingStatus {
         this.end = end;
     }
 
-    public Set<Long> getDownloadedSet() {
-        return downloadedSet;
-    }
-
-    public void setDownloadedSet(Set<Long> downloadedSet) {
-        this.downloadedSet = downloadedSet;
-    }
-
     public long getUpdateTime() {
         return updateTime;
     }
@@ -88,5 +80,9 @@ public class NodeDownloadingStatus {
 
     public boolean finished() {
         return downloadedSet.size()==(end-start+1);
+    }
+
+    public Set<Long> getDownloadedSet() {
+        return downloadedSet;
     }
 }
