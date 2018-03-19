@@ -425,7 +425,8 @@ public class ConsensusMeetingRunner implements Runnable {
 
     private List<ConsensusReward> calcReward(List<Transaction> txList, PocMeetingMember self) {
         List<ConsensusReward> rewardList = new ArrayList<>();
-        if (this.consensusManager.getCurrentRound().getTotalDeposit().getValue() == 0) {
+        Consensus<Agent> ca = self.getAgentConsensus();
+        if (ca.getExtend().getSeed()) {
             long totalFee = 0;
             for (Transaction tx : txList) {
                 totalFee += tx.getFee().getValue();
@@ -434,7 +435,6 @@ public class ConsensusMeetingRunner implements Runnable {
                 return rewardList;
             }
             double caReward = totalFee;
-            Consensus<Agent> ca = self.getAgentConsensus();
             ConsensusReward agentReword = new ConsensusReward();
             agentReword.setAddress(ca.getAddress());
             agentReword.setReward(Na.valueOf((long) caReward));
@@ -445,7 +445,6 @@ public class ConsensusMeetingRunner implements Runnable {
         for (Transaction tx : txList) {
             totalFee += tx.getFee().getValue();
         }
-        Consensus<Agent> ca = self.getAgentConsensus();
         Na agentTotalDeposit = self.getTotolEntrustDeposit().add(ca.getExtend().getDeposit());
         double total = totalFee + PocConsensusConstant.ANNUAL_INFLATION.getValue() *
                 (PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * this.consensusManager.getCurrentRound().getMemberCount()) / PocConsensusConstant.BLOCK_COUNT_OF_YEAR
