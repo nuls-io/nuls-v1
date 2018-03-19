@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -425,7 +425,8 @@ public class ConsensusMeetingRunner implements Runnable {
 
     private List<ConsensusReward> calcReward(List<Transaction> txList, PocMeetingMember self) {
         List<ConsensusReward> rewardList = new ArrayList<>();
-        if (this.consensusManager.getCurrentRound().getTotalDeposit().getValue() == 0) {
+        Consensus<Agent> ca = self.getAgentConsensus();
+        if (ca.getExtend().getSeed()) {
             long totalFee = 0;
             for (Transaction tx : txList) {
                 totalFee += tx.getFee().getValue();
@@ -434,7 +435,6 @@ public class ConsensusMeetingRunner implements Runnable {
                 return rewardList;
             }
             double caReward = totalFee;
-            Consensus<Agent> ca = self.getAgentConsensus();
             ConsensusReward agentReword = new ConsensusReward();
             agentReword.setAddress(ca.getAddress());
             agentReword.setReward(Na.valueOf((long) caReward));
@@ -445,7 +445,6 @@ public class ConsensusMeetingRunner implements Runnable {
         for (Transaction tx : txList) {
             totalFee += tx.getFee().getValue();
         }
-        Consensus<Agent> ca = self.getAgentConsensus();
         Na agentTotalDeposit = self.getTotolEntrustDeposit().add(ca.getExtend().getDeposit());
         double total = totalFee + PocConsensusConstant.ANNUAL_INFLATION.getValue() *
                 (PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * this.consensusManager.getCurrentRound().getMemberCount()) / PocConsensusConstant.BLOCK_COUNT_OF_YEAR
