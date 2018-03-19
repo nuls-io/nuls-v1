@@ -35,18 +35,19 @@ import io.nuls.notify.handler.WebSocketHandler;
 import org.java_websocket.WebSocket;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author daviyang35
  * @date 2018/2/25
  */
 public class NotificationController implements WebSocketDelegate, NulsEventDelegate {
-    private final List<WebSocket> connectionsList = new ArrayList<>();
-    private NulsEventHandler nulsEventHandler = new NulsEventHandler();
-    private WebSocketHandler webSocketHandler;
+
     private Map<String, RequestHandler> dispatcherMap = new HashMap<>();
-    private SubscriptionContext subscriptionContext = new SubscriptionContext();
+    private WebSocketHandler webSocketHandler;
+    private NulsEventHandler nulsEventHandler = new NulsEventHandler();
+    private Map<WebSocket, Subscriber> subscriberMap = new HashMap<>();
     private short listenPort;
 
     public NotificationController() {
@@ -58,7 +59,6 @@ public class NotificationController implements WebSocketDelegate, NulsEventDeleg
     private void addRequestHandler(RequestHandler handler) {
         String method = handler.method().toLowerCase();
         if (!dispatcherMap.containsKey(method)) {
-            handler.setContext(subscriptionContext);
             dispatcherMap.put(method, handler);
         } else {
             Log.error("Duplicate request method handler. {} {}", method, handler.getClass().getName());
@@ -87,18 +87,19 @@ public class NotificationController implements WebSocketDelegate, NulsEventDeleg
 
     @Override
     public void onConnected(WebSocket sock) {
-        synchronized (connectionsList) {
-            connectionsList.add(sock);
+        synchronized (subscriberMap) {
+            Subscriber subscriber = new Subscriber();
+            subscriber.setSocket(sock);
+            sock.setAttachment(subscriber);
+            subscriberMap.put(sock, subscriber);
         }
     }
 
     @Override
     public void onDisconnected(WebSocket sock) {
-        synchronized (connectionsList) {
-            connectionsList.remove(sock);
-
-            // remove all subscriber
-            subscriptionContext.removeSubscriber(sock);
+        sock.setAttachment(null);
+        synchronized (subscriberMap) {
+            subscriberMap.remove(sock);
         }
     }
 
@@ -143,9 +144,15 @@ public class NotificationController implements WebSocketDelegate, NulsEventDeleg
 
     @Override
     public void onEventFire(short moduleID, String eventName, String payload) {
-        Set<WebSocket> subscribedSource = subscriptionContext.findSubscribedSource((int) moduleID, eventName);
-        for (WebSocket sock : subscribedSource) {
-            sock.send(payload);
+        synchronized (subscriberMap) {
+            for (Subscriber subscriber : subscriberMap.values()) {
+                if (subscriber.isSubscribed(moduleID, eventName)) {
+                    WebSocket sock = subscriber.getSocket();
+                    if (sock != null) {
+                        sock.send(payload);
+                    }
+                }
+            }
         }
     }
 
@@ -166,7 +173,8 @@ public class NotificationController implements WebSocketDelegate, NulsEventDeleg
 
         if (dispatcherMap.containsKey(method)) {
             RequestHandler handler = dispatcherMap.get(method);
-            handler.handleRequest(sock, data, response);
+            Integer status = handler.handleRequest(sock, data, response);
+            response.put("status", status);
         } else {
             response.put("status", 404);
         }
