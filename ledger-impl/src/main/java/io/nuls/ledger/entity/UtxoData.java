@@ -47,9 +47,6 @@ import java.util.List;
  */
 public class UtxoData extends CoinData {
     public UtxoData() {
-        CoinTransactionValidatorManager.addTxDefValidator(UtxoTxInputsValidator.getInstance());
-        CoinTransactionValidatorManager.addTxDefValidator(UtxoTxOutputsValidator.getInstance());
-        CoinTransactionValidatorManager.addTxDefValidator( AmountValidator.getInstance());
     }
 
     private List<UtxoInput> inputs = new ArrayList<>();
