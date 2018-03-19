@@ -46,8 +46,10 @@ import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.entity.tx.TransferTransaction;
 import io.nuls.ledger.event.notice.BalanceChangeData;
 import io.nuls.ledger.event.notice.BalanceChangeNotice;
-import io.nuls.ledger.script.TransferScript;
 import io.nuls.ledger.service.impl.LedgerCacheService;
+
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Niels
@@ -55,6 +57,8 @@ import io.nuls.ledger.service.impl.LedgerCacheService;
 public class UtxoTransactionTool {
 
     private static UtxoTransactionTool instance = new UtxoTransactionTool();
+
+    private Lock lock = new ReentrantLock();
 
     private UtxoTransactionTool() {
 
@@ -135,90 +139,94 @@ public class UtxoTransactionTool {
         return false;
     }
 
-    public void calcBalance(String address) {
-        UtxoBalance balance = (UtxoBalance) ledgerCacheService.getBalance(address);
-        if (balance == null) {
-            return;
-        }
 
-        long usable = 0;
-        long lock = 0;
-        long currentTime = TimeService.currentTimeMillis();
-        if (NulsContext.getInstance().getGenesisBlock() == null) {
-            try {
-                Thread.sleep(100L);
-            } catch (InterruptedException e) {
-            }
-            calcBalance(address);
-            return;
-        }
-        long genesisTime = NulsContext.getInstance().getGenesisBlock().getHeader().getTime();
-        long bestHeight = NulsContext.getInstance().getNetBestBlockHeight();
-
-        for (UtxoOutput output : balance.getUnSpends()) {
-            if (UtxoOutput.UTXO_CONFIRM_UNLOCK == output.getStatus() ||
-                    UtxoOutput.UTXO_UNCONFIRM_UNLOCK == output.getStatus()) {
-                if (output.getLockTime() > 0) {
-                    if (output.getLockTime() > genesisTime) {
-                        if (output.getLockTime() > currentTime) {
-                            lock += output.getValue();
-                        } else {
-                            usable += output.getValue();
-                        }
-                    } else {
-                        if (output.getLockTime() > bestHeight) {
-                            lock += output.getValue();
-                        } else {
-                            usable += output.getValue();
-                        }
-                    }
-                } else {
-                    usable += output.getValue();
-                }
-            } else if (UtxoOutput.UTXO_CONFIRM_LOCK == output.getStatus() ||
-                    UtxoOutput.UTXO_UNCONFIRM_LOCK == output.getStatus()) {
-                lock += output.getValue();
-            }
-        }
-
-        Na oldNa = balance.getBalance();
-        if (null == oldNa) {
-            oldNa = Na.ZERO;
-        }
-        long oldBalance = oldNa.getValue();
-        long change = lock + usable - oldBalance;
-        balance.setLocked(Na.valueOf(lock));
-        balance.setUsable(Na.valueOf(usable));
-        balance.setBalance(balance.getUsable().add(balance.getLocked()));
-        if (NulsContext.LOCAL_ADDRESS_LIST != null && NulsContext.LOCAL_ADDRESS_LIST.contains(address)) {
-            if (change == 0) {
+    public void calcBalanceByUtxo(String address) {
+        lock.lock();
+        try {
+            UtxoBalance balance = (UtxoBalance) ledgerCacheService.getBalance(address);
+            if (balance == null) {
                 return;
             }
-            BalanceChangeNotice notice = new BalanceChangeNotice();
-            BalanceChangeData data = new BalanceChangeData();
-            data.setAddress(address);
-            data.setStatus(1);
-            if (change < 0) {
-                data.setType(1);
-                data.setAmount(Na.valueOf(0 - change));
-            } else {
-                data.setType(0);
-                data.setAmount(Na.valueOf(change));
-            }
-            notice.setEventBody(data);
-            if (eventBroadcaster == null) {
-                eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
-            }
-            eventBroadcaster.publishToLocal(notice);
-        }
 
-        if (balance.getUnSpends().isEmpty()) {
-            ledgerCacheService.removeBalance(address);
-        }
-    }
+            long usable = 0;
+            long lock = 0;
+            long currentTime = TimeService.currentTimeMillis();
+            if (NulsContext.getInstance().getGenesisBlock() == null) {
+                try {
+                    Thread.sleep(100L);
+                } catch (InterruptedException e) {
+                }
+                calcBalanceByUtxo(address);
+                return;
+            }
+            long genesisTime = NulsContext.getInstance().getGenesisBlock().getHeader().getTime();
+            long bestHeight = NulsContext.getInstance().getNetBestBlockHeight();
 
-    public void calcBalance(Address address) {
-        calcBalance(address.getBase58());
+            for (UtxoOutput output : balance.getUnSpends()) {
+                if (UtxoOutput.UTXO_CONFIRM_UNLOCK == output.getStatus() ||
+                        UtxoOutput.UTXO_UNCONFIRM_UNLOCK == output.getStatus()) {
+                    if (output.getLockTime() > 0) {
+                        if (output.getLockTime() > genesisTime) {
+                            if (output.getLockTime() > currentTime) {
+                                lock += output.getValue();
+                            } else {
+                                usable += output.getValue();
+                            }
+                        } else {
+                            if (output.getLockTime() > bestHeight) {
+                                lock += output.getValue();
+                            } else {
+                                usable += output.getValue();
+                            }
+                        }
+                    } else {
+                        usable += output.getValue();
+                    }
+                } else if (UtxoOutput.UTXO_CONFIRM_LOCK == output.getStatus() ||
+                        UtxoOutput.UTXO_UNCONFIRM_LOCK == output.getStatus()) {
+                    lock += output.getValue();
+                }
+            }
+
+            Na oldNa = balance.getBalance();
+            if (null == oldNa) {
+                oldNa = Na.ZERO;
+            }
+            long oldBalance = oldNa.getValue();
+            long change = lock + usable - oldBalance;
+            balance.setLocked(Na.valueOf(lock));
+            balance.setUsable(Na.valueOf(usable));
+            balance.setBalance(balance.getUsable().add(balance.getLocked()));
+
+
+            if (NulsContext.LOCAL_ADDRESS_LIST != null && NulsContext.LOCAL_ADDRESS_LIST.contains(address)) {
+                if (change == 0) {
+                    return;
+                }
+                BalanceChangeNotice notice = new BalanceChangeNotice();
+                BalanceChangeData data = new BalanceChangeData();
+                data.setAddress(address);
+                data.setStatus(1);
+                if (change < 0) {
+                    data.setType(1);
+                    data.setAmount(Na.valueOf(0 - change));
+                } else {
+                    data.setType(0);
+                    data.setAmount(Na.valueOf(change));
+                }
+                notice.setEventBody(data);
+                if (eventBroadcaster == null) {
+                    eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
+                }
+                eventBroadcaster.publishToLocal(notice);
+            }
+
+            if (balance.getUnSpends().isEmpty()) {
+                ledgerCacheService.removeBalance(address);
+            }
+        } finally {
+            lock.unlock();
+        }
     }
 
     private AccountService getAccountService() {
@@ -227,11 +235,4 @@ public class UtxoTransactionTool {
         }
         return accountService;
     }
-
-    public TransferScript createTTransferScript(UtxoInput input, UtxoOutput output) {
-        TransferScript transferScript = new TransferScript();
-
-        return transferScript;
-    }
-
 }

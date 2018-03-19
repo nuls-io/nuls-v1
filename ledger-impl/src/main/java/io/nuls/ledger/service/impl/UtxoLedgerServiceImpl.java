@@ -293,8 +293,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             unSpends.add(output);
         }
         ledgerCacheService.putBalance(address, balance);
-        UtxoTransactionTool.getInstance().calcBalance(address);
-
+        UtxoTransactionTool.getInstance().calcBalanceByUtxo(address);
         return balance;
     }
 
