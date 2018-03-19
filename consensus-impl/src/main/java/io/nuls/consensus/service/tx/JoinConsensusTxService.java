@@ -31,11 +31,14 @@ import io.nuls.consensus.entity.member.Delegate;
 import io.nuls.consensus.entity.tx.PocJoinConsensusTransaction;
 import io.nuls.consensus.event.notice.EntrustConsensusNotice;
 import io.nuls.consensus.utils.ConsensusTool;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.tx.serivce.TransactionService;
 import io.nuls.db.dao.DelegateAccountDataService;
 import io.nuls.db.dao.DelegateDataService;
+import io.nuls.db.entity.DelegateAccountPo;
 import io.nuls.db.entity.DelegatePo;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.service.intf.LedgerService;
@@ -51,6 +54,7 @@ import java.util.Map;
 public class JoinConsensusTxService implements TransactionService<PocJoinConsensusTransaction> {
     private ConsensusCacheManager manager = ConsensusCacheManager.getInstance();
     private DelegateDataService delegateDataService = NulsContext.getServiceBean(DelegateDataService.class);
+    private DelegateAccountDataService accountDataService = NulsContext.getServiceBean(DelegateAccountDataService.class);
 
     @Override
     public void onRollback(PocJoinConsensusTransaction tx) throws NulsException {
@@ -74,9 +78,13 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
         }
         if (sum >= PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT.getValue()) {
             manager.changeDelegateStatus(tx.getTxData().getExtend().getHash(), ConsensusStatusEnum.IN);
+            DelegateAccountPo daPo = this.accountDataService.get(cd.getExtend().getDelegateAddress());
+            if (null == daPo) {
+                throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "the agent cannot find,agent address:" + cd.getExtend().getDelegateAddress());
+            }
+            daPo.setStatus(ConsensusStatusEnum.IN.getCode());
+            this.accountDataService.updateSelective(daPo);
         }
-
-
         EntrustConsensusNotice notice = new EntrustConsensusNotice();
         notice.setEventBody(tx);
         NulsContext.getServiceBean(EventBroadcaster.class).publishToLocal(notice);

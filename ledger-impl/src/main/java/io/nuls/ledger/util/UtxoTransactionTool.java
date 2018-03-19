@@ -265,12 +265,13 @@ public class UtxoTransactionTool {
             balance = ledgerCacheService.getBalance(address);
 
             if (balance != null) {
-                if(type == APPROVE) {
+                if (type == APPROVE) {
                     balance.setUsable(balance.getUsable().add(value));
-                }else if(type == ROLLBACK) {
+                } else if (type == ROLLBACK) {
                     balance.setUsable(balance.getUsable().add(value));
                 }
             }
+            balance.setBalance(balance.getLocked().add(balance.getUsable()));
         }
     }
 

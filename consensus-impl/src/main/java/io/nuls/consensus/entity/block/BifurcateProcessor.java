@@ -130,7 +130,8 @@ public class BifurcateProcessor {
 
     public List<String> getHashList(long height) {
         Set<String> set = new HashSet<>();
-        for (BlockHeaderChain chain : this.chainList) {
+        List<BlockHeaderChain> chainList1 = new ArrayList<>(this.chainList);
+        for (BlockHeaderChain chain : chainList1) {
             HeaderDigest headerDigest = chain.getHeaderDigest(height);
             if (null != headerDigest) {
                 set.add(headerDigest.getHash());

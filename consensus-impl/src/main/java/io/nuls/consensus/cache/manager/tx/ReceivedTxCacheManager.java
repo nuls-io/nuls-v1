@@ -53,6 +53,9 @@ public class ReceivedTxCacheManager {
     }
 
     public boolean txExist(NulsDigestData hash) {
+        if (txCache == null||hash==null) {
+            return false;
+        }
         return null != txCache.get(hash.getDigestHex());
     }
 

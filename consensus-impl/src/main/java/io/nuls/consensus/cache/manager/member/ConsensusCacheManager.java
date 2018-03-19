@@ -92,7 +92,7 @@ public class ConsensusCacheManager {
         for (DelegatePo dpo : delegatePoList) {
             Consensus<Delegate> cd = ConsensusTool.fromPojo(dpo);
             this.cacheDelegate(cd);
-            if (null != self && cd.getAddress().equals(self.getAddress().toString())) {
+            if (null != self && null == mine && cd.getAddress().equals(self.getAddress().toString())) {
                 mine = cd;
             }
         }

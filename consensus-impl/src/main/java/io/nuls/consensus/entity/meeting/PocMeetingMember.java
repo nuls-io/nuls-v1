@@ -158,7 +158,7 @@ public class PocMeetingMember implements Comparable<PocMeetingMember> {
             return;
         }
         for(Consensus<Delegate> dc:delegateList){
-            totolEntrustDeposit .add(dc.getExtend().getDeposit());
+            totolEntrustDeposit = totolEntrustDeposit .add(dc.getExtend().getDeposit());
         }
         this.totolEntrustDeposit = totolEntrustDeposit;
     }
