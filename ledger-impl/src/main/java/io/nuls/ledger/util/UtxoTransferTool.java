@@ -178,7 +178,7 @@ public class UtxoTransferTool {
             tx.setRemark(po.getRemark().getBytes(NulsContext.DEFAULT_ENCODING));
         }
         if (null != po.getTxData()) {
-            tx.parseTxData(new NulsByteBuffer(po.getTxData()));
+            tx.setTxData(tx.parseTxData(new NulsByteBuffer(po.getTxData())));
         }
         transferCoinData(tx, po.getInputs(), po.getOutputs());
         tx.setStatus(TxStatusEnum.CONFIRMED);
