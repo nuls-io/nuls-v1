@@ -215,6 +215,9 @@ public class BlockMaintenanceThread implements Runnable {
                 if (blockInfo.getBestHash().equals(localBestBlock.getHeader().getHash())) {
                     break;
                 }
+                if (blockInfo.getNodeIdList().size()==1) {
+                    break;
+                }
                 Log.warn("Rollback block start height:{},local has wrong blocks!",localBestBlock.getHeader().getHeight());
                 //bifurcation
                 rollbackBlock(localBestBlock.getHeader().getHeight());
