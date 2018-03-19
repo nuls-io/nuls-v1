@@ -191,7 +191,7 @@ public class BlockMaintenanceThread implements Runnable {
                     blockInfo.getBestHash().equals(localBestBlock.getHeader().getHash())) {
                 break;
             } else if (blockInfo.getBestHeight() <= localBestBlock.getHeader().getHeight()) {
-                if (blockInfo.getBestHeight() == 0) {
+                if (blockInfo.getBestHeight() == 0||blockInfo.getNodeIdList().size()==1) {
                     break;
                 }
                 //local height is highest
@@ -205,6 +205,7 @@ public class BlockMaintenanceThread implements Runnable {
                 if (null != header && header.getHash().equals(blockInfo.getBestHash())) {
                     break;
                 }
+                Log.warn("Rollback block start height:{},local is highest and wrong!",localBestBlock.getHeader().getHeight());
                 //bifurcation
                 rollbackBlock(localBestBlock.getHeader().getHeight());
                 localBestBlock = this.blockService.getLocalBestBlock();
@@ -214,6 +215,7 @@ public class BlockMaintenanceThread implements Runnable {
                 if (blockInfo.getBestHash().equals(localBestBlock.getHeader().getHash())) {
                     break;
                 }
+                Log.warn("Rollback block start height:{},local has wrong blocks!",localBestBlock.getHeader().getHeight());
                 //bifurcation
                 rollbackBlock(localBestBlock.getHeader().getHeight());
                 localBestBlock = this.blockService.getLocalBestBlock();
