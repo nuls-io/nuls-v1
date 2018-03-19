@@ -61,12 +61,9 @@ public class UtxoInput extends BaseNulsData {
 
     private UtxoOutput from;
 
-    private Transaction parent;
-
     // key = fromHash + "-" + fromIndex, a key that will not be serialized, only used for caching
     private String key;
 
-    private LedgerCacheService ledgerCacheService = LedgerCacheService.getInstance();
 
     public UtxoInput() {
 
@@ -81,11 +78,6 @@ public class UtxoInput extends BaseNulsData {
         this();
         this.txHash = txHash;
         this.from = output;
-    }
-
-    public UtxoInput(NulsDigestData txHash, UtxoOutput from, Transaction parent) {
-        this(txHash, from);
-        this.parent = parent;
     }
 
     @Override
@@ -129,9 +121,6 @@ public class UtxoInput extends BaseNulsData {
     }
 
     public NulsDigestData getTxHash() {
-        if (txHash == null && parent != null) {
-            this.txHash = parent.getHash();
-        }
         return txHash;
     }
 
@@ -149,21 +138,13 @@ public class UtxoInput extends BaseNulsData {
 
     public UtxoOutput getFrom() {
         if (from == null && fromHash != null) {
-            from = ledgerCacheService.getUtxo(this.getKey());
+            from = LedgerCacheService.getInstance().getUtxo(this.getKey());
         }
         return from;
     }
 
     public void setFrom(UtxoOutput from) {
         this.from = from;
-    }
-
-    public Transaction getParent() {
-        return parent;
-    }
-
-    public void setParent(Transaction parent) {
-        this.parent = parent;
     }
 
     public int getIndex() {

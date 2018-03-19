@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -31,7 +31,6 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.script.P2PKHScript;
-import io.nuls.core.script.Script;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
@@ -50,8 +49,6 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
 
     private long value;
 
-    private UtxoInput spentBy;
-
     private String address;
 
     private long lockTime;
@@ -63,8 +60,6 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
     /**
      * ------ redundancy ------
      */
-    private Transaction parent;
-
     private long createTime;
 
     private int txType;
@@ -114,29 +109,18 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
         lockTime = byteBuffer.readInt48();
         p2PKHScript = byteBuffer.readNulsData(new P2PKHScript());
 
-       Address addressObj = new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), this.getOwner());
+        Address addressObj = new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), this.getOwner());
 
         this.address = addressObj.toString();
     }
 
 
     public NulsDigestData getTxHash() {
-        if (txHash == null && parent != null) {
-            this.txHash = parent.getHash();
-        }
         return txHash;
     }
 
     public void setTxHash(NulsDigestData txHash) {
         this.txHash = txHash;
-    }
-
-    public UtxoInput getSpentBy() {
-        return spentBy;
-    }
-
-    public void setSpentBy(UtxoInput spentBy) {
-        this.spentBy = spentBy;
     }
 
     public long getValue() {
@@ -185,14 +169,6 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
 
     public void setStatus(int status) {
         this.status = status;
-    }
-
-    public Transaction getParent() {
-        return parent;
-    }
-
-    public void setParent(Transaction parent) {
-        this.parent = parent;
     }
 
     public String getKey() {
@@ -244,7 +220,7 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
         return 0;
     }
 
-    public byte[] getOwner(){
+    public byte[] getOwner() {
         return this.getP2PKHScript().getPublicKeyDigest().getDigestBytes();
     }
 }
