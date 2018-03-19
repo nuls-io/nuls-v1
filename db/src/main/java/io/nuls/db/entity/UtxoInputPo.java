@@ -37,8 +37,6 @@ public class UtxoInputPo {
 
     private Integer fromIndex;
 
-    private byte[] sign;
-
     private UtxoOutputPo fromOutPut;
 
     public String getTxHash() {
@@ -63,14 +61,6 @@ public class UtxoInputPo {
 
     public void setFromIndex(Integer fromIndex) {
         this.fromIndex = fromIndex;
-    }
-
-    public byte[] getSign() {
-        return sign;
-    }
-
-    public void setSign(byte[] sign) {
-        this.sign = sign;
     }
 
     public String getFromHash() {

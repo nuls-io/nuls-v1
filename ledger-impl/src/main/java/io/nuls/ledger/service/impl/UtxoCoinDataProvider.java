@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -26,16 +26,14 @@ package io.nuls.ledger.service.impl;
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
-import io.nuls.core.chain.entity.*;
+import io.nuls.core.chain.entity.Na;
+import io.nuls.core.chain.entity.NulsDigestData;
+import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.constant.TxStatusEnum;
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.crypto.ECKey;
-import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.utils.crypto.Utils;
+import io.nuls.core.script.P2PKHScript;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
@@ -46,17 +44,16 @@ import io.nuls.db.entity.TxAccountRelationPo;
 import io.nuls.db.entity.UtxoInputPo;
 import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.db.transactional.annotation.DbSession;
-import io.nuls.ledger.entity.*;
+import io.nuls.ledger.entity.CoinData;
+import io.nuls.ledger.entity.UtxoData;
+import io.nuls.ledger.entity.UtxoInput;
+import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
-import io.nuls.ledger.script.P2PKHScript;
-import io.nuls.ledger.script.P2PKHScriptSig;
 import io.nuls.ledger.service.intf.CoinDataProvider;
 import io.nuls.ledger.util.UtxoTransactionTool;
 import io.nuls.ledger.util.UtxoTransferTool;
 
-import java.io.IOException;
-import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -91,7 +88,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
     }
 
     @Override
-    public void approve(CoinData coinData, Transaction tx) {
+    public void approve(CoinData coinData, Transaction tx) throws NulsException {
         //Lock the transaction specified output in the cache when the newly received transaction is approved.
         UtxoData utxoData = (UtxoData) coinData;
         for (UtxoInput input : utxoData.getInputs()) {
@@ -132,6 +129,8 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 addressSet.add(Address.fromHashs(output.getAddress()).getBase58());
             }
 
+            //calc balance
+            UtxoTransactionTool.getInstance().calcBalance(utxoData, UtxoTransactionTool.APPROVE);
         } catch (Exception e) {
             //rollback
             for (UtxoOutput output : unSpends) {
@@ -147,11 +146,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 ledgerCacheService.removeUtxo(output.getKey());
             }
             throw e;
-        } finally {
-            //calc balance
-            for (String address : addressSet) {
-                UtxoTransactionTool.getInstance().calcBalance(address);
-            }
         }
     }
 
@@ -163,7 +157,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
      * 3. save new unSpend output (cache and database)
      * 4. finally, calc balance
      */
-    public void save(CoinData coinData, Transaction tx) {
+    public void save(CoinData coinData, Transaction tx) throws NulsException {
         UtxoData utxoData = (UtxoData) coinData;
 
         List<UtxoInputPo> inputPoList = new ArrayList<>();
@@ -180,7 +174,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 UtxoOutput output = utxoData.getOutputs().get(i);
 
                 output = ledgerCacheService.getUtxo(output.getKey());
-                if (output == null || UtxoOutput.UTXO_UNCONFIRM_UNLOCK != output.getStatus()) {
+                if (output == null || !output.isUsable()) {
                     throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "use a not legal utxo");
                 }
 
@@ -204,7 +198,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             relationDataService.save(txRelations);
 
             afterSaveDatabase(spends, utxoData, tx);
-
+            UtxoTransactionTool.getInstance().calcBalance(utxoData, UtxoTransactionTool.COMMIT);
         } catch (Exception e) {
             //rollback
             Log.warn(e.getMessage(), e);
@@ -215,10 +209,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 ledgerCacheService.updateUtxoStatus(spend.getKey(), UtxoOutput.UTXO_SPENT, UtxoOutput.UTXO_CONFIRM_LOCK);
             }
             throw e;
-        } finally {
-            for (String address : addressSet) {
-                UtxoTransactionTool.getInstance().calcBalance(address);
-            }
         }
     }
 
@@ -243,7 +233,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             }
             spends.add(spend);
             spendPoList.add(UtxoTransferTool.toOutputPojo(spend));
-            addressSet.add(Address.fromHashs(spend.getAddress()).getBase58());
+            addressSet.add(spend.getAddress());
         }
     }
 
@@ -277,7 +267,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             for (int i = utxoData.getOutputs().size() - 1; i >= 0; i--) {
                 UtxoOutput output = utxoData.getOutputs().get(i);
                 ledgerCacheService.removeUtxo(output.getKey());
-                addressSet.add(Address.fromHashs(output.getAddress()).getBase58());
+                addressSet.add(output.getAddress());
             }
 
             //process input
@@ -300,8 +290,10 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 ledgerCacheService.putUtxo(output.getKey(), output);
             }
 
-            for (String address : addressSet) {
-                UtxoTransactionTool.getInstance().calcBalance(address);
+            try {
+                UtxoTransactionTool.getInstance().calcBalance(utxoData, UtxoTransactionTool.ROLLBACK);
+            } catch (NulsException e) {
+                e.printStackTrace();
             }
 
             relationDataService.deleteRelation(tx.getHash().getDigestHex(), addressSet);
@@ -334,7 +326,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 input.setFrom(output);
                 input.setFromHash(output.getTxHash());
                 input.setFromIndex(output.getIndex());
-                input.setParent(tx);
+                input.setTxHash(tx.getHash());
                 input.setIndex(i);
                 inputValue += output.getValue();
 
@@ -344,11 +336,12 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 
 
         //get EcKey for output's script
+        Account account = null;
         byte[] priKey = null;
         if (coinParam.getPriKey() != null) {
             priKey = coinParam.getPriKey();
         } else if (!coinParam.getFrom().isEmpty()) {
-            Account account = accountService.getAccount(coinParam.getFrom().get(0));
+            account = accountService.getAccount(coinParam.getFrom().get(0));
             if (account == null) {
                 throw new NulsException(ErrorCode.ACCOUNT_NOT_EXIST);
             }
@@ -363,24 +356,21 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             }
         }
 
-        //create scriptSig foreach input
-        for (int i = 0; i < inputs.size(); i++) {
-            P2PKHScriptSig scriptSig = new P2PKHScriptSig();
-            ECKey ecKey = ECKey.fromPrivate(new BigInteger(priKey));
-
-            Address address = new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), Utils.sha256hash160(ecKey.getPubKey(false)));
-            scriptSig.setPublicKey(ecKey.getPubKey(false));
-
-            NulsSignData signData = new NulsSignData();
-            signData.setSignAlgType((short) 1);
-            signData.setSignBytes(ecKey.sign(Sha256Hash.twiceOf(address.getHash160())).encodeToDER());
-            scriptSig.setSignData(signData);
-            try {
-                inputs.get(i).setScriptSig(scriptSig.serialize());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        //create scriptSig foreach input // todo ,sign data must be different
+//        for (int i = 0; i < inputs.size(); i++) {
+//            P2PKHScriptSig scriptSig = new P2PKHScriptSig();
+//            ECKey ecKey = ECKey.fromPrivate(new BigInteger(priKey));
+//
+//            Address address = new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), Utils.sha256hash160(ecKey.getPubKey()));
+//            scriptSig.setPublicKey(ecKey.getPubKey());
+//            NulsSignData signData = accountService.signDigest(new NulsDigestData(NulsDigestData.DIGEST_ALG_SHA160,address.getHash160()),account,password);
+//            scriptSig.setSignData(signData);
+//            try {
+//                inputs.get(i).setScriptSig(scriptSig.serialize());
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
 
         //create outputs
         int i = 0;
@@ -390,12 +380,12 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             List<Coin> coinList = entry.getValue();
             for (Coin coin : coinList) {
                 UtxoOutput output = new UtxoOutput();
-                output.setAddress(new Address(address).getHash());
+                output.setAddress(address);
                 output.setValue(coin.getNa().getValue());
                 output.setStatus(UtxoOutput.UTXO_CONFIRM_UNLOCK);
                 output.setIndex(i);
-                P2PKHScript p2PKHScript = new P2PKHScript(NulsDigestData.calcDigestData((new Address(address).getHash160()), NulsDigestData.DIGEST_ALG_SHA160));
-                output.setScript(p2PKHScript);
+                P2PKHScript p2PKHScript = new P2PKHScript(new NulsDigestData(NulsDigestData.DIGEST_ALG_SHA160, new Address(address).getHash160()));
+                output.setP2PKHScript(p2PKHScript);
                 if (coin.getUnlockHeight() > 0) {
                     output.setLockTime(coin.getUnlockHeight());
                 } else if (coin.getUnlockTime() > 0) {
@@ -403,7 +393,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 } else {
                     output.setLockTime(0L);
                 }
-                output.setParent(tx);
+                output.setTxHash(tx.getHash());
                 outputValue += output.getValue();
                 outputs.add(output);
                 i++;
@@ -418,10 +408,10 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             output.setAddress(inputs.get(0).getFrom().getAddress());
             output.setValue(balance);
             output.setIndex(i);
-            output.setParent(tx);
+            output.setTxHash(tx.getHash());
             output.setStatus(UtxoOutput.UTXO_CONFIRM_UNLOCK);
-            P2PKHScript p2PKHScript = new P2PKHScript(NulsDigestData.calcDigestData(ECKey.fromPrivate(new BigInteger(priKey)).getPubKey(false), NulsDigestData.DIGEST_ALG_SHA160));
-            output.setScript(p2PKHScript);
+            P2PKHScript p2PKHScript = new P2PKHScript(new NulsDigestData(NulsDigestData.DIGEST_ALG_SHA160, account.getHash160()));
+            output.setP2PKHScript(p2PKHScript);
             outputs.add(output);
         }
 
@@ -433,11 +423,15 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
     @Override
     public void afterParse(CoinData coinData, Transaction tx) {
         UtxoData utxoData = (UtxoData) coinData;
-        for (UtxoInput input : utxoData.getInputs()) {
-            input.setTxHash(tx.getHash());
+        if (null != utxoData.getInputs()) {
+            for (UtxoInput input : utxoData.getInputs()) {
+                input.setTxHash(tx.getHash());
+            }
         }
-        for (UtxoOutput output : utxoData.getOutputs()) {
-            output.setTxHash(tx.getHash());
+        if (null != utxoData.getOutputs()) {
+            for (UtxoOutput output : utxoData.getOutputs()) {
+                output.setTxHash(tx.getHash());
+            }
         }
     }
 }

@@ -47,11 +47,13 @@ public class TransactionLocalPo {
 
     private String remark;
 
+    private Integer size;
+
     private int transferType;
 
     private byte[] txData;
 
-    private byte[] sign;
+    private byte[] scriptSig;
 
     private List<UtxoInputPo> inputs;
 
@@ -70,7 +72,8 @@ public class TransactionLocalPo {
         this.transferType = Transaction.TRANSFER_RECEIVE;
         this.remark = tx.getRemark();
         this.txData = tx.getTxData();
-        this.sign = tx.getSign();
+        this.scriptSig = tx.getScriptSig();
+        this.size = tx.getSize();
     }
 
     public String getHash() {
@@ -138,12 +141,12 @@ public class TransactionLocalPo {
         this.txIndex = txIndex;
     }
 
-    public byte[] getSign() {
-        return sign;
+    public byte[] getScriptSig() {
+        return scriptSig;
     }
 
-    public void setSign(byte[] sign) {
-        this.sign = sign;
+    public void setScriptSig(byte[] scriptSig) {
+        this.scriptSig = scriptSig;
     }
 
     public int getTransferType() {
@@ -168,5 +171,13 @@ public class TransactionLocalPo {
 
     public void setOutputs(List<UtxoOutputPo> outputs) {
         this.outputs = outputs;
+    }
+
+    public Integer getSize() {
+        return size;
+    }
+
+    public void setSize(Integer size) {
+        this.size = size;
     }
 }

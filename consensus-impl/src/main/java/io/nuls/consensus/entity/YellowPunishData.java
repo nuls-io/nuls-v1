@@ -23,8 +23,8 @@
  */
 package io.nuls.consensus.entity;
 
+import io.nuls.consensus.entity.validator.tx.YellowPunishValidator;
 import io.nuls.core.chain.entity.BaseNulsData;
-import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -40,12 +40,12 @@ public class YellowPunishData extends BaseNulsData {
     private long height;
     private String address;
     public YellowPunishData(){
-//todo        this.registerValidator();
+        this.registerValidator(YellowPunishValidator.getInstance());
     }
     @Override
     public int size() {
         int size = 0;
-        size += VarInt.sizeOf(height);
+        size += Utils.sizeOfLong(height);
         size += Utils.sizeOfString(address);
         return size;
     }

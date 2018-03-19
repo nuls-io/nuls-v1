@@ -23,20 +23,20 @@
  */
 package io.nuls.consensus.entity.genesis;
 
+import io.nuls.account.entity.Account;
 import io.nuls.account.service.intf.AccountService;
+import io.nuls.account.util.AccountTool;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.utils.StringFileLoader;
 import io.nuls.core.chain.entity.*;
-import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.crypto.ECKey;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.script.P2PKHScriptSig;
 import io.nuls.core.utils.crypto.Hex;
-import io.nuls.core.utils.date.DateUtil;
-import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.json.JSONUtils;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
@@ -46,6 +46,7 @@ import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.tx.CoinBaseTransaction;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -142,11 +143,28 @@ public final class GenesisBlock extends Block {
             Log.error(e);
             throw new NulsRuntimeException(e);
         }
+
+        P2PKHScriptSig p2PKHScriptSig = new P2PKHScriptSig();
+        Account account = null;
         try {
-            tx.setSign(this.signature(tx.getHash().serialize()));
-        } catch (IOException e) {
-            Log.error(e);
+            account = AccountTool.createAccount(priKey);
+        } catch (NulsException e) {
+            e.printStackTrace();
         }
+        AccountService accountService = NulsContext.getServiceBean(AccountService.class);
+        P2PKHScriptSig scriptSig = null;
+        try {
+            scriptSig = accountService.createP2PKHScriptSigFromDigest(tx.getHash(),account,"");
+        } catch (NulsException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            tx.setScriptSig(scriptSig.serialize());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         List<Transaction> txlist = new ArrayList<>();
 //        tx.setStatus(TxStatusEnum.AGREED);
         txlist.add(tx);
@@ -182,16 +200,21 @@ public final class GenesisBlock extends Block {
         }
         header.setPackingAddress(address);
         header.setHash(NulsDigestData.calcDigestData(header));
-        try {
-            header.setSign(this.signature(header.getHash().serialize()));
-        } catch (IOException e) {
-            Log.error(e);
-        }
+
+        P2PKHScriptSig p2PKHScriptSig = new P2PKHScriptSig();
+        NulsSignData signData = this.signature(header.getHash().getDigestBytes());
+        p2PKHScriptSig.setSignData(signData);
+        p2PKHScriptSig.setPublicKey(getGenesisPubkey());
+        header.setScriptSig(p2PKHScriptSig);
     }
 
     private NulsSignData signature(byte[] bytes) {
         AccountService service = NulsContext.getServiceBean(AccountService.class);
-        return service.signData(bytes, Hex.decode(priKey));
+        return service.signDigest(bytes, ECKey.fromPrivate(new BigInteger(Hex.decode(priKey))).getPrivKeyBytes());
+    }
+
+    private byte[]  getGenesisPubkey(){
+        return ECKey.fromPrivate(new BigInteger(Hex.decode(priKey))).getPubKey();
     }
 }
 

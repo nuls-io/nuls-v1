@@ -76,7 +76,7 @@ public class Delegate extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += VarInt.sizeOf(deposit.getValue());
+        size += Utils.sizeOfLong(deposit.getValue());
         size += Utils.sizeOfString(delegateAddress);
         return size;
     }

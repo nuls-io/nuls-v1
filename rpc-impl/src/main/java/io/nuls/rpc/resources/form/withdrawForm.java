@@ -30,7 +30,7 @@ package io.nuls.rpc.resources.form;
  * @author Niels
  * @date 2018/3/14
  */
-public class EntrustCancelForm {
+public class withdrawForm {
     private String txHash;
     private String password;
 

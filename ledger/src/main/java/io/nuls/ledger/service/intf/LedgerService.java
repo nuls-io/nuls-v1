@@ -58,7 +58,7 @@ public interface LedgerService {
 
     List<Transaction> getTxList(long height) throws Exception;
 
-    Page<Transaction> getTxList(long height, int pageNum, int pageSize) throws Exception;
+    Page<Transaction> getTxList(long height, int type, int pageNum, int pageSize) throws Exception;
 
     Balance getBalance(String address);
 

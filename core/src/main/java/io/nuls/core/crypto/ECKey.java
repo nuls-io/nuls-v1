@@ -23,6 +23,8 @@
  */
 package io.nuls.core.crypto;
 
+import io.nuls.core.chain.entity.NulsDigestData;
+import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.log.Log;
@@ -192,7 +194,7 @@ public class ECKey {
      *
      * @return byte[]
      */
-    public byte[] getPubKey(boolean compressed) {
+    protected byte[] getPubKey(boolean compressed) {
         return pub.getEncoded(compressed);
     }
 
@@ -389,21 +391,25 @@ public class ECKey {
      * @param hash
      * @return ECDSASignature
      */
-    public ECDSASignature sign(Sha256Hash hash) {
+    public byte[] sign(byte[] hash) {
         return sign(hash, null);
     }
 
-    public ECDSASignature sign(Sha256Hash hash, KeyParameter aesKey) {
+    public byte[] sign(Sha256Hash hash, BigInteger aesKey) {
+        return doSign(hash.getBytes(), priv);
+    }
+
+    public byte[] sign(byte [] hash, BigInteger aesKey) {
         return doSign(hash, priv);
     }
 
-    protected ECDSASignature doSign(Sha256Hash input, BigInteger privateKeyForSigning) {
+    protected byte[] doSign(byte[] input, BigInteger privateKeyForSigning) {
         Utils.checkNotNull(privateKeyForSigning);
         ECDSASigner signer = new ECDSASigner(new HMacDSAKCalculator(new SHA256Digest()));
         ECPrivateKeyParameters privKey = new ECPrivateKeyParameters(privateKeyForSigning, CURVE);
         signer.init(true, privKey);
-        BigInteger[] components = signer.generateSignature(input.getBytes());
-        return new ECDSASignature(components[0], components[1]).toCanonicalised();
+        BigInteger[] components = signer.generateSignature(input);
+        return new ECDSASignature(components[0], components[1]).toCanonicalised().encodeToDER();
     }
 
     /**
@@ -444,10 +450,5 @@ public class ECKey {
 
     public void setEncryptedPrivateKey(EncryptedData encryptedPrivateKey) {
         this.encryptedPrivateKey = encryptedPrivateKey;
-    }
-
-    public static void main(String[] args){
-        ECKey ecKey = ECKey.fromPrivate(new BigInteger(Hex.decode("39e9a6cbfc515a68f312a928342050940c2874d3b9e0cd733b56f992ee5cd996")));
-        System.out.print(ecKey.getPublicKeyAsHex());
     }
 }

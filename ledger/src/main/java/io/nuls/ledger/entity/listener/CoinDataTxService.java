@@ -23,7 +23,10 @@
  */
 package io.nuls.ledger.entity.listener;
 
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.tx.serivce.TransactionService;
+import io.nuls.core.utils.log.Log;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 
 /**
@@ -32,21 +35,33 @@ import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
  */
 public class CoinDataTxService implements TransactionService<AbstractCoinTransaction> {
     private static final CoinDataTxService INSTANCE = new CoinDataTxService();
-    private CoinDataTxService(){}
+
+    private CoinDataTxService() {
+    }
 
     @Override
     public void onRollback(AbstractCoinTransaction tx) {
-        tx.getCoinDataProvider().rollback(tx.getCoinData(),tx);
+        tx.getCoinDataProvider().rollback(tx.getCoinData(), tx);
     }
 
     @Override
     public void onCommit(AbstractCoinTransaction tx) {
-        tx.getCoinDataProvider().save(tx.getCoinData(),tx);
+        try {
+            tx.getCoinDataProvider().save(tx.getCoinData(), tx);
+        } catch (NulsException e) {
+            Log.error(e);
+            throw new NulsRuntimeException(e);
+        }
     }
 
     @Override
     public void onApproval(AbstractCoinTransaction tx) {
-        tx.getCoinDataProvider().approve(tx.getCoinData(),tx);
+        try {
+            tx.getCoinDataProvider().approve(tx.getCoinData(), tx);
+        } catch (NulsException e) {
+            Log.error(e);
+            throw new NulsRuntimeException(e);
+        }
     }
 
     public static CoinDataTxService getInstance() {

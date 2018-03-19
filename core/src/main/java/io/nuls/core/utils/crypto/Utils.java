@@ -134,7 +134,7 @@ public class Utils {
     /**
      * Given a textual message, returns a byte buffer formatted as follows:</p>
      *
-     * <tt><p>[24] "Bitcoin Signed Message:\n" [message.length as a varint] message</p></tt>
+     * <tt>[24] "Bitcoin Signed Message:\n" [message.length as a varint] message</p></tt>
      */
     public static byte[] formatMessageForSigning(String message) {
         try {
@@ -487,7 +487,7 @@ public class Utils {
         return VarInt.sizeOf(val);
     }
 
-    public static int sizeOfInt6() {
+    public static int sizeOfInt48() {
         return NulsConstant.INT48_VALUE_LENGTH1;
     }
 

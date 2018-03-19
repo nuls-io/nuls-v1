@@ -61,13 +61,15 @@ public class I18nUtils {
         //load all language properties
         try {
             URL furl = I18nUtils.class.getClassLoader().getResource(FOLDER);
-            File folderFile = new File(furl.getPath());
-            for (File file : folderFile.listFiles()) {
-                InputStream is = new FileInputStream(file);
-                Properties prop = new Properties();
-                prop.load(new InputStreamReader(is, NulsContext.DEFAULT_ENCODING));
-                String key = file.getName().replace(".properties", "");
-                ALL_MAPPING.put(key, prop);
+            if (null != furl) {
+                File folderFile = new File(furl.getPath());
+                for (File file : folderFile.listFiles()) {
+                    InputStream is = new FileInputStream(file);
+                    Properties prop = new Properties();
+                    prop.load(new InputStreamReader(is, NulsContext.DEFAULT_ENCODING));
+                    String key = file.getName().replace(".properties", "");
+                    ALL_MAPPING.put(key, prop);
+                }
             }
         } catch (IOException e) {
             Log.error(e);

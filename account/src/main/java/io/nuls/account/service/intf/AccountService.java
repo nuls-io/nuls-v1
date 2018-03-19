@@ -29,6 +29,8 @@ import io.nuls.account.entity.Alias;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.chain.entity.Result;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.script.P2PKHScriptSig;
 
 import java.util.List;
 
@@ -48,6 +50,8 @@ public interface AccountService {
     Account createAccount(String passwd);
 
     Result<List<String>> createAccount(int count,String password);
+
+    Result removeAccount(String address, String password);
 
     Account getDefaultAccount();
 
@@ -71,15 +75,25 @@ public interface AccountService {
 
     Result unlockAccounts(String password, int seconds);
 
+    NulsSignData signDigest(byte[] bytes, byte[] priKey);
+
     NulsSignData signData(byte[] bytes, byte[] priKey);
 
-    NulsSignData signData(byte[] bytes, Account account, String password);
+    NulsSignData signDigest(NulsDigestData digestData, Account account, String password) throws NulsException;
 
-    NulsSignData signData(NulsDigestData digestData, Account account, String password);
+    NulsSignData signDigest(byte [] digestBytes, Account account, String password) throws NulsException;
+
+    NulsSignData signData(byte[] data, Account account, String password) throws NulsException;
+
+    P2PKHScriptSig createP2PKHScriptSig(byte[] data, Account account, String password) throws NulsException;
+
+    P2PKHScriptSig createP2PKHScriptSigFromDigest(NulsDigestData nulsDigestData, Account account, String password) throws NulsException;
 
     Result setAlias(String address, String password, String alias);
 
-    Result verifySign(byte[] bytes, NulsSignData data);
+    Result verifySign(byte[] bytes, NulsSignData data, byte[] pubKey);
+
+    Result verifyDigestSign(NulsDigestData digestData, NulsSignData signData,byte[] pubKey);
 
     Result exportAccount(String address, String password);
 

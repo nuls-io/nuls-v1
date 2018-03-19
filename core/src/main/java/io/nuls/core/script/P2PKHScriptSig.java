@@ -21,14 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.ledger.script;
+package io.nuls.core.script;
 
+import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.NulsSignData;
+import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.crypto.ECKey;
 import io.nuls.core.exception.NulsException;
-
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
+import io.nuls.core.validate.ValidateResult;
+import org.bouncycastle.jce.provider.JDKKeyFactory;
 
 import java.io.IOException;
 
@@ -93,5 +97,22 @@ public class P2PKHScriptSig extends Script {
 
         //todo
         return new byte[0];
+    }
+
+    public ValidateResult verifySign(NulsDigestData digestData){
+        boolean b = ECKey.verify(digestData.getDigestBytes(),signData.getSignBytes(),this.getPublicKey());
+        if(b){
+            return ValidateResult.getSuccessResult();
+        }else {
+            return ValidateResult.getFailedResult(ErrorCode.SIGNATURE_ERROR);
+        }
+    }
+
+    public byte[] getSignerHash160(){
+        return Utils.sha256hash160(getPublicKey());
+    }
+
+    public static P2PKHScriptSig createFromBytes(byte[] bytes) throws NulsException {
+        return new NulsByteBuffer(bytes).readNulsData(new P2PKHScriptSig());
     }
 }

@@ -37,21 +37,17 @@ import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.chain.entity.Result;
 import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.crypto.AESEncrypt;
-import io.nuls.core.crypto.ECKey;
-import io.nuls.core.crypto.MD5Util;
-import io.nuls.core.crypto.VarInt;
+import io.nuls.core.crypto.*;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.script.P2PKHScriptSig;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.date.TimeService;
-import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
@@ -72,9 +68,9 @@ import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.ledger.util.UtxoTransferTool;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -110,7 +106,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public void start() {
         List<Account> accounts = getAccountList();
-        if(accounts.size()>0) {
+        if (accounts.size() > 0) {
             setDefaultAccount(accounts.get(0).getAddress().getBase58());
         }
     }
@@ -168,7 +164,7 @@ public class AccountServiceImpl implements AccountService {
                 if (!defaultAccount.unlock(password)) {
                     return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
                 }
-            }catch (NulsException e){
+            } catch (NulsException e) {
                 return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
             }
         }
@@ -198,7 +194,7 @@ public class AccountServiceImpl implements AccountService {
                 notice.setEventBody(account);
                 eventBroadcaster.publishToLocal(notice);
             }
-            if(getDefaultAccount() == null) {
+            if (getDefaultAccount() == null) {
                 setDefaultAccount(accounts.get(0).getAddress().getBase58());
             }
             return new Result<>(true, "OK", resultList);
@@ -210,6 +206,25 @@ public class AccountServiceImpl implements AccountService {
 
             locker.unlock();
         }
+    }
+
+    @Override
+    @DbSession
+    public Result removeAccount(String address, String password) {
+        Account account = getAccount(address);
+        if (account == null) {
+            return Result.getFailed(ErrorCode.ACCOUNT_NOT_EXIST);
+        }
+        try {
+            if (!account.decrypt(password)) {
+                return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
+            }
+        } catch (NulsException e) {
+            return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
+        }
+        accountDao.delete(address);
+        accountCacheService.removeAccount(address);
+        return Result.getSuccess();
     }
 
     @Override
@@ -292,7 +307,7 @@ public class AccountServiceImpl implements AccountService {
                 byte[] publicKeyBytes = account.getPriKey();
                 account.lock();
                 return new Result(true, "OK", Hex.encode(publicKeyBytes));
-            }catch (NulsException e){
+            } catch (NulsException e) {
                 return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
             }
         }
@@ -300,8 +315,8 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public void setDefaultAccount(String id) {
-        if(id == null){
-            return ;
+        if (id == null) {
+            return;
         }
         Account account = accountCacheService.getAccountById(id);
         if (null != account) {
@@ -373,7 +388,7 @@ public class AccountServiceImpl implements AccountService {
                 if (!account.unlock(oldPassword)) {
                     return new Result(false, "old password error");
                 }
-                account.encrypt(newPassword,true);
+                account.encrypt(newPassword, true);
 
                 AccountPo po = new AccountPo();
                 AccountTool.toPojo(account, po);
@@ -425,7 +440,7 @@ public class AccountServiceImpl implements AccountService {
                 if (!account.unlock(password)) {
                     return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
                 }
-            }catch (NulsException e){
+            } catch (NulsException e) {
                 return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
             }
         }
@@ -452,33 +467,85 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public NulsSignData signData(byte[] bytes, byte[] priKey) {
-        //todo
-        return NulsSignData.EMPTY_SIGN;
+    public NulsSignData signDigest(byte[] digest, byte[] priKey) {
+        //todo need to support kinds of algs
+        ECKey ecKey = ECKey.fromPrivate(new BigInteger(priKey));
+        byte[] signbytes = ecKey.sign(digest);
+        NulsSignData nulsSignData = new NulsSignData();
+        nulsSignData.setSignAlgType(NulsSignData.SIGN_ALG_ECC);
+        nulsSignData.setSignBytes(signbytes);
+        return nulsSignData;
     }
 
     @Override
-    public NulsSignData signData(byte[] bytes, Account account, String password) {
-        if (null == bytes || bytes.length == 0) {
-            return null;
+    public NulsSignData signData(byte[] bytes, byte[] priKey){
+        return signDigest(NulsDigestData.calcDigestData(bytes).getDigestBytes(),priKey);
+    }
+
+    @Override
+    public NulsSignData signDigest(byte[] digest, Account account, String password) throws NulsException {
+        if (null == digest || digest.length == 0) {
+            throw new NulsException(ErrorCode.DATA_ERROR);
         }
         if (account.isEncrypted()) {
-            return this.signData(bytes, AESEncrypt.decrypt(account.getEncryptedPriKey(), password));
+            return this.signDigest(digest, AESEncrypt.decrypt(account.getEncryptedPriKey(), password));
         } else {
-            return this.signData(bytes, account.getPriKey());
+            return this.signDigest(digest, account.getPriKey());
         }
     }
 
     @Override
-    public NulsSignData signData(NulsDigestData digestData, Account account, String password) {
+    public NulsSignData signDigest(NulsDigestData digestData, Account account, String password) throws NulsException {
         if (null == digestData) {
-            return null;
+            throw new NulsException(ErrorCode.DATA_ERROR);
         }
-        return this.signData(digestData.getWholeBytes(), account, password);
+        if(account == null){
+            account = getDefaultAccount();
+            if (account == null){
+                throw new NulsException(ErrorCode.ACCOUNT_NOT_EXIST);
+            }
+        }
+        return this.signDigest(digestData.getDigestBytes(), account, password);
     }
 
     @Override
-    public Result verifySign(byte[] bytes, NulsSignData data) {
+    public NulsSignData signData(byte[] data, Account account, String password) throws NulsException {
+        if (null == data || data.length==0) {
+            throw new NulsException(ErrorCode.DATA_ERROR);
+        }
+        if(account == null){
+            account = getDefaultAccount();
+            if (account == null){
+                throw new NulsException(ErrorCode.ACCOUNT_NOT_EXIST);
+            }
+        }
+        return this.signDigest(NulsDigestData.calcDigestData(data).getDigestBytes(), account, password);
+    }
+
+    @Override
+    public P2PKHScriptSig createP2PKHScriptSig(byte[] data, Account account, String password) throws NulsException {
+        P2PKHScriptSig p2PKHScriptSig = new P2PKHScriptSig();
+        p2PKHScriptSig.setSignData(signData(data,account,password));
+        p2PKHScriptSig.setPublicKey(account.getPubKey());
+        return p2PKHScriptSig;
+    }
+
+    @Override
+    public P2PKHScriptSig createP2PKHScriptSigFromDigest(NulsDigestData nulsDigestData, Account account, String password) throws NulsException{
+        P2PKHScriptSig p2PKHScriptSig = new P2PKHScriptSig();
+        p2PKHScriptSig.setSignData(signDigest(nulsDigestData,account,password));
+        p2PKHScriptSig.setPublicKey(account.getPubKey());
+        return p2PKHScriptSig;
+    }
+
+    @Override
+    public Result verifySign(byte[] data, NulsSignData signData,byte[] pubKey) {
+        return verifyDigestSign(NulsDigestData.calcDigestData(data),signData,pubKey);
+    }
+
+    @Override
+    public Result verifyDigestSign(NulsDigestData digestData, NulsSignData signData,byte[] pubKey) {
+        ECKey.verify(digestData.getDigestBytes(),signData.getSignBytes(),pubKey);
         //todo
         return new Result(true, null);
     }
@@ -501,7 +568,7 @@ public class AccountServiceImpl implements AccountService {
             CoinTransferData coinData = new CoinTransferData(AccountConstant.ALIAS_NA, address, null);
             AliasTransaction aliasTx = new AliasTransaction(coinData, password);
             aliasTx.setHash(NulsDigestData.calcDigestData(aliasTx.serialize()));
-            aliasTx.setSign(signData(aliasTx.getHash(), account, password));
+            aliasTx.setScriptSig(createP2PKHScriptSigFromDigest(aliasTx.getHash(), account, password).serialize());
             ValidateResult validate = aliasTx.verify();
             if (validate.isFailed()) {
                 return new Result(false, validate.getMessage());
@@ -548,7 +615,7 @@ public class AccountServiceImpl implements AccountService {
                     if (!StringUtils.validPassword(password) || !account.decrypt(password)) {
                         return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
                     }
-                }catch (NulsException e){
+                } catch (NulsException e) {
                     return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
                 }
             }
@@ -570,7 +637,7 @@ public class AccountServiceImpl implements AccountService {
         List<String> prikeyList = new ArrayList<>();
         for (Account account : accounts) {
             try {
-                account.unlock(password);
+                account.decrypt(password);
                 prikeyList.add(Hex.encode(account.getPriKey()));
                 account.encrypt(password);
             } catch (NulsException e) {
@@ -668,7 +735,7 @@ public class AccountServiceImpl implements AccountService {
         //maybe account has been imported
         AccountPo accountPo = accountDao.get(account.getAddress().getBase58());
         if (accountPo != null) {
-            return Result.getSuccess();
+            return Result.getFailed(ErrorCode.ACCOUNT_EXIST);
         } else {
             accountPo = new AccountPo();
         }
@@ -707,7 +774,9 @@ public class AccountServiceImpl implements AccountService {
         AccountImportedNotice notice = new AccountImportedNotice();
         notice.setEventBody(account);
         eventBroadcaster.publishToLocal(notice);
-        return Result.getSuccess();
+        Result result = Result.getSuccess();
+        result.setObject(accountPo.getAddress());
+        return result;
     }
 
     @Override
@@ -730,6 +799,7 @@ public class AccountServiceImpl implements AccountService {
         for (String priKey : keys) {
             try {
                 account = AccountTool.createAccount(priKey);
+                account.encrypt(password);
             } catch (NulsException e) {
                 return Result.getFailed("invalid prikey");
             }

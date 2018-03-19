@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -29,7 +29,6 @@ import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.dto.Page;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
@@ -38,7 +37,6 @@ import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.rpc.entity.OutputDto;
-import io.nuls.rpc.entity.PageDto;
 import io.nuls.rpc.entity.RpcResult;
 import io.nuls.rpc.entity.TransactionDto;
 
@@ -85,12 +83,12 @@ public class TransactionResource {
     }
 
     @GET
-    @Path("/address/list")
+    @Path("/list")
     @Produces(MediaType.APPLICATION_JSON)
 
     public RpcResult list(@QueryParam("address") String address, @QueryParam("type") int type,
                           @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
-        if (!StringUtils.validAddress(address) || pageNumber < 0 || pageSize < 0 || pageSize > 100) {
+        if (type < 0 || pageNumber < 0 || pageSize < 0 || pageSize > 100) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         if (pageNumber == 0) {
@@ -100,33 +98,40 @@ public class TransactionResource {
             pageSize = 10;
         }
 
-        RpcResult result;
         try {
-            PageDto pageDto = new PageDto();
-            pageDto.setPageNumber(pageNumber);
-            pageDto.setPageSize(pageSize);
+            RpcResult result = RpcResult.getSuccess();
 
-            long count = ledgerService.getTxCount(address, type);
-            pageDto.setTotal(count);
-
-            List<Transaction> txList = ledgerService.getTxList(address, type, pageNumber, pageSize);
-            if (txList == null || txList.isEmpty()) {
-                return RpcResult.getSuccess().setData(pageDto);
+            Page<Transaction> pages = new Page<>();
+            if (StringUtils.isBlank(address)) {
+                pages = ledgerService.getTxList(-1, type, pageNumber, pageSize);
+            } else if (StringUtils.validAddress(address)) {
+                pages.setPageNumber(pageNumber);
+                pages.setPageSize(pageSize);
+                long count = ledgerService.getTxCount(address, type);
+                pages.setTotal(count);
+                if (count == 0) {
+                    return RpcResult.getSuccess().setData(pages);
+                }
+                List<Transaction> txList = ledgerService.getTxList(address, type, pageNumber, pageSize);
+                pages.setList(txList);
+                List<TransactionDto> dtoList = new ArrayList<>();
+                for (Transaction tx : txList) {
+                    dtoList.add(new TransactionDto(tx, address));
+                }
             }
-
+            Page<TransactionDto> pageDto = new Page<>(pages);
             List<TransactionDto> dtoList = new ArrayList<>();
-            for (Transaction tx : txList) {
-                dtoList.add(new TransactionDto(tx, address));
+            for (Transaction tx : pages.getList()) {
+                dtoList.add(new TransactionDto(tx));
             }
             pageDto.setList(dtoList);
-
-            result = RpcResult.getSuccess();
-            result.setData(dtoList);
+            result.setData(pageDto);
+            return result;
         } catch (Exception e) {
             Log.error(e);
             return RpcResult.getFailed(e.getMessage());
         }
-        return result;
+
     }
 
     @GET
@@ -147,7 +152,7 @@ public class TransactionResource {
 
         Page<TransactionDto> dtoPage = null;
         try {
-            Page<Transaction> txPage = ledgerService.getTxList(height, pageNumber, pageSize);
+            Page<Transaction> txPage = ledgerService.getTxList(height, 0, pageNumber, pageSize);
             List<TransactionDto> dtoList = new ArrayList<>();
             dtoPage = new Page<>(txPage);
             for (Transaction tx : txPage.getList()) {

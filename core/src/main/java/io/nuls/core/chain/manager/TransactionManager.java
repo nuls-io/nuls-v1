@@ -25,6 +25,7 @@ package io.nuls.core.chain.manager;
 
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.tx.serivce.TransactionService;
@@ -87,10 +88,5 @@ public class TransactionManager {
 
     public static TransactionService getService(Class<? extends Transaction> txClass) {
         return TX_SERVICE_MAP.get(txClass);
-    }
-
-    public static void main(String[] args) throws Exception {
-        Transaction coinBaseTransaction = TransactionManager.getInstance(new NulsByteBuffer(Hex.decode("01ffa10e4b14620100000000ffffffff000001000000")));
-        System.out.println(coinBaseTransaction.size());
     }
 }

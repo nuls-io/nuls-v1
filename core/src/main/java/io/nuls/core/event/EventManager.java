@@ -32,6 +32,7 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Niels
@@ -39,7 +40,7 @@ import java.util.*;
  */
 public class EventManager {
     public static final String KEY_SPLIT = "_";
-    private static final Map<String, Class<? extends BaseEvent>> EVENT_MAP = new HashMap<>();
+    private static final Map<String, Class<? extends BaseEvent>> EVENT_MAP = new ConcurrentHashMap<>();
     private static final Set<Class<? extends BaseEvent>> EVENT_CLASSES = new HashSet<>();
 
     public static void care(Class<? extends BaseEvent> busDataClass) {

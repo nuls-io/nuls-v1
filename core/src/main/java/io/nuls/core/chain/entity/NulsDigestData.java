@@ -63,6 +63,11 @@ public class NulsDigestData extends BaseNulsData {
         }
     }
 
+    public NulsDigestData(short alg_type,byte[] bytes){
+        this.digestBytes = bytes;
+        this.digestAlgType = alg_type;
+    }
+
     public short getDigestAlgType() {
         return digestAlgType;
     }

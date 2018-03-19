@@ -5,9 +5,12 @@ import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
+import io.nuls.db.entity.BlockHeaderPo;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +33,7 @@ public class BlockDto {
 
     private String packingAddress;
 
-    private String sign;
+    private String scriptSign;
 
     private Long roundIndex;
 
@@ -46,9 +49,11 @@ public class BlockDto {
 
     private Long confirmCount;
 
+    private int size;
+
     private List<TransactionDto> txList;
 
-    public BlockDto(Block block, long reward, long fee) {
+    public BlockDto(Block block, long reward, long fee) throws IOException {
         this(block.getHeader(), reward, fee);
 
         this.txList = new ArrayList<>();
@@ -57,7 +62,7 @@ public class BlockDto {
         }
     }
 
-    public BlockDto(BlockHeader header, long reward, long fee) {
+    public BlockDto(BlockHeader header, long reward, long fee) throws IOException {
         long bestBlockHeight = NulsContext.getInstance().getBestBlock().getHeader().getHeight();
         this.hash = header.getHash().getDigestHex();
         this.preHash = header.getPreHash().getDigestHex();
@@ -66,9 +71,47 @@ public class BlockDto {
         this.height = header.getHeight();
         this.txCount = header.getTxCount();
         this.packingAddress = header.getPackingAddress();
-        this.sign = header.getSign().getSignHex();
+        this.scriptSign = Hex.encode(header.getScriptSig().serialize());
         this.reward = reward;
         this.fee = fee;
+        this.confirmCount = bestBlockHeight - this.height;
+        this.size = header.getSize();
+        NulsByteBuffer byteBuffer = new NulsByteBuffer(header.getExtend());
+        try {
+            this.roundIndex = byteBuffer.readVarInt();
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+        try {
+            this.consensusMemberCount = (int) byteBuffer.readVarInt();
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+        try {
+            this.roundStartTime = byteBuffer.readVarInt();
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+        try {
+            this.packingIndexOfRound = (int) byteBuffer.readVarInt();
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+    }
+
+    public BlockDto(BlockHeaderPo header, long reward, long fee) {
+        long bestBlockHeight = NulsContext.getInstance().getBestBlock().getHeader().getHeight();
+        this.hash = header.getHash();
+        this.preHash = header.getPreHash();
+        this.merkleHash = header.getMerkleHash();
+        this.time = header.getCreateTime();
+        this.height = header.getHeight();
+        this.txCount = header.getTxCount();
+        this.packingAddress = header.getConsensusAddress();
+        this.scriptSign = Hex.encode(header.getScriptSig());
+        this.reward = reward;
+        this.fee = fee;
+        this.size = header.getSize();
         this.confirmCount = bestBlockHeight - this.height;
         NulsByteBuffer byteBuffer = new NulsByteBuffer(header.getExtend());
         try {
@@ -150,12 +193,12 @@ public class BlockDto {
         this.packingAddress = packingAddress;
     }
 
-    public String getSign() {
-        return sign;
+    public String getScriptSig() {
+        return scriptSign;
     }
 
-    public void setSign(String sign) {
-        this.sign = sign;
+    public void setScriptSig(String scriptSig) {
+        this.scriptSign = scriptSig;
     }
 
     public Long getRoundIndex() {
@@ -220,5 +263,13 @@ public class BlockDto {
 
     public void setConfirmCount(Long confirmCount) {
         this.confirmCount = confirmCount;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
     }
 }

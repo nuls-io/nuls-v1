@@ -45,8 +45,8 @@ public class JoinConsensusParam {
         AssertUtil.canNotEmpty(map, ErrorCode.NULL_PARAMETER.getMsg());
         AssertUtil.canNotEmpty(map.get(DEPOSIT), ErrorCode.NULL_PARAMETER.getMsg());
         AssertUtil.canNotEmpty(map.get(AGENT_ADDRESS), ErrorCode.NULL_PARAMETER.getMsg());
-        AssertUtil.canNotEmpty(map.get(AGENT_NAME), ErrorCode.NULL_PARAMETER.getMsg());
-        AssertUtil.canNotEmpty(map.get(COMMISSION_RATE), ErrorCode.NULL_PARAMETER.getMsg());
+//        AssertUtil.canNotEmpty(map.get(AGENT_NAME), ErrorCode.NULL_PARAMETER.getMsg());
+//        AssertUtil.canNotEmpty(map.get(COMMISSION_RATE), ErrorCode.NULL_PARAMETER.getMsg());
         this.params = map;
     }
 

@@ -63,7 +63,7 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     private DelegateAccountDataService delegateAccountService = NulsContext.getServiceBean(DelegateAccountDataService.class);
     private DelegateDataService delegateDataService = NulsContext.getServiceBean(DelegateDataService.class);
-    private ConsensusManager consensusManager = ConsensusManager.getInstance();
+
     @Override
     public void onRollback(PocExitConsensusTransaction tx) throws NulsException {
         Transaction joinTx = ledgerService.getTx(tx.getTxData());
@@ -80,10 +80,20 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
             dpo.setAgentAddress(raTx.getTxData().getAddress());
             dpo.setStatus(ConsensusStatusEnum.IN.getCode());
             this.delegateDataService.updateSelectiveByAgentAddress(dpo);
-            consensusManager.joinMeeting();
             CancelConsensusNotice notice = new CancelConsensusNotice();
             notice.setEventBody(tx);
             NulsContext.getServiceBean(EventBroadcaster.class).publishToLocal(notice);
+            //cache delegates
+            Map<String, Object> params = new HashMap<>();
+            params.put("agentAddress", raTx.getTxData().getAddress());
+            List<DelegatePo> polist = this.delegateDataService.getList(params);
+            if (null == polist || polist.isEmpty()) {
+                return;
+            }
+            for (DelegatePo po : polist) {
+                Consensus<Delegate> cd = ConsensusTool.fromPojo(po);
+                this.manager.cacheDelegate(cd);
+            }
             return;
         }
         PocJoinConsensusTransaction pjcTx = (PocJoinConsensusTransaction) joinTx;
@@ -115,7 +125,6 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
             dpo.setAgentAddress(raTx.getTxData().getAddress());
             dpo.setStatus(ConsensusStatusEnum.NOT_IN.getCode());
             this.delegateDataService.updateSelectiveByAgentAddress(dpo);
-            consensusManager.exitMeeting();
             return;
         }
         PocJoinConsensusTransaction pjcTx = (PocJoinConsensusTransaction) joinTx;

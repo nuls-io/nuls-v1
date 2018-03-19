@@ -23,11 +23,10 @@
  */
 package io.nuls.consensus.entity.validator.block.header;
 
+import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.BlockHeader;
-import io.nuls.core.chain.entity.NulsSignData;
-import io.nuls.core.chain.entity.Result;
+import io.nuls.core.chain.entity.*;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.Log;
@@ -50,21 +49,10 @@ public class HeaderSignValidator implements NulsDataValidator<BlockHeader> {
     }
     @Override
     public ValidateResult validate(BlockHeader data) {
-        if(data.getSign()==null){
+        if(data.getScriptSig()==null){
             return ValidateResult.getFailedResult(ERROR_MESSAGE);
         }
-        Result result = null;
-        try {
-            result = accountService.verifySign(data.getHash().serialize(),data.getSign());
-        } catch (IOException e) {
-            Log.error(e);
-        }
-        ValidateResult validateResult = new ValidateResult();
-        validateResult.setMessage(ERROR_MESSAGE);
-        validateResult.setLevel(SeverityLevelEnum.NORMAL_FOUL);
-        validateResult.setErrorCode(result.getErrorCode());
-        validateResult.setSuccess(result.isSuccess());
-        validateResult.setObject(result.getObject());
-        return validateResult;
+        ValidateResult verifyRsult = data.getScriptSig().verifySign(data.getHash());
+        return verifyRsult;
     }
 }

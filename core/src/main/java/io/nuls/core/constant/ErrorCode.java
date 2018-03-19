@@ -56,6 +56,7 @@ public enum ErrorCode {
     PARAMETER_ERROR("SYS018", 10018),
     DATA_NOT_FOUND("SYS019", 10019),
     FILE_BROKEN("SYS020", 20020),
+    SIGNATURE_ERROR("SYS021", 20021),
     /**
      * ----------  Consensus Network code   ---------
      */
@@ -87,6 +88,7 @@ public enum ErrorCode {
     PASSWORD_IS_WRONG("ACT000", 45000),
     ACCOUNT_NOT_EXIST("ACT001", 45001),
     ACCOUNT_IS_ALREADY_ENCRYPTED("ACT002", 45002),
+    ACCOUNT_EXIST("ACT003",45003),
 
     /**
      * ----------  DB Exception code   ---------
@@ -130,7 +132,9 @@ public enum ErrorCode {
     UTXO_SPENT("LED001", 70001),
     UTXO_STATUS_CHANGE("LED002", 70002),
     BALANCE_NOT_ENOUGH("LED003", 70003),
-
+    INVALID_OUTPUT("LED004",70004 ),
+    INVALID_AMOUNT("LED005",70005 ),
+    ORPHAN_TX("LED006",70006),
     /**
      * messages
      */

@@ -20,7 +20,7 @@ public class InputDto {
         this.index = input.getIndex();
         this.fromHash = input.getFromHash().getDigestHex();
         this.fromIndex = input.getFromIndex();
-        this.address = Address.fromHashs(input.getFrom().getAddress()).getBase58();
+        this.address = input.getFrom().getAddress();
         this.value = input.getFrom().getValue();
     }
 

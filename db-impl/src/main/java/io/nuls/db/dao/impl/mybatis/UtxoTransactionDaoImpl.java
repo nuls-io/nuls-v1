@@ -61,8 +61,8 @@ public class UtxoTransactionDaoImpl implements UtxoTransactionDataService {
     }
 
     @Override
-    public Page<TransactionPo> getTxs(long blockHeight, int pageNum, int pageSize) {
-        return txDao.getTxs(blockHeight, pageNum, pageSize);
+    public Page<TransactionPo> getTxs(long blockHeight, int type, int pageNum, int pageSize) {
+        return txDao.getTxs(blockHeight, type, pageNum, pageSize);
     }
 
     @Override
@@ -85,8 +85,8 @@ public class UtxoTransactionDaoImpl implements UtxoTransactionDataService {
     }
 
     @Override
-    public List<TransactionPo> getTxs(String address, int type, Integer pageNumber, Integer pageSize) {
-        return txDao.getTxs(address, type, pageNumber, pageSize);
+    public List<TransactionPo> getTxs(String address, int type, Integer start, Integer limit) {
+        return txDao.getTxs(address, type, start, limit);
     }
 
     @Override

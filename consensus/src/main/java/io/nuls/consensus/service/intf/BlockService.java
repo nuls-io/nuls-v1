@@ -26,7 +26,9 @@ package io.nuls.consensus.service.intf;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
+import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
+import io.nuls.db.entity.BlockHeaderPo;
 
 import java.io.IOException;
 import java.util.List;
@@ -45,21 +47,25 @@ public interface BlockService {
 
     Block getLocalBestBlock();
 
-    BlockHeader getBlockHeader(long height);
+    BlockHeader getBlockHeader(long height) throws NulsException;
 
-    BlockHeader getBlockHeader(String hash);
+    BlockHeader getBlockHeader(String hash) throws NulsException;
 
     Block getBlock(String hash);
 
     Block getBlock(long height);
 
-    List<Block> getBlockList(long startHeight, long endHeight);
+    List<Block> getBlockList(long startHeight, long endHeight) throws NulsException;
 
-    void saveBlock(Block block) throws IOException;
+    boolean saveBlock(Block block) throws IOException;
 
     void rollbackBlock(long height) throws NulsException;
 
     List<BlockHeader> getBlockHeaderList(long start, long end, long split);
 
-    BlockHeader getBlockHeader(NulsDigestData hash);
+    Page<BlockHeaderPo> getBlockHeaderList(String nodeAddress, int type, int pageNumber, int pageSize);
+
+    Page<BlockHeaderPo> getBlockHeaderList(int pageNumber, int pageSize);
+
+    BlockHeader getBlockHeader(NulsDigestData hash) throws NulsException;
 }

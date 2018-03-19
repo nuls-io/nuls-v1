@@ -25,6 +25,7 @@ package io.nuls.consensus.entity.validator.block;
 
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.core.chain.entity.Block;
+import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 
@@ -37,16 +38,22 @@ public class BlockMaxSizeValidator implements NulsDataValidator<Block> {
 
     private static final String ERROR_MESSAGE = "The block is too big!";
 
-    private BlockMaxSizeValidator(){}
-    public static BlockMaxSizeValidator getInstance(){
+    private BlockMaxSizeValidator() {
+    }
+
+    public static BlockMaxSizeValidator getInstance() {
         return INSTANCE;
     }
+
     @Override
     public ValidateResult validate(Block data) {
         if (data == null) {
             return ValidateResult.getFailedResult("Data is null!");
         }
-        int length = data.size();
+        long length = 0L;
+        for (Transaction tx : data.getTxs()) {
+            length += tx.size();
+        }
         if (length >= PocConsensusConstant.MAX_BLOCK_SIZE) {
             return ValidateResult.getFailedResult(ERROR_MESSAGE);
         }

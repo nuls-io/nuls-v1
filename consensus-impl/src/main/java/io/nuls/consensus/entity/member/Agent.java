@@ -25,7 +25,6 @@ package io.nuls.consensus.entity.member;
 
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.Na;
-import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -41,7 +40,7 @@ public class Agent extends BaseNulsData {
 
     private Na deposit;
 
-    public String delegateAddress;
+    public String agentAddress;
 
     private double commissionRate;
 
@@ -64,10 +63,9 @@ public class Agent extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size++;
-        size += VarInt.sizeOf(deposit.getValue());
-        size += Utils.sizeOfString(this.delegateAddress);
-        size += Utils.double2Bytes(commissionRate).length;
+        size += Utils.sizeOfLong(deposit.getValue());
+        size += Utils.sizeOfString(this.agentAddress);
+        size += Utils.sizeOfDouble(this.commissionRate);
         size += Utils.sizeOfString(this.introduction);
         size += Utils.sizeOfBoolean(seed);
         size += Utils.sizeOfString(agentName);
@@ -77,7 +75,7 @@ public class Agent extends BaseNulsData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeVarInt(deposit.getValue());
-        stream.writeString(delegateAddress);
+        stream.writeString(agentAddress);
         stream.writeDouble(this.commissionRate);
         stream.writeString(this.introduction);
         stream.writeBoolean(seed);
@@ -87,7 +85,7 @@ public class Agent extends BaseNulsData {
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.deposit = Na.valueOf(byteBuffer.readVarInt());
-        this.delegateAddress = byteBuffer.readString();
+        this.agentAddress = byteBuffer.readString();
         this.commissionRate = byteBuffer.readDouble();
         this.introduction = byteBuffer.readString();
         this.seed = byteBuffer.readBoolean();
@@ -102,12 +100,12 @@ public class Agent extends BaseNulsData {
         this.deposit = deposit;
     }
 
-    public String getDelegateAddress() {
-        return delegateAddress;
+    public String getAgentAddress() {
+        return agentAddress;
     }
 
-    public void setDelegateAddress(String delegateAddress) {
-        this.delegateAddress = delegateAddress;
+    public void setAgentAddress(String agentAddress) {
+        this.agentAddress = agentAddress;
     }
 
     public int getStatus() {

@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,19 +21,50 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.ledger.script;
+
+package io.nuls.rpc.resources.form;
 
 /**
- * Created by win10 on 2017/10/30.
+ * @author Niels
+ * @date 2018/3/14
  */
-public class ScriptException extends RuntimeException{
+public class DepositForm {
+    private String address;
+    private String agentAddress;
+    private long deposit;
+    private String password;
 
-    public ScriptException(String msg) {
-        super(msg);
+    public String getAddress() {
+        return address;
     }
 
-    public ScriptException(String msg, Exception e) {
-        super(msg, e);
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getAgentAddress() {
+        return agentAddress;
+    }
+
+    public void setAgentAddress(String agentAddress) {
+        this.agentAddress = agentAddress;
+    }
+
+    public long getDeposit() {
+        return deposit;
+    }
+
+    public void setDeposit(long deposit) {
+        this.deposit = deposit;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

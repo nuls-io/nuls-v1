@@ -112,23 +112,26 @@ public class BlockBatchDownloadUtils {
     public void request(List<String> nodeIdList, long startHeight, long endHeight) throws InterruptedException {
         lock.lock();
         if (working) {
+            lock.unlock();
             return;
         }
         working = true;
-        this.init(nodeIdList);
         try {
+            this.init(nodeIdList);
             blocksHash = DistributedBlockInfoRequestUtils.getInstance().request(startHeight, endHeight, DOWNLOAD_BLOCKS_PER_TIME);
+            request(startHeight, endHeight);
+            while (working) {
+                verify();
+                Thread.sleep(100L);
+            }
+            if (!working) {
+                lock.unlock();
+            }
         } catch (Exception e) {
+            Log.error(e.getMessage());
             working = false;
-            return;
-        }
-        request(startHeight, endHeight);
-        while (working) {
-            verify();
-            Thread.sleep(100L);
-        }
-        if (!working) {
             lock.unlock();
+            return;
         }
     }
 
@@ -328,7 +331,7 @@ public class BlockBatchDownloadUtils {
                 }
             }
             String preHash = block.getHeader().getPreHash().getDigestHex();
-            Block preBlock = blockMap.get(block.getHeader().getHeight()-1);
+            Block preBlock = blockMap.get(block.getHeader().getHeight() - 1);
             if (preBlock == null) {
                 preBlock = blockService.getBlock(preHash);
             }

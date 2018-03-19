@@ -79,24 +79,31 @@ public class DistributedBlockInfoRequestUtils {
     }
 
     public BlockInfo request(long start, long end, long split) {
+//        Log.error("==================wait it:"+Thread.currentThread().getName());
         lock.lock();
-        requesting = true;
-        hashesMap.clear();
-        calcMap.clear();
-        this.start = start;
-        this.end = end;
-        this.split = split;
-        askHighest = start == end && start <= 0;
-        GetBlocksHashRequest event = new GetBlocksHashRequest(start, end, split);
-        this.startTime = TimeService.currentTimeMillis();
-        nodeIdList = this.eventBroadcaster.broadcastAndCache(event, false);
-        if (nodeIdList.isEmpty()) {
-//            Log.error("get best height from net faild!");
+//        Log.error("==================lock it:"+Thread.currentThread().getName());
+        try {
+            requesting = true;
+            hashesMap.clear();
+            calcMap.clear();
+            this.start = start;
+            this.end = end;
+            this.split = split;
+            askHighest = start == end && start <= 0;
+            GetBlocksHashRequest event = new GetBlocksHashRequest(start, end, split);
+            this.startTime = TimeService.currentTimeMillis();
+            nodeIdList = this.eventBroadcaster.broadcastAndCache(event, false);
+            if (nodeIdList.isEmpty()) {
+                return null;
+            }
+            BlockInfo bi = this.getBlockInfo();
+            return bi;
+        } catch (Exception e) {
+            throw e;
+        } finally {
+//            Log.error("===============unlock it:"+Thread.currentThread().getName());
             lock.unlock();
-            return null;
         }
-
-        return this.getBlockInfo();
     }
 
 
@@ -143,8 +150,8 @@ public class DistributedBlockInfoRequestUtils {
         BlockInfo result = null;
         for (String key : calcMap.keySet()) {
             List<String> nodes = calcMap.get(key);
-
-            if (nodes.size() > halfSize) {
+            //todo =
+            if (nodes.size() >= halfSize) {
                 result = new BlockInfo();
                 BlockHashResponse response = hashesMap.get(nodes.get(0));
                 Long bestHeight = 0L;
@@ -173,9 +180,9 @@ public class DistributedBlockInfoRequestUtils {
             } catch (InterruptedException e) {
                 Log.error(e);
             }
-            try{
+            try {
                 this.request(start, end, split);
-            }catch (Exception e){
+            } catch (Exception e) {
                 Log.error(e.getMessage());
             }
         }
@@ -194,7 +201,7 @@ public class DistributedBlockInfoRequestUtils {
             }
             long timeout = 10000L;
 
-            if ((TimeService.currentTimeMillis() - startTime) > (timeout - 1000L) && hashesMap.size() > ((nodeIdList.size() + 1) / 2) && askHighest) {
+            if ((TimeService.currentTimeMillis() - startTime) > (timeout - 1000L) && hashesMap.size() >= ((nodeIdList.size() + 1) / 2) && askHighest) {
                 long localHeight = NulsContext.getInstance().getBestBlock().getHeader().getHeight();
                 long minHeight = Long.MAX_VALUE;
                 NulsDigestData minHash = null;
@@ -216,17 +223,17 @@ public class DistributedBlockInfoRequestUtils {
                 result.setBestHeight(minHeight);
                 result.setNodeIdList(this.nodeIdList);
                 result.setFinished(true);
-                bestBlockInfo = result;
-            }
-            if ((TimeService.currentTimeMillis() - startTime) > timeout) {
-                lock.unlock();
+                if (result.getBestHeight() < Long.MAX_VALUE) {
+                    bestBlockInfo = result;
+                }
+            } else if ((TimeService.currentTimeMillis() - startTime) > timeout) {
                 throw new NulsRuntimeException(ErrorCode.TIME_OUT);
             }
         }
         BlockInfo info = bestBlockInfo;
         bestBlockInfo = null;
         requesting = false;
-        lock.unlock();
         return info;
+
     }
 }

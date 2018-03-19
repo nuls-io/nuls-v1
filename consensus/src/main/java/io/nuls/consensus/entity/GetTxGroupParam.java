@@ -54,7 +54,7 @@ public class GetTxGroupParam extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += Utils.sizeOfInt6();
+        size += Utils.sizeOfInt48();
         size += Utils.sizeOfNulsData(blockHash);
         size += VarInt.sizeOf(txHashList.size());
         size += this.getTxHashBytesLength();

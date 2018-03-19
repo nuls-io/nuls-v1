@@ -35,16 +35,16 @@ import java.util.List;
  * @author Niels
  * @date 2018/1/5
  */
-public class ReceivedTxCacheManager {
-    private static ReceivedTxCacheManager INSTANCE = new ReceivedTxCacheManager();
-    private static final String CACHE_NAME = "Received-tx-cache";
+public class OrphanTxCacheManager {
+    private static OrphanTxCacheManager INSTANCE = new OrphanTxCacheManager();
+    private static final String CACHE_NAME = "Orphan-tx-cache";
     private CacheMap<String, Transaction> txCache;
 
-    private ReceivedTxCacheManager() {
+    private OrphanTxCacheManager() {
 
     }
 
-    public static ReceivedTxCacheManager getInstance() {
+    public static OrphanTxCacheManager getInstance() {
         return INSTANCE;
     }
 
