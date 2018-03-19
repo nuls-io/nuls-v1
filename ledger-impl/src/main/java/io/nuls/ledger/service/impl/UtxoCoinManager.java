@@ -73,7 +73,7 @@ public class UtxoCoinManager {
         }
 
         for (String str : addressSet) {
-            UtxoTransactionTool.getInstance().calcBalance(str);
+            UtxoTransactionTool.getInstance().calcBalanceByUtxo(str);
         }
     }
 

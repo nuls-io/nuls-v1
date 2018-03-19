@@ -73,6 +73,7 @@ public class TransactionLocalPo {
         this.remark = tx.getRemark();
         this.txData = tx.getTxData();
         this.scriptSig = tx.getScriptSig();
+        this.size = tx.getSize();
     }
 
     public String getHash() {
