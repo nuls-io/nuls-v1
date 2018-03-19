@@ -32,14 +32,4 @@ import io.nuls.core.constant.TxStatusEnum;
  * @date 2017/12/21
  */
 public abstract class CoinData extends BaseNulsData {
-
-    private Transaction transaction;
-
-    public Transaction getTransaction() {
-        return transaction;
-    }
-
-    public void setTransaction(Transaction transaction) {
-        this.transaction = transaction;
-    }
 }

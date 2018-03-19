@@ -32,6 +32,7 @@ import io.nuls.core.validate.ValidateResult;
 import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.UtxoInput;
 import io.nuls.ledger.entity.UtxoOutput;
+import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 
 import java.util.Arrays;
 
@@ -39,7 +40,7 @@ import java.util.Arrays;
  * @author Niels
  * @date 2017/11/20
  */
-public class UtxoTxInputsValidator implements NulsDataValidator<UtxoData> {
+public class UtxoTxInputsValidator implements NulsDataValidator<AbstractCoinTransaction> {
 
     private static final UtxoTxInputsValidator INSTANCE = new UtxoTxInputsValidator();
 
@@ -52,21 +53,21 @@ public class UtxoTxInputsValidator implements NulsDataValidator<UtxoData> {
     }
 
     @Override
-    public ValidateResult validate(UtxoData data) {
-
+    public ValidateResult validate(AbstractCoinTransaction tx) {
+        UtxoData data = (UtxoData) tx.getCoinData();
         for (int i = 0; i < data.getInputs().size(); i++) {
             UtxoInput input = data.getInputs().get(i);
             UtxoOutput output = input.getFrom();
 
-            if (output == null && data.getTransaction().getStatus() == TxStatusEnum.CACHED) {
+            if (output == null && tx.getStatus() == TxStatusEnum.CACHED) {
                 return ValidateResult.getFailedResult(ErrorCode.ORPHAN_TX);
             }
 
-            if (data.getTransaction().getStatus() == TxStatusEnum.CACHED) {
+            if (tx.getStatus() == TxStatusEnum.CACHED) {
                 if (!output.isUsable()) {
                     return ValidateResult.getFailedResult(ErrorCode.UTXO_STATUS_CHANGE);
                 }
-            } else if (data.getTransaction().getStatus() == TxStatusEnum.AGREED) {
+            } else if (tx.getStatus() == TxStatusEnum.AGREED) {
                 if (!output.isLocked()) {
                     return ValidateResult.getFailedResult(ErrorCode.UTXO_STATUS_CHANGE);
                 }
@@ -75,7 +76,7 @@ public class UtxoTxInputsValidator implements NulsDataValidator<UtxoData> {
             byte[] owner = output.getOwner();
             P2PKHScriptSig p2PKHScriptSig = null;
             try {
-                p2PKHScriptSig = P2PKHScriptSig.createFromBytes(data.getTransaction().getScriptSig());
+                p2PKHScriptSig = P2PKHScriptSig.createFromBytes(tx.getScriptSig());
             } catch (NulsException e) {
                 return ValidateResult.getFailedResult(ErrorCode.DATA_ERROR);
             }

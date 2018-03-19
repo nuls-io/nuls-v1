@@ -29,6 +29,9 @@ import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
+import io.nuls.core.validate.ValidatorManager;
+import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
+import io.nuls.ledger.entity.tx.TransferTransaction;
 import io.nuls.ledger.validator.AmountValidator;
 import io.nuls.ledger.validator.UtxoTxInputsValidator;
 import io.nuls.ledger.validator.UtxoTxOutputsValidator;
@@ -43,9 +46,9 @@ import java.util.List;
  */
 public class UtxoData extends CoinData {
     public UtxoData() {
-        this.registerValidator(UtxoTxInputsValidator.getInstance());
-        this.registerValidator(UtxoTxOutputsValidator.getInstance());
-        this.registerValidator(AmountValidator.getInstance());
+        ValidatorManager.addValidator(AbstractCoinTransaction.class,UtxoTxInputsValidator.getInstance());
+        ValidatorManager.addValidator(AbstractCoinTransaction.class,UtxoTxOutputsValidator.getInstance());
+        ValidatorManager.addValidator(TransferTransaction.class,AmountValidator.getInstance());
     }
 
     private List<UtxoInput> inputs = new ArrayList<>();

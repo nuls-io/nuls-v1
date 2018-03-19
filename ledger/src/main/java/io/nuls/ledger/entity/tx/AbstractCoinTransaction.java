@@ -26,7 +26,6 @@ package io.nuls.ledger.entity.tx;
 import io.nuls.consensus.service.intf.ConsensusService;
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
@@ -67,7 +66,6 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
         this.fee = NulsContext.getServiceBean(ConsensusService.class).getTxFee(this.getType());
         coinParam.setFee(fee);
         this.coinData = coinDataProvider.createByTransferData(this, coinParam, password);
-        this.coinData.setTransaction(this);
         this.time = TimeService.currentTimeMillis();
     }
 
@@ -106,7 +104,6 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
         this.setScriptSig(scriptsigCache);
         //sign = cache;
         coinDataProvider.afterParse(coinData, this);
-        this.coinData.setTransaction(this);
     }
 
     public CoinDataProvider getCoinDataProvider() {
