@@ -44,7 +44,7 @@ public class DelegateSearchParams extends Searchable {
             this.addCondition(SEARCH_FIELD_ADDRESS, SearchOperator.eq, params.get(SEARCH_FIELD_ADDRESS));
         }
         if (params.containsKey(SEARCH_FIELD_AGENT_ADDRESS)) {
-            this.addCondition(SEARCH_FIELD_AGENT_ADDRESS, SearchOperator.eq, params.get(SEARCH_FIELD_AGENT_ADDRESS));
+            this.addCondition("agent_address", SearchOperator.eq, params.get(SEARCH_FIELD_AGENT_ADDRESS));
         }
     }
 }

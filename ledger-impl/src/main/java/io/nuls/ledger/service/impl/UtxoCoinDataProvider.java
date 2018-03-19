@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -99,7 +99,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         }
 
         List<UtxoOutput> unSpends = new ArrayList<>();
-        Set<String> addressSet = new HashSet<>();
         boolean update;
         try {
             //update inputs referenced utxo status
@@ -118,7 +117,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                     unSpend.setStatus(UtxoOutput.UTXO_UNCONFIRM_LOCK);
                 }
                 unSpends.add(unSpend);
-                addressSet.add(Address.fromHashs(unSpend.getAddress()).getBase58());
             }
 
             //cache new utxo ,it is unConfirm
@@ -126,7 +124,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 UtxoOutput output = utxoData.getOutputs().get(i);
                 output.setStatus(UtxoOutput.UTXO_UNCONFIRM_UNLOCK);
                 ledgerCacheService.putUtxo(output.getKey(), output);
-                addressSet.add(Address.fromHashs(output.getAddress()).getBase58());
             }
 
             //calc balance
@@ -149,14 +146,14 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         }
     }
 
-    @Override
-    @DbSession
     /**
      * 1. change spending output status  (cache and database)
      * 2. save new input
      * 3. save new unSpend output (cache and database)
      * 4. finally, calc balance
      */
+    @Override
+    @DbSession
     public void save(CoinData coinData, Transaction tx) throws NulsException {
         UtxoData utxoData = (UtxoData) coinData;
 
@@ -172,9 +169,8 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             List<UtxoOutputPo> outputPoList = new ArrayList<>();
             for (int i = 0; i < utxoData.getOutputs().size(); i++) {
                 UtxoOutput output = utxoData.getOutputs().get(i);
-
                 output = ledgerCacheService.getUtxo(output.getKey());
-                if (output == null || !output.isUsable()) {
+                if (output == null || (output.getStatus() == UtxoOutput.UTXO_SPENT)) {
                     throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "use a not legal utxo");
                 }
 
@@ -206,7 +202,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 ledgerCacheService.removeUtxo(output.getKey());
             }
             for (UtxoOutput spend : spends) {
-                ledgerCacheService.updateUtxoStatus(spend.getKey(), UtxoOutput.UTXO_SPENT, UtxoOutput.UTXO_CONFIRM_LOCK);
+                ledgerCacheService.updateUtxoStatus(spend.getKey(), UtxoOutput.UTXO_CONFIRM_LOCK, UtxoOutput.UTXO_SPENT);
             }
             throw e;
         }
@@ -219,13 +215,11 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         boolean update;
         for (int i = 0; i < utxoData.getInputs().size(); i++) {
             UtxoInput input = utxoData.getInputs().get(i);
-            inputPoList.add(UtxoTransferTool.toInputPojo(input));
 
             UtxoOutput spend = ledgerCacheService.getUtxo(input.getKey());
             if (spend == null || spend.isUnConfirm()) {
                 throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "the output is not exist!");
             }
-
             //change utxo status,
             update = ledgerCacheService.updateUtxoStatus(input.getKey(), UtxoOutput.UTXO_SPENT, UtxoOutput.UTXO_CONFIRM_LOCK);
             if (!update) {
@@ -234,6 +228,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             spends.add(spend);
             spendPoList.add(UtxoTransferTool.toOutputPojo(spend));
             addressSet.add(spend.getAddress());
+            inputPoList.add(UtxoTransferTool.toInputPojo(input));
         }
     }
 
@@ -244,7 +239,9 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         for (int i = 0; i < utxoData.getOutputs().size(); i++) {
             UtxoOutput output = utxoData.getOutputs().get(i);
             output = ledgerCacheService.getUtxo(output.getKey());
-            output.setStatus(UtxoOutput.UTXO_CONFIRM_UNLOCK);
+            if(output.getStatus() > 2) {
+                output.setStatus(output.getStatus() - 3);
+            }
         }
     }
 
@@ -382,7 +379,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 UtxoOutput output = new UtxoOutput();
                 output.setAddress(address);
                 output.setValue(coin.getNa().getValue());
-                output.setStatus(UtxoOutput.UTXO_CONFIRM_UNLOCK);
+                output.setStatus(UtxoOutput.UTXO_UNCONFIRM_UNLOCK);
                 output.setIndex(i);
                 P2PKHScript p2PKHScript = new P2PKHScript(new NulsDigestData(NulsDigestData.DIGEST_ALG_SHA160, new Address(address).getHash160()));
                 output.setP2PKHScript(p2PKHScript);
@@ -409,7 +406,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             output.setValue(balance);
             output.setIndex(i);
             output.setTxHash(tx.getHash());
-            output.setStatus(UtxoOutput.UTXO_CONFIRM_UNLOCK);
+            output.setStatus(UtxoOutput.UTXO_UNCONFIRM_UNLOCK);
             P2PKHScript p2PKHScript = new P2PKHScript(new NulsDigestData(NulsDigestData.DIGEST_ALG_SHA160, account.getHash160()));
             output.setP2PKHScript(p2PKHScript);
             outputs.add(output);
