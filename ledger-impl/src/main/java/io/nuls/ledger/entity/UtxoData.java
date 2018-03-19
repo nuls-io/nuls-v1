@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -32,6 +32,7 @@ import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.validate.ValidatorManager;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.ledger.entity.tx.TransferTransaction;
+import io.nuls.ledger.entity.validator.CoinTransactionValidatorManager;
 import io.nuls.ledger.validator.AmountValidator;
 import io.nuls.ledger.validator.UtxoTxInputsValidator;
 import io.nuls.ledger.validator.UtxoTxOutputsValidator;
@@ -46,15 +47,16 @@ import java.util.List;
  */
 public class UtxoData extends CoinData {
     public UtxoData() {
-        ValidatorManager.addValidator(AbstractCoinTransaction.class,UtxoTxInputsValidator.getInstance());
-        ValidatorManager.addValidator(AbstractCoinTransaction.class,UtxoTxOutputsValidator.getInstance());
-        ValidatorManager.addValidator(TransferTransaction.class,AmountValidator.getInstance());
+        CoinTransactionValidatorManager.addTxDefValidator(UtxoTxInputsValidator.getInstance());
+        CoinTransactionValidatorManager.addTxDefValidator(UtxoTxOutputsValidator.getInstance());
+        CoinTransactionValidatorManager.addTxDefValidator( AmountValidator.getInstance());
     }
 
     private List<UtxoInput> inputs = new ArrayList<>();
 
     private List<UtxoOutput> outputs = new ArrayList<>();
     ;
+
     public List<UtxoInput> getInputs() {
         return inputs;
     }
