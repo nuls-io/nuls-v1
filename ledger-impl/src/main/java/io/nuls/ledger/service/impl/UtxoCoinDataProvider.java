@@ -332,7 +332,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 input.setFrom(output);
                 input.setFromHash(output.getTxHash());
                 input.setFromIndex(output.getIndex());
-                input.setParent(tx);
+                input.setTxHash(tx.getHash());
                 input.setIndex(i);
                 inputValue += output.getValue();
 
@@ -399,7 +399,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 } else {
                     output.setLockTime(0L);
                 }
-                output.setParent(tx);
+                output.setTxHash(tx.getHash());
                 outputValue += output.getValue();
                 outputs.add(output);
                 i++;
@@ -414,7 +414,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             output.setAddress(inputs.get(0).getFrom().getAddress());
             output.setValue(balance);
             output.setIndex(i);
-            output.setParent(tx);
+            output.setTxHash(tx.getHash());
             output.setStatus(UtxoOutput.UTXO_CONFIRM_UNLOCK);
             P2PKHScript p2PKHScript = new P2PKHScript(new NulsDigestData(NulsDigestData.DIGEST_ALG_SHA160, account.getHash160()));
             output.setP2PKHScript(p2PKHScript);

@@ -27,9 +27,7 @@ import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.constant.SeverityLevelEnum;
-import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.log.Log;
@@ -80,6 +78,7 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
         if (result.isFailed()) {
             if (result.getErrorCode() == ErrorCode.ORPHAN_TX) {
                 orphanTxCacheManager.putTx(tx);
+                eventBroadcaster.broadcastHashAndCacheAysn(event, false, fromId);
                 return;
             }
             if (result.getLevel() == SeverityLevelEnum.NORMAL_FOUL) {
@@ -94,7 +93,7 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
                 ledgerService.approvalTx(tx);
             }
             cacheManager.putTx(tx);
-            eventBroadcaster.broadcastHashAndCacheAysn(event,false,fromId);
+            eventBroadcaster.broadcastHashAndCacheAysn(event, false, fromId);
         } catch (Exception e) {
             Log.error(e);
         }
