@@ -40,7 +40,6 @@ public class YellowPunishData extends BaseNulsData {
     private long height;
     private String address;
     public YellowPunishData(){
-        this.registerValidator(YellowPunishValidator.getInstance());
     }
     @Override
     public int size() {
