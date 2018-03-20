@@ -24,12 +24,15 @@
 package io.nuls.rpc.resources.impl;
 
 import io.nuls.account.service.intf.AccountService;
+import io.nuls.consensus.entity.AgentInfo;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
+import io.nuls.consensus.entity.DepositList;
 import io.nuls.consensus.service.intf.ConsensusService;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.date.TimeService;
@@ -48,6 +51,7 @@ import io.nuls.rpc.resources.form.StopAgentForm;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -122,6 +126,66 @@ public class PocConsensusResource {
         AssertUtil.canNotEmpty(form.getPassword());
         consensusService.stopConsensus(form.getAddress(), form.getPassword(),null);
         return RpcResult.getSuccess();
+    }
+
+
+    @GET
+    @Path("/depositList")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult list(@QueryParam("address") String address,
+                          @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
+        if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+        if (pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if (pageSize == 0) {
+            pageSize = 10;
+        }
+        RpcResult result = RpcResult.getSuccess();
+        Page<DepositList> listPage = new Page<>();
+        if(!StringUtils.validAddress(address)){
+            return RpcResult.getFailed(ErrorCode.ADDRESS_ERROR);
+        }
+
+        Page<DepositList> pageDto = new Page<>();
+        List<DepositList> dtoList = new ArrayList<>();
+        //todo
+        pageDto.setList(dtoList);
+        result.setData(pageDto);
+        return result;
+    }
+
+    @GET
+    @Path("/agentList")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult list(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
+
+        RpcResult result = RpcResult.getSuccess();
+        Page<AgentInfo> listPage = new Page<>();
+
+        AgentInfo agentInfo = new AgentInfo();
+        //todo
+
+        result.setData(agentInfo);
+        return result;
+    }
+
+    @GET
+    @Path("/agentInfo")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult list(@QueryParam("agentName") String agentName){
+
+        RpcResult result = RpcResult.getSuccess();
+        Page<AgentInfo> listPage = new Page<>();
+
+        Page<AgentInfo> pageDto = new Page<>();
+        List<AgentInfo> dtoList = new ArrayList<>();
+        //todo
+        pageDto.setList(dtoList);
+        result.setData(pageDto);
+        return result;
     }
 
     @POST
