@@ -23,6 +23,7 @@
  */
 package io.nuls.db.dao.impl.mybatis;
 
+import com.github.pagehelper.PageHelper;
 import io.nuls.db.dao.DelegateAccountDataService;
 import io.nuls.db.dao.impl.mybatis.mapper.DelegateAccountMapper;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
@@ -30,6 +31,7 @@ import io.nuls.db.entity.DelegateAccountPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.db.transactional.annotation.PROPAGATION;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -51,4 +53,6 @@ public class DelegateAccountDaoImpl extends BaseDaoImpl<DelegateAccountMapper, S
     public int updateSelective(DelegateAccountPo po) {
         return getMapper().updateByPrimaryKeySelective(po);
     }
+
+
 }

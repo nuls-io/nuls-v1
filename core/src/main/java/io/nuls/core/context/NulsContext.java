@@ -38,7 +38,6 @@ import java.util.Set;
  * @author Niels
  */
 public class NulsContext {
-    //todo 临时使用
     public static String CACHED_PASSWORD_OF_WALLET = "nuls123456";
 
     private static final HashMap<String, Short> CHAIN_ID_MAP = new HashMap<String, Short>();

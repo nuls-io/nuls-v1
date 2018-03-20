@@ -36,6 +36,7 @@ public enum ErrorCode {
      */
     SUCCESS("SYS000", 10000),
     FAILED("SYS001", 10001),
+    WARNNING("SYS002",10998),
     SYS_UNKOWN_EXCEPTION("SYS999", 10999),
     FILE_NOT_FOUND("SYS002", 10002),
     NULL_PARAMETER("SYS003", 10003),
@@ -89,6 +90,7 @@ public enum ErrorCode {
     ACCOUNT_NOT_EXIST("ACT001", 45001),
     ACCOUNT_IS_ALREADY_ENCRYPTED("ACT002", 45002),
     ACCOUNT_EXIST("ACT003",45003),
+    ADDRESS_ERROR("ACT004",45004),
 
     /**
      * ----------  DB Exception code   ---------

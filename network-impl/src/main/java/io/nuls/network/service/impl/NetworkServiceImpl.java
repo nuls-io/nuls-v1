@@ -45,7 +45,10 @@ import io.nuls.network.param.TestNetworkParam;
 import io.nuls.network.service.NetworkService;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author vivi
@@ -116,15 +119,14 @@ public class NetworkServiceImpl implements NetworkService {
         TaskManager.shutdownByModuleId(NulsConstant.MODULE_ID_NETWORK);
     }
 
-
     @Override
     public void removeNode(String nodeId) {
-        nodesManager.removeNode(nodeId,null);
+        nodesManager.removeNode(nodeId, null);
     }
 
     @Override
     public void removeNode(String nodeId, int type) {
-        nodesManager.removeNode(nodeId,type);
+        nodesManager.removeNode(nodeId, type);
     }
 
     @Override
@@ -135,6 +137,19 @@ public class NetworkServiceImpl implements NetworkService {
     @Override
     public List<Node> getAvailableNodes() {
         return nodesManager.getAvailableNodes();
+    }
+
+    @Override
+    public Set<String> getNodesIp() {
+        Set<String> ipList = new HashSet<>();
+        for (String ip : NetworkContext.ipMap.keySet()) {
+            ipList.add(ip);
+        }
+        List<Node> nodeList = getAvailableNodes();
+        for (Node node : nodeList) {
+            ipList.add(node.getIp());
+        }
+        return ipList;
     }
 
     @Override

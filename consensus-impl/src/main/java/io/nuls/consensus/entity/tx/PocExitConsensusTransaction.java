@@ -27,6 +27,7 @@ import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.tx.UnlockNulsTransaction;
 
 /**
@@ -37,6 +38,10 @@ public class PocExitConsensusTransaction extends UnlockNulsTransaction<NulsDiges
 
     public PocExitConsensusTransaction() {
         super(TransactionConstant.TX_TYPE_EXIT_CONSENSUS);
+    }
+
+    public PocExitConsensusTransaction(CoinTransferData params, String password) throws NulsException {
+        super(TransactionConstant.TX_TYPE_EXIT_CONSENSUS, params, password);
     }
 
     @Override

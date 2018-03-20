@@ -92,7 +92,7 @@ public class ConsensusCacheManager {
         for (DelegatePo dpo : delegatePoList) {
             Consensus<Delegate> cd = ConsensusTool.fromPojo(dpo);
             this.cacheDelegate(cd);
-            if (null != self && cd.getAddress().equals(self.getAddress().toString())) {
+            if (null != self && null == mine && cd.getAddress().equals(self.getAddress().toString())) {
                 mine = cd;
             }
         }
@@ -104,10 +104,8 @@ public class ConsensusCacheManager {
         if (null == mine) {
             info.setStatus(ConsensusStatusEnum.NOT_IN.getCode());
         } else if (mine.getExtend() instanceof Agent) {
-            info.setStartTime(((Agent) mine.getExtend()).getStartTime());
             info.setStatus(((Agent) mine.getExtend()).getStatus());
         } else if (mine.getExtend() instanceof Delegate) {
-            info.setStartTime(((Delegate) mine.getExtend()).getStartTime());
             info.setStatus(((Delegate) mine.getExtend()).getStatus());
         }
         this.updateConsensusStatusInfo(info);

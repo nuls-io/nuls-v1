@@ -97,6 +97,11 @@ public class AccountResource {
     @Path("/alias")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult alias(AccountParamForm form) {
+        if (!StringUtils.validAddress(form.getAddress()) ||
+                !StringUtils.validPassword(form.getPassword()) ||
+                StringUtils.isBlank(form.getAddress())) {
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
         Result result = accountService.setAlias(form.getAddress(), form.getPassword(), form.getAlias());
         RpcResult rpcResult = new RpcResult(result);
         return rpcResult;
@@ -120,9 +125,11 @@ public class AccountResource {
     @Path("/balance/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getBalance(@PathParam("address") String address) {
+        if (StringUtils.isNotBlank(address) && !StringUtils.validAddress(address)) {
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
         Balance balance = ledgerService.getBalance(address);
         RpcResult result = RpcResult.getSuccess();
-
         result.setData(new BalanceDto(balance));
         return result;
     }
@@ -136,7 +143,7 @@ public class AccountResource {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         UtxoBalance balance = (UtxoBalance) ledgerService.getBalance(address);
-        if(balance == null || balance.getUnSpends() == null) {
+        if (balance == null || balance.getUnSpends() == null) {
             return RpcResult.getFailed("balance not enough");
         }
         amount += consensusService.getTxFee(Integer.MAX_VALUE).getValue();

@@ -38,13 +38,13 @@
     </insert>
 
     <update id="updateByPrimaryKey" parameterType="io.nuls.db.entity.AccountPo">
-        update account
+        update account set
         create_time = #{createTime,jdbcType=BIGINT},
         alias = #{alias,jdbcType=VARCHAR},
         status = #{status,jdbcType=INTEGER},
-        pubKey = #{pubKey,jdbcType=VARBINARY},
+        pub_key = #{pubKey,jdbcType=VARBINARY},
         pri_key = #{priKey,jdbcType=VARBINARY},
-        encryptedPriKey = #{encryptedPriKey,jdbcType=VARBINARY},
+        encrypted_pri_key = #{encryptedPriKey,jdbcType=VARBINARY},
         extend = #{extend,jdbcType=VARBINARY}
         where address = #{address,jdbcType=VARCHAR}
     </update>

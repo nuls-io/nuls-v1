@@ -59,10 +59,11 @@ public interface PocConsensusConstant {
      * Set temporarily as a fixed value,unit:nuls
      */
     int BLOCK_COUNT_OF_YEAR = 3153600;
+    int BLOCK_COUNT_OF_DAY = 8640;
     /**
      * value = 5000000/3154600
      */
-    double BLOCK_REWARD = 1.5855;
+    Na BLOCK_REWARD = Na.valueOf(158548960);
     Na TRANSACTION_FEE = Na.CENT;
     /**
      * unit:second

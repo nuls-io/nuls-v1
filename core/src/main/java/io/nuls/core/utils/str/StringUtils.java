@@ -24,6 +24,8 @@
 package io.nuls.core.utils.str;
 
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.crypto.Base58;
 
 import java.io.UnsupportedEncodingException;
 import java.util.UUID;
@@ -32,6 +34,8 @@ import java.util.UUID;
  * Created by Niels on 2017/10/9.
  */
 public class StringUtils {
+
+    public static final int ADDRESS_HASH_LENGTH = 23;
 
     public static boolean isBlank(String str) {
         return null == str || str.trim().length() == 0;
@@ -93,7 +97,13 @@ public class StringUtils {
 
     public static boolean validAddress(String address) {
         if (isBlank(address)) return false;
-        if (address.length() > 35) return false;
+        try {
+            byte[] bytes = Base58.decode(address);
+            if (bytes.length != ADDRESS_HASH_LENGTH) return false;
+        } catch (NulsException e) {
+            return false;
+        }
+
         return true;
     }
 

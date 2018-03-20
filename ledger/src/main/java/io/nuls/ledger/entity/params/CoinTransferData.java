@@ -24,8 +24,8 @@
 package io.nuls.ledger.entity.params;
 
 import io.nuls.core.chain.entity.Na;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.str.StringUtils;
+import io.nuls.ledger.entity.CoinData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,9 +38,13 @@ import java.util.Map;
  */
 public class CoinTransferData {
 
+    private OperationType type;
+
     private byte[] priKey;
 
     private List from;
+
+    private List<CoinData> fromCoinData;
 
     private Map<String, List<Coin>> toMap;
 
@@ -48,37 +52,36 @@ public class CoinTransferData {
 
     private Na fee;
 
-    public CoinTransferData() {
+    public CoinTransferData(OperationType type) {
         this.from = new ArrayList();
         this.toMap = new HashMap<>();
+        this.type = type;
     }
 
-    public CoinTransferData(Na totalNa) {
-        this();
+    public CoinTransferData(OperationType type, Na totalNa) {
+        this(type);
         this.totalNa = totalNa;
     }
 
-    public CoinTransferData(Na totalNa, String from) {
-        this(totalNa);
-        this.addFrom(from, totalNa);
+    public CoinTransferData(OperationType type, Na totalNa, String from) {
+        this(type, totalNa);
+        this.addFrom(from);
     }
 
-    public CoinTransferData(Na totalNa, String from, String to) {
-        this(totalNa);
-        this.addFrom(from, totalNa);
+    public CoinTransferData(OperationType type, Na totalNa, String from, String to) {
+        this(type, totalNa, from);
         if (StringUtils.isNotBlank(to)) {
             this.addTo(to, new Coin(totalNa));
         }
     }
 
-    public CoinTransferData(Na totalNa, List<String> from) {
-        this(totalNa);
-        this.from = from;
+    public CoinTransferData(OperationType type, Na totalNa, List<String> from) {
+        this(type, totalNa);
+        this.setFrom(from);
     }
 
-    public CoinTransferData(Na totalNa, List<String> from, String to) {
-        this(totalNa);
-        this.from = from;
+    public CoinTransferData(OperationType type, Na totalNa, List<String> from, String to) {
+        this(type, totalNa, from);
         if (StringUtils.isNotBlank(to)) {
             this.addTo(to, new Coin(totalNa));
         }
@@ -116,7 +119,7 @@ public class CoinTransferData {
         this.fee = fee;
     }
 
-    public void addFrom(String address, Na na) {
+    public void addFrom(String address) {
         this.from.add(address);
     }
 
@@ -135,5 +138,28 @@ public class CoinTransferData {
 
     public void setPriKey(byte[] priKey) {
         this.priKey = priKey;
+    }
+
+    public void addFromCoinData(CoinData coinData) {
+        if (this.fromCoinData == null) {
+            this.fromCoinData = new ArrayList<>();
+        }
+        this.fromCoinData.add(coinData);
+    }
+
+    public List<CoinData> getFromCoinData() {
+        return fromCoinData;
+    }
+
+    public void setFromCoinData(List<CoinData> fromCoinData) {
+        this.fromCoinData = fromCoinData;
+    }
+
+    public OperationType getType() {
+        return type;
+    }
+
+    public void setType(OperationType type) {
+        this.type = type;
     }
 }

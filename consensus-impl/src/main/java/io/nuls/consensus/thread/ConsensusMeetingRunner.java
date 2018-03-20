@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -62,12 +62,14 @@ import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.calc.DoubleUtils;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
+import io.nuls.ledger.entity.params.OperationType;
 import io.nuls.ledger.entity.tx.CoinBaseTransaction;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.network.entity.Node;
@@ -197,6 +199,7 @@ public class ConsensusMeetingRunner implements Runnable {
 
         Map<String, List<Consensus<Delegate>>> delegateMap = new HashMap<>();
         List<Consensus<Delegate>> delegateList = consensusCacheManager.getCachedDelegateList();
+        Na totalDeposit = Na.ZERO;
         for (Consensus<Delegate> cd : delegateList) {
             List<Consensus<Delegate>> sonList = delegateMap.get(cd.getExtend().getDelegateAddress());
             if (null == sonList) {
@@ -204,9 +207,9 @@ public class ConsensusMeetingRunner implements Runnable {
             }
             sonList.add(cd);
             delegateMap.put(cd.getExtend().getDelegateAddress(), sonList);
+            totalDeposit = totalDeposit.add(cd.getExtend().getDeposit());
         }
         List<PocMeetingMember> memberList = new ArrayList<>();
-        Na totalDeposit = Na.ZERO;
         for (Consensus<Agent> ca : list) {
             boolean isSeed = ca.getExtend().getSeed();
             if (!isSeed && ca.getExtend().getDeposit().isLessThan(PocConsensusConstant.AGENT_DEPOSIT_LOWER_LIMIT)) {
@@ -245,7 +248,7 @@ public class ConsensusMeetingRunner implements Runnable {
         }
         PocMeetingMember self = current.getMember(consensusManager.getConsensusStatusInfo().getAccount().getAddress().toString());
         self.setCreditVal(calcCreditVal());
-        long timeUnit = 100L;
+        long timeUnit = 1000L;
         while (TimeService.currentTimeMillis() <= (self.getPackTime() - timeUnit)) {
             try {
                 Thread.sleep(timeUnit);
@@ -288,7 +291,6 @@ public class ConsensusMeetingRunner implements Runnable {
         List<NulsDigestData> outHashList = new ArrayList<>();
         List<NulsDigestData> hashList = new ArrayList<>();
         long totalSize = 0L;
-        Log.error("txList.size:" + txList.size());
         for (int i = 0; i < txList.size(); i++) {
             Transaction tx = txList.get(i);
             totalSize += tx.size();
@@ -325,7 +327,7 @@ public class ConsensusMeetingRunner implements Runnable {
         Block newBlock = ConsensusTool.createBlock(bd, consensusManager.getConsensusStatusInfo().getAccount());
         ValidateResult result = newBlock.verify();
         if (result.isFailed()) {
-            Log.error("packing block error" + result.getMessage());
+            Log.warn("packing block error" + result.getMessage());
             for (Transaction tx : newBlock.getTxs()) {
                 if (tx.getType() == TransactionConstant.TX_TYPE_COIN_BASE) {
                     continue;
@@ -389,7 +391,7 @@ public class ConsensusMeetingRunner implements Runnable {
     }
 
     private void coinBaseTx(List<Transaction> txList, PocMeetingMember self) throws NulsException, IOException {
-        CoinTransferData data = new CoinTransferData();
+        CoinTransferData data = new CoinTransferData(OperationType.COIN_BASE);
         data.setFee(Na.ZERO);
         List<ConsensusReward> rewardList = calcReward(txList, self);
         Na total = Na.ZERO;
@@ -425,7 +427,8 @@ public class ConsensusMeetingRunner implements Runnable {
 
     private List<ConsensusReward> calcReward(List<Transaction> txList, PocMeetingMember self) {
         List<ConsensusReward> rewardList = new ArrayList<>();
-        if (this.consensusManager.getCurrentRound().getTotalDeposit().getValue() == 0) {
+        Consensus<Agent> ca = self.getAgentConsensus();
+        if (ca.getExtend().getSeed()) {
             long totalFee = 0;
             for (Transaction tx : txList) {
                 totalFee += tx.getFee().getValue();
@@ -434,7 +437,6 @@ public class ConsensusMeetingRunner implements Runnable {
                 return rewardList;
             }
             double caReward = totalFee;
-            Consensus<Agent> ca = self.getAgentConsensus();
             ConsensusReward agentReword = new ConsensusReward();
             agentReword.setAddress(ca.getAddress());
             agentReword.setReward(Na.valueOf((long) caReward));
@@ -445,29 +447,34 @@ public class ConsensusMeetingRunner implements Runnable {
         for (Transaction tx : txList) {
             totalFee += tx.getFee().getValue();
         }
-        Consensus<Agent> ca = self.getAgentConsensus();
-        Na agentTotalDeposit = self.getTotolEntrustDeposit().add(ca.getExtend().getDeposit());
-        double total = totalFee + PocConsensusConstant.ANNUAL_INFLATION.getValue() *
-                (PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * this.consensusManager.getCurrentRound().getMemberCount()) / PocConsensusConstant.BLOCK_COUNT_OF_YEAR
-                * (agentTotalDeposit.getValue() / this.consensusManager.getCurrentRound().getTotalDeposit().getValue());
-        double commissionRate = (100 - ca.getExtend().getCommissionRate()) / 100;
-        double caReward = total * ((ca.getExtend().getDeposit().getValue() / this.consensusManager.getCurrentRound().getTotalDeposit().getValue())
-                + (((this.consensusManager.getCurrentRound().getTotalDeposit().getValue() - ca.getExtend().getDeposit().getValue()) / this.consensusManager.getCurrentRound().getTotalDeposit().getValue()
-        ) * commissionRate));
+        double total = totalFee + DoubleUtils.mul(this.consensusManager.getCurrentRound().getMemberCount(), PocConsensusConstant.BLOCK_REWARD.getValue());
         ConsensusReward agentReword = new ConsensusReward();
         agentReword.setAddress(ca.getAddress());
+        double caReward = DoubleUtils.mul(total, DoubleUtils.div(ca.getExtend().getDeposit().getValue(), this.consensusManager.getCurrentRound().getTotalDeposit().getValue()));
+        caReward = caReward
+                + DoubleUtils.mul(total, DoubleUtils.mul(DoubleUtils.div((this.consensusManager.getCurrentRound().getTotalDeposit().getValue() - ca.getExtend().getDeposit().getValue()), this.consensusManager.getCurrentRound().getTotalDeposit().getValue()
+        ), DoubleUtils.round(ca.getExtend().getCommissionRate()/100, 2)));
         agentReword.setReward(Na.valueOf((long) caReward));
-        rewardList.add(agentReword);
+        Map<String, ConsensusReward> rewardMap = new HashMap<>();
+        rewardMap.put(ca.getAddress(), agentReword);
+        double delegateCommissionRate = DoubleUtils.div((100 - ca.getExtend().getCommissionRate()), 100, 2);
         for (Consensus<Delegate> cd : self.getDelegateList()) {
-            double reward = total *
-                    (cd.getExtend().getDeposit().getValue() /
-                            this.consensusManager.getCurrentRound().getTotalDeposit().getValue())
-                    * (1 - commissionRate);
-            ConsensusReward delegateReword = new ConsensusReward();
+            double reward =
+                    DoubleUtils.mul(DoubleUtils.mul(total, delegateCommissionRate),
+                            DoubleUtils.div(cd.getExtend().getDeposit().getValue(),
+                                    this.consensusManager.getCurrentRound().getTotalDeposit().getValue()));
+
+            ConsensusReward delegateReword = rewardMap.get(cd.getAddress());
+            if (null == delegateReword) {
+                delegateReword = new ConsensusReward();
+                delegateReword.setReward(Na.ZERO);
+            }
             delegateReword.setAddress(cd.getAddress());
-            delegateReword.setReward(Na.valueOf((long) reward));
-            rewardList.add(delegateReword);
+            delegateReword.setReward(delegateReword.getReward().add(Na.valueOf((long) reward)));
+            rewardMap.put(cd.getAddress(), delegateReword);
         }
+
+        rewardList.addAll(rewardMap.values());
         return rewardList;
     }
 

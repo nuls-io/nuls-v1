@@ -86,7 +86,8 @@ public class BifurcateProcessor {
 
     public BlockHeaderChain getLongestChain() {
         List<BlockHeaderChain> longestChainList = new ArrayList<>();
-        for (BlockHeaderChain chain : chainList) {
+        List<BlockHeaderChain>  list = new ArrayList<>(chainList);
+        for (BlockHeaderChain chain : list) {
             if (longestChainList.isEmpty() || chain.size() > longestChainList.get(0).size()) {
                 longestChainList.clear();
                 longestChainList.add(chain);
@@ -130,7 +131,8 @@ public class BifurcateProcessor {
 
     public List<String> getHashList(long height) {
         Set<String> set = new HashSet<>();
-        for (BlockHeaderChain chain : this.chainList) {
+        List<BlockHeaderChain> chainList1 = new ArrayList<>(this.chainList);
+        for (BlockHeaderChain chain : chainList1) {
             HeaderDigest headerDigest = chain.getHeaderDigest(height);
             if (null != headerDigest) {
                 set.add(headerDigest.getHash());

@@ -46,6 +46,9 @@ import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * @author Vive
+ */
 public class UtxoTransferTool {
 
     public static UtxoOutput toOutput(UtxoOutputPo po) {
@@ -175,7 +178,7 @@ public class UtxoTransferTool {
             tx.setRemark(po.getRemark().getBytes(NulsContext.DEFAULT_ENCODING));
         }
         if (null != po.getTxData()) {
-            tx.parseTxData(new NulsByteBuffer(po.getTxData()));
+            tx.setTxData(tx.parseTxData(new NulsByteBuffer(po.getTxData())));
         }
         transferCoinData(tx, po.getInputs(), po.getOutputs());
         tx.setStatus(TxStatusEnum.CONFIRMED);

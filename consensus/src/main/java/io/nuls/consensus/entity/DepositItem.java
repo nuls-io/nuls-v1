@@ -1,5 +1,4 @@
-/*
- *
+/**
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -21,17 +20,55 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
-
-package io.nuls.rpc.resources.dto;
+package io.nuls.consensus.entity;
 
 /**
- * @author Niels
- * @date 2018/3/14
+ * author Facjas
+ * date 2018/3/20.
  */
-public class ConsensusAddressDTO {
-    private String address;
-    private String status;
-//    private
+public class DepositItem {
+
+    long depositTime;
+    long amount;
+    String agentAddress;
+    //0: waiting   1: in consensus
+
+    int status;
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+
+
+    public long getDepositTime() {
+        return depositTime;
+    }
+
+    public void setDepositTime(long depositTime) {
+        this.depositTime = depositTime;
+    }
+
+    public long getAmount() {
+        return amount;
+    }
+
+    public void setAmount(long amount) {
+        this.amount = amount;
+    }
+
+    public String getAgentAddress() {
+        return agentAddress;
+    }
+
+    public void setAgentAddress(String agentAddress) {
+        this.agentAddress = agentAddress;
+    }
+
+
 }

@@ -55,8 +55,6 @@ public class Coin {
 
     private long unlockHeight;
 
-    private boolean canBeUnlocked;
-
     public Na getNa() {
         return na;
     }
@@ -79,14 +77,6 @@ public class Coin {
 
     public void setUnlockHeight(long unlockHeight) {
         this.unlockHeight = unlockHeight;
-    }
-
-    public boolean isCanBeUnlocked() {
-        return canBeUnlocked;
-    }
-
-    public void setCanBeUnlocked(boolean canBeUnlocked) {
-        this.canBeUnlocked = canBeUnlocked;
     }
 
 }
