@@ -35,6 +35,7 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.db.entity.UtxoOutputPo;
+import io.nuls.ledger.service.impl.LedgerCacheService;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.rpc.entity.OutputDto;
 import io.nuls.rpc.entity.RpcResult;
@@ -168,22 +169,22 @@ public class TransactionResource {
     @GET
     @Path("/utxo/locked")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult list(@QueryParam("address") String address, @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
-        if (address != null && !StringUtils.validAddress(address)) {
+    public RpcResult list(@QueryParam("address") String address,
+                          @QueryParam("pageNumber") int pageNumber,
+                          @QueryParam("pageSize") int pageSize) {
+        if (!StringUtils.validAddress(address)) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         if (pageNumber < 0 || pageSize < 0) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
-        if (StringUtils.isBlank(address)) {
-            address = accountService.getDefaultAccount().getAddress().getBase58();
-        }
         if (pageNumber == 0) {
             pageNumber = 1;
         }
         if (pageSize == 0) {
-            pageSize = 1;
+            pageSize = 10;
         }
+        //todo        ledgerService.getLockUtxo
         List<UtxoOutputPo> poList = outputDataService.getLockUtxo(address, TimeService.currentTimeMillis(), pageNumber, pageSize);
         List<OutputDto> dtoList = new ArrayList<>();
         for (UtxoOutputPo po : poList) {
