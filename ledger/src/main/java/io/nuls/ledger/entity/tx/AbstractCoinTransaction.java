@@ -73,8 +73,8 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
         if (null != coinParam) {
             this.fee = NulsContext.getServiceBean(ConsensusService.class).getTxFee(this.getType());
             coinParam.setFee(fee);
+            this.coinData = coinDataProvider.createByTransferData(this, coinParam, password);
         }
-        this.coinData = coinDataProvider.createByTransferData(this, coinParam, password);
         this.time = TimeService.currentTimeMillis();
     }
 
