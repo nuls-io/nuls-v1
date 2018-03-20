@@ -38,6 +38,8 @@ import java.util.Map;
  */
 public class CoinTransferData {
 
+    private OperationType type;
+
     private byte[] priKey;
 
     private List from;
@@ -50,37 +52,36 @@ public class CoinTransferData {
 
     private Na fee;
 
-    public CoinTransferData() {
+    public CoinTransferData(OperationType type) {
         this.from = new ArrayList();
         this.toMap = new HashMap<>();
+        this.type = type;
     }
 
-    public CoinTransferData(Na totalNa) {
-        this();
+    public CoinTransferData(OperationType type, Na totalNa) {
+        this(type);
         this.totalNa = totalNa;
     }
 
-    public CoinTransferData(Na totalNa, String from) {
-        this(totalNa);
+    public CoinTransferData(OperationType type, Na totalNa, String from) {
+        this(type, totalNa);
         this.addFrom(from);
     }
 
-    public CoinTransferData(Na totalNa, String from, String to) {
-        this(totalNa);
-        this.addFrom(from);
+    public CoinTransferData(OperationType type, Na totalNa, String from, String to) {
+        this(type, totalNa, from);
         if (StringUtils.isNotBlank(to)) {
             this.addTo(to, new Coin(totalNa));
         }
     }
 
-    public CoinTransferData(Na totalNa, List<String> from) {
-        this(totalNa);
-        this.from = from;
+    public CoinTransferData(OperationType type, Na totalNa, List<String> from) {
+        this(type, totalNa);
+        this.setFrom(from);
     }
 
-    public CoinTransferData(Na totalNa, List<String> from, String to) {
-        this(totalNa);
-        this.from = from;
+    public CoinTransferData(OperationType type, Na totalNa, List<String> from, String to) {
+        this(type, totalNa, from);
         if (StringUtils.isNotBlank(to)) {
             this.addTo(to, new Coin(totalNa));
         }
@@ -152,5 +153,13 @@ public class CoinTransferData {
 
     public void setFromCoinData(List<CoinData> fromCoinData) {
         this.fromCoinData = fromCoinData;
+    }
+
+    public OperationType getType() {
+        return type;
+    }
+
+    public void setType(OperationType type) {
+        this.type = type;
     }
 }

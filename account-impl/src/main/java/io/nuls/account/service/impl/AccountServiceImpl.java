@@ -63,6 +63,7 @@ import io.nuls.db.entity.TransactionPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.params.CoinTransferData;
+import io.nuls.ledger.entity.params.OperationType;
 import io.nuls.ledger.event.TransactionEvent;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.ledger.util.UtxoTransferTool;
@@ -565,7 +566,7 @@ public class AccountServiceImpl implements AccountService {
 
         try {
             TransactionEvent event = new TransactionEvent();
-            CoinTransferData coinData = new CoinTransferData(AccountConstant.ALIAS_NA, address, null);
+            CoinTransferData coinData = new CoinTransferData(OperationType.TRANSFER,AccountConstant.ALIAS_NA, address, null);
             AliasTransaction aliasTx = new AliasTransaction(coinData, password);
             aliasTx.setHash(NulsDigestData.calcDigestData(aliasTx.serialize()));
             aliasTx.setScriptSig(createP2PKHScriptSigFromDigest(aliasTx.getHash(), account, password).serialize());

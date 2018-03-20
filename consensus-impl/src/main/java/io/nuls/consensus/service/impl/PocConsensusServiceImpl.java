@@ -53,6 +53,7 @@ import io.nuls.core.utils.str.StringUtils;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
+import io.nuls.ledger.entity.params.OperationType;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.ledger.event.TransactionEvent;
 import io.nuls.ledger.service.intf.LedgerService;
@@ -81,13 +82,12 @@ public class PocConsensusServiceImpl implements ConsensusService {
 
     private void registerAgent(Agent agent, Account account, String password) throws IOException, NulsException {
         TransactionEvent event = new TransactionEvent();
-        CoinTransferData data = new CoinTransferData();
+        CoinTransferData data = new CoinTransferData(OperationType.LOCK);
         data.setFee(this.getTxFee(TransactionConstant.TX_TYPE_REGISTER_AGENT));
         data.setTotalNa(agent.getDeposit());
         data.addFrom(account.getAddress().toString());
         Coin coin = new Coin();
-        coin.setCanBeUnlocked(true);
-        coin.setUnlockHeight(Long.MAX_VALUE);
+        coin.setUnlockHeight(0);
         coin.setUnlockTime(0);
         coin.setNa(agent.getDeposit());
         data.addTo(account.getAddress().toString(), coin);
@@ -127,13 +127,12 @@ public class PocConsensusServiceImpl implements ConsensusService {
         delegate.setDeposit(Na.valueOf(amount));
         delegate.setStartTime(TimeService.currentTimeMillis());
         ca.setExtend(delegate);
-        CoinTransferData data = new CoinTransferData();
+        CoinTransferData data = new CoinTransferData(OperationType.LOCK);
         data.setFee(this.getTxFee(TransactionConstant.TX_TYPE_REGISTER_AGENT));
         data.setTotalNa(delegate.getDeposit());
         data.addFrom(account.getAddress().toString());
         Coin coin = new Coin();
-        coin.setCanBeUnlocked(true);
-        coin.setUnlockHeight(Long.MAX_VALUE);
+        coin.setUnlockHeight(0);
         coin.setUnlockTime(0);
         coin.setNa(delegate.getDeposit());
         data.addTo(account.getAddress().toString(), coin);
@@ -194,7 +193,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
             throw new NulsRuntimeException(ErrorCode.PASSWORD_IS_WRONG);
         }
         TransactionEvent event = new TransactionEvent();
-        CoinTransferData coinTransferData = new CoinTransferData();
+        CoinTransferData coinTransferData = new CoinTransferData(OperationType.UNLOCK);
         coinTransferData.setFee(this.getTxFee(TransactionConstant.TX_TYPE_EXIT_CONSENSUS));
         coinTransferData.setTotalNa(lastCoinTransferData.getTotalNa());
         coinTransferData.addFrom(address);

@@ -69,6 +69,7 @@ import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
+import io.nuls.ledger.entity.params.OperationType;
 import io.nuls.ledger.entity.tx.CoinBaseTransaction;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.network.entity.Node;
@@ -390,7 +391,7 @@ public class ConsensusMeetingRunner implements Runnable {
     }
 
     private void coinBaseTx(List<Transaction> txList, PocMeetingMember self) throws NulsException, IOException {
-        CoinTransferData data = new CoinTransferData();
+        CoinTransferData data = new CoinTransferData(OperationType.COIN_BASE);
         data.setFee(Na.ZERO);
         List<ConsensusReward> rewardList = calcReward(txList, self);
         Na total = Na.ZERO;

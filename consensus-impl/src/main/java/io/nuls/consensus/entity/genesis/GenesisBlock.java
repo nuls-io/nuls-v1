@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -43,6 +43,7 @@ import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
+import io.nuls.ledger.entity.params.OperationType;
 import io.nuls.ledger.entity.tx.CoinBaseTransaction;
 
 import java.io.IOException;
@@ -105,7 +106,7 @@ public final class GenesisBlock extends Block {
         if (null == list || list.isEmpty()) {
             throw new NulsRuntimeException(ErrorCode.CONFIG_ERROR);
         }
-        CoinTransferData data = new CoinTransferData();
+        CoinTransferData data = new CoinTransferData(OperationType.COIN_BASE);
         data.setPriKey(Hex.decode(priKey));
         data.setFee(Na.ZERO);
         Na total = Na.ZERO;
@@ -117,7 +118,6 @@ public final class GenesisBlock extends Block {
             Integer height = (Integer) map.get(CONFIG_FILED_UNLOCK_HEIGHT);
             Coin coin = new Coin();
             coin.setNa(Na.parseNuls(nuls));
-            coin.setCanBeUnlocked(false);
             coin.setUnlockTime(0);
             if (height == null) {
                 coin.setUnlockTime(0);
@@ -154,7 +154,7 @@ public final class GenesisBlock extends Block {
         AccountService accountService = NulsContext.getServiceBean(AccountService.class);
         P2PKHScriptSig scriptSig = null;
         try {
-            scriptSig = accountService.createP2PKHScriptSigFromDigest(tx.getHash(),account,"");
+            scriptSig = accountService.createP2PKHScriptSigFromDigest(tx.getHash(), account, "");
         } catch (NulsException e) {
             e.printStackTrace();
         }
@@ -213,7 +213,7 @@ public final class GenesisBlock extends Block {
         return service.signDigest(bytes, ECKey.fromPrivate(new BigInteger(Hex.decode(priKey))).getPrivKeyBytes());
     }
 
-    private byte[]  getGenesisPubkey(){
+    private byte[] getGenesisPubkey() {
         return ECKey.fromPrivate(new BigInteger(Hex.decode(priKey))).getPubKey();
     }
 }
