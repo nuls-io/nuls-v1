@@ -135,7 +135,7 @@ public class PocConsensusResource {
     public RpcResult list(@QueryParam("address") String address,
                           @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize, @QueryParam("type") int type) {
         //type =0  : all the depositlist sent by an account
-        //type =1  : all the depositlist an agents
+        //type =1  : all the depositlist recieved by an agent
         if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
