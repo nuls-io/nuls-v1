@@ -25,52 +25,50 @@ package io.nuls.network.message.impl;
 
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.event.BaseEvent;
-import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Node;
 import io.nuls.network.message.NetworkCacheService;
 import io.nuls.network.message.NetworkEventResult;
+import io.nuls.network.message.entity.GetNodeEvent;
+import io.nuls.network.message.entity.GetNodesIpEvent;
 import io.nuls.network.message.entity.NodeEvent;
+import io.nuls.network.message.entity.NodesIpEvent;
 import io.nuls.network.message.handler.NetWorkEventHandler;
 import io.nuls.network.service.NetworkService;
-import sun.nio.ch.Net;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author vivi
  * @date 2017/11/21
  */
-public class NodeEventHandler implements NetWorkEventHandler {
+public class GetNodesIpEventHandler implements NetWorkEventHandler {
 
-    private static final NodeEventHandler INSTANCE = new NodeEventHandler();
+    private static final GetNodesIpEventHandler INSTANCE = new GetNodesIpEventHandler();
 
     private NetworkService networkService;
 
     private NetworkCacheService cacheService;
 
-    private NodeEventHandler() {
+    private GetNodesIpEventHandler() {
         cacheService = NetworkCacheService.getInstance();
     }
 
-    public static NodeEventHandler getInstance() {
+    public static GetNodesIpEventHandler getInstance() {
         return INSTANCE;
     }
 
     @Override
-    public NetworkEventResult process(BaseEvent networkEvent, Node node) {
-        NodeEvent event = (NodeEvent) networkEvent;
-
-//        String key = event.getHeader().getEventType() + "-" + node.getIp();
-//        if (cacheService.existEvent(key)) {
-//            networkService.removeNode(node.getId());
-//            return null;
-//        }
-//        cacheService.putEvent(key, event, false);
-
-        for (Node newNode : event.getEventBody().getNodes()) {
-            newNode.setType(Node.OUT);
-            newNode.setStatus(Node.WAIT);
-            getNetworkService().addNodeToGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP, newNode);
+    public NetworkEventResult process(BaseEvent event, Node node) {
+        List<Node> availableNodes = getNetworkService().getAvailableNodes();
+        List<String> ipList = new ArrayList<>();
+        for (Node n : availableNodes) {
+            ipList.add(n.getIp());
         }
-        return null;
+
+        NodesIpEvent ipEvent = new NodesIpEvent(ipList);
+        return new NetworkEventResult(true, ipEvent);
     }
 
     private NetworkService getNetworkService() {
@@ -79,4 +77,5 @@ public class NodeEventHandler implements NetWorkEventHandler {
         }
         return networkService;
     }
+
 }

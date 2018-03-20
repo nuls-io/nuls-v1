@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -27,6 +27,10 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.event.CommonStringEvent;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
+import io.nuls.network.constant.NetworkConstant;
+import io.nuls.network.entity.Node;
+import io.nuls.network.entity.NodeGroup;
+import io.nuls.network.service.NetworkService;
 import io.nuls.rpc.entity.InfoDto;
 import io.nuls.rpc.entity.RpcResult;
 
@@ -35,6 +39,8 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Niels
@@ -44,7 +50,7 @@ import javax.ws.rs.core.MediaType;
 public class NetworkMessageResource {
 
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
-
+    private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
 
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
@@ -76,8 +82,37 @@ public class NetworkMessageResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getInfo() {
         RpcResult result = RpcResult.getSuccess();
-        InfoDto info = new InfoDto(NulsContext.getInstance().getBestBlock().getHeader().getHeight(), NulsContext.getInstance().getNetBestBlockHeight(), TimeService.getNetTimeOffset());
+        InfoDto info = new InfoDto(NulsContext.getInstance().getBestBlock().getHeader().getHeight(),
+                NulsContext.getInstance().getNetBestBlockHeight(), TimeService.getNetTimeOffset());
+
+        NodeGroup inGroup = networkService.getNodeGroup(NetworkConstant.NETWORK_NODE_IN_GROUP);
+        NodeGroup outGroup = networkService.getNodeGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP);
+
+        int count = 0;
+        for (Node node : inGroup.getNodes().values()) {
+            if (node.getStatus() == Node.HANDSHAKE) {
+                count += 1;
+            }
+        }
+        info.setInCount(count);
+
+        count = 0;
+        for (Node node : outGroup.getNodes().values()) {
+            if (node.getStatus() == Node.HANDSHAKE) {
+                count += 1;
+            }
+        }
+        info.setOutCount(count);
         result.setData(info);
+        return result;
+    }
+
+    @GET
+    @Path("/nodes/ip")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult getNode() {
+        Set<String> ipSet = networkService.getNodesIp();
+        RpcResult result = RpcResult.getSuccess().setData(ipSet);
         return result;
     }
 }

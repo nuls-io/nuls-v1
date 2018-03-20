@@ -31,6 +31,7 @@ import io.nuls.network.entity.param.AbstractNetworkParam;
 
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author vivi
@@ -45,11 +46,14 @@ public interface NetworkService {
     void shutdown();
 
     void removeNode(String nodeId);
+
     void removeNode(String nodeId,int type);
 
     Node getNode(String nodeId);
 
     List<Node> getAvailableNodes();
+
+    Set<String> getNodesIp();
 
     void blackNode(String nodeId, int status);
 

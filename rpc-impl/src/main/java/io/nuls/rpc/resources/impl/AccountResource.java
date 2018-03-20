@@ -125,9 +125,11 @@ public class AccountResource {
     @Path("/balance/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getBalance(@PathParam("address") String address) {
+        if (StringUtils.isNotBlank(address) && !StringUtils.validAddress(address)) {
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
         Balance balance = ledgerService.getBalance(address);
         RpcResult result = RpcResult.getSuccess();
-
         result.setData(new BalanceDto(balance));
         return result;
     }

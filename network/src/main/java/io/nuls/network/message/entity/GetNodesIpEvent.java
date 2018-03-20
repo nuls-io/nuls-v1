@@ -39,37 +39,27 @@ import java.io.IOException;
  * @author vivi
  * @date 2017/12/1.
  */
-public class GetNodeEvent extends BaseEvent {
+public class GetNodesIpEvent extends BaseEvent {
 
-    private int length;
-
-    public GetNodeEvent() {
-        super(NulsConstant.MODULE_ID_NETWORK, NetworkConstant.NETWORK_GET_NODE_EVENT);
-    }
-
-    public GetNodeEvent(int length) {
-        this();
-        this.length = length;
+    public GetNodesIpEvent() {
+        super(NulsConstant.MODULE_ID_NETWORK, NetworkConstant.NETWORK_GET_NODEIP_EVENT);
     }
 
     @Override
     public int size() {
         int s = 0;
         s += EventHeader.EVENT_HEADER_LENGTH;
-        s += VarInt.sizeOf(length);
         return s;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeNulsData(getHeader());
-        stream.writeVarInt(length);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.setHeader(byteBuffer.readNulsData(new EventHeader()));
-        length = (int) byteBuffer.readVarInt();
     }
 
     @Override
@@ -80,14 +70,6 @@ public class GetNodeEvent extends BaseEvent {
     @Override
     public NoticeData getNotice() {
         return null;
-    }
-
-    public int getLength() {
-        return length;
-    }
-
-    public void setLength(int length) {
-        this.length = length;
     }
 
 }

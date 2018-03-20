@@ -29,47 +29,61 @@ import io.nuls.core.event.BaseEvent;
 import io.nuls.core.event.EventHeader;
 import io.nuls.core.event.NoticeData;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.network.constant.NetworkConstant;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author vivi
  * @date 2017/12/1.
  */
-public class GetNodeEvent extends BaseEvent {
+public class NodesIpEvent extends BaseEvent {
 
-    private int length;
+    private List<String> ipList;
 
-    public GetNodeEvent() {
-        super(NulsConstant.MODULE_ID_NETWORK, NetworkConstant.NETWORK_GET_NODE_EVENT);
+    public NodesIpEvent() {
+        super(NulsConstant.MODULE_ID_NETWORK, NetworkConstant.NETWORK_GET_NODEIP_EVENT);
+        this.ipList = new ArrayList<>();
     }
 
-    public GetNodeEvent(int length) {
-        this();
-        this.length = length;
+    public NodesIpEvent(List ipList) {
+        super(NulsConstant.MODULE_ID_NETWORK, NetworkConstant.NETWORK_GET_NODEIP_EVENT);
+        this.ipList = ipList;
     }
 
     @Override
     public int size() {
         int s = 0;
         s += EventHeader.EVENT_HEADER_LENGTH;
-        s += VarInt.sizeOf(length);
+        s += VarInt.sizeOf(ipList.size());
+        for (String ip : ipList) {
+            s += Utils.sizeOfString(ip);
+        }
         return s;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeNulsData(getHeader());
-        stream.writeVarInt(length);
+        stream.write(new VarInt(ipList.size()).encode());
+        for (String ip : ipList) {
+            stream.writeString(ip);
+        }
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.setHeader(byteBuffer.readNulsData(new EventHeader()));
-        length = (int) byteBuffer.readVarInt();
+        int size = (int) byteBuffer.readVarInt();
+        for (int i = 0; i < size; i++) {
+            String ip = byteBuffer.readString();
+            ipList.add(ip);
+        }
     }
 
     @Override
@@ -82,12 +96,11 @@ public class GetNodeEvent extends BaseEvent {
         return null;
     }
 
-    public int getLength() {
-        return length;
+    public List<String> getIpList() {
+        return ipList;
     }
 
-    public void setLength(int length) {
-        this.length = length;
+    public void setIpList(List<String> ipList) {
+        this.ipList = ipList;
     }
-
 }

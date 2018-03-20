@@ -50,7 +50,6 @@ public class GetVersionEvent extends BaseEvent {
 
     public GetVersionEvent(int externalPort) {
         this();
-        this.setEventBody(new NulsIntegerData(externalPort));
         this.externalPort = externalPort;
     }
 
