@@ -47,12 +47,12 @@ public class NodesIpEvent extends BaseEvent {
     private List<String> ipList;
 
     public NodesIpEvent() {
-        super(NulsConstant.MODULE_ID_NETWORK, NetworkConstant.NETWORK_GET_NODEIP_EVENT);
+        super(NulsConstant.MODULE_ID_NETWORK, NetworkConstant.NETWORK_NODEIP_EVENT);
         this.ipList = new ArrayList<>();
     }
 
     public NodesIpEvent(List ipList) {
-        super(NulsConstant.MODULE_ID_NETWORK, NetworkConstant.NETWORK_GET_NODEIP_EVENT);
+        super(NulsConstant.MODULE_ID_NETWORK, NetworkConstant.NETWORK_NODEIP_EVENT);
         this.ipList = ipList;
     }
 

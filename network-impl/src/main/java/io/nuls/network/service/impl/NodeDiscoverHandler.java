@@ -29,7 +29,6 @@ import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
-import io.nuls.core.utils.queue.fqueue.internal.Entity;
 import io.nuls.db.dao.NodeDataService;
 import io.nuls.db.entity.NodePo;
 import io.nuls.network.NetworkContext;
@@ -178,6 +177,7 @@ public class NodeDiscoverHandler implements Runnable {
             long now = TimeService.currentTimeMillis();
 
             if (count == 10) {
+                count = 0;
                 List<String> list = new ArrayList<>();
                 for (Map.Entry<String, Long> entry : NetworkContext.ipMap.entrySet()) {
                     if (now - entry.getValue() > DateUtil.MINUTE_TIME * 2) {
@@ -187,7 +187,6 @@ public class NodeDiscoverHandler implements Runnable {
                 for (String ip : list) {
                     NetworkContext.ipMap.remove(ip);
                 }
-                count = 0;
             }
 
             try {
