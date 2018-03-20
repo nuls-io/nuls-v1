@@ -28,10 +28,7 @@ import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.constant.PocConsensusConstant;
-import io.nuls.consensus.entity.Consensus;
-import io.nuls.consensus.entity.ConsensusAgentImpl;
-import io.nuls.consensus.entity.ConsensusDelegateImpl;
-import io.nuls.consensus.entity.ConsensusStatusInfo;
+import io.nuls.consensus.entity.*;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.member.Delegate;
 import io.nuls.consensus.entity.params.JoinConsensusParam;
@@ -48,7 +45,6 @@ import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
@@ -226,6 +222,20 @@ public class PocConsensusServiceImpl implements ConsensusService {
         List<Consensus> resultList = new ArrayList<>(list);
         resultList.addAll(consensusCacheManager.getCachedDelegateList(ConsensusStatusEnum.IN));
         return resultList;
+    }
+
+    @Override
+    public List<DepositList> getDepositList(String address){
+        //todo
+        List <DepositList> depositList = null;
+        return depositList;
+    }
+
+    @Override
+    public List<AgentInfo> getAgentList(){
+        //todo
+        List <AgentInfo> agentInfo = null;
+        return agentInfo;
     }
 
     @Override
