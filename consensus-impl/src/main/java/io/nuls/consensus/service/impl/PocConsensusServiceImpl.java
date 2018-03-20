@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -45,6 +45,7 @@ import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TransactionConstant;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.crypto.Hex;
@@ -56,6 +57,7 @@ import io.nuls.core.utils.str.StringUtils;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
+import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.ledger.event.TransactionEvent;
 import io.nuls.ledger.service.intf.LedgerService;
 
@@ -86,7 +88,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
         CoinTransferData data = new CoinTransferData();
         data.setFee(this.getTxFee(TransactionConstant.TX_TYPE_REGISTER_AGENT));
         data.setTotalNa(agent.getDeposit());
-        data.addFrom(account.getAddress().toString(), agent.getDeposit());
+        data.addFrom(account.getAddress().toString());
         Coin coin = new Coin();
         coin.setCanBeUnlocked(true);
         coin.setUnlockHeight(Long.MAX_VALUE);
@@ -108,10 +110,10 @@ public class PocConsensusServiceImpl implements ConsensusService {
         tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(), account, password).serialize());
         tx.verifyWithException();
         event.setEventBody(tx);
-       List<String> nodeList = eventBroadcaster.broadcastHashAndCache(event, true);
-       if(null==nodeList||nodeList.isEmpty()){
-           throw new NulsRuntimeException(ErrorCode.FAILED,"broadcast transaction failed!");
-       }
+        List<String> nodeList = eventBroadcaster.broadcastHashAndCache(event, true);
+        if (null == nodeList || nodeList.isEmpty()) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "broadcast transaction failed!");
+        }
     }
 
     private void joinTheConsensus(Account account, String password, long amount, String agentAddress) throws IOException, NulsException {
@@ -132,7 +134,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
         CoinTransferData data = new CoinTransferData();
         data.setFee(this.getTxFee(TransactionConstant.TX_TYPE_REGISTER_AGENT));
         data.setTotalNa(delegate.getDeposit());
-        data.addFrom(account.getAddress().toString(), delegate.getDeposit());
+        data.addFrom(account.getAddress().toString());
         Coin coin = new Coin();
         coin.setCanBeUnlocked(true);
         coin.setUnlockHeight(Long.MAX_VALUE);
@@ -160,23 +162,25 @@ public class PocConsensusServiceImpl implements ConsensusService {
 //            Log.error(e);
 //        }
         List<String> nodeList = eventBroadcaster.broadcastAndCache(event, true);
-        if(null==nodeList||nodeList.isEmpty()){
-            throw new NulsRuntimeException(ErrorCode.FAILED,"broadcast transaction failed!");
+        if (null == nodeList || nodeList.isEmpty()) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "broadcast transaction failed!");
         }
     }
 
     @Override
     public void stopConsensus(String address, String password, Map<String, Object> paramsMap) throws NulsException, IOException {
-        Transaction joinTx = null;
+        AbstractCoinTransaction joinTx = null;
+        CoinTransferData lastCoinTransferData = null;
         if (null != paramsMap && StringUtils.isNotBlank((String) paramsMap.get("txHash"))) {
             PocJoinConsensusTransaction tx = (PocJoinConsensusTransaction) ledgerService.getTx(NulsDigestData.fromDigestHex((String) paramsMap.get("txHash")));
             address = tx.getTxData().getAddress();
+            lastCoinTransferData = tx.getCoinDataProvider().getTransferData(tx.getCoinData());
             joinTx = tx;
         } else {
             try {
                 List<Transaction> txlist = this.ledgerService.getTxList(address, TransactionConstant.TX_TYPE_REGISTER_AGENT);
                 if (null != txlist || !txlist.isEmpty()) {
-                    joinTx = txlist.get(0);
+                    joinTx = (AbstractCoinTransaction) txlist.get(0);
                 }
             } catch (Exception e) {
                 Log.error(e);
@@ -194,7 +198,16 @@ public class PocConsensusServiceImpl implements ConsensusService {
             throw new NulsRuntimeException(ErrorCode.PASSWORD_IS_WRONG);
         }
         TransactionEvent event = new TransactionEvent();
-        PocExitConsensusTransaction tx = new PocExitConsensusTransaction();
+        CoinTransferData coinTransferData = new CoinTransferData();
+        coinTransferData.setFee(this.getTxFee(TransactionConstant.TX_TYPE_EXIT_CONSENSUS));
+        coinTransferData.setTotalNa(lastCoinTransferData.getTotalNa());
+        coinTransferData.addFrom(address);
+        Coin coin = new Coin();
+        coin.setNa(lastCoinTransferData.getTotalNa());
+        coin.setUnlockHeight(NulsContext.getInstance().getBestBlock().getHeader().getHeight()+3*PocConsensusConstant.BLOCK_COUNT_OF_DAY);
+        coinTransferData.addTo(address, coin);
+        coinTransferData.addFromCoinData(joinTx.getCoinData());
+        PocExitConsensusTransaction tx = new PocExitConsensusTransaction(coinTransferData, password);
         tx.setTxData(joinTx.getHash());
         try {
             tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
