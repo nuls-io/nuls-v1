@@ -108,7 +108,7 @@ public class NetworkMessageResource {
     }
 
     @GET
-    @Path("/nodes/ip")
+    @Path("/nodes")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getNode() {
         Set<String> ipSet = networkService.getNodesIp();
