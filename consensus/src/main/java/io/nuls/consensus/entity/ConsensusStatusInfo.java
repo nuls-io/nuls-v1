@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,6 +24,7 @@
 package io.nuls.consensus.entity;
 
 import io.nuls.account.entity.Account;
+import io.nuls.core.chain.entity.Na;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -33,12 +34,12 @@ import java.util.Map;
  * @author Niels
  * @date 2017/11/7
  */
-public class ConsensusStatusInfo implements Serializable{
+public class ConsensusStatusInfo implements Serializable {
     private Account account;
     private int status;
     private long startTime;
     private int parkedCount;
-    private double accumulativeReward;
+    private Na accumulativeReward;
     private Map<String, Object> extend = new HashMap<>();
 
     public Account getAccount() {
@@ -81,11 +82,11 @@ public class ConsensusStatusInfo implements Serializable{
         this.startTime = startTime;
     }
 
-    public double getAccumulativeReward() {
+    public Na getAccumulativeReward() {
         return accumulativeReward;
     }
 
-    public void setAccumulativeReward(double accumulativeReward) {
+    public void setAccumulativeReward(Na accumulativeReward) {
         this.accumulativeReward = accumulativeReward;
     }
 

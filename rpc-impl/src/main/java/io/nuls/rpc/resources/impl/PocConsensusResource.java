@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -72,9 +72,8 @@ public class PocConsensusResource {
     public RpcResult getInfo(@QueryParam("address") String address) {
         AssertUtil.canNotEmpty(address, ErrorCode.NULL_PARAMETER);
         RpcResult result = RpcResult.getSuccess();
-        ConsensusStatusInfo status = consensusService.getConsensusInfo(address);
-        ConsensusAddressDTO dto = new ConsensusAddressDTO();
-        //todo
+        ConsensusStatusInfo info = consensusService.getConsensusInfo(address);
+        ConsensusAddressDTO dto = new ConsensusAddressDTO(info);
         result.setData(dto);
         return result;
     }
@@ -124,7 +123,7 @@ public class PocConsensusResource {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getAddress());
         AssertUtil.canNotEmpty(form.getPassword());
-        consensusService.stopConsensus(form.getAddress(), form.getPassword(),null);
+        consensusService.stopConsensus(form.getAddress(), form.getPassword(), null);
         return RpcResult.getSuccess();
     }
 
@@ -147,7 +146,7 @@ public class PocConsensusResource {
         }
         RpcResult result = RpcResult.getSuccess();
         Page<DepositList> listPage = new Page<>();
-        if(!StringUtils.validAddress(address)){
+        if (!StringUtils.validAddress(address)) {
             return RpcResult.getFailed(ErrorCode.ADDRESS_ERROR);
         }
 
@@ -177,7 +176,7 @@ public class PocConsensusResource {
     @GET
     @Path("/agentInfo")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult list(@QueryParam("agentName") String agentName){
+    public RpcResult list(@QueryParam("agentName") String agentName) {
 
         RpcResult result = RpcResult.getSuccess();
         Page<AgentInfo> listPage = new Page<>();
@@ -196,9 +195,9 @@ public class PocConsensusResource {
     public RpcResult out(WithdrawForm form) throws NulsException, IOException {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getTxHash());
-        Map<String,Object> params  = new HashMap<>();
-        params.put("txHash",form.getTxHash());
-        consensusService.stopConsensus(null,form.getPassword(),params);
+        Map<String, Object> params = new HashMap<>();
+        params.put("txHash", form.getTxHash());
+        consensusService.stopConsensus(null, form.getPassword(), params);
         return RpcResult.getSuccess();
     }
 

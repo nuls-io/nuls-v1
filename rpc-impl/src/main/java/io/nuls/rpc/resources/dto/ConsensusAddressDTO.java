@@ -26,12 +26,73 @@
 
 package io.nuls.rpc.resources.dto;
 
+import io.nuls.consensus.entity.ConsensusStatusInfo;
+
 /**
  * @author Niels
  * @date 2018/3/14
  */
 public class ConsensusAddressDTO {
+
     private String address;
-    private String status;
-//    private
+
+    private Integer status;
+
+    private Long startTime;
+
+    private Integer parkedCount;
+
+    private Long reward;
+
+    public ConsensusAddressDTO() {
+
+    }
+
+    public ConsensusAddressDTO(ConsensusStatusInfo info) {
+        this.address = info.getAccount().getAddress().getBase58();
+        this.status = info.getStatus();
+        this.startTime = info.getStartTime();
+        this.parkedCount = info.getParkedCount();
+        this.reward = info.getAccumulativeReward().getValue();
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    public Long getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(Long startTime) {
+        this.startTime = startTime;
+    }
+
+    public Integer getParkedCount() {
+        return parkedCount;
+    }
+
+    public void setParkedCount(Integer parkedCount) {
+        this.parkedCount = parkedCount;
+    }
+
+    public Long getReward() {
+        return reward;
+    }
+
+    public void setReward(Long reward) {
+        this.reward = reward;
+    }
 }
