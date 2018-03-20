@@ -224,10 +224,10 @@ public class PocConsensusServiceImpl implements ConsensusService {
     }
 
     @Override
-    public List<DepositList> getDepositList(String address){
+    public List<DepositItem> getDepositList(String address){
         //todo
-        List <DepositList> depositList = null;
-        return depositList;
+        List <DepositItem> depositItem = null;
+        return depositItem;
     }
 
     @Override
@@ -238,11 +238,15 @@ public class PocConsensusServiceImpl implements ConsensusService {
     }
 
     @Override
-    public ConsensusStatusInfo getConsensusInfo(String address) {
-        if (StringUtils.isBlank(address)) {
-            address = this.accountService.getDefaultAccount().getAddress().getBase58();
-        }
-        return consensusCacheManager.getConsensusStatusInfo(address);
+    public Map<String, Object> getConsensusInfo() {
+        //todo
+        return null;
+    }
+
+    @Override
+    public Map<String,Object> getConsensusInfo(String address) {
+        //todo
+        return null;
     }
 
     @Override
@@ -293,4 +297,9 @@ public class PocConsensusServiceImpl implements ConsensusService {
         }
     }
 
+    @Override
+    public ConsensusStatusInfo getConsensusStatus(String address) {
+        //todo
+        return null;
+    }
 }

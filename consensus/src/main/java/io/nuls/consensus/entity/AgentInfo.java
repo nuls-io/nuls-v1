@@ -37,7 +37,7 @@ public class AgentInfo {
     private Na totalDeposit;
     private double commissionRate;
     double creditRatio;
-    int menbers;
+    int memberCount;
     private String introduction;
 
     public String getDelegateAddress() {
@@ -88,12 +88,12 @@ public class AgentInfo {
         this.creditRatio = creditRatio;
     }
 
-    public int getMenbers() {
-        return menbers;
+    public int getMemberCount() {
+        return memberCount;
     }
 
-    public void setMenbers(int menbers) {
-        this.menbers = menbers;
+    public void setMemberCount(int memberCount) {
+        this.memberCount = memberCount;
     }
 
     public String getIntroduction() {

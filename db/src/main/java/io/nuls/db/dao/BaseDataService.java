@@ -90,4 +90,6 @@ public interface BaseDataService<K, T> {
      */
     Long getCount();
 
+    List<T> getPageList(Map<String, Object> params, int pageSize, int pageIndex, String orderBy);
+
 }
