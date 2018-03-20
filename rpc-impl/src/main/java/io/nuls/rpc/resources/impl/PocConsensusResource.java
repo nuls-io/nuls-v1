@@ -133,7 +133,9 @@ public class PocConsensusResource {
     @Path("/depositList")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult list(@QueryParam("address") String address,
-                          @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
+                          @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize, @QueryParam("type") int type) {
+        //type =0  : all the depositlist sent by an account
+        //type =1  : all the depositlist an agents
         if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
