@@ -452,7 +452,7 @@ public class ConsensusMeetingRunner implements Runnable {
         double caReward = DoubleUtils.mul(total, DoubleUtils.div(ca.getExtend().getDeposit().getValue(), this.consensusManager.getCurrentRound().getTotalDeposit().getValue()));
         caReward = caReward
                 + DoubleUtils.mul(total, DoubleUtils.mul(DoubleUtils.div((this.consensusManager.getCurrentRound().getTotalDeposit().getValue() - ca.getExtend().getDeposit().getValue()), this.consensusManager.getCurrentRound().getTotalDeposit().getValue()
-        ), DoubleUtils.round(ca.getExtend().getCommissionRate(), 2)));
+        ), DoubleUtils.round(ca.getExtend().getCommissionRate()/100, 2)));
         agentReword.setReward(Na.valueOf((long) caReward));
         Map<String, ConsensusReward> rewardMap = new HashMap<>();
         rewardMap.put(ca.getAddress(), agentReword);
