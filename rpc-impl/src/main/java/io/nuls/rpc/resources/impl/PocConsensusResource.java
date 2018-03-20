@@ -41,7 +41,7 @@ import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.rpc.entity.RpcResult;
 import io.nuls.rpc.resources.dto.ConsensusAddressDTO;
 import io.nuls.rpc.resources.form.CreateAgentForm;
-import io.nuls.rpc.resources.form.withdrawForm;
+import io.nuls.rpc.resources.form.WithdrawForm;
 import io.nuls.rpc.resources.form.DepositForm;
 import io.nuls.rpc.resources.form.StopAgentForm;
 
@@ -127,7 +127,7 @@ public class PocConsensusResource {
     @POST
     @Path("/withdraw")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult out(withdrawForm form) throws NulsException, IOException {
+    public RpcResult out(WithdrawForm form) throws NulsException, IOException {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getTxHash());
         Map<String,Object> params  = new HashMap<>();

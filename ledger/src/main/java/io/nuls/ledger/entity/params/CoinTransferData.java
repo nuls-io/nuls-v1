@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,8 +24,8 @@
 package io.nuls.ledger.entity.params;
 
 import io.nuls.core.chain.entity.Na;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.str.StringUtils;
+import io.nuls.ledger.entity.CoinData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,6 +41,8 @@ public class CoinTransferData {
     private byte[] priKey;
 
     private List from;
+
+    private List<CoinData> fromCoinData;
 
     private Map<String, List<Coin>> toMap;
 
@@ -60,12 +62,12 @@ public class CoinTransferData {
 
     public CoinTransferData(Na totalNa, String from) {
         this(totalNa);
-        this.addFrom(from, totalNa);
+        this.addFrom(from);
     }
 
     public CoinTransferData(Na totalNa, String from, String to) {
         this(totalNa);
-        this.addFrom(from, totalNa);
+        this.addFrom(from);
         if (StringUtils.isNotBlank(to)) {
             this.addTo(to, new Coin(totalNa));
         }
@@ -116,7 +118,7 @@ public class CoinTransferData {
         this.fee = fee;
     }
 
-    public void addFrom(String address, Na na) {
+    public void addFrom(String address) {
         this.from.add(address);
     }
 
@@ -135,5 +137,20 @@ public class CoinTransferData {
 
     public void setPriKey(byte[] priKey) {
         this.priKey = priKey;
+    }
+
+    public void addFromCoinData(CoinData coinData) {
+        if (this.fromCoinData == null) {
+            this.fromCoinData = new ArrayList<>();
+        }
+        this.fromCoinData.add(coinData);
+    }
+
+    public List<CoinData> getFromCoinData() {
+        return fromCoinData;
+    }
+
+    public void setFromCoinData(List<CoinData> fromCoinData) {
+        this.fromCoinData = fromCoinData;
     }
 }

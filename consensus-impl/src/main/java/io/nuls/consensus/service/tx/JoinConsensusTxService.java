@@ -68,6 +68,8 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
         Consensus<Delegate> cd = tx.getTxData();
         cd.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
         DelegatePo po = ConsensusTool.delegateToPojo(cd);
+        po.setBlockHeight(tx.getBlockHeight());
+        po.setTime(tx.getTime());
         delegateDataService.save(po);
         Map<String, Object> paramsMap = new HashMap<>();
         paramsMap.put("agentAddress", cd.getExtend().getDelegateAddress());
@@ -77,7 +79,8 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
             sum += delegatePo.getDeposit();
         }
         if (sum >= PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT.getValue()) {
-            manager.changeDelegateStatus(tx.getTxData().getExtend().getHash(), ConsensusStatusEnum.IN);
+            manager.changeAgentStatus(tx.getTxData().getExtend().getDelegateAddress(),ConsensusStatusEnum.IN);
+            manager.changeDelegateStatusByAgent(tx.getTxData().getExtend().getDelegateAddress(),ConsensusStatusEnum.IN);
             DelegateAccountPo daPo = this.accountDataService.get(cd.getExtend().getDelegateAddress());
             if (null == daPo) {
                 throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "the agent cannot find,agent address:" + cd.getExtend().getDelegateAddress());

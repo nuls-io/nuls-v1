@@ -59,6 +59,7 @@ public interface PocConsensusConstant {
      * Set temporarily as a fixed value,unit:nuls
      */
     int BLOCK_COUNT_OF_YEAR = 3153600;
+    int BLOCK_COUNT_OF_DAY = 8640;
     /**
      * value = 5000000/3154600
      */
