@@ -90,6 +90,7 @@ public enum ErrorCode {
     ACCOUNT_NOT_EXIST("ACT001", 45001),
     ACCOUNT_IS_ALREADY_ENCRYPTED("ACT002", 45002),
     ACCOUNT_EXIST("ACT003",45003),
+    ADDRESS_ERROR("ACT004",45004),
 
     /**
      * ----------  DB Exception code   ---------

@@ -34,6 +34,7 @@ import io.nuls.network.message.handler.NetWorkEventHandler;
 import io.nuls.network.service.NetworkService;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -76,22 +77,17 @@ public class GetNodeEventHandler implements NetWorkEventHandler {
     private List<Node> getAvailableNodes(int length, String nodeId) {
         List<Node> nodes = new ArrayList<>();
         int count = 0;
-        for (Node node : getNetworkService().getAvailableNodes()) {
+        List<Node> availableNodes = getNetworkService().getAvailableNodes();
+        Collections.shuffle(availableNodes);
+        for (Node node : availableNodes) {
             if (node.getId().equals(nodeId)) {
                 continue;
             }
             nodes.add(node);
             count++;
-            if (count == length) {
+            if (count == length || count > 20) {
                 break;
             }
-        }
-        if(nodes.isEmpty()) {
-            Node node1 = new Node();
-            node1.setIp("192.168.1.111");
-            node1.setPort(8003);
-            node1.setMagicNumber(123456789);
-            nodes.add(node1);
         }
         return nodes;
     }

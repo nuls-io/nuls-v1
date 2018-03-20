@@ -21,33 +21,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.account.entity.tx;
+package io.nuls.network.message.entity;
 
-
-import io.nuls.account.entity.Alias;
-import io.nuls.core.constant.TransactionConstant;
+import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.crypto.VarInt;
+import io.nuls.core.event.BaseEvent;
+import io.nuls.core.event.EventHeader;
+import io.nuls.core.event.NoticeData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
-import io.nuls.ledger.entity.params.CoinTransferData;
-import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
+import io.nuls.core.utils.io.NulsOutputStreamBuffer;
+import io.nuls.network.constant.NetworkConstant;
+
+import java.io.IOException;
 
 /**
  * @author vivi
- * @date 2017/12/18.
+ * @date 2017/12/1.
  */
-public class AliasTransaction extends AbstractCoinTransaction<Alias> {
+public class GetNodesIpEvent extends BaseEvent {
 
-    public AliasTransaction() throws NulsException {
-        super(TransactionConstant.TX_TYPE_SET_ALIAS, null, null);
-    }
-
-    public AliasTransaction(CoinTransferData coinParam, String password, Alias alias) throws NulsException {
-        super(TransactionConstant.TX_TYPE_SET_ALIAS, coinParam, password);
-        this.setTxData(alias);
+    public GetNodesIpEvent() {
+        super(NulsConstant.MODULE_ID_NETWORK, NetworkConstant.NETWORK_GET_NODEIP_EVENT);
     }
 
     @Override
-    public Alias parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
-        return new Alias(byteBuffer);
+    public int size() {
+        int s = 0;
+        s += EventHeader.EVENT_HEADER_LENGTH;
+        return s;
     }
+
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeNulsData(getHeader());
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.setHeader(byteBuffer.readNulsData(new EventHeader()));
+    }
+
+    @Override
+    protected BaseEvent parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
+        return null;
+    }
+
+    @Override
+    public NoticeData getNotice() {
+        return null;
+    }
+
 }

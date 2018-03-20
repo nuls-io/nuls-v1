@@ -23,8 +23,10 @@
  */
 package io.nuls.consensus.service.intf;
 
+import io.nuls.consensus.entity.AgentInfo;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
+import io.nuls.consensus.entity.DepositItem;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.exception.NulsException;
 
@@ -42,10 +44,18 @@ public interface ConsensusService {
 
     void startConsensus(String address, String password, Map<String, Object> paramsMap) throws NulsException;
 
-    void stopConsensus(String address, String password,Map<String, Object> paramsMap) throws NulsException, IOException;
+    void stopConsensus(String address, String password, Map<String, Object> paramsMap) throws NulsException, IOException;
 
     List<Consensus> getConsensusAccountList();
 
-    ConsensusStatusInfo getConsensusInfo(String address);
+    List<DepositItem> getDepositList(String address);
+
+    List<AgentInfo> getAgentList();
+
+    Map<String, Object> getConsensusInfo();
+
+    Map<String, Object> getConsensusInfo(String address);
+
+    ConsensusStatusInfo getConsensusStatus(String address);
 
 }

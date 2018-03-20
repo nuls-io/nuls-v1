@@ -86,7 +86,8 @@ public class BifurcateProcessor {
 
     public BlockHeaderChain getLongestChain() {
         List<BlockHeaderChain> longestChainList = new ArrayList<>();
-        for (BlockHeaderChain chain : chainList) {
+        List<BlockHeaderChain>  list = new ArrayList<>(chainList);
+        for (BlockHeaderChain chain : list) {
             if (longestChainList.isEmpty() || chain.size() > longestChainList.get(0).size()) {
                 longestChainList.clear();
                 longestChainList.add(chain);

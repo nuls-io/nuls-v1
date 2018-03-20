@@ -23,9 +23,11 @@
  */
 package io.nuls.db.dao.impl.mybatis;
 
+import com.github.pagehelper.PageHelper;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.BaseDataService;
 import io.nuls.db.dao.impl.mybatis.common.BaseMapper;
+import io.nuls.db.entity.DelegateAccountPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.db.dao.impl.mybatis.session.SessionManager;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
@@ -122,9 +124,6 @@ public abstract class BaseDaoImpl<T extends BaseMapper<K, V>, K, V> implements B
 
     /**
      * change params to searchable object
-     *
-     * @param params
-     * @return
      */
     protected abstract Searchable getSearchable(Map<String, Object> params);
 
@@ -135,5 +134,17 @@ public abstract class BaseDaoImpl<T extends BaseMapper<K, V>, K, V> implements B
 
     public long getCount(Map<String, Object> params) {
         return this.getMapper().selectCount(getSearchable(params));
+    }
+
+
+    public List<V> getPageList(Map<String, Object> params, int pageSize, int pageIndex, String orderBy) {
+        Searchable searchable = null;
+        if (null != params && !params.isEmpty()) {
+            searchable = this.getSearchable(params);
+        }
+        int start = pageSize * pageIndex - pageSize;
+        PageHelper.offsetPage(start, pageIndex);
+        PageHelper.orderBy(orderBy);
+        return getMapper().selectList(searchable);
     }
 }

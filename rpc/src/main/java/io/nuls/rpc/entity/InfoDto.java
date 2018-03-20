@@ -10,6 +10,14 @@ public class InfoDto {
 
     private String timeOffset;
 
+    private int inCount;
+
+    private int outCount;
+
+    public InfoDto() {
+
+    }
+
     public InfoDto(long localBestHeight, long netBestHeight, long offsetTime) {
         this.localBestHeight = localBestHeight;
         this.netBestHeight = netBestHeight;
@@ -38,5 +46,21 @@ public class InfoDto {
 
     public void setTimeOffset(String timeOffset) {
         this.timeOffset = timeOffset;
+    }
+
+    public int getInCount() {
+        return inCount;
+    }
+
+    public void setInCount(int inCount) {
+        this.inCount = inCount;
+    }
+
+    public int getOutCount() {
+        return outCount;
+    }
+
+    public void setOutCount(int outCount) {
+        this.outCount = outCount;
     }
 }
