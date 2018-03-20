@@ -81,6 +81,7 @@ public class ConsensusManager implements Runnable {
     private void loadConfigration() {
         Block bestBlock = null;
         Block genesisBlock = GenesisBlock.getInstance();
+        NulsContext.getInstance().setGenesisBlock(genesisBlock);
         try {
             bestBlock = blockStorageService.getBlock(blockStorageService.getBestHeight());
         } catch (Exception e) {
