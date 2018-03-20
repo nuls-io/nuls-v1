@@ -101,22 +101,15 @@ public class TransactionDto {
                     if (!isTransfer) {
                         isTransfer = true;
                     }
-                    value += input.getValue();
+                    value -= input.getValue();
                 }
             }
             for (OutputDto output : outputs) {
-                if (isTransfer) {
-                    if (address.equals(output.getAddress())) {
-                        value -= output.getValue();
-                    }
-                } else {
-                    if (!address.equals(output.getAddress())) {
-                        value += output.getValue();
-                    }
+                if (address.equals(output.getAddress())) {
+                    value += output.getValue();
                 }
             }
 
-            value = Math.abs(value);
             this.value = value;
             if (isTransfer) {
                 this.transferType = -1;
