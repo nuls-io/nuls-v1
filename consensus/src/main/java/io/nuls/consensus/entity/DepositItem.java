@@ -27,7 +27,7 @@ package io.nuls.consensus.entity;
  * author Facjas
  * date 2018/3/20.
  */
-public class DepositList {
+public class DepositItem {
 
     long depositTime;
     long amount;

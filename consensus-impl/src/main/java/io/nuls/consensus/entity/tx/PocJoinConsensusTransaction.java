@@ -28,6 +28,7 @@ import io.nuls.consensus.entity.ConsensusDelegateImpl;
 import io.nuls.consensus.entity.member.Delegate;
 import io.nuls.consensus.entity.validator.consensus.DelegateCountValidator;
 import io.nuls.consensus.entity.validator.consensus.DelegateDepositValidator;
+import io.nuls.consensus.entity.validator.tx.AllreadyJoinConsensusValidator;
 import io.nuls.consensus.entity.validator.tx.CreditThresholdValidator;
 import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.TransactionConstant;
@@ -52,6 +53,7 @@ public class PocJoinConsensusTransaction extends LockNulsTransaction<Consensus<D
     }
 
     private void initValidator() {
+        this.registerValidator(AllreadyJoinConsensusValidator.getInstance());
         this.registerValidator(CreditThresholdValidator.getInstance());
         this.registerValidator(DelegateCountValidator.getInstance());
         this.registerValidator(DelegateDepositValidator.getInstance());

@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -36,9 +36,11 @@ import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.consensus.entity.genesis.GenesisBlock;
 import io.nuls.consensus.entity.meeting.PocMeetingRound;
 import io.nuls.consensus.entity.member.Agent;
+import io.nuls.consensus.service.impl.BlockStorageService;
 import io.nuls.consensus.thread.BlockMaintenanceThread;
 import io.nuls.consensus.thread.BlockPersistenceThread;
 import io.nuls.consensus.thread.ConsensusMeetingRunner;
+import io.nuls.core.chain.entity.Block;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.thread.manager.TaskManager;
@@ -61,6 +63,7 @@ public class ConsensusManager implements Runnable {
     private ConfirmingTxCacheManager confirmingTxCacheManager;
     private ReceivedTxCacheManager receivedTxCacheManager;
     private OrphanTxCacheManager orphanTxCacheManager;
+    private BlockStorageService blockStorageService = BlockStorageService.getInstance();
     private AccountService accountService;
     private boolean partakePacking = false;
     private List<String> seedNodeList;
@@ -76,7 +79,18 @@ public class ConsensusManager implements Runnable {
     }
 
     private void loadConfigration() {
-        NulsContext.getInstance().setGenesisBlock(GenesisBlock.getInstance());
+        Block bestBlock = null;
+        Block genesisBlock = GenesisBlock.getInstance();
+        try {
+            bestBlock = blockStorageService.getBlock(blockStorageService.getBestHeight());
+        } catch (Exception e) {
+            Log.error(e);
+        }
+        if (bestBlock == null) {
+            bestBlock = genesisBlock;
+        }
+        NulsContext.getInstance().setGenesisBlock(bestBlock);
+
         partakePacking = NulsContext.MODULES_CONFIG.getCfgValue(PocConsensusConstant.CFG_CONSENSUS_SECTION, PocConsensusConstant.PROPERTY_PARTAKE_PACKING, false);
         seedNodeList = new ArrayList<>();
         Set<String> seedAddressSet = new HashSet<>();

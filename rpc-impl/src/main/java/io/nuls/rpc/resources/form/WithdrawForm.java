@@ -31,8 +31,17 @@ package io.nuls.rpc.resources.form;
  * @date 2018/3/14
  */
 public class WithdrawForm {
+    private String address;
     private String txHash;
     private String password;
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
     public String getPassword() {
         return password;

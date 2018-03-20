@@ -5,5 +5,5 @@ package io.nuls.ledger.entity.params;
  * @date: 2018/3/20
  */
 public enum OperationType {
-    COIN_BASE,TRANSFER, LOCK, UNLOCK
+    COIN_BASE, TRANSFER, LOCK, UNLOCK
 }
