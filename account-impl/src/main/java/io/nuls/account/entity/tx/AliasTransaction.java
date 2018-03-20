@@ -41,8 +41,9 @@ public class AliasTransaction extends AbstractCoinTransaction<Alias> {
         super(TransactionConstant.TX_TYPE_SET_ALIAS, null, null);
     }
 
-    public AliasTransaction(CoinTransferData coinParam, String password) throws NulsException {
+    public AliasTransaction(CoinTransferData coinParam, String password, Alias alias) throws NulsException {
         super(TransactionConstant.TX_TYPE_SET_ALIAS, coinParam, password);
+        this.setTxData(alias);
     }
 
     @Override

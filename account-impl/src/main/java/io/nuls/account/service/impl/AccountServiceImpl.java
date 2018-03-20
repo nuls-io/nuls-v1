@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -479,8 +479,8 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public NulsSignData signData(byte[] bytes, byte[] priKey){
-        return signDigest(NulsDigestData.calcDigestData(bytes).getDigestBytes(),priKey);
+    public NulsSignData signData(byte[] bytes, byte[] priKey) {
+        return signDigest(NulsDigestData.calcDigestData(bytes).getDigestBytes(), priKey);
     }
 
     @Override
@@ -500,9 +500,9 @@ public class AccountServiceImpl implements AccountService {
         if (null == digestData) {
             throw new NulsException(ErrorCode.DATA_ERROR);
         }
-        if(account == null){
+        if (account == null) {
             account = getDefaultAccount();
-            if (account == null){
+            if (account == null) {
                 throw new NulsException(ErrorCode.ACCOUNT_NOT_EXIST);
             }
         }
@@ -511,12 +511,12 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public NulsSignData signData(byte[] data, Account account, String password) throws NulsException {
-        if (null == data || data.length==0) {
+        if (null == data || data.length == 0) {
             throw new NulsException(ErrorCode.DATA_ERROR);
         }
-        if(account == null){
+        if (account == null) {
             account = getDefaultAccount();
-            if (account == null){
+            if (account == null) {
                 throw new NulsException(ErrorCode.ACCOUNT_NOT_EXIST);
             }
         }
@@ -526,27 +526,27 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public P2PKHScriptSig createP2PKHScriptSig(byte[] data, Account account, String password) throws NulsException {
         P2PKHScriptSig p2PKHScriptSig = new P2PKHScriptSig();
-        p2PKHScriptSig.setSignData(signData(data,account,password));
+        p2PKHScriptSig.setSignData(signData(data, account, password));
         p2PKHScriptSig.setPublicKey(account.getPubKey());
         return p2PKHScriptSig;
     }
 
     @Override
-    public P2PKHScriptSig createP2PKHScriptSigFromDigest(NulsDigestData nulsDigestData, Account account, String password) throws NulsException{
+    public P2PKHScriptSig createP2PKHScriptSigFromDigest(NulsDigestData nulsDigestData, Account account, String password) throws NulsException {
         P2PKHScriptSig p2PKHScriptSig = new P2PKHScriptSig();
-        p2PKHScriptSig.setSignData(signDigest(nulsDigestData,account,password));
+        p2PKHScriptSig.setSignData(signDigest(nulsDigestData, account, password));
         p2PKHScriptSig.setPublicKey(account.getPubKey());
         return p2PKHScriptSig;
     }
 
     @Override
-    public Result verifySign(byte[] data, NulsSignData signData,byte[] pubKey) {
-        return verifyDigestSign(NulsDigestData.calcDigestData(data),signData,pubKey);
+    public Result verifySign(byte[] data, NulsSignData signData, byte[] pubKey) {
+        return verifyDigestSign(NulsDigestData.calcDigestData(data), signData, pubKey);
     }
 
     @Override
-    public Result verifyDigestSign(NulsDigestData digestData, NulsSignData signData,byte[] pubKey) {
-        ECKey.verify(digestData.getDigestBytes(),signData.getSignBytes(),pubKey);
+    public Result verifyDigestSign(NulsDigestData digestData, NulsSignData signData, byte[] pubKey) {
+        ECKey.verify(digestData.getDigestBytes(), signData.getSignBytes(), pubKey);
         //todo
         return new Result(true, null);
     }
@@ -566,8 +566,8 @@ public class AccountServiceImpl implements AccountService {
 
         try {
             TransactionEvent event = new TransactionEvent();
-            CoinTransferData coinData = new CoinTransferData(OperationType.TRANSFER,AccountConstant.ALIAS_NA, address, null);
-            AliasTransaction aliasTx = new AliasTransaction(coinData, password);
+            CoinTransferData coinData = new CoinTransferData(OperationType.TRANSFER, AccountConstant.ALIAS_NA, address, null);
+            AliasTransaction aliasTx = new AliasTransaction(coinData, password, new Alias(address, password));
             aliasTx.setHash(NulsDigestData.calcDigestData(aliasTx.serialize()));
             aliasTx.setScriptSig(createP2PKHScriptSigFromDigest(aliasTx.getHash(), account, password).serialize());
             ValidateResult validate = aliasTx.verify();
