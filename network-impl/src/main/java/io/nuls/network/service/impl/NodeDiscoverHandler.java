@@ -147,8 +147,10 @@ public class NodeDiscoverHandler implements Runnable {
      */
     @Override
     public void run() {
+        Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+
         while (running) {
-            Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+            count++;
             List<Node> nodeList = new ArrayList<>(nodesManager.getNodes().values());
             StringBuilder str = new StringBuilder();
             for (Node node : nodeList) {
@@ -174,6 +176,7 @@ public class NodeDiscoverHandler implements Runnable {
             }
 
             long now = TimeService.currentTimeMillis();
+
             if (count == 10) {
                 List<String> list = new ArrayList<>();
                 for (Map.Entry<String, Long> entry : NetworkContext.ipMap.entrySet()) {
