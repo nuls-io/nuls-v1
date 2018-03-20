@@ -50,15 +50,13 @@ public class DevNetworkParam extends AbstractNetworkParam {
         this.packetMagic = NulsContext.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_MAGIC, 123456789);
 
 
-        InetSocketAddress address0 = new InetSocketAddress("192.168.1.102", port);
-        //InetSocketAddress address1 = new InetSocketAddress("192.168.1.103", port);
-        //InetSocketAddress address2 = new InetSocketAddress("192.168.1.131", port);
-        InetSocketAddress address3 = new InetSocketAddress("192.168.1.103", port);
+        InetSocketAddress address0 = new InetSocketAddress("192.168.1.156", port);
+        InetSocketAddress address1 = new InetSocketAddress("192.168.1.157", port);
+        InetSocketAddress address2 = new InetSocketAddress("192.168.1.158", port);
 
         seedNodes.add(address0);
-        //seedNodes.add(address1);
-        //seedNodes.add(address2);
-        seedNodes.add(address3);
+        seedNodes.add(address1);
+        seedNodes.add(address2);
 
 
         this.messageFilter = DefaultMessageFilter.getInstance();
