@@ -89,7 +89,7 @@ public class ConsensusManager implements Runnable {
         if (bestBlock == null) {
             bestBlock = genesisBlock;
         }
-        NulsContext.getInstance().setGenesisBlock(bestBlock);
+        NulsContext.getInstance().setBestBlock(bestBlock);
 
         partakePacking = NulsContext.MODULES_CONFIG.getCfgValue(PocConsensusConstant.CFG_CONSENSUS_SECTION, PocConsensusConstant.PROPERTY_PARTAKE_PACKING, false);
         seedNodeList = new ArrayList<>();
