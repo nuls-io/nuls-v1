@@ -72,7 +72,7 @@ public class PocConsensusResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getWholeInfo() {
-        RpcResult result = new RpcResult();
+        RpcResult result = RpcResult.getSuccess();
         WholeNetConsensusInfoDTO dto = new WholeNetConsensusInfoDTO();
         if (temp == 1) {
             dto.setAgentCount(18);
