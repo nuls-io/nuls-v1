@@ -121,6 +121,7 @@ public class BlockBatchDownloadUtils {
             while (working) {
                 verify();
                 if ((TimeService.currentTimeMillis() - lastOperateTime) >= 5000) {
+                    working = false;
                     lock.unlock();
                     return;
                 }

@@ -509,6 +509,19 @@ public class ConsensusMeetingRunner implements Runnable {
         } catch (NulsException e) {
             Log.error(e);
         }
+
+
+//        1.
+//
+//
+//
+//
+//
+//
+//
+//
+
+
         boolean punish = self.getIndexOfRound() == 1 && lastBlockRoundData.getPackingIndexOfRound() != lastBlockRoundData.getConsensusMemberCount();
         punish = punish || (self.getIndexOfRound() > 1 && self.getIndexOfRound() != (lastBlockRoundData.getPackingIndexOfRound() + 1));
         if (!punish) {
