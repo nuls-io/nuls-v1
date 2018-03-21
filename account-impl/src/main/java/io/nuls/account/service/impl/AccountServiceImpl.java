@@ -555,7 +555,7 @@ public class AccountServiceImpl implements AccountService {
     public Result setAlias(String address, String password, String alias) {
         Account account = getAccount(address);
         if (account == null) {
-            return new Result(false, "Account not found");
+            return new Result(false, ErrorCode.ACCOUNT_NOT_EXIST, null);
         }
         if (StringUtils.isNotBlank(account.getAlias())) {
             return new Result(false, "Alias has been set up");
@@ -567,7 +567,7 @@ public class AccountServiceImpl implements AccountService {
         try {
             TransactionEvent event = new TransactionEvent();
             CoinTransferData coinData = new CoinTransferData(OperationType.TRANSFER, AccountConstant.ALIAS_NA, address, null);
-            AliasTransaction aliasTx = new AliasTransaction(coinData, password, new Alias(address, password));
+            AliasTransaction aliasTx = new AliasTransaction(coinData, password, new Alias(address, alias));
             aliasTx.setHash(NulsDigestData.calcDigestData(aliasTx.serialize()));
             aliasTx.setScriptSig(createP2PKHScriptSigFromDigest(aliasTx.getHash(), account, password).serialize());
             ValidateResult validate = aliasTx.verify();

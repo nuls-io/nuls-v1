@@ -28,13 +28,18 @@ import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.consensus.cache.manager.block.BlockCacheManager;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.service.intf.BlockService;
+import io.nuls.consensus.utils.BlockBatchDownloadUtils;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
+import io.nuls.network.entity.Node;
+import io.nuls.network.service.NetworkService;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Niels
@@ -46,6 +51,7 @@ public class BlockPersistenceThread implements Runnable {
     private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
     private ConfirmingTxCacheManager txCacheManager = ConfirmingTxCacheManager.getInstance();
+    private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
     private boolean running;
 
     private BlockPersistenceThread() {
@@ -84,6 +90,16 @@ public class BlockPersistenceThread implements Runnable {
         }
         Block block = blockCacheManager.getBlock(height);
         if (null == block) {
+            List<Node> nodeList = networkService.getAvailableNodes();
+            List<String> nodeIdList = new ArrayList<>();
+            for (Node node : nodeList) {
+                nodeIdList.add(node.getId());
+            }
+            try {
+                BlockBatchDownloadUtils.getInstance().request(nodeIdList, height, height);
+            } catch (InterruptedException e) {
+                Log.error(e);
+            }
             return;
         }
         boolean isSuccess = blockService.saveBlock(block);

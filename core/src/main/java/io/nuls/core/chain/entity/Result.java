@@ -39,7 +39,7 @@ public class Result<T> {
 
     private T object;
 
-    public Result(boolean success, String message, ErrorCode errorCode,T object) {
+    public Result(boolean success, String message, ErrorCode errorCode, T object) {
         this.success = success;
         this.message = message;
         this.errorCode = errorCode;
@@ -47,15 +47,21 @@ public class Result<T> {
     }
 
     public Result() {
-        this(false,"",ErrorCode.SUCCESS,null);
+        this(false, "", ErrorCode.SUCCESS, null);
     }
 
     public Result(boolean success, String message) {
-        this(success,message,ErrorCode.SUCCESS,null);
+        this(success, message, ErrorCode.SUCCESS, null);
+    }
+
+    public Result(boolean success, ErrorCode errorCode, T object) {
+        this.success = success;
+        this.errorCode = errorCode;
+        this.object = object;
     }
 
     public Result(boolean success, String message, T t) {
-        this(success,message,ErrorCode.SUCCESS,t);
+        this(success, message, ErrorCode.SUCCESS, t);
     }
 
     public boolean isSuccess() {
@@ -110,7 +116,7 @@ public class Result<T> {
     }
 
     public static Result getFailed(ErrorCode errorCode) {
-        return new Result(false,errorCode.getMsg());
+        return new Result(false, errorCode.getMsg());
     }
 
     public T getObject() {

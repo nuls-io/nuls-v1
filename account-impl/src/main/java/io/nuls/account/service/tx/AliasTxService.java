@@ -49,33 +49,31 @@ public class AliasTxService implements TransactionService<AliasTransaction> {
     }
 
 
-    private AccountAliasDataService dataService;
+    private AccountAliasDataService aliasDataService;
 
     @Override
     public void onRollback(AliasTransaction tx) throws NulsException {
         AliasPo po = AccountTool.toAliasPojo(tx.getTxData());
-        dataService.rollbackAlias(po);
-
+        aliasDataService.rollbackAlias(po);
     }
 
     @Override
     public void onCommit(AliasTransaction tx) throws NulsException {
         Alias alias = tx.getTxData();
         alias.setStatus(1);
-        dataService.saveAlias(AccountTool.toAliasPojo(alias));
+        aliasDataService.saveAlias(AccountTool.toAliasPojo(alias));
     }
 
     @Override
     public void onApproval(AliasTransaction tx) throws NulsException {
-        try {
-            AliasPo po = AccountTool.toAliasPojo(tx.getTxData());
-            dataService.saveAlias(po);
-        }catch (Exception e) {
-            throw new NulsException(ErrorCode.DB_SAVE_ERROR, e);
+        Alias alias = tx.getTxData();
+        AliasPo po = aliasDataService.getAlias(alias.getAlias());
+        if (alias != null) {
+            throw new NulsException(ErrorCode.ALIAS_EXIST);
         }
     }
 
     public void setDataService(AccountAliasDataService dataService) {
-        this.dataService = dataService;
+        this.aliasDataService = dataService;
     }
 }
