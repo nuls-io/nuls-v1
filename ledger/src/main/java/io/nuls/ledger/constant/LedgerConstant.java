@@ -42,5 +42,5 @@ public interface LedgerConstant {
 
 
     long BLOCK_COUNT_OF_YEAR = 3153600;
-    Na TRANSACTION_FEE = Na.parseNuls(0.01);
+    Na TRANSACTION_FEE = Na.CENT;
 }

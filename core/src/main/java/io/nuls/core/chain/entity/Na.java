@@ -278,4 +278,5 @@ public final class Na implements Comparable<Na>, Serializable {
     public int compareTo(final Na other) {
         return Long.compare(this.value, other.value);
     }
+
 }
