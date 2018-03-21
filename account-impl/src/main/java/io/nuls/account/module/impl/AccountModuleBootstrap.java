@@ -26,7 +26,6 @@ package io.nuls.account.module.impl;
 import io.nuls.account.entity.tx.AliasTransaction;
 import io.nuls.account.event.*;
 import io.nuls.account.module.intf.AbstractAccountModule;
-import io.nuls.account.service.impl.AccountCacheService;
 import io.nuls.account.service.impl.AccountServiceImpl;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.account.service.tx.AliasTxService;
@@ -41,7 +40,6 @@ import io.nuls.core.event.EventManager;
 public class AccountModuleBootstrap extends AbstractAccountModule {
 
     private AccountService accountService;
-    private AccountCacheService cacheService ;
 
     @Override
     public void init() {
@@ -52,13 +50,11 @@ public class AccountModuleBootstrap extends AbstractAccountModule {
         EventManager.putEvent(SetAliasNotice.class);
         this.registerService(AccountServiceImpl.class);
         accountService = NulsContext.getServiceBean(AccountService.class);
-        cacheService = AccountCacheService.getInstance();
-        this.registerTransaction(TransactionConstant.TX_TYPE_SET_ALIAS, AliasTransaction.class,AliasTxService.getInstance());
+        this.registerTransaction(TransactionConstant.TX_TYPE_SET_ALIAS, AliasTransaction.class, AliasTxService.getInstance());
     }
 
     @Override
     public void start() {
-        accountService.init();
         accountService.start();
     }
 

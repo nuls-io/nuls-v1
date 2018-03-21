@@ -47,9 +47,9 @@ import java.util.List;
 public class AccountTxDaoImpl implements AccountAliasDataService {
 
     @Autowired
-    private AccountDataService accountDao ;
+    private AccountDataService accountDao;
     @Autowired
-    private AliasDataService aliasDao ;
+    private AliasDataService aliasDao;
     @Autowired
     private TransactionLocalDataService txDao;
 
@@ -57,15 +57,11 @@ public class AccountTxDaoImpl implements AccountAliasDataService {
     @Override
     public Result saveAlias(AliasPo alias) {
         try {
-            if (alias.getStatus() == 0) {
-                aliasDao.save(alias);
-            } else {
-                aliasDao.update(alias);
-                AccountPo po = new AccountPo();
-                po.setAddress(alias.getAddress());
-                po.setAlias(alias.getAlias());
-                accountDao.updateAlias(po);
-            }
+            aliasDao.save(alias);
+            AccountPo po = new AccountPo();
+            po.setAddress(alias.getAddress());
+            po.setAlias(alias.getAlias());
+            accountDao.updateAlias(po);
         } catch (Exception e) {
             throw new NulsRuntimeException(ErrorCode.DB_SAVE_ERROR);
         }
@@ -88,14 +84,21 @@ public class AccountTxDaoImpl implements AccountAliasDataService {
     @DbSession
     public void rollbackAlias(AliasPo aliasPo) {
         try {
-            aliasDao.delete(aliasPo.getAlias());
-
-            AccountPo po = new AccountPo();
-            po.setAddress(aliasPo.getAddress());
-            po.setAlias("");
-            accountDao.updateAlias(po);
+            AliasPo po = aliasDao.get(aliasPo.getAlias());
+            if (po != null && po.getAddress().equals(aliasPo.getAddress())) {
+                aliasDao.delete(aliasPo.getAlias());
+                AccountPo accountPo = new AccountPo();
+                po.setAddress(aliasPo.getAddress());
+                po.setAlias("");
+                accountDao.updateAlias(accountPo);
+            }
         } catch (Exception e) {
             throw new NulsRuntimeException(ErrorCode.DB_ROLLBACK_ERROR);
         }
+    }
+
+    @Override
+    public AliasPo getAlias(String alias) {
+        return aliasDao.get(alias);
     }
 }

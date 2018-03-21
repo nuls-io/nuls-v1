@@ -39,8 +39,6 @@ import java.util.List;
  */
 public interface AccountService {
 
-    void init();
-
     void start();
 
     void shutdown();
