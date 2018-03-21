@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -36,7 +36,7 @@ public enum ErrorCode {
      */
     SUCCESS("SYS000", 10000),
     FAILED("SYS001", 10001),
-    WARNNING("SYS002",10998),
+    WARNNING("SYS002", 10998),
     SYS_UNKOWN_EXCEPTION("SYS999", 10999),
     FILE_NOT_FOUND("SYS002", 10002),
     NULL_PARAMETER("SYS003", 10003),
@@ -89,8 +89,9 @@ public enum ErrorCode {
     PASSWORD_IS_WRONG("ACT000", 45000),
     ACCOUNT_NOT_EXIST("ACT001", 45001),
     ACCOUNT_IS_ALREADY_ENCRYPTED("ACT002", 45002),
-    ACCOUNT_EXIST("ACT003",45003),
-    ADDRESS_ERROR("ACT004",45004),
+    ACCOUNT_EXIST("ACT003", 45003),
+    ADDRESS_ERROR("ACT004", 45004),
+    ALIAS_EXIST("ACT005", 45005),
 
     /**
      * ----------  DB Exception code   ---------
@@ -134,9 +135,9 @@ public enum ErrorCode {
     UTXO_SPENT("LED001", 70001),
     UTXO_STATUS_CHANGE("LED002", 70002),
     BALANCE_NOT_ENOUGH("LED003", 70003),
-    INVALID_OUTPUT("LED004",70004 ),
-    INVALID_AMOUNT("LED005",70005 ),
-    ORPHAN_TX("LED006",70006),
+    INVALID_OUTPUT("LED004", 70004),
+    INVALID_AMOUNT("LED005", 70005),
+    ORPHAN_TX("LED006", 70006),
     /**
      * messages
      */
@@ -145,15 +146,15 @@ public enum ErrorCode {
     CREATE_AN_ACCOUNT("MSG003", 80003),
     CHANGE_DEFAULT_ACCOUNT("MSG004", 80004),
     WALLET_PASSWORD_CHANGED("MSG005", 80005),
-    SET_AN_ALIAS("MSG006",80006 ),
-    IMPORTED_AN_ACCOUNT("MSG007",80007),
-    START_PACKED_BLOCK("MSG008",80008 ),
-    REGISTER_AGENT("MSG009",80009),
-    ASSEMBLED_BLOCK("MSG010",80010),
-    JOIN_CONSENSUS("MSG011",80011 ),
-    EXIT_CONSENSUS("MSG012",80012 ),
-    CANCEL_CONSENSUS("MSG013",80013 ),
-    BALANCE_CHANGE("MSG014",80014 );
+    SET_AN_ALIAS("MSG006", 80006),
+    IMPORTED_AN_ACCOUNT("MSG007", 80007),
+    START_PACKED_BLOCK("MSG008", 80008),
+    REGISTER_AGENT("MSG009", 80009),
+    ASSEMBLED_BLOCK("MSG010", 80010),
+    JOIN_CONSENSUS("MSG011", 80011),
+    EXIT_CONSENSUS("MSG012", 80012),
+    CANCEL_CONSENSUS("MSG013", 80013),
+    BALANCE_CHANGE("MSG014", 80014);
     private final int msg;
     private final String code;
 

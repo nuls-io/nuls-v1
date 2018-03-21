@@ -40,4 +40,8 @@ public interface AccountAliasDataService {
     void importAccount(List<AccountPo> accountPoList);
 
     void rollbackAlias(AliasPo aliasPo);
+
+    AliasPo getAlias(String alias);
+
+
 }

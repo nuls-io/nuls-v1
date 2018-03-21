@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -555,7 +555,7 @@ public class AccountServiceImpl implements AccountService {
     public Result setAlias(String address, String password, String alias) {
         Account account = getAccount(address);
         if (account == null) {
-            return new Result(false, "Account not found");
+            return new Result(false, ErrorCode.ACCOUNT_NOT_EXIST, null);
         }
         if (StringUtils.isNotBlank(account.getAlias())) {
             return new Result(false, "Alias has been set up");
@@ -567,7 +567,7 @@ public class AccountServiceImpl implements AccountService {
         try {
             TransactionEvent event = new TransactionEvent();
             CoinTransferData coinData = new CoinTransferData(OperationType.TRANSFER, AccountConstant.ALIAS_NA, address, null);
-            AliasTransaction aliasTx = new AliasTransaction(coinData, password, new Alias(address, password));
+            AliasTransaction aliasTx = new AliasTransaction(coinData, password, new Alias(address, alias));
             aliasTx.setHash(NulsDigestData.calcDigestData(aliasTx.serialize()));
             aliasTx.setScriptSig(createP2PKHScriptSigFromDigest(aliasTx.getHash(), account, password).serialize());
             ValidateResult validate = aliasTx.verify();
