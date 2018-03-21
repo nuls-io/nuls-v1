@@ -30,15 +30,42 @@ import io.nuls.core.chain.entity.Na;
  * date 2018/3/20.
  */
 public class AgentInfo {
-
+    //节点名称
+    private String agentName;
+//    代理地址
     private String delegateAddress;
+//    状态
     private int status;
+//    自己的保证金
     private Na owndeposit;
+//    所有委托之和
     private Na totalDeposit;
+//    代理佣金
     private double commissionRate;
-    double creditRatio;
-    int memberCount;
+//    信用值
+    private double creditRatio;
+//    委托数量
+    private int memberCount;
+//    节点介绍
     private String introduction;
+//    累计奖励
+    private Na reward;
+
+    public Na getReward() {
+        return reward;
+    }
+
+    public void setReward(Na reward) {
+        this.reward = reward;
+    }
+
+    public String getAgentName() {
+        return agentName;
+    }
+
+    public void setAgentName(String agentName) {
+        this.agentName = agentName;
+    }
 
     public String getDelegateAddress() {
         return delegateAddress;
