@@ -540,7 +540,7 @@ public class ConsensusMeetingRunner implements Runnable {
             Log.error(e);
             throw new NulsRuntimeException(e);
         }
-        if (round.getPreviousRound() == null) {
+        if (round.getPreviousRound() == null||round.getPreviousRound().getIndex()<=lastRoundData.getRoundIndex()) {
             while (true) {
                 if (lastRoundData.getPackingIndexOfRound() == lastRoundData.getConsensusMemberCount() ||
                         lastRoundData.getRoundEndTime() <= TimeService.currentTimeMillis()) {
