@@ -27,6 +27,7 @@ import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.intf.NulsCloneable;
+import io.nuls.core.utils.str.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,8 +39,13 @@ import java.util.concurrent.locks.ReentrantLock;
  * @date 2018/1/11
  */
 public class BlockHeaderChain implements NulsCloneable {
+    private final String id;
     private List<HeaderDigest> headerDigestList = Collections.synchronizedList(new ArrayList<>());
     private final ReentrantLock lock = new ReentrantLock();
+
+    public BlockHeaderChain(){
+        this.id = StringUtils.getNewUUID();
+    }
 
     public BlockHeaderChain getBifurcateChain(BlockHeader header) {
         int index = indexOf(header.getPreHash().getDigestHex(), header.getHeight() - 1);
@@ -161,5 +167,20 @@ public class BlockHeaderChain implements NulsCloneable {
 
     public boolean contains(BlockHeader header) {
         return headerDigestList.contains(new HeaderDigest(header.getHash().getDigestHex(), header.getHeight()));
+    }
+
+    @Override
+    public boolean equals(Object object){
+        if(null==object){
+            return false;
+        }
+        if(!(object instanceof BlockHeaderChain)){
+            return false;
+        }
+        return this.id.equals(((BlockHeaderChain) object).getId());
+    }
+
+    public String getId() {
+        return id;
     }
 }
