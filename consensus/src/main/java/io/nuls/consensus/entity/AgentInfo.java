@@ -30,15 +30,32 @@ import io.nuls.core.chain.entity.Na;
  * date 2018/3/20.
  */
 public class AgentInfo {
-
+    private String agentName;
     private String delegateAddress;
     private int status;
     private Na owndeposit;
     private Na totalDeposit;
     private double commissionRate;
-    double creditRatio;
-    int memberCount;
+    private double creditRatio;
+    private int memberCount;
     private String introduction;
+    private Na reward;
+
+    public Na getReward() {
+        return reward;
+    }
+
+    public void setReward(Na reward) {
+        this.reward = reward;
+    }
+
+    public String getAgentName() {
+        return agentName;
+    }
+
+    public void setAgentName(String agentName) {
+        this.agentName = agentName;
+    }
 
     public String getDelegateAddress() {
         return delegateAddress;
