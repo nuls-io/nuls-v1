@@ -27,6 +27,7 @@ import io.nuls.consensus.event.BlockEvent;
 import io.nuls.consensus.cache.manager.block.BlockCacheManager;
 import io.nuls.consensus.utils.BlockBatchDownloadUtils;
 import io.nuls.core.chain.entity.Block;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.crypto.Hex;
@@ -53,7 +54,7 @@ public class BlockEventHandler extends AbstractEventHandler<BlockEvent> {
             return;
         }
         ValidateResult result = block.verify();
-        if (result.isFailed()) {
+        if (result.isFailed()&&result.getErrorCode()!= ErrorCode.ORPHAN_TX) {
             if (result.getLevel() == SeverityLevelEnum.FLAGRANT_FOUL) {
                 networkService.blackNode(fromId, NodePo.YELLOW);
             }
