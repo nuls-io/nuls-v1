@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -37,7 +37,8 @@ public class BifurcateProcessor {
 
     private static final BifurcateProcessor INSTANCE = new BifurcateProcessor();
 
-    private List<BlockHeaderChain> chainList = Collections.synchronizedList(new ArrayList<>());;
+    private List<BlockHeaderChain> chainList = Collections.synchronizedList(new ArrayList<>());
+    ;
 
     private long bestHeight;
 
@@ -49,6 +50,30 @@ public class BifurcateProcessor {
     }
 
     public boolean addHeader(BlockHeader header) {
+        boolean result = add(header);
+        if (result) {
+            checkIt();
+        }
+        return result;
+    }
+
+    private void checkIt() {
+        List<BlockHeaderChain> chainList1 = new ArrayList<>(this.chainList);
+        int size = 0;
+        for (BlockHeaderChain chain : chainList1) {
+            int listSize = chain.size();
+            if (size < listSize) {
+                size = listSize;
+            }
+        }
+        for (BlockHeaderChain chain : chainList1) {
+            if (chain.size() < (size - 6)) {
+                this.chainList.remove(chain);
+            }
+        }
+    }
+
+    private boolean add(BlockHeader header) {
         for (BlockHeaderChain chain : chainList) {
             if (chain.contains(header)) {
                 return false;
@@ -86,7 +111,7 @@ public class BifurcateProcessor {
 
     public BlockHeaderChain getLongestChain() {
         List<BlockHeaderChain> longestChainList = new ArrayList<>();
-        List<BlockHeaderChain>  list = new ArrayList<>(chainList);
+        List<BlockHeaderChain> list = new ArrayList<>(chainList);
         for (BlockHeaderChain chain : list) {
             if (longestChainList.isEmpty() || chain.size() > longestChainList.get(0).size()) {
                 longestChainList.clear();
