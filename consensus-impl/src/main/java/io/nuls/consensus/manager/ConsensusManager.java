@@ -36,9 +36,11 @@ import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.consensus.entity.genesis.GenesisBlock;
 import io.nuls.consensus.entity.meeting.PocMeetingRound;
 import io.nuls.consensus.entity.member.Agent;
+import io.nuls.consensus.service.impl.BlockStorageService;
 import io.nuls.consensus.thread.BlockMaintenanceThread;
 import io.nuls.consensus.thread.BlockPersistenceThread;
 import io.nuls.consensus.thread.ConsensusMeetingRunner;
+import io.nuls.core.chain.entity.Block;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.thread.manager.TaskManager;
@@ -61,6 +63,7 @@ public class ConsensusManager implements Runnable {
     private ConfirmingTxCacheManager confirmingTxCacheManager;
     private ReceivedTxCacheManager receivedTxCacheManager;
     private OrphanTxCacheManager orphanTxCacheManager;
+    private BlockStorageService blockStorageService = BlockStorageService.getInstance();
     private AccountService accountService;
     private boolean partakePacking = false;
     private List<String> seedNodeList;
@@ -76,7 +79,19 @@ public class ConsensusManager implements Runnable {
     }
 
     private void loadConfigration() {
-        NulsContext.getInstance().setGenesisBlock(GenesisBlock.getInstance());
+        Block bestBlock = null;
+        Block genesisBlock = GenesisBlock.getInstance();
+        NulsContext.getInstance().setGenesisBlock(genesisBlock);
+        try {
+            bestBlock = blockStorageService.getBlock(blockStorageService.getBestHeight());
+        } catch (Exception e) {
+            Log.error(e);
+        }
+        if (bestBlock == null) {
+            bestBlock = genesisBlock;
+        }
+        NulsContext.getInstance().setBestBlock(bestBlock);
+
         partakePacking = NulsContext.MODULES_CONFIG.getCfgValue(PocConsensusConstant.CFG_CONSENSUS_SECTION, PocConsensusConstant.PROPERTY_PARTAKE_PACKING, false);
         seedNodeList = new ArrayList<>();
         Set<String> seedAddressSet = new HashSet<>();

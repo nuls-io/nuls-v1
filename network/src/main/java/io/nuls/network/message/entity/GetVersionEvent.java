@@ -23,7 +23,6 @@
  */
 package io.nuls.network.message.entity;
 
-import io.nuls.core.chain.entity.basic.NulsIntegerData;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.event.BaseEvent;
@@ -50,7 +49,6 @@ public class GetVersionEvent extends BaseEvent {
 
     public GetVersionEvent(int externalPort) {
         this();
-        this.setEventBody(new NulsIntegerData(externalPort));
         this.externalPort = externalPort;
     }
 

@@ -63,6 +63,7 @@ import io.nuls.db.entity.TransactionPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.params.CoinTransferData;
+import io.nuls.ledger.entity.params.OperationType;
 import io.nuls.ledger.event.TransactionEvent;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.ledger.util.UtxoTransferTool;
@@ -478,8 +479,8 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public NulsSignData signData(byte[] bytes, byte[] priKey){
-        return signDigest(NulsDigestData.calcDigestData(bytes).getDigestBytes(),priKey);
+    public NulsSignData signData(byte[] bytes, byte[] priKey) {
+        return signDigest(NulsDigestData.calcDigestData(bytes).getDigestBytes(), priKey);
     }
 
     @Override
@@ -499,9 +500,9 @@ public class AccountServiceImpl implements AccountService {
         if (null == digestData) {
             throw new NulsException(ErrorCode.DATA_ERROR);
         }
-        if(account == null){
+        if (account == null) {
             account = getDefaultAccount();
-            if (account == null){
+            if (account == null) {
                 throw new NulsException(ErrorCode.ACCOUNT_NOT_EXIST);
             }
         }
@@ -510,12 +511,12 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public NulsSignData signData(byte[] data, Account account, String password) throws NulsException {
-        if (null == data || data.length==0) {
+        if (null == data || data.length == 0) {
             throw new NulsException(ErrorCode.DATA_ERROR);
         }
-        if(account == null){
+        if (account == null) {
             account = getDefaultAccount();
-            if (account == null){
+            if (account == null) {
                 throw new NulsException(ErrorCode.ACCOUNT_NOT_EXIST);
             }
         }
@@ -525,27 +526,27 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public P2PKHScriptSig createP2PKHScriptSig(byte[] data, Account account, String password) throws NulsException {
         P2PKHScriptSig p2PKHScriptSig = new P2PKHScriptSig();
-        p2PKHScriptSig.setSignData(signData(data,account,password));
+        p2PKHScriptSig.setSignData(signData(data, account, password));
         p2PKHScriptSig.setPublicKey(account.getPubKey());
         return p2PKHScriptSig;
     }
 
     @Override
-    public P2PKHScriptSig createP2PKHScriptSigFromDigest(NulsDigestData nulsDigestData, Account account, String password) throws NulsException{
+    public P2PKHScriptSig createP2PKHScriptSigFromDigest(NulsDigestData nulsDigestData, Account account, String password) throws NulsException {
         P2PKHScriptSig p2PKHScriptSig = new P2PKHScriptSig();
-        p2PKHScriptSig.setSignData(signDigest(nulsDigestData,account,password));
+        p2PKHScriptSig.setSignData(signDigest(nulsDigestData, account, password));
         p2PKHScriptSig.setPublicKey(account.getPubKey());
         return p2PKHScriptSig;
     }
 
     @Override
-    public Result verifySign(byte[] data, NulsSignData signData,byte[] pubKey) {
-        return verifyDigestSign(NulsDigestData.calcDigestData(data),signData,pubKey);
+    public Result verifySign(byte[] data, NulsSignData signData, byte[] pubKey) {
+        return verifyDigestSign(NulsDigestData.calcDigestData(data), signData, pubKey);
     }
 
     @Override
-    public Result verifyDigestSign(NulsDigestData digestData, NulsSignData signData,byte[] pubKey) {
-        ECKey.verify(digestData.getDigestBytes(),signData.getSignBytes(),pubKey);
+    public Result verifyDigestSign(NulsDigestData digestData, NulsSignData signData, byte[] pubKey) {
+        ECKey.verify(digestData.getDigestBytes(), signData.getSignBytes(), pubKey);
         //todo
         return new Result(true, null);
     }
@@ -565,8 +566,8 @@ public class AccountServiceImpl implements AccountService {
 
         try {
             TransactionEvent event = new TransactionEvent();
-            CoinTransferData coinData = new CoinTransferData(AccountConstant.ALIAS_NA, address, null);
-            AliasTransaction aliasTx = new AliasTransaction(coinData, password);
+            CoinTransferData coinData = new CoinTransferData(OperationType.TRANSFER, AccountConstant.ALIAS_NA, address, null);
+            AliasTransaction aliasTx = new AliasTransaction(coinData, password, new Alias(address, password));
             aliasTx.setHash(NulsDigestData.calcDigestData(aliasTx.serialize()));
             aliasTx.setScriptSig(createP2PKHScriptSigFromDigest(aliasTx.getHash(), account, password).serialize());
             ValidateResult validate = aliasTx.verify();

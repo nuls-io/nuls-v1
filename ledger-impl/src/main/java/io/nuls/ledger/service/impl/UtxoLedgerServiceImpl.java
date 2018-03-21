@@ -54,6 +54,7 @@ import io.nuls.ledger.entity.UtxoBalance;
 import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
+import io.nuls.ledger.entity.params.OperationType;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.entity.tx.TransferTransaction;
@@ -272,11 +273,31 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     public Balance getBalance(String address) {
-        Balance balance = ledgerCacheService.getBalance(address);
-        if (null == balance) {
-            balance = calcBalance(address);
+        if (StringUtils.isNotBlank(address)) {
+            Balance balance = ledgerCacheService.getBalance(address);
+            if (null == balance) {
+                balance = calcBalance(address);
+            }
+            return balance;
+        } else {
+            Balance allBalance = new Balance();
+            long usable = 0;
+            long locked = 0;
+            for (String addr : NulsContext.LOCAL_ADDRESS_LIST) {
+                Balance balance = ledgerCacheService.getBalance(addr);
+                if (null == balance) {
+                    balance = calcBalance(addr);
+                }
+                if (null != balance) {
+                    usable += balance.getUsable().getValue();
+                    locked += balance.getLocked().getValue();
+                }
+            }
+            allBalance.setUsable(Na.valueOf(usable));
+            allBalance.setLocked(Na.valueOf(locked));
+            allBalance.setBalance(Na.valueOf(usable + locked));
+            return allBalance;
         }
-        return balance;
     }
 
     private Balance calcBalance(String address) {
@@ -299,7 +320,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     public Result transfer(String address, String password, String toAddress, Na amount, String remark) {
-        CoinTransferData coinData = new CoinTransferData(amount, address, toAddress);
+        CoinTransferData coinData = new CoinTransferData(OperationType.TRANSFER, amount, address, toAddress);
         return transfer(coinData, password, remark);
     }
 
@@ -329,7 +350,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     public Result transfer(List<String> addressList, String password, String toAddress, Na amount, String remark) {
-        CoinTransferData coinData = new CoinTransferData(amount, addressList, toAddress);
+        CoinTransferData coinData = new CoinTransferData(OperationType.TRANSFER, amount, addressList, toAddress);
         return transfer(coinData, password, remark);
     }
 
@@ -338,7 +359,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     public Result lock(String address, String password, Na amount, long unlockTime, String remark) {
         LockNulsTransaction tx = null;
         try {
-            CoinTransferData coinData = new CoinTransferData(amount, address);
+            CoinTransferData coinData = new CoinTransferData(OperationType.LOCK, amount, address);
             coinData.addTo(address, new Coin(amount, unlockTime));
             tx = UtxoTransactionTool.getInstance().createLockNulsTx(coinData, password, remark);
 

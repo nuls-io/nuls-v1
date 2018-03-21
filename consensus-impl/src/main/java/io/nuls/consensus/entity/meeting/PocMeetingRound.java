@@ -141,5 +141,7 @@ public class PocMeetingRound {
         return index;
     }
 
-
+    public List<PocMeetingMember> getMemberList() {
+        return memberList;
+    }
 }

@@ -34,4 +34,6 @@ public interface DelegateAccountDataService extends BaseDataService< String,Dele
 
 
     int updateSelective(DelegateAccountPo po);
+
+
 }

@@ -23,64 +23,52 @@
  */
 package io.nuls.network.message.impl;
 
-import io.nuls.core.chain.entity.Block;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.event.BaseEvent;
-import io.nuls.core.utils.log.Log;
 import io.nuls.network.entity.Node;
 import io.nuls.network.message.NetworkCacheService;
 import io.nuls.network.message.NetworkEventResult;
-import io.nuls.network.message.entity.GetVersionEvent;
-import io.nuls.network.message.entity.VersionEvent;
+import io.nuls.network.message.entity.GetNodeEvent;
+import io.nuls.network.message.entity.GetNodesIpEvent;
+import io.nuls.network.message.entity.NodeEvent;
+import io.nuls.network.message.entity.NodesIpEvent;
 import io.nuls.network.message.handler.NetWorkEventHandler;
 import io.nuls.network.service.NetworkService;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * @author vivi
- * @date 2017/11/24.
+ * @date 2017/11/21
  */
-public class GetVersionEventHandler implements NetWorkEventHandler {
+public class GetNodesIpEventHandler implements NetWorkEventHandler {
 
-    private static final GetVersionEventHandler INSTANCE = new GetVersionEventHandler();
-
-    private NetworkCacheService cacheService;
+    private static final GetNodesIpEventHandler INSTANCE = new GetNodesIpEventHandler();
 
     private NetworkService networkService;
 
-    private GetVersionEventHandler() {
+    private NetworkCacheService cacheService;
+
+    private GetNodesIpEventHandler() {
         cacheService = NetworkCacheService.getInstance();
     }
 
-    public static GetVersionEventHandler getInstance() {
+    public static GetNodesIpEventHandler getInstance() {
         return INSTANCE;
     }
 
     @Override
-    public NetworkEventResult process(BaseEvent networkEvent, Node node) {
-        GetVersionEvent event = (GetVersionEvent) networkEvent;
-
-//        String key = event.getHeader().getEventType() + "-" + node.getId();
-//        if (cacheService.existEvent(key)) {
-//            Log.info("----------GetVersionEventHandler  cacheService  existEvent--------");
-//            getNetworkService().removeNode(node.getId());
-//            return null;
-//        }
-//        cacheService.putEvent(key, event, true);
-
-        Block block = NulsContext.getInstance().getBestBlock();
-        while (block == null) {
-            try {
-                Thread.sleep(1000);
-                block = NulsContext.getInstance().getBestBlock();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+    public NetworkEventResult process(BaseEvent event, Node node) {
+        List<Node> availableNodes = getNetworkService().getAvailableNodes();
+        List<String> ipList = new ArrayList<>();
+        for (Node n : availableNodes) {
+            ipList.add(n.getIp());
         }
 
-        VersionEvent replyMessage = new VersionEvent(getNetworkService().getNetworkParam().getExternalPort(),
-                block.getHeader().getHeight(), block.getHeader().getHash().getDigestHex());
-        node.setPort(event.getExternalPort());
-        return new NetworkEventResult(true, replyMessage);
+        NodesIpEvent ipEvent = new NodesIpEvent(ipList);
+        return new NetworkEventResult(true, ipEvent);
     }
 
     private NetworkService getNetworkService() {
@@ -89,4 +77,5 @@ public class GetVersionEventHandler implements NetWorkEventHandler {
         }
         return networkService;
     }
+
 }

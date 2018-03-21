@@ -54,4 +54,6 @@ public interface NetworkConstant {
     short NETWORK_VERSION_EVENT = 02;
     short NETWORK_GET_NODE_EVENT = 03;
     short NETWORK_NODE_EVENT = 04;
+    short NETWORK_GET_NODEIP_EVENT = 05;
+    short NETWORK_NODEIP_EVENT = 06;
 }

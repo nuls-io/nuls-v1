@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -35,6 +35,7 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.db.entity.UtxoOutputPo;
+import io.nuls.ledger.service.impl.LedgerCacheService;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.rpc.entity.OutputDto;
 import io.nuls.rpc.entity.RpcResult;
@@ -168,22 +169,22 @@ public class TransactionResource {
     @GET
     @Path("/utxo/locked")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult list(@QueryParam("address") String address, @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
-        if (address != null && !StringUtils.validAddress(address)) {
+    public RpcResult list(@QueryParam("address") String address,
+                          @QueryParam("pageNumber") int pageNumber,
+                          @QueryParam("pageSize") int pageSize) {
+        if (!StringUtils.validAddress(address)) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         if (pageNumber < 0 || pageSize < 0) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
-        if (StringUtils.isBlank(address)) {
-            address = accountService.getDefaultAccount().getAddress().getBase58();
-        }
         if (pageNumber == 0) {
             pageNumber = 1;
         }
         if (pageSize == 0) {
-            pageSize = 1;
+            pageSize = 10;
         }
+        //todo        ledgerService.getLockUtxo
         List<UtxoOutputPo> poList = outputDataService.getLockUtxo(address, TimeService.currentTimeMillis(), pageNumber, pageSize);
         List<OutputDto> dtoList = new ArrayList<>();
         for (UtxoOutputPo po : poList) {

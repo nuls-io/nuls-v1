@@ -25,7 +25,11 @@ package io.nuls.network;
 
 import io.nuls.core.utils.cfg.PropertiesEntity;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Niels
@@ -42,4 +46,7 @@ public class NetworkContext {
     }
 
     private static PropertiesEntity NETWORK_CONFIG;
+
+    public static Map<String, Long> ipMap = new ConcurrentHashMap<>();
+
 }

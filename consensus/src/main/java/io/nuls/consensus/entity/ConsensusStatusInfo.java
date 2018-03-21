@@ -33,13 +33,9 @@ import java.util.Map;
  * @author Niels
  * @date 2017/11/7
  */
-public class ConsensusStatusInfo implements Serializable{
+public class ConsensusStatusInfo implements Serializable {
     private Account account;
     private int status;
-    private long startTime;
-    private int parkedCount;
-    private double accumulativeReward;
-    private Map<String, Object> extend = new HashMap<>();
 
     public Account getAccount() {
         return account;
@@ -49,21 +45,6 @@ public class ConsensusStatusInfo implements Serializable{
         this.account = account;
     }
 
-    public void putExtend(String key, Object value) {
-        extend.put(key, value);
-    }
-
-    public void removeExtend(String key) {
-        extend.remove(key);
-    }
-
-    public Object getExtendValue(String key) {
-        return extend.get(key);
-    }
-
-    public Map<String, Object> getExtend() {
-        return extend;
-    }
 
     public int getStatus() {
         return status;
@@ -73,27 +54,4 @@ public class ConsensusStatusInfo implements Serializable{
         this.status = status;
     }
 
-    public long getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(long startTime) {
-        this.startTime = startTime;
-    }
-
-    public double getAccumulativeReward() {
-        return accumulativeReward;
-    }
-
-    public void setAccumulativeReward(double accumulativeReward) {
-        this.accumulativeReward = accumulativeReward;
-    }
-
-    public int getParkedCount() {
-        return parkedCount;
-    }
-
-    public void setParkedCount(int parkedCount) {
-        this.parkedCount = parkedCount;
-    }
 }
