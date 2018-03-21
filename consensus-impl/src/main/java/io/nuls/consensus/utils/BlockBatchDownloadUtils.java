@@ -278,7 +278,7 @@ public class BlockBatchDownloadUtils {
                 break;
             }
             ValidateResult result1 = block.verify();
-            if (result1.isFailed()&&result1.getErrorCode()!= ErrorCode.ORPHAN_TX) {
+            if (result1.isFailed() && result1.getErrorCode() != ErrorCode.ORPHAN_TX) {
                 if (null != result1.getMessage()) {
                     Log.info(result1.getMessage());
                 }
@@ -373,7 +373,10 @@ public class BlockBatchDownloadUtils {
                 break;
             }
             try {
-                result = nodeStatusMap.get(nodeId).finished();
+                NodeDownloadingStatus status = nodeStatusMap.get(nodeId);
+                if (status != null) {
+                    result = status.finished();
+                }
             } catch (Exception e) {
                 Log.error(e);
             }
