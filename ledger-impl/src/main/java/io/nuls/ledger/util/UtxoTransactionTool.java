@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -46,6 +46,7 @@ import io.nuls.ledger.event.notice.BalanceChangeNotice;
 import io.nuls.ledger.service.impl.LedgerCacheService;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -143,86 +144,40 @@ public class UtxoTransactionTool {
         return false;
     }
 
-
-    public void calcBalanceByUtxo(String address) {
+    public void calcBalance(String address, boolean sendNotice) {
         lock.lock();
         try {
             UtxoBalance balance = (UtxoBalance) ledgerCacheService.getBalance(address);
             if (balance == null) {
                 return;
             }
+            checkUtxoTimeLock(balance.getUnSpends());
 
             long usable = 0;
             long lock = 0;
-            long currentTime = TimeService.currentTimeMillis();
-            if (NulsContext.getInstance().getGenesisBlock() == null) {
-                try {
-                    Thread.sleep(100L);
-                } catch (InterruptedException e) {
-                }
-                calcBalanceByUtxo(address);
-                return;
-            }
-            long genesisTime = NulsContext.getInstance().getGenesisBlock().getHeader().getTime();
-            long bestHeight = NulsContext.getInstance().getNetBestBlockHeight();
-
             for (UtxoOutput output : balance.getUnSpends()) {
-                if (UtxoOutput.UTXO_CONFIRM_UNLOCK == output.getStatus() ||
-                        UtxoOutput.UTXO_UNCONFIRM_UNLOCK == output.getStatus()) {
-                    if (output.getLockTime() > 0) {
-                        if (output.getLockTime() > genesisTime) {
-                            if (output.getLockTime() > currentTime) {
-                                lock += output.getValue();
-                            } else {
-                                usable += output.getValue();
-                            }
-                        } else {
-                            if (output.getLockTime() > bestHeight) {
-                                lock += output.getValue();
-                            } else {
-                                usable += output.getValue();
-                            }
-                        }
-                    } else {
-                        usable += output.getValue();
-                    }
-                } else if (UtxoOutput.UTXO_CONFIRM_LOCK == output.getStatus() ||
-                        UtxoOutput.UTXO_UNCONFIRM_LOCK == output.getStatus()) {
-                    lock += output.getValue();
+                if (output.isUsable()) {
+                    usable += output.getValue();
+                } else if (output.isLocked()) {
+                    usable += output.getValue();
                 }
             }
 
-            Na oldNa = balance.getBalance();
-            if (null == oldNa) {
-                oldNa = Na.ZERO;
-            }
-            long oldBalance = oldNa.getValue();
-            long change = lock + usable - oldBalance;
+            Balance oldBalance = new Balance(balance.getUsable(), balance.getLocked());
+
             balance.setLocked(Na.valueOf(lock));
             balance.setUsable(Na.valueOf(usable));
             balance.setBalance(balance.getUsable().add(balance.getLocked()));
 
+            //check exchange
+            if (oldBalance.getBalance().getValue() == balance.getBalance().getValue() &&
+                    oldBalance.getUsable().getValue() == balance.getUsable().getValue() &&
+                    oldBalance.getLocked().getValue() == balance.getLocked().getValue()) {
+                return;
+            }
 
-            if (NulsContext.LOCAL_ADDRESS_LIST != null && NulsContext.LOCAL_ADDRESS_LIST.contains(address)) {
-                if (change == 0) {
-                    return;
-                }
-                BalanceChangeNotice notice = new BalanceChangeNotice();
-                BalanceChangeData data = new BalanceChangeData();
-                data.setAddress(address);
-                data.setStatus(1);
-                if (change < 0) {
-                    data.setType(1);
-                    data.setAmount(Na.valueOf(0 - change));
-                } else {
-                    data.setType(0);
-                    data.setAmount(Na.valueOf(change));
-                }
-                notice.setEventBody(data);
-                if (eventBroadcaster == null) {
-                    eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
-                }
-                eventBroadcaster.publishToLocal(notice);
+            if (sendNotice) {
+                sendNotice(oldBalance, balance, address);
             }
 
             if (balance.getUnSpends().isEmpty()) {
@@ -233,45 +188,56 @@ public class UtxoTransactionTool {
         }
     }
 
+    private void sendNotice(Balance oldBalance, Balance balance, String address) {
+        long oldNa = oldBalance.getBalance().getValue();
+        long change = balance.getBalance().getValue() - oldNa;
 
-    public void calcBalance(UtxoData utxoData, int type) throws NulsException {
-        String address;
-        Na value;
-        Balance balance;
-
-        for (UtxoInput input : utxoData.getInputs()) {
-            value = Na.valueOf(input.getFrom().getValue());
-            address = Address.fromHashs(input.getFrom().getAddress()).getBase58();
-            balance = ledgerCacheService.getBalance(address);
-
-            if (balance != null) {
-                if (type == APPROVE) {
-                    balance.setLocked(balance.getLocked().add(value));
-                    balance.setUsable(balance.getUsable().subtract(value));
-                } else if (type == COMMIT) {
-                    balance.setLocked(balance.getLocked().subtract(value));
-                } else if (type == ROLLBACK) {
-                    balance.setUsable(balance.getUsable().add(value));
-                }
-                balance.setBalance(balance.getLocked().add(balance.getUsable()));
+        if (NulsContext.LOCAL_ADDRESS_LIST != null && NulsContext.LOCAL_ADDRESS_LIST.contains(address)) {
+            if (change == 0) {
+                return;
             }
+            BalanceChangeNotice notice = new BalanceChangeNotice();
+            BalanceChangeData data = new BalanceChangeData();
+            data.setAddress(address);
+            data.setStatus(1);
+            if (change < 0) {
+                data.setType(1);
+                data.setAmount(Na.valueOf(0 - change));
+            } else {
+                data.setType(0);
+                data.setAmount(Na.valueOf(change));
+            }
+            notice.setEventBody(data);
+            if (eventBroadcaster == null) {
+                eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
+            }
+            eventBroadcaster.publishToLocal(notice);
         }
+    }
 
+    public void checkUtxoTimeLock(List<UtxoOutput> outputList) {
+        long currentTime = TimeService.currentTimeMillis();
         long genesisTime = NulsContext.getInstance().getGenesisBlock().getHeader().getTime();
         long bestHeight = NulsContext.getInstance().getNetBestBlockHeight();
-        for (UtxoOutput output : utxoData.getOutputs()) {
-            value = Na.valueOf(output.getValue());
-            address = Address.fromHashs(output.getAddress()).getBase58();
-            balance = ledgerCacheService.getBalance(address);
-
-            if (balance != null) {
-                if (type == APPROVE) {
-                    balance.setUsable(balance.getUsable().add(value));
-                } else if (type == ROLLBACK) {
-                    balance.setUsable(balance.getUsable().add(value));
+        for (UtxoOutput output : outputList) {
+            if (output.isLocked()) {
+                // check lock by time
+                if (output.getLockTime() >= genesisTime && output.getLockTime() <= currentTime) {
+                    if (OutPutStatusEnum.UTXO_CONFIRM_TIME_LOCK.equals(output.getStatus())) {
+                        output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
+                    } else if (OutPutStatusEnum.UTXO_UNCONFIRM_TIME_LOCK.equals(output.getStatus())) {
+                        output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND);
+                    }
+                }
+                // check lock by height
+                else if (output.getLockTime() < genesisTime && output.getLockTime() >= bestHeight) {
+                    if (OutPutStatusEnum.UTXO_CONFIRM_TIME_LOCK.equals(output.getStatus())) {
+                        output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
+                    } else if (OutPutStatusEnum.UTXO_UNCONFIRM_TIME_LOCK.equals(output.getStatus())) {
+                        output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND);
+                    }
                 }
             }
-            balance.setBalance(balance.getLocked().add(balance.getUsable()));
         }
     }
 
