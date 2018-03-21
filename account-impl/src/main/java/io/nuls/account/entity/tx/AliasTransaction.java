@@ -25,6 +25,7 @@ package io.nuls.account.entity.tx;
 
 
 import io.nuls.account.entity.Alias;
+import io.nuls.account.entity.validator.AliasValidator;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -39,10 +40,12 @@ public class AliasTransaction extends AbstractCoinTransaction<Alias> {
 
     public AliasTransaction() throws NulsException {
         super(TransactionConstant.TX_TYPE_SET_ALIAS, null, null);
+        this.registerValidator(AliasValidator.getInstance());
     }
 
     public AliasTransaction(CoinTransferData coinParam, String password, Alias alias) throws NulsException {
         super(TransactionConstant.TX_TYPE_SET_ALIAS, coinParam, password);
+        this.registerValidator(AliasValidator.getInstance());
         this.setTxData(alias);
     }
 

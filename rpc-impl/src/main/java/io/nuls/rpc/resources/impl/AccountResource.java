@@ -97,10 +97,8 @@ public class AccountResource {
     @Path("/alias")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult alias(AccountParamForm form) {
-        if (!StringUtils.validAddress(form.getAddress()) ||
-                !StringUtils.validPassword(form.getPassword()) ||
-                StringUtils.isBlank(form.getAddress())) {
-            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        if (!StringUtils.validAddress(form.getAddress())) {
+            return RpcResult.getFailed(ErrorCode.DATA_NOT_FOUND);
         }
         Result result = accountService.setAlias(form.getAddress(), form.getPassword(), form.getAlias());
         RpcResult rpcResult = new RpcResult(result);

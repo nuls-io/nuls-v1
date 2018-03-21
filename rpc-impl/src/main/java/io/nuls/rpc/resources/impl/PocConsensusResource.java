@@ -266,6 +266,8 @@ public class PocConsensusResource {
                 item.setTotalDeposit(Na.parseNuls(300000));
                 item.setIntroduction("哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈");
                 item.setDelegateAddress("2CYdNLysoMbPRc4Q5YsVreT99Q61ZSg");
+                item.setAgentName("超级节点" + i);
+                item.setReward(Na.parseNuls(1000000000 * i));
                 list.add(item);
             }
             listPage.setList(list);
@@ -298,6 +300,8 @@ public class PocConsensusResource {
                 item.setTotalDeposit(Na.parseNuls(300000));
                 item.setIntroduction("哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈");
                 item.setDelegateAddress("2CYdNLysoMbPRc4Q5YsVreT99Q61ZSg");
+                item.setAgentName("超级节点" + i);
+                item.setReward(Na.parseNuls(1000000000 * i));
                 list.add(item);
             }
             result.setData(list);
