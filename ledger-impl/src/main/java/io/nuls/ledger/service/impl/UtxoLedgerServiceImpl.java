@@ -24,12 +24,10 @@
 package io.nuls.ledger.service.impl;
 
 import io.nuls.cache.service.intf.CacheService;
-import io.nuls.core.chain.entity.Na;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.Result;
-import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.chain.entity.*;
 import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.dto.Page;
@@ -49,6 +47,7 @@ import io.nuls.db.entity.UtxoInputPo;
 import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
+import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.entity.UtxoBalance;
 import io.nuls.ledger.entity.UtxoOutput;
@@ -294,10 +293,26 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         }
     }
 
+    @Override
+    public Na getTxFee(int txType) {
+        Block bestBlock = NulsContext.getInstance().getBestBlock();
+        if (null == bestBlock) {
+            return LedgerConstant.TRANSACTION_FEE;
+        }
+        long blockHeight = bestBlock.getHeader().getHeight();
+        if (txType == TransactionConstant.TX_TYPE_COIN_BASE ||
+                txType == TransactionConstant.TX_TYPE_SMALL_CHANGE ||
+                txType == TransactionConstant.TX_TYPE_EXIT_CONSENSUS
+                ) {
+            return Na.ZERO;
+        }
+        long x = blockHeight / LedgerConstant.BLOCK_COUNT_OF_YEAR + 1;
+        return LedgerConstant.TRANSACTION_FEE.div(x);
+    }
 
     @Override
     public Result transfer(String address, String password, String toAddress, Na amount, String remark) {
-        CoinTransferData coinData = new CoinTransferData(OperationType.TRANSFER, amount, address, toAddress);
+        CoinTransferData coinData = new CoinTransferData(OperationType.TRANSFER, amount, address, toAddress, getTxFee(TransactionConstant.TX_TYPE_TRANSFER));
         return transfer(coinData, password, remark);
     }
 
@@ -327,7 +342,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     public Result transfer(List<String> addressList, String password, String toAddress, Na amount, String remark) {
-        CoinTransferData coinData = new CoinTransferData(OperationType.TRANSFER, amount, addressList, toAddress);
+        CoinTransferData coinData = new CoinTransferData(OperationType.TRANSFER, amount, addressList, toAddress, getTxFee(TransactionConstant.TX_TYPE_TRANSFER));
         return transfer(coinData, password, remark);
     }
 
@@ -336,7 +351,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     public Result lock(String address, String password, Na amount, long unlockTime, String remark) {
         LockNulsTransaction tx = null;
         try {
-            CoinTransferData coinData = new CoinTransferData(OperationType.LOCK, amount, address);
+            CoinTransferData coinData = new CoinTransferData(OperationType.LOCK, amount, address, getTxFee(TransactionConstant.TX_TYPE_LOCK));
             coinData.addTo(address, new Coin(amount, unlockTime));
             tx = UtxoTransactionTool.getInstance().createLockNulsTx(coinData, password, remark);
 

@@ -23,6 +23,7 @@
  */
 package io.nuls.consensus.entity.block;
 
+import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.context.NulsContext;
@@ -88,11 +89,12 @@ public class BifurcateProcessor {
             } else if (index >= 0) {
                 BlockHeaderChain newChain = chain.getBifurcateChain(header);
                 chainList.add(newChain);
-                setBestHeight(header);
                 return true;
             }
         }
-        if ((bestHeight + 1) != header.getHeight()) {
+        Block bestBlock = NulsContext.getInstance().getBestBlock();
+        if ((bestBlock.getHeader().getHeight() + 1) != header.getHeight()
+                || !bestBlock.getHeader().getHash().getDigestHex().equals(header.getPreHash().getDigestHex())) {
             return false;
         }
         BlockHeaderChain chain = new BlockHeaderChain();

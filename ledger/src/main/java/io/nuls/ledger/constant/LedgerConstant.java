@@ -23,6 +23,8 @@
  */
 package io.nuls.ledger.constant;
 
+import io.nuls.core.chain.entity.Na;
+
 /**
  * @author Niels
  * @date 2017/11/8
@@ -38,4 +40,7 @@ public interface LedgerConstant {
     short EVENT_TYPE_TRANSACTION = 1;
     short NOTICE_BALANCE_CHANGE = 2;
 
+
+    long BLOCK_COUNT_OF_YEAR = 3153600;
+    Na TRANSACTION_FEE = Na.parseNuls(0.01);
 }

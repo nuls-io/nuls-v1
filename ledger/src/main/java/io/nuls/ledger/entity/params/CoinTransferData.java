@@ -52,36 +52,37 @@ public class CoinTransferData {
 
     private Na fee;
 
-    public CoinTransferData(OperationType type) {
+    public CoinTransferData(OperationType type,Na fee) {
         this.from = new ArrayList();
         this.toMap = new HashMap<>();
         this.type = type;
+        this.fee = fee;
     }
 
-    public CoinTransferData(OperationType type, Na totalNa) {
-        this(type);
+    public CoinTransferData(OperationType type, Na totalNa,Na fee) {
+        this(type,fee);
         this.totalNa = totalNa;
     }
 
-    public CoinTransferData(OperationType type, Na totalNa, String from) {
-        this(type, totalNa);
+    public CoinTransferData(OperationType type, Na totalNa, String from,Na fee) {
+        this(type, totalNa,fee);
         this.addFrom(from);
     }
 
-    public CoinTransferData(OperationType type, Na totalNa, String from, String to) {
-        this(type, totalNa, from);
+    public CoinTransferData(OperationType type, Na totalNa, String from, String to,Na fee) {
+        this(type, totalNa, from,fee);
         if (StringUtils.isNotBlank(to)) {
             this.addTo(to, new Coin(totalNa));
         }
     }
 
-    public CoinTransferData(OperationType type, Na totalNa, List<String> from) {
+    public CoinTransferData(OperationType type, Na totalNa, List<String> from,Na fee) {
         this(type, totalNa);
         this.setFrom(from);
     }
 
-    public CoinTransferData(OperationType type, Na totalNa, List<String> from, String to) {
-        this(type, totalNa, from);
+    public CoinTransferData(OperationType type, Na totalNa, List<String> from, String to,Na fee) {
+        this(type, totalNa, from,fee);
         if (StringUtils.isNotBlank(to)) {
             this.addTo(to, new Coin(totalNa));
         }

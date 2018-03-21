@@ -391,7 +391,7 @@ public class ConsensusMeetingRunner implements Runnable {
     }
 
     private void coinBaseTx(List<Transaction> txList, PocMeetingMember self) throws NulsException, IOException {
-        CoinTransferData data = new CoinTransferData(OperationType.COIN_BASE);
+        CoinTransferData data = new CoinTransferData(OperationType.COIN_BASE,this.ledgerService.getTxFee(TransactionConstant.TX_TYPE_COIN_BASE));
         data.setFee(Na.ZERO);
         List<ConsensusReward> rewardList = calcReward(txList, self);
         Na total = Na.ZERO;

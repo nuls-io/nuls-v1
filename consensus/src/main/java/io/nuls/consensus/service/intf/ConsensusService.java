@@ -40,8 +40,6 @@ import java.util.Map;
  */
 public interface ConsensusService {
 
-    Na getTxFee(int txType);
-
     void startConsensus(String address, String password, Map<String, Object> paramsMap) throws NulsException;
 
     void stopConsensus(String address, String password, Map<String, Object> paramsMap) throws NulsException, IOException;
