@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -261,13 +261,13 @@ public class PocConsensusResource {
                 item.setCommissionRate(15);
                 item.setCreditRatio(0.9);
                 item.setStatus(2);
-                item.setMemberCount(3);
-                item.setOwndeposit(Na.parseNuls(50000));
-                item.setTotalDeposit(Na.parseNuls(300000));
-                item.setIntroduction("哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈");
+                item.setMemberCount(3+pageNumber);
+                item.setOwndeposit(Na.parseNuls(50000+pageNumber));
+                item.setTotalDeposit(Na.parseNuls(300000+pageNumber));
+                item.setIntroduction("哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈"+pageNumber);
                 item.setDelegateAddress("2CYdNLysoMbPRc4Q5YsVreT99Q61ZSg");
-                item.setAgentName("超级节点" + i);
-                item.setReward(Na.parseNuls(1000000000 * i));
+                item.setAgentName("超级节点" + i+pageNumber);
+                item.setReward(Na.parseNuls(1000000000 * i+pageNumber));
                 list.add(item);
             }
             listPage.setList(list);
@@ -283,28 +283,34 @@ public class PocConsensusResource {
     }
 
     @GET
-    @Path("/agent/{agentAddress}")
+    @Path("/agent/{agentAddress}/{pageNumber}/{pageSize}")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult list(@QueryParam("agentAddress") String agentAddress) {
+    public RpcResult list(@PathParam("agentAddress") String agentAddress, @PathParam("pageNumber") Integer pageNumber, @PathParam("pageSize") Integer pageSize) {
 
         RpcResult result = RpcResult.getSuccess();
+        Page<AgentInfo> listPage = new Page<>();
         if (temp == 1) {
+            listPage.setPageNumber(pageNumber);
+            listPage.setPageSize(pageSize);
+            listPage.setTotal(pageSize * 3);
+            listPage.setPages(3);
             List<AgentInfo> list = new ArrayList<>();
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < pageSize; i++) {
                 AgentInfo item = new AgentInfo();
                 item.setCommissionRate(15);
                 item.setCreditRatio(0.9);
                 item.setStatus(2);
-                item.setMemberCount(3);
-                item.setOwndeposit(Na.parseNuls(50000));
-                item.setTotalDeposit(Na.parseNuls(300000));
+                item.setMemberCount(3+pageNumber);
+                item.setOwndeposit(Na.parseNuls(50000+pageNumber));
+                item.setTotalDeposit(Na.parseNuls(300000+pageNumber));
                 item.setIntroduction("哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈");
                 item.setDelegateAddress("2CYdNLysoMbPRc4Q5YsVreT99Q61ZSg");
-                item.setAgentName("超级节点" + i);
-                item.setReward(Na.parseNuls(1000000000 * i));
+                item.setAgentName("超级节点" + i+pageNumber);
+                item.setReward(Na.parseNuls(1000000000 * i+pageNumber));
                 list.add(item);
             }
-            result.setData(list);
+            listPage.setList(list);
+            result.setData(listPage);
             return result;
         }
 

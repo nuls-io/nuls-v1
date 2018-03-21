@@ -99,10 +99,6 @@ public class AccountServiceImpl implements AccountService {
     private volatile boolean isLockNow = true;
 
     @Override
-    public void init() {
-    }
-
-    @Override
     public void start() {
         List<Account> accounts = getAccountList();
         if (accounts.size() > 0) {
