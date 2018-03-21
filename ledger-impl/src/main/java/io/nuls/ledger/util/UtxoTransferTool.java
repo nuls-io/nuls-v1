@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -38,6 +38,7 @@ import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.entity.TransactionPo;
 import io.nuls.db.entity.UtxoInputPo;
 import io.nuls.db.entity.UtxoOutputPo;
+import io.nuls.ledger.entity.OutPutStatusEnum;
 import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.UtxoInput;
 import io.nuls.ledger.entity.UtxoOutput;
@@ -64,7 +65,13 @@ public class UtxoTransferTool {
             //todo
             Log.error(e);
         }
-        output.setStatus(po.getStatus());
+        if (po.getStatus() == UtxoOutputPo.USABLE) {
+            output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
+        } else if (po.getStatus() == UtxoOutputPo.LOCKED) {
+            output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_CONSENSUS_LOCK);
+        } else if (po.getStatus() == UtxoOutputPo.SPENT) {
+            output.setStatus(OutPutStatusEnum.UTXO_SPENT);
+        }
 
         if (po.getCreateTime() != null) {
             output.setCreateTime(po.getCreateTime());
@@ -85,7 +92,13 @@ public class UtxoTransferTool {
         if (null != output.getP2PKHScript()) {
             po.setScript(output.getP2PKHScript().getBytes());
         }
-        po.setStatus((byte) output.getStatus());
+        if (OutPutStatusEnum.UTXO_SPENT == output.getStatus()) {
+            po.setStatus(UtxoOutputPo.SPENT);
+        } else if (OutPutStatusEnum.UTXO_CONFIRM_CONSENSUS_LOCK == output.getStatus()) {
+            po.setStatus(UtxoOutputPo.LOCKED);
+        } else {
+            po.setStatus(UtxoOutputPo.USABLE);
+        }
         return po;
     }
 
@@ -206,7 +219,6 @@ public class UtxoTransferTool {
         return tx;
     }
 
-
     private static void transferCoinData(Transaction tx, List<UtxoInputPo> inputPoList, List<UtxoOutputPo> outputPoList) {
         if (tx instanceof AbstractCoinTransaction) {
             AbstractCoinTransaction coinTx = (AbstractCoinTransaction) tx;
@@ -223,5 +235,4 @@ public class UtxoTransferTool {
             coinTx.setCoinData(utxoData);
         }
     }
-
 }

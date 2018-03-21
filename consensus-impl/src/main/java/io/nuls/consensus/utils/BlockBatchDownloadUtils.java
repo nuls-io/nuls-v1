@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -33,20 +33,16 @@ import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Result;
-import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.queue.service.impl.QueueService;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.core.validate.ValidateResult;
-import io.nuls.db.entity.NodePo;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.network.service.NetworkService;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -85,6 +81,7 @@ public class BlockBatchDownloadUtils {
     private DownloadRound currentRound;
     private List<String> nodeIdList;
     private BlockInfo blocksHash;
+    private long lastOperateTime;
 
     private Lock lock = new ReentrantLock();
 
@@ -115,6 +112,7 @@ public class BlockBatchDownloadUtils {
             lock.unlock();
             return;
         }
+        this.lastOperateTime = TimeService.currentTimeMillis();
         working = true;
         try {
             this.init(nodeIdList);
@@ -122,6 +120,11 @@ public class BlockBatchDownloadUtils {
             request(startHeight, endHeight);
             while (working) {
                 verify();
+                if ((TimeService.currentTimeMillis() - lastOperateTime) >= 5000) {
+                    working = false;
+                    lock.unlock();
+                    return;
+                }
                 Thread.sleep(100L);
             }
             if (!working) {
@@ -215,6 +218,7 @@ public class BlockBatchDownloadUtils {
             if (null == status) {
                 return false;
             }
+            this.lastOperateTime = TimeService.currentTimeMillis();
             if (!status.containsHeight(block.getHeader().getHeight())) {
                 return false;
             }
@@ -310,7 +314,7 @@ public class BlockBatchDownloadUtils {
         networkService.removeNode(nodeStatus.getNodeId());
         this.nodeIdList.remove(nodeStatus.getNodeId());
         this.queueService.remove(queueId, nodeStatus.getNodeId());
-        if (nodeIdList.isEmpty()) {
+        if (nodeIdList.isEmpty() || queueService.size(queueId) == 0) {
             return;
         }
         this.sendRequest(nodeStatus.getStart(), nodeStatus.getEnd(), this.queueService.take(queueId));

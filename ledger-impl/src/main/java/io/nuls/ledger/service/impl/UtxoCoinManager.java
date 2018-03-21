@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -73,7 +73,7 @@ public class UtxoCoinManager {
         }
 
         for (String str : addressSet) {
-            UtxoTransactionTool.getInstance().calcBalanceByUtxo(str);
+            UtxoTransactionTool.getInstance().calcBalance(str, false);
         }
     }
 
@@ -85,46 +85,47 @@ public class UtxoCoinManager {
      * @return
      */
     public List<UtxoOutput> getAccountUnSpend(String address, Na value) {
-        lock.lock();
-        List<UtxoOutput> unSpends = new ArrayList<>();
-        try {
-            UtxoBalance balance = (UtxoBalance) ledgerCacheService.getBalance(address);
-            if (balance == null || balance.getUsable().isLessThan(value)) {
-                return unSpends;
-            }
-
-            //check use-able is enough , find unSpend utxo
-            boolean enough = false;
-            Na amount = Na.ZERO;
-            for (int i = 0; i < balance.getUnSpends().size(); i++) {
-                UtxoOutput output = balance.getUnSpends().get(i);
-                boolean update = ledgerCacheService.updateUtxoStatus(output.getKey(), UtxoOutput.UTXO_CONFIRM_LOCK, UtxoOutput.UTXO_CONFIRM_UNLOCK);
-                //other tx locked this utxo
-                if (!update) {
-                    continue;
-                }
-                unSpends.add(output);
-                amount = amount.add(Na.valueOf(output.getValue()));
-                if (amount.isGreaterThan(value)) {
-                    enough = true;
-                    break;
-                }
-            }
-            if (!enough) {
-                for (UtxoOutput output : unSpends) {
-                    ledgerCacheService.updateUtxoStatus(output.getKey(), UtxoOutput.UTXO_CONFIRM_UNLOCK, UtxoOutput.UTXO_CONFIRM_LOCK);
-                }
-                unSpends = new ArrayList<>();
-            }
-        } catch (Exception e) {
-            Log.error(e);
-            for (UtxoOutput output : unSpends) {
-                ledgerCacheService.updateUtxoStatus(output.getKey(), UtxoOutput.UTXO_CONFIRM_UNLOCK, UtxoOutput.UTXO_CONFIRM_LOCK);
-            }
-        } finally {
-            lock.unlock();
-        }
-        return unSpends;
+        return null;
+//        lock.lock();
+//        List<UtxoOutput> unSpends = new ArrayList<>();
+//        try {
+//            UtxoBalance balance = (UtxoBalance) ledgerCacheService.getBalance(address);
+//            if (balance == null || balance.getUsable().isLessThan(value)) {
+//                return unSpends;
+//            }
+//
+//            //check use-able is enough , find unSpend utxo
+//            boolean enough = false;
+//            Na amount = Na.ZERO;
+//            for (int i = 0; i < balance.getUnSpends().size(); i++) {
+//                UtxoOutput output = balance.getUnSpends().get(i);
+//                boolean update = ledgerCacheService.updateUtxoStatus(output.getKey(), UtxoOutput.UTXO_CONFIRM_LOCK, UtxoOutput.UTXO_CONFIRM_UNLOCK);
+//                //other tx locked this utxo
+//                if (!update) {
+//                    continue;
+//                }
+//                unSpends.add(output);
+//                amount = amount.add(Na.valueOf(output.getValue()));
+//                if (amount.isGreaterThan(value)) {
+//                    enough = true;
+//                    break;
+//                }
+//            }
+//            if (!enough) {
+//                for (UtxoOutput output : unSpends) {
+//                    ledgerCacheService.updateUtxoStatus(output.getKey(), UtxoOutput.UTXO_CONFIRM_UNLOCK, UtxoOutput.UTXO_CONFIRM_LOCK);
+//                }
+//                unSpends = new ArrayList<>();
+//            }
+//        } catch (Exception e) {
+//            Log.error(e);
+//            for (UtxoOutput output : unSpends) {
+//                ledgerCacheService.updateUtxoStatus(output.getKey(), UtxoOutput.UTXO_CONFIRM_UNLOCK, UtxoOutput.UTXO_CONFIRM_LOCK);
+//            }
+//        } finally {
+//            lock.unlock();
+//        }
+//        return unSpends;
     }
 
     public List<UtxoOutput> getAccountsUnSpend(List<String> addressList, Na value) {

@@ -69,6 +69,12 @@ public class NulsContext {
     public static Na INVESTMENT = Na.ZERO;
 
     public Block getGenesisBlock() {
+        while (genesisBlock == null) {
+            try {
+                Thread.sleep(100L);
+            } catch (InterruptedException e) {
+            }
+        }
         return genesisBlock;
     }
 
