@@ -25,6 +25,7 @@ package io.nuls.consensus.entity.validator.block;
 
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
@@ -53,6 +54,9 @@ public class BlockTxValidator implements NulsDataValidator<Block> {
         for (Transaction tx : block.getTxs()) {
             ValidateResult result = tx.verify();
             if (null==result||result.isFailed()) {
+                if(result.getErrorCode()== ErrorCode.ORPHAN_TX){
+                    return result;
+                }
                 return ValidateResult.getFailedResult("there is wrong transaction!");
             }
             if (tx.getType() == TransactionConstant.TX_TYPE_COIN_BASE) {
