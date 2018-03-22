@@ -322,6 +322,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         UtxoData utxoData = new UtxoData();
         List<UtxoInput> inputs = new ArrayList<>();
         List<UtxoOutput> outputs = new ArrayList<>();
+        Na totalNa = Na.ZERO;
 
         if (coinParam.getTotalNa().equals(Na.ZERO)) {
             utxoData.setInputs(inputs);
@@ -403,6 +404,14 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 output.setTxHash(tx.getHash());
                 outputValue += output.getValue();
                 outputs.add(output);
+
+                if (coinParam.getFrom().contains(address)) {
+                    if (tx instanceof LockNulsTransaction && i == 0) {
+                        totalNa.add(Na.valueOf(output.getValue()));
+                    }
+                } else {
+                    totalNa.add(Na.valueOf(output.getValue()));
+                }
                 i++;
             }
         }
@@ -424,21 +433,36 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 
         utxoData.setInputs(inputs);
         utxoData.setOutputs(outputs);
+        utxoData.setTotalNa(totalNa);
         return utxoData;
     }
 
     @Override
     public void afterParse(CoinData coinData, Transaction tx) {
         UtxoData utxoData = (UtxoData) coinData;
+        Set<String> addressSet = new HashSet<>();
+
         if (null != utxoData.getInputs()) {
             for (UtxoInput input : utxoData.getInputs()) {
                 input.setTxHash(tx.getHash());
+                addressSet.add(input.getFrom().getAddress());
             }
         }
+
+        Na totalNa = Na.ZERO;
         if (null != utxoData.getOutputs()) {
-            for (UtxoOutput output : utxoData.getOutputs()) {
+            for (int i = 0; i < utxoData.getOutputs().size(); i++) {
+                UtxoOutput output = utxoData.getOutputs().get(i);
                 output.setTxHash(tx.getHash());
+                if (addressSet.contains(output.getAddress())) {
+                    if (tx instanceof LockNulsTransaction && i == 0) {
+                        totalNa.add(Na.valueOf(output.getValue()));
+                    }
+                } else {
+                    totalNa.add(Na.valueOf(output.getValue()));
+                }
             }
         }
+        coinData.setTotalNa(totalNa);
     }
 }

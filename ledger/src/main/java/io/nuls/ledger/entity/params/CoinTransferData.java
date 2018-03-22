@@ -42,7 +42,7 @@ public class CoinTransferData {
 
     private byte[] priKey;
 
-    private List from;
+    private List<String> from;
 
     private Map<String, List<Coin>> toMap;
 
