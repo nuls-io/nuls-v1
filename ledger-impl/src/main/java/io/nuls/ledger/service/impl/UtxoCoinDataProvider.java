@@ -30,13 +30,10 @@ import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.constant.TxStatusEnum;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.script.P2PKHScript;
-import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
@@ -50,8 +47,6 @@ import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.ledger.entity.*;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
-import io.nuls.ledger.entity.params.OperationType;
-import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.entity.tx.UnlockNulsTransaction;
 import io.nuls.ledger.service.intf.CoinDataProvider;
@@ -145,14 +140,12 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
     private void approveProcessOutput(List<UtxoOutput> outputs, Transaction tx, Set<String> addressSet) {
         for (int i = 0; i < outputs.size(); i++) {
             UtxoOutput output = outputs.get(i);
-            if (tx.getType() == TransactionConstant.TX_TYPE_REGISTER_AGENT || tx.getType() == TransactionConstant.TX_TYPE_JOIN_CONSENSUS) {
+            if (tx instanceof LockNulsTransaction && i == 0) {
                 output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_CONSENSUS_LOCK);
+            } else if (output.getLockTime() > 0) {
+                output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_TIME_LOCK);
             } else {
-                if (output.getLockTime() > 0) {
-                    output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_TIME_LOCK);
-                } else {
-                    output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND);
-                }
+                output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND);
             }
             ledgerCacheService.putUtxo(output.getKey(), output);
             addressSet.add(output.getAddress());
