@@ -51,7 +51,6 @@ public class AccountModuleBootstrap extends AbstractAccountModule {
         this.registerService(AccountServiceImpl.class);
         accountService = NulsContext.getServiceBean(AccountService.class);
         this.registerTransaction(TransactionConstant.TX_TYPE_SET_ALIAS, AliasTransaction.class, AliasTxService.getInstance());
-        accountService.init();
     }
 
     @Override

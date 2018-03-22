@@ -391,7 +391,7 @@ public class ConsensusMeetingRunner implements Runnable {
     }
 
     private void coinBaseTx(List<Transaction> txList, PocMeetingMember self) throws NulsException, IOException {
-        CoinTransferData data = new CoinTransferData(OperationType.COIN_BASE);
+        CoinTransferData data = new CoinTransferData(OperationType.COIN_BASE,this.ledgerService.getTxFee(TransactionConstant.TX_TYPE_COIN_BASE));
         data.setFee(Na.ZERO);
         List<ConsensusReward> rewardList = calcReward(txList, self);
         Na total = Na.ZERO;
@@ -509,6 +509,19 @@ public class ConsensusMeetingRunner implements Runnable {
         } catch (NulsException e) {
             Log.error(e);
         }
+
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
         boolean punish = self.getIndexOfRound() == 1 && lastBlockRoundData.getPackingIndexOfRound() != lastBlockRoundData.getConsensusMemberCount();
         punish = punish || (self.getIndexOfRound() > 1 && self.getIndexOfRound() != (lastBlockRoundData.getPackingIndexOfRound() + 1));
         if (!punish) {
@@ -540,7 +553,7 @@ public class ConsensusMeetingRunner implements Runnable {
             Log.error(e);
             throw new NulsRuntimeException(e);
         }
-        if (round.getPreviousRound() == null) {
+        if (round.getPreviousRound() == null||round.getPreviousRound().getIndex()<=lastRoundData.getRoundIndex()) {
             while (true) {
                 if (lastRoundData.getPackingIndexOfRound() == lastRoundData.getConsensusMemberCount() ||
                         lastRoundData.getRoundEndTime() <= TimeService.currentTimeMillis()) {

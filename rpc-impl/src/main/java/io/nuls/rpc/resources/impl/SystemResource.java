@@ -27,6 +27,7 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.module.service.ModuleService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
+import io.nuls.rpc.entity.HelpInfoDto;
 import io.nuls.rpc.entity.RpcResult;
 import io.nuls.rpc.entity.VersionDto;
 
@@ -48,6 +49,14 @@ public class SystemResource {
         rpcVersion.setMyVersion(NulsContext.VERSION);
         rpcVersion.setNewestVersion(NulsContext.NEWEST_VERSION);
         return RpcResult.getSuccess().setData(rpcVersion);
+    }
+
+    @GET
+    @Path("/help")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult getHelp(){
+        HelpInfoDto help =new HelpInfoDto();
+        return RpcResult.getSuccess().setData(help);
     }
 
     @POST
@@ -106,4 +115,5 @@ public class SystemResource {
 //        module.start();
         return RpcResult.getSuccess();
     }
+
 }

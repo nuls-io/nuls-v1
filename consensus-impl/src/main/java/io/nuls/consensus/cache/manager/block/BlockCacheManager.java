@@ -30,6 +30,7 @@ import io.nuls.consensus.constant.ConsensusCacheConstant;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.GetBlockHeaderParam;
 import io.nuls.consensus.entity.block.BifurcateProcessor;
+import io.nuls.consensus.entity.block.BlockHeaderChain;
 import io.nuls.consensus.event.GetBlockHeaderEvent;
 import io.nuls.consensus.utils.DownloadDataUtils;
 import io.nuls.core.chain.entity.Block;
@@ -257,29 +258,6 @@ public class BlockCacheManager {
         this.storedHeight = storedHeight;
     }
 
-//    private HeaderDigest getNextHeaderDigest1(long height) {
-//        HeaderDigest headerDigest = nextHeaderDigest();
-//        if (null == headerDigest) {
-//            return null;
-//        }
-//        while (height > headerDigest.getHeight()) {
-//            this.bifurcateProcessor.removeHeight(headerDigest.getHeight());
-//            headerDigest = nextHeaderDigest();
-//            if (null == headerDigest) {
-//                return null;
-//            }
-//        }
-//        return headerDigest;
-//    }
-//
-//    private HeaderDigest nextHeaderDigest() {
-//        BlockHeaderChain chain = this.bifurcateProcessor.getLongestChain();
-//        if (null == chain) {
-//            return null;
-//        }
-//        return chain.getFirst();
-//    }
-
     public Block getBlock(long height) {
         String hash = getDigestHex(height);
         if (hash == null) {
@@ -305,7 +283,8 @@ public class BlockCacheManager {
     }
 
     public boolean canPersistence() {
-        return null != bifurcateProcessor.getLongestChain() && bifurcateProcessor.getLongestChain().size() > PocConsensusConstant.CONFIRM_BLOCK_COUNT;
+        BlockHeaderChain longestChain = bifurcateProcessor.getLongestChain();
+        return null !=longestChain  && longestChain.size() > PocConsensusConstant.CONFIRM_BLOCK_COUNT;
     }
 
     public long getRecievedMaxHeight() {

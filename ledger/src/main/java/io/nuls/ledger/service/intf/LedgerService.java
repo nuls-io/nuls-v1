@@ -62,6 +62,8 @@ public interface LedgerService {
 
     Balance getBalance(String address);
 
+    Na getTxFee(int txType);
+
     Result transfer(String address, String password, String toAddress, Na amount, String remark);
 
     Result transfer(List<String> addressList, String password, String toAddress, Na amount, String remark);

@@ -91,6 +91,9 @@ public class BlockPersistenceThread implements Runnable {
         Block block = blockCacheManager.getBlock(height);
         if (null == block) {
             List<Node> nodeList = networkService.getAvailableNodes();
+            if(nodeList==null||nodeList.isEmpty()){
+                return;
+            }
             List<String> nodeIdList = new ArrayList<>();
             for (Node node : nodeList) {
                 nodeIdList.add(node.getId());

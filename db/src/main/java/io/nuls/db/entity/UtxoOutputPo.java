@@ -37,6 +37,10 @@ public class UtxoOutputPo {
 
     private Long lockTime;
 
+    public static byte USABLE = 0;
+    public static byte LOCKED = 1;
+    public static byte SPENT = 2;
+
     private Byte status;
 
     private String address;
