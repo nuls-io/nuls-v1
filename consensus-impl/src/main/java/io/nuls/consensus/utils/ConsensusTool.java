@@ -44,7 +44,7 @@ import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.entity.BlockHeaderPo;
-import io.nuls.db.entity.DelegateAccountPo;
+import io.nuls.db.entity.AgentPo;
 import io.nuls.db.entity.DelegatePo;
 
 import java.io.IOException;
@@ -106,7 +106,7 @@ public class ConsensusTool {
         return header;
     }
 
-    public static Consensus<Agent> fromPojo(DelegateAccountPo po) {
+    public static Consensus<Agent> fromPojo(AgentPo po) {
         if (null == po) {
             return null;
         }
@@ -114,13 +114,13 @@ public class ConsensusTool {
         agent.setStatus(ConsensusStatusEnum.WAITING.getCode());
         agent.setDeposit(Na.valueOf(po.getDeposit()));
         agent.setCommissionRate(po.getCommissionRate());
-        agent.setAgentAddress(po.getNodeAddress());
+        agent.setAgentAddress(po.getPackingAddress());
         agent.setIntroduction(po.getRemark());
         agent.setStartTime(po.getStartTime());
         agent.setStatus(po.getStatus());
         agent.setAgentName(po.getAgentName());
         Consensus<Agent> ca = new ConsensusAgentImpl();
-        ca.setAddress(po.getAddress());
+        ca.setAddress(po.getAgentAddress());
         ca.setExtend(agent);
         return ca;
     }
@@ -140,17 +140,16 @@ public class ConsensusTool {
         return ca;
     }
 
-    public static DelegateAccountPo agentToPojo(Consensus<Agent> bean) {
+    public static AgentPo agentToPojo(Consensus<Agent> bean) {
         if (null == bean) {
             return null;
         }
-        DelegateAccountPo po = new DelegateAccountPo();
-        po.setAddress(bean.getAddress());
+        AgentPo po = new AgentPo();
+        po.setAgentAddress(bean.getAddress());
         po.setDeposit(bean.getExtend().getDeposit().getValue());
         po.setStartTime(bean.getExtend().getStartTime());
         po.setRemark(bean.getExtend().getIntroduction());
-        po.setNodeAddress(bean.getExtend().getAgentAddress());
-        po.setId(bean.getAddress());
+        po.setPackingAddress(bean.getExtend().getAgentAddress());
         po.setStatus(bean.getExtend().getStatus());
         po.setAgentName(bean.getExtend().getAgentName());
         po.setCommissionRate(bean.getExtend().getCommissionRate());

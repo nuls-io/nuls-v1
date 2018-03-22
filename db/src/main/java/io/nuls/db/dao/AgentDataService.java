@@ -23,17 +23,16 @@
  */
 package io.nuls.db.dao;
 
-import io.nuls.db.entity.DelegateAccountPo;
+import io.nuls.db.entity.AgentPo;
 
 /**
  *
  * @author Niels
  * @date 2017/11/20
  */
-public interface DelegateAccountDataService extends BaseDataService< String,DelegateAccountPo> {
+public interface AgentDataService extends BaseDataService< String,AgentPo> {
 
-
-    int updateSelective(DelegateAccountPo po);
+    int updateSelective(AgentPo po);
 
 
 }

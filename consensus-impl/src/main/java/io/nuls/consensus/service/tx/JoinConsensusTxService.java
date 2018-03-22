@@ -36,12 +36,11 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.tx.serivce.TransactionService;
-import io.nuls.db.dao.DelegateAccountDataService;
+import io.nuls.db.dao.AgentDataService;
 import io.nuls.db.dao.DelegateDataService;
-import io.nuls.db.entity.DelegateAccountPo;
+import io.nuls.db.entity.AgentPo;
 import io.nuls.db.entity.DelegatePo;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
-import io.nuls.ledger.service.intf.LedgerService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -54,7 +53,7 @@ import java.util.Map;
 public class JoinConsensusTxService implements TransactionService<PocJoinConsensusTransaction> {
     private ConsensusCacheManager manager = ConsensusCacheManager.getInstance();
     private DelegateDataService delegateDataService = NulsContext.getServiceBean(DelegateDataService.class);
-    private DelegateAccountDataService accountDataService = NulsContext.getServiceBean(DelegateAccountDataService.class);
+    private AgentDataService accountDataService = NulsContext.getServiceBean(AgentDataService.class);
 
     @Override
     public void onRollback(PocJoinConsensusTransaction tx) throws NulsException {
@@ -81,7 +80,7 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
         if (sum >= PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT.getValue()) {
             manager.changeAgentStatus(tx.getTxData().getExtend().getDelegateAddress(),ConsensusStatusEnum.IN);
             manager.changeDelegateStatusByAgent(tx.getTxData().getExtend().getDelegateAddress(),ConsensusStatusEnum.IN);
-            DelegateAccountPo daPo = this.accountDataService.get(cd.getExtend().getDelegateAddress());
+            AgentPo daPo = this.accountDataService.get(cd.getExtend().getDelegateAddress());
             if (null == daPo) {
                 throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "the agent cannot find,agent address:" + cd.getExtend().getDelegateAddress());
             }

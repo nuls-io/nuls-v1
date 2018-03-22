@@ -23,15 +23,13 @@
  */
 package io.nuls.db.dao.impl.mybatis;
 
-import com.github.pagehelper.PageHelper;
-import io.nuls.db.dao.DelegateAccountDataService;
-import io.nuls.db.dao.impl.mybatis.mapper.DelegateAccountMapper;
+import io.nuls.db.dao.AgentDataService;
+import io.nuls.db.dao.impl.mybatis.mapper.AgentMapper;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
-import io.nuls.db.entity.DelegateAccountPo;
+import io.nuls.db.entity.AgentPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.db.transactional.annotation.PROPAGATION;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -39,9 +37,9 @@ import java.util.Map;
  * @date 2017/11/22
  */
 @DbSession(transactional = PROPAGATION.NONE)
-public class DelegateAccountDaoImpl extends BaseDaoImpl<DelegateAccountMapper, String, DelegateAccountPo> implements DelegateAccountDataService {
-    public DelegateAccountDaoImpl() {
-        super(DelegateAccountMapper.class);
+public class AgentDaoImpl extends BaseDaoImpl<AgentMapper, String, AgentPo> implements AgentDataService {
+    public AgentDaoImpl() {
+        super(AgentMapper.class);
     }
 
     @Override
@@ -50,9 +48,8 @@ public class DelegateAccountDaoImpl extends BaseDaoImpl<DelegateAccountMapper, S
     }
 
     @Override
-    public int updateSelective(DelegateAccountPo po) {
+    public int updateSelective(AgentPo po) {
         return getMapper().updateByPrimaryKeySelective(po);
     }
-
 
 }

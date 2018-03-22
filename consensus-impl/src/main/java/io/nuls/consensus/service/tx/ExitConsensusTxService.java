@@ -30,20 +30,18 @@ import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.member.Delegate;
 import io.nuls.consensus.entity.tx.PocExitConsensusTransaction;
 import io.nuls.consensus.entity.tx.PocJoinConsensusTransaction;
-import io.nuls.consensus.entity.tx.RedPunishTransaction;
 import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
 import io.nuls.consensus.event.notice.CancelConsensusNotice;
 import io.nuls.consensus.event.notice.StopConsensusNotice;
-import io.nuls.consensus.manager.ConsensusManager;
 import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.tx.serivce.TransactionService;
-import io.nuls.db.dao.DelegateAccountDataService;
+import io.nuls.db.dao.AgentDataService;
 import io.nuls.db.dao.DelegateDataService;
-import io.nuls.db.entity.DelegateAccountPo;
+import io.nuls.db.entity.AgentPo;
 import io.nuls.db.entity.DelegatePo;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.service.intf.LedgerService;
@@ -61,7 +59,7 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
     private ConsensusCacheManager manager = ConsensusCacheManager.getInstance();
 
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
-    private DelegateAccountDataService delegateAccountService = NulsContext.getServiceBean(DelegateAccountDataService.class);
+    private AgentDataService delegateAccountService = NulsContext.getServiceBean(AgentDataService.class);
     private DelegateDataService delegateDataService = NulsContext.getServiceBean(DelegateDataService.class);
 
     @Override
@@ -72,8 +70,8 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
             Consensus<Agent> ca = raTx.getTxData();
             ca.getExtend().setStatus(ConsensusStatusEnum.IN.getCode());
             manager.cacheAgent(ca);
-            DelegateAccountPo agentPo = new DelegateAccountPo();
-            agentPo.setId(raTx.getTxData().getAddress());
+            AgentPo agentPo = new AgentPo();
+            agentPo.setAgentAddress(raTx.getTxData().getAddress());
             agentPo.setStatus(ConsensusStatusEnum.IN.getCode());
             this.delegateAccountService.updateSelective(agentPo);
             DelegatePo dpo = new DelegatePo();
@@ -119,8 +117,8 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
             RegisterAgentTransaction raTx = (RegisterAgentTransaction) joinTx;
             manager.delAgent(raTx.getTxData().getAddress());
             manager.delDelegateByAgent(raTx.getTxData().getAddress());
-            DelegateAccountPo agentPo = new DelegateAccountPo();
-            agentPo.setId(raTx.getTxData().getAddress());
+            AgentPo agentPo = new AgentPo();
+            agentPo.setAgentAddress(raTx.getTxData().getAddress());
             agentPo.setStatus(ConsensusStatusEnum.NOT_IN.getCode());
             this.delegateAccountService.updateSelective(agentPo);
             DelegatePo dpo = new DelegatePo();
