@@ -34,22 +34,7 @@ import io.nuls.core.validate.ValidateResult;
  * @author Niels
  * @date 2017/11/17
  */
-public class
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-BlockTxValidator implements NulsDataValidator<Block> {
+public class BlockTxValidator implements NulsDataValidator<Block> {
     private static final String ERROR_MESSAGE = "";
     public static final BlockTxValidator INSTANCE = new BlockTxValidator();
 

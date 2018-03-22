@@ -28,6 +28,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.ledger.entity.CoinData;
 import io.nuls.ledger.entity.params.CoinTransferData;
+import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 
 /**
  * @author Niels
@@ -37,7 +38,7 @@ public interface CoinDataProvider {
 
     CoinData parse(NulsByteBuffer byteBuffer) throws NulsException;
 
-    CoinTransferData getTransferData(CoinData coinData);
+    CoinTransferData getTransferData(AbstractCoinTransaction tx);
 
     void approve(CoinData coinData, Transaction tx) throws NulsException;
 

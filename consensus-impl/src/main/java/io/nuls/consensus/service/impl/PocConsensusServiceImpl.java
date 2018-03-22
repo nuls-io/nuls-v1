@@ -167,7 +167,6 @@ public class PocConsensusServiceImpl implements ConsensusService {
         if (null != paramsMap && StringUtils.isNotBlank((String) paramsMap.get("txHash"))) {
             PocJoinConsensusTransaction tx = (PocJoinConsensusTransaction) ledgerService.getTx(NulsDigestData.fromDigestHex((String) paramsMap.get("txHash")));
             address = tx.getTxData().getAddress();
-            lastCoinTransferData = tx.getCoinDataProvider().getTransferData(tx.getCoinData());
             joinTx = tx;
         } else {
             try {
@@ -183,6 +182,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
         if (null == joinTx) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "The related transaction is not exist!");
         }
+        lastCoinTransferData = joinTx.getCoinDataProvider().getTransferData(joinTx);
         Account account = this.accountService.getAccount(address);
         if (null == account) {
             throw new NulsRuntimeException(ErrorCode.ACCOUNT_NOT_EXIST, "address:" + address.toString());
