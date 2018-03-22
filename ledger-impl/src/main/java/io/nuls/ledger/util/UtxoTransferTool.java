@@ -43,9 +43,12 @@ import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.UtxoInput;
 import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
+import io.nuls.ledger.entity.tx.LockNulsTransaction;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Vive
@@ -224,14 +227,26 @@ public class UtxoTransferTool {
             AbstractCoinTransaction coinTx = (AbstractCoinTransaction) tx;
 
             UtxoData utxoData = new UtxoData();
+            Na totalNa = Na.ZERO;
+            Set<String> addressSet = new HashSet<>();
 
             for (UtxoInputPo inputPo : inputPoList) {
                 utxoData.getInputs().add(toInput(inputPo));
+                addressSet.add(inputPo.getFromOutPut().getAddress());
             }
 
-            for (UtxoOutputPo outputPo : outputPoList) {
+            for (int i = 0; i < outputPoList.size(); i++) {
+                UtxoOutputPo outputPo = outputPoList.get(i);
                 utxoData.getOutputs().add(toOutput(outputPo));
+                if (addressSet.contains(outputPo.getAddress())) {
+                    if (tx instanceof LockNulsTransaction && i == 0) {
+                        totalNa.add(Na.valueOf(outputPo.getValue()));
+                    }
+                } else {
+                    totalNa.add(Na.valueOf(outputPo.getValue()));
+                }
             }
+            utxoData.setTotalNa(totalNa);
             coinTx.setCoinData(utxoData);
         }
     }
