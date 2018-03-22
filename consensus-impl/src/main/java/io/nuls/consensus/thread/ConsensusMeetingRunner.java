@@ -23,6 +23,7 @@
  */
 package io.nuls.consensus.thread;
 
+import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.cache.manager.block.BlockCacheManager;
 import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
@@ -502,7 +503,6 @@ public class ConsensusMeetingRunner implements Runnable {
     }
 
     private void yellowPunishTx(Block bestBlock, List<Transaction> txList, PocMeetingMember self) throws NulsException, IOException {
-        //todo check it
         BlockRoundData lastBlockRoundData = new BlockRoundData();
         try {
             lastBlockRoundData.parse(bestBlock.getHeader().getExtend());
@@ -513,34 +513,38 @@ public class ConsensusMeetingRunner implements Runnable {
         ok = ok || (self.getRoundIndex() == (lastBlockRoundData.getRoundIndex() + 1)
                 && self.getIndexOfRound() == 0
                 && lastBlockRoundData.getPackingIndexOfRound() == lastBlockRoundData.getConsensusMemberCount());
+        ok = ok || (self.getRoundIndex() - 1) > lastBlockRoundData.getRoundIndex();
         if (ok) {
             return;
         }
-
-
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-
-        boolean punish = self.getIndexOfRound() == 1 && lastBlockRoundData.getPackingIndexOfRound() != lastBlockRoundData.getConsensusMemberCount();
-        punish = punish || (self.getIndexOfRound() > 1 && self.getIndexOfRound() != (lastBlockRoundData.getPackingIndexOfRound() + 1));
-        if (!punish) {
-            return;
-        }
-        PocMeetingMember previous = this.consensusManager.getCurrentRound().getMember(self.getIndexOfRound() - 1);
-        if (null == previous) {
-            return;
+        List<Address> addressList = new ArrayList<>();
+        PocMeetingRound round = consensusManager.getCurrentRound();
+        long roundIndex = lastBlockRoundData.getRoundIndex();
+        int packingIndex = lastBlockRoundData.getPackingIndexOfRound() + 1;
+        while (true) {
+            PocMeetingRound tempRound;
+            if (roundIndex==self.getRoundIndex()) {
+                tempRound = round;
+            } else {
+                tempRound = round.getPreviousRound();
+            }
+            if (packingIndex == tempRound.getMemberCount()) {
+                roundIndex++;
+                packingIndex = 1;
+                continue;
+            }
+            if (tempRound.getIndex() == round.getIndex() && packingIndex == self.getIndexOfRound()) {
+                break;
+            }
+            PocMeetingMember member = tempRound.getMember(packingIndex);
+            if (null == member) {
+                throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
+            }
+            addressList.add(Address.fromHashs(member.getAddress()));
         }
         YellowPunishTransaction punishTx = new YellowPunishTransaction();
         YellowPunishData data = new YellowPunishData();
-        data.setAddress(previous.getAddress());
+        data.setAddressList(addressList);
         data.setHeight(bestBlock.getHeader().getHeight() + 1);
         punishTx.setTxData(data);
         punishTx.setTime(TimeService.currentTimeMillis());
