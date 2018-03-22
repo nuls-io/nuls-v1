@@ -60,8 +60,8 @@ public class ConsensusCacheManager {
 
     private static final ConsensusCacheManager INSTANCE = new ConsensusCacheManager();
 
-    private DepositDataService delegateDao = NulsContext.getServiceBean(DepositDataService.class);
-    private AgentDataService delegateAccountDao = NulsContext.getServiceBean(AgentDataService.class);
+    private DepositDataService depositDao = NulsContext.getServiceBean(DepositDataService.class);
+    private AgentDataService agentDao = NulsContext.getServiceBean(AgentDataService.class);
     private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
 
     private CacheMap<String, Consensus<Agent>> inAgentCache = new CacheMap<>(IN_AGENT_LIST, 512);
@@ -79,10 +79,10 @@ public class ConsensusCacheManager {
 
     public void init() {
         Account self = accountService.getDefaultAccount();
-        List<DepositPo> depositPoList = this.delegateDao.getList();
-        List<AgentPo> delegateAccountPoList = this.delegateAccountDao.getList();
+        List<DepositPo> depositPoList = this.depositDao.getList();
+        List<AgentPo> agentPoList = this.agentDao.getList();
         Consensus mine = null;
-        for (AgentPo po : delegateAccountPoList) {
+        for (AgentPo po : agentPoList) {
             Consensus<Agent> ca = ConsensusTool.fromPojo(po);
             this.cacheAgent(ca);
             if (null != self && ca.getAddress().equals(self.getAddress().toString())) {
