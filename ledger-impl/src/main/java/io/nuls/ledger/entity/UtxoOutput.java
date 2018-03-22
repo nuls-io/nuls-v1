@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -55,7 +55,7 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
 
     private P2PKHScript p2PKHScript;
 
-    private int status;
+    private OutPutStatusEnum status;
 
     /**
      * ------ redundancy ------
@@ -67,12 +67,6 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
     // key = txHash + "-" + index, a key that will not be serialized, only used for caching
     private String key;
 
-
-    public static final int UTXO_CONFIRM_UNLOCK = 0;
-    public static final int UTXO_CONFIRM_LOCK = 1;
-    public static final int UTXO_SPENT = 2;
-    public static final int UTXO_UNCONFIRM_UNLOCK = 3;
-    public static final int UTXO_UNCONFIRM_LOCK = 4;
 
     public UtxoOutput() {
     }
@@ -163,11 +157,11 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
         this.address = address;
     }
 
-    public int getStatus() {
+    public OutPutStatusEnum getStatus() {
         return status;
     }
 
-    public void setStatus(int status) {
+    public void setStatus(OutPutStatusEnum status) {
         this.status = status;
     }
 
@@ -198,18 +192,6 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
         this.txType = txType;
     }
 
-    public boolean isUsable() {
-        return status == UTXO_CONFIRM_UNLOCK || status == UTXO_UNCONFIRM_UNLOCK;
-    }
-
-    public boolean isUnConfirm() {
-        return status == UTXO_UNCONFIRM_UNLOCK || status == UTXO_UNCONFIRM_LOCK;
-    }
-
-    public boolean isLocked() {
-        return status == UTXO_UNCONFIRM_LOCK || status == UTXO_CONFIRM_LOCK;
-    }
-
     @Override
     public int compareTo(UtxoOutput o) {
         if (this.value < o.getValue()) {
@@ -218,6 +200,28 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
             return 1;
         }
         return 0;
+    }
+
+    public boolean isUsable() {
+        return OutPutStatusEnum.UTXO_CONFIRM_UNSPEND == status || OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND == status;
+    }
+
+    public boolean isSpend() {
+        return OutPutStatusEnum.UTXO_CONFIRM_SPEND == status || OutPutStatusEnum.UTXO_UNCONFIRM_SPEND == status;
+    }
+
+    public boolean isLocked() {
+        return OutPutStatusEnum.UTXO_CONFIRM_CONSENSUS_LOCK == status ||
+                OutPutStatusEnum.UTXO_UNCONFIRM_CONSENSUS_LOCK == status ||
+                OutPutStatusEnum.UTXO_CONFIRM_TIME_LOCK == status ||
+                OutPutStatusEnum.UTXO_UNCONFIRM_TIME_LOCK == status;
+    }
+
+    public boolean isConfirm() {
+        return OutPutStatusEnum.UTXO_CONFIRM_UNSPEND == status ||
+                OutPutStatusEnum.UTXO_CONFIRM_TIME_LOCK == status ||
+                OutPutStatusEnum.UTXO_CONFIRM_SPEND == status ||
+                OutPutStatusEnum.UTXO_CONFIRM_CONSENSUS_LOCK == status;
     }
 
     public byte[] getOwner() {

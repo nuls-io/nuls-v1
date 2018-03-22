@@ -29,6 +29,8 @@ import io.nuls.core.exception.NulsRuntimeException;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
 
 /**
  * Nuls unit
@@ -102,7 +104,7 @@ public final class Na implements Comparable<Na>, Serializable {
 
     public static Na parseNuls(final String str) {
         try {
-            long value = new BigDecimal(str).movePointRight(SMALLEST_UNIT_EXPONENT).toBigIntegerExact().longValue();
+            long value = new BigDecimal(str).movePointRight(SMALLEST_UNIT_EXPONENT).setScale(SMALLEST_UNIT_EXPONENT, RoundingMode.HALF_DOWN).longValue();
             return Na.valueOf(value);
         } catch (ArithmeticException e) {
             throw new IllegalArgumentException(e);
@@ -111,7 +113,7 @@ public final class Na implements Comparable<Na>, Serializable {
 
     public static Na parseNuls(final double nuls) {
         try {
-            long value = new BigDecimal(nuls).movePointRight(SMALLEST_UNIT_EXPONENT).toBigIntegerExact().longValue();
+            long value = new BigDecimal(nuls).movePointRight(SMALLEST_UNIT_EXPONENT).setScale(SMALLEST_UNIT_EXPONENT, RoundingMode.HALF_DOWN).longValue();
             return Na.valueOf(value);
         } catch (ArithmeticException e) {
             throw new IllegalArgumentException(e);
@@ -278,4 +280,5 @@ public final class Na implements Comparable<Na>, Serializable {
     public int compareTo(final Na other) {
         return Long.compare(this.value, other.value);
     }
+
 }

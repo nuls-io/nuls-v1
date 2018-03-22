@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,12 +24,10 @@
 package io.nuls.ledger.service.impl;
 
 import io.nuls.cache.service.intf.CacheService;
-import io.nuls.core.chain.entity.Na;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.Result;
-import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.chain.entity.*;
 import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.dto.Page;
@@ -49,6 +47,7 @@ import io.nuls.db.entity.UtxoInputPo;
 import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
+import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.entity.UtxoBalance;
 import io.nuls.ledger.entity.UtxoOutput;
@@ -275,9 +274,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     public Balance getBalance(String address) {
         if (StringUtils.isNotBlank(address)) {
             Balance balance = ledgerCacheService.getBalance(address);
-            if (null == balance) {
-                balance = calcBalance(address);
-            }
             return balance;
         } else {
             Balance allBalance = new Balance();
@@ -285,9 +281,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             long locked = 0;
             for (String addr : NulsContext.LOCAL_ADDRESS_LIST) {
                 Balance balance = ledgerCacheService.getBalance(addr);
-                if (null == balance) {
-                    balance = calcBalance(addr);
-                }
                 if (null != balance) {
                     usable += balance.getUsable().getValue();
                     locked += balance.getLocked().getValue();
@@ -300,27 +293,26 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         }
     }
 
-    private Balance calcBalance(String address) {
-
-        UtxoBalance balance = new UtxoBalance();
-        List<UtxoOutputPo> unSpendList = txDao.getAccountUnSpend(address);
-        if (unSpendList == null || unSpendList.isEmpty()) {
-            return balance;
+    @Override
+    public Na getTxFee(int txType) {
+        Block bestBlock = NulsContext.getInstance().getBestBlock();
+        if (null == bestBlock) {
+            return LedgerConstant.TRANSACTION_FEE;
         }
-        List<UtxoOutput> unSpends = new ArrayList<>();
-
-        for (UtxoOutputPo po : unSpendList) {
-            UtxoOutput output = UtxoTransferTool.toOutput(po);
-            unSpends.add(output);
+        long blockHeight = bestBlock.getHeader().getHeight();
+        if (txType == TransactionConstant.TX_TYPE_COIN_BASE ||
+                txType == TransactionConstant.TX_TYPE_SMALL_CHANGE ||
+                txType == TransactionConstant.TX_TYPE_EXIT_CONSENSUS
+                ) {
+            return Na.ZERO;
         }
-        ledgerCacheService.putBalance(address, balance);
-        UtxoTransactionTool.getInstance().calcBalanceByUtxo(address);
-        return balance;
+        long x = blockHeight / LedgerConstant.BLOCK_COUNT_OF_YEAR + 1;
+        return LedgerConstant.TRANSACTION_FEE.div(x);
     }
 
     @Override
     public Result transfer(String address, String password, String toAddress, Na amount, String remark) {
-        CoinTransferData coinData = new CoinTransferData(OperationType.TRANSFER, amount, address, toAddress);
+        CoinTransferData coinData = new CoinTransferData(OperationType.TRANSFER, amount, address, toAddress, getTxFee(TransactionConstant.TX_TYPE_TRANSFER));
         return transfer(coinData, password, remark);
     }
 
@@ -350,7 +342,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     public Result transfer(List<String> addressList, String password, String toAddress, Na amount, String remark) {
-        CoinTransferData coinData = new CoinTransferData(OperationType.TRANSFER, amount, addressList, toAddress);
+        CoinTransferData coinData = new CoinTransferData(OperationType.TRANSFER, amount, addressList, toAddress, getTxFee(TransactionConstant.TX_TYPE_TRANSFER));
         return transfer(coinData, password, remark);
     }
 
@@ -359,7 +351,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     public Result lock(String address, String password, Na amount, long unlockTime, String remark) {
         LockNulsTransaction tx = null;
         try {
-            CoinTransferData coinData = new CoinTransferData(OperationType.LOCK, amount, address);
+            CoinTransferData coinData = new CoinTransferData(OperationType.LOCK, amount, address, getTxFee(TransactionConstant.TX_TYPE_LOCK));
             coinData.addTo(address, new Coin(amount, unlockTime));
             tx = UtxoTransactionTool.getInstance().createLockNulsTx(coinData, password, remark);
 

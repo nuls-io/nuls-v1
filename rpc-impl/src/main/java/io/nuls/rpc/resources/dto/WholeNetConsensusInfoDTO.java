@@ -9,6 +9,15 @@ public class WholeNetConsensusInfoDTO {
     private int agentCount;
     private long totalDeposit;
     private long rewardOfDay;
+    private int consensusAccountNumber;
+
+    public int getConsensusAccountNumber() {
+        return consensusAccountNumber;
+    }
+
+    public void setConsensusAccountNumber(int consensusAccountNumber) {
+        this.consensusAccountNumber = consensusAccountNumber;
+    }
 
     public int getAgentCount() {
         return agentCount;

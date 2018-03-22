@@ -1,8 +1,7 @@
 package io.nuls.rpc.entity;
 
-import io.nuls.account.entity.Address;
-import io.nuls.core.chain.entity.Na;
 import io.nuls.db.entity.UtxoOutputPo;
+import io.nuls.ledger.entity.OutPutStatusEnum;
 import io.nuls.ledger.entity.UtxoOutput;
 
 public class OutputDto {
@@ -23,12 +22,19 @@ public class OutputDto {
 
     public OutputDto(UtxoOutput output) {
         this.index = output.getIndex();
-        this.address =output.getAddress();
+        this.address = output.getAddress();
         this.value = output.getValue();
         this.createTime = output.getCreateTime();
         this.lockTime = output.getLockTime();
         this.type = output.getTxType();
-        this.status = output.getStatus();
+        if (OutPutStatusEnum.UTXO_SPENT == output.getStatus()) {
+            this.status = 2;
+        } else if (OutPutStatusEnum.UTXO_CONFIRM_CONSENSUS_LOCK == output.getStatus()) {
+            this.status = 1;
+        } else {
+            this.status = 0;
+        }
+
     }
 
     public OutputDto(UtxoOutputPo output) {

@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -44,44 +44,49 @@ public class CoinTransferData {
 
     private List from;
 
-    private List<CoinData> fromCoinData;
-
     private Map<String, List<Coin>> toMap;
 
     private Na totalNa;
 
     private Na fee;
 
-    public CoinTransferData(OperationType type) {
+    public CoinTransferData() {
         this.from = new ArrayList();
         this.toMap = new HashMap<>();
-        this.type = type;
+        this.totalNa = Na.ZERO;
+        this.fee = Na.ZERO;
     }
 
-    public CoinTransferData(OperationType type, Na totalNa) {
-        this(type);
+    public CoinTransferData(OperationType type, Na fee) {
+        this();
+        this.type = type;
+        this.fee = fee;
+    }
+
+    public CoinTransferData(OperationType type, Na totalNa, Na fee) {
+        this(type, fee);
         this.totalNa = totalNa;
     }
 
-    public CoinTransferData(OperationType type, Na totalNa, String from) {
-        this(type, totalNa);
+    public CoinTransferData(OperationType type, Na totalNa, String from, Na fee) {
+        this(type, totalNa, fee);
         this.addFrom(from);
     }
 
-    public CoinTransferData(OperationType type, Na totalNa, String from, String to) {
-        this(type, totalNa, from);
+    public CoinTransferData(OperationType type, Na totalNa, String from, String to, Na fee) {
+        this(type, totalNa, from, fee);
         if (StringUtils.isNotBlank(to)) {
             this.addTo(to, new Coin(totalNa));
         }
     }
 
-    public CoinTransferData(OperationType type, Na totalNa, List<String> from) {
+    public CoinTransferData(OperationType type, Na totalNa, List<String> from, Na fee) {
         this(type, totalNa);
         this.setFrom(from);
     }
 
-    public CoinTransferData(OperationType type, Na totalNa, List<String> from, String to) {
-        this(type, totalNa, from);
+    public CoinTransferData(OperationType type, Na totalNa, List<String> from, String to, Na fee) {
+        this(type, totalNa, from, fee);
         if (StringUtils.isNotBlank(to)) {
             this.addTo(to, new Coin(totalNa));
         }
@@ -138,21 +143,6 @@ public class CoinTransferData {
 
     public void setPriKey(byte[] priKey) {
         this.priKey = priKey;
-    }
-
-    public void addFromCoinData(CoinData coinData) {
-        if (this.fromCoinData == null) {
-            this.fromCoinData = new ArrayList<>();
-        }
-        this.fromCoinData.add(coinData);
-    }
-
-    public List<CoinData> getFromCoinData() {
-        return fromCoinData;
-    }
-
-    public void setFromCoinData(List<CoinData> fromCoinData) {
-        this.fromCoinData = fromCoinData;
     }
 
     public OperationType getType() {
