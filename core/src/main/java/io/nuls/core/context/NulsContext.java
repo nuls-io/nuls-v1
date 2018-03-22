@@ -26,6 +26,7 @@ package io.nuls.core.context;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.utils.cfg.IniEntity;
+import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.spring.lite.core.SpringLiteContext;
 
@@ -60,7 +61,7 @@ public class NulsContext {
      */
     private Block bestBlock;
     private Block genesisBlock;
-    private Long netBestBlockHeight;
+    private Long netBestBlockHeight = 0L;
 
     public static Set<String> LOCAL_ADDRESS_LIST = new HashSet<>();
     public static String DEFAULT_ACCOUNT_ID;
@@ -147,8 +148,11 @@ public class NulsContext {
     }
 
     public Long getNetBestBlockHeight() {
-        if (netBestBlockHeight == null) {
-            netBestBlockHeight = 0L;
+        if (null == bestBlock) {
+            return netBestBlockHeight;
+        }
+        if (netBestBlockHeight < bestBlock.getHeader().getHeight()) {
+            netBestBlockHeight = bestBlock.getHeader().getHeight();
         }
         return netBestBlockHeight;
     }
