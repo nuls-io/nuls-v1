@@ -50,6 +50,7 @@ import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.ledger.entity.*;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
+import io.nuls.ledger.entity.params.OperationType;
 import io.nuls.ledger.service.intf.CoinDataProvider;
 import io.nuls.ledger.util.UtxoTransactionTool;
 import io.nuls.ledger.util.UtxoTransferTool;
@@ -383,7 +384,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             }
         }
 
-
         //create outputs
         int i = 0;
         long outputValue = 0;
@@ -394,7 +394,11 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 UtxoOutput output = new UtxoOutput();
                 output.setAddress(address);
                 output.setValue(coin.getNa().getValue());
-                output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND);
+                if (coinParam.getType() == OperationType.LOCK) {
+                    output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_CONSENSUS_LOCK);
+                } else {
+                    output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND);
+                }
                 output.setIndex(i);
                 P2PKHScript p2PKHScript = new P2PKHScript(new NulsDigestData(NulsDigestData.DIGEST_ALG_SHA160, new Address(address).getHash160()));
                 output.setP2PKHScript(p2PKHScript);
