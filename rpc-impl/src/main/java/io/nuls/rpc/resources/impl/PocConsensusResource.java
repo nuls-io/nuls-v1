@@ -24,10 +24,12 @@
 package io.nuls.rpc.resources.impl;
 
 import io.nuls.account.service.intf.AccountService;
+import io.nuls.account.util.AccountTool;
 import io.nuls.consensus.entity.AgentInfo;
 import io.nuls.consensus.entity.DepositItem;
 import io.nuls.consensus.service.intf.ConsensusService;
 import io.nuls.core.chain.entity.Na;
+import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
@@ -35,9 +37,12 @@ import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.date.TimeService;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
+import io.nuls.db.dao.DelegateAccountDataService;
 import io.nuls.db.dao.UtxoOutputDataService;
+import io.nuls.db.entity.DelegateAccountPo;
 import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.rpc.entity.RpcResult;
@@ -66,6 +71,9 @@ public class PocConsensusResource {
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     private UtxoOutputDataService outputDataService = NulsContext.getServiceBean(UtxoOutputDataService.class);
     private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
+
+    private DelegateAccountDataService delegateAccountDataService = NulsContext.getServiceBean(DelegateAccountDataService.class);
+
     //todo 临时使用的
     private int temp = 1;
 
@@ -165,176 +173,6 @@ public class PocConsensusResource {
         return RpcResult.getSuccess();
     }
 
-    @GET
-    @Path("/deposit/agent/{address}/{pageNumber}/{pageSize}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult list(@PathParam("address") String address,
-                          @PathParam("pageNumber") int pageNumber, @PathParam("pageSize") int pageSize) {
-        //type =0  : all the depositlist sent by an account
-        //type =1  : all the depositlist recieved by an agent
-        if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
-            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
-        }
-        if (pageNumber == 0) {
-            pageNumber = 1;
-        }
-        if (pageSize == 0) {
-            pageSize = 10;
-        }
-        RpcResult result = RpcResult.getSuccess();
-        Page<DepositItem> listPage = new Page<>();
-        if (temp == 1) {
-            listPage.setPageNumber(pageNumber);
-            listPage.setPageSize(pageSize);
-            listPage.setTotal(pageSize * 3);
-            listPage.setPages(3);
-            List<DepositItem> list = new ArrayList<>();
-            for (int i = 0; i < pageSize; i++) {
-                DepositItem item = new DepositItem();
-                item.setAmount(1000000000);
-                item.setDepositTime(System.currentTimeMillis());
-                item.setStatus(2);
-                item.setAgentAddress("2CYdNLysoMbPRc4Q5YsVreT99Q61ZSg");
-                list.add(item);
-            }
-            listPage.setList(list);
-            result.setData(listPage);
-            return result;
-        }
-
-
-        if (!StringUtils.validAddress(address)) {
-            return RpcResult.getFailed(ErrorCode.ADDRESS_ERROR);
-        }
-
-        Page<DepositItem> pageDto = new Page<>();
-        List<DepositItem> dtoList = new ArrayList<>();
-        //todo
-        pageDto.setList(dtoList);
-        result.setData(pageDto);
-        return result;
-    }
-
-    @GET
-    @Path("/deposit/delegate/{address}/{pageNumber}/{pageSize}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult agentListImIn(@PathParam("address") String address,
-                                   @PathParam("pageNumber") int pageNumber, @PathParam("pageSize") int pageSize) {
-        RpcResult result = RpcResult.getSuccess();
-        Page<DepositItem> listPage = new Page<>();
-        if (temp == 1) {
-            listPage.setPageNumber(pageNumber);
-            listPage.setPageSize(pageSize);
-            listPage.setTotal(pageSize * 3);
-            listPage.setPages(3);
-            List<DepositItem> list = new ArrayList<>();
-            for (int i = 0; i < pageSize; i++) {
-                DepositItem item = new DepositItem();
-                item.setAmount(1000000000);
-                item.setDepositTime(System.currentTimeMillis());
-                item.setStatus(2);
-                item.setAgentAddress("2CYdNLysoMbPRc4Q5YsVreT99Q61ZSg");
-                list.add(item);
-            }
-            listPage.setList(list);
-            result.setData(listPage);
-            return result;
-        }
-        //todo
-        return result;
-    }
-
-    @GET
-    @Path("/agent/{pageNumber}/{pageSize}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult list(@PathParam("pageNumber") int pageNumber, @PathParam("pageSize") int pageSize, @QueryParam("address") String address) {
-        RpcResult result = RpcResult.getSuccess();
-        Page<AgentInfo> listPage = new Page<>();
-        if (temp == 1) {
-            listPage.setPageNumber(pageNumber);
-            listPage.setPageSize(pageSize);
-            listPage.setTotal(pageSize * 3);
-            listPage.setPages(3);
-            List<AgentInfo> list = new ArrayList<>();
-            for (int i = 0; i < pageSize; i++) {
-                AgentInfo item = new AgentInfo();
-                item.setCommissionRate(15);
-                item.setCreditRatio(0.9);
-                item.setStatus(2);
-                item.setMemberCount(3+pageNumber);
-                item.setOwndeposit(Na.parseNuls(50000+pageNumber));
-                item.setTotalDeposit(Na.parseNuls(300000+pageNumber));
-                item.setIntroduction("哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈"+pageNumber);
-                item.setDelegateAddress("2CYdNLysoMbPRc4Q5YsVreT99Q61ZSg");
-                item.setAgentName("超级节点" + i+pageNumber);
-                item.setReward(Na.parseNuls(1000000000 * i+pageNumber));
-                list.add(item);
-            }
-            listPage.setList(list);
-            result.setData(listPage);
-            return result;
-        }
-
-        AgentInfo agentInfo = new AgentInfo();
-        //todo
-
-        result.setData(agentInfo);
-        return result;
-    }
-
-    @GET
-    @Path("/agent/{agentAddress}/{pageNumber}/{pageSize}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult list(@PathParam("agentAddress") String agentAddress, @PathParam("pageNumber") Integer pageNumber, @PathParam("pageSize") Integer pageSize) {
-
-        RpcResult result = RpcResult.getSuccess();
-        Page<AgentInfo> listPage = new Page<>();
-        if (temp == 1) {
-            listPage.setPageNumber(pageNumber);
-            listPage.setPageSize(pageSize);
-            listPage.setTotal(pageSize * 3);
-            listPage.setPages(3);
-            List<AgentInfo> list = new ArrayList<>();
-            for (int i = 0; i < pageSize; i++) {
-                AgentInfo item = new AgentInfo();
-                item.setCommissionRate(15);
-                item.setCreditRatio(0.9);
-                item.setStatus(2);
-                item.setMemberCount(3+pageNumber);
-                item.setOwndeposit(Na.parseNuls(50000+pageNumber));
-                item.setTotalDeposit(Na.parseNuls(300000+pageNumber));
-                item.setIntroduction("哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈");
-                item.setDelegateAddress("2CYdNLysoMbPRc4Q5YsVreT99Q61ZSg");
-                item.setAgentName("超级节点" + i+pageNumber);
-                item.setReward(Na.parseNuls(1000000000 * i+pageNumber));
-                list.add(item);
-            }
-            listPage.setList(list);
-            result.setData(listPage);
-            return result;
-        }
-
-        Page<AgentInfo> pageDto = new Page<>();
-        List<AgentInfo> dtoList = new ArrayList<>();
-        //todo
-        pageDto.setList(dtoList);
-        result.setData(pageDto);
-        return result;
-    }
-
-    @POST
-    @Path("/withdraw")
-    @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult out(WithdrawForm form) throws NulsException, IOException {
-        AssertUtil.canNotEmpty(form);
-        AssertUtil.canNotEmpty(form.getTxHash());
-        AssertUtil.canNotEmpty(form.getPassword());
-        AssertUtil.canNotEmpty(form.getAddress());
-        Map<String, Object> params = new HashMap<>();
-        params.put("txHash", form.getTxHash());
-        consensusService.stopConsensus(form.getAddress(), form.getPassword(), params);
-        return RpcResult.getSuccess();
-    }
 
     @GET
     @Path("/profit")
@@ -369,5 +207,208 @@ public class PocConsensusResource {
         RpcResult rpcResult = RpcResult.getSuccess();
         rpcResult.setData(map);
         return rpcResult;
+    }
+
+
+    @GET
+    @Path("/agent/list")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult getAgentListBy(@QueryParam("pageNumber") Integer pageNumber, @QueryParam("pageSize") Integer pageSize) {
+
+        RpcResult result = RpcResult.getSuccess();
+        Page<AgentInfo> listPage = new Page<>();
+        if (temp == 1) {
+            listPage.setPageNumber(pageNumber);
+            listPage.setPageSize(pageSize);
+            listPage.setTotal(pageSize * 3);
+            listPage.setPages(3);
+            List<AgentInfo> list = new ArrayList<>();
+            for (int i = 0; i < pageSize; i++) {
+                AgentInfo item = new AgentInfo();
+                item.setCommissionRate(15);
+                item.setCreditRatio(0.9);
+                item.setStatus(2);
+                item.setMemberCount(3 + pageNumber);
+                item.setOwndeposit(Na.parseNuls(50000 + pageNumber));
+                item.setTotalDeposit(Na.parseNuls(300000 + pageNumber));
+                item.setIntroduction("哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈" + pageNumber);
+                item.setAgentAddress("2CYdNLysoMbPRc4Q5YsVreT99Q61ZSg");
+                item.setAgentName("超级节点" + i + pageNumber);
+                item.setStartTime(System.currentTimeMillis());
+                item.setPackedCount(11234 + i * pageNumber);
+                item.setReward(Na.parseNuls(1120 * i + pageNumber));
+                list.add(item);
+            }
+            listPage.setList(list);
+            result.setData(listPage);
+            return result;
+        }
+
+        Page<AgentInfo> pageDto = new Page<>();
+        List<AgentInfo> dtoList = new ArrayList<>();
+        //todo
+        pageDto.setList(dtoList);
+        result.setData(pageDto);
+        return result;
+    }
+
+
+    @GET
+    @Path("/agent/address/{address}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult getAgentListByDepositAddress(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize, @PathParam("address") String address) {
+        RpcResult result = RpcResult.getSuccess();
+        Page<AgentInfo> listPage = new Page<>();
+        if (temp == 1) {
+            listPage.setPageNumber(pageNumber);
+            listPage.setPageSize(pageSize);
+            listPage.setTotal(pageSize * 3);
+            listPage.setPages(3);
+            List<AgentInfo> list = new ArrayList<>();
+            for (int i = 0; i < pageSize; i++) {
+                AgentInfo item = new AgentInfo();
+                item.setCommissionRate(15);
+                item.setCreditRatio(0.9);
+                item.setStatus(2);
+                item.setMemberCount(3 + pageNumber);
+                item.setOwndeposit(Na.parseNuls(50000 + pageNumber));
+                item.setTotalDeposit(Na.parseNuls(300000 + pageNumber));
+                item.setIntroduction("哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈" + pageNumber);
+                item.setAgentAddress("2CYdNLysoMbPRc4Q5YsVreT99Q61ZSg");
+                item.setAgentName("超级节点" + i + pageNumber);
+                item.setStartTime(System.currentTimeMillis());
+                item.setPackedCount(11234 + i * pageNumber);
+                item.setReward(Na.parseNuls(1120 * i + pageNumber));
+                list.add(item);
+            }
+            listPage.setList(list);
+            result.setData(listPage);
+            return result;
+        }
+
+        AgentInfo agentInfo = new AgentInfo();
+        //todo
+
+        result.setData(agentInfo);
+        return result;
+    }
+
+    @GET
+    @Path("/deposit/address/{address}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult getDepositListByAddress(@PathParam("address") String address,
+                                             @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize, @QueryParam("agentAddress") String agentAddress) {
+        RpcResult result = RpcResult.getSuccess();
+        Page<DepositItem> listPage = new Page<>();
+        if (temp == 1) {
+            listPage.setPageNumber(pageNumber);
+            listPage.setPageSize(pageSize);
+            listPage.setTotal(pageSize * 3);
+            listPage.setPages(3);
+            List<DepositItem> list = new ArrayList<>();
+            for (int i = 0; i < pageSize; i++) {
+                DepositItem item = new DepositItem();
+                item.setAddress(address);
+                item.setAmount(1000000000);
+                item.setDepositTime(System.currentTimeMillis());
+                item.setStatus(2);
+                if (agentAddress != null) {
+                    item.setAgentAddress(agentAddress);
+                } else {
+                    try {
+                        item.setAgentAddress(AccountTool.createAccount().getAddress().toString());
+                    } catch (NulsException e) {
+                        Log.error(e);
+                    }
+                }
+                list.add(item);
+            }
+            listPage.setList(list);
+            result.setData(listPage);
+            return result;
+        }
+        //todo 排序：委托时间倒序
+        return result;
+    }
+
+    @GET
+    @Path("/deposit/agent/{agentAddress}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult queryDepositListByAgentAddress(@PathParam("agentAddress") String agentAddress,
+                                                    @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
+        if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+        if (pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if (pageSize == 0) {
+            pageSize = 10;
+        }
+        RpcResult result = RpcResult.getSuccess();
+        Page<DepositItem> listPage = new Page<>();
+        if (temp == 1) {
+            listPage.setPageNumber(pageNumber);
+            listPage.setPageSize(pageSize);
+            listPage.setTotal(pageSize * 3);
+            listPage.setPages(3);
+            List<DepositItem> list = new ArrayList<>();
+            for (int i = 0; i < pageSize; i++) {
+                DepositItem item = new DepositItem();
+                try {
+                    item.setAddress(AccountTool.createAccount().getAddress().toString());
+                } catch (NulsException e) {
+                    Log.error(e);
+                }
+                item.setAmount(100000000 + i);
+                item.setDepositTime(System.currentTimeMillis());
+                item.setStatus(i / 2);
+                item.setAgentAddress(agentAddress);
+                list.add(item);
+            }
+            listPage.setList(list);
+            result.setData(listPage);
+            return result;
+        }
+        if (!StringUtils.validAddress(agentAddress)) {
+            return RpcResult.getFailed(ErrorCode.ADDRESS_ERROR);
+        }
+
+        Page<DepositItem> pageDto = new Page<>();
+        List<DepositItem> dtoList = new ArrayList<>();
+        //todo 排序：委托时间倒序
+        pageDto.setList(dtoList);
+        result.setData(pageDto);
+        return result;
+    }
+
+    @GET
+    @Path("/agent/status")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult getAllAgentStatusList() {
+        RpcResult rpcResult = RpcResult.getSuccess();
+        List<DelegateAccountPo> polist = delegateAccountDataService.getList();
+        if (null == polist || polist.isEmpty()) {
+            return rpcResult;
+        }
+        Map<String, Integer> statusMap = new HashMap<>();
+        for (DelegateAccountPo po : polist) {
+            statusMap.put(po.getAddress(), po.getStatus());
+        }
+        return rpcResult.setData(statusMap);
+    }
+
+    @POST
+    @Path("/withdraw")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult exitConsensus(WithdrawForm form) throws NulsException, IOException {
+        AssertUtil.canNotEmpty(form);
+        AssertUtil.canNotEmpty(form.getTxHash());
+        AssertUtil.canNotEmpty(form.getPassword());
+        AssertUtil.canNotEmpty(form.getAddress());
+        Map<String, Object> params = new HashMap<>();
+        params.put("txHash", form.getTxHash());
+        Transaction tx = consensusService.stopConsensus(form.getAddress(), form.getPassword(), params);
+        return RpcResult.getSuccess().setData(tx.getHash().getDigestHex());
     }
 }

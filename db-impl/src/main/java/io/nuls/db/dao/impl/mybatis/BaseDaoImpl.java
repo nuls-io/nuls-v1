@@ -137,13 +137,14 @@ public abstract class BaseDaoImpl<T extends BaseMapper<K, V>, K, V> implements B
     }
 
 
-    public List<V> getPageList(Map<String, Object> params, int pageSize, int pageIndex, String orderBy) {
+    @Override
+    public List<V> getPageList(Map<String, Object> params, int pageSize, int pageNumber, String orderBy) {
         Searchable searchable = null;
         if (null != params && !params.isEmpty()) {
             searchable = this.getSearchable(params);
         }
-        int start = pageSize * pageIndex - pageSize;
-        PageHelper.offsetPage(start, pageIndex);
+        int start = pageSize * pageNumber - pageSize;
+        PageHelper.offsetPage(start, pageNumber);
         PageHelper.orderBy(orderBy);
         return getMapper().selectList(searchable);
     }

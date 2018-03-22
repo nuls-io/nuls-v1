@@ -33,9 +33,9 @@ public class AgentInfo {
     //节点名称
     private String agentName;
     //    代理地址
-    private String delegateAddress;
+    private String agentAddress;
 
-    private String delegateAddressAlias ="小节";
+    private String agentAddressAlias ="小节";
     //    状态
     private int status;
     //    自己的保证金
@@ -53,12 +53,32 @@ public class AgentInfo {
     //    累计奖励
     private Na reward;
 
-    public String getDelegateAddressAlias() {
-        return delegateAddressAlias;
+    private long packedCount;
+
+    private long startTime;
+
+    public long getStartTime() {
+        return startTime;
     }
 
-    public void setDelegateAddressAlias(String delegateAddressAlias) {
-        this.delegateAddressAlias = delegateAddressAlias;
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
+    }
+
+    public long getPackedCount() {
+        return packedCount;
+    }
+
+    public void setPackedCount(long packedCount) {
+        this.packedCount = packedCount;
+    }
+
+    public String getAgentAddressAlias() {
+        return agentAddressAlias;
+    }
+
+    public void setAgentAddressAlias(String agentAddressAlias) {
+        this.agentAddressAlias = agentAddressAlias;
     }
 
     public Na getReward() {
@@ -77,12 +97,12 @@ public class AgentInfo {
         this.agentName = agentName;
     }
 
-    public String getDelegateAddress() {
-        return delegateAddress;
+    public String getAgentAddress() {
+        return agentAddress;
     }
 
-    public void setDelegateAddress(String delegateAddress) {
-        this.delegateAddress = delegateAddress;
+    public void setAgentAddress(String agentAddress) {
+        this.agentAddress = agentAddress;
     }
 
     public int getStatus() {
