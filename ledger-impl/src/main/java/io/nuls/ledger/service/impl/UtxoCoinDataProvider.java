@@ -50,6 +50,7 @@ import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.ledger.entity.*;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
+import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.ledger.service.intf.CoinDataProvider;
 import io.nuls.ledger.util.UtxoTransactionTool;
 import io.nuls.ledger.util.UtxoTransferTool;
@@ -81,8 +82,8 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
     }
 
     @Override
-    public CoinTransferData getTransferData(CoinData coinData) {
-        UtxoData utxoData = (UtxoData) coinData;
+    public CoinTransferData getTransferData(AbstractCoinTransaction tx) {
+        UtxoData utxoData = (UtxoData) tx.getCoinData();
         //todo
         return null;
     }
