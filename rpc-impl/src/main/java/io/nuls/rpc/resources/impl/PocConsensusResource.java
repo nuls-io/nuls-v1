@@ -144,7 +144,7 @@ public class PocConsensusResource {
         paramsMap.put("commissionRate", form.getCommissionRate());
         paramsMap.put("agentName", form.getAgentName());
         Transaction tx = consensusService.startConsensus(form.getAddress(), form.getPassword(), paramsMap);
-        return RpcResult.getSuccess().setData(tx.getHash());
+        return RpcResult.getSuccess().setData(tx.getHash().getDigestHex());
     }
 
 
@@ -161,7 +161,7 @@ public class PocConsensusResource {
         paramsMap.put("deposit", form.getDeposit());
         paramsMap.put("agentAddress", form.getAgentAddress());
         Transaction tx = consensusService.startConsensus(form.getAddress(), form.getPassword(), paramsMap);
-        return RpcResult.getSuccess().setData(tx.getHash());
+        return RpcResult.getSuccess().setData(tx.getHash().getDigestHex());
     }
 
 
@@ -173,7 +173,7 @@ public class PocConsensusResource {
         AssertUtil.canNotEmpty(form.getAddress());
         AssertUtil.canNotEmpty(form.getPassword());
         Transaction tx = consensusService.stopConsensus(form.getAddress(), form.getPassword(), null);
-        return RpcResult.getSuccess().setData(tx.getHash());
+        return RpcResult.getSuccess().setData(tx.getHash().getDigestHex());
     }
 
 
