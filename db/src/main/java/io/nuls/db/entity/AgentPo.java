@@ -23,15 +23,16 @@
  */
 package io.nuls.db.entity;
 
-public class DelegateAccountPo {
+/**
+ * @author Niels
+ */
+public class AgentPo {
 
-    private String id;
+    private String agentAddress;
 
     private String agentName;
 
-    private String address;
-
-    private String nodeAddress;
+    private String packingAddress;
 
     private Long deposit;
 
@@ -41,28 +42,20 @@ public class DelegateAccountPo {
     private Double commissionRate;
     private int status;
 
-    public String getId() {
-        return id;
+    public String getAgentAddress() {
+        return agentAddress;
     }
 
-    public void setId(String id) {
-        this.id = id == null ? null : id.trim();
+    public void setAgentAddress(String agentAddress) {
+        this.agentAddress = agentAddress;
     }
 
-    public String getAddress() {
-        return address;
+    public String getPackingAddress() {
+        return packingAddress;
     }
 
-    public void setAddress(String address) {
-        this.address = address == null ? null : address.trim();
-    }
-
-    public String getNodeAddress() {
-        return nodeAddress;
-    }
-
-    public void setNodeAddress(String nodeAddress) {
-        this.nodeAddress = nodeAddress == null ? null : nodeAddress.trim();
+    public void setPackingAddress(String packingAddress) {
+        this.packingAddress = packingAddress;
     }
 
     public Long getDeposit() {

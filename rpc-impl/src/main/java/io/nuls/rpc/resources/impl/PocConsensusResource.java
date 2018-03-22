@@ -40,9 +40,9 @@ import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
-import io.nuls.db.dao.DelegateAccountDataService;
+import io.nuls.db.dao.AgentDataService;
 import io.nuls.db.dao.UtxoOutputDataService;
-import io.nuls.db.entity.DelegateAccountPo;
+import io.nuls.db.entity.AgentPo;
 import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.rpc.entity.RpcResult;
@@ -72,7 +72,7 @@ public class PocConsensusResource {
     private UtxoOutputDataService outputDataService = NulsContext.getServiceBean(UtxoOutputDataService.class);
     private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
 
-    private DelegateAccountDataService delegateAccountDataService = NulsContext.getServiceBean(DelegateAccountDataService.class);
+    private AgentDataService delegateAccountDataService = NulsContext.getServiceBean(AgentDataService.class);
 
     //todo 临时使用的
     private int temp = 1;
@@ -393,13 +393,13 @@ public class PocConsensusResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getAllAgentStatusList() {
         RpcResult rpcResult = RpcResult.getSuccess();
-        List<DelegateAccountPo> polist = delegateAccountDataService.getList();
+        List<AgentPo> polist = delegateAccountDataService.getList();
         if (null == polist || polist.isEmpty()) {
             return rpcResult;
         }
         Map<String, Integer> statusMap = new HashMap<>();
-        for (DelegateAccountPo po : polist) {
-            statusMap.put(po.getAddress(), po.getStatus());
+        for (AgentPo po : polist) {
+            statusMap.put(po.getAgentAddress(), po.getStatus());
         }
         return rpcResult.setData(statusMap);
     }

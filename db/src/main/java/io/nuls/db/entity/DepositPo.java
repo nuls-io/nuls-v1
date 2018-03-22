@@ -23,7 +23,10 @@
  */
 package io.nuls.db.entity;
 
-public class DelegatePo {
+/**
+ * @author Niels
+ */
+public class DepositPo {
 
     private String id;
 
@@ -38,6 +41,16 @@ public class DelegatePo {
     private Long time;
 
     private Long blockHeight;
+
+    private String txHash;
+
+    public String getTxHash() {
+        return txHash;
+    }
+
+    public void setTxHash(String txHash) {
+        this.txHash = txHash;
+    }
 
     public String getId() {
         return id;

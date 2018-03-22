@@ -24,20 +24,23 @@
  *
  */
 
-package io.nuls.consensus.entity;
-
-import io.nuls.consensus.entity.member.Deposit;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.io.NulsByteBuffer;
+package io.nuls.consensus.constant;
 
 /**
  * @author Niels
- * @date 2018/3/12
+ * @date 2018/3/22
  */
-public class ConsensusDelegateImpl extends Consensus<Deposit> {
+public enum PunishType {
 
-    @Override
-    protected Deposit parseExtend(NulsByteBuffer byteBuffer) throws NulsException {
-        return byteBuffer.readNulsData(new Deposit());
+    YELLOW(0), RED(1);
+
+    private final int code;
+
+    PunishType(int code) {
+        this.code = code;
+    }
+
+    public int getCode() {
+        return code;
     }
 }

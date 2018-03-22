@@ -42,7 +42,7 @@ import io.nuls.consensus.entity.meeting.ConsensusReward;
 import io.nuls.consensus.entity.meeting.PocMeetingMember;
 import io.nuls.consensus.entity.meeting.PocMeetingRound;
 import io.nuls.consensus.entity.member.Agent;
-import io.nuls.consensus.entity.member.Delegate;
+import io.nuls.consensus.entity.member.Deposit;
 import io.nuls.consensus.entity.tx.RedPunishTransaction;
 import io.nuls.consensus.entity.tx.YellowPunishTransaction;
 import io.nuls.consensus.event.BlockHeaderEvent;
@@ -198,11 +198,11 @@ public class ConsensusMeetingRunner implements Runnable {
             currentRound.setStartTime(startTime);
         }
 
-        Map<String, List<Consensus<Delegate>>> delegateMap = new HashMap<>();
-        List<Consensus<Delegate>> delegateList = consensusCacheManager.getCachedDelegateList();
+        Map<String, List<Consensus<Deposit>>> delegateMap = new HashMap<>();
+        List<Consensus<Deposit>> delegateList = consensusCacheManager.getCachedDelegateList();
         Na totalDeposit = Na.ZERO;
-        for (Consensus<Delegate> cd : delegateList) {
-            List<Consensus<Delegate>> sonList = delegateMap.get(cd.getExtend().getDelegateAddress());
+        for (Consensus<Deposit> cd : delegateList) {
+            List<Consensus<Deposit>> sonList = delegateMap.get(cd.getExtend().getDelegateAddress());
             if (null == sonList) {
                 sonList = new ArrayList<>();
             }
@@ -459,7 +459,7 @@ public class ConsensusMeetingRunner implements Runnable {
         Map<String, ConsensusReward> rewardMap = new HashMap<>();
         rewardMap.put(ca.getAddress(), agentReword);
         double delegateCommissionRate = DoubleUtils.div((100 - ca.getExtend().getCommissionRate()), 100, 2);
-        for (Consensus<Delegate> cd : self.getDelegateList()) {
+        for (Consensus<Deposit> cd : self.getDelegateList()) {
             double reward =
                     DoubleUtils.mul(DoubleUtils.mul(total, delegateCommissionRate),
                             DoubleUtils.div(cd.getExtend().getDeposit().getValue(),

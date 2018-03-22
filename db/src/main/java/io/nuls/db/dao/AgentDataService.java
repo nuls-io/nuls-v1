@@ -21,30 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.db.dao.impl.mybatis.params;
+package io.nuls.db.dao;
 
-import io.nuls.db.dao.impl.mybatis.util.SearchOperator;
-import io.nuls.db.dao.impl.mybatis.util.Searchable;
-
-import java.util.Map;
+import io.nuls.db.entity.AgentPo;
 
 /**
+ *
  * @author Niels
- * @date 2017/11/23
+ * @date 2017/11/20
  */
-public class DelegateSearchParams extends Searchable {
-    public static final String SEARCH_FIELD_AGENT_ADDRESS = "agentAddress";
-    public static final String SEARCH_FIELD_ADDRESS = "address";
+public interface AgentDataService extends BaseDataService< String,AgentPo> {
 
-    public DelegateSearchParams(Map<String, Object> params) {
-        if (null == params) {
-            return;
-        }
-        if (params.containsKey(SEARCH_FIELD_ADDRESS)) {
-            this.addCondition(SEARCH_FIELD_ADDRESS, SearchOperator.eq, params.get(SEARCH_FIELD_ADDRESS));
-        }
-        if (params.containsKey(SEARCH_FIELD_AGENT_ADDRESS)) {
-            this.addCondition("agent_address", SearchOperator.eq, params.get(SEARCH_FIELD_AGENT_ADDRESS));
-        }
-    }
+    int updateSelective(AgentPo po);
+
+
 }
