@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -94,6 +94,7 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
                 Consensus<Delegate> cd = ConsensusTool.fromPojo(po);
                 this.manager.cacheDelegate(cd);
             }
+            //todo 重新锁定所有解锁的金额
             return;
         }
         PocJoinConsensusTransaction pjcTx = (PocJoinConsensusTransaction) joinTx;
@@ -108,6 +109,7 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
         StopConsensusNotice notice = new StopConsensusNotice();
         notice.setEventBody(tx);
         NulsContext.getServiceBean(EventBroadcaster.class).publishToLocal(notice);
+        //todo 重新锁定解锁的金额
     }
 
     @Override
@@ -125,6 +127,8 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
             dpo.setAgentAddress(raTx.getTxData().getAddress());
             dpo.setStatus(ConsensusStatusEnum.NOT_IN.getCode());
             this.delegateDataService.updateSelectiveByAgentAddress(dpo);
+            //todo 彻底解锁抵押的金额
+            //todo 解锁所有参与委托的金额
             return;
         }
         PocJoinConsensusTransaction pjcTx = (PocJoinConsensusTransaction) joinTx;
@@ -134,6 +138,7 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
         dpo.setId(cd.getExtend().getHash());
         dpo.setStatus(ConsensusStatusEnum.NOT_IN.getCode());
         this.delegateDataService.updateSelective(dpo);
+        //todo 彻底解锁抵押的金额
     }
 
     @Override
@@ -143,10 +148,12 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
             RegisterAgentTransaction raTx = (RegisterAgentTransaction) joinTx;
             manager.changeAgentStatus(raTx.getTxData().getAddress(), ConsensusStatusEnum.NOT_IN);
             manager.changeDelegateStatusByAgent(raTx.getTxData().getAddress(), ConsensusStatusEnum.NOT_IN);
+            //todo 解锁抵押的金额
             return;
         }
         PocJoinConsensusTransaction pjcTx = (PocJoinConsensusTransaction) joinTx;
         Consensus<Delegate> cd = pjcTx.getTxData();
         manager.changeDelegateStatus(cd.getExtend().getHash(), ConsensusStatusEnum.NOT_IN);
+        //todo 内存解锁抵押的金额
     }
 }
