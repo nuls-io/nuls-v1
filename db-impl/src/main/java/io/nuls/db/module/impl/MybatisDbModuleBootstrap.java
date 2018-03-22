@@ -75,7 +75,7 @@ public class MybatisDbModuleBootstrap extends AbstractDBModule {
         this.registerService(AliasDaoImpl.class);
         this.registerService(PunishLogDaoImpl.class);
         this.registerService(AccountDaoImpl.class);
-        this.registerService(DelegateDaoImpl.class);
+        this.registerService(DepositDaoImpl.class);
         this.registerService(AgentDaoImpl.class);
         this.registerService(NodeDaoImpl.class);
         this.registerService(NodeGroupDaoImpl.class);

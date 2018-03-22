@@ -26,7 +26,7 @@
 
 package io.nuls.consensus.entity;
 
-import io.nuls.consensus.entity.member.Delegate;
+import io.nuls.consensus.entity.member.Deposit;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 
@@ -34,10 +34,10 @@ import io.nuls.core.utils.io.NulsByteBuffer;
  * @author Niels
  * @date 2018/3/12
  */
-public class ConsensusDelegateImpl extends Consensus<Delegate> {
+public class ConsensusDelegateImpl extends Consensus<Deposit> {
 
     @Override
-    protected Delegate parseExtend(NulsByteBuffer byteBuffer) throws NulsException {
-        return byteBuffer.readNulsData(new Delegate());
+    protected Deposit parseExtend(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new Deposit());
     }
 }

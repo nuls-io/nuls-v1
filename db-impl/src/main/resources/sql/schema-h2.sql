@@ -41,16 +41,17 @@ CREATE TABLE IF NOT EXISTS `agent` (
   `status` INT DEFAULT 0,
   `start_time` bigint(14) NOT NULL,
   `commission_rate` decimal(14) NOT NULL,
+  `agent_address` varchar(40) NOT NULL,
   PRIMARY KEY (`agent_address`)
 );
-CREATE TABLE IF NOT EXISTS `delegate` (
+CREATE TABLE IF NOT EXISTS `deposit` (
   `id` varchar(32) NOT NULL,
   `address` varchar(40) NOT NULL,
   `agent_address` varchar(40) NOT NULL,
   `deposit` bigint(18) NOT NULL,
   `status` int(1) DEFAULT NULL,
   `time` bigint(14) DEFAULT NULL,
-  `block_height` bigint(20) DEFAULT NULL,
+  `tx_hash` varchar(70) NOT NULL,
   PRIMARY KEY (`id`)
 );
 

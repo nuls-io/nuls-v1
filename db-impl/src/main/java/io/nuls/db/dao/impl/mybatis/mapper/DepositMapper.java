@@ -24,15 +24,15 @@
 package io.nuls.db.dao.impl.mybatis.mapper;
 
 import io.nuls.db.dao.impl.mybatis.common.BaseMapper;
-import io.nuls.db.entity.DelegatePo;
+import io.nuls.db.entity.DepositPo;
 
 /**
  * @author Niels
  * @date 2017/11/20
  */
-public interface DelegateMapper extends BaseMapper<String,DelegatePo> {
+public interface DepositMapper extends BaseMapper<String,DepositPo> {
 
     int deleteByAgentAddress(String address);
 
-    int updateSelectiveByAgentAddress(DelegatePo po);
+    int updateSelectiveByAgentAddress(DepositPo po);
 }

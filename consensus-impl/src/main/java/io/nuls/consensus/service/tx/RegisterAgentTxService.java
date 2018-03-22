@@ -34,7 +34,7 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.tx.serivce.TransactionService;
 import io.nuls.db.dao.AgentDataService;
-import io.nuls.db.dao.DelegateDataService;
+import io.nuls.db.dao.DepositDataService;
 import io.nuls.db.entity.AgentPo;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 
@@ -45,7 +45,7 @@ import io.nuls.event.bus.service.intf.EventBroadcaster;
 public class RegisterAgentTxService implements TransactionService<RegisterAgentTransaction> {
     private ConsensusCacheManager manager = ConsensusCacheManager.getInstance();
     private AgentDataService delegateAccountService = NulsContext.getServiceBean(AgentDataService.class);
-    private DelegateDataService delegateService = NulsContext.getServiceBean(DelegateDataService.class);
+    private DepositDataService delegateService = NulsContext.getServiceBean(DepositDataService.class);
 
     @Override
     public void onRollback(RegisterAgentTransaction tx) throws NulsException {

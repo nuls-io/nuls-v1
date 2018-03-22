@@ -42,7 +42,7 @@ import java.io.UnsupportedEncodingException;
  * @author Niels
  * @date 2017/12/4
  */
-public class Delegate extends BaseNulsData {
+public class Deposit extends BaseNulsData {
     private Na deposit;
     private String delegateAddress;
     private int status;

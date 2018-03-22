@@ -32,7 +32,7 @@ import io.nuls.consensus.entity.ConsensusDelegateImpl;
 import io.nuls.consensus.entity.block.BlockData;
 import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.entity.member.Agent;
-import io.nuls.consensus.entity.member.Delegate;
+import io.nuls.consensus.entity.member.Deposit;
 import io.nuls.core.chain.entity.*;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
@@ -45,7 +45,7 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.db.entity.AgentPo;
-import io.nuls.db.entity.DelegatePo;
+import io.nuls.db.entity.DepositPo;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -125,18 +125,18 @@ public class ConsensusTool {
         return ca;
     }
 
-    public static Consensus<Delegate> fromPojo(DelegatePo po) {
+    public static Consensus<Deposit> fromPojo(DepositPo po) {
         if (null == po) {
             return null;
         }
-        Consensus<Delegate> ca = new ConsensusDelegateImpl();
+        Consensus<Deposit> ca = new ConsensusDelegateImpl();
         ca.setAddress(po.getAddress());
-        Delegate delegate = new Delegate();
-        delegate.setDelegateAddress(po.getAgentAddress());
-        delegate.setDeposit(Na.valueOf(po.getDeposit()));
-        delegate.setStartTime(po.getTime());
-        delegate.setHash(po.getId());
-        ca.setExtend(delegate);
+        Deposit deposit = new Deposit();
+        deposit.setDelegateAddress(po.getAgentAddress());
+        deposit.setDeposit(Na.valueOf(po.getDeposit()));
+        deposit.setStartTime(po.getTime());
+        deposit.setHash(po.getId());
+        ca.setExtend(deposit);
         return ca;
     }
 
@@ -156,16 +156,17 @@ public class ConsensusTool {
         return po;
     }
 
-    public static DelegatePo delegateToPojo(Consensus<Delegate> bean) {
+    public static DepositPo depositToPojo(Consensus<Deposit> bean,String txHash) {
         if (null == bean) {
             return null;
         }
-        DelegatePo po = new DelegatePo();
+        DepositPo po = new DepositPo();
         po.setAddress(bean.getAddress());
         po.setDeposit(bean.getExtend().getDeposit().getValue());
         po.setTime(bean.getExtend().getStartTime());
         po.setAgentAddress(bean.getExtend().getDelegateAddress());
         po.setId(StringUtils.getNewUUID());
+        po.setTxHash(txHash);
         return po;
     }
 

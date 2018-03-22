@@ -23,11 +23,11 @@
  */
 package io.nuls.db.dao.impl.mybatis;
 
-import io.nuls.db.dao.DelegateDataService;
-import io.nuls.db.dao.impl.mybatis.mapper.DelegateMapper;
-import io.nuls.db.dao.impl.mybatis.params.DelegateSearchParams;
+import io.nuls.db.dao.DepositDataService;
+import io.nuls.db.dao.impl.mybatis.mapper.DepositMapper;
+import io.nuls.db.dao.impl.mybatis.params.DepositSearchParams;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
-import io.nuls.db.entity.DelegatePo;
+import io.nuls.db.entity.DepositPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.db.transactional.annotation.PROPAGATION;
 
@@ -38,14 +38,14 @@ import java.util.Map;
  * @date 2017/11/22
  */
 @DbSession(transactional = PROPAGATION.NONE)
-public class DelegateDaoImpl extends BaseDaoImpl<DelegateMapper, String, DelegatePo> implements DelegateDataService {
-    public DelegateDaoImpl() {
-        super(DelegateMapper.class);
+public class DepositDaoImpl extends BaseDaoImpl<DepositMapper, String, DepositPo> implements DepositDataService {
+    public DepositDaoImpl() {
+        super(DepositMapper.class);
     }
 
     @Override
     protected Searchable getSearchable(Map<String, Object> params) {
-        return new DelegateSearchParams(params);
+        return new DepositSearchParams(params);
     }
 
     @Override
@@ -54,12 +54,12 @@ public class DelegateDaoImpl extends BaseDaoImpl<DelegateMapper, String, Delegat
     }
 
     @Override
-    public int updateSelective(DelegatePo po) {
+    public int updateSelective(DepositPo po) {
         return this.getMapper().updateByPrimaryKeySelective(po);
     }
 
     @Override
-    public int updateSelectiveByAgentAddress(DelegatePo po) {
+    public int updateSelectiveByAgentAddress(DepositPo po) {
         return this.getMapper().updateSelectiveByAgentAddress(po);
     }
 }
