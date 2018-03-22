@@ -316,7 +316,8 @@ public class PocConsensusResource {
                 item.setAmount(1000000000);
                 item.setDepositTime(System.currentTimeMillis());
                 item.setStatus(2);
-                if (agentAddress != null) {
+                item.setAgentName("二货节点"+i);
+                if (StringUtils.isNotBlank(agentAddress)) {
                     item.setAgentAddress(agentAddress);
                 } else {
                     try {
@@ -364,6 +365,7 @@ public class PocConsensusResource {
                 } catch (NulsException e) {
                     Log.error(e);
                 }
+                item.setAgentName("二货节点"+i);
                 item.setAmount(100000000 + i);
                 item.setDepositTime(System.currentTimeMillis());
                 item.setStatus(i / 2);
