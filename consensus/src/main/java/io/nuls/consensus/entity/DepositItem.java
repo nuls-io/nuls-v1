@@ -29,11 +29,19 @@ package io.nuls.consensus.entity;
  */
 public class DepositItem {
     private String address;
-    long depositTime;
-    long amount;
-    String agentAddress;
+    private long depositTime;
+    private long amount;
+    private String agentAddress;
+    private String agentName;
+    private int status;
 
-    int status;
+    public String getAgentName() {
+        return agentName;
+    }
+
+    public void setAgentName(String agentName) {
+        this.agentName = agentName;
+    }
 
     public int getStatus() {
         return status;

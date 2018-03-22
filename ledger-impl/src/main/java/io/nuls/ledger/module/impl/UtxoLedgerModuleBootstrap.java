@@ -23,7 +23,6 @@
  */
 package io.nuls.ledger.module.impl;
 
-import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.chain.manager.TransactionValidatorManager;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
