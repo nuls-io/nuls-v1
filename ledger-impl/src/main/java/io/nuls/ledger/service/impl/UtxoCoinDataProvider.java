@@ -52,6 +52,8 @@ import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.params.OperationType;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
+import io.nuls.ledger.entity.tx.LockNulsTransaction;
+import io.nuls.ledger.entity.tx.UnlockNulsTransaction;
 import io.nuls.ledger.service.intf.CoinDataProvider;
 import io.nuls.ledger.util.UtxoTransactionTool;
 import io.nuls.ledger.util.UtxoTransferTool;
@@ -80,13 +82,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
     public CoinData parse(NulsByteBuffer byteBuffer) throws NulsException {
         CoinData coinData = byteBuffer.readNulsData(new UtxoData());
         return coinData;
-    }
-
-    @Override
-    public CoinTransferData getTransferData(AbstractCoinTransaction tx) {
-        UtxoData utxoData = (UtxoData) tx.getCoinData();
-        //todo
-        return null;
     }
 
     @Override
@@ -344,7 +339,14 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         long inputValue = 0;
         if (!coinParam.getFrom().isEmpty()) {
             //find unSpends to create inputs for this tx
-            List<UtxoOutput> unSpends = coinManager.getAccountsUnSpend(coinParam.getFrom(), coinParam.getTotalNa().add(coinParam.getFee()));
+            Na totalFee = Na.ZERO;
+            if (tx instanceof UnlockNulsTransaction) {
+                totalFee = coinParam.getFee();
+            } else {
+                totalFee = coinParam.getTotalNa().add(coinParam.getFee());
+            }
+
+            List<UtxoOutput> unSpends = coinManager.getAccountsUnSpend(coinParam.getFrom(), totalFee);
             if (unSpends.isEmpty()) {
                 throw new NulsException(ErrorCode.BALANCE_NOT_ENOUGH);
             }
@@ -362,7 +364,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 inputs.add(input);
             }
         }
-
 
         //get EcKey for output's script
         Account account = null;
@@ -384,7 +385,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 priKey = account.getPriKey();
             }
         }
-
 
         //create outputs
         int i = 0;

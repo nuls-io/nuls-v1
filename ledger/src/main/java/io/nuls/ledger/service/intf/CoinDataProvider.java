@@ -38,8 +38,6 @@ public interface CoinDataProvider {
 
     CoinData parse(NulsByteBuffer byteBuffer) throws NulsException;
 
-    CoinTransferData getTransferData(AbstractCoinTransaction tx);
-
     void approve(CoinData coinData, Transaction tx) throws NulsException;
 
     void save(CoinData coinData, Transaction tx) throws NulsException;
