@@ -86,6 +86,7 @@ public class PocConsensusResource {
             dto.setAgentCount(18);
             dto.setRewardOfDay(20112345678L);
             dto.setTotalDeposit(321000000000L);
+            dto.setConsensusAccountNumber(10000);
             result.setData(dto);
             return result;
         }
@@ -103,14 +104,14 @@ public class PocConsensusResource {
         if (temp == 1) {
             if (StringUtils.isBlank(address)) {
                 dto.setAgentCount(2);
-                dto.setDelegateAgentCount(10);
+                dto.setConsensusAccountCount(10);
                 dto.setReward(1234500000000L);
                 dto.setRewardOfDay(234500000000L);
                 dto.setTotalDeposit(300000000000000L);
                 dto.setUsableBalance(2234500000000L);
             } else {
                 dto.setAgentCount(0);
-                dto.setDelegateAgentCount(2);
+                dto.setConsensusAccountCount(2);
                 dto.setReward(5500000000L);
                 dto.setRewardOfDay(1500000000L);
                 dto.setTotalDeposit(20000000000000L);
@@ -142,14 +143,15 @@ public class PocConsensusResource {
         paramsMap.put("introduction", form.getRemark());
         paramsMap.put("commissionRate", form.getCommissionRate());
         paramsMap.put("agentName", form.getAgentName());
-        consensusService.startConsensus(form.getAddress(), form.getPassword(), paramsMap);
-        return RpcResult.getSuccess();
+        Transaction tx = consensusService.startConsensus(form.getAddress(), form.getPassword(), paramsMap);
+        return RpcResult.getSuccess().setData(tx.getHash());
     }
+
 
     @POST
     @Path("/deposit")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult in(DepositForm form) throws NulsException {
+    public RpcResult depositToAgent(DepositForm form) throws NulsException {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getAddress());
         AssertUtil.canNotEmpty(form.getAgentAddress());
@@ -158,19 +160,20 @@ public class PocConsensusResource {
         Map<String, Object> paramsMap = new HashMap<>();
         paramsMap.put("deposit", form.getDeposit());
         paramsMap.put("agentAddress", form.getAgentAddress());
-        consensusService.startConsensus(form.getAddress(), form.getPassword(), paramsMap);
-        return RpcResult.getSuccess();
+        Transaction tx = consensusService.startConsensus(form.getAddress(), form.getPassword(), paramsMap);
+        return RpcResult.getSuccess().setData(tx.getHash());
     }
 
-    @POST
-    @Path("/agent/stop")
+
+    @DELETE
+    @Path("/agent")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult stopAgent(StopAgentForm form) throws NulsException, IOException {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getAddress());
         AssertUtil.canNotEmpty(form.getPassword());
-        consensusService.stopConsensus(form.getAddress(), form.getPassword(), null);
-        return RpcResult.getSuccess();
+        Transaction tx = consensusService.stopConsensus(form.getAddress(), form.getPassword(), null);
+        return RpcResult.getSuccess().setData(tx.getHash());
     }
 
 
@@ -213,7 +216,8 @@ public class PocConsensusResource {
     @GET
     @Path("/agent/list")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult getAgentListBy(@QueryParam("pageNumber") Integer pageNumber, @QueryParam("pageSize") Integer pageSize) {
+    public RpcResult getAgentList(@QueryParam("pageNumber") Integer pageNumber, @QueryParam("pageSize") Integer pageSize,
+                                  @QueryParam("keyword") String keyword, @QueryParam("sortType") String sortType) {
 
         RpcResult result = RpcResult.getSuccess();
         Page<AgentInfo> listPage = new Page<>();
