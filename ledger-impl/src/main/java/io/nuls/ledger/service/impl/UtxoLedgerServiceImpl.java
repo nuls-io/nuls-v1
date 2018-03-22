@@ -508,12 +508,11 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public void unlockTxApprove(UnlockNulsTransaction tx) {
-        String lockTxHash = ((NulsDigestData) tx.getTxData()).getDigestHex();
+    public void unlockTxApprove(String txHash) {
         boolean b = true;
         int index = 0;
         while (b) {
-            UtxoOutput output = ledgerCacheService.getUtxo(lockTxHash + "-" + index);
+            UtxoOutput output = ledgerCacheService.getUtxo(txHash + "-" + index);
             if (output != null) {
                 if (OutPutStatusEnum.UTXO_UNCONFIRM_CONSENSUS_LOCK == output.getStatus()) {
                     output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND);
@@ -528,18 +527,17 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     @DbSession
-    public void unlockTxSave(UnlockNulsTransaction tx) {
-        NulsDigestData lockTxHash = (NulsDigestData) tx.getTxData();
-        txDao.unlockTxOutput(lockTxHash.getDigestHex());
+    public void unlockTxSave(String txHash) {
+        txDao.unlockTxOutput(txHash);
     }
 
     @Override
-    public void unlockTxRollback(UnlockNulsTransaction tx) {
-        String lockTxHash = ((NulsDigestData) tx.getTxData()).getDigestHex();
+    @DbSession
+    public void unlockTxRollback(String txHash) {
         boolean b = true;
         int index = 0;
         while (b) {
-            UtxoOutput output = ledgerCacheService.getUtxo(lockTxHash + "-" + index);
+            UtxoOutput output = ledgerCacheService.getUtxo(txHash + "-" + index);
             if (output != null) {
                 if (OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND == output.getStatus()) {
                     output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_CONSENSUS_LOCK);
@@ -550,7 +548,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 b = false;
             }
         }
-        txDao.lockTxOutput(lockTxHash);
+        txDao.lockTxOutput(txHash);
     }
 
     public List<TransactionService> getServiceList(Class<? extends Transaction> txClass) {
