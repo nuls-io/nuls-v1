@@ -1,6 +1,5 @@
 package io.nuls.rpc.sdk.service;
 
-import io.nuls.core.utils.log.Log;
 import io.nuls.rpc.sdk.entity.RpcClientResult;
 import io.nuls.rpc.sdk.params.CreateAgentParams;
 import io.nuls.rpc.sdk.params.EntrustCancelParams;
@@ -27,7 +26,7 @@ public class ConsensusService {
         try {
             return restFul.post("/consensus/createAgent", JSONUtils.obj2json(params));
         } catch (Exception e) {
-            Log.error(e);
+            e.printStackTrace();
             return RpcClientResult.getFailed(e.getMessage());
         }
     }
@@ -36,7 +35,7 @@ public class ConsensusService {
         try {
             return restFul.post("/consensus/entrust", JSONUtils.obj2json(params));
         } catch (Exception e) {
-            Log.error(e);
+            e.printStackTrace();
             return RpcClientResult.getFailed(e.getMessage());
         }
     }
@@ -45,7 +44,7 @@ public class ConsensusService {
         try {
             return restFul.post("/consensus/cancel", JSONUtils.obj2json(params));
         } catch (Exception e) {
-            Log.error(e);
+            e.printStackTrace();
             return RpcClientResult.getFailed(e.getMessage());
         }
     }
@@ -55,7 +54,7 @@ public class ConsensusService {
         try {
             return restFul.post("/consensus/stopAgent", JSONUtils.obj2json(params));
         } catch (Exception e) {
-            Log.error(e);
+            e.printStackTrace();
             return RpcClientResult.getFailed(e.getMessage());
         }
     }
