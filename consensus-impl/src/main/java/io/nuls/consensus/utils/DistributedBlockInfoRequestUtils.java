@@ -157,6 +157,10 @@ public class DistributedBlockInfoRequestUtils {
             if (nodes.size() >= halfSize) {
                 result = new BlockInfo();
                 BlockHashResponse response = hashesMap.get(nodes.get(0));
+                if(response==null||response.getHeightList()==null){
+                    //todo check it
+                    continue;
+                }
                 Long bestHeight = 0L;
                 NulsDigestData bestHash = null;
                 for (int i = 0; i < response.getHeightList().size(); i++) {

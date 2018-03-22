@@ -766,6 +766,9 @@ public class AccountServiceImpl implements AccountService {
         accountCacheService.putAccount(account);
         NulsContext.LOCAL_ADDRESS_LIST.add(accountPo.getAddress());
         ledgerService.getBalance(accountPo.getAddress());
+        if(getDefaultAccount() == null) {
+            setDefaultAccount(account.getAddress().getBase58());
+        }
         AccountImportedNotice notice = new AccountImportedNotice();
         notice.setEventBody(account);
         eventBroadcaster.publishToLocal(notice);
