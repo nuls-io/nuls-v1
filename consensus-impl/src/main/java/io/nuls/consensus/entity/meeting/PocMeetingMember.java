@@ -39,6 +39,9 @@ import java.util.List;
 public class PocMeetingMember implements Comparable<PocMeetingMember> {
     private long roundIndex;
     private long roundStartTime;
+    /**
+     * Starting from 1
+     */
     private int indexOfRound;
     private String address;
     private String packerAddress;

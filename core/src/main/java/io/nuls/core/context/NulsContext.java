@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -26,6 +26,7 @@ package io.nuls.core.context;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.utils.cfg.IniEntity;
+import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.spring.lite.core.SpringLiteContext;
 
@@ -60,7 +61,7 @@ public class NulsContext {
      */
     private Block bestBlock;
     private Block genesisBlock;
-    private Long netBestBlockHeight;
+    private Long netBestBlockHeight = 0L;
 
     public static Set<String> LOCAL_ADDRESS_LIST = new HashSet<>();
     public static String DEFAULT_ACCOUNT_ID;
@@ -88,9 +89,7 @@ public class NulsContext {
 
     public Block getBestBlock() {
         if (bestBlock == null) {
-            if (bestBlock == null) {
-                bestBlock = getGenesisBlock();
-            }
+            bestBlock = getGenesisBlock();
         }
         return bestBlock;
     }
@@ -149,8 +148,11 @@ public class NulsContext {
     }
 
     public Long getNetBestBlockHeight() {
-        if (netBestBlockHeight == null) {
-            netBestBlockHeight = 0L;
+        if (null == bestBlock) {
+            return netBestBlockHeight;
+        }
+        if (netBestBlockHeight < bestBlock.getHeader().getHeight()) {
+            netBestBlockHeight = bestBlock.getHeader().getHeight();
         }
         return netBestBlockHeight;
     }

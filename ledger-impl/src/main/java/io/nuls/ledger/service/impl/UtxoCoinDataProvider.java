@@ -30,13 +30,10 @@ import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.constant.TxStatusEnum;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.script.P2PKHScript;
-import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
@@ -50,6 +47,8 @@ import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.ledger.entity.*;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
+import io.nuls.ledger.entity.tx.LockNulsTransaction;
+import io.nuls.ledger.entity.tx.UnlockNulsTransaction;
 import io.nuls.ledger.service.intf.CoinDataProvider;
 import io.nuls.ledger.util.UtxoTransactionTool;
 import io.nuls.ledger.util.UtxoTransferTool;
@@ -78,13 +77,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
     public CoinData parse(NulsByteBuffer byteBuffer) throws NulsException {
         CoinData coinData = byteBuffer.readNulsData(new UtxoData());
         return coinData;
-    }
-
-    @Override
-    public CoinTransferData getTransferData(CoinData coinData) {
-        UtxoData utxoData = (UtxoData) coinData;
-        //todo
-        return null;
     }
 
     @Override
@@ -148,14 +140,12 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
     private void approveProcessOutput(List<UtxoOutput> outputs, Transaction tx, Set<String> addressSet) {
         for (int i = 0; i < outputs.size(); i++) {
             UtxoOutput output = outputs.get(i);
-            if (tx.getType() == TransactionConstant.TX_TYPE_REGISTER_AGENT || tx.getType() == TransactionConstant.TX_TYPE_JOIN_CONSENSUS) {
+            if (tx instanceof LockNulsTransaction && i == 0) {
                 output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_CONSENSUS_LOCK);
+            } else if (output.getLockTime() > 0) {
+                output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_TIME_LOCK);
             } else {
-                if (output.getLockTime() > 0) {
-                    output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_TIME_LOCK);
-                } else {
-                    output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND);
-                }
+                output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND);
             }
             ledgerCacheService.putUtxo(output.getKey(), output);
             addressSet.add(output.getAddress());
@@ -332,6 +322,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         UtxoData utxoData = new UtxoData();
         List<UtxoInput> inputs = new ArrayList<>();
         List<UtxoOutput> outputs = new ArrayList<>();
+        Na totalNa = Na.ZERO;
 
         if (coinParam.getTotalNa().equals(Na.ZERO)) {
             utxoData.setInputs(inputs);
@@ -342,7 +333,14 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         long inputValue = 0;
         if (!coinParam.getFrom().isEmpty()) {
             //find unSpends to create inputs for this tx
-            List<UtxoOutput> unSpends = coinManager.getAccountsUnSpend(coinParam.getFrom(), coinParam.getTotalNa().add(coinParam.getFee()));
+            Na totalFee = Na.ZERO;
+            if (tx instanceof UnlockNulsTransaction) {
+                totalFee = coinParam.getFee();
+            } else {
+                totalFee = coinParam.getTotalNa().add(coinParam.getFee());
+            }
+
+            List<UtxoOutput> unSpends = coinManager.getAccountsUnSpend(coinParam.getFrom(), totalFee);
             if (unSpends.isEmpty()) {
                 throw new NulsException(ErrorCode.BALANCE_NOT_ENOUGH);
             }
@@ -360,7 +358,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 inputs.add(input);
             }
         }
-
 
         //get EcKey for output's script
         Account account = null;
@@ -382,7 +379,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 priKey = account.getPriKey();
             }
         }
-
 
         //create outputs
         int i = 0;
@@ -408,6 +404,14 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 output.setTxHash(tx.getHash());
                 outputValue += output.getValue();
                 outputs.add(output);
+
+                if (coinParam.getFrom().contains(address)) {
+                    if (tx instanceof LockNulsTransaction && i == 0) {
+                        totalNa.add(Na.valueOf(output.getValue()));
+                    }
+                } else {
+                    totalNa.add(Na.valueOf(output.getValue()));
+                }
                 i++;
             }
         }
@@ -429,21 +433,36 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 
         utxoData.setInputs(inputs);
         utxoData.setOutputs(outputs);
+        utxoData.setTotalNa(totalNa);
         return utxoData;
     }
 
     @Override
     public void afterParse(CoinData coinData, Transaction tx) {
         UtxoData utxoData = (UtxoData) coinData;
+        Set<String> addressSet = new HashSet<>();
+
         if (null != utxoData.getInputs()) {
             for (UtxoInput input : utxoData.getInputs()) {
                 input.setTxHash(tx.getHash());
+                addressSet.add(input.getFrom().getAddress());
             }
         }
+
+        Na totalNa = Na.ZERO;
         if (null != utxoData.getOutputs()) {
-            for (UtxoOutput output : utxoData.getOutputs()) {
+            for (int i = 0; i < utxoData.getOutputs().size(); i++) {
+                UtxoOutput output = utxoData.getOutputs().get(i);
                 output.setTxHash(tx.getHash());
+                if (addressSet.contains(output.getAddress())) {
+                    if (tx instanceof LockNulsTransaction && i == 0) {
+                        totalNa.add(Na.valueOf(output.getValue()));
+                    }
+                } else {
+                    totalNa.add(Na.valueOf(output.getValue()));
+                }
             }
         }
+        coinData.setTotalNa(totalNa);
     }
 }

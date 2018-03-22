@@ -28,13 +28,20 @@ package io.nuls.consensus.entity;
  * date 2018/3/20.
  */
 public class DepositItem {
+    private String address;
+    private long depositTime;
+    private long amount;
+    private String agentAddress;
+    private String agentName;
+    private int status;
 
-    long depositTime;
-    long amount;
-    String agentAddress;
-    //0: waiting   1: in consensus
+    public String getAgentName() {
+        return agentName;
+    }
 
-    int status;
+    public void setAgentName(String agentName) {
+        this.agentName = agentName;
+    }
 
     public int getStatus() {
         return status;
@@ -44,7 +51,13 @@ public class DepositItem {
         this.status = status;
     }
 
+    public String getAddress() {
+        return address;
+    }
 
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
     public long getDepositTime() {
         return depositTime;

@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,6 +23,7 @@
  */
 package io.nuls.consensus.thread;
 
+import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.cache.manager.block.BlockCacheManager;
 import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
@@ -391,7 +392,7 @@ public class ConsensusMeetingRunner implements Runnable {
     }
 
     private void coinBaseTx(List<Transaction> txList, PocMeetingMember self) throws NulsException, IOException {
-        CoinTransferData data = new CoinTransferData(OperationType.COIN_BASE);
+        CoinTransferData data = new CoinTransferData(OperationType.COIN_BASE, this.ledgerService.getTxFee(TransactionConstant.TX_TYPE_COIN_BASE));
         data.setFee(Na.ZERO);
         List<ConsensusReward> rewardList = calcReward(txList, self);
         Na total = Na.ZERO;
@@ -453,7 +454,7 @@ public class ConsensusMeetingRunner implements Runnable {
         double caReward = DoubleUtils.mul(total, DoubleUtils.div(ca.getExtend().getDeposit().getValue(), this.consensusManager.getCurrentRound().getTotalDeposit().getValue()));
         caReward = caReward
                 + DoubleUtils.mul(total, DoubleUtils.mul(DoubleUtils.div((this.consensusManager.getCurrentRound().getTotalDeposit().getValue() - ca.getExtend().getDeposit().getValue()), this.consensusManager.getCurrentRound().getTotalDeposit().getValue()
-        ), DoubleUtils.round(ca.getExtend().getCommissionRate()/100, 2)));
+        ), DoubleUtils.round(ca.getExtend().getCommissionRate() / 100, 2)));
         agentReword.setReward(Na.valueOf((long) caReward));
         Map<String, ConsensusReward> rewardMap = new HashMap<>();
         rewardMap.put(ca.getAddress(), agentReword);
@@ -502,38 +503,48 @@ public class ConsensusMeetingRunner implements Runnable {
     }
 
     private void yellowPunishTx(Block bestBlock, List<Transaction> txList, PocMeetingMember self) throws NulsException, IOException {
-        //todo check it
         BlockRoundData lastBlockRoundData = new BlockRoundData();
         try {
             lastBlockRoundData.parse(bestBlock.getHeader().getExtend());
         } catch (NulsException e) {
             Log.error(e);
         }
-
-
-//        1.
-//
-//
-//
-//
-//
-//
-//
-//
-
-
-        boolean punish = self.getIndexOfRound() == 1 && lastBlockRoundData.getPackingIndexOfRound() != lastBlockRoundData.getConsensusMemberCount();
-        punish = punish || (self.getIndexOfRound() > 1 && self.getIndexOfRound() != (lastBlockRoundData.getPackingIndexOfRound() + 1));
-        if (!punish) {
+        boolean ok = self.getRoundIndex() == lastBlockRoundData.getRoundIndex() && self.getIndexOfRound() == (1 + lastBlockRoundData.getPackingIndexOfRound());
+        ok = ok || (self.getRoundIndex() == (lastBlockRoundData.getRoundIndex() + 1)
+                && self.getIndexOfRound() == 0
+                && lastBlockRoundData.getPackingIndexOfRound() == lastBlockRoundData.getConsensusMemberCount());
+        ok = ok || (self.getRoundIndex() - 1) > lastBlockRoundData.getRoundIndex();
+        if (ok) {
             return;
         }
-        PocMeetingMember previous = this.consensusManager.getCurrentRound().getMember(self.getIndexOfRound() - 1);
-        if (null == previous) {
-            return;
+        List<Address> addressList = new ArrayList<>();
+        PocMeetingRound round = consensusManager.getCurrentRound();
+        long roundIndex = lastBlockRoundData.getRoundIndex();
+        int packingIndex = lastBlockRoundData.getPackingIndexOfRound() + 1;
+        while (true) {
+            PocMeetingRound tempRound;
+            if (roundIndex==self.getRoundIndex()) {
+                tempRound = round;
+            } else {
+                tempRound = round.getPreviousRound();
+            }
+            if (packingIndex == tempRound.getMemberCount()) {
+                roundIndex++;
+                packingIndex = 1;
+                continue;
+            }
+            if (tempRound.getIndex() == round.getIndex() && packingIndex == self.getIndexOfRound()) {
+                break;
+            }
+            PocMeetingMember member = tempRound.getMember(packingIndex);
+            if (null == member) {
+                throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
+            }
+            addressList.add(Address.fromHashs(member.getAddress()));
         }
         YellowPunishTransaction punishTx = new YellowPunishTransaction();
         YellowPunishData data = new YellowPunishData();
-        data.setAddress(previous.getAddress());
+        data.setAddressList(addressList);
         data.setHeight(bestBlock.getHeader().getHeight() + 1);
         punishTx.setTxData(data);
         punishTx.setTime(TimeService.currentTimeMillis());
@@ -553,7 +564,7 @@ public class ConsensusMeetingRunner implements Runnable {
             Log.error(e);
             throw new NulsRuntimeException(e);
         }
-        if (round.getPreviousRound() == null||round.getPreviousRound().getIndex()<=lastRoundData.getRoundIndex()) {
+        if (round.getPreviousRound() == null || round.getPreviousRound().getIndex() <= lastRoundData.getRoundIndex()) {
             while (true) {
                 if (lastRoundData.getPackingIndexOfRound() == lastRoundData.getConsensusMemberCount() ||
                         lastRoundData.getRoundEndTime() <= TimeService.currentTimeMillis()) {

@@ -144,7 +144,7 @@ public class AccountResource {
         if (balance == null || balance.getUnSpends() == null) {
             return RpcResult.getFailed("balance not enough");
         }
-        amount += consensusService.getTxFee(Integer.MAX_VALUE).getValue();
+        amount += this.ledgerService.getTxFee(Integer.MAX_VALUE).getValue();
 
         long usable = 0;
         boolean enough = false;

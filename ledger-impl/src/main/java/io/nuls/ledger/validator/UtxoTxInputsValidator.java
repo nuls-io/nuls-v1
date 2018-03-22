@@ -68,7 +68,7 @@ public class UtxoTxInputsValidator implements NulsDataValidator<AbstractCoinTran
                     return ValidateResult.getFailedResult(ErrorCode.UTXO_STATUS_CHANGE);
                 }
             } else if (tx.getStatus() == TxStatusEnum.AGREED) {
-                if (!output.isLocked()) {
+                if (!output.isSpend()) {
                     return ValidateResult.getFailedResult(ErrorCode.UTXO_STATUS_CHANGE);
                 }
             }

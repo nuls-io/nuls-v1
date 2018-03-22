@@ -106,9 +106,8 @@ public final class GenesisBlock extends Block {
         if (null == list || list.isEmpty()) {
             throw new NulsRuntimeException(ErrorCode.CONFIG_ERROR);
         }
-        CoinTransferData data = new CoinTransferData(OperationType.COIN_BASE);
+        CoinTransferData data = new CoinTransferData(OperationType.COIN_BASE,Na.ZERO);
         data.setPriKey(Hex.decode(priKey));
-        data.setFee(Na.ZERO);
         Na total = Na.ZERO;
         for (Map<String, Object> map : list) {
             String address = (String) map.get(CONFIG_FILED_ADDRESS);

@@ -85,4 +85,8 @@ public interface UtxoTransactionDataService {
     long getBlockReward(long blockHeight);
 
     long getBlockFee(long blockHeight);
+
+    void unlockTxOutput(String txHash);
+
+    void lockTxOutput(String txHash);
 }

@@ -24,12 +24,10 @@
 package io.nuls.ledger.service.impl;
 
 import io.nuls.cache.service.intf.CacheService;
-import io.nuls.core.chain.entity.Na;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.Result;
-import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.chain.entity.*;
 import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.dto.Page;
@@ -42,6 +40,7 @@ import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.core.validate.ValidateResult;
+import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.db.dao.UtxoTransactionDataService;
 import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.entity.TransactionPo;
@@ -49,7 +48,9 @@ import io.nuls.db.entity.UtxoInputPo;
 import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
+import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.entity.Balance;
+import io.nuls.ledger.entity.OutPutStatusEnum;
 import io.nuls.ledger.entity.UtxoBalance;
 import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.params.Coin;
@@ -58,6 +59,7 @@ import io.nuls.ledger.entity.params.OperationType;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.entity.tx.TransferTransaction;
+import io.nuls.ledger.entity.tx.UnlockNulsTransaction;
 import io.nuls.ledger.event.TransactionEvent;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.ledger.util.UtxoTransactionTool;
@@ -294,10 +296,26 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         }
     }
 
+    @Override
+    public Na getTxFee(int txType) {
+        Block bestBlock = NulsContext.getInstance().getBestBlock();
+        if (null == bestBlock) {
+            return LedgerConstant.TRANSACTION_FEE;
+        }
+        long blockHeight = bestBlock.getHeader().getHeight();
+        if (txType == TransactionConstant.TX_TYPE_COIN_BASE ||
+                txType == TransactionConstant.TX_TYPE_SMALL_CHANGE ||
+                txType == TransactionConstant.TX_TYPE_EXIT_CONSENSUS
+                ) {
+            return Na.ZERO;
+        }
+        long x = blockHeight / LedgerConstant.BLOCK_COUNT_OF_YEAR + 1;
+        return LedgerConstant.TRANSACTION_FEE.div(x);
+    }
 
     @Override
     public Result transfer(String address, String password, String toAddress, Na amount, String remark) {
-        CoinTransferData coinData = new CoinTransferData(OperationType.TRANSFER, amount, address, toAddress);
+        CoinTransferData coinData = new CoinTransferData(OperationType.TRANSFER, amount, address, toAddress, getTxFee(TransactionConstant.TX_TYPE_TRANSFER));
         return transfer(coinData, password, remark);
     }
 
@@ -327,7 +345,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     public Result transfer(List<String> addressList, String password, String toAddress, Na amount, String remark) {
-        CoinTransferData coinData = new CoinTransferData(OperationType.TRANSFER, amount, addressList, toAddress);
+        CoinTransferData coinData = new CoinTransferData(OperationType.TRANSFER, amount, addressList, toAddress, getTxFee(TransactionConstant.TX_TYPE_TRANSFER));
         return transfer(coinData, password, remark);
     }
 
@@ -336,7 +354,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     public Result lock(String address, String password, Na amount, long unlockTime, String remark) {
         LockNulsTransaction tx = null;
         try {
-            CoinTransferData coinData = new CoinTransferData(OperationType.LOCK, amount, address);
+            CoinTransferData coinData = new CoinTransferData(OperationType.LOCK, amount, address, getTxFee(TransactionConstant.TX_TYPE_LOCK));
             coinData.addTo(address, new Coin(amount, unlockTime));
             tx = UtxoTransactionTool.getInstance().createLockNulsTx(coinData, password, remark);
 
@@ -487,6 +505,50 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     public long getBlockFee(Long blockHeight) {
         return txDao.getBlockFee(blockHeight);
+    }
+
+    @Override
+    public void unlockTxApprove(String txHash) {
+        boolean b = true;
+        int index = 0;
+        while (b) {
+            UtxoOutput output = ledgerCacheService.getUtxo(txHash + "-" + index);
+            if (output != null) {
+                if (OutPutStatusEnum.UTXO_UNCONFIRM_CONSENSUS_LOCK == output.getStatus()) {
+                    output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND);
+                } else if (OutPutStatusEnum.UTXO_CONFIRM_CONSENSUS_LOCK == output.getStatus()) {
+                    output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
+                }
+            } else {
+                b = false;
+            }
+        }
+    }
+
+    @Override
+    @DbSession
+    public void unlockTxSave(String txHash) {
+        txDao.unlockTxOutput(txHash);
+    }
+
+    @Override
+    @DbSession
+    public void unlockTxRollback(String txHash) {
+        boolean b = true;
+        int index = 0;
+        while (b) {
+            UtxoOutput output = ledgerCacheService.getUtxo(txHash + "-" + index);
+            if (output != null) {
+                if (OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND == output.getStatus()) {
+                    output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_CONSENSUS_LOCK);
+                } else if (OutPutStatusEnum.UTXO_CONFIRM_UNSPEND == output.getStatus()) {
+                    output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_CONSENSUS_LOCK);
+                }
+            } else {
+                b = false;
+            }
+        }
+        txDao.lockTxOutput(txHash);
     }
 
     public List<TransactionService> getServiceList(Class<? extends Transaction> txClass) {

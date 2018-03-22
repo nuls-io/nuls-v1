@@ -64,7 +64,6 @@ public interface PocConsensusConstant {
      * value = 5000000/3154600
      */
     Na BLOCK_REWARD = Na.valueOf(158548960);
-    Na TRANSACTION_FEE = Na.CENT;
     /**
      * unit:second
      */

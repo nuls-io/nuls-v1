@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -30,6 +30,7 @@ import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.ledger.entity.Balance;
+import io.nuls.ledger.entity.tx.UnlockNulsTransaction;
 
 import java.io.IOException;
 import java.util.List;
@@ -62,6 +63,8 @@ public interface LedgerService {
 
     Balance getBalance(String address);
 
+    Na getTxFee(int txType);
+
     Result transfer(String address, String password, String toAddress, Na amount, String remark);
 
     Result transfer(List<String> addressList, String password, String toAddress, Na amount, String remark);
@@ -91,4 +94,10 @@ public interface LedgerService {
     long getBlockReward(long blockHeight);
 
     long getBlockFee(Long blockHeight);
+
+    void unlockTxApprove(String txHash);
+
+    void unlockTxSave(String txHash);
+
+    void unlockTxRollback(String txHash);
 }
