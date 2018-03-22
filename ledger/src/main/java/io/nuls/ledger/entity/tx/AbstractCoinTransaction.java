@@ -119,7 +119,7 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
     }
 
     public final CoinTransferData getCoinTransferData() {
-        return this.getCoinDataProvider().getTransferData(this.coinData);
+        return this.getCoinDataProvider().getTransferData(this);
     }
 
     public final CoinData getCoinData() {
