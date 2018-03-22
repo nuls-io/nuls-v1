@@ -95,9 +95,9 @@ public interface LedgerService {
 
     long getBlockFee(Long blockHeight);
 
-    void unlockTxApprove(UnlockNulsTransaction tx);
+    void unlockTxApprove(String txHash);
 
-    void unlockTxSave(UnlockNulsTransaction tx);
+    void unlockTxSave(String txHash);
 
-    void unlockTxRollback(UnlockNulsTransaction tx);
+    void unlockTxRollback(String txHash);
 }

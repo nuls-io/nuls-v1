@@ -111,7 +111,6 @@ public class UtxoTransferTool {
         input.setIndex(po.getInIndex());
         input.setFromHash(new NulsDigestData(Hex.decode(po.getFromHash())));
         input.setFromIndex(po.getFromIndex());
-        //input.setScriptSig(po.getSign());
 
         UtxoOutput output = new UtxoOutput();
         output.setTxHash(new NulsDigestData(Hex.decode(po.getFromOutPut().getTxHash())));
@@ -129,7 +128,6 @@ public class UtxoTransferTool {
         po.setInIndex(input.getIndex());
         po.setFromHash(input.getFromHash().getDigestHex());
         po.setFromIndex(input.getFromIndex());
-        //po.setSign(input.getScriptSig());
         return po;
     }
 
