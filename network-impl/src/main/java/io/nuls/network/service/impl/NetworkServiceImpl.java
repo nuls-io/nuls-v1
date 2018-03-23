@@ -183,7 +183,7 @@ public class NetworkServiceImpl implements NetworkService {
                 continue;
             }
             System.out.print(list[i].getClassName()+"-");
-            System.out.println(list[i].getMethodName()+":");
+            System.out.print(list[i].getMethodName()+":");
             System.out.println(list[i].getLineNumber());
         }
         System.out.println("-----------------------------------");
