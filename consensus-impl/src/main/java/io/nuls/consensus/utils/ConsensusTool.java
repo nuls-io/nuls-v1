@@ -28,7 +28,7 @@ import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.ConsensusAgentImpl;
-import io.nuls.consensus.entity.ConsensusDelegateImpl;
+import io.nuls.consensus.entity.ConsensusDepositImpl;
 import io.nuls.consensus.entity.block.BlockData;
 import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.entity.member.Agent;
@@ -129,13 +129,13 @@ public class ConsensusTool {
         if (null == po) {
             return null;
         }
-        Consensus<Deposit> ca = new ConsensusDelegateImpl();
+        Consensus<Deposit> ca = new ConsensusDepositImpl();
         ca.setAddress(po.getAddress());
         Deposit deposit = new Deposit();
-        deposit.setDelegateAddress(po.getAgentAddress());
+        deposit.setAgentAddress(po.getAgentAddress());
         deposit.setDeposit(Na.valueOf(po.getDeposit()));
         deposit.setStartTime(po.getTime());
-        deposit.setHash(po.getId());
+        ca.setHash(NulsDigestData.fromDigestHex(po.getId()));
         ca.setExtend(deposit);
         return ca;
     }
@@ -164,8 +164,8 @@ public class ConsensusTool {
         po.setAddress(bean.getAddress());
         po.setDeposit(bean.getExtend().getDeposit().getValue());
         po.setTime(bean.getExtend().getStartTime());
-        po.setAgentAddress(bean.getExtend().getDelegateAddress());
-        po.setId(StringUtils.getNewUUID());
+        po.setAgentAddress(bean.getExtend().getAgentAddress());
+        po.setId(bean.getHexHash());
         po.setTxHash(txHash);
         return po;
     }

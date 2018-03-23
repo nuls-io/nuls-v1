@@ -90,7 +90,7 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
             }
             for (DepositPo po : polist) {
                 Consensus<Deposit> cd = ConsensusTool.fromPojo(po);
-                this.manager.cacheDelegate(cd);
+                this.manager.cacheDeposit(cd);
             }
             this.ledgerService.unlockTxRollback(tx.getTxData().getDigestHex());
             Map<String, Object> paramsMap = new HashMap<>();
@@ -104,8 +104,8 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
         PocJoinConsensusTransaction pjcTx = (PocJoinConsensusTransaction) joinTx;
         Consensus<Deposit> cd = pjcTx.getTxData();
         cd.getExtend().setStatus(ConsensusStatusEnum.IN.getCode());
-        manager.cacheDelegate(cd);
-        DepositPo dPo = this.depositDataService.get(cd.getExtend().getHash());
+        manager.cacheDeposit(cd);
+        DepositPo dPo = this.depositDataService.get(cd.getHexHash());
         if (dPo == null) {
             dPo = ConsensusTool.depositToPojo(cd,tx.getHash().getDigestHex());
             this.depositDataService.save(dPo);
@@ -122,7 +122,7 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
         if (joinTx.getType() == TransactionConstant.TX_TYPE_REGISTER_AGENT) {
             RegisterAgentTransaction raTx = (RegisterAgentTransaction) joinTx;
             manager.delAgent(raTx.getTxData().getAddress());
-            manager.delDelegateByAgent(raTx.getTxData().getAddress());
+            manager.delDepositByAgent(raTx.getTxData().getAddress());
             AgentPo agentPo = new AgentPo();
             agentPo.setAgentAddress(raTx.getTxData().getAddress());
             agentPo.setStatus(ConsensusStatusEnum.NOT_IN.getCode());
@@ -143,9 +143,9 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
         }
         PocJoinConsensusTransaction pjcTx = (PocJoinConsensusTransaction) joinTx;
         Consensus<Deposit> cd = pjcTx.getTxData();
-        manager.delDelegate(cd.getExtend().getHash());
+        manager.delDeposit(cd.getHexHash());
         DepositPo dpo = new DepositPo();
-        dpo.setId(cd.getExtend().getHash());
+        dpo.setId(cd.getHexHash());
         dpo.setStatus(ConsensusStatusEnum.NOT_IN.getCode());
         this.depositDataService.updateSelective(dpo);
         this.ledgerService.unlockTxSave(tx.getTxData().getDigestHex());
@@ -157,13 +157,13 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
         if (joinTx.getType() == TransactionConstant.TX_TYPE_REGISTER_AGENT) {
             RegisterAgentTransaction raTx = (RegisterAgentTransaction) joinTx;
             manager.changeAgentStatus(raTx.getTxData().getAddress(), ConsensusStatusEnum.NOT_IN);
-            manager.changeDelegateStatusByAgent(raTx.getTxData().getAddress(), ConsensusStatusEnum.NOT_IN);
+            manager.changeDepositStatusByAgent(raTx.getTxData().getAddress(), ConsensusStatusEnum.NOT_IN);
             this.ledgerService.unlockTxApprove(tx.getTxData().getDigestHex());
             return;
         }
         PocJoinConsensusTransaction pjcTx = (PocJoinConsensusTransaction) joinTx;
         Consensus<Deposit> cd = pjcTx.getTxData();
-        manager.changeDelegateStatus(cd.getExtend().getHash(), ConsensusStatusEnum.NOT_IN);
+        manager.changeDepositStatus(cd.getHexHash(), ConsensusStatusEnum.NOT_IN);
         this.ledgerService.unlockTxApprove(tx.getTxData().getDigestHex());
     }
 }
