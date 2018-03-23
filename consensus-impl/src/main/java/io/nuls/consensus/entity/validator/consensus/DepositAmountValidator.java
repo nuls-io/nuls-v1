@@ -39,15 +39,15 @@ import java.util.List;
  * @author Niels
  * @date 2018/1/17
  */
-public class DelegateDepositValidator implements NulsDataValidator<PocJoinConsensusTransaction> {
+public class DepositAmountValidator implements NulsDataValidator<PocJoinConsensusTransaction> {
 
-    private static final DelegateDepositValidator INSTANCE = new DelegateDepositValidator();
+    private static final DepositAmountValidator INSTANCE = new DepositAmountValidator();
     private ConsensusCacheManager consensusCacheManager = ConsensusCacheManager.getInstance();
 
-    private DelegateDepositValidator() {
+    private DepositAmountValidator() {
     }
 
-    public static DelegateDepositValidator getInstance() {
+    public static DepositAmountValidator getInstance() {
         return INSTANCE;
     }
 
@@ -56,6 +56,9 @@ public class DelegateDepositValidator implements NulsDataValidator<PocJoinConsen
         Na limit = PocConsensusConstant.ENTRUSTER_DEPOSIT_LOWER_LIMIT;
         Na max = PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT;
         List<Consensus<Deposit>> list = consensusCacheManager.getCachedDepositList(data.getTxData().getExtend().getAgentAddress());
+        if(list==null){
+            return ValidateResult.getSuccessResult();
+        }
         for (Consensus<Deposit> cd : list) {
             max = max.subtract(cd.getExtend().getDeposit());
         }
