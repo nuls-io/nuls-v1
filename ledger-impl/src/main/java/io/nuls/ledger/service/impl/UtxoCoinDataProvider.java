@@ -440,12 +440,9 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
     @Override
     public void afterParse(CoinData coinData, Transaction tx) {
         UtxoData utxoData = (UtxoData) coinData;
-        Set<String> addressSet = new HashSet<>();
-
         if (null != utxoData.getInputs()) {
             for (UtxoInput input : utxoData.getInputs()) {
                 input.setTxHash(tx.getHash());
-                addressSet.add(input.getFrom().getAddress());
             }
         }
 
@@ -454,13 +451,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             for (int i = 0; i < utxoData.getOutputs().size(); i++) {
                 UtxoOutput output = utxoData.getOutputs().get(i);
                 output.setTxHash(tx.getHash());
-                if (addressSet.contains(output.getAddress())) {
-                    if (tx instanceof LockNulsTransaction && i == 0) {
-                        totalNa.add(Na.valueOf(output.getValue()));
-                    }
-                } else {
-                    totalNa.add(Na.valueOf(output.getValue()));
-                }
             }
         }
         coinData.setTotalNa(totalNa);
