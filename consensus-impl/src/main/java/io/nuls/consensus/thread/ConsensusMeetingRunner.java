@@ -543,6 +543,7 @@ public class ConsensusMeetingRunner implements Runnable {
                 throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
             }
             addressList.add(Address.fromHashs(member.getAddress()));
+            packingIndex++;
         }
         if(addressList.isEmpty()){
             return ;
