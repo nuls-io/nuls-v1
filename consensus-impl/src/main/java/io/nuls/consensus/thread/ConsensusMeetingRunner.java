@@ -152,7 +152,7 @@ public class ConsensusMeetingRunner implements Runnable {
     private boolean checkCondition() {
         List<Node> nodes = networkService.getAvailableNodes();
         boolean result = nodes != null && nodes.size() >= MIN_NODE_COUNT;
-        result = result&&(NulsContext.getInstance().getBestBlock().getHeader().getHeight()>=NulsContext.getInstance().getNetBestBlockHeight());
+        result = result && (NulsContext.getInstance().getBestBlock().getHeader().getHeight() >= NulsContext.getInstance().getNetBestBlockHeight());
         return result;
     }
 
@@ -197,7 +197,7 @@ public class ConsensusMeetingRunner implements Runnable {
             long index = time / roundTime;
             long startTime = currentRound.getStartTime() + index * roundTime;
             currentRound.setStartTime(startTime);
-            currentRound.setIndex(currentRound.getPreviousRound().getIndex()+index);
+            currentRound.setIndex(currentRound.getPreviousRound().getIndex() + index);
         }
 
         Map<String, List<Consensus<Deposit>>> delegateMap = new HashMap<>();
@@ -525,7 +525,7 @@ public class ConsensusMeetingRunner implements Runnable {
         int packingIndex = lastBlockRoundData.getPackingIndexOfRound() + 1;
         while (true) {
             PocMeetingRound tempRound;
-            if (roundIndex==self.getRoundIndex()) {
+            if (roundIndex == self.getRoundIndex()) {
                 tempRound = round;
             } else {
                 tempRound = round.getPreviousRound();
@@ -535,18 +535,21 @@ public class ConsensusMeetingRunner implements Runnable {
                 packingIndex = 1;
                 continue;
             }
-            if (tempRound.getIndex() == round.getIndex() && packingIndex == self.getIndexOfRound()) {
+            if (tempRound.getIndex() > round.getIndex()) {
+                break;
+            }
+            if (tempRound.getIndex() == round.getIndex() && packingIndex >= self.getIndexOfRound()) {
                 break;
             }
             PocMeetingMember member = tempRound.getMember(packingIndex);
             if (null == member) {
                 throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
             }
-            addressList.add(Address.fromHashs(member.getAddress()));
             packingIndex++;
+            addressList.add(Address.fromHashs(member.getAddress()));
         }
-        if(addressList.isEmpty()){
-            return ;
+        if (addressList.isEmpty()) {
+            return;
         }
         YellowPunishTransaction punishTx = new YellowPunishTransaction();
         YellowPunishData data = new YellowPunishData();
