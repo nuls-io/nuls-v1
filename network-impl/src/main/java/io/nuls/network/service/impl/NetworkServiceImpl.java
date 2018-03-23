@@ -122,12 +122,14 @@ public class NetworkServiceImpl implements NetworkService {
     @Override
     public void removeNode(String nodeId) {
         StackTraceElement[] list=Thread.currentThread().getStackTrace();
-        System.out.println("=========================================================================");
+        System.out.println("================================================================================================================================");
         for (int i = 0; i < list.length; i++) {
-            System.out.print(list[i].getClassName()+"/t");
-            System.out.print(list[i].getFileName()+"/t");
-            System.out.print(list[i].getLineNumber()+"/t");
-            System.out.println(list[i].getMethodName());
+            if(!list[i].getClassName().startsWith("io.nuls")){
+                continue;
+            }
+            System.out.print(list[i].getClassName()+"-");
+            System.out.println(list[i].getMethodName()+":");
+            System.out.println(list[i].getLineNumber());
             System.out.println("-----------------------------------");
         }
         nodesManager.removeNode(nodeId, null);
@@ -136,12 +138,14 @@ public class NetworkServiceImpl implements NetworkService {
     @Override
     public void removeNode(String nodeId, int type) {
         StackTraceElement[] list=Thread.currentThread().getStackTrace();
-        System.out.println("=========================================================================");
+        System.out.println("================================================================================================================================");
         for (int i = 0; i < list.length; i++) {
-            System.out.print(list[i].getClassName()+"/t");
-            System.out.print(list[i].getFileName()+"/t");
-            System.out.print(list[i].getLineNumber()+"/t");
-            System.out.println(list[i].getMethodName());
+            if(!list[i].getClassName().startsWith("io.nuls")){
+                continue;
+            }
+            System.out.print(list[i].getClassName()+"-");
+            System.out.println(list[i].getMethodName()+":");
+            System.out.println(list[i].getLineNumber());
             System.out.println("-----------------------------------");
         }
         nodesManager.removeNode(nodeId, type);
@@ -173,12 +177,14 @@ public class NetworkServiceImpl implements NetworkService {
     @Override
     public void blackNode(String nodeId, int status) {
         StackTraceElement[] list=Thread.currentThread().getStackTrace();
-        System.out.println("=========================================================================");
+        System.out.println("================================================================================================================================");
         for (int i = 0; i < list.length; i++) {
-            System.out.print(list[i].getClassName()+"/t");
-            System.out.print(list[i].getFileName()+"/t");
-            System.out.print(list[i].getLineNumber()+"/t");
-            System.out.println(list[i].getMethodName());
+            if(!list[i].getClassName().startsWith("io.nuls")){
+                continue;
+            }
+            System.out.print(list[i].getClassName()+"-");
+            System.out.println(list[i].getMethodName()+":");
+            System.out.println(list[i].getLineNumber());
             System.out.println("-----------------------------------");
         }
         nodesManager.blackNode(nodeId, status);
