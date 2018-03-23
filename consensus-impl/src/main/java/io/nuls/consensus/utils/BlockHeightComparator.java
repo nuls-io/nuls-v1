@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,9 +21,11 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
 package io.nuls.consensus.utils;
 
+import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.Transaction;
 
 import java.util.Comparator;
@@ -31,18 +34,17 @@ import java.util.Comparator;
  * @author Niels
  * @date 2017/12/26
  */
-public class TxTimeComparator implements Comparator<Transaction> {
+public class BlockHeightComparator implements Comparator<Block> {
 
-    private static  final TxTimeComparator INSTANCE = new TxTimeComparator();
-    private TxTimeComparator(){}
-    public static TxTimeComparator getInstance(){
+    private static  final BlockHeightComparator INSTANCE = new BlockHeightComparator();
+    private BlockHeightComparator(){}
+    public static BlockHeightComparator getInstance(){
         return INSTANCE;
     }
 
     @Override
-    public int compare(Transaction o1, Transaction o2) {
-//        long key = o1.size() - o2.size();
-        long key = o1.getTime() - o2.getTime();
+    public int compare(Block o1, Block o2) {
+        long key = o1.getHeader().getHeight() - o2.getHeader().getHeight();
         int val = 0;
         if (key > 0) {
             return 1;
