@@ -121,33 +121,11 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public void removeNode(String nodeId) {
-        StackTraceElement[] list=Thread.currentThread().getStackTrace();
-        System.out.println("================================================================================================================================");
-        for (int i = 0; i < list.length; i++) {
-            if(!list[i].getClassName().startsWith("io.nuls")){
-                continue;
-            }
-            System.out.print(list[i].getClassName()+"-");
-            System.out.print(list[i].getMethodName()+":");
-            System.out.println(list[i].getLineNumber());
-        }
-        System.out.println("-----------------------------------");
         nodesManager.removeNode(nodeId, null);
     }
 
     @Override
     public void removeNode(String nodeId, int type) {
-        StackTraceElement[] list=Thread.currentThread().getStackTrace();
-        System.out.println("================================================================================================================================");
-        for (int i = 0; i < list.length; i++) {
-            if(!list[i].getClassName().startsWith("io.nuls")){
-                continue;
-            }
-            System.out.print(list[i].getClassName()+"-");
-            System.out.print(list[i].getMethodName()+":");
-            System.out.println(list[i].getLineNumber());
-        }
-        System.out.println("-----------------------------------");
         nodesManager.removeNode(nodeId, type);
     }
 
@@ -176,17 +154,6 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public void blackNode(String nodeId, int status) {
-        StackTraceElement[] list=Thread.currentThread().getStackTrace();
-        System.out.println("================================================================================================================================");
-        for (int i = 0; i < list.length; i++) {
-            if(!list[i].getClassName().startsWith("io.nuls")){
-                continue;
-            }
-            System.out.print(list[i].getClassName()+"-");
-            System.out.print(list[i].getMethodName()+":");
-            System.out.println(list[i].getLineNumber());
-        }
-        System.out.println("-----------------------------------");
         nodesManager.blackNode(nodeId, status);
     }
 
