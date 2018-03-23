@@ -530,16 +530,16 @@ public class ConsensusMeetingRunner implements Runnable {
             } else {
                 tempRound = round.getPreviousRound();
             }
-            if (packingIndex == tempRound.getMemberCount()) {
-                roundIndex++;
-                packingIndex = 1;
-                continue;
-            }
             if (tempRound.getIndex() > round.getIndex()) {
                 break;
             }
             if (tempRound.getIndex() == round.getIndex() && packingIndex >= self.getIndexOfRound()) {
                 break;
+            }
+            if (packingIndex == tempRound.getMemberCount()) {
+                roundIndex++;
+                packingIndex = 1;
+                continue;
             }
             PocMeetingMember member = tempRound.getMember(packingIndex);
             if (null == member) {
