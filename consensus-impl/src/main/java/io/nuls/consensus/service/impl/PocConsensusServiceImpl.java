@@ -119,10 +119,10 @@ public class PocConsensusServiceImpl implements ConsensusService {
         }
         AssertUtil.canNotEmpty(agentAddress);
         TransactionEvent event = new TransactionEvent();
-        Consensus<Deposit> ca = new ConsensusDelegateImpl();
+        Consensus<Deposit> ca = new ConsensusDepositImpl();
         ca.setAddress(account.getAddress().toString());
         Deposit deposit = new Deposit();
-        deposit.setDelegateAddress(agentAddress);
+        deposit.setAgentAddress(agentAddress);
         deposit.setDeposit(Na.valueOf(amount));
         deposit.setStartTime(TimeService.currentTimeMillis());
         ca.setExtend(deposit);
@@ -210,7 +210,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
     public List<Consensus> getConsensusAccountList() {
         List<Consensus<Agent>> list = consensusCacheManager.getCachedAgentList(ConsensusStatusEnum.IN);
         List<Consensus> resultList = new ArrayList<>(list);
-        resultList.addAll(consensusCacheManager.getCachedDelegateList(ConsensusStatusEnum.IN));
+        resultList.addAll(consensusCacheManager.getCachedDepositList(ConsensusStatusEnum.IN));
         return resultList;
     }
 

@@ -34,7 +34,7 @@ import io.nuls.core.utils.io.NulsByteBuffer;
  * @author Niels
  * @date 2018/3/12
  */
-public class ConsensusDelegateImpl extends Consensus<Deposit> {
+public class ConsensusDepositImpl extends Consensus<Deposit> {
 
     @Override
     protected Deposit parseExtend(NulsByteBuffer byteBuffer) throws NulsException {

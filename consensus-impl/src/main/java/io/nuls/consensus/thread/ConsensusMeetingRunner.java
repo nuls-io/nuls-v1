@@ -201,15 +201,15 @@ public class ConsensusMeetingRunner implements Runnable {
         }
 
         Map<String, List<Consensus<Deposit>>> delegateMap = new HashMap<>();
-        List<Consensus<Deposit>> delegateList = consensusCacheManager.getCachedDelegateList();
+        List<Consensus<Deposit>> delegateList = consensusCacheManager.getCachedDepositList();
         Na totalDeposit = Na.ZERO;
         for (Consensus<Deposit> cd : delegateList) {
-            List<Consensus<Deposit>> sonList = delegateMap.get(cd.getExtend().getDelegateAddress());
+            List<Consensus<Deposit>> sonList = delegateMap.get(cd.getExtend().getAgentAddress());
             if (null == sonList) {
                 sonList = new ArrayList<>();
             }
             sonList.add(cd);
-            delegateMap.put(cd.getExtend().getDelegateAddress(), sonList);
+            delegateMap.put(cd.getExtend().getAgentAddress(), sonList);
             totalDeposit = totalDeposit.add(cd.getExtend().getDeposit());
         }
         List<PocMeetingMember> memberList = new ArrayList<>();
@@ -327,7 +327,7 @@ public class ConsensusMeetingRunner implements Runnable {
         }
         addConsensusTx(bestBlock, txList, self);
         bd.setTxList(txList);
-        Log.info("txCount:"+txList.size());
+        Log.info("txCount:" + txList.size());
         Block newBlock = ConsensusTool.createBlock(bd, consensusManager.getConsensusStatusInfo().getAccount());
         ValidateResult result = newBlock.verify();
         if (result.isFailed()) {
@@ -542,9 +542,14 @@ public class ConsensusMeetingRunner implements Runnable {
                 packingIndex = 1;
                 continue;
             }
-            PocMeetingMember member = tempRound.getMember(packingIndex);
-            if (null == member) {
-                throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
+            PocMeetingMember member;
+            try {
+                member = tempRound.getMember(packingIndex);
+                if (null == member) {
+                    break;
+                }
+            } catch (Exception e) {
+                break;
             }
             packingIndex++;
             addressList.add(Address.fromHashs(member.getAddress()));
