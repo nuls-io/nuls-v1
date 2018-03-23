@@ -138,4 +138,11 @@ public class BlockHashResponse extends BaseNulsData {
             this.hashList.addAll(response.getHashList());
         }
     }
+
+    public NulsDigestData getBestHash(){
+        if(null==hashList||hashList.isEmpty()){
+            return null;
+        }
+        return hashList.get(hashList.size()-1);
+    }
 }

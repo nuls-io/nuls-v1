@@ -59,13 +59,14 @@ public class DepositAmountValidator implements NulsDataValidator<PocJoinConsensu
         if(list==null){
             return ValidateResult.getSuccessResult();
         }
+        Na total = Na.ZERO;
         for (Consensus<Deposit> cd : list) {
-            max = max.subtract(cd.getExtend().getDeposit());
+            total = total.add(cd.getExtend().getDeposit());
         }
         if (limit.isGreaterThan(data.getTxData().getExtend().getDeposit())) {
             return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_NOT_ENOUGH);
         }
-        if (max.isLessThan(data.getTxData().getExtend().getDeposit())) {
+        if (max.isLessThan(total)) {
             return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_TOO_MUCH);
         }
         return ValidateResult.getSuccessResult();

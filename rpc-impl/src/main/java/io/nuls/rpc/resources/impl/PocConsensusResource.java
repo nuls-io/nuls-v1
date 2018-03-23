@@ -407,14 +407,23 @@ public class PocConsensusResource {
     @POST
     @Path("/withdraw")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult exitConsensus(WithdrawForm form) throws NulsException, IOException {
+    public RpcResult exitConsensus(WithdrawForm form)  {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getTxHash());
         AssertUtil.canNotEmpty(form.getPassword());
         AssertUtil.canNotEmpty(form.getAddress());
         Map<String, Object> params = new HashMap<>();
         params.put("txHash", form.getTxHash());
-        Transaction tx = consensusService.stopConsensus(form.getAddress(), form.getPassword(), params);
+        Transaction tx = null;
+        try {
+            tx = consensusService.stopConsensus(form.getAddress(), form.getPassword(), params);
+        } catch (NulsException e) {
+            Log.error(e);
+            return RpcResult.getFailed(e.getMessage());
+        } catch (IOException e) {
+            Log.error(e);
+            return RpcResult.getFailed(e.getMessage());
+        }
         return RpcResult.getSuccess().setData(tx.getHash().getDigestHex());
     }
 }

@@ -122,7 +122,7 @@ public class DistributedBlockInfoRequestUtils {
         if (response.getHeightList().get(response.getHeightList().size() - 1) < end) {
             return true;
         }
-        String key = response.getHash().getDigestHex();
+        String key = response.getBestHash().getDigestHex();
         List<String> nodes = calcMap.get(key);
         if (null == nodes) {
             nodes = new ArrayList<>();

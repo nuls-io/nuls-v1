@@ -24,6 +24,7 @@
 package io.nuls.consensus.service.tx;
 
 import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
+import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.member.Agent;
@@ -145,6 +146,9 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
     @Override
     public void onApproval(PocExitConsensusTransaction tx) throws NulsException {
         Transaction joinTx = ledgerService.getTx(tx.getTxData());
+        if(joinTx==null){
+            joinTx = ConfirmingTxCacheManager.getInstance().getTx(tx.getTxData());
+        }
         if (joinTx.getType() == TransactionConstant.TX_TYPE_REGISTER_AGENT) {
             RegisterAgentTransaction raTx = (RegisterAgentTransaction) joinTx;
             manager.changeAgentStatus(raTx.getTxData().getAddress(), ConsensusStatusEnum.NOT_IN);

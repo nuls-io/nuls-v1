@@ -19,7 +19,7 @@
     "password":"nuls123456"
   },
   "withdraw":{
-    "address":"2CaWijtZQaUVayV2c5Yd1MRjyWWQugv"
+    "address":"2CaWijtZQaUVayV2c5Yd1MRjyWWQugv",
     "txHash":"0000202edea27395d514efedf42e1e6aeb342aa7d551919b1a1e3e655f7d56ebacbb39",
     "password":"nuls123456"
   }
