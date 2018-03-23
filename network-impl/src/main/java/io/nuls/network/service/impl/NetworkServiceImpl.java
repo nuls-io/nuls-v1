@@ -135,6 +135,15 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public void removeNode(String nodeId, int type) {
+        StackTraceElement[] list=Thread.currentThread().getStackTrace();
+        System.out.println("=========================================================================");
+        for (int i = 0; i < list.length; i++) {
+            System.out.print(list[i].getClassName()+"/t");
+            System.out.print(list[i].getFileName()+"/t");
+            System.out.print(list[i].getLineNumber()+"/t");
+            System.out.println(list[i].getMethodName());
+            System.out.println("-----------------------------------");
+        }
         nodesManager.removeNode(nodeId, type);
     }
 
