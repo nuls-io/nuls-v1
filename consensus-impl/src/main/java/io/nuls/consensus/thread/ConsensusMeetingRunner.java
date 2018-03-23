@@ -152,6 +152,7 @@ public class ConsensusMeetingRunner implements Runnable {
     private boolean checkCondition() {
         List<Node> nodes = networkService.getAvailableNodes();
         boolean result = nodes != null && nodes.size() >= MIN_NODE_COUNT;
+        result = result&&(NulsContext.getInstance().getBestBlock().getHeader().getHeight()>=NulsContext.getInstance().getNetBestBlockHeight());
         return result;
     }
 
@@ -196,6 +197,7 @@ public class ConsensusMeetingRunner implements Runnable {
             long index = time / roundTime;
             long startTime = currentRound.getStartTime() + index * roundTime;
             currentRound.setStartTime(startTime);
+            currentRound.setIndex(currentRound.getPreviousRound().getIndex()+index);
         }
 
         Map<String, List<Consensus<Deposit>>> delegateMap = new HashMap<>();
@@ -511,7 +513,7 @@ public class ConsensusMeetingRunner implements Runnable {
         }
         boolean ok = self.getRoundIndex() == lastBlockRoundData.getRoundIndex() && self.getIndexOfRound() == (1 + lastBlockRoundData.getPackingIndexOfRound());
         ok = ok || (self.getRoundIndex() == (lastBlockRoundData.getRoundIndex() + 1)
-                && self.getIndexOfRound() == 0
+                && self.getIndexOfRound() == 1
                 && lastBlockRoundData.getPackingIndexOfRound() == lastBlockRoundData.getConsensusMemberCount());
         ok = ok || (self.getRoundIndex() - 1) > lastBlockRoundData.getRoundIndex();
         if (ok) {
@@ -541,6 +543,9 @@ public class ConsensusMeetingRunner implements Runnable {
                 throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
             }
             addressList.add(Address.fromHashs(member.getAddress()));
+        }
+        if(addressList.isEmpty()){
+            return ;
         }
         YellowPunishTransaction punishTx = new YellowPunishTransaction();
         YellowPunishData data = new YellowPunishData();

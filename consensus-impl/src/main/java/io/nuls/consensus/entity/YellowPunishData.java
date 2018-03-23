@@ -57,7 +57,7 @@ public class YellowPunishData extends BaseNulsData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeVarInt(height);
-        stream.writeInt32(addressList.size());
+        stream.writeVarInt(addressList.size());
         for (Address address : addressList) {
             stream.write(address.getHash());
         }

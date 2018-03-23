@@ -52,6 +52,7 @@ public class BlockTxValidator implements NulsDataValidator<Block> {
         }
         int count = 0;
         for (Transaction tx : block.getTxs()) {
+
             ValidateResult result = tx.verify();
             if (null==result||result.isFailed()) {
                 if(result.getErrorCode()== ErrorCode.ORPHAN_TX){
