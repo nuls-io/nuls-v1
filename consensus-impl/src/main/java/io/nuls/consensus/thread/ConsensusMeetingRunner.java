@@ -151,7 +151,7 @@ public class ConsensusMeetingRunner implements Runnable {
 
     private boolean checkCondition() {
         List<Node> nodes = networkService.getAvailableNodes();
-        boolean result = nodes != null && nodes.size() >= 0;//MIN_NODE_COUNT;
+        boolean result = nodes != null && nodes.size() >= MIN_NODE_COUNT;
         result = result && (NulsContext.getInstance().getBestBlock().getHeader().getHeight() >= NulsContext.getInstance().getNetBestBlockHeight());
         return result;
     }
@@ -234,7 +234,6 @@ public class ConsensusMeetingRunner implements Runnable {
             mm.setRoundStartTime(currentRound.getStartTime());
             memberList.add(mm);
             totalDeposit = totalDeposit.add(ca.getExtend().getDeposit());
-            totalDeposit = Na.valueOf(2200000);
         }
         Collections.sort(memberList);
         currentRound.setMemberList(memberList);
