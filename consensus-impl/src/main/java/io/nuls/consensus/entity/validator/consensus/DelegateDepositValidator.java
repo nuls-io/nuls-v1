@@ -55,7 +55,7 @@ public class DelegateDepositValidator implements NulsDataValidator<PocJoinConsen
     public ValidateResult validate(PocJoinConsensusTransaction data) {
         Na limit = PocConsensusConstant.ENTRUSTER_DEPOSIT_LOWER_LIMIT;
         Na max = PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT;
-        List<Consensus<Deposit>> list = consensusCacheManager.getCachedDelegateList(data.getTxData().getExtend().getDelegateAddress());
+        List<Consensus<Deposit>> list = consensusCacheManager.getCachedDepositList(data.getTxData().getExtend().getAgentAddress());
         for (Consensus<Deposit> cd : list) {
             max = max.subtract(cd.getExtend().getDeposit());
         }

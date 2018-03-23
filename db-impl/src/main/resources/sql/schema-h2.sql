@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS `agent` (
   PRIMARY KEY (`agent_address`)
 );
 CREATE TABLE IF NOT EXISTS `deposit` (
-  `id` varchar(32) NOT NULL,
+  `id` varchar(70) NOT NULL,
   `address` varchar(40) NOT NULL,
   `agent_address` varchar(40) NOT NULL,
   `deposit` bigint(18) NOT NULL,
