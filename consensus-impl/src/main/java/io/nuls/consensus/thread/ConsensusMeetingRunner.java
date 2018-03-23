@@ -42,7 +42,7 @@ import io.nuls.consensus.entity.meeting.ConsensusReward;
 import io.nuls.consensus.entity.meeting.PocMeetingMember;
 import io.nuls.consensus.entity.meeting.PocMeetingRound;
 import io.nuls.consensus.entity.member.Agent;
-import io.nuls.consensus.entity.member.Delegate;
+import io.nuls.consensus.entity.member.Deposit;
 import io.nuls.consensus.entity.tx.RedPunishTransaction;
 import io.nuls.consensus.entity.tx.YellowPunishTransaction;
 import io.nuls.consensus.event.BlockHeaderEvent;
@@ -152,6 +152,7 @@ public class ConsensusMeetingRunner implements Runnable {
     private boolean checkCondition() {
         List<Node> nodes = networkService.getAvailableNodes();
         boolean result = nodes != null && nodes.size() >= MIN_NODE_COUNT;
+        result = result&&(NulsContext.getInstance().getBestBlock().getHeader().getHeight()>=NulsContext.getInstance().getNetBestBlockHeight());
         return result;
     }
 
@@ -196,13 +197,14 @@ public class ConsensusMeetingRunner implements Runnable {
             long index = time / roundTime;
             long startTime = currentRound.getStartTime() + index * roundTime;
             currentRound.setStartTime(startTime);
+            currentRound.setIndex(currentRound.getPreviousRound().getIndex()+index);
         }
 
-        Map<String, List<Consensus<Delegate>>> delegateMap = new HashMap<>();
-        List<Consensus<Delegate>> delegateList = consensusCacheManager.getCachedDelegateList();
+        Map<String, List<Consensus<Deposit>>> delegateMap = new HashMap<>();
+        List<Consensus<Deposit>> delegateList = consensusCacheManager.getCachedDelegateList();
         Na totalDeposit = Na.ZERO;
-        for (Consensus<Delegate> cd : delegateList) {
-            List<Consensus<Delegate>> sonList = delegateMap.get(cd.getExtend().getDelegateAddress());
+        for (Consensus<Deposit> cd : delegateList) {
+            List<Consensus<Deposit>> sonList = delegateMap.get(cd.getExtend().getDelegateAddress());
             if (null == sonList) {
                 sonList = new ArrayList<>();
             }
@@ -459,7 +461,7 @@ public class ConsensusMeetingRunner implements Runnable {
         Map<String, ConsensusReward> rewardMap = new HashMap<>();
         rewardMap.put(ca.getAddress(), agentReword);
         double delegateCommissionRate = DoubleUtils.div((100 - ca.getExtend().getCommissionRate()), 100, 2);
-        for (Consensus<Delegate> cd : self.getDelegateList()) {
+        for (Consensus<Deposit> cd : self.getDelegateList()) {
             double reward =
                     DoubleUtils.mul(DoubleUtils.mul(total, delegateCommissionRate),
                             DoubleUtils.div(cd.getExtend().getDeposit().getValue(),
@@ -511,7 +513,7 @@ public class ConsensusMeetingRunner implements Runnable {
         }
         boolean ok = self.getRoundIndex() == lastBlockRoundData.getRoundIndex() && self.getIndexOfRound() == (1 + lastBlockRoundData.getPackingIndexOfRound());
         ok = ok || (self.getRoundIndex() == (lastBlockRoundData.getRoundIndex() + 1)
-                && self.getIndexOfRound() == 0
+                && self.getIndexOfRound() == 1
                 && lastBlockRoundData.getPackingIndexOfRound() == lastBlockRoundData.getConsensusMemberCount());
         ok = ok || (self.getRoundIndex() - 1) > lastBlockRoundData.getRoundIndex();
         if (ok) {
@@ -541,6 +543,9 @@ public class ConsensusMeetingRunner implements Runnable {
                 throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
             }
             addressList.add(Address.fromHashs(member.getAddress()));
+        }
+        if(addressList.isEmpty()){
+            return ;
         }
         YellowPunishTransaction punishTx = new YellowPunishTransaction();
         YellowPunishData data = new YellowPunishData();

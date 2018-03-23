@@ -21,19 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.db.dao;
+package io.nuls.db.dao.impl.mybatis.mapper;
 
-import io.nuls.db.entity.DelegateAccountPo;
+import io.nuls.db.dao.impl.mybatis.common.BaseMapper;
+import io.nuls.db.entity.DepositPo;
 
 /**
- *
  * @author Niels
  * @date 2017/11/20
  */
-public interface DelegateAccountDataService extends BaseDataService< String,DelegateAccountPo> {
+public interface DepositMapper extends BaseMapper<String,DepositPo> {
 
+    int deleteByAgentAddress(String address);
 
-    int updateSelective(DelegateAccountPo po);
-
-
+    int updateSelectiveByAgentAddress(DepositPo po);
 }

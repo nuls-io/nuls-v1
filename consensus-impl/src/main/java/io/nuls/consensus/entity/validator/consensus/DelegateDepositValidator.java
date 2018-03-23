@@ -26,9 +26,8 @@ package io.nuls.consensus.entity.validator.consensus;
 import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
-import io.nuls.consensus.entity.member.Delegate;
+import io.nuls.consensus.entity.member.Deposit;
 import io.nuls.consensus.entity.tx.PocJoinConsensusTransaction;
-import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.validate.NulsDataValidator;
@@ -56,8 +55,8 @@ public class DelegateDepositValidator implements NulsDataValidator<PocJoinConsen
     public ValidateResult validate(PocJoinConsensusTransaction data) {
         Na limit = PocConsensusConstant.ENTRUSTER_DEPOSIT_LOWER_LIMIT;
         Na max = PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT;
-        List<Consensus<Delegate>> list = consensusCacheManager.getCachedDelegateList(data.getTxData().getExtend().getDelegateAddress());
-        for (Consensus<Delegate> cd : list) {
+        List<Consensus<Deposit>> list = consensusCacheManager.getCachedDelegateList(data.getTxData().getExtend().getDelegateAddress());
+        for (Consensus<Deposit> cd : list) {
             max = max.subtract(cd.getExtend().getDeposit());
         }
         if (limit.isGreaterThan(data.getTxData().getExtend().getDeposit())) {

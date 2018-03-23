@@ -23,21 +23,12 @@
  * SOFTWARE.
  *
  */
+package io.nuls.db.dao.impl.mybatis.mapper;
 
-package io.nuls.consensus.entity;
+import io.nuls.db.dao.impl.mybatis.common.BaseMapper;
+import io.nuls.db.entity.PunishLogPo;
 
-import io.nuls.consensus.entity.member.Deposit;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.io.NulsByteBuffer;
+public interface PunishLogMapper extends BaseMapper<String, PunishLogPo> {
 
-/**
- * @author Niels
- * @date 2018/3/12
- */
-public class ConsensusDelegateImpl extends Consensus<Deposit> {
-
-    @Override
-    protected Deposit parseExtend(NulsByteBuffer byteBuffer) throws NulsException {
-        return byteBuffer.readNulsData(new Deposit());
-    }
+    int deleteByHeight(long height);
 }
