@@ -30,7 +30,6 @@ import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.ledger.entity.Balance;
-import io.nuls.ledger.entity.tx.UnlockNulsTransaction;
 
 import java.io.IOException;
 import java.util.List;

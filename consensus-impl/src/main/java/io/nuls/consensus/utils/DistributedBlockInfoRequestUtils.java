@@ -79,9 +79,7 @@ public class DistributedBlockInfoRequestUtils {
     }
 
     public BlockInfo request(long start, long end, long split) {
-//        Log.error("==================wait it:"+Thread.currentThread().getName());
         lock.lock();
-//        Log.error("==================lock it:"+Thread.currentThread().getName());
         try {
             requesting = true;
             hashesMap.clear();
@@ -104,7 +102,6 @@ public class DistributedBlockInfoRequestUtils {
         } catch (Exception e) {
             throw e;
         } finally {
-//            Log.error("===============unlock it:"+Thread.currentThread().getName());
             lock.unlock();
         }
     }
@@ -184,18 +181,19 @@ public class DistributedBlockInfoRequestUtils {
         }
         if (null != result) {
             bestBlockInfo = result;
-        } else if (size == calcMap.size()) {
-            try {
-                Thread.sleep(2000L);
-            } catch (InterruptedException e) {
-                Log.error(e);
-            }
-            try {
-                this.request(start, end, split);
-            } catch (Exception e) {
-                Log.error(e.getMessage());
-            }
         }
+//        else if (size == calcMap.size()) {
+//            try {
+//                Thread.sleep(2000L);
+//            } catch (InterruptedException e) {
+//                Log.error(e);
+//            }
+//            try {
+//                this.request(start, end, split);
+//            } catch (Exception e) {
+//                Log.error(e.getMessage());
+//            }
+//        }
 
     }
 

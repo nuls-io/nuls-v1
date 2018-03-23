@@ -51,6 +51,7 @@ public class ReceivedTxCacheListener implements NulsCacheListener<String, Transa
 
     private void rollbackTx(Transaction tx) {
         if (tx.getStatus() == TxStatusEnum.CACHED) {
+            Log.warn("drop a tx:"+tx.getHash()+",type:"+tx.getType());
             return;
         }
         try {
