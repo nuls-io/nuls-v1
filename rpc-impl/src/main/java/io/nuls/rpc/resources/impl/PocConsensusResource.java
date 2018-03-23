@@ -131,7 +131,7 @@ public class PocConsensusResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult createAgent(CreateAgentForm form) throws NulsException {
         AssertUtil.canNotEmpty(form);
-        AssertUtil.canNotEmpty(form.getAddress());
+        AssertUtil.canNotEmpty(form.getAgentAddress());
         AssertUtil.canNotEmpty(form.getAgentName());
         AssertUtil.canNotEmpty(form.getPackingAddress());
         AssertUtil.canNotEmpty(form.getDeposit());
@@ -139,11 +139,11 @@ public class PocConsensusResource {
         AssertUtil.canNotEmpty(form.getPassword());
         Map<String, Object> paramsMap = new HashMap<>();
         paramsMap.put("deposit", form.getDeposit());
-        paramsMap.put("agentAddress", form.getPackingAddress());
+        paramsMap.put("packingAddress", form.getPackingAddress());
         paramsMap.put("introduction", form.getRemark());
         paramsMap.put("commissionRate", form.getCommissionRate());
         paramsMap.put("agentName", form.getAgentName());
-        Transaction tx = consensusService.startConsensus(form.getAddress(), form.getPassword(), paramsMap);
+        Transaction tx = consensusService.startConsensus(form.getAgentAddress(), form.getPassword(), paramsMap);
         return RpcResult.getSuccess().setData(tx.getHash().getDigestHex());
     }
 

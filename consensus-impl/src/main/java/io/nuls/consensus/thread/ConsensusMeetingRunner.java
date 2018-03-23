@@ -230,7 +230,7 @@ public class ConsensusMeetingRunner implements Runnable {
             }
             mm.setRoundIndex(currentRound.getIndex());
             mm.setAddress(ca.getAddress());
-            mm.setPackerAddress(ca.getExtend().getAgentAddress());
+            mm.setPackerAddress(ca.getExtend().getPackingAddress());
             mm.setRoundStartTime(currentRound.getStartTime());
             memberList.add(mm);
             totalDeposit = totalDeposit.add(ca.getExtend().getDeposit());
@@ -611,7 +611,7 @@ public class ConsensusMeetingRunner implements Runnable {
             Consensus<Agent> member = new ConsensusAgentImpl();
             member.setAddress(address);
             Agent agent = new Agent();
-            agent.setAgentAddress(address);
+            agent.setPackingAddress(address);
             agent.setStartTime(0);
             agent.setIntroduction("seed");
             agent.setCommissionRate(0);

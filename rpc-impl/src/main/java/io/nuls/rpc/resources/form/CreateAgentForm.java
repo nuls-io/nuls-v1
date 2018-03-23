@@ -31,7 +31,7 @@ package io.nuls.rpc.resources.form;
  * @date 2018/3/14
  */
 public class CreateAgentForm {
-    private String address;
+    private String agentAddress;
     private String packingAddress;
     private double commissionRate;
     private long   deposit;
@@ -55,12 +55,12 @@ public class CreateAgentForm {
         this.password = password;
     }
 
-    public String getAddress() {
-        return address;
+    public String getAgentAddress() {
+        return agentAddress;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public void setAgentAddress(String agentAddress) {
+        this.agentAddress = agentAddress;
     }
 
     public String getPackingAddress() {

@@ -36,6 +36,7 @@ public class JoinConsensusParam {
     public static final String DEPOSIT = "deposit";
     public static final String AGENT_NAME = "agentName";
     public static final String AGENT_ADDRESS = "agentAddress";
+    public static final String PACKING_ADDRESS = "packingAddress";
     public static final String INTRODUCTION = "introduction";
     public static final String COMMISSION_RATE = "commissionRate";
 
@@ -44,7 +45,6 @@ public class JoinConsensusParam {
     public JoinConsensusParam(Map<String, Object> map) {
         AssertUtil.canNotEmpty(map, ErrorCode.NULL_PARAMETER.getMsg());
         AssertUtil.canNotEmpty(map.get(DEPOSIT), ErrorCode.NULL_PARAMETER.getMsg());
-        AssertUtil.canNotEmpty(map.get(AGENT_ADDRESS), ErrorCode.NULL_PARAMETER.getMsg());
 //        AssertUtil.canNotEmpty(map.get(AGENT_NAME), ErrorCode.NULL_PARAMETER.getMsg());
 //        AssertUtil.canNotEmpty(map.get(COMMISSION_RATE), ErrorCode.NULL_PARAMETER.getMsg());
         this.params = map;
@@ -60,6 +60,10 @@ public class JoinConsensusParam {
 
     public String getAgentAddress() {
         return (String) params.get(AGENT_ADDRESS);
+    }
+
+    public String getPackingAddress() {
+        return (String) params.get(PACKING_ADDRESS);
     }
 
     public String getIntroduction() {
