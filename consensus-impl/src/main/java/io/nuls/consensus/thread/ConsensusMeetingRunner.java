@@ -280,7 +280,7 @@ public class ConsensusMeetingRunner implements Runnable {
     private void packing(PocMeetingMember self) throws NulsException, IOException {
         Block bestBlock = context.getBestBlock();
         List<Transaction> txList = txCacheManager.getTxList();
-        txList.sort(new TxTimeComparator());
+        txList.sort(TxTimeComparator.getInstance());
         BlockData bd = new BlockData();
         bd.setHeight(bestBlock.getHeader().getHeight() + 1);
         bd.setPreHash(bestBlock.getHeader().getHash());
@@ -355,7 +355,7 @@ public class ConsensusMeetingRunner implements Runnable {
         if (null == orphanTxList || orphanTxList.isEmpty()) {
             return;
         }
-        txList.sort(new TxTimeComparator());
+        txList.sort(TxTimeComparator.getInstance());
         List<NulsDigestData> outHashList = new ArrayList<>();
         for (Transaction tx : orphanTxList) {
             totalSize += tx.size();
