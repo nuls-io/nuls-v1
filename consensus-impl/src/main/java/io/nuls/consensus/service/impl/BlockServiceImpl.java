@@ -25,6 +25,7 @@ package io.nuls.consensus.service.impl;
 
 import io.nuls.consensus.cache.manager.block.BlockCacheManager;
 import io.nuls.consensus.service.intf.BlockService;
+import io.nuls.consensus.utils.BlockHeightComparator;
 import io.nuls.core.chain.entity.*;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.dto.Page;
@@ -37,6 +38,7 @@ import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.ledger.service.intf.LedgerService;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -134,6 +136,7 @@ public class BlockServiceImpl implements BlockService {
                 }
             }
         }
+        Collections.sort(blockList, BlockHeightComparator.getInstance());
         return blockList;
     }
 

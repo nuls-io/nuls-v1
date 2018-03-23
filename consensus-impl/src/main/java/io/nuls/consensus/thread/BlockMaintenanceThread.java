@@ -76,8 +76,9 @@ public class BlockMaintenanceThread implements Runnable {
         while (true) {
             try {
                 syncBlock();
+                Thread.sleep(PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND* 1000L);
             } catch (NulsRuntimeException e1) {
-                Log.error(e1.getMessage());
+                Log.warn(e1.getMessage());
                 try {
                     Thread.sleep(PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000L);
                 } catch (InterruptedException e2) {
@@ -216,7 +217,7 @@ public class BlockMaintenanceThread implements Runnable {
                     break;
                 }
                 if (blockInfo.getNodeIdList().size()==1) {
-                    break;
+                   throw new NulsRuntimeException(ErrorCode.FAILED,"node count not enough!");
                 }
                 Log.warn("Rollback block start height:{},local has wrong blocks!",localBestBlock.getHeader().getHeight());
                 //bifurcation
@@ -241,7 +242,7 @@ public class BlockMaintenanceThread implements Runnable {
             try {
                 localHeader = this.blockService.getBlockHeader(height);
             } catch (NulsException e) {
-                System.out.println(e);
+               Log.error(e);
                 //todo
             }
             BlockInfo blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(height);
