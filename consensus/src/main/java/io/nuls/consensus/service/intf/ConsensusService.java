@@ -41,7 +41,7 @@ import java.util.Map;
  */
 public interface ConsensusService {
 
-    Transaction startConsensus(String address, String password, Map<String, Object> paramsMap) throws NulsException;
+    Transaction startConsensus(String agentAddress, String password, Map<String, Object> paramsMap) throws NulsException;
 
     Transaction stopConsensus(String address, String password, Map<String, Object> paramsMap) throws NulsException, IOException;
 

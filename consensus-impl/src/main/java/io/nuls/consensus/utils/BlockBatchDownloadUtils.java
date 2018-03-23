@@ -312,6 +312,7 @@ public class BlockBatchDownloadUtils {
         if (null == nodeStatus) {
             return;
         }
+        Log.info("--------------------------------failedExecute removeNode:" + nodeStatus.getNodeId());
         networkService.removeNode(nodeStatus.getNodeId());
         this.nodeIdList.remove(nodeStatus.getNodeId());
         this.queueService.remove(queueId, nodeStatus.getNodeId());

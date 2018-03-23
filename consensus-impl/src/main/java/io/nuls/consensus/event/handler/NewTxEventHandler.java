@@ -82,6 +82,7 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
                 return;
             }
             if (result.getLevel() == SeverityLevelEnum.NORMAL_FOUL) {
+                Log.info("-----------------------------------------------newTxHandler remove node:" +fromId);
                 networkService.removeNode(fromId);
             } else if (result.getLevel() == SeverityLevelEnum.FLAGRANT_FOUL) {
                 networkService.blackNode(fromId, NodePo.BLACK);

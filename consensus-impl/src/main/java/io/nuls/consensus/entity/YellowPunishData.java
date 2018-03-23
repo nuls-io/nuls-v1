@@ -66,8 +66,8 @@ public class YellowPunishData extends BaseNulsData {
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.height = byteBuffer.readVarInt();
-        int size = byteBuffer.readInt32LE();
-        for(int i=0;i<size;i++){
+        long size = byteBuffer.readVarInt();
+        for (int i = 0; i < size; i++) {
             addressList.add(Address.fromHashs(byteBuffer.readBytes(Address.HASH_LENGTH)));
         }
     }

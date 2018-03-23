@@ -152,7 +152,7 @@ public class ConsensusMeetingRunner implements Runnable {
     private boolean checkCondition() {
         List<Node> nodes = networkService.getAvailableNodes();
         boolean result = nodes != null && nodes.size() >= MIN_NODE_COUNT;
-        result = result&&(NulsContext.getInstance().getBestBlock().getHeader().getHeight()>=NulsContext.getInstance().getNetBestBlockHeight());
+        result = result && (NulsContext.getInstance().getBestBlock().getHeader().getHeight() >= NulsContext.getInstance().getNetBestBlockHeight());
         return result;
     }
 
@@ -197,7 +197,7 @@ public class ConsensusMeetingRunner implements Runnable {
             long index = time / roundTime;
             long startTime = currentRound.getStartTime() + index * roundTime;
             currentRound.setStartTime(startTime);
-            currentRound.setIndex(currentRound.getPreviousRound().getIndex()+index);
+            currentRound.setIndex(currentRound.getPreviousRound().getIndex() + index);
         }
 
         Map<String, List<Consensus<Deposit>>> delegateMap = new HashMap<>();
@@ -230,7 +230,7 @@ public class ConsensusMeetingRunner implements Runnable {
             }
             mm.setRoundIndex(currentRound.getIndex());
             mm.setAddress(ca.getAddress());
-            mm.setPackerAddress(ca.getExtend().getAgentAddress());
+            mm.setPackerAddress(ca.getExtend().getPackingAddress());
             mm.setRoundStartTime(currentRound.getStartTime());
             memberList.add(mm);
             totalDeposit = totalDeposit.add(ca.getExtend().getDeposit());
@@ -327,6 +327,7 @@ public class ConsensusMeetingRunner implements Runnable {
         }
         addConsensusTx(bestBlock, txList, self);
         bd.setTxList(txList);
+        Log.info("txCount:"+txList.size());
         Block newBlock = ConsensusTool.createBlock(bd, consensusManager.getConsensusStatusInfo().getAccount());
         ValidateResult result = newBlock.verify();
         if (result.isFailed()) {
@@ -525,27 +526,31 @@ public class ConsensusMeetingRunner implements Runnable {
         int packingIndex = lastBlockRoundData.getPackingIndexOfRound() + 1;
         while (true) {
             PocMeetingRound tempRound;
-            if (roundIndex==self.getRoundIndex()) {
+            if (roundIndex == self.getRoundIndex()) {
                 tempRound = round;
             } else {
                 tempRound = round.getPreviousRound();
+            }
+            if (tempRound.getIndex() > round.getIndex()) {
+                break;
+            }
+            if (tempRound.getIndex() == round.getIndex() && packingIndex >= self.getIndexOfRound()) {
+                break;
             }
             if (packingIndex == tempRound.getMemberCount()) {
                 roundIndex++;
                 packingIndex = 1;
                 continue;
             }
-            if (tempRound.getIndex() == round.getIndex() && packingIndex == self.getIndexOfRound()) {
-                break;
-            }
             PocMeetingMember member = tempRound.getMember(packingIndex);
             if (null == member) {
                 throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
             }
+            packingIndex++;
             addressList.add(Address.fromHashs(member.getAddress()));
         }
-        if(addressList.isEmpty()){
-            return ;
+        if (addressList.isEmpty()) {
+            return;
         }
         YellowPunishTransaction punishTx = new YellowPunishTransaction();
         YellowPunishData data = new YellowPunishData();
@@ -607,7 +612,7 @@ public class ConsensusMeetingRunner implements Runnable {
             Consensus<Agent> member = new ConsensusAgentImpl();
             member.setAddress(address);
             Agent agent = new Agent();
-            agent.setAgentAddress(address);
+            agent.setPackingAddress(address);
             agent.setStartTime(0);
             agent.setIntroduction("seed");
             agent.setCommissionRate(0);

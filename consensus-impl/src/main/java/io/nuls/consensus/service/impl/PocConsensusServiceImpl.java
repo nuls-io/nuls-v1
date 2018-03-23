@@ -242,10 +242,10 @@ public class PocConsensusServiceImpl implements ConsensusService {
 
 
     @Override
-    public Transaction startConsensus(String address, String password, Map<String, Object> paramsMap) throws NulsException {
-        Account account = this.accountService.getAccount(address);
+    public Transaction startConsensus(String agentAddress, String password, Map<String, Object> paramsMap) throws NulsException {
+        Account account = this.accountService.getAccount(agentAddress);
         if (null == account) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "The account is not exist,address:" + address);
+            throw new NulsRuntimeException(ErrorCode.FAILED, "The account is not exist,address:" + agentAddress);
         }
         if (paramsMap == null || paramsMap.size() < 2) {
             throw new NulsRuntimeException(ErrorCode.NULL_PARAMETER);
@@ -256,7 +256,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
         JoinConsensusParam params = new JoinConsensusParam(paramsMap);
         if (StringUtils.isNotBlank(params.getIntroduction())) {
             Agent agent = new Agent();
-            agent.setAgentAddress(params.getAgentAddress());
+            agent.setPackingAddress(params.getPackingAddress());
             agent.setDeposit(Na.valueOf(params.getDeposit()));
             agent.setIntroduction(params.getIntroduction());
             agent.setSeed(params.isSeed());
