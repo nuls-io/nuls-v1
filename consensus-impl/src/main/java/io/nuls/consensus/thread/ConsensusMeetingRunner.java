@@ -151,7 +151,7 @@ public class ConsensusMeetingRunner implements Runnable {
 
     private boolean checkCondition() {
         List<Node> nodes = networkService.getAvailableNodes();
-        boolean result = nodes != null && nodes.size() >= MIN_NODE_COUNT;
+        boolean result = nodes != null && nodes.size() >= 0;//MIN_NODE_COUNT;
         result = result && (NulsContext.getInstance().getBestBlock().getHeader().getHeight() >= NulsContext.getInstance().getNetBestBlockHeight());
         return result;
     }
@@ -234,6 +234,7 @@ public class ConsensusMeetingRunner implements Runnable {
             mm.setRoundStartTime(currentRound.getStartTime());
             memberList.add(mm);
             totalDeposit = totalDeposit.add(ca.getExtend().getDeposit());
+            totalDeposit = Na.valueOf(2200000);
         }
         Collections.sort(memberList);
         currentRound.setMemberList(memberList);
@@ -512,10 +513,15 @@ public class ConsensusMeetingRunner implements Runnable {
         } catch (NulsException e) {
             Log.error(e);
         }
-        boolean ok = self.getRoundIndex() == lastBlockRoundData.getRoundIndex() && self.getIndexOfRound() == (1 + lastBlockRoundData.getPackingIndexOfRound());
+        // continuous blocks in the same round
+        boolean ok = (self.getRoundIndex() == lastBlockRoundData.getRoundIndex()) && (self.getIndexOfRound() == (1 + lastBlockRoundData.getPackingIndexOfRound()));
+
+        //continuous blocks between two rounds
         ok = ok || (self.getRoundIndex() == (lastBlockRoundData.getRoundIndex() + 1)
                 && self.getIndexOfRound() == 1
                 && lastBlockRoundData.getPackingIndexOfRound() == lastBlockRoundData.getConsensusMemberCount());
+
+        //two rounds
         ok = ok || (self.getRoundIndex() - 1) > lastBlockRoundData.getRoundIndex();
         if (ok) {
             return;
@@ -523,7 +529,14 @@ public class ConsensusMeetingRunner implements Runnable {
         List<Address> addressList = new ArrayList<>();
         PocMeetingRound round = consensusManager.getCurrentRound();
         long roundIndex = lastBlockRoundData.getRoundIndex();
-        int packingIndex = lastBlockRoundData.getPackingIndexOfRound() + 1;
+        int packingIndex = 0;
+
+        if(lastBlockRoundData.getPackingIndexOfRound() == lastBlockRoundData.getConsensusMemberCount()){
+            packingIndex = 1;
+        }else {
+            packingIndex = lastBlockRoundData.getPackingIndexOfRound() + 1;
+        }
+
         while (true) {
             PocMeetingRound tempRound;
             if (roundIndex == self.getRoundIndex()) {
