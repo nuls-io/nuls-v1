@@ -549,7 +549,7 @@ public class ConsensusMeetingRunner implements Runnable {
             if (tempRound.getIndex() == round.getIndex() && packingIndex >= self.getIndexOfRound()) {
                 break;
             }
-            if (packingIndex == tempRound.getMemberCount()) {
+            if (packingIndex >= tempRound.getMemberCount()) {
                 roundIndex++;
                 packingIndex = 1;
                 continue;
