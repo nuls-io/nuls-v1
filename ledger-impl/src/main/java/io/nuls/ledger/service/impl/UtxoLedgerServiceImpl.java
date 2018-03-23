@@ -519,6 +519,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 } else if (OutPutStatusEnum.UTXO_CONFIRM_CONSENSUS_LOCK == output.getStatus()) {
                     output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
                 }
+                index++;
             } else {
                 b = false;
             }
@@ -544,6 +545,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 } else if (OutPutStatusEnum.UTXO_CONFIRM_UNSPEND == output.getStatus()) {
                     output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_CONSENSUS_LOCK);
                 }
+                index++;
             } else {
                 b = false;
             }
