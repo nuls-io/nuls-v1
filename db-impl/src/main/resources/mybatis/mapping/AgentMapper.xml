@@ -60,7 +60,7 @@
       <if test="address != null">
         agent_address,
       </if>
-      <if test="nodeAddress != null">
+      <if test="packingAddress != null">
         packing_address,
       </if>
       <if test="deposit != null">
@@ -86,7 +86,7 @@
       <if test="address != null">
         #{agentAddress,jdbcType=VARCHAR},
       </if>
-      <if test="nodeAddress != null">
+      <if test="packingAddress != null">
         #{packingAddress,jdbcType=VARCHAR},
       </if>
       <if test="deposit != null">
@@ -116,7 +116,7 @@
     -->
     update agent
     <set>
-      <if test="nodeAddress != null">
+      <if test="packingAddress != null">
         packing_address = #{packingAddress,jdbcType=VARCHAR},
       </if>
       <if test="deposit != null">
@@ -147,7 +147,7 @@
     -->
     update agent
     set address = #{address,jdbcType=VARCHAR},
-    node_address = #{nodeAddress,jdbcType=VARCHAR},
+    packing_address = #{packingAddress,jdbcType=VARCHAR},
     deposit = #{deposit,jdbcType=BIGINT},
     remark = #{remark,jdbcType=VARCHAR}, commission_rate=#{commissionRate,jdbcType=NUMERIC},start_time = #{startTime,jdbcType=BIGINT},
     status = #{status,jdbcType=INTEGER}
