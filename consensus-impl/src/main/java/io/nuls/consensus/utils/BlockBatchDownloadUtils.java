@@ -64,7 +64,6 @@ public class BlockBatchDownloadUtils {
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
     private QueueService<String> queueService = new QueueService<>();
     private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
-    private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
 
 
@@ -120,7 +119,9 @@ public class BlockBatchDownloadUtils {
             blocksHash = DistributedBlockInfoRequestUtils.getInstance().request(startHeight, endHeight, DOWNLOAD_BLOCKS_PER_TIME);
             request(startHeight, endHeight);
             while (working) {
-                verify();
+                if((lastOperateTime+1000)<TimeService.currentTimeMillis()){
+                    verify();
+                }
                 if ((TimeService.currentTimeMillis() - lastOperateTime) >= 5000) {
                     working = false;
                     lock.unlock();
@@ -312,8 +313,6 @@ public class BlockBatchDownloadUtils {
         if (null == nodeStatus) {
             return;
         }
-        Log.info("--------------------------------failedExecute removeNode:" + nodeStatus.getNodeId());
-        networkService.removeNode(nodeStatus.getNodeId());
         this.nodeIdList.remove(nodeStatus.getNodeId());
         this.queueService.remove(queueId, nodeStatus.getNodeId());
         if (nodeIdList.isEmpty() || queueService.size(queueId) == 0) {
