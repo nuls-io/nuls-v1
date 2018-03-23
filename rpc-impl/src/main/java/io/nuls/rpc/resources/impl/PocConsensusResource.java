@@ -165,8 +165,8 @@ public class PocConsensusResource {
     }
 
 
-    @DELETE
-    @Path("/agent")
+    @POST
+    @Path("/agent/stop")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult stopAgent(StopAgentForm form) throws NulsException, IOException {
         AssertUtil.canNotEmpty(form);
