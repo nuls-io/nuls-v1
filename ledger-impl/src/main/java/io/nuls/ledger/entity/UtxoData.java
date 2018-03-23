@@ -24,14 +24,18 @@
 package io.nuls.ledger.entity;
 
 import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.chain.entity.Na;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
+import io.nuls.ledger.entity.tx.LockNulsTransaction;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Niels
@@ -116,5 +120,33 @@ public class UtxoData extends CoinData {
             outputs.add(output);
         }
 
+    }
+
+    @Override
+    public Na getTotalNa() {
+        if(null==super.getTotalNa()) {
+            Set<String> addressSet = new HashSet<>();
+
+            if (null != this.getInputs()) {
+                for (UtxoInput input : this.getInputs()) {
+                    addressSet.add(input.getFrom().getAddress());
+                }
+            }
+            Na totalNa = Na.ZERO;
+            if (null != this.getOutputs()) {
+                for (int i = 0; i < this.getOutputs().size(); i++) {
+                    UtxoOutput output = this.getOutputs().get(i);
+                    if (addressSet.contains(output.getAddress())) {
+                        if ( i == 0&&output.isLocked()) {
+                            totalNa.add(Na.valueOf(output.getValue()));
+                        }
+                    } else {
+                        totalNa.add(Na.valueOf(output.getValue()));
+                    }
+                }
+            }
+            this.setTotalNa(totalNa);
+        }
+        return super.getTotalNa();
     }
 }

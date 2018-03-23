@@ -141,6 +141,7 @@ public class BlockServiceImpl implements BlockService {
     @Override
     @DbSession
     public boolean saveBlock(Block block) throws IOException {
+        block.verifyWithException();
         for (int x = 0; x < block.getHeader().getTxCount(); x++) {
             Transaction tx = block.getTxs().get(x);
             tx.setBlockHeight(block.getHeader().getHeight());
