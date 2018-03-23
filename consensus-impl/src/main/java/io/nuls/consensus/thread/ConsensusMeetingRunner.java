@@ -327,6 +327,7 @@ public class ConsensusMeetingRunner implements Runnable {
         }
         addConsensusTx(bestBlock, txList, self);
         bd.setTxList(txList);
+        Log.info("txCount:"+txList.size());
         Block newBlock = ConsensusTool.createBlock(bd, consensusManager.getConsensusStatusInfo().getAccount());
         ValidateResult result = newBlock.verify();
         if (result.isFailed()) {
