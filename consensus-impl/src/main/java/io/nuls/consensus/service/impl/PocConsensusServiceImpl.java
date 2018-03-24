@@ -402,6 +402,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
             Map<String, Object> map = new HashMap<>();
             map.put("agentId", ca.getHexHash());
             map.put("agentName", ca.getExtend().getAgentName());
+            map.put("packingAddress",ca.getExtend().getPackingAddress());
             map.put("agentAddress", ca.getAddress());
             map.put("agentAddressAlias", null);
             map.put("status", ca.getExtend().getStatus());
@@ -412,8 +413,15 @@ public class PocConsensusServiceImpl implements ConsensusService {
             map.put("creditRatio", 1);
             map.put("reward", 2018);
             map.put("packedCount", 2018);
-            map.put("totalDeposit", 2018);
-            map.put("memberCount", 2018);
+            List<Consensus<Deposit>> deposits = this.consensusCacheManager.getCachedDepositListByAgentHash(ca.getHexHash());
+            long totalDeposit = 0;
+            Set<String> memberSet = new HashSet<>();
+            for(Consensus<Deposit> cd:deposits){
+                totalDeposit+=cd.getExtend().getDeposit().getValue();
+                memberSet.add(cd.getAddress());
+            }
+            map.put("totalDeposit", totalDeposit);
+            map.put("memberCount", memberSet.size());
             resultList.add(map);
         }
         page.setList(resultList);
@@ -498,6 +506,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
         Map<String, Object> map = new HashMap<>();
         map.put("agentId", ca.getHexHash());
         map.put("agentName", ca.getExtend().getAgentName());
+        map.put("packingAddress",ca.getExtend().getPackingAddress());
         map.put("agentAddress", ca.getAddress());
         map.put("agentAddressAlias", null);
         map.put("status", ca.getExtend().getStatus());
@@ -508,8 +517,15 @@ public class PocConsensusServiceImpl implements ConsensusService {
         map.put("creditRatio", 1);
         map.put("reward", 2018);
         map.put("packedCount", 2018);
-        map.put("totalDeposit", 2018);
-        map.put("memberCount", 2018);
+        List<Consensus<Deposit>> deposits = this.consensusCacheManager.getCachedDepositListByAgentHash(ca.getHexHash());
+        long totalDeposit = 0;
+        Set<String> memberSet = new HashSet<>();
+        for(Consensus<Deposit> cd:deposits){
+            totalDeposit+=cd.getExtend().getDeposit().getValue();
+            memberSet.add(cd.getAddress());
+        }
+        map.put("totalDeposit", totalDeposit);
+        map.put("memberCount", memberSet.size());
         return map;
     }
 }
