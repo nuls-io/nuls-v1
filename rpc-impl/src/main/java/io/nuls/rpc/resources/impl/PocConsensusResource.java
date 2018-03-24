@@ -271,14 +271,15 @@ public class PocConsensusResource {
 //            result.setData(listPage);
 //            return result;
 //        }
-        Page<Map<String, Object>> list = this.consensusService.getAgentList(keyword, null, sortType, pageNumber, pageSize);
+        Page<Map<String, Object>> list = this.consensusService.getAgentList(keyword, null, null, sortType, pageNumber, pageSize);
         result.setData(list);
         return result;
     }
+
     @GET
     @Path("/agent/{agentAddress}")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult getAgentByAddress(@PathParam("agentAddress")String agentAddress) {
+    public RpcResult getAgentByAddress(@PathParam("agentAddress") String agentAddress) {
         RpcResult result = RpcResult.getSuccess();
         Map<String, Object> data = this.consensusService.getAgent(agentAddress);
         result.setData(data);
@@ -329,7 +330,7 @@ public class PocConsensusResource {
 //            return result;
 //        }
 
-        Page<Map<String, Object>> list = this.consensusService.getAgentList(null, address, null, pageNumber, pageSize);
+        Page<Map<String, Object>> list = this.consensusService.getAgentList(null, address, null, null, pageNumber, pageSize);
         result.setData(list);
         return result;
     }

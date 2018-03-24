@@ -347,14 +347,27 @@ public class PocConsensusServiceImpl implements ConsensusService {
     }
 
     @Override
-    public Page<Map<String, Object>> getAgentList(String keyword, String address, String sortType, Integer pageNumber, Integer pageSize) {
+    public Page<Map<String, Object>> getAgentList(String keyword, String depositAddress,String agentAddress, String sortType, Integer pageNumber, Integer pageSize) {
         List<Consensus<Agent>> agentList = this.consensusCacheManager.getCachedAgentList();
         Page<Map<String, Object>> page = new Page<>();
         int start = pageNumber * pageSize - pageSize;
-        if (StringUtils.validAddress(address)) {
+        if (StringUtils.validAddress(agentAddress)) {
             for (int i = agentList.size() - 1; i >= 0; i--) {
                 Consensus<Agent> consensus = agentList.get(i);
-                if (!consensus.getAddress().equals(address)) {
+                if (!consensus.getAddress().equals(agentAddress)) {
+                    agentList.remove(i);
+                }
+            }
+        }
+        if(StringUtils.validAddress(depositAddress)){
+            List<Consensus<Deposit>> depositList = this.consensusCacheManager.getCachedDepositListByAddress(depositAddress);
+            Set<String> agentHashSet = new HashSet<>();
+            for(Consensus<Deposit> cd:depositList){
+                agentHashSet.add(cd.getExtend().getAgentHash());
+            }
+            for (int i = agentList.size() - 1; i >= 0; i--) {
+                Consensus<Agent> consensus = agentList.get(i);
+                if (!agentHashSet.contains(consensus.getHexHash())) {
                     agentList.remove(i);
                 }
             }

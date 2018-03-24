@@ -61,7 +61,7 @@ public interface ConsensusService {
      * @return
      */
 
-    Page<Map<String,Object>> getAgentList(String keyword, String address, String sortType, Integer pageNumber, Integer pageSize);
+    Page<Map<String,Object>> getAgentList(String keyword, String address,String agentAddress, String sortType, Integer pageNumber, Integer pageSize);
 
     Page<Map<String,Object>> getDepositList(String address, String agentAddress, Integer pageNumber, Integer pageSize);
 
