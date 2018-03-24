@@ -262,7 +262,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
                 map.put("agentCount", 1 + (int) map.get("agentCount"));
                 totalDeposit += agent.getExtend().getDeposit().getValue();
             }
-            map.put("totalDeposit", totalDeposit + Long.parseLong(""+ map.get("totalDeposit")));
+            map.put("totalDeposit", totalDeposit + Long.parseLong("" + map.get("totalDeposit")));
         }
         map.put("joinAccountCount", joinedAgent.size());
         map.put("usableBalance", 2018);
@@ -272,7 +272,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
     }
 
     private Map<String, Object> getConsensusInfoByAddress(String address) {
-        if(!StringUtils.validAddress(address)){
+        if (!StringUtils.validAddress(address)) {
             return null;
         }
         Consensus<Agent> agent = this.consensusCacheManager.getCachedAgentByAddress(address);
@@ -287,7 +287,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
         if (null != agent) {
             map.put("agentCount", 1);
             totalDeposit += agent.getExtend().getDeposit().getValue();
-        }else {
+        } else {
             map.put("agentCount", 0);
         }
         map.put("totalDeposit", totalDeposit);
@@ -487,5 +487,29 @@ public class PocConsensusServiceImpl implements ConsensusService {
         }
         page.setList(resultList);
         return page;
+    }
+
+    @Override
+    public Map<String, Object> getAgent(String agentAddress) {
+        Consensus<Agent> ca = this.consensusCacheManager.getCachedAgentByAddress(agentAddress);
+        if (ca == null) {
+            return null;
+        }
+        Map<String, Object> map = new HashMap<>();
+        map.put("agentId", ca.getHexHash());
+        map.put("agentName", ca.getExtend().getAgentName());
+        map.put("agentAddress", ca.getAddress());
+        map.put("agentAddressAlias", null);
+        map.put("status", ca.getExtend().getStatus());
+        map.put("owndeposit", ca.getExtend().getDeposit().getValue());
+        map.put("commissionRate", ca.getExtend().getCommissionRate());
+        map.put("introduction", ca.getExtend().getIntroduction());
+        map.put("startTime", ca.getExtend().getStartTime());
+        map.put("creditRatio", 1);
+        map.put("reward", 2018);
+        map.put("packedCount", 2018);
+        map.put("totalDeposit", 2018);
+        map.put("memberCount", 2018);
+        return map;
     }
 }

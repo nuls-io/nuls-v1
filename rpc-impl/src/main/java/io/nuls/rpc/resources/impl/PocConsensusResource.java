@@ -275,7 +275,15 @@ public class PocConsensusResource {
         result.setData(list);
         return result;
     }
-
+    @GET
+    @Path("/agent/{agentAddress}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult getAgentByAddress(@PathParam("agentAddress")String agentAddress) {
+        RpcResult result = RpcResult.getSuccess();
+        Map<String, Object> data = this.consensusService.getAgent(agentAddress);
+        result.setData(data);
+        return result;
+    }
 
     @GET
     @Path("/agent/address/{address}")
