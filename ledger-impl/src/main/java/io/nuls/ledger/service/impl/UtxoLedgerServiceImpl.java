@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,6 +24,7 @@
 package io.nuls.ledger.service.impl;
 
 import io.nuls.cache.service.intf.CacheService;
+import io.nuls.consensus.utils.TxTimeComparator;
 import io.nuls.core.chain.entity.*;
 import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ErrorCode;
@@ -67,6 +68,7 @@ import io.nuls.ledger.util.UtxoTransferTool;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -87,6 +89,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     private static final String RECEIVE_TX_CACHE = "Received-tx-cache";
 
     private static final String CONFIRM_TX_CACHE = "Confirming-tx-cache";
+
+    private static final String ORPHAN_TX_CACHE = "Orphan-tx-cache";
     @Autowired
     private CacheService<String, Transaction> txCacheService;
 
@@ -202,6 +206,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     private List<Transaction> getCacheTxList(String address, int txType) throws NulsException {
         List<Transaction> cacheTxList = new ArrayList<>(txCacheService.getElementList(CONFIRM_TX_CACHE));
+        cacheTxList.addAll(txCacheService.getElementList(RECEIVE_TX_CACHE));
+        cacheTxList.addAll(txCacheService.getElementList(ORPHAN_TX_CACHE));
         for (int i = cacheTxList.size() - 1; i >= 0; i--) {
             Transaction tx = cacheTxList.get(i);
             if (txType > 0 && tx.getType() != txType) {
@@ -212,6 +218,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 cacheTxList.remove(i);
             }
         }
+        Collections.sort(cacheTxList, TxTimeComparator.getInstance());
         return cacheTxList;
     }
 

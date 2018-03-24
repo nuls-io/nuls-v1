@@ -96,10 +96,14 @@ public class StringUtils {
     }
 
     public static boolean validAddress(String address) {
-        if (isBlank(address)) return false;
+        if (isBlank(address)){
+            return false;
+        }
         try {
             byte[] bytes = Base58.decode(address);
-            if (bytes.length != ADDRESS_HASH_LENGTH) return false;
+            if (bytes.length != ADDRESS_HASH_LENGTH){
+                return false;
+            }
         } catch (NulsException e) {
             return false;
         }
@@ -108,8 +112,12 @@ public class StringUtils {
     }
 
     public static boolean validHash(String hash) {
-        if (isBlank(hash)) return false;
-        if (hash.length() > 73) return false;
+        if (isBlank(hash)){
+            return false;
+        }
+        if (hash.length() > 73){
+            return false;
+        }
         return true;
     }
 

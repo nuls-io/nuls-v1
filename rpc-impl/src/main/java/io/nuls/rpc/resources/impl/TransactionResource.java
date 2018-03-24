@@ -115,7 +115,6 @@ public class TransactionResource {
     @GET
     @Path("/list")
     @Produces(MediaType.APPLICATION_JSON)
-
     public RpcResult list(@QueryParam("address") String address, @QueryParam("type") int type,
                           @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
         if (type < 0 || pageNumber < 0 || pageSize < 0 || pageSize > 100) {
