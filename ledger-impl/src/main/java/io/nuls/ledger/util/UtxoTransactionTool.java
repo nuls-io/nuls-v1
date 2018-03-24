@@ -127,7 +127,7 @@ public class UtxoTransactionTool {
                 if (input.getFrom() == null) {
                     continue;
                 }
-                if (NulsContext.LOCAL_ADDRESS_LIST.contains(Address.fromHashs(input.getFrom().getAddress()).getBase58())) {
+                if (NulsContext.LOCAL_ADDRESS_LIST.contains(input.getFrom().getAddress())) {
                     tx.setTransferType(Transaction.TRANSFER_SEND);
                     return true;
                 }
@@ -136,7 +136,7 @@ public class UtxoTransactionTool {
         // check output
         if (coinData.getOutputs() != null && !coinData.getOutputs().isEmpty()) {
             for (UtxoOutput output : coinData.getOutputs()) {
-                if (NulsContext.LOCAL_ADDRESS_LIST.contains(Address.fromHashs(output.getAddress()).getBase58())) {
+                if (NulsContext.LOCAL_ADDRESS_LIST.contains(output.getAddress())) {
                     tx.setTransferType(Transaction.TRANSFER_RECEIVE);
                     return true;
                 }
