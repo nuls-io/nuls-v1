@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -274,13 +274,24 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         if (utxoData == null) {
             return;
         }
-//        if (TxStatusEnum.AGREED.equals(tx.getStatus())) {
-//            for (UtxoInput input : utxoData.getInputs()) {
-//                ledgerCacheService.updateUtxoStatus(input.getKey(), UtxoOutput.UTXO_CONFIRM_UNLOCK, UtxoOutput.UTXO_CONFIRM_LOCK);
-//            }
-//        } else
-        if (tx.getStatus().equals(TxStatusEnum.CONFIRMED)) {
-            Set<String> addressSet = new HashSet<>();
+
+        Set<String> addressSet = new HashSet<>();
+        if (TxStatusEnum.AGREED.equals(tx.getStatus())) {
+            for (UtxoInput input : utxoData.getInputs()) {
+                UtxoOutput from = ledgerCacheService.getUtxo(input.getKey());
+                if (from != null) {
+                    if (from.getStatus() == OutPutStatusEnum.UTXO_SPENT) {
+                        from.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
+                        addressSet.add(from.getAddress());
+                    }
+//                    else if (from.getStatus() == OutPutStatusEnum.UTXO_CONFIRM_SPEND) {
+//                        from.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
+//                    } else if (from.getStatus() == OutPutStatusEnum.UTXO_UNCONFIRM_SPEND) {
+//                        from.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND);
+//                    }
+                }
+            }
+        } else if (tx.getStatus().equals(TxStatusEnum.CONFIRMED)) {
             //process output
             outputDataService.deleteByHash(tx.getHash().getDigestHex());
             for (int i = utxoData.getOutputs().size() - 1; i >= 0; i--) {
@@ -308,12 +319,10 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 UtxoOutput output = UtxoTransferTool.toOutput(outputPo);
                 ledgerCacheService.putUtxo(output.getKey(), output);
             }
-
             relationDataService.deleteRelation(tx.getHash().getDigestHex(), addressSet);
-
-            for (String address : addressSet) {
-                UtxoTransactionTool.getInstance().calcBalance(address, true);
-            }
+        }
+        for (String address : addressSet) {
+            UtxoTransactionTool.getInstance().calcBalance(address, false);
         }
     }
 
