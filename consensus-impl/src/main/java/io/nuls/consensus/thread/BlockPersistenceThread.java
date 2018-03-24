@@ -29,6 +29,7 @@ import io.nuls.consensus.cache.manager.block.BlockCacheManager;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.utils.BlockBatchDownloadUtils;
+import io.nuls.consensus.utils.BlockHeightComparator;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
@@ -39,6 +40,7 @@ import io.nuls.network.service.NetworkService;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -90,6 +92,17 @@ public class BlockPersistenceThread implements Runnable {
         }
         Block block = blockCacheManager.getBlock(height);
         if (null == block) {
+
+            if(blockCacheManager.getBlockCacheMap().size()>this.blockCacheManager.getBifurcateProcessor().getLongestChain().size()){
+                List<Block> blockList = new ArrayList<>(blockCacheManager.getBlockCacheMap().values());
+                Collections.sort(blockList, BlockHeightComparator.getInstance());
+                for(Block b:blockList){
+                    this.blockCacheManager.getBifurcateProcessor().addHeader(b.getHeader());
+                }
+                return;
+            }
+
+
             List<Node> nodeList = networkService.getAvailableNodes();
             if(nodeList==null||nodeList.isEmpty()){
                 return;

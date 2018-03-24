@@ -36,14 +36,22 @@ import java.util.Comparator;
  */
 public class BlockHeightComparator implements Comparator<Block> {
 
-    private static  final BlockHeightComparator INSTANCE = new BlockHeightComparator();
-    private BlockHeightComparator(){}
-    public static BlockHeightComparator getInstance(){
+    private static final BlockHeightComparator INSTANCE = new BlockHeightComparator();
+
+    private BlockHeightComparator() {
+    }
+
+    public static BlockHeightComparator getInstance() {
         return INSTANCE;
     }
 
     @Override
     public int compare(Block o1, Block o2) {
+        if (o1 == null || o1.getHeader() == null) {
+            return 1;
+        } else if (o2 == null || o2.getHeader() == null) {
+            return -1;
+        }
         long key = o1.getHeader().getHeight() - o2.getHeader().getHeight();
         int val = 0;
         if (key > 0) {

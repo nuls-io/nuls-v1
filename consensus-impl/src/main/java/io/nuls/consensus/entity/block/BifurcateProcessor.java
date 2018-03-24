@@ -123,7 +123,7 @@ public class BifurcateProcessor {
             }
         }
         if (longestChainList.size() > 1 || longestChainList.isEmpty()) {
-            return null;
+            return new BlockHeaderChain();
         }
         return longestChainList.get(0);
     }
