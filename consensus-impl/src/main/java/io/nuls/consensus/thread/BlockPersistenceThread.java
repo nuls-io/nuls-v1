@@ -73,8 +73,9 @@ public class BlockPersistenceThread implements Runnable {
             try {
                 if (blockCacheManager.canPersistence()) {
                     doPersistence();
+                }else{
+                    Thread.sleep(1000L);
                 }
-                Thread.sleep(1000L);
             } catch (Exception e) {
                 Log.error(e);
             }
