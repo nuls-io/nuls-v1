@@ -289,21 +289,6 @@ public class PocConsensusServiceImpl implements ConsensusService {
         List<Consensus<Agent>> agentList = this.consensusCacheManager.getCachedAgentList();
         Page<Map<String, Object>> page = new Page<>();
         int start = pageNumber * pageSize - pageSize;
-        if (agentList.isEmpty() || start >= agentList.size()) {
-            page.setPageNumber(pageNumber);
-            page.setPageSize(pageSize);
-            page.setTotal(agentList.size());
-            int sum = 0;
-            if (page.getTotal() % pageSize > 0) {
-                sum = 1;
-            }
-            page.setPages((int) ((page.getTotal() / pageSize) + sum));
-            return page;
-        }
-        int end = pageNumber * pageSize - 1;
-        if (end > agentList.size()) {
-            end = agentList.size();
-        }
         if (StringUtils.validAddress(address)) {
             for (int i = agentList.size() - 1; i >= 0; i--) {
                 Consensus<Agent> consensus = agentList.get(i);
@@ -322,6 +307,22 @@ public class PocConsensusServiceImpl implements ConsensusService {
                 }
             }
         }
+        if (agentList.isEmpty() || start >= agentList.size()) {
+            page.setPageNumber(pageNumber);
+            page.setPageSize(pageSize);
+            page.setTotal(agentList.size());
+            int sum = 0;
+            if (page.getTotal() % pageSize > 0) {
+                sum = 1;
+            }
+            page.setPages((int) ((page.getTotal() / pageSize) + sum));
+            return page;
+        }
+        int end = pageNumber * pageSize - 1;
+        if (end > agentList.size()) {
+            end = agentList.size();
+        }
+
         int type = AgentComparator.COMMISSION_RATE;
         if ("owndeposit".equals(sortType)) {
             type = AgentComparator.DEPOSIT;
@@ -372,6 +373,9 @@ public class PocConsensusServiceImpl implements ConsensusService {
         Consensus<Agent> agent = null;
         if (StringUtils.validAddress(agentAddress)) {
             agent = this.consensusCacheManager.getCachedAgentByAddress(agentAddress);
+            if(null==agent){
+                depositList.clear();
+            }
         }
         for (int i = depositList.size() - 1; i >= 0; i--) {
             Consensus<Deposit> cd = depositList.get(i);
