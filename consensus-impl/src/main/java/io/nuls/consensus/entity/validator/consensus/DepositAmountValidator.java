@@ -39,15 +39,15 @@ import java.util.List;
  * @author Niels
  * @date 2018/1/17
  */
-public class DelegateDepositValidator implements NulsDataValidator<PocJoinConsensusTransaction> {
+public class DepositAmountValidator implements NulsDataValidator<PocJoinConsensusTransaction> {
 
-    private static final DelegateDepositValidator INSTANCE = new DelegateDepositValidator();
+    private static final DepositAmountValidator INSTANCE = new DepositAmountValidator();
     private ConsensusCacheManager consensusCacheManager = ConsensusCacheManager.getInstance();
 
-    private DelegateDepositValidator() {
+    private DepositAmountValidator() {
     }
 
-    public static DelegateDepositValidator getInstance() {
+    public static DepositAmountValidator getInstance() {
         return INSTANCE;
     }
 
@@ -55,14 +55,18 @@ public class DelegateDepositValidator implements NulsDataValidator<PocJoinConsen
     public ValidateResult validate(PocJoinConsensusTransaction data) {
         Na limit = PocConsensusConstant.ENTRUSTER_DEPOSIT_LOWER_LIMIT;
         Na max = PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT;
-        List<Consensus<Deposit>> list = consensusCacheManager.getCachedDelegateList(data.getTxData().getExtend().getDelegateAddress());
+        List<Consensus<Deposit>> list = consensusCacheManager.getCachedDepositList(data.getTxData().getExtend().getAgentAddress());
+        if(list==null){
+            return ValidateResult.getSuccessResult();
+        }
+        Na total = Na.ZERO;
         for (Consensus<Deposit> cd : list) {
-            max = max.subtract(cd.getExtend().getDeposit());
+            total = total.add(cd.getExtend().getDeposit());
         }
         if (limit.isGreaterThan(data.getTxData().getExtend().getDeposit())) {
             return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_NOT_ENOUGH);
         }
-        if (max.isLessThan(data.getTxData().getExtend().getDeposit())) {
+        if (max.isLessThan(total)) {
             return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_TOO_MUCH);
         }
         return ValidateResult.getSuccessResult();

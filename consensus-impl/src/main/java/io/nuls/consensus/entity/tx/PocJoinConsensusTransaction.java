@@ -24,10 +24,10 @@
 package io.nuls.consensus.entity.tx;
 
 import io.nuls.consensus.entity.Consensus;
-import io.nuls.consensus.entity.ConsensusDelegateImpl;
+import io.nuls.consensus.entity.ConsensusDepositImpl;
 import io.nuls.consensus.entity.member.Deposit;
-import io.nuls.consensus.entity.validator.consensus.DelegateCountValidator;
-import io.nuls.consensus.entity.validator.consensus.DelegateDepositValidator;
+import io.nuls.consensus.entity.validator.consensus.DepositCountValidator;
+import io.nuls.consensus.entity.validator.consensus.DepositAmountValidator;
 import io.nuls.consensus.entity.validator.tx.AllreadyJoinConsensusValidator;
 import io.nuls.consensus.entity.validator.tx.CreditThresholdValidator;
 import io.nuls.core.constant.TransactionConstant;
@@ -54,13 +54,13 @@ public class PocJoinConsensusTransaction extends LockNulsTransaction<Consensus<D
     private void initValidator() {
         this.registerValidator(AllreadyJoinConsensusValidator.getInstance());
         this.registerValidator(CreditThresholdValidator.getInstance());
-        this.registerValidator(DelegateCountValidator.getInstance());
-        this.registerValidator(DelegateDepositValidator.getInstance());
+        this.registerValidator(DepositCountValidator.getInstance());
+        this.registerValidator(DepositAmountValidator.getInstance());
     }
 
     @Override
     public Consensus<Deposit> parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
-        Consensus<Deposit> consensus = byteBuffer.readNulsData(new ConsensusDelegateImpl());
+        Consensus<Deposit> consensus = byteBuffer.readNulsData(new ConsensusDepositImpl());
         return consensus;
     }
 }

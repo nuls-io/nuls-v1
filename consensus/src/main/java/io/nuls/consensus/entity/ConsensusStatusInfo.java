@@ -36,6 +36,15 @@ import java.util.Map;
 public class ConsensusStatusInfo implements Serializable {
     private Account account;
     private int status;
+    private boolean seed;
+
+    public boolean isSeed() {
+        return seed;
+    }
+
+    public void setSeed(boolean seed) {
+        this.seed = seed;
+    }
 
     public Account getAccount() {
         return account;

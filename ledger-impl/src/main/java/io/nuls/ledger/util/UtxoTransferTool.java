@@ -31,6 +31,7 @@ import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.script.P2PKHScript;
 import io.nuls.core.utils.crypto.Hex;
+import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
@@ -68,8 +69,22 @@ public class UtxoTransferTool {
             //todo
             Log.error(e);
         }
+        long currentTime = TimeService.currentTimeMillis();
+        long genesisTime = NulsContext.getInstance().getGenesisBlock().getHeader().getTime();
+        long bestHeight = NulsContext.getInstance().getNetBestBlockHeight();
+
         if (po.getStatus() == UtxoOutputPo.USABLE) {
-            output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
+            if (po.getLockTime() > 0) {
+                if (po.getLockTime() >= genesisTime && po.getLockTime() > currentTime) {
+                    output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_TIME_LOCK);
+                } else if (po.getLockTime() < genesisTime && po.getLockTime() > bestHeight) {
+                    output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_TIME_LOCK);
+                } else {
+                    output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
+                }
+            } else {
+                output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
+            }
         } else if (po.getStatus() == UtxoOutputPo.LOCKED) {
             output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_CONSENSUS_LOCK);
         } else if (po.getStatus() == UtxoOutputPo.SPENT) {

@@ -24,11 +24,13 @@
 package io.nuls.consensus.entity;
 
 import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.intf.NulsCloneable;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
+import io.nuls.core.utils.log.Log;
 import org.apache.tools.ant.taskdefs.Basename;
 
 import java.io.IOException;
@@ -42,6 +44,8 @@ public abstract class Consensus<T extends BaseNulsData> extends BaseNulsData imp
     private String address;
 
     private T extend;
+
+    private NulsDigestData hash;
 
     @Override
     public int size() {
@@ -61,6 +65,11 @@ public abstract class Consensus<T extends BaseNulsData> extends BaseNulsData imp
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.address = byteBuffer.readString();
        this.extend = this.parseExtend(byteBuffer);
+        try {
+            this.hash = NulsDigestData.calcDigestData(this.serialize());
+        } catch (IOException e) {
+            Log.error(e);
+        }
     }
 
     protected abstract T parseExtend(NulsByteBuffer byteBuffer) throws NulsException;
@@ -79,6 +88,25 @@ public abstract class Consensus<T extends BaseNulsData> extends BaseNulsData imp
 
     public void setExtend(T extend) {
         this.extend = extend;
+    }
+
+    public NulsDigestData getHash() {
+        if(null==hash){
+            try {
+                this. hash = NulsDigestData.calcDigestData(this.serialize());
+            } catch (IOException e) {
+                Log.error(e);
+            }
+        }
+        return hash;
+    }
+
+    public String getHexHash(){
+        return this.getHash().getDigestHex();
+    }
+
+    public void setHash(NulsDigestData hash) {
+        this.hash = hash;
     }
 
     @Override

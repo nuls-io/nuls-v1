@@ -108,35 +108,31 @@ public class BlockBatchDownloadUtils {
 
     public void request(List<String> nodeIdList, long startHeight, long endHeight) throws InterruptedException {
         lock.lock();
-        if (working) {
-            lock.unlock();
-            return;
-        }
-        this.lastOperateTime = TimeService.currentTimeMillis();
-        working = true;
         try {
+            if (working) {
+                return;
+            }
+            this.lastOperateTime = TimeService.currentTimeMillis();
+            working = true;
             this.init(nodeIdList);
             blocksHash = DistributedBlockInfoRequestUtils.getInstance().request(startHeight, endHeight, DOWNLOAD_BLOCKS_PER_TIME);
             request(startHeight, endHeight);
             while (working) {
-                if((lastOperateTime+1000)<TimeService.currentTimeMillis()){
+                if ((lastOperateTime + 1000) < TimeService.currentTimeMillis()) {
                     verify();
                 }
                 if ((TimeService.currentTimeMillis() - lastOperateTime) >= 5000) {
                     working = false;
-                    lock.unlock();
                     return;
                 }
                 Thread.sleep(100L);
             }
-            if (!working) {
-                lock.unlock();
-            }
         } catch (Exception e) {
             Log.error(e.getMessage());
             working = false;
-            lock.unlock();
             return;
+        } finally {
+            lock.unlock();
         }
     }
 

@@ -317,4 +317,20 @@ public class BlockCacheManager {
     public void removeBlock(String hash) {
         //todo
     }
+
+    public CacheMap<String, BlockHeader> getHeaderCacheMap() {
+        return headerCacheMap;
+    }
+
+    public CacheMap<String, Block> getBlockCacheMap() {
+        return blockCacheMap;
+    }
+
+    public CacheMap<String, SmallBlock> getSmallBlockCacheMap() {
+        return smallBlockCacheMap;
+    }
+
+    public BifurcateProcessor getBifurcateProcessor() {
+        return bifurcateProcessor;
+    }
 }

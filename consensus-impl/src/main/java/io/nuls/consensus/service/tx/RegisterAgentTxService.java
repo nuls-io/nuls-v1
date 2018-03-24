@@ -50,7 +50,7 @@ public class RegisterAgentTxService implements TransactionService<RegisterAgentT
     @Override
     public void onRollback(RegisterAgentTransaction tx) throws NulsException {
         this.manager.delAgent(tx.getTxData().getAddress());
-        manager.delDelegateByAgent(tx.getTxData().getAddress());
+        manager.delDepositByAgent(tx.getTxData().getAddress());
         this.delegateAccountService.delete(tx.getTxData().getAddress());
         this.delegateService.deleteByAgentAddress(tx.getTxData().getAddress());
     }

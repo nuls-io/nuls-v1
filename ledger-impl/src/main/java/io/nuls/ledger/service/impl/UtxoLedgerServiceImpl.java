@@ -99,6 +99,9 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     public Transaction getTx(NulsDigestData hash) {
         TransactionPo po = txDao.gettx(hash.getDigestHex());
+        if(null==po){
+            return null;
+        }
         try {
             return UtxoTransferTool.toTransaction(po);
         } catch (Exception e) {
@@ -110,6 +113,9 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     public Transaction getLocalTx(NulsDigestData hash) {
         TransactionLocalPo po = txDao.getLocaltx(hash.getDigestHex());
+        if(null==po){
+            return null;
+        }
         try {
             return UtxoTransferTool.toTransaction(po);
         } catch (Exception e) {
@@ -519,6 +525,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 } else if (OutPutStatusEnum.UTXO_CONFIRM_CONSENSUS_LOCK == output.getStatus()) {
                     output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
                 }
+                index++;
             } else {
                 b = false;
             }
@@ -544,6 +551,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 } else if (OutPutStatusEnum.UTXO_CONFIRM_UNSPEND == output.getStatus()) {
                     output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_CONSENSUS_LOCK);
                 }
+                index++;
             } else {
                 b = false;
             }

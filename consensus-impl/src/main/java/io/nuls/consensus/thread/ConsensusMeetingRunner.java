@@ -152,7 +152,8 @@ public class ConsensusMeetingRunner implements Runnable {
     private boolean checkCondition() {
         List<Node> nodes = networkService.getAvailableNodes();
         boolean result = nodes != null && nodes.size() >= MIN_NODE_COUNT;
-        result = result && (NulsContext.getInstance().getBestBlock().getHeader().getHeight() >= NulsContext.getInstance().getNetBestBlockHeight());
+        boolean synced = ((NulsContext.getInstance().getNetBestBlockHeight() > 0 || (null != consensusManager.getConsensusStatusInfo() && consensusManager.getConsensusStatusInfo().isSeed())) && NulsContext.getInstance().getBestBlock().getHeader().getHeight() >= NulsContext.getInstance().getNetBestBlockHeight());
+        result = result && synced;
         return result;
     }
 
@@ -201,15 +202,15 @@ public class ConsensusMeetingRunner implements Runnable {
         }
 
         Map<String, List<Consensus<Deposit>>> delegateMap = new HashMap<>();
-        List<Consensus<Deposit>> delegateList = consensusCacheManager.getCachedDelegateList();
+        List<Consensus<Deposit>> delegateList = consensusCacheManager.getCachedDepositList();
         Na totalDeposit = Na.ZERO;
         for (Consensus<Deposit> cd : delegateList) {
-            List<Consensus<Deposit>> sonList = delegateMap.get(cd.getExtend().getDelegateAddress());
+            List<Consensus<Deposit>> sonList = delegateMap.get(cd.getExtend().getAgentAddress());
             if (null == sonList) {
                 sonList = new ArrayList<>();
             }
             sonList.add(cd);
-            delegateMap.put(cd.getExtend().getDelegateAddress(), sonList);
+            delegateMap.put(cd.getExtend().getAgentAddress(), sonList);
             totalDeposit = totalDeposit.add(cd.getExtend().getDeposit());
         }
         List<PocMeetingMember> memberList = new ArrayList<>();
@@ -327,7 +328,7 @@ public class ConsensusMeetingRunner implements Runnable {
         }
         addConsensusTx(bestBlock, txList, self);
         bd.setTxList(txList);
-        Log.info("txCount:"+txList.size());
+        Log.info("txCount:" + txList.size());
         Block newBlock = ConsensusTool.createBlock(bd, consensusManager.getConsensusStatusInfo().getAccount());
         ValidateResult result = newBlock.verify();
         if (result.isFailed()) {
@@ -512,10 +513,15 @@ public class ConsensusMeetingRunner implements Runnable {
         } catch (NulsException e) {
             Log.error(e);
         }
-        boolean ok = self.getRoundIndex() == lastBlockRoundData.getRoundIndex() && self.getIndexOfRound() == (1 + lastBlockRoundData.getPackingIndexOfRound());
+        // continuous blocks in the same round
+        boolean ok = (self.getRoundIndex() == lastBlockRoundData.getRoundIndex()) && (self.getIndexOfRound() == (1 + lastBlockRoundData.getPackingIndexOfRound()));
+
+        //continuous blocks between two rounds
         ok = ok || (self.getRoundIndex() == (lastBlockRoundData.getRoundIndex() + 1)
                 && self.getIndexOfRound() == 1
                 && lastBlockRoundData.getPackingIndexOfRound() == lastBlockRoundData.getConsensusMemberCount());
+
+        //two rounds
         ok = ok || (self.getRoundIndex() - 1) > lastBlockRoundData.getRoundIndex();
         if (ok) {
             return;
@@ -523,7 +529,14 @@ public class ConsensusMeetingRunner implements Runnable {
         List<Address> addressList = new ArrayList<>();
         PocMeetingRound round = consensusManager.getCurrentRound();
         long roundIndex = lastBlockRoundData.getRoundIndex();
-        int packingIndex = lastBlockRoundData.getPackingIndexOfRound() + 1;
+        int packingIndex = 0;
+
+        if (lastBlockRoundData.getPackingIndexOfRound() == lastBlockRoundData.getConsensusMemberCount()) {
+            packingIndex = 1;
+        } else {
+            packingIndex = lastBlockRoundData.getPackingIndexOfRound() + 1;
+        }
+
         while (true) {
             PocMeetingRound tempRound;
             if (roundIndex == self.getRoundIndex()) {
@@ -537,14 +550,19 @@ public class ConsensusMeetingRunner implements Runnable {
             if (tempRound.getIndex() == round.getIndex() && packingIndex >= self.getIndexOfRound()) {
                 break;
             }
-            if (packingIndex == tempRound.getMemberCount()) {
+            if (packingIndex >= tempRound.getMemberCount()) {
                 roundIndex++;
                 packingIndex = 1;
                 continue;
             }
-            PocMeetingMember member = tempRound.getMember(packingIndex);
-            if (null == member) {
-                throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
+            PocMeetingMember member;
+            try {
+                member = tempRound.getMember(packingIndex);
+                if (null == member) {
+                    break;
+                }
+            } catch (Exception e) {
+                break;
             }
             packingIndex++;
             addressList.add(Address.fromHashs(member.getAddress()));
@@ -628,7 +646,7 @@ public class ConsensusMeetingRunner implements Runnable {
     private List<Consensus<Agent>> calcConsensusAgentList() {
         List<Consensus<Agent>> list = new ArrayList<>();
         list.addAll(consensusCacheManager.getCachedAgentList(ConsensusStatusEnum.IN));
-        list.addAll(consensusCacheManager.getCachedAgentList(ConsensusStatusEnum.WAITING));
+//        list.addAll(consensusCacheManager.getCachedAgentList(ConsensusStatusEnum.WAITING));
         if (list.size() >= PocConsensusConstant.MIN_CONSENSUS_AGENT_COUNT) {
             return list;
         }
