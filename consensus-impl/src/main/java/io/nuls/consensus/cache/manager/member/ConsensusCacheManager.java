@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -135,11 +135,11 @@ public class ConsensusCacheManager {
 
     public void cacheAgent(Consensus<Agent> ca) {
         if (ca.getExtend().getStatus() == ConsensusStatusEnum.IN.getCode()) {
-            this.inAgentCache.put(ca.getAddress(), ca);
-            this.outAgentCache.remove(ca.getAddress());
+            this.inAgentCache.put(ca.getHexHash(), ca);
+            this.outAgentCache.remove(ca.getHexHash());
         } else {
-            this.outAgentCache.put(ca.getAddress(), ca);
-            this.inAgentCache.remove(ca.getAddress());
+            this.outAgentCache.put(ca.getHexHash(), ca);
+            this.inAgentCache.remove(ca.getHexHash());
         }
     }
 
@@ -227,27 +227,27 @@ public class ConsensusCacheManager {
             return null;
         }
         if (ca.getExtend().getStatus() == ConsensusStatusEnum.IN.getCode()) {
-            return filter(inDelegateCache.values(), agentAddress);
+            return agentHashFilter(inDelegateCache.values(), agentAddress);
         } else {
-            return filter(outDelegateCache.values(), agentAddress);
+            return agentHashFilter(outDelegateCache.values(), agentAddress);
         }
     }
 
-    private List<Consensus<Deposit>> filter(List<Consensus<Deposit>> allList, String agentAddress) {
+    private List<Consensus<Deposit>> agentHashFilter(List<Consensus<Deposit>> allList, String agentHash) {
         List<Consensus<Deposit>> list = new ArrayList<>();
         for (Consensus<Deposit> cd : allList) {
-            if (cd.getExtend().getAgentAddress().equals(agentAddress)) {
+            if (cd.getExtend().getAgentHash().equals(agentHash)) {
                 list.add(cd);
             }
         }
         return list;
     }
 
-    public void changeDepositStatusByAgent(String address, ConsensusStatusEnum status) {
+    public void changeDepositStatusByAgentHash(String agentHash, ConsensusStatusEnum status) {
         if (status == ConsensusStatusEnum.IN) {
             List<Consensus<Deposit>> allOutList = new ArrayList<>(outDelegateCache.values());
             for (Consensus<Deposit> cd : allOutList) {
-                if (cd.getExtend().getAgentAddress().equals(address)) {
+                if (cd.getExtend().getAgentHash().equals(agentHash)) {
                     outDelegateCache.remove(cd.getHexHash());
                     inDelegateCache.put(cd.getHexHash(), cd);
                 }
@@ -256,23 +256,23 @@ public class ConsensusCacheManager {
         }
         List<Consensus<Deposit>> allOutList = new ArrayList<>(inDelegateCache.values());
         for (Consensus<Deposit> cd : allOutList) {
-            if (cd.getExtend().getAgentAddress().equals(address)) {
+            if (cd.getExtend().getAgentHash().equals(agentHash)) {
                 inDelegateCache.remove(cd.getHexHash());
                 outDelegateCache.put(cd.getHexHash(), cd);
             }
         }
     }
 
-    public void delDepositByAgent(String address) {
+    public void delDepositByAgentHash(String agentHash) {
         List<Consensus<Deposit>> allList = new ArrayList<>(outDelegateCache.values());
         for (Consensus<Deposit> cd : allList) {
-            if (cd.getExtend().getAgentAddress().equals(address)) {
+            if (cd.getExtend().getAgentHash().equals(agentHash)) {
                 outDelegateCache.remove(cd.getHexHash());
             }
         }
         allList = new ArrayList<>(inDelegateCache.values());
         for (Consensus<Deposit> cd : allList) {
-            if (cd.getExtend().getAgentAddress().equals(address)) {
+            if (cd.getExtend().getAgentHash().equals(agentHash)) {
                 inDelegateCache.remove(cd.getHexHash());
             }
         }

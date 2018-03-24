@@ -111,18 +111,18 @@ public class PocConsensusServiceImpl implements ConsensusService {
         return tx;
     }
 
-    private Transaction joinTheConsensus(Account account, String password, long amount, String agentAddress) throws IOException, NulsException {
+    private Transaction joinTheConsensus(Account account, String password, long amount, String agentHash) throws IOException, NulsException {
         AssertUtil.canNotEmpty(account);
         AssertUtil.canNotEmpty(password);
         if (amount < PocConsensusConstant.ENTRUSTER_DEPOSIT_LOWER_LIMIT.getValue()) {
             throw new NulsRuntimeException(ErrorCode.NULL_PARAMETER);
         }
-        AssertUtil.canNotEmpty(agentAddress);
+        AssertUtil.canNotEmpty(agentHash);
         TransactionEvent event = new TransactionEvent();
         Consensus<Deposit> ca = new ConsensusDepositImpl();
         ca.setAddress(account.getAddress().toString());
         Deposit deposit = new Deposit();
-        deposit.setAgentAddress(agentAddress);
+        deposit.setAgentHash(agentHash);
         deposit.setDeposit(Na.valueOf(amount));
         deposit.setStartTime(TimeService.currentTimeMillis());
         ca.setExtend(deposit);
@@ -146,14 +146,6 @@ public class PocConsensusServiceImpl implements ConsensusService {
         tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(), account, password).serialize());
         tx.verifyWithException();
         event.setEventBody(tx);
-
-//        TransactionEvent newEvent = new TransactionEvent();
-//        try {
-//            newEvent.parse(event.serialize());
-//            System.out.println(Hex.encode(newEvent.serialize()).equalsIgnoreCase(Hex.encode(event.serialize())));
-//        } catch (NulsException e) {
-//            Log.error(e);
-//        }
         List<String> nodeList = eventBroadcaster.broadcastAndCache(event, true);
         if (null == nodeList || nodeList.isEmpty()) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "broadcast transaction failed!");
@@ -166,7 +158,6 @@ public class PocConsensusServiceImpl implements ConsensusService {
         AbstractCoinTransaction joinTx = null;
         if (null != paramsMap && StringUtils.isNotBlank((String) paramsMap.get("txHash"))) {
             PocJoinConsensusTransaction tx = (PocJoinConsensusTransaction) ledgerService.getTx(NulsDigestData.fromDigestHex((String) paramsMap.get("txHash")));
-            address = tx.getTxData().getAddress();
             joinTx = tx;
         } else {
             try {
@@ -242,10 +233,10 @@ public class PocConsensusServiceImpl implements ConsensusService {
 
 
     @Override
-    public Transaction startConsensus(String agentAddress, String password, Map<String, Object> paramsMap) throws NulsException {
-        Account account = this.accountService.getAccount(agentAddress);
+    public Transaction startConsensus(String address, String password, Map<String, Object> paramsMap) throws NulsException {
+        Account account = this.accountService.getAccount(address);
         if (null == account) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "The account is not exist,address:" + agentAddress);
+            throw new NulsRuntimeException(ErrorCode.FAILED, "The account is not exist,address:" + address);
         }
         if (paramsMap == null || paramsMap.size() < 2) {
             throw new NulsRuntimeException(ErrorCode.NULL_PARAMETER);
@@ -269,7 +260,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
             }
         }
         try {
-            return this.joinTheConsensus(account, password, params.getDeposit(), params.getAgentAddress());
+            return this.joinTheConsensus(account, password, params.getDeposit(), params.getAgentHash());
         } catch (IOException e) {
             throw new NulsRuntimeException(e);
         }
@@ -277,7 +268,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
 
     @Override
     public ConsensusStatusInfo getConsensusStatus(String address) {
-        //todo
+        //todo 现在需要实现
         return null;
     }
 }

@@ -35,7 +35,7 @@ import java.util.Map;
 public class JoinConsensusParam {
     public static final String DEPOSIT = "deposit";
     public static final String AGENT_NAME = "agentName";
-    public static final String AGENT_ADDRESS = "agentAddress";
+    public static final String AGENT_HASH = "agentHash";
     public static final String PACKING_ADDRESS = "packingAddress";
     public static final String INTRODUCTION = "introduction";
     public static final String COMMISSION_RATE = "commissionRate";
@@ -58,8 +58,8 @@ public class JoinConsensusParam {
         return (Long) params.get(DEPOSIT);
     }
 
-    public String getAgentAddress() {
-        return (String) params.get(AGENT_ADDRESS);
+    public String getAgentHash() {
+        return (String) params.get(AGENT_HASH);
     }
 
     public String getPackingAddress() {

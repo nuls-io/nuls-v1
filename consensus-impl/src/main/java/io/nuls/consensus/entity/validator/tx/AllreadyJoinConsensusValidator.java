@@ -51,7 +51,7 @@ public class AllreadyJoinConsensusValidator implements NulsDataValidator<PocJoin
 
     @Override
     public ValidateResult validate(PocJoinConsensusTransaction tx) {
-        ConsensusStatusInfo info = consensusService.getConsensusStatus(tx.getTxData().getAddress());
+        ConsensusStatusInfo info = consensusService.getConsensusStatus(tx.getTxData().getHexHash());
 
         if (info!=null&&info.getStatus() != ConsensusStatusEnum.NOT_IN.getCode()) {
             return ValidateResult.getFailedResult(ErrorCode.FAILED);

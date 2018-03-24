@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS `block_header` (
   PRIMARY KEY (`hash`)
 );
 CREATE TABLE IF NOT EXISTS `agent` (
+  `id` varchar(70) NOT NULL,
   `agent_address` varchar(40) NOT NULL,
   `agent_name` varchar(20) NOT NULL,
   `packing_address` varchar(40) NOT NULL,
@@ -42,12 +43,12 @@ CREATE TABLE IF NOT EXISTS `agent` (
   `status` INT DEFAULT 0,
   `start_time` bigint(14) NOT NULL,
   `commission_rate` decimal(14) NOT NULL,
-  PRIMARY KEY (`agent_address`)
+  PRIMARY KEY (`id`)
 );
 CREATE TABLE IF NOT EXISTS `deposit` (
   `id` varchar(70) NOT NULL,
   `address` varchar(40) NOT NULL,
-  `agent_address` varchar(40) NOT NULL,
+  `agent_id` varchar(70) NOT NULL,
   `deposit` bigint(18) NOT NULL,
   `status` int(1) DEFAULT NULL,
   `time` bigint(14) DEFAULT NULL,

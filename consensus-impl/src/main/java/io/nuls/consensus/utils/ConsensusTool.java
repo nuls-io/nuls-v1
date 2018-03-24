@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -42,7 +42,6 @@ import io.nuls.core.script.P2PKHScriptSig;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
-import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.db.entity.AgentPo;
 import io.nuls.db.entity.DepositPo;
@@ -121,6 +120,7 @@ public class ConsensusTool {
         agent.setAgentName(po.getAgentName());
         Consensus<Agent> ca = new ConsensusAgentImpl();
         ca.setAddress(po.getAgentAddress());
+        ca.setHash(NulsDigestData.fromDigestHex(po.getId()));
         ca.setExtend(agent);
         return ca;
     }
@@ -132,7 +132,7 @@ public class ConsensusTool {
         Consensus<Deposit> ca = new ConsensusDepositImpl();
         ca.setAddress(po.getAddress());
         Deposit deposit = new Deposit();
-        deposit.setAgentAddress(po.getAgentAddress());
+        deposit.setAgentHash(po.getAgentHash());
         deposit.setDeposit(Na.valueOf(po.getDeposit()));
         deposit.setStartTime(po.getTime());
         ca.setHash(NulsDigestData.fromDigestHex(po.getId()));
@@ -146,6 +146,7 @@ public class ConsensusTool {
         }
         AgentPo po = new AgentPo();
         po.setAgentAddress(bean.getAddress());
+        po.setId(bean.getHexHash());
         po.setDeposit(bean.getExtend().getDeposit().getValue());
         po.setStartTime(bean.getExtend().getStartTime());
         po.setRemark(bean.getExtend().getIntroduction());
@@ -156,7 +157,7 @@ public class ConsensusTool {
         return po;
     }
 
-    public static DepositPo depositToPojo(Consensus<Deposit> bean,String txHash) {
+    public static DepositPo depositToPojo(Consensus<Deposit> bean, String txHash) {
         if (null == bean) {
             return null;
         }
@@ -164,7 +165,7 @@ public class ConsensusTool {
         po.setAddress(bean.getAddress());
         po.setDeposit(bean.getExtend().getDeposit().getValue());
         po.setTime(bean.getExtend().getStartTime());
-        po.setAgentAddress(bean.getExtend().getAgentAddress());
+        po.setAgentHash(bean.getExtend().getAgentHash());
         po.setId(bean.getHexHash());
         po.setTxHash(txHash);
         return po;

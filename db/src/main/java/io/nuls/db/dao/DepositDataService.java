@@ -32,9 +32,9 @@ import io.nuls.db.entity.DepositPo;
  */
 public interface DepositDataService extends BaseDataService<String, DepositPo> {
 
-    int deleteByAgentAddress(String address);
+    int deleteByAgentHash(String agentHash);
 
     int updateSelective(DepositPo po);
 
-    int updateSelectiveByAgentAddress(DepositPo po);
+    int updateSelectiveByAgentHash(DepositPo po);
 }

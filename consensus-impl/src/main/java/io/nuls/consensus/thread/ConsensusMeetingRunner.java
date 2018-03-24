@@ -201,16 +201,16 @@ public class ConsensusMeetingRunner implements Runnable {
             currentRound.setIndex(currentRound.getPreviousRound().getIndex() + index);
         }
 
-        Map<String, List<Consensus<Deposit>>> delegateMap = new HashMap<>();
+        Map<String, List<Consensus<Deposit>>> depositMap = new HashMap<>();
         List<Consensus<Deposit>> delegateList = consensusCacheManager.getCachedDepositList();
         Na totalDeposit = Na.ZERO;
         for (Consensus<Deposit> cd : delegateList) {
-            List<Consensus<Deposit>> sonList = delegateMap.get(cd.getExtend().getAgentAddress());
+            List<Consensus<Deposit>> sonList = depositMap.get(cd.getExtend().getAgentHash());
             if (null == sonList) {
                 sonList = new ArrayList<>();
             }
             sonList.add(cd);
-            delegateMap.put(cd.getExtend().getAgentAddress(), sonList);
+            depositMap.put(cd.getExtend().getAgentHash(), sonList);
             totalDeposit = totalDeposit.add(cd.getExtend().getDeposit());
         }
         List<PocMeetingMember> memberList = new ArrayList<>();
@@ -221,7 +221,7 @@ public class ConsensusMeetingRunner implements Runnable {
             }
             PocMeetingMember mm = new PocMeetingMember();
             mm.setAgentConsensus(ca);
-            mm.setDelegateList(delegateMap.get(ca.getAddress()));
+            mm.setDelegateList(depositMap.get(ca.getHexHash()));
             if (!isSeed && (mm.getDelegateList() == null || mm.getDelegateList().size() > PocConsensusConstant.MAX_ACCEPT_NUM_OF_DELEGATE)) {
                 continue;
             }
@@ -230,7 +230,8 @@ public class ConsensusMeetingRunner implements Runnable {
                 continue;
             }
             mm.setRoundIndex(currentRound.getIndex());
-            mm.setAddress(ca.getAddress());
+            mm.setAgentHash(ca.getHexHash());
+            mm.setAgentAddress(ca.getAddress());
             mm.setPackerAddress(ca.getExtend().getPackingAddress());
             mm.setRoundStartTime(currentRound.getStartTime());
             memberList.add(mm);
@@ -565,7 +566,7 @@ public class ConsensusMeetingRunner implements Runnable {
                 break;
             }
             packingIndex++;
-            addressList.add(Address.fromHashs(member.getAddress()));
+            addressList.add(Address.fromHashs(member.getAgentAddress()));
         }
         if (addressList.isEmpty()) {
             return;

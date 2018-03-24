@@ -55,7 +55,7 @@ public class DepositAmountValidator implements NulsDataValidator<PocJoinConsensu
     public ValidateResult validate(PocJoinConsensusTransaction data) {
         Na limit = PocConsensusConstant.ENTRUSTER_DEPOSIT_LOWER_LIMIT;
         Na max = PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT;
-        List<Consensus<Deposit>> list = consensusCacheManager.getCachedDepositList(data.getTxData().getExtend().getAgentAddress());
+        List<Consensus<Deposit>> list = consensusCacheManager.getCachedDepositList(data.getTxData().getExtend().getAgentHash());
         if(list==null){
             return ValidateResult.getSuccessResult();
         }
