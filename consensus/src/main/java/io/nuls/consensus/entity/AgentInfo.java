@@ -30,6 +30,7 @@ import io.nuls.core.chain.entity.Na;
  * date 2018/3/20.
  */
 public class AgentInfo {
+    private String agentId;
     //节点名称
     private String agentName;
     //    代理地址
@@ -56,6 +57,14 @@ public class AgentInfo {
     private long packedCount;
 
     private long startTime;
+
+    public String getAgentId() {
+        return agentId;
+    }
+
+    public void setAgentId(String agentId) {
+        this.agentId = agentId;
+    }
 
     public long getStartTime() {
         return startTime;

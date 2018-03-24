@@ -154,12 +154,12 @@ public class PocConsensusResource {
     public RpcResult depositToAgent(DepositForm form) throws NulsException {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getAddress());
-        AssertUtil.canNotEmpty(form.getAgentAddress());
+        AssertUtil.canNotEmpty(form.getAgentId());
         AssertUtil.canNotEmpty(form.getDeposit());
         AssertUtil.canNotEmpty(form.getPassword());
         Map<String, Object> paramsMap = new HashMap<>();
         paramsMap.put("deposit", form.getDeposit());
-        paramsMap.put("agentAddress", form.getAgentAddress());
+        paramsMap.put("agentHash", form.getAgentId());
         Transaction tx = consensusService.startConsensus(form.getAddress(), form.getPassword(), paramsMap);
         return RpcResult.getSuccess().setData(tx.getHash().getDigestHex());
     }
@@ -229,6 +229,7 @@ public class PocConsensusResource {
             List<AgentInfo> list = new ArrayList<>();
             for (int i = 0; i < pageSize; i++) {
                 AgentInfo item = new AgentInfo();
+                item.setAgentId(StringUtils.getNewUUID());
                 item.setCommissionRate(15);
                 item.setCreditRatio(0.9);
                 item.setStatus(2);
@@ -274,6 +275,7 @@ public class PocConsensusResource {
                 item.setCommissionRate(15);
                 item.setCreditRatio(0.9);
                 item.setStatus(2);
+                item.setAgentId(StringUtils.getNewUUID());
                 item.setMemberCount(3 + pageNumber);
                 item.setOwndeposit(Na.parseNuls(50000 + pageNumber));
                 item.setTotalDeposit(Na.parseNuls(300000 + pageNumber));
