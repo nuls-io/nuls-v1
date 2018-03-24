@@ -293,7 +293,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
         map.put("joinAccountCount", joinedAgent.size());
         map.put("usableBalance", 2018);
         map.put("rewardOfDay", 2018);
-        return null;
+        return map;
     }
 
     @Override
