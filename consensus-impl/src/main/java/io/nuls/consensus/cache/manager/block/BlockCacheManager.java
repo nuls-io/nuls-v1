@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -141,15 +141,17 @@ public class BlockCacheManager {
 
     public void cacheBlock(Block block) {
 
-        boolean b = this.bifurcateProcessor.addHeader(block.getHeader());
-        if (b) {
-            NulsContext.getInstance().setBestBlock(block);
-        }
+
         //txs approval
         List<String> blockHashList = bifurcateProcessor.getHashList(block.getHeader().getHeight());
-        if (blockHashList.size() > 1) {
-            rollbackBlocksTxs(blockHashList);
-            return;
+        if (blockHashList != null) {
+            blockHashList.remove(block.getHeader().getHash().getDigestHex());
+            if (blockHashList.size() > 1) {
+                rollbackBlocksTxs(blockHashList);
+                this.bifurcateProcessor.addHeader(block.getHeader());
+                blockCacheMap.put(block.getHeader().getHash().getDigestHex(), block);
+                return;
+            }
         }
         for (int i = 0; i < block.getHeader().getTxCount(); i++) {
             Transaction tx = block.getTxs().get(i);
@@ -161,22 +163,27 @@ public class BlockCacheManager {
                     this.ledgerService.approvalTx(tx);
                     confirmingTxCacheManager.putTx(tx);
                 } catch (NulsException e) {
-                    rollbackBlocksTxs(block.getTxs(),0,i);
+                    rollbackBlocksTxs(block.getTxs(), 0, i);
                     Log.error(e);
                     throw new NulsRuntimeException(e);
                 }
             }
         }
         txCacheManager.removeTx(block.getTxHashList());
+        boolean b = this.bifurcateProcessor.addHeader(block.getHeader());
+        if (b) {
+            NulsContext.getInstance().setBestBlock(block);
+        }
         blockCacheMap.put(block.getHeader().getHash().getDigestHex(), block);
         Block block1 = this.getBlock(block.getHeader().getHeight());
         if (null != block1 && block1.getHeader().getHeight() > NulsContext.getInstance().getBestBlock().getHeader().getHeight()) {
             NulsContext.getInstance().setBestBlock(block1);
         }
+
     }
 
     private void rollbackBlocksTxs(List<Transaction> txList, int start, int end) {
-        for(int i=start;i<=end&&i< txList.size();i++){
+        for (int i = start; i <= end && i < txList.size(); i++) {
             Transaction tx = txList.get(i);
             if (tx.getStatus() == TxStatusEnum.AGREED
                     ) {
@@ -203,15 +210,7 @@ public class BlockCacheManager {
     private void rollbackTxs(List<Transaction> txs) {
         for (Transaction tx : txs) {
             boolean isMine;
-//            try {
-//                isMine = ledgerService.checkTxIsMine(tx);
-//            } catch (NulsException e) {
-//                Log.error(e);
-//                throw new NulsRuntimeException(e);
-//            }
-            if (tx.getStatus() == TxStatusEnum.AGREED
-//                    && !isMine
-                    ) {
+            if (tx.getStatus() == TxStatusEnum.AGREED) {
                 try {
                     ledgerService.rollbackTx(tx);
                 } catch (NulsException e) {
@@ -298,7 +297,7 @@ public class BlockCacheManager {
 
     public boolean canPersistence() {
         BlockHeaderChain longestChain = bifurcateProcessor.getLongestChain();
-        return null !=longestChain  && longestChain.size() > PocConsensusConstant.CONFIRM_BLOCK_COUNT;
+        return null != longestChain && longestChain.size() > PocConsensusConstant.CONFIRM_BLOCK_COUNT;
     }
 
     public long getRecievedMaxHeight() {
@@ -332,5 +331,9 @@ public class BlockCacheManager {
 
     public BifurcateProcessor getBifurcateProcessor() {
         return bifurcateProcessor;
+    }
+
+    public boolean processingBifurcation(long height) {
+        return this.bifurcateProcessor.processing(height);
     }
 }

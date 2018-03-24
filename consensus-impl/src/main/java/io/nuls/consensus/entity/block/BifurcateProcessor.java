@@ -27,8 +27,11 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.utils.log.Log;
 
 import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Niels
@@ -42,6 +45,8 @@ public class BifurcateProcessor {
 
     private long bestHeight;
 
+    private Lock lock = new ReentrantLock();
+
     private BifurcateProcessor() {
     }
 
@@ -50,11 +55,16 @@ public class BifurcateProcessor {
     }
 
     public synchronized boolean addHeader(BlockHeader header) {
-        boolean result = add(header);
-        if (result) {
-            checkIt();
+        lock.lock();
+        try {
+            boolean result = add(header);
+            if (result) {
+                checkIt();
+            }
+            return result;
+        } finally {
+            lock.unlock();
         }
-        return result;
     }
 
     private void checkIt() {
@@ -138,12 +148,16 @@ public class BifurcateProcessor {
     }
 
     public void removeHash(String hash) {
-        if (chainList.isEmpty()) {
-            return;
+        lock.lock();
+        try {
+            if (chainList.isEmpty()) {
+                return;
+            }
+            List<BlockHeaderChain> tempList = new ArrayList<>(this.chainList);
+            tempList.forEach((BlockHeaderChain chain) -> removeBlock(chain, hash));
+        } finally {
+            lock.unlock();
         }
-        List<BlockHeaderChain> tempList = new ArrayList<>(this.chainList);
-        tempList.forEach((BlockHeaderChain chain) -> removeBlock(chain, hash));
-
     }
 
     private void removeBlock(BlockHeaderChain chain, String hashHex) {
@@ -167,5 +181,41 @@ public class BifurcateProcessor {
             }
         }
         return new ArrayList<>(set);
+    }
+
+    public boolean processing(long height) {
+        if (chainList.isEmpty()) {
+            return false;
+        }
+        lock.lock();
+        try {
+            List<String> hashList = this.getHashList(height);
+            if (hashList.size() == 1) {
+                return true;
+            }
+            if (hashList.isEmpty()) {
+                Log.warn("lost a block:" + height);
+                return false;
+            }
+            List<BlockHeaderChain> longestChainList = new ArrayList<>();
+            int size = 0;
+            for (BlockHeaderChain chain : chainList) {
+                if (chain.size() == size) {
+                    longestChainList.add(chain);
+                } else if (chain.size() > size && size == 0) {
+                    longestChainList.add(chain);
+                } else if (chain.size() > size && size != 0) {
+                    longestChainList.clear();
+                    longestChainList.add(chain);
+                }
+            }
+            if (longestChainList.size() != 1) {
+                return false;
+            }
+            chainList = longestChainList;
+            return true;
+        } finally {
+            lock.unlock();
+        }
     }
 }
