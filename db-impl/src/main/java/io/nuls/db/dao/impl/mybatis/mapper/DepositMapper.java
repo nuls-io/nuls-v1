@@ -32,7 +32,7 @@ import io.nuls.db.entity.DepositPo;
  */
 public interface DepositMapper extends BaseMapper<String,DepositPo> {
 
-    int deleteByAgentAddress(String address);
+    int deleteByAgentHash(String address);
 
-    int updateSelectiveByAgentAddress(DepositPo po);
+    int updateSelectiveByAgentHash(DepositPo po);
 }

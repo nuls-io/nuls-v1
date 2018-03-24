@@ -50,7 +50,7 @@ public class DepositDaoImpl extends BaseDaoImpl<DepositMapper, String, DepositPo
 
     @Override
     public int deleteByAgentHash(String address) {
-        return this.getMapper().deleteByAgentAddress(address);
+        return this.getMapper().deleteByAgentHash(address);
     }
 
     @Override
@@ -60,6 +60,6 @@ public class DepositDaoImpl extends BaseDaoImpl<DepositMapper, String, DepositPo
 
     @Override
     public int updateSelectiveByAgentHash(DepositPo po) {
-        return this.getMapper().updateSelectiveByAgentAddress(po);
+        return this.getMapper().updateSelectiveByAgentHash(po);
     }
 }
