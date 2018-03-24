@@ -333,9 +333,17 @@ public class PocConsensusServiceImpl implements ConsensusService {
     }
 
     @Override
-    public ConsensusStatusInfo getConsensusStatus(String address) {
-        //todo 现在需要实现
-        return null;
+    public ConsensusStatusInfo getConsensusStatus(String agentHash) {
+        Consensus<Agent> ca = this.consensusCacheManager.getCachedAgentByHash(agentHash);
+        if(null==ca){
+            return null;
+        }
+        Account account = this.accountService.getAccount(ca.getAddress());
+        ConsensusStatusInfo info = new ConsensusStatusInfo();
+        info.setSeed(false);
+        info.setStatus(ca.getExtend().getStatus());
+        info.setAccount(account);
+        return info;
     }
 
     @Override

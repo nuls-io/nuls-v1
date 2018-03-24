@@ -36,24 +36,23 @@ import io.nuls.core.validate.ValidateResult;
  * @author Niels
  * @date 2017/12/6
  */
-public class AllreadyJoinConsensusValidator implements NulsDataValidator<PocJoinConsensusTransaction> {
+public class AgentExistValidator implements NulsDataValidator<PocJoinConsensusTransaction> {
 
-    private static final AllreadyJoinConsensusValidator INSTANCE = new AllreadyJoinConsensusValidator();
+    private static final AgentExistValidator INSTANCE = new AgentExistValidator();
 
     private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
 
-    private AllreadyJoinConsensusValidator() {
+    private AgentExistValidator() {
     }
 
-    public static final AllreadyJoinConsensusValidator getInstance() {
+    public static final AgentExistValidator getInstance() {
         return INSTANCE;
     }
 
     @Override
     public ValidateResult validate(PocJoinConsensusTransaction tx) {
-        ConsensusStatusInfo info = consensusService.getConsensusStatus(tx.getTxData().getHexHash());
-
-        if (info!=null&&info.getStatus() != ConsensusStatusEnum.NOT_IN.getCode()) {
+        ConsensusStatusInfo info = consensusService.getConsensusStatus(tx.getTxData().getExtend().getAgentHash());
+        if (info==null) {
             return ValidateResult.getFailedResult(ErrorCode.FAILED);
         }
         return ValidateResult.getSuccessResult();
