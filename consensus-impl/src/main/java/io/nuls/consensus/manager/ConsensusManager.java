@@ -140,12 +140,14 @@ public class ConsensusManager implements Runnable {
             if (this.seedNodeList.contains(address)) {
                 info.setAccount(accountService.getAccount(address));
                 info.setStatus(ConsensusStatusEnum.IN.getCode());
+                info.setSeed(true);
                 break;
             }
             for (Consensus<Agent> agent : agentList) {
                 if (agent.getExtend().getPackingAddress().equals(address)) {
                     info.setAccount(accountService.getAccount(address));
                     info.setStatus(agent.getExtend().getStatus());
+                    info.setSeed(agent.getExtend().getSeed());
                     if (ConsensusStatusEnum.NOT_IN.getCode() != info.getStatus()) {
                         break;
                     }

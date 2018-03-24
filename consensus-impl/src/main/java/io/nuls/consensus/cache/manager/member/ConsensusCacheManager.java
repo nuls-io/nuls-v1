@@ -104,9 +104,8 @@ public class ConsensusCacheManager {
         if (null == mine) {
             info.setStatus(ConsensusStatusEnum.NOT_IN.getCode());
         } else if (mine.getExtend() instanceof Agent) {
+            info.setSeed(((Agent) mine.getExtend()).getSeed());
             info.setStatus(((Agent) mine.getExtend()).getStatus());
-        } else if (mine.getExtend() instanceof Deposit) {
-            info.setStatus(((Deposit) mine.getExtend()).getStatus());
         }
         this.updateConsensusStatusInfo(info);
     }

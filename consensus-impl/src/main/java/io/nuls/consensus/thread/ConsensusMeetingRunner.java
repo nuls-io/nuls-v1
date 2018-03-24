@@ -152,7 +152,8 @@ public class ConsensusMeetingRunner implements Runnable {
     private boolean checkCondition() {
         List<Node> nodes = networkService.getAvailableNodes();
         boolean result = nodes != null && nodes.size() >= MIN_NODE_COUNT;
-        result = result && (NulsContext.getInstance().getBestBlock().getHeader().getHeight() >= NulsContext.getInstance().getNetBestBlockHeight());
+        boolean synced = ((NulsContext.getInstance().getNetBestBlockHeight() > 0 || (null != consensusManager.getConsensusStatusInfo() && consensusManager.getConsensusStatusInfo().isSeed())) && NulsContext.getInstance().getBestBlock().getHeader().getHeight() >= NulsContext.getInstance().getNetBestBlockHeight());
+        result = result && synced;
         return result;
     }
 
@@ -530,9 +531,9 @@ public class ConsensusMeetingRunner implements Runnable {
         long roundIndex = lastBlockRoundData.getRoundIndex();
         int packingIndex = 0;
 
-        if(lastBlockRoundData.getPackingIndexOfRound() == lastBlockRoundData.getConsensusMemberCount()){
+        if (lastBlockRoundData.getPackingIndexOfRound() == lastBlockRoundData.getConsensusMemberCount()) {
             packingIndex = 1;
-        }else {
+        } else {
             packingIndex = lastBlockRoundData.getPackingIndexOfRound() + 1;
         }
 
