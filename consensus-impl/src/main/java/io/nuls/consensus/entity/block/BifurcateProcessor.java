@@ -39,7 +39,6 @@ public class BifurcateProcessor {
     private static final BifurcateProcessor INSTANCE = new BifurcateProcessor();
 
     private List<BlockHeaderChain> chainList = Collections.synchronizedList(new ArrayList<>());
-    ;
 
     private long bestHeight;
 
@@ -50,7 +49,7 @@ public class BifurcateProcessor {
         return INSTANCE;
     }
 
-    public boolean addHeader(BlockHeader header) {
+    public synchronized boolean addHeader(BlockHeader header) {
         boolean result = add(header);
         if (result) {
             checkIt();
@@ -75,12 +74,14 @@ public class BifurcateProcessor {
     }
 
     private boolean add(BlockHeader header) {
-        for (BlockHeaderChain chain : chainList) {
+        for (int i = 0; i < this.chainList.size(); i++) {
+            BlockHeaderChain chain = chainList.get(i);
             if (chain.contains(header)) {
                 return false;
             }
         }
-        for (BlockHeaderChain chain : chainList) {
+        for (int i = 0; i < this.chainList.size(); i++) {
+            BlockHeaderChain chain = chainList.get(i);
             int index = chain.indexOf(header.getPreHash().getDigestHex(), header.getHeight() - 1);
             if (index == chain.size() - 1) {
                 chain.addHeader(header);
