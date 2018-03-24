@@ -71,9 +71,8 @@ public class BlockPersistenceThread implements Runnable {
         this.running = true;
         while (true) {
             try {
-                doPersistence();
                 if (blockCacheManager.canPersistence()) {
-                    continue;
+                    doPersistence();
                 }
                 Thread.sleep(1000L);
             } catch (Exception e) {
@@ -92,7 +91,6 @@ public class BlockPersistenceThread implements Runnable {
         }
         Block block = blockCacheManager.getBlock(height);
         if (null == block) {
-
             if(blockCacheManager.getBlockCacheMap().size()>this.blockCacheManager.getBifurcateProcessor().getLongestChain().size()){
                 List<Block> blockList = new ArrayList<>(blockCacheManager.getBlockCacheMap().values());
                 Collections.sort(blockList, BlockHeightComparator.getInstance());
