@@ -58,7 +58,7 @@ public class BlockTxValidator implements NulsDataValidator<Block> {
                 if(result.getErrorCode()== ErrorCode.ORPHAN_TX){
                     return result;
                 }
-                return ValidateResult.getFailedResult("there is wrong transaction!");
+                return ValidateResult.getFailedResult("there is wrong transaction!msg:"+result.getMessage());
             }
             if (tx.getType() == TransactionConstant.TX_TYPE_COIN_BASE) {
                 count++;
