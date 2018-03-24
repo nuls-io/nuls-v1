@@ -99,7 +99,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     public Transaction getTx(NulsDigestData hash) {
         TransactionPo po = txDao.gettx(hash.getDigestHex());
-        if(null==po){
+        if (null == po) {
             return null;
         }
         try {
@@ -113,7 +113,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     public Transaction getLocalTx(NulsDigestData hash) {
         TransactionLocalPo po = txDao.getLocaltx(hash.getDigestHex());
-        if(null==po){
+        if (null == po) {
             return null;
         }
         try {
@@ -180,11 +180,17 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 }
                 return txList;
             }
+
             int start = (pageNumber - 1) * pageSize;
             if (txList.size() >= start + pageSize) {
                 return txList.subList(start, start + pageSize);
+            } else if (start < txList.size()) {
+                txList = txList.subList(start, txList.size());
+                start = 0;
+                pageSize = pageSize - txList.size();
+            } else {
+                start = start - txList.size();
             }
-            start = start - txList.size();
             poList = txDao.getTxs(address, txType, start, pageSize);
             txList = new ArrayList<>();
             for (TransactionPo po : poList) {
@@ -226,9 +232,13 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         int start = (pageNumber - 1) * pageSize;
         if (txList.size() >= start + pageSize) {
             return txList.subList(start, start + pageSize);
+        } else if (start < txList.size()) {
+            txList = txList.subList(start, txList.size());
+            start = 0;
+            pageSize = pageSize - txList.size();
+        } else {
+            start = start - txList.size();
         }
-
-        start = start - txList.size();
         poList = txDao.getLocalTxs(address, txType, start, pageSize);
         txList = new ArrayList<>();
         for (TransactionLocalPo po : poList) {

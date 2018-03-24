@@ -87,7 +87,8 @@ public class TransactionLocalDaoImpl extends BaseDaoImpl<TransactionLocalMapper,
             PageHelper.offsetPage(start, limit);
         }
         PageHelper.orderBy("a.create_time desc");
-        return getMapper().selectByAddress(searchable);
+        List<TransactionLocalPo> localPoList = getMapper().selectByAddress(searchable);
+        return localPoList;
     }
 
     @Override

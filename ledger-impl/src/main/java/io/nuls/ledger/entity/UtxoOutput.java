@@ -37,6 +37,8 @@ import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.str.StringUtils;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by win10 on 2017/10/30.
@@ -227,4 +229,5 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
     public byte[] getOwner() {
         return this.getP2PKHScript().getPublicKeyDigest().getDigestBytes();
     }
+
 }
