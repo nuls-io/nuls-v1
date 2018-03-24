@@ -44,7 +44,7 @@ public class DepositSearchParams extends Searchable {
             this.addCondition(SEARCH_FIELD_ADDRESS, SearchOperator.eq, params.get(SEARCH_FIELD_ADDRESS));
         }
         if (params.containsKey(SEARCH_FIELD_AGENT_ADDRESS)) {
-            this.addCondition("agent_hash", SearchOperator.eq, params.get(SEARCH_FIELD_AGENT_ADDRESS));
+            this.addCondition("agent_id", SearchOperator.eq, params.get(SEARCH_FIELD_AGENT_ADDRESS));
         }
     }
 }
