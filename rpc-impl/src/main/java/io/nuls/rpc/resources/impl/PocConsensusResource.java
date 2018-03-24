@@ -98,33 +98,45 @@ public class PocConsensusResource {
     }
 
     @GET
+    @Path("/local")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult getInfo() {
+        RpcResult result = RpcResult.getSuccess();
+//        ConsensusInfoDTO dto = new ConsensusInfoDTO();
+//        if (temp == 1) {
+//            dto.setAgentCount(2);
+//            dto.setConsensusAccountCount(10);
+//            dto.setReward(1234500000000L);
+//            dto.setRewardOfDay(234500000000L);
+//            dto.setTotalDeposit(300000000000000L);
+//            dto.setUsableBalance(2234500000000L);
+//            result.setData(dto);
+//            return result;
+//        }
+        Map<String, Object> dataMap = consensusService.getConsensusInfo(null);
+        result.setData(dataMap);
+        return result;
+    }
+
+    @GET
     @Path("/address/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getInfo(@PathParam("address") String address) {
+        AssertUtil.canNotEmpty(address);
         RpcResult result = RpcResult.getSuccess();
-        ConsensusInfoDTO dto = new ConsensusInfoDTO();
-        if (temp == 1) {
-            if (StringUtils.isBlank(address)) {
-                dto.setAgentCount(2);
-                dto.setConsensusAccountCount(10);
-                dto.setReward(1234500000000L);
-                dto.setRewardOfDay(234500000000L);
-                dto.setTotalDeposit(300000000000000L);
-                dto.setUsableBalance(2234500000000L);
-            } else {
-                dto.setAgentCount(0);
-                dto.setConsensusAccountCount(2);
-                dto.setReward(5500000000L);
-                dto.setRewardOfDay(1500000000L);
-                dto.setTotalDeposit(20000000000000L);
-                dto.setUsableBalance(234500000000L);
-            }
-            result.setData(dto);
-            return result;
-        }
+//        ConsensusInfoDTO dto = new ConsensusInfoDTO();
+//        if (temp == 1) {
+//            dto.setAgentCount(0);
+//            dto.setConsensusAccountCount(2);
+//            dto.setReward(5500000000L);
+//            dto.setRewardOfDay(1500000000L);
+//            dto.setTotalDeposit(20000000000000L);
+//            dto.setUsableBalance(234500000000L);
+//            result.setData(dto);
+//            return result;
+//        }
         Map<String, Object> dataMap = consensusService.getConsensusInfo(address);
-        //todo
-        result.setData(dto);
+        result.setData(dataMap);
         return result;
     }
 
@@ -371,10 +383,10 @@ public class PocConsensusResource {
     public RpcResult queryDepositListByAgentAddress(@PathParam("agentAddress") String agentAddress,
                                                     @QueryParam("pageNumber") Integer pageNumber, @QueryParam("pageSize") Integer pageSize) {
         AssertUtil.canNotEmpty(agentAddress);
-        if (null==pageNumber||pageNumber == 0) {
+        if (null == pageNumber || pageNumber == 0) {
             pageNumber = 1;
         }
-        if (null==pageSize||pageSize == 0) {
+        if (null == pageSize || pageSize == 0) {
             pageSize = 10;
         }
         if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {

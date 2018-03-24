@@ -293,4 +293,17 @@ public class ConsensusCacheManager {
         allSet.addAll(inDelegateCache.values());
         return new ArrayList<>(allSet);
     }
+    public List<Consensus<Deposit>> getCachedDepositListByAddress(String address) {
+        Set<Consensus<Deposit>> allSet = new HashSet<>(outDelegateCache.values());
+        allSet.addAll(inDelegateCache.values());
+
+        List<Consensus<Deposit>> list =  new ArrayList<>(allSet);
+        for(int i=list.size()-1;i>=0;i--){
+            Consensus<Deposit> cd = list.get(i);
+            if(!cd.getAddress().equals(address)){
+                list.remove(i);
+            }
+        }
+        return list;
+    }
 }
