@@ -97,4 +97,16 @@
         join utxo_output b on a.`hash` = b.tx_hash
         <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
     </select>
+
+    <update id="unlockTxOutput" parameterType="java.lang.String">
+        update utxo_output
+        set status = 0
+        where status = 1 and tx_hash = #{txHash,jdbcType=VARCHAR}
+    </update>
+
+    <update id="lockTxOutput" parameterType="java.lang.String">
+        update utxo_output
+        set status = 1
+        where out_index = 0 and tx_hash = #{txHash,jdbcType=VARCHAR}
+    </update>
 </mapper>

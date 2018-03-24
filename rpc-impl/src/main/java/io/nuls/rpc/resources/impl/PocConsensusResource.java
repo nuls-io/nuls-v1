@@ -40,9 +40,9 @@ import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
-import io.nuls.db.dao.DelegateAccountDataService;
+import io.nuls.db.dao.AgentDataService;
 import io.nuls.db.dao.UtxoOutputDataService;
-import io.nuls.db.entity.DelegateAccountPo;
+import io.nuls.db.entity.AgentPo;
 import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.rpc.entity.RpcResult;
@@ -72,7 +72,7 @@ public class PocConsensusResource {
     private UtxoOutputDataService outputDataService = NulsContext.getServiceBean(UtxoOutputDataService.class);
     private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
 
-    private DelegateAccountDataService delegateAccountDataService = NulsContext.getServiceBean(DelegateAccountDataService.class);
+    private AgentDataService delegateAccountDataService = NulsContext.getServiceBean(AgentDataService.class);
 
     //todo 临时使用的
     private int temp = 1;
@@ -131,7 +131,7 @@ public class PocConsensusResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult createAgent(CreateAgentForm form) throws NulsException {
         AssertUtil.canNotEmpty(form);
-        AssertUtil.canNotEmpty(form.getAddress());
+        AssertUtil.canNotEmpty(form.getAgentAddress());
         AssertUtil.canNotEmpty(form.getAgentName());
         AssertUtil.canNotEmpty(form.getPackingAddress());
         AssertUtil.canNotEmpty(form.getDeposit());
@@ -139,12 +139,12 @@ public class PocConsensusResource {
         AssertUtil.canNotEmpty(form.getPassword());
         Map<String, Object> paramsMap = new HashMap<>();
         paramsMap.put("deposit", form.getDeposit());
-        paramsMap.put("agentAddress", form.getPackingAddress());
+        paramsMap.put("packingAddress", form.getPackingAddress());
         paramsMap.put("introduction", form.getRemark());
         paramsMap.put("commissionRate", form.getCommissionRate());
         paramsMap.put("agentName", form.getAgentName());
-        Transaction tx = consensusService.startConsensus(form.getAddress(), form.getPassword(), paramsMap);
-        return RpcResult.getSuccess().setData(tx.getHash());
+        Transaction tx = consensusService.startConsensus(form.getAgentAddress(), form.getPassword(), paramsMap);
+        return RpcResult.getSuccess().setData(tx.getHash().getDigestHex());
     }
 
 
@@ -161,19 +161,19 @@ public class PocConsensusResource {
         paramsMap.put("deposit", form.getDeposit());
         paramsMap.put("agentAddress", form.getAgentAddress());
         Transaction tx = consensusService.startConsensus(form.getAddress(), form.getPassword(), paramsMap);
-        return RpcResult.getSuccess().setData(tx.getHash());
+        return RpcResult.getSuccess().setData(tx.getHash().getDigestHex());
     }
 
 
-    @DELETE
-    @Path("/agent")
+    @POST
+    @Path("/agent/stop")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult stopAgent(StopAgentForm form) throws NulsException, IOException {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getAddress());
         AssertUtil.canNotEmpty(form.getPassword());
         Transaction tx = consensusService.stopConsensus(form.getAddress(), form.getPassword(), null);
-        return RpcResult.getSuccess().setData(tx.getHash());
+        return RpcResult.getSuccess().setData(tx.getHash().getDigestHex());
     }
 
 
@@ -316,7 +316,8 @@ public class PocConsensusResource {
                 item.setAmount(1000000000);
                 item.setDepositTime(System.currentTimeMillis());
                 item.setStatus(2);
-                if (agentAddress != null) {
+                item.setAgentName("二货节点"+i);
+                if (StringUtils.isNotBlank(agentAddress)) {
                     item.setAgentAddress(agentAddress);
                 } else {
                     try {
@@ -364,6 +365,7 @@ public class PocConsensusResource {
                 } catch (NulsException e) {
                     Log.error(e);
                 }
+                item.setAgentName("二货节点"+i);
                 item.setAmount(100000000 + i);
                 item.setDepositTime(System.currentTimeMillis());
                 item.setStatus(i / 2);
@@ -391,13 +393,13 @@ public class PocConsensusResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getAllAgentStatusList() {
         RpcResult rpcResult = RpcResult.getSuccess();
-        List<DelegateAccountPo> polist = delegateAccountDataService.getList();
+        List<AgentPo> polist = delegateAccountDataService.getList();
         if (null == polist || polist.isEmpty()) {
             return rpcResult;
         }
         Map<String, Integer> statusMap = new HashMap<>();
-        for (DelegateAccountPo po : polist) {
-            statusMap.put(po.getAddress(), po.getStatus());
+        for (AgentPo po : polist) {
+            statusMap.put(po.getAgentAddress(), po.getStatus());
         }
         return rpcResult.setData(statusMap);
     }
@@ -405,14 +407,23 @@ public class PocConsensusResource {
     @POST
     @Path("/withdraw")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult exitConsensus(WithdrawForm form) throws NulsException, IOException {
+    public RpcResult exitConsensus(WithdrawForm form)  {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getTxHash());
         AssertUtil.canNotEmpty(form.getPassword());
         AssertUtil.canNotEmpty(form.getAddress());
         Map<String, Object> params = new HashMap<>();
         params.put("txHash", form.getTxHash());
-        Transaction tx = consensusService.stopConsensus(form.getAddress(), form.getPassword(), params);
+        Transaction tx = null;
+        try {
+            tx = consensusService.stopConsensus(form.getAddress(), form.getPassword(), params);
+        } catch (NulsException e) {
+            Log.error(e);
+            return RpcResult.getFailed(e.getMessage());
+        } catch (IOException e) {
+            Log.error(e);
+            return RpcResult.getFailed(e.getMessage());
+        }
         return RpcResult.getSuccess().setData(tx.getHash().getDigestHex());
     }
 }

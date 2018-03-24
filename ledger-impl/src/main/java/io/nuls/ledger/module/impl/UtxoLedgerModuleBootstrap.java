@@ -23,7 +23,6 @@
  */
 package io.nuls.ledger.module.impl;
 
-import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.chain.manager.TransactionValidatorManager;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
@@ -81,7 +80,6 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
         TransactionValidatorManager.addTxDefValidator(TxRemarkValidator.getInstance());
         TransactionValidatorManager.addTxDefValidator(TxFieldValidator.getInstance());
         TransactionValidatorManager.addTxDefValidator(TxSignValidator.getInstance());
-
 
         CoinTransactionValidatorManager.addTxDefValidator(UtxoTxInputsValidator.getInstance());
         CoinTransactionValidatorManager.addTxDefValidator(UtxoTxOutputsValidator.getInstance());

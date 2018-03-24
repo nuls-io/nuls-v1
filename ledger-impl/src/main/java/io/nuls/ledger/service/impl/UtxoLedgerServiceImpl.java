@@ -40,6 +40,7 @@ import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.core.validate.ValidateResult;
+import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.db.dao.UtxoTransactionDataService;
 import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.entity.TransactionPo;
@@ -49,6 +50,7 @@ import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.entity.Balance;
+import io.nuls.ledger.entity.OutPutStatusEnum;
 import io.nuls.ledger.entity.UtxoBalance;
 import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.params.Coin;
@@ -57,6 +59,7 @@ import io.nuls.ledger.entity.params.OperationType;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.entity.tx.TransferTransaction;
+import io.nuls.ledger.entity.tx.UnlockNulsTransaction;
 import io.nuls.ledger.event.TransactionEvent;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.ledger.util.UtxoTransactionTool;
@@ -96,6 +99,9 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     public Transaction getTx(NulsDigestData hash) {
         TransactionPo po = txDao.gettx(hash.getDigestHex());
+        if(null==po){
+            return null;
+        }
         try {
             return UtxoTransferTool.toTransaction(po);
         } catch (Exception e) {
@@ -107,6 +113,9 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     public Transaction getLocalTx(NulsDigestData hash) {
         TransactionLocalPo po = txDao.getLocaltx(hash.getDigestHex());
+        if(null==po){
+            return null;
+        }
         try {
             return UtxoTransferTool.toTransaction(po);
         } catch (Exception e) {
@@ -502,6 +511,52 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     public long getBlockFee(Long blockHeight) {
         return txDao.getBlockFee(blockHeight);
+    }
+
+    @Override
+    public void unlockTxApprove(String txHash) {
+        boolean b = true;
+        int index = 0;
+        while (b) {
+            UtxoOutput output = ledgerCacheService.getUtxo(txHash + "-" + index);
+            if (output != null) {
+                if (OutPutStatusEnum.UTXO_UNCONFIRM_CONSENSUS_LOCK == output.getStatus()) {
+                    output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND);
+                } else if (OutPutStatusEnum.UTXO_CONFIRM_CONSENSUS_LOCK == output.getStatus()) {
+                    output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
+                }
+                index++;
+            } else {
+                b = false;
+            }
+        }
+    }
+
+    @Override
+    @DbSession
+    public void unlockTxSave(String txHash) {
+        txDao.unlockTxOutput(txHash);
+    }
+
+    @Override
+    @DbSession
+    public void unlockTxRollback(String txHash) {
+        boolean b = true;
+        int index = 0;
+        while (b) {
+            UtxoOutput output = ledgerCacheService.getUtxo(txHash + "-" + index);
+            if (output != null) {
+                if (OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND == output.getStatus()) {
+                    output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_CONSENSUS_LOCK);
+                } else if (OutPutStatusEnum.UTXO_CONFIRM_UNSPEND == output.getStatus()) {
+                    output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_CONSENSUS_LOCK);
+                }
+                index++;
+            } else {
+                b = false;
+            }
+        }
+        txDao.lockTxOutput(txHash);
     }
 
     public List<TransactionService> getServiceList(Class<? extends Transaction> txClass) {

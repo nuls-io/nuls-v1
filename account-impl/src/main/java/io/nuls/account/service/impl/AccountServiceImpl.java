@@ -118,31 +118,6 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @DbSession
-    public Account createAccount(String passwd) {
-        locker.lock();
-        try {
-            Account account = AccountTool.createAccount();
-            account.encrypt(passwd);
-            signAccount(account);
-            AccountPo po = new AccountPo();
-            AccountTool.toPojo(account, po);
-            this.accountDao.save(po);
-            this.accountCacheService.putAccount(account);
-            NulsContext.LOCAL_ADDRESS_LIST.add(account.getAddress().getBase58());
-            AccountCreateNotice notice = new AccountCreateNotice();
-            notice.setEventBody(account);
-            eventBroadcaster.publishToLocal(notice);
-            return account;
-        } catch (Exception e) {
-            Log.error(e);
-            throw new NulsRuntimeException(ErrorCode.FAILED, "create account failed!");
-        } finally {
-            locker.unlock();
-        }
-    }
-
-    @Override
-    @DbSession
     public Result<List<String>> createAccount(int count, String password) {
         if (count <= 0 || count > AccountTool.CREATE_MAX_SIZE) {
             return new Result<>(false, "between 0 and 100 can be created at once");
@@ -159,10 +134,12 @@ public class AccountServiceImpl implements AccountService {
                 if (!defaultAccount.unlock(password)) {
                     return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
                 }
+                defaultAccount.lock();
             } catch (NulsException e) {
                 return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
             }
         }
+
 
         locker.lock();
         try {
@@ -188,9 +165,6 @@ public class AccountServiceImpl implements AccountService {
                 AccountCreateNotice notice = new AccountCreateNotice();
                 notice.setEventBody(account);
                 eventBroadcaster.publishToLocal(notice);
-            }
-            if (getDefaultAccount() == null) {
-                setDefaultAccount(accounts.get(0).getAddress().getBase58());
             }
             return new Result<>(true, "OK", resultList);
         } catch (Exception e) {
@@ -369,7 +343,10 @@ public class AccountServiceImpl implements AccountService {
         }
         List<Account> accounts = this.getAccountList();
         if (accounts == null || accounts.isEmpty()) {
-            return new Result(false, "No account was found");
+
+
+
+            new Result(false, "No account was found");
         }
 
         try {
@@ -738,12 +715,13 @@ public class AccountServiceImpl implements AccountService {
         Account defaultAcct = getDefaultAccount();
         if (defaultAcct != null) {
             try {
-                if (!defaultAcct.decrypt(password)) {
+                if (!defaultAcct.unlock(password)) {
                     return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
                 }
-                defaultAcct.encrypt(password);
+                defaultAcct.lock();
             } catch (NulsException e) {
                 e.printStackTrace();
+                return Result.getFailed("ErrorCode.PASSWORD_IS_WRONG");
             }
         }
         try {

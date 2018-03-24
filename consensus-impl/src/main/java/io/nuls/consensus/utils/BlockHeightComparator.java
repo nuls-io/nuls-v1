@@ -23,21 +23,34 @@
  * SOFTWARE.
  *
  */
+package io.nuls.consensus.utils;
 
-package io.nuls.consensus.entity;
+import io.nuls.core.chain.entity.Block;
+import io.nuls.core.chain.entity.Transaction;
 
-import io.nuls.consensus.entity.member.Delegate;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.io.NulsByteBuffer;
+import java.util.Comparator;
 
 /**
  * @author Niels
- * @date 2018/3/12
+ * @date 2017/12/26
  */
-public class ConsensusDelegateImpl extends Consensus<Delegate> {
+public class BlockHeightComparator implements Comparator<Block> {
+
+    private static  final BlockHeightComparator INSTANCE = new BlockHeightComparator();
+    private BlockHeightComparator(){}
+    public static BlockHeightComparator getInstance(){
+        return INSTANCE;
+    }
 
     @Override
-    protected Delegate parseExtend(NulsByteBuffer byteBuffer) throws NulsException {
-        return byteBuffer.readNulsData(new Delegate());
+    public int compare(Block o1, Block o2) {
+        long key = o1.getHeader().getHeight() - o2.getHeader().getHeight();
+        int val = 0;
+        if (key > 0) {
+            return 1;
+        } else if (key < 0) {
+            return -1;
+        }
+        return val;
     }
 }

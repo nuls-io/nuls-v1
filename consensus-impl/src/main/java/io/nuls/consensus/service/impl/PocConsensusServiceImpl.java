@@ -30,7 +30,7 @@ import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.*;
 import io.nuls.consensus.entity.member.Agent;
-import io.nuls.consensus.entity.member.Delegate;
+import io.nuls.consensus.entity.member.Deposit;
 import io.nuls.consensus.entity.params.JoinConsensusParam;
 import io.nuls.consensus.entity.tx.PocExitConsensusTransaction;
 import io.nuls.consensus.entity.tx.PocJoinConsensusTransaction;
@@ -42,7 +42,6 @@ import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TransactionConstant;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.date.TimeService;
@@ -120,20 +119,20 @@ public class PocConsensusServiceImpl implements ConsensusService {
         }
         AssertUtil.canNotEmpty(agentAddress);
         TransactionEvent event = new TransactionEvent();
-        Consensus<Delegate> ca = new ConsensusDelegateImpl();
+        Consensus<Deposit> ca = new ConsensusDepositImpl();
         ca.setAddress(account.getAddress().toString());
-        Delegate delegate = new Delegate();
-        delegate.setDelegateAddress(agentAddress);
-        delegate.setDeposit(Na.valueOf(amount));
-        delegate.setStartTime(TimeService.currentTimeMillis());
-        ca.setExtend(delegate);
+        Deposit deposit = new Deposit();
+        deposit.setAgentAddress(agentAddress);
+        deposit.setDeposit(Na.valueOf(amount));
+        deposit.setStartTime(TimeService.currentTimeMillis());
+        ca.setExtend(deposit);
         CoinTransferData data = new CoinTransferData(OperationType.LOCK, this.ledgerService.getTxFee(TransactionConstant.TX_TYPE_JOIN_CONSENSUS));
-        data.setTotalNa(delegate.getDeposit());
+        data.setTotalNa(deposit.getDeposit());
         data.addFrom(account.getAddress().toString());
         Coin coin = new Coin();
         coin.setUnlockHeight(0);
         coin.setUnlockTime(0);
-        coin.setNa(delegate.getDeposit());
+        coin.setNa(deposit.getDeposit());
         data.addTo(account.getAddress().toString(), coin);
         PocJoinConsensusTransaction tx = null;
         try {
@@ -211,7 +210,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
     public List<Consensus> getConsensusAccountList() {
         List<Consensus<Agent>> list = consensusCacheManager.getCachedAgentList(ConsensusStatusEnum.IN);
         List<Consensus> resultList = new ArrayList<>(list);
-        resultList.addAll(consensusCacheManager.getCachedDelegateList(ConsensusStatusEnum.IN));
+        resultList.addAll(consensusCacheManager.getCachedDepositList(ConsensusStatusEnum.IN));
         return resultList;
     }
 
@@ -243,10 +242,10 @@ public class PocConsensusServiceImpl implements ConsensusService {
 
 
     @Override
-    public Transaction startConsensus(String address, String password, Map<String, Object> paramsMap) throws NulsException {
-        Account account = this.accountService.getAccount(address);
+    public Transaction startConsensus(String agentAddress, String password, Map<String, Object> paramsMap) throws NulsException {
+        Account account = this.accountService.getAccount(agentAddress);
         if (null == account) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "The account is not exist,address:" + address);
+            throw new NulsRuntimeException(ErrorCode.FAILED, "The account is not exist,address:" + agentAddress);
         }
         if (paramsMap == null || paramsMap.size() < 2) {
             throw new NulsRuntimeException(ErrorCode.NULL_PARAMETER);
@@ -257,7 +256,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
         JoinConsensusParam params = new JoinConsensusParam(paramsMap);
         if (StringUtils.isNotBlank(params.getIntroduction())) {
             Agent agent = new Agent();
-            agent.setAgentAddress(params.getAgentAddress());
+            agent.setPackingAddress(params.getPackingAddress());
             agent.setDeposit(Na.valueOf(params.getDeposit()));
             agent.setIntroduction(params.getIntroduction());
             agent.setSeed(params.isSeed());

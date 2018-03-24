@@ -78,7 +78,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        //Log.error(cause);
+        Log.error("---------------ServerChannelHandler exceptionCaught :" + cause.getMessage());
         ctx.channel().close();
     }
 

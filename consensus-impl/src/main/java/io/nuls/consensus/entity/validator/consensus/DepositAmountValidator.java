@@ -26,9 +26,8 @@ package io.nuls.consensus.entity.validator.consensus;
 import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
-import io.nuls.consensus.entity.member.Delegate;
+import io.nuls.consensus.entity.member.Deposit;
 import io.nuls.consensus.entity.tx.PocJoinConsensusTransaction;
-import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.validate.NulsDataValidator;
@@ -40,15 +39,15 @@ import java.util.List;
  * @author Niels
  * @date 2018/1/17
  */
-public class DelegateDepositValidator implements NulsDataValidator<PocJoinConsensusTransaction> {
+public class DepositAmountValidator implements NulsDataValidator<PocJoinConsensusTransaction> {
 
-    private static final DelegateDepositValidator INSTANCE = new DelegateDepositValidator();
+    private static final DepositAmountValidator INSTANCE = new DepositAmountValidator();
     private ConsensusCacheManager consensusCacheManager = ConsensusCacheManager.getInstance();
 
-    private DelegateDepositValidator() {
+    private DepositAmountValidator() {
     }
 
-    public static DelegateDepositValidator getInstance() {
+    public static DepositAmountValidator getInstance() {
         return INSTANCE;
     }
 
@@ -56,14 +55,18 @@ public class DelegateDepositValidator implements NulsDataValidator<PocJoinConsen
     public ValidateResult validate(PocJoinConsensusTransaction data) {
         Na limit = PocConsensusConstant.ENTRUSTER_DEPOSIT_LOWER_LIMIT;
         Na max = PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT;
-        List<Consensus<Delegate>> list = consensusCacheManager.getCachedDelegateList(data.getTxData().getExtend().getDelegateAddress());
-        for (Consensus<Delegate> cd : list) {
-            max = max.subtract(cd.getExtend().getDeposit());
+        List<Consensus<Deposit>> list = consensusCacheManager.getCachedDepositList(data.getTxData().getExtend().getAgentAddress());
+        if(list==null){
+            return ValidateResult.getSuccessResult();
+        }
+        Na total = Na.ZERO;
+        for (Consensus<Deposit> cd : list) {
+            total = total.add(cd.getExtend().getDeposit());
         }
         if (limit.isGreaterThan(data.getTxData().getExtend().getDeposit())) {
             return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_NOT_ENOUGH);
         }
-        if (max.isLessThan(data.getTxData().getExtend().getDeposit())) {
+        if (max.isLessThan(total)) {
             return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_TOO_MUCH);
         }
         return ValidateResult.getSuccessResult();

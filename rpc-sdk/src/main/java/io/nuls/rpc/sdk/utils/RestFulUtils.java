@@ -23,7 +23,6 @@
  */
 package io.nuls.rpc.sdk.utils;
 
-import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.rpc.sdk.entity.RpcClientResult;
 
 import javax.ws.rs.client.Client;
@@ -81,7 +80,7 @@ public class RestFulUtils {
         try {
             return post(path, JSONUtils.obj2json(paramsMap));
         } catch (Exception e) {
-            throw new NulsRuntimeException(e);
+            throw new RuntimeException(e);
         }
     }
 

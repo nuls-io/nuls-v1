@@ -10,6 +10,14 @@ CREATE TABLE IF NOT EXISTS `account` (
   `status` INT DEFAULT 0,
   PRIMARY KEY (`address`)
 );
+CREATE TABLE IF NOT EXISTS `punish_log` (
+  `id` varchar(32) NOT NULL,
+  `address` varchar(40) NOT NULL,
+  `type` int(1) NOT NULL,
+  `height` bigint(14) NOT NULL,
+  `time` bigint(14) NOT NULL,
+  PRIMARY KEY (`id`)
+);
 
 CREATE TABLE IF NOT EXISTS `block_header` (
   `hash` varchar(70) NOT NULL,
@@ -25,25 +33,26 @@ CREATE TABLE IF NOT EXISTS `block_header` (
   `size` int(9),
   PRIMARY KEY (`hash`)
 );
-CREATE TABLE IF NOT EXISTS `delegate_account` (
-  `id` varchar(32) NOT NULL,
-  `address` varchar(40) NOT NULL,
-  `node_address` varchar(40) NOT NULL,
+CREATE TABLE IF NOT EXISTS `agent` (
+  `agent_address` varchar(40) NOT NULL,
+  `agent_name` varchar(20) NOT NULL,
+  `packing_address` varchar(40) NOT NULL,
   `deposit` bigint(18) NOT NULL,
   `remark` varchar(255) NOT NULL,
   `status` INT DEFAULT 0,
   `start_time` bigint(14) NOT NULL,
   `commission_rate` decimal(14) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`agent_address`)
 );
-CREATE TABLE IF NOT EXISTS `delegate` (
-  `id` varchar(32) NOT NULL,
+CREATE TABLE IF NOT EXISTS `deposit` (
+  `id` varchar(70) NOT NULL,
   `address` varchar(40) NOT NULL,
   `agent_address` varchar(40) NOT NULL,
   `deposit` bigint(18) NOT NULL,
   `status` int(1) DEFAULT NULL,
   `time` bigint(14) DEFAULT NULL,
-  `block_height` bigint(20) DEFAULT NULL,
+  `block_height` bigint(14) DEFAULT NULL,
+  `tx_hash` varchar(70) NOT NULL,
   PRIMARY KEY (`id`)
 );
 
@@ -58,10 +67,12 @@ CREATE TABLE IF NOT EXISTS `node` (
   `magic_num` int(11) NOT NULL,
   PRIMARY KEY (`id`)
 );
+
 CREATE TABLE IF NOT EXISTS `node_group` (
   `name` varchar(30) NOT NULL,
   PRIMARY KEY (`name`)
 );
+
 CREATE TABLE IF NOT EXISTS `node_group_relation` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `node_id` varchar(30) NOT NULL,

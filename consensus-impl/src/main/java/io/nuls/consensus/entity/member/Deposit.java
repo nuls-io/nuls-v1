@@ -26,28 +26,23 @@ package io.nuls.consensus.entity.member;
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 
 /**
  * @author Niels
  * @date 2017/12/4
  */
-public class Delegate extends BaseNulsData {
+public class Deposit extends BaseNulsData {
     private Na deposit;
-    private String delegateAddress;
+    private String agentAddress;
     private int status;
     private long startTime;
-    private String hash;
 
     public long getStartTime() {
         return startTime;
@@ -65,48 +60,35 @@ public class Delegate extends BaseNulsData {
         this.deposit = deposit;
     }
 
-    public String getDelegateAddress() {
-        return delegateAddress;
+    public String getAgentAddress() {
+        return agentAddress;
     }
 
-    public void setDelegateAddress(String delegateAddress) {
-        this.delegateAddress = delegateAddress;
+    public void setAgentAddress(String agentAddress) {
+        this.agentAddress = agentAddress;
     }
 
     @Override
     public int size() {
         int size = 0;
         size += Utils.sizeOfLong(deposit.getValue());
-        size += Utils.sizeOfString(delegateAddress);
+        size += Utils.sizeOfString(agentAddress);
+        size += Utils.sizeOfInt48();
         return size;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer buffer) throws IOException {
         buffer.writeVarInt(deposit.getValue());
-        buffer.writeString(delegateAddress);
+        buffer.writeString(agentAddress);
+        buffer.writeInt48(startTime);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.deposit = Na.valueOf(byteBuffer.readVarInt());
-        this.delegateAddress = byteBuffer.readString();
-        try {
-            this.hash = NulsDigestData.calcDigestData(this.serialize()).getDigestHex();
-        } catch (IOException e) {
-            Log.error(e);
-        }
-    }
-
-    public String getHash() {
-        if(hash==null){
-            try {
-                this.hash = NulsDigestData.calcDigestData(this.serialize()).getDigestHex();
-            } catch (IOException e) {
-                Log.error(e);
-            }
-        }
-        return hash;
+        this.agentAddress = byteBuffer.readString();
+        this.startTime = byteBuffer.readInt48();
     }
 
     public int getStatus() {
@@ -115,9 +97,5 @@ public class Delegate extends BaseNulsData {
 
     public void setStatus(int status) {
         this.status = status;
-    }
-
-    public void setHash(String hash) {
-        this.hash = hash;
     }
 }

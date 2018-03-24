@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,19 +21,23 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.db.dao.impl.mybatis.mapper;
 
-import io.nuls.db.dao.impl.mybatis.common.BaseMapper;
-import io.nuls.db.entity.DelegatePo;
+package io.nuls.consensus.entity;
+
+import io.nuls.consensus.entity.member.Deposit;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.io.NulsByteBuffer;
 
 /**
  * @author Niels
- * @date 2017/11/20
+ * @date 2018/3/12
  */
-public interface DelegateMapper extends BaseMapper<String,DelegatePo> {
+public class ConsensusDepositImpl extends Consensus<Deposit> {
 
-    int deleteByAgentAddress(String address);
-
-    int updateSelectiveByAgentAddress(DelegatePo po);
+    @Override
+    protected Deposit parseExtend(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new Deposit());
+    }
 }

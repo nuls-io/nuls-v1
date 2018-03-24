@@ -33,6 +33,11 @@ import java.util.Comparator;
  */
 public class TxTimeComparator implements Comparator<Transaction> {
 
+    private static  final TxTimeComparator INSTANCE = new TxTimeComparator();
+    private TxTimeComparator(){}
+    public static TxTimeComparator getInstance(){
+        return INSTANCE;
+    }
 
     @Override
     public int compare(Transaction o1, Transaction o2) {

@@ -59,7 +59,6 @@ public class MybatisDbModuleBootstrap extends AbstractDBModule {
 
     @Override
     public void start() {
-
     }
 
 
@@ -74,9 +73,10 @@ public class MybatisDbModuleBootstrap extends AbstractDBModule {
     private void initService() {
         this.registerService(BlockDaoImpl.class);
         this.registerService(AliasDaoImpl.class);
+        this.registerService(PunishLogDaoImpl.class);
         this.registerService(AccountDaoImpl.class);
-        this.registerService(DelegateDaoImpl.class);
-        this.registerService(DelegateAccountDaoImpl.class);
+        this.registerService(DepositDaoImpl.class);
+        this.registerService(AgentDaoImpl.class);
         this.registerService(NodeDaoImpl.class);
         this.registerService(NodeGroupDaoImpl.class);
         this.registerService(NodeGroupRelationDaoImpl.class);

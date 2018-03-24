@@ -25,7 +25,6 @@ package io.nuls.consensus.utils;
 
 import io.nuls.consensus.entity.BlockHashResponse;
 import io.nuls.consensus.event.GetBlocksHashRequest;
-import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
@@ -35,7 +34,6 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -60,7 +58,7 @@ public class DistributedBlockInfoRequestUtils {
     private Lock lock = new ReentrantLock();
     private boolean requesting;
     private long startTime;
-    private boolean askHighest = false;
+    private boolean askOneHeight = false;
 
     private DistributedBlockInfoRequestUtils() {
     }
@@ -79,9 +77,7 @@ public class DistributedBlockInfoRequestUtils {
     }
 
     public BlockInfo request(long start, long end, long split) {
-//        Log.error("==================wait it:"+Thread.currentThread().getName());
         lock.lock();
-//        Log.error("==================lock it:"+Thread.currentThread().getName());
         try {
             requesting = true;
             hashesMap.clear();
@@ -89,7 +85,7 @@ public class DistributedBlockInfoRequestUtils {
             this.start = start;
             this.end = end;
             this.split = split;
-            askHighest = start == end && start <= 0;
+            askOneHeight = start == end ;
             GetBlocksHashRequest event = new GetBlocksHashRequest(start, end, split);
             this.startTime = TimeService.currentTimeMillis();
             nodeIdList = this.eventBroadcaster.broadcastAndCache(event, false);
@@ -104,7 +100,6 @@ public class DistributedBlockInfoRequestUtils {
         } catch (Exception e) {
             throw e;
         } finally {
-//            Log.error("===============unlock it:"+Thread.currentThread().getName());
             lock.unlock();
         }
     }
@@ -127,7 +122,7 @@ public class DistributedBlockInfoRequestUtils {
         if (response.getHeightList().get(response.getHeightList().size() - 1) < end) {
             return true;
         }
-        String key = response.getHash().getDigestHex();
+        String key = response.getBestHash().getDigestHex();
         List<String> nodes = calcMap.get(key);
         if (null == nodes) {
             nodes = new ArrayList<>();
@@ -153,10 +148,17 @@ public class DistributedBlockInfoRequestUtils {
         BlockInfo result = null;
         for (String key : calcMap.keySet()) {
             List<String> nodes = calcMap.get(key);
+            if(nodes==null){
+                continue;
+            }
             //todo =
             if (nodes.size() >= halfSize) {
                 result = new BlockInfo();
                 BlockHashResponse response = hashesMap.get(nodes.get(0));
+                if(response==null||response.getHeightList()==null){
+                    //todo check it
+                    continue;
+                }
                 Long bestHeight = 0L;
                 NulsDigestData bestHash = null;
                 for (int i = 0; i < response.getHeightList().size(); i++) {
@@ -177,18 +179,19 @@ public class DistributedBlockInfoRequestUtils {
         }
         if (null != result) {
             bestBlockInfo = result;
-        } else if (size == calcMap.size()) {
-            try {
-                Thread.sleep(2000L);
-            } catch (InterruptedException e) {
-                Log.error(e);
-            }
-            try {
-                this.request(start, end, split);
-            } catch (Exception e) {
-                Log.error(e.getMessage());
-            }
         }
+//        else if (size == calcMap.size()) {
+//            try {
+//                Thread.sleep(2000L);
+//            } catch (InterruptedException e) {
+//                Log.error(e);
+//            }
+//            try {
+//                this.request(start, end, split);
+//            } catch (Exception e) {
+//                Log.error(e.getMessage());
+//            }
+//        }
 
     }
 
@@ -204,7 +207,7 @@ public class DistributedBlockInfoRequestUtils {
             }
             long timeout = 10000L;
 
-            if ((TimeService.currentTimeMillis() - startTime) > (timeout - 1000L) && hashesMap.size() >= ((nodeIdList.size() + 1) / 2) && askHighest) {
+            if ((TimeService.currentTimeMillis() - startTime) > (timeout - 1000L) && hashesMap.size() >= ((nodeIdList.size() + 1) / 2) && askOneHeight) {
                 long localHeight = NulsContext.getInstance().getBestBlock().getHeader().getHeight();
                 long minHeight = Long.MAX_VALUE;
                 NulsDigestData minHash = null;

@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,41 +21,26 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.consensus.service.intf;
 
-import io.nuls.consensus.entity.AgentInfo;
-import io.nuls.consensus.entity.Consensus;
-import io.nuls.consensus.entity.ConsensusStatusInfo;
-import io.nuls.consensus.entity.DepositItem;
-import io.nuls.core.chain.entity.Na;
-import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.exception.NulsException;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
+package io.nuls.consensus.constant;
 
 /**
  * @author Niels
- * @date 2017/11/7
+ * @date 2018/3/22
  */
-public interface ConsensusService {
+public enum PunishType {
 
-    Transaction startConsensus(String agentAddress, String password, Map<String, Object> paramsMap) throws NulsException;
+    YELLOW(0), RED(1);
 
-    Transaction stopConsensus(String address, String password, Map<String, Object> paramsMap) throws NulsException, IOException;
+    private final int code;
 
-    List<Consensus> getConsensusAccountList();
+    PunishType(int code) {
+        this.code = code;
+    }
 
-    List<DepositItem> getDepositList(String address);
-
-    List<AgentInfo> getAgentList();
-
-    Map<String, Object> getConsensusInfo();
-
-    Map<String, Object> getConsensusInfo(String address);
-
-    ConsensusStatusInfo getConsensusStatus(String address);
-
+    public int getCode() {
+        return code;
+    }
 }

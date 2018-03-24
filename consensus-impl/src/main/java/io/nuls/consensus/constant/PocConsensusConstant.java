@@ -80,6 +80,7 @@ public interface PocConsensusConstant {
      * Maximum acceptable number of delegate
      */
     int MAX_ACCEPT_NUM_OF_DELEGATE = 1000;
+    int MAX_AGENT_COUNT_OF_ADRRESS = 1;
 
     Na SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT = Na.parseNuls(200000);
     Na SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT = Na.parseNuls(500000);

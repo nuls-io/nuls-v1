@@ -21,38 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.db.dao.impl.mybatis;
+package io.nuls.db.dao;
 
-import com.github.pagehelper.PageHelper;
-import io.nuls.db.dao.DelegateAccountDataService;
-import io.nuls.db.dao.impl.mybatis.mapper.DelegateAccountMapper;
-import io.nuls.db.dao.impl.mybatis.util.Searchable;
-import io.nuls.db.entity.DelegateAccountPo;
-import io.nuls.db.transactional.annotation.DbSession;
-import io.nuls.db.transactional.annotation.PROPAGATION;
-
-import java.util.List;
-import java.util.Map;
+import io.nuls.db.entity.AgentPo;
 
 /**
+ *
  * @author Niels
- * @date 2017/11/22
+ * @date 2017/11/20
  */
-@DbSession(transactional = PROPAGATION.NONE)
-public class DelegateAccountDaoImpl extends BaseDaoImpl<DelegateAccountMapper, String, DelegateAccountPo> implements DelegateAccountDataService {
-    public DelegateAccountDaoImpl() {
-        super(DelegateAccountMapper.class);
-    }
+public interface AgentDataService extends BaseDataService< String,AgentPo> {
 
-    @Override
-    protected Searchable getSearchable(Map<String, Object> params) {
-        return null;
-    }
-
-    @Override
-    public int updateSelective(DelegateAccountPo po) {
-        return getMapper().updateByPrimaryKeySelective(po);
-    }
+    int updateSelective(AgentPo po);
 
 
 }

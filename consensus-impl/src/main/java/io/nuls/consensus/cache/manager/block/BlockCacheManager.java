@@ -33,10 +33,7 @@ import io.nuls.consensus.entity.block.BifurcateProcessor;
 import io.nuls.consensus.entity.block.BlockHeaderChain;
 import io.nuls.consensus.event.GetBlockHeaderEvent;
 import io.nuls.consensus.utils.DownloadDataUtils;
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.BlockHeader;
-import io.nuls.core.chain.entity.SmallBlock;
-import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.chain.entity.*;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
@@ -164,7 +161,9 @@ public class BlockCacheManager {
                     this.ledgerService.approvalTx(tx);
                     confirmingTxCacheManager.putTx(tx);
                 } catch (NulsException e) {
+                    rollbackBlocksTxs(block.getTxs(),0,i);
                     Log.error(e);
+                    throw new NulsRuntimeException(e);
                 }
             }
         }
@@ -174,6 +173,21 @@ public class BlockCacheManager {
         if (null != block1 && block1.getHeader().getHeight() > NulsContext.getInstance().getBestBlock().getHeader().getHeight()) {
             NulsContext.getInstance().setBestBlock(block1);
         }
+    }
+
+    private void rollbackBlocksTxs(List<Transaction> txList, int start, int end) {
+        for(int i=start;i<=end&&i< txList.size();i++){
+            Transaction tx = txList.get(i);
+            if (tx.getStatus() == TxStatusEnum.AGREED
+                    ) {
+                try {
+                    ledgerService.rollbackTx(tx);
+                } catch (NulsException e) {
+                    Log.error(e);
+                }
+            }
+        }
+
     }
 
     private void rollbackBlocksTxs(List<String> blockHashList) {

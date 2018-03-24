@@ -21,40 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.consensus.service.intf;
+package io.nuls.db.dao.impl.mybatis.mapper;
 
-import io.nuls.consensus.entity.AgentInfo;
-import io.nuls.consensus.entity.Consensus;
-import io.nuls.consensus.entity.ConsensusStatusInfo;
-import io.nuls.consensus.entity.DepositItem;
-import io.nuls.core.chain.entity.Na;
-import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.exception.NulsException;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
+import io.nuls.db.dao.impl.mybatis.common.BaseMapper;
+import io.nuls.db.entity.DepositPo;
 
 /**
  * @author Niels
- * @date 2017/11/7
+ * @date 2017/11/20
  */
-public interface ConsensusService {
+public interface DepositMapper extends BaseMapper<String,DepositPo> {
 
-    Transaction startConsensus(String agentAddress, String password, Map<String, Object> paramsMap) throws NulsException;
+    int deleteByAgentAddress(String address);
 
-    Transaction stopConsensus(String address, String password, Map<String, Object> paramsMap) throws NulsException, IOException;
-
-    List<Consensus> getConsensusAccountList();
-
-    List<DepositItem> getDepositList(String address);
-
-    List<AgentInfo> getAgentList();
-
-    Map<String, Object> getConsensusInfo();
-
-    Map<String, Object> getConsensusInfo(String address);
-
-    ConsensusStatusInfo getConsensusStatus(String address);
-
+    int updateSelectiveByAgentAddress(DepositPo po);
 }

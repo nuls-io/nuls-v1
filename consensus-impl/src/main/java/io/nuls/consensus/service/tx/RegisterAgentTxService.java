@@ -29,17 +29,14 @@ import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
 import io.nuls.consensus.event.notice.RegisterAgentNotice;
-import io.nuls.consensus.manager.ConsensusManager;
 import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.tx.serivce.TransactionService;
-import io.nuls.db.dao.DelegateAccountDataService;
-import io.nuls.db.dao.DelegateDataService;
-import io.nuls.db.entity.DelegateAccountPo;
-import io.nuls.db.entity.DelegatePo;
+import io.nuls.db.dao.AgentDataService;
+import io.nuls.db.dao.DepositDataService;
+import io.nuls.db.entity.AgentPo;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
-import io.nuls.ledger.service.intf.LedgerService;
 
 /**
  * @author Niels
@@ -47,13 +44,13 @@ import io.nuls.ledger.service.intf.LedgerService;
  */
 public class RegisterAgentTxService implements TransactionService<RegisterAgentTransaction> {
     private ConsensusCacheManager manager = ConsensusCacheManager.getInstance();
-    private DelegateAccountDataService delegateAccountService = NulsContext.getServiceBean(DelegateAccountDataService.class);
-    private DelegateDataService delegateService = NulsContext.getServiceBean(DelegateDataService.class);
+    private AgentDataService delegateAccountService = NulsContext.getServiceBean(AgentDataService.class);
+    private DepositDataService delegateService = NulsContext.getServiceBean(DepositDataService.class);
 
     @Override
     public void onRollback(RegisterAgentTransaction tx) throws NulsException {
         this.manager.delAgent(tx.getTxData().getAddress());
-        manager.delDelegateByAgent(tx.getTxData().getAddress());
+        manager.delDepositByAgent(tx.getTxData().getAddress());
         this.delegateAccountService.delete(tx.getTxData().getAddress());
         this.delegateService.deleteByAgentAddress(tx.getTxData().getAddress());
     }
@@ -63,7 +60,7 @@ public class RegisterAgentTxService implements TransactionService<RegisterAgentT
         manager.changeAgentStatus(tx.getTxData().getAddress(), ConsensusStatusEnum.WAITING);
         Consensus<Agent> ca = tx.getTxData();
         ca.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
-        DelegateAccountPo po = ConsensusTool.agentToPojo(ca);
+        AgentPo po = ConsensusTool.agentToPojo(ca);
         delegateAccountService.save(po);
         RegisterAgentNotice notice = new RegisterAgentNotice();
         notice.setEventBody(tx);

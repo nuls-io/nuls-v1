@@ -31,6 +31,7 @@ import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.script.P2PKHScript;
 import io.nuls.core.utils.crypto.Hex;
+import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
@@ -43,9 +44,12 @@ import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.UtxoInput;
 import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
+import io.nuls.ledger.entity.tx.LockNulsTransaction;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Vive
@@ -65,8 +69,22 @@ public class UtxoTransferTool {
             //todo
             Log.error(e);
         }
+        long currentTime = TimeService.currentTimeMillis();
+        long genesisTime = NulsContext.getInstance().getGenesisBlock().getHeader().getTime();
+        long bestHeight = NulsContext.getInstance().getNetBestBlockHeight();
+
         if (po.getStatus() == UtxoOutputPo.USABLE) {
-            output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
+            if (po.getLockTime() > 0) {
+                if (po.getLockTime() >= genesisTime && po.getLockTime() > currentTime) {
+                    output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_TIME_LOCK);
+                } else if (po.getLockTime() < genesisTime && po.getLockTime() > bestHeight) {
+                    output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_TIME_LOCK);
+                } else {
+                    output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
+                }
+            } else {
+                output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
+            }
         } else if (po.getStatus() == UtxoOutputPo.LOCKED) {
             output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_CONSENSUS_LOCK);
         } else if (po.getStatus() == UtxoOutputPo.SPENT) {
@@ -108,7 +126,6 @@ public class UtxoTransferTool {
         input.setIndex(po.getInIndex());
         input.setFromHash(new NulsDigestData(Hex.decode(po.getFromHash())));
         input.setFromIndex(po.getFromIndex());
-        //input.setScriptSig(po.getSign());
 
         UtxoOutput output = new UtxoOutput();
         output.setTxHash(new NulsDigestData(Hex.decode(po.getFromOutPut().getTxHash())));
@@ -126,7 +143,6 @@ public class UtxoTransferTool {
         po.setInIndex(input.getIndex());
         po.setFromHash(input.getFromHash().getDigestHex());
         po.setFromIndex(input.getFromIndex());
-        //po.setSign(input.getScriptSig());
         return po;
     }
 
@@ -224,14 +240,26 @@ public class UtxoTransferTool {
             AbstractCoinTransaction coinTx = (AbstractCoinTransaction) tx;
 
             UtxoData utxoData = new UtxoData();
+            Na totalNa = Na.ZERO;
+            Set<String> addressSet = new HashSet<>();
 
             for (UtxoInputPo inputPo : inputPoList) {
                 utxoData.getInputs().add(toInput(inputPo));
+                addressSet.add(inputPo.getFromOutPut().getAddress());
             }
 
-            for (UtxoOutputPo outputPo : outputPoList) {
+            for (int i = 0; i < outputPoList.size(); i++) {
+                UtxoOutputPo outputPo = outputPoList.get(i);
                 utxoData.getOutputs().add(toOutput(outputPo));
+                if (addressSet.contains(outputPo.getAddress())) {
+                    if (tx instanceof LockNulsTransaction && i == 0) {
+                        totalNa.add(Na.valueOf(outputPo.getValue()));
+                    }
+                } else {
+                    totalNa.add(Na.valueOf(outputPo.getValue()));
+                }
             }
+            utxoData.setTotalNa(totalNa);
             coinTx.setCoinData(utxoData);
         }
     }

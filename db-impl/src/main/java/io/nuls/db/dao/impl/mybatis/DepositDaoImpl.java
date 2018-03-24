@@ -21,31 +21,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.db.dao.impl.mybatis.mapper;
+package io.nuls.db.dao.impl.mybatis;
 
-import io.nuls.db.dao.impl.mybatis.common.BaseMapper;
+import io.nuls.db.dao.DepositDataService;
+import io.nuls.db.dao.impl.mybatis.mapper.DepositMapper;
+import io.nuls.db.dao.impl.mybatis.params.DepositSearchParams;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
-import io.nuls.db.entity.UtxoOutputPo;
-import org.apache.ibatis.annotations.Param;
+import io.nuls.db.entity.DepositPo;
+import io.nuls.db.transactional.annotation.DbSession;
+import io.nuls.db.transactional.annotation.PROPAGATION;
 
-import java.util.List;
 import java.util.Map;
 
 /**
  * @author Niels
- * @date 2017/11/20
+ * @date 2017/11/22
  */
-public interface UtxoOutputMapper extends BaseMapper<Map<String, Object>, UtxoOutputPo> {
+@DbSession(transactional = PROPAGATION.NONE)
+public class DepositDaoImpl extends BaseDaoImpl<DepositMapper, String, DepositPo> implements DepositDataService {
+    public DepositDaoImpl() {
+        super(DepositMapper.class);
+    }
 
-    int updateStatus(UtxoOutputPo po);
+    @Override
+    protected Searchable getSearchable(Map<String, Object> params) {
+        return new DepositSearchParams(params);
+    }
 
-    List<UtxoOutputPo> selectAccountOutput(Searchable searchable);
+    @Override
+    public int deleteByAgentAddress(String address) {
+        return this.getMapper().deleteByAgentAddress(address);
+    }
 
-    void deleteBySearchable(Searchable searchable);
+    @Override
+    public int updateSelective(DepositPo po) {
+        return this.getMapper().updateByPrimaryKeySelective(po);
+    }
 
-    long getBlockReward(Searchable searchable);
-
-    void unlockTxOutput(String txHash);
-
-    void lockTxOutput(String txHash);
+    @Override
+    public int updateSelectiveByAgentAddress(DepositPo po) {
+        return this.getMapper().updateSelectiveByAgentAddress(po);
+    }
 }

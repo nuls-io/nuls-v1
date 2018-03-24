@@ -40,7 +40,7 @@ public class Agent extends BaseNulsData {
 
     private Na deposit;
 
-    public String agentAddress;
+    private String packingAddress;
 
     private double commissionRate;
 
@@ -64,7 +64,7 @@ public class Agent extends BaseNulsData {
     public int size() {
         int size = 0;
         size += Utils.sizeOfLong(deposit.getValue());
-        size += Utils.sizeOfString(this.agentAddress);
+        size += Utils.sizeOfString(this.packingAddress);
         size += Utils.sizeOfDouble(this.commissionRate);
         size += Utils.sizeOfString(this.introduction);
         size += Utils.sizeOfBoolean(seed);
@@ -75,7 +75,7 @@ public class Agent extends BaseNulsData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeVarInt(deposit.getValue());
-        stream.writeString(agentAddress);
+        stream.writeString(packingAddress);
         stream.writeDouble(this.commissionRate);
         stream.writeString(this.introduction);
         stream.writeBoolean(seed);
@@ -85,7 +85,7 @@ public class Agent extends BaseNulsData {
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.deposit = Na.valueOf(byteBuffer.readVarInt());
-        this.agentAddress = byteBuffer.readString();
+        this.packingAddress = byteBuffer.readString();
         this.commissionRate = byteBuffer.readDouble();
         this.introduction = byteBuffer.readString();
         this.seed = byteBuffer.readBoolean();
@@ -100,12 +100,12 @@ public class Agent extends BaseNulsData {
         this.deposit = deposit;
     }
 
-    public String getAgentAddress() {
-        return agentAddress;
+    public String getPackingAddress() {
+        return packingAddress;
     }
 
-    public void setAgentAddress(String agentAddress) {
-        this.agentAddress = agentAddress;
+    public void setPackingAddress(String packingAddress) {
+        this.packingAddress = packingAddress;
     }
 
     public int getStatus() {

@@ -27,6 +27,7 @@ import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.ConsensusAgentImpl;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.validator.consensus.AccountCreditValidator;
+import io.nuls.consensus.entity.validator.consensus.AgentCountValidator;
 import io.nuls.consensus.entity.validator.consensus.AgentDepositValidator;
 import io.nuls.consensus.entity.validator.consensus.CommissionRateValidator;
 import io.nuls.core.constant.TransactionConstant;
@@ -56,6 +57,7 @@ public class RegisterAgentTransaction extends LockNulsTransaction<Consensus<Agen
         this.registerValidator(new CommissionRateValidator());
         this.registerValidator(new AccountCreditValidator());
         this.registerValidator(new AgentDepositValidator());
+        this.registerValidator(new AgentCountValidator());
     }
 
     @Override

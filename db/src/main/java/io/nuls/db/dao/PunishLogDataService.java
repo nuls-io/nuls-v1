@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,16 +21,17 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.db.dao.impl.mybatis.mapper;
+package io.nuls.db.dao;
 
-import io.nuls.db.dao.impl.mybatis.common.BaseMapper;
-import io.nuls.db.entity.DelegateAccountPo;
+import io.nuls.db.entity.PunishLogPo;
 
 /**
- * @author Niels
- * @date 2017/11/20
+ * @author vivi
+ * @date 2017/12/13.
  */
-public interface DelegateAccountMapper extends BaseMapper<String,DelegateAccountPo> {
+public interface PunishLogDataService extends BaseDataService<String, PunishLogPo> {
 
+    int deleteByHeight(long height);
 }

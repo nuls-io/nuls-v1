@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,41 +21,59 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.consensus.service.intf;
 
-import io.nuls.consensus.entity.AgentInfo;
-import io.nuls.consensus.entity.Consensus;
-import io.nuls.consensus.entity.ConsensusStatusInfo;
-import io.nuls.consensus.entity.DepositItem;
-import io.nuls.core.chain.entity.Na;
-import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.exception.NulsException;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
+package io.nuls.db.entity;
 
 /**
  * @author Niels
- * @date 2017/11/7
+ * @date 2018/3/22
  */
-public interface ConsensusService {
+public class PunishLogPo {
+    private String id;
+    private int type;
+    private String address;
+    private long time;
+    private long height;
 
-    Transaction startConsensus(String agentAddress, String password, Map<String, Object> paramsMap) throws NulsException;
+    public String getId() {
+        return id;
+    }
 
-    Transaction stopConsensus(String address, String password, Map<String, Object> paramsMap) throws NulsException, IOException;
+    public void setId(String id) {
+        this.id = id;
+    }
 
-    List<Consensus> getConsensusAccountList();
+    public int getType() {
+        return type;
+    }
 
-    List<DepositItem> getDepositList(String address);
+    public void setType(int type) {
+        this.type = type;
+    }
 
-    List<AgentInfo> getAgentList();
+    public String getAddress() {
+        return address;
+    }
 
-    Map<String, Object> getConsensusInfo();
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
-    Map<String, Object> getConsensusInfo(String address);
+    public long getTime() {
+        return time;
+    }
 
-    ConsensusStatusInfo getConsensusStatus(String address);
+    public void setTime(long time) {
+        this.time = time;
+    }
 
+    public long getHeight() {
+        return height;
+    }
+
+    public void setHeight(long height) {
+        this.height = height;
+    }
 }

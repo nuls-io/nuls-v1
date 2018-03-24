@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -76,8 +76,9 @@ public class BlockMaintenanceThread implements Runnable {
         while (true) {
             try {
                 syncBlock();
+                Thread.sleep(PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000L);
             } catch (NulsRuntimeException e1) {
-                Log.error(e1.getMessage());
+                Log.warn(e1.getMessage());
                 try {
                     Thread.sleep(PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000L);
                 } catch (InterruptedException e2) {
@@ -191,7 +192,7 @@ public class BlockMaintenanceThread implements Runnable {
                     blockInfo.getBestHash().equals(localBestBlock.getHeader().getHash())) {
                 break;
             } else if (blockInfo.getBestHeight() <= localBestBlock.getHeader().getHeight()) {
-                if (blockInfo.getBestHeight() == 0||blockInfo.getNodeIdList().size()==1) {
+                if (blockInfo.getBestHeight() == 0 || blockInfo.getNodeIdList().size() == 1) {
                     break;
                 }
                 //local height is highest
@@ -205,7 +206,7 @@ public class BlockMaintenanceThread implements Runnable {
                 if (null != header && header.getHash().equals(blockInfo.getBestHash())) {
                     break;
                 }
-                Log.warn("Rollback block start height:{},local is highest and wrong!",localBestBlock.getHeader().getHeight());
+                Log.warn("Rollback block start height:{},local is highest and wrong!", localBestBlock.getHeader().getHeight());
                 //bifurcation
                 rollbackBlock(localBestBlock.getHeader().getHeight());
                 localBestBlock = this.blockService.getLocalBestBlock();
@@ -215,10 +216,10 @@ public class BlockMaintenanceThread implements Runnable {
                 if (blockInfo.getBestHash().equals(localBestBlock.getHeader().getHash())) {
                     break;
                 }
-                if (blockInfo.getNodeIdList().size()==1) {
-                    break;
+                if (blockInfo.getNodeIdList().size() == 1) {
+                    throw new NulsRuntimeException(ErrorCode.FAILED, "node count not enough!");
                 }
-                Log.warn("Rollback block start height:{},local has wrong blocks!",localBestBlock.getHeader().getHeight());
+                Log.warn("Rollback block start height:{},local has wrong blocks!", localBestBlock.getHeader().getHeight());
                 //bifurcation
                 rollbackBlock(localBestBlock.getHeader().getHeight());
                 localBestBlock = this.blockService.getLocalBestBlock();
@@ -237,16 +238,10 @@ public class BlockMaintenanceThread implements Runnable {
         long height = startHeight - 1;
         boolean previousRb = false;
         if (height > 0) {
-            BlockHeader localHeader = null;
-            try {
-                localHeader = this.blockService.getBlockHeader(height);
-            } catch (NulsException e) {
-                System.out.println(e);
-                //todo
-            }
+            Block block = this.blockService.getBlock(height);
+            NulsContext.getInstance().setBestBlock(block);
             BlockInfo blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(height);
-
-            if (null != blockInfo && null != blockInfo.getBestHash() && !blockInfo.getBestHash().equals(localHeader.getHash())) {
+            if (null != blockInfo && null != blockInfo.getBestHash() && !blockInfo.getBestHash().equals(block.getHeader().getHash())) {
                 previousRb = true;
             }
         }

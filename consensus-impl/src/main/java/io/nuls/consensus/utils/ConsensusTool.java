@@ -28,11 +28,11 @@ import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.ConsensusAgentImpl;
-import io.nuls.consensus.entity.ConsensusDelegateImpl;
+import io.nuls.consensus.entity.ConsensusDepositImpl;
 import io.nuls.consensus.entity.block.BlockData;
 import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.entity.member.Agent;
-import io.nuls.consensus.entity.member.Delegate;
+import io.nuls.consensus.entity.member.Deposit;
 import io.nuls.core.chain.entity.*;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
@@ -44,8 +44,8 @@ import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.entity.BlockHeaderPo;
-import io.nuls.db.entity.DelegateAccountPo;
-import io.nuls.db.entity.DelegatePo;
+import io.nuls.db.entity.AgentPo;
+import io.nuls.db.entity.DepositPo;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -106,7 +106,7 @@ public class ConsensusTool {
         return header;
     }
 
-    public static Consensus<Agent> fromPojo(DelegateAccountPo po) {
+    public static Consensus<Agent> fromPojo(AgentPo po) {
         if (null == po) {
             return null;
         }
@@ -114,59 +114,59 @@ public class ConsensusTool {
         agent.setStatus(ConsensusStatusEnum.WAITING.getCode());
         agent.setDeposit(Na.valueOf(po.getDeposit()));
         agent.setCommissionRate(po.getCommissionRate());
-        agent.setAgentAddress(po.getNodeAddress());
+        agent.setPackingAddress(po.getPackingAddress());
         agent.setIntroduction(po.getRemark());
         agent.setStartTime(po.getStartTime());
         agent.setStatus(po.getStatus());
         agent.setAgentName(po.getAgentName());
         Consensus<Agent> ca = new ConsensusAgentImpl();
-        ca.setAddress(po.getAddress());
+        ca.setAddress(po.getAgentAddress());
         ca.setExtend(agent);
         return ca;
     }
 
-    public static Consensus<Delegate> fromPojo(DelegatePo po) {
+    public static Consensus<Deposit> fromPojo(DepositPo po) {
         if (null == po) {
             return null;
         }
-        Consensus<Delegate> ca = new ConsensusDelegateImpl();
+        Consensus<Deposit> ca = new ConsensusDepositImpl();
         ca.setAddress(po.getAddress());
-        Delegate delegate = new Delegate();
-        delegate.setDelegateAddress(po.getAgentAddress());
-        delegate.setDeposit(Na.valueOf(po.getDeposit()));
-        delegate.setStartTime(po.getTime());
-        delegate.setHash(po.getId());
-        ca.setExtend(delegate);
+        Deposit deposit = new Deposit();
+        deposit.setAgentAddress(po.getAgentAddress());
+        deposit.setDeposit(Na.valueOf(po.getDeposit()));
+        deposit.setStartTime(po.getTime());
+        ca.setHash(NulsDigestData.fromDigestHex(po.getId()));
+        ca.setExtend(deposit);
         return ca;
     }
 
-    public static DelegateAccountPo agentToPojo(Consensus<Agent> bean) {
+    public static AgentPo agentToPojo(Consensus<Agent> bean) {
         if (null == bean) {
             return null;
         }
-        DelegateAccountPo po = new DelegateAccountPo();
-        po.setAddress(bean.getAddress());
+        AgentPo po = new AgentPo();
+        po.setAgentAddress(bean.getAddress());
         po.setDeposit(bean.getExtend().getDeposit().getValue());
         po.setStartTime(bean.getExtend().getStartTime());
         po.setRemark(bean.getExtend().getIntroduction());
-        po.setNodeAddress(bean.getExtend().getAgentAddress());
-        po.setId(bean.getAddress());
+        po.setPackingAddress(bean.getExtend().getPackingAddress());
         po.setStatus(bean.getExtend().getStatus());
         po.setAgentName(bean.getExtend().getAgentName());
         po.setCommissionRate(bean.getExtend().getCommissionRate());
         return po;
     }
 
-    public static DelegatePo delegateToPojo(Consensus<Delegate> bean) {
+    public static DepositPo depositToPojo(Consensus<Deposit> bean,String txHash) {
         if (null == bean) {
             return null;
         }
-        DelegatePo po = new DelegatePo();
+        DepositPo po = new DepositPo();
         po.setAddress(bean.getAddress());
         po.setDeposit(bean.getExtend().getDeposit().getValue());
         po.setTime(bean.getExtend().getStartTime());
-        po.setAgentAddress(bean.getExtend().getDelegateAddress());
-        po.setId(StringUtils.getNewUUID());
+        po.setAgentAddress(bean.getExtend().getAgentAddress());
+        po.setId(bean.getHexHash());
+        po.setTxHash(txHash);
         return po;
     }
 
