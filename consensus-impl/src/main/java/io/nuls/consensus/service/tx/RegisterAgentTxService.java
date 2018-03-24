@@ -57,7 +57,7 @@ public class RegisterAgentTxService implements TransactionService<RegisterAgentT
 
     @Override
     public void onCommit(RegisterAgentTransaction tx) throws NulsException {
-        manager.changeAgentStatus(tx.getTxData().getHexHash(), ConsensusStatusEnum.WAITING);
+        manager.changeAgentStatusByHash(tx.getTxData().getHexHash(), ConsensusStatusEnum.WAITING);
         Consensus<Agent> ca = tx.getTxData();
         ca.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
         AgentPo po = ConsensusTool.agentToPojo(ca);

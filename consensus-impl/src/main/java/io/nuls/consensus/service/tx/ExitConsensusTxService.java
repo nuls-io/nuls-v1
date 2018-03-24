@@ -151,7 +151,7 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
         }
         if (joinTx.getType() == TransactionConstant.TX_TYPE_REGISTER_AGENT) {
             RegisterAgentTransaction raTx = (RegisterAgentTransaction) joinTx;
-            manager.changeAgentStatus(raTx.getTxData().getHexHash(), ConsensusStatusEnum.NOT_IN);
+            manager.changeAgentStatusByHash(raTx.getTxData().getHexHash(), ConsensusStatusEnum.NOT_IN);
             manager.changeDepositStatusByAgentHash(raTx.getTxData().getHexHash(), ConsensusStatusEnum.NOT_IN);
             this.ledgerService.unlockTxApprove(tx.getTxData().getDigestHex());
             return;

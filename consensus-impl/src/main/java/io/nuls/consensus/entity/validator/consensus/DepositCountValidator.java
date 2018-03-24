@@ -54,9 +54,9 @@ public class DepositCountValidator implements NulsDataValidator<PocJoinConsensus
     @Override
     public ValidateResult validate(PocJoinConsensusTransaction tx) {
         Consensus<Deposit> cd = tx.getTxData();
-        List<Consensus<Deposit>> list = consensusCacheManager.getCachedDepositList(cd.getExtend().getAgentHash());
-        if (null != list && list.size() >= PocConsensusConstant.MAX_ACCEPT_NUM_OF_DELEGATE) {
-            return ValidateResult.getFailedResult(ErrorCode.DELEGATE_OVER_COUNT);
+        List<Consensus<Deposit>> list = consensusCacheManager.getCachedDepositListByAgentHash(cd.getExtend().getAgentHash());
+        if (null != list && list.size() >= PocConsensusConstant.MAX_ACCEPT_NUM_OF_DEPOSIT) {
+            return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_OVER_COUNT);
         }
         return ValidateResult.getSuccessResult();
     }
