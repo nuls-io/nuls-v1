@@ -216,6 +216,9 @@ public class BlockMaintenanceThread implements Runnable {
                 if (blockInfo.getBestHash().equals(localBestBlock.getHeader().getHash())) {
                     break;
                 }
+                if(localBestBlock.getHeader().getHeight()!=blockInfo.getBestHeight()){
+                    throw new NulsRuntimeException(ErrorCode.FAILED,"answer not asked!");
+                }
                 if (blockInfo.getNodeIdList().size() == 1) {
                     throw new NulsRuntimeException(ErrorCode.FAILED, "node count not enough!");
                 }
