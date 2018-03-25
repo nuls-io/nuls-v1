@@ -58,6 +58,7 @@ public class GetBlockHandler extends AbstractEventHandler<GetBlockRequest> {
             }
             if(block.getTxs().isEmpty()){
                 //todo why
+                Log.warn("block has no tx!");
                 BlockCacheManager.getInstance().removeBlock(block.getHeader().getHash().getDigestHex());
                 continue;
             }
