@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,21 +21,33 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.rpc.service.intf;
+
+package io.nuls.consensus.entity.validator.tx;
+
+import io.nuls.consensus.entity.Consensus;
+import io.nuls.consensus.entity.ConsensusAgentImpl;
+import io.nuls.consensus.entity.member.Agent;
+import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
+import io.nuls.core.utils.str.StringUtils;
+import io.nuls.core.validate.NulsDataValidator;
+import io.nuls.core.validate.ValidateResult;
 
 /**
- *
  * @author Niels
- * @date 2017/9/25
+ * @date 2018/3/25
  */
-public interface RpcServerService {
-    /**
-     * start http server，restFul
-     */
-    void startServer(String ip, int port);
-
-    void shutdown();
-
-    boolean isStarted();
+public class RegisterAgentFieldValidator implements NulsDataValidator<RegisterAgentTransaction> {
+    @Override
+    public ValidateResult validate(RegisterAgentTransaction tx) {
+        Consensus<Agent> agent = tx.getTxData();
+        if (null == agent) {
+            return ValidateResult.getFailedResult("tx data can not be null!");
+        }
+        if(!StringUtils.validAddress(agent.getAddress())||!StringUtils.validAddress(agent.getExtend().getPackingAddress())){
+            return ValidateResult.getFailedResult("");
+        }
+        return null;
+    }
 }
