@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -114,16 +114,17 @@ public class TransactionResource {
     @GET
     @Path("/list")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult list(@QueryParam("address") String address, @QueryParam("type") int type,
+    public RpcResult list(@QueryParam("blockHeight") Long blockHeight,
+                          @QueryParam("address") String address, @QueryParam("type") int type,
                           @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
-        if (type < 0 || pageNumber < 0 || pageSize < 0 || pageSize > 100) {
+        if (blockHeight == null && StringUtils.isBlank(address) && type == 0) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
-        if (pageNumber == 0) {
-            pageNumber = 1;
+        if ((blockHeight != null && blockHeight < 0) || type < 0 || pageNumber < 0 || pageSize < 0) {
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
-        if (pageSize == 0) {
-            pageSize = 10;
+        if ((pageNumber == 0 && pageSize > 0) || (pageNumber > 0 && pageSize == 0)) {
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
 
         try {
@@ -131,16 +132,23 @@ public class TransactionResource {
 
             Page<Transaction> pages = new Page<>();
             if (StringUtils.isBlank(address)) {
-                pages = ledgerService.getTxList(-1, type, pageNumber, pageSize);
+                pages = ledgerService.getTxList(blockHeight, type, pageNumber, pageSize);
             } else if (StringUtils.validAddress(address)) {
-                pages.setPageNumber(pageNumber);
-                pages.setPageSize(pageSize);
-                long count = ledgerService.getTxCount(address, type);
+
+                long count = ledgerService.getTxCount(blockHeight, address, type);
+                if (pageSize > 0) {
+                    pages.setPageNumber(pageNumber);
+                    pages.setPageSize(pageSize);
+                } else {
+                    pages.setPageNumber(pageNumber);
+                    pages.setPages((int) count);
+                }
+
                 pages.setTotal(count);
                 if (count == 0) {
                     return RpcResult.getSuccess().setData(pages);
                 }
-                List<Transaction> txList = ledgerService.getTxList(address, type, pageNumber, pageSize);
+                List<Transaction> txList = ledgerService.getTxList(blockHeight, address, type, pageNumber, pageSize);
                 pages.setList(txList);
             }
             Page<TransactionDto> pageDto = new Page<>(pages);
@@ -155,42 +163,6 @@ public class TransactionResource {
             Log.error(e);
             return RpcResult.getFailed(e.getMessage());
         }
-
-    }
-
-    @GET
-    @Path("/block/list")
-    @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult list(@QueryParam("height") long height,
-                          @QueryParam("pageNumber") int pageNumber,
-                          @QueryParam("pageSize") int pageSize) {
-        if (height < 0 || pageNumber < 0 || pageSize < 0) {
-            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
-        }
-        if (pageNumber == 0) {
-            pageNumber = 1;
-        }
-        if (pageSize == 0) {
-            pageSize = 20000;
-        }
-
-        Page<TransactionDto> dtoPage = null;
-        try {
-            Page<Transaction> txPage = ledgerService.getTxList(height, 0, pageNumber, pageSize);
-            List<TransactionDto> dtoList = new ArrayList<>();
-            dtoPage = new Page<>(txPage);
-            for (Transaction tx : txPage.getList()) {
-                dtoList.add(new TransactionDto(tx));
-            }
-            dtoPage.setList(dtoList);
-        } catch (Exception e) {
-            Log.error(e);
-            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
-        }
-
-        RpcResult result = RpcResult.getSuccess();
-        result.setData(dtoPage);
-        return result;
     }
 
     @GET

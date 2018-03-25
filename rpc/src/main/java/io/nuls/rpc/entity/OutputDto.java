@@ -6,6 +6,8 @@ import io.nuls.ledger.entity.UtxoOutput;
 
 public class OutputDto {
 
+    private String txHash;
+
     private Integer index;
 
     private String address;
@@ -21,6 +23,7 @@ public class OutputDto {
     private Integer status;
 
     public OutputDto(UtxoOutput output) {
+        this.txHash = output.getTxHash().getDigestHex();
         this.index = output.getIndex();
         this.address = output.getAddress();
         this.value = output.getValue();
@@ -38,6 +41,7 @@ public class OutputDto {
     }
 
     public OutputDto(UtxoOutputPo output) {
+        this.txHash = output.getTxHash();
         this.index = output.getOutIndex();
         this.address = output.getAddress();
         this.value = output.getValue();
@@ -101,5 +105,13 @@ public class OutputDto {
 
     public void setStatus(Integer status) {
         this.status = status;
+    }
+
+    public String getTxHash() {
+        return txHash;
+    }
+
+    public void setTxHash(String txHash) {
+        this.txHash = txHash;
     }
 }

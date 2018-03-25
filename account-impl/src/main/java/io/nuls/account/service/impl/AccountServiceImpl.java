@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -345,7 +345,6 @@ public class AccountServiceImpl implements AccountService {
         if (accounts == null || accounts.isEmpty()) {
 
 
-
             new Result(false, "No account was found");
         }
 
@@ -576,28 +575,44 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result exportAccount(String address, String password) {
-        Account account = null;
-        if (!StringUtils.isBlank(address)) {
-            account = accountCacheService.getAccountByAddress(address);
-            if (account == null) {
-                return Result.getFailed(ErrorCode.DATA_NOT_FOUND);
-            }
-            if (account.isEncrypted()) {
-                try {
-                    if (!StringUtils.validPassword(password) || !account.decrypt(password)) {
-                        return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
-                    }
-                } catch (NulsException e) {
-                    return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
-                }
-            }
+        Account account = accountCacheService.getAccountByAddress(address);
+        if (account == null) {
+            return Result.getFailed(ErrorCode.DATA_NOT_FOUND);
+        }
+        List<String> prikeyList = new ArrayList<>();
+        try {
+            account.decrypt(password);
+            prikeyList.add(Hex.encode(account.getPriKey()));
+            account.encrypt(password);
+        } catch (NulsException e) {
+            return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
         }
 
-        Result result = backUpFile("");
-        if (!result.isSuccess()) {
-            return result;
-        }
-        return exportAccount(account, (File) result.getObject());
+        Map<String, Object> map = new HashMap<>();
+        map.put("prikeys", prikeyList);
+        map.put("password", MD5Util.md5(password));
+        return new Result(true, "OK", map);
+//        if (!StringUtils.isBlank(address)) {
+//            account = accountCacheService.getAccountByAddress(address);
+//            if (account == null) {
+//                return Result.getFailed(ErrorCode.DATA_NOT_FOUND);
+//            }
+//            if (account.isEncrypted()) {
+//                try {
+//                    if (!StringUtils.validPassword(password) || !account.decrypt(password)) {
+//                        return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
+//                    }
+//                } catch (NulsException e) {
+//                    return Result.getFailed(ErrorCode.PASSWORD_IS_WRONG);
+//                }
+//            }
+//        }
+//
+//        Result result = backUpFile("");
+//        if (!result.isSuccess()) {
+//            return result;
+//        }
+//        return exportAccount(account, (File) result.getObject());
     }
 
     @Override
@@ -744,7 +759,7 @@ public class AccountServiceImpl implements AccountService {
         accountCacheService.putAccount(account);
         NulsContext.LOCAL_ADDRESS_LIST.add(accountPo.getAddress());
         ledgerService.getBalance(accountPo.getAddress());
-        if(getDefaultAccount() == null) {
+        if (getDefaultAccount() == null) {
             setDefaultAccount(account.getAddress().getBase58());
         }
         AccountImportedNotice notice = new AccountImportedNotice();
