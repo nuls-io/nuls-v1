@@ -29,7 +29,9 @@ package io.nuls.rpc.sdk.entity;
 import java.util.Map;
 
 /**
- * @author Vive
+ * @Desription:
+ * @Author: PierreLuo
+ * @Date: 2018/3/25
  */
 public class OutputDto {
 
@@ -37,21 +39,24 @@ public class OutputDto {
 
     private String address;
 
-    private Double value;
+    private Long value;
 
     private Long createTime;
 
     private Long lockTime;
-
+    //tx.type
     private Integer type;
+
+    private Integer status;
 
     public OutputDto(Map<String, Object> map) {
         index = (Integer) map.get("index");
-        lockTime = (Long) map.get("lockTime");
-        createTime = (Long) map.get("createTime");
         address = (String) map.get("address");
-        value = (Double) map.get("value");
-        this.type = (Integer) map.get("type");
+        value = Long.parseLong(""+ map.get("value"));
+        createTime = Long.parseLong(""+ map.get("createTime"));
+        lockTime = Long.parseLong(""+ map.get("lockTime"));
+        type = (Integer) map.get("type");
+        status = (Integer) map.get("status");
     }
 
     public Integer getIndex() {
@@ -70,11 +75,11 @@ public class OutputDto {
         this.address = address;
     }
 
-    public Double getValue() {
+    public Long getValue() {
         return value;
     }
 
-    public void setValue(Double value) {
+    public void setValue(Long value) {
         this.value = value;
     }
 
@@ -100,5 +105,13 @@ public class OutputDto {
 
     public void setType(Integer type) {
         this.type = type;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 }

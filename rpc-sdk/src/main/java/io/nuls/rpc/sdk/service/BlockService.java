@@ -43,7 +43,7 @@ public class BlockService {
      */
     public RpcClientResult getBlock(String hash) {
         AssertUtil.canNotEmpty(hash, "block hash cannot null!");
-        RpcClientResult result = restFul.get("/block/" + hash, null);
+        RpcClientResult result = restFul.get("/block/header/hash/" + hash, null);
         if (result.isSuccess()) {
             result.setData(new BlockDto((Map<String, Object>) result.getData(), true));
         }
@@ -55,23 +55,23 @@ public class BlockService {
      * @return BlockHeader
      */
     public RpcClientResult getBlock(int height) {
-        RpcClientResult result = restFul.get("/block/height/" + height, null);
+        RpcClientResult result = restFul.get("/block/header/height/" + height, null);
         if (result.isSuccess()) {
             result.setData(new BlockDto((Map<String, Object>) result.getData(), true));
         }
         return result;
     }
 
-    public RpcClientResult getBlockCount() {
+    /*public RpcClientResult getBlockCount() {
         return restFul.get("/block/count", null);
-    }
+}
 
     public RpcClientResult getBestBlockHeight() {
         return restFul.get("/block/bestheight", null);
-    }
+    }*/
 
     public RpcClientResult getBestBlockHash() {
-        return restFul.get("/block/besthash", null);
+        return restFul.get("/block/newest", null);
     }
 
     public RpcClientResult getBlockHashByHeight(int height) {

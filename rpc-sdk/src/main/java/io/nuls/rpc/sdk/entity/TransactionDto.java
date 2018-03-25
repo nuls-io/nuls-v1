@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author Vive
+ * @Desription:
+ * @Author: PierreLuo
+ * @Date: 2018/3/25
  */
 public class TransactionDto {
 
@@ -20,34 +22,42 @@ public class TransactionDto {
 
     private Long blockHeight;
 
-    private Double fee;
+    private Long fee;
 
-    private Double value;
+    private Long value;
 
     private List<InputDto> inputs;
 
     private List<OutputDto> outputs;
 
-    /**
-     * -1 transfer,  1 receiver
-     */
+    // -1 transfer,  1 receiver
     private Integer transferType;
 
     private String remark;
 
-    private String sign;
+    private String scriptSig;
+    // 0, unConfirm  1, confirm
+    private Integer status;
+
+    private Long confirmCount;
+
+    private int size;
 
     public TransactionDto(Map<String, Object> map){
         hash = (String) map.get("hash");
         type = (Integer) map.get("type");
         index = (Integer) map.get("index");
-        time = (Long) map.get("time");
-        blockHeight = (Long) map.get("blockHeight");
-        fee = (Double) map.get("fee");
-        value = (Double) map.get("value");
+        time = Long.parseLong(""+map.get("time"));
+        blockHeight = Long.parseLong(""+map.get("blockHeight"));
+        fee = Long.parseLong(""+map.get("fee"));
+        value = Long.parseLong(""+map.get("value"));
         transferType = (Integer) map.get("transferType");
         remark = (String) map.get("remark");
-        sign = (String) map.get("sign");
+        scriptSig = (String) map.get("scriptSig");
+        status = (Integer) map.get("status");
+        confirmCount = Long.parseLong(""+map.get("confirmCount"));
+        size = (Integer) map.get("size");
+
         inputs = new ArrayList<>();
         List<Map<String,Object>> inputMapList = (List<Map<String, Object>>) map.get("inputs");
         for(Map<String, Object> inputMap:inputMapList){
@@ -100,19 +110,19 @@ public class TransactionDto {
         this.blockHeight = blockHeight;
     }
 
-    public Double getFee() {
+    public Long getFee() {
         return fee;
     }
 
-    public void setFee(Double fee) {
+    public void setFee(Long fee) {
         this.fee = fee;
     }
 
-    public Double getValue() {
+    public Long getValue() {
         return value;
     }
 
-    public void setValue(Double value) {
+    public void setValue(Long value) {
         this.value = value;
     }
 
@@ -148,12 +158,35 @@ public class TransactionDto {
         this.remark = remark;
     }
 
-    public String getSign() {
-        return sign;
+    public String getScriptSig() {
+        return scriptSig;
     }
 
-    public void setSign(String sign) {
-        this.sign = sign;
+    public void setScriptSig(String scriptSig) {
+        this.scriptSig = scriptSig;
     }
 
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    public Long getConfirmCount() {
+        return confirmCount;
+    }
+
+    public void setConfirmCount(Long confirmCount) {
+        this.confirmCount = confirmCount;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
 }

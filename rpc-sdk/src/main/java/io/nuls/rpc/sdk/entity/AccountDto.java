@@ -29,17 +29,11 @@ package io.nuls.rpc.sdk.entity;
 import java.util.Map;
 
 /**
- * @author Vive
+ * @Desription:
+ * @Author: PierreLuo
+ * @Date: 2018/3/25
  */
 public class AccountDto {
-
-    public AccountDto(Map<String, Object> map){
-        address= (String) map.get("address");
-        alias= (String) map.get("alias");
-        pubKey= (String) map.get("pubKey");
-        extend= (String) map.get("extend");
-        createTime= (Long) map.get("createTime");
-    }
 
     private String address;
 
@@ -50,6 +44,14 @@ public class AccountDto {
     private String extend;
 
     private Long createTime;
+
+    public AccountDto(Map<String, Object> map){
+        address= (String) map.get("address");
+        alias= (String) map.get("alias");
+        pubKey= (String) map.get("pubKey");
+        extend= (String) map.get("extend");
+        createTime= Long.parseLong(""+ map.get("createTime"));
+    }
 
     public String getAddress() {
         return address;
