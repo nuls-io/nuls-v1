@@ -70,17 +70,27 @@ public class TransactionDaoImpl extends BaseDaoImpl<TransactionMapper, String, T
         if (type != 0) {
             searchable.addCondition("type", SearchOperator.eq, type);
         }
-        if (blockHeight >= 0) {
+        if (blockHeight != null) {
             searchable.addCondition("block_height", SearchOperator.eq, blockHeight);
         }
 
         long count = getMapper().selectCount(searchable);
-        PageHelper.startPage(pageNum, pageSize);
+        if (pageNum > 0 && pageSize > 0) {
+            PageHelper.startPage(pageNum, pageSize);
+        }
+
         PageHelper.orderBy("a.create_time desc,b.in_index asc,c.out_index asc");
         List<TransactionPo> poList = getMapper().selectList(searchable);
         Page<TransactionPo> page = new Page<>();
-        page.setPageNumber(pageNum);
-        page.setPageSize(pageSize);
+
+        if (pageSize > 0) {
+            page.setPageNumber(pageNum);
+            page.setPageSize(pageSize);
+        } else {
+            page.setPageNumber(1);
+            page.setPageSize((int) count);
+        }
+
         page.setTotal(count);
         page.setList(poList);
         return page;
@@ -96,41 +106,50 @@ public class TransactionDaoImpl extends BaseDaoImpl<TransactionMapper, String, T
     }
 
     @Override
-    public List<TransactionPo> getTxs(String address, int type, Integer start, Integer limit) {
+    public List<TransactionPo> getTxs(Long blockHeight, String address, int type, int start, int limit) {
         Searchable searchable = new Searchable();
 //        Condition condition = Condition.custom("(e.address = c.address or e.address = d.address)");
 //        searchable.addCondition(condition);
         if (type != 0) {
             searchable.addCondition("a.type", SearchOperator.eq, type);
         }
+        if (blockHeight != null) {
+            searchable.addCondition("a.block_height", SearchOperator.eq, blockHeight);
+        }
         if (StringUtils.isNotBlank(address)) {
             searchable.addCondition("e.address", SearchOperator.eq, address);
         }
 
-        if (start != null && limit != null) {
+        if (start != 0 && limit != 0) {
             PageHelper.offsetPage(start, limit);
         }
-        PageHelper.orderBy("a.create_time desc");
+        PageHelper.orderBy("a.create_time desc, b.in_index asc, c.out_index asc");
         return getMapper().selectByAddress(searchable);
     }
 
     @Override
     public List<TransactionPo> getTxs(String address, int type) {
-        return getTxs(address, type, null, null);
+        return getTxs(null, address, type, 0, 0);
     }
 
     @Override
-    public long getTxsCount(String address, int type) {
+    public long getTxsCount(Long blockHeight, String address, int type) {
         Searchable searchable = new Searchable();
         if (StringUtils.isBlank(address)) {
             if (type != 0) {
                 searchable.addCondition("type", SearchOperator.eq, type);
+            }
+            if(blockHeight != null) {
+                searchable.addCondition("block_height", SearchOperator.eq, blockHeight);
             }
             return getMapper().selectCount(searchable);
         }
 
         if (type != 0) {
             searchable.addCondition("a.type", SearchOperator.eq, type);
+        }
+        if(blockHeight != null) {
+            searchable.addCondition("a.block_height", SearchOperator.eq, blockHeight);
         }
         searchable.addCondition("e.address", SearchOperator.eq, address);
         return getMapper().selectCountByAddress(searchable);

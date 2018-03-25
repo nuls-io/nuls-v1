@@ -78,6 +78,11 @@ public class BlockPersistenceThread implements Runnable {
                 }
             } catch (Exception e) {
                 Log.error(e);
+                try {
+                    Thread.sleep(1000L);
+                } catch (InterruptedException e1) {
+                    Log.error(e1);
+                }
             }
         }
     }
@@ -122,7 +127,7 @@ public class BlockPersistenceThread implements Runnable {
             }
             return;
         }
-        if(block.getTxs().isEmpty()){
+        if (block.getTxs().isEmpty()) {
             //todo why
             Log.warn("block has no tx!");
             blockCacheManager.removeBlock(block.getHeader());

@@ -48,9 +48,9 @@ public interface LedgerService {
 
     List<Transaction> getTxList(String address, int txType) throws Exception;
 
-    long getTxCount(String address, int txType) throws Exception;
+    long getTxCount(Long blockHeight, String address, int txType) throws Exception;
 
-    List<Transaction> getTxList(String address, int txType, Integer pageNumber, Integer pageSize) throws Exception;
+    List<Transaction> getTxList(Long blockHeight, String address, int txType, int pageNumber, int pageSize) throws Exception;
 
     List<Transaction> getTxList(String blockHash) throws Exception;
 
@@ -58,7 +58,7 @@ public interface LedgerService {
 
     List<Transaction> getTxList(long height) throws Exception;
 
-    Page<Transaction> getTxList(long height, int type, int pageNum, int pageSize) throws Exception;
+    Page<Transaction> getTxList(Long height, int type, int pageNum, int pageSize) throws Exception;
 
     Balance getBalance(String address);
 
@@ -79,6 +79,8 @@ public interface LedgerService {
     void saveTxInLocal(String address);
 
     boolean checkTxIsMine(Transaction tx) throws NulsException;
+
+    boolean checkTxIsMine(Transaction tx, String address) throws NulsException;
 
     void rollbackTx(Transaction tx) throws NulsException;
 

@@ -49,6 +49,8 @@ import io.nuls.rpc.resources.form.CreateAgentForm;
 import io.nuls.rpc.resources.form.WithdrawForm;
 import io.nuls.rpc.resources.form.DepositForm;
 import io.nuls.rpc.resources.form.StopAgentForm;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -62,6 +64,7 @@ import java.util.Map;
  * @date 2017/9/30
  */
 @Path("/consensus")
+@Api(value = "/browse", description = "Consensus")
 public class PocConsensusResource {
     private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
@@ -70,12 +73,12 @@ public class PocConsensusResource {
 
     private AgentDataService agentDataService = NulsContext.getServiceBean(AgentDataService.class);
 
-
-    //todo 临时使用的
-    private int temp = 1;
+    public PocConsensusResource() {
+    }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation("Get the whole network consensus infomation!")
     public RpcResult getWholeInfo() {
         RpcResult result = RpcResult.getSuccess();
         WholeNetConsensusInfoDTO dto = new WholeNetConsensusInfoDTO();
@@ -143,6 +146,7 @@ public class PocConsensusResource {
     @POST
     @Path("/agent")
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation("Create an agent for consensus!")
     public RpcResult createAgent(CreateAgentForm form) throws NulsException {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getAgentAddress());
@@ -165,6 +169,7 @@ public class PocConsensusResource {
     @POST
     @Path("/deposit")
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation("deposit nuls to a bank!")
     public RpcResult depositToAgent(DepositForm form) throws NulsException {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getAddress());

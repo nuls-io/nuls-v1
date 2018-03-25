@@ -24,11 +24,9 @@
 package io.nuls.db.dao.impl.mybatis;
 
 import com.github.pagehelper.PageHelper;
-import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.TransactionLocalDataService;
 import io.nuls.db.dao.impl.mybatis.mapper.TransactionLocalMapper;
-import io.nuls.db.dao.impl.mybatis.util.Condition;
 import io.nuls.db.dao.impl.mybatis.util.SearchOperator;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import io.nuls.db.entity.TransactionLocalPo;
@@ -72,36 +70,42 @@ public class TransactionLocalDaoImpl extends BaseDaoImpl<TransactionLocalMapper,
     }
 
     @Override
-    public List<TransactionLocalPo> getTxs(String address, int type, Integer start, Integer limit) {
+    public List<TransactionLocalPo> getTxs(Long blockHeight, String address, int type, int start, int limit) {
         Searchable searchable = new Searchable();
 //        Condition condition = Condition.custom("(e.address = c.address or e.address = d.address)");
 //        searchable.addCondition(condition);
         if (type != 0) {
             searchable.addCondition("a.type", SearchOperator.eq, type);
         }
+        if (blockHeight != null) {
+            searchable.addCondition("a.block_height", SearchOperator.eq, blockHeight);
+        }
         if (StringUtils.isNotBlank(address)) {
             searchable.addCondition("e.address", SearchOperator.eq, address);
         }
 
-        if (start != null && limit != null) {
+        if (start != 0 && limit != 0) {
             PageHelper.offsetPage(start, limit);
         }
-        PageHelper.orderBy("a.create_time desc");
+        PageHelper.orderBy("a.create_time desc, b.in_index asc, c.out_index asc");
         List<TransactionLocalPo> localPoList = getMapper().selectByAddress(searchable);
         return localPoList;
     }
 
     @Override
     public List<TransactionLocalPo> getTxs(String address, int type) {
-        return getTxs(address, type, null, null);
+        return getTxs(null, address, type, 0, 0);
     }
 
     @Override
-    public Long getTxsCount(String address, int type) {
+    public Long getTxsCount(Long blockHeight, String address, int type) {
         Searchable searchable = new Searchable();
         if (StringUtils.isBlank(address)) {
             if (type != 0) {
                 searchable.addCondition("type", SearchOperator.eq, type);
+            }
+            if(blockHeight != null) {
+                searchable.addCondition("block_height", SearchOperator.eq, blockHeight);
             }
             return getMapper().selectCount(searchable);
         }
@@ -109,8 +113,10 @@ public class TransactionLocalDaoImpl extends BaseDaoImpl<TransactionLocalMapper,
         if (type != 0) {
             searchable.addCondition("a.type", SearchOperator.eq, type);
         }
+        if(blockHeight != null) {
+            searchable.addCondition("a.block_height", SearchOperator.eq, blockHeight);
+        }
         searchable.addCondition("e.address", SearchOperator.eq, address);
         return getMapper().selectCountByAddress(searchable);
     }
-
 }
