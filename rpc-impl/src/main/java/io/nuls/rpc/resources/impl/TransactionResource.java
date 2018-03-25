@@ -38,7 +38,6 @@ import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.event.TransactionEvent;
-import io.nuls.ledger.service.impl.LedgerCacheService;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.rpc.entity.OutputDto;
 import io.nuls.rpc.entity.RpcResult;
@@ -57,7 +56,6 @@ import java.util.List;
 @Path("/tx")
 public class TransactionResource {
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
-    private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
     private UtxoOutputDataService outputDataService = NulsContext.getServiceBean(UtxoOutputDataService.class);
 
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
