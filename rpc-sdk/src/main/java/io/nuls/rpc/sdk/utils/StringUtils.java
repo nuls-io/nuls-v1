@@ -97,7 +97,7 @@ public class StringUtils {
         if (isBlank(address)){
             return false;
         }
-        if (address.length() > 35) return false;
+        if (address.length() > 40) return false;
         return true;
     }
 

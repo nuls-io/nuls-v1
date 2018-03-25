@@ -33,14 +33,23 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author Niels
- * @date 2017/11/1
+ * @Desription:
+ * @Author: PierreLuo
+ * @Date: 2018/3/25
  */
 public class BlockService {
     private RestFulUtils restFul = RestFulUtils.getInstance();
 
+    /**
+     * @param hash
+     * @return
+     */
     public RpcClientResult getBlock(String hash) {
-        AssertUtil.canNotEmpty(hash, "block hash cannot null!");
+        try {
+            AssertUtil.canNotEmpty(hash, "block hash cannot null!");
+        } catch (Exception e) {
+            return RpcClientResult.getFailed(e.getMessage());
+        }
         RpcClientResult result = restFul.get("/block/hash/" + hash, null);
         if (result.isSuccess()) {
             result.setData(new BlockDto((Map<String, Object>) result.getData(), true));
@@ -48,7 +57,15 @@ public class BlockService {
         return result;
     }
 
+
+    /**
+     * @param height
+     * @return
+     */
     public RpcClientResult getBlock(int height) {
+        if(height < 0){
+            return RpcClientResult.getFailed(RpcCmdConstant.PARAMETER_ERROR_MSG);
+        }
         RpcClientResult result = restFul.get("/block/height/" + height, null);
         if (result.isSuccess()) {
             result.setData(new BlockDto((Map<String, Object>) result.getData(), true));
@@ -56,7 +73,16 @@ public class BlockService {
         return result;
     }
 
+    /**
+     * @param hash
+     * @return
+     */
     public RpcClientResult getBlockHeader(String hash) {
+        try {
+            AssertUtil.canNotEmpty(hash, "block hash cannot null!");
+        } catch (Exception e) {
+            return RpcClientResult.getFailed(e.getMessage());
+        }
         RpcClientResult result = restFul.get("/block/header/hash/" + hash, null);
         if (result.isSuccess()) {
             result.setData(new BlockDto((Map<String, Object>) result.getData(), false));
@@ -64,7 +90,14 @@ public class BlockService {
         return result;
     }
 
+    /**
+     * @param height
+     * @return
+     */
     public RpcClientResult getBlockHeader(int height) {
+        if(height < 0){
+            return RpcClientResult.getFailed(RpcCmdConstant.PARAMETER_ERROR_MSG);
+        }
         RpcClientResult result = restFul.get("/block/header/height/" + height, null);
         if (result.isSuccess()) {
             result.setData(new BlockDto((Map<String, Object>) result.getData(), false));
@@ -73,6 +106,9 @@ public class BlockService {
     }
 
 
+    /**
+     * @return
+     */
     public RpcClientResult getBestBlockHeader() {
         RpcClientResult result = restFul.get("/block/newest", null);
         if (result.isSuccess()) {
@@ -81,6 +117,11 @@ public class BlockService {
         return result;
     }
 
+    /**
+     * @param pageNumber
+     * @param pageSize
+     * @return
+     */
     public RpcClientResult listBlockHeader(int pageNumber, int pageSize) {
         if(pageNumber < 0 || pageSize < 0 ){
             return RpcClientResult.getFailed(RpcCmdConstant.PARAMETER_ERROR_MSG);
