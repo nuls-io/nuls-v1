@@ -148,12 +148,16 @@ public class NulsContext {
     }
 
     public Long getNetBestBlockHeight() {
-        if (null == bestBlock) {
-            return netBestBlockHeight;
+        if (null != bestBlock&&netBestBlockHeight < bestBlock.getHeader().getHeight()) {
+            return bestBlock.getHeader().getHeight();
         }
-        if (netBestBlockHeight < bestBlock.getHeader().getHeight()) {
-            netBestBlockHeight = bestBlock.getHeader().getHeight();
+        if(null==netBestBlockHeight){
+            return 0L;
         }
+        return netBestBlockHeight;
+    }
+
+    public Long getNetBestBlockHeightWithNull() {
         return netBestBlockHeight;
     }
 

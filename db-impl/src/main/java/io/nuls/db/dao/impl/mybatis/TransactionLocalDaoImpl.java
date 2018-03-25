@@ -74,8 +74,8 @@ public class TransactionLocalDaoImpl extends BaseDaoImpl<TransactionLocalMapper,
     @Override
     public List<TransactionLocalPo> getTxs(String address, int type, Integer start, Integer limit) {
         Searchable searchable = new Searchable();
-        Condition condition = Condition.custom("(e.address = c.address or e.address = d.address)");
-        searchable.addCondition(condition);
+//        Condition condition = Condition.custom("(e.address = c.address or e.address = d.address)");
+//        searchable.addCondition(condition);
         if (type != 0) {
             searchable.addCondition("a.type", SearchOperator.eq, type);
         }

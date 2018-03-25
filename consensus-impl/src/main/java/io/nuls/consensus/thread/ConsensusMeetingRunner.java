@@ -342,6 +342,7 @@ public class ConsensusMeetingRunner implements Runnable {
             }
             return;
         }
+        confirmingTxCacheManager.putTx(newBlock.getTxs().get(0));
         blockCacheManager.cacheBlockHeader(newBlock.getHeader(), null);
         blockCacheManager.cacheBlock(newBlock);
         BlockHeaderEvent event = new BlockHeaderEvent();
@@ -542,8 +543,10 @@ public class ConsensusMeetingRunner implements Runnable {
             PocMeetingRound tempRound;
             if (roundIndex == self.getRoundIndex()) {
                 tempRound = round;
-            } else {
+            } else if(roundIndex==(self.getRoundIndex()-1)){
                 tempRound = round.getPreviousRound();
+            }else{
+                break;
             }
             if (tempRound.getIndex() > round.getIndex()) {
                 break;

@@ -62,7 +62,7 @@ public class BlockStorageService {
 
     public Block getBlock(long height) throws Exception {
         Block block = blockCacheManager.getBlock(height);
-        if (null != block) {
+        if (null != block&&block.getTxs().size()==block.getHeader().getTxCount()) {
             return block;
         }
         BlockHeader header = getBlockHeader(height);
@@ -74,6 +74,9 @@ public class BlockStorageService {
             txList = ledgerService.getTxList(height);
         } catch (Exception e) {
             Log.error(e);
+        }
+        if(header.getTxCount()!=txList.size()){
+            Log.warn("block has wrong tx size!");
         }
         return fillBlock(header, txList);
     }

@@ -196,7 +196,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 start = start - txList.size();
             }
             poList = txDao.getTxs(address, txType, start, pageSize);
-            txList = new ArrayList<>();
             for (TransactionPo po : poList) {
                 txList.add(UtxoTransferTool.toTransaction(po));
             }
@@ -247,7 +246,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             start = start - txList.size();
         }
         poList = txDao.getLocalTxs(address, txType, start, pageSize);
-        txList = new ArrayList<>();
         for (TransactionLocalPo po : poList) {
             txList.add(UtxoTransferTool.toTransaction(po));
         }
@@ -347,14 +345,14 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         try {
             tx = UtxoTransactionTool.getInstance().createTransferTx(coinData, password, remark);
             ValidateResult result = tx.verify();
-            if (!result.getErrorCode().getCode().equals(ErrorCode.SUCCESS.getCode())) {
-                throw new NulsException(ErrorCode.FAILED);
+            if (result.isFailed()) {
+                throw new NulsException(result.getErrorCode());
             }
             byte[] txbytes = tx.serialize();
             TransferTransaction new_tx = new NulsByteBuffer(txbytes).readNulsData(new TransferTransaction());
             result = new_tx.verify();
-            if (!result.getErrorCode().getCode().equals(ErrorCode.SUCCESS.getCode())) {
-                throw new NulsException(ErrorCode.FAILED);
+            if (result.isFailed()) {
+                throw new NulsException(result.getErrorCode());
             }
             TransactionEvent event = new TransactionEvent();
             event.setEventBody(tx);
