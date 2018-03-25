@@ -45,10 +45,28 @@ public class CommandHandler {
         register(new SystemProcessors.Exit());
         register(new SystemProcessors.Help());
         register(new SystemProcessors.Version());
-        register(new AccountProcessors.CreateAccount());
+
         register(new BlockProcessors.GetBestBlockHeader());
-        register(new WalletProcessors.Transfer());
+        register(new BlockProcessors.GetBlock());
+        register(new BlockProcessors.GetBlockHeader());
+        register(new BlockProcessors.ListBlockHeader());
+
+        register(new AccountProcessors.AliasAccount());
+        register(new AccountProcessors.CreateAccount());
+        register(new AccountProcessors.GetAsset());
         register(new AccountProcessors.GetBalance());
+        register(new AccountProcessors.GetPrivateKey());
+        register(new AccountProcessors.GetUnspentUTXO());
+        register(new AccountProcessors.GetWalletBalance());
+        register(new AccountProcessors.ListAccount());
+
+        register(new WalletProcessors.BackupWallet());
+        register(new WalletProcessors.ImportAccount());
+        register(new WalletProcessors.RemoveAccount());
+        register(new WalletProcessors.ResetPassword());
+        register(new WalletProcessors.SetPassword());
+        register(new WalletProcessors.Transfer());
+
         register(new ConsensusProcessors.GetAgentList());
         //todo 修改为配置
         SdkManager.init("http://127.0.0.1:8001/nuls");

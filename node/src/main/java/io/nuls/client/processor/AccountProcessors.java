@@ -122,6 +122,211 @@ public abstract class AccountProcessors implements CommandProcessor {
         }
     }
 
+    public static class GetWalletBalance extends AccountProcessors {
+
+        @Override
+        public String getCommand() {
+            return "getwalletbalance";
+        }
+
+        @Override
+        public String getHelp() {
+            return null;
+        }
+
+        @Override
+        public String getCommandDescription() {
+            return "getwalletbalance --get total balance of all addresses in the wallet";
+        }
+
+        @Override
+        public boolean argsValidate(String[] args) {
+            //TODO 参数校验
+            return true;
+        }
+
+        @Override
+        public CommandResult execute(String[] args) {
+            RpcClientResult result = accountService.getTotalBalance();
+            if (null == result) {
+                return CommandResult.getFailed("Failure to execute");
+            }
+            return CommandResult.getResult(result);
+        }
+    }
+
+    public static class ListAccount extends AccountProcessors {
+
+        @Override
+        public String getCommand() {
+            return "listaccount";
+        }
+
+        @Override
+        public String getHelp() {
+            return null;
+        }
+
+        @Override
+        public String getCommandDescription() {
+            //TODO 命令描述
+            return "listaccount --get total balance of all addresses in the wallet";
+        }
+
+        @Override
+        public boolean argsValidate(String[] args) {
+            //TODO 参数校验
+            return true;
+        }
+
+        @Override
+        public CommandResult execute(String[] args) {
+            RpcClientResult result = accountService.getAccountList();
+            if (null == result) {
+                return CommandResult.getFailed("Failure to execute");
+            }
+            return CommandResult.getResult(result);
+        }
+    }
+
+    public static class GetUnspentUTXO extends AccountProcessors {
+
+        @Override
+        public String getCommand() {
+            return "getunspentutxo";
+        }
+
+        @Override
+        public String getHelp() {
+            return null;
+        }
+
+        @Override
+        public String getCommandDescription() {
+            //TODO 命令描述
+            return "getunspentutxo --get total balance of all addresses in the wallet";
+        }
+
+        @Override
+        public boolean argsValidate(String[] args) {
+            //TODO 参数校验
+            return true;
+        }
+
+        @Override
+        public CommandResult execute(String[] args) {
+            //TODO 金额问题，SDK需要转成小数，RPC需要转成整数
+            RpcClientResult result = accountService.getUnspentUTXO(args[1], Long.valueOf(args[2]));
+            if (null == result) {
+                return CommandResult.getFailed("Failure to execute");
+            }
+            return CommandResult.getResult(result);
+        }
+    }
+
+    public static class AliasAccount extends AccountProcessors {
+
+        @Override
+        public String getCommand() {
+            return "aliasaccount";
+        }
+
+        @Override
+        public String getHelp() {
+            return null;
+        }
+
+        @Override
+        public String getCommandDescription() {
+            //TODO 命令描述
+            return "aliasaccount --get total balance of all addresses in the wallet";
+        }
+
+        @Override
+        public boolean argsValidate(String[] args) {
+            //TODO 参数校验
+            return true;
+        }
+
+        @Override
+        public CommandResult execute(String[] args) {
+            RpcClientResult result = accountService.setAlias(args[1], args[2], args[3]);
+            if (null == result) {
+                return CommandResult.getFailed("Failure to execute");
+            }
+            return CommandResult.getResult(result);
+        }
+    }
+
+    public static class GetPrivateKey extends AccountProcessors {
+
+        @Override
+        public String getCommand() {
+            return "getprivatekey";
+        }
+
+        @Override
+        public String getHelp() {
+            return null;
+        }
+
+        @Override
+        public String getCommandDescription() {
+            //TODO 命令描述
+            return "getprivatekey --get total balance of all addresses in the wallet";
+        }
+
+        @Override
+        public boolean argsValidate(String[] args) {
+            //TODO 参数校验
+            return true;
+        }
+
+        @Override
+        public CommandResult execute(String[] args) {
+            RpcClientResult result = accountService.getPrivateKey(args[1], args[2]);
+            if (null == result) {
+                return CommandResult.getFailed("Failure to execute");
+            }
+            return CommandResult.getResult(result);
+        }
+    }
+
+
+    public static class GetAsset extends AccountProcessors {
+
+        @Override
+        public String getCommand() {
+            return "getasset";
+        }
+
+        @Override
+        public String getHelp() {
+            return null;
+        }
+
+        @Override
+        public String getCommandDescription() {
+            //TODO 命令描述
+            return "getasset --get total balance of all addresses in the wallet";
+        }
+
+        @Override
+        public boolean argsValidate(String[] args) {
+            //TODO 参数校验
+            return true;
+        }
+
+        @Override
+        public CommandResult execute(String[] args) {
+            RpcClientResult result = accountService.getAsset(args[1]);
+            if (null == result) {
+                return CommandResult.getFailed("Failure to execute");
+            }
+            return CommandResult.getResult(result);
+        }
+    }
+
 
 
 }

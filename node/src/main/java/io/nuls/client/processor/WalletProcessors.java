@@ -44,10 +44,80 @@ public abstract class WalletProcessors implements CommandProcessor {
 
     protected WalletService walletService = new WalletService();
 
+    public static class SetPassword extends WalletProcessors {
+
+        @Override
+        public String getCommand() {
+            return "setpwd";
+        }
+
+        @Override
+        public String getHelp() {
+            return null;
+        }
+
+        @Override
+        public String getCommandDescription() {
+            //TODO 命令描述
+            return "setpwd --get total balance of all addresses in the wallet";
+        }
+
+        @Override
+        public boolean argsValidate(String[] args) {
+            //TODO 参数校验
+            return true;
+        }
+
+        @Override
+        public CommandResult execute(String[] args) {
+            RpcClientResult result = walletService.setPassword(args[1]);
+            if (null == result) {
+                return CommandResult.getFailed("Failure to execute");
+            }
+            return CommandResult.getResult(result);
+        }
+    }
+
+
+    public static class ResetPassword extends WalletProcessors {
+
+        @Override
+        public String getCommand() {
+            return "resetpwd";
+        }
+
+        @Override
+        public String getHelp() {
+            return null;
+        }
+
+        @Override
+        public String getCommandDescription() {
+            //TODO 命令描述
+            return "resetpwd --get total balance of all addresses in the wallet";
+        }
+
+        @Override
+        public boolean argsValidate(String[] args) {
+            //TODO 参数校验
+            return true;
+        }
+
+        @Override
+        public CommandResult execute(String[] args) {
+            RpcClientResult result = walletService.resetPassword(args[1], args[2]);
+            if (null == result) {
+                return CommandResult.getFailed("Failure to execute");
+            }
+            return CommandResult.getResult(result);
+        }
+    }
+
     /**
      * nuls transfer
      */
     public static class Transfer extends WalletProcessors {
+        //TODO 转账
 
         private ThreadLocal<TransferForm> paramsData = new ThreadLocal<>();
 
@@ -63,7 +133,7 @@ public abstract class WalletProcessors implements CommandProcessor {
 
         @Override
         public String getCommandDescription() {
-            return "transfer <address> <toAddress> <amount> <password> <remark> --toAddress$amount&password are required";
+            return "transfer <address> <toAddress> <amount> <password> [remark] --toAddress$amount&password are required";
         }
 
         @Override
@@ -139,6 +209,40 @@ public abstract class WalletProcessors implements CommandProcessor {
         }
     }
 
+    public static class BackupWallet extends WalletProcessors {
+
+        @Override
+        public String getCommand() {
+            return "backup";
+        }
+
+        @Override
+        public String getHelp() {
+            return null;
+        }
+
+        @Override
+        public String getCommandDescription() {
+            //TODO 命令描述
+            return "backup --get total balance of all addresses in the wallet";
+        }
+
+        @Override
+        public boolean argsValidate(String[] args) {
+            //TODO 参数校验
+            return true;
+        }
+
+        @Override
+        public CommandResult execute(String[] args) {
+            RpcClientResult result = walletService.backup(args[1], args[2]);
+            if (null == result) {
+                return CommandResult.getFailed("Failure to execute");
+            }
+            return CommandResult.getResult(result);
+        }
+    }
+
     /**
      * get the balance of a address
      */
@@ -151,16 +255,19 @@ public abstract class WalletProcessors implements CommandProcessor {
 
         @Override
         public String getHelp() {
+
             return null;
         }
 
         @Override
         public String getCommandDescription() {
-            return "balance <prikey> <password> --import an account by prikey";
+            //TODO 命令描述
+            return "import <prikey> <password> --import an account by prikey";
         }
 
         @Override
         public boolean argsValidate(String[] args) {
+            //TODO 参数校验
             if (args.length != 3) {
                 return false;
             }
@@ -172,6 +279,46 @@ public abstract class WalletProcessors implements CommandProcessor {
         @Override
         public CommandResult execute(String[] args) {
             RpcClientResult result = walletService.importAccount(args[1],args[2]);
+            if (null == result) {
+                return CommandResult.getFailed("Failure to execute");
+            }
+            return CommandResult.getResult(result);
+        }
+    }
+
+    public static class RemoveAccount extends WalletProcessors {
+
+        @Override
+        public String getCommand() {
+            return "remove";
+        }
+
+        @Override
+        public String getHelp() {
+
+            return null;
+        }
+
+        @Override
+        public String getCommandDescription() {
+            //TODO 命令描述
+            return "remove <prikey> <password> --import an account by prikey";
+        }
+
+        @Override
+        public boolean argsValidate(String[] args) {
+            //TODO 参数校验
+            if (args.length != 3) {
+                return false;
+            }
+            AssertUtil.canNotEmpty(args[1]);
+            AssertUtil.canNotEmpty(args[2]);
+            return true;
+        }
+
+        @Override
+        public CommandResult execute(String[] args) {
+            RpcClientResult result = walletService.removeAccount(args[1],args[2]);
             if (null == result) {
                 return CommandResult.getFailed("Failure to execute");
             }
