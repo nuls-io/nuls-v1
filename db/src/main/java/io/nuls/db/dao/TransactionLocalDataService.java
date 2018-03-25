@@ -42,6 +42,6 @@ public interface TransactionLocalDataService extends BaseDataService<String, Tra
 
     List<TransactionLocalPo> getTxs(String address, int type);
 
-    Long getTxsCount(String address, int type);
+    Long getTxsCount(Long blockHeight, String address, int type);
 
 }

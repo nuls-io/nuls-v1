@@ -118,10 +118,10 @@ public class TransactionResource {
         if (blockHeight == null && StringUtils.isBlank(address) && type == 0) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
-        if (blockHeight != null && blockHeight < 0) {
+        if ((blockHeight != null && blockHeight < 0) || type < 0 || pageNumber < 0 || pageSize < 0) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
-        if (type < 0 || pageNumber < 0 || pageSize < 0) {
+        if ((pageNumber == 0 && pageSize > 0) || (pageNumber > 0 && pageSize == 0)) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
 
@@ -133,7 +133,7 @@ public class TransactionResource {
                 pages = ledgerService.getTxList(blockHeight, type, pageNumber, pageSize);
             } else if (StringUtils.validAddress(address)) {
 
-                long count = ledgerService.getTxCount(address, type);
+                long count = ledgerService.getTxCount(blockHeight, address, type);
                 if (pageSize > 0) {
                     pages.setPageNumber(pageNumber);
                     pages.setPageSize(pageSize);

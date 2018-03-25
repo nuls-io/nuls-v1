@@ -45,7 +45,7 @@ public interface TransactionDataService extends BaseDataService<String, Transact
 
     List<TransactionPo> getTxs(String address, int type);
 
-    long getTxsCount(String address, int type);
+    long getTxsCount(Long blockHeight, String address, int type);
 
     long getFeeByHeight(long blockHeight);
 }

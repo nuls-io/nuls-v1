@@ -48,7 +48,7 @@ public interface LedgerService {
 
     List<Transaction> getTxList(String address, int txType) throws Exception;
 
-    long getTxCount(String address, int txType) throws Exception;
+    long getTxCount(Long blockHeight, String address, int txType) throws Exception;
 
     List<Transaction> getTxList(Long blockHeight, String address, int txType, int pageNumber, int pageSize) throws Exception;
 

@@ -133,17 +133,23 @@ public class TransactionDaoImpl extends BaseDaoImpl<TransactionMapper, String, T
     }
 
     @Override
-    public long getTxsCount(String address, int type) {
+    public long getTxsCount(Long blockHeight, String address, int type) {
         Searchable searchable = new Searchable();
         if (StringUtils.isBlank(address)) {
             if (type != 0) {
                 searchable.addCondition("type", SearchOperator.eq, type);
+            }
+            if(blockHeight != null) {
+                searchable.addCondition("block_height", SearchOperator.eq, blockHeight);
             }
             return getMapper().selectCount(searchable);
         }
 
         if (type != 0) {
             searchable.addCondition("a.type", SearchOperator.eq, type);
+        }
+        if(blockHeight != null) {
+            searchable.addCondition("a.block_height", SearchOperator.eq, blockHeight);
         }
         searchable.addCondition("e.address", SearchOperator.eq, address);
         return getMapper().selectCountByAddress(searchable);

@@ -71,8 +71,8 @@ public class UtxoTransactionDaoImpl implements UtxoTransactionDataService {
     }
 
     @Override
-    public Long getTxsCount(String address, int type) {
-        return txDao.getTxsCount(address, type);
+    public Long getTxsCount(Long blockHeight, String address, int type) {
+        return txDao.getTxsCount(blockHeight, address, type);
     }
 
     @Override
@@ -119,8 +119,8 @@ public class UtxoTransactionDaoImpl implements UtxoTransactionDataService {
     }
 
     @Override
-    public Long getLocalTxsCount(String address, int type) {
-        return txLocalDao.getTxsCount(address, type);
+    public Long getLocalTxsCount(Long blockHeight, String address, int type) {
+        return txLocalDao.getTxsCount(blockHeight, address, type);
     }
 
     @Override
