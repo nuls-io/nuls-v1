@@ -138,7 +138,7 @@ public class WalletResouce {
         try {
             result = accountService.importAccount(form.getPrikey(), form.getPassword());
         } catch (Exception e) {
-            return RpcResult.getFailed(ErrorCode.SYS_UNKOWN_EXCEPTION);
+            return RpcResult.getFailed(result.getErrorCode());
         }
         return new RpcResult(result);
     }
