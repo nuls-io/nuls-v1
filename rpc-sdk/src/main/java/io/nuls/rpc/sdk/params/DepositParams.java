@@ -30,9 +30,35 @@ package io.nuls.rpc.sdk.params;
  * @author Niels
  * @date 2018/3/14
  */
-public class EntrustCancelParams {
-    private String txHash;
+public class DepositParams {
+    private String address;
+    private String agentAddress;
+    private long deposit;
     private String password;
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getAgentAddress() {
+        return agentAddress;
+    }
+
+    public void setAgentAddress(String agentAddress) {
+        this.agentAddress = agentAddress;
+    }
+
+    public long getDeposit() {
+        return deposit;
+    }
+
+    public void setDeposit(long deposit) {
+        this.deposit = deposit;
+    }
 
     public String getPassword() {
         return password;
@@ -40,13 +66,5 @@ public class EntrustCancelParams {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public String getTxHash() {
-        return txHash;
-    }
-
-    public void setTxHash(String txHash) {
-        this.txHash = txHash;
     }
 }
