@@ -104,20 +104,21 @@ public class TransactionDto {
                     value -= input.getValue();
                 }
             }
+
             for (OutputDto output : outputs) {
                 if (address.equals(output.getAddress())) {
                     value += output.getValue();
                 }
             }
-
-            this.value = value;
             if (isTransfer) {
                 this.transferType = -1;
+                value += this.getFee();
             } else {
                 this.transferType = 1;
             }
-        }
 
+            this.value = value;
+        }
     }
 
     public String getHash() {
