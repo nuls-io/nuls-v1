@@ -196,7 +196,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 start = start - txList.size();
             }
             poList = txDao.getTxs(address, txType, start, pageSize);
-            txList = new ArrayList<>();
             for (TransactionPo po : poList) {
                 txList.add(UtxoTransferTool.toTransaction(po));
             }
@@ -247,7 +246,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             start = start - txList.size();
         }
         poList = txDao.getLocalTxs(address, txType, start, pageSize);
-        txList = new ArrayList<>();
         for (TransactionLocalPo po : poList) {
             txList.add(UtxoTransferTool.toTransaction(po));
         }
