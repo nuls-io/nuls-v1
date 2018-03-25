@@ -80,6 +80,8 @@ public interface LedgerService {
 
     boolean checkTxIsMine(Transaction tx) throws NulsException;
 
+    boolean checkTxIsMine(Transaction tx, String address) throws NulsException;
+
     void rollbackTx(Transaction tx) throws NulsException;
 
     void commitTx(Transaction tx) throws NulsException;
