@@ -48,6 +48,11 @@ public abstract class ConsensusProcessors implements CommandProcessor {
         }
 
         @Override
+        public String getHelp() {
+            return null;
+        }
+
+        @Override
         public String getCommandDescription() {
             return "agentlist --get all agents";
         }

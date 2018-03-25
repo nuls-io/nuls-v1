@@ -51,6 +51,11 @@ public abstract class SystemProcessors implements CommandProcessor {
         }
 
         @Override
+        public String getHelp() {
+            return null;
+        }
+
+        @Override
         public String getCommandDescription() {
             return "exit --Exit the nuls command line";
         }
@@ -71,6 +76,11 @@ public abstract class SystemProcessors implements CommandProcessor {
         @Override
         public String getCommand() {
             return "help";
+        }
+
+        @Override
+        public String getHelp() {
+            return null;
         }
 
         @Override
@@ -99,6 +109,11 @@ public abstract class SystemProcessors implements CommandProcessor {
         @Override
         public String getCommand() {
             return "version";
+        }
+
+        @Override
+        public String getHelp() {
+            return null;
         }
 
         @Override

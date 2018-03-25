@@ -132,4 +132,13 @@ public class StringUtils {
         }
         return xor;
     }
+
+    public static boolean isNumeric(String str) {
+        for (int i = 0, len = str.length(); i < len; i++) {
+            if (!Character.isDigit(str.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

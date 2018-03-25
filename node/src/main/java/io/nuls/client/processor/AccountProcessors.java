@@ -51,12 +51,19 @@ public abstract class AccountProcessors implements CommandProcessor {
         }
 
         @Override
+        public String getHelp() {
+            return null;
+        }
+
+        @Override
         public String getCommandDescription() {
+            //TODO 命令描述
             return "createaccount <password> <count> --create <count> accounts & Encrypting with with <password>";
         }
 
         @Override
         public boolean argsValidate(String[] args) {
+            //TODO 参数校验
             if (args.length != 3) {
                 return false;
             }
@@ -82,16 +89,22 @@ public abstract class AccountProcessors implements CommandProcessor {
 
         @Override
         public String getCommand() {
-            return "balance";
+            return "getbalance";
+        }
+
+        @Override
+        public String getHelp() {
+            return null;
         }
 
         @Override
         public String getCommandDescription() {
-            return "balance <address> --get the balance of a address";
+            return "getbalance <address> --get the balance of a address";
         }
 
         @Override
         public boolean argsValidate(String[] args) {
+            //TODO 参数校验
             if (args.length != 2) {
                 return false;
             }
@@ -110,38 +123,5 @@ public abstract class AccountProcessors implements CommandProcessor {
     }
 
 
-    /**
-     * get the balance of a address
-     */
-    public static class ImportAccount extends AccountProcessors {
 
-        @Override
-        public String getCommand() {
-            return "import";
-        }
-
-        @Override
-        public String getCommandDescription() {
-            return "balance <prikey> <password> --import an account by prikey";
-        }
-
-        @Override
-        public boolean argsValidate(String[] args) {
-            if (args.length != 3) {
-                return false;
-            }
-            AssertUtil.canNotEmpty(args[1]);
-            AssertUtil.canNotEmpty(args[2]);
-            return true;
-        }
-
-        @Override
-        public CommandResult execute(String[] args) {
-            RpcClientResult result = accountService.importAccount(args[1],args[2]);
-            if (null == result) {
-                return CommandResult.getFailed("Failure to execute");
-            }
-            return CommandResult.getResult(result);
-        }
-    }
 }

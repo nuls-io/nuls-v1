@@ -30,6 +30,7 @@ import io.nuls.account.entity.Account;
 import io.nuls.client.entity.CommandResult;
 import io.nuls.client.processor.intf.CommandProcessor;
 import io.nuls.core.chain.entity.Na;
+import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.rpc.resources.form.TransferForm;
 import io.nuls.rpc.sdk.entity.RpcClientResult;
@@ -43,19 +44,6 @@ public abstract class WalletProcessors implements CommandProcessor {
 
     protected WalletService walletService = new WalletService();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
     /**
      * nuls transfer
      */
@@ -66,6 +54,11 @@ public abstract class WalletProcessors implements CommandProcessor {
         @Override
         public String getCommand() {
             return "transfer";
+        }
+
+        @Override
+        public String getHelp() {
+            return null;
         }
 
         @Override
@@ -142,6 +135,46 @@ public abstract class WalletProcessors implements CommandProcessor {
                 form = getTransferForm(args);
             }
             RpcClientResult result = this.walletService.transfer(form.getAddress(), form.getPassword(), form.getToAddress(), form.getAmount(), form.getRemark());
+            return CommandResult.getResult(result);
+        }
+    }
+
+    /**
+     * get the balance of a address
+     */
+    public static class ImportAccount extends WalletProcessors {
+
+        @Override
+        public String getCommand() {
+            return "import";
+        }
+
+        @Override
+        public String getHelp() {
+            return null;
+        }
+
+        @Override
+        public String getCommandDescription() {
+            return "balance <prikey> <password> --import an account by prikey";
+        }
+
+        @Override
+        public boolean argsValidate(String[] args) {
+            if (args.length != 3) {
+                return false;
+            }
+            AssertUtil.canNotEmpty(args[1]);
+            AssertUtil.canNotEmpty(args[2]);
+            return true;
+        }
+
+        @Override
+        public CommandResult execute(String[] args) {
+            RpcClientResult result = walletService.importAccount(args[1],args[2]);
+            if (null == result) {
+                return CommandResult.getFailed("Failure to execute");
+            }
             return CommandResult.getResult(result);
         }
     }
