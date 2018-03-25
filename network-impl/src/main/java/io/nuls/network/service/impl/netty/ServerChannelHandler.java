@@ -17,6 +17,9 @@ import io.nuls.network.service.NetworkService;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 
+/**
+ * @author Vive
+ */
 @ChannelHandler.Sharable
 public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
@@ -78,7 +81,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        Log.error("---------------ServerChannelHandler exceptionCaught :" + cause.getMessage());
+        Log.debug("---------------ServerChannelHandler exceptionCaught :" + cause.getMessage());
         ctx.channel().close();
     }
 
