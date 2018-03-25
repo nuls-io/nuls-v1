@@ -46,7 +46,7 @@ public class CommandHandler {
         register(new SystemProcessors.Help());
         register(new SystemProcessors.Version());
         register(new AccountProcessors.CreateAccount());
-        register(new BlockProcessors.BestHeight());
+        register(new BlockProcessors.BestBlockHeader());
         register(new WalletProcessors.Transfer());
         register(new AccountProcessors.GetBalance());
         register(new ConsensusProcessors.GetAgentList());

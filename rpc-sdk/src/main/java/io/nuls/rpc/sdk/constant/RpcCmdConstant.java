@@ -7,5 +7,6 @@ public interface RpcCmdConstant {
     String RESULT_CODE_FAILED = "SYS001";
 
     String RESULT_CODE_UNKOWN = "SYS999";
+    String PARAMETER_ERROR_MSG = "parameter error";
 
 }

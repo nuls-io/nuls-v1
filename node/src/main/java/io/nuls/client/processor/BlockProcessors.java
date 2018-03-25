@@ -40,9 +40,9 @@ public abstract class BlockProcessors implements CommandProcessor {
     protected BlockService blockService = new BlockService();
 
     /**
-     * Get the best height of blocks
+     * Get the best header of blocks
      */
-    public static class BestHeight extends BlockProcessors {
+    public static class BestBlockHeader extends BlockProcessors {
 
         @Override
         public String getCommand() {
@@ -51,7 +51,7 @@ public abstract class BlockProcessors implements CommandProcessor {
 
         @Override
         public String getCommandDescription() {
-            return "bestheight --get the bestheight of block";
+            return "bestheight --get the best block header";
         }
 
         @Override
@@ -61,7 +61,7 @@ public abstract class BlockProcessors implements CommandProcessor {
 
         @Override
         public CommandResult execute(String[] args) {
-            RpcClientResult result = this.blockService.getBestBlockHeight();
+            RpcClientResult result = this.blockService.getBestBlockHeader();
             return CommandResult.getResult(result);
         }
     }
