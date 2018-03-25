@@ -33,6 +33,7 @@ import io.nuls.network.entity.NodeGroup;
 import io.nuls.network.service.NetworkService;
 import io.nuls.rpc.entity.InfoDto;
 import io.nuls.rpc.entity.RpcResult;
+import io.swagger.annotations.Api;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -47,6 +48,8 @@ import java.util.Set;
  * @date 2017/10/24
  */
 @Path("/network")
+
+@Api(value ="/browse", description ="Network")
 public class NetworkMessageResource {
 
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);

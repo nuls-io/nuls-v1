@@ -40,6 +40,7 @@ import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.rpc.entity.*;
 import io.nuls.rpc.resources.form.AccountParamForm;
+import io.swagger.annotations.Api;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -51,6 +52,7 @@ import java.util.List;
  * @date 2017/9/30
  */
 @Path("/account")
+@Api(value ="/browse", description ="Account")
 public class AccountResource {
 
     private AccountService accountService = NulsContext.getServiceBean(AccountService.class);

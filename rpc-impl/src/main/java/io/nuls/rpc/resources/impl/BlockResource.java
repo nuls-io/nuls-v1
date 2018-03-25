@@ -35,6 +35,7 @@ import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.rpc.entity.BlockDto;
 import io.nuls.rpc.entity.RpcResult;
+import io.swagger.annotations.Api;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -47,6 +48,7 @@ import java.io.IOException;
  * @date 2017/9/30
  */
 @Path("/block")
+@Api(value ="/browse", description ="Block")
 public class BlockResource {
 
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);

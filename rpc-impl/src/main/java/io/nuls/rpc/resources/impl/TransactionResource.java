@@ -23,7 +23,6 @@
  */
 package io.nuls.rpc.resources.impl;
 
-import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
@@ -43,6 +42,7 @@ import io.nuls.rpc.entity.OutputDto;
 import io.nuls.rpc.entity.RpcResult;
 import io.nuls.rpc.entity.TransactionDto;
 import io.nuls.rpc.resources.form.TxForm;
+import io.swagger.annotations.Api;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -54,6 +54,7 @@ import java.util.List;
  * @date 2017/9/30
  */
 @Path("/tx")
+@Api(value ="/browse", description ="Transaction")
 public class TransactionResource {
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     private UtxoOutputDataService outputDataService = NulsContext.getServiceBean(UtxoOutputDataService.class);

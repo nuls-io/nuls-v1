@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,11 +23,13 @@
  */
 package io.nuls.rpc.service.impl;
 
+import org.glassfish.grizzly.http.server.CLStaticHttpHandler;
 import org.glassfish.grizzly.http.server.HttpServer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.rpc.constant.RpcConstant;
 import io.nuls.rpc.resources.impl.NulsResourceConfig;
 import io.nuls.rpc.service.intf.RpcServerService;
+import org.glassfish.grizzly.http.server.ServerConfiguration;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 
 import javax.ws.rs.core.UriBuilder;
@@ -46,7 +48,7 @@ public class RpcServerServiceImpl implements RpcServerService {
 
     @Override
     public void startServer(String ip, int port, String moduleUrl) {
-        URI serverURI = UriBuilder.fromUri("http://" + ip + "/" + moduleUrl).port(port).build();
+        URI serverURI = UriBuilder.fromUri("http://" + ip+"/"+moduleUrl).port(port).build();
         final Map<String, Object> initParams = new HashMap<>();
         initParams.put("jersey.config.server.provider.packages", RpcConstant.PACKAGES);
         initParams.put("load-on-startup", "1");
@@ -55,8 +57,13 @@ public class RpcServerServiceImpl implements RpcServerService {
         httpServer = GrizzlyHttpServerFactory.createHttpServer(serverURI, rc);
         try {
             httpServer.start();
+            ClassLoader loader = this.getClass().getClassLoader();
+            CLStaticHttpHandler docsHandler = new CLStaticHttpHandler(loader, "swagger-ui/");
+            docsHandler.setFileCacheEnabled(false);
+            ServerConfiguration cfg = httpServer.getServerConfiguration();
+            cfg.addHttpHandler(docsHandler, "/docs/");
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.error(e);
         }
         Log.info("http restFul server is started!url is " + serverURI.toString());
     }

@@ -30,6 +30,7 @@ import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.rpc.entity.HelpInfoDto;
 import io.nuls.rpc.entity.RpcResult;
 import io.nuls.rpc.entity.VersionDto;
+import io.swagger.annotations.Api;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -39,6 +40,7 @@ import javax.ws.rs.core.MediaType;
  * @date 2017/9/30
  */
 @Path("/sys")
+@Api(value ="/browse", description ="System")
 public class SystemResource {
 
     @GET

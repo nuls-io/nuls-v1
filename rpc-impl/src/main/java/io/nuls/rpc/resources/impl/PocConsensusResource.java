@@ -49,6 +49,7 @@ import io.nuls.rpc.resources.form.CreateAgentForm;
 import io.nuls.rpc.resources.form.WithdrawForm;
 import io.nuls.rpc.resources.form.DepositForm;
 import io.nuls.rpc.resources.form.StopAgentForm;
+import io.swagger.annotations.Api;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -62,6 +63,7 @@ import java.util.Map;
  * @date 2017/9/30
  */
 @Path("/consensus")
+@Api(value ="/browse", description ="Consensus")
 public class PocConsensusResource {
     private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);

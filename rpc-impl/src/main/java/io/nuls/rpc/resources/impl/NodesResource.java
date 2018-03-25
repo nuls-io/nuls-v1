@@ -25,6 +25,7 @@ package io.nuls.rpc.resources.impl;
 
 import io.nuls.core.context.NulsContext;
 import io.nuls.rpc.entity.RpcResult;
+import io.swagger.annotations.Api;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -38,6 +39,7 @@ import javax.ws.rs.core.MediaType;
  *
  */
 @Path("/nodes")
+@Api(value ="/browse", description ="Nodes")
 public class NodesResource  {
     private NulsContext context = NulsContext.getInstance();
 
