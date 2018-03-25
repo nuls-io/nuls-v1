@@ -393,7 +393,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
             page.setPages((int) ((page.getTotal() / pageSize) + sum));
             return page;
         }
-        int end = pageNumber * pageSize - 1;
+        int end = pageNumber * pageSize;
         if (end > agentList.size()) {
             end = agentList.size();
         }
@@ -482,12 +482,11 @@ public class PocConsensusServiceImpl implements ConsensusService {
             page.setPages((int) ((page.getTotal() / pageSize) + sum));
             return page;
         }
-        int end = pageNumber * pageSize - 1;
+        int end = pageNumber * pageSize;
         if (end > depositList.size()) {
             end = depositList.size();
         }
 
-        //todo 排序：委托时间倒序
         Collections.sort(depositList, DepositComparator.getInstance());
         List<Consensus<Deposit>> sublist = depositList.subList(start, end);
         page.setPageNumber(pageNumber);
