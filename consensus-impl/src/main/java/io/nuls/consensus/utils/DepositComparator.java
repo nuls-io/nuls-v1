@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,52 +21,36 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.consensus.constant;
 
-import io.nuls.core.i18n.I18nUtils;
+package io.nuls.consensus.utils;
+
+import io.nuls.consensus.entity.Consensus;
+import io.nuls.consensus.entity.member.Agent;
+import io.nuls.consensus.entity.member.Deposit;
+
+import java.util.Comparator;
 
 /**
  * @author Niels
- * @date 2017/12/5
+ * @date 2018/3/24
  */
-public enum ConsensusRole {
+public class DepositComparator implements Comparator<Consensus<Deposit>> {
 
-    AGENT(1,69994),
 
-    DEPOSIT_NODE(2,69995),
+    private static final DepositComparator INSTANCE  =  new DepositComparator();
 
-    ENTRUSTER(3,69996);
-    private final int code;
-    private final int textCode;
-
-    ConsensusRole(int code,int textCode) {
-        this.code = code;
-        this.textCode = textCode;
+    public static DepositComparator getInstance() {
+        return INSTANCE;
     }
 
-    /**
-     * the text to show of the role
-     *
-     * @return
-     */
-    public String getText() {
-        return I18nUtils.get(textCode);
-    }
-    public int getCode() {
-        return code;
+    private DepositComparator() {
+
     }
 
-    public static ConsensusRole getConsensusRoleByCode(int code) {
-        switch (code) {
-            case 1:
-                return AGENT;
-            case 2:
-                return DEPOSIT_NODE;
-            case 3:
-                return ENTRUSTER;
-            default:
-                return null;
-        }
+    @Override
+    public int compare(Consensus<Deposit> o1, Consensus<Deposit> o2) {
+        return (int) (o1.getExtend().getStartTime()-o2.getExtend().getStartTime());
     }
 }

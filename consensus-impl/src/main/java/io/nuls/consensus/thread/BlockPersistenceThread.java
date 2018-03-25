@@ -122,6 +122,12 @@ public class BlockPersistenceThread implements Runnable {
             }
             return;
         }
+        if(block.getTxs().isEmpty()){
+            //todo why
+            Log.warn("block has no tx!");
+            blockCacheManager.removeBlock(block.getHeader());
+            return;
+        }
         boolean isSuccess = blockService.saveBlock(block);
         if (isSuccess) {
             blockCacheManager.removeBlock(block.getHeader());

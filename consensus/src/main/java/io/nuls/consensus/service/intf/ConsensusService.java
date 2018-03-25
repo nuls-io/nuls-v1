@@ -23,12 +23,10 @@
  */
 package io.nuls.consensus.service.intf;
 
-import io.nuls.consensus.entity.AgentInfo;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
-import io.nuls.consensus.entity.DepositItem;
-import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 
 import java.io.IOException;
@@ -47,14 +45,25 @@ public interface ConsensusService {
 
     List<Consensus> getConsensusAccountList();
 
-    List<DepositItem> getDepositList(String address);
-
-    List<AgentInfo> getAgentList();
-
     Map<String, Object> getConsensusInfo();
 
     Map<String, Object> getConsensusInfo(String address);
 
     ConsensusStatusInfo getConsensusStatus(String address);
 
+
+    /**
+     * for client Customized
+     * @param keyword
+     * @param sortType
+     * @param pageNumber
+     * @param pageSize
+     * @return
+     */
+
+    Page<Map<String,Object>> getAgentList(String keyword, String address,String agentAddress, String sortType, Integer pageNumber, Integer pageSize);
+
+    Page<Map<String,Object>> getDepositList(String address, String agentAddress, Integer pageNumber, Integer pageSize);
+
+    Map<String,Object> getAgent(String agentAddress);
 }

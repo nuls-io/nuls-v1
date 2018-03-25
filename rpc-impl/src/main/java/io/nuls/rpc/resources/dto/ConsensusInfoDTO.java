@@ -9,7 +9,7 @@ public class ConsensusInfoDTO {
     private int agentCount;
     private long totalDeposit;
     private long reward;
-    private int consensusAccountCount;
+    private int joinAccountCount;
     private long usableBalance;
     private long rewardOfDay;
 
@@ -45,12 +45,12 @@ public class ConsensusInfoDTO {
         this.reward = reward;
     }
 
-    public int getConsensusAccountCount() {
-        return consensusAccountCount;
+    public int getJoinAccountCount() {
+        return joinAccountCount;
     }
 
-    public void setConsensusAccountCount(int consensusAccountCount) {
-        this.consensusAccountCount = consensusAccountCount;
+    public void setJoinAccountCount(int joinAccountCount) {
+        this.joinAccountCount = joinAccountCount;
     }
 
     public long getUsableBalance() {

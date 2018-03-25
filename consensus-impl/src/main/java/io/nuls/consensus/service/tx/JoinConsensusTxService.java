@@ -78,7 +78,7 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
             sum += depositPo.getDeposit();
         }
         if (sum >= PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT.getValue()) {
-            manager.changeAgentStatus(tx.getTxData().getExtend().getAgentHash(),ConsensusStatusEnum.IN);
+            manager.changeAgentStatusByHash(tx.getTxData().getExtend().getAgentHash(),ConsensusStatusEnum.IN);
             manager.changeDepositStatusByAgentHash(tx.getTxData().getExtend().getAgentHash(),ConsensusStatusEnum.IN);
             AgentPo daPo = this.accountDataService.get(cd.getExtend().getAgentHash());
             if (null == daPo) {

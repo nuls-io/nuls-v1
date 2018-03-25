@@ -23,8 +23,10 @@
  */
 package io.nuls.consensus.event.handler;
 
+import io.nuls.consensus.cache.manager.block.BlockCacheManager;
 import io.nuls.consensus.event.BlockEvent;
 import io.nuls.consensus.event.GetBlockRequest;
+import io.nuls.consensus.service.impl.BlockStorageService;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.*;
 import io.nuls.core.chain.manager.TransactionManager;
@@ -52,6 +54,12 @@ public class GetBlockHandler extends AbstractEventHandler<GetBlockRequest> {
         List<Block> blockList = blockService.getBlockList(event.getStart(), event.getEnd());
         for (Block block : blockList) {
             if(null==block){
+                continue;
+            }
+            if(block.getTxs().isEmpty()){
+                //todo why
+                Log.warn("block has no tx!");
+                BlockCacheManager.getInstance().removeBlock(block.getHeader().getHash().getDigestHex());
                 continue;
             }
             BlockEvent blockEvent = new BlockEvent();
