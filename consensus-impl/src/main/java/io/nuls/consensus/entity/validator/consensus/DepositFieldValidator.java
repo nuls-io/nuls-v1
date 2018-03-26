@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,25 +21,43 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
 package io.nuls.consensus.entity.validator.consensus;
 
+import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.constant.PocConsensusConstant;
-import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
+import io.nuls.consensus.entity.Consensus;
+import io.nuls.consensus.entity.member.Deposit;
+import io.nuls.consensus.entity.tx.PocJoinConsensusTransaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 
+import java.util.List;
+
 /**
  * @author Niels
- * @date 2018/1/4
+ * @date 2018/1/17
  */
-public class CommissionRateValidator implements NulsDataValidator<RegisterAgentTransaction> {
+public class DepositFieldValidator implements NulsDataValidator<PocJoinConsensusTransaction> {
+
+    private static final DepositFieldValidator INSTANCE = new DepositFieldValidator();
+
+    private DepositFieldValidator() {
+    }
+
+    public static DepositFieldValidator getInstance() {
+        return INSTANCE;
+    }
+
+    private ConsensusCacheManager consensusCacheManager = ConsensusCacheManager.getInstance();
+
     @Override
-    public ValidateResult validate(RegisterAgentTransaction data) {
-        double commissionRate = data.getTxData().getExtend().getCommissionRate();
-        if(commissionRate<= PocConsensusConstant.MIN_COMMISSION_RATE||commissionRate>PocConsensusConstant.MAX_COMMISSION_RATE){
-            return ValidateResult.getFailedResult(ErrorCode.COMMISSION_RATE_OUT_OF_RANGE);
+    public ValidateResult validate(PocJoinConsensusTransaction tx) {
+        Consensus<Deposit> deposit = tx.getTxData();
+        if (deposit.getExtend().getStartTime() <= 0) {
+            return ValidateResult.getFailedResult("start time cannot be 0!");
         }
         return ValidateResult.getSuccessResult();
     }
