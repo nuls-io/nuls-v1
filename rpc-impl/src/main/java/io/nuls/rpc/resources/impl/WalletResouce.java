@@ -23,6 +23,7 @@
  */
 package io.nuls.rpc.resources.impl;
 
+import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.Result;
@@ -107,7 +108,7 @@ public class WalletResouce {
     @Path("/backup")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult backup(AccountParamForm form) {
-        if (StringUtils.isNotBlank(form.getAddress()) && !StringUtils.validAddress(form.getAddress())) {
+        if (StringUtils.isNotBlank(form.getAddress()) && !Address.validAddress(form.getAddress())) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         if (StringUtils.validPassword(form.getPassword())) {
@@ -230,7 +231,7 @@ public class WalletResouce {
     @Path("/remove")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult removeAccount(AccountParamForm form) {
-        if (!StringUtils.validPassword(form.getPassword()) || !StringUtils.validAddress(form.getAddress())) {
+        if (!StringUtils.validPassword(form.getPassword()) || !Address.validAddress(form.getAddress())) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         Result result = accountService.removeAccount(form.getAddress(), form.getPassword());

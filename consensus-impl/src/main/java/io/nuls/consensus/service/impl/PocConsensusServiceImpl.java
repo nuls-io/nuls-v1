@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,6 +24,7 @@
 package io.nuls.consensus.service.impl;
 
 import io.nuls.account.entity.Account;
+import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.cache.service.intf.CacheService;
 import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
@@ -71,7 +72,6 @@ import java.util.*;
  * @date 2017/11/9
  */
 public class PocConsensusServiceImpl implements ConsensusService {
-
 
     @Autowired
     private AccountService accountService;
@@ -204,14 +204,6 @@ public class PocConsensusServiceImpl implements ConsensusService {
     }
 
     @Override
-    public List<Consensus> getConsensusAccountList() {
-        List<Consensus<Agent>> list = consensusCacheManager.getCachedAgentList(ConsensusStatusEnum.IN);
-        List<Consensus> resultList = new ArrayList<>(list);
-        resultList.addAll(consensusCacheManager.getCachedDepositList(ConsensusStatusEnum.IN));
-        return resultList;
-    }
-
-    @Override
     public Map<String, Object> getConsensusInfo() {
         List<Consensus<Agent>> agentList = consensusCacheManager.getCachedAgentList(ConsensusStatusEnum.IN);
         boolean hashAgent = agentList.size() > 0;
@@ -275,7 +267,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
     }
 
     private Map<String, Object> getConsensusInfoByAddress(String address) {
-        if (!StringUtils.validAddress(address)) {
+        if (!Address.validAddress(address)) {
             return null;
         }
         Consensus<Agent> agent = this.consensusCacheManager.getCachedAgentByAddress(address);
@@ -336,25 +328,11 @@ public class PocConsensusServiceImpl implements ConsensusService {
     }
 
     @Override
-    public ConsensusStatusInfo getConsensusStatus(String agentHash) {
-        Consensus<Agent> ca = this.consensusCacheManager.getCachedAgentByHash(agentHash);
-        if(null==ca){
-            return null;
-        }
-        Account account = this.accountService.getAccount(ca.getAddress());
-        ConsensusStatusInfo info = new ConsensusStatusInfo();
-        info.setSeed(false);
-        info.setStatus(ca.getExtend().getStatus());
-        info.setAccount(account);
-        return info;
-    }
-
-    @Override
-    public Page<Map<String, Object>> getAgentList(String keyword, String depositAddress,String agentAddress, String sortType, Integer pageNumber, Integer pageSize) {
+    public Page<Map<String, Object>> getAgentList(String keyword, String depositAddress, String agentAddress, String sortType, Integer pageNumber, Integer pageSize) {
         List<Consensus<Agent>> agentList = this.consensusCacheManager.getCachedAgentList();
         Page<Map<String, Object>> page = new Page<>();
         int start = pageNumber * pageSize - pageSize;
-        if (StringUtils.validAddress(agentAddress)) {
+        if (Address.validAddress(agentAddress)) {
             for (int i = agentList.size() - 1; i >= 0; i--) {
                 Consensus<Agent> consensus = agentList.get(i);
                 if (!consensus.getAddress().equals(agentAddress)) {
@@ -362,10 +340,10 @@ public class PocConsensusServiceImpl implements ConsensusService {
                 }
             }
         }
-        if(StringUtils.validAddress(depositAddress)){
+        if (Address.validAddress(depositAddress)) {
             List<Consensus<Deposit>> depositList = this.consensusCacheManager.getCachedDepositListByAddress(depositAddress);
             Set<String> agentHashSet = new HashSet<>();
-            for(Consensus<Deposit> cd:depositList){
+            for (Consensus<Deposit> cd : depositList) {
                 agentHashSet.add(cd.getExtend().getAgentHash());
             }
             for (int i = agentList.size() - 1; i >= 0; i--) {
@@ -412,6 +390,17 @@ public class PocConsensusServiceImpl implements ConsensusService {
             type = AgentComparator.DEPOSITABLE;
         }
         Collections.sort(agentList, AgentComparator.getInstance(type));
+        if (StringUtils.isNotBlank(depositAddress)) {
+            for (int i = 0; i < agentList.size(); i++) {
+                Consensus<Agent> ca = agentList.get(i);
+                if (ca.getAddress().equals(depositAddress)) {
+                    agentList.remove(i);
+                    agentList.add(0, ca);
+                    break;
+                }
+
+            }
+        }
         List<Consensus<Agent>> sublist = agentList.subList(start, end);
         page.setPageNumber(pageNumber);
         page.setPageSize(pageSize);
@@ -426,7 +415,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
             Map<String, Object> map = new HashMap<>();
             map.put("agentId", ca.getHexHash());
             map.put("agentName", ca.getExtend().getAgentName());
-            map.put("packingAddress",ca.getExtend().getPackingAddress());
+            map.put("packingAddress", ca.getExtend().getPackingAddress());
             map.put("agentAddress", ca.getAddress());
             map.put("agentAddressAlias", null);
             map.put("status", ca.getExtend().getStatus());
@@ -440,8 +429,8 @@ public class PocConsensusServiceImpl implements ConsensusService {
             List<Consensus<Deposit>> deposits = this.consensusCacheManager.getCachedDepositListByAgentHash(ca.getHexHash());
             long totalDeposit = 0;
             Set<String> memberSet = new HashSet<>();
-            for(Consensus<Deposit> cd:deposits){
-                totalDeposit+=cd.getExtend().getDeposit().getValue();
+            for (Consensus<Deposit> cd : deposits) {
+                totalDeposit += cd.getExtend().getDeposit().getValue();
                 memberSet.add(cd.getAddress());
             }
             map.put("totalDeposit", totalDeposit);
@@ -455,9 +444,9 @@ public class PocConsensusServiceImpl implements ConsensusService {
     @Override
     public Page<Map<String, Object>> getDepositList(String address, String agentAddress, Integer pageNumber, Integer pageSize) {
         List<Consensus<Deposit>> depositList = this.consensusCacheManager.getCachedDepositList();
-        boolean isAddress = StringUtils.validAddress(address);
+        boolean isAddress = Address.validAddress(address);
         Consensus<Agent> agent = null;
-        if (StringUtils.validAddress(agentAddress)) {
+        if (Address.validAddress(agentAddress)) {
             agent = this.consensusCacheManager.getCachedAgentByAddress(agentAddress);
             if (null == agent) {
                 depositList.clear();
@@ -529,7 +518,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
         Map<String, Object> map = new HashMap<>();
         map.put("agentId", ca.getHexHash());
         map.put("agentName", ca.getExtend().getAgentName());
-        map.put("packingAddress",ca.getExtend().getPackingAddress());
+        map.put("packingAddress", ca.getExtend().getPackingAddress());
         map.put("agentAddress", ca.getAddress());
         map.put("agentAddressAlias", null);
         map.put("status", ca.getExtend().getStatus());
@@ -543,8 +532,8 @@ public class PocConsensusServiceImpl implements ConsensusService {
         List<Consensus<Deposit>> deposits = this.consensusCacheManager.getCachedDepositListByAgentHash(ca.getHexHash());
         long totalDeposit = 0;
         Set<String> memberSet = new HashSet<>();
-        for(Consensus<Deposit> cd:deposits){
-            totalDeposit+=cd.getExtend().getDeposit().getValue();
+        for (Consensus<Deposit> cd : deposits) {
+            totalDeposit += cd.getExtend().getDeposit().getValue();
             memberSet.add(cd.getAddress());
         }
         map.put("totalDeposit", totalDeposit);

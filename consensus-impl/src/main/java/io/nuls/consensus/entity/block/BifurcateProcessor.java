@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,13 +25,14 @@ package io.nuls.consensus.entity.block;
 
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
-import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.Log;
 
-import java.util.*;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author Niels
@@ -41,11 +42,9 @@ public class BifurcateProcessor {
 
     private static final BifurcateProcessor INSTANCE = new BifurcateProcessor();
 
-    private List<BlockHeaderChain> chainList = Collections.synchronizedList(new ArrayList<>());
+    private List<BlockHeaderChain> chainList = new CopyOnWriteArrayList<>();
 
     private long bestHeight;
-
-    private Lock lock = new ReentrantLock();
 
     private BifurcateProcessor() {
     }
@@ -55,28 +54,23 @@ public class BifurcateProcessor {
     }
 
     public synchronized boolean addHeader(BlockHeader header) {
-        lock.lock();
-        try {
-            boolean result = add(header);
-            if (result) {
-                checkIt();
-            }
-            return result;
-        } finally {
-            lock.unlock();
+        boolean result = add(header);
+        if (result) {
+            checkIt();
         }
+        return result;
     }
 
     private void checkIt() {
-        List<BlockHeaderChain> chainList1 = new ArrayList<>(this.chainList);
         int size = 0;
-        for (BlockHeaderChain chain : chainList1) {
+        for (BlockHeaderChain chain : chainList) {
             int listSize = chain.size();
             if (size < listSize) {
                 size = listSize;
             }
         }
-        for (BlockHeaderChain chain : chainList1) {
+        for (int i = chainList.size() - 1; i >= 0; i--) {
+            BlockHeaderChain chain = chainList.get(i);
             if (chain.size() < (size - 6)) {
                 this.chainList.remove(chain);
             }
@@ -148,16 +142,11 @@ public class BifurcateProcessor {
     }
 
     public void removeHash(String hash) {
-        lock.lock();
-        try {
-            if (chainList.isEmpty()) {
-                return;
-            }
-            List<BlockHeaderChain> tempList = new ArrayList<>(this.chainList);
-            tempList.forEach((BlockHeaderChain chain) -> removeBlock(chain, hash));
-        } finally {
-            lock.unlock();
+        if (chainList.isEmpty()) {
+            return;
         }
+        List<BlockHeaderChain> tempList = new ArrayList<>(this.chainList);
+        tempList.forEach((BlockHeaderChain chain) -> removeBlock(chain, hash));
     }
 
     private void removeBlock(BlockHeaderChain chain, String hashHex) {
@@ -187,35 +176,43 @@ public class BifurcateProcessor {
         if (chainList.isEmpty()) {
             return false;
         }
-        lock.lock();
-        try {
-            List<String> hashList = this.getHashList(height);
-            if (hashList.size() == 1) {
-                return true;
-            }
-            if (hashList.isEmpty()) {
-                Log.warn("lost a block:" + height);
-                return false;
-            }
-            List<BlockHeaderChain> longestChainList = new ArrayList<>();
-            int size = 0;
-            for (BlockHeaderChain chain : chainList) {
-                if (chain.size() == size) {
-                    longestChainList.add(chain);
-                } else if (chain.size() > size && size == 0) {
-                    longestChainList.add(chain);
-                } else if (chain.size() > size && size != 0) {
-                    longestChainList.clear();
-                    longestChainList.add(chain);
-                }
-            }
-            if (longestChainList.size() != 1) {
-                return false;
-            }
-            chainList = longestChainList;
+        List<String> hashList = this.getHashList(height);
+        if (hashList.size() == 1) {
             return true;
-        } finally {
-            lock.unlock();
         }
+        if (hashList.isEmpty()) {
+            Log.warn("lost a block:" + height);
+            return false;
+        }
+        int maxSize = 0;
+        int secondMaxSize = 0;
+        for (BlockHeaderChain chain : chainList) {
+            int size = chain.size();
+            if (size > maxSize) {
+                secondMaxSize = maxSize;
+                maxSize = size;
+            } else if (size > secondMaxSize) {
+                secondMaxSize = size;
+            } else if (size == maxSize) {
+                secondMaxSize = size;
+            }
+        }
+        if (maxSize <= (secondMaxSize + 6)) {
+            return false;
+        }
+        for (int i = chainList.size() - 1; i >= 0; i--) {
+            if (chainList.size() < maxSize) {
+                chainList.remove(i);
+            }
+        }
+        return true;
+    }
+
+    public int getHashSize() {
+        Set<String> hashSet = new HashSet<>();
+        for (BlockHeaderChain chain : chainList) {
+            hashSet.addAll(chain.getHashSet());
+        }
+        return hashSet.size();
     }
 }

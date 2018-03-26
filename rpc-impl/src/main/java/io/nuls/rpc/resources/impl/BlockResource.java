@@ -23,6 +23,7 @@
  */
 package io.nuls.rpc.resources.impl;
 
+import io.nuls.account.entity.Address;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
@@ -156,7 +157,7 @@ public class BlockResource {
                                         @QueryParam("pageNumber") int pageNumber,
                                         @QueryParam("pageSize") int pageSize) {
 
-        if (type < 1 || type > 2 || pageNumber < 0 || pageSize < 0 || !StringUtils.validAddress(address)) {
+        if (type < 1 || type > 2 || pageNumber < 0 || pageSize < 0 || !Address.validAddress(address)) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         if (pageNumber == 0) {

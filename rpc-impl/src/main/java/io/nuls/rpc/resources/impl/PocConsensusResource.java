@@ -23,6 +23,7 @@
  */
 package io.nuls.rpc.resources.impl;
 
+import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.service.intf.ConsensusService;
 import io.nuls.core.chain.entity.Na;
@@ -156,7 +157,7 @@ public class PocConsensusResource {
         AssertUtil.canNotEmpty(form.getRemark());
         AssertUtil.canNotEmpty(form.getPassword());
 
-        if (!StringUtils.validAddress(form.getPackingAddress()) || !StringUtils.validAddress(form.getAgentAddress())) {
+        if (!Address.validAddress(form.getPackingAddress()) || !Address.validAddress(form.getAgentAddress())) {
             throw new NulsRuntimeException(ErrorCode.PARAMETER_ERROR);
         }
 
@@ -206,7 +207,7 @@ public class PocConsensusResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult profit(@QueryParam("address") String address) {
         Map<String, Object> map = new HashMap<>();
-        if ((address != null && !StringUtils.validAddress(address))) {
+        if ((address != null && !Address.validAddress(address))) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         if (address == null) {
