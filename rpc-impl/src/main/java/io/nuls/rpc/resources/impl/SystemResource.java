@@ -23,7 +23,10 @@
  */
 package io.nuls.rpc.resources.impl;
 
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.i18n.I18nUtils;
 import io.nuls.core.module.service.ModuleService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
@@ -47,8 +50,17 @@ public class SystemResource {
     @Path("/lang/{language}")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult setLanguage(@PathParam("language") String language) {
-
-
+        AssertUtil.canNotEmpty(language);
+        boolean b = I18nUtils.hasLanguage(language);
+        if(!b){
+            return RpcResult.getFailed(ErrorCode.DATA_ERROR,"language unkown!");
+        }
+        try {
+            I18nUtils.setLanguage(language);
+        } catch (NulsException e) {
+            Log.error(e);
+            RpcResult.getFailed(e.getMessage());
+        }
         return RpcResult.getSuccess();
     }
 

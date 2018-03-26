@@ -61,6 +61,7 @@ import io.nuls.ledger.entity.params.OperationType;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.ledger.event.TransactionEvent;
 import io.nuls.ledger.service.intf.LedgerService;
+import org.spongycastle.util.Times;
 
 import java.io.IOException;
 import java.util.*;
@@ -102,6 +103,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
         }
         Consensus<Agent> con = new ConsensusAgentImpl();
         con.setAddress(account.getAddress().toString());
+        agent.setStartTime(TimeService.currentTimeMillis());
         con.setExtend(agent);
         tx.setTxData(con);
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
