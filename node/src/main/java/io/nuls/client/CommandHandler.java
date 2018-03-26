@@ -88,13 +88,17 @@ public class CommandHandler {
     }
 
     private String processCommand(String[] args) {
-        if (args.length == 0) {
+        int length = args.length;
+        if (length == 0) {
             return CommandConstant.COMMAND_ERROR;
         }
         String command = args[0];
         CommandProcessor processor = PROCESSOR_MAP.get(command);
         if (processor == null) {
             return command + " not a nuls command!";
+        }
+        if(length == 2 && CommandConstant.NEED_HELP.equals(args[1])) {
+            return processor.getHelp();
         }
         try {
             boolean result = processor.argsValidate(args);

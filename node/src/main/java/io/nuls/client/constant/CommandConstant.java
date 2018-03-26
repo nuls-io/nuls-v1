@@ -34,6 +34,7 @@ public interface CommandConstant {
 
     String CMD_EXIT = "exit";
     String CMD_HELP = "help";
+    String NEED_HELP = "-help";
 
     String CMD_SYS = "sys";
     String CMD_ACCT = "account";

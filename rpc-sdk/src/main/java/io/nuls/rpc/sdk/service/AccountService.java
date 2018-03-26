@@ -40,7 +40,8 @@ import java.util.Map;
  * @Author: PierreLuo
  * @Date: 2018/3/25
  */
-public class AccountService {
+public enum AccountService {
+    ACCOUNT_SERVICE;
     private RestFulUtils restFul = RestFulUtils.getInstance();
 
     /**

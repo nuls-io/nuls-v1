@@ -37,7 +37,7 @@ import io.nuls.rpc.sdk.service.BlockService;
  */
 public abstract class BlockProcessors implements CommandProcessor {
 
-    protected BlockService blockService = new BlockService();
+    protected BlockService blockService = BlockService.BLOCK_SERVICE;
 
     public static class GetBlockHeader extends BlockProcessors {
 

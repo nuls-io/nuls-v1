@@ -10,7 +10,8 @@ import java.util.Map;
  * @author: Charlie
  * @date: 2018/3/26
  */
-public class NetworkService {
+public enum NetworkService {
+    NETWORK_SERVICE;
 
     private RestFulUtils restFul = RestFulUtils.getInstance();
 

@@ -27,6 +27,7 @@
 package io.nuls.client.processor;
 
 import io.nuls.account.entity.Account;
+import io.nuls.client.CommandHelper;
 import io.nuls.client.entity.CommandResult;
 import io.nuls.client.processor.intf.CommandProcessor;
 import io.nuls.core.chain.entity.Na;
@@ -36,13 +37,15 @@ import io.nuls.rpc.resources.form.TransferForm;
 import io.nuls.rpc.sdk.entity.RpcClientResult;
 import io.nuls.rpc.sdk.service.WalletService;
 
+import java.util.Scanner;
+
 /**
  * @author Niels
  * @date 2018/3/7
  */
 public abstract class WalletProcessors implements CommandProcessor {
 
-    protected WalletService walletService = new WalletService();
+    protected WalletService walletService = WalletService.WALLET_SERVICE;
 
     public static class SetPassword extends WalletProcessors {
 
@@ -94,12 +97,19 @@ public abstract class WalletProcessors implements CommandProcessor {
         @Override
         public String getCommandDescription() {
             //TODO 命令描述
-            return "resetpwd --get total balance of all addresses in the wallet";
+            return "resetpwd <oldpassword> <newpassword> --reset password for your wallet";
         }
 
         @Override
         public boolean argsValidate(String[] args) {
-            //TODO 参数校验
+            int length = args.length;
+            if(length != 3)
+                return false;
+            if(!CommandHelper.checkArgsIsNull(args))
+                return false;
+            String oldPwd = args[1];
+            String newPwd = args[2];
+            CommandHelper.confirmPwd(newPwd);
             return true;
         }
 

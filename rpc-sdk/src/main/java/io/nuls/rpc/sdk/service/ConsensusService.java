@@ -15,7 +15,8 @@ import java.util.Map;
  * @author: Charlie
  * @date: 2018/03/25
  */
-public class ConsensusService {
+public enum ConsensusService {
+    CONSENSUS_SERVICE;
 
     private RestFulUtils restFul = RestFulUtils.getInstance();
 

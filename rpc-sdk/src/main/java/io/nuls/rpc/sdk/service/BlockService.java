@@ -37,7 +37,8 @@ import java.util.Map;
  * @Author: PierreLuo
  * @Date: 2018/3/25
  */
-public class BlockService {
+public enum BlockService {
+    BLOCK_SERVICE;
     private RestFulUtils restFul = RestFulUtils.getInstance();
 
     /**

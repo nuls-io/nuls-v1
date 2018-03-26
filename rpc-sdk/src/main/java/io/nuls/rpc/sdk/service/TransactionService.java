@@ -14,7 +14,9 @@ import java.util.Map;
  * @author: Charlie
  * @date: 2018/3/25
  */
-public class TransactionService {
+public enum TransactionService {
+    TRANSACTION_SERVICE;
+
     private RestFulUtils restFul = RestFulUtils.getInstance();
 
     public RpcClientResult getTxByhash(String hash){

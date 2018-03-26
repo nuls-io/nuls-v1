@@ -38,7 +38,7 @@ import io.nuls.rpc.sdk.service.AccountService;
  */
 public abstract class AccountProcessors implements CommandProcessor {
 
-    protected AccountService accountService = new AccountService();
+    protected AccountService accountService = AccountService.ACCOUNT_SERVICE;
 
     /**
      * create accounts processor

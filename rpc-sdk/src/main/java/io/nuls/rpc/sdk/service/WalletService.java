@@ -39,7 +39,9 @@ import java.util.Map;
  * @Author: PierreLuo
  * @Date: 2018/3/25
  */
-public class WalletService {
+public enum WalletService {
+    WALLET_SERVICE;
+
     private RestFulUtils restFul = RestFulUtils.getInstance();
 
     /**

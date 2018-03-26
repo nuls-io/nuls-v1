@@ -38,7 +38,7 @@ import io.nuls.rpc.sdk.service.SystemService;
  */
 public abstract class SystemProcessors implements CommandProcessor {
 
-    protected SystemService systemService = new SystemService();
+    protected SystemService systemService = SystemService.SYSTEM_SERVICE;
 
     /**
      * exit the command line
