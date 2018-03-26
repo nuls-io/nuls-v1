@@ -26,8 +26,8 @@
 
 package io.nuls.client.processor;
 
-import io.nuls.account.entity.Account;
-import io.nuls.client.CommandHelper;
+import io.nuls.client.helper.CommandBulider;
+import io.nuls.client.helper.CommandHelper;
 import io.nuls.client.entity.CommandResult;
 import io.nuls.client.processor.intf.CommandProcessor;
 import io.nuls.core.chain.entity.Na;
@@ -35,9 +35,10 @@ import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.rpc.resources.form.TransferForm;
 import io.nuls.rpc.sdk.entity.RpcClientResult;
+import io.nuls.rpc.sdk.service.AccountService;
 import io.nuls.rpc.sdk.service.WalletService;
 
-import java.util.Scanner;
+import java.util.List;
 
 /**
  * @author Niels
@@ -46,6 +47,7 @@ import java.util.Scanner;
 public abstract class WalletProcessors implements CommandProcessor {
 
     protected WalletService walletService = WalletService.WALLET_SERVICE;
+    protected AccountService accountService = AccountService.ACCOUNT_SERVICE;
 
     public static class SetPassword extends WalletProcessors {
 
@@ -56,18 +58,27 @@ public abstract class WalletProcessors implements CommandProcessor {
 
         @Override
         public String getHelp() {
-            return null;
+            CommandBulider builder = new CommandBulider();
+            //TODO 翻译
+            builder.newLine(getCommandDescription())
+                    .newLine("\t<password> 密码 - 必输, 长度8-20位, 必须同时包含大小写字母和数字");
+            return builder.toString();
         }
 
         @Override
         public String getCommandDescription() {
-            //TODO 命令描述
-            return "setpwd --get total balance of all addresses in the wallet";
+            return "setpwd <password> --set password of the wallet";
         }
 
         @Override
         public boolean argsValidate(String[] args) {
-            //TODO 参数校验
+            int length = args.length;
+            if(length != 2)
+                return false;
+            if(!CommandHelper.checkArgsIsNull(args))
+                return false;
+            String newPwd = args[1];
+            CommandHelper.confirmPwd(newPwd);
             return true;
         }
 
@@ -91,12 +102,16 @@ public abstract class WalletProcessors implements CommandProcessor {
 
         @Override
         public String getHelp() {
-            return null;
+            CommandBulider builder = new CommandBulider();
+            //TODO 翻译
+            builder.newLine(getCommandDescription())
+                    .newLine("\t<oldpassword> 现有密码 - 必输")
+                    .newLine("\t<newpassword> 新密码 - 必输");
+            return builder.toString();
         }
 
         @Override
         public String getCommandDescription() {
-            //TODO 命令描述
             return "resetpwd <oldpassword> <newpassword> --reset password for your wallet";
         }
 
@@ -107,7 +122,6 @@ public abstract class WalletProcessors implements CommandProcessor {
                 return false;
             if(!CommandHelper.checkArgsIsNull(args))
                 return false;
-            String oldPwd = args[1];
             String newPwd = args[2];
             CommandHelper.confirmPwd(newPwd);
             return true;
@@ -228,24 +242,37 @@ public abstract class WalletProcessors implements CommandProcessor {
 
         @Override
         public String getHelp() {
-            return null;
+            CommandBulider builder = new CommandBulider();
+            //TODO 翻译
+            builder.newLine(getCommandDescription())
+                    .newLine("\t<password> 密码 - 必输")
+                    .newLine("\t[address] 备份账户地址，默认不传视为备份钱包所有账户 - 选填");
+            return builder.toString();
         }
 
         @Override
         public String getCommandDescription() {
-            //TODO 命令描述
-            return "backup --get total balance of all addresses in the wallet";
+            return "backup <password> [address] --backup the wallet";
         }
 
         @Override
         public boolean argsValidate(String[] args) {
-            //TODO 参数校验
+            int length = args.length;
+            if(length < 2)
+                return false;
+            if(!CommandHelper.checkArgsIsNull(args))
+                return false;
             return true;
         }
 
         @Override
         public CommandResult execute(String[] args) {
-            RpcClientResult result = walletService.backup(args[1], args[2]);
+            int length = args.length;
+            String address = null;
+            if(length == 3) {
+                address = args[2];
+            }
+            RpcClientResult result = walletService.backup(args[1], address);
             if (null == result) {
                 return CommandResult.getFailed("Failure to execute");
             }
