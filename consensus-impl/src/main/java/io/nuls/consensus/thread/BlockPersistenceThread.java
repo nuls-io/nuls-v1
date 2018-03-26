@@ -103,7 +103,7 @@ public class BlockPersistenceThread implements Runnable {
         }
         Block block = blockCacheManager.getBlock(height);
         if (null == block) {
-            if (blockCacheManager.getBlockCacheMap().size() > this.blockCacheManager.getBifurcateProcessor().getLongestChain().size()) {
+            if (blockCacheManager.getBlockCacheMap().size() > this.blockCacheManager.getBifurcateProcessor().getHashSize()) {
                 List<Block> blockList = new ArrayList<>(blockCacheManager.getBlockCacheMap().values());
                 Collections.sort(blockList, BlockHeightComparator.getInstance());
                 for (Block b : blockList) {
