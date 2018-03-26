@@ -110,9 +110,9 @@ public class BlockDaoImpl extends BaseDaoImpl<BlockHeaderMapper, String, BlockHe
     public Page<BlockHeaderPo> getBlockListByAddress(String nodeAddress, int type, int pageNumber, int pageSize) {
         Searchable searchable = new Searchable();
         if (type == 1) {
-            searchable.addCondition("a.address", SearchOperator.eq, nodeAddress);
+            searchable.addCondition("a.agent_address", SearchOperator.eq, nodeAddress);
         } else {
-            searchable.addCondition("a.node_address", SearchOperator.eq, nodeAddress);
+            searchable.addCondition("a.packing_address", SearchOperator.eq, nodeAddress);
         }
 
         PageHelper.startPage(pageNumber, pageSize);

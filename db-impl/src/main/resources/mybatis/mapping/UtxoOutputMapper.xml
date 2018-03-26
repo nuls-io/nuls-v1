@@ -91,13 +91,6 @@
         <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
     </delete>
 
-    <select id="getBlockReward" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultType="java.lang.Long">
-        select sum(b.value)
-        from transaction a
-        join utxo_output b on a.`hash` = b.tx_hash
-        <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
-    </select>
-
     <update id="unlockTxOutput" parameterType="java.lang.String">
         update utxo_output
         set status = 0
@@ -109,4 +102,11 @@
         set status = 1
         where out_index = 0 and tx_hash = #{txHash,jdbcType=VARCHAR}
     </update>
+
+    <select id="getCoinBaseReward" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultType="java.lang.Long">
+        SELECT IFNULL(sum(b.`value`),0) as totalreward
+        from `transaction` a
+        join utxo_output b on a.`hash` = b.tx_hash
+        <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
+    </select>
 </mapper>

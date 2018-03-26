@@ -82,14 +82,7 @@ public class PocConsensusResource {
     public RpcResult getWholeInfo() {
         RpcResult result = RpcResult.getSuccess();
         WholeNetConsensusInfoDTO dto = new WholeNetConsensusInfoDTO();
-//        if (temp == 1) {
-//            dto.setAgentCount(18);
-//            dto.setRewardOfDay(20112345678L);
-//            dto.setTotalDeposit(321000000000L);
-//            dto.setConsensusAccountNumber(10000);
-//            result.setData(dto);
-//            return result;
-//        }
+
         Map<String, Object> map = this.consensusService.getConsensusInfo();
         dto.setAgentCount((Integer) map.get("agentCount"));
         dto.setRewardOfDay((Long) map.get("rewardOfDay"));
@@ -105,17 +98,6 @@ public class PocConsensusResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getInfo() {
         RpcResult result = RpcResult.getSuccess();
-//        ConsensusInfoDTO dto = new ConsensusInfoDTO();
-//        if (temp == 1) {
-//            dto.setAgentCount(2);
-//            dto.setConsensusAccountCount(10);
-//            dto.setReward(1234500000000L);
-//            dto.setRewardOfDay(234500000000L);
-//            dto.setTotalDeposit(300000000000000L);
-//            dto.setUsableBalance(2234500000000L);
-//            result.setData(dto);
-//            return result;
-//        }
         Map<String, Object> dataMap = consensusService.getConsensusInfo(null);
         result.setData(dataMap);
         return result;
@@ -127,17 +109,7 @@ public class PocConsensusResource {
     public RpcResult getInfo(@PathParam("address") String address) {
         AssertUtil.canNotEmpty(address);
         RpcResult result = RpcResult.getSuccess();
-//        ConsensusInfoDTO dto = new ConsensusInfoDTO();
-//        if (temp == 1) {
-//            dto.setAgentCount(0);
-//            dto.setConsensusAccountCount(2);
-//            dto.setReward(5500000000L);
-//            dto.setRewardOfDay(1500000000L);
-//            dto.setTotalDeposit(20000000000000L);
-//            dto.setUsableBalance(234500000000L);
-//            result.setData(dto);
-//            return result;
-//        }
+
         Map<String, Object> dataMap = consensusService.getConsensusInfo(address);
         result.setData(dataMap);
         return result;
