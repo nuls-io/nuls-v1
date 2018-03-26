@@ -208,14 +208,6 @@ public class PocConsensusServiceImpl implements ConsensusService {
     }
 
     @Override
-    public List<Consensus> getConsensusAccountList() {
-        List<Consensus<Agent>> list = consensusCacheManager.getCachedAgentList(ConsensusStatusEnum.IN);
-        List<Consensus> resultList = new ArrayList<>(list);
-        resultList.addAll(consensusCacheManager.getCachedDepositList(ConsensusStatusEnum.IN));
-        return resultList;
-    }
-
-    @Override
     public Map<String, Object> getConsensusInfo() {
         List<Consensus<Agent>> agentList = consensusCacheManager.getCachedAgentList(ConsensusStatusEnum.IN);
         List<Consensus<Deposit>> depositList = consensusCacheManager.getCachedDepositList(ConsensusStatusEnum.IN);
@@ -350,20 +342,6 @@ public class PocConsensusServiceImpl implements ConsensusService {
         } catch (IOException e) {
             throw new NulsRuntimeException(e);
         }
-    }
-
-    @Override
-    public ConsensusStatusInfo getConsensusStatus(String agentHash) {
-        Consensus<Agent> ca = this.consensusCacheManager.getCachedAgentByHash(agentHash);
-        if (null == ca) {
-            return null;
-        }
-        Account account = this.accountService.getAccount(ca.getAddress());
-        ConsensusStatusInfo info = new ConsensusStatusInfo();
-        info.setSeed(false);
-        info.setStatus(ca.getExtend().getStatus());
-        info.setAccount(account);
-        return info;
     }
 
     @Override
