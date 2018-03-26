@@ -91,7 +91,11 @@ public class DistributedBlockInfoRequestUtils {
                 return null;
             }
             BlockInfo bi = this.getBlockInfo();
+
             if (start == end && start <= 0 && bi.getNodeIdList().size() >= (nodeIdList.size() / 2)) {
+                if(bi==null){
+                    NulsContext.getInstance().setNetBestBlockHeight(null);
+                }
                 NulsContext.getInstance().setNetBestBlockHeight(bi.getBestHeight());
             }
             return bi;

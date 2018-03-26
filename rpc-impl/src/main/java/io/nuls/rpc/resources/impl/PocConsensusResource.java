@@ -44,12 +44,11 @@ import io.nuls.db.entity.AgentPo;
 import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.rpc.entity.RpcResult;
-import io.nuls.rpc.resources.dto.ConsensusInfoDTO;
 import io.nuls.rpc.resources.dto.WholeNetConsensusInfoDTO;
 import io.nuls.rpc.resources.form.CreateAgentForm;
-import io.nuls.rpc.resources.form.WithdrawForm;
 import io.nuls.rpc.resources.form.DepositForm;
 import io.nuls.rpc.resources.form.StopAgentForm;
+import io.nuls.rpc.resources.form.WithdrawForm;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 

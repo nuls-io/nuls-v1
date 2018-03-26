@@ -42,7 +42,6 @@ import io.nuls.core.validate.ValidateResult;
 import io.nuls.ledger.service.intf.LedgerService;
 
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
 
 /**
  * @author Niels
@@ -190,7 +189,7 @@ public class BlockMaintenanceThread implements Runnable {
                     netBestBlockInfo.getBestHash().equals(localBestBlock.getHeader().getHash())) {
                 break;
             } else if (netBestBlockInfo.getBestHeight() <= localBestBlock.getHeader().getHeight()) {
-                if (netBestBlockInfo.getBestHeight() == 0 || netBestBlockInfo.getNodeIdList().size() == 1) {
+                if (netBestBlockInfo.getBestHeight() == 0) {
                     break;
                 }
                 //local height is highest
@@ -203,6 +202,9 @@ public class BlockMaintenanceThread implements Runnable {
 
                 if (null != header && header.getHash().equals(netBestBlockInfo.getBestHash())) {
                     break;
+                }
+                if (netBestBlockInfo.getNodeIdList().size() == 1) {
+                    throw new NulsRuntimeException(ErrorCode.FAILED, "node count not enough!");
                 }
                 Log.warn("Rollback block start height:{},local is highest and wrong!", localBestBlock.getHeader().getHeight());
                 //bifurcation
