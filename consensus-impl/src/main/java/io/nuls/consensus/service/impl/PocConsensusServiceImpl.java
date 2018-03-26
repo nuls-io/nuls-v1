@@ -231,6 +231,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
         //todo 更改为真实计算
         long rewardOfDay = 0;
         if (hashAgent) {
+            //2018
             rewardOfDay = PocConsensusConstant.BLOCK_REWARD.getValue() * PocConsensusConstant.BLOCK_COUNT_OF_DAY;
         }
         map.put("rewardOfDay", rewardOfDay);
