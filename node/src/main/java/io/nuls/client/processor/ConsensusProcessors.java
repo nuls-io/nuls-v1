@@ -28,8 +28,13 @@ package io.nuls.client.processor;
 
 import io.nuls.client.entity.CommandResult;
 import io.nuls.client.processor.intf.CommandProcessor;
+import io.nuls.core.utils.str.StringUtils;
 import io.nuls.rpc.sdk.entity.RpcClientResult;
-import io.nuls.rpc.sdk.service.BlockService;
+import io.nuls.rpc.sdk.params.CreateAgentParams;
+import io.nuls.rpc.sdk.params.DepositParams;
+import io.nuls.rpc.sdk.service.ConsensusService;
+
+import java.math.BigDecimal;
 
 /**
  * @author Niels
@@ -37,14 +42,13 @@ import io.nuls.rpc.sdk.service.BlockService;
  */
 public abstract class ConsensusProcessors implements CommandProcessor {
 
-    /**
-     *
-     */
-    public static class GetAgentList extends ConsensusProcessors {
+    protected ConsensusService consensusService = ConsensusService.CONSENSUS_SERVICE;
+
+    public static class GetConsensus extends ConsensusProcessors {
 
         @Override
         public String getCommand() {
-            return "agentlist";
+            return "getconsensus";
         }
 
         @Override
@@ -54,7 +58,7 @@ public abstract class ConsensusProcessors implements CommandProcessor {
 
         @Override
         public String getCommandDescription() {
-            return "agentlist --get all agents";
+            return "getconsensus -- get general consensus information";
         }
 
         @Override
@@ -64,8 +68,152 @@ public abstract class ConsensusProcessors implements CommandProcessor {
 
         @Override
         public CommandResult execute(String[] args) {
-            //todo
+            RpcClientResult result = consensusService.getconsensus();
+            if (null == result) {
+                return CommandResult.getFailed("Failure to execute");
+            }
+            return CommandResult.getResult(result);
+        }
+    }
+
+    public static class GetConsensusAddress extends ConsensusProcessors{
+        @Override
+        public String getCommand() {
+            return "getconsensusaddress";
+        }
+
+        @Override
+        public String getHelp() {
             return null;
+        }
+
+        @Override
+        public String getCommandDescription() {
+            return "getconsensusaddress <address> -- get consensus information by wallet address";
+        }
+
+        @Override
+        public boolean argsValidate(String[] args) {
+            int length = args.length;
+            if(length != 2){
+                return false;
+            }
+            if(!StringUtils.validAddressSimple(args[1])){
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public CommandResult execute(String[] args) {
+            RpcClientResult result = consensusService.getconsensusaddress(args[1]);
+            if (null == result) {
+                return CommandResult.getFailed("Failure to execute");
+            }
+            return CommandResult.getResult(result);
+        }
+    }
+
+    public static class CreateAgent extends ConsensusProcessors{
+        @Override
+        public String getCommand() {
+            return "createagent";
+        }
+
+        @Override
+        public String getHelp() {
+            return null;
+        }
+
+        @Override
+        public String getCommandDescription() {
+            return "createagent <address> <packingAddress> <commissionRate> <deposit> <agentName> <password> <remark>  --create a agent";
+        }
+
+        @Override
+        public boolean argsValidate(String[] args) {
+            int length = args.length;
+            if(length != 8){
+                return false;
+            }
+            if(!StringUtils.validAddressSimple(args[1]) || !StringUtils.validAddressSimple(args[2]) || StringUtils.isBlank(args[3])
+                    || StringUtils.isBlank(args[4]) || StringUtils.isBlank(args[5]) || StringUtils.validPassword(args[6])
+                    || !StringUtils.isBlank(args[7])){
+                return false;
+            }
+            if(StringUtils.isNumberGtZero(args[3])){
+                return false;
+            }
+            if(StringUtils.isNumberGtZero(args[4])){
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public CommandResult execute(String[] args) {
+            CreateAgentParams params = new CreateAgentParams();
+            params.setAddress(args[1]);
+            params.setPackingAddress(args[2]);
+            params.setCommissionRate(args[3]);
+            params.setDeposit(Long.valueOf(args[4]));
+            params.setAgentName(args[5]);
+            params.setPassword(args[6]);
+            params.setRemark(args[7]);
+            RpcClientResult result = consensusService.createAgent(params);
+            if (null == result) {
+                return CommandResult.getFailed("Failure to execute");
+            }
+            return CommandResult.getResult(result);
+        }
+    }
+
+
+    public static class Deposit extends ConsensusProcessors {
+        @Override
+        public String getCommand() {
+            return "deposit";
+        }
+
+        @Override
+        public String getHelp() {
+            return null;
+        }
+
+        @Override
+        public String getCommandDescription() {
+            return "deposit <address> <agentAddress> <deposit> <password>  -- apply for deposit";
+        }
+
+        @Override
+        public boolean argsValidate(String[] args) {
+            int length = args.length;
+            if(length != 5){
+                return false;
+            }
+            if(!StringUtils.validAddressSimple(args[1]) || !StringUtils.validAddressSimple(args[2])
+                    || StringUtils.isBlank(args[3]) || StringUtils.validPassword(args[4])){
+                return false;
+            }
+
+            if(StringUtils.isNumberGtZero(args[3])){
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public CommandResult execute(String[] args) {
+            DepositParams params = new DepositParams();
+            params.setAddress(args[1]);
+            params.setAgentAddress(args[2]);
+            params.setDeposit(Long.valueOf(args[3]));
+            params.setPassword(args[4]);
+            RpcClientResult result = consensusService.deposit(params);
+            if (null == result) {
+                return CommandResult.getFailed("Failure to execute");
+            }
+            return CommandResult.getResult(result);
         }
     }
 

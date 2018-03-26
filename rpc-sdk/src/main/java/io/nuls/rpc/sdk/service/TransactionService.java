@@ -19,7 +19,7 @@ public enum TransactionService {
 
     private RestFulUtils restFul = RestFulUtils.getInstance();
 
-    public RpcClientResult getTxByhash(String hash){
+    public RpcClientResult getTx(String hash){
         try {
             AssertUtil.canNotEmpty(hash);
         } catch (Exception e) {
