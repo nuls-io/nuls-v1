@@ -47,6 +47,11 @@ public abstract class BlockProcessors implements CommandProcessor {
         }
 
         @Override
+        public String getHelp() {
+            return null;
+        }
+
+        @Override
         public String getCommandDescription() {
             return "getblockheader --get the block header with hash or height";
         }
@@ -75,6 +80,11 @@ public abstract class BlockProcessors implements CommandProcessor {
         @Override
         public String getCommand() {
             return "getblock";
+        }
+
+        @Override
+        public String getHelp() {
+            return null;
         }
 
         @Override
@@ -112,6 +122,11 @@ public abstract class BlockProcessors implements CommandProcessor {
         }
 
         @Override
+        public String getHelp() {
+            return null;
+        }
+
+        @Override
         public String getCommandDescription() {
             return "bestheight --get the best block header";
         }
@@ -134,6 +149,11 @@ public abstract class BlockProcessors implements CommandProcessor {
         @Override
         public String getCommand() {
             return "listblockheader";
+        }
+
+        @Override
+        public String getHelp() {
+            return null;
         }
 
         @Override
