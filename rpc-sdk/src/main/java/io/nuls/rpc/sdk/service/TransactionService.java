@@ -4,7 +4,6 @@ import io.nuls.rpc.sdk.entity.RpcClientResult;
 import io.nuls.rpc.sdk.entity.TransactionDto;
 import io.nuls.rpc.sdk.utils.AssertUtil;
 import io.nuls.rpc.sdk.utils.RestFulUtils;
-import io.nuls.rpc.sdk.utils.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,25 +23,22 @@ public class TransactionService {
         } catch (Exception e) {
             return RpcClientResult.getFailed(e.getMessage());
         }
-        RpcClientResult result = restFul.get("tx/hash/" + hash, null);
+        RpcClientResult result = restFul.get("/tx/hash/" + hash, null);
         if(result.isSuccess()){
             result.setData(new TransactionDto((Map<String, Object>)result.getData()));
         }
         return result;
     }
 
-    public RpcClientResult getTxList(long height, String address){
+    public RpcClientResult getTxList(String address){
         try {
-            AssertUtil.canNotEmpty(height);
+            AssertUtil.canNotEmpty(address);
         } catch (Exception e) {
             return RpcClientResult.getFailed(e.getMessage());
         }
         Map<String, String> params = new HashMap<>(2);
-        params.put("height", String.valueOf(height));
-        if(StringUtils.validAddress(address)){
-            params.put("address", address);
-        }
-        RpcClientResult result = restFul.get("tx/", params);
+        params.put("address", String.valueOf(address));
+        RpcClientResult result = restFul.get("/tx/list", params);
         if(result.isSuccess()){
             List<Map<String, Object>> list = (List<Map<String, Object>>)result.getData();
             List<TransactionDto> transactionDtoList = new ArrayList<>(10);
