@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -40,8 +40,17 @@ import javax.ws.rs.core.MediaType;
  * @date 2017/9/30
  */
 @Path("/sys")
-@Api(value ="/browse", description ="System")
+@Api(value = "/browse", description = "System")
 public class SystemResource {
+
+    @PUT
+    @Path("/lang/{language}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult setLanguage(@PathParam("language") String language) {
+
+
+        return RpcResult.getSuccess();
+    }
 
     @GET
     @Path("/version")
@@ -56,8 +65,8 @@ public class SystemResource {
     @GET
     @Path("/help")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult getHelp(){
-        HelpInfoDto help =new HelpInfoDto();
+    public RpcResult getHelp() {
+        HelpInfoDto help = new HelpInfoDto();
         return RpcResult.getSuccess().setData(help);
     }
 
@@ -65,7 +74,7 @@ public class SystemResource {
     @Path("/module/load")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult startModule(@FormParam("moduleName") String moduleName, @FormParam("moduleClass") String moduleClass) {
-       //todo change the params to a form entity
+        //todo change the params to a form entity
         RpcResult result = null;
         do {
             ModuleService service = ModuleService.getInstance();
