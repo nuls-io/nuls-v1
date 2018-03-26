@@ -30,13 +30,13 @@ public class AgentCountValidator implements NulsDataValidator<RegisterAgentTrans
                 if (ca.getAddress().equals(tx.getTxData().getAddress())) {
                     return ValidateResult.getFailedResult("An address can only create one agent");
                 }
-                if (ca.getAddress().equals(ca.getExtend().getPackingAddress())) {
+                if (ca.getAddress().equals(agent.getPackingAddress())) {
                     return ValidateResult.getFailedResult("The address can only create one agent");
                 }
-                if (ca.getExtend().getPackingAddress().equals(ca.getAddress())) {
+                if (agent.getPackingAddress().equals(ca.getAddress())) {
                     return ValidateResult.getFailedResult("The packingAddress is an agentAddress");
                 }
-                if (ca.getExtend().getPackingAddress().equals(ca.getExtend().getPackingAddress())) {
+                if (agent.getPackingAddress().equals(ca.getExtend().getPackingAddress())) {
                     return ValidateResult.getFailedResult("The packingAddress is busy!");
                 }
                 if(agentName.equals(ca.getExtend().getAgentName())){
