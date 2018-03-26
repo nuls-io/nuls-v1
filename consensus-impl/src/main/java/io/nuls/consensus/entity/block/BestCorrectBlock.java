@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,26 +21,37 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.consensus.entity.validator.consensus;
 
-import io.nuls.consensus.constant.PocConsensusConstant;
-import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
-import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.validate.NulsDataValidator;
-import io.nuls.core.validate.ValidateResult;
+package io.nuls.consensus.entity.block;
+
+import io.nuls.consensus.utils.BlockInfo;
+import io.nuls.core.chain.entity.Block;
 
 /**
  * @author Niels
- * @date 2018/1/4
+ * @date 2018/3/26
  */
-public class CommissionRateValidator implements NulsDataValidator<RegisterAgentTransaction> {
-    @Override
-    public ValidateResult validate(RegisterAgentTransaction data) {
-        double commissionRate = data.getTxData().getExtend().getCommissionRate();
-        if(commissionRate<= PocConsensusConstant.MIN_COMMISSION_RATE||commissionRate>PocConsensusConstant.MAX_COMMISSION_RATE){
-            return ValidateResult.getFailedResult(ErrorCode.COMMISSION_RATE_OUT_OF_RANGE);
-        }
-        return ValidateResult.getSuccessResult();
+public class BestCorrectBlock {
+
+    private Block localBestBlock;
+
+    private BlockInfo netBestBlockInfo;
+
+    public Block getLocalBestBlock() {
+        return localBestBlock;
+    }
+
+    public void setLocalBestBlock(Block localBestBlock) {
+        this.localBestBlock = localBestBlock;
+    }
+
+    public BlockInfo getNetBestBlockInfo() {
+        return netBestBlockInfo;
+    }
+
+    public void setNetBestBlockInfo(BlockInfo netBestBlockInfo) {
+        this.netBestBlockInfo = netBestBlockInfo;
     }
 }

@@ -23,14 +23,12 @@
  */
 package io.nuls.consensus.service.intf;
 
-import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -43,14 +41,9 @@ public interface ConsensusService {
 
     Transaction stopConsensus(String address, String password, Map<String, Object> paramsMap) throws NulsException, IOException;
 
-    List<Consensus> getConsensusAccountList();
-
     Map<String, Object> getConsensusInfo();
 
     Map<String, Object> getConsensusInfo(String address);
-
-    ConsensusStatusInfo getConsensusStatus(String address);
-
 
     /**
      * for client Customized

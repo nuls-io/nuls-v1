@@ -26,6 +26,8 @@
 
 package io.nuls.consensus.entity.validator.tx;
 
+import io.nuls.account.entity.Address;
+import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.ConsensusAgentImpl;
 import io.nuls.consensus.entity.member.Agent;
@@ -45,9 +47,16 @@ public class RegisterAgentFieldValidator implements NulsDataValidator<RegisterAg
         if (null == agent) {
             return ValidateResult.getFailedResult("tx data can not be null!");
         }
-        if(!StringUtils.validAddress(agent.getAddress())||!StringUtils.validAddress(agent.getExtend().getPackingAddress())){
-            return ValidateResult.getFailedResult("");
+        if (!Address.validAddress(agent.getAddress()) || !Address.validAddress(agent.getExtend().getPackingAddress())) {
+            return ValidateResult.getFailedResult("Address format wrong!");
         }
-        return null;
+        if (agent.getAddress().equals(agent.getExtend().getPackingAddress())) {
+            return ValidateResult.getFailedResult("It's not safe:agentAddress equals packingAddress");
+        }
+
+        if (agent.getExtend().getStartTime() <= 0) {
+            return ValidateResult.getFailedResult("start time cannot be 0!");
+        }
+        return ValidateResult.getSuccessResult();
     }
 }

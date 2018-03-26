@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -30,6 +30,7 @@ import io.nuls.core.utils.crypto.Base58;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.log.Log;
+import io.nuls.core.utils.str.StringUtils;
 
 /**
  * @author Niels
@@ -93,7 +94,7 @@ public class Address {
         return fromHashs(bytes);
     }
 
-    public static Address fromHashs(byte[] hashs){
+    public static Address fromHashs(byte[] hashs) {
         if (hashs == null || hashs.length != HASH_LENGTH) {
             throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
         }
@@ -102,11 +103,8 @@ public class Address {
         byte[] content = new byte[LENGTH];
         System.arraycopy(hashs, 2, content, 0, LENGTH);
 
-        byte[] sign = new byte[1];
-        System.arraycopy(hashs, 22, sign, 0, 1);
-
         Address address = new Address(addressType, content);
-        address.checkXOR(sign[0]);
+        checkXOR(address.getHash());
         return address;
     }
 
@@ -131,17 +129,39 @@ public class Address {
         return xor;
     }
 
-    protected void checkXOR(byte xorByte){
+    public static boolean validAddress(String address) {
+        if (StringUtils.isBlank(address)) {
+            return false;
+        }
+        byte[] bytes = null;
+        try {
+            bytes = Base58.decode(address);
+            if (bytes.length != HASH_LENGTH) {
+                return false;
+            }
+        } catch (NulsException e) {
+            return false;
+        }
+        try {
+            checkXOR(bytes);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    protected static void checkXOR(byte[] hashs) {
         byte[] body = new byte[22];
-        System.arraycopy(Utils.shortToBytes(addressType), 0, body, 0, 2);
-        System.arraycopy(hash160, 0, body, 2, hash160.length);
+        System.arraycopy(hashs, 0, body, 0, 22);
 
         byte xor = 0x00;
         for (int i = 0; i < body.length; i++) {
             xor ^= body[i];
         }
+        byte[] sign = new byte[1];
+        System.arraycopy(hashs, 22, sign, 0, 1);
 
-        if (xor != xorByte) {
+        if (xor != hashs[22]) {
             throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
         }
     }

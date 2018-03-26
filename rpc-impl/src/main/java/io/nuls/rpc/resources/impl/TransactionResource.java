@@ -23,6 +23,7 @@
  */
 package io.nuls.rpc.resources.impl;
 
+import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
@@ -133,7 +134,7 @@ public class TransactionResource {
             Page<Transaction> pages = new Page<>();
             if (StringUtils.isBlank(address)) {
                 pages = ledgerService.getTxList(blockHeight, type, pageNumber, pageSize);
-            } else if (StringUtils.validAddress(address)) {
+            } else if (Address.validAddress(address)) {
 
                 long count = ledgerService.getTxCount(blockHeight, address, type);
                 if (pageSize > 0) {
@@ -171,7 +172,7 @@ public class TransactionResource {
     public RpcResult list(@QueryParam("address") String address,
                           @QueryParam("pageNumber") int pageNumber,
                           @QueryParam("pageSize") int pageSize) {
-        if (!StringUtils.validAddress(address)) {
+        if (!Address.validAddress(address)) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         if (pageNumber < 0 || pageSize < 0) {

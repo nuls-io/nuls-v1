@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,6 +23,7 @@
  */
 package io.nuls.rpc.resources.impl;
 
+import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.service.intf.ConsensusService;
 import io.nuls.core.chain.entity.Na;
@@ -32,6 +33,7 @@ import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
@@ -43,12 +45,11 @@ import io.nuls.db.entity.AgentPo;
 import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.rpc.entity.RpcResult;
-import io.nuls.rpc.resources.dto.ConsensusInfoDTO;
 import io.nuls.rpc.resources.dto.WholeNetConsensusInfoDTO;
 import io.nuls.rpc.resources.form.CreateAgentForm;
-import io.nuls.rpc.resources.form.WithdrawForm;
 import io.nuls.rpc.resources.form.DepositForm;
 import io.nuls.rpc.resources.form.StopAgentForm;
+import io.nuls.rpc.resources.form.WithdrawForm;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -82,14 +83,7 @@ public class PocConsensusResource {
     public RpcResult getWholeInfo() {
         RpcResult result = RpcResult.getSuccess();
         WholeNetConsensusInfoDTO dto = new WholeNetConsensusInfoDTO();
-//        if (temp == 1) {
-//            dto.setAgentCount(18);
-//            dto.setRewardOfDay(20112345678L);
-//            dto.setTotalDeposit(321000000000L);
-//            dto.setConsensusAccountNumber(10000);
-//            result.setData(dto);
-//            return result;
-//        }
+
         Map<String, Object> map = this.consensusService.getConsensusInfo();
         dto.setAgentCount((Integer) map.get("agentCount"));
         dto.setRewardOfDay((Long) map.get("rewardOfDay"));
@@ -105,17 +99,6 @@ public class PocConsensusResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getInfo() {
         RpcResult result = RpcResult.getSuccess();
-//        ConsensusInfoDTO dto = new ConsensusInfoDTO();
-//        if (temp == 1) {
-//            dto.setAgentCount(2);
-//            dto.setConsensusAccountCount(10);
-//            dto.setReward(1234500000000L);
-//            dto.setRewardOfDay(234500000000L);
-//            dto.setTotalDeposit(300000000000000L);
-//            dto.setUsableBalance(2234500000000L);
-//            result.setData(dto);
-//            return result;
-//        }
         Map<String, Object> dataMap = consensusService.getConsensusInfo(null);
         result.setData(dataMap);
         return result;
@@ -127,17 +110,7 @@ public class PocConsensusResource {
     public RpcResult getInfo(@PathParam("address") String address) {
         AssertUtil.canNotEmpty(address);
         RpcResult result = RpcResult.getSuccess();
-//        ConsensusInfoDTO dto = new ConsensusInfoDTO();
-//        if (temp == 1) {
-//            dto.setAgentCount(0);
-//            dto.setConsensusAccountCount(2);
-//            dto.setReward(5500000000L);
-//            dto.setRewardOfDay(1500000000L);
-//            dto.setTotalDeposit(20000000000000L);
-//            dto.setUsableBalance(234500000000L);
-//            result.setData(dto);
-//            return result;
-//        }
+
         Map<String, Object> dataMap = consensusService.getConsensusInfo(address);
         result.setData(dataMap);
         return result;
@@ -155,6 +128,11 @@ public class PocConsensusResource {
         AssertUtil.canNotEmpty(form.getDeposit());
         AssertUtil.canNotEmpty(form.getRemark());
         AssertUtil.canNotEmpty(form.getPassword());
+
+        if (!Address.validAddress(form.getPackingAddress()) || !Address.validAddress(form.getAgentAddress())) {
+            throw new NulsRuntimeException(ErrorCode.PARAMETER_ERROR);
+        }
+
         Map<String, Object> paramsMap = new HashMap<>();
         paramsMap.put("deposit", form.getDeposit());
         paramsMap.put("packingAddress", form.getPackingAddress());
@@ -201,7 +179,7 @@ public class PocConsensusResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult profit(@QueryParam("address") String address) {
         Map<String, Object> map = new HashMap<>();
-        if ((address != null && !StringUtils.validAddress(address))) {
+        if ((address != null && !Address.validAddress(address))) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         if (address == null) {

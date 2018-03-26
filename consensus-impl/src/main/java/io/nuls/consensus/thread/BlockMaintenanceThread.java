@@ -24,6 +24,7 @@
 package io.nuls.consensus.thread;
 
 import io.nuls.consensus.constant.PocConsensusConstant;
+import io.nuls.consensus.entity.block.BestCorrectBlock;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.utils.BlockBatchDownloadUtils;
 import io.nuls.consensus.utils.BlockInfo;
@@ -40,7 +41,6 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.ledger.service.intf.LedgerService;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -95,18 +95,18 @@ public class BlockMaintenanceThread implements Runnable {
     }
 
     public synchronized void syncBlock() {
-        Block localBestBlock = getLocalBestCorrectBlock();
+        BestCorrectBlock bestCorrectBlock = getBestCorrectBlock();
         boolean doit = false;
         long startHeight = 1;
-        BlockInfo blockInfo = null;
         do {
-            if (null == localBestBlock) {
+            if (null == bestCorrectBlock.getLocalBestBlock() && bestCorrectBlock.getNetBestBlockInfo() == null) {
                 doit = true;
-                blockInfo = BEST_HEIGHT_FROM_NET.request(-1);
+                BlockInfo blockInfo = BEST_HEIGHT_FROM_NET.request(-1);
+                bestCorrectBlock.setNetBestBlockInfo(blockInfo);
                 break;
             }
-            startHeight = localBestBlock.getHeader().getHeight() + 1;
-            long interval = TimeService.currentTimeMillis() - localBestBlock.getHeader().getTime();
+            startHeight = bestCorrectBlock.getLocalBestBlock().getHeader().getHeight() + 1;
+            long interval = TimeService.currentTimeMillis() - bestCorrectBlock.getLocalBestBlock().getHeader().getTime();
             if (interval < (PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 2000)) {
                 doit = false;
                 try {
@@ -115,17 +115,19 @@ public class BlockMaintenanceThread implements Runnable {
                     Log.error(e);
                 }
                 break;
+            };
+            if(null==bestCorrectBlock.getNetBestBlockInfo()){
+                bestCorrectBlock.setNetBestBlockInfo(BEST_HEIGHT_FROM_NET.request(0));
             }
-            blockInfo = BEST_HEIGHT_FROM_NET.request(0);
-            if (null == blockInfo) {
+            if (null == bestCorrectBlock.getNetBestBlockInfo()) {
                 break;
             }
-            if (blockInfo.getBestHeight() > localBestBlock.getHeader().getHeight()) {
+            if (bestCorrectBlock.getNetBestBlockInfo().getBestHeight() > bestCorrectBlock.getLocalBestBlock().getHeader().getHeight()) {
                 doit = true;
                 break;
             }
         } while (false);
-        if (null == blockInfo) {
+        if (null == bestCorrectBlock.getNetBestBlockInfo()) {
             try {
                 Thread.sleep(100L);
             } catch (InterruptedException e) {
@@ -134,7 +136,7 @@ public class BlockMaintenanceThread implements Runnable {
             return;
         }
         if (doit) {
-            downloadBlocks(blockInfo.getNodeIdList(), startHeight, blockInfo.getBestHeight());
+            downloadBlocks(bestCorrectBlock.getNetBestBlockInfo().getNodeIdList(), startHeight, bestCorrectBlock.getNetBestBlockInfo().getBestHeight());
         }
     }
 
@@ -170,34 +172,39 @@ public class BlockMaintenanceThread implements Runnable {
         }
     }
 
-    private Block getLocalBestCorrectBlock() {
+    private BestCorrectBlock getBestCorrectBlock() {
+        BestCorrectBlock resultCorrentInfo = new BestCorrectBlock();
         Block localBestBlock = this.blockService.getLocalBestBlock();
         do {
             if (null == localBestBlock || localBestBlock.getHeader().getHeight() <= 1) {
                 break;
             }
-            BlockInfo blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(0);
-            if (null == blockInfo || blockInfo.getBestHash() == null) {
+            BlockInfo netBestBlockInfo = DistributedBlockInfoRequestUtils.getInstance().request(0);
+            resultCorrentInfo.setNetBestBlockInfo(netBestBlockInfo);
+            if (null == netBestBlockInfo || netBestBlockInfo.getBestHash() == null) {
                 break;
             }
             //same to network nodes
-            if (blockInfo.getBestHeight() == localBestBlock.getHeader().getHeight() &&
-                    blockInfo.getBestHash().equals(localBestBlock.getHeader().getHash())) {
+            if (netBestBlockInfo.getBestHeight() == localBestBlock.getHeader().getHeight() &&
+                    netBestBlockInfo.getBestHash().equals(localBestBlock.getHeader().getHash())) {
                 break;
-            } else if (blockInfo.getBestHeight() <= localBestBlock.getHeader().getHeight()) {
-                if (blockInfo.getBestHeight() == 0 || blockInfo.getNodeIdList().size() == 1) {
+            } else if (netBestBlockInfo.getBestHeight() <= localBestBlock.getHeader().getHeight()) {
+                if (netBestBlockInfo.getBestHeight() == 0) {
                     break;
                 }
                 //local height is highest
                 BlockHeader header = null;
                 try {
-                    header = blockService.getBlockHeader(blockInfo.getBestHeight());
+                    header = blockService.getBlockHeader(netBestBlockInfo.getBestHeight());
                 } catch (NulsException e) {
                     break;
                 }
 
-                if (null != header && header.getHash().equals(blockInfo.getBestHash())) {
+                if (null != header && header.getHash().equals(netBestBlockInfo.getBestHash())) {
                     break;
+                }
+                if (netBestBlockInfo.getNodeIdList().size() == 1) {
+                    throw new NulsRuntimeException(ErrorCode.FAILED, "node count not enough!");
                 }
                 Log.warn("Rollback block start height:{},local is highest and wrong!", localBestBlock.getHeader().getHeight());
                 //bifurcation
@@ -205,14 +212,14 @@ public class BlockMaintenanceThread implements Runnable {
                 localBestBlock = this.blockService.getLocalBestBlock();
                 break;
             } else {
-                blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(localBestBlock.getHeader().getHeight());
-                if (blockInfo.getBestHash().equals(localBestBlock.getHeader().getHash())) {
+                netBestBlockInfo = DistributedBlockInfoRequestUtils.getInstance().request(localBestBlock.getHeader().getHeight());
+                if (netBestBlockInfo.getBestHash().equals(localBestBlock.getHeader().getHash())) {
                     break;
                 }
-                if (localBestBlock.getHeader().getHeight() != blockInfo.getBestHeight()) {
+                if (localBestBlock.getHeader().getHeight() != netBestBlockInfo.getBestHeight()) {
                     throw new NulsRuntimeException(ErrorCode.FAILED, "answer not asked!");
                 }
-                if (blockInfo.getNodeIdList().size() == 1) {
+                if (netBestBlockInfo.getNodeIdList().size() == 1) {
                     throw new NulsRuntimeException(ErrorCode.FAILED, "node count not enough!");
                 }
                 Log.warn("Rollback block start height:{},local has wrong blocks!", localBestBlock.getHeader().getHeight());
@@ -221,7 +228,10 @@ public class BlockMaintenanceThread implements Runnable {
                 localBestBlock = this.blockService.getLocalBestBlock();
             }
         } while (false);
-        return localBestBlock;
+        resultCorrentInfo.setLocalBestBlock(localBestBlock);
+
+
+        return resultCorrentInfo;
     }
 
     private void rollbackBlock(long startHeight) {

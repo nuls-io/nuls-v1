@@ -140,8 +140,6 @@ public class BlockCacheManager {
     }
 
     public void cacheBlock(Block block) {
-
-
         //txs approval
         List<String> blockHashList = bifurcateProcessor.getHashList(block.getHeader().getHeight());
         if (blockHashList != null) {

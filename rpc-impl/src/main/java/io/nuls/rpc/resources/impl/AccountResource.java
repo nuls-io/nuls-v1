@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -76,7 +76,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult get(@PathParam("address") String address) {
         RpcResult result;
-        if (!StringUtils.validAddress(address)) {
+        if (!Address.validAddress(address)) {
             result = RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
             return result;
         }
@@ -102,7 +102,7 @@ public class AccountResource {
     @Path("/alias")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult alias(AccountParamForm form) {
-        if (!StringUtils.validAddress(form.getAddress())) {
+        if (!Address.validAddress(form.getAddress())) {
             return RpcResult.getFailed(ErrorCode.DATA_NOT_FOUND);
         }
         Result result = accountService.setAlias(form.getAddress(), form.getPassword(), form.getAlias());
@@ -128,7 +128,7 @@ public class AccountResource {
     @Path("/balance/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getBalance(@PathParam("address") String address) {
-        if (!StringUtils.validAddress(address)) {
+        if (!Address.validAddress(address)) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         Balance balance = ledgerService.getBalance(address);
@@ -152,7 +152,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getUtxo(@QueryParam("address") String address,
                              @QueryParam("amount") long amount) {
-        if (!StringUtils.validAddress(address) || amount <= 0 || amount > Na.MAX_NA_VALUE) {
+        if (!Address.validAddress(address) || amount <= 0 || amount > Na.MAX_NA_VALUE) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         UtxoBalance balance = (UtxoBalance) ledgerService.getBalance(address);
@@ -187,7 +187,7 @@ public class AccountResource {
     @Path("/prikey")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getPrikey(AccountParamForm form) {
-        if (!StringUtils.validAddress(form.getAddress()) || !StringUtils.validPassword(form.getPassword())) {
+        if (!Address.validAddress(form.getAddress()) || !StringUtils.validPassword(form.getPassword())) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         Result result = accountService.getPrivateKey(form.getAddress(), form.getPassword());
@@ -198,7 +198,7 @@ public class AccountResource {
     @Path("/assets/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getAssets(@PathParam("address") String address) {
-        if (!StringUtils.validAddress(address)) {
+        if (!Address.validAddress(address)) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
 

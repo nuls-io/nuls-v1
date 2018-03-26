@@ -42,15 +42,16 @@ import java.util.List;
 public class AccountCreditValidator implements NulsDataValidator<RegisterAgentTransaction> {
 
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
+
     @Override
     public ValidateResult validate(RegisterAgentTransaction data) {
         List<Transaction> list = null;
         try {
-               list = ledgerService.getTxList(data.getTxData().getAddress(), TransactionConstant.TX_TYPE_RED_PUNISH);
+            list = ledgerService.getTxList(data.getTxData().getAddress(), TransactionConstant.TX_TYPE_RED_PUNISH);
         } catch (Exception e) {
             Log.error(e);
         }
-        if(null!=list&&!list.isEmpty()){
+        if (null != list && !list.isEmpty()) {
             return ValidateResult.getFailedResult(ErrorCode.LACK_OF_CREDIT);
         }
         return ValidateResult.getSuccessResult();

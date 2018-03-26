@@ -23,12 +23,11 @@
  */
 package io.nuls.consensus.entity.validator.tx;
 
-import io.nuls.consensus.constant.ConsensusStatusEnum;
-import io.nuls.consensus.entity.ConsensusStatusInfo;
+import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
+import io.nuls.consensus.entity.Consensus;
+import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.tx.PocJoinConsensusTransaction;
-import io.nuls.consensus.service.intf.ConsensusService;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 
@@ -40,7 +39,7 @@ public class AgentExistValidator implements NulsDataValidator<PocJoinConsensusTr
 
     private static final AgentExistValidator INSTANCE = new AgentExistValidator();
 
-    private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
+    private ConsensusCacheManager cacheManager = ConsensusCacheManager.getInstance();
 
     private AgentExistValidator() {
     }
@@ -51,8 +50,8 @@ public class AgentExistValidator implements NulsDataValidator<PocJoinConsensusTr
 
     @Override
     public ValidateResult validate(PocJoinConsensusTransaction tx) {
-        ConsensusStatusInfo info = consensusService.getConsensusStatus(tx.getTxData().getExtend().getAgentHash());
-        if (info==null) {
+        Consensus<Agent> ca = cacheManager.getCachedAgentByHash(tx.getTxData().getExtend().getAgentHash());
+        if (ca == null) {
             return ValidateResult.getFailedResult(ErrorCode.FAILED);
         }
         return ValidateResult.getSuccessResult();

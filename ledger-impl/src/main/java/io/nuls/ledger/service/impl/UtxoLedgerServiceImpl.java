@@ -537,6 +537,16 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
+    public long getLastDayTimeReward() {
+        return txDao.getLastDayTimeReward();
+    }
+
+    @Override
+    public long getAccountReward(String address, long lastTime) {
+        return txDao.getAccountReward(address, lastTime);
+    }
+
+    @Override
     public void unlockTxApprove(String txHash) {
         boolean b = true;
         int index = 0;
