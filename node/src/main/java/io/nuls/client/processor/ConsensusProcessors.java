@@ -120,17 +120,17 @@ public abstract class ConsensusProcessors implements CommandProcessor {
         }
     }
 
-    public static class CreateAgent extends ConsensusProcessors{
+    public static class Agent extends ConsensusProcessors{
         @Override
         public String getCommand() {
-            return "createagent";
+            return "agent";
         }
 
         @Override
         public String getHelp() {
             CommandBulider bulider = new CommandBulider();
             bulider.newLine(getCommandDescription())
-                    .newLine("\t<address>   申请账户的地址 -required")
+                    .newLine("\t<agentAddress>   申请账户的地址 -required")
                     .newLine("\t<packingAddress>    打包地址    -required")
                     .newLine("\t<commissionRate>    佣金比例    -required")
                     .newLine("\t<deposit>   参与共识需要的总金额 -required")
@@ -142,7 +142,7 @@ public abstract class ConsensusProcessors implements CommandProcessor {
 
         @Override
         public String getCommandDescription() {
-            return "createagent <address> <packingAddress> <commissionRate> <deposit> <agentName> <password> <remark>  --create a agent";
+            return "agent <agentAddress> <packingAddress> <commissionRate> <deposit> <agentName> <password> <remark>  --create a agent";
         }
 
         @Override
@@ -152,14 +152,14 @@ public abstract class ConsensusProcessors implements CommandProcessor {
                 return false;
             }
             if(!StringUtils.validAddressSimple(args[1]) || !StringUtils.validAddressSimple(args[2]) || StringUtils.isBlank(args[3])
-                    || StringUtils.isBlank(args[4]) || StringUtils.isBlank(args[5]) || StringUtils.validPassword(args[6])
-                    || !StringUtils.isBlank(args[7])){
+                    || StringUtils.isBlank(args[4]) || StringUtils.isBlank(args[5]) || !StringUtils.validPassword(args[6])
+                    || StringUtils.isBlank(args[7])){
                 return false;
             }
-            if(StringUtils.isNumberGtZero(args[3])){
+            if(!StringUtils.isNumberGtZero(args[3])){
                 return false;
             }
-            if(StringUtils.isNumberGtZero(args[4])){
+            if(!StringUtils.isNumberGtZero(args[4])){
                 return false;
             }
             return true;
@@ -168,14 +168,14 @@ public abstract class ConsensusProcessors implements CommandProcessor {
         @Override
         public CommandResult execute(String[] args) {
             CreateAgentParams params = new CreateAgentParams();
-            params.setAddress(args[1]);
+            params.setAgentAddress(args[1]);
             params.setPackingAddress(args[2]);
-            params.setCommissionRate(args[3]);
+            params.setCommissionRate(Double.valueOf(args[3]));
             params.setDeposit(Long.valueOf(args[4]));
             params.setAgentName(args[5]);
             params.setPassword(args[6]);
             params.setRemark(args[7]);
-            RpcClientResult result = consensusService.createAgent(params);
+            RpcClientResult result = consensusService.agent(params);
             if (null == result) {
                 return CommandResult.getFailed("Failure to execute");
             }
@@ -213,11 +213,11 @@ public abstract class ConsensusProcessors implements CommandProcessor {
                 return false;
             }
             if(!StringUtils.validAddressSimple(args[1]) || StringUtils.isBlank(args[2])
-                    || StringUtils.isBlank(args[3]) || StringUtils.validPassword(args[4])){
+                    || StringUtils.isBlank(args[3]) || !StringUtils.validPassword(args[4])){
                 return false;
             }
 
-            if(StringUtils.isNumberGtZero(args[3])){
+            if(!StringUtils.isNumberGtZero(args[3])){
                 return false;
             }
             return true;

@@ -69,7 +69,7 @@ public class CommandHandler {
 
         register(new ConsensusProcessors.GetConsensus());
         register(new ConsensusProcessors.GetConsensusAddress());
-        register(new ConsensusProcessors.CreateAgent());
+        register(new ConsensusProcessors.Agent());
         register(new ConsensusProcessors.Deposit());
         register(new ConsensusProcessors.GetAgentStatus());
         register(new ConsensusProcessors.StopAgent());

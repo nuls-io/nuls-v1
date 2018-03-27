@@ -42,16 +42,16 @@ public enum ConsensusService {
     }
 
 
-    public RpcClientResult createAgent(CreateAgentParams params) {
+    public RpcClientResult agent(CreateAgentParams params) {
         try {
-            AssertUtil.canNotEmpty(params.getAddress());
+            AssertUtil.canNotEmpty(params.getAgentAddress());
             AssertUtil.canNotEmpty(params.getAgentName());
             AssertUtil.canNotEmpty(params.getCommissionRate());
             AssertUtil.canNotEmpty(params.getDeposit());
             AssertUtil.canNotEmpty(params.getPackingAddress());
             AssertUtil.canNotEmpty(params.getPassword());
             AssertUtil.canNotEmpty(params.getRemark());
-            return restFul.post("/consensus/createAgent", JSONUtils.obj2json(params));
+            return restFul.post("/consensus/agent", JSONUtils.obj2json(params));
         } catch (Exception e) {
             e.printStackTrace();
             return RpcClientResult.getFailed(e.getMessage());
