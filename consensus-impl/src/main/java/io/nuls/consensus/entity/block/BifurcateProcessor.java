@@ -135,7 +135,7 @@ public class BifurcateProcessor {
         }
         List<String> hashList = this.getHashList(height);
         if (hashList.isEmpty()) {
-            Log.warn("lost a block:" + height);
+            //Log.warn("lost a block:" + height);
             return false;
         }
         int maxSize = 0;

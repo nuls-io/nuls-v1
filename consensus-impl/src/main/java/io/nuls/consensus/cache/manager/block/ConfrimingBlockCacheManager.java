@@ -31,6 +31,7 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 
 import java.util.List;
@@ -69,7 +70,10 @@ public class ConfrimingBlockCacheManager {
         if (null == block || null == block.getHeader() || block.getTxs().isEmpty()) {
             throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "The block is wrong!");
         }
-        if (block.getHeader().getHeight()>1&&!headerCacheMap.containsKey(block.getHeader().getPreHash().getDigestHex())) {
+        if(headerCacheMap.isEmpty()&&!block.getHeader().getPreHash().getDigestHex().equals(NulsContext.getInstance().getBestBlock().getHeader().getHash().getDigestHex())){
+            return false;
+        }
+        if (!headerCacheMap.isEmpty()&&!headerCacheMap.containsKey(block.getHeader().getPreHash().getDigestHex())) {
             return false;
         }
         String hash = block.getHeader().getHash().getDigestHex();
