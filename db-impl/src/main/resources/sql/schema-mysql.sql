@@ -111,7 +111,7 @@ CREATE TABLE IF NOT EXISTS `transaction` (
   `scriptSig` varbinary(255) DEFAULT NULL,
   `size` int(9) DEFAULT NULL,
   PRIMARY KEY (`hash`),
- -- KEY `block_height_idx` (`block_height`)
+  KEY `block_height_idx` (`block_height`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `transaction_local` (
@@ -127,7 +127,7 @@ CREATE TABLE IF NOT EXISTS `transaction_local` (
   `scriptSig` varbinary(255) DEFAULT NULL,
   `size` int(9) DEFAULT NULL,
   PRIMARY KEY (`hash`),
---  KEY `block_height_id` (`block_height`)
+  KEY `block_height_id` (`block_height`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `tx_account_relation` (
@@ -154,7 +154,7 @@ CREATE TABLE IF NOT EXISTS `utxo_output` (
   `script` varbinary(1024) NOT NULL,
   `address` varchar(40) NOT NULL,
   PRIMARY KEY (`tx_hash`,`out_index`),
- -- KEY `addres_idx` (`address`)
+  KEY `addres_idx` (`address`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `alias` (
@@ -164,7 +164,3 @@ CREATE TABLE IF NOT EXISTS `alias` (
   PRIMARY KEY (`alias`),
   UNIQUE KEY `alias_address_idx` (`address`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-create index IF NOT EXISTS block_height_idx on transaction(block_height);
-create index IF NOT EXISTS block_height_idx on transaction_local(block_height);
-create index IF NOT EXISTS addres_idx on utxo_output(address);

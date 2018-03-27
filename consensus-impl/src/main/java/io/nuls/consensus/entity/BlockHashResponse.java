@@ -145,4 +145,11 @@ public class BlockHashResponse extends BaseNulsData {
         }
         return hashList.get(hashList.size()-1);
     }
+
+    public long getBestHeight(){
+        if(null==heightList||heightList.isEmpty()){
+            return 0L;
+        }
+        return heightList.get(heightList.size()-1);
+    }
 }

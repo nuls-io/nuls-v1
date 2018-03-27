@@ -63,7 +63,7 @@ public class BlockEventHandler extends AbstractEventHandler<BlockEvent> {
         if (BlockBatchDownloadUtils.getInstance().downloadedBlock(fromId, block)) {
             return;
         }
-        blockCacheManager.addBlock(block,false);
+        blockCacheManager.addBlock(block,false,fromId);
 
     }
 }
