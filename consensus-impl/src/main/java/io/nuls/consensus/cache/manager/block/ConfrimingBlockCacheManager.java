@@ -69,7 +69,7 @@ public class ConfrimingBlockCacheManager {
         if (null == block || null == block.getHeader() || block.getTxs().isEmpty()) {
             throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "The block is wrong!");
         }
-        if (headerCacheMap.containsKey(block.getHeader().getPreHash().getDigestHex())) {
+        if (block.getHeader().getHeight()>1&&!headerCacheMap.containsKey(block.getHeader().getPreHash().getDigestHex())) {
             return false;
         }
         String hash = block.getHeader().getHash().getDigestHex();
