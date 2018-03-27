@@ -226,34 +226,6 @@ public class PocConsensusResource {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         RpcResult result = RpcResult.getSuccess();
-//        Page<AgentInfo> listPage = new Page<>();
-//        if (temp == 1) {
-//            listPage.setPageNumber(pageNumber);
-//            listPage.setPageSize(pageSize);
-//            listPage.setTotal(pageSize * 3);
-//            listPage.setPages(3);
-//            List<AgentInfo> list = new ArrayList<>();
-//            for (int i = 0; i < pageSize; i++) {
-//                AgentInfo item = new AgentInfo();
-//                item.setAgentId(StringUtils.getNewUUID());
-//                item.setCommissionRate(15);
-//                item.setCreditRatio(0.9);
-//                item.setStatus(2);
-//                item.setMemberCount(3 + pageNumber);
-//                item.setOwndeposit(Na.parseNuls(50000 + pageNumber));
-//                item.setTotalDeposit(Na.parseNuls(300000 + pageNumber));
-//                item.setIntroduction("哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈" + pageNumber);
-//                item.setAgentAddress("2CYdNLysoMbPRc4Q5YsVreT99Q61ZSg");
-//                item.setAgentName("超级节点" + i + pageNumber);
-//                item.setStartTime(System.currentTimeMillis());
-//                item.setPackedCount(11234 + i * pageNumber);
-//                item.setReward(Na.parseNuls(1120 * i + pageNumber));
-//                list.add(item);
-//            }
-//            listPage.setList(list);
-//            result.setData(listPage);
-//            return result;
-//        }
         Page<Map<String, Object>> list = this.consensusService.getAgentList(keyword, null, null, sortType, pageNumber, pageSize);
         result.setData(list);
         return result;

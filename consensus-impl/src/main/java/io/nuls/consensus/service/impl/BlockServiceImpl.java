@@ -225,6 +225,11 @@ public class BlockServiceImpl implements BlockService {
         return header;
     }
 
+    @Override
+    public long getPackingCount(String address) {
+        return blockStorageService.getBlockCount(address, -1, -1);
+    }
+
     private void rollback(List<Transaction> txs, int max) {
         for (int x = 0; x < max; x++) {
             Transaction tx = txs.get(x);

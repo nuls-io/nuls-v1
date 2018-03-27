@@ -547,6 +547,11 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
+    public long getAgentReward(String address, int type) {
+        return txDao.getAgentReward(address, type);
+    }
+
+    @Override
     public void unlockTxApprove(String txHash) {
         boolean b = true;
         int index = 0;

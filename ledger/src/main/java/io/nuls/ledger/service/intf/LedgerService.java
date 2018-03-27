@@ -104,6 +104,8 @@ public interface LedgerService {
 
     long getAccountReward(String address, long lastTime);
 
+    long getAgentReward(String address, int type);
+
     void unlockTxApprove(String txHash);
 
     void unlockTxSave(String txHash);
