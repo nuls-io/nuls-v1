@@ -1,5 +1,6 @@
 package io.nuls.rpc.sdk.service;
 
+import io.nuls.rpc.sdk.constant.RpcCmdConstant;
 import io.nuls.rpc.sdk.entity.RpcClientResult;
 import io.nuls.rpc.sdk.entity.TransactionDto;
 import io.nuls.rpc.sdk.utils.AssertUtil;
@@ -23,7 +24,7 @@ public enum TransactionService {
         try {
             AssertUtil.canNotEmpty(hash);
         } catch (Exception e) {
-            return RpcClientResult.getFailed(e.getMessage());
+            return RpcClientResult.getFailed(RpcCmdConstant.PARAMETER_ERROR_MSG);
         }
         RpcClientResult result = restFul.get("/tx/hash/" + hash, null);
         if(result.isSuccess()){
@@ -36,13 +37,14 @@ public enum TransactionService {
         try {
             AssertUtil.canNotEmpty(address);
         } catch (Exception e) {
-            return RpcClientResult.getFailed(e.getMessage());
+            return RpcClientResult.getFailed(RpcCmdConstant.PARAMETER_ERROR_MSG);
         }
         Map<String, String> params = new HashMap<>(2);
         params.put("address", String.valueOf(address));
         RpcClientResult result = restFul.get("/tx/list", params);
         if(result.isSuccess()){
-            List<Map<String, Object>> list = (List<Map<String, Object>>)result.getData();
+            Map<String, Object> page = (Map<String, Object>)result.getData();
+            List<Map<String, Object>> list = (List<Map<String, Object>>)page.get("list");
             List<TransactionDto> transactionDtoList = new ArrayList<>(10);
             for (Map<String, Object> map : list){
                 transactionDtoList.add(new TransactionDto(map));
