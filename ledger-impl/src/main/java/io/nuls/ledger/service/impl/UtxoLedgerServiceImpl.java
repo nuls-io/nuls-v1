@@ -93,10 +93,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     private Lock lock = new ReentrantLock();
 
     @Override
-    public void init() {
-    }
-
-    @Override
     public Transaction getTx(NulsDigestData hash) {
         Transaction tx = getTxFromCache(hash);
         if (tx != null) {
