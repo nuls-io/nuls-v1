@@ -298,6 +298,9 @@ public class ConsensusMeetingRunner implements Runnable {
         List<NulsDigestData> hashList = new ArrayList<>();
         long totalSize = 0L;
         for (int i = 0; i < txList.size(); i++) {
+            if ((self.getPackTime() - TimeService.currentTimeMillis()) <= 100) {
+                break;
+            }
             Transaction tx = txList.get(i);
             totalSize += tx.size();
             if (totalSize >= PocConsensusConstant.MAX_BLOCK_SIZE) {
@@ -326,7 +329,7 @@ public class ConsensusMeetingRunner implements Runnable {
         }
         txCacheManager.removeTx(outHashList);
         if (totalSize < PocConsensusConstant.MAX_BLOCK_SIZE) {
-            addOrphanTx(txList, totalSize);
+            addOrphanTx(txList, totalSize, self);
         }
         addConsensusTx(bestBlock, txList, self);
         bd.setTxList(txList);
@@ -344,7 +347,7 @@ public class ConsensusMeetingRunner implements Runnable {
             return;
         }
         confirmingTxCacheManager.putTx(newBlock.getTxs().get(0));
-        blockManager.addBlock(newBlock,false);
+        blockManager.addBlock(newBlock, false);
         BlockHeaderEvent event = new BlockHeaderEvent();
         event.setEventBody(newBlock.getHeader());
         eventBroadcaster.broadcastAndCache(event, false);
@@ -353,7 +356,10 @@ public class ConsensusMeetingRunner implements Runnable {
         eventBroadcaster.publishToLocal(notice);
     }
 
-    private void addOrphanTx(List<Transaction> txList, long totalSize) {
+    private void addOrphanTx(List<Transaction> txList, long totalSize, PocMeetingMember self) {
+        if ((self.getPackTime() - TimeService.currentTimeMillis()) <= 100) {
+            return;
+        }
         List<Transaction> orphanTxList = orphanTxCacheManager.getTxList();
         if (null == orphanTxList || orphanTxList.isEmpty()) {
             return;
@@ -361,6 +367,9 @@ public class ConsensusMeetingRunner implements Runnable {
         txList.sort(TxTimeComparator.getInstance());
         List<NulsDigestData> outHashList = new ArrayList<>();
         for (Transaction tx : orphanTxList) {
+            if ((self.getPackTime() - TimeService.currentTimeMillis()) <= 100) {
+                break;
+            }
             totalSize += tx.size();
             if (totalSize >= PocConsensusConstant.MAX_BLOCK_SIZE) {
                 break;
