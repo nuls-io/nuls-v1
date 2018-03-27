@@ -217,7 +217,7 @@ public class DistributedBlockInfoRequestUtils {
                     for (BlockHashResponse response : hashesMap.values()) {
                         long height = response.getHeightList().get(0);
                         NulsDigestData hash = response.getHashList().get(0);
-                        if (height >= localHeight && height <= minHeight) {
+                        if (height>0&&height >= localHeight && height <= minHeight) {
                             minHeight = height;
                             minHash = hash;
                         }
