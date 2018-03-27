@@ -305,7 +305,11 @@ public class PocConsensusServiceImpl implements ConsensusService {
         Balance balance = ledgerService.getBalance(address);
         map.put("reward", reward);
         map.put("joinAccountCount", joinedAgent.size());
-        map.put("usableBalance", balance.getUsable().getValue());
+        if(null==balance||balance.getUsable()==null){
+            map.put("usableBalance", 0);
+        }else{
+            map.put("usableBalance", balance.getUsable().getValue());
+        }
         map.put("rewardOfDay", rewardOfDay);
         return map;
     }
