@@ -111,7 +111,7 @@ public class WalletResouce {
         if (StringUtils.isNotBlank(form.getAddress()) && !Address.validAddress(form.getAddress())) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
-        if (StringUtils.validPassword(form.getPassword())) {
+        if (!StringUtils.validPassword(form.getPassword())) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
 

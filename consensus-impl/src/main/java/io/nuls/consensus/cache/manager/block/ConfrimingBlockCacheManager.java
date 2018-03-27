@@ -55,8 +55,8 @@ public class ConfrimingBlockCacheManager {
     }
 
     public void init() {
-        txsCacheMap = new CacheMap<>(ConsensusCacheConstant.BLOCK_TXS_CACHE_NAME, 256, ConsensusCacheConstant.LIVE_TIME, 0);
-        headerCacheMap = new CacheMap<>(ConsensusCacheConstant.BLOCK_HEADER_CACHE_NAME, 64, ConsensusCacheConstant.LIVE_TIME, 0);
+        txsCacheMap = new CacheMap<>(ConsensusCacheConstant.BLOCK_TXS_CACHE_NAME, 256, 0, 0);
+        headerCacheMap = new CacheMap<>(ConsensusCacheConstant.BLOCK_HEADER_CACHE_NAME, 64, 0, 0);
     }
 
     public BlockHeader getBlockHeader(String hash) {
