@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -381,6 +381,12 @@ public class PocConsensusServiceImpl implements ConsensusService {
             }
         }
         if (agentList.isEmpty() || start >= agentList.size()) {
+            if (StringUtils.isNotBlank(depositAddress)) {
+                Consensus<Agent> ca = consensusCacheManager.getCachedAgentByAddress(depositAddress);
+                if (null != ca) {
+                    agentList.add(0, ca);
+                }
+            }
             page.setPageNumber(pageNumber);
             page.setPageSize(pageSize);
             page.setTotal(agentList.size());
@@ -388,6 +394,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
             if (page.getTotal() % pageSize > 0) {
                 sum = 1;
             }
+            page.setList(transList(agentList));
             page.setPages((int) ((page.getTotal() / pageSize) + sum));
             return page;
         }
@@ -408,14 +415,21 @@ public class PocConsensusServiceImpl implements ConsensusService {
         }
         Collections.sort(agentList, AgentComparator.getInstance(type));
         if (StringUtils.isNotBlank(depositAddress)) {
+            boolean b = true;
             for (int i = 0; i < agentList.size(); i++) {
                 Consensus<Agent> ca = agentList.get(i);
                 if (ca.getAddress().equals(depositAddress)) {
                     agentList.remove(i);
                     agentList.add(0, ca);
+                    b = false;
                     break;
                 }
-
+            }
+            if (b) {
+                Consensus<Agent> ca = consensusCacheManager.getCachedAgentByAddress(depositAddress);
+                if (null != ca) {
+                    agentList.add(0, ca);
+                }
             }
         }
         List<Consensus<Agent>> sublist = agentList.subList(start, end);
@@ -427,8 +441,14 @@ public class PocConsensusServiceImpl implements ConsensusService {
             sum = 1;
         }
         page.setPages((int) ((page.getTotal() / pageSize) + sum));
+        List<Map<String,Object>> resultList = transList(sublist);
+        page.setList(resultList);
+        return page;
+    }
+
+    private List<Map<String, Object>> transList(List<Consensus<Agent>> agentList) {
         List<Map<String, Object>> resultList = new ArrayList<>();
-        for (Consensus<Agent> ca : sublist) {
+        for (Consensus<Agent> ca : agentList) {
             Map<String, Object> map = new HashMap<>();
             map.put("agentId", ca.getHexHash());
             map.put("agentName", ca.getExtend().getAgentName());
@@ -454,8 +474,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
             map.put("memberCount", memberSet.size());
             resultList.add(map);
         }
-        page.setList(resultList);
-        return page;
+        return resultList;
     }
 
     @Override
@@ -515,7 +534,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
             map.put("agentId", cd.getExtend().getAgentHash());
             map.put("agentName", agent.getExtend().getAgentName());
             map.put("agentAddress", agent.getAddress());
-            map.put("txHash",cd.getExtend().getTxHash());
+            map.put("txHash", cd.getExtend().getTxHash());
             map.put("agentAddressAlias", null);
             map.put("address", cd.getAddress());
             map.put("status", cd.getExtend().getStatus());
