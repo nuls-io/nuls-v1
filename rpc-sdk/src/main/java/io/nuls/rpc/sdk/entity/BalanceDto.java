@@ -1,6 +1,8 @@
 package io.nuls.rpc.sdk.entity;
 
 
+import io.nuls.rpc.sdk.utils.StringUtils;
+
 import java.util.Map;
 
 public class BalanceDto {
@@ -12,9 +14,9 @@ public class BalanceDto {
     private Long locked;
 
     public BalanceDto(Map<String, Object> map) {
-        balance= Long.parseLong(""+ map.get("balance"));
-        usable= Long.parseLong(""+ map.get("usable"));
-        locked= Long.parseLong(""+ map.get("locked"));
+        balance= StringUtils.parseLong(map.get("balance"));
+        usable= StringUtils.parseLong(map.get("usable"));
+        locked= StringUtils.parseLong(map.get("locked"));
     }
 
     public Long getBalance() {

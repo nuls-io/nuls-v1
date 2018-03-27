@@ -1,5 +1,7 @@
 package io.nuls.rpc.sdk.entity;
 
+import io.nuls.rpc.sdk.utils.StringUtils;
+
 import java.util.Map;
 
 /**
@@ -23,10 +25,10 @@ public class ConsensusAddressInfoDto {
     public ConsensusAddressInfoDto(Map<String, Object> map) {
         this.agentCount = (Integer)map.get("agentCount");
         this.totalDeposit = (Integer)map.get("totalDeposit");
-        this.reward = (Long)map.get("reward");
+        this.reward = StringUtils.parseLong(map.get("reward"));
         this.joinAgentCount = (Integer)map.get("joinAgentCount");
-        this.usableBalance = (Long)map.get("usableBalance");
-        this.rewardOfDay = (Long)map.get("rewardOfDay");
+        this.usableBalance = StringUtils.parseLong(map.get("usableBalance"));
+        this.rewardOfDay = StringUtils.parseLong(map.get("rewardOfDay"));
     }
 
     public Integer getAgentCount() {

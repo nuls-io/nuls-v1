@@ -1,5 +1,7 @@
 package io.nuls.rpc.sdk.entity;
 
+import io.nuls.rpc.sdk.utils.StringUtils;
+
 import java.util.Map;
 
 /**
@@ -19,9 +21,9 @@ public class ConsensusIntegratedDto {
 
     public ConsensusIntegratedDto(Map<String, Object> map){
         this.agentCount = (Integer)map.get("agentCount");
-        this.rewardOfDay = (Long)map.get("rewardOfDay");
+        this.rewardOfDay = StringUtils.parseLong(map.get("rewardOfDay"));
         this.consensusAccountNumber = (Integer)map.get("consensusAccountNumber");
-        this.totalDeposit = (Long)map.get("totalDeposit");
+        this.totalDeposit = StringUtils.parseLong(map.get("totalDeposit"));
     }
 
     public int getAgentCount() {

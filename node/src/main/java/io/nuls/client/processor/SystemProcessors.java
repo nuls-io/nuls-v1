@@ -28,6 +28,7 @@ package io.nuls.client.processor;
 
 import io.nuls.client.CommandHandler;
 import io.nuls.client.entity.CommandResult;
+import io.nuls.client.helper.CommandBulider;
 import io.nuls.client.processor.intf.CommandProcessor;
 import io.nuls.rpc.sdk.entity.RpcClientResult;
 import io.nuls.rpc.sdk.service.SystemService;
@@ -52,7 +53,10 @@ public abstract class SystemProcessors implements CommandProcessor {
 
         @Override
         public String getHelp() {
-            return null;
+            CommandBulider builder = new CommandBulider();
+            //TODO 翻译
+            builder.newLine(getCommandDescription());
+            return builder.toString();
         }
 
         @Override
@@ -80,7 +84,9 @@ public abstract class SystemProcessors implements CommandProcessor {
 
         @Override
         public String getHelp() {
-            return null;
+            CommandBulider builder = new CommandBulider();
+            builder.newLine(getCommandDescription());
+            return builder.toString();
         }
 
         @Override
@@ -113,7 +119,9 @@ public abstract class SystemProcessors implements CommandProcessor {
 
         @Override
         public String getHelp() {
-            return null;
+            CommandBulider builder = new CommandBulider();
+            builder.newLine(getCommandDescription());
+            return builder.toString();
         }
 
         @Override

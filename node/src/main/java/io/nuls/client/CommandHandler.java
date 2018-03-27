@@ -82,7 +82,7 @@ public class CommandHandler {
         register(new NetwrokProcessor.getnetworknodes());
 
         //todo 修改为配置
-        SdkManager.init("http://127.0.0.1:8001/nuls");
+        SdkManager.init("http://192.168.1.201:8001");
     }
 
     public static void main(String[] args) throws IOException {
@@ -96,7 +96,7 @@ public class CommandHandler {
                 System.out.print(CommandConstant.COMMAND_PS1);
                 continue;
             }
-            System.out.print(CommandConstant.COMMAND_PS1 + instance.processCommand(read.split(" ")) + "\n" + CommandConstant.COMMAND_PS1);
+            System.out.print(instance.processCommand(read.split(" ")) + "\n" + CommandConstant.COMMAND_PS1);
         }
     }
 

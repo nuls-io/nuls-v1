@@ -26,6 +26,8 @@
 
 package io.nuls.rpc.sdk.entity;
 
+import io.nuls.rpc.sdk.utils.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -75,18 +77,18 @@ public class BlockDto {
         this.hash = (String) map.get("hash");
         this.preHash = (String) map.get("preHash");
         this.merkleHash = (String) map.get("merkleHash");
-        this.time = Long.parseLong(""+ map.get("time"));
-        this.height = Long.parseLong(""+  map.get("height"));
-        this.txCount = Long.parseLong(""+ map.get("txCount"));
+        this.time = StringUtils.parseLong(map.get("time"));
+        this.height = StringUtils.parseLong( map.get("height"));
+        this.txCount = StringUtils.parseLong(map.get("txCount"));
         this.packingAddress = (String) map.get("packingAddress");
         this.scriptSign = (String) map.get("scriptSign");
-        this.roundIndex = Long.parseLong(""+  map.get("roundIndex"));
+        this.roundIndex = StringUtils.parseLong( map.get("roundIndex"));
         this.consensusMemberCount = (Integer) map.get("consensusMemberCount");
-        this.roundStartTime = Long.parseLong(""+  map.get("roundStartTime"));
+        this.roundStartTime = StringUtils.parseLong( map.get("roundStartTime"));
         this.packingIndexOfRound = (Integer) map.get("packingIndexOfRound");
-        this.reward = Long.parseLong(""+  map.get("reward"));
-        this.fee = Long.parseLong(""+  map.get("fee"));
-        this.confirmCount = Long.parseLong(""+  map.get("confirmCount"));
+        this.reward = StringUtils.parseLong( map.get("reward"));
+        this.fee = StringUtils.parseLong( map.get("fee"));
+        this.confirmCount = StringUtils.parseLong( map.get("confirmCount"));
         this.size = (Integer) map.get("size");
         if (all) {
             this.txList = new ArrayList<>();

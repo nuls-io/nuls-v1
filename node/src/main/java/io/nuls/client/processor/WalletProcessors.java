@@ -155,11 +155,11 @@ public abstract class WalletProcessors implements CommandProcessor {
             CommandBulider builder = new CommandBulider();
             //TODO 翻译
             builder.newLine(getCommandDescription())
-                    .newLine("\t<address> 转账账户地址 - 必输")
-                    .newLine("\t<toaddress> 接收人地址 - 必输")
-                    .newLine("\t<amount> 转账金额 - 必输")
-                    .newLine("\t<password> 钱包密码 - 必输")
-                    .newLine("\t[remark] 备注 - 选填");
+                    .newLine("\t<address> \t\t转账账户地址 - 必输")
+                    .newLine("\t<toaddress> \t接收人地址 - 必输")
+                    .newLine("\t<amount> \t\t转账金额 - 必输")
+                    .newLine("\t<password> \t\t钱包密码 - 必输")
+                    .newLine("\t[remark] \t\t备注 - 选填");
             return builder.toString();
         }
 

@@ -26,6 +26,8 @@
 
 package io.nuls.rpc.sdk.entity;
 
+import io.nuls.rpc.sdk.utils.StringUtils;
+
 import java.util.Map;
 
 /**
@@ -52,9 +54,9 @@ public class OutputDto {
     public OutputDto(Map<String, Object> map) {
         index = (Integer) map.get("index");
         address = (String) map.get("address");
-        value = Long.parseLong(""+ map.get("value"));
-        createTime = Long.parseLong(""+ map.get("createTime"));
-        lockTime = Long.parseLong(""+ map.get("lockTime"));
+        value = StringUtils.parseLong(map.get("value"));
+        createTime = StringUtils.parseLong(map.get("createTime"));
+        lockTime = StringUtils.parseLong(map.get("lockTime"));
         type = (Integer) map.get("type");
         status = (Integer) map.get("status");
     }

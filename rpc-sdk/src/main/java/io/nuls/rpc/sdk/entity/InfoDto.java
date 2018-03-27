@@ -26,6 +26,8 @@
 
 package io.nuls.rpc.sdk.entity;
 
+import io.nuls.rpc.sdk.utils.StringUtils;
+
 import java.util.Map;
 
 /**
@@ -44,8 +46,8 @@ public class InfoDto {
     private Integer outCount;
 
     public InfoDto(Map<String, Object> map) {
-        localBestHeight = Long.parseLong(""+ map.get("localBestHeight"));
-        netBestHeight = Long.parseLong(""+ map.get("netBestHeight"));
+        localBestHeight = StringUtils.parseLong(map.get("localBestHeight"));
+        netBestHeight = StringUtils.parseLong(map.get("netBestHeight"));
         timeOffset = (String) map.get("timeOffset");
         inCount = (Integer) map.get("inCount");
         outCount = (Integer) map.get("outCount");

@@ -26,6 +26,8 @@
 
 package io.nuls.rpc.sdk.entity;
 
+import io.nuls.rpc.sdk.utils.StringUtils;
+
 import java.util.Map;
 
 /**
@@ -50,7 +52,7 @@ public class AccountDto {
         alias= (String) map.get("alias");
         pubKey= (String) map.get("pubKey");
         extend= (String) map.get("extend");
-        createTime= Long.parseLong(""+ map.get("createTime"));
+        createTime= StringUtils.parseLong(map.get("createTime"));
     }
 
     public String getAddress() {

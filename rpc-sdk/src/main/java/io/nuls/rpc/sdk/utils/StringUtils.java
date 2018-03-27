@@ -122,4 +122,19 @@ public class StringUtils {
         }
         return xor;
     }
+
+    public static Long parseLong(Object obj) {
+        if(obj == null)
+            return null;
+        String value = obj.toString();
+        if(value.trim().length() == 0) {
+            return null;
+        }
+        try {
+            return Long.valueOf(value);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
 }

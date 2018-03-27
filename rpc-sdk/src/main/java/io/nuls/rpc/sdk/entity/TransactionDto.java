@@ -1,6 +1,8 @@
 package io.nuls.rpc.sdk.entity;
 
 
+import io.nuls.rpc.sdk.utils.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -47,15 +49,15 @@ public class TransactionDto {
         hash = (String) map.get("hash");
         type = (Integer) map.get("type");
         index = (Integer) map.get("index");
-        time = Long.parseLong(""+map.get("time"));
-        blockHeight = Long.parseLong(""+map.get("blockHeight"));
-        fee = Long.parseLong(""+map.get("fee"));
-        value = Long.parseLong(""+map.get("value"));
+        time = StringUtils.parseLong(map.get("time"));
+        blockHeight = StringUtils.parseLong(map.get("blockHeight"));
+        fee = StringUtils.parseLong(map.get("fee"));
+        value = StringUtils.parseLong(map.get("value"));
         transferType = (Integer) map.get("transferType");
         remark = (String) map.get("remark");
         scriptSig = (String) map.get("scriptSig");
         status = (Integer) map.get("status");
-        confirmCount = Long.parseLong(""+map.get("confirmCount"));
+        confirmCount = StringUtils.parseLong(map.get("confirmCount"));
         size = (Integer) map.get("size");
 
         inputs = new ArrayList<>();

@@ -4,6 +4,7 @@ import io.nuls.core.chain.entity.Na;
 import io.nuls.rpc.sdk.entity.RpcClientResult;
 import io.nuls.rpc.sdk.service.AccountService;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Scanner;
 
@@ -57,4 +58,5 @@ public class CommandHelper {
             return null;
         }
     }
+
 }

@@ -1,5 +1,7 @@
 package io.nuls.rpc.sdk.entity;
 
+import io.nuls.rpc.sdk.utils.StringUtils;
+
 import java.util.Map;
 
 /**
@@ -19,8 +21,8 @@ public class NetworkDto {
     private Integer outCount;
 
     public NetworkDto(Map<String, Object> map){
-        this.localBestHeight = (Long)map.get("localBestHeight");
-        this.netBestHeight = (Long)map.get("netBestHeight");
+        this.localBestHeight = StringUtils.parseLong(map.get("localBestHeight"));
+        this.netBestHeight = StringUtils.parseLong(map.get("netBestHeight"));
         this.timeOffset = (String)map.get("timeOffset");
         this.inCount = (Integer)map.get("inCount");
         this.outCount = (Integer)map.get("outCount");
