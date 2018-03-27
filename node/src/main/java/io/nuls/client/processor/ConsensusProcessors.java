@@ -27,6 +27,7 @@
 package io.nuls.client.processor;
 
 import io.nuls.client.entity.CommandResult;
+import io.nuls.client.helper.CommandBulider;
 import io.nuls.client.processor.intf.CommandProcessor;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.rpc.sdk.entity.RpcClientResult;
@@ -53,7 +54,9 @@ public abstract class ConsensusProcessors implements CommandProcessor {
 
         @Override
         public String getHelp() {
-            return null;
+            CommandBulider bulider = new CommandBulider();
+            bulider.newLine(getCommandDescription());
+            return bulider.toString();
         }
 
         @Override
@@ -84,7 +87,10 @@ public abstract class ConsensusProcessors implements CommandProcessor {
 
         @Override
         public String getHelp() {
-            return null;
+            CommandBulider bulider = new CommandBulider();
+            bulider.newLine(getCommandDescription())
+                    .newLine("\t<address> 钱包账户地址 -required");
+            return bulider.toString();
         }
 
         @Override
@@ -122,7 +128,16 @@ public abstract class ConsensusProcessors implements CommandProcessor {
 
         @Override
         public String getHelp() {
-            return null;
+            CommandBulider bulider = new CommandBulider();
+            bulider.newLine(getCommandDescription())
+                    .newLine("\t<address>   申请账户的地址 -required")
+                    .newLine("\t<packingAddress>    打包地址    -required")
+                    .newLine("\t<commissionRate>    佣金比例    -required")
+                    .newLine("\t<deposit>   参与共识需要的总金额 -required")
+                    .newLine("\t<agentName> 节点名称    -required")
+                    .newLine("\t<password>  密码  -required")
+                    .newLine("\t<remark>    节点备注    -required");
+            return bulider.toString();
         }
 
         @Override
@@ -177,7 +192,13 @@ public abstract class ConsensusProcessors implements CommandProcessor {
 
         @Override
         public String getHelp() {
-            return null;
+            CommandBulider bulider = new CommandBulider();
+            bulider.newLine(getCommandDescription())
+                    .newLine("\t<address>   参与共识账户的地址 -required")
+                    .newLine("\t<agentId>    共识节点的Id    -required")
+                    .newLine("\t<deposit>   参与共识的金额 -required")
+                    .newLine("\t<password>  密码  -required");
+            return bulider.toString();
         }
 
         @Override
@@ -225,7 +246,11 @@ public abstract class ConsensusProcessors implements CommandProcessor {
 
         @Override
         public String getHelp() {
-            return null;
+            CommandBulider bulider = new CommandBulider();
+            bulider.newLine(getCommandDescription())
+                    .newLine("\t<address>   账户的地址 -required")
+                    .newLine("\t<password>  密码  -required");
+            return bulider.toString();
         }
 
         @Override
@@ -266,7 +291,9 @@ public abstract class ConsensusProcessors implements CommandProcessor {
 
         @Override
         public String getHelp() {
-            return null;
+            CommandBulider bulider = new CommandBulider();
+            bulider.newLine(getCommandDescription());
+            return bulider.toString();
         }
 
         @Override
@@ -297,7 +324,12 @@ public abstract class ConsensusProcessors implements CommandProcessor {
 
         @Override
         public String getHelp() {
-            return null;
+            CommandBulider bulider = new CommandBulider();
+            bulider.newLine(getCommandDescription())
+                    .newLine("\t<address>   节点地址 -required")
+                    .newLine("\t<password>  密码  -required")
+                    .newLine("\t<txHash>  加入共识时的交易hash  -required");
+            return bulider.toString();
         }
 
         @Override

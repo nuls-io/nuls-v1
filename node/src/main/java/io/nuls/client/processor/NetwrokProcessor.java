@@ -1,6 +1,7 @@
 package io.nuls.client.processor;
 
 import io.nuls.client.entity.CommandResult;
+import io.nuls.client.helper.CommandBulider;
 import io.nuls.client.processor.intf.CommandProcessor;
 import io.nuls.rpc.sdk.entity.RpcClientResult;
 import io.nuls.rpc.sdk.service.NetworkService;
@@ -21,7 +22,9 @@ public abstract class NetwrokProcessor implements CommandProcessor{
 
         @Override
         public String getHelp() {
-            return null;
+            CommandBulider bulider = new CommandBulider();
+            bulider.newLine(getCommandDescription());
+            return bulider.toString();
         }
 
         @Override
@@ -52,7 +55,9 @@ public abstract class NetwrokProcessor implements CommandProcessor{
 
         @Override
         public String getHelp() {
-            return null;
+            CommandBulider bulider = new CommandBulider();
+            bulider.newLine(getCommandDescription());
+            return bulider.toString();
         }
 
         @Override
