@@ -155,7 +155,8 @@ public class BifurcateProcessor {
             return false;
         }
         for (int i = chainList.size() - 1; i >= 0; i--) {
-            if (chainList.size() < maxSize) {
+            BlockHeaderChain chain = chainList.get(i);
+            if (chain.size() < maxSize) {
                 chainList.remove(i);
             }
         }

@@ -334,7 +334,7 @@ public class ConsensusMeetingRunner implements Runnable {
         Block newBlock = ConsensusTool.createBlock(bd, consensusManager.getConsensusStatusInfo().getAccount());
         ValidateResult result = newBlock.verify();
         if (result.isFailed()) {
-            Log.warn("packing block error" + result.getMessage());
+            Log.warn("packing block error:" + result.getMessage());
             for (Transaction tx : newBlock.getTxs()) {
                 if (tx.getType() == TransactionConstant.TX_TYPE_COIN_BASE) {
                     continue;

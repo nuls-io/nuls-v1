@@ -57,7 +57,7 @@ public class BlockBatchDownloadUtils {
     /**
      * todo unit:ms
      */
-    private static final long DOWNLOAD_IDLE_TIME_OUT = 1000;
+    private static final long DOWNLOAD_IDLE_TIME_OUT = 20000;
 
     private static final BlockBatchDownloadUtils INSTANCE = new BlockBatchDownloadUtils();
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
@@ -120,7 +120,7 @@ public class BlockBatchDownloadUtils {
             blocksHash = DistributedBlockInfoRequestUtils.getInstance().request(startHeight, endHeight, DOWNLOAD_BLOCKS_PER_TIME);
             request(startHeight, endHeight);
             while (working) {
-                if ((lastOperateTime + 1000) < TimeService.currentTimeMillis()) {
+                if ((lastOperateTime + DOWNLOAD_IDLE_TIME_OUT) < TimeService.currentTimeMillis()) {
                     verify();
                 }
                 if ((TimeService.currentTimeMillis() - lastOperateTime) >= 5000) {
@@ -209,6 +209,7 @@ public class BlockBatchDownloadUtils {
         this.eventBroadcaster.sendToNode(new GetBlockRequest(start, end), nodeId);
         status.setUpdateTime(System.currentTimeMillis());
         nodeStatusMap.put(nodeId, status);
+        Log.info("download block :"+start+"-"+end+",from : "+nodeId);
     }
 
 
