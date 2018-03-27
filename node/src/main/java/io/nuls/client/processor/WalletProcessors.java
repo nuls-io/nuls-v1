@@ -41,8 +41,9 @@ import io.nuls.rpc.sdk.service.WalletService;
 import java.util.List;
 
 /**
- * @author Niels
- * @date 2018/3/7
+ * @Desription:
+ * @Author: PierreLuo
+ * @Date: 2018/3/27
  */
 public abstract class WalletProcessors implements CommandProcessor {
 
@@ -141,7 +142,6 @@ public abstract class WalletProcessors implements CommandProcessor {
      * nuls transfer
      */
     public static class Transfer extends WalletProcessors {
-        //TODO 转账
 
         private ThreadLocal<TransferForm> paramsData = new ThreadLocal<>();
 
@@ -152,20 +152,33 @@ public abstract class WalletProcessors implements CommandProcessor {
 
         @Override
         public String getHelp() {
-            return null;
+            CommandBulider builder = new CommandBulider();
+            //TODO 翻译
+            builder.newLine(getCommandDescription())
+                    .newLine("\t<address> 转账账户地址 - 必输")
+                    .newLine("\t<toaddress> 接收人地址 - 必输")
+                    .newLine("\t<amount> 转账金额 - 必输")
+                    .newLine("\t<password> 钱包密码 - 必输")
+                    .newLine("\t[remark] 备注 - 选填");
+            return builder.toString();
         }
 
         @Override
         public String getCommandDescription() {
-            return "transfer <address> <toAddress> <amount> <password> [remark] --toAddress$amount&password are required";
+            return "transfer <address> <toAddress> <amount> <password> [remark] --transfer";
         }
 
         @Override
         public boolean argsValidate(String[] args) {
             boolean result;
             do {
-                result = args.length >= 2;
-                if (!result) {
+                int length = args.length;
+                if (length != 5 && length != 6) {
+                    result = false;
+                    break;
+                }
+                if(!CommandHelper.checkArgsIsNull(args)) {
+                    result = false;
                     break;
                 }
                 TransferForm form = getTransferForm(args);
@@ -180,32 +193,30 @@ public abstract class WalletProcessors implements CommandProcessor {
         }
 
         private TransferForm getTransferForm(String[] args) {
-            TransferForm form = new TransferForm();
+            TransferForm form = null;
+            Long amount = null;
+            try {
+                amount = CommandHelper.getLongAmount(args[3]);
+                if(amount != null) {
+                    form = new TransferForm();
+                } else {
+                    return null;
+                }
+
+            } catch (Exception e) {
+                return null;
+            }
             switch (args.length) {
-                case 4:
-                    form.setToAddress(args[1]);
-                    form.setAmount(Na.parseNuls(args[2]).getValue());
-                    form.setPassword(args[3]);
-                    break;
                 case 5:
-                    Double amount = getDoubleAmount(args[2]);
-                    if (null == amount) {
-                        form.setAddress(args[1]);
-                        form.setToAddress(args[2]);
-                        amount = getDoubleAmount(args[3]);
-                        form.setAmount(Na.parseNuls(amount).getValue());
-                        form.setPassword(args[4]);
-                    } else {
-                        form.setToAddress(args[1]);
-                        form.setAmount(Na.parseNuls(amount).getValue());
-                        form.setPassword(args[3]);
-                        form.setRemark(args[4]);
-                    }
+                    form.setAddress(args[1]);
+                    form.setToAddress(args[2]);
+                    form.setAmount(amount);
+                    form.setPassword(args[4]);
                     break;
                 case 6:
                     form.setAddress(args[1]);
                     form.setToAddress(args[2]);
-                    form.setAmount(Na.parseNuls(args[3]).getValue());
+                    form.setAmount(amount);
                     form.setPassword(args[4]);
                     form.setRemark(args[5]);
                     break;
@@ -214,21 +225,13 @@ public abstract class WalletProcessors implements CommandProcessor {
         }
 
 
-        private Double getDoubleAmount(String arg) {
-            try {
-                return Double.parseDouble(arg);
-            } catch (Exception e) {
-                return null;
-            }
-        }
-
         @Override
         public CommandResult execute(String[] args) {
             TransferForm form = paramsData.get();
             if (null == form) {
                 form = getTransferForm(args);
             }
-            RpcClientResult result = this.walletService.transfer(form.getAddress(), form.getPassword(), form.getToAddress(), form.getAmount(), form.getRemark());
+            RpcClientResult result = this.walletService.transfer(form.getAddress(), form.getToAddress(), form.getAmount(), form.getPassword(), form.getRemark());
             return CommandResult.getResult(result);
         }
     }
@@ -292,24 +295,28 @@ public abstract class WalletProcessors implements CommandProcessor {
 
         @Override
         public String getHelp() {
-
-            return null;
+            CommandBulider builder = new CommandBulider();
+            //TODO 翻译
+            builder.newLine(getCommandDescription())
+                    .newLine("\t<prikey> 明文私钥 - 必输")
+                    .newLine("\t<newpassword> 钱包密码 - 必输");
+            return builder.toString();
         }
 
         @Override
         public String getCommandDescription() {
-            //TODO 命令描述
             return "import <prikey> <password> --import an account by prikey";
         }
 
         @Override
         public boolean argsValidate(String[] args) {
-            //TODO 参数校验
-            if (args.length != 3) {
+            int length = args.length;
+            if(length != 3)
                 return false;
-            }
-            AssertUtil.canNotEmpty(args[1]);
-            AssertUtil.canNotEmpty(args[2]);
+            if(!CommandHelper.checkArgsIsNull(args))
+                return false;
+            String pwd = args[2];
+            CommandHelper.checkAndConfirmPwd(pwd);
             return true;
         }
 
@@ -332,24 +339,26 @@ public abstract class WalletProcessors implements CommandProcessor {
 
         @Override
         public String getHelp() {
-
-            return null;
+            CommandBulider builder = new CommandBulider();
+            //TODO 翻译
+            builder.newLine(getCommandDescription())
+                    .newLine("\t<address> 账户地址 - 必输")
+                    .newLine("\t<password> 钱包密码 - 必输");
+            return builder.toString();
         }
 
         @Override
         public String getCommandDescription() {
-            //TODO 命令描述
-            return "remove <prikey> <password> --import an account by prikey";
+            return "remove <address> <password> --remove an account from wallet";
         }
 
         @Override
         public boolean argsValidate(String[] args) {
-            //TODO 参数校验
-            if (args.length != 3) {
+            int length = args.length;
+            if(length != 3)
                 return false;
-            }
-            AssertUtil.canNotEmpty(args[1]);
-            AssertUtil.canNotEmpty(args[2]);
+            if(!CommandHelper.checkArgsIsNull(args))
+                return false;
             return true;
         }
 

@@ -27,6 +27,8 @@
 package io.nuls.client.processor;
 
 import io.nuls.client.entity.CommandResult;
+import io.nuls.client.helper.CommandBulider;
+import io.nuls.client.helper.CommandHelper;
 import io.nuls.client.processor.intf.CommandProcessor;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.rpc.sdk.entity.RpcClientResult;
@@ -48,17 +50,26 @@ public abstract class BlockProcessors implements CommandProcessor {
 
         @Override
         public String getHelp() {
-            return null;
+            CommandBulider builder = new CommandBulider();
+            //TODO 翻译
+            builder.newLine(getCommandDescription())
+                    .newLine("\t<hash> | <height> 区块哈希或者区块高度, 只输其一, 多输无效 - 必输");
+            return builder.toString();
         }
 
         @Override
         public String getCommandDescription() {
-            return "getblockheader --get the block header with hash or height";
+            //TODO 翻译
+            return "getblockheader <hash> | <height>--get the block header with hash or height";
         }
 
         @Override
         public boolean argsValidate(String[] args) {
-            //TODO 参数校验
+            int length = args.length;
+            if(length != 2)
+                return false;
+            if(!CommandHelper.checkArgsIsNull(args))
+                return false;
             return true;
         }
 
@@ -84,17 +95,26 @@ public abstract class BlockProcessors implements CommandProcessor {
 
         @Override
         public String getHelp() {
-            return null;
+            CommandBulider builder = new CommandBulider();
+            //TODO 翻译
+            builder.newLine(getCommandDescription())
+                    .newLine("\t<hash> | <height> 区块哈希或者区块高度, 只输其一, 多输无效 - 必输");
+            return builder.toString();
         }
 
         @Override
         public String getCommandDescription() {
+            //TODO 翻译
             return "getblock --get the block with hash or height";
         }
 
         @Override
         public boolean argsValidate(String[] args) {
-            //TODO 参数校验
+            int length = args.length;
+            if(length != 2)
+                return false;
+            if(!CommandHelper.checkArgsIsNull(args))
+                return false;
             return true;
         }
 
@@ -118,21 +138,27 @@ public abstract class BlockProcessors implements CommandProcessor {
 
         @Override
         public String getCommand() {
-            return "bestheight";
+            return "getbestblockheader";
         }
 
         @Override
         public String getHelp() {
-            return null;
+            CommandBulider builder = new CommandBulider();
+            builder.newLine(getCommandDescription());
+            return builder.toString();
         }
 
         @Override
         public String getCommandDescription() {
-            return "bestheight --get the best block header";
+            //TODO 翻译
+            return "getbestblockheader --get the best block header";
         }
 
         @Override
         public boolean argsValidate(String[] args) {
+            int length = args.length;
+            if(length > 1)
+                return false;
             return true;
         }
 
@@ -153,18 +179,31 @@ public abstract class BlockProcessors implements CommandProcessor {
 
         @Override
         public String getHelp() {
-            return null;
+            CommandBulider builder = new CommandBulider();
+            //TODO 翻译
+            builder.newLine(getCommandDescription())
+                    .newLine("\t<pageSize> 每页条数 - 必输")
+                    .newLine("\t<pageNumber> 页码 - 必输");
+            return builder.toString();
         }
 
         @Override
         public String getCommandDescription() {
-            //TODO 命令描述
-            return "listblockheader --get the best block header";
+            //TODO 翻译
+            return "listblockheader <pageSize> <pageNumber>--查询区块头列表";
         }
 
         @Override
         public boolean argsValidate(String[] args) {
-            //TODO 参数校验
+            int length = args.length;
+            if(length != 3)
+                return false;
+            if(!CommandHelper.checkArgsIsNull(args))
+                return false;
+            if(!StringUtils.isNumeric(args[1]))
+                return false;
+            if(!StringUtils.isNumeric(args[2]))
+                return false;
             return true;
         }
 

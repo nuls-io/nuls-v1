@@ -1,5 +1,6 @@
 package io.nuls.client.helper;
 
+import io.nuls.core.chain.entity.Na;
 import io.nuls.rpc.sdk.entity.RpcClientResult;
 import io.nuls.rpc.sdk.service.AccountService;
 
@@ -15,7 +16,7 @@ public class CommandHelper {
 
     public static boolean checkArgsIsNull(String... args) {
         for(String arg : args) {
-            if(arg == null)
+            if(arg == null || arg.trim().length() == 0)
                 return false;
         }
         return true;
@@ -44,6 +45,16 @@ public class CommandHelper {
                 System.out.print("The password you entered did not match.\nPlease confirm password:");
                 confirmed = scanner.nextLine();
             }
+        }
+    }
+
+    public static Long getLongAmount(String arg) {
+        Na na = null;
+        try {
+            na = Na.parseNuls(arg);
+            return na.getValue();
+        } catch (Exception e) {
+            return null;
         }
     }
 }

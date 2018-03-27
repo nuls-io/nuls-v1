@@ -27,14 +27,21 @@
 package io.nuls.client.processor;
 
 import io.nuls.client.entity.CommandResult;
+import io.nuls.client.helper.CommandBulider;
+import io.nuls.client.helper.CommandHelper;
 import io.nuls.client.processor.intf.CommandProcessor;
 import io.nuls.core.utils.param.AssertUtil;
+import io.nuls.core.utils.str.StringUtils;
 import io.nuls.rpc.sdk.entity.RpcClientResult;
 import io.nuls.rpc.sdk.service.AccountService;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 /**
- * @author Niels
- * @date 2018/3/7
+ * @Desription:
+ * @Author: PierreLuo
+ * @Date: 2018/3/27
  */
 public abstract class AccountProcessors implements CommandProcessor {
 
@@ -52,22 +59,32 @@ public abstract class AccountProcessors implements CommandProcessor {
 
         @Override
         public String getHelp() {
-            return null;
+            CommandBulider builder = new CommandBulider();
+            //TODO 翻译
+            builder.newLine(getCommandDescription())
+                    .newLine("\t<password> 钱包密码, 若没有则新建 - 必输")
+                    .newLine("\t<count> 创建账户数量 - 必输");
+            return builder.toString();
         }
 
         @Override
         public String getCommandDescription() {
-            //TODO 命令描述
-            return "createaccount <password> <count> --create <count> accounts & Encrypting with with <password>";
+            return "createaccount <password> <count> --create <count> accounts & Encrypting with <password>";
         }
 
         @Override
         public boolean argsValidate(String[] args) {
-            //TODO 参数校验
-            if (args.length != 3) {
+            int length = args.length;
+            if(length != 3)
+                return false;
+            if(!CommandHelper.checkArgsIsNull(args))
+                return false;
+            // validate <count>
+            if(!StringUtils.isNumeric(args[2])) {
                 return false;
             }
-            AssertUtil.canNotEmpty(args[1]);
+            String pwd = args[1];
+            CommandHelper.checkAndConfirmPwd(pwd);
             return true;
         }
 
@@ -94,7 +111,11 @@ public abstract class AccountProcessors implements CommandProcessor {
 
         @Override
         public String getHelp() {
-            return null;
+            CommandBulider builder = new CommandBulider();
+            //TODO 翻译
+            builder.newLine(getCommandDescription())
+                    .newLine("\t<address> 账户地址 - 必输");
+            return builder.toString();
         }
 
         @Override
@@ -104,11 +125,11 @@ public abstract class AccountProcessors implements CommandProcessor {
 
         @Override
         public boolean argsValidate(String[] args) {
-            //TODO 参数校验
-            if (args.length != 2) {
+            int length = args.length;
+            if(length != 2)
                 return false;
-            }
-            AssertUtil.canNotEmpty(args[1]);
+            if(!CommandHelper.checkArgsIsNull(args))
+                return false;
             return true;
         }
 
@@ -131,7 +152,9 @@ public abstract class AccountProcessors implements CommandProcessor {
 
         @Override
         public String getHelp() {
-            return null;
+            CommandBulider builder = new CommandBulider();
+            builder.newLine(getCommandDescription());
+            return builder.toString();
         }
 
         @Override
@@ -141,7 +164,9 @@ public abstract class AccountProcessors implements CommandProcessor {
 
         @Override
         public boolean argsValidate(String[] args) {
-            //TODO 参数校验
+            int length = args.length;
+            if(length > 1)
+                return false;
             return true;
         }
 
@@ -164,18 +189,21 @@ public abstract class AccountProcessors implements CommandProcessor {
 
         @Override
         public String getHelp() {
-            return null;
+            CommandBulider builder = new CommandBulider();
+            builder.newLine(getCommandDescription());
+            return builder.toString();
         }
 
         @Override
         public String getCommandDescription() {
-            //TODO 命令描述
-            return "listaccount --get total balance of all addresses in the wallet";
+            return "listaccount --get all addresses in the wallet";
         }
 
         @Override
         public boolean argsValidate(String[] args) {
-            //TODO 参数校验
+            int length = args.length;
+            if(length > 1)
+                return false;
             return true;
         }
 
@@ -198,24 +226,37 @@ public abstract class AccountProcessors implements CommandProcessor {
 
         @Override
         public String getHelp() {
-            return null;
+            CommandBulider builder = new CommandBulider();
+            //TODO 翻译
+            builder.newLine(getCommandDescription())
+                    .newLine("\t<address> 账户地址 - 必输")
+                    .newLine("\t<amount> 金额 - 必输");
+            return builder.toString();
         }
 
         @Override
         public String getCommandDescription() {
-            //TODO 命令描述
-            return "getunspentutxo --get total balance of all addresses in the wallet";
+            //TODO 翻译
+            return "getunspentutxo <address> <amount> --查询账户足够数量的未花费输出";
         }
 
         @Override
         public boolean argsValidate(String[] args) {
-            //TODO 参数校验
+            int length = args.length;
+            if(length != 3)
+                return false;
+            if(!CommandHelper.checkArgsIsNull(args))
+                return false;
+            Long amount = CommandHelper.getLongAmount(args[2]);
+            if(amount == null) {
+                return false;
+            }
+            args[2] = amount.toString();
             return true;
         }
 
         @Override
         public CommandResult execute(String[] args) {
-            //TODO 金额问题，SDK需要转成小数，RPC需要转成整数
             RpcClientResult result = accountService.getUnspentUTXO(args[1], Long.valueOf(args[2]));
             if (null == result) {
                 return CommandResult.getFailed("Failure to execute");
@@ -233,18 +274,28 @@ public abstract class AccountProcessors implements CommandProcessor {
 
         @Override
         public String getHelp() {
-            return null;
+            CommandBulider builder = new CommandBulider();
+            //TODO 翻译
+            builder.newLine(getCommandDescription())
+                    .newLine("\t<alias> 别名 - 必输")
+                    .newLine("\t<address> 账户地址 - 必输")
+                    .newLine("\t<password> 钱包密码 - 必输");
+            return builder.toString();
         }
 
         @Override
         public String getCommandDescription() {
-            //TODO 命令描述
-            return "aliasaccount --get total balance of all addresses in the wallet";
+            //TODO 翻译
+            return "aliasaccount <alias> <address> <password>--为账户设置别名";
         }
 
         @Override
         public boolean argsValidate(String[] args) {
-            //TODO 参数校验
+            int length = args.length;
+            if(length != 4)
+                return false;
+            if(!CommandHelper.checkArgsIsNull(args))
+                return false;
             return true;
         }
 
@@ -267,18 +318,27 @@ public abstract class AccountProcessors implements CommandProcessor {
 
         @Override
         public String getHelp() {
-            return null;
+            CommandBulider builder = new CommandBulider();
+            //TODO 翻译
+            builder.newLine(getCommandDescription())
+                    .newLine("\t<address> 账户地址 - 必输")
+                    .newLine("\t<password> 钱包密码 - 必输");
+            return builder.toString();
         }
 
         @Override
         public String getCommandDescription() {
-            //TODO 命令描述
-            return "getprivatekey --get total balance of all addresses in the wallet";
+            //TODO 翻译
+            return "getprivatekey <address> <password>--查询账户私钥，只能查询本地创建或导入的账户";
         }
 
         @Override
         public boolean argsValidate(String[] args) {
-            //TODO 参数校验
+            int length = args.length;
+            if(length != 3)
+                return false;
+            if(!CommandHelper.checkArgsIsNull(args))
+                return false;
             return true;
         }
 
@@ -302,18 +362,26 @@ public abstract class AccountProcessors implements CommandProcessor {
 
         @Override
         public String getHelp() {
-            return null;
+            CommandBulider builder = new CommandBulider();
+            //TODO 翻译
+            builder.newLine(getCommandDescription())
+                    .newLine("\t<address> 账户地址 - 必输");
+            return builder.toString();
         }
 
         @Override
         public String getCommandDescription() {
-            //TODO 命令描述
-            return "getasset --get total balance of all addresses in the wallet";
+            //TODO 翻译
+            return "getasset <address>--查询账户资产";
         }
 
         @Override
         public boolean argsValidate(String[] args) {
-            //TODO 参数校验
+            int length = args.length;
+            if(length != 2)
+                return false;
+            if(!CommandHelper.checkArgsIsNull(args))
+                return false;
             return true;
         }
 

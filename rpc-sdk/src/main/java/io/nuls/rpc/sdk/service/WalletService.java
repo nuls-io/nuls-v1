@@ -99,7 +99,7 @@ public enum WalletService {
      * @param remark
      * @return
      */
-    public RpcClientResult transfer(String address, String password, String toAddress, Long amount, String remark) {
+    public RpcClientResult transfer(String address, String toAddress, Long amount, String password, String remark) {
         try {
             AssertUtil.canNotEmpty(address);
             AssertUtil.canNotEmpty(password);
