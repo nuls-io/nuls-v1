@@ -39,6 +39,7 @@ import io.nuls.core.chain.entity.Result;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.*;
 import io.nuls.core.exception.NulsException;
@@ -540,7 +541,7 @@ public class AccountServiceImpl implements AccountService {
 
         try {
             TransactionEvent event = new TransactionEvent();
-            CoinTransferData coinData = new CoinTransferData(OperationType.TRANSFER, AccountConstant.ALIAS_NA, address, null);
+            CoinTransferData coinData = new CoinTransferData(OperationType.TRANSFER, AccountConstant.ALIAS_NA, address, ledgerService.getTxFee(TransactionConstant.TX_TYPE_SET_ALIAS));
             AliasTransaction aliasTx = new AliasTransaction(coinData, password, new Alias(address, alias));
             aliasTx.setHash(NulsDigestData.calcDigestData(aliasTx.serialize()));
             aliasTx.setScriptSig(createP2PKHScriptSigFromDigest(aliasTx.getHash(), account, password).serialize());
