@@ -399,7 +399,14 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 UtxoOutput output = new UtxoOutput();
                 output.setAddress(address);
                 output.setValue(coin.getNa().getValue());
-                output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND);
+                if (output.getLockTime() > 0) {
+                    output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_TIME_LOCK);
+                } else if (tx instanceof LockNulsTransaction) {
+                    output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_CONSENSUS_LOCK);
+                } else {
+                    output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND);
+                }
+
                 output.setIndex(i);
                 P2PKHScript p2PKHScript = new P2PKHScript(new NulsDigestData(NulsDigestData.DIGEST_ALG_SHA160, new Address(address).getHash160()));
                 output.setP2PKHScript(p2PKHScript);
