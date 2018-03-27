@@ -10,6 +10,8 @@ import java.util.Map;
  */
 public class ConsensusAgentInfoDto {
 
+    private String agentId;
+
     private String agentAddress;
 
     private String agentName;
@@ -35,6 +37,7 @@ public class ConsensusAgentInfoDto {
     private Long reward;
 
     public ConsensusAgentInfoDto(Map<String, Object> map){
+        this.agentId = (String)map.get("agentId");
         this.agentAddress = (String)map.get("agentAddress");
         this.agentName = (String)map.get("agentName");
         this.status = (Integer)map.get("status");
@@ -47,6 +50,14 @@ public class ConsensusAgentInfoDto {
         this.startTime = StringUtils.parseLong(map.get("startTime"));
         this.packedCount = (Integer)map.get("packedCount");
         this.reward = StringUtils.parseLong(map.get("reward"));
+    }
+
+    public String getAgentId() {
+        return agentId;
+    }
+
+    public void setAgentId(String agentId) {
+        this.agentId = agentId;
     }
 
     public String getAgentAddress() {
