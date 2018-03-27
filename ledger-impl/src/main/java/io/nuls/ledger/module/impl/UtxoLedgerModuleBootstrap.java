@@ -69,7 +69,6 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
         coinManager.setOutputDataService(outputDataService);
         cacheService = LedgerCacheService.getInstance();
         addNormalTxValidator();
-
     }
 
     /**

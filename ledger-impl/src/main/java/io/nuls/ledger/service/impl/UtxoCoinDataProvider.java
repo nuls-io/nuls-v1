@@ -331,7 +331,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         UtxoData utxoData = new UtxoData();
         List<UtxoInput> inputs = new ArrayList<>();
         List<UtxoOutput> outputs = new ArrayList<>();
-        Na totalNa = Na.ZERO;
+       // Na totalNa = Na.ZERO;
 
         if (coinParam.getTotalNa().equals(Na.ZERO)) {
             utxoData.setInputs(inputs);
@@ -414,13 +414,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 outputValue += output.getValue();
                 outputs.add(output);
 
-                if (coinParam.getFrom().contains(address)) {
-                    if (tx instanceof LockNulsTransaction && i == 0) {
-                        totalNa.add(Na.valueOf(output.getValue()));
-                    }
-                } else {
-                    totalNa.add(Na.valueOf(output.getValue()));
-                }
                 i++;
             }
         }
@@ -442,7 +435,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 
         utxoData.setInputs(inputs);
         utxoData.setOutputs(outputs);
-        utxoData.setTotalNa(totalNa);
         return utxoData;
     }
 
@@ -455,13 +447,13 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             }
         }
 
-        Na totalNa = Na.ZERO;
-        if (null != utxoData.getOutputs()) {
-            for (int i = 0; i < utxoData.getOutputs().size(); i++) {
-                UtxoOutput output = utxoData.getOutputs().get(i);
-                output.setTxHash(tx.getHash());
-            }
-        }
-        coinData.setTotalNa(totalNa);
+//        Na totalNa = Na.ZERO;
+//        if (null != utxoData.getOutputs()) {
+//            for (int i = 0; i < utxoData.getOutputs().size(); i++) {
+//                UtxoOutput output = utxoData.getOutputs().get(i);
+//                output.setTxHash(tx.getHash());
+//            }
+//        }
+//        coinData.setTotalNa(totalNa);
     }
 }
