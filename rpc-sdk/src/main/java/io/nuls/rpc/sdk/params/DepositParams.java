@@ -32,7 +32,7 @@ package io.nuls.rpc.sdk.params;
  */
 public class DepositParams {
     private String address;
-    private String agentAddress;
+    private String agentId;
     private long deposit;
     private String password;
 
@@ -44,12 +44,12 @@ public class DepositParams {
         this.address = address;
     }
 
-    public String getAgentAddress() {
-        return agentAddress;
+    public String getAgentId() {
+        return agentId;
     }
 
-    public void setAgentAddress(String agentAddress) {
-        this.agentAddress = agentAddress;
+    public void setAgentId(String agentId) {
+        this.agentId = agentId;
     }
 
     public long getDeposit() {

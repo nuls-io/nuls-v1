@@ -182,7 +182,7 @@ public abstract class ConsensusProcessors implements CommandProcessor {
 
         @Override
         public String getCommandDescription() {
-            return "deposit <address> <agentAddress> <deposit> <password>  -- apply for deposit";
+            return "deposit <address> <agentId> <deposit> <password>  -- apply for deposit";
         }
 
         @Override
@@ -191,7 +191,7 @@ public abstract class ConsensusProcessors implements CommandProcessor {
             if(length != 5){
                 return false;
             }
-            if(!StringUtils.validAddressSimple(args[1]) || !StringUtils.validAddressSimple(args[2])
+            if(!StringUtils.validAddressSimple(args[1]) || StringUtils.isBlank(args[2])
                     || StringUtils.isBlank(args[3]) || StringUtils.validPassword(args[4])){
                 return false;
             }
@@ -206,7 +206,7 @@ public abstract class ConsensusProcessors implements CommandProcessor {
         public CommandResult execute(String[] args) {
             DepositParams params = new DepositParams();
             params.setAddress(args[1]);
-            params.setAgentAddress(args[2]);
+            params.setAgentId(args[2]);
             params.setDeposit(Long.valueOf(args[3]));
             params.setPassword(args[4]);
             RpcClientResult result = consensusService.deposit(params);

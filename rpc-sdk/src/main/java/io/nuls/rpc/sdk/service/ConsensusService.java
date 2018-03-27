@@ -64,7 +64,7 @@ public enum ConsensusService {
             AssertUtil.canNotEmpty(params.getAddress());
             AssertUtil.canNotEmpty(params.getDeposit());
             AssertUtil.canNotEmpty(params.getPassword());
-            AssertUtil.canNotEmpty(params.getAgentAddress());
+            AssertUtil.canNotEmpty(params.getAgentId());
             return restFul.post("/consensus/deposit", JSONUtils.obj2json(params));
         } catch (Exception e) {
             e.printStackTrace();
