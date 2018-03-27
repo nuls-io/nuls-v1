@@ -139,11 +139,11 @@ public class UtxoData extends CoinData {
                     UtxoOutput output = this.getOutputs().get(i);
                     if (addressSet.contains(output.getAddress())) {
                         if (i == 0 && output.isLocked()) {
-                            totalNa.add(Na.valueOf(output.getValue()));
+                            totalNa = totalNa.add(Na.valueOf(output.getValue()));
                             break;
                         }
                     } else {
-                        totalNa.add(Na.valueOf(output.getValue()));
+                        totalNa = totalNa.add(Na.valueOf(output.getValue()));
                     }
                 }
             }
