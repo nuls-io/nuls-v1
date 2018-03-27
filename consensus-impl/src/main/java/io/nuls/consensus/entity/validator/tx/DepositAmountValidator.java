@@ -23,14 +23,16 @@
  * SOFTWARE.
  *
  */
-package io.nuls.consensus.entity.validator.consensus;
+package io.nuls.consensus.entity.validator.tx;
 
 import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.member.Deposit;
 import io.nuls.consensus.entity.tx.PocJoinConsensusTransaction;
+import io.nuls.core.chain.entity.Na;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 
@@ -40,23 +42,41 @@ import java.util.List;
  * @author Niels
  * @date 2018/1/17
  */
-public class DepositFieldValidator implements NulsDataValidator<PocJoinConsensusTransaction> {
+public class DepositAmountValidator implements NulsDataValidator<PocJoinConsensusTransaction> {
 
-    private static final DepositFieldValidator INSTANCE = new DepositFieldValidator();
+    private static final DepositAmountValidator INSTANCE = new DepositAmountValidator();
+    private ConsensusCacheManager consensusCacheManager = ConsensusCacheManager.getInstance();
 
-    private DepositFieldValidator() {
+    private DepositAmountValidator() {
     }
 
-    public static DepositFieldValidator getInstance() {
+    public static DepositAmountValidator getInstance() {
         return INSTANCE;
     }
 
     @Override
-    public ValidateResult validate(PocJoinConsensusTransaction tx) {
-        Consensus<Deposit> deposit = tx.getTxData();
-        if (deposit.getExtend().getStartTime() <= 0) {
-            return ValidateResult.getFailedResult("start time cannot be 0!");
+    public ValidateResult validate(PocJoinConsensusTransaction data) {
+        Na limit = PocConsensusConstant.ENTRUSTER_DEPOSIT_LOWER_LIMIT;
+        Na max = PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT;
+        List<Consensus<Deposit>> list = consensusCacheManager.getCachedDepositListByAgentHash(data.getTxData().getExtend().getAgentHash());
+        if(list==null){
+            return ValidateResult.getSuccessResult();
+        }
+        Na total = Na.ZERO;
+        for (Consensus<Deposit> cd : list) {
+            total = total.add(cd.getExtend().getDeposit());
+        }
+        if (limit.isGreaterThan(data.getTxData().getExtend().getDeposit())) {
+            return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_NOT_ENOUGH);
+        }
+        if (max.isLessThan(total)) {
+            return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_TOO_MUCH);
+        }
+
+        if(!data.getTxData().getExtend().getDeposit().equals(data.getCoinData().getTotalNa())){
+            return ValidateResult.getFailedResult(SeverityLevelEnum.FLAGRANT_FOUL,ErrorCode.DEPOSIT_ERROR);
         }
         return ValidateResult.getSuccessResult();
     }
+
 }
