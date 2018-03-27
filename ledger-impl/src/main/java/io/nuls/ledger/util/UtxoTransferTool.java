@@ -253,10 +253,10 @@ public class UtxoTransferTool {
                 utxoData.getOutputs().add(toOutput(outputPo));
                 if (addressSet.contains(outputPo.getAddress())) {
                     if (tx instanceof LockNulsTransaction && i == 0) {
-                        totalNa.add(Na.valueOf(outputPo.getValue()));
+                        totalNa = totalNa.add(Na.valueOf(outputPo.getValue()));
                     }
                 } else {
-                    totalNa.add(Na.valueOf(outputPo.getValue()));
+                    totalNa = totalNa.add(Na.valueOf(outputPo.getValue()));
                 }
             }
             utxoData.setTotalNa(totalNa);

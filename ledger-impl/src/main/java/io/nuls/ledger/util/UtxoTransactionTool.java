@@ -24,7 +24,6 @@
 package io.nuls.ledger.util;
 
 import io.nuls.account.entity.Account;
-import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
@@ -45,8 +44,6 @@ import io.nuls.ledger.event.notice.BalanceChangeData;
 import io.nuls.ledger.event.notice.BalanceChangeNotice;
 import io.nuls.ledger.service.impl.LedgerCacheService;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;

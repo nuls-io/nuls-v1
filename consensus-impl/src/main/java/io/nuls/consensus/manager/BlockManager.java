@@ -98,7 +98,7 @@ public class BlockManager {
             blockCacheBuffer.cacheBlock(block);
             return;
         }
-        bifurcateProcessor.addHeader1(block.getHeader());
+        bifurcateProcessor.addHeader(block.getHeader());
         if (bifurcateProcessor.getChainSize() == 1) {
             try {
                 this.appravalBlock(block);

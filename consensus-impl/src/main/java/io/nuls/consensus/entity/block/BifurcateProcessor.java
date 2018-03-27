@@ -50,7 +50,7 @@ public class BifurcateProcessor {
         return INSTANCE;
     }
 
-    public synchronized void addHeader1(BlockHeader header) {
+    public synchronized void addHeader(BlockHeader header) {
         boolean result = add(header);
         if (result) {
             checkIt();
