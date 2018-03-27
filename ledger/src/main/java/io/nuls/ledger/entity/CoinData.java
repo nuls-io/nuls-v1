@@ -36,9 +36,7 @@ public abstract class CoinData extends BaseNulsData {
 
     protected Na totalNa;
 
-    public Na getTotalNa() {
-        return totalNa;
-    }
+    public abstract Na getTotalNa();
 
     public void setTotalNa(Na totalNa) {
         this.totalNa = totalNa;

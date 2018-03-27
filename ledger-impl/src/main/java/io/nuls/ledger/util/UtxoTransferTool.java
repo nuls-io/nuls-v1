@@ -240,7 +240,6 @@ public class UtxoTransferTool {
             AbstractCoinTransaction coinTx = (AbstractCoinTransaction) tx;
 
             UtxoData utxoData = new UtxoData();
-            Na totalNa = Na.ZERO;
             Set<String> addressSet = new HashSet<>();
 
             for (UtxoInputPo inputPo : inputPoList) {
@@ -251,15 +250,7 @@ public class UtxoTransferTool {
             for (int i = 0; i < outputPoList.size(); i++) {
                 UtxoOutputPo outputPo = outputPoList.get(i);
                 utxoData.getOutputs().add(toOutput(outputPo));
-                if (addressSet.contains(outputPo.getAddress())) {
-                    if (tx instanceof LockNulsTransaction && i == 0) {
-                        totalNa.add(Na.valueOf(outputPo.getValue()));
-                    }
-                } else {
-                    totalNa.add(Na.valueOf(outputPo.getValue()));
-                }
             }
-            utxoData.setTotalNa(totalNa);
             coinTx.setCoinData(utxoData);
         }
     }

@@ -248,7 +248,7 @@ public class BlockMaintenanceThread implements Runnable {
         if (height > 0) {
             NulsContext.getInstance().setBestBlock(block);
             BlockInfo blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(height);
-            if (null != blockInfo && null != blockInfo.getBestHash() && !blockInfo.getBestHash().equals(block.getHeader().getHash())) {
+            if (null != blockInfo && null != blockInfo.getBestHash() &&(!blockInfo.getBestHash().equals(block.getHeader().getHash())&&blockInfo.getBestHeight()==height) ) {
                 previousRb = true;
             }
         }

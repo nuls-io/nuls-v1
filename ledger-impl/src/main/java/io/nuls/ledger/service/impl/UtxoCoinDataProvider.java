@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -331,7 +331,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         UtxoData utxoData = new UtxoData();
         List<UtxoInput> inputs = new ArrayList<>();
         List<UtxoOutput> outputs = new ArrayList<>();
-        Na totalNa = Na.ZERO;
+        // Na totalNa = Na.ZERO;
 
         if (coinParam.getTotalNa().equals(Na.ZERO)) {
             utxoData.setInputs(inputs);
@@ -414,13 +414,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 outputValue += output.getValue();
                 outputs.add(output);
 
-                if (coinParam.getFrom().contains(address)) {
-                    if (tx instanceof LockNulsTransaction && i == 0) {
-                        totalNa.add(Na.valueOf(output.getValue()));
-                    }
-                } else {
-                    totalNa.add(Na.valueOf(output.getValue()));
-                }
                 i++;
             }
         }
@@ -442,7 +435,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 
         utxoData.setInputs(inputs);
         utxoData.setOutputs(outputs);
-        utxoData.setTotalNa(totalNa);
         return utxoData;
     }
 
@@ -454,14 +446,16 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 input.setTxHash(tx.getHash());
             }
         }
-
-        Na totalNa = Na.ZERO;
-        if (null != utxoData.getOutputs()) {
-            for (int i = 0; i < utxoData.getOutputs().size(); i++) {
-                UtxoOutput output = utxoData.getOutputs().get(i);
-                output.setTxHash(tx.getHash());
-            }
+        if (tx instanceof LockNulsTransaction) {
+            utxoData.getOutputs().get(0).setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_CONSENSUS_LOCK);
         }
-        coinData.setTotalNa(totalNa);
+//        Na totalNa = Na.ZERO;
+//        if (null != utxoData.getOutputs()) {
+//            for (int i = 0; i < utxoData.getOutputs().size(); i++) {
+//                UtxoOutput output = utxoData.getOutputs().get(i);
+//                output.setTxHash(tx.getHash());
+//            }
+//        }
+//        coinData.setTotalNa(totalNa);
     }
 }

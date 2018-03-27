@@ -23,7 +23,6 @@
  */
 package io.nuls.ledger.service.impl;
 
-import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.UtxoOutputDataService;

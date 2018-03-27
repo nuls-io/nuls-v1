@@ -23,42 +23,35 @@
  * SOFTWARE.
  *
  */
-package io.nuls.consensus.entity.validator.consensus;
+package io.nuls.consensus.entity.validator.tx;
 
-import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.constant.PocConsensusConstant;
-import io.nuls.consensus.entity.Consensus;
-import io.nuls.consensus.entity.member.Deposit;
-import io.nuls.consensus.entity.tx.PocJoinConsensusTransaction;
+import io.nuls.consensus.entity.member.Agent;
+import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 
-import java.util.List;
-
 /**
  * @author Niels
- * @date 2018/1/17
+ * @date 2017/12/6
  */
-public class DepositFieldValidator implements NulsDataValidator<PocJoinConsensusTransaction> {
-
-    private static final DepositFieldValidator INSTANCE = new DepositFieldValidator();
-
-    private DepositFieldValidator() {
-    }
-
-    public static DepositFieldValidator getInstance() {
-        return INSTANCE;
-    }
-
-    private ConsensusCacheManager consensusCacheManager = ConsensusCacheManager.getInstance();
-
+public class AgentDepositValidator implements NulsDataValidator<RegisterAgentTransaction> {
     @Override
-    public ValidateResult validate(PocJoinConsensusTransaction tx) {
-        Consensus<Deposit> deposit = tx.getTxData();
-        if (deposit.getExtend().getStartTime() <= 0) {
-            return ValidateResult.getFailedResult("start time cannot be 0!");
+    public ValidateResult validate(RegisterAgentTransaction tx) {
+        ValidateResult result = ValidateResult.getSuccessResult();
+        Agent agent = tx.getTxData().getExtend();
+        if (null == agent) {
+            return ValidateResult.getFailedResult(ErrorCode.NULL_PARAMETER);
         }
-        return ValidateResult.getSuccessResult();
+        if (PocConsensusConstant.AGENT_DEPOSIT_LOWER_LIMIT.isGreaterThan(agent.getDeposit())) {
+            return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_NOT_ENOUGH);
+        }
+
+        if(!agent.getDeposit().equals(tx.getCoinData().getTotalNa())){
+            return ValidateResult.getFailedResult(SeverityLevelEnum.FLAGRANT_FOUL,ErrorCode.DEPOSIT_ERROR);
+        }
+        return result;
     }
 }
