@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -70,12 +70,13 @@ public class DistributedBlockInfoRequestUtils {
      * default:0,get best height;
      *
      * @param height
+     * @param sendList
      */
-    public BlockInfo request(long height) {
-        return this.request(height, height, 1);
+    public BlockInfo request(long height, List<String> sendList) {
+        return this.request(height, height, 1,nodeIdList);
     }
 
-    public BlockInfo request(long start, long end, long split) {
+    public BlockInfo request(long start, long end, long split, List<String> sendList) {
         lock.lock();
         try {
             requesting = true;
@@ -86,7 +87,17 @@ public class DistributedBlockInfoRequestUtils {
             this.split = split;
             GetBlocksHashRequest event = new GetBlocksHashRequest(start, end, split);
             this.startTime = TimeService.currentTimeMillis();
-            nodeIdList = this.eventBroadcaster.broadcastAndCache(event, false);
+            if(null==sendList||sendList.isEmpty()){
+                nodeIdList = this.eventBroadcaster.broadcastAndCache(event, false);
+            }else{
+                this.nodeIdList = new ArrayList<>();
+                for(String nodeId:sendList){
+                    boolean result = this.eventBroadcaster.sendToNode(event,nodeId);
+                    if(result){
+                        this.nodeIdList.add(nodeId);
+                    }
+                }
+            }
             if (nodeIdList.isEmpty()) {
                 return null;
             }
@@ -111,6 +122,11 @@ public class DistributedBlockInfoRequestUtils {
             return false;
         }
         if (!requesting) {
+            return false;
+        }
+        if (response.getBestHeight() == 0 && NulsContext.getInstance().getBestHeight() > 0) {
+            hashesMap.remove(nodeId);
+            nodeIdList.remove(nodeId);
             return false;
         }
         if (hashesMap.get(nodeId) == null) {
@@ -214,12 +230,12 @@ public class DistributedBlockInfoRequestUtils {
                 NulsDigestData minHash = null;
                 List<String> nodeIds = new ArrayList<>();
                 try {
-                    for (String nodeId:hashesMap.keySet()) {
+                    for (String nodeId : hashesMap.keySet()) {
                         BlockHashResponse response = hashesMap.get(nodeId);
                         long height = response.getHeightList().get(0);
                         NulsDigestData hash = response.getHashList().get(0);
-                        if (height >= localHeight ) {
-                            if(height <= minHeight) {
+                        if (height >= localHeight) {
+                            if (height <= minHeight) {
                                 minHeight = height;
                                 minHash = hash;
                             }
@@ -240,7 +256,7 @@ public class DistributedBlockInfoRequestUtils {
                 } else {
                     throw new NulsRuntimeException(ErrorCode.TIME_OUT);
                 }
-            } else if ((TimeService.currentTimeMillis() - startTime) > timeout&&!(hashesMap.size() >= ((nodeIdList.size() + 1) / 2) && start == end && start <= 0)) {
+            } else if ((TimeService.currentTimeMillis() - startTime) > timeout && !(hashesMap.size() >= ((nodeIdList.size() + 1) / 2) && start == end && start <= 0)) {
                 throw new NulsRuntimeException(ErrorCode.TIME_OUT);
             }
         }

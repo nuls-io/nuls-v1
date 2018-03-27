@@ -34,6 +34,7 @@ import io.nuls.consensus.entity.GetBlockParam;
 import io.nuls.consensus.entity.block.BifurcateProcessor;
 import io.nuls.consensus.event.GetBlockHeaderEvent;
 import io.nuls.consensus.event.GetBlockRequest;
+import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.utils.DownloadDataUtils;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
@@ -89,6 +90,12 @@ public class BlockManager {
     public void addBlock(Block block, boolean verify, String nodeId) {
         if (block == null || block.getHeader() == null || block.getTxs() == null || block.getTxs().isEmpty()) {
             return;
+        }
+        if (storedHeight == 0) {
+            BlockService blockService = NulsContext.getServiceBean(BlockService.class);
+            if (null != blockService) {
+                storedHeight = blockService.getLocalSavedHeight();
+            }
         }
         if (block.getHeader().getHeight() <= storedHeight) {
             return;
