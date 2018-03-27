@@ -138,7 +138,7 @@ public class StringUtils {
         return true;
     }
 
-    private static Pattern NUMBER_PATTERN = Pattern.compile("-?[0-9]+(\\.[0-9]+)?");
+    private static final Pattern NUMBER_PATTERN = Pattern.compile("-?[0-9]+(\\.[0-9]+)?");
     public static boolean isNumber(String str) {
         Matcher isNum = NUMBER_PATTERN.matcher(str);
         if (!isNum.matches()) {
@@ -147,7 +147,7 @@ public class StringUtils {
         return true;
     }
 
-    private static Pattern GT_ZERO_NUMBER_PATTERN = Pattern.compile("([1-9][0-9]*(\\.\\d+)?)|(0\\.\\d*[1-9]+0*)");
+    private static final Pattern GT_ZERO_NUMBER_PATTERN = Pattern.compile("([1-9][0-9]*(\\.\\d+)?)|(0\\.\\d*[1-9]+0*)");
     public static boolean isNumberGtZero(String str) {
         Matcher isNum = GT_ZERO_NUMBER_PATTERN.matcher(str);
         if (!isNum.matches()) {

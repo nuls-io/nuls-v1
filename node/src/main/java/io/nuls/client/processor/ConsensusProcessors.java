@@ -32,9 +32,9 @@ import io.nuls.core.utils.str.StringUtils;
 import io.nuls.rpc.sdk.entity.RpcClientResult;
 import io.nuls.rpc.sdk.params.CreateAgentParams;
 import io.nuls.rpc.sdk.params.DepositParams;
+import io.nuls.rpc.sdk.params.StopAgentParams;
+import io.nuls.rpc.sdk.params.WithdrawParams;
 import io.nuls.rpc.sdk.service.ConsensusService;
-
-import java.math.BigDecimal;
 
 /**
  * @author Niels
@@ -211,6 +211,121 @@ public abstract class ConsensusProcessors implements CommandProcessor {
             params.setPassword(args[4]);
             RpcClientResult result = consensusService.deposit(params);
             if (null == result) {
+                return CommandResult.getFailed("Failure to execute");
+            }
+            return CommandResult.getResult(result);
+        }
+    }
+
+    public static class StopAgent extends ConsensusProcessors{
+        @Override
+        public String getCommand() {
+            return "stopagent";
+        }
+
+        @Override
+        public String getHelp() {
+            return null;
+        }
+
+        @Override
+        public String getCommandDescription() {
+            return "stopagent <address> <password> -- stop the agent";
+        }
+
+        @Override
+        public boolean argsValidate(String[] args) {
+           int length = args.length;
+           if(length != 3){
+               return false;
+           }
+            if(!StringUtils.validAddressSimple(args[1]) || !StringUtils.validPassword(args[2])){
+                return false;
+            }
+           return true;
+        }
+
+        @Override
+        public CommandResult execute(String[] args) {
+            StopAgentParams stopAgentParams = new StopAgentParams();
+            stopAgentParams.setAddress(args[1]);
+            stopAgentParams.setPassword(args[2]);
+            RpcClientResult result = consensusService.stopagent(stopAgentParams);
+            if(null == result){
+                return CommandResult.getFailed("Failure to execute");
+            }
+            return CommandResult.getResult(result);
+        }
+    }
+
+    public static class GetAgentStatus extends ConsensusProcessors{
+        @Override
+        public String getCommand() {
+            return "getagentstatus";
+        }
+
+        @Override
+        public String getHelp() {
+            return null;
+        }
+
+        @Override
+        public String getCommandDescription() {
+            return "getagentstatus -- get agent status";
+        }
+
+        @Override
+        public boolean argsValidate(String[] args) {
+            return true;
+        }
+
+        @Override
+        public CommandResult execute(String[] args) {
+            RpcClientResult result = consensusService.getagentstatus();
+            if(null == result){
+                return CommandResult.getFailed("Failure to execute");
+            }
+            return CommandResult.getResult(result);
+        }
+    }
+
+    public static class Withdraw extends ConsensusProcessors{
+        @Override
+        public String getCommand() {
+            return "withdraw";
+        }
+
+        @Override
+        public String getHelp() {
+            return null;
+        }
+
+        @Override
+        public String getCommandDescription() {
+            return "withdraw <address> <password> <txHash> -- withdraw the agent";
+        }
+
+        @Override
+        public boolean argsValidate(String[] args) {
+            int length = args.length;
+            if(length != 45){
+                return false;
+            }
+            if(!StringUtils.validAddressSimple(args[1]) || !StringUtils.validPassword(args[2])
+                    || !StringUtils.validHash(args[3])){
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public CommandResult execute(String[] args) {
+            WithdrawParams withdrawParams = new WithdrawParams();
+            withdrawParams.setAddress(args[1]);
+            withdrawParams.setPassword(args[2]);
+            withdrawParams.setTxHash(args[3]);
+            RpcClientResult result = consensusService.withdraw(withdrawParams);
+            if(null == result){
                 return CommandResult.getFailed("Failure to execute");
             }
             return CommandResult.getResult(result);
