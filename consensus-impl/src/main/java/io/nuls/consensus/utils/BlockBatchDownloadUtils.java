@@ -209,7 +209,7 @@ public class BlockBatchDownloadUtils {
         this.eventBroadcaster.sendToNode(new GetBlockRequest(start, end), nodeId);
         status.setUpdateTime(System.currentTimeMillis());
         nodeStatusMap.put(nodeId, status);
-        Log.info("download block :"+start+"-"+end+",from : "+nodeId);
+        Log.info("download block :" + start + "-" + end + ",from : " + nodeId);
     }
 
 
@@ -289,7 +289,7 @@ public class BlockBatchDownloadUtils {
                 }
                 return;
             }
-            blockManager.addBlock(block, false);
+            blockManager.addBlock(block, false, null);
             receivedTxCacheManager.removeTx(block.getTxHashList());
             confirmingTxCacheManager.putTxList(block.getTxs());
         }

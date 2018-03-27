@@ -347,7 +347,7 @@ public class ConsensusMeetingRunner implements Runnable {
             return;
         }
         confirmingTxCacheManager.putTx(newBlock.getTxs().get(0));
-        blockManager.addBlock(newBlock, false);
+        blockManager.addBlock(newBlock, false, null);
         BlockHeaderEvent event = new BlockHeaderEvent();
         event.setEventBody(newBlock.getHeader());
         eventBroadcaster.broadcastAndCache(event, false);

@@ -133,7 +133,7 @@ public class DownloadDataUtils {
                 }
                 return;
             }
-            blockManager.addBlock(block, false);
+            blockManager.addBlock(block, false,nodeId);
             AssembledBlockNotice notice = new AssembledBlockNotice();
             notice.setEventBody(header);
             eventBroadcaster.publishToLocal(notice);

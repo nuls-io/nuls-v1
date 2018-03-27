@@ -42,6 +42,7 @@ public class BifurcateProcessor {
     private static final BifurcateProcessor INSTANCE = new BifurcateProcessor();
 
     private List<BlockHeaderChain> chainList = new CopyOnWriteArrayList<>();
+    private long maxHeight;
 
     private BifurcateProcessor() {
     }
@@ -53,6 +54,9 @@ public class BifurcateProcessor {
     public synchronized void addHeader(BlockHeader header) {
         boolean result = add(header);
         if (result) {
+            if(header.getHeight()>maxHeight){
+                maxHeight = header.getHeight();
+            }
             checkIt();
         }
     }
@@ -175,4 +179,7 @@ public class BifurcateProcessor {
         return chainList.size();
     }
 
+    public long getMaxHeight() {
+        return maxHeight;
+    }
 }

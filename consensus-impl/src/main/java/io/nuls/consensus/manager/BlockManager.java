@@ -30,7 +30,10 @@ import io.nuls.consensus.cache.manager.block.ConfrimingBlockCacheManager;
 import io.nuls.consensus.cache.manager.block.BlockCacheBuffer;
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
+import io.nuls.consensus.entity.GetBlockParam;
 import io.nuls.consensus.entity.block.BifurcateProcessor;
+import io.nuls.consensus.event.GetBlockHeaderEvent;
+import io.nuls.consensus.event.GetBlockRequest;
 import io.nuls.consensus.utils.DownloadDataUtils;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
@@ -83,7 +86,7 @@ public class BlockManager {
         ledgerService = NulsContext.getServiceBean(LedgerService.class);
     }
 
-    public void addBlock(Block block, boolean verify) {
+    public void addBlock(Block block, boolean verify, String nodeId) {
         if (block == null || block.getHeader() == null || block.getTxs() == null || block.getTxs().isEmpty()) {
             return;
         }
@@ -96,6 +99,19 @@ public class BlockManager {
         boolean success = confrimingBlockCacheManager.cacheBlock(block);
         if (!success) {
             blockCacheBuffer.cacheBlock(block);
+            boolean hasPre = blockCacheBuffer.getBlock(block.getHeader().getPreHash().getDigestHex()) != null;
+            if (!hasPre && null != nodeId) {
+                GetBlockRequest request = new GetBlockRequest();
+                GetBlockParam params = new GetBlockParam();
+                long height = block.getHeader().getHeight();
+                if (height > this.bifurcateProcessor.getMaxHeight()) {
+                    height = this.bifurcateProcessor.getMaxHeight() + 1;
+                }
+                params.setStart(height);
+                params.setEnd(height);
+                request.setEventBody(params);
+                this.eventBroadcaster.sendToNode(request, nodeId);
+            }
             return;
         }
         bifurcateProcessor.addHeader(block.getHeader());
@@ -158,7 +174,7 @@ public class BlockManager {
             Log.warn("the block is null!");
             return;
         }
-        this.rollback(block);
+        this.rollbackTxList(block.getTxs(), 0, block.getTxs().size());
         List<String> hashList = this.bifurcateProcessor.getHashList(block.getHeader().getHeight() - 1);
         if (hashList.size() > 1) {
             Block preBlock = confrimingBlockCacheManager.getBlock(block.getHeader().getPreHash().getDigestHex());
@@ -183,7 +199,7 @@ public class BlockManager {
     }
 
     public void rollback(Block block) {
-        this.rollbackTxList(block.getTxs(), 0, block.getTxs().size());
+        this.rollbackAppraval(block);
     }
 
 
@@ -197,7 +213,7 @@ public class BlockManager {
             return;
         }
         blockCacheBuffer.removeBlock(nextHash);
-        this.addBlock(block, true);
+        this.addBlock(block, true, null);
     }
 
     public long getStoredHeight() {

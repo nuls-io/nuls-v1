@@ -94,7 +94,7 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
             }
             return;
         }
-        blockManager.addBlock(block, false);
+        blockManager.addBlock(block, false, fromId);
         downloadDataUtils.removeTxGroup(block.getHeader().getHash().getDigestHex());
         AssembledBlockNotice notice = new AssembledBlockNotice();
         notice.setEventBody(header);
