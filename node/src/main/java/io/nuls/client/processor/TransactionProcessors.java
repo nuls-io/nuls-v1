@@ -52,7 +52,7 @@ public abstract class TransactionProcessors implements CommandProcessor {
         }
     }
 
-    public static class getTxList extends TransactionProcessors{
+    public static class GetTxList extends TransactionProcessors{
 
         @Override
         public String getCommand() {

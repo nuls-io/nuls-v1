@@ -67,10 +67,20 @@ public class CommandHandler {
         register(new WalletProcessors.SetPassword());
         register(new WalletProcessors.Transfer());
 
-        register(new ConsensusProcessors.CreateAgent());
-        register(new ConsensusProcessors.Deposit());
         register(new ConsensusProcessors.GetConsensus());
         register(new ConsensusProcessors.GetConsensusAddress());
+        register(new ConsensusProcessors.CreateAgent());
+        register(new ConsensusProcessors.Deposit());
+        register(new ConsensusProcessors.GetAgentStatus());
+        register(new ConsensusProcessors.StopAgent());
+        register(new ConsensusProcessors.Withdraw());
+
+        register(new TransactionProcessors.GetTx());
+        register(new TransactionProcessors.GetTxList());
+
+        register(new NetwrokProcessor.GetNetworkInfo());
+        register(new NetwrokProcessor.getnetworknodes());
+
         //todo 修改为配置
         SdkManager.init("http://127.0.0.1:8001/nuls");
     }
