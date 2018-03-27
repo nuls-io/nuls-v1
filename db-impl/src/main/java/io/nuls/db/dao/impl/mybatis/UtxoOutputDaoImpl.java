@@ -142,7 +142,7 @@ public class UtxoOutputDaoImpl extends BaseDaoImpl<UtxoOutputMapper, Map<String,
     public long getRewardByBlockHeight(long height) {
         Searchable searchable = new Searchable();
         searchable.addCondition("a.type", SearchOperator.eq, TransactionConstant.TX_TYPE_COIN_BASE);
-        searchable.addCondition("a.height", SearchOperator.eq, height);
+        searchable.addCondition("a.block_height", SearchOperator.eq, height);
         return getMapper().getCoinBaseReward(searchable);
     }
 
