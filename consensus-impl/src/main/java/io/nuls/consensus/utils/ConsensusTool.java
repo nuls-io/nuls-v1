@@ -135,6 +135,7 @@ public class ConsensusTool {
         deposit.setAgentHash(po.getAgentHash());
         deposit.setDeposit(Na.valueOf(po.getDeposit()));
         deposit.setStartTime(po.getTime());
+        deposit.setTxHash(po.getTxHash());
         ca.setHash(NulsDigestData.fromDigestHex(po.getId()));
         ca.setExtend(deposit);
         return ca;

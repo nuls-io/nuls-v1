@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -45,7 +45,7 @@ public class GetTxGroupParam extends BaseNulsData {
     private long time;
     private NulsDigestData blockHash;
 
-    private List<NulsDigestData> txHashList;
+    private List<NulsDigestData> txHashList = new ArrayList<>();
 
     public GetTxGroupParam() {
         this.time = TimeService.currentTimeMillis();
@@ -100,6 +100,10 @@ public class GetTxGroupParam extends BaseNulsData {
 
     public List<NulsDigestData> getTxHashList() {
         return txHashList;
+    }
+
+    public void addHash(NulsDigestData hash) {
+        this.txHashList.add(hash);
     }
 
     public void setTxHashList(List<NulsDigestData> txHashList) {
