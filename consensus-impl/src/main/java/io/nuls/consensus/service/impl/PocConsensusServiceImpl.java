@@ -415,8 +415,10 @@ public class PocConsensusServiceImpl implements ConsensusService {
             map.put("introduction", ca.getExtend().getIntroduction());
             map.put("startTime", ca.getExtend().getStartTime());
             map.put("creditRatio", 1);
-            map.put("reward", 2018);
-            map.put("packedCount", 2018);
+
+            long reward = ledgerService.getAgentReward(ca.getAddress(), 1);
+            map.put("reward", reward);
+            map.put("packedCount", blockService.getPackingCount(ca.getExtend().getPackingAddress()));
             List<Consensus<Deposit>> deposits = this.consensusCacheManager.getCachedDepositListByAgentHash(ca.getHexHash());
             long totalDeposit = 0;
             Set<String> memberSet = new HashSet<>();
@@ -431,7 +433,6 @@ public class PocConsensusServiceImpl implements ConsensusService {
         page.setList(resultList);
         return page;
     }
-
 
 
     @Override

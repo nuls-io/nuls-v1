@@ -109,4 +109,15 @@
         join utxo_output b on a.`hash` = b.tx_hash
         <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
     </select>
+
+
+    <select id="getAgentReward" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultType="java.lang.Long">
+        SELECT IFNULL(sum(d.`value`),0) as totalreward
+        from agent a
+        left join block_header b on a.packing_address = b.consensus_address
+        left join `transaction` c on b.height = c.block_height
+        left join utxo_output d on c.`hash` = d.tx_hash
+        <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
+    </select>
+
 </mapper>

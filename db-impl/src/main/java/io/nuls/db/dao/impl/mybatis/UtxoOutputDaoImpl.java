@@ -167,6 +167,18 @@ public class UtxoOutputDaoImpl extends BaseDaoImpl<UtxoOutputMapper, Map<String,
     }
 
     @Override
+    public long getAgentReward(String address, int type) {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("c.type", SearchOperator.eq, TransactionConstant.TX_TYPE_COIN_BASE);
+        if (type == 1) {
+            searchable.addCondition("a.agent_address", SearchOperator.eq, address);
+        } else {
+            searchable.addCondition("a.packing_address", SearchOperator.eq, address);
+        }
+        return getMapper().getAgentReward(searchable);
+    }
+
+    @Override
     public void unlockTxOutput(String txHash) {
         getMapper().unlockTxOutput(txHash);
     }

@@ -195,6 +195,11 @@ public class UtxoTransactionDaoImpl implements UtxoTransactionDataService {
     }
 
     @Override
+    public long getAgentReward(String address, int type){
+        return outputDao.getAgentReward(address, type);
+    }
+
+    @Override
     @DbSession
     public void unlockTxOutput(String txHash) {
         outputDao.unlockTxOutput(txHash);
