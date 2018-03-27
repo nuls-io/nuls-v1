@@ -242,7 +242,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
         List<TransactionLocalPo> poList;
         if (pageNumber == 0 && pageSize == 0) {
-            poList = txDao.getLocalTxs(blockHeight, address, txType, pageNumber, pageSize);
+            poList = txDao.getLocalTxs(blockHeight, address, txType, 0, 0);
             for (TransactionLocalPo po : poList) {
                 txList.add(UtxoTransferTool.toTransaction(po));
             }
