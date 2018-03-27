@@ -51,8 +51,6 @@ public class DepositFieldValidator implements NulsDataValidator<PocJoinConsensus
         return INSTANCE;
     }
 
-    private ConsensusCacheManager consensusCacheManager = ConsensusCacheManager.getInstance();
-
     @Override
     public ValidateResult validate(PocJoinConsensusTransaction tx) {
         Consensus<Deposit> deposit = tx.getTxData();
