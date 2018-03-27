@@ -96,7 +96,6 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
 
     @Override
     public void start() {
-        ledgerService.init();
         //cache the wallet's all accounts unSpend output
         coinManager.cacheAllUnSpendUtxo();
 

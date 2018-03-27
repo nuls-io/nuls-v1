@@ -15,6 +15,12 @@ public class Page<T> {
 
     private List<T> list;
 
+    public Page(int pageNumber, int pageSize) {
+        this.pageNumber = pageNumber;
+        this.pageSize = pageSize;
+        this.list = new ArrayList<>();
+    }
+
     public Page() {
         this.list = new ArrayList<>();
     }
