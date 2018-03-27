@@ -65,7 +65,6 @@ public class CommandHandler {
         register(new WalletProcessors.ImportAccount());
         register(new WalletProcessors.RemoveAccount());
         register(new WalletProcessors.ResetPassword());
-        register(new WalletProcessors.SetPassword());
         register(new WalletProcessors.Transfer());
 
         register(new ConsensusProcessors.GetConsensus());
