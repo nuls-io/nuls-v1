@@ -26,10 +26,7 @@ package io.nuls.ledger.entity.tx;
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.ledger.entity.params.CoinTransferData;
-
-import java.util.List;
 
 /**
  * @author Niels
