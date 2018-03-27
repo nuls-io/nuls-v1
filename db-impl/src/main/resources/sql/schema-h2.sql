@@ -147,10 +147,9 @@ CREATE TABLE IF NOT EXISTS `utxo_output` (
 );
 
 CREATE TABLE IF NOT EXISTS `alias` (
-  `alias` VARCHAR(40) NOT NULL,
+  `alias` varchar(40) NOT NULL,
   `address` varchar(40) NOT NULL,
-  `status` tinyint(1),
-  PRIMARY KEY (`alias`)
-);
- -- alias index
- create unique index IF NOT EXISTS alias_address_idx on alias(address);
+  `status` tinyint(1) DEFAULT NULL,
+  PRIMARY KEY (`alias`),
+  UNIQUE KEY `alias_address_idx` (`address`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

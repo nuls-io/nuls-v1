@@ -98,6 +98,11 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     public Transaction getTx(NulsDigestData hash) {
+        Transaction tx = getTxFromCache(hash);
+        if (tx != null) {
+            return tx;
+        }
+
         TransactionPo po = txDao.gettx(hash.getDigestHex());
         if (null == po) {
             return null;
@@ -112,6 +117,11 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     public Transaction getLocalTx(NulsDigestData hash) {
+        Transaction tx = getTxFromCache(hash);
+        if (tx != null) {
+            return tx;
+        }
+
         TransactionLocalPo po = txDao.getLocaltx(hash.getDigestHex());
         if (null == po) {
             return null;
@@ -197,6 +207,18 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             }
         }
         return txList;
+    }
+
+    private Transaction getTxFromCache(NulsDigestData hash) {
+        List<Transaction> cacheTxList = new ArrayList<>(txCacheService.getElementList(CONFIRM_TX_CACHE));
+        cacheTxList.addAll(txCacheService.getElementList(RECEIVE_TX_CACHE));
+        cacheTxList.addAll(txCacheService.getElementList(ORPHAN_TX_CACHE));
+        for (Transaction tx : cacheTxList) {
+            if (hash.equals(tx.getHash())) {
+                return tx;
+            }
+        }
+        return null;
     }
 
     private List<Transaction> getCacheTxList(String address, int txType) throws NulsException {
