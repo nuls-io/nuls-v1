@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,7 +23,7 @@
  */
 package io.nuls.consensus.utils;
 
-import io.nuls.consensus.cache.manager.block.BlockCacheManager;
+import io.nuls.consensus.cache.manager.block.TemporaryCacheManager;
 import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.consensus.entity.GetSmallBlockParam;
 import io.nuls.consensus.entity.GetTxGroupParam;
@@ -31,6 +31,7 @@ import io.nuls.consensus.entity.RedPunishData;
 import io.nuls.consensus.event.GetSmallBlockRequest;
 import io.nuls.consensus.event.GetTxGroupRequest;
 import io.nuls.consensus.event.notice.AssembledBlockNotice;
+import io.nuls.consensus.manager.BlockManager;
 import io.nuls.consensus.thread.ConsensusMeetingRunner;
 import io.nuls.consensus.thread.DataDownloadThread;
 import io.nuls.core.chain.entity.*;
@@ -68,7 +69,9 @@ public class DownloadDataUtils {
 
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
     private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
-    private BlockCacheManager blockCacheManager;
+    private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
+    private BlockManager blockManager = BlockManager.getInstance();
+
 
     private final Map<String, Long> smbRequest = new HashMap<>();
     private final Map<String, Long> tgRequest = new HashMap<>();
@@ -82,7 +85,7 @@ public class DownloadDataUtils {
         request.setEventBody(param);
         smbRequest.put(blockHash.getDigestHex(), System.currentTimeMillis());
         Integer value = smbRequestCount.get(blockHash.getDigestHex());
-        if(value==null){
+        if (value == null) {
             value = 0;
         }
         smbRequestCount.put(blockHash.getDigestHex(), 1 + value);
@@ -98,10 +101,8 @@ public class DownloadDataUtils {
         GetTxGroupParam data = new GetTxGroupParam();
         data.setBlockHash(blockHash);
         List<NulsDigestData> txHashList = new ArrayList<>();
-        if (null == blockCacheManager) {
-            blockCacheManager = BlockCacheManager.getInstance();
-        }
-        SmallBlock smb = blockCacheManager.getSmallBlock(blockHash.getDigestHex());
+
+        SmallBlock smb = temporaryCacheManager.getSmallBlock(blockHash.getDigestHex());
         for (NulsDigestData txHash : smb.getTxHashList()) {
             boolean exist = txCacheManager.txExist(txHash);
             if (!exist) {
@@ -109,7 +110,7 @@ public class DownloadDataUtils {
             }
         }
         if (txHashList.isEmpty()) {
-            BlockHeader header = blockCacheManager.getBlockHeader(smb.getBlockHash().getDigestHex());
+            BlockHeader header = temporaryCacheManager.getBlockHeader(smb.getBlockHash().getDigestHex());
             if (null == header) {
                 return;
             }
@@ -132,7 +133,7 @@ public class DownloadDataUtils {
                 }
                 return;
             }
-            blockCacheManager.cacheBlock(block);
+            blockManager.addBlock(block, false);
             AssembledBlockNotice notice = new AssembledBlockNotice();
             notice.setEventBody(header);
             eventBroadcaster.publishToLocal(notice);

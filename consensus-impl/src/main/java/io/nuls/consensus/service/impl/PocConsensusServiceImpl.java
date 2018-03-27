@@ -492,6 +492,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
             map.put("agentId", cd.getExtend().getAgentHash());
             map.put("agentName", agent.getExtend().getAgentName());
             map.put("agentAddress", agent.getAddress());
+            map.put("txHash",cd.getExtend().getTxHash());
             map.put("agentAddressAlias", null);
             map.put("address", cd.getAddress());
             map.put("status", cd.getExtend().getStatus());

@@ -23,7 +23,7 @@
  */
 package io.nuls.consensus.service.impl;
 
-import io.nuls.consensus.cache.manager.block.BlockCacheManager;
+import io.nuls.consensus.manager.BlockManager;
 import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
@@ -51,7 +51,7 @@ public class BlockStorageService {
 
     private BlockHeaderService headerDao = NulsContext.getServiceBean(BlockHeaderService.class);
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
-    private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
+    private BlockManager blockCacheManager = BlockManager.getInstance();
 
     private BlockStorageService() {
     }
@@ -164,11 +164,6 @@ public class BlockStorageService {
     public BlockHeader getBlockHeader(long height) throws NulsException {
         BlockHeader header = blockCacheManager.getBlockHeader(height);
         if (null != header) {
-            return header;
-        }
-        Block block = blockCacheManager.getBlock(height);
-        if (null != block) {
-            header = block.getHeader();
             return header;
         }
         BlockHeaderPo po = this.headerDao.getHeader(height);

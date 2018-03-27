@@ -65,6 +65,7 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
     public void onCommit(PocJoinConsensusTransaction tx) throws NulsException {
         manager.changeDepositStatus(tx.getTxData().getHexHash(), ConsensusStatusEnum.WAITING);
         Consensus<Deposit> cd = tx.getTxData();
+        cd.getExtend().setTxHash(tx.getHash().getDigestHex());
         cd.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
         DepositPo po = ConsensusTool.depositToPojo(cd,tx.getHash().getDigestHex());
         po.setBlockHeight(tx.getBlockHeight());
@@ -96,6 +97,7 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
     public void onApproval(PocJoinConsensusTransaction tx) throws NulsException {
         Consensus<Deposit> cd = tx.getTxData();
         cd.getExtend().setStatus(ConsensusStatusEnum.NOT_IN.getCode());
+        cd.getExtend().setTxHash(tx.getHash().getDigestHex());
         manager.cacheDeposit(cd);
 
     }

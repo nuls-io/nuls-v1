@@ -25,7 +25,6 @@ package io.nuls.consensus.thread;
 
 import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
-import io.nuls.consensus.cache.manager.block.BlockCacheManager;
 import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
@@ -47,6 +46,7 @@ import io.nuls.consensus.entity.tx.RedPunishTransaction;
 import io.nuls.consensus.entity.tx.YellowPunishTransaction;
 import io.nuls.consensus.event.BlockHeaderEvent;
 import io.nuls.consensus.event.notice.PackedBlockNotice;
+import io.nuls.consensus.manager.BlockManager;
 import io.nuls.consensus.manager.ConsensusManager;
 import io.nuls.consensus.service.impl.PocBlockService;
 import io.nuls.consensus.service.intf.BlockService;
@@ -91,7 +91,7 @@ public class ConsensusMeetingRunner implements Runnable {
     private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     private ConsensusCacheManager consensusCacheManager = ConsensusCacheManager.getInstance();
-    private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
+    private BlockManager blockManager = BlockManager.getInstance();
     private PocBlockService pocBlockService = PocBlockService.getInstance();
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
@@ -298,6 +298,9 @@ public class ConsensusMeetingRunner implements Runnable {
         List<NulsDigestData> hashList = new ArrayList<>();
         long totalSize = 0L;
         for (int i = 0; i < txList.size(); i++) {
+            if ((self.getPackTime() - TimeService.currentTimeMillis()) <= 100) {
+                break;
+            }
             Transaction tx = txList.get(i);
             totalSize += tx.size();
             if (totalSize >= PocConsensusConstant.MAX_BLOCK_SIZE) {
@@ -326,7 +329,7 @@ public class ConsensusMeetingRunner implements Runnable {
         }
         txCacheManager.removeTx(outHashList);
         if (totalSize < PocConsensusConstant.MAX_BLOCK_SIZE) {
-            addOrphanTx(txList, totalSize);
+            addOrphanTx(txList, totalSize, self);
         }
         addConsensusTx(bestBlock, txList, self);
         bd.setTxList(txList);
@@ -334,7 +337,7 @@ public class ConsensusMeetingRunner implements Runnable {
         Block newBlock = ConsensusTool.createBlock(bd, consensusManager.getConsensusStatusInfo().getAccount());
         ValidateResult result = newBlock.verify();
         if (result.isFailed()) {
-            Log.warn("packing block error" + result.getMessage());
+            Log.warn("packing block error:" + result.getMessage());
             for (Transaction tx : newBlock.getTxs()) {
                 if (tx.getType() == TransactionConstant.TX_TYPE_COIN_BASE) {
                     continue;
@@ -344,8 +347,7 @@ public class ConsensusMeetingRunner implements Runnable {
             return;
         }
         confirmingTxCacheManager.putTx(newBlock.getTxs().get(0));
-        blockCacheManager.cacheBlockHeader(newBlock.getHeader(), null);
-        blockCacheManager.cacheBlock(newBlock);
+        blockManager.addBlock(newBlock, false);
         BlockHeaderEvent event = new BlockHeaderEvent();
         event.setEventBody(newBlock.getHeader());
         eventBroadcaster.broadcastAndCache(event, false);
@@ -354,7 +356,10 @@ public class ConsensusMeetingRunner implements Runnable {
         eventBroadcaster.publishToLocal(notice);
     }
 
-    private void addOrphanTx(List<Transaction> txList, long totalSize) {
+    private void addOrphanTx(List<Transaction> txList, long totalSize, PocMeetingMember self) {
+        if ((self.getPackTime() - TimeService.currentTimeMillis()) <= 100) {
+            return;
+        }
         List<Transaction> orphanTxList = orphanTxCacheManager.getTxList();
         if (null == orphanTxList || orphanTxList.isEmpty()) {
             return;
@@ -362,6 +367,9 @@ public class ConsensusMeetingRunner implements Runnable {
         txList.sort(TxTimeComparator.getInstance());
         List<NulsDigestData> outHashList = new ArrayList<>();
         for (Transaction tx : orphanTxList) {
+            if ((self.getPackTime() - TimeService.currentTimeMillis()) <= 100) {
+                break;
+            }
             totalSize += tx.size();
             if (totalSize >= PocConsensusConstant.MAX_BLOCK_SIZE) {
                 break;

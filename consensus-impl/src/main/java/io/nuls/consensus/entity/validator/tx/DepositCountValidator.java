@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,31 +21,45 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.consensus.entity.validator.consensus;
+package io.nuls.consensus.entity.validator.tx;
 
+import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.constant.PocConsensusConstant;
-import io.nuls.consensus.entity.member.Agent;
-import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
+import io.nuls.consensus.entity.Consensus;
+import io.nuls.consensus.entity.member.Deposit;
+import io.nuls.consensus.entity.tx.PocJoinConsensusTransaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 
+import java.util.List;
+
 /**
  * @author Niels
- * @date 2017/12/6
+ * @date 2018/1/17
  */
-public class AgentDepositValidator implements NulsDataValidator<RegisterAgentTransaction> {
+public class DepositCountValidator implements NulsDataValidator<PocJoinConsensusTransaction> {
+
+    private static final DepositCountValidator INSTANCE = new DepositCountValidator();
+
+    private DepositCountValidator() {
+    }
+
+    public static DepositCountValidator getInstance() {
+        return INSTANCE;
+    }
+
+    private ConsensusCacheManager consensusCacheManager = ConsensusCacheManager.getInstance();
+
     @Override
-    public ValidateResult validate(RegisterAgentTransaction tx) {
-        ValidateResult result = ValidateResult.getSuccessResult();
-        Agent agent = tx.getTxData().getExtend();
-        if (null == agent) {
-            return ValidateResult.getFailedResult(ErrorCode.NULL_PARAMETER);
+    public ValidateResult validate(PocJoinConsensusTransaction tx) {
+        Consensus<Deposit> cd = tx.getTxData();
+        List<Consensus<Deposit>> list = consensusCacheManager.getCachedDepositListByAgentHash(cd.getExtend().getAgentHash());
+        if (null != list && list.size() >= PocConsensusConstant.MAX_ACCEPT_NUM_OF_DEPOSIT) {
+            return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_OVER_COUNT);
         }
-        if (PocConsensusConstant.AGENT_DEPOSIT_LOWER_LIMIT.isGreaterThan(agent.getDeposit())) {
-            result = ValidateResult.getFailedResult(ErrorCode.DEPOSIT_NOT_ENOUGH);
-        }
-        return result;
+        return ValidateResult.getSuccessResult();
     }
 }

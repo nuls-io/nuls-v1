@@ -43,6 +43,7 @@ public class Deposit extends BaseNulsData {
     private String agentHash;
     private int status;
     private long startTime;
+    private String txHash;
 
     public long getStartTime() {
         return startTime;
@@ -97,5 +98,13 @@ public class Deposit extends BaseNulsData {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public void setTxHash(String txHash) {
+        this.txHash = txHash;
+    }
+
+    public String getTxHash() {
+        return txHash;
     }
 }

@@ -63,6 +63,6 @@ public class CreditThresholdValidator implements NulsDataValidator<PocJoinConsen
         if (null == list || list.isEmpty()) {
             return ValidateResult.getSuccessResult();
         }
-        return ValidateResult.getFailedResult(ErrorCode.FAILED);
+        return ValidateResult.getFailedResult(ErrorCode.LACK_OF_CREDIT);
     }
 }

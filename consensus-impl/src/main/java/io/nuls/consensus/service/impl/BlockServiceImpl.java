@@ -23,10 +23,14 @@
  */
 package io.nuls.consensus.service.impl;
 
-import io.nuls.consensus.cache.manager.block.BlockCacheManager;
+import io.nuls.consensus.manager.BlockManager;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.utils.BlockHeightComparator;
-import io.nuls.core.chain.entity.*;
+import io.nuls.core.chain.entity.Block;
+import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.core.chain.entity.NulsDigestData;
+import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
@@ -47,7 +51,7 @@ import java.util.List;
  */
 public class BlockServiceImpl implements BlockService {
     private BlockStorageService blockStorageService = BlockStorageService.getInstance();
-    private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
+    private BlockManager blockManager = BlockManager.getInstance();
     @Autowired
     private LedgerService ledgerService;
 
@@ -64,7 +68,7 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public long getLocalHeight() {
-        long height = blockCacheManager.getBestHeight();
+        long height = NulsContext.getInstance().getBestHeight();
         if (height == 0) {
             height = blockStorageService.getBestHeight();
         }
@@ -123,7 +127,7 @@ public class BlockServiceImpl implements BlockService {
             long currentMaxHeight = blockList.get(blockList.size() - 1).getHeader().getHeight();
             while (currentMaxHeight < endHeight) {
                 long next = currentMaxHeight + 1;
-                Block block = blockCacheManager.getBlock(next);
+                Block block = blockManager.getBlock(next);
                 if (null == block) {
                     try {
                         block = blockStorageService.getBlock(next);
@@ -145,15 +149,35 @@ public class BlockServiceImpl implements BlockService {
     @DbSession
     public boolean saveBlock(Block block) throws IOException {
         block.verifyWithException();
+        boolean b = false;
         for (int x = 0; x < block.getHeader().getTxCount(); x++) {
             Transaction tx = block.getTxs().get(x);
-            tx.setBlockHeight(block.getHeader().getHeight());
-            try {
-                ledgerService.commitTx(tx);
-            } catch (Exception e) {
-                Log.error(e);
-                rollback(block.getTxs(), x);
-                throw new NulsRuntimeException(e);
+            if (tx.getStatus() == TxStatusEnum.CACHED) {
+                b = true;
+                tx.setBlockHeight(block.getHeader().getHeight());
+                try {
+                    ledgerService.approvalTx(tx);
+                } catch (Exception e) {
+                    Log.error(e);
+                    rollback(block.getTxs(), x);
+                    throw new NulsRuntimeException(e);
+                }
+            }
+        }
+        if (b) {
+            block.verifyWithException();
+        }
+        for (int x = 0; x < block.getHeader().getTxCount(); x++) {
+            Transaction tx = block.getTxs().get(x);
+            if (tx.getStatus() == TxStatusEnum.AGREED) {
+                tx.setBlockHeight(block.getHeader().getHeight());
+                try {
+                    ledgerService.commitTx(tx);
+                } catch (Exception e) {
+                    Log.error(e);
+                    rollback(block.getTxs(), x);
+                    throw new NulsRuntimeException(e);
+                }
             }
         }
         ledgerService.saveTxList(block.getTxs());
@@ -169,6 +193,7 @@ public class BlockServiceImpl implements BlockService {
         if (null == block) {
             return;
         }
+        blockManager.rollback(block);
         this.rollback(block.getTxs(), block.getTxs().size() - 1);
         this.ledgerService.deleteTx(block.getHeader().getHeight());
         blockStorageService.delete(block.getHeader().getHash().getDigestHex());
@@ -193,7 +218,7 @@ public class BlockServiceImpl implements BlockService {
     @Override
     public BlockHeader getBlockHeader(NulsDigestData hash) throws NulsException {
         String hashHex = hash.getDigestHex();
-        BlockHeader header = blockCacheManager.getBlockHeader(hashHex);
+        BlockHeader header = blockManager.getBlockHeader(hashHex);
         if (null == header) {
             header = blockStorageService.getBlockHeader(hashHex);
         }

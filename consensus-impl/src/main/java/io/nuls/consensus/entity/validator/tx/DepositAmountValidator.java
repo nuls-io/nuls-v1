@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,8 +21,9 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.consensus.entity.validator.consensus;
+package io.nuls.consensus.entity.validator.tx;
 
 import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.constant.PocConsensusConstant;
@@ -30,6 +32,7 @@ import io.nuls.consensus.entity.member.Deposit;
 import io.nuls.consensus.entity.tx.PocJoinConsensusTransaction;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 
@@ -68,6 +71,10 @@ public class DepositAmountValidator implements NulsDataValidator<PocJoinConsensu
         }
         if (max.isLessThan(total)) {
             return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_TOO_MUCH);
+        }
+
+        if(!data.getTxData().getExtend().getDeposit().equals(data.getCoinData().getTotalNa())){
+            return ValidateResult.getFailedResult(SeverityLevelEnum.FLAGRANT_FOUL,ErrorCode.DEPOSIT_ERROR);
         }
         return ValidateResult.getSuccessResult();
     }

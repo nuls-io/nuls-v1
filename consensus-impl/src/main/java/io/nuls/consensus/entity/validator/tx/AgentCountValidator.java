@@ -1,4 +1,30 @@
-package io.nuls.consensus.entity.validator.consensus;
+/*
+ *
+ * MIT License
+ *
+ * Copyright (c) 2017-2018 nuls.io
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
+
+package io.nuls.consensus.entity.validator.tx;
 
 import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.constant.PocConsensusConstant;
@@ -13,6 +39,7 @@ import java.util.List;
 
 /**
  * date 2018/3/23.
+ *
  * @author Facjas
  */
 public class AgentCountValidator implements NulsDataValidator<RegisterAgentTransaction> {
@@ -27,6 +54,9 @@ public class AgentCountValidator implements NulsDataValidator<RegisterAgentTrans
         List<Consensus<Agent>> caList = consensusCacheManager.getCachedAgentList();
         if (caList != null) {
             for (Consensus<Agent> ca : caList) {
+                if (ca.getHexHash().equals(tx.getTxData().getHexHash())) {
+                    continue;
+                }
                 if (ca.getAddress().equals(tx.getTxData().getAddress())) {
                     return ValidateResult.getFailedResult("An address can only create one agent");
                 }
@@ -39,7 +69,7 @@ public class AgentCountValidator implements NulsDataValidator<RegisterAgentTrans
                 if (agent.getPackingAddress().equals(ca.getExtend().getPackingAddress())) {
                     return ValidateResult.getFailedResult("The packingAddress is busy!");
                 }
-                if(agentName.equals(ca.getExtend().getAgentName())){
+                if (agentName.equals(ca.getExtend().getAgentName())) {
                     return ValidateResult.getFailedResult("AgentName repetition!");
                 }
             }
