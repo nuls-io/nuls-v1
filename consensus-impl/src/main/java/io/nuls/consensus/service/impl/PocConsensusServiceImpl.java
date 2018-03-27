@@ -292,7 +292,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
         Map<String, Object> map = new HashMap<>();
         if (null != agent) {
             map.put("agentCount", 1);
-            totalDeposit += agent.getExtend().getDeposit().getValue();
+//            totalDeposit += agent.getExtend().getDeposit().getValue();
         } else {
             map.put("agentCount", 0);
         }

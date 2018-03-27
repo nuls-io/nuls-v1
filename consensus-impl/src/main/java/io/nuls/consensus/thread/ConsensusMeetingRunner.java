@@ -161,7 +161,7 @@ public class ConsensusMeetingRunner implements Runnable {
     private boolean checkBestHash() {
         BlockInfo blockInfo;
         try {
-            blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(-1);
+            blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(-1, null);
         } catch (Exception e) {
             return false;
         }
@@ -347,7 +347,7 @@ public class ConsensusMeetingRunner implements Runnable {
             return;
         }
         confirmingTxCacheManager.putTx(newBlock.getTxs().get(0));
-        blockManager.addBlock(newBlock, false);
+        blockManager.addBlock(newBlock, false, null);
         BlockHeaderEvent event = new BlockHeaderEvent();
         event.setEventBody(newBlock.getHeader());
         eventBroadcaster.broadcastAndCache(event, false);

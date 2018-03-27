@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -101,7 +101,7 @@ public class BlockMaintenanceThread implements Runnable {
         do {
             if (null == bestCorrectBlock.getLocalBestBlock() && bestCorrectBlock.getNetBestBlockInfo() == null) {
                 doit = true;
-                BlockInfo blockInfo = BEST_HEIGHT_FROM_NET.request(-1);
+                BlockInfo blockInfo = BEST_HEIGHT_FROM_NET.request(-1, null);
                 bestCorrectBlock.setNetBestBlockInfo(blockInfo);
                 break;
             }
@@ -115,9 +115,10 @@ public class BlockMaintenanceThread implements Runnable {
                     Log.error(e);
                 }
                 break;
-            };
-            if(null==bestCorrectBlock.getNetBestBlockInfo()){
-                bestCorrectBlock.setNetBestBlockInfo(BEST_HEIGHT_FROM_NET.request(0));
+            }
+            ;
+            if (null == bestCorrectBlock.getNetBestBlockInfo()) {
+                bestCorrectBlock.setNetBestBlockInfo(BEST_HEIGHT_FROM_NET.request(0, null));
             }
             if (null == bestCorrectBlock.getNetBestBlockInfo()) {
                 break;
@@ -179,7 +180,7 @@ public class BlockMaintenanceThread implements Runnable {
             if (null == localBestBlock || localBestBlock.getHeader().getHeight() <= 1) {
                 break;
             }
-            BlockInfo netBestBlockInfo = DistributedBlockInfoRequestUtils.getInstance().request(0);
+            BlockInfo netBestBlockInfo = DistributedBlockInfoRequestUtils.getInstance().request(0, null);
             resultCorrentInfo.setNetBestBlockInfo(netBestBlockInfo);
             if (null == netBestBlockInfo || netBestBlockInfo.getBestHash() == null) {
                 break;
@@ -212,7 +213,7 @@ public class BlockMaintenanceThread implements Runnable {
                 localBestBlock = this.blockService.getLocalBestBlock();
                 break;
             } else {
-                netBestBlockInfo = DistributedBlockInfoRequestUtils.getInstance().request(localBestBlock.getHeader().getHeight());
+                netBestBlockInfo = DistributedBlockInfoRequestUtils.getInstance().request(localBestBlock.getHeader().getHeight(), netBestBlockInfo.getNodeIdList());
                 if (netBestBlockInfo.getBestHash().equals(localBestBlock.getHeader().getHash())) {
                     break;
                 }
@@ -247,8 +248,8 @@ public class BlockMaintenanceThread implements Runnable {
         boolean previousRb = false;
         if (height > 0) {
             NulsContext.getInstance().setBestBlock(block);
-            BlockInfo blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(height);
-            if (null != blockInfo && null != blockInfo.getBestHash() &&(!blockInfo.getBestHash().equals(block.getHeader().getHash())&&blockInfo.getBestHeight()==height) ) {
+            BlockInfo blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(height,null);
+            if (null != blockInfo && null != blockInfo.getBestHash() && (!blockInfo.getBestHash().equals(block.getHeader().getHash()) && blockInfo.getBestHeight() == height)) {
                 previousRb = true;
             }
         }
