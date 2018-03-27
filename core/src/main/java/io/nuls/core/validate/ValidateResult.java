@@ -78,7 +78,7 @@ public class ValidateResult<T> extends Result<T> {
 
     public static ValidateResult getFailedResult(ErrorCode errorCode, String msg) {
         ValidateResult vr = getFailedResult(errorCode);
-        vr.setObject(msg);
+        vr.setMessage(msg);
         return vr;
     }
 }

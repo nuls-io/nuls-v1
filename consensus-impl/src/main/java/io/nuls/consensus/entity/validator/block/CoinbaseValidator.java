@@ -79,25 +79,10 @@ public class CoinbaseValidator implements NulsDataValidator<Block> {
         } catch (NulsException e) {
             Log.error(e);
         }
-        if(null==blockRound){
+        if (null == blockRound) {
             return ValidateResult.getFailedResult("Cann't get the round data!");
         }
-        long nowRoundIndex = consensusManager.getCurrentRound().getIndex();
-        if(blockRound.getRoundIndex()<(nowRoundIndex-1)){
-            return ValidateResult.getSuccessResult();
-        }
-        if(consensusManager.getCurrentRound().getPreviousRound()==null&&nowRoundIndex==consensusManager.getCurrentRound().getIndex()-1){
-            return ValidateResult.getSuccessResult();
-        }
         //todo 金额验证
-
-
-
-
-
-
-
-
 
 
         return ValidateResult.getSuccessResult();
