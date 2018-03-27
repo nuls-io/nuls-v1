@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -236,11 +236,9 @@ public class ConsensusCacheManager {
         if (null == ca) {
             return null;
         }
-        if (ca.getExtend().getStatus() == ConsensusStatusEnum.IN.getCode()) {
-            return agentHashFilter(inDelegateCache.values(), agentHash);
-        } else {
-            return agentHashFilter(outDelegateCache.values(), agentHash);
-        }
+        List<Consensus<Deposit>> depositList = agentHashFilter(inDelegateCache.values(), agentHash);
+        depositList.addAll(agentHashFilter(outDelegateCache.values(), agentHash));
+        return depositList;
     }
 
     private List<Consensus<Deposit>> agentHashFilter(List<Consensus<Deposit>> allList, String agentHash) {
@@ -293,14 +291,15 @@ public class ConsensusCacheManager {
         allSet.addAll(inDelegateCache.values());
         return new ArrayList<>(allSet);
     }
+
     public List<Consensus<Deposit>> getCachedDepositListByAddress(String address) {
         Set<Consensus<Deposit>> allSet = new HashSet<>(outDelegateCache.values());
         allSet.addAll(inDelegateCache.values());
 
-        List<Consensus<Deposit>> list =  new ArrayList<>(allSet);
-        for(int i=list.size()-1;i>=0;i--){
+        List<Consensus<Deposit>> list = new ArrayList<>(allSet);
+        for (int i = list.size() - 1; i >= 0; i--) {
             Consensus<Deposit> cd = list.get(i);
-            if(!cd.getAddress().equals(address)){
+            if (!cd.getAddress().equals(address)) {
                 list.remove(i);
             }
         }
