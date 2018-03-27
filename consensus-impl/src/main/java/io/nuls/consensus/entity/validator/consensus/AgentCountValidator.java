@@ -13,6 +13,7 @@ import java.util.List;
 
 /**
  * date 2018/3/23.
+ *
  * @author Facjas
  */
 public class AgentCountValidator implements NulsDataValidator<RegisterAgentTransaction> {
@@ -27,6 +28,9 @@ public class AgentCountValidator implements NulsDataValidator<RegisterAgentTrans
         List<Consensus<Agent>> caList = consensusCacheManager.getCachedAgentList();
         if (caList != null) {
             for (Consensus<Agent> ca : caList) {
+                if (ca.getHexHash().equals(tx.getTxData().getHexHash())) {
+                    continue;
+                }
                 if (ca.getAddress().equals(tx.getTxData().getAddress())) {
                     return ValidateResult.getFailedResult("An address can only create one agent");
                 }
@@ -39,7 +43,7 @@ public class AgentCountValidator implements NulsDataValidator<RegisterAgentTrans
                 if (agent.getPackingAddress().equals(ca.getExtend().getPackingAddress())) {
                     return ValidateResult.getFailedResult("The packingAddress is busy!");
                 }
-                if(agentName.equals(ca.getExtend().getAgentName())){
+                if (agentName.equals(ca.getExtend().getAgentName())) {
                     return ValidateResult.getFailedResult("AgentName repetition!");
                 }
             }
