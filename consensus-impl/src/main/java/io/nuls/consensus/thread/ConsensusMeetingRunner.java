@@ -25,7 +25,6 @@ package io.nuls.consensus.thread;
 
 import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
-import io.nuls.consensus.cache.manager.block.BlockCacheManager;
 import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
@@ -47,6 +46,7 @@ import io.nuls.consensus.entity.tx.RedPunishTransaction;
 import io.nuls.consensus.entity.tx.YellowPunishTransaction;
 import io.nuls.consensus.event.BlockHeaderEvent;
 import io.nuls.consensus.event.notice.PackedBlockNotice;
+import io.nuls.consensus.manager.BlockManager;
 import io.nuls.consensus.manager.ConsensusManager;
 import io.nuls.consensus.service.impl.PocBlockService;
 import io.nuls.consensus.service.intf.BlockService;
@@ -91,7 +91,7 @@ public class ConsensusMeetingRunner implements Runnable {
     private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     private ConsensusCacheManager consensusCacheManager = ConsensusCacheManager.getInstance();
-    private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
+    private BlockManager blockManager = BlockManager.getInstance();
     private PocBlockService pocBlockService = PocBlockService.getInstance();
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
@@ -344,8 +344,7 @@ public class ConsensusMeetingRunner implements Runnable {
             return;
         }
         confirmingTxCacheManager.putTx(newBlock.getTxs().get(0));
-        blockCacheManager.cacheBlockHeader(newBlock.getHeader(), null);
-        blockCacheManager.cacheBlock(newBlock);
+        blockManager.addBlock(newBlock,false);
         BlockHeaderEvent event = new BlockHeaderEvent();
         event.setEventBody(newBlock.getHeader());
         eventBroadcaster.broadcastAndCache(event, false);
