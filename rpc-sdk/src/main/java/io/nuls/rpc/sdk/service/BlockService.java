@@ -24,12 +24,15 @@
 package io.nuls.rpc.sdk.service;
 
 import io.nuls.rpc.sdk.constant.RpcCmdConstant;
+import io.nuls.rpc.sdk.entity.AccountDto;
 import io.nuls.rpc.sdk.entity.BlockDto;
 import io.nuls.rpc.sdk.entity.RpcClientResult;
 import io.nuls.rpc.sdk.utils.AssertUtil;
 import io.nuls.rpc.sdk.utils.RestFulUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -140,7 +143,15 @@ public enum BlockService {
         param.put("pageSize", String.valueOf(pageSize));
         RpcClientResult result = restFul.get("/block/list", param);
         if (result.isSuccess()) {
-            result.setData(new BlockDto((Map<String, Object>) result.getData(), false));
+            Map<String, Object> dataMap = (Map<String, Object>)result.getData();
+            if(dataMap != null) {
+                List<Map<String, Object>> list = (List<Map<String, Object>>) dataMap.get("list");
+                List<BlockDto> blockDtoList = new ArrayList<>();
+                for (Map<String, Object> map : list) {
+                    blockDtoList.add(new BlockDto(map, false));
+                }
+                result.setData(blockDtoList);
+            }
         }
         return result;
     }

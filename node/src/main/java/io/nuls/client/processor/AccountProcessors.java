@@ -99,6 +99,49 @@ public abstract class AccountProcessors implements CommandProcessor {
     }
 
 
+
+    public static class GetAccount extends AccountProcessors {
+
+        @Override
+        public String getCommand() {
+            return "getaccount";
+        }
+
+        @Override
+        public String getHelp() {
+            CommandBulider builder = new CommandBulider();
+            //TODO 翻译
+            builder.newLine(getCommandDescription())
+                    .newLine("\t<address> 账户地址 - 必输");
+            return builder.toString();
+        }
+
+        @Override
+        public String getCommandDescription() {
+            //TODO 翻译
+            return "getaccount <address> --获取账户基本信息";
+        }
+
+        @Override
+        public boolean argsValidate(String[] args) {
+            int length = args.length;
+            if(length != 2)
+                return false;
+            if(!CommandHelper.checkArgsIsNull(args))
+                return false;
+            return true;
+        }
+
+        @Override
+        public CommandResult execute(String[] args) {
+            RpcClientResult result = accountService.getBaseInfo(args[1]);
+            if (null == result) {
+                return CommandResult.getFailed("Failure to execute");
+            }
+            return CommandResult.getResult(result);
+        }
+    }
+
     /**
      * get the balance of a address
      */

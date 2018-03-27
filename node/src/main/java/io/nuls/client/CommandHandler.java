@@ -53,6 +53,7 @@ public class CommandHandler {
 
         register(new AccountProcessors.AliasAccount());
         register(new AccountProcessors.CreateAccount());
+        register(new AccountProcessors.GetAccount());
         register(new AccountProcessors.GetAsset());
         register(new AccountProcessors.GetBalance());
         register(new AccountProcessors.GetPrivateKey());
@@ -120,7 +121,7 @@ public class CommandHandler {
             }
             return processor.execute(args).toString();
         } catch (Exception e) {
-            return CommandConstant.COMMAND_ERROR + ":" + e.getMessage();
+            return CommandConstant.EXCEPTION + ": " + e.getMessage();
         }
     }
 
