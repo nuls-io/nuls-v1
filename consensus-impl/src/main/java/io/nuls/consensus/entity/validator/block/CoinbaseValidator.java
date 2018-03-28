@@ -32,6 +32,7 @@ import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.constant.TransactionConstant;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.NulsDataValidator;
@@ -81,6 +82,9 @@ public class CoinbaseValidator implements NulsDataValidator<Block> {
         }
         if (null == blockRound) {
             return ValidateResult.getFailedResult("Cann't get the round data!");
+        }
+        if(block.getHeader().getHeight()!=(NulsContext.getInstance().getBestHeight()+1)){
+            return ValidateResult.getSuccessResult();
         }
         //todo 金额验证
 
