@@ -12,7 +12,7 @@ public class ConsensusAddressInfoDto {
 
     private Integer agentCount;
 
-    private Integer totalDeposit;
+    private Long totalDeposit;
 
     private Long reward;
 
@@ -24,7 +24,7 @@ public class ConsensusAddressInfoDto {
 
     public ConsensusAddressInfoDto(Map<String, Object> map) {
         this.agentCount = (Integer)map.get("agentCount");
-        this.totalDeposit = (Integer)map.get("totalDeposit");
+        this.totalDeposit = StringUtils.parseLong(map.get("totalDeposit"));
         this.reward = StringUtils.parseLong(map.get("reward"));
         this.joinAgentCount = (Integer)map.get("joinAgentCount");
         this.usableBalance = StringUtils.parseLong(map.get("usableBalance"));
@@ -39,11 +39,11 @@ public class ConsensusAddressInfoDto {
         this.agentCount = agentCount;
     }
 
-    public Integer getTotalDeposit() {
+    public Long getTotalDeposit() {
         return totalDeposit;
     }
 
-    public void setTotalDeposit(Integer totalDeposit) {
+    public void setTotalDeposit(Long totalDeposit) {
         this.totalDeposit = totalDeposit;
     }
 

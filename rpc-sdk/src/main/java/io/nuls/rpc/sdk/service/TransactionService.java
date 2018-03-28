@@ -21,7 +21,7 @@ public enum TransactionService {
 
     private RestFulUtils restFul = RestFulUtils.getInstance();
 
-    public RpcClientResult getTxBase(String hash){
+    private RpcClientResult getTxBase(String hash){
         try {
             AssertUtil.canNotEmpty(hash);
         } catch (Exception e) {
@@ -48,7 +48,7 @@ public enum TransactionService {
         return result;
     }
 
-    public RpcClientResult getTxList(String address){
+    private RpcClientResult getTxListBase(String address){
         try {
             AssertUtil.canNotEmpty(address);
         } catch (Exception e) {
@@ -57,12 +57,32 @@ public enum TransactionService {
         Map<String, String> params = new HashMap<>(2);
         params.put("address", String.valueOf(address));
         RpcClientResult result = restFul.get("/tx/list", params);
+
+        return result;
+    }
+
+    public RpcClientResult getTxList(String address){
+        RpcClientResult result = getTxListBase(address);
         if(result.isSuccess()){
             Map<String, Object> page = (Map<String, Object>)result.getData();
             List<Map<String, Object>> list = (List<Map<String, Object>>)page.get("list");
             List<TransactionDto> transactionDtoList = new ArrayList<>(10);
             for (Map<String, Object> map : list){
                 transactionDtoList.add(new TransactionDto(map));
+            }
+            result.setData(transactionDtoList);
+        }
+        return result;
+    }
+
+    public RpcClientResult getTxListNa2Nuls(String address){
+        RpcClientResult result = getTxListBase(address);
+        if(result.isSuccess()){
+            Map<String, Object> page = (Map<String, Object>)result.getData();
+            List<Map<String, Object>> list = (List<Map<String, Object>>)page.get("list");
+            List<TransactionDto> transactionDtoList = new ArrayList<>(10);
+            for (Map<String, Object> map : list){
+                transactionDtoList.add(new TransactionNa2NulsDto(map));
             }
             result.setData(transactionDtoList);
         }

@@ -71,7 +71,7 @@ public abstract class ConsensusProcessors implements CommandProcessor {
 
         @Override
         public CommandResult execute(String[] args) {
-            RpcClientResult result = consensusService.getconsensus();
+            RpcClientResult result = consensusService.getConsensusNa2Nuls();
             if (null == result) {
                 return CommandResult.getFailed("Failure to execute");
             }
@@ -112,7 +112,7 @@ public abstract class ConsensusProcessors implements CommandProcessor {
 
         @Override
         public CommandResult execute(String[] args) {
-            RpcClientResult result = consensusService.getconsensusaddress(args[1]);
+            RpcClientResult result = consensusService.getConsensusAddressNa2Nuls(args[1]);
             if (null == result) {
                 return CommandResult.getFailed("Failure to execute");
             }
@@ -275,7 +275,48 @@ public abstract class ConsensusProcessors implements CommandProcessor {
             StopAgentParams stopAgentParams = new StopAgentParams();
             stopAgentParams.setAddress(args[1]);
             stopAgentParams.setPassword(args[2]);
-            RpcClientResult result = consensusService.stopagent(stopAgentParams);
+            RpcClientResult result = consensusService.stopAgent(stopAgentParams);
+            if(null == result){
+                return CommandResult.getFailed("Failure to execute");
+            }
+            return CommandResult.getResult(result);
+        }
+    }
+
+    public static class GetAgent extends ConsensusProcessors{
+        @Override
+        public String getCommand() {
+            return "getagent";
+        }
+
+        @Override
+        public String getHelp() {
+            CommandBulider bulider = new CommandBulider();
+            bulider.newLine(getCommandDescription())
+                    .newLine("\t<address>   节点拥有人地址 -required");
+            return bulider.toString();
+        }
+
+        @Override
+        public String getCommandDescription() {
+            return "getagent <address> -- get agent information";
+        }
+
+        @Override
+        public boolean argsValidate(String[] args) {
+            int length = args.length;
+            if(length != 2){
+                return false;
+            }
+            if(!StringUtils.validAddressSimple(args[1])){
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public CommandResult execute(String[] args) {
+            RpcClientResult result = consensusService.getAgentNa2Nuls(args[1]);
             if(null == result){
                 return CommandResult.getFailed("Failure to execute");
             }
@@ -308,7 +349,7 @@ public abstract class ConsensusProcessors implements CommandProcessor {
 
         @Override
         public CommandResult execute(String[] args) {
-            RpcClientResult result = consensusService.getagentstatus();
+            RpcClientResult result = consensusService.getAgentStatus();
             if(null == result){
                 return CommandResult.getFailed("Failure to execute");
             }

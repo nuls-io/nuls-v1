@@ -20,23 +20,42 @@ public enum ConsensusService {
 
     private RestFulUtils restFul = RestFulUtils.getInstance();
 
-    public RpcClientResult getconsensus(){
+    public RpcClientResult getConsensus(){
         RpcClientResult result = restFul.get("/consensus", null);
         if(result.isSuccess()){
             result.setData(new ConsensusIntegratedDto((Map<String, Object>)result.getData()));
         }
         return result;
     }
+    public RpcClientResult getConsensusNa2Nuls(){
+        RpcClientResult result = restFul.get("/consensus", null);
+        if(result.isSuccess()){
+            result.setData(new ConsensusIntegratedNa2NulsDto((Map<String, Object>)result.getData()));
+        }
+        return result;
+    }
 
-    public RpcClientResult getconsensusaddress(String address){
+    private RpcClientResult getConsensusAddressBase(String address){
         try {
             AssertUtil.canNotEmpty(address);
         } catch (Exception e) {
             return RpcClientResult.getFailed(e.getMessage());
         }
-        RpcClientResult result = restFul.get("/consensus/address/" + address, null);
+        return restFul.get("/consensus/address/" + address, null);
+    }
+
+    public RpcClientResult getConsensusAddress(String address){
+        RpcClientResult result = getConsensusAddressBase(address);
         if(result.isSuccess()){
             result.setData(new ConsensusAddressInfoDto((Map<String, Object>)result.getData()));
+        }
+        return result;
+    }
+
+    public RpcClientResult getConsensusAddressNa2Nuls(String address){
+        RpcClientResult result = getConsensusAddressBase(address);
+        if(result.isSuccess()){
+            result.setData(new ConsensusAddressInfoNa2NulsDto((Map<String, Object>)result.getData()));
         }
         return result;
     }
@@ -72,7 +91,7 @@ public enum ConsensusService {
         }
     }
 
-    public RpcClientResult stopagent (StopAgentParams params) {
+    public RpcClientResult stopAgent (StopAgentParams params) {
         try {
             AssertUtil.canNotEmpty(params.getAddress());
             AssertUtil.canNotEmpty(params.getPassword());
@@ -83,21 +102,33 @@ public enum ConsensusService {
         }
     }
 
-    public RpcClientResult getagent(String agentAddress) {
+    private RpcClientResult getAgentBase(String agentAddress) {
         try {
             AssertUtil.canNotEmpty(agentAddress);
         } catch (Exception e) {
             e.printStackTrace();
             return RpcClientResult.getFailed(e.getMessage());
         }
-        RpcClientResult result = restFul.get("/consensus/agent/" + agentAddress, null);
+        return restFul.get("/consensus/agent/" + agentAddress, null);
+    }
+
+    public RpcClientResult getAgent(String agentAddress) {
+        RpcClientResult result = getAgentBase(agentAddress);
         if(result.isSuccess()){
             result.setData(new ConsensusAgentInfoDto((Map<String, Object>)result.getData()));
         }
         return result;
     }
 
-    public RpcClientResult getagentstatus() {
+    public RpcClientResult getAgentNa2Nuls(String agentAddress) {
+        RpcClientResult result = getAgentBase(agentAddress);
+        if(result.isSuccess()){
+            result.setData(new ConsensusAgentInfoNa2NulsDto((Map<String, Object>)result.getData()));
+        }
+        return result;
+    }
+
+    public RpcClientResult getAgentStatus() {
         RpcClientResult result = restFul.get("/consensus/agent/status" , null);
         if(result.isSuccess()){
             result.setData(new ConsensusStatusDto((Map<String, Object>)result.getData()));
