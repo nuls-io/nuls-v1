@@ -31,12 +31,13 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
+import io.nuls.ledger.entity.tx.TransferTransaction;
 
 /**
  * @author vivi
  * @date 2017/12/18.
  */
-public class AliasTransaction extends AbstractCoinTransaction<Alias> {
+public class AliasTransaction extends TransferTransaction<Alias> {
 
     public AliasTransaction() throws NulsException {
         super(TransactionConstant.TX_TYPE_SET_ALIAS);
