@@ -96,14 +96,22 @@ public class UtxoOutputDaoImpl extends BaseDaoImpl<UtxoOutputMapper, Map<String,
     }
 
     @Override
-    public long getLockUtxoCount(String address, Long beginTime) {
+    public long getLockUtxoCount(String address, Long beginTime, Long bestHeight, Long genesisTime) {
         Searchable searchable = new Searchable();
 
-        Condition condition = new Condition("lock_time", SearchOperator.gt, beginTime);
-        condition.setPrefix("(");
+        Condition condition;
+        condition = new Condition("lock_time", SearchOperator.gt, bestHeight);
+        condition.setPrefix("((");
         searchable.addCondition(condition);
 
-        condition = new Condition("status", SearchOperator.eq, UtxoOutputPo.LOCKED);
+        condition = new Condition("lock_time", SearchOperator.lt, genesisTime);
+        condition.setEndfix(")");
+        searchable.addCondition(condition);
+
+        condition = new Condition(Condition.OR, "lock_time", SearchOperator.gt, beginTime);
+        searchable.addCondition(condition);
+
+        condition = new Condition(Condition.OR, "status", SearchOperator.eq, UtxoOutputPo.LOCKED);
         condition.setEndfix(")");
         searchable.addCondition(condition);
 
@@ -112,13 +120,23 @@ public class UtxoOutputDaoImpl extends BaseDaoImpl<UtxoOutputMapper, Map<String,
     }
 
     @Override
-    public List<UtxoOutputPo> getLockUtxo(String address, Long beginTime, Integer start, Integer limit) {
+    public List<UtxoOutputPo> getLockUtxo(String address, Long beginTime,
+                                          Long bestHeight, Long genesisTime,
+                                          Integer start, Integer limit) {
         Searchable searchable = new Searchable();
-        Condition condition = new Condition("b.lock_time", SearchOperator.gt, beginTime);
-        condition.setPrefix("(");
+        Condition condition;
+        condition = new Condition("lock_time", SearchOperator.gt, bestHeight);
+        condition.setPrefix("((");
         searchable.addCondition(condition);
 
-        condition = new Condition("b.status", SearchOperator.eq, UtxoOutputPo.LOCKED);
+        condition = new Condition("lock_time", SearchOperator.lt, genesisTime);
+        condition.setEndfix(")");
+        searchable.addCondition(condition);
+
+        condition = new Condition(Condition.OR, "lock_time", SearchOperator.gt, beginTime);
+        searchable.addCondition(condition);
+
+        condition = new Condition(Condition.OR, "status", SearchOperator.eq, UtxoOutputPo.LOCKED);
         condition.setEndfix(")");
         searchable.addCondition(condition);
         searchable.addCondition("b.address", SearchOperator.eq, address);
