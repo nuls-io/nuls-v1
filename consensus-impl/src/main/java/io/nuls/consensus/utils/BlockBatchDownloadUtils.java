@@ -120,9 +120,9 @@ public class BlockBatchDownloadUtils {
             blocksHash = DistributedBlockInfoRequestUtils.getInstance().request(startHeight, endHeight, DOWNLOAD_BLOCKS_PER_TIME,nodeIdList);
             request(startHeight, endHeight);
             while (working) {
-//                if ((lastOperateTime + DOWNLOAD_IDLE_TIME_OUT) < TimeService.currentTimeMillis()) {
-//                    verify();
-//                }
+                if ((lastOperateTime + DOWNLOAD_IDLE_TIME_OUT) < TimeService.currentTimeMillis()) {
+                    verify();
+                }
                 if ((TimeService.currentTimeMillis() - lastOperateTime) >= DOWNLOAD_IDLE_TIME_OUT) {
                     working = false;
                     return;
