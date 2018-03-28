@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -43,6 +43,7 @@ import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -57,7 +58,7 @@ public class BlockBatchDownloadUtils {
     /**
      * todo unit:ms
      */
-    private static final long DOWNLOAD_IDLE_TIME_OUT = 20000;
+    private static final long DOWNLOAD_IDLE_TIME_OUT = 1000;
 
     private static final BlockBatchDownloadUtils INSTANCE = new BlockBatchDownloadUtils();
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
@@ -80,7 +81,6 @@ public class BlockBatchDownloadUtils {
     private DownloadRound currentRound;
     private List<String> nodeIdList;
     private BlockInfo blocksHash;
-    private long lastOperateTime;
 
     private Lock lock = new ReentrantLock();
 
@@ -114,20 +114,13 @@ public class BlockBatchDownloadUtils {
             if (working) {
                 return;
             }
-            this.lastOperateTime = TimeService.currentTimeMillis();
             working = true;
             this.init(nodeIdList);
-            blocksHash = DistributedBlockInfoRequestUtils.getInstance().request(startHeight, endHeight, DOWNLOAD_BLOCKS_PER_TIME,nodeIdList);
+            blocksHash = DistributedBlockInfoRequestUtils.getInstance().request(startHeight, endHeight, DOWNLOAD_BLOCKS_PER_TIME, nodeIdList);
             request(startHeight, endHeight);
             while (working) {
-                if ((lastOperateTime + DOWNLOAD_IDLE_TIME_OUT) < TimeService.currentTimeMillis()) {
-                    verify();
-                }
-                if ((TimeService.currentTimeMillis() - lastOperateTime) >= DOWNLOAD_IDLE_TIME_OUT) {
-                    working = false;
-                    return;
-                }
-                Thread.sleep(100L);
+                verify();
+                Thread.sleep(500L);
             }
         } catch (Exception e) {
             Log.error(e.getMessage());
@@ -206,10 +199,12 @@ public class BlockBatchDownloadUtils {
         status.setStart(start);
         status.setEnd(end);
         status.setNodeId(nodeId);
+        nodeStatusMap.put(nodeId, status);
         this.eventBroadcaster.sendToNode(new GetBlockRequest(start, end), nodeId);
         status.setUpdateTime(System.currentTimeMillis());
-        nodeStatusMap.put(nodeId, status);
-        Log.info("download block :" + start + "-" + end + ",from : " + nodeId);
+        if(start!=end){
+            Log.info("download block :" + start + "-" + end + ",from : " + nodeId);
+        }
     }
 
 
@@ -219,7 +214,6 @@ public class BlockBatchDownloadUtils {
             if (null == status) {
                 return false;
             }
-            this.lastOperateTime = TimeService.currentTimeMillis();
             if (!status.containsHeight(block.getHeader().getHeight())) {
                 return false;
             }
@@ -229,7 +223,6 @@ public class BlockBatchDownloadUtils {
             if (status.finished()) {
                 this.queueService.offer(queueId, nodeId);
             }
-            verify();
         } catch (Exception e) {
             Log.error(e);
         }
@@ -237,28 +230,23 @@ public class BlockBatchDownloadUtils {
     }
 
     private synchronized void verify() {
-        boolean done = true;
-        if (nodeStatusMap.isEmpty()) {
-            working = false;
-            return;
-        }
         List<NodeDownloadingStatus> values = new ArrayList(nodeStatusMap.values());
         for (NodeDownloadingStatus status : values) {
-            if (!done) {
-                break;
+            if (!status.finished() && status.getUpdateTime() < (TimeService.currentTimeMillis() - DOWNLOAD_IDLE_TIME_OUT)) {
+                this.queueService.offer(queueId, status.getNodeId());
             }
-            done = status.finished();
-            if (!done && status.getUpdateTime() < (TimeService.currentTimeMillis() - DOWNLOAD_IDLE_TIME_OUT)) {
-                nodeStatusMap.remove(status.getNodeId());
+        }
+        if (blockMap.size() != (currentRound.getEnd() - currentRound.getStart() + 1)) {
+            for (long i = currentRound.getStart(); i <= currentRound.getEnd(); i++) {
+                if (blockMap.containsKey(i)) {
+                    continue;
+                }
                 try {
-                    failedExecute(status);
+                    this.failedExecute(i);
                 } catch (InterruptedException e) {
                     Log.error(e);
                 }
-
             }
-        }
-        if (!done) {
             return;
         }
         Result result;
@@ -278,11 +266,15 @@ public class BlockBatchDownloadUtils {
                 Log.error("cache block is null");
                 break;
             }
+            if(block.getHeader().getHeight()<=NulsContext.getInstance().getBestHeight()){
+                continue;
+            }
             ValidateResult result1 = block.verify();
             if (result1.isFailed() && result1.getErrorCode() != ErrorCode.ORPHAN_TX) {
                 if (null != result1.getMessage()) {
                     Log.info(result1.getMessage());
                 }
+                blockMap.remove(block.getHeader().getHeight());
                 try {
                     failedExecute(block.getHeader().getHeight());
                 } catch (InterruptedException e) {
@@ -299,26 +291,26 @@ public class BlockBatchDownloadUtils {
 
 
     private void failedExecute(long height) throws InterruptedException {
-        NodeDownloadingStatus status = null;
-        for (NodeDownloadingStatus status1 : nodeStatusMap.values()) {
-            if (status1.containsHeight(height)) {
-                status = status1;
-                break;
-            }
+        if (nodeIdList.isEmpty()) {
+            return;
         }
-        this.failedExecute(status);
+        if (blockMap.containsKey(height)) {
+            return;
+        }
+        this.sendRequest(height, height, this.queueService.take(queueId));
     }
 
     private void failedExecute(NodeDownloadingStatus nodeStatus) throws InterruptedException {
         if (null == nodeStatus) {
             return;
         }
-        this.nodeIdList.remove(nodeStatus.getNodeId());
-        this.queueService.remove(queueId, nodeStatus.getNodeId());
-        if (nodeIdList.isEmpty() || queueService.size(queueId) == 0) {
-            return;
+        this.queueService.offer(queueId, nodeStatus.getNodeId());
+        for (long i = nodeStatus.getStart(); i <= nodeStatus.getEnd(); i++) {
+            if (nodeStatus.getDownloadedSet().contains(i)) {
+                continue;
+            }
+            failedExecute(i);
         }
-        this.sendRequest(nodeStatus.getStart(), nodeStatus.getEnd(), this.queueService.take(queueId));
     }
 
     private Result checkHash() throws InterruptedException {

@@ -96,9 +96,6 @@ public class BlockStorageService {
         } catch (Exception e) {
             Log.error(e);
         }
-        if(txList.size()!=header.getTxCount()){
-            System.out.println();
-        }
         return fillBlock(header, txList);
     }
 
