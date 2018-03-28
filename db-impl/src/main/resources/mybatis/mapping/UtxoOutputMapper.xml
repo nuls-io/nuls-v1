@@ -66,7 +66,7 @@
         </foreach>
     </insert>
     <select id="countAll" resultType="java.lang.Long">
-        select count(id) from utxo_output
+        select count(1) from utxo_output
     </select>
     <select id="selectList" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultMap="BaseResultMap">
         select
@@ -75,7 +75,7 @@
         <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
     </select>
     <select id="selectCount" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultType="java.lang.Long">
-        select count(id) from utxo_output
+        select count(1) from utxo_output
         <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
     </select>
 

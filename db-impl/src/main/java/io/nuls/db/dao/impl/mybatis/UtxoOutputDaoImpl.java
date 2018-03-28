@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -31,6 +31,7 @@ import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.db.dao.impl.mybatis.mapper.UtxoOutputMapper;
+import io.nuls.db.dao.impl.mybatis.util.Condition;
 import io.nuls.db.dao.impl.mybatis.util.SearchOperator;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import io.nuls.db.entity.UtxoOutputPo;
@@ -95,11 +96,33 @@ public class UtxoOutputDaoImpl extends BaseDaoImpl<UtxoOutputMapper, Map<String,
     }
 
     @Override
-    public List<UtxoOutputPo> getLockUtxo(String address, Long beginTime, Integer pageNumber, Integer pageSize) {
+    public long getLockUtxoCount(String address, Long beginTime) {
         Searchable searchable = new Searchable();
+
+        Condition condition = new Condition("lock_time", SearchOperator.gt, beginTime);
+        condition.setPrefix("(");
+        searchable.addCondition(condition);
+
+        condition = new Condition("status", SearchOperator.eq, UtxoOutputPo.LOCKED);
+        condition.setEndfix(")");
+        searchable.addCondition(condition);
+
+        searchable.addCondition("address", SearchOperator.eq, address);
+        return getMapper().selectCount(searchable);
+    }
+
+    @Override
+    public List<UtxoOutputPo> getLockUtxo(String address, Long beginTime, Integer start, Integer limit) {
+        Searchable searchable = new Searchable();
+        Condition condition = new Condition("b.lock_time", SearchOperator.gt, beginTime);
+        condition.setPrefix("(");
+        searchable.addCondition(condition);
+
+        condition = new Condition("b.status", SearchOperator.eq, UtxoOutputPo.LOCKED);
+        condition.setEndfix(")");
+        searchable.addCondition(condition);
         searchable.addCondition("b.address", SearchOperator.eq, address);
-        searchable.addCondition("b.lock_time", SearchOperator.gt, beginTime);
-        PageHelper.startPage(pageNumber, pageSize);
+        PageHelper.offsetPage(start, limit);
 
         return getMapper().selectAccountOutput(searchable);
     }
