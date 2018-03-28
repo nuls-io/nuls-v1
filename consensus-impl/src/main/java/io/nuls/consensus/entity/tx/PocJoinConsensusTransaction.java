@@ -24,13 +24,13 @@
 package io.nuls.consensus.entity.tx;
 
 import io.nuls.consensus.entity.Consensus;
-import io.nuls.consensus.entity.ConsensusDelegateImpl;
-import io.nuls.consensus.entity.member.Delegate;
-import io.nuls.consensus.entity.validator.consensus.DelegateCountValidator;
-import io.nuls.consensus.entity.validator.consensus.DelegateDepositValidator;
-import io.nuls.consensus.entity.validator.tx.AllreadyJoinConsensusValidator;
+import io.nuls.consensus.entity.ConsensusDepositImpl;
+import io.nuls.consensus.entity.member.Deposit;
+import io.nuls.consensus.entity.validator.tx.DepositCountValidator;
+import io.nuls.consensus.entity.validator.tx.DepositAmountValidator;
+import io.nuls.consensus.entity.validator.tx.DepositFieldValidator;
+import io.nuls.consensus.entity.validator.tx.AgentExistValidator;
 import io.nuls.consensus.entity.validator.tx.CreditThresholdValidator;
-import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -41,7 +41,7 @@ import io.nuls.ledger.entity.tx.LockNulsTransaction;
  * @author Niels
  * @date 2017/12/4
  */
-public class PocJoinConsensusTransaction extends LockNulsTransaction<Consensus<Delegate>> {
+public class PocJoinConsensusTransaction extends LockNulsTransaction<Consensus<Deposit>> {
     public PocJoinConsensusTransaction() {
         super(TransactionConstant.TX_TYPE_JOIN_CONSENSUS);
         this.initValidator();
@@ -53,15 +53,17 @@ public class PocJoinConsensusTransaction extends LockNulsTransaction<Consensus<D
     }
 
     private void initValidator() {
-        this.registerValidator(AllreadyJoinConsensusValidator.getInstance());
+        this.registerValidator(DepositFieldValidator.getInstance());
+        this.registerValidator(AgentExistValidator.getInstance());
         this.registerValidator(CreditThresholdValidator.getInstance());
-        this.registerValidator(DelegateCountValidator.getInstance());
-        this.registerValidator(DelegateDepositValidator.getInstance());
+        this.registerValidator(DepositCountValidator.getInstance());
+        this.registerValidator(DepositAmountValidator.getInstance());
     }
 
     @Override
-    public Consensus<Delegate> parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
-        Consensus<Delegate> consensus = byteBuffer.readNulsData(new ConsensusDelegateImpl());
+    public Consensus<Deposit> parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
+        Consensus<Deposit> consensus = byteBuffer.readNulsData(new ConsensusDepositImpl());
         return consensus;
     }
+
 }

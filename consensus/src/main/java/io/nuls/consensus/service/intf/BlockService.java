@@ -68,4 +68,6 @@ public interface BlockService {
     Page<BlockHeaderPo> getBlockHeaderList(int pageNumber, int pageSize);
 
     BlockHeader getBlockHeader(NulsDigestData hash) throws NulsException;
+
+    long getPackingCount(String address);
 }

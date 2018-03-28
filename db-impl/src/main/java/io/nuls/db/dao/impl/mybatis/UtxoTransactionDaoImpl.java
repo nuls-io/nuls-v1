@@ -61,7 +61,7 @@ public class UtxoTransactionDaoImpl implements UtxoTransactionDataService {
     }
 
     @Override
-    public Page<TransactionPo> getTxs(long blockHeight, int type, int pageNum, int pageSize) {
+    public Page<TransactionPo> getTxs(Long blockHeight, int type, int pageNum, int pageSize) {
         return txDao.getTxs(blockHeight, type, pageNum, pageSize);
     }
 
@@ -71,8 +71,8 @@ public class UtxoTransactionDaoImpl implements UtxoTransactionDataService {
     }
 
     @Override
-    public Long getTxsCount(String address, int type) {
-        return txDao.getTxsCount(address, type);
+    public Long getTxsCount(Long blockHeight, String address, int type) {
+        return txDao.getTxsCount(blockHeight, address, type);
     }
 
     @Override
@@ -85,8 +85,8 @@ public class UtxoTransactionDaoImpl implements UtxoTransactionDataService {
     }
 
     @Override
-    public List<TransactionPo> getTxs(String address, int type, Integer start, Integer limit) {
-        return txDao.getTxs(address, type, start, limit);
+    public List<TransactionPo> getTxs(Long blockHeight, String address, int type, int start, int limit) {
+        return txDao.getTxs(null, address, type, start, limit);
     }
 
     @Override
@@ -114,13 +114,13 @@ public class UtxoTransactionDaoImpl implements UtxoTransactionDataService {
     }
 
     @Override
-    public List<TransactionLocalPo> getLocalTxs(String address, int type, Integer start, Integer limit) {
-        return txLocalDao.getTxs(address, type, start, limit);
+    public List<TransactionLocalPo> getLocalTxs(Long blockHeight, String address, int type, int start, int limit) {
+        return txLocalDao.getTxs(blockHeight, address, type, start, limit);
     }
 
     @Override
-    public Long getLocalTxsCount(String address, int type) {
-        return txLocalDao.getTxsCount(address, type);
+    public Long getLocalTxsCount(Long blockHeight, String address, int type) {
+        return txLocalDao.getTxsCount(blockHeight, address, type);
     }
 
     @Override
@@ -182,5 +182,31 @@ public class UtxoTransactionDaoImpl implements UtxoTransactionDataService {
     @Override
     public long getBlockFee(long blockHeight) {
         return txDao.getFeeByHeight(blockHeight);
+    }
+
+    @Override
+    public long getLastDayTimeReward() {
+        return outputDao.getLastDayTimeReward();
+    }
+
+    @Override
+    public long getAccountReward(String address, long lastTime) {
+        return outputDao.getAccountReward(address, lastTime);
+    }
+
+    @Override
+    public long getAgentReward(String address, int type){
+        return outputDao.getAgentReward(address, type);
+    }
+
+    @Override
+    @DbSession
+    public void unlockTxOutput(String txHash) {
+        outputDao.unlockTxOutput(txHash);
+    }
+
+    @Override
+    public void lockTxOutput(String txHash) {
+        outputDao.lockTxOutput(txHash);
     }
 }

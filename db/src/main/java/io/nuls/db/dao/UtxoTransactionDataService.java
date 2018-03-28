@@ -44,15 +44,15 @@ public interface UtxoTransactionDataService {
 
     List<TransactionPo> getTxs(long blockHeight);
 
-    Page<TransactionPo> getTxs(long blockHeight, int type, int pageNum, int pageSize);
+    Page<TransactionPo> getTxs(Long blockHeight, int type, int pageNum, int pageSize);
 
     List<TransactionPo> getTxs(String blockHash);
 
     List<TransactionPo> getTxs(long startHeight, long endHeight);
 
-    Long getTxsCount(String address, int type);
+    Long getTxsCount(Long blockHeight, String address, int type);
 
-    List<TransactionPo> getTxs(String address, int type, Integer start, Integer limit);
+    List<TransactionPo> getTxs(Long blockHeight, String address, int type, int start, int limit);
 
     List<TransactionLocalPo> getLocalTxs(long blockHeight);
 
@@ -60,9 +60,9 @@ public interface UtxoTransactionDataService {
 
     List<TransactionLocalPo> getLocalTxs(long startHeight, long endHeight);
 
-    List<TransactionLocalPo> getLocalTxs(String address, int type, Integer start, Integer limit);
+    List<TransactionLocalPo> getLocalTxs(Long blockHeight, String address, int type, int start, int limit);
 
-    Long getLocalTxsCount(String address, int type);
+    Long getLocalTxsCount(Long blockHeight, String address, int type);
 
     List<UtxoInputPo> getTxInputs(String txHash);
 
@@ -85,4 +85,14 @@ public interface UtxoTransactionDataService {
     long getBlockReward(long blockHeight);
 
     long getBlockFee(long blockHeight);
+
+    long getLastDayTimeReward();
+
+    long getAccountReward(String address, long lastTime);
+
+    long getAgentReward(String address, int type);
+
+    void unlockTxOutput(String txHash);
+
+    void lockTxOutput(String txHash);
 }

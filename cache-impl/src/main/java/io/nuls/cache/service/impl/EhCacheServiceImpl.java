@@ -177,12 +177,12 @@ public class EhCacheServiceImpl<K, T> implements CacheService<K, T> {
     @Override
     public Set<K> keySet(String cacheTitle) {
         Iterator it = cacheManager.getCache(cacheTitle).iterator();
-        Set<K> list = new HashSet<>();
+        Set<K> set = new HashSet<>();
         while (it.hasNext()) {
             Cache.Entry<K, T> entry = (Cache.Entry<K, T>) it.next();
-            list.add((K) entry.getKey());
+            set.add((K) entry.getKey());
         }
-        return list;
+        return set;
     }
 
 }

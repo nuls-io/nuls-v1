@@ -10,8 +10,8 @@
   },
   "entrust": {
     "address": "2CYsoYpzQAQhGSp4Bcc26kqrfzFvnpN",
-    "agentAddress": "2CYsoYpzQAQhGSp4Bcc26kqrfzFvnpN",
-    "deposit": 25000000000000,
+    "agentId": "00002094b0f99e85f7028d6d1b90b1cd8022b8c79cf7b25413f052594070445b0e6483",
+    "deposit": 21000000000000,
     "password": "nuls123456"
   },
   "import":{
@@ -19,7 +19,8 @@
     "password":"nuls123456"
   },
   "withdraw":{
-    "txHash":"",
+    "address":"2CaWijtZQaUVayV2c5Yd1MRjyWWQugv",
+    "txHash":"0000202edea27395d514efedf42e1e6aeb342aa7d551919b1a1e3e655f7d56ebacbb39",
     "password":"nuls123456"
   }
 }

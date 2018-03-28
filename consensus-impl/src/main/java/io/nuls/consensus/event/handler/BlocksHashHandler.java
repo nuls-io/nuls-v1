@@ -39,7 +39,7 @@ public class BlocksHashHandler extends AbstractEventHandler<BlocksHashEvent> {
         try {
             DistributedBlockInfoRequestUtils.getInstance().addBlockHashResponse(fromId, event.getEventBody());
         }catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
             throw e;
         }
 

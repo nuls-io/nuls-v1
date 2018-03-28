@@ -23,6 +23,7 @@
  */
 package io.nuls.rpc.resources.impl;
 
+import io.nuls.account.entity.Address;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
@@ -35,6 +36,7 @@ import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.rpc.entity.BlockDto;
 import io.nuls.rpc.entity.RpcResult;
+import io.swagger.annotations.Api;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -47,11 +49,15 @@ import java.io.IOException;
  * @date 2017/9/30
  */
 @Path("/block")
+@Api(value = "/browse", description = "Block")
 public class BlockResource {
 
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
 
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
+
+    public BlockResource() {
+    }
 
     @GET
     @Path("/header/height/{height}")
@@ -151,7 +157,7 @@ public class BlockResource {
                                         @QueryParam("pageNumber") int pageNumber,
                                         @QueryParam("pageSize") int pageSize) {
 
-        if (type < 1 || type > 2 || pageNumber < 0 || pageSize < 0 || !StringUtils.validAddress(address)) {
+        if (type < 1 || type > 2 || pageNumber < 0 || pageSize < 0 || !Address.validAddress(address)) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         if (pageNumber == 0) {

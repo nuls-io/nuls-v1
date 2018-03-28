@@ -26,7 +26,7 @@ package io.nuls.consensus.entity.meeting;
 import io.nuls.account.entity.Address;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.member.Agent;
-import io.nuls.consensus.entity.member.Delegate;
+import io.nuls.consensus.entity.member.Deposit;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.crypto.Sha256Hash;
 
@@ -39,8 +39,12 @@ import java.util.List;
 public class PocMeetingMember implements Comparable<PocMeetingMember> {
     private long roundIndex;
     private long roundStartTime;
+    /**
+     * Starting from 1
+     */
     private int indexOfRound;
-    private String address;
+    private String agentHash;
+    private String agentAddress;
     private String packerAddress;
     private long packTime;
 
@@ -48,7 +52,7 @@ public class PocMeetingMember implements Comparable<PocMeetingMember> {
 
     private String sortValue;
     private Consensus<Agent> agentConsensus;
-    private List<Consensus<Delegate>> delegateList;
+    private List<Consensus<Deposit>> delegateList;
     private Na totolEntrustDeposit = Na.ZERO;
 
     public Consensus<Agent> getAgentConsensus() {
@@ -67,11 +71,11 @@ public class PocMeetingMember implements Comparable<PocMeetingMember> {
         this.totolEntrustDeposit = totolEntrustDeposit;
     }
 
-    public List<Consensus<Delegate>> getDelegateList() {
+    public List<Consensus<Deposit>> getDelegateList() {
         return delegateList;
     }
 
-    public void setDelegateList(List<Consensus<Delegate>> delegateList) {
+    public void setDelegateList(List<Consensus<Deposit>> delegateList) {
         this.delegateList = delegateList;
     }
 
@@ -91,12 +95,20 @@ public class PocMeetingMember implements Comparable<PocMeetingMember> {
         this.roundStartTime = roundStartTime;
     }
 
-    public String getAddress() {
-        return address;
+    public String getAgentHash() {
+        return agentHash;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public void setAgentHash(String agentHash) {
+        this.agentHash = agentHash;
+    }
+
+    public String getAgentAddress() {
+        return agentAddress;
+    }
+
+    public void setAgentAddress(String agentAddress) {
+        this.agentAddress = agentAddress;
     }
 
     public String getPackerAddress() {
@@ -142,11 +154,11 @@ public class PocMeetingMember implements Comparable<PocMeetingMember> {
     @Override
     public int compareTo(PocMeetingMember o2) {
         if (this.getSortValue() == null) {
-            String hashHex = new Address(this.getAddress()).hashHex();
+            String hashHex = new Address(this.getAgentAddress()).hashHex();
             this.setSortValue(Sha256Hash.twiceOf((roundStartTime + hashHex).getBytes()).toString());
         }
         if (o2.getSortValue() == null) {
-            String hashHex = new Address(o2.getAddress()).hashHex();
+            String hashHex = new Address(o2.getAgentAddress()).hashHex();
             o2.setSortValue(Sha256Hash.twiceOf((o2.getRoundStartTime() + hashHex).getBytes()).toString());
         }
         return this.getSortValue().compareTo(o2.getSortValue());
@@ -157,7 +169,7 @@ public class PocMeetingMember implements Comparable<PocMeetingMember> {
         if(delegateList==null){
             return;
         }
-        for(Consensus<Delegate> dc:delegateList){
+        for(Consensus<Deposit> dc:delegateList){
             totolEntrustDeposit = totolEntrustDeposit .add(dc.getExtend().getDeposit());
         }
         this.totolEntrustDeposit = totolEntrustDeposit;

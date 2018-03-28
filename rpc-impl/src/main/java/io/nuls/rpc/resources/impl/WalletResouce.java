@@ -23,31 +23,30 @@
  */
 package io.nuls.rpc.resources.impl;
 
-import com.sun.org.apache.regexp.internal.RE;
+import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.Result;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.MD5Util;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.json.JSONUtils;
-import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.rpc.entity.RpcResult;
 import io.nuls.rpc.resources.form.AccountParamForm;
 import io.nuls.rpc.resources.form.TransferForm;
-import org.glassfish.jersey.media.multipart.FormDataBodyPart;
+import io.swagger.annotations.Api;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.io.*;
-import java.util.HashMap;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
 
@@ -56,6 +55,7 @@ import java.util.Map;
  * @date 2017/9/30
  */
 @Path("/wallet")
+@Api(value ="/browse", description ="Wallet")
 public class WalletResouce {
 
     private static final int MAX_UNLOCK_TIME = 60;
@@ -108,7 +108,19 @@ public class WalletResouce {
     @Path("/backup")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult backup(AccountParamForm form) {
-        Result result = this.accountService.exportAccounts(form.getPassword());
+        if (StringUtils.isNotBlank(form.getAddress()) && !Address.validAddress(form.getAddress())) {
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+        if (!StringUtils.validPassword(form.getPassword())) {
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+
+        Result result;
+        if (StringUtils.isNotBlank(form.getAddress())) {
+            result = accountService.exportAccount(form.getAddress(), form.getPassword());
+        } else {
+            result = this.accountService.exportAccounts(form.getPassword());
+        }
         return new RpcResult(result);
     }
 
@@ -127,7 +139,7 @@ public class WalletResouce {
         try {
             result = accountService.importAccount(form.getPrikey(), form.getPassword());
         } catch (Exception e) {
-            return RpcResult.getFailed(ErrorCode.SYS_UNKOWN_EXCEPTION);
+            return RpcResult.getFailed(result.getErrorCode());
         }
         return new RpcResult(result);
     }
@@ -219,7 +231,7 @@ public class WalletResouce {
     @Path("/remove")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult removeAccount(AccountParamForm form) {
-        if (!StringUtils.validPassword(form.getPassword()) || !StringUtils.validAddress(form.getAddress())) {
+        if (!StringUtils.validPassword(form.getPassword()) || !Address.validAddress(form.getAddress())) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         Result result = accountService.removeAccount(form.getAddress(), form.getPassword());

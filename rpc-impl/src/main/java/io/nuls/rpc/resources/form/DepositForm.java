@@ -32,7 +32,8 @@ package io.nuls.rpc.resources.form;
  */
 public class DepositForm {
     private String address;
-    private String agentAddress;
+
+    private String agentId;
     private long deposit;
     private String password;
 
@@ -44,12 +45,12 @@ public class DepositForm {
         this.address = address;
     }
 
-    public String getAgentAddress() {
-        return agentAddress;
+    public String getAgentId() {
+        return agentId;
     }
 
-    public void setAgentAddress(String agentAddress) {
-        this.agentAddress = agentAddress;
+    public void setAgentId(String agentId) {
+        this.agentId = agentId;
     }
 
     public long getDeposit() {

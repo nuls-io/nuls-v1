@@ -27,7 +27,7 @@ import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
-import io.nuls.consensus.entity.member.Delegate;
+import io.nuls.consensus.entity.member.Deposit;
 import io.nuls.consensus.entity.tx.PocJoinConsensusTransaction;
 import io.nuls.consensus.event.notice.EntrustConsensusNotice;
 import io.nuls.consensus.utils.ConsensusTool;
@@ -36,12 +36,11 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.tx.serivce.TransactionService;
-import io.nuls.db.dao.DelegateAccountDataService;
-import io.nuls.db.dao.DelegateDataService;
-import io.nuls.db.entity.DelegateAccountPo;
-import io.nuls.db.entity.DelegatePo;
+import io.nuls.db.dao.AgentDataService;
+import io.nuls.db.dao.DepositDataService;
+import io.nuls.db.entity.AgentPo;
+import io.nuls.db.entity.DepositPo;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
-import io.nuls.ledger.service.intf.LedgerService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -53,37 +52,38 @@ import java.util.Map;
  */
 public class JoinConsensusTxService implements TransactionService<PocJoinConsensusTransaction> {
     private ConsensusCacheManager manager = ConsensusCacheManager.getInstance();
-    private DelegateDataService delegateDataService = NulsContext.getServiceBean(DelegateDataService.class);
-    private DelegateAccountDataService accountDataService = NulsContext.getServiceBean(DelegateAccountDataService.class);
+    private DepositDataService depositDataService = NulsContext.getServiceBean(DepositDataService.class);
+    private AgentDataService accountDataService = NulsContext.getServiceBean(AgentDataService.class);
 
     @Override
     public void onRollback(PocJoinConsensusTransaction tx) throws NulsException {
-        this.manager.delDelegate(tx.getTxData().getExtend().getHash());
-        delegateDataService.delete(tx.getTxData().getExtend().getHash());
+        this.manager.delDeposit(tx.getTxData().getHexHash());
+        depositDataService.delete(tx.getTxData().getHexHash());
     }
 
     @Override
     public void onCommit(PocJoinConsensusTransaction tx) throws NulsException {
-        manager.changeDelegateStatus(tx.getTxData().getExtend().getHash(), ConsensusStatusEnum.WAITING);
-        Consensus<Delegate> cd = tx.getTxData();
+        manager.changeDepositStatus(tx.getTxData().getHexHash(), ConsensusStatusEnum.WAITING);
+        Consensus<Deposit> cd = tx.getTxData();
+        cd.getExtend().setTxHash(tx.getHash().getDigestHex());
         cd.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
-        DelegatePo po = ConsensusTool.delegateToPojo(cd);
+        DepositPo po = ConsensusTool.depositToPojo(cd,tx.getHash().getDigestHex());
         po.setBlockHeight(tx.getBlockHeight());
         po.setTime(tx.getTime());
-        delegateDataService.save(po);
+        depositDataService.save(po);
         Map<String, Object> paramsMap = new HashMap<>();
-        paramsMap.put("agentAddress", cd.getExtend().getDelegateAddress());
-        List<DelegatePo> poList = delegateDataService.getList(paramsMap);
+        paramsMap.put("agentHash", cd.getExtend().getAgentHash());
+        List<DepositPo> poList = depositDataService.getList(paramsMap);
         long sum = 0L;
-        for (DelegatePo delegatePo : poList) {
-            sum += delegatePo.getDeposit();
+        for (DepositPo depositPo : poList) {
+            sum += depositPo.getDeposit();
         }
         if (sum >= PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT.getValue()) {
-            manager.changeAgentStatus(tx.getTxData().getExtend().getDelegateAddress(),ConsensusStatusEnum.IN);
-            manager.changeDelegateStatusByAgent(tx.getTxData().getExtend().getDelegateAddress(),ConsensusStatusEnum.IN);
-            DelegateAccountPo daPo = this.accountDataService.get(cd.getExtend().getDelegateAddress());
+            manager.changeAgentStatusByHash(tx.getTxData().getExtend().getAgentHash(),ConsensusStatusEnum.IN);
+            manager.changeDepositStatusByAgentHash(tx.getTxData().getExtend().getAgentHash(),ConsensusStatusEnum.IN);
+            AgentPo daPo = this.accountDataService.get(cd.getExtend().getAgentHash());
             if (null == daPo) {
-                throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "the agent cannot find,agent address:" + cd.getExtend().getDelegateAddress());
+                throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "the agent cannot find,agent hash:" + cd.getExtend().getAgentHash());
             }
             daPo.setStatus(ConsensusStatusEnum.IN.getCode());
             this.accountDataService.updateSelective(daPo);
@@ -95,9 +95,10 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
 
     @Override
     public void onApproval(PocJoinConsensusTransaction tx) throws NulsException {
-        Consensus<Delegate> cd = tx.getTxData();
+        Consensus<Deposit> cd = tx.getTxData();
         cd.getExtend().setStatus(ConsensusStatusEnum.NOT_IN.getCode());
-        manager.cacheDelegate(cd);
+        cd.getExtend().setTxHash(tx.getHash().getDigestHex());
+        manager.cacheDeposit(cd);
 
     }
 }

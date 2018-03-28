@@ -43,5 +43,11 @@ public interface UtxoOutputMapper extends BaseMapper<Map<String, Object>, UtxoOu
 
     void deleteBySearchable(Searchable searchable);
 
-    long getBlockReward(Searchable searchable);
+    long getCoinBaseReward(Searchable searchable);
+
+    long getAgentReward(Searchable searchable);
+
+    void unlockTxOutput(String txHash);
+
+    void lockTxOutput(String txHash);
 }

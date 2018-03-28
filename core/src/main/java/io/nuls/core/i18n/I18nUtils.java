@@ -90,4 +90,8 @@ public class I18nUtils {
         }
         return nowMapping.getProperty(id + "");
     }
+
+    public static boolean hasLanguage(String lang){
+        return ALL_MAPPING.containsKey(lang);
+    }
 }

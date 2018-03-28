@@ -24,35 +24,31 @@
 package io.nuls.ledger.entity;
 
 import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.chain.entity.Na;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
-import io.nuls.core.validate.ValidatorManager;
-import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
-import io.nuls.ledger.entity.tx.TransferTransaction;
-import io.nuls.ledger.entity.validator.CoinTransactionValidatorManager;
-import io.nuls.ledger.validator.AmountValidator;
-import io.nuls.ledger.validator.UtxoTxInputsValidator;
-import io.nuls.ledger.validator.UtxoTxOutputsValidator;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Niels
  * @date 2017/11/16
  */
 public class UtxoData extends CoinData {
+
     public UtxoData() {
+
     }
 
     private List<UtxoInput> inputs = new ArrayList<>();
 
     private List<UtxoOutput> outputs = new ArrayList<>();
-    ;
 
     public List<UtxoInput> getInputs() {
         return inputs;
@@ -123,5 +119,35 @@ public class UtxoData extends CoinData {
             outputs.add(output);
         }
 
+    }
+
+    @Override
+    public Na getTotalNa() {
+        if (null == this.totalNa) {
+            Set<String> addressSet = new HashSet<>();
+
+            if (null != this.getInputs()) {
+                for (UtxoInput input : this.getInputs()) {
+                    addressSet.add(input.getFrom().getAddress());
+                }
+            }
+
+            Na totalNa = Na.ZERO;
+            if (null != this.getOutputs()) {
+                for (int i = 0; i < this.getOutputs().size(); i++) {
+                    UtxoOutput output = this.getOutputs().get(i);
+                    if (addressSet.contains(output.getAddress())) {
+                        if (i == 0 && output.isLocked()) {
+                            totalNa = totalNa.add(Na.valueOf(output.getValue()));
+                            break;
+                        }
+                    } else {
+                        totalNa = totalNa.add(Na.valueOf(output.getValue()));
+                    }
+                }
+            }
+            this.setTotalNa(totalNa);
+        }
+        return this.totalNa;
     }
 }

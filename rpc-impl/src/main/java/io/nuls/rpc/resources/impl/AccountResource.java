@@ -40,6 +40,7 @@ import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.rpc.entity.*;
 import io.nuls.rpc.resources.form.AccountParamForm;
+import io.swagger.annotations.Api;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -51,11 +52,15 @@ import java.util.List;
  * @date 2017/9/30
  */
 @Path("/account")
+@Api(value = "/browse", description = "Account")
 public class AccountResource {
 
     private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
+
+    public AccountResource() {
+    }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
@@ -71,7 +76,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult get(@PathParam("address") String address) {
         RpcResult result;
-        if (!StringUtils.validAddress(address)) {
+        if (!Address.validAddress(address)) {
             result = RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
             return result;
         }
@@ -97,7 +102,7 @@ public class AccountResource {
     @Path("/alias")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult alias(AccountParamForm form) {
-        if (!StringUtils.validAddress(form.getAddress())) {
+        if (!Address.validAddress(form.getAddress())) {
             return RpcResult.getFailed(ErrorCode.DATA_NOT_FOUND);
         }
         Result result = accountService.setAlias(form.getAddress(), form.getPassword(), form.getAlias());
@@ -123,10 +128,20 @@ public class AccountResource {
     @Path("/balance/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getBalance(@PathParam("address") String address) {
-        if (StringUtils.isNotBlank(address) && !StringUtils.validAddress(address)) {
+        if (!Address.validAddress(address)) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         Balance balance = ledgerService.getBalance(address);
+        RpcResult result = RpcResult.getSuccess();
+        result.setData(new BalanceDto(balance));
+        return result;
+    }
+
+    @GET
+    @Path("/balances")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult getBalance() {
+        Balance balance = ledgerService.getBalance(null);
         RpcResult result = RpcResult.getSuccess();
         result.setData(new BalanceDto(balance));
         return result;
@@ -137,7 +152,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getUtxo(@QueryParam("address") String address,
                              @QueryParam("amount") long amount) {
-        if (!StringUtils.validAddress(address) || amount <= 0 || amount > Na.MAX_NA_VALUE) {
+        if (!Address.validAddress(address) || amount <= 0 || amount > Na.MAX_NA_VALUE) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         UtxoBalance balance = (UtxoBalance) ledgerService.getBalance(address);
@@ -172,7 +187,7 @@ public class AccountResource {
     @Path("/prikey")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getPrikey(AccountParamForm form) {
-        if (!StringUtils.validAddress(form.getAddress()) || !StringUtils.validPassword(form.getPassword())) {
+        if (!Address.validAddress(form.getAddress()) || !StringUtils.validPassword(form.getPassword())) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         Result result = accountService.getPrivateKey(form.getAddress(), form.getPassword());
@@ -183,7 +198,7 @@ public class AccountResource {
     @Path("/assets/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getAssets(@PathParam("address") String address) {
-        if (!StringUtils.validAddress(address)) {
+        if (!Address.validAddress(address)) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
 

@@ -23,13 +23,17 @@
  */
 package io.nuls.rpc.resources.impl;
 
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.i18n.I18nUtils;
 import io.nuls.core.module.service.ModuleService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.rpc.entity.HelpInfoDto;
 import io.nuls.rpc.entity.RpcResult;
 import io.nuls.rpc.entity.VersionDto;
+import io.swagger.annotations.Api;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -39,7 +43,26 @@ import javax.ws.rs.core.MediaType;
  * @date 2017/9/30
  */
 @Path("/sys")
+@Api(value = "/browse", description = "System")
 public class SystemResource {
+
+    @PUT
+    @Path("/lang/{language}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult setLanguage(@PathParam("language") String language) {
+        AssertUtil.canNotEmpty(language);
+        boolean b = I18nUtils.hasLanguage(language);
+        if(!b){
+            return RpcResult.getFailed(ErrorCode.DATA_ERROR,"language unkown!");
+        }
+        try {
+            I18nUtils.setLanguage(language);
+        } catch (NulsException e) {
+            Log.error(e);
+            RpcResult.getFailed(e.getMessage());
+        }
+        return RpcResult.getSuccess();
+    }
 
     @GET
     @Path("/version")
@@ -54,8 +77,8 @@ public class SystemResource {
     @GET
     @Path("/help")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult getHelp(){
-        HelpInfoDto help =new HelpInfoDto();
+    public RpcResult getHelp() {
+        HelpInfoDto help = new HelpInfoDto();
         return RpcResult.getSuccess().setData(help);
     }
 
@@ -63,7 +86,7 @@ public class SystemResource {
     @Path("/module/load")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult startModule(@FormParam("moduleName") String moduleName, @FormParam("moduleClass") String moduleClass) {
-       //todo change the params to a form entity
+        //todo change the params to a form entity
         RpcResult result = null;
         do {
             ModuleService service = ModuleService.getInstance();

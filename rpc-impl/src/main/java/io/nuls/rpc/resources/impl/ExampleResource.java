@@ -26,6 +26,10 @@ package io.nuls.rpc.resources.impl;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.rpc.entity.RpcResult;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.apache.commons.io.FileUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
@@ -42,7 +46,8 @@ import java.io.InputStream;
  * @author Niels
  * @date 2017/9/25
  */
-@Path("/")
+@Path("/test")
+@Api(value = "/browse", description = "Browse tags")
 public class ExampleResource {
 
     public ExampleResource() {
@@ -83,7 +88,7 @@ public class ExampleResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult uploadTest1(@FormDataParam("file") InputStream fileInputStream,
-                                @FormDataParam("file") FormDataContentDisposition disposition) {
+                                 @FormDataParam("file") FormDataContentDisposition disposition) {
 
         return RpcResult.getSuccess();
     }

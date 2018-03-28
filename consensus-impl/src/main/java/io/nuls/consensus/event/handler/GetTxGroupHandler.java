@@ -52,7 +52,6 @@ public class GetTxGroupHandler extends AbstractEventHandler<GetTxGroupRequest> {
 
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
     private BlockService blockService =NulsContext.getServiceBean(BlockService.class);
-    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
 
     @Override
     public void onEvent(GetTxGroupRequest event, String fromId) {

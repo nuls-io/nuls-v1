@@ -23,30 +23,46 @@
  */
 package io.nuls.consensus.service.tx;
 
+import io.nuls.account.entity.Address;
+import io.nuls.consensus.constant.PunishType;
+import io.nuls.consensus.entity.YellowPunishData;
 import io.nuls.consensus.entity.tx.YellowPunishTransaction;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.tx.serivce.TransactionService;
+import io.nuls.core.utils.str.StringUtils;
+import io.nuls.db.dao.PunishLogDataService;
+import io.nuls.db.entity.PunishLogPo;
 
 /**
  * @author Niels
  * @date 2018/1/8
  */
-public class YellowPunishTxService implements TransactionService<YellowPunishTransaction>{
+public class YellowPunishTxService implements TransactionService<YellowPunishTransaction> {
+
+    private PunishLogDataService punishLogDataService = NulsContext.getServiceBean(PunishLogDataService.class);
+
     @Override
     public void onRollback(YellowPunishTransaction tx) throws NulsException {
-        // todo auto-generated method stub(niels)
-
+        YellowPunishData data = tx.getTxData();
+        this.punishLogDataService.deleteByHeight(data.getHeight());
     }
 
     @Override
     public void onCommit(YellowPunishTransaction tx) throws NulsException {
-        // todo auto-generated method stub(niels)
-
+        YellowPunishData data = tx.getTxData();
+        for (Address address : data.getAddressList()) {
+            PunishLogPo po = new PunishLogPo();
+            po.setAddress(address.getBase58());
+            po.setHeight(data.getHeight());
+            po.setId(StringUtils.getNewUUID());
+            po.setTime(tx.getTime());
+            po.setType(PunishType.YELLOW.getCode());
+            punishLogDataService.save(po);
+        }
     }
 
     @Override
     public void onApproval(YellowPunishTransaction tx) throws NulsException {
-        // todo auto-generated method stub(niels)
-
     }
 }

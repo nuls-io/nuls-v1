@@ -74,7 +74,7 @@ public class NodeDownloadingStatus {
         return height >= start && height <= end;
     }
 
-    public void downloaded(long height) {
+    public synchronized void downloaded(long height) {
         downloadedSet.add(height);
     }
 

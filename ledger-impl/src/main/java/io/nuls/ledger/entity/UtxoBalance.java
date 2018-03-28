@@ -27,6 +27,7 @@ import io.nuls.core.chain.entity.Na;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author Niels
@@ -42,7 +43,7 @@ public class UtxoBalance extends Balance {
 
     public UtxoBalance(Na usable, Na locked) {
         super(usable, locked);
-        this.unSpends = new ArrayList<>();
+        this.unSpends = new CopyOnWriteArrayList<>();
     }
 
     public UtxoBalance(Na usable, Na locked, List<UtxoOutput> unSpends) {

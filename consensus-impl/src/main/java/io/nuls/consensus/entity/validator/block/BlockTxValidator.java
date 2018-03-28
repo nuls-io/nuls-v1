@@ -52,12 +52,13 @@ public class BlockTxValidator implements NulsDataValidator<Block> {
         }
         int count = 0;
         for (Transaction tx : block.getTxs()) {
+
             ValidateResult result = tx.verify();
             if (null==result||result.isFailed()) {
                 if(result.getErrorCode()== ErrorCode.ORPHAN_TX){
                     return result;
                 }
-                return ValidateResult.getFailedResult("there is wrong transaction!");
+                return ValidateResult.getFailedResult("there is wrong transaction!msg:"+result.getMessage());
             }
             if (tx.getType() == TransactionConstant.TX_TYPE_COIN_BASE) {
                 count++;

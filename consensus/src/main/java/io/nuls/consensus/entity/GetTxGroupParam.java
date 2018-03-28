@@ -45,7 +45,7 @@ public class GetTxGroupParam extends BaseNulsData {
     private long time;
     private NulsDigestData blockHash;
 
-    private List<NulsDigestData> txHashList;
+    private List<NulsDigestData> txHashList = new ArrayList<>();
 
     public GetTxGroupParam() {
         this.time = TimeService.currentTimeMillis();
@@ -100,6 +100,10 @@ public class GetTxGroupParam extends BaseNulsData {
 
     public List<NulsDigestData> getTxHashList() {
         return txHashList;
+    }
+
+    public void addHash(NulsDigestData hash) {
+        this.txHashList.add(hash);
     }
 
     public void setTxHashList(List<NulsDigestData> txHashList) {

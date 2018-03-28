@@ -24,15 +24,11 @@
 package io.nuls.consensus.thread;
 
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
-import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
-import io.nuls.consensus.cache.manager.block.BlockCacheManager;
-import io.nuls.consensus.constant.PocConsensusConstant;
+import io.nuls.consensus.manager.BlockManager;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.utils.BlockBatchDownloadUtils;
 import io.nuls.core.chain.entity.Block;
-import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.entity.Node;
 import io.nuls.network.service.NetworkService;
@@ -48,7 +44,7 @@ import java.util.List;
 public class BlockPersistenceThread implements Runnable {
     public static final String THREAD_NAME = "block-persistence-thread";
     private static final BlockPersistenceThread INSTANCE = new BlockPersistenceThread();
-    private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
+    private BlockManager blockManager = BlockManager.getInstance();
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
     private ConfirmingTxCacheManager txCacheManager = ConfirmingTxCacheManager.getInstance();
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
@@ -69,29 +65,32 @@ public class BlockPersistenceThread implements Runnable {
         this.running = true;
         while (true) {
             try {
-                doPersistence();
-                if (blockCacheManager.canPersistence()) {
-                    continue;
+                long height = blockManager.getStoredHeight() + 1;
+                if (height == 1) {
+                    height = blockService.getLocalSavedHeight() + 1;
                 }
-                Thread.sleep(1000L);
+                boolean success = blockManager.processingBifurcation(height);
+                if (success) {
+                    doPersistence(height);
+                } else {
+                    Thread.sleep(1000L);
+                }
             } catch (Exception e) {
                 Log.error(e);
+                try {
+                    Thread.sleep(1000L);
+                } catch (InterruptedException e1) {
+                    Log.error(e1);
+                }
             }
         }
     }
 
-    private void doPersistence() throws IOException {
-        long height = blockCacheManager.getStoredHeight() + 1;
-        if (height == 1) {
-            height = blockService.getLocalSavedHeight() + 1;
-        }
-        if ((height + PocConsensusConstant.CONFIRM_BLOCK_COUNT) >= blockCacheManager.getBestHeight()) {
-            return;
-        }
-        Block block = blockCacheManager.getBlock(height);
+    private void doPersistence(long height) throws IOException {
+        Block block = blockManager.getBlock(height);
         if (null == block) {
             List<Node> nodeList = networkService.getAvailableNodes();
-            if(nodeList==null||nodeList.isEmpty()){
+            if (nodeList == null || nodeList.isEmpty()) {
                 return;
             }
             List<String> nodeIdList = new ArrayList<>();
@@ -105,10 +104,17 @@ public class BlockPersistenceThread implements Runnable {
             }
             return;
         }
+        if (block.getTxs().isEmpty()) {
+            //todo why
+            Log.warn("block has no tx!");
+            blockManager.removeBlock(block.getHeader().getHash().getDigestHex());
+            return;
+        }
         boolean isSuccess = blockService.saveBlock(block);
         if (isSuccess) {
-            blockCacheManager.removeBlock(block.getHeader());
-            blockCacheManager.setStoredHeight(height);
+            blockManager.removeBlock(block.getHeader().getHash().getDigestHex());
+
+            blockManager.setStoredHeight(height);
             txCacheManager.removeTxList(block.getTxHashList());
         }
     }

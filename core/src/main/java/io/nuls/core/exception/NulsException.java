@@ -74,7 +74,7 @@ public class NulsException extends Exception {
      * @since 1.4
      */
     public NulsException(ErrorCode message, Throwable cause) {
-        super(message.getMsg(), cause);
+        super( cause);
         this.code = message.getCode();
         this.message = message.getMsg();
     }

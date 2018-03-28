@@ -37,6 +37,9 @@ import org.glassfish.jersey.server.ResourceConfig;
 public class NulsResourceConfig extends ResourceConfig {
 
     public NulsResourceConfig() {
+        register(io.swagger.jaxrs.listing.ApiListingResource.class);
+        register(io.swagger.jaxrs.listing.AcceptHeaderApiListingResource.class);
+        register(io.swagger.jaxrs.listing.SwaggerSerializers.class);
         register(MultiPartFeature.class);
         register(RpcServerFilter.class);
         register(JacksonJsonProvider.class);

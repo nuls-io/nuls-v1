@@ -28,7 +28,6 @@ package io.nuls.consensus.event.notice;
 
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.tx.PocJoinConsensusTransaction;
-import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.event.BaseEvent;

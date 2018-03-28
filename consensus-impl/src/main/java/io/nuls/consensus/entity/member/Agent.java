@@ -40,18 +40,18 @@ public class Agent extends BaseNulsData {
 
     private Na deposit;
 
-    public String agentAddress;
+    private String packingAddress;
 
     private double commissionRate;
 
     private String introduction;
 
     private String agentName;
+    private long startTime;
 
     /**
      * the following fields is for The account self(delegate Account)
      */
-    private long startTime;
     private int status;
     private long roundNo;
     private long roundIndex;
@@ -64,32 +64,35 @@ public class Agent extends BaseNulsData {
     public int size() {
         int size = 0;
         size += Utils.sizeOfLong(deposit.getValue());
-        size += Utils.sizeOfString(this.agentAddress);
+        size += Utils.sizeOfString(this.packingAddress);
         size += Utils.sizeOfDouble(this.commissionRate);
         size += Utils.sizeOfString(this.introduction);
         size += Utils.sizeOfBoolean(seed);
         size += Utils.sizeOfString(agentName);
+        size +=Utils.sizeOfInt48();
         return size;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeVarInt(deposit.getValue());
-        stream.writeString(agentAddress);
+        stream.writeString(packingAddress);
         stream.writeDouble(this.commissionRate);
         stream.writeString(this.introduction);
         stream.writeBoolean(seed);
         stream.writeString(agentName);
+        stream.writeInt48(startTime);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.deposit = Na.valueOf(byteBuffer.readVarInt());
-        this.agentAddress = byteBuffer.readString();
+        this.packingAddress = byteBuffer.readString();
         this.commissionRate = byteBuffer.readDouble();
         this.introduction = byteBuffer.readString();
         this.seed = byteBuffer.readBoolean();
         this.agentName = byteBuffer.readString();
+        this.startTime = byteBuffer.readInt48();
     }
 
     public Na getDeposit() {
@@ -100,12 +103,12 @@ public class Agent extends BaseNulsData {
         this.deposit = deposit;
     }
 
-    public String getAgentAddress() {
-        return agentAddress;
+    public String getPackingAddress() {
+        return packingAddress;
     }
 
-    public void setAgentAddress(String agentAddress) {
-        this.agentAddress = agentAddress;
+    public void setPackingAddress(String packingAddress) {
+        this.packingAddress = packingAddress;
     }
 
     public int getStatus() {

@@ -29,17 +29,14 @@ import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
 import io.nuls.consensus.event.notice.RegisterAgentNotice;
-import io.nuls.consensus.manager.ConsensusManager;
 import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.tx.serivce.TransactionService;
-import io.nuls.db.dao.DelegateAccountDataService;
-import io.nuls.db.dao.DelegateDataService;
-import io.nuls.db.entity.DelegateAccountPo;
-import io.nuls.db.entity.DelegatePo;
+import io.nuls.db.dao.AgentDataService;
+import io.nuls.db.dao.DepositDataService;
+import io.nuls.db.entity.AgentPo;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
-import io.nuls.ledger.service.intf.LedgerService;
 
 /**
  * @author Niels
@@ -47,23 +44,23 @@ import io.nuls.ledger.service.intf.LedgerService;
  */
 public class RegisterAgentTxService implements TransactionService<RegisterAgentTransaction> {
     private ConsensusCacheManager manager = ConsensusCacheManager.getInstance();
-    private DelegateAccountDataService delegateAccountService = NulsContext.getServiceBean(DelegateAccountDataService.class);
-    private DelegateDataService delegateService = NulsContext.getServiceBean(DelegateDataService.class);
+    private AgentDataService delegateAccountService = NulsContext.getServiceBean(AgentDataService.class);
+    private DepositDataService delegateService = NulsContext.getServiceBean(DepositDataService.class);
 
     @Override
     public void onRollback(RegisterAgentTransaction tx) throws NulsException {
-        this.manager.delAgent(tx.getTxData().getAddress());
-        manager.delDelegateByAgent(tx.getTxData().getAddress());
-        this.delegateAccountService.delete(tx.getTxData().getAddress());
-        this.delegateService.deleteByAgentAddress(tx.getTxData().getAddress());
+        this.manager.delAgent(tx.getTxData().getHexHash());
+        manager.delDepositByAgentHash(tx.getTxData().getHexHash());
+        this.delegateAccountService.delete(tx.getTxData().getHexHash());
+        this.delegateService.deleteByAgentHash(tx.getTxData().getHexHash());
     }
 
     @Override
     public void onCommit(RegisterAgentTransaction tx) throws NulsException {
-        manager.changeAgentStatus(tx.getTxData().getAddress(), ConsensusStatusEnum.WAITING);
+        manager.changeAgentStatusByHash(tx.getTxData().getHexHash(), ConsensusStatusEnum.WAITING);
         Consensus<Agent> ca = tx.getTxData();
         ca.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
-        DelegateAccountPo po = ConsensusTool.agentToPojo(ca);
+        AgentPo po = ConsensusTool.agentToPojo(ca);
         delegateAccountService.save(po);
         RegisterAgentNotice notice = new RegisterAgentNotice();
         notice.setEventBody(tx);

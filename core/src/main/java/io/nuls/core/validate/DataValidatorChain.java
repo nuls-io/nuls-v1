@@ -46,7 +46,13 @@ public class DataValidatorChain {
             return ValidateResult.getSuccessResult();
         }
         index.set(-1);
-        ValidateResult result = doValidate(data);
+        ValidateResult result;
+        try {
+            result = doValidate(data);
+        } catch (Exception e) {
+            Log.error(e);
+            result = ValidateResult.getFailedResult(e.getMessage());
+        }
         boolean b = index.get() == list.size();
         index.remove();
         if (b) {
