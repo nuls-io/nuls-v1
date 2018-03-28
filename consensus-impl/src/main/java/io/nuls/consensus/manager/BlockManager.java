@@ -26,7 +26,7 @@
 
 package io.nuls.consensus.manager;
 
-import io.nuls.consensus.cache.manager.block.ConfrimingBlockCacheManager;
+import io.nuls.consensus.cache.manager.block.ConfirmingBlockCacheManager;
 import io.nuls.consensus.cache.manager.block.BlockCacheBuffer;
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
@@ -60,7 +60,7 @@ public class BlockManager {
     private static final BlockManager INSTANCE = new BlockManager();
     private NulsContext context = NulsContext.getInstance();
 
-    private ConfrimingBlockCacheManager confrimingBlockCacheManager = ConfrimingBlockCacheManager.getInstance();
+    private ConfirmingBlockCacheManager confirmingBlockCacheManager = ConfirmingBlockCacheManager.getInstance();
     private BlockCacheBuffer blockCacheBuffer = BlockCacheBuffer.getInstance();
 
     private EventBroadcaster eventBroadcaster;
@@ -103,7 +103,7 @@ public class BlockManager {
         if (verify) {
             block.verifyWithException();
         }
-        boolean success = confrimingBlockCacheManager.cacheBlock(block);
+        boolean success = confirmingBlockCacheManager.cacheBlock(block);
         if (!success) {
             blockCacheBuffer.cacheBlock(block);
             boolean hasPre = blockCacheBuffer.getBlock(block.getHeader().getPreHash().getDigestHex()) != null;
@@ -135,7 +135,7 @@ public class BlockManager {
                 this.lastAppravedHash = block.getHeader().getHash().getDigestHex();
                 checkNextblock(block.getHeader().getHash().getDigestHex());
             } catch (Exception e) {
-                confrimingBlockCacheManager.removeBlock(block.getHeader().getHash().getDigestHex());
+                confirmingBlockCacheManager.removeBlock(block.getHeader().getHash().getDigestHex());
                 blockCacheBuffer.cacheBlock(block);
                 return;
             }
@@ -190,7 +190,7 @@ public class BlockManager {
         this.rollbackTxList(block.getTxs(), 0, block.getTxs().size());
         List<String> hashList = this.bifurcateProcessor.getHashList(block.getHeader().getHeight() - 1);
         if (hashList.size() > 1) {
-            Block preBlock = confrimingBlockCacheManager.getBlock(block.getHeader().getPreHash().getDigestHex());
+            Block preBlock = confirmingBlockCacheManager.getBlock(block.getHeader().getPreHash().getDigestHex());
             this.rollbackAppraval(preBlock);
         }
     }
@@ -204,7 +204,7 @@ public class BlockManager {
     }
 
     public Block getBlock(String hash) {
-        Block block = confrimingBlockCacheManager.getBlock(hash);
+        Block block = confirmingBlockCacheManager.getBlock(hash);
         if (block == null) {
             block = this.blockCacheBuffer.getBlock(hash);
         }
@@ -243,12 +243,12 @@ public class BlockManager {
 
     public void removeBlock(String hash) {
         this.bifurcateProcessor.removeHash(hash);
-        confrimingBlockCacheManager.removeBlock(hash);
+        confirmingBlockCacheManager.removeBlock(hash);
         blockCacheBuffer.removeBlock(hash);
     }
 
     public BlockHeader getBlockHeader(String hashHex) {
-        BlockHeader header = confrimingBlockCacheManager.getBlockHeader(hashHex);
+        BlockHeader header = confirmingBlockCacheManager.getBlockHeader(hashHex);
         if (null == header) {
             header = blockCacheBuffer.getBlockHeader(hashHex);
         }
@@ -260,11 +260,11 @@ public class BlockManager {
         if (list.size() != 1) {
             return null;
         }
-        return confrimingBlockCacheManager.getBlockHeader(list.get(0));
+        return confirmingBlockCacheManager.getBlockHeader(list.get(0));
     }
 
     public void clear() {
-        this.confrimingBlockCacheManager.clear();
+        this.confirmingBlockCacheManager.clear();
         this.blockCacheBuffer.clear();
     }
 }

@@ -25,7 +25,7 @@ package io.nuls.consensus.manager;
 
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.cache.manager.block.BlockCacheBuffer;
-import io.nuls.consensus.cache.manager.block.ConfrimingBlockCacheManager;
+import io.nuls.consensus.cache.manager.block.ConfirmingBlockCacheManager;
 import io.nuls.consensus.cache.manager.block.TemporaryCacheManager;
 import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
@@ -62,7 +62,7 @@ public class ConsensusManager implements Runnable {
     private static ConsensusManager INSTANCE = new ConsensusManager();
     private TemporaryCacheManager temporaryCacheManager;
     private BlockCacheBuffer blockCacheBuffer;
-    private ConfrimingBlockCacheManager confrimingBlockCacheManager;
+    private ConfirmingBlockCacheManager confirmingBlockCacheManager;
 
     private BlockManager blockCacheManager;
     private ConsensusCacheManager consensusCacheManager;
@@ -125,8 +125,8 @@ public class ConsensusManager implements Runnable {
         this.temporaryCacheManager.init();
         this.blockCacheBuffer = BlockCacheBuffer.getInstance();
         this.blockCacheBuffer.init();
-        this.confrimingBlockCacheManager = ConfrimingBlockCacheManager.getInstance();
-        this.confrimingBlockCacheManager.init();
+        this.confirmingBlockCacheManager = ConfirmingBlockCacheManager.getInstance();
+        this.confirmingBlockCacheManager.init();
 
 
         blockCacheManager = BlockManager.getInstance();

@@ -41,16 +41,16 @@ import java.util.List;
  * @author Niels
  * @date 2017/12/12
  */
-public class ConfrimingBlockCacheManager {
-    private static final ConfrimingBlockCacheManager INSTANCE = new ConfrimingBlockCacheManager();
+public class ConfirmingBlockCacheManager {
+    private static final ConfirmingBlockCacheManager INSTANCE = new ConfirmingBlockCacheManager();
 
     private CacheMap<String, BlockHeader> headerCacheMap;
     private CacheMap<String, List<Transaction>> txsCacheMap;
 
-    private ConfrimingBlockCacheManager() {
+    private ConfirmingBlockCacheManager() {
     }
 
-    public static ConfrimingBlockCacheManager getInstance() {
+    public static ConfirmingBlockCacheManager getInstance() {
         return INSTANCE;
     }
 

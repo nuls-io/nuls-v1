@@ -23,7 +23,7 @@
  */
 package io.nuls.consensus.entity.block;
 
-import io.nuls.consensus.cache.manager.block.ConfrimingBlockCacheManager;
+import io.nuls.consensus.cache.manager.block.ConfirmingBlockCacheManager;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.Log;
@@ -42,7 +42,7 @@ public class BifurcateProcessor {
 
     private static final BifurcateProcessor INSTANCE = new BifurcateProcessor();
 
-    private ConfrimingBlockCacheManager confrimingBlockCacheManager = ConfrimingBlockCacheManager.getInstance();
+    private ConfirmingBlockCacheManager confirmingBlockCacheManager = ConfirmingBlockCacheManager.getInstance();
 
     private List<BlockHeaderChain> chainList = new CopyOnWriteArrayList<>();
     private long maxHeight;
@@ -86,7 +86,7 @@ public class BifurcateProcessor {
 
         for (String hash : removeHashSet) {
             if (!rightHashSet.contains(hash)) {
-                confrimingBlockCacheManager.removeBlock(hash);
+                confirmingBlockCacheManager.removeBlock(hash);
             }
         }
 
@@ -188,7 +188,7 @@ public class BifurcateProcessor {
 
         for (String hash : removeHashSet) {
             if (!rightHashSet.contains(hash)) {
-                confrimingBlockCacheManager.removeBlock(hash);
+                confirmingBlockCacheManager.removeBlock(hash);
             }
         }
         return true;
