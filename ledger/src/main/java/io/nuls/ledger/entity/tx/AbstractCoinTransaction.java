@@ -72,8 +72,8 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
         this(type);
         if (null != coinParam) {
             this.coinData = coinDataProvider.createByTransferData(this, coinParam, password);
+            this.fee = coinParam.getFee();
         }
-        this.fee = coinParam.getFee();
         this.time = TimeService.currentTimeMillis();
     }
 
