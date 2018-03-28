@@ -284,11 +284,11 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                         from.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
                         addressSet.add(from.getAddress());
                     }
-//                    else if (from.getStatus() == OutPutStatusEnum.UTXO_CONFIRM_SPEND) {
-//                        from.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
-//                    } else if (from.getStatus() == OutPutStatusEnum.UTXO_UNCONFIRM_SPEND) {
-//                        from.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND);
-//                    }
+                    else if (from.getStatus() == OutPutStatusEnum.UTXO_CONFIRM_SPEND) {
+                        from.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
+                    } else if (from.getStatus() == OutPutStatusEnum.UTXO_UNCONFIRM_SPEND) {
+                        from.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND);
+                    }
                 }
             }
         } else if (tx.getStatus().equals(TxStatusEnum.CONFIRMED)) {
