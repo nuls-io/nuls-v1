@@ -345,8 +345,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         }
         long blockHeight = bestBlock.getHeader().getHeight();
         if (txType == TransactionConstant.TX_TYPE_COIN_BASE ||
-                txType == TransactionConstant.TX_TYPE_SMALL_CHANGE ||
-                txType == TransactionConstant.TX_TYPE_EXIT_CONSENSUS
+                txType == TransactionConstant.TX_TYPE_SMALL_CHANGE
+                //|| txType == TransactionConstant.TX_TYPE_EXIT_CONSENSUS
                 ) {
             return Na.ZERO;
         }
