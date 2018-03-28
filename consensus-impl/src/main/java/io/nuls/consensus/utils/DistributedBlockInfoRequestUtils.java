@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -50,7 +51,7 @@ public class DistributedBlockInfoRequestUtils {
     private static final DistributedBlockInfoRequestUtils INSTANCE = new DistributedBlockInfoRequestUtils();
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
-    private List<String> nodeIdList;
+    private CopyOnWriteArrayList<String> nodeIdList;
     private Map<String, BlockHashResponse> hashesMap = new ConcurrentHashMap<>();
     /**
      * list order by answered time
@@ -91,13 +92,13 @@ public class DistributedBlockInfoRequestUtils {
             GetBlocksHashRequest event = new GetBlocksHashRequest(start, end, split);
             this.startTime = TimeService.currentTimeMillis();
             if (null == sendList) {
-                this.nodeIdList = new ArrayList<>();
+                this.nodeIdList = new CopyOnWriteArrayList<>();
                 List<Node> nodes = networkService.getAvailableNodes();
                 for (Node node : nodes) {
                     this.nodeIdList.add(node.getId());
                 }
             } else {
-                this.nodeIdList = sendList;
+                this.nodeIdList = new CopyOnWriteArrayList<>(sendList);
             }
             if (nodeIdList.isEmpty()) {
                 return null;
