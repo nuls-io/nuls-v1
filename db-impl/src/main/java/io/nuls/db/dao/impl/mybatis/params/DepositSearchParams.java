@@ -33,7 +33,7 @@ import java.util.Map;
  * @date 2017/11/23
  */
 public class DepositSearchParams extends Searchable {
-    public static final String SEARCH_FIELD_AGENT_ADDRESS = "agentAddress";
+    public static final String SEARCH_FIELD_AGENT_ADDRESS = "agentHash";
     public static final String SEARCH_FIELD_ADDRESS = "address";
 
     public DepositSearchParams(Map<String, Object> params) {
@@ -44,7 +44,7 @@ public class DepositSearchParams extends Searchable {
             this.addCondition(SEARCH_FIELD_ADDRESS, SearchOperator.eq, params.get(SEARCH_FIELD_ADDRESS));
         }
         if (params.containsKey(SEARCH_FIELD_AGENT_ADDRESS)) {
-            this.addCondition("agent_address", SearchOperator.eq, params.get(SEARCH_FIELD_AGENT_ADDRESS));
+            this.addCondition("agent_id", SearchOperator.eq, params.get(SEARCH_FIELD_AGENT_ADDRESS));
         }
     }
 }

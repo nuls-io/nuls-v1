@@ -28,6 +28,8 @@ package io.nuls.db.entity;
  */
 public class AgentPo {
 
+    private String id;
+
     private String agentAddress;
 
     private String agentName;
@@ -41,6 +43,14 @@ public class AgentPo {
     private Long startTime;
     private Double commissionRate;
     private int status;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getAgentAddress() {
         return agentAddress;

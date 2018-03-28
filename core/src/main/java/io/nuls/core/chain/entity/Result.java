@@ -77,6 +77,9 @@ public class Result<T> {
     }
 
     public String getMessage() {
+        if (null == message) {
+            return errorCode.getMsg();
+        }
         return message;
     }
 

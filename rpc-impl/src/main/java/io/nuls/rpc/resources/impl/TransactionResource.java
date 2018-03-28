@@ -23,7 +23,7 @@
  */
 package io.nuls.rpc.resources.impl;
 
-import io.nuls.account.service.intf.AccountService;
+import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
@@ -38,12 +38,12 @@ import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.event.TransactionEvent;
-import io.nuls.ledger.service.impl.LedgerCacheService;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.rpc.entity.OutputDto;
 import io.nuls.rpc.entity.RpcResult;
 import io.nuls.rpc.entity.TransactionDto;
 import io.nuls.rpc.resources.form.TxForm;
+import io.swagger.annotations.Api;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -55,9 +55,9 @@ import java.util.List;
  * @date 2017/9/30
  */
 @Path("/tx")
+@Api(value = "/browse", description = "Transaction")
 public class TransactionResource {
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
-    private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
     private UtxoOutputDataService outputDataService = NulsContext.getServiceBean(UtxoOutputDataService.class);
 
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
@@ -115,17 +115,17 @@ public class TransactionResource {
     @GET
     @Path("/list")
     @Produces(MediaType.APPLICATION_JSON)
-
-    public RpcResult list(@QueryParam("address") String address, @QueryParam("type") int type,
+    public RpcResult list(@QueryParam("blockHeight") Long blockHeight,
+                          @QueryParam("address") String address, @QueryParam("type") int type,
                           @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
-        if (type < 0 || pageNumber < 0 || pageSize < 0 || pageSize > 100) {
+        if (blockHeight == null && StringUtils.isBlank(address) && type == 0) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
-        if (pageNumber == 0) {
-            pageNumber = 1;
+        if ((blockHeight != null && blockHeight < 0) || type < 0 || pageNumber < 0 || pageSize < 0) {
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
-        if (pageSize == 0) {
-            pageSize = 10;
+        if ((pageNumber == 0 && pageSize > 0) || (pageNumber > 0 && pageSize == 0)) {
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
 
         try {
@@ -133,16 +133,28 @@ public class TransactionResource {
 
             Page<Transaction> pages = new Page<>();
             if (StringUtils.isBlank(address)) {
-                pages = ledgerService.getTxList(-1, type, pageNumber, pageSize);
-            } else if (StringUtils.validAddress(address)) {
-                pages.setPageNumber(pageNumber);
-                pages.setPageSize(pageSize);
-                long count = ledgerService.getTxCount(address, type);
+                pages = ledgerService.getTxList(blockHeight, type, pageNumber, pageSize);
+            } else if (Address.validAddress(address)) {
+
+                long count = ledgerService.getTxCount(blockHeight, address, type);
+                if (count < (pageNumber - 1) * pageSize) {
+                    Page page = new Page(pageNumber, pageSize);
+                    return result.setData(page);
+                }
+
+                if (pageSize > 0) {
+                    pages.setPageNumber(pageNumber);
+                    pages.setPageSize(pageSize);
+                } else {
+                    pages.setPageNumber(pageNumber);
+                    pages.setPages((int) count);
+                }
+
                 pages.setTotal(count);
                 if (count == 0) {
                     return RpcResult.getSuccess().setData(pages);
                 }
-                List<Transaction> txList = ledgerService.getTxList(address, type, pageNumber, pageSize);
+                List<Transaction> txList = ledgerService.getTxList(blockHeight, address, type, pageNumber, pageSize);
                 pages.setList(txList);
             }
             Page<TransactionDto> pageDto = new Page<>(pages);
@@ -157,42 +169,6 @@ public class TransactionResource {
             Log.error(e);
             return RpcResult.getFailed(e.getMessage());
         }
-
-    }
-
-    @GET
-    @Path("/block/list")
-    @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult list(@QueryParam("height") long height,
-                          @QueryParam("pageNumber") int pageNumber,
-                          @QueryParam("pageSize") int pageSize) {
-        if (height < 0 || pageNumber < 0 || pageSize < 0) {
-            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
-        }
-        if (pageNumber == 0) {
-            pageNumber = 1;
-        }
-        if (pageSize == 0) {
-            pageSize = 20000;
-        }
-
-        Page<TransactionDto> dtoPage = null;
-        try {
-            Page<Transaction> txPage = ledgerService.getTxList(height, 0, pageNumber, pageSize);
-            List<TransactionDto> dtoList = new ArrayList<>();
-            dtoPage = new Page<>(txPage);
-            for (Transaction tx : txPage.getList()) {
-                dtoList.add(new TransactionDto(tx));
-            }
-            dtoPage.setList(dtoList);
-        } catch (Exception e) {
-            Log.error(e);
-            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
-        }
-
-        RpcResult result = RpcResult.getSuccess();
-        result.setData(dtoPage);
-        return result;
     }
 
     @GET
@@ -201,7 +177,7 @@ public class TransactionResource {
     public RpcResult list(@QueryParam("address") String address,
                           @QueryParam("pageNumber") int pageNumber,
                           @QueryParam("pageSize") int pageSize) {
-        if (!StringUtils.validAddress(address)) {
+        if (!Address.validAddress(address)) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         if (pageNumber < 0 || pageSize < 0) {

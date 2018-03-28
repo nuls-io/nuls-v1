@@ -29,7 +29,6 @@ import io.nuls.core.exception.NulsRuntimeException;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.math.RoundingMode;
 
 /**

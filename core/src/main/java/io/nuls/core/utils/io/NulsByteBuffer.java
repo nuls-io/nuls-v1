@@ -250,7 +250,7 @@ public class NulsByteBuffer {
             return TransactionManager.getInstance(this);
         } catch (Exception e) {
             Log.error(e);
-            throw new NulsException(ErrorCode.DATA_PARSE_ERROR);
+            throw new NulsException(e);
         }
     }
 }

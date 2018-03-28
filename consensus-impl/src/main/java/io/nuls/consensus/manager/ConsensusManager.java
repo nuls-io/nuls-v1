@@ -24,7 +24,9 @@
 package io.nuls.consensus.manager;
 
 import io.nuls.account.service.intf.AccountService;
-import io.nuls.consensus.cache.manager.block.BlockCacheManager;
+import io.nuls.consensus.cache.manager.block.BlockCacheBuffer;
+import io.nuls.consensus.cache.manager.block.ConfrimingBlockCacheManager;
+import io.nuls.consensus.cache.manager.block.TemporaryCacheManager;
 import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
@@ -58,7 +60,11 @@ import java.util.Set;
  */
 public class ConsensusManager implements Runnable {
     private static ConsensusManager INSTANCE = new ConsensusManager();
-    private BlockCacheManager blockCacheManager;
+    private TemporaryCacheManager temporaryCacheManager;
+    private BlockCacheBuffer blockCacheBuffer;
+    private ConfrimingBlockCacheManager confrimingBlockCacheManager;
+
+    private BlockManager blockCacheManager;
     private ConsensusCacheManager consensusCacheManager;
     private ConfirmingTxCacheManager confirmingTxCacheManager;
     private ReceivedTxCacheManager receivedTxCacheManager;
@@ -115,8 +121,18 @@ public class ConsensusManager implements Runnable {
         if (this.partakePacking) {
             //todo
         }
-        blockCacheManager = BlockCacheManager.getInstance();
+        this.temporaryCacheManager = TemporaryCacheManager.getInstance();
+        this.temporaryCacheManager.init();
+        this.blockCacheBuffer = BlockCacheBuffer.getInstance();
+        this.blockCacheBuffer.init();
+        this.confrimingBlockCacheManager = ConfrimingBlockCacheManager.getInstance();
+        this.confrimingBlockCacheManager.init();
+
+
+        blockCacheManager = BlockManager.getInstance();
         blockCacheManager.init();
+
+
         consensusCacheManager = ConsensusCacheManager.getInstance();
         consensusCacheManager.init();
         confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
@@ -193,6 +209,7 @@ public class ConsensusManager implements Runnable {
 
     public void destroy() {
         blockCacheManager.clear();
+        this.temporaryCacheManager.clear();
         consensusCacheManager.clear();
         confirmingTxCacheManager.clear();
         receivedTxCacheManager.clear();

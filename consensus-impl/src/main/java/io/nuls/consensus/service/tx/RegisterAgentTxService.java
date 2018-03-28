@@ -49,15 +49,15 @@ public class RegisterAgentTxService implements TransactionService<RegisterAgentT
 
     @Override
     public void onRollback(RegisterAgentTransaction tx) throws NulsException {
-        this.manager.delAgent(tx.getTxData().getAddress());
-        manager.delDepositByAgent(tx.getTxData().getAddress());
-        this.delegateAccountService.delete(tx.getTxData().getAddress());
-        this.delegateService.deleteByAgentAddress(tx.getTxData().getAddress());
+        this.manager.delAgent(tx.getTxData().getHexHash());
+        manager.delDepositByAgentHash(tx.getTxData().getHexHash());
+        this.delegateAccountService.delete(tx.getTxData().getHexHash());
+        this.delegateService.deleteByAgentHash(tx.getTxData().getHexHash());
     }
 
     @Override
     public void onCommit(RegisterAgentTransaction tx) throws NulsException {
-        manager.changeAgentStatus(tx.getTxData().getAddress(), ConsensusStatusEnum.WAITING);
+        manager.changeAgentStatusByHash(tx.getTxData().getHexHash(), ConsensusStatusEnum.WAITING);
         Consensus<Agent> ca = tx.getTxData();
         ca.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
         AgentPo po = ConsensusTool.agentToPojo(ca);

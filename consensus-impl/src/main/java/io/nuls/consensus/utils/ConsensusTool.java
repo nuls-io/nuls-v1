@@ -42,7 +42,6 @@ import io.nuls.core.script.P2PKHScriptSig;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
-import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.db.entity.AgentPo;
 import io.nuls.db.entity.DepositPo;
@@ -121,6 +120,7 @@ public class ConsensusTool {
         agent.setAgentName(po.getAgentName());
         Consensus<Agent> ca = new ConsensusAgentImpl();
         ca.setAddress(po.getAgentAddress());
+        ca.setHash(NulsDigestData.fromDigestHex(po.getId()));
         ca.setExtend(agent);
         return ca;
     }
@@ -132,9 +132,10 @@ public class ConsensusTool {
         Consensus<Deposit> ca = new ConsensusDepositImpl();
         ca.setAddress(po.getAddress());
         Deposit deposit = new Deposit();
-        deposit.setAgentAddress(po.getAgentAddress());
+        deposit.setAgentHash(po.getAgentHash());
         deposit.setDeposit(Na.valueOf(po.getDeposit()));
         deposit.setStartTime(po.getTime());
+        deposit.setTxHash(po.getTxHash());
         ca.setHash(NulsDigestData.fromDigestHex(po.getId()));
         ca.setExtend(deposit);
         return ca;
@@ -146,6 +147,7 @@ public class ConsensusTool {
         }
         AgentPo po = new AgentPo();
         po.setAgentAddress(bean.getAddress());
+        po.setId(bean.getHexHash());
         po.setDeposit(bean.getExtend().getDeposit().getValue());
         po.setStartTime(bean.getExtend().getStartTime());
         po.setRemark(bean.getExtend().getIntroduction());
@@ -156,7 +158,7 @@ public class ConsensusTool {
         return po;
     }
 
-    public static DepositPo depositToPojo(Consensus<Deposit> bean,String txHash) {
+    public static DepositPo depositToPojo(Consensus<Deposit> bean, String txHash) {
         if (null == bean) {
             return null;
         }
@@ -164,7 +166,7 @@ public class ConsensusTool {
         po.setAddress(bean.getAddress());
         po.setDeposit(bean.getExtend().getDeposit().getValue());
         po.setTime(bean.getExtend().getStartTime());
-        po.setAgentAddress(bean.getExtend().getAgentAddress());
+        po.setAgentHash(bean.getExtend().getAgentHash());
         po.setId(bean.getHexHash());
         po.setTxHash(txHash);
         return po;

@@ -23,11 +23,17 @@
  */
 package io.nuls.consensus.event.handler;
 
-import io.nuls.consensus.cache.manager.block.BlockCacheManager;
+import io.nuls.consensus.cache.manager.block.TemporaryCacheManager;
+import io.nuls.consensus.entity.GetSmallBlockParam;
 import io.nuls.consensus.event.BlockHeaderEvent;
+import io.nuls.consensus.event.GetSmallBlockRequest;
+import io.nuls.consensus.manager.BlockManager;
+import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.handler.AbstractEventHandler;
+import io.nuls.event.bus.service.intf.EventBroadcaster;
 
 /**
  * @author facjas
@@ -35,15 +41,26 @@ import io.nuls.event.bus.handler.AbstractEventHandler;
  */
 public class BlockHeaderHandler extends AbstractEventHandler<BlockHeaderEvent> {
 
-    private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
+    private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
+    private BlockManager blockManager = BlockManager.getInstance();
+    private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
 
     @Override
     public void onEvent(BlockHeaderEvent event, String fromId) {
         BlockHeader header = event.getEventBody();
-        if(null==header){
+        if (null == header) {
             Log.warn("recieved a null blockHeader!");
             return;
         }
-        blockCacheManager.cacheBlockHeader(header, fromId);
+        Block block = blockManager.getBlock(header.getHash().getDigestHex());
+        if (null != block) {
+            return;
+        }
+        GetSmallBlockRequest request = new GetSmallBlockRequest();
+        GetSmallBlockParam param = new GetSmallBlockParam();
+        param.setBlockHash(header.getHash());
+        request.setEventBody(param);
+        eventBroadcaster.sendToNode(request, fromId);
+        temporaryCacheManager.cacheBlockHeader(header);
     }
 }

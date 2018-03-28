@@ -32,7 +32,7 @@ public class DepositPo {
 
     private String address;
 
-    private String agentAddress;
+    private String agentHash;
 
     private Long deposit;
 
@@ -68,12 +68,12 @@ public class DepositPo {
         this.address = address == null ? null : address.trim();
     }
 
-    public String getAgentAddress() {
-        return agentAddress;
+    public String getAgentHash() {
+        return agentHash;
     }
 
-    public void setAgentAddress(String agentAddress) {
-        this.agentAddress = agentAddress == null ? null : agentAddress.trim();
+    public void setAgentHash(String agentHash) {
+        this.agentHash = agentHash;
     }
 
     public Long getDeposit() {

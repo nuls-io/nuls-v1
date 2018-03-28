@@ -35,9 +35,15 @@ import java.util.List;
  * @date 2017/11/20
  */
 public interface TransactionMapper  extends BaseMapper<String,TransactionPo> {
+
     List<TransactionPo> selectByAddress(Searchable searchable);
 
     Long selectCountByAddress(Searchable searchable);
 
     Long getFeeByHeight(@Param("height") long height);
+
+    List<String> selectTxHashList(Searchable searchable);
+
+    List<String> selectTxHashListRelation(Searchable searchable);
+
 }

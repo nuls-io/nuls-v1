@@ -36,6 +36,7 @@ import io.nuls.core.utils.io.NulsByteBuffer;
  */
 public class SmallBlockEvent extends BaseConsensusEvent<SmallBlock> {
 
+
     public SmallBlockEvent() {
         super(ConsensusEventType.SMALL_BLOCK);
     }

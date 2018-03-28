@@ -65,24 +65,25 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
     public void onCommit(PocJoinConsensusTransaction tx) throws NulsException {
         manager.changeDepositStatus(tx.getTxData().getHexHash(), ConsensusStatusEnum.WAITING);
         Consensus<Deposit> cd = tx.getTxData();
+        cd.getExtend().setTxHash(tx.getHash().getDigestHex());
         cd.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
         DepositPo po = ConsensusTool.depositToPojo(cd,tx.getHash().getDigestHex());
         po.setBlockHeight(tx.getBlockHeight());
         po.setTime(tx.getTime());
         depositDataService.save(po);
         Map<String, Object> paramsMap = new HashMap<>();
-        paramsMap.put("agentAddress", cd.getExtend().getAgentAddress());
+        paramsMap.put("agentHash", cd.getExtend().getAgentHash());
         List<DepositPo> poList = depositDataService.getList(paramsMap);
         long sum = 0L;
         for (DepositPo depositPo : poList) {
             sum += depositPo.getDeposit();
         }
         if (sum >= PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT.getValue()) {
-            manager.changeAgentStatus(tx.getTxData().getExtend().getAgentAddress(),ConsensusStatusEnum.IN);
-            manager.changeDepositStatusByAgent(tx.getTxData().getExtend().getAgentAddress(),ConsensusStatusEnum.IN);
-            AgentPo daPo = this.accountDataService.get(cd.getExtend().getAgentAddress());
+            manager.changeAgentStatusByHash(tx.getTxData().getExtend().getAgentHash(),ConsensusStatusEnum.IN);
+            manager.changeDepositStatusByAgentHash(tx.getTxData().getExtend().getAgentHash(),ConsensusStatusEnum.IN);
+            AgentPo daPo = this.accountDataService.get(cd.getExtend().getAgentHash());
             if (null == daPo) {
-                throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "the agent cannot find,agent address:" + cd.getExtend().getAgentAddress());
+                throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "the agent cannot find,agent hash:" + cd.getExtend().getAgentHash());
             }
             daPo.setStatus(ConsensusStatusEnum.IN.getCode());
             this.accountDataService.updateSelective(daPo);
@@ -96,6 +97,7 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
     public void onApproval(PocJoinConsensusTransaction tx) throws NulsException {
         Consensus<Deposit> cd = tx.getTxData();
         cd.getExtend().setStatus(ConsensusStatusEnum.NOT_IN.getCode());
+        cd.getExtend().setTxHash(tx.getHash().getDigestHex());
         manager.cacheDeposit(cd);
 
     }

@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,7 +24,6 @@
 package io.nuls.ledger.util;
 
 import io.nuls.account.entity.Account;
-import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
@@ -45,7 +44,6 @@ import io.nuls.ledger.event.notice.BalanceChangeData;
 import io.nuls.ledger.event.notice.BalanceChangeNotice;
 import io.nuls.ledger.service.impl.LedgerCacheService;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -126,7 +124,7 @@ public class UtxoTransactionTool {
                 if (input.getFrom() == null) {
                     continue;
                 }
-                if (NulsContext.LOCAL_ADDRESS_LIST.contains(Address.fromHashs(input.getFrom().getAddress()).getBase58())) {
+                if (NulsContext.LOCAL_ADDRESS_LIST.contains(input.getFrom().getAddress())) {
                     tx.setTransferType(Transaction.TRANSFER_SEND);
                     return true;
                 }
@@ -135,7 +133,42 @@ public class UtxoTransactionTool {
         // check output
         if (coinData.getOutputs() != null && !coinData.getOutputs().isEmpty()) {
             for (UtxoOutput output : coinData.getOutputs()) {
-                if (NulsContext.LOCAL_ADDRESS_LIST.contains(Address.fromHashs(output.getAddress()).getBase58())) {
+                if (NulsContext.LOCAL_ADDRESS_LIST.contains(output.getAddress())) {
+                    tx.setTransferType(Transaction.TRANSFER_RECEIVE);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    /**
+     * check the tx is mine
+     * when any input or output has my address
+     *
+     * @param tx
+     * @return
+     */
+    public boolean isMine(AbstractCoinTransaction tx, String address) throws NulsException {
+
+        UtxoData coinData = (UtxoData) tx.getCoinData();
+        //check input
+        if (coinData.getInputs() != null && !coinData.getInputs().isEmpty()) {
+            for (UtxoInput input : coinData.getInputs()) {
+                if (input.getFrom() == null) {
+                    continue;
+                }
+                if (input.getFrom().getAddress().equals(address)) {
+                    tx.setTransferType(Transaction.TRANSFER_SEND);
+                    return true;
+                }
+            }
+        }
+        // check output
+        if (coinData.getOutputs() != null && !coinData.getOutputs().isEmpty()) {
+            for (UtxoOutput output : coinData.getOutputs()) {
+                if (output.getAddress().equals(address)) {
                     tx.setTransferType(Transaction.TRANSFER_RECEIVE);
                     return true;
                 }
@@ -159,7 +192,7 @@ public class UtxoTransactionTool {
                 if (output.isUsable()) {
                     usable += output.getValue();
                 } else if (output.isLocked()) {
-                    usable += output.getValue();
+                    lock += output.getValue();
                 }
             }
 
@@ -247,4 +280,5 @@ public class UtxoTransactionTool {
         }
         return accountService;
     }
+
 }

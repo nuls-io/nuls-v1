@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -240,7 +240,6 @@ public class UtxoTransferTool {
             AbstractCoinTransaction coinTx = (AbstractCoinTransaction) tx;
 
             UtxoData utxoData = new UtxoData();
-            Na totalNa = Na.ZERO;
             Set<String> addressSet = new HashSet<>();
 
             for (UtxoInputPo inputPo : inputPoList) {
@@ -251,15 +250,7 @@ public class UtxoTransferTool {
             for (int i = 0; i < outputPoList.size(); i++) {
                 UtxoOutputPo outputPo = outputPoList.get(i);
                 utxoData.getOutputs().add(toOutput(outputPo));
-                if (addressSet.contains(outputPo.getAddress())) {
-                    if (tx instanceof LockNulsTransaction && i == 0) {
-                        totalNa.add(Na.valueOf(outputPo.getValue()));
-                    }
-                } else {
-                    totalNa.add(Na.valueOf(outputPo.getValue()));
-                }
             }
-            utxoData.setTotalNa(totalNa);
             coinTx.setCoinData(utxoData);
         }
     }

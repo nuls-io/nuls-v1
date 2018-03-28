@@ -75,7 +75,6 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
         this.registerTransaction(TransactionConstant.TX_TYPE_EXIT_CONSENSUS, PocExitConsensusTransaction.class, new ExitConsensusTxService());
         this.registerService(BlockServiceImpl.class);
         this.registerService(PocConsensusServiceImpl.class);
-
     }
 
     @Override

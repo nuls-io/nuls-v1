@@ -47,11 +47,11 @@ public class Agent extends BaseNulsData {
     private String introduction;
 
     private String agentName;
+    private long startTime;
 
     /**
      * the following fields is for The account self(delegate Account)
      */
-    private long startTime;
     private int status;
     private long roundNo;
     private long roundIndex;
@@ -69,6 +69,7 @@ public class Agent extends BaseNulsData {
         size += Utils.sizeOfString(this.introduction);
         size += Utils.sizeOfBoolean(seed);
         size += Utils.sizeOfString(agentName);
+        size +=Utils.sizeOfInt48();
         return size;
     }
 
@@ -80,6 +81,7 @@ public class Agent extends BaseNulsData {
         stream.writeString(this.introduction);
         stream.writeBoolean(seed);
         stream.writeString(agentName);
+        stream.writeInt48(startTime);
     }
 
     @Override
@@ -90,6 +92,7 @@ public class Agent extends BaseNulsData {
         this.introduction = byteBuffer.readString();
         this.seed = byteBuffer.readBoolean();
         this.agentName = byteBuffer.readString();
+        this.startTime = byteBuffer.readInt48();
     }
 
     public Na getDeposit() {

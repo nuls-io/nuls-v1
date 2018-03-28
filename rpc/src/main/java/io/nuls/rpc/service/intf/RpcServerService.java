@@ -32,7 +32,7 @@ public interface RpcServerService {
     /**
      * start http server，restFul
      */
-    void startServer(String ip, int port, String moduleUrl);
+    void startServer(String ip, int port);
 
     void shutdown();
 

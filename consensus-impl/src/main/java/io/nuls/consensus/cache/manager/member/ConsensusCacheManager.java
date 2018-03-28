@@ -55,8 +55,8 @@ public class ConsensusCacheManager {
     private static final String CACHE_CONSENSUS_STATUS_INFO = "consensus-status-info";
     private static final String IN_AGENT_LIST = "agent-list-in";
     private static final String OUT_AGENT_LIST = "agent-list-wait";
-    private static final String IN_DELEGATE_LIST = "in-delegate-list";
-    private static final String OUT_DELEGATE_LIST = "wait-delegate-list";
+    private static final String IN_DEPOSIT_LIST = "in-delegate-list";
+    private static final String OUT_DEPOSIT_LIST = "wait-delegate-list";
 
     private static final ConsensusCacheManager INSTANCE = new ConsensusCacheManager();
 
@@ -66,8 +66,8 @@ public class ConsensusCacheManager {
 
     private CacheMap<String, Consensus<Agent>> inAgentCache = new CacheMap<>(IN_AGENT_LIST, 512);
     private CacheMap<String, Consensus<Agent>> outAgentCache = new CacheMap<>(OUT_AGENT_LIST, 512);
-    private CacheMap<String, Consensus<Deposit>> inDelegateCache = new CacheMap<>(IN_DELEGATE_LIST, 1024);
-    private CacheMap<String, Consensus<Deposit>> outDelegateCache = new CacheMap<>(OUT_DELEGATE_LIST, 1024);
+    private CacheMap<String, Consensus<Deposit>> inDelegateCache = new CacheMap<>(IN_DEPOSIT_LIST, 1024);
+    private CacheMap<String, Consensus<Deposit>> outDelegateCache = new CacheMap<>(OUT_DEPOSIT_LIST, 1024);
     private CacheMap<String, ConsensusStatusInfo> consensusStatusCache = new CacheMap<>(CACHE_CONSENSUS_STATUS_INFO, 128);
 
     private ConsensusCacheManager() {
@@ -135,18 +135,28 @@ public class ConsensusCacheManager {
 
     public void cacheAgent(Consensus<Agent> ca) {
         if (ca.getExtend().getStatus() == ConsensusStatusEnum.IN.getCode()) {
-            this.inAgentCache.put(ca.getAddress(), ca);
-            this.outAgentCache.remove(ca.getAddress());
+            this.inAgentCache.put(ca.getHexHash(), ca);
+            this.outAgentCache.remove(ca.getHexHash());
         } else {
-            this.outAgentCache.put(ca.getAddress(), ca);
-            this.inAgentCache.remove(ca.getAddress());
+            this.outAgentCache.put(ca.getHexHash(), ca);
+            this.inAgentCache.remove(ca.getHexHash());
         }
     }
 
-    public Consensus<Agent> getCachedAgent(String address) {
-        Consensus<Agent> ca = this.inAgentCache.get(address);
+    public Consensus<Agent> getCachedAgentByAddress(String agentAddress) {
+        List<Consensus<Agent>> agentList = this.getCachedAgentList();
+        for (Consensus<Agent> ca : agentList) {
+            if (ca.getAddress().equals(agentAddress)) {
+                return ca;
+            }
+        }
+        return null;
+    }
+
+    public Consensus<Agent> getCachedAgentByHash(String agentHash) {
+        Consensus<Agent> ca = this.inAgentCache.get(agentHash);
         if (ca == null) {
-            ca = this.outAgentCache.get(address);
+            ca = this.outAgentCache.get(agentHash);
         }
         return ca;
     }
@@ -163,12 +173,12 @@ public class ConsensusCacheManager {
         this.outAgentCache.remove(address);
     }
 
-    public void changeAgentStatus(String address, ConsensusStatusEnum statusEnum) {
-        Consensus<Agent> ca = getCachedAgent(address);
+    public void changeAgentStatusByHash(String agentHash, ConsensusStatusEnum statusEnum) {
+        Consensus<Agent> ca = getCachedAgentByHash(agentHash);
         if (statusEnum.getCode() == ca.getExtend().getStatus()) {
             return;
         }
-        this.delAgent(address);
+        this.delAgent(agentHash);
         ca.getExtend().setStatus(statusEnum.getCode());
         this.cacheAgent(ca);
     }
@@ -221,33 +231,31 @@ public class ConsensusCacheManager {
         this.cacheDeposit(ca);
     }
 
-    public List<Consensus<Deposit>> getCachedDepositList(String agentAddress) {
-        Consensus<Agent> ca = this.getCachedAgent(agentAddress);
+    public List<Consensus<Deposit>> getCachedDepositListByAgentHash(String agentHash) {
+        Consensus<Agent> ca = this.getCachedAgentByHash(agentHash);
         if (null == ca) {
             return null;
         }
-        if (ca.getExtend().getStatus() == ConsensusStatusEnum.IN.getCode()) {
-            return filter(inDelegateCache.values(), agentAddress);
-        } else {
-            return filter(outDelegateCache.values(), agentAddress);
-        }
+        List<Consensus<Deposit>> depositList = agentHashFilter(inDelegateCache.values(), agentHash);
+        depositList.addAll(agentHashFilter(outDelegateCache.values(), agentHash));
+        return depositList;
     }
 
-    private List<Consensus<Deposit>> filter(List<Consensus<Deposit>> allList, String agentAddress) {
+    private List<Consensus<Deposit>> agentHashFilter(List<Consensus<Deposit>> allList, String agentHash) {
         List<Consensus<Deposit>> list = new ArrayList<>();
         for (Consensus<Deposit> cd : allList) {
-            if (cd.getExtend().getAgentAddress().equals(agentAddress)) {
+            if (cd.getExtend().getAgentHash().equals(agentHash)) {
                 list.add(cd);
             }
         }
         return list;
     }
 
-    public void changeDepositStatusByAgent(String address, ConsensusStatusEnum status) {
+    public void changeDepositStatusByAgentHash(String agentHash, ConsensusStatusEnum status) {
         if (status == ConsensusStatusEnum.IN) {
             List<Consensus<Deposit>> allOutList = new ArrayList<>(outDelegateCache.values());
             for (Consensus<Deposit> cd : allOutList) {
-                if (cd.getExtend().getAgentAddress().equals(address)) {
+                if (cd.getExtend().getAgentHash().equals(agentHash)) {
                     outDelegateCache.remove(cd.getHexHash());
                     inDelegateCache.put(cd.getHexHash(), cd);
                 }
@@ -256,23 +264,23 @@ public class ConsensusCacheManager {
         }
         List<Consensus<Deposit>> allOutList = new ArrayList<>(inDelegateCache.values());
         for (Consensus<Deposit> cd : allOutList) {
-            if (cd.getExtend().getAgentAddress().equals(address)) {
+            if (cd.getExtend().getAgentHash().equals(agentHash)) {
                 inDelegateCache.remove(cd.getHexHash());
                 outDelegateCache.put(cd.getHexHash(), cd);
             }
         }
     }
 
-    public void delDepositByAgent(String address) {
+    public void delDepositByAgentHash(String agentHash) {
         List<Consensus<Deposit>> allList = new ArrayList<>(outDelegateCache.values());
         for (Consensus<Deposit> cd : allList) {
-            if (cd.getExtend().getAgentAddress().equals(address)) {
+            if (cd.getExtend().getAgentHash().equals(agentHash)) {
                 outDelegateCache.remove(cd.getHexHash());
             }
         }
         allList = new ArrayList<>(inDelegateCache.values());
         for (Consensus<Deposit> cd : allList) {
-            if (cd.getExtend().getAgentAddress().equals(address)) {
+            if (cd.getExtend().getAgentHash().equals(agentHash)) {
                 inDelegateCache.remove(cd.getHexHash());
             }
         }
@@ -282,5 +290,19 @@ public class ConsensusCacheManager {
         Set<Consensus<Deposit>> allSet = new HashSet<>(outDelegateCache.values());
         allSet.addAll(inDelegateCache.values());
         return new ArrayList<>(allSet);
+    }
+
+    public List<Consensus<Deposit>> getCachedDepositListByAddress(String address) {
+        Set<Consensus<Deposit>> allSet = new HashSet<>(outDelegateCache.values());
+        allSet.addAll(inDelegateCache.values());
+
+        List<Consensus<Deposit>> list = new ArrayList<>(allSet);
+        for (int i = list.size() - 1; i >= 0; i--) {
+            Consensus<Deposit> cd = list.get(i);
+            if (!cd.getAddress().equals(address)) {
+                list.remove(i);
+            }
+        }
+        return list;
     }
 }

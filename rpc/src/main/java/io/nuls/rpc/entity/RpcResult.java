@@ -118,6 +118,11 @@ public class RpcResult<T> {
         return new RpcResult(false, errorCode);
     }
 
+    public static RpcResult getFailed(ErrorCode errorCode, String message) {
+        return new RpcResult(false, errorCode.getCode(), message);
+    }
+
+
     @Override
     public String toString() {
         try {

@@ -75,4 +75,10 @@ public class ValidateResult<T> extends Result<T> {
     public void setLevel(SeverityLevelEnum level) {
         this.level = level;
     }
+
+    public static ValidateResult getFailedResult(ErrorCode errorCode, String msg) {
+        ValidateResult vr = getFailedResult(errorCode);
+        vr.setMessage(msg);
+        return vr;
+    }
 }

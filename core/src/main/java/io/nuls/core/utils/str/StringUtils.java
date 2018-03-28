@@ -31,11 +31,11 @@ import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
 /**
- * Created by Niels on 2017/10/9.
+ *
+ * @author Niels
+ * @date 2017/10/9
  */
 public class StringUtils {
-
-    public static final int ADDRESS_HASH_LENGTH = 23;
 
     public static boolean isBlank(String str) {
         return null == str || str.trim().length() == 0;
@@ -95,21 +95,13 @@ public class StringUtils {
         return true;
     }
 
-    public static boolean validAddress(String address) {
-        if (isBlank(address)) return false;
-        try {
-            byte[] bytes = Base58.decode(address);
-            if (bytes.length != ADDRESS_HASH_LENGTH) return false;
-        } catch (NulsException e) {
+    public static boolean validHash(String hash) {
+        if (isBlank(hash)){
             return false;
         }
-
-        return true;
-    }
-
-    public static boolean validHash(String hash) {
-        if (isBlank(hash)) return false;
-        if (hash.length() > 73) return false;
+        if (hash.length() > 73){
+            return false;
+        }
         return true;
     }
 

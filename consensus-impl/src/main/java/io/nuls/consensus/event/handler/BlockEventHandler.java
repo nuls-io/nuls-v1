@@ -24,13 +24,12 @@
 package io.nuls.consensus.event.handler;
 
 import io.nuls.consensus.event.BlockEvent;
-import io.nuls.consensus.cache.manager.block.BlockCacheManager;
+import io.nuls.consensus.manager.BlockManager;
 import io.nuls.consensus.utils.BlockBatchDownloadUtils;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.entity.NodePo;
@@ -43,7 +42,7 @@ import io.nuls.network.service.NetworkService;
  */
 public class BlockEventHandler extends AbstractEventHandler<BlockEvent> {
 
-    private BlockCacheManager blockCacheManager = BlockCacheManager.getInstance();
+    private BlockManager blockCacheManager = BlockManager.getInstance();
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
 
     @Override
@@ -58,12 +57,13 @@ public class BlockEventHandler extends AbstractEventHandler<BlockEvent> {
             if (result.getLevel() == SeverityLevelEnum.FLAGRANT_FOUL) {
                 networkService.blackNode(fromId, NodePo.YELLOW);
             }
+            Log.warn("recieved a wrong blockEvent:{},form:{}",result.getMessage(),fromId);
             return;
         }
         if (BlockBatchDownloadUtils.getInstance().downloadedBlock(fromId, block)) {
             return;
         }
-        blockCacheManager.cacheBlock(block);
+        blockCacheManager.addBlock(block,false,fromId);
 
     }
 }

@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -27,6 +27,8 @@ import com.github.pagehelper.PageHelper;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.date.DateUtil;
+import io.nuls.core.utils.date.TimeService;
 import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.db.dao.impl.mybatis.mapper.UtxoOutputMapper;
 import io.nuls.db.dao.impl.mybatis.util.SearchOperator;
@@ -140,9 +142,40 @@ public class UtxoOutputDaoImpl extends BaseDaoImpl<UtxoOutputMapper, Map<String,
     public long getRewardByBlockHeight(long height) {
         Searchable searchable = new Searchable();
         searchable.addCondition("a.type", SearchOperator.eq, TransactionConstant.TX_TYPE_COIN_BASE);
-        searchable.addCondition("a.height", SearchOperator.eq, height);
+        searchable.addCondition("a.block_height", SearchOperator.eq, height);
+        return getMapper().getCoinBaseReward(searchable);
+    }
 
-        return 0;
+    @Override
+    public long getLastDayTimeReward() {
+        Searchable searchable = new Searchable();
+        long lastDayTime = TimeService.currentTimeMillis() - DateUtil.DATE_TIME;
+        searchable.addCondition("a.type", SearchOperator.eq, TransactionConstant.TX_TYPE_COIN_BASE);
+        searchable.addCondition("a.create_time", SearchOperator.gt, lastDayTime);
+        return getMapper().getCoinBaseReward(searchable);
+    }
+
+    @Override
+    public long getAccountReward(String address, long lastTime) {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("a.type", SearchOperator.eq, TransactionConstant.TX_TYPE_COIN_BASE);
+        searchable.addCondition("b.address", SearchOperator.eq, address);
+        if (lastTime > 0) {
+            searchable.addCondition("a.create_time", SearchOperator.gt, lastTime);
+        }
+        return getMapper().getCoinBaseReward(searchable);
+    }
+
+    @Override
+    public long getAgentReward(String address, int type) {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("c.type", SearchOperator.eq, TransactionConstant.TX_TYPE_COIN_BASE);
+        if (type == 1) {
+            searchable.addCondition("a.agent_address", SearchOperator.eq, address);
+        } else {
+            searchable.addCondition("a.packing_address", SearchOperator.eq, address);
+        }
+        return getMapper().getAgentReward(searchable);
     }
 
     @Override

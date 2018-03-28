@@ -31,8 +31,6 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
-import io.nuls.event.bus.filter.NulsEventFilter;
-import io.nuls.event.bus.filter.NulsEventFilterChain;
 import io.nuls.ledger.service.intf.LedgerService;
 
 import java.util.List;
@@ -65,6 +63,6 @@ public class CreditThresholdValidator implements NulsDataValidator<PocJoinConsen
         if (null == list || list.isEmpty()) {
             return ValidateResult.getSuccessResult();
         }
-        return ValidateResult.getFailedResult(ErrorCode.FAILED);
+        return ValidateResult.getFailedResult(ErrorCode.LACK_OF_CREDIT);
     }
 }

@@ -26,16 +26,12 @@ package io.nuls.consensus.event.handler;
 import io.nuls.consensus.event.BlockEvent;
 import io.nuls.consensus.event.GetBlockRequest;
 import io.nuls.consensus.service.intf.BlockService;
-import io.nuls.core.chain.entity.*;
-import io.nuls.core.chain.manager.TransactionManager;
+import io.nuls.core.chain.entity.Block;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.io.NulsByteBuffer;
-import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -51,7 +47,7 @@ public class GetBlockHandler extends AbstractEventHandler<GetBlockRequest> {
     public void onEvent(GetBlockRequest event, String fromId) throws NulsException {
         List<Block> blockList = blockService.getBlockList(event.getStart(), event.getEnd());
         for (Block block : blockList) {
-            if(null==block){
+            if (null == block) {
                 continue;
             }
             BlockEvent blockEvent = new BlockEvent();

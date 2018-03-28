@@ -40,9 +40,10 @@ import java.io.IOException;
  */
 public class Deposit extends BaseNulsData {
     private Na deposit;
-    private String agentAddress;
+    private String agentHash;
     private int status;
     private long startTime;
+    private String txHash;
 
     public long getStartTime() {
         return startTime;
@@ -60,19 +61,19 @@ public class Deposit extends BaseNulsData {
         this.deposit = deposit;
     }
 
-    public String getAgentAddress() {
-        return agentAddress;
+    public String getAgentHash() {
+        return agentHash;
     }
 
-    public void setAgentAddress(String agentAddress) {
-        this.agentAddress = agentAddress;
+    public void setAgentHash(String agentHash) {
+        this.agentHash = agentHash;
     }
 
     @Override
     public int size() {
         int size = 0;
         size += Utils.sizeOfLong(deposit.getValue());
-        size += Utils.sizeOfString(agentAddress);
+        size += Utils.sizeOfString(agentHash);
         size += Utils.sizeOfInt48();
         return size;
     }
@@ -80,14 +81,14 @@ public class Deposit extends BaseNulsData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer buffer) throws IOException {
         buffer.writeVarInt(deposit.getValue());
-        buffer.writeString(agentAddress);
+        buffer.writeString(agentHash);
         buffer.writeInt48(startTime);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.deposit = Na.valueOf(byteBuffer.readVarInt());
-        this.agentAddress = byteBuffer.readString();
+        this.agentHash = byteBuffer.readString();
         this.startTime = byteBuffer.readInt48();
     }
 
@@ -97,5 +98,13 @@ public class Deposit extends BaseNulsData {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public void setTxHash(String txHash) {
+        this.txHash = txHash;
+    }
+
+    public String getTxHash() {
+        return txHash;
     }
 }

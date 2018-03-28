@@ -33,7 +33,7 @@ public enum ConsensusRole {
 
     AGENT(1,69994),
 
-    DELEGATE_NODE(2,69995),
+    DEPOSIT_NODE(2,69995),
 
     ENTRUSTER(3,69996);
     private final int code;
@@ -61,7 +61,7 @@ public enum ConsensusRole {
             case 1:
                 return AGENT;
             case 2:
-                return DELEGATE_NODE;
+                return DEPOSIT_NODE;
             case 3:
                 return ENTRUSTER;
             default:

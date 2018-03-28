@@ -26,15 +26,15 @@ package io.nuls.consensus.entity.tx;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.ConsensusAgentImpl;
 import io.nuls.consensus.entity.member.Agent;
-import io.nuls.consensus.entity.validator.consensus.AccountCreditValidator;
-import io.nuls.consensus.entity.validator.consensus.AgentCountValidator;
-import io.nuls.consensus.entity.validator.consensus.AgentDepositValidator;
-import io.nuls.consensus.entity.validator.consensus.CommissionRateValidator;
+import io.nuls.consensus.entity.validator.tx.AccountCreditValidator;
+import io.nuls.consensus.entity.validator.tx.AgentCountValidator;
+import io.nuls.consensus.entity.validator.tx.AgentDepositValidator;
+import io.nuls.consensus.entity.validator.tx.CommissionRateValidator;
+import io.nuls.consensus.entity.validator.tx.RegisterAgentFieldValidator;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.ledger.entity.params.CoinTransferData;
-import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 
 /**
@@ -54,6 +54,7 @@ public class RegisterAgentTransaction extends LockNulsTransaction<Consensus<Agen
     }
 
     private void initValidator() {
+        this.registerValidator(new RegisterAgentFieldValidator());
         this.registerValidator(new CommissionRateValidator());
         this.registerValidator(new AccountCreditValidator());
         this.registerValidator(new AgentDepositValidator());
