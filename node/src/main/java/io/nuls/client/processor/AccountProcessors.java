@@ -26,17 +26,15 @@
 
 package io.nuls.client.processor;
 
+import io.nuls.rpc.sdk.entity.BalanceNa2NulsDto;
 import io.nuls.client.entity.CommandResult;
 import io.nuls.client.helper.CommandBulider;
 import io.nuls.client.helper.CommandHelper;
 import io.nuls.client.processor.intf.CommandProcessor;
-import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
+import io.nuls.rpc.sdk.entity.BalanceDto;
 import io.nuls.rpc.sdk.entity.RpcClientResult;
 import io.nuls.rpc.sdk.service.AccountService;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 /**
  * @Desription:
@@ -178,7 +176,7 @@ public abstract class AccountProcessors implements CommandProcessor {
 
         @Override
         public CommandResult execute(String[] args) {
-            RpcClientResult result = accountService.getBalance(args[1]);
+            RpcClientResult result = accountService.getBalanceNa2Nuls(args[1]);
             if (null == result) {
                 return CommandResult.getFailed("Failure to execute");
             }

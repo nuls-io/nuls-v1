@@ -125,15 +125,15 @@ public class StringUtils {
 
     public static Long parseLong(Object obj) {
         if(obj == null)
-            return null;
+            return 0l;
         String value = obj.toString();
         if(value.trim().length() == 0) {
-            return null;
+            return 0l;
         }
         try {
             return Long.valueOf(value);
         } catch (Exception e) {
-            return null;
+            return 0l;
         }
     }
 

@@ -43,6 +43,9 @@ import java.util.Map;
 public enum AccountService {
     ACCOUNT_SERVICE;
     private RestFulUtils restFul = RestFulUtils.getInstance();
+    {
+
+    }
 
     /**
      * @param password : the password of the walletl
@@ -91,15 +94,27 @@ public enum AccountService {
      * @param address can not null
      * @return
      */
-    public RpcClientResult getBalance(String address) {
+    private RpcClientResult getBalanceBase(String address) {
         try {
             AssertUtil.canNotEmpty(address);
         } catch (Exception e) {
             return RpcClientResult.getFailed(e.getMessage());
         }
-        RpcClientResult result = restFul.get("/account/balance/" + address, null);
+        return restFul.get("/account/balance/" + address, null);
+    }
+
+    public RpcClientResult getBalance(String address) {
+        RpcClientResult result = getBalanceBase(address);
         if (result.isSuccess()) {
             result.setData(new BalanceDto((Map<String, Object>) result.getData()));
+        }
+        return result;
+    }
+
+    public RpcClientResult getBalanceNa2Nuls(String address) {
+        RpcClientResult result = getBalanceBase(address);
+        if (result.isSuccess()) {
+            result.setData(new BalanceNa2NulsDto((Map<String, Object>) result.getData()));
         }
         return result;
     }
