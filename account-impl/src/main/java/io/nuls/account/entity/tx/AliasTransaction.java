@@ -39,7 +39,7 @@ import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 public class AliasTransaction extends AbstractCoinTransaction<Alias> {
 
     public AliasTransaction() throws NulsException {
-        super(TransactionConstant.TX_TYPE_SET_ALIAS, null, null);
+        super(TransactionConstant.TX_TYPE_SET_ALIAS);
         this.registerValidator(AliasValidator.getInstance());
     }
 
