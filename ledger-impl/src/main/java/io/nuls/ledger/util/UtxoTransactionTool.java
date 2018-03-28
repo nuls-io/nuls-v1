@@ -112,7 +112,7 @@ public class UtxoTransactionTool {
      * @param tx
      * @return
      */
-    public boolean isMine(AbstractCoinTransaction tx) throws NulsException {
+    public boolean isMine(AbstractCoinTransaction tx) {
         if (NulsContext.LOCAL_ADDRESS_LIST.isEmpty()) {
             return false;
         }
@@ -150,7 +150,7 @@ public class UtxoTransactionTool {
      * @param tx
      * @return
      */
-    public boolean isMine(AbstractCoinTransaction tx, String address) throws NulsException {
+    public boolean isMine(AbstractCoinTransaction tx, String address) {
 
         UtxoData coinData = (UtxoData) tx.getCoinData();
         //check input
