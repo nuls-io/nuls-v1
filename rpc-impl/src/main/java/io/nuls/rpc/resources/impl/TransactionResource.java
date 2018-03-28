@@ -198,7 +198,10 @@ public class TransactionResource {
             dtoList.add(new OutputDto(po));
         }
         RpcResult result = RpcResult.getSuccess();
-        result.setData(dtoList);
+
+        Page dtoPage = new Page(page);
+        dtoPage.setList(dtoList);
+        result.setData(dtoPage);
         return result;
     }
 

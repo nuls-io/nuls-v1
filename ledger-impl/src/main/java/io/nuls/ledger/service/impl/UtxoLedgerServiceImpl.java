@@ -631,7 +631,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             }
         }
 
-        long count = outputDataService.getLockUtxoCount(address, TimeService.currentTimeMillis());
+        long count = outputDataService.getLockUtxoCount(address, TimeService.currentTimeMillis(), NulsContext.getInstance().getBestHeight(),
+                NulsContext.getInstance().getGenesisBlock().getHeader().getTime());
         int start = (pageNumber - 1) * pageSize;
         if (lockOutputs.size() >= start + pageSize) {
             lockOutputs = lockOutputs.subList(start, start + pageSize);
@@ -646,7 +647,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         } else {
             start = start - lockOutputs.size();
         }
-        List<UtxoOutputPo> poList = outputDataService.getLockUtxo(address, TimeService.currentTimeMillis(), start, pageSize);
+        List<UtxoOutputPo> poList = outputDataService.getLockUtxo(address, TimeService.currentTimeMillis(), NulsContext.getInstance().getBestHeight(),
+                NulsContext.getInstance().getGenesisBlock().getHeader().getTime(), start, pageSize);
         for (UtxoOutputPo po : poList) {
             lockOutputs.add(UtxoTransferTool.toOutput(po));
         }
