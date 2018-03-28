@@ -139,7 +139,7 @@
     </select>
 
     <select id="selectCountByAddress" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultType="java.lang.Long">
-        select count(e.tx_hash) as txCount
+        select count(DISTINCT e.tx_hash) as txCount
         from tx_account_relation e
         join transaction a on e.tx_hash = a.hash
         <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
@@ -149,5 +149,18 @@
         select sum(fee) as fee
         from transaction
         where block_height = #{height,jdbcType=BIGINT}
+    </select>
+
+    <select id="selectTxHashList" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultType="java.lang.String">
+        select hash
+        from transaction a
+        <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
+    </select>
+
+    <select id="selectTxHashListRelation" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultType="java.lang.String">
+        select DISTINCT e.tx_hash as tx_hash
+        from tx_account_relation e
+        join transaction a on e.tx_hash = a.hash
+        <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
     </select>
 </mapper>

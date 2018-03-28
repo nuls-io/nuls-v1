@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -33,6 +33,7 @@ import io.nuls.db.dao.impl.mybatis.mapper.TransactionMapper;
 import io.nuls.db.dao.impl.mybatis.util.Condition;
 import io.nuls.db.dao.impl.mybatis.util.SearchOperator;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
+import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.entity.TransactionPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.db.transactional.annotation.PROPAGATION;
@@ -75,10 +76,18 @@ public class TransactionDaoImpl extends BaseDaoImpl<TransactionMapper, String, T
         }
 
         long count = getMapper().selectCount(searchable);
+        if (count < (pageNum - 1) * pageSize) {
+            return new Page<>(pageNum, pageSize);
+        }
+
+        PageHelper.orderBy("a.create_time desc");
         if (pageNum > 0 && pageSize > 0) {
             PageHelper.startPage(pageNum, pageSize);
         }
+        List<String> txHashList = getMapper().selectTxHashList(searchable);
 
+        searchable = new Searchable();
+        searchable.addCondition("a.hash", SearchOperator.in, txHashList);
         PageHelper.orderBy("a.create_time desc,b.in_index asc,c.out_index asc");
         List<TransactionPo> poList = getMapper().selectList(searchable);
         Page<TransactionPo> page = new Page<>();
@@ -119,12 +128,18 @@ public class TransactionDaoImpl extends BaseDaoImpl<TransactionMapper, String, T
         if (StringUtils.isNotBlank(address)) {
             searchable.addCondition("e.address", SearchOperator.eq, address);
         }
-
-        if (start != 0 && limit != 0) {
-            PageHelper.offsetPage(start, limit);
+        if (start == 0 & limit == 0) {
+            PageHelper.orderBy("a.create_time desc, b.in_index asc, c.out_index asc");
+            return getMapper().selectByAddress(searchable);
         }
+        PageHelper.offsetPage(start, limit);
+        PageHelper.orderBy("a.create_time desc");
+        List<String> txHashList = getMapper().selectTxHashListRelation(searchable);
+        searchable = new Searchable();
+        searchable.addCondition("a.hash", SearchOperator.in, txHashList);
         PageHelper.orderBy("a.create_time desc, b.in_index asc, c.out_index asc");
-        return getMapper().selectByAddress(searchable);
+        List<TransactionPo> localPoList = getMapper().selectByAddress(searchable);
+        return localPoList;
     }
 
     @Override
@@ -139,7 +154,7 @@ public class TransactionDaoImpl extends BaseDaoImpl<TransactionMapper, String, T
             if (type != 0) {
                 searchable.addCondition("type", SearchOperator.eq, type);
             }
-            if(blockHeight != null) {
+            if (blockHeight != null) {
                 searchable.addCondition("block_height", SearchOperator.eq, blockHeight);
             }
             return getMapper().selectCount(searchable);
@@ -148,7 +163,7 @@ public class TransactionDaoImpl extends BaseDaoImpl<TransactionMapper, String, T
         if (type != 0) {
             searchable.addCondition("a.type", SearchOperator.eq, type);
         }
-        if(blockHeight != null) {
+        if (blockHeight != null) {
             searchable.addCondition("a.block_height", SearchOperator.eq, blockHeight);
         }
         searchable.addCondition("e.address", SearchOperator.eq, address);

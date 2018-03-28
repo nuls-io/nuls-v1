@@ -40,8 +40,6 @@ import java.util.List;
  */
 public interface LedgerService {
 
-    void init();
-
     Transaction getTx(NulsDigestData hash);
 
     Transaction getLocalTx(NulsDigestData hash);
