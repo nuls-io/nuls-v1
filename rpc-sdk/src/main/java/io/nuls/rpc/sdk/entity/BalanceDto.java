@@ -14,9 +14,9 @@ public class BalanceDto {
     private Long locked;
 
     public BalanceDto(Map<String, Object> map) {
-        balance= StringUtils.parseLong(map.get("balance"));
-        usable= StringUtils.parseLong(map.get("usable"));
-        locked= StringUtils.parseLong(map.get("locked"));
+        balance = StringUtils.parseLong(map.get("balance"));
+        usable = StringUtils.parseLong(map.get("usable"));
+        locked = StringUtils.parseLong(map.get("locked"));
     }
 
     public Long getBalance() {

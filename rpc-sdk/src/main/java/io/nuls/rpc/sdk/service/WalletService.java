@@ -48,6 +48,7 @@ public enum WalletService {
      * @param password
      * @return
      */
+    @Deprecated
     public RpcClientResult setPassword(String password) {
         try {
             AssertUtil.canNotEmpty(password);
@@ -81,7 +82,7 @@ public enum WalletService {
 
         Map<String, String> params = new HashMap<>();
         params.put("password", password);
-        params.put("newpassword", newpassword);
+        params.put("newPassword", newpassword);
         String content = null;
         try {
             content = JSONUtils.obj2json(params);
@@ -164,7 +165,7 @@ public enum WalletService {
 
         Map<String, String> params = new HashMap<>();
         params.put("password", password);
-        params.put("privateKey", privateKey);
+        params.put("prikey", privateKey);
         String content = null;
         try {
             content = JSONUtils.obj2json(params);

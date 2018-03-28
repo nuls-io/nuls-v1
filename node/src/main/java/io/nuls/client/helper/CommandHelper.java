@@ -26,11 +26,11 @@ public class CommandHelper {
 
 
     public static void confirmPwd(String newPwd) {
-        System.out.print("Please confirm password:");
+        System.out.print("Please confirm the new password:");
         Scanner scanner = new Scanner(System.in);
         String confirmed = scanner.nextLine();
         while (!newPwd.equals(confirmed)) {
-            System.out.print("The password you entered did not match.\nPlease confirm password:");
+            System.out.print("The password you entered did not match.\nPlease confirm the new password:");
             confirmed = scanner.nextLine();
         }
     }
@@ -39,11 +39,11 @@ public class CommandHelper {
         RpcClientResult result = AccountService.ACCOUNT_SERVICE.getAccountList();
         List list = (List)result.getData();
         if(list == null || list.size() == 0) {
-            System.out.print("Please confirm password:");
+            System.out.print("Please confirm the new password:");
             Scanner scanner = new Scanner(System.in);
             String confirmed = scanner.nextLine();
             while (!pwd.equals(confirmed)) {
-                System.out.print("The password you entered did not match.\nPlease confirm password:");
+                System.out.print("The password you entered did not match.\nPlease confirm the new password:");
                 confirmed = scanner.nextLine();
             }
         }

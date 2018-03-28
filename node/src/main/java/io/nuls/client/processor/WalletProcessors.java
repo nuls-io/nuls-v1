@@ -50,6 +50,12 @@ public abstract class WalletProcessors implements CommandProcessor {
     protected WalletService walletService = WalletService.WALLET_SERVICE;
     protected AccountService accountService = AccountService.ACCOUNT_SERVICE;
 
+    /**
+     * @Desription: Deprecated
+     * @Author: PierreLuo
+     * @Date: 2018/3/27
+     */
+    @Deprecated
     public static class SetPassword extends WalletProcessors {
 
         @Override
@@ -263,6 +269,8 @@ public abstract class WalletProcessors implements CommandProcessor {
             int length = args.length;
             if(length < 2)
                 return false;
+            if(length > 3)
+                return false;
             if(!CommandHelper.checkArgsIsNull(args))
                 return false;
             return true;
@@ -322,7 +330,9 @@ public abstract class WalletProcessors implements CommandProcessor {
 
         @Override
         public CommandResult execute(String[] args) {
-            RpcClientResult result = walletService.importAccount(args[1],args[2]);
+            String pwd = args[2];
+            String privateKey = args[1];
+            RpcClientResult result = walletService.importAccount(pwd, privateKey);
             if (null == result) {
                 return CommandResult.getFailed("Failure to execute");
             }
