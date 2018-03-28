@@ -1,3 +1,2 @@
 #!/bin/sh
-file=$PWD/pid/pid
-kill -9 `cat ${file}`
+kill -9 `ps -ef| grep io.nuls.Bootstrap |awk '{print $2}'`

@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -32,6 +32,8 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
+import io.nuls.network.entity.Node;
+import io.nuls.network.service.NetworkService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +49,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class DistributedBlockInfoRequestUtils {
     private static final DistributedBlockInfoRequestUtils INSTANCE = new DistributedBlockInfoRequestUtils();
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
+    private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
     private List<String> nodeIdList;
     private Map<String, BlockHashResponse> hashesMap = new ConcurrentHashMap<>();
     /**
@@ -73,7 +76,7 @@ public class DistributedBlockInfoRequestUtils {
      * @param sendList
      */
     public BlockInfo request(long height, List<String> sendList) {
-        return this.request(height, height, 1,nodeIdList);
+        return this.request(height, height, 1, sendList);
     }
 
     public BlockInfo request(long start, long end, long split, List<String> sendList) {
@@ -87,19 +90,23 @@ public class DistributedBlockInfoRequestUtils {
             this.split = split;
             GetBlocksHashRequest event = new GetBlocksHashRequest(start, end, split);
             this.startTime = TimeService.currentTimeMillis();
-            if(null==sendList||sendList.isEmpty()){
-                nodeIdList = this.eventBroadcaster.broadcastAndCache(event, false);
-            }else{
+            if (null == sendList) {
                 this.nodeIdList = new ArrayList<>();
-                for(String nodeId:sendList){
-                    boolean result = this.eventBroadcaster.sendToNode(event,nodeId);
-                    if(result){
-                        this.nodeIdList.add(nodeId);
-                    }
+                List<Node> nodes = networkService.getAvailableNodes();
+                for (Node node : nodes) {
+                    this.nodeIdList.add(node.getId());
                 }
+            } else {
+                this.nodeIdList = sendList;
             }
             if (nodeIdList.isEmpty()) {
                 return null;
+            }
+            for (String nodeId : nodeIdList) {
+                boolean result = this.eventBroadcaster.sendToNode(event, nodeId);
+                if (!result) {
+                    this.nodeIdList.remove(nodeId);
+                }
             }
             BlockInfo bi = this.getBlockInfo();
             if (start == end && start <= 0 && bi.getNodeIdList().size() >= (nodeIdList.size() / 2)) {
@@ -136,9 +143,9 @@ public class DistributedBlockInfoRequestUtils {
             instance.merge(response);
             hashesMap.put(nodeId, instance);
         }
-        if (response.getHeightList().get(response.getHeightList().size() - 1) < end) {
-            return true;
-        }
+//        if (response.getHeightList().get(response.getHeightList().size() - 1) < end) {
+//            return true;
+//        }
         String key = response.getBestHash().getDigestHex();
         List<String> nodes = calcMap.get(key);
         if (null == nodes) {
@@ -224,7 +231,7 @@ public class DistributedBlockInfoRequestUtils {
             }
             long timeout = 10000L;
 
-            if ((TimeService.currentTimeMillis() - startTime) > (timeout - 1000L) && hashesMap.size() >= ((nodeIdList.size() + 1) / 2) && start == end && start <= 0) {
+            if ((TimeService.currentTimeMillis() - startTime) > (timeout - 1000L) && hashesMap.size() >= ((nodeIdList.size() + 1) / 2) && end <= 0) {
                 long localHeight = NulsContext.getInstance().getBestBlock().getHeader().getHeight();
                 long minHeight = Long.MAX_VALUE;
                 NulsDigestData minHash = null;
@@ -256,7 +263,7 @@ public class DistributedBlockInfoRequestUtils {
                 } else {
                     throw new NulsRuntimeException(ErrorCode.TIME_OUT);
                 }
-            } else if ((TimeService.currentTimeMillis() - startTime) > timeout && !(hashesMap.size() >= ((nodeIdList.size() + 1) / 2) && start == end && start <= 0)) {
+            }else if ((TimeService.currentTimeMillis() - startTime) > timeout && !(hashesMap.size() >= ((nodeIdList.size() + 1) / 2))) {
                 throw new NulsRuntimeException(ErrorCode.TIME_OUT);
             }
         }
@@ -264,6 +271,5 @@ public class DistributedBlockInfoRequestUtils {
         bestBlockInfo = null;
         requesting = false;
         return info;
-
     }
 }

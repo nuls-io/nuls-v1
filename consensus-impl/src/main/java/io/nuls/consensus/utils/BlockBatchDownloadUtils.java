@@ -123,7 +123,7 @@ public class BlockBatchDownloadUtils {
                 if ((lastOperateTime + DOWNLOAD_IDLE_TIME_OUT) < TimeService.currentTimeMillis()) {
                     verify();
                 }
-                if ((TimeService.currentTimeMillis() - lastOperateTime) >= 5000) {
+                if ((TimeService.currentTimeMillis() - lastOperateTime) >= DOWNLOAD_IDLE_TIME_OUT) {
                     working = false;
                     return;
                 }
