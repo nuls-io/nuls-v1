@@ -10,11 +10,14 @@ import io.nuls.core.utils.str.StringUtils;
 public class CommandBulider {
     private StringBuilder builder = new StringBuilder();
     private static final String LINE_SEPARATOR = "line.separator";
+    private int i = 0;
 
     public CommandBulider newLine(String content) {
         if(StringUtils.isBlank(content))
             return this.newLine();
         builder.append(content).append(System.getProperty(LINE_SEPARATOR));
+        if(i++ == 0)
+            this.newLine("\tOPTIONS:");
         return this;
     }
 
@@ -24,6 +27,8 @@ public class CommandBulider {
     }
 
     public String toString() {
+        if(i == 2)
+            this.newLine("\tnone");
         return builder.toString();
     }
 }

@@ -38,10 +38,9 @@ import java.util.*;
  */
 public class CommandHandler {
 
-    public static final Map<String, CommandProcessor> PROCESSOR_MAP = new HashMap<>();
+    public static final Map<String, CommandProcessor> PROCESSOR_MAP = new TreeMap<>();
 
     private void init() {
-        //todo 在这里注册所有的命令处理器
         register(new SystemProcessors.Exit());
         register(new SystemProcessors.Help());
         register(new SystemProcessors.Version());
@@ -81,7 +80,7 @@ public class CommandHandler {
         register(new NetwrokProcessor.GetNetworkInfo());
         register(new NetwrokProcessor.getnetworknodes());
 
-        //todo 修改为配置
+        //TODO 修改为配置
         SdkManager.init("http://192.168.1.201:8001");
     }
 
@@ -96,7 +95,7 @@ public class CommandHandler {
                 System.out.print(CommandConstant.COMMAND_PS1);
                 continue;
             }
-            System.out.print(instance.processCommand(read.split(" ")) + "\n" + CommandConstant.COMMAND_PS1);
+            System.out.print(instance.processCommand(read.split("\\s+")) + "\n" + CommandConstant.COMMAND_PS1);
         }
     }
 

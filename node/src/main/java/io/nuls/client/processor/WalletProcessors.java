@@ -26,19 +26,14 @@
 
 package io.nuls.client.processor;
 
+import io.nuls.client.entity.CommandResult;
 import io.nuls.client.helper.CommandBulider;
 import io.nuls.client.helper.CommandHelper;
-import io.nuls.client.entity.CommandResult;
 import io.nuls.client.processor.intf.CommandProcessor;
-import io.nuls.core.chain.entity.Na;
-import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.rpc.resources.form.TransferForm;
 import io.nuls.rpc.sdk.entity.RpcClientResult;
-import io.nuls.rpc.sdk.service.AccountService;
 import io.nuls.rpc.sdk.service.WalletService;
-
-import java.util.List;
 
 /**
  * @Desription:
@@ -48,7 +43,6 @@ import java.util.List;
 public abstract class WalletProcessors implements CommandProcessor {
 
     protected WalletService walletService = WalletService.WALLET_SERVICE;
-    protected AccountService accountService = AccountService.ACCOUNT_SERVICE;
 
     /**
      * @Desription: Deprecated
@@ -113,7 +107,7 @@ public abstract class WalletProcessors implements CommandProcessor {
             //TODO 翻译
             builder.newLine(getCommandDescription())
                     .newLine("\t<oldpassword> 现有密码 - 必输")
-                    .newLine("\t<newpassword> 新密码 - 必输");
+                    .newLine("\t<newpassword> 新密码 - 必输, 长度8-20位, 必须同时包含大小写字母和数字");
             return builder.toString();
         }
 
@@ -136,6 +130,10 @@ public abstract class WalletProcessors implements CommandProcessor {
 
         @Override
         public CommandResult execute(String[] args) {
+            //TODO 翻译
+            if(args[1].equals(args[2])) {
+                return CommandResult.getFailed("密码没有改动");
+            }
             RpcClientResult result = walletService.resetPassword(args[1], args[2]);
             if (null == result) {
                 return CommandResult.getFailed("Failure to execute");
