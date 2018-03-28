@@ -29,6 +29,7 @@ import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 
@@ -46,13 +47,20 @@ public class GetBlockHandler extends AbstractEventHandler<GetBlockRequest> {
     @Override
     public void onEvent(GetBlockRequest event, String fromId) throws NulsException {
         List<Block> blockList = blockService.getBlockList(event.getStart(), event.getEnd());
+        if(blockList.size()!=(event.getEnd()-event.getStart()+1)){
+            Log.warn("count wrong!");
+        }
         for (Block block : blockList) {
             if (null == block) {
+                Log.warn("there is a null block:"+event.getStart() + "-" + event.getEnd());
                 continue;
             }
             BlockEvent blockEvent = new BlockEvent();
             blockEvent.setEventBody(block);
-            eventBroadcaster.sendToNode(blockEvent, fromId);
+           boolean b =  eventBroadcaster.sendToNode(blockEvent, fromId);
+           if(!b){
+               Log.warn("send block failed:"+fromId+",height:"+block.getHeader().getHeight());
+           }
         }
     }
 

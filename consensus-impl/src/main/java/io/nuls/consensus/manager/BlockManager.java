@@ -111,8 +111,14 @@ public class BlockManager {
                 GetBlockRequest request = new GetBlockRequest();
                 GetBlockParam params = new GetBlockParam();
                 long height = block.getHeader().getHeight();
-                if (height > this.bifurcateProcessor.getMaxHeight()) {
-                    height = this.bifurcateProcessor.getMaxHeight() + 1;
+                long localMaxHeight = this.bifurcateProcessor.getMaxHeight();
+                if (localMaxHeight < context.getBestHeight()) {
+                    localMaxHeight = context.getBestHeight();
+                }
+                if (height > localMaxHeight) {
+                    height = localMaxHeight + 1;
+                } else {
+                    height = height - 1;
                 }
                 params.setStart(height);
                 params.setEnd(height);

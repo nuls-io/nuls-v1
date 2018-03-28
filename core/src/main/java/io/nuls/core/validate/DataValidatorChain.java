@@ -55,9 +55,7 @@ public class DataValidatorChain {
         }
         boolean b = index.get() == list.size();
         index.remove();
-        if (b) {
-            return ValidateResult.getSuccessResult();
-        } else if (!b && result.isSuccess()) {
+        if (!b && result.isSuccess()) {
             return ValidateResult.getFailedResult("The Validators not fully executed`");
         }
         return result;

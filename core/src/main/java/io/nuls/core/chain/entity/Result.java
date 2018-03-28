@@ -24,6 +24,7 @@
 package io.nuls.core.chain.entity;
 
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.utils.str.StringUtils;
 
 /**
  * @author vivi
@@ -77,7 +78,7 @@ public class Result<T> {
     }
 
     public String getMessage() {
-        if (null == message) {
+        if (StringUtils.isBlank(message)) {
             return errorCode.getMsg();
         }
         return message;
