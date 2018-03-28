@@ -56,11 +56,13 @@ public class BlockHeaderHandler extends AbstractEventHandler<BlockHeaderEvent> {
         if (null != block) {
             return;
         }
+        header.verifyWithException();
         GetSmallBlockRequest request = new GetSmallBlockRequest();
         GetSmallBlockParam param = new GetSmallBlockParam();
         param.setBlockHash(header.getHash());
         request.setEventBody(param);
         eventBroadcaster.sendToNode(request, fromId);
         temporaryCacheManager.cacheBlockHeader(header);
+        eventBroadcaster.broadcastHashAndCacheAysn(event,false,fromId);
     }
 }
