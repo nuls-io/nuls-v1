@@ -241,7 +241,7 @@ public class DistributedBlockInfoRequestUtils {
                         BlockHashResponse response = hashesMap.get(nodeId);
                         long height = response.getHeightList().get(0);
                         NulsDigestData hash = response.getHashList().get(0);
-                        if (height >= localHeight) {
+                        if (height > localHeight) {
                             if (height <= minHeight) {
                                 minHeight = height;
                                 minHash = hash;
