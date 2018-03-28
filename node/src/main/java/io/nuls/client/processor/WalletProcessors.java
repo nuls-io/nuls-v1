@@ -306,14 +306,14 @@ public abstract class WalletProcessors implements CommandProcessor {
             CommandBulider builder = new CommandBulider();
             //TODO 翻译
             builder.newLine(getCommandDescription())
-                    .newLine("\t<prikey> 明文私钥 - 必输")
-                    .newLine("\t<newpassword> 钱包密码 - 必输");
+                    .newLine("\t<privatekey> 明文私钥 - 必输")
+                    .newLine("\t<password> 钱包密码 - 必输");
             return builder.toString();
         }
 
         @Override
         public String getCommandDescription() {
-            return "import <prikey> <password> --import an account by prikey";
+            return "import <privatekey> <password> --import an account by privatekey";
         }
 
         @Override

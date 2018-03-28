@@ -242,7 +242,8 @@ public class BlockBatchDownloadUtils {
             working = false;
             return;
         }
-        for (NodeDownloadingStatus status : nodeStatusMap.values()) {
+        List<NodeDownloadingStatus> values = new ArrayList(nodeStatusMap.values());
+        for (NodeDownloadingStatus status : values) {
             if (!done) {
                 break;
             }

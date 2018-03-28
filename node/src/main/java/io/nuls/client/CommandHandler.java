@@ -116,7 +116,7 @@ public class CommandHandler {
         try {
             boolean result = processor.argsValidate(args);
             if (!result) {
-                return "args incorrect:::" + processor.getCommandDescription();
+                return "args incorrect:\n" + processor.getHelp();
             }
             return processor.execute(args).toString();
         } catch (Exception e) {
