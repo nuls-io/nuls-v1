@@ -294,11 +294,11 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         } else if (tx.getStatus().equals(TxStatusEnum.CONFIRMED)) {
             //process output
             outputDataService.deleteByHash(tx.getHash().getDigestHex());
-            for (int i = utxoData.getOutputs().size() - 1; i >= 0; i--) {
-                UtxoOutput output = utxoData.getOutputs().get(i);
-                ledgerCacheService.removeUtxo(output.getKey());
-                addressSet.add(output.getAddress());
-            }
+//            for (int i = utxoData.getOutputs().size() - 1; i >= 0; i--) {
+//                UtxoOutput output = utxoData.getOutputs().get(i);
+//                ledgerCacheService.removeUtxo(output.getKey());
+//                addressSet.add(output.getAddress());
+//            }
 
             //process input
             //1. delete input (database)
