@@ -124,10 +124,20 @@ public enum AccountService {
      *
      * @return
      */
+    private RpcClientResult getTotalBalanceBase() {
+        return restFul.get("/account/balances", null);
+    }
     public RpcClientResult getTotalBalance() {
-        RpcClientResult result = restFul.get("/account/balances", null);
+        RpcClientResult result = getTotalBalanceBase();
         if (result.isSuccess()) {
             result.setData(new BalanceDto((Map<String, Object>) result.getData()));
+        }
+        return result;
+    }
+    public RpcClientResult getTotalBalanceNa2Nuls() {
+        RpcClientResult result = getTotalBalanceBase();
+        if (result.isSuccess()) {
+            result.setData(new BalanceNa2NulsDto((Map<String, Object>) result.getData()));
         }
         return result;
     }
@@ -156,9 +166,8 @@ public enum AccountService {
      * @param amount
      * @return
      */
-    public RpcClientResult getUnspentUTXO(String address, Long amount) {
+    private RpcClientResult getUnspentUTXOBase(String address, Long amount) {
         try {
-            //TODO 金额问题，SDK需要转成小数，RPC需要转成整数
             AssertUtil.canNotEmpty(address);
             AssertUtil.canNotEmpty(amount);
         } catch (Exception e) {
@@ -168,7 +177,10 @@ public enum AccountService {
         Map<String, String> params = new HashMap<>();
         params.put("address", address);
         params.put("amount", amount.toString());
-        RpcClientResult result = restFul.get("/account/utxo", params);
+        return restFul.get("/account/utxo", params);
+    }
+    public RpcClientResult getUnspentUTXO(String address, Long amount) {
+        RpcClientResult result = getUnspentUTXOBase(address, amount);
         if (result.isSuccess()) {
             List<Map<String, Object>> list = (List<Map<String, Object>>) result.getData();
             List<OutputDto> outputDtoList = new ArrayList<>();
@@ -176,6 +188,18 @@ public enum AccountService {
                 outputDtoList.add(new OutputDto(map));
             }
             result.setData(outputDtoList);
+        }
+        return result;
+    }
+    public RpcClientResult getUnspentUTXONa2Nuls(String address, Long amount) {
+        RpcClientResult result = getUnspentUTXOBase(address, amount);
+        if (result.isSuccess()) {
+            List<Map<String, Object>> list = (List<Map<String, Object>>) result.getData();
+            List<OutputNa2NulsDto> outputNa2NulsDtoList = new ArrayList<>();
+            for (Map<String, Object> map : list) {
+                outputNa2NulsDtoList.add(new OutputNa2NulsDto(map));
+            }
+            result.setData(outputNa2NulsDtoList);
         }
         return result;
     }
@@ -239,14 +263,17 @@ public enum AccountService {
      * @param address
      * @return
      */
-    public RpcClientResult getAsset(String address) {
+    private RpcClientResult getAssetBase(String address) {
         try {
             AssertUtil.canNotEmpty(address);
         } catch (Exception e) {
             return RpcClientResult.getFailed(e.getMessage());
         }
 
-        RpcClientResult result = restFul.get("/account/assets/" + address, null);
+        return restFul.get("/account/assets/" + address, null);
+    }
+    public RpcClientResult getAsset(String address) {
+        RpcClientResult result = getAssetBase(address);
         if (result.isSuccess()) {
             List<Map<String, Object>> list = (List<Map<String, Object>>) result.getData();
             List<AssetDto> assetDtoList = new ArrayList<>();
@@ -254,6 +281,18 @@ public enum AccountService {
                 assetDtoList.add(new AssetDto(map));
             }
             result.setData(assetDtoList);
+        }
+        return result;
+    }
+    public RpcClientResult getAssetNa2Nuls(String address) {
+        RpcClientResult result = getAssetBase(address);
+        if (result.isSuccess()) {
+            List<Map<String, Object>> list = (List<Map<String, Object>>) result.getData();
+            List<AssetNa2NulsDto> assetNa2NulsDtoList = new ArrayList<>();
+            for (Map<String, Object> map : list) {
+                assetNa2NulsDtoList.add(new AssetNa2NulsDto(map));
+            }
+            result.setData(assetNa2NulsDtoList);
         }
         return result;
     }

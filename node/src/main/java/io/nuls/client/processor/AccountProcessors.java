@@ -213,7 +213,7 @@ public abstract class AccountProcessors implements CommandProcessor {
 
         @Override
         public CommandResult execute(String[] args) {
-            RpcClientResult result = accountService.getTotalBalance();
+            RpcClientResult result = accountService.getTotalBalanceNa2Nuls();
             if (null == result) {
                 return CommandResult.getFailed("Failure to execute");
             }
@@ -298,7 +298,7 @@ public abstract class AccountProcessors implements CommandProcessor {
 
         @Override
         public CommandResult execute(String[] args) {
-            RpcClientResult result = accountService.getUnspentUTXO(args[1], Long.valueOf(args[2]));
+            RpcClientResult result = accountService.getUnspentUTXONa2Nuls(args[1], Long.valueOf(args[2]));
             if (null == result) {
                 return CommandResult.getFailed("Failure to execute");
             }
@@ -428,7 +428,7 @@ public abstract class AccountProcessors implements CommandProcessor {
 
         @Override
         public CommandResult execute(String[] args) {
-            RpcClientResult result = accountService.getAsset(args[1]);
+            RpcClientResult result = accountService.getAssetNa2Nuls(args[1]);
             if (null == result) {
                 return CommandResult.getFailed("Failure to execute");
             }

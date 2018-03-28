@@ -78,9 +78,9 @@ public abstract class BlockProcessors implements CommandProcessor {
             String arg = args[1];
             RpcClientResult result;
             if(StringUtils.isNumeric(arg)) {
-                result = this.blockService.getBlockHeader(Integer.valueOf(arg));
+                result = this.blockService.getBlockHeaderNa2Nuls(Integer.valueOf(arg));
             } else {
-                result = this.blockService.getBlockHeader(arg);
+                result = this.blockService.getBlockHeaderNa2Nuls(arg);
             }
             return CommandResult.getResult(result);
         }
@@ -123,9 +123,9 @@ public abstract class BlockProcessors implements CommandProcessor {
             String arg = args[1];
             RpcClientResult result;
             if(StringUtils.isNumeric(arg)) {
-                result = this.blockService.getBlock(Integer.valueOf(arg));
+                result = this.blockService.getBlockNa2Nuls(Integer.valueOf(arg));
             } else {
-                result = this.blockService.getBlock(arg);
+                result = this.blockService.getBlockNa2Nuls(arg);
             }
             return CommandResult.getResult(result);
         }
@@ -164,7 +164,7 @@ public abstract class BlockProcessors implements CommandProcessor {
 
         @Override
         public CommandResult execute(String[] args) {
-            RpcClientResult result = this.blockService.getBestBlockHeader();
+            RpcClientResult result = this.blockService.getBestBlockHeaderNa2Nuls();
             return CommandResult.getResult(result);
         }
     }
@@ -211,7 +211,7 @@ public abstract class BlockProcessors implements CommandProcessor {
         public CommandResult execute(String[] args) {
             Integer pageNumber = Integer.valueOf(args[2]);
             Integer pageSize = Integer.valueOf(args[1]);
-            RpcClientResult result = this.blockService.listBlockHeader(pageNumber, pageSize);
+            RpcClientResult result = this.blockService.listBlockHeaderNa2Nuls(pageNumber, pageSize);
             return CommandResult.getResult(result);
         }
     }

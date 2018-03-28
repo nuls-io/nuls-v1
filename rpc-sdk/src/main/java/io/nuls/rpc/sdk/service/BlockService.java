@@ -26,6 +26,7 @@ package io.nuls.rpc.sdk.service;
 import io.nuls.rpc.sdk.constant.RpcCmdConstant;
 import io.nuls.rpc.sdk.entity.AccountDto;
 import io.nuls.rpc.sdk.entity.BlockDto;
+import io.nuls.rpc.sdk.entity.BlockNa2NulsDto;
 import io.nuls.rpc.sdk.entity.RpcClientResult;
 import io.nuls.rpc.sdk.utils.AssertUtil;
 import io.nuls.rpc.sdk.utils.RestFulUtils;
@@ -48,15 +49,25 @@ public enum BlockService {
      * @param hash
      * @return
      */
-    public RpcClientResult getBlock(String hash) {
+    private RpcClientResult getBlockBase(String hash) {
         try {
             AssertUtil.canNotEmpty(hash, "block hash cannot null!");
         } catch (Exception e) {
             return RpcClientResult.getFailed(e.getMessage());
         }
-        RpcClientResult result = restFul.get("/block/hash/" + hash, null);
+        return restFul.get("/block/hash/" + hash, null);
+    }
+    public RpcClientResult getBlock(String hash) {
+        RpcClientResult result = getBlockBase(hash);
         if (result.isSuccess()) {
             result.setData(new BlockDto((Map<String, Object>) result.getData(), true));
+        }
+        return result;
+    }
+    public RpcClientResult getBlockNa2Nuls(String hash) {
+        RpcClientResult result = getBlockBase(hash);
+        if (result.isSuccess()) {
+            result.setData(new BlockNa2NulsDto((Map<String, Object>) result.getData(), true));
         }
         return result;
     }
@@ -66,13 +77,23 @@ public enum BlockService {
      * @param height
      * @return
      */
-    public RpcClientResult getBlock(int height) {
+    private RpcClientResult getBlockBase(int height) {
         if(height < 0){
             return RpcClientResult.getFailed(RpcCmdConstant.PARAMETER_ERROR_MSG);
         }
-        RpcClientResult result = restFul.get("/block/height/" + height, null);
+        return restFul.get("/block/height/" + height, null);
+    }
+    public RpcClientResult getBlock(int height) {
+        RpcClientResult result = getBlockBase(height);
         if (result.isSuccess()) {
             result.setData(new BlockDto((Map<String, Object>) result.getData(), true));
+        }
+        return result;
+    }
+    public RpcClientResult getBlockNa2Nuls(int height) {
+        RpcClientResult result = getBlockBase(height);
+        if (result.isSuccess()) {
+            result.setData(new BlockNa2NulsDto((Map<String, Object>) result.getData(), true));
         }
         return result;
     }
@@ -81,15 +102,25 @@ public enum BlockService {
      * @param hash
      * @return
      */
-    public RpcClientResult getBlockHeader(String hash) {
+    private RpcClientResult getBlockHeaderBase(String hash) {
         try {
             AssertUtil.canNotEmpty(hash, "block hash cannot null!");
         } catch (Exception e) {
             return RpcClientResult.getFailed(e.getMessage());
         }
-        RpcClientResult result = restFul.get("/block/header/hash/" + hash, null);
+        return restFul.get("/block/header/hash/" + hash, null);
+    }
+    public RpcClientResult getBlockHeader(String hash) {
+        RpcClientResult result = getBlockHeaderBase(hash);
         if (result.isSuccess()) {
             result.setData(new BlockDto((Map<String, Object>) result.getData(), false));
+        }
+        return result;
+    }
+    public RpcClientResult getBlockHeaderNa2Nuls(String hash) {
+        RpcClientResult result = getBlockHeaderBase(hash);
+        if (result.isSuccess()) {
+            result.setData(new BlockNa2NulsDto((Map<String, Object>) result.getData(), false));
         }
         return result;
     }
@@ -98,13 +129,23 @@ public enum BlockService {
      * @param height
      * @return
      */
-    public RpcClientResult getBlockHeader(int height) {
+    private RpcClientResult getBlockHeaderBase(int height) {
         if(height < 0){
             return RpcClientResult.getFailed(RpcCmdConstant.PARAMETER_ERROR_MSG);
         }
-        RpcClientResult result = restFul.get("/block/header/height/" + height, null);
+        return restFul.get("/block/header/height/" + height, null);
+    }
+    public RpcClientResult getBlockHeader(int height) {
+        RpcClientResult result = getBlockHeaderBase(height);
         if (result.isSuccess()) {
             result.setData(new BlockDto((Map<String, Object>) result.getData(), false));
+        }
+        return result;
+    }
+    public RpcClientResult getBlockHeaderNa2Nuls(int height) {
+        RpcClientResult result = getBlockHeaderBase(height);
+        if (result.isSuccess()) {
+            result.setData(new BlockNa2NulsDto((Map<String, Object>) result.getData(), false));
         }
         return result;
     }
@@ -113,10 +154,20 @@ public enum BlockService {
     /**
      * @return
      */
+    private RpcClientResult getBestBlockHeaderBase() {
+        return restFul.get("/block/newest", null);
+    }
     public RpcClientResult getBestBlockHeader() {
-        RpcClientResult result = restFul.get("/block/newest", null);
+        RpcClientResult result = getBestBlockHeaderBase();
         if (result.isSuccess()) {
             result.setData(new BlockDto((Map<String, Object>) result.getData(), false));
+        }
+        return result;
+    }
+    public RpcClientResult getBestBlockHeaderNa2Nuls() {
+        RpcClientResult result = getBestBlockHeaderBase();
+        if (result.isSuccess()) {
+            result.setData(new BlockNa2NulsDto((Map<String, Object>) result.getData(), false));
         }
         return result;
     }
@@ -126,7 +177,7 @@ public enum BlockService {
      * @param pageSize
      * @return
      */
-    public RpcClientResult listBlockHeader(int pageNumber, int pageSize) {
+    private RpcClientResult listBlockHeaderBase(int pageNumber, int pageSize) {
         if(pageNumber < 0 || pageSize < 0 ){
             return RpcClientResult.getFailed(RpcCmdConstant.PARAMETER_ERROR_MSG);
         }
@@ -141,7 +192,10 @@ public enum BlockService {
         Map<String, String> param = new HashMap<>(2);
         param.put("pageNumber", String.valueOf(pageNumber));
         param.put("pageSize", String.valueOf(pageSize));
-        RpcClientResult result = restFul.get("/block/list", param);
+        return restFul.get("/block/list", param);
+    }
+    public RpcClientResult listBlockHeader(int pageNumber, int pageSize) {
+        RpcClientResult result = listBlockHeaderBase(pageNumber, pageSize);
         if (result.isSuccess()) {
             Map<String, Object> dataMap = (Map<String, Object>)result.getData();
             if(dataMap != null) {
@@ -151,6 +205,21 @@ public enum BlockService {
                     blockDtoList.add(new BlockDto(map, false));
                 }
                 result.setData(blockDtoList);
+            }
+        }
+        return result;
+    }
+    public RpcClientResult listBlockHeaderNa2Nuls(int pageNumber, int pageSize) {
+        RpcClientResult result = listBlockHeaderBase(pageNumber, pageSize);
+        if (result.isSuccess()) {
+            Map<String, Object> dataMap = (Map<String, Object>)result.getData();
+            if(dataMap != null) {
+                List<Map<String, Object>> list = (List<Map<String, Object>>) dataMap.get("list");
+                List<BlockNa2NulsDto> blockNa2NulsDtoList = new ArrayList<>();
+                for (Map<String, Object> map : list) {
+                    blockNa2NulsDtoList.add(new BlockNa2NulsDto(map, false));
+                }
+                result.setData(blockNa2NulsDtoList);
             }
         }
         return result;
