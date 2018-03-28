@@ -3,6 +3,7 @@ package io.nuls.rpc.sdk.service;
 import io.nuls.rpc.sdk.constant.RpcCmdConstant;
 import io.nuls.rpc.sdk.entity.RpcClientResult;
 import io.nuls.rpc.sdk.entity.TransactionDto;
+import io.nuls.rpc.sdk.entity.TransactionNa2NulsDto;
 import io.nuls.rpc.sdk.utils.AssertUtil;
 import io.nuls.rpc.sdk.utils.RestFulUtils;
 
@@ -20,15 +21,29 @@ public enum TransactionService {
 
     private RestFulUtils restFul = RestFulUtils.getInstance();
 
-    public RpcClientResult getTx(String hash){
+    public RpcClientResult getTxBase(String hash){
         try {
             AssertUtil.canNotEmpty(hash);
         } catch (Exception e) {
             return RpcClientResult.getFailed(RpcCmdConstant.PARAMETER_ERROR_MSG);
         }
         RpcClientResult result = restFul.get("/tx/hash/" + hash, null);
+        return result;
+    }
+
+
+    public RpcClientResult getTx(String hash){
+        RpcClientResult result = getTxBase(hash);
         if(result.isSuccess()){
             result.setData(new TransactionDto((Map<String, Object>)result.getData()));
+        }
+        return result;
+    }
+
+    public RpcClientResult getTxNa2Nuls(String hash){
+        RpcClientResult result = getTxBase(hash);
+        if(result.isSuccess()){
+            result.setData(new TransactionNa2NulsDto((Map<String, Object>)result.getData()));
         }
         return result;
     }
