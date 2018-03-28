@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS `block_header` (
 CREATE TABLE IF NOT EXISTS `agent` (
   `id` varchar(70) NOT NULL,
   `agent_address` varchar(40) NOT NULL,
-  `agent_name` varchar(20) NOT NULL,
+  `agent_name` varchar(50) NOT NULL,
   `packing_address` varchar(40) NOT NULL,
   `deposit` bigint(18) NOT NULL,
   `remark` varchar(255) NOT NULL,
