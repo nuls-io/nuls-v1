@@ -659,7 +659,6 @@ public class ConsensusMeetingRunner implements Runnable {
     private List<Consensus<Agent>> calcConsensusAgentList() {
         List<Consensus<Agent>> list = new ArrayList<>();
         list.addAll(consensusCacheManager.getCachedAgentList(ConsensusStatusEnum.IN));
-//        list.addAll(consensusCacheManager.getCachedAgentList(ConsensusStatusEnum.WAITING));
         if (list.size() >= PocConsensusConstant.MIN_CONSENSUS_AGENT_COUNT) {
             return list;
         }
