@@ -26,6 +26,8 @@
 
 package io.nuls.rpc.resources.form;
 
+import io.nuls.core.utils.str.StringUtils;
+
 /**
  * @author Niels
  * @date 2018/3/14
@@ -40,7 +42,7 @@ public class WithdrawForm {
     }
 
     public void setAddress(String address) {
-        this.address = address;
+        this.address = (address==null)?null:address.trim();
     }
 
     public String getPassword() {
@@ -48,7 +50,7 @@ public class WithdrawForm {
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        this.password = StringUtils.formatStringPara(password);
     }
 
     public String getTxHash() {
@@ -56,6 +58,6 @@ public class WithdrawForm {
     }
 
     public void setTxHash(String txHash) {
-        this.txHash = txHash;
+        this.txHash = StringUtils.formatStringPara(txHash);
     }
 }
