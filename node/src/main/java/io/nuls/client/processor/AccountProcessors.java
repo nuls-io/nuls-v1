@@ -108,9 +108,8 @@ public abstract class AccountProcessors implements CommandProcessor {
         @Override
         public String getHelp() {
             CommandBulider builder = new CommandBulider();
-            //TODO 翻译
             builder.newLine(getCommandDescription())
-                    .newLine("\t<address> 账户地址 - 必输");
+                    .newLine("\t<address> the account address - require");
             return builder.toString();
         }
 
@@ -153,9 +152,8 @@ public abstract class AccountProcessors implements CommandProcessor {
         @Override
         public String getHelp() {
             CommandBulider builder = new CommandBulider();
-            //TODO 翻译
             builder.newLine(getCommandDescription())
-                    .newLine("\t<address> 账户地址 - 必输");
+                    .newLine("\t<address> the account address - require");
             return builder.toString();
         }
 
@@ -258,11 +256,11 @@ public abstract class AccountProcessors implements CommandProcessor {
         }
     }
 
-    public static class GetUnspentUTXO extends AccountProcessors {
+    public static class GetUTXO extends AccountProcessors {
 
         @Override
         public String getCommand() {
-            return "getunspentutxo";
+            return "getutxo";
         }
 
         @Override
@@ -270,15 +268,14 @@ public abstract class AccountProcessors implements CommandProcessor {
             CommandBulider builder = new CommandBulider();
             //TODO 翻译
             builder.newLine(getCommandDescription())
-                    .newLine("\t<address> 账户地址 - 必输")
-                    .newLine("\t<amount> 金额 - 必输");
+                    .newLine("\t<address> the account address - require")
+                    .newLine("\t<amount> 金额，本命令会返回等于或大于此金额的utxo - require");
             return builder.toString();
         }
 
         @Override
         public String getCommandDescription() {
-            //TODO 翻译
-            return "getunspentutxo <address> <amount> --查询账户足够数量的未花费输出";
+            return "getutxo <address> <amount> --Obtain sufficient amount of utxo from the account.";
         }
 
         @Override
@@ -298,7 +295,7 @@ public abstract class AccountProcessors implements CommandProcessor {
 
         @Override
         public CommandResult execute(String[] args) {
-            RpcClientResult result = accountService.getUnspentUTXONa2Nuls(args[1], Long.valueOf(args[2]));
+            RpcClientResult result = accountService.getUTXONa2Nuls(args[1], Long.valueOf(args[2]));
             if (null == result) {
                 return CommandResult.getFailed("Failure to execute");
             }

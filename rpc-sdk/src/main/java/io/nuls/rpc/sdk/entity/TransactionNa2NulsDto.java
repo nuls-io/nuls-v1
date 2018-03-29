@@ -17,7 +17,7 @@ public class TransactionNa2NulsDto extends TransactionDto {
     private List<OutputDto> outputs;
 
     public TransactionNa2NulsDto(Map<String, Object> map) {
-        super(map);
+        super(map, false);
         this.inputs = new ArrayList<>();
         List<Map<String,Object>> inputMapList = (List<Map<String, Object>>) map.get("inputs");
         for(Map<String, Object> inputMap:inputMapList){

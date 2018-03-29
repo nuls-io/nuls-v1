@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -201,7 +201,7 @@ public class BlockBatchDownloadUtils {
         nodeStatusMap.put(nodeId, status);
         this.eventBroadcaster.sendToNode(new GetBlockRequest(start, end), nodeId);
         status.setUpdateTime(System.currentTimeMillis());
-        if(start!=end){
+        if (start != end) {
             Log.info("download block :" + start + "-" + end + ",from : " + nodeId);
         }
     }
@@ -265,7 +265,7 @@ public class BlockBatchDownloadUtils {
                 Log.error("cache block is null");
                 break;
             }
-            if(block.getHeader().getHeight()<=NulsContext.getInstance().getBestHeight()){
+            if (block.getHeader().getHeight() <= NulsContext.getInstance().getBestHeight()) {
                 continue;
             }
             ValidateResult result1 = block.verify();
@@ -320,20 +320,14 @@ public class BlockBatchDownloadUtils {
             }
             if ((i - currentRound.getStart()) % DOWNLOAD_BLOCKS_PER_TIME == 0) {
                 NulsDigestData mustHash = blocksHash.getHash(block.getHeader().getHeight());
+                if (mustHash == null) {
+                    continue;
+                }
                 NulsDigestData hash = block.getHeader().getHash();
                 if (null == hash || null == mustHash || !mustHash.getDigestHex().equals(hash.getDigestHex())) {
                     failedExecute(block.getHeader().getHeight());
                     return Result.getFailed("hash wrong!");
                 }
-            }
-            String preHash = block.getHeader().getPreHash().getDigestHex();
-            Block preBlock = blockMap.get(block.getHeader().getHeight() - 1);
-            if (preBlock == null) {
-                preBlock = blockService.getBlock(preHash);
-            }
-            if (null == preBlock || preBlock.getHeader().getHeight() != (block.getHeader().getHeight() - 1)) {
-                failedExecute(block.getHeader().getHeight());
-                return Result.getFailed("prehash wrong!");
             }
         }
         return Result.getSuccess();
@@ -358,21 +352,7 @@ public class BlockBatchDownloadUtils {
     }
 
     private boolean roundFinished() {
-        boolean result = true;
-        for (String nodeId : currentRound.getNodeIdList()) {
-            if (!result) {
-                break;
-            }
-            try {
-                NodeDownloadingStatus status = nodeStatusMap.get(nodeId);
-                if (status != null) {
-                    result = status.finished();
-                }
-            } catch (Exception e) {
-                Log.error(e);
-            }
-        }
-        return result;
+        return blockMap.size() == (currentRound.getEnd() - currentRound.getStart() + 1);
     }
 
     public boolean isFinished() {

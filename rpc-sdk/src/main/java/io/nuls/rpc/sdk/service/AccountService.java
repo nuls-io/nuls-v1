@@ -166,7 +166,7 @@ public enum AccountService {
      * @param amount
      * @return
      */
-    private RpcClientResult getUnspentUTXOBase(String address, Long amount) {
+    private RpcClientResult getUTXOBase(String address, Long amount) {
         try {
             AssertUtil.canNotEmpty(address);
             AssertUtil.canNotEmpty(amount);
@@ -179,8 +179,8 @@ public enum AccountService {
         params.put("amount", amount.toString());
         return restFul.get("/account/utxo", params);
     }
-    public RpcClientResult getUnspentUTXO(String address, Long amount) {
-        RpcClientResult result = getUnspentUTXOBase(address, amount);
+    public RpcClientResult getUTXO(String address, Long amount) {
+        RpcClientResult result = getUTXOBase(address, amount);
         if (result.isSuccess()) {
             List<Map<String, Object>> list = (List<Map<String, Object>>) result.getData();
             List<OutputDto> outputDtoList = new ArrayList<>();
@@ -191,8 +191,8 @@ public enum AccountService {
         }
         return result;
     }
-    public RpcClientResult getUnspentUTXONa2Nuls(String address, Long amount) {
-        RpcClientResult result = getUnspentUTXOBase(address, amount);
+    public RpcClientResult getUTXONa2Nuls(String address, Long amount) {
+        RpcClientResult result = getUTXOBase(address, amount);
         if (result.isSuccess()) {
             List<Map<String, Object>> list = (List<Map<String, Object>>) result.getData();
             List<OutputNa2NulsDto> outputNa2NulsDtoList = new ArrayList<>();
