@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -209,33 +209,35 @@ public class BlockMaintenanceThread implements Runnable {
                 }
                 Log.warn("Rollback block start height:{},local is highest and wrong!", localBestBlock.getHeader().getHeight());
                 //bifurcation
-                rollbackBlock(localBestBlock.getHeader().getHeight());
+                rollbackBlock(localBestBlock.getHeader().getHeight(), netBestBlockInfo.getNodeIdList());
                 localBestBlock = this.blockService.getLocalBestBlock();
                 break;
             } else {
-                netBestBlockInfo = DistributedBlockInfoRequestUtils.getInstance().request(localBestBlock.getHeader().getHeight(), netBestBlockInfo.getNodeIdList());
-                if (netBestBlockInfo.getBestHash().equals(localBestBlock.getHeader().getHash())) {
-                    break;
-                }
-                if (localBestBlock.getHeader().getHeight() != netBestBlockInfo.getBestHeight()) {
-                    throw new NulsRuntimeException(ErrorCode.FAILED, "answer not asked!");
-                }
-                if (netBestBlockInfo.getNodeIdList().size() == 1) {
-                    throw new NulsRuntimeException(ErrorCode.FAILED, "node count not enough!");
-                }
-                Log.warn("Rollback block start height:{},local has wrong blocks!", localBestBlock.getHeader().getHeight());
-                //bifurcation
-                rollbackBlock(localBestBlock.getHeader().getHeight());
+                checkNeedRollback(localBestBlock,netBestBlockInfo.getNodeIdList());
                 localBestBlock = this.blockService.getLocalBestBlock();
             }
         } while (false);
         resultCorrentInfo.setLocalBestBlock(localBestBlock);
-
-
         return resultCorrentInfo;
     }
 
-    private void rollbackBlock(long startHeight) {
+    private void checkNeedRollback(Block block,List<String> nodeIdList) {
+        BlockInfo netBestBlockInfo = DistributedBlockInfoRequestUtils.getInstance().request(block.getHeader().getHeight(), nodeIdList);
+        if (netBestBlockInfo.getBestHash().equals(block.getHeader().getHash())) {
+            return;
+        }
+        if (block.getHeader().getHeight() != netBestBlockInfo.getBestHeight()) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "answer not asked!");
+        }
+        if (netBestBlockInfo.getNodeIdList().size() == 1) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "node count not enough!");
+        }
+        Log.warn("Rollback block start height:{},local has wrong blocks!", block.getHeader().getHeight());
+        //bifurcation
+        rollbackBlock(block.getHeader().getHeight(),nodeIdList);
+    }
+
+    private void rollbackBlock(long startHeight, List<String> nodeIdList) {
         long height = startHeight - 1;
         Block block = this.blockService.getBlock(height);
         try {
@@ -245,16 +247,6 @@ public class BlockMaintenanceThread implements Runnable {
             Log.error(e);
             return;
         }
-        boolean previousRb = false;
-        if (height > 0) {
-            NulsContext.getInstance().setBestBlock(block);
-            BlockInfo blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(height,null);
-            if (null != blockInfo && null != blockInfo.getBestHash() && (!blockInfo.getBestHash().equals(block.getHeader().getHash()) && blockInfo.getBestHeight() == height)) {
-                previousRb = true;
-            }
-        }
-        if (previousRb) {
-            rollbackBlock(height);
-        }
+        checkNeedRollback(block,nodeIdList);
     }
 }

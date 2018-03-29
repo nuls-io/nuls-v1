@@ -45,6 +45,11 @@ public class PackingRoundManager {
 
     private PocMeetingRound currentRound;
 
+    public boolean calc() {
+
+
+        return false;
+    }
 
 
 }
