@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -346,7 +346,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         long blockHeight = bestBlock.getHeader().getHeight();
         if (txType == TransactionConstant.TX_TYPE_COIN_BASE ||
                 txType == TransactionConstant.TX_TYPE_SMALL_CHANGE
-                //|| txType == TransactionConstant.TX_TYPE_EXIT_CONSENSUS
+            //|| txType == TransactionConstant.TX_TYPE_EXIT_CONSENSUS
                 ) {
             return Na.ZERO;
         }
@@ -583,6 +583,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             } else {
                 b = false;
             }
+            UtxoTransactionTool.getInstance().calcBalance(output.getAddress(), false);
         }
     }
 
@@ -609,6 +610,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             } else {
                 b = false;
             }
+            UtxoTransactionTool.getInstance().calcBalance(output.getAddress(), false);
         }
         txDao.lockTxOutput(txHash);
     }
