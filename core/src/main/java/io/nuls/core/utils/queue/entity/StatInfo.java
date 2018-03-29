@@ -61,7 +61,7 @@ public class StatInfo {
      */
     public StatInfo(String queueName, long lastSize, int latelySecond) {
         if (queueName == null || queueName.trim().isEmpty()) {
-            throw new NulsRuntimeException(ErrorCode.QUEUE_NAME_ERROR);
+            throw new NulsRuntimeException(ErrorCode.PARAMETER_ERROR,"queue name error!");
         }
         this.name = queueName.substring(6);
         this.lastSize = lastSize;
