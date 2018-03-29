@@ -201,8 +201,8 @@ public class UtxoTransactionDaoImpl implements UtxoTransactionDataService {
 
     @Override
     @DbSession
-    public void unlockTxOutput(String txHash) {
-        outputDao.unlockTxOutput(txHash);
+    public void unlockTxOutput(String txHash, long lockTime) {
+        outputDao.unlockTxOutput(txHash, lockTime);
     }
 
     @Override

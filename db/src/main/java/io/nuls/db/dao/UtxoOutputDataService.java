@@ -62,7 +62,7 @@ public interface UtxoOutputDataService extends BaseDataService<Map<String, Objec
 
     long getAgentReward(String address, int type);
 
-    void unlockTxOutput(String txHash);
+    void unlockTxOutput(String txHash, long lockTime);
 
     void lockTxOutput(String txHash);
 }
