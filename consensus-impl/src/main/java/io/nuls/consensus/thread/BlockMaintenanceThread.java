@@ -238,6 +238,9 @@ public class BlockMaintenanceThread implements Runnable {
     private void rollbackBlock(long startHeight, List<String> nodeIdList) {
         long height = startHeight - 1;
         Block block = this.blockService.getBlock(height);
+        if(null==block){
+            block = this.blockService.getLocalBestBlock();
+        }
         try {
             this.blockService.rollbackBlock(startHeight);
             NulsContext.getInstance().setBestBlock(block);
