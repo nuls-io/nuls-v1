@@ -221,6 +221,10 @@ public final class Na implements Comparable<Na>, Serializable {
         return compareTo(other) > 0;
     }
 
+    public boolean isEnough(Na other) {
+        return compareTo(other) >= 0;
+    }
+
     /**
      * Returns true if the monetary value represented by this instance is less than that
      * of the given other Na, otherwise false.

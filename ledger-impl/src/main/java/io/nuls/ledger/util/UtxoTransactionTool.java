@@ -177,6 +177,45 @@ public class UtxoTransactionTool {
         return false;
     }
 
+    public boolean isMySend(AbstractCoinTransaction tx) {
+        if (NulsContext.LOCAL_ADDRESS_LIST.isEmpty()) {
+            return false;
+        }
+
+        UtxoData coinData = (UtxoData) tx.getCoinData();
+        //check input
+        if (coinData.getInputs() != null && !coinData.getInputs().isEmpty()) {
+            for (UtxoInput input : coinData.getInputs()) {
+                if (input.getFrom() == null) {
+                    continue;
+                }
+                if (NulsContext.LOCAL_ADDRESS_LIST.contains(input.getFrom().getAddress())) {
+                    tx.setTransferType(Transaction.TRANSFER_SEND);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean isMySend(AbstractCoinTransaction tx, String address) {
+
+        UtxoData coinData = (UtxoData) tx.getCoinData();
+        //check input
+        if (coinData.getInputs() != null && !coinData.getInputs().isEmpty()) {
+            for (UtxoInput input : coinData.getInputs()) {
+                if (input.getFrom() == null) {
+                    continue;
+                }
+                if (input.getFrom().getAddress().equals(address)) {
+                    tx.setTransferType(Transaction.TRANSFER_SEND);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public void calcBalance(String address, boolean sendNotice) {
         lock.lock();
         try {
