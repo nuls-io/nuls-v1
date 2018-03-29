@@ -489,6 +489,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
+    @DbSession
     public void rollbackTx(Transaction tx) throws NulsException {
         AssertUtil.canNotEmpty(tx, ErrorCode.NULL_PARAMETER);
         if (tx.getStatus() == TxStatusEnum.CACHED) {
@@ -502,6 +503,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
+    @DbSession
     public void commitTx(Transaction tx) throws NulsException {
         AssertUtil.canNotEmpty(tx, ErrorCode.NULL_PARAMETER);
         if (tx.getStatus() != TxStatusEnum.AGREED) {
