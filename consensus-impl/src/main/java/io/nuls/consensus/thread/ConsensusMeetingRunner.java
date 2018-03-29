@@ -122,7 +122,7 @@ public class ConsensusMeetingRunner implements Runnable {
         this.running = true;
         boolean result = (TimeService.currentTimeMillis() - context.getBestBlock().getHeader().getTime()) <= 1000L;
         if (!result) {
-            while (checkBestHash()) {
+            while (!checkBestHash()) {
                 try {
                     Thread.sleep(10000L);
                 } catch (InterruptedException e) {
