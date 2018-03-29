@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,25 +21,29 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- */
-package io.nuls.client.constant;
-
-/**
- * Created by Niels on 2017/10/30.
  *
  */
-public interface CommandConstant {
 
-    String COMMAND_PS1 = "nuls>>> ";
-    String COMMAND_ERROR = "command error! ";
-    String EXCEPTION = "Exception";
+package io.nuls.rpc.sdk.entity;
 
-    String CMD_EXIT = "exit";
-    String CMD_HELP = "help";
-    String NEED_HELP = "-h";
-    String NEED_ALL = "-a";
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.nuls.rpc.sdk.utils.StringUtils;
 
-    String CMD_SYS = "sys";
-    String CMD_ACCT = "account";
+import java.util.Map;
 
+/**
+ * @Desription:
+ * @Author: PierreLuo
+ * @Date: 2018/3/25
+ */
+public class OutputNa2NulsDto extends OutputDto{
+
+    public OutputNa2NulsDto(Map<String, Object> map) {
+        super(map);
+    }
+
+    @JsonProperty("value")
+    public String getValue0() {
+        return Na.valueOf(getValue()).toText();
+    }
 }

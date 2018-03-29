@@ -11,13 +11,8 @@ import java.util.Map;
  * @author Niels
  * @date 2018-03-07
  */
-public class SystemService {
-
-    private static SystemService instance = new SystemService();
-
-    public static SystemService getInstance() {
-        return instance;
-    }
+public enum SystemService {
+    SYSTEM_SERVICE;
 
     private RestFulUtils restFul = RestFulUtils.getInstance();
 

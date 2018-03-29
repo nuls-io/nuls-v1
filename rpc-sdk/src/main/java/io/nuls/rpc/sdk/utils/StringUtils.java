@@ -21,23 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.core.utils.str;
+package io.nuls.rpc.sdk.utils;
 
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.crypto.Base58;
+import io.nuls.rpc.sdk.constant.RpcCmdConstant;
 
 import java.io.UnsupportedEncodingException;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
- *
- * @author Niels
- * @date 2017/10/9
+ * Created by Niels on 2017/10/9.
  */
 public class StringUtils {
+
+    public static final int ADDRESS_HASH_LENGTH = 23;
 
     public static boolean isBlank(String str) {
         return null == str || str.trim().length() == 0;
@@ -59,9 +55,6 @@ public class StringUtils {
         return UUID.randomUUID().toString().replaceAll("-", "");
     }
 
-    public static String formatStringPara(String para){
-        return  (isNull(para))?null:para.trim();
-    }
     /**
      * Check the difficulty of the password
      * length between 8 and 20, the combination of characters and numbers
@@ -90,13 +83,21 @@ public class StringUtils {
                 return false;
             }
             alias = alias.trim();
-            byte[] aliasBytes = alias.getBytes(NulsContext.DEFAULT_ENCODING);
+            byte[] aliasBytes = alias.getBytes(RpcCmdConstant.DEFAULT_ENCODING);
             if (aliasBytes.length < 3 || aliasBytes.length > 20) {
                 return false;
             }
         } catch (UnsupportedEncodingException e) {
             return false;
         }
+        return true;
+    }
+
+    public static boolean validAddress(String address) {
+        if (isBlank(address)){
+            return false;
+        }
+        if (address.length() > 40) return false;
         return true;
     }
 
@@ -122,40 +123,18 @@ public class StringUtils {
         return xor;
     }
 
-    public static boolean validAddressSimple(String address) {
-        if (isBlank(address)){
-            return false;
+    public static Long parseLong(Object obj) {
+        if(obj == null)
+            return 0l;
+        String value = obj.toString();
+        if(value.trim().length() == 0) {
+            return 0l;
         }
-        if (address.length() > 40) {
-            return false;
+        try {
+            return Long.valueOf(value);
+        } catch (Exception e) {
+            return 0l;
         }
-        return true;
     }
 
-    public static boolean isNumeric(String str) {
-        for (int i = 0, len = str.length(); i < len; i++) {
-            if (!Character.isDigit(str.charAt(i))) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static final Pattern NUMBER_PATTERN = Pattern.compile("-?[0-9]+(\\.[0-9]+)?");
-    public static boolean isNumber(String str) {
-        Matcher isNum = NUMBER_PATTERN.matcher(str);
-        if (!isNum.matches()) {
-            return false;
-        }
-        return true;
-    }
-
-    private static final Pattern GT_ZERO_NUMBER_PATTERN = Pattern.compile("([1-9][0-9]*(\\.\\d+)?)|(0\\.\\d*[1-9]+0*)");
-    public static boolean isNumberGtZero(String str) {
-        Matcher isNum = GT_ZERO_NUMBER_PATTERN.matcher(str);
-        if (!isNum.matches()) {
-            return false;
-        }
-        return true;
-    }
 }
