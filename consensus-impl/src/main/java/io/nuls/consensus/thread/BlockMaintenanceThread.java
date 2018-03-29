@@ -239,15 +239,20 @@ public class BlockMaintenanceThread implements Runnable {
         try {
             this.blockService.rollbackBlock(startHeight);
             long height = startHeight - 1;
-            Block block = this.blockService.getBlock(height);
-            if (null == block) {
-                block = this.blockService.getLocalBestBlock();
-            }
+            Block block = getPreBlock(height);
             NulsContext.getInstance().setBestBlock(block);
             checkNeedRollback(block, nodeIdList, null);
         } catch (NulsException e) {
             Log.error(e);
             return;
         }
+    }
+
+    private Block getPreBlock(long height) {
+        Block block = this.blockService.getBlock(height);
+        if (null == block) {
+           block = getPreBlock(height-1);
+        }
+        return block;
     }
 }
