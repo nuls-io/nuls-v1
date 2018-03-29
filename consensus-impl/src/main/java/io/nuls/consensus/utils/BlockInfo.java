@@ -78,4 +78,8 @@ public class BlockInfo {
     public void setFinished(boolean finished) {
         this.finished = finished;
     }
+
+    public void clearHeightHashMap(){
+        this.heightHashMap.clear();
+    }
 }
