@@ -56,7 +56,7 @@ public class CommandHandler {
         register(new AccountProcessors.GetAsset());
         register(new AccountProcessors.GetBalance());
         register(new AccountProcessors.GetPrivateKey());
-        register(new AccountProcessors.GetUnspentUTXO());
+        register(new AccountProcessors.GetUTXO());
         register(new AccountProcessors.GetWalletBalance());
         register(new AccountProcessors.ListAccount());
 
