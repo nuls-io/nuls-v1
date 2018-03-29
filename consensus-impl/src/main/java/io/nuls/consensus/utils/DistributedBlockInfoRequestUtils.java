@@ -25,6 +25,7 @@ package io.nuls.consensus.utils;
 
 import io.nuls.consensus.entity.BlockHashResponse;
 import io.nuls.consensus.event.GetBlocksHashRequest;
+import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
@@ -262,7 +263,16 @@ public class DistributedBlockInfoRequestUtils {
                 if (result.getBestHeight() < Long.MAX_VALUE) {
                     bestBlockInfo = result;
                 } else {
-                    throw new NulsRuntimeException(ErrorCode.TIME_OUT);
+                    if (result.getBestHeight() == Long.MAX_VALUE) {
+                        result.clearHeightHashMap();
+                        Block block = NulsContext.getInstance().getBestBlock();
+                        result.setBestHeight(block.getHeader().getHeight());
+                        result.setBestHash(block.getHeader().getHash());
+                        result.putHash(result.getBestHeight(),result.getBestHash());
+                        result.setNodeIdList(this.nodeIdList);
+                    }
+
+
                 }
             }else if ((TimeService.currentTimeMillis() - startTime) > timeout && !(hashesMap.size() >= ((nodeIdList.size() + 1) / 2))) {
                 throw new NulsRuntimeException(ErrorCode.TIME_OUT);
