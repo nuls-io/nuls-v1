@@ -427,7 +427,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             for (int i = 0; i < txList.size(); i++) {
                 Transaction tx = txList.get(i);
                 boolean isMine = this.checkTxIsMine(tx);
-                ;
                 TransactionPo po = UtxoTransferTool.toTransactionPojo(tx);
                 poList.add(po);
                 if (isMine) {
@@ -592,6 +591,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             } else {
                 b = false;
             }
+
             UtxoTransactionTool.getInstance().calcBalance(output.getAddress(), false);
         }
     }
