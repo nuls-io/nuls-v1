@@ -31,6 +31,7 @@ import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.db.dao.impl.mybatis.mapper.UtxoOutputMapper;
+import io.nuls.db.dao.impl.mybatis.util.Condition;
 import io.nuls.db.dao.impl.mybatis.util.SearchOperator;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import io.nuls.db.entity.UtxoOutputPo;
@@ -95,11 +96,51 @@ public class UtxoOutputDaoImpl extends BaseDaoImpl<UtxoOutputMapper, Map<String,
     }
 
     @Override
-    public List<UtxoOutputPo> getLockUtxo(String address, Long beginTime, Integer pageNumber, Integer pageSize) {
+    public long getLockUtxoCount(String address, Long beginTime, Long bestHeight, Long genesisTime) {
         Searchable searchable = new Searchable();
+
+        Condition condition;
+        condition = new Condition("lock_time", SearchOperator.gt, bestHeight);
+        condition.setPrefix("((");
+        searchable.addCondition(condition);
+
+        condition = new Condition("lock_time", SearchOperator.lt, genesisTime);
+        condition.setEndfix(")");
+        searchable.addCondition(condition);
+
+        condition = new Condition(Condition.OR, "lock_time", SearchOperator.gt, beginTime);
+        searchable.addCondition(condition);
+
+        condition = new Condition(Condition.OR, "status", SearchOperator.eq, UtxoOutputPo.LOCKED);
+        condition.setEndfix(")");
+        searchable.addCondition(condition);
+
+        searchable.addCondition("address", SearchOperator.eq, address);
+        return getMapper().selectCount(searchable);
+    }
+
+    @Override
+    public List<UtxoOutputPo> getLockUtxo(String address, Long beginTime,
+                                          Long bestHeight, Long genesisTime,
+                                          Integer start, Integer limit) {
+        Searchable searchable = new Searchable();
+        Condition condition;
+        condition = new Condition("lock_time", SearchOperator.gt, bestHeight);
+        condition.setPrefix("((");
+        searchable.addCondition(condition);
+
+        condition = new Condition("lock_time", SearchOperator.lt, genesisTime);
+        condition.setEndfix(")");
+        searchable.addCondition(condition);
+
+        condition = new Condition(Condition.OR, "lock_time", SearchOperator.gt, beginTime);
+        searchable.addCondition(condition);
+
+        condition = new Condition(Condition.OR, "status", SearchOperator.eq, UtxoOutputPo.LOCKED);
+        condition.setEndfix(")");
+        searchable.addCondition(condition);
         searchable.addCondition("b.address", SearchOperator.eq, address);
-        searchable.addCondition("b.lock_time", SearchOperator.gt, beginTime);
-        PageHelper.startPage(pageNumber, pageSize);
+        PageHelper.offsetPage(start, limit);
 
         return getMapper().selectAccountOutput(searchable);
     }

@@ -37,6 +37,7 @@ import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
+import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.event.TransactionEvent;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.rpc.entity.OutputDto;
@@ -190,13 +191,17 @@ public class TransactionResource {
             pageSize = 10;
         }
         //todo        ledgerService.getLockUtxo
-        List<UtxoOutputPo> poList = outputDataService.getLockUtxo(address, TimeService.currentTimeMillis(), pageNumber, pageSize);
+        Page<UtxoOutput> page = ledgerService.getLockUtxo(address, pageNumber, pageSize);
+
         List<OutputDto> dtoList = new ArrayList<>();
-        for (UtxoOutputPo po : poList) {
+        for (UtxoOutput po : page.getList()) {
             dtoList.add(new OutputDto(po));
         }
         RpcResult result = RpcResult.getSuccess();
-        result.setData(dtoList);
+
+        Page dtoPage = new Page(page);
+        dtoPage.setList(dtoList);
+        result.setData(dtoPage);
         return result;
     }
 

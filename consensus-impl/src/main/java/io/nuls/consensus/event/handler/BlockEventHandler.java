@@ -36,6 +36,8 @@ import io.nuls.db.entity.NodePo;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.network.service.NetworkService;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * @author facjas
  * @date 2017/11/16
@@ -44,7 +46,6 @@ public class BlockEventHandler extends AbstractEventHandler<BlockEvent> {
 
     private BlockManager blockCacheManager = BlockManager.getInstance();
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
-
     @Override
     public void onEvent(BlockEvent event, String fromId) {
         Block block = event.getEventBody();
@@ -52,15 +53,17 @@ public class BlockEventHandler extends AbstractEventHandler<BlockEvent> {
             Log.warn("recieved a null blockEvent form "+fromId);
             return;
         }
+
+        if (BlockBatchDownloadUtils.getInstance().downloadedBlock(fromId, block)) {
+            return;
+        }
+
         ValidateResult result = block.verify();
         if (result.isFailed()&&result.getErrorCode()!= ErrorCode.ORPHAN_TX) {
             if (result.getLevel() == SeverityLevelEnum.FLAGRANT_FOUL) {
                 networkService.blackNode(fromId, NodePo.YELLOW);
             }
             Log.warn("recieved a wrong blockEvent:{},form:{}",result.getMessage(),fromId);
-            return;
-        }
-        if (BlockBatchDownloadUtils.getInstance().downloadedBlock(fromId, block)) {
             return;
         }
         blockCacheManager.addBlock(block,false,fromId);

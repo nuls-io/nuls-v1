@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -35,21 +35,25 @@ import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.tx.serivce.TransactionService;
+import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.core.validate.ValidateResult;
+import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.db.dao.UtxoTransactionDataService;
 import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.entity.TransactionPo;
 import io.nuls.db.entity.UtxoInputPo;
+import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.entity.OutPutStatusEnum;
+import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
@@ -79,6 +83,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     private LedgerCacheService ledgerCacheService = LedgerCacheService.getInstance();
     @Autowired
     private UtxoTransactionDataService txDao;
+    @Autowired
+    private UtxoOutputDataService outputDataService;
     @Autowired
     private EventBroadcaster eventBroadcaster;
 
@@ -217,7 +223,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         return null;
     }
 
-    private List<Transaction> getCacheTxList(String address, int txType) throws NulsException {
+    private List<Transaction> getCacheTxList(String address, int txType) {
         List<Transaction> cacheTxList = new ArrayList<>(txCacheService.getElementList(CONFIRM_TX_CACHE));
         cacheTxList.addAll(txCacheService.getElementList(RECEIVE_TX_CACHE));
         cacheTxList.addAll(txCacheService.getElementList(ORPHAN_TX_CACHE));
@@ -339,8 +345,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         }
         long blockHeight = bestBlock.getHeader().getHeight();
         if (txType == TransactionConstant.TX_TYPE_COIN_BASE ||
-                txType == TransactionConstant.TX_TYPE_SMALL_CHANGE ||
-                txType == TransactionConstant.TX_TYPE_EXIT_CONSENSUS
+                txType == TransactionConstant.TX_TYPE_SMALL_CHANGE
+            //|| txType == TransactionConstant.TX_TYPE_EXIT_CONSENSUS
                 ) {
             return Na.ZERO;
         }
@@ -420,12 +426,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             List<TransactionLocalPo> localPoList = new ArrayList<>();
             for (int i = 0; i < txList.size(); i++) {
                 Transaction tx = txList.get(i);
-                boolean isMine = false;
-                try {
-                    isMine = this.checkTxIsMine(tx);
-                } catch (NulsException e) {
-                    throw new NulsRuntimeException(e);
-                }
+                boolean isMine = this.checkTxIsMine(tx);
+                ;
                 TransactionPo po = UtxoTransferTool.toTransactionPojo(tx);
                 poList.add(po);
                 if (isMine) {
@@ -472,7 +474,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
 
     @Override
-    public boolean checkTxIsMine(Transaction tx) throws NulsException {
+    public boolean checkTxIsMine(Transaction tx) {
         if (tx instanceof AbstractCoinTransaction) {
             return UtxoTransactionTool.getInstance().isMine((AbstractCoinTransaction) tx);
         }
@@ -480,7 +482,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public boolean checkTxIsMine(Transaction tx, String address) throws NulsException {
+    public boolean checkTxIsMine(Transaction tx, String address) {
         if (tx instanceof AbstractCoinTransaction) {
             return UtxoTransactionTool.getInstance().isMine((AbstractCoinTransaction) tx, address);
         }
@@ -581,6 +583,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             } else {
                 b = false;
             }
+            UtxoTransactionTool.getInstance().calcBalance(output.getAddress(), false);
         }
     }
 
@@ -607,8 +610,54 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             } else {
                 b = false;
             }
+            UtxoTransactionTool.getInstance().calcBalance(output.getAddress(), false);
         }
         txDao.lockTxOutput(txHash);
+    }
+
+    @Override
+    public Page<UtxoOutput> getLockUtxo(String address, Integer pageNumber, Integer pageSize) {
+        List<UtxoOutput> lockOutputs = new ArrayList<>();
+
+        List<Transaction> txCacheList = getCacheTxList(address, 0);
+        for (Transaction tx : txCacheList) {
+            if (checkTxIsMine(tx, address)) {
+                UtxoData utxoData = (UtxoData) ((AbstractCoinTransaction) tx).getCoinData();
+                for (UtxoOutput output : utxoData.getOutputs()) {
+                    if (output.getAddress().equals(address) && output.isLocked()) {
+                        output.setCreateTime(tx.getTime());
+                        output.setTxType(tx.getType());
+                        lockOutputs.add(output);
+                    }
+                }
+            }
+        }
+
+        long count = outputDataService.getLockUtxoCount(address, TimeService.currentTimeMillis(), NulsContext.getInstance().getBestHeight(),
+                NulsContext.getInstance().getGenesisBlock().getHeader().getTime());
+        int start = (pageNumber - 1) * pageSize;
+        if (lockOutputs.size() >= start + pageSize) {
+            lockOutputs = lockOutputs.subList(start, start + pageSize);
+            Page page = new Page(pageNumber, pageSize);
+            page.setList(lockOutputs);
+            page.setTotal(count);
+            return page;
+        } else if (start < lockOutputs.size()) {
+            lockOutputs = lockOutputs.subList(start, lockOutputs.size());
+            start = 0;
+            pageSize = pageSize - lockOutputs.size();
+        } else {
+            start = start - lockOutputs.size();
+        }
+        List<UtxoOutputPo> poList = outputDataService.getLockUtxo(address, TimeService.currentTimeMillis(), NulsContext.getInstance().getBestHeight(),
+                NulsContext.getInstance().getGenesisBlock().getHeader().getTime(), start, pageSize);
+        for (UtxoOutputPo po : poList) {
+            lockOutputs.add(UtxoTransferTool.toOutput(po));
+        }
+        Page page = new Page(pageNumber, pageSize);
+        page.setTotal(count);
+        page.setList(lockOutputs);
+        return page;
     }
 
     public List<TransactionService> getServiceList(Class<? extends Transaction> txClass) {

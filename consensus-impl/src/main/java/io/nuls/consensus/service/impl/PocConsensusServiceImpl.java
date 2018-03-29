@@ -191,6 +191,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
         TransactionEvent event = new TransactionEvent();
         CoinTransferData coinTransferData = new CoinTransferData(OperationType.UNLOCK, this.ledgerService.getTxFee(TransactionConstant.TX_TYPE_EXIT_CONSENSUS));
         coinTransferData.setTotalNa(Na.ZERO);
+        coinTransferData.addFrom(account.getAddress().toString());
         PocExitConsensusTransaction tx = new PocExitConsensusTransaction(coinTransferData, password);
         tx.setTxData(joinTx.getHash());
         try {

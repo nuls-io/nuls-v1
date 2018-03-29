@@ -29,6 +29,7 @@ import io.nuls.core.chain.entity.Result;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
+import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.ledger.entity.Balance;
 
 import java.io.IOException;
@@ -76,9 +77,9 @@ public interface LedgerService {
 
     void saveTxInLocal(String address);
 
-    boolean checkTxIsMine(Transaction tx) throws NulsException;
+    boolean checkTxIsMine(Transaction tx);
 
-    boolean checkTxIsMine(Transaction tx, String address) throws NulsException;
+    boolean checkTxIsMine(Transaction tx, String address);
 
     void rollbackTx(Transaction tx) throws NulsException;
 
@@ -96,6 +97,7 @@ public interface LedgerService {
 
     /**
      * get the last 24 hours coinbase transaction reward
+     *
      * @return
      */
     long getLastDayTimeReward();
@@ -109,4 +111,6 @@ public interface LedgerService {
     void unlockTxSave(String txHash);
 
     void unlockTxRollback(String txHash);
+
+    Page getLockUtxo(String address, Integer pageNumber, Integer pageSize);
 }

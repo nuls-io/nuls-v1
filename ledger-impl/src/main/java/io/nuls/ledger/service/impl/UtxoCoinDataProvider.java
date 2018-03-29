@@ -284,21 +284,21 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                         from.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
                         addressSet.add(from.getAddress());
                     }
-//                    else if (from.getStatus() == OutPutStatusEnum.UTXO_CONFIRM_SPEND) {
-//                        from.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
-//                    } else if (from.getStatus() == OutPutStatusEnum.UTXO_UNCONFIRM_SPEND) {
-//                        from.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND);
-//                    }
+                    else if (from.getStatus() == OutPutStatusEnum.UTXO_CONFIRM_SPEND) {
+                        from.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
+                    } else if (from.getStatus() == OutPutStatusEnum.UTXO_UNCONFIRM_SPEND) {
+                        from.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND);
+                    }
                 }
             }
         } else if (tx.getStatus().equals(TxStatusEnum.CONFIRMED)) {
             //process output
             outputDataService.deleteByHash(tx.getHash().getDigestHex());
-            for (int i = utxoData.getOutputs().size() - 1; i >= 0; i--) {
-                UtxoOutput output = utxoData.getOutputs().get(i);
-                ledgerCacheService.removeUtxo(output.getKey());
-                addressSet.add(output.getAddress());
-            }
+//            for (int i = utxoData.getOutputs().size() - 1; i >= 0; i--) {
+//                UtxoOutput output = utxoData.getOutputs().get(i);
+//                ledgerCacheService.removeUtxo(output.getKey());
+//                addressSet.add(output.getAddress());
+//            }
 
             //process input
             //1. delete input (database)

@@ -1,6 +1,5 @@
 package io.nuls.rpc.entity;
 
-import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.ledger.entity.OutPutStatusEnum;
 import io.nuls.ledger.entity.UtxoOutput;
 
@@ -19,7 +18,7 @@ public class OutputDto {
     private Long lockTime;
     //tx.type
     private Integer type;
-
+    // 0, usable, 1, timeLock, 2, consensusLock 3, spent
     private Integer status;
 
     public OutputDto(UtxoOutput output) {
@@ -31,24 +30,17 @@ public class OutputDto {
         this.lockTime = output.getLockTime();
         this.type = output.getTxType();
         if (OutPutStatusEnum.UTXO_SPENT == output.getStatus()) {
+            this.status = 3;
+        } else if (OutPutStatusEnum.UTXO_CONFIRM_CONSENSUS_LOCK == output.getStatus() ||
+                OutPutStatusEnum.UTXO_UNCONFIRM_CONSENSUS_LOCK == output.getStatus()) {
             this.status = 2;
-        } else if (OutPutStatusEnum.UTXO_CONFIRM_CONSENSUS_LOCK == output.getStatus()) {
+        } else if (OutPutStatusEnum.UTXO_CONFIRM_TIME_LOCK == output.getStatus() ||
+                OutPutStatusEnum.UTXO_UNCONFIRM_TIME_LOCK == output.getStatus()) {
             this.status = 1;
         } else {
             this.status = 0;
         }
 
-    }
-
-    public OutputDto(UtxoOutputPo output) {
-        this.txHash = output.getTxHash();
-        this.index = output.getOutIndex();
-        this.address = output.getAddress();
-        this.value = output.getValue();
-        this.createTime = output.getCreateTime();
-        this.lockTime = output.getLockTime();
-        this.type = output.getTxType();
-        this.status = output.getStatus().intValue();
     }
 
     public Integer getIndex() {
