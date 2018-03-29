@@ -152,6 +152,7 @@ public class BlockManager {
             tx.setIndex(i);
             if (tx.getStatus() == null || tx.getStatus() == TxStatusEnum.CACHED) {
                 try {
+                    tx.verifyWithException();
                     this.ledgerService.approvalTx(tx);
                     confirmingTxCacheManager.putTx(tx);
                 } catch (NulsException e) {
