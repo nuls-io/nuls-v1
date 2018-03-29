@@ -38,6 +38,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
+import io.nuls.core.utils.queue.entity.BlockingQueueImpl;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.ledger.service.intf.LedgerService;
 
@@ -213,7 +214,7 @@ public class BlockMaintenanceThread implements Runnable {
                 localBestBlock = this.blockService.getLocalBestBlock();
                 break;
             } else {
-                checkNeedRollback(localBestBlock,netBestBlockInfo.getNodeIdList());
+                checkNeedRollback(localBestBlock,netBestBlockInfo.getNodeIdList(),netBestBlockInfo);
                 localBestBlock = this.blockService.getLocalBestBlock();
             }
         } while (false);
@@ -221,16 +222,13 @@ public class BlockMaintenanceThread implements Runnable {
         return resultCorrentInfo;
     }
 
-    private void checkNeedRollback(Block block,List<String> nodeIdList) {
-        BlockInfo netBestBlockInfo = DistributedBlockInfoRequestUtils.getInstance().request(block.getHeader().getHeight(), nodeIdList);
-        if (netBestBlockInfo.getBestHash().equals(block.getHeader().getHash())) {
+    private void checkNeedRollback(Block block, List<String> nodeIdList, BlockInfo netBestBlockInfo) {
+        BlockInfo netThisBlockInfo = DistributedBlockInfoRequestUtils.getInstance().request(block.getHeader().getHeight(), nodeIdList);
+        if (netThisBlockInfo.getBestHash().equals(block.getHeader().getHash())) {
             return;
         }
-        if (block.getHeader().getHeight() != netBestBlockInfo.getBestHeight()) {
+        if (block.getHeader().getHeight() != netThisBlockInfo.getBestHeight()) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "answer not asked!");
-        }
-        if (netBestBlockInfo.getNodeIdList().size() == 1) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "node count not enough!");
         }
         Log.warn("Rollback block start height:{},local has wrong blocks!", block.getHeader().getHeight());
         //bifurcation
@@ -247,6 +245,6 @@ public class BlockMaintenanceThread implements Runnable {
             Log.error(e);
             return;
         }
-        checkNeedRollback(block,nodeIdList);
+        checkNeedRollback(block,nodeIdList,null);
     }
 }
