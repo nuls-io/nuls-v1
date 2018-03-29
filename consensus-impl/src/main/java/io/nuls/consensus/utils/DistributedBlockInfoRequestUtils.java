@@ -269,7 +269,7 @@ public class DistributedBlockInfoRequestUtils {
                     result.setNodeIdList(this.nodeIdList);
                 }
                 bestBlockInfo = result;
-            } else if ((TimeService.currentTimeMillis() - startTime) > timeout && !(hashesMap.size() >= ((nodeIdList.size() + 1) / 2))) {
+            } else if ((TimeService.currentTimeMillis() - startTime) > timeout ) {
                 throw new NulsRuntimeException(ErrorCode.TIME_OUT);
             }else{
                 calc();
