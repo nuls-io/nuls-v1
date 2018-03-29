@@ -28,6 +28,7 @@ package io.nuls.client.processor;
 
 import io.nuls.client.entity.CommandResult;
 import io.nuls.client.helper.CommandBulider;
+import io.nuls.client.helper.CommandHelper;
 import io.nuls.client.processor.intf.CommandProcessor;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.rpc.sdk.entity.RpcClientResult;
@@ -171,7 +172,7 @@ public abstract class ConsensusProcessors implements CommandProcessor {
             params.setAgentAddress(args[1]);
             params.setPackingAddress(args[2]);
             params.setCommissionRate(Double.valueOf(args[3]));
-            params.setDeposit(Long.valueOf(args[4]));
+            params.setDeposit(CommandHelper.getLongAmount(args[4]));
             params.setAgentName(args[5]);
             params.setPassword(args[6]);
             params.setRemark(args[7]);
@@ -228,7 +229,7 @@ public abstract class ConsensusProcessors implements CommandProcessor {
             DepositParams params = new DepositParams();
             params.setAddress(args[1]);
             params.setAgentId(args[2]);
-            params.setDeposit(Long.valueOf(args[3]));
+            params.setDeposit(CommandHelper.getLongAmount(args[3]));
             params.setPassword(args[4]);
             RpcClientResult result = consensusService.deposit(params);
             if (null == result) {
@@ -381,7 +382,7 @@ public abstract class ConsensusProcessors implements CommandProcessor {
         @Override
         public boolean argsValidate(String[] args) {
             int length = args.length;
-            if(length != 45){
+            if(length != 4){
                 return false;
             }
             if(!StringUtils.validAddressSimple(args[1]) || !StringUtils.validPassword(args[2])
@@ -398,6 +399,39 @@ public abstract class ConsensusProcessors implements CommandProcessor {
             withdrawParams.setPassword(args[2]);
             withdrawParams.setTxHash(args[3]);
             RpcClientResult result = consensusService.withdraw(withdrawParams);
+            if(null == result){
+                return CommandResult.getFailed("Failure to execute");
+            }
+            return CommandResult.getResult(result);
+        }
+    }
+
+    public static class GetAllAgents extends ConsensusProcessors{
+        @Override
+        public String getCommand() {
+            return "getallagents";
+        }
+
+        @Override
+        public String getHelp() {
+            CommandBulider bulider = new CommandBulider();
+            bulider.newLine(getCommandDescription());
+            return bulider.toString();
+        }
+
+        @Override
+        public String getCommandDescription() {
+            return "getallagents -- get all of agents";
+        }
+
+        @Override
+        public boolean argsValidate(String[] args) {
+            return true;
+        }
+
+        @Override
+        public CommandResult execute(String[] args) {
+            RpcClientResult result = consensusService.getAllAgent();
             if(null == result){
                 return CommandResult.getFailed("Failure to execute");
             }

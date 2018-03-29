@@ -9,6 +9,8 @@ import io.nuls.rpc.sdk.utils.AssertUtil;
 import io.nuls.rpc.sdk.utils.JSONUtils;
 import io.nuls.rpc.sdk.utils.RestFulUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -149,6 +151,18 @@ public enum ConsensusService {
         }
     }
 
-
+    public RpcClientResult getAllAgent() {
+        RpcClientResult result = restFul.get("/consensus/agent/list" , null);
+        if(result.isSuccess()){
+            Map<String, Object> page = (Map<String, Object>)result.getData();
+            List<Map<String, Object>> list = (List<Map<String, Object>>)page.get("list");
+            List<ConsensusAgentListDto> consensusAgentListDtoList = new ArrayList<>(10);
+            for (Map<String, Object> map : list){
+                consensusAgentListDtoList.add(new ConsensusAgentListDto(map));
+            }
+            result.setData(consensusAgentListDtoList);
+        }
+        return result;
+    }
 
 }

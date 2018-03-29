@@ -43,8 +43,8 @@ public class ConsensusAgentInfoDto {
         this.status = (Integer)map.get("status");
         this.owndeposit = StringUtils.parseLong(map.get("owndeposit"));
         this.totalDeposit = StringUtils.parseLong(map.get("totalDeposit"));
-        this.commissionRate = (Double)map.get("commissionRate");
-        this.creditRatio = (Double)map.get("creditRatio");
+        this.commissionRate =  Double.parseDouble(String.valueOf(map.get("commissionRate")));
+        this.creditRatio = Double.parseDouble(String.valueOf(map.get("creditRatio")));
         this.memberCount = (Integer)map.get("memberCount");
         this.introduction = (String)map.get("introduction");
         this.startTime = StringUtils.parseLong(map.get("startTime"));

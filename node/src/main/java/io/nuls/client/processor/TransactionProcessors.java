@@ -48,7 +48,7 @@ public abstract class TransactionProcessors implements CommandProcessor {
 
         @Override
         public CommandResult execute(String[] args) {
-            RpcClientResult result = transactionService.getTx(args[1]);
+            RpcClientResult result = transactionService.getTxNa2Nuls(args[1]);
             if (null == result) {
                 return CommandResult.getFailed("Failure to execute");
             }
