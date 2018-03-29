@@ -568,17 +568,26 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public void unlockTxApprove(String txHash) {
+    public void unlockTxApprove(String txHash, long rockTime) {
         boolean b = true;
         int index = 0;
         while (b) {
             UtxoOutput output = ledgerCacheService.getUtxo(txHash + "-" + index);
             if (output != null) {
-                if (OutPutStatusEnum.UTXO_UNCONFIRM_CONSENSUS_LOCK == output.getStatus()) {
-                    output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND);
-                } else if (OutPutStatusEnum.UTXO_CONFIRM_CONSENSUS_LOCK == output.getStatus()) {
-                    output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
+                if (rockTime > 0) {
+                    if (OutPutStatusEnum.UTXO_UNCONFIRM_CONSENSUS_LOCK == output.getStatus()) {
+                        output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_TIME_LOCK);
+                    } else if (OutPutStatusEnum.UTXO_CONFIRM_CONSENSUS_LOCK == output.getStatus()) {
+                        output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_TIME_LOCK);
+                    }
+                } else {
+                    if (OutPutStatusEnum.UTXO_UNCONFIRM_CONSENSUS_LOCK == output.getStatus()) {
+                        output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND);
+                    } else if (OutPutStatusEnum.UTXO_CONFIRM_CONSENSUS_LOCK == output.getStatus()) {
+                        output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
+                    }
                 }
+
                 index++;
             } else {
                 b = false;
@@ -589,8 +598,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     @DbSession
-    public void unlockTxSave(String txHash) {
-        txDao.unlockTxOutput(txHash);
+    public void unlockTxSave(String txHash, long lockTime) {
+        txDao.unlockTxOutput(txHash, lockTime);
     }
 
     @Override
