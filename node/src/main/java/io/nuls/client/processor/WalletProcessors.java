@@ -130,9 +130,8 @@ public abstract class WalletProcessors implements CommandProcessor {
 
         @Override
         public CommandResult execute(String[] args) {
-            //TODO 翻译
             if(args[1].equals(args[2])) {
-                return CommandResult.getFailed("密码没有改动");
+                return CommandResult.getFailed("password no change.");
             }
             RpcClientResult result = walletService.resetPassword(args[1], args[2]);
             if (null == result) {

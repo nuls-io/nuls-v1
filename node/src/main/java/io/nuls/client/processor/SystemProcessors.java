@@ -27,6 +27,7 @@
 package io.nuls.client.processor;
 
 import io.nuls.client.CommandHandler;
+import io.nuls.client.constant.CommandConstant;
 import io.nuls.client.entity.CommandResult;
 import io.nuls.client.helper.CommandBulider;
 import io.nuls.client.processor.intf.CommandProcessor;
@@ -54,7 +55,6 @@ public abstract class SystemProcessors implements CommandProcessor {
         @Override
         public String getHelp() {
             CommandBulider builder = new CommandBulider();
-            //TODO 翻译
             builder.newLine(getCommandDescription());
             return builder.toString();
         }
@@ -85,27 +85,40 @@ public abstract class SystemProcessors implements CommandProcessor {
         @Override
         public String getHelp() {
             CommandBulider builder = new CommandBulider();
-            builder.newLine(getCommandDescription());
+            builder.newLine(getCommandDescription())
+                    .newLine("\t[-a] show all commands and options of command - optional");
             return builder.toString();
         }
 
         @Override
         public String getCommandDescription() {
-            return "help --print all commands";
+            return "help [-a] --print all commands";
         }
 
         @Override
         public boolean argsValidate(String[] args) {
+            int length = args.length;
+            if(length > 2)
+                return false;
+            if(length == 2 && !CommandConstant.NEED_ALL.equals(args[1])) {
+                return false;
+            }
             return true;
         }
 
         @Override
         public CommandResult execute(String[] args) {
+            int length = args.length;
             StringBuilder str = new StringBuilder();
             str.append("all commands:");
             for (CommandProcessor processor : CommandHandler.PROCESSOR_MAP.values()) {
                 str.append("\n");
-                str.append(processor.getCommandDescription());
+                if(length == 2 && CommandConstant.NEED_ALL.equals(args[1])) {
+                    str.append(processor.getHelp());
+                } else {
+                    str.append(processor.getCommandDescription());
+                }
+
             }
             return CommandResult.getSuccess(str.toString());
         }

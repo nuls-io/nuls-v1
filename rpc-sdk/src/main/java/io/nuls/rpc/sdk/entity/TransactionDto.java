@@ -46,6 +46,10 @@ public class TransactionDto {
     private int size;
 
     public TransactionDto(Map<String, Object> map){
+        this(map, true);
+    }
+
+    public TransactionDto(Map<String, Object> map, boolean isSetList){
         hash = (String) map.get("hash");
         type = (Integer) map.get("type");
         index = (Integer) map.get("index");
@@ -60,15 +64,17 @@ public class TransactionDto {
         confirmCount = StringUtils.parseLong(map.get("confirmCount"));
         size = (Integer) map.get("size");
 
-        inputs = new ArrayList<>();
-        List<Map<String,Object>> inputMapList = (List<Map<String, Object>>) map.get("inputs");
-        for(Map<String, Object> inputMap:inputMapList){
-            inputs.add(new InputDto(inputMap));
-        }
-        outputs = new ArrayList<>();
-        List<Map<String,Object>> outputMapList = (List<Map<String, Object>>) map.get("outputs");
-        for(Map<String, Object> outputMap:outputMapList){
-            outputs.add(new OutputDto(outputMap));
+        if(isSetList) {
+            inputs = new ArrayList<>();
+            List<Map<String,Object>> inputMapList = (List<Map<String, Object>>) map.get("inputs");
+            for(Map<String, Object> inputMap:inputMapList){
+                inputs.add(new InputDto(inputMap));
+            }
+            outputs = new ArrayList<>();
+            List<Map<String,Object>> outputMapList = (List<Map<String, Object>>) map.get("outputs");
+            for(Map<String, Object> outputMap:outputMapList){
+                outputs.add(new OutputDto(outputMap));
+            }
         }
     }
 
