@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -26,6 +26,7 @@ package io.nuls.consensus.service.tx;
 import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
+import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.member.Deposit;
@@ -97,7 +98,7 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
             Map<String, Object> paramsMap = new HashMap<>();
             paramsMap.put("agentHash", ca.getHexHash());
             List<DepositPo> poList = depositDataService.getList(paramsMap);
-            for(DepositPo po:poList){
+            for (DepositPo po : poList) {
                 this.ledgerService.unlockTxRollback(po.getTxHash());
             }
             return;
@@ -108,7 +109,7 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
         manager.cacheDeposit(cd);
         DepositPo dPo = this.depositDataService.get(cd.getHexHash());
         if (dPo == null) {
-            dPo = ConsensusTool.depositToPojo(cd,tx.getHash().getDigestHex());
+            dPo = ConsensusTool.depositToPojo(cd, tx.getHash().getDigestHex());
             this.depositDataService.save(dPo);
         }
         StopConsensusNotice notice = new StopConsensusNotice();
@@ -125,12 +126,12 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
             manager.delAgent(raTx.getTxData().getHexHash());
             manager.delDepositByAgentHash(raTx.getTxData().getHexHash());
 
-            this.ledgerService.unlockTxSave(tx.getTxData().getDigestHex());
+            this.ledgerService.unlockTxSave(tx.getTxData().getDigestHex(), tx.getTime() + PocConsensusConstant.STOP_AGENT_DEPOSIT_LOCKED_TIME * 24 * 3600 * 1000);
             Map<String, Object> paramsMap = new HashMap<>();
             paramsMap.put("agentHash", raTx.getTxData().getHexHash());
             List<DepositPo> poList = depositDataService.getList(paramsMap);
-            for(DepositPo po:poList){
-                this.ledgerService.unlockTxSave(po.getTxHash());
+            for (DepositPo po : poList) {
+                this.ledgerService.unlockTxSave(po.getTxHash(), 0);
             }
             this.agentDataService.delete(raTx.getTxData().getHexHash());
             this.depositDataService.deleteByAgentHash(raTx.getTxData().getHexHash());
@@ -140,25 +141,25 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
         Consensus<Deposit> cd = pjcTx.getTxData();
         manager.delDeposit(cd.getHexHash());
         this.depositDataService.delete(cd.getHexHash());
-        this.ledgerService.unlockTxSave(tx.getTxData().getDigestHex());
+        this.ledgerService.unlockTxSave(tx.getTxData().getDigestHex(), 0);
     }
 
     @Override
     public void onApproval(PocExitConsensusTransaction tx) throws NulsException {
         Transaction joinTx = ledgerService.getTx(tx.getTxData());
-        if(joinTx==null){
+        if (joinTx == null) {
             joinTx = ConfirmingTxCacheManager.getInstance().getTx(tx.getTxData());
         }
         if (joinTx.getType() == TransactionConstant.TX_TYPE_REGISTER_AGENT) {
             RegisterAgentTransaction raTx = (RegisterAgentTransaction) joinTx;
             manager.changeAgentStatusByHash(raTx.getTxData().getHexHash(), ConsensusStatusEnum.NOT_IN);
             manager.changeDepositStatusByAgentHash(raTx.getTxData().getHexHash(), ConsensusStatusEnum.NOT_IN);
-            this.ledgerService.unlockTxApprove(tx.getTxData().getDigestHex());
+            this.ledgerService.unlockTxApprove(tx.getTxData().getDigestHex(),tx.getTime() + PocConsensusConstant.STOP_AGENT_DEPOSIT_LOCKED_TIME * 24 * 3600 * 1000);
             return;
         }
         PocJoinConsensusTransaction pjcTx = (PocJoinConsensusTransaction) joinTx;
         Consensus<Deposit> cd = pjcTx.getTxData();
         manager.changeDepositStatus(cd.getHexHash(), ConsensusStatusEnum.NOT_IN);
-        this.ledgerService.unlockTxApprove(tx.getTxData().getDigestHex());
+        this.ledgerService.unlockTxApprove(tx.getTxData().getDigestHex(), 0);
     }
 }
