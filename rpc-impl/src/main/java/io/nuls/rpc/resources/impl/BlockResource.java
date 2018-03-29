@@ -63,6 +63,10 @@ public class BlockResource {
     @Path("/header/height/{height}")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getHeaderByHeight(@PathParam("height") Integer height) throws NulsException, IOException {
+        if( height<0 || height > Integer.MAX_VALUE){
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR );
+        }
+
         RpcResult result = RpcResult.getSuccess();
         BlockHeader blockHeader = blockService.getBlockHeader(height);
         if (blockHeader == null) {
@@ -78,6 +82,11 @@ public class BlockResource {
     @Path("/header/hash/{hash}")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getHeader(@PathParam("hash") String hash) throws NulsException, IOException {
+        hash = StringUtils.formatStringPara(hash);
+        if(!StringUtils.validHash(hash)){
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR );
+        }
+
         RpcResult result = RpcResult.getSuccess();
         BlockHeader blockHeader = blockService.getBlockHeader(hash);
         if (blockHeader == null) {

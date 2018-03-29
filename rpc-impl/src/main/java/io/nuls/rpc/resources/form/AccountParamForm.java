@@ -26,6 +26,8 @@
 
 package io.nuls.rpc.resources.form;
 
+import io.nuls.core.utils.str.StringUtils;
+
 /**
  * @author Niels
  * @date 2018/3/7
@@ -49,7 +51,7 @@ public class AccountParamForm {
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        this.password = StringUtils.formatStringPara(password);
     }
 
     public int getCount() {
@@ -65,7 +67,7 @@ public class AccountParamForm {
     }
 
     public void setAddress(String address) {
-        this.address = address;
+        this.address = StringUtils.formatStringPara(address);
     }
 
     public String getAlias() {
@@ -73,7 +75,7 @@ public class AccountParamForm {
     }
 
     public void setAlias(String alias) {
-        this.alias = alias;
+        this.alias = StringUtils.formatStringPara(alias);
     }
 
     public String getPrikey() {
@@ -81,7 +83,7 @@ public class AccountParamForm {
     }
 
     public void setPrikey(String prikey) {
-        this.prikey = prikey;
+        this.prikey = StringUtils.formatStringPara(prikey);
     }
 
     public String getNewPassword() {
@@ -89,6 +91,6 @@ public class AccountParamForm {
     }
 
     public void setNewPassword(String newPassword) {
-        this.newPassword = newPassword;
+        this.newPassword = StringUtils.formatStringPara(newPassword);
     }
 }

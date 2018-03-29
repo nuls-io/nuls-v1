@@ -26,12 +26,16 @@
 
 package io.nuls.rpc.sdk.entity;
 
+import io.nuls.rpc.sdk.utils.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 /**
- * @author Vive
+ * @Desription:
+ * @Author: PierreLuo
+ * @Date: 2018/3/25
  */
 public class BlockDto {
 
@@ -49,27 +53,43 @@ public class BlockDto {
 
     private String packingAddress;
 
-    private String sign;
+    private String scriptSign;
 
     private Long roundIndex;
+
     private Integer consensusMemberCount;
+
     private Long roundStartTime;
+
     private Integer packingIndexOfRound;
-    private ArrayList<TransactionDto> txList;
+
+    private Long reward;
+
+    private Long fee;
+
+    private Long confirmCount;
+
+    private int size;
+
+    private List<TransactionDto> txList;
 
     public BlockDto(Map<String, Object> map, boolean all) {
         this.hash = (String) map.get("hash");
         this.preHash = (String) map.get("preHash");
         this.merkleHash = (String) map.get("merkleHash");
-        this.time = Long.parseLong(""+ map.get("time"));
-        this.height = Long.parseLong(""+  map.get("height"));
-        this.txCount = Long.parseLong(""+ map.get("txCount"));
+        this.time = StringUtils.parseLong(map.get("time"));
+        this.height = StringUtils.parseLong( map.get("height"));
+        this.txCount = StringUtils.parseLong(map.get("txCount"));
         this.packingAddress = (String) map.get("packingAddress");
-        this.sign = (String) map.get("sign");
-        roundIndex = Long.parseLong(""+  map.get("roundIndex"));
-        consensusMemberCount = (Integer) map.get("consensusMemberCount");
-        roundStartTime = Long.parseLong(""+  map.get("roundStartTime"));
-        packingIndexOfRound = (Integer) map.get("packingIndexOfRound");
+        this.scriptSign = (String) map.get("scriptSign");
+        this.roundIndex = StringUtils.parseLong( map.get("roundIndex"));
+        this.consensusMemberCount = (Integer) map.get("consensusMemberCount");
+        this.roundStartTime = StringUtils.parseLong( map.get("roundStartTime"));
+        this.packingIndexOfRound = (Integer) map.get("packingIndexOfRound");
+        this.reward = StringUtils.parseLong( map.get("reward"));
+        this.fee = StringUtils.parseLong( map.get("fee"));
+        this.confirmCount = StringUtils.parseLong( map.get("confirmCount"));
+        this.size = (Integer) map.get("size");
         if (all) {
             this.txList = new ArrayList<>();
             for (Map<String, Object> tx : (List<Map<String, Object>>) map.get("txList")) {
@@ -77,7 +97,6 @@ public class BlockDto {
             }
         }
     }
-
 
     public String getHash() {
         return hash;
@@ -135,12 +154,12 @@ public class BlockDto {
         this.packingAddress = packingAddress;
     }
 
-    public String getSign() {
-        return sign;
+    public String getScriptSign() {
+        return scriptSign;
     }
 
-    public void setSign(String sign) {
-        this.sign = sign;
+    public void setScriptSign(String scriptSign) {
+        this.scriptSign = scriptSign;
     }
 
     public Long getRoundIndex() {
@@ -173,5 +192,45 @@ public class BlockDto {
 
     public void setPackingIndexOfRound(Integer packingIndexOfRound) {
         this.packingIndexOfRound = packingIndexOfRound;
+    }
+
+    public Long getReward() {
+        return reward;
+    }
+
+    public void setReward(Long reward) {
+        this.reward = reward;
+    }
+
+    public Long getFee() {
+        return fee;
+    }
+
+    public void setFee(Long fee) {
+        this.fee = fee;
+    }
+
+    public Long getConfirmCount() {
+        return confirmCount;
+    }
+
+    public void setConfirmCount(Long confirmCount) {
+        this.confirmCount = confirmCount;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
+
+    public List<TransactionDto> getTxList() {
+        return txList;
+    }
+
+    public void setTxList(List<TransactionDto> txList) {
+        this.txList = txList;
     }
 }

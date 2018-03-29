@@ -24,6 +24,7 @@
 package io.nuls.rpc.sdk.utils;
 
 import io.nuls.rpc.sdk.entity.RpcClientResult;
+import org.glassfish.jersey.jackson.internal.jackson.jaxrs.json.JacksonJsonProvider;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -47,6 +48,7 @@ public class RestFulUtils {
     private String serverUri;
 
     private RestFulUtils() {
+        client.register(JacksonJsonProvider.class);
     }
 
     public void setServerUri(String serverUri) {
