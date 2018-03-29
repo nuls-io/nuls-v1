@@ -214,7 +214,7 @@ public class BlockMaintenanceThread implements Runnable {
                 localBestBlock = this.blockService.getLocalBestBlock();
                 break;
             } else {
-                checkNeedRollback(localBestBlock,netBestBlockInfo.getNodeIdList(),netBestBlockInfo);
+                checkNeedRollback(localBestBlock, netBestBlockInfo.getNodeIdList(), netBestBlockInfo);
                 localBestBlock = this.blockService.getLocalBestBlock();
             }
         } while (false);
@@ -232,22 +232,22 @@ public class BlockMaintenanceThread implements Runnable {
         }
         Log.warn("Rollback block start height:{},local has wrong blocks!", block.getHeader().getHeight());
         //bifurcation
-        rollbackBlock(block.getHeader().getHeight(),nodeIdList);
+        rollbackBlock(block.getHeader().getHeight(), nodeIdList);
     }
 
     private void rollbackBlock(long startHeight, List<String> nodeIdList) {
-        long height = startHeight - 1;
-        Block block = this.blockService.getBlock(height);
-        if(null==block){
-            block = this.blockService.getLocalBestBlock();
-        }
         try {
             this.blockService.rollbackBlock(startHeight);
+            long height = startHeight - 1;
+            Block block = this.blockService.getBlock(height);
+            if (null == block) {
+                block = this.blockService.getLocalBestBlock();
+            }
             NulsContext.getInstance().setBestBlock(block);
+            checkNeedRollback(block, nodeIdList, null);
         } catch (NulsException e) {
             Log.error(e);
             return;
         }
-        checkNeedRollback(block,nodeIdList,null);
     }
 }
