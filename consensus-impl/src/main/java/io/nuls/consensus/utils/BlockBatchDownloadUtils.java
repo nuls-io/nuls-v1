@@ -325,6 +325,7 @@ public class BlockBatchDownloadUtils {
                 }
                 NulsDigestData hash = block.getHeader().getHash();
                 if (null == hash || null == mustHash || !mustHash.getDigestHex().equals(hash.getDigestHex())) {
+                    blockMap.remove(block.getHeader().getHeight());
                     failedExecute(block.getHeader().getHeight());
                     return Result.getFailed("hash wrong!");
                 }
