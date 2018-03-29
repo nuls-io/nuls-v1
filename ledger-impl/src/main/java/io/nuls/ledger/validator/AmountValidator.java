@@ -54,6 +54,9 @@ public class AmountValidator implements NulsDataValidator<AbstractCoinTransactio
         if (tx.getType() == TransactionConstant.TX_TYPE_TRANSFER) {
             long inTotal = 0;
             for (int i = 0; i < data.getInputs().size(); i++) {
+                if(data.getInputs().get(i).getFrom()==null){
+                    return ValidateResult.getFailedResult(ErrorCode.ORPHAN_TX);
+                }
                 inTotal += data.getInputs().get(i).getFrom().getValue();
             }
 

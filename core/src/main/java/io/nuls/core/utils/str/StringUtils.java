@@ -57,6 +57,9 @@ public class StringUtils {
         return UUID.randomUUID().toString().replaceAll("-", "");
     }
 
+    public static String formatStringPara(String para){
+        return  (isNull(para))?null:para.trim();
+    }
     /**
      * Check the difficulty of the password
      * length between 8 and 20, the combination of characters and numbers
