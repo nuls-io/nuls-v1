@@ -5,19 +5,19 @@ package io.nuls.rpc.sdk.params;
  * @date: 2018/3/15
  */
 public class CreateAgentParams {
-    private String address;
+    private String agentAddress;
     private String packingAddress;
-    private String commissionRate;
+    private double commissionRate;
     private long deposit;
     private String remark;
     private String agentName;
     private String password;
 
-    public String getCommissionRate() {
+    public double getCommissionRate() {
         return commissionRate;
     }
 
-    public void setCommissionRate(String commissionRate) {
+    public void setCommissionRate(double commissionRate) {
         this.commissionRate = commissionRate;
     }
 
@@ -29,12 +29,12 @@ public class CreateAgentParams {
         this.password = password;
     }
 
-    public String getAddress() {
-        return address;
+    public String getAgentAddress() {
+        return agentAddress;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public void setAgentAddress(String agentAddress) {
+        this.agentAddress = agentAddress;
     }
 
     public String getPackingAddress() {

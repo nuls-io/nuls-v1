@@ -26,6 +26,8 @@
 
 package io.nuls.rpc.resources.form;
 
+import io.nuls.core.utils.str.StringUtils;
+
 /**
  * @author Niels
  * @date 2018/3/9
@@ -47,7 +49,7 @@ public class TransferForm {
     }
 
     public void setAddress(String address) {
-        this.address = address;
+        this.address = StringUtils.formatStringPara(address);
     }
 
     public String getPassword() {
@@ -55,7 +57,7 @@ public class TransferForm {
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        this.password = StringUtils.formatStringPara(password);
     }
 
     public String getToAddress() {
@@ -63,7 +65,7 @@ public class TransferForm {
     }
 
     public void setToAddress(String toAddress) {
-        this.toAddress = toAddress;
+        this.toAddress = StringUtils.formatStringPara(toAddress);
     }
 
     public Long getAmount() {
@@ -79,6 +81,6 @@ public class TransferForm {
     }
 
     public void setRemark(String remark) {
-        this.remark = remark;
+        this.remark = StringUtils.formatStringPara(remark);
     }
 }

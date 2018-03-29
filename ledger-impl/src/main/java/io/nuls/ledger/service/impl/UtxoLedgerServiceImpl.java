@@ -233,7 +233,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 cacheTxList.remove(i);
                 continue;
             }
-            if (StringUtils.isNotBlank(address) && !checkTxIsMine(tx, address)) {
+            if (StringUtils.isNotBlank(address) && !checkTxIsMySend(tx, address)) {
                 cacheTxList.remove(i);
             }
         }
@@ -300,6 +300,21 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             txList.add(UtxoTransferTool.toTransaction(po));
         }
         return txList;
+    }
+
+    @Override
+    public List<Transaction> getCacheTxList(int type) {
+        List<Transaction> cacheTxList = new ArrayList<>(txCacheService.getElementList(CONFIRM_TX_CACHE));
+        cacheTxList.addAll(txCacheService.getElementList(RECEIVE_TX_CACHE));
+        cacheTxList.addAll(txCacheService.getElementList(ORPHAN_TX_CACHE));
+        for (int i = cacheTxList.size() - 1; i >= 0; i--) {
+            Transaction tx = cacheTxList.get(i);
+            if (type > 0 && tx.getType() != type) {
+                cacheTxList.remove(i);
+                continue;
+            }
+        }
+        return cacheTxList;
     }
 
     @Override
@@ -427,7 +442,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             for (int i = 0; i < txList.size(); i++) {
                 Transaction tx = txList.get(i);
                 boolean isMine = this.checkTxIsMine(tx);
-                ;
                 TransactionPo po = UtxoTransferTool.toTransactionPojo(tx);
                 poList.add(po);
                 if (isMine) {
@@ -490,6 +504,23 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
+    public boolean checkTxIsMySend(Transaction tx) {
+        if (tx instanceof AbstractCoinTransaction) {
+            return UtxoTransactionTool.getInstance().isMySend((AbstractCoinTransaction) tx);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean checkTxIsMySend(Transaction tx, String address) {
+        if (tx instanceof AbstractCoinTransaction) {
+            return UtxoTransactionTool.getInstance().isMySend((AbstractCoinTransaction) tx, address);
+        }
+        return false;
+    }
+
+    @Override
+
     public void rollbackTx(Transaction tx) throws NulsException {
         AssertUtil.canNotEmpty(tx, ErrorCode.NULL_PARAMETER);
         if (tx.getStatus() == TxStatusEnum.CACHED) {
@@ -503,6 +534,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
+    @DbSession
     public void commitTx(Transaction tx) throws NulsException {
         AssertUtil.canNotEmpty(tx, ErrorCode.NULL_PARAMETER);
         if (tx.getStatus() != TxStatusEnum.AGREED) {
@@ -592,6 +624,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             } else {
                 b = false;
             }
+
             UtxoTransactionTool.getInstance().calcBalance(output.getAddress(), false);
         }
     }

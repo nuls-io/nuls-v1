@@ -25,8 +25,7 @@
  */
 package io.nuls.rpc.sdk.service;
 
-import io.nuls.rpc.sdk.entity.AccountDto;
-import io.nuls.rpc.sdk.entity.RpcClientResult;
+import io.nuls.rpc.sdk.entity.*;
 import io.nuls.rpc.sdk.utils.AssertUtil;
 import io.nuls.rpc.sdk.utils.JSONUtils;
 import io.nuls.rpc.sdk.utils.RestFulUtils;
@@ -37,11 +36,16 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author Niels
- * @date 2017/11/1
+ * @Desription:
+ * @Author: PierreLuo
+ * @Date: 2018/3/25
  */
-public class AccountService {
+public enum AccountService {
+    ACCOUNT_SERVICE;
     private RestFulUtils restFul = RestFulUtils.getInstance();
+    {
+
+    }
 
     /**
      * @param password : the password of the walletl
@@ -49,8 +53,12 @@ public class AccountService {
      * @return
      */
     public RpcClientResult create(String password, Integer count) {
-        AssertUtil.canNotEmpty(password);
-        AssertUtil.canNotEmpty(count);
+        try {
+            AssertUtil.canNotEmpty(password);
+            AssertUtil.canNotEmpty(count);
+        } catch (Exception e) {
+            return RpcClientResult.getFailed(e.getMessage());
+        }
         Map<String, String> params = new HashMap<>();
         params.put("password", password);
         params.put("count", count + "");
@@ -67,10 +75,13 @@ public class AccountService {
      * @param address,the address string of the account
      * @return account info
      */
-    public RpcClientResult load(String address) {
-        AssertUtil.canNotEmpty(address);
-        //todo 路径应该去掉get
-        RpcClientResult result = restFul.get("/account/get/" + address, null);
+    public RpcClientResult getBaseInfo(String address) {
+        try {
+            AssertUtil.canNotEmpty(address);
+        } catch (Exception e) {
+            return RpcClientResult.getFailed(e.getMessage());
+        }
+        RpcClientResult result = restFul.get("/account/" + address, null);
         if (result.isSuccess()) {
             result.setData(new AccountDto((Map<String, Object>) result.getData()));
         }
@@ -78,19 +89,57 @@ public class AccountService {
     }
 
     /**
-     * @param alias,    the name you want set to the address
-     * @param address,  what you want set a name
-     * @param password, the password of the wallet
+     * get the balance items of the address
+     *
+     * @param address can not null
      * @return
      */
-    public RpcClientResult setAlias(String alias, String address, String password) {
-        AssertUtil.canNotEmpty(alias);
-        AssertUtil.canNotEmpty(address);
-        AssertUtil.canNotEmpty(password);
-        //todo 等待接口修改后实现
+    private RpcClientResult getBalanceBase(String address) {
+        try {
+            AssertUtil.canNotEmpty(address);
+        } catch (Exception e) {
+            return RpcClientResult.getFailed(e.getMessage());
+        }
+        return restFul.get("/account/balance/" + address, null);
+    }
 
+    public RpcClientResult getBalance(String address) {
+        RpcClientResult result = getBalanceBase(address);
+        if (result.isSuccess()) {
+            result.setData(new BalanceDto((Map<String, Object>) result.getData()));
+        }
+        return result;
+    }
 
-        return null;
+    public RpcClientResult getBalanceNa2Nuls(String address) {
+        RpcClientResult result = getBalanceBase(address);
+        if (result.isSuccess()) {
+            result.setData(new BalanceNa2NulsDto((Map<String, Object>) result.getData()));
+        }
+        return result;
+    }
+
+    /**
+     * get total balance
+     *
+     * @return
+     */
+    private RpcClientResult getTotalBalanceBase() {
+        return restFul.get("/account/balances", null);
+    }
+    public RpcClientResult getTotalBalance() {
+        RpcClientResult result = getTotalBalanceBase();
+        if (result.isSuccess()) {
+            result.setData(new BalanceDto((Map<String, Object>) result.getData()));
+        }
+        return result;
+    }
+    public RpcClientResult getTotalBalanceNa2Nuls() {
+        RpcClientResult result = getTotalBalanceBase();
+        if (result.isSuccess()) {
+            result.setData(new BalanceNa2NulsDto((Map<String, Object>) result.getData()));
+        }
+        return result;
     }
 
     /**
@@ -111,26 +160,142 @@ public class AccountService {
         return result;
     }
 
+
     /**
-     * get the balance items of the address
-     *
-     * @param address can not null
+     * @param address
+     * @param amount
      * @return
      */
-    public RpcClientResult getBalance(String address) {
-        AssertUtil.canNotEmpty(address);
-        RpcClientResult result = restFul.get("/account/balance/" + address, null);
-        //todo 接口需要修改
-        return null;
-    }
+    private RpcClientResult getUTXOBase(String address, Long amount) {
+        try {
+            AssertUtil.canNotEmpty(address);
+            AssertUtil.canNotEmpty(amount);
+        } catch (Exception e) {
+            return RpcClientResult.getFailed(e.getMessage());
+        }
 
-    public RpcClientResult importAccount(String prikey, String password) {
-        AssertUtil.canNotEmpty(prikey);
-        AssertUtil.canNotEmpty(password);
         Map<String, String> params = new HashMap<>();
-        params.put("prikey", prikey);
-        params.put("password", password);
-        RpcClientResult result = restFul.get("/wallet/import", params);
+        params.put("address", address);
+        params.put("amount", amount.toString());
+        return restFul.get("/account/utxo", params);
+    }
+    public RpcClientResult getUTXO(String address, Long amount) {
+        RpcClientResult result = getUTXOBase(address, amount);
+        if (result.isSuccess()) {
+            List<Map<String, Object>> list = (List<Map<String, Object>>) result.getData();
+            List<OutputDto> outputDtoList = new ArrayList<>();
+            for (Map<String, Object> map : list) {
+                outputDtoList.add(new OutputDto(map));
+            }
+            result.setData(outputDtoList);
+        }
         return result;
     }
+    public RpcClientResult getUTXONa2Nuls(String address, Long amount) {
+        RpcClientResult result = getUTXOBase(address, amount);
+        if (result.isSuccess()) {
+            List<Map<String, Object>> list = (List<Map<String, Object>>) result.getData();
+            List<OutputNa2NulsDto> outputNa2NulsDtoList = new ArrayList<>();
+            for (Map<String, Object> map : list) {
+                outputNa2NulsDtoList.add(new OutputNa2NulsDto(map));
+            }
+            result.setData(outputNa2NulsDtoList);
+        }
+        return result;
+    }
+
+    /**
+     * @param alias,    the name you want set to the address
+     * @param address,  what you want set a name
+     * @param password, the password of the wallet
+     * @return
+     */
+    public RpcClientResult setAlias(String alias, String address, String password) {
+        try {
+            AssertUtil.canNotEmpty(alias);
+            AssertUtil.canNotEmpty(address);
+            AssertUtil.canNotEmpty(password);
+        } catch (Exception e) {
+            return RpcClientResult.getFailed(e.getMessage());
+        }
+
+        Map<String, String> params = new HashMap<>();
+        params.put("alias", alias);
+        params.put("address", address);
+        params.put("password", password);
+        String content = null;
+        try {
+            content = JSONUtils.obj2json(params);
+        } catch (Exception e) {
+            return RpcClientResult.getFailed(e.getMessage());
+        }
+        return restFul.post("/account/alias", content);
+    }
+
+    /**
+     * @param address
+     * @param password
+     * @return
+     */
+    public RpcClientResult getPrivateKey(String address, String password) {
+        try {
+            AssertUtil.canNotEmpty(address);
+            AssertUtil.canNotEmpty(password);
+        } catch (Exception e) {
+            return RpcClientResult.getFailed(e.getMessage());
+        }
+
+        Map<String, String> params = new HashMap<>();
+        params.put("address", address);
+        params.put("password", password);
+        String content = null;
+        try {
+            content = JSONUtils.obj2json(params);
+        } catch (Exception e) {
+            return RpcClientResult.getFailed(e.getMessage());
+        }
+        return restFul.post("/account/prikey", content);
+    }
+
+    /**
+     *
+     *
+     * @param address
+     * @return
+     */
+    private RpcClientResult getAssetBase(String address) {
+        try {
+            AssertUtil.canNotEmpty(address);
+        } catch (Exception e) {
+            return RpcClientResult.getFailed(e.getMessage());
+        }
+
+        return restFul.get("/account/assets/" + address, null);
+    }
+    public RpcClientResult getAsset(String address) {
+        RpcClientResult result = getAssetBase(address);
+        if (result.isSuccess()) {
+            List<Map<String, Object>> list = (List<Map<String, Object>>) result.getData();
+            List<AssetDto> assetDtoList = new ArrayList<>();
+            for (Map<String, Object> map : list) {
+                assetDtoList.add(new AssetDto(map));
+            }
+            result.setData(assetDtoList);
+        }
+        return result;
+    }
+    public RpcClientResult getAssetNa2Nuls(String address) {
+        RpcClientResult result = getAssetBase(address);
+        if (result.isSuccess()) {
+            List<Map<String, Object>> list = (List<Map<String, Object>>) result.getData();
+            List<AssetNa2NulsDto> assetNa2NulsDtoList = new ArrayList<>();
+            for (Map<String, Object> map : list) {
+                assetNa2NulsDtoList.add(new AssetNa2NulsDto(map));
+            }
+            result.setData(assetNa2NulsDtoList);
+        }
+        return result;
+    }
+
+
 }

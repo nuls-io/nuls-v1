@@ -45,6 +45,7 @@ import io.nuls.db.dao.AgentDataService;
 import io.nuls.db.dao.DepositDataService;
 import io.nuls.db.entity.AgentPo;
 import io.nuls.db.entity.DepositPo;
+import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.service.intf.LedgerService;
 
@@ -65,6 +66,7 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
     private DepositDataService depositDataService = NulsContext.getServiceBean(DepositDataService.class);
 
     @Override
+    @DbSession
     public void onRollback(PocExitConsensusTransaction tx) throws NulsException {
         Transaction joinTx = ledgerService.getTx(tx.getTxData());
         if (joinTx.getType() == TransactionConstant.TX_TYPE_REGISTER_AGENT) {
@@ -119,6 +121,7 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
     }
 
     @Override
+    @DbSession
     public void onCommit(PocExitConsensusTransaction tx) throws NulsException {
         Transaction joinTx = ledgerService.getTx(tx.getTxData());
         if (joinTx.getType() == TransactionConstant.TX_TYPE_REGISTER_AGENT) {
