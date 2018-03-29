@@ -74,7 +74,7 @@ public class AliasValidator implements NulsDataValidator<AliasTransaction> {
             for (Transaction trx : txList) {
                 Alias a = ((AliasTransaction) trx).getTxData();
                 if(alias.getAddress().equals(a.getAlias())) {
-                    return ValidateResult.getFailedResult("The alias has been occupied");
+                    return ValidateResult.getFailedResult("Alias has been set up ");
                 }
                 if(alias.getAlias().equals(a.getAlias())){
                     return ValidateResult.getFailedResult("The alias has been occupied");
