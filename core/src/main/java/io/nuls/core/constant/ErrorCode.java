@@ -105,10 +105,6 @@ public enum ErrorCode {
     DB_SAVE_ERROR("DB006", 20006),
     DB_UPDATE_ERROR("DB007", 20007),
     DB_ROLLBACK_ERROR("DB008", 20008),
-    /**
-     * ----------  MQ Exception code   ---------
-     */
-    QUEUE_NAME_ERROR("MQ001", 70001),
 
     /**
      * ----------  RPC Exception code   ---------
