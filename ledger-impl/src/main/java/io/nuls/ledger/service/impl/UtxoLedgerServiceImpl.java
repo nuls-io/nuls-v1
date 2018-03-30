@@ -619,13 +619,11 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                         output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
                     }
                 }
-
+                UtxoTransactionTool.getInstance().calcBalance(output.getAddress(), false);
                 index++;
             } else {
                 b = false;
             }
-
-            UtxoTransactionTool.getInstance().calcBalance(output.getAddress(), false);
         }
     }
 
@@ -648,11 +646,11 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 } else if (OutPutStatusEnum.UTXO_CONFIRM_UNSPEND == output.getStatus()) {
                     output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_CONSENSUS_LOCK);
                 }
+                UtxoTransactionTool.getInstance().calcBalance(output.getAddress(), false);
                 index++;
             } else {
                 b = false;
             }
-            UtxoTransactionTool.getInstance().calcBalance(output.getAddress(), false);
         }
         txDao.lockTxOutput(txHash);
     }
