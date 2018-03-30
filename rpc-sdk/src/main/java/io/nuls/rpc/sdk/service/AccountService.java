@@ -83,7 +83,8 @@ public enum AccountService {
         }
         RpcClientResult result = restFul.get("/account/" + address, null);
         if (result.isSuccess()) {
-            result.setData(new AccountDto((Map<String, Object>) result.getData()));
+            if(result.getData() != null)
+                result.setData(new AccountDto((Map<String, Object>) result.getData()));
         }
         return result;
     }
@@ -106,7 +107,8 @@ public enum AccountService {
     public RpcClientResult getBalance(String address) {
         RpcClientResult result = getBalanceBase(address);
         if (result.isSuccess()) {
-            result.setData(new BalanceDto((Map<String, Object>) result.getData()));
+            if(result.getData() != null)
+                result.setData(new BalanceDto((Map<String, Object>) result.getData()));
         }
         return result;
     }
@@ -114,7 +116,8 @@ public enum AccountService {
     public RpcClientResult getBalanceNa2Nuls(String address) {
         RpcClientResult result = getBalanceBase(address);
         if (result.isSuccess()) {
-            result.setData(new BalanceNa2NulsDto((Map<String, Object>) result.getData()));
+            if(result.getData() != null)
+                result.setData(new BalanceNa2NulsDto((Map<String, Object>) result.getData()));
         }
         return result;
     }
@@ -130,14 +133,16 @@ public enum AccountService {
     public RpcClientResult getTotalBalance() {
         RpcClientResult result = getTotalBalanceBase();
         if (result.isSuccess()) {
-            result.setData(new BalanceDto((Map<String, Object>) result.getData()));
+            if(result.getData() != null)
+                result.setData(new BalanceDto((Map<String, Object>) result.getData()));
         }
         return result;
     }
     public RpcClientResult getTotalBalanceNa2Nuls() {
         RpcClientResult result = getTotalBalanceBase();
         if (result.isSuccess()) {
-            result.setData(new BalanceNa2NulsDto((Map<String, Object>) result.getData()));
+            if(result.getData() != null)
+                result.setData(new BalanceNa2NulsDto((Map<String, Object>) result.getData()));
         }
         return result;
     }
@@ -150,12 +155,14 @@ public enum AccountService {
     public RpcClientResult getAccountList() {
         RpcClientResult result = restFul.get("/account/list", null);
         if (result.isSuccess()) {
-            List<Map<String, Object>> list = (List<Map<String, Object>>) result.getData();
-            List<AccountDto> accountDtoList = new ArrayList<>();
-            for (Map<String, Object> map : list) {
-                accountDtoList.add(new AccountDto(map));
+            if(result.getData() != null) {
+                List<Map<String, Object>> list = (List<Map<String, Object>>) result.getData();
+                List<AccountDto> accountDtoList = new ArrayList<>();
+                for (Map<String, Object> map : list) {
+                    accountDtoList.add(new AccountDto(map));
+                }
+                result.setData(accountDtoList);
             }
-            result.setData(accountDtoList);
         }
         return result;
     }
@@ -182,24 +189,28 @@ public enum AccountService {
     public RpcClientResult getUTXO(String address, Long amount) {
         RpcClientResult result = getUTXOBase(address, amount);
         if (result.isSuccess()) {
-            List<Map<String, Object>> list = (List<Map<String, Object>>) result.getData();
-            List<OutputDto> outputDtoList = new ArrayList<>();
-            for (Map<String, Object> map : list) {
-                outputDtoList.add(new OutputDto(map));
+            if(result.getData() != null) {
+                List<Map<String, Object>> list = (List<Map<String, Object>>) result.getData();
+                List<OutputDto> outputDtoList = new ArrayList<>();
+                for (Map<String, Object> map : list) {
+                    outputDtoList.add(new OutputDto(map));
+                }
+                result.setData(outputDtoList);
             }
-            result.setData(outputDtoList);
         }
         return result;
     }
     public RpcClientResult getUTXONa2Nuls(String address, Long amount) {
         RpcClientResult result = getUTXOBase(address, amount);
         if (result.isSuccess()) {
-            List<Map<String, Object>> list = (List<Map<String, Object>>) result.getData();
-            List<OutputNa2NulsDto> outputNa2NulsDtoList = new ArrayList<>();
-            for (Map<String, Object> map : list) {
-                outputNa2NulsDtoList.add(new OutputNa2NulsDto(map));
+            if(result.getData() != null) {
+                List<Map<String, Object>> list = (List<Map<String, Object>>) result.getData();
+                List<OutputNa2NulsDto> outputNa2NulsDtoList = new ArrayList<>();
+                for (Map<String, Object> map : list) {
+                    outputNa2NulsDtoList.add(new OutputNa2NulsDto(map));
+                }
+                result.setData(outputNa2NulsDtoList);
             }
-            result.setData(outputNa2NulsDtoList);
         }
         return result;
     }
@@ -275,24 +286,28 @@ public enum AccountService {
     public RpcClientResult getAsset(String address) {
         RpcClientResult result = getAssetBase(address);
         if (result.isSuccess()) {
-            List<Map<String, Object>> list = (List<Map<String, Object>>) result.getData();
-            List<AssetDto> assetDtoList = new ArrayList<>();
-            for (Map<String, Object> map : list) {
-                assetDtoList.add(new AssetDto(map));
+            if(result.getData() != null) {
+                List<Map<String, Object>> list = (List<Map<String, Object>>) result.getData();
+                List<AssetDto> assetDtoList = new ArrayList<>();
+                for (Map<String, Object> map : list) {
+                    assetDtoList.add(new AssetDto(map));
+                }
+                result.setData(assetDtoList);
             }
-            result.setData(assetDtoList);
         }
         return result;
     }
     public RpcClientResult getAssetNa2Nuls(String address) {
         RpcClientResult result = getAssetBase(address);
         if (result.isSuccess()) {
-            List<Map<String, Object>> list = (List<Map<String, Object>>) result.getData();
-            List<AssetNa2NulsDto> assetNa2NulsDtoList = new ArrayList<>();
-            for (Map<String, Object> map : list) {
-                assetNa2NulsDtoList.add(new AssetNa2NulsDto(map));
+            if(result.getData() != null) {
+                List<Map<String, Object>> list = (List<Map<String, Object>>) result.getData();
+                List<AssetNa2NulsDto> assetNa2NulsDtoList = new ArrayList<>();
+                for (Map<String, Object> map : list) {
+                    assetNa2NulsDtoList.add(new AssetNa2NulsDto(map));
+                }
+                result.setData(assetNa2NulsDtoList);
             }
-            result.setData(assetNa2NulsDtoList);
         }
         return result;
     }
