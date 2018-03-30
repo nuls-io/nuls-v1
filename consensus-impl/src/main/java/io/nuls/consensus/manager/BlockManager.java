@@ -198,6 +198,7 @@ public class BlockManager {
         List<String> hashList = this.bifurcateProcessor.getHashList(block.getHeader().getHeight() - 1);
         if (hashList.size() > 1) {
             Block preBlock = confirmingBlockCacheManager.getBlock(block.getHeader().getPreHash().getDigestHex());
+            context.setBestBlock(preBlock);
             this.rollbackAppraval(preBlock);
         }
     }

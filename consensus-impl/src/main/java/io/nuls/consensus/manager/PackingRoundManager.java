@@ -597,6 +597,7 @@ public class PackingRoundManager {
                             String preHash = firstBlock.getHeader().getPreHash().getDigestHex();
                             Block block = getBlockService().getBlock(preHash);
                             if (null == block) {
+                                //todo
                                 return null;
                             }
                             BlockRoundData blockRoundData = new BlockRoundData(block.getHeader().getExtend());
