@@ -70,7 +70,8 @@ import java.util.*;
  */
 public class PackingRoundManager {
 
-    private static final PackingRoundManager INSTANCE = new PackingRoundManager();
+    private static final PackingRoundManager VALIDATE_INSTANCE = new PackingRoundManager();
+    private static final PackingRoundManager PACK_INSTANCE = new PackingRoundManager();
 
     private BlockService consensusBlockService;
     private PocBlockService pocBlockService = PocBlockService.getInstance();
@@ -87,12 +88,15 @@ public class PackingRoundManager {
     private PackingRoundManager() {
     }
 
-    public static PackingRoundManager getInstance() {
-        return INSTANCE;
+    public static PackingRoundManager getValidateInstance() {
+        return VALIDATE_INSTANCE;
+    }
+
+    public static PackingRoundManager getPackInstance() {
+        return PACK_INSTANCE;
     }
 
     private PocMeetingRound currentRound;
-    private PocMeetingRound previousRound;
 
 
     public ValidateResult validateBlockHeader(BlockHeader header) {
@@ -255,7 +259,7 @@ public class PackingRoundManager {
         if ((localThisRoundData.getIndex() - localPreRoundData.getIndex()) != differenceOfRoundIndex && 0 == differenceOfPackingIndex) {
             return ValidateResult.getFailedResult("There's no docking between the two rounds.");
         }
-        long indexOfRound = 1+ (header.getTime() - thisBlockRoundData.getRoundStartTime()) / (1000 * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND);
+        long indexOfRound = 1 + (header.getTime() - thisBlockRoundData.getRoundStartTime()) / (1000 * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND);
         if (thisBlockRoundData.getPackingIndexOfRound() == indexOfRound) {
             return ValidateResult.getSuccessResult();
         }
@@ -369,7 +373,6 @@ public class PackingRoundManager {
 
     private void recalc(Block bestBlock) {
         this.currentRound = null;
-        this.previousRound = null;
         this.calc(bestBlock);
     }
 
@@ -379,18 +382,27 @@ public class PackingRoundManager {
      * @param bestBlock The local view of the latest height, including a short split of my own, is likely to be higher than the latest local level.
      * @return
      */
-    public void calc(Block bestBlock) {
+    public synchronized void calc(Block bestBlock) {
         long bestHeight = bestBlock.getHeader().getHeight();
         BlockRoundData bestRoundData = new BlockRoundData(bestBlock.getHeader().getExtend());
-        if (null != currentRound && TimeService.currentTimeMillis() > currentRound.getEndTime()) {
-            this.previousRound = currentRound;
+        if (null != currentRound && currentRound.getIndex() == bestRoundData.getRoundIndex() && bestRoundData.getPackingIndexOfRound() == bestRoundData.getConsensusMemberCount()) {
+            PocMeetingRound previousRound = currentRound;
             this.currentRound = calcNextRound(bestBlock.getHeader(), bestHeight, bestRoundData);
-        } else if (null != currentRound && currentRound.getIndex() == bestRoundData.getRoundIndex() && bestRoundData.getPackingIndexOfRound() == bestRoundData.getConsensusMemberCount()) {
-            this.previousRound = currentRound;
-            this.currentRound = calcNextRound(bestBlock.getHeader(), bestHeight, bestRoundData);
+            if (previousRound.getIndex() != (currentRound.getIndex() - 1)) {
+                previousRound = calcCurrentRound(bestBlock.getHeader(), bestHeight, bestRoundData);
+                this.currentRound.setPreRound(previousRound);
+            }
         } else if (null != currentRound && currentRound.getIndex() == bestRoundData.getRoundIndex()) {
-            //nothing to do
-            return;
+            if (  TimeService.currentTimeMillis() > currentRound.getEndTime()) {
+                PocMeetingRound previousRound = currentRound;
+                this.currentRound = calcNextRound(bestBlock.getHeader(), bestHeight, bestRoundData);
+                if (previousRound.getIndex() != (currentRound.getIndex() - 1)) {
+                    previousRound = calcCurrentRound(bestBlock.getHeader(), bestHeight, bestRoundData);
+                    this.currentRound.setPreRound(previousRound);
+                }
+            }else{
+                return;
+            }
         } else if (null != currentRound && currentRound.getIndex() > bestRoundData.getRoundIndex()) {
             this.recalc(bestBlock);
             return;
@@ -398,11 +410,13 @@ public class PackingRoundManager {
             this.recalc(bestBlock);
             return;
         } else if (null == currentRound && bestRoundData.getPackingIndexOfRound() == bestRoundData.getConsensusMemberCount()) {
-            this.previousRound = calcCurrentRound(bestBlock.getHeader(), bestHeight, bestRoundData);
+            PocMeetingRound previousRound = calcCurrentRound(bestBlock.getHeader(), bestHeight, bestRoundData);
             this.currentRound = calcNextRound(bestBlock.getHeader(), bestHeight, bestRoundData);
+            this.currentRound.setPreRound(previousRound);
         } else if (null == currentRound) {
-            this.previousRound = calcPreviousRound(bestBlock.getHeader(), bestHeight, bestRoundData);
+            PocMeetingRound previousRound = calcPreviousRound(bestBlock.getHeader(), bestHeight, bestRoundData);
             this.currentRound = calcCurrentRound(bestBlock.getHeader(), bestHeight, bestRoundData);
+            this.currentRound.setPreRound(previousRound);
         }
         List<Account> accountList = accountService.getAccountList();
         this.currentRound.calcLocalPacker(accountList);
@@ -673,10 +687,6 @@ public class PackingRoundManager {
         return seedList;
     }
 
-    public PocMeetingRound getPreviousRound() {
-        return previousRound;
-    }
-
     public PocMeetingRound getCurrentRound() {
         return currentRound;
     }
@@ -691,14 +701,14 @@ public class PackingRoundManager {
 
 
     private PocMeetingRound getRoundData(long roundIndex) {
-        if (null == currentRound || previousRound == null) {
+        if (null == currentRound ) {
             return null;
         }
         if (roundIndex == currentRound.getIndex()) {
             return currentRound;
         }
-        if (roundIndex == previousRound.getIndex()) {
-            return previousRound;
+        if (roundIndex == currentRound.getPreRound().getIndex()) {
+            return currentRound.getPreRound();
         }
         return null;
     }

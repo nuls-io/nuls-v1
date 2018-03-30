@@ -38,7 +38,7 @@ import io.nuls.core.validate.ValidateResult;
  */
 public class BlockConsensusValidator implements NulsDataValidator<Block> {
     private static BlockConsensusValidator INSTANCE = new BlockConsensusValidator();
-    private PackingRoundManager packingRoundManager = PackingRoundManager.getInstance();
+    private PackingRoundManager packingRoundManager = PackingRoundManager.getValidateInstance();
     private BlockConsensusValidator(){}
     public static BlockConsensusValidator getInstance(){
         return INSTANCE;

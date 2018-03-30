@@ -45,6 +45,15 @@ public class PocMeetingRound {
     private int memberCount;
     private List<PocMeetingMember> memberList;
     private Map<String, Integer> addressOrderMap = new HashMap<>();
+    private PocMeetingRound preRound;
+
+    public PocMeetingRound getPreRound() {
+        return preRound;
+    }
+
+    public void setPreRound(PocMeetingRound preRound) {
+        this.preRound = preRound;
+    }
 
     public long getStartTime() {
         return startTime;

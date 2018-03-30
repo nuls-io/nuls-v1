@@ -84,7 +84,7 @@ public class ConsensusMeetingRunner implements Runnable {
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
     private boolean running = false;
     private ConsensusManager consensusManager = ConsensusManager.getInstance();
-    private PackingRoundManager packingRoundManager = PackingRoundManager.getInstance();
+    private PackingRoundManager packingRoundManager = PackingRoundManager.getPackInstance();
     private ConfirmingTxCacheManager confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
     private static Map<Long, RedPunishData> punishMap = new HashMap<>();
 
@@ -385,7 +385,7 @@ public class ConsensusMeetingRunner implements Runnable {
             if (roundIndex == self.getRoundIndex()) {
                 tempRound = round;
             } else if (roundIndex == (self.getRoundIndex() - 1)) {
-                tempRound = packingRoundManager.getPreviousRound();
+                tempRound = round.getPreRound();
             } else {
                 break;
             }
