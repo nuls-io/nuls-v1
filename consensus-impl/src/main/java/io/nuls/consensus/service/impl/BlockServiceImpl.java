@@ -169,6 +169,7 @@ public class BlockServiceImpl implements BlockService {
         }
         for (int x = 0; x < block.getHeader().getTxCount(); x++) {
             Transaction tx = block.getTxs().get(x);
+            tx.setIndex(x);
             if (tx.getStatus() == TxStatusEnum.AGREED) {
                 tx.setBlockHeight(block.getHeader().getHeight());
                 try {
