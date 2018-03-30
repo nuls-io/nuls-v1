@@ -28,17 +28,15 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.tx.serivce.TransactionService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.transactional.annotation.DbSession;
+import io.nuls.db.transactional.annotation.PROPAGATION;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 
 /**
  * @author Niels
  * @date 2017/12/21
  */
+@DbSession(transactional = PROPAGATION.NONE)
 public class CoinDataTxService implements TransactionService<AbstractCoinTransaction> {
-    private static final CoinDataTxService INSTANCE = new CoinDataTxService();
-
-    private CoinDataTxService() {
-    }
 
     @Override
     @DbSession
@@ -66,9 +64,5 @@ public class CoinDataTxService implements TransactionService<AbstractCoinTransac
             Log.error(e);
             throw new NulsRuntimeException(e);
         }
-    }
-
-    public static CoinDataTxService getInstance() {
-        return INSTANCE;
     }
 }

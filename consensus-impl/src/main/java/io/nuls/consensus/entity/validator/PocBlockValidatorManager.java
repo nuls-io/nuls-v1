@@ -50,7 +50,7 @@ public class PocBlockValidatorManager {
 
         BlockValidatorManager.addBlockDefValitor(BlockFieldValidator.getInstance());
 
-        BlockValidatorManager.addBlockDefValitor(BlockPackerValidator.getInstance());
+        BlockValidatorManager.addBlockDefValitor(BlockConsensusValidator.getInstance());
 
         BlockValidatorManager.addBlockDefValitor(BlockMaxSizeValidator.getInstance());
 

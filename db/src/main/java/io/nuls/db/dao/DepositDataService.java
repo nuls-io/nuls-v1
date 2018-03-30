@@ -25,6 +25,8 @@ package io.nuls.db.dao;
 
 import io.nuls.db.entity.DepositPo;
 
+import java.util.List;
+
 /**
  *
  * @author Niels
@@ -32,9 +34,13 @@ import io.nuls.db.entity.DepositPo;
  */
 public interface DepositDataService extends BaseDataService<String, DepositPo> {
 
-    int deleteByAgentHash(String agentHash);
+    int deleteById(DepositPo po);
+
+    int deleteByAgentHash(DepositPo po);
 
     int updateSelective(DepositPo po);
 
     int updateSelectiveByAgentHash(DepositPo po);
+
+    List<DepositPo> getAllList(long calcHeight);
 }

@@ -106,7 +106,7 @@ public final class GenesisBlock extends Block {
         if (null == list || list.isEmpty()) {
             throw new NulsRuntimeException(ErrorCode.CONFIG_ERROR);
         }
-        CoinTransferData data = new CoinTransferData(OperationType.COIN_BASE,Na.ZERO);
+        CoinTransferData data = new CoinTransferData(OperationType.COIN_BASE, Na.ZERO);
         data.setPriKey(Hex.decode(priKey));
         Na total = Na.ZERO;
         for (Map<String, Object> map : list) {
@@ -189,7 +189,7 @@ public final class GenesisBlock extends Block {
 
         BlockRoundData data = new BlockRoundData();
         data.setRoundIndex(1);
-        data.setRoundStartTime(header.getTime());
+        data.setRoundStartTime(header.getTime() - PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000);
         data.setConsensusMemberCount(1);
         data.setPackingIndexOfRound(1);
         try {

@@ -40,6 +40,8 @@ import io.nuls.db.dao.AgentDataService;
 import io.nuls.db.dao.DepositDataService;
 import io.nuls.db.entity.AgentPo;
 import io.nuls.db.entity.DepositPo;
+import io.nuls.db.transactional.annotation.DbSession;
+import io.nuls.db.transactional.annotation.PROPAGATION;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 
 import java.util.HashMap;
@@ -50,24 +52,31 @@ import java.util.Map;
  * @author Niels
  * @date 2018/1/8
  */
+@DbSession(transactional = PROPAGATION.NONE)
 public class JoinConsensusTxService implements TransactionService<PocJoinConsensusTransaction> {
     private ConsensusCacheManager manager = ConsensusCacheManager.getInstance();
     private DepositDataService depositDataService = NulsContext.getServiceBean(DepositDataService.class);
     private AgentDataService accountDataService = NulsContext.getServiceBean(AgentDataService.class);
 
     @Override
+    @DbSession
     public void onRollback(PocJoinConsensusTransaction tx) throws NulsException {
         this.manager.delDeposit(tx.getTxData().getHexHash());
-        depositDataService.delete(tx.getTxData().getHexHash());
+
+        DepositPo delPo = new DepositPo();
+        delPo.setId(tx.getTxData().getHexHash());
+        delPo.setDelHeight(tx.getBlockHeight());
+        depositDataService.deleteById(delPo);
     }
 
     @Override
+    @DbSession
     public void onCommit(PocJoinConsensusTransaction tx) throws NulsException {
         manager.changeDepositStatus(tx.getTxData().getHexHash(), ConsensusStatusEnum.WAITING);
         Consensus<Deposit> cd = tx.getTxData();
         cd.getExtend().setTxHash(tx.getHash().getDigestHex());
         cd.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
-        DepositPo po = ConsensusTool.depositToPojo(cd,tx.getHash().getDigestHex());
+        DepositPo po = ConsensusTool.depositToPojo(cd, tx.getHash().getDigestHex());
         po.setBlockHeight(tx.getBlockHeight());
         po.setTime(tx.getTime());
         depositDataService.save(po);
@@ -79,8 +88,8 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
             sum += depositPo.getDeposit();
         }
         if (sum >= PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT.getValue()) {
-            manager.changeAgentStatusByHash(tx.getTxData().getExtend().getAgentHash(),ConsensusStatusEnum.IN);
-            manager.changeDepositStatusByAgentHash(tx.getTxData().getExtend().getAgentHash(),ConsensusStatusEnum.IN);
+            manager.changeAgentStatusByHash(tx.getTxData().getExtend().getAgentHash(), ConsensusStatusEnum.IN);
+            manager.changeDepositStatusByAgentHash(tx.getTxData().getExtend().getAgentHash(), ConsensusStatusEnum.IN);
             AgentPo daPo = this.accountDataService.get(cd.getExtend().getAgentHash());
             if (null == daPo) {
                 throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "the agent cannot find,agent hash:" + cd.getExtend().getAgentHash());

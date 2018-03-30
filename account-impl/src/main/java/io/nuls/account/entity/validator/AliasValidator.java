@@ -23,11 +23,14 @@
  */
 package io.nuls.account.entity.validator;
 
+import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.entity.Address;
 import io.nuls.account.entity.Alias;
 import io.nuls.account.entity.tx.AliasTransaction;
 import io.nuls.cache.service.intf.CacheService;
+import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.str.StringUtils;
@@ -35,6 +38,8 @@ import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.dao.AliasDataService;
 import io.nuls.db.entity.AliasPo;
+import io.nuls.ledger.entity.UtxoData;
+import io.nuls.ledger.entity.UtxoInput;
 import io.nuls.ledger.service.intf.LedgerService;
 
 import java.util.List;
@@ -69,14 +74,27 @@ public class AliasValidator implements NulsDataValidator<AliasTransaction> {
             return ValidateResult.getFailedResult("The alias is between 3 to 20 characters");
         }
 
+        long aliasValue = 0;
+        UtxoData utxoData = (UtxoData) tx.getCoinData();
+        for (UtxoInput input : utxoData.getInputs()) {
+            if (input.getFrom() == null) {
+                return ValidateResult.getFailedResult(ErrorCode.ORPHAN_TX);
+            }
+            aliasValue += input.getFrom().getValue();
+        }
+
+        if (aliasValue < AccountConstant.ALIAS_NA.add(getLedgerService().getTxFee(TransactionConstant.TX_TYPE_SET_ALIAS)).getValue()) {
+            return ValidateResult.getFailedResult("utxo not enough");
+        }
+
         List<Transaction> txList = getLedgerService().getCacheTxList(TransactionConstant.TX_TYPE_SET_ALIAS);
         if (txList != null && tx.size() > 0) {
             for (Transaction trx : txList) {
                 Alias a = ((AliasTransaction) trx).getTxData();
-                if(alias.getAddress().equals(a.getAlias())) {
+                if (alias.getAddress().equals(a.getAlias())) {
                     return ValidateResult.getFailedResult("Alias has been set up ");
                 }
-                if(alias.getAlias().equals(a.getAlias())){
+                if (alias.getAlias().equals(a.getAlias())) {
                     return ValidateResult.getFailedResult("The alias has been occupied");
                 }
             }

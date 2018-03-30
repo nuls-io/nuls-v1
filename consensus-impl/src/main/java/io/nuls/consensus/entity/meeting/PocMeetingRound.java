@@ -23,6 +23,7 @@
  */
 package io.nuls.consensus.entity.meeting;
 
+import io.nuls.account.entity.Account;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.constant.ErrorCode;
@@ -37,21 +38,13 @@ import java.util.Map;
  * @date 2017/12/25
  */
 public class PocMeetingRound {
-
-
-    public PocMeetingRound(PocMeetingRound previousRound) {
-        this.previousRound = previousRound;
-    }
-
-    private PocMeetingRound previousRound;
+    private Account localPacker;
     private Na totalDeposit;
-//    private Na agentTotalDeposit;
     private long index;
     private long startTime;
     private int memberCount;
     private List<PocMeetingMember> memberList;
     private Map<String, Integer> addressOrderMap = new HashMap<>();
-//    private ConsensusGroup consensusGroup;
 
     public long getStartTime() {
         return startTime;
@@ -74,10 +67,13 @@ public class PocMeetingRound {
     }
 
     public PocMeetingMember getMember(int order) {
+        if (order == 0) {
+            throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "the parameter is wrong:memberOrder");
+        }
         if (null == memberList || memberList.isEmpty()) {
             throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "consensus member list is empty");
         }
-        return this.memberList.get(order);
+        return this.memberList.get(order-1);
     }
 
     public void setMemberList(List<PocMeetingMember> memberList) {
@@ -88,34 +84,33 @@ public class PocMeetingRound {
         addressOrderMap.clear();
         for (int i = 0; i < memberList.size(); i++) {
             PocMeetingMember pmm = memberList.get(i);
+            pmm.setRoundIndex(this.getIndex());
+            pmm.setRoundStartTime(this.getStartTime());
             pmm.setIndexOfRound(i + 1);
             pmm.setPackTime(pmm.getRoundStartTime() + PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000 * pmm.getIndexOfRound());
-            addressOrderMap.put(pmm.getPackerAddress(), i);
+            addressOrderMap.put(pmm.getPackingAddress(), i+1);
         }
     }
 
-    public int getOrder(String address) {
+    public Integer getOrder(String address) {
         Integer val = addressOrderMap.get(address);
         if (null == val) {
-            throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "address not in consensus:" + address);
+            return null;
         }
         return val;
     }
 
     public PocMeetingMember getMember(String address) {
-        int order = getOrder(address);
+        Integer order = getOrder(address);
+        if (null == order) {
+            return null;
+        }
         return getMember(order);
     }
 
-    public PocMeetingRound getPreviousRound() {
-        return previousRound;
+    public Account getLocalPacker() {
+        return localPacker;
     }
-
-    public void setPreviousRound(PocMeetingRound previousRound) {
-        this.previousRound = previousRound;
-    }
-
-
 
     public long getIndex() {
         return index;
@@ -133,15 +128,16 @@ public class PocMeetingRound {
         this.totalDeposit = totalDeposit;
     }
 
-    public Integer indexOf(String address) {
-        Integer index = addressOrderMap.get(address);
-        if (index == null) {
-            index = -1;
-        }
-        return index;
-    }
-
     public List<PocMeetingMember> getMemberList() {
         return memberList;
+    }
+
+    public void calcLocalPacker(List<Account> accountList) {
+        for (Account account : accountList) {
+            if (null != this.getOrder(account.getAddress().getBase58())) {
+                this.localPacker = account;
+                return;
+            }
+        }
     }
 }

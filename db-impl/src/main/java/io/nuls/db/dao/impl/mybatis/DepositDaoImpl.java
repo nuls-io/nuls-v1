@@ -31,6 +31,7 @@ import io.nuls.db.entity.DepositPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.db.transactional.annotation.PROPAGATION;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -49,8 +50,13 @@ public class DepositDaoImpl extends BaseDaoImpl<DepositMapper, String, DepositPo
     }
 
     @Override
-    public int deleteByAgentHash(String address) {
-        return this.getMapper().deleteByAgentHash(address);
+    public int deleteById(DepositPo po) {
+        return this.getMapper().deleteByPrimaryKey(po);
+    }
+
+    @Override
+    public int deleteByAgentHash(DepositPo po) {
+        return this.getMapper().deleteByAgentHash(po);
     }
 
     @Override
@@ -61,5 +67,10 @@ public class DepositDaoImpl extends BaseDaoImpl<DepositMapper, String, DepositPo
     @Override
     public int updateSelectiveByAgentHash(DepositPo po) {
         return this.getMapper().updateSelectiveByAgentHash(po);
+    }
+
+    @Override
+    public List<DepositPo> getAllList(long blockHeight) {
+        return this.getMapper().getAllList(blockHeight);
     }
 }

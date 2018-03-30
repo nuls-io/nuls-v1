@@ -26,13 +26,19 @@ package io.nuls.db.dao.impl.mybatis.mapper;
 import io.nuls.db.dao.impl.mybatis.common.BaseMapper;
 import io.nuls.db.entity.DepositPo;
 
+import java.util.List;
+
 /**
  * @author Niels
  * @date 2017/11/20
  */
 public interface DepositMapper extends BaseMapper<String,DepositPo> {
 
-    int deleteByAgentHash(String address);
+    int deleteByAgentHash(DepositPo po);
 
     int updateSelectiveByAgentHash(DepositPo po);
+
+    int deleteByPrimaryKey(DepositPo po);
+
+    List<DepositPo> getAllList(long blockHeight);
 }

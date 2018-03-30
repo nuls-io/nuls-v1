@@ -23,31 +23,18 @@
  */
 package io.nuls.consensus.entity.validator.block.header;
 
-import io.nuls.account.entity.Address;
-import io.nuls.account.util.AccountTool;
-import io.nuls.consensus.entity.block.BlockRoundData;
-import io.nuls.consensus.entity.meeting.PocMeetingMember;
-import io.nuls.consensus.entity.meeting.PocMeetingRound;
-import io.nuls.consensus.manager.ConsensusManager;
-import io.nuls.consensus.service.intf.BlockService;
-import io.nuls.consensus.thread.ConsensusMeetingRunner;
+import io.nuls.consensus.manager.PackingRoundManager;
 import io.nuls.core.chain.entity.BlockHeader;
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
-
-import java.util.Arrays;
 
 /**
  * @author Niels
  * @date 2017/11/17
  */
 public class HeaderPackerValidator implements NulsDataValidator<BlockHeader> {
-    private static final String ERROR_MESSAGE = "block header packer check failed";
     public static final HeaderPackerValidator INSTANCE = new HeaderPackerValidator();
-    private ConsensusManager consensusManager = ConsensusManager.getInstance();
+    public PackingRoundManager packingRoundManager = PackingRoundManager.getInstance();
 
     private HeaderPackerValidator() {
     }
@@ -58,62 +45,8 @@ public class HeaderPackerValidator implements NulsDataValidator<BlockHeader> {
 
     @Override
     public ValidateResult validate(BlockHeader header) {
-        BlockHeader preHeader = null;
-        try {
-            preHeader = NulsContext.getServiceBean(BlockService.class).getBlockHeader(header.getPreHash());
-        } catch (NulsException e) {
-            //todo
-        }
-
-        PocMeetingRound currentRound = consensusManager.getCurrentRound();
-        if (header.getHeight() == 0) {
-            return ValidateResult.getSuccessResult();
-        }
-        if (preHeader == null) {
-            return ValidateResult.getSuccessResult();
-        }
-        BlockRoundData roundData = null;
-        try {
-            roundData = new BlockRoundData(preHeader.getExtend());
-        } catch (NulsException e) {
-            Log.error(e);
-            return ValidateResult.getFailedResult(e.getMessage());
-        }
-        if (null == currentRound) {
-            return ValidateResult.getSuccessResult();
-        }
-        if (currentRound.getIndex() == roundData.getRoundIndex() && currentRound.getMemberCount() > (roundData.getPackingIndexOfRound() + 1)) {
-            if (currentRound.indexOf(header.getPackingAddress()) <= roundData.getPackingIndexOfRound()) {
-                return ValidateResult.getFailedResult(ERROR_MESSAGE);
-            }
-        }
-
-        byte[] packingHash160 = AccountTool.getHash160ByAddress(header.getPackingAddress());
-        byte[] hash160InScriptSig = header.getScriptSig().getSignerHash160();
-
-        if(!Arrays.equals(packingHash160,hash160InScriptSig)){
-            return ValidateResult.getFailedResult(ERROR_MESSAGE);
-        }
-        BlockRoundData nowRoundData = null;
-        try {
-            nowRoundData = new BlockRoundData(header.getExtend());
-        } catch (NulsException e) {
-            Log.error(e);
-            return ValidateResult.getFailedResult(ERROR_MESSAGE);
-        }
-        if (!isAdjacent(roundData, nowRoundData)) {
-            return ValidateResult.getFailedResult(ERROR_MESSAGE);
-        }
-        return ValidateResult.getSuccessResult();
+        return packingRoundManager.validateBlockHeader(header);
     }
 
-    private boolean isAdjacent(BlockRoundData roundData, BlockRoundData nowRoundData) {
-//        if (roundData.getRoundIndex() == nowRoundData.getRoundIndex()) {
-//            return roundData.getPackingIndexOfRound() + 1 == nowRoundData.getPackingIndexOfRound();
-//        } else if (roundData.getRoundIndex() + 1 == nowRoundData.getRoundIndex()) {
-//            return 1 == nowRoundData.getPackingIndexOfRound();
-//        }
-//        return false;
-        return true;
-    }
+
 }

@@ -166,4 +166,13 @@ public class BlockDaoImpl extends BaseDaoImpl<BlockHeaderMapper, String, BlockHe
         return this.getMapper().getSumOfRoundIndexOfYellowPunish(params);
     }
 
+    @Override
+    public Long getRoundFirstBlockHeight(long roundIndex) {
+        return this.getMapper().getRoundFirstBlockHeight(roundIndex);
+    }
+    @Override
+    public Long getRoundLastBlockHeight(long roundIndex) {
+        return this.getMapper().getRoundLastBlockHeight(roundIndex);
+    }
+
 }

@@ -50,7 +50,7 @@
     delete from punish_log
     where id = #{id,jdbcType=VARCHAR}
     </delete>
-    <delete id="deleteByHeight" parameterType="java.lang.Integer">
+    <delete id="deleteByHeight" parameterType="java.lang.Long">
         delete from punish_log
         where height = #{height,jdbcType=BIGINT}
     </delete>

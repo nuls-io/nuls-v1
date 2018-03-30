@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -46,6 +46,8 @@ import io.nuls.db.dao.DepositDataService;
 import io.nuls.db.entity.AgentPo;
 import io.nuls.db.entity.DepositPo;
 import io.nuls.db.transactional.annotation.DbSession;
+import io.nuls.db.transactional.annotation.PROPAGATION;
+import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.service.intf.LedgerService;
 
@@ -72,37 +74,34 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
         if (joinTx.getType() == TransactionConstant.TX_TYPE_REGISTER_AGENT) {
             RegisterAgentTransaction raTx = (RegisterAgentTransaction) joinTx;
             Consensus<Agent> ca = raTx.getTxData();
-            ca.getExtend().setStatus(ConsensusStatusEnum.IN.getCode());
+            ca.getExtend().setBlockHeight(raTx.getBlockHeight());
+            ca.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
             manager.cacheAgent(ca);
-            AgentPo agentPo = new AgentPo();
-            agentPo.setId(raTx.getTxData().getHexHash());
-            agentPo.setStatus(ConsensusStatusEnum.IN.getCode());
-            this.agentDataService.updateSelective(agentPo);
+            AgentPo agentPo = ConsensusTool.agentToPojo(ca);
+            this.agentDataService.save(agentPo);
+
+            this.ledgerService.unlockTxRollback(tx.getTxData().getDigestHex());
+
             DepositPo dpo = new DepositPo();
             dpo.setId(raTx.getTxData().getHexHash());
-            dpo.setStatus(ConsensusStatusEnum.IN.getCode());
+            dpo.setDelHeight(tx.getBlockHeight());
             this.depositDataService.updateSelectiveByAgentHash(dpo);
-            CancelConsensusNotice notice = new CancelConsensusNotice();
-            notice.setEventBody(tx);
-            NulsContext.getServiceBean(EventBroadcaster.class).publishToLocal(notice);
-            //cache delegates
+
+            //cache deposit
             Map<String, Object> params = new HashMap<>();
             params.put("agentHash", raTx.getTxData().getHexHash());
             List<DepositPo> polist = this.depositDataService.getList(params);
-            if (null == polist || polist.isEmpty()) {
-                return;
+            if (null != polist) {
+                for (DepositPo po : polist) {
+                    Consensus<Deposit> cd = ConsensusTool.fromPojo(po);
+                    this.manager.cacheDeposit(cd);
+                    this.ledgerService.unlockTxRollback(po.getTxHash());
+                }
             }
-            for (DepositPo po : polist) {
-                Consensus<Deposit> cd = ConsensusTool.fromPojo(po);
-                this.manager.cacheDeposit(cd);
-            }
-            this.ledgerService.unlockTxRollback(tx.getTxData().getDigestHex());
-            Map<String, Object> paramsMap = new HashMap<>();
-            paramsMap.put("agentHash", ca.getHexHash());
-            List<DepositPo> poList = depositDataService.getList(paramsMap);
-            for (DepositPo po : poList) {
-                this.ledgerService.unlockTxRollback(po.getTxHash());
-            }
+
+            CancelConsensusNotice notice = new CancelConsensusNotice();
+            notice.setEventBody(tx);
+            NulsContext.getServiceBean(EventBroadcaster.class).publishToLocal(notice);
             return;
         }
         PocJoinConsensusTransaction pjcTx = (PocJoinConsensusTransaction) joinTx;
@@ -136,8 +135,11 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
             for (DepositPo po : poList) {
                 this.ledgerService.unlockTxSave(po.getTxHash(), 0);
             }
-            this.agentDataService.delete(raTx.getTxData().getHexHash());
-            this.depositDataService.deleteByAgentHash(raTx.getTxData().getHexHash());
+            this.agentDataService.deleteById(raTx.getTxData().getHexHash(),tx.getBlockHeight());
+            DepositPo delPo = new DepositPo();
+            delPo.setAgentHash(raTx.getTxData().getHexHash());
+            delPo.setDelHeight(tx.getBlockHeight());
+            this.depositDataService.deleteByAgentHash(delPo);
             return;
         }
         PocJoinConsensusTransaction pjcTx = (PocJoinConsensusTransaction) joinTx;
@@ -148,6 +150,7 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
     }
 
     @Override
+    @DbSession
     public void onApproval(PocExitConsensusTransaction tx) throws NulsException {
         Transaction joinTx = ledgerService.getTx(tx.getTxData());
         if (joinTx == null) {
@@ -157,7 +160,7 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
             RegisterAgentTransaction raTx = (RegisterAgentTransaction) joinTx;
             manager.changeAgentStatusByHash(raTx.getTxData().getHexHash(), ConsensusStatusEnum.NOT_IN);
             manager.changeDepositStatusByAgentHash(raTx.getTxData().getHexHash(), ConsensusStatusEnum.NOT_IN);
-            this.ledgerService.unlockTxApprove(tx.getTxData().getDigestHex(),tx.getTime() + PocConsensusConstant.STOP_AGENT_DEPOSIT_LOCKED_TIME * 24 * 3600 * 1000);
+            this.ledgerService.unlockTxApprove(tx.getTxData().getDigestHex(), tx.getTime() + PocConsensusConstant.STOP_AGENT_DEPOSIT_LOCKED_TIME * 24 * 3600 * 1000);
             return;
         }
         PocJoinConsensusTransaction pjcTx = (PocJoinConsensusTransaction) joinTx;

@@ -100,4 +100,11 @@
         <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
     </select>
 
+    <select id="getRoundFirstBlockHeight" parameterType="java.lang.Long" resultType="java.lang.Long">
+        select min(height) from block_header where round_index = #{roundIndex,jdbcType=BIGINT}
+    </select>
+    <select id="getRoundLastBlockHeight" parameterType="java.lang.Long" resultType="java.lang.Long">
+        select max(height) from block_header where round_index = #{roundIndex,jdbcType=BIGINT}
+    </select>
+
 </mapper>

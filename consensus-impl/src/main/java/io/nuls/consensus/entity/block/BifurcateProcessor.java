@@ -209,4 +209,14 @@ public class BifurcateProcessor {
     public long getMaxHeight() {
         return maxHeight;
     }
+
+    public BlockHeaderChain getLongestChain() {
+        BlockHeaderChain longest = null;
+        for (BlockHeaderChain chain : chainList) {
+            if (longest == null || chain.size() > longest.size()) {
+                longest = chain;
+            }
+        }
+        return longest;
+    }
 }
