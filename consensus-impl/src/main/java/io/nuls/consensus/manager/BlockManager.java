@@ -72,8 +72,6 @@ public class BlockManager {
     private ConfirmingTxCacheManager confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
     private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
 
-    private PackingRoundManager packingRoundManager = PackingRoundManager.getInstance();
-
     private long storedHeight;
     private long recievedMaxHeight;
     private String lastAppravedHash;
@@ -166,7 +164,7 @@ public class BlockManager {
             }
         }
         txCacheManager.removeTx(block.getTxHashList());
-        packingRoundManager.calc(block);
+        PackingRoundManager.getInstance().calc(block);
     }
 
     private void rollbackTxList(List<Transaction> txList, int start, int end) {
@@ -193,7 +191,7 @@ public class BlockManager {
             return;
         }
         this.rollbackTxList(block.getTxs(), 0, block.getTxs().size());
-        packingRoundManager.calc(this.getBlock(block.getHeader().getPreHash().getDigestHex()));
+        PackingRoundManager.getInstance().calc(this.getBlock(block.getHeader().getPreHash().getDigestHex()));
         List<String> hashList = this.bifurcateProcessor.getHashList(block.getHeader().getHeight() - 1);
         if (hashList.size() > 1) {
             Block preBlock = confirmingBlockCacheManager.getBlock(block.getHeader().getPreHash().getDigestHex());

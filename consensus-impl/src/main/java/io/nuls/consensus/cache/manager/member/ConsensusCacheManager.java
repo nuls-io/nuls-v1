@@ -198,4 +198,18 @@ public class ConsensusCacheManager {
         }
         return list;
     }
+
+    public Set<String> agentKeySet(){
+        return agentCache.keySet();
+    }
+    public Set<String> depositKeySet(){
+        return depositCache.keySet();
+    }
+
+    public void removeAgent(String key) {
+        this.agentCache.remove(key);
+    }
+    public void removeDeposit(String key) {
+        this.depositCache.remove(key);
+    }
 }

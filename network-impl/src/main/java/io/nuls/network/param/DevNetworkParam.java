@@ -52,7 +52,7 @@ public class DevNetworkParam extends AbstractNetworkParam {
 
         InetSocketAddress address0 = new InetSocketAddress("192.168.1.102", port);
         InetSocketAddress address1 = new InetSocketAddress("192.168.1.103", port);
-        InetSocketAddress address2 = new InetSocketAddress("192.168.1.157", port);
+        InetSocketAddress address2 = new InetSocketAddress("192.168.1.188", port);
         InetSocketAddress address3 = new InetSocketAddress("192.168.1.233", port);
 
         seedNodes.add(address0);
