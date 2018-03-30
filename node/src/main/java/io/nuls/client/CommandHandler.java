@@ -110,7 +110,13 @@ public class CommandHandler {
             /** release*/
             //SdkManager.init("http://"+ RpcConstant.DEFAULT_IP + ":" + port);
             /** test*/
-            SdkManager.init("http://192.168.1.201:" + port);
+            String ip = null;
+            try {
+                ip = NulsContext.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, "test.server.ip");
+            } catch (NulsException e) {
+                ip = "192.168.1.201";
+            }
+            SdkManager.init("http://" + ip + ":" + port);
         }
 
     }
