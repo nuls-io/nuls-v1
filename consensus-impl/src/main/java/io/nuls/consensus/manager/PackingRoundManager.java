@@ -550,7 +550,6 @@ public class PackingRoundManager {
             for (PocMeetingMember member : memberList) {
                 member.setRoundIndex(round.getIndex());
                 member.setRoundStartTime(round.getStartTime());
-                member.setSortValue(bestRoundData.getRoundEndTime() + "");
             }
         }
         return round;

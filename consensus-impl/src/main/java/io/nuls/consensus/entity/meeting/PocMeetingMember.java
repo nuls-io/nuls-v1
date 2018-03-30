@@ -88,10 +88,6 @@ public class PocMeetingMember implements Comparable<PocMeetingMember> {
         }
     }
 
-    public void setSortValue(String sortValue) {
-        this.sortValue = sortValue;
-    }
-
     public long getRoundStartTime() {
         return roundStartTime;
     }
