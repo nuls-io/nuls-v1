@@ -397,17 +397,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
             TransactionEvent event = new TransactionEvent();
             event.setEventBody(tx);
-            Log.info("-----------------------------transfer tx-------------------------------");
-            Log.info("txHash:" + tx.getHash().getDigestHex());
-            UtxoData utxoData = (UtxoData) tx.getCoinData();
-            for (UtxoInput input : utxoData.getInputs()) {
-                Log.info("input:" + input.getKey());
-            }
-            for (UtxoOutput output : utxoData.getOutputs()) {
-                Log.info("output:" + tx.getHash().getDigestHex() +"-" + output.getIndex());
-            }
-            Log.info("-----------------------------  end   -------------------------------");
-
             eventBroadcaster.broadcastAndCacheAysn(event, true);
         } catch (Exception e) {
             Log.error(e);
