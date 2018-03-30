@@ -92,6 +92,9 @@ public class AliasValidator implements NulsDataValidator<AliasTransaction> {
             List<Transaction> txList = getLedgerService().getCacheTxList(TransactionConstant.TX_TYPE_SET_ALIAS);
             if (txList != null && tx.size() > 0) {
                 for (Transaction trx : txList) {
+                    if(trx.getHash().equals(tx.getHash())) {
+                        continue;
+                    }
                     Alias a = ((AliasTransaction) trx).getTxData();
                     if (alias.getAddress().equals(a.getAddress())) {
                         return ValidateResult.getFailedResult("Alias has been set up ");
