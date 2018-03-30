@@ -136,7 +136,7 @@ public class PackingRoundManager {
         } else {
             localPreRoundData = localThisRoundData.getPreRound();
             if (localPreRoundData == null) {
-                localPreRoundData = calcCurrentRound(preBlock.getHeader(),preBlock.getHeader().getHeight(),preRoundData);
+                localPreRoundData = calcCurrentRound(preBlock.getHeader(), preBlock.getHeader().getHeight(), preRoundData);
             }
         }
 
@@ -201,27 +201,49 @@ public class PackingRoundManager {
                 return ValidateResult.getFailedResult("The count of YellowPunishTx is wrong,it should be " + interval);
             } else {
                 long roundIndex = preRoundData.getRoundIndex();
-                long indexOfRound = preRoundData.getPackingIndexOfRound() + 1;
+                int indexOfRound = 0;
+
+                if (preRoundData.getPackingIndexOfRound() == preRoundData.getConsensusMemberCount()) {
+                    roundIndex++;
+                    indexOfRound = 1;
+                } else {
+                    indexOfRound = preRoundData.getPackingIndexOfRound() + 1;
+                }
                 List<String> addressList = new ArrayList<>();
                 while (true) {
-                    PocMeetingRound round = getRoundData(roundIndex);
-                    if (null == round) {
+                    PocMeetingRound tempRound;
+                    if (roundIndex == roundData.getRoundIndex()) {
+                        tempRound = localThisRoundData;
+                    } else if (roundIndex == (roundData.getRoundIndex() - 1)) {
+                        tempRound = localPreRoundData;
+                    } else {
                         break;
                     }
-                    if (roundIndex == roundData.getRoundIndex() && roundData.getPackingIndexOfRound() <= indexOfRound) {
+                    if (tempRound == null) {
                         break;
                     }
-                    if (round.getMemberCount() < indexOfRound) {
+                    if (tempRound.getIndex() > roundData.getRoundIndex()) {
+                        break;
+                    }
+                    if (tempRound.getIndex() == roundData.getRoundIndex() && indexOfRound >= roundData.getPackingIndexOfRound()) {
+                        break;
+                    }
+                    if (indexOfRound >= tempRound.getMemberCount()) {
                         roundIndex++;
                         indexOfRound = 1;
                         continue;
                     }
-                    PocMeetingMember meetingMember = round.getMember(interval);
-                    if (null == meetingMember) {
-                        return ValidateResult.getFailedResult("the round data has error!");
+                    PocMeetingMember smo;
+                    try {
+                        smo = tempRound.getMember(indexOfRound);
+                        if (null == member) {
+                            break;
+                        }
+                    } catch (Exception e) {
+                        break;
                     }
-                    addressList.add(meetingMember.getAgentAddress());
                     indexOfRound++;
+                    addressList.add(smo.getAgentAddress());
                 }
                 if (addressList.size() != yellowPunishTx.getTxData().getAddressList().size()) {
                     return ValidateResult.getFailedResult("The block has wrong yellow punish Tx!address list size is wrong!");
