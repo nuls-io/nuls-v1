@@ -88,6 +88,7 @@ public class ConsensusMeetingRunner implements Runnable {
     private PackingRoundManager packingRoundManager = PackingRoundManager.getPackInstance();
     private ConfirmingTxCacheManager confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
     private static Map<Long, RedPunishData> punishMap = new HashMap<>();
+    private long packingRoundIndex;
 
     private ConsensusMeetingRunner() {
     }
@@ -175,6 +176,15 @@ public class ConsensusMeetingRunner implements Runnable {
     private void nextRound() throws NulsException, IOException {
         packingRoundManager.calc(getBestBlock());
         PocMeetingRound round = packingRoundManager.getCurrentRound();
+        if (this.packingRoundIndex == round.getIndex()) {
+            try {
+                Thread.sleep(1000L);
+            } catch (InterruptedException e) {
+                Log.error(e);
+            }
+            return;
+        }
+        this.packingRoundIndex = round.getIndex();
         while (TimeService.currentTimeMillis() < round.getStartTime()) {
             try {
                 Thread.sleep(100L);
