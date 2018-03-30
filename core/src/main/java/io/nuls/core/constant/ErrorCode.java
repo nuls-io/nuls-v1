@@ -79,7 +79,7 @@ public enum ErrorCode {
     /**
      * ---- direct Exception code---
      **/
-    VERIFICATION_FAILD("SYS000", 11000),
+    VERIFICATION_FAILD("DATA004", 11000),
     DATA_PARSE_ERROR("DATA001", 11001),
     DATA_OVER_SIZE_ERROR("DATA002", 11002),
     INPUT_VALUE_ERROR("DATA003", 11003),
