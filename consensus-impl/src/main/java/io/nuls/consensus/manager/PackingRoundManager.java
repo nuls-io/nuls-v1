@@ -142,7 +142,7 @@ public class PackingRoundManager {
         if (roundData.getRoundIndex()==(localPreRoundData.getIndex()+1)&&roundData.getRoundStartTime() != localPreRoundData.getEndTime()) {
             return ValidateResult.getFailedResult("The round data of the block is wrong!");
         }
-        PocMeetingMember member = localPreRoundData.getMember(roundData.getPackingIndexOfRound());
+        PocMeetingMember member = localThisRoundData.getMember(roundData.getPackingIndexOfRound());
         if (null == member) {
             return ValidateResult.getFailedResult("Cannot find the packing member!");
         }
@@ -517,7 +517,7 @@ public class PackingRoundManager {
                         firstBlock = getBlockService().getBlock(height);
                         height++;
                         BlockRoundData blockRoundData = new BlockRoundData(firstBlock.getHeader().getExtend());
-                        if (bestRoundData.getRoundIndex() == round.getIndex()) {
+                        if (blockRoundData.getRoundIndex() == round.getIndex()) {
                             break;
                         }
                     }

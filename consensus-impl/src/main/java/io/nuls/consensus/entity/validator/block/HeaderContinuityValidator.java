@@ -64,7 +64,7 @@ public class HeaderContinuityValidator implements NulsDataValidator<BlockHeader>
                 preHeader = NulsContext.getServiceBean(BlockService.class).getBlockHeader(header.getHeight() - 1);
             } catch (NulsException e) {
                 //todo
-                e.printStackTrace();
+               Log.error(e);
             }
             if (null == preHeader) {
                 break;
