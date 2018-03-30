@@ -27,6 +27,7 @@
 package io.nuls.consensus.manager;
 
 import io.nuls.account.entity.Account;
+import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
@@ -70,7 +71,8 @@ import java.util.*;
  */
 public class PackingRoundManager {
 
-    private static final PackingRoundManager INSTANCE = new PackingRoundManager();
+    private static final PackingRoundManager VALIDATE_INSTANCE = new PackingRoundManager();
+    private static final PackingRoundManager PACK_INSTANCE = new PackingRoundManager();
 
     private BlockService consensusBlockService;
     private PocBlockService pocBlockService = PocBlockService.getInstance();
@@ -81,19 +83,18 @@ public class PackingRoundManager {
     private AgentDataService agentDataService = NulsContext.getServiceBean(AgentDataService.class);
     private DepositDataService depositDataService = NulsContext.getServiceBean(DepositDataService.class);
     private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
-    private List<PocMeetingMember> seedList;
-
+    private PocMeetingRound currentRound;
 
     private PackingRoundManager() {
     }
 
-    public static PackingRoundManager getInstance() {
-        return INSTANCE;
+    public static PackingRoundManager getValidateInstance() {
+        return VALIDATE_INSTANCE;
     }
 
-    private PocMeetingRound currentRound;
-    private PocMeetingRound previousRound;
-
+    public static PackingRoundManager getPackInstance() {
+        return PACK_INSTANCE;
+    }
 
     public ValidateResult validateBlockHeader(BlockHeader header) {
         return validate(header, null);
@@ -110,12 +111,13 @@ public class PackingRoundManager {
         return validate(block.getHeader(), block.getTxs());
     }
 
-    public ValidateResult validate(BlockHeader header, List<Transaction> txs) {
+    public synchronized ValidateResult validate(BlockHeader header, List<Transaction> txs) {
         if (header.getHeight() == 0) {
             return ValidateResult.getSuccessResult();
         }
-        BlockRoundData
-                roundData = new BlockRoundData(header.getExtend());
+        BlockRoundData roundData = new BlockRoundData(header.getExtend());
+
+
         Block preBlock = getBlockService().getBlock(header.getPreHash().getDigestHex());
         if (null == preBlock) {
             //When a block does not exist, it is temporarily validated.
@@ -123,23 +125,28 @@ public class PackingRoundManager {
         }
         BlockRoundData preRoundData = new BlockRoundData(preBlock.getHeader().getExtend());
 
-        PocMeetingRound localPreRoundData = getRoundDataOrCalc(preBlock.getHeader(), preBlock.getHeader().getHeight(), preRoundData);
-        PocMeetingRound localThisRoundData = null;
-        if (localPreRoundData.getIndex() == roundData.getRoundIndex()) {
-            localThisRoundData = localPreRoundData;
+        PocMeetingRound localThisRoundData = calcCurrentRound(header, header.getHeight(), roundData);
+        if (null == localThisRoundData) {
+            return ValidateResult.getFailedResult("cannot calc round info!");
+        }
+        PocMeetingRound localPreRoundData;
+        if (roundData.getRoundIndex() == preRoundData.getRoundIndex()) {
+            localPreRoundData = localThisRoundData;
         } else {
-            localThisRoundData = getRoundDataOrCalc(header, header.getHeight(), roundData);
-            //Verify that the time of the two turns is correct.
-            ValidateResult result = checkThisRound(localPreRoundData, localThisRoundData, roundData);
-            if (result.isFailed()) {
-                return result;
+            localPreRoundData = calcCurrentRound(preBlock.getHeader(), preBlock.getHeader().getHeight(), preRoundData);
+            if (null == localPreRoundData) {
+                return ValidateResult.getFailedResult("cann't calc pre round info");
+            }
+            ValidateResult vr = checkThisRound(localPreRoundData, localThisRoundData, roundData, header);
+            if (vr.isFailed()) {
+                return vr;
             }
         }
 
-        if (roundData.getConsensusMemberCount() != localPreRoundData.getMemberCount()) {
+        if (roundData.getConsensusMemberCount() != localThisRoundData.getMemberCount()) {
             return ValidateResult.getFailedResult("The round data of the block is wrong!");
         }
-        if (roundData.getRoundIndex()==(localPreRoundData.getIndex()+1)&&roundData.getRoundStartTime() != localPreRoundData.getEndTime()) {
+        if (roundData.getRoundIndex() == (localPreRoundData.getIndex() + 1) && roundData.getRoundStartTime() != localPreRoundData.getEndTime()) {
             return ValidateResult.getFailedResult("The round data of the block is wrong!");
         }
         PocMeetingMember member = localThisRoundData.getMember(roundData.getPackingIndexOfRound());
@@ -197,33 +204,62 @@ public class PackingRoundManager {
                 return ValidateResult.getFailedResult("The count of YellowPunishTx is wrong,it should be " + interval);
             } else {
                 long roundIndex = preRoundData.getRoundIndex();
-                long indexOfRound = preRoundData.getPackingIndexOfRound() + 1;
+                int indexOfRound = 0;
+
+                if (preRoundData.getPackingIndexOfRound() == preRoundData.getConsensusMemberCount()) {
+                    roundIndex++;
+                    indexOfRound = 1;
+                } else {
+                    indexOfRound = preRoundData.getPackingIndexOfRound() + 1;
+                }
                 List<String> addressList = new ArrayList<>();
                 while (true) {
-                    PocMeetingRound round = getRoundData(roundIndex);
-                    if (null == round) {
+                    PocMeetingRound tempRound;
+                    if (roundIndex == roundData.getRoundIndex()) {
+                        tempRound = localThisRoundData;
+                    } else if (roundIndex == (roundData.getRoundIndex() - 1)) {
+                        tempRound = localPreRoundData;
+                    } else {
                         break;
                     }
-                    if (roundIndex == roundData.getRoundIndex() && roundData.getPackingIndexOfRound() <= indexOfRound) {
+                    if (tempRound == null) {
                         break;
                     }
-                    if (round.getMemberCount() < indexOfRound) {
+                    if (tempRound.getIndex() > roundData.getRoundIndex()) {
+                        break;
+                    }
+                    if (tempRound.getIndex() == roundData.getRoundIndex() && indexOfRound >= roundData.getPackingIndexOfRound()) {
+                        break;
+                    }
+                    if (indexOfRound > tempRound.getMemberCount()) {
                         roundIndex++;
                         indexOfRound = 1;
                         continue;
                     }
-                    PocMeetingMember meetingMember = round.getMember(interval);
-                    if (null == meetingMember) {
-                        return ValidateResult.getFailedResult("the round data has error!");
+                    PocMeetingMember smo;
+                    try {
+                        smo = tempRound.getMember(indexOfRound);
+                        if (null == member) {
+                            break;
+                        }
+                    } catch (Exception e) {
+                        break;
                     }
-                    addressList.add(meetingMember.getAgentAddress());
                     indexOfRound++;
+                    addressList.add(smo.getAgentAddress());
                 }
                 if (addressList.size() != yellowPunishTx.getTxData().getAddressList().size()) {
                     return ValidateResult.getFailedResult("The block has wrong yellow punish Tx!address list size is wrong!");
                 }
                 for (String address : addressList) {
-                    if (!yellowPunishTx.getTxData().getAddressList().contains(address)) {
+                    boolean contains = false;
+                    for (Address addressObj : yellowPunishTx.getTxData().getAddressList()) {
+                        if (addressObj.getBase58().equals(address)) {
+                            contains = true;
+                            break;
+                        }
+                    }
+                    if (!contains) {
                         return ValidateResult.getFailedResult("The block has wrong yellow punish Tx!It has wrong address");
                     }
                 }
@@ -240,7 +276,7 @@ public class PackingRoundManager {
      * @param localThisRoundData
      * @return
      */
-    private ValidateResult checkThisRound(PocMeetingRound localPreRoundData, PocMeetingRound localThisRoundData, BlockRoundData thisBlockRoundData) {
+    private ValidateResult checkThisRound(PocMeetingRound localPreRoundData, PocMeetingRound localThisRoundData, BlockRoundData thisBlockRoundData, BlockHeader header) {
         if (localPreRoundData.getEndTime() == localThisRoundData.getStartTime() && localPreRoundData.getIndex() == (localThisRoundData.getIndex() - 1)) {
             return ValidateResult.getSuccessResult();
         } else if (localPreRoundData.getIndex() == (localThisRoundData.getIndex() - 1)) {
@@ -248,11 +284,15 @@ public class PackingRoundManager {
         }
         long betweenTime = localThisRoundData.getStartTime() - localPreRoundData.getEndTime();
 
-        long differenceOfRoundIndex = betweenTime / (localThisRoundData.getMemberCount()*1000*PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND);
+        long differenceOfRoundIndex = 1 + betweenTime / (localThisRoundData.getMemberCount() * 1000 * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND);
 
-        long differenceOfPackingIndex = betweenTime % localThisRoundData.getMemberCount();
-        if ((localThisRoundData.getIndex() - localPreRoundData.getIndex()) == differenceOfRoundIndex
-                && thisBlockRoundData.getPackingIndexOfRound() == (differenceOfPackingIndex + 1)) {
+        long differenceOfPackingIndex = betweenTime % (localThisRoundData.getMemberCount() * 1000 * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND);
+
+        if (!((localThisRoundData.getIndex() - localPreRoundData.getIndex()) == differenceOfRoundIndex && 0 == differenceOfPackingIndex)) {
+            return ValidateResult.getFailedResult("There's no docking between the two rounds.");
+        }
+        long indexOfRound = 1 + (header.getTime() - thisBlockRoundData.getRoundStartTime()) / (1000 * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND);
+        if (thisBlockRoundData.getPackingIndexOfRound() == indexOfRound) {
             return ValidateResult.getSuccessResult();
         }
         return ValidateResult.getFailedResult("There's no docking between the two rounds.");
@@ -301,6 +341,7 @@ public class PackingRoundManager {
         CoinBaseTransaction tx;
         try {
             tx = new CoinBaseTransaction(data, null);
+            tx.setTime(member.getPackTime());
         } catch (NulsException e) {
             Log.error(e);
             throw new NulsRuntimeException(e);
@@ -365,7 +406,6 @@ public class PackingRoundManager {
 
     private void recalc(Block bestBlock) {
         this.currentRound = null;
-        this.previousRound = null;
         this.calc(bestBlock);
     }
 
@@ -375,30 +415,41 @@ public class PackingRoundManager {
      * @param bestBlock The local view of the latest height, including a short split of my own, is likely to be higher than the latest local level.
      * @return
      */
-    public void calc(Block bestBlock) {
+    public synchronized void calc(Block bestBlock) {
         long bestHeight = bestBlock.getHeader().getHeight();
         BlockRoundData bestRoundData = new BlockRoundData(bestBlock.getHeader().getExtend());
-        if (null != currentRound && TimeService.currentTimeMillis() > currentRound.getEndTime()) {
-            this.previousRound = currentRound;
+        if (null == currentRound && bestRoundData.getPackingIndexOfRound() == bestRoundData.getConsensusMemberCount()) {
+            PocMeetingRound previousRound = calcCurrentRound(bestBlock.getHeader(), bestHeight, bestRoundData);
             this.currentRound = calcNextRound(bestBlock.getHeader(), bestHeight, bestRoundData);
+            this.currentRound.setPreRound(previousRound);
+        } else if (null == currentRound) {
+            PocMeetingRound previousRound = calcPreviousRound(bestBlock.getHeader(), bestHeight, bestRoundData);
+            this.currentRound = calcCurrentRound(bestBlock.getHeader(), bestHeight, bestRoundData);
+            this.currentRound.setPreRound(previousRound);
         } else if (null != currentRound && currentRound.getIndex() == bestRoundData.getRoundIndex() && bestRoundData.getPackingIndexOfRound() == bestRoundData.getConsensusMemberCount()) {
-            this.previousRound = currentRound;
+            PocMeetingRound previousRound = currentRound;
             this.currentRound = calcNextRound(bestBlock.getHeader(), bestHeight, bestRoundData);
+            if (previousRound.getIndex() != (currentRound.getIndex() - 1)) {
+                previousRound = calcCurrentRound(bestBlock.getHeader(), bestHeight, bestRoundData);
+            }
+            this.currentRound.setPreRound(previousRound);
         } else if (null != currentRound && currentRound.getIndex() == bestRoundData.getRoundIndex()) {
-            //nothing to do
-            return;
+            if (TimeService.currentTimeMillis() > currentRound.getEndTime()) {
+                PocMeetingRound previousRound = currentRound;
+                this.currentRound = calcNextRound(bestBlock.getHeader(), bestHeight, bestRoundData);
+                if (previousRound.getIndex() != (currentRound.getIndex() - 1)) {
+                    previousRound = calcCurrentRound(bestBlock.getHeader(), bestHeight, bestRoundData);
+                }
+                this.currentRound.setPreRound(previousRound);
+            } else {
+                return;
+            }
         } else if (null != currentRound && currentRound.getIndex() > bestRoundData.getRoundIndex()) {
             this.recalc(bestBlock);
             return;
         } else if (null != currentRound && currentRound.getIndex() < bestRoundData.getRoundIndex()) {
             this.recalc(bestBlock);
             return;
-        } else if (null == currentRound && bestRoundData.getPackingIndexOfRound() == bestRoundData.getConsensusMemberCount()) {
-            this.previousRound = calcCurrentRound(bestBlock.getHeader(), bestHeight, bestRoundData);
-            this.currentRound = calcNextRound(bestBlock.getHeader(), bestHeight, bestRoundData);
-        } else if (null == currentRound) {
-            this.previousRound = calcPreviousRound(bestBlock.getHeader(), bestHeight, bestRoundData);
-            this.currentRound = calcCurrentRound(bestBlock.getHeader(), bestHeight, bestRoundData);
         }
         List<Account> accountList = accountService.getAccountList();
         this.currentRound.calcLocalPacker(accountList);
@@ -419,6 +470,9 @@ public class PackingRoundManager {
                 while (true) {
                     Block block = getBlockService().getBlock(height);
                     height--;
+                    if(null==block){
+                        return null;
+                    }
                     BlockRoundData blockRoundData = new BlockRoundData(block.getHeader().getExtend());
                     if (blockRoundData.getRoundIndex() <= (round.getIndex() - 1)) {
                         lastBlock = block;
@@ -430,16 +484,19 @@ public class PackingRoundManager {
             calcHeight = lastBlock.getHeader().getHeight();
             needSetStartTime = false;
         }
-        List<PocMeetingMember> memberList = getMemberList(calcHeight, round, header);
+        List<PocMeetingMember> memberList;
+        if (calcHeight == (0 - PocConsensusConstant.CONFIRM_BLOCK_COUNT)) {
+            memberList = getFirstMemberList(header);
+        } else {
+            memberList = getMemberList(calcHeight, round, header);
+        }
 
         Collections.sort(memberList);
         if (needSetStartTime) {
             round.setStartTime(bestRoundData.getRoundEndTime() - PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000 * memberList.size());
         }
         round.setMemberList(memberList);
-
         round.setMemberCount(memberList.size());
-
         return round;
     }
 
@@ -447,16 +504,6 @@ public class PackingRoundManager {
         PocMeetingRound round = new PocMeetingRound();
         round.setIndex(bestRoundData.getRoundIndex() + 1);
         round.setStartTime(bestRoundData.getRoundEndTime());
-        round.setMemberCount(bestRoundData.getConsensusMemberCount());
-        while (round.getEndTime() < TimeService.currentTimeMillis()) {
-            long time = TimeService.currentTimeMillis() - round.getStartTime();
-            long roundTime = round.getEndTime() - round.getStartTime();
-            long index = time / roundTime;
-            long startTime = round.getStartTime() + index * roundTime;
-            round.setStartTime(startTime);
-            round.setIndex(bestRoundData.getRoundIndex() + index);
-        }
-
         long calcHeight = 0L;
         if (bestRoundData.getPackingIndexOfRound() == bestRoundData.getConsensusMemberCount() || NulsContext.getInstance().getBestHeight() <= bestHeight) {
             calcHeight = bestHeight - PocConsensusConstant.CONFIRM_BLOCK_COUNT;
@@ -496,7 +543,34 @@ public class PackingRoundManager {
 
         round.setMemberCount(memberList.size());
 
+        boolean b = false;
+        while (round.getEndTime() < TimeService.currentTimeMillis()) {
+            long time = TimeService.currentTimeMillis() - round.getStartTime();
+            long roundTime = PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000L * round.getMemberCount();
+            long index = time / roundTime;
+            long startTime = round.getStartTime() + index * roundTime;
+            round.setStartTime(startTime);
+            round.setIndex(round.getIndex() + index);
+            b = true;
+        }
+        if (b) {
+            for (PocMeetingMember member : memberList) {
+                member.setRoundIndex(round.getIndex());
+                member.setRoundStartTime(round.getStartTime());
+            }
+        }
+
         return round;
+    }
+
+    public List<PocMeetingMember> getFirstMemberList(BlockHeader header) {
+        List<PocMeetingMember> memberList = new ArrayList<>();
+        PocMeetingMember member = new PocMeetingMember();
+        member.setPackingAddress(header.getPackingAddress());
+        member.setAgentAddress(header.getPackingAddress());
+        member.setCreditVal(1);
+        memberList.add(member);
+        return memberList;
     }
 
 
@@ -505,30 +579,39 @@ public class PackingRoundManager {
         round.setIndex(bestRoundData.getRoundIndex());
         round.setMemberCount(bestRoundData.getConsensusMemberCount());
         round.setStartTime(bestRoundData.getRoundStartTime());
-        long calcHeight = 0L;
-        if (bestHeight - PocConsensusConstant.CONFIRM_BLOCK_COUNT > 1) {
-            if (bestRoundData.getPackingIndexOfRound() == 1) {
-                calcHeight = bestHeight - PocConsensusConstant.CONFIRM_BLOCK_COUNT - 1;
-            } else {
-                Block firstBlock = getBlockService().getRoundFirstBlockFromDb(round.getIndex());
-                if (null == firstBlock) {
-                    long height = bestHeight - bestRoundData.getPackingIndexOfRound() + 1;
-                    while (true) {
-                        firstBlock = getBlockService().getBlock(height);
-                        height++;
-                        BlockRoundData blockRoundData = new BlockRoundData(firstBlock.getHeader().getExtend());
-                        if (blockRoundData.getRoundIndex() == round.getIndex()) {
-                            break;
+        List<PocMeetingMember> memberList;
+        if (bestHeight == 0) {
+            memberList = getFirstMemberList(bestBlockHeader);
+        } else {
+            long calcHeight = 0L;
+            if (bestHeight - PocConsensusConstant.CONFIRM_BLOCK_COUNT > 1) {
+                if (bestRoundData.getPackingIndexOfRound() == 1) {
+                    calcHeight = bestHeight - PocConsensusConstant.CONFIRM_BLOCK_COUNT - 1;
+                } else {
+                    Block firstBlock = getBlockService().getRoundFirstBlockFromDb(round.getIndex());
+                    if (null == firstBlock) {
+                        firstBlock = new Block();
+                        firstBlock.setHeader(bestBlockHeader);
+
+                        while (true) {
+                            String preHash = firstBlock.getHeader().getPreHash().getDigestHex();
+                            Block block = getBlockService().getBlock(preHash);
+                            if (null == block) {
+                                return null;
+                            }
+                            BlockRoundData blockRoundData = new BlockRoundData(block.getHeader().getExtend());
+                            if (blockRoundData.getRoundIndex() < round.getIndex()) {
+                                break;
+                            } else if (blockRoundData.getRoundIndex() == round.getIndex()) {
+                                firstBlock = block;
+                            }
                         }
                     }
-
+                    calcHeight = firstBlock.getHeader().getHeight() - PocConsensusConstant.CONFIRM_BLOCK_COUNT - 1;
                 }
-
-                calcHeight = firstBlock.getHeader().getHeight() - PocConsensusConstant.CONFIRM_BLOCK_COUNT - 1;
             }
+            memberList = getMemberList(calcHeight, round, bestBlockHeader);
         }
-        List<PocMeetingMember> memberList = getMemberList(calcHeight, round, bestBlockHeader);
-
         Collections.sort(memberList);
 
         round.setMemberList(memberList);
@@ -540,82 +623,76 @@ public class PackingRoundManager {
 
     private List<PocMeetingMember> getMemberList(long calcHeight, PocMeetingRound round, BlockHeader bestBlockHeader) {
         List<PocMeetingMember> memberList = new ArrayList<>();
-        if (calcHeight == 0) {
-            round.setTotalDeposit(Na.ZERO);
+        Na totalDeposit = Na.ZERO;
+        for (String address : csManager.getSeedNodeList()) {
             PocMeetingMember member = new PocMeetingMember();
-            member.setPackingAddress(bestBlockHeader.getPackingAddress());
-            member.setAgentAddress(bestBlockHeader.getPackingAddress());
+            member.setAgentAddress(address);
+            member.setPackingAddress(address);
             member.setCreditVal(1);
+            member.setRoundStartTime(round.getStartTime());
+            member.setRoundIndex(round.getIndex());
             memberList.add(member);
-        } else {
-            Na totalDeposit = Na.ZERO;
-            List<PocMeetingMember> seedMemberList = getDefaultSeedList();
-            for (PocMeetingMember member : seedMemberList) {
-                member.setRoundStartTime(round.getStartTime());
-                member.setRoundIndex(round.getIndex());
-                memberList.add(member);
-            }
-            List<Consensus<Agent>> agentList = getAgentList(calcHeight);
-            Map<String, List<DepositPo>> depositMap = new HashMap<>();
-            if (agentList.size() > 0) {
-                List<DepositPo> depositPoList = depositDataService.getAllList(calcHeight);
-                for (DepositPo depositPo : depositPoList) {
-                    List<DepositPo> subList = depositMap.get(depositPo.getAgentHash());
-                    if (null == subList) {
-                        subList = new ArrayList<>();
-                        depositMap.put(depositPo.getAgentHash(), subList);
-                    }
-                    subList.add(depositPo);
-                }
-            }
-            Set<String> agentSet = consensusCacheManager.agentKeySet();
-            Set<String> depositKeySet = consensusCacheManager.depositKeySet();
-
-            for (Consensus<Agent> ca : agentList) {
-                PocMeetingMember member = new PocMeetingMember();
-                member.setAgentConsensus(ca);
-                member.setRoundIndex(round.getIndex());
-                member.setAgentHash(ca.getHexHash());
-                member.setAgentAddress(ca.getAddress());
-                member.setPackingAddress(ca.getExtend().getPackingAddress());
-                member.setRoundStartTime(round.getStartTime());
-                member.setOwnDeposit(ca.getExtend().getDeposit());
-                member.setCommissionRate(ca.getExtend().getCommissionRate());
-                totalDeposit = totalDeposit.add(ca.getExtend().getDeposit());
-                List<DepositPo> depositPoList = depositMap.get(ca.getHexHash());
-                if (depositPoList != null) {
-                    List<Consensus<Deposit>> cdlist = new ArrayList<>();
-                    for (DepositPo depositPo : depositPoList) {
-                        Consensus<Deposit> cd = ConsensusTool.fromPojo(depositPo);
-                        member.setTotalDeposit(member.getTotalDeposit().add(cd.getExtend().getDeposit()));
-                        cdlist.add(cd);
-                    }
-                    member.setDepositList(cdlist);
-                }
-                totalDeposit = totalDeposit.add(member.getTotalDeposit());
-                member.setCreditVal(calcCreditVal(member, round.getIndex() - 2));
-                if(member.getTotalDeposit().isGreaterThan(PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT)){
-                    ca.getExtend().setStatus(ConsensusStatusEnum.IN.getCode());
-                    memberList.add(member);
-                }else{
-                    ca.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
-                }
-                consensusCacheManager.cacheAgent(ca);
-                agentSet.remove(ca.getHexHash());
-                for(Consensus<Deposit> cd:member.getDepositList()){
-                    cd.getExtend().setStatus(ca.getExtend().getStatus());
-                    consensusCacheManager.cacheDeposit(cd);
-                    depositKeySet.remove(cd.getHexHash());
-                }
-            }
-            for(String key:agentSet){
-                consensusCacheManager.removeAgent(key);
-            }
-            for(String key:depositKeySet){
-                consensusCacheManager.removeDeposit(key);
-            }
-            round.setTotalDeposit(totalDeposit);
         }
+        List<Consensus<Agent>> agentList = getAgentList(calcHeight);
+        Map<String, List<DepositPo>> depositMap = new HashMap<>();
+        if (agentList.size() > 0) {
+            List<DepositPo> depositPoList = depositDataService.getAllList(calcHeight);
+            for (DepositPo depositPo : depositPoList) {
+                List<DepositPo> subList = depositMap.get(depositPo.getAgentHash());
+                if (null == subList) {
+                    subList = new ArrayList<>();
+                    depositMap.put(depositPo.getAgentHash(), subList);
+                }
+                subList.add(depositPo);
+            }
+        }
+        Set<String> agentSet = consensusCacheManager.agentKeySet();
+        Set<String> depositKeySet = consensusCacheManager.depositKeySet();
+
+        for (Consensus<Agent> ca : agentList) {
+            PocMeetingMember member = new PocMeetingMember();
+            member.setAgentConsensus(ca);
+            member.setRoundIndex(round.getIndex());
+            member.setAgentHash(ca.getHexHash());
+            member.setAgentAddress(ca.getAddress());
+            member.setPackingAddress(ca.getExtend().getPackingAddress());
+            member.setRoundStartTime(round.getStartTime());
+            member.setOwnDeposit(ca.getExtend().getDeposit());
+            member.setCommissionRate(ca.getExtend().getCommissionRate());
+            totalDeposit = totalDeposit.add(ca.getExtend().getDeposit());
+            List<DepositPo> depositPoList = depositMap.get(ca.getHexHash());
+            if (depositPoList != null) {
+                List<Consensus<Deposit>> cdlist = new ArrayList<>();
+                for (DepositPo depositPo : depositPoList) {
+                    Consensus<Deposit> cd = ConsensusTool.fromPojo(depositPo);
+                    member.setTotalDeposit(member.getTotalDeposit().add(cd.getExtend().getDeposit()));
+                    cdlist.add(cd);
+                }
+                member.setDepositList(cdlist);
+            }
+            totalDeposit = totalDeposit.add(member.getTotalDeposit());
+            member.setCreditVal(calcCreditVal(member, round.getIndex() - 2));
+            if (member.getTotalDeposit().isGreaterThan(PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT)) {
+                ca.getExtend().setStatus(ConsensusStatusEnum.IN.getCode());
+                memberList.add(member);
+            } else {
+                ca.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
+            }
+            consensusCacheManager.cacheAgent(ca);
+            agentSet.remove(ca.getHexHash());
+            for (Consensus<Deposit> cd : member.getDepositList()) {
+                cd.getExtend().setStatus(ca.getExtend().getStatus());
+                consensusCacheManager.cacheDeposit(cd);
+                depositKeySet.remove(cd.getHexHash());
+            }
+        }
+        for (String key : agentSet) {
+            consensusCacheManager.removeAgent(key);
+        }
+        for (String key : depositKeySet) {
+            consensusCacheManager.removeDeposit(key);
+        }
+        round.setTotalDeposit(totalDeposit);
         Collections.sort(memberList);
         return memberList;
     }
@@ -649,29 +726,6 @@ public class PackingRoundManager {
         return agentList;
     }
 
-    private List<PocMeetingMember> getDefaultSeedList() {
-        if (null != seedList) {
-            return seedList;
-        }
-        List<PocMeetingMember> seedList = new ArrayList<>();
-        if (csManager.getSeedNodeList() == null) {
-            return seedList;
-        }
-        for (String address : csManager.getSeedNodeList()) {
-            PocMeetingMember member = new PocMeetingMember();
-            member.setAgentAddress(address);
-            member.setPackingAddress(address);
-            member.setCreditVal(1);
-            seedList.add(member);
-        }
-        this.seedList = seedList;
-        return seedList;
-    }
-
-    public PocMeetingRound getPreviousRound() {
-        return previousRound;
-    }
-
     public PocMeetingRound getCurrentRound() {
         return currentRound;
     }
@@ -686,22 +740,22 @@ public class PackingRoundManager {
 
 
     private PocMeetingRound getRoundData(long roundIndex) {
-        if (null == currentRound || previousRound == null) {
+        if (null == currentRound) {
             return null;
         }
         if (roundIndex == currentRound.getIndex()) {
             return currentRound;
         }
-        if (roundIndex == previousRound.getIndex()) {
-            return previousRound;
+        if (null != currentRound.getPreRound() && roundIndex == currentRound.getPreRound().getIndex()) {
+            return currentRound.getPreRound();
         }
         return null;
     }
 
     public boolean isLocalHasSeed(List<Account> accountList) {
         for (Account account : accountList) {
-            for (PocMeetingMember seed : this.getDefaultSeedList()) {
-                if (seed.getAgentAddress().equals(account.getAddress().getBase58())) {
+            for (String seedAddress : csManager.getSeedNodeList()) {
+                if (seedAddress.equals(account.getAddress().getBase58())) {
                     return true;
                 }
             }

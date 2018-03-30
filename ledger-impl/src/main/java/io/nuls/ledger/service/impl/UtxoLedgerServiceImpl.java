@@ -318,6 +318,20 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
+    public Transaction getCacheTx(String txHash) {
+        Transaction tx = txCacheService.getElement(ORPHAN_TX_CACHE, txHash);
+        if(tx != null) {
+            return tx;
+        }
+        tx = txCacheService.getElement(RECEIVE_TX_CACHE, txHash);
+        if(tx != null) {
+            return tx;
+        }
+        tx = txCacheService.getElement(CONFIRM_TX_CACHE, txHash);
+        return tx;
+    }
+
+    @Override
     public Page<Transaction> getTxList(Long height, int type, int pageNum, int pageSize) throws Exception {
         Page<TransactionPo> poPage = txDao.getTxs(height, type, pageNum, pageSize);
         Page<Transaction> txPage = new Page<>(poPage);
@@ -619,13 +633,11 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                         output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
                     }
                 }
-
+                UtxoTransactionTool.getInstance().calcBalance(output.getAddress(), false);
                 index++;
             } else {
                 b = false;
             }
-
-            UtxoTransactionTool.getInstance().calcBalance(output.getAddress(), false);
         }
     }
 
@@ -648,11 +660,11 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 } else if (OutPutStatusEnum.UTXO_CONFIRM_UNSPEND == output.getStatus()) {
                     output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_CONSENSUS_LOCK);
                 }
+                UtxoTransactionTool.getInstance().calcBalance(output.getAddress(), false);
                 index++;
             } else {
                 b = false;
             }
-            UtxoTransactionTool.getInstance().calcBalance(output.getAddress(), false);
         }
         txDao.lockTxOutput(txHash);
     }

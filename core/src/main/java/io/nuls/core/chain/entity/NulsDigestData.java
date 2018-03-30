@@ -24,6 +24,7 @@
 package io.nuls.core.chain.entity;
 
 
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -59,7 +60,7 @@ public class NulsDigestData extends BaseNulsData {
             this.parse(bytes);
         } catch (NulsException e) {
             Log.error(e);
-            throw new NulsRuntimeException(e);
+            throw new NulsRuntimeException(ErrorCode.DATA_PARSE_ERROR,"hash format error");
         }
     }
 

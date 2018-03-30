@@ -434,7 +434,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 
         if (balance > 0) {
             UtxoOutput output = new UtxoOutput();
-            //todo script
+
             output.setAddress(inputs.get(0).getFrom().getAddress());
             output.setValue(balance);
             output.setIndex(i);

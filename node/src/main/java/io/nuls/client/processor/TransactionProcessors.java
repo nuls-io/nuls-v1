@@ -25,7 +25,7 @@ public abstract class TransactionProcessors implements CommandProcessor {
         public String getHelp() {
             CommandBulider bulider = new CommandBulider();
             bulider.newLine(getCommandDescription())
-                    .newLine("\t<hash>   hash地址 -required");
+                    .newLine("\t<hash>   transaction hash -required");
             return bulider.toString();
         }
 

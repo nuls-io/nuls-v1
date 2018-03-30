@@ -60,9 +60,9 @@ public abstract class WalletProcessors implements CommandProcessor {
         @Override
         public String getHelp() {
             CommandBulider builder = new CommandBulider();
-            //TODO 翻译
+
             builder.newLine(getCommandDescription())
-                    .newLine("\t<password> 密码 - 必输, 长度8-20位, 必须同时包含大小写字母和数字");
+                    .newLine("\t<password> password - Required, Wallet password (8-20 characters, lower case letters and Numbers)");
             return builder.toString();
         }
 
@@ -74,10 +74,12 @@ public abstract class WalletProcessors implements CommandProcessor {
         @Override
         public boolean argsValidate(String[] args) {
             int length = args.length;
-            if(length != 2)
+            if(length != 2) {
                 return false;
-            if(!CommandHelper.checkArgsIsNull(args))
+            }
+            if(!CommandHelper.checkArgsIsNull(args)) {
                 return false;
+            }
             String newPwd = args[1];
             CommandHelper.confirmPwd(newPwd);
             return true;
@@ -104,10 +106,9 @@ public abstract class WalletProcessors implements CommandProcessor {
         @Override
         public String getHelp() {
             CommandBulider builder = new CommandBulider();
-            //TODO 翻译
             builder.newLine(getCommandDescription())
-                    .newLine("\t<oldpassword> 现有密码 - 必输")
-                    .newLine("\t<newpassword> 新密码 - 必输, 长度8-20位, 必须同时包含大小写字母和数字");
+                    .newLine("\t<oldpassword>  old password - Required")
+                    .newLine("\t<newpassword>  new password - Required, Wallet password (8-20 characters, lower case letters and Numbers)");
             return builder.toString();
         }
 
@@ -119,10 +120,12 @@ public abstract class WalletProcessors implements CommandProcessor {
         @Override
         public boolean argsValidate(String[] args) {
             int length = args.length;
-            if(length != 3)
+            if(length != 3) {
                 return false;
-            if(!CommandHelper.checkArgsIsNull(args))
+            }
+            if(!CommandHelper.checkArgsIsNull(args)) {
                 return false;
+            }
             String newPwd = args[2];
             CommandHelper.confirmPwd(newPwd);
             return true;
@@ -156,13 +159,12 @@ public abstract class WalletProcessors implements CommandProcessor {
         @Override
         public String getHelp() {
             CommandBulider builder = new CommandBulider();
-            //TODO 翻译
             builder.newLine(getCommandDescription())
-                    .newLine("\t<address> \t\t转账账户地址 - 必输")
-                    .newLine("\t<toaddress> \t接收人地址 - 必输")
-                    .newLine("\t<amount> \t\t转账金额 - 必输")
-                    .newLine("\t<password> \t\t钱包密码 - 必输")
-                    .newLine("\t[remark] \t\t备注 - 选填");
+                    .newLine("\t<address> \t\tsource address - Required")
+                    .newLine("\t<toaddress> \treceiving address - Required")
+                    .newLine("\t<amount> \t\tamount - Required")
+                    .newLine("\t<password> \t\tpassword - Required")
+                    .newLine("\t[remark] \t\tremark - ");
             return builder.toString();
         }
 
@@ -249,10 +251,9 @@ public abstract class WalletProcessors implements CommandProcessor {
         @Override
         public String getHelp() {
             CommandBulider builder = new CommandBulider();
-            //TODO 翻译
             builder.newLine(getCommandDescription())
-                    .newLine("\t<password> 密码 - 必输")
-                    .newLine("\t[address] 备份账户地址，默认不传视为备份钱包所有账户 - 选填");
+                    .newLine("\t<password> password - Required")
+                    .newLine("\t[address] the account you want to back up，you can back up all your account without [address] ");
             return builder.toString();
         }
 
@@ -264,12 +265,15 @@ public abstract class WalletProcessors implements CommandProcessor {
         @Override
         public boolean argsValidate(String[] args) {
             int length = args.length;
-            if(length < 2)
+            if(length < 2) {
                 return false;
-            if(length > 3)
+            }
+            if(length > 3) {
                 return false;
-            if(!CommandHelper.checkArgsIsNull(args))
+            }
+            if(!CommandHelper.checkArgsIsNull(args)) {
                 return false;
+            }
             return true;
         }
 
@@ -303,8 +307,8 @@ public abstract class WalletProcessors implements CommandProcessor {
             CommandBulider builder = new CommandBulider();
             //TODO 翻译
             builder.newLine(getCommandDescription())
-                    .newLine("\t<privatekey> 明文私钥 - 必输")
-                    .newLine("\t<password> 钱包密码 - 必输");
+                    .newLine("\t<privatekey> plain private key - Required")
+                    .newLine("\t<password> password - Required");
             return builder.toString();
         }
 
@@ -316,10 +320,12 @@ public abstract class WalletProcessors implements CommandProcessor {
         @Override
         public boolean argsValidate(String[] args) {
             int length = args.length;
-            if(length != 3)
+            if(length != 3) {
                 return false;
-            if(!CommandHelper.checkArgsIsNull(args))
+            }
+            if(!CommandHelper.checkArgsIsNull(args)) {
                 return false;
+            }
             String pwd = args[2];
             CommandHelper.checkAndConfirmPwd(pwd);
             return true;
@@ -347,10 +353,9 @@ public abstract class WalletProcessors implements CommandProcessor {
         @Override
         public String getHelp() {
             CommandBulider builder = new CommandBulider();
-            //TODO 翻译
             builder.newLine(getCommandDescription())
-                    .newLine("\t<address> 账户地址 - 必输")
-                    .newLine("\t<password> 钱包密码 - 必输");
+                    .newLine("\t<address> address - Required")
+                    .newLine("\t<password> password - Required");
             return builder.toString();
         }
 
@@ -362,10 +367,12 @@ public abstract class WalletProcessors implements CommandProcessor {
         @Override
         public boolean argsValidate(String[] args) {
             int length = args.length;
-            if(length != 3)
+            if(length != 3) {
                 return false;
-            if(!CommandHelper.checkArgsIsNull(args))
+            }
+            if(!CommandHelper.checkArgsIsNull(args)) {
                 return false;
+            }
             return true;
         }
 

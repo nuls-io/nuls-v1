@@ -58,25 +58,27 @@ public abstract class AccountProcessors implements CommandProcessor {
         @Override
         public String getHelp() {
             CommandBulider builder = new CommandBulider();
-            //TODO 翻译
+
             builder.newLine(getCommandDescription())
-                    .newLine("\t<password> 钱包密码, 若没有则新建 - 必输")
-                    .newLine("\t<count> 创建账户数量 - 必输");
+                    .newLine("\t<password> the password your wallet, Required")
+                    .newLine("\t<count> the count of account you want to create, Required");
             return builder.toString();
         }
 
         @Override
         public String getCommandDescription() {
-            return "createaccount <password> <count> --create <count> accounts & Encrypting with <password>";
+            return "createaccount <password> <count> --create <count> accounts , encrypted by <password>";
         }
 
         @Override
         public boolean argsValidate(String[] args) {
             int length = args.length;
-            if(length != 3)
+            if(length != 3) {
                 return false;
-            if(!CommandHelper.checkArgsIsNull(args))
+            }
+            if(!CommandHelper.checkArgsIsNull(args)) {
                 return false;
+            }
             // validate <count>
             if(!StringUtils.isNumeric(args[2])) {
                 return false;
@@ -109,23 +111,24 @@ public abstract class AccountProcessors implements CommandProcessor {
         public String getHelp() {
             CommandBulider builder = new CommandBulider();
             builder.newLine(getCommandDescription())
-                    .newLine("\t<address> the account address - require");
+                    .newLine("\t<address> the account address - Required");
             return builder.toString();
         }
 
         @Override
         public String getCommandDescription() {
-            //TODO 翻译
-            return "getaccount <address> --获取账户基本信息";
+            return "getaccount <address> --get account information";
         }
 
         @Override
         public boolean argsValidate(String[] args) {
             int length = args.length;
-            if(length != 2)
+            if(length != 2) {
                 return false;
-            if(!CommandHelper.checkArgsIsNull(args))
+            }
+            if(!CommandHelper.checkArgsIsNull(args)) {
                 return false;
+            }
             return true;
         }
 
@@ -165,10 +168,12 @@ public abstract class AccountProcessors implements CommandProcessor {
         @Override
         public boolean argsValidate(String[] args) {
             int length = args.length;
-            if(length != 2)
+            if(length != 2) {
                 return false;
-            if(!CommandHelper.checkArgsIsNull(args))
+            }
+            if(!CommandHelper.checkArgsIsNull(args)) {
                 return false;
+            }
             return true;
         }
 
@@ -204,8 +209,9 @@ public abstract class AccountProcessors implements CommandProcessor {
         @Override
         public boolean argsValidate(String[] args) {
             int length = args.length;
-            if(length > 1)
+            if(length > 1) {
                 return false;
+            }
             return true;
         }
 
@@ -241,8 +247,9 @@ public abstract class AccountProcessors implements CommandProcessor {
         @Override
         public boolean argsValidate(String[] args) {
             int length = args.length;
-            if(length > 1)
+            if(length > 1) {
                 return false;
+            }
             return true;
         }
 
@@ -266,25 +273,26 @@ public abstract class AccountProcessors implements CommandProcessor {
         @Override
         public String getHelp() {
             CommandBulider builder = new CommandBulider();
-            //TODO 翻译
             builder.newLine(getCommandDescription())
-                    .newLine("\t<address> the account address - require")
-                    .newLine("\t<amount> 金额，本命令会返回等于或大于此金额的utxo - require");
+                    .newLine("\t<address> the account address - Required")
+                    .newLine("\t<amount> account, utxo - Required");
             return builder.toString();
         }
 
         @Override
         public String getCommandDescription() {
-            return "getutxo <address> <amount> --Obtain sufficient amount of utxo from the account.";
+            return "getutxo <address> <amount> --get a minimal list of UTXO,the total amount of which is greater than <amount>.";
         }
 
         @Override
         public boolean argsValidate(String[] args) {
             int length = args.length;
-            if(length != 3)
+            if(length != 3) {
                 return false;
-            if(!CommandHelper.checkArgsIsNull(args))
+            }
+            if(!CommandHelper.checkArgsIsNull(args)) {
                 return false;
+            }
             Long amount = CommandHelper.getLongAmount(args[2]);
             if(amount == null) {
                 return false;
@@ -313,27 +321,27 @@ public abstract class AccountProcessors implements CommandProcessor {
         @Override
         public String getHelp() {
             CommandBulider builder = new CommandBulider();
-            //TODO 翻译
             builder.newLine(getCommandDescription())
-                    .newLine("\t<alias> 别名 - 必输")
-                    .newLine("\t<address> 账户地址 - 必输")
-                    .newLine("\t<password> 钱包密码 - 必输");
+                    .newLine("\t<alias> alias - Required")
+                    .newLine("\t<address> address - Required")
+                    .newLine("\t<password> password - Required");
             return builder.toString();
         }
 
         @Override
         public String getCommandDescription() {
-            //TODO 翻译
-            return "aliasaccount <alias> <address> <password>--为账户设置别名";
+            return "aliasaccount <alias> <address> <password>--create a nickname";
         }
 
         @Override
         public boolean argsValidate(String[] args) {
             int length = args.length;
-            if(length != 4)
+            if(length != 4) {
                 return false;
-            if(!CommandHelper.checkArgsIsNull(args))
+            }
+            if(!CommandHelper.checkArgsIsNull(args)) {
                 return false;
+            }
             return true;
         }
 
@@ -357,26 +365,26 @@ public abstract class AccountProcessors implements CommandProcessor {
         @Override
         public String getHelp() {
             CommandBulider builder = new CommandBulider();
-            //TODO 翻译
             builder.newLine(getCommandDescription())
-                    .newLine("\t<address> 账户地址 - 必输")
-                    .newLine("\t<password> 钱包密码 - 必输");
+                    .newLine("\t<address> address - Required")
+                    .newLine("\t<password> password - Required");
             return builder.toString();
         }
 
         @Override
         public String getCommandDescription() {
-            //TODO 翻译
-            return "getprivatekey <address> <password>--查询账户私钥，只能查询本地创建或导入的账户";
+            return "getprivatekey <address> <password>--get the private key of your account";
         }
 
         @Override
         public boolean argsValidate(String[] args) {
             int length = args.length;
-            if(length != 3)
+            if(length != 3) {
                 return false;
-            if(!CommandHelper.checkArgsIsNull(args))
+            }
+            if(!CommandHelper.checkArgsIsNull(args)) {
                 return false;
+            }
             return true;
         }
 
@@ -401,25 +409,25 @@ public abstract class AccountProcessors implements CommandProcessor {
         @Override
         public String getHelp() {
             CommandBulider builder = new CommandBulider();
-            //TODO 翻译
             builder.newLine(getCommandDescription())
-                    .newLine("\t<address> 账户地址 - 必输");
+                    .newLine("\t<address> address - Required");
             return builder.toString();
         }
 
         @Override
         public String getCommandDescription() {
-            //TODO 翻译
-            return "getasset <address>--查询账户资产";
+            return "getasset <address>--get your assets";
         }
 
         @Override
         public boolean argsValidate(String[] args) {
             int length = args.length;
-            if(length != 2)
+            if(length != 2) {
                 return false;
-            if(!CommandHelper.checkArgsIsNull(args))
+            }
+            if(!CommandHelper.checkArgsIsNull(args)) {
                 return false;
+            }
             return true;
         }
 

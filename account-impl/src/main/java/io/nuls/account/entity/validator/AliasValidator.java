@@ -32,6 +32,7 @@ import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TransactionConstant;
+import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.core.validate.NulsDataValidator;
@@ -67,7 +68,7 @@ public class AliasValidator implements NulsDataValidator<AliasTransaction> {
     @Override
     public ValidateResult validate(AliasTransaction tx) {
         Alias alias = tx.getTxData();
-        if (StringUtils.isBlank(alias.getAddress()) || new Address(alias.getAddress()).getHash().length != 23) {
+        if (!Address.validAddress(alias.getAddress())) {
             return ValidateResult.getFailedResult("The address format error");
         }
         if (!StringUtils.validAlias(alias.getAlias())) {
@@ -87,15 +88,20 @@ public class AliasValidator implements NulsDataValidator<AliasTransaction> {
             return ValidateResult.getFailedResult("utxo not enough");
         }
 
-        List<Transaction> txList = getLedgerService().getCacheTxList(TransactionConstant.TX_TYPE_SET_ALIAS);
-        if (txList != null && tx.size() > 0) {
-            for (Transaction trx : txList) {
-                Alias a = ((AliasTransaction) trx).getTxData();
-                if (alias.getAddress().equals(a.getAlias())) {
-                    return ValidateResult.getFailedResult("Alias has been set up ");
-                }
-                if (alias.getAlias().equals(a.getAlias())) {
-                    return ValidateResult.getFailedResult("The alias has been occupied");
+        if (tx.getStatus() == TxStatusEnum.CACHED) {
+            List<Transaction> txList = getLedgerService().getCacheTxList(TransactionConstant.TX_TYPE_SET_ALIAS);
+            if (txList != null && tx.size() > 0) {
+                for (Transaction trx : txList) {
+                    if(trx.getHash().equals(tx.getHash())) {
+                        continue;
+                    }
+                    Alias a = ((AliasTransaction) trx).getTxData();
+                    if (alias.getAddress().equals(a.getAddress())) {
+                        return ValidateResult.getFailedResult("Alias has been set up ");
+                    }
+                    if (alias.getAlias().equals(a.getAlias())) {
+                        return ValidateResult.getFailedResult("The alias has been occupied");
+                    }
                 }
             }
         }
