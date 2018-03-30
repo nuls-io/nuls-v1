@@ -722,7 +722,7 @@ public class PackingRoundManager {
         if (roundIndex == currentRound.getIndex()) {
             return currentRound;
         }
-        if (roundIndex == currentRound.getPreRound().getIndex()) {
+        if (null!=currentRound.getPreRound()&&roundIndex == currentRound.getPreRound().getIndex()) {
             return currentRound.getPreRound();
         }
         return null;
