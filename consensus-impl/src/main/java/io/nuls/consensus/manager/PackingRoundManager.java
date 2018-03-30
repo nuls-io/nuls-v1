@@ -83,6 +83,7 @@ public class PackingRoundManager {
     private AgentDataService agentDataService = NulsContext.getServiceBean(AgentDataService.class);
     private DepositDataService depositDataService = NulsContext.getServiceBean(DepositDataService.class);
     private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
+    private PocMeetingRound currentRound;
 
     private PackingRoundManager() {
     }
@@ -94,9 +95,6 @@ public class PackingRoundManager {
     public static PackingRoundManager getPackInstance() {
         return PACK_INSTANCE;
     }
-
-    private PocMeetingRound currentRound;
-
 
     public ValidateResult validateBlockHeader(BlockHeader header) {
         return validate(header, null);
@@ -113,7 +111,7 @@ public class PackingRoundManager {
         return validate(block.getHeader(), block.getTxs());
     }
 
-    public ValidateResult validate(BlockHeader header, List<Transaction> txs) {
+    public synchronized ValidateResult validate(BlockHeader header, List<Transaction> txs) {
         if (header.getHeight() == 0) {
             return ValidateResult.getSuccessResult();
         }
