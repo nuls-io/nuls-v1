@@ -78,6 +78,7 @@ public class PocMeetingRound {
 
     public void setMemberList(List<PocMeetingMember> memberList) {
         this.memberList = memberList;
+        this.memberCount = memberList.size();
         if (null == memberList || memberList.isEmpty()) {
             throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "consensus member list is empty");
         }
@@ -89,7 +90,6 @@ public class PocMeetingRound {
             pmm.setIndexOfRound(i + 1);
             addressOrderMap.put(pmm.getPackingAddress(), i+1);
         }
-        this.memberCount = memberList.size();
     }
 
     public Integer getOrder(String address) {

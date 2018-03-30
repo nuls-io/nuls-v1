@@ -154,6 +154,7 @@ public class ConsensusMeetingRunner implements Runnable {
         try {
             blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(-1, null);
         } catch (Exception e) {
+            Log.error(e.getMessage());
             return false;
         }
         if (blockInfo == null || blockInfo.getBestHash() == null) {
