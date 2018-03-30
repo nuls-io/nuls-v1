@@ -128,9 +128,17 @@ public class PackingRoundManager {
         }
         BlockRoundData preRoundData = new BlockRoundData(preBlock.getHeader().getExtend());
 
-        PocMeetingRound localThisRoundData =  calcCurrentRound(header, header.getHeight(), roundData);
-        PocMeetingRound localPreRoundData  = calcCurrentRound(preBlock.getHeader(), preBlock.getHeader().getHeight(), preRoundData);
-
+        PocMeetingRound localThisRoundData = calcCurrentRound(header, header.getHeight(), roundData);
+        PocMeetingRound localPreRoundData;
+        if (roundData.getRoundIndex() == preRoundData.getRoundIndex()) {
+            localPreRoundData = localThisRoundData;
+        } else {
+            localPreRoundData = calcCurrentRound(preBlock.getHeader(), preBlock.getHeader().getHeight(), preRoundData);
+            ValidateResult vr = checkThisRound(localPreRoundData, localThisRoundData, roundData, header);
+            if (vr.isFailed()) {
+                return vr;
+            }
+        }
 
         if (roundData.getConsensusMemberCount() != localThisRoundData.getMemberCount()) {
             return ValidateResult.getFailedResult("The round data of the block is wrong!");
@@ -415,7 +423,7 @@ public class PackingRoundManager {
             PocMeetingRound previousRound = calcPreviousRound(bestBlock.getHeader(), bestHeight, bestRoundData);
             this.currentRound = calcCurrentRound(bestBlock.getHeader(), bestHeight, bestRoundData);
             this.currentRound.setPreRound(previousRound);
-        }else if (null != currentRound && currentRound.getIndex() == bestRoundData.getRoundIndex() && bestRoundData.getPackingIndexOfRound() == bestRoundData.getConsensusMemberCount()) {
+        } else if (null != currentRound && currentRound.getIndex() == bestRoundData.getRoundIndex() && bestRoundData.getPackingIndexOfRound() == bestRoundData.getConsensusMemberCount()) {
             PocMeetingRound previousRound = currentRound;
             this.currentRound = calcNextRound(bestBlock.getHeader(), bestHeight, bestRoundData);
             if (previousRound.getIndex() != (currentRound.getIndex() - 1)) {
