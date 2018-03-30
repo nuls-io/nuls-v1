@@ -141,7 +141,7 @@ public class PackingRoundManager {
             }
         }
 
-        if (roundData.getConsensusMemberCount() != localPreRoundData.getMemberCount()) {
+        if (roundData.getConsensusMemberCount() != localThisRoundData.getMemberCount()) {
             return ValidateResult.getFailedResult("The round data of the block is wrong!");
         }
         if (roundData.getRoundIndex() == (localPreRoundData.getIndex() + 1) && roundData.getRoundStartTime() != localPreRoundData.getEndTime()) {
