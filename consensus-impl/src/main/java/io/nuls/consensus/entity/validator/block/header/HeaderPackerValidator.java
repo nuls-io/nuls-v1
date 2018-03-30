@@ -34,7 +34,7 @@ import io.nuls.core.validate.ValidateResult;
  */
 public class HeaderPackerValidator implements NulsDataValidator<BlockHeader> {
     public static final HeaderPackerValidator INSTANCE = new HeaderPackerValidator();
-    public PackingRoundManager packingRoundManager = PackingRoundManager.getInstance();
+    public PackingRoundManager packingRoundManager = PackingRoundManager.getValidateInstance();
 
     private HeaderPackerValidator() {
     }
