@@ -462,7 +462,6 @@ public class PackingRoundManager {
         }
         round.setMemberList(memberList);
         round.setMemberCount(memberList.size());
-
         return round;
     }
 
@@ -508,6 +507,7 @@ public class PackingRoundManager {
         round.setMemberList(memberList);
 
         round.setMemberCount(memberList.size());
+        boolean b = false;
         while (round.getEndTime() < TimeService.currentTimeMillis()) {
             long time = TimeService.currentTimeMillis() - round.getStartTime();
             long roundTime = PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000L * round.getMemberCount();
@@ -515,11 +515,14 @@ public class PackingRoundManager {
             long startTime = round.getStartTime() + index * roundTime;
             round.setStartTime(startTime);
             round.setIndex(bestRoundData.getRoundIndex() + index);
+            b = true;
         }
-        for (PocMeetingMember member : memberList) {
-            member.setRoundIndex(round.getIndex());
-            member.setRoundStartTime(round.getStartTime());
-
+        if (b) {
+            for (PocMeetingMember member : memberList) {
+                member.setRoundIndex(round.getIndex());
+                member.setRoundStartTime(round.getStartTime());
+                member.setSortValue(bestRoundData.getRoundEndTime()+"");
+            }
         }
         return round;
     }
@@ -722,7 +725,7 @@ public class PackingRoundManager {
         if (roundIndex == currentRound.getIndex()) {
             return currentRound;
         }
-        if (null!=currentRound.getPreRound()&&roundIndex == currentRound.getPreRound().getIndex()) {
+        if (null != currentRound.getPreRound() && roundIndex == currentRound.getPreRound().getIndex()) {
             return currentRound.getPreRound();
         }
         return null;
