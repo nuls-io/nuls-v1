@@ -98,8 +98,9 @@ public abstract class SystemProcessors implements CommandProcessor {
         @Override
         public boolean argsValidate(String[] args) {
             int length = args.length;
-            if(length > 2)
+            if(length > 2) {
                 return false;
+            }
             if(length == 2 && !CommandConstant.NEED_ALL.equals(args[1])) {
                 return false;
             }
