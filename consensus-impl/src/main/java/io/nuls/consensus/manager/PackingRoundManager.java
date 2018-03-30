@@ -248,10 +248,11 @@ public class PackingRoundManager {
         }
         long betweenTime = localThisRoundData.getStartTime() - localPreRoundData.getEndTime();
 
-        long differenceOfRoundIndex = betweenTime / localThisRoundData.getMemberCount();
+        long differenceOfRoundIndex = betweenTime / (localThisRoundData.getMemberCount()*1000*PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND);
 
         long differenceOfPackingIndex = betweenTime % localThisRoundData.getMemberCount();
-        if ((localThisRoundData.getIndex() - localPreRoundData.getIndex()) == differenceOfRoundIndex && thisBlockRoundData.getPackingIndexOfRound() == (differenceOfPackingIndex + 1)) {
+        if ((localThisRoundData.getIndex() - localPreRoundData.getIndex()) == differenceOfRoundIndex
+                && thisBlockRoundData.getPackingIndexOfRound() == (differenceOfPackingIndex + 1)) {
             return ValidateResult.getSuccessResult();
         }
         return ValidateResult.getFailedResult("There's no docking between the two rounds.");
