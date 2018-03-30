@@ -26,7 +26,10 @@ package io.nuls.client;
 import io.nuls.client.constant.CommandConstant;
 import io.nuls.client.processor.*;
 import io.nuls.client.processor.intf.CommandProcessor;
+import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.str.StringUtils;
+import io.nuls.rpc.constant.RpcConstant;
 import io.nuls.rpc.sdk.SdkManager;
 
 import java.io.IOException;
@@ -82,8 +85,22 @@ public class CommandHandler {
         register(new NetwrokProcessor.GetNetworkInfo());
         register(new NetwrokProcessor.getnetworknodes());
 
-        //TODO 修改为配置
-        SdkManager.init("http://192.168.1.201:8001");
+        sdkInit();
+    }
+
+    private void sdkInit() {
+        String port = null;
+        try {
+            port = NulsContext.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_PORT);
+        } catch (NulsException e) {
+            // skip
+        }
+        if (StringUtils.isBlank(port)) {
+            SdkManager.init("http://"+ RpcConstant.DEFAULT_IP + ":" + RpcConstant.DEFAULT_PORT);
+        } else {
+            SdkManager.init("http://"+ RpcConstant.DEFAULT_IP + ":" + port);
+        }
+
     }
 
     public static void main(String[] args) throws IOException {
