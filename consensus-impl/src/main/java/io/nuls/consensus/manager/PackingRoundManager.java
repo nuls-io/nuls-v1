@@ -447,15 +447,7 @@ public class PackingRoundManager {
         PocMeetingRound round = new PocMeetingRound();
         round.setIndex(bestRoundData.getRoundIndex() + 1);
         round.setStartTime(bestRoundData.getRoundEndTime());
-        round.setMemberCount(bestRoundData.getConsensusMemberCount());
-        while (round.getEndTime() < TimeService.currentTimeMillis()) {
-            long time = TimeService.currentTimeMillis() - round.getStartTime();
-            long roundTime = round.getEndTime() - round.getStartTime();
-            long index = time / roundTime;
-            long startTime = round.getStartTime() + index * roundTime;
-            round.setStartTime(startTime);
-            round.setIndex(bestRoundData.getRoundIndex() + index);
-        }
+
 
         long calcHeight = 0L;
         if (bestRoundData.getPackingIndexOfRound() == bestRoundData.getConsensusMemberCount() || NulsContext.getInstance().getBestHeight() <= bestHeight) {
@@ -495,7 +487,14 @@ public class PackingRoundManager {
         round.setMemberList(memberList);
 
         round.setMemberCount(memberList.size());
-
+        while (round.getEndTime() < TimeService.currentTimeMillis()) {
+            long time = TimeService.currentTimeMillis() - round.getStartTime();
+            long roundTime = round.getEndTime() - round.getStartTime();
+            long index = time / roundTime;
+            long startTime = round.getStartTime() + index * roundTime;
+            round.setStartTime(startTime);
+            round.setIndex(bestRoundData.getRoundIndex() + index);
+        }
         return round;
     }
 
