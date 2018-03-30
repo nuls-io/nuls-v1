@@ -517,7 +517,7 @@ public class PackingRoundManager {
                         firstBlock = getBlockService().getBlock(height);
                         height++;
                         BlockRoundData blockRoundData = new BlockRoundData(firstBlock.getHeader().getExtend());
-                        if (bestRoundData.getRoundIndex() == round.getIndex()) {
+                        if (blockRoundData.getRoundIndex() == round.getIndex()) {
                             break;
                         }
                     }
