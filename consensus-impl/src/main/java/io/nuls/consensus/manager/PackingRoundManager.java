@@ -472,6 +472,9 @@ public class PackingRoundManager {
                 while (true) {
                     Block block = getBlockService().getBlock(height);
                     height--;
+                    if(null==block){
+                        return null;
+                    }
                     BlockRoundData blockRoundData = new BlockRoundData(block.getHeader().getExtend());
                     if (blockRoundData.getRoundIndex() <= (round.getIndex() - 1)) {
                         lastBlock = block;
