@@ -532,10 +532,14 @@ public class PackingRoundManager {
                 Block firstBlock = getBlockService().getRoundFirstBlockFromDb(round.getIndex());
                 if (null == firstBlock) {
                     long height = bestHeight - bestRoundData.getPackingIndexOfRound() + 1;
-                    while (true) {
-                        firstBlock = getBlockService().getBlock(height);
+                    while (true) {BlockRoundData blockRoundData ;
+                        if(height==bestBlockHeader.getHeight()){
+                            blockRoundData =bestRoundData;
+                        }else{
+                            firstBlock = getBlockService().getBlock(height);
+                            blockRoundData = new BlockRoundData(firstBlock.getHeader().getExtend());
+                        }
                         height++;
-                        BlockRoundData blockRoundData = new BlockRoundData(firstBlock.getHeader().getExtend());
                         if (blockRoundData.getRoundIndex() == round.getIndex()) {
                             break;
                         }
