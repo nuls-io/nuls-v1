@@ -32,6 +32,7 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.Log;
+import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 
@@ -56,7 +57,10 @@ public class BlockHeaderHandler extends AbstractEventHandler<BlockHeaderEvent> {
         if (null != block) {
             return;
         }
-        header.verifyWithException();
+       ValidateResult result = header.verify();
+        if(result.isFailed()){
+            return;
+        }
         GetSmallBlockRequest request = new GetSmallBlockRequest();
         GetSmallBlockParam param = new GetSmallBlockParam();
         param.setBlockHash(header.getHash());
