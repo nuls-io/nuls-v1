@@ -119,7 +119,7 @@ public class TransactionResource {
     public RpcResult list(@QueryParam("blockHeight") Long blockHeight,
                           @QueryParam("address") String address, @QueryParam("type") int type,
                           @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
-        if (blockHeight == null && StringUtils.isBlank(address) && type == 0) {
+        if (blockHeight == null && StringUtils.isBlank(address) && type == 0 && pageNumber == 0 && pageSize == 0) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         if ((blockHeight != null && blockHeight < 0) || type < 0 || pageNumber < 0 || pageSize < 0) {

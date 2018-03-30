@@ -26,26 +26,178 @@
 package io.nuls.rpc.sdk.service;
 
 import io.nuls.rpc.sdk.entity.RpcClientResult;
+import io.nuls.rpc.sdk.utils.AssertUtil;
+import io.nuls.rpc.sdk.utils.JSONUtils;
 import io.nuls.rpc.sdk.utils.RestFulUtils;
+import io.nuls.rpc.sdk.utils.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author Niels
- * @date 2017/11/1
+ * @Desription:
+ * @Author: PierreLuo
+ * @Date: 2018/3/25
  */
-public class WalletService {
+public enum WalletService {
+    WALLET_SERVICE;
+
     private RestFulUtils restFul = RestFulUtils.getInstance();
 
-    public RpcClientResult transfer(String address, String password, String toAddress, Long amount, String remark) {
+    /**
+     * @param password
+     * @return
+     */
+    @Deprecated
+    public RpcClientResult setPassword(String password) {
+        try {
+            AssertUtil.canNotEmpty(password);
+        } catch (Exception e) {
+            return RpcClientResult.getFailed(e.getMessage());
+        }
+
+        Map<String, String> params = new HashMap<>();
+        params.put("password", password);
+        String content = null;
+        try {
+            content = JSONUtils.obj2json(params);
+        } catch (Exception e) {
+            return RpcClientResult.getFailed(e.getMessage());
+        }
+        return restFul.post("/wallet/encrypt", content);
+    }
+
+    /**
+     * @param password
+     * @param newpassword
+     * @return
+     */
+    public RpcClientResult resetPassword(String password, String newpassword) {
+        try {
+            AssertUtil.canNotEmpty(password);
+            AssertUtil.canNotEmpty(newpassword);
+        } catch (Exception e) {
+            return RpcClientResult.getFailed(e.getMessage());
+        }
+
+        Map<String, String> params = new HashMap<>();
+        params.put("password", password);
+        params.put("newPassword", newpassword);
+        String content = null;
+        try {
+            content = JSONUtils.obj2json(params);
+        } catch (Exception e) {
+            return RpcClientResult.getFailed(e.getMessage());
+        }
+        return restFul.post("/wallet/reset", content);
+    }
+
+    /**
+     * @param address
+     * @param password
+     * @param toAddress
+     * @param amount
+     * @param remark
+     * @return
+     */
+    public RpcClientResult transfer(String address, String toAddress, Long amount, String password, String remark) {
+        try {
+            AssertUtil.canNotEmpty(address);
+            AssertUtil.canNotEmpty(password);
+            AssertUtil.canNotEmpty(toAddress);
+            AssertUtil.canNotEmpty(amount);
+        } catch (Exception e) {
+            return RpcClientResult.getFailed(e.getMessage());
+        }
         Map<String, String> params = new HashMap<>();
         params.put("address", address);
         params.put("password", password);
         params.put("toAddress", toAddress);
         params.put("amount", amount + "");
         params.put("remark", remark);
-        return this.restFul.post("/wallet/transfer", params);
+        String content = null;
+        try {
+            content = JSONUtils.obj2json(params);
+        } catch (Exception e) {
+            return RpcClientResult.getFailed(e.getMessage());
+        }
+        return this.restFul.post("/wallet/transfer", content);
+    }
+
+    /**
+     * @param password
+     * @param address
+     * @return
+     */
+    public RpcClientResult backup(String password, String address) {
+        try {
+            AssertUtil.canNotEmpty(password);
+        } catch (Exception e) {
+            return RpcClientResult.getFailed(e.getMessage());
+        }
+
+        Map<String, String> params = new HashMap<>();
+        params.put("password", password);
+        if(StringUtils.isNotBlank(address)) {
+            params.put("address", address);
+        }
+        String content = null;
+        try {
+            content = JSONUtils.obj2json(params);
+        } catch (Exception e) {
+            return RpcClientResult.getFailed(e.getMessage());
+        }
+        return restFul.post("/wallet/backup", content);
+    }
+
+    /**
+     * @param password
+     * @param privateKey
+     * @return
+     */
+    public RpcClientResult importAccount(String password, String privateKey) {
+        try {
+            AssertUtil.canNotEmpty(password);
+            AssertUtil.canNotEmpty(privateKey);
+        } catch (Exception e) {
+            return RpcClientResult.getFailed(e.getMessage());
+        }
+
+        Map<String, String> params = new HashMap<>();
+        params.put("password", password);
+        params.put("prikey", privateKey);
+        String content = null;
+        try {
+            content = JSONUtils.obj2json(params);
+        } catch (Exception e) {
+            return RpcClientResult.getFailed(e.getMessage());
+        }
+        return restFul.post("/wallet/import", content);
+    }
+
+    /**
+     * @param address
+     * @param password
+     * @return
+     */
+    public RpcClientResult removeAccount(String address, String password) {
+        try {
+            AssertUtil.canNotEmpty(password);
+            AssertUtil.canNotEmpty(address);
+        } catch (Exception e) {
+            return RpcClientResult.getFailed(e.getMessage());
+        }
+
+        Map<String, String> params = new HashMap<>();
+        params.put("password", password);
+        params.put("address", address);
+        String content = null;
+        try {
+            content = JSONUtils.obj2json(params);
+        } catch (Exception e) {
+            return RpcClientResult.getFailed(e.getMessage());
+        }
+        return restFul.post("/wallet/remove", content);
     }
 
 }

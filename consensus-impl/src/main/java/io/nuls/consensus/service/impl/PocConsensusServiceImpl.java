@@ -271,7 +271,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
         Map<String, Object> map = new HashMap<>();
         map.put("agentCount", agentCount);
         map.put("totalDeposit", totalDeposit);
-        map.put("joinAccountCount", joinedAgent.size());
+        map.put("joinAgentCount", joinedAgent.size());
         map.put("usableBalance", usableBalance);
         map.put("reward", reward);
         map.put("rewardOfDay", rewardOfDay);

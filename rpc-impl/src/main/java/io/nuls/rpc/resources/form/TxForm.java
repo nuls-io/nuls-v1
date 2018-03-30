@@ -45,7 +45,7 @@ public class TxForm {
     }
 
     public void setData(String data) {
-        this.data = data;
+        this.data = StringUtils.formatStringPara(data);
     }
 
     public Transaction getTx() throws Exception {

@@ -30,6 +30,7 @@ import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.SeverityLevelEnum;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 
@@ -49,8 +50,12 @@ public class AgentDepositValidator implements NulsDataValidator<RegisterAgentTra
             return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_NOT_ENOUGH);
         }
 
-        if(!agent.getDeposit().equals(tx.getCoinData().getTotalNa())){
-            return ValidateResult.getFailedResult(SeverityLevelEnum.FLAGRANT_FOUL,ErrorCode.DEPOSIT_ERROR);
+        try {
+            if (!agent.getDeposit().equals(tx.getCoinData().getTotalNa())) {
+                return ValidateResult.getFailedResult(SeverityLevelEnum.FLAGRANT_FOUL, ErrorCode.DEPOSIT_ERROR);
+            }
+        } catch (NulsException e) {
+            return ValidateResult.getFailedResult(ErrorCode.ORPHAN_TX);
         }
         return result;
     }

@@ -23,8 +23,10 @@
  */
 package io.nuls.account.service.tx;
 
+import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Alias;
 import io.nuls.account.entity.tx.AliasTransaction;
+import io.nuls.account.service.impl.AccountCacheService;
 import io.nuls.account.util.AccountTool;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
@@ -32,6 +34,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.tx.serivce.TransactionService;
 import io.nuls.db.dao.AccountAliasDataService;
 import io.nuls.db.entity.AliasPo;
+import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.db.transactional.annotation.PROPAGATION;
 
@@ -42,6 +45,8 @@ import io.nuls.db.transactional.annotation.PROPAGATION;
 @DbSession(transactional = PROPAGATION.NONE)
 public class AliasTxService implements TransactionService<AliasTransaction> {
 
+
+    private AccountCacheService accountCacheService = AccountCacheService.getInstance();
 
     public AliasTxService() {
 
@@ -55,6 +60,11 @@ public class AliasTxService implements TransactionService<AliasTransaction> {
     public void onRollback(AliasTransaction tx) throws NulsException {
         AliasPo po = AccountTool.toAliasPojo(tx.getTxData());
         getAliasDataService().rollbackAlias(po);
+        Account account = accountCacheService.getAccountByAddress(po.getAddress());
+        if (account != null) {
+            account.setAlias("");
+            accountCacheService.putAccount(account);
+        }
     }
 
     @Override
@@ -63,9 +73,15 @@ public class AliasTxService implements TransactionService<AliasTransaction> {
         Alias alias = tx.getTxData();
         alias.setStatus(1);
         getAliasDataService().saveAlias(AccountTool.toAliasPojo(alias));
+        Account account = accountCacheService.getAccountByAddress(alias.getAddress());
+        if (account != null) {
+            account.setAlias(alias.getAlias());
+            accountCacheService.putAccount(account);
+        }
     }
 
     @Override
+    @DbSession
     public void onApproval(AliasTransaction tx) throws NulsException {
         Alias alias = tx.getTxData();
         AliasPo po = getAliasDataService().getAlias(alias.getAlias());

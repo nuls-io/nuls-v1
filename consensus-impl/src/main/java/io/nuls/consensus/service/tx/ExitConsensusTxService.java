@@ -47,6 +47,7 @@ import io.nuls.db.entity.AgentPo;
 import io.nuls.db.entity.DepositPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.db.transactional.annotation.PROPAGATION;
+import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.service.intf.LedgerService;
 
@@ -58,7 +59,6 @@ import java.util.Map;
  * @author Niels
  * @date 2018/1/8
  */
-@DbSession(transactional = PROPAGATION.NONE)
 public class ExitConsensusTxService implements TransactionService<PocExitConsensusTransaction> {
 
     private ConsensusCacheManager manager = ConsensusCacheManager.getInstance();

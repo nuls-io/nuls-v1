@@ -53,6 +53,10 @@ public final class JSONUtils {
         return OBJECT_MAPPER.writeValueAsString(obj);
     }
 
+    public static String obj2PrettyJson(Object obj) throws Exception {
+        return OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
+    }
+
     /**
      * json string convert to javaBean
      */

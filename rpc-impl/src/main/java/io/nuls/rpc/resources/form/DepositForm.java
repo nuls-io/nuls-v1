@@ -26,6 +26,8 @@
 
 package io.nuls.rpc.resources.form;
 
+import io.nuls.core.utils.str.StringUtils;
+
 /**
  * @author Niels
  * @date 2018/3/14
@@ -42,7 +44,7 @@ public class DepositForm {
     }
 
     public void setAddress(String address) {
-        this.address = address;
+        this.address = StringUtils.formatStringPara(address);
     }
 
     public String getAgentId() {
@@ -50,7 +52,7 @@ public class DepositForm {
     }
 
     public void setAgentId(String agentId) {
-        this.agentId = agentId;
+        this.agentId = StringUtils.formatStringPara(agentId);
     }
 
     public long getDeposit() {
@@ -66,6 +68,6 @@ public class DepositForm {
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        this.password = StringUtils.formatStringPara(password);
     }
 }

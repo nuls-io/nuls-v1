@@ -147,7 +147,7 @@ public class UtxoCoinManager {
                     }
                     unSpends.add(output);
                     amount = amount.add(Na.valueOf(output.getValue()));
-                    if (amount.isGreaterThan(value)) {
+                    if (amount.isEnough(value)) {
                         enough = true;
                         break;
                     }

@@ -151,9 +151,9 @@ public class BlockStorageService {
             List<Transaction> list = map.get(tx.getBlockHeight());
             if (null == list) {
                 list = new ArrayList<>();
+                map.put(tx.getBlockHeight(), list);
             }
             list.add(tx);
-            map.put(tx.getBlockHeight(), list);
         }
         return map;
     }
