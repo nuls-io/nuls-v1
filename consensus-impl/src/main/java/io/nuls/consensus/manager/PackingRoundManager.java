@@ -249,8 +249,6 @@ public class PackingRoundManager {
         long betweenTime = localThisRoundData.getStartTime() - localPreRoundData.getEndTime();
 
         long differenceOfRoundIndex = betweenTime / (localThisRoundData.getMemberCount() * 1000 * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND);
-        differenceOfRoundIndex = differenceOfRoundIndex + 1;
-
 
         long differenceOfPackingIndex = betweenTime % (localThisRoundData.getMemberCount() * 1000 * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND);
         differenceOfPackingIndex = differenceOfPackingIndex / (1000 * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND) + 1;
