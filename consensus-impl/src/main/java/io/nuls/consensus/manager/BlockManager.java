@@ -206,11 +206,11 @@ public class BlockManager {
             return;
         }
         this.rollbackTxList(block.getTxs(), 0, block.getTxs().size());
-        PackingRoundManager.getValidateInstance().calc(this.getBlock(block.getHeader().getPreHash().getDigestHex()));
+        Block preBlock =this.getBlock(block.getHeader().getPreHash().getDigestHex());
+        context.setBestBlock(preBlock);
+        PackingRoundManager.getValidateInstance().calc(preBlock);
         List<String> hashList = this.bifurcateProcessor.getHashList(block.getHeader().getHeight() - 1);
         if (hashList.size() > 1) {
-            Block preBlock = confirmingBlockCacheManager.getBlock(block.getHeader().getPreHash().getDigestHex());
-            context.setBestBlock(preBlock);
             this.rollbackAppraval(preBlock);
         }
     }
