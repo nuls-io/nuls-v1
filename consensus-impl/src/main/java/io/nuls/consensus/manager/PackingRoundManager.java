@@ -117,8 +117,9 @@ public class PackingRoundManager {
         if (header.getHeight() == 0) {
             return ValidateResult.getSuccessResult();
         }
-        BlockRoundData
-                roundData = new BlockRoundData(header.getExtend());
+        BlockRoundData roundData = new BlockRoundData(header.getExtend());
+
+
         Block preBlock = getBlockService().getBlock(header.getPreHash().getDigestHex());
         if (null == preBlock) {
             //When a block does not exist, it is temporarily validated.
@@ -536,7 +537,7 @@ public class PackingRoundManager {
 
         round.setMemberCount(memberList.size());
         boolean b = false;
-        while (round.getEndTime() < TimeService.currentTimeMillis()) {
+        if (round.getEndTime() < TimeService.currentTimeMillis()) {
             long time = TimeService.currentTimeMillis() - round.getStartTime();
             long roundTime = PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000L * round.getMemberCount();
             long index = time / roundTime;
