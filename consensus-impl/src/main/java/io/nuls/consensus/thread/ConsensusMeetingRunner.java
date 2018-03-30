@@ -191,7 +191,7 @@ public class ConsensusMeetingRunner implements Runnable {
         long timeUnit = 2000L;
         while (TimeService.currentTimeMillis() <= (self.getPackTime() - timeUnit)) {
             try {
-                Thread.sleep(timeUnit);
+                Thread.sleep(100L);
             } catch (InterruptedException e) {
                 Log.error(e);
             }

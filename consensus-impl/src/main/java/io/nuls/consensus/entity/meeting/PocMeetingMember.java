@@ -24,6 +24,7 @@
 package io.nuls.consensus.entity.meeting;
 
 import io.nuls.account.entity.Address;
+import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.member.Deposit;
@@ -46,7 +47,6 @@ public class PocMeetingMember implements Comparable<PocMeetingMember> {
      * Starting from 1
      */
     private int indexOfRound;
-    private long packTime;
     private double creditVal;
     private String sortValue;
     private Consensus<Agent> agentConsensus;
@@ -132,12 +132,10 @@ public class PocMeetingMember implements Comparable<PocMeetingMember> {
     }
 
     public long getPackTime() {
+        long packTime = PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000 * this.getIndexOfRound() +roundStartTime;
         return packTime;
     }
 
-    public void setPackTime(long packTime) {
-        this.packTime = packTime;
-    }
 
     public long getRoundIndex() {
         return roundIndex;

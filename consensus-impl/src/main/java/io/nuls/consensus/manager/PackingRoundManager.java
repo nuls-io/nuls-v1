@@ -249,9 +249,11 @@ public class PackingRoundManager {
         long betweenTime = localThisRoundData.getStartTime() - localPreRoundData.getEndTime();
 
         long differenceOfRoundIndex = betweenTime / (localThisRoundData.getMemberCount() * 1000 * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND);
+        differenceOfRoundIndex = differenceOfRoundIndex + 1;
+
 
         long differenceOfPackingIndex = betweenTime % (localThisRoundData.getMemberCount() * 1000 * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND);
-        differenceOfPackingIndex = differenceOfPackingIndex / (1000 * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND) + 1;
+        differenceOfPackingIndex = differenceOfPackingIndex / (1000 * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND) ;
         if ((localThisRoundData.getIndex() - localPreRoundData.getIndex()) == differenceOfRoundIndex
                 && thisBlockRoundData.getPackingIndexOfRound() == (differenceOfPackingIndex + 1)) {
             return ValidateResult.getSuccessResult();
@@ -438,7 +440,6 @@ public class PackingRoundManager {
             round.setStartTime(bestRoundData.getRoundEndTime() - PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000 * memberList.size());
         }
         round.setMemberList(memberList);
-
         round.setMemberCount(memberList.size());
 
         return round;
@@ -495,6 +496,11 @@ public class PackingRoundManager {
             long startTime = round.getStartTime() + index * roundTime;
             round.setStartTime(startTime);
             round.setIndex(bestRoundData.getRoundIndex() + index);
+        }
+        for(PocMeetingMember member:memberList){
+            member.setRoundIndex(round.getIndex());
+            member.setRoundStartTime(round.getStartTime());
+
         }
         return round;
     }
