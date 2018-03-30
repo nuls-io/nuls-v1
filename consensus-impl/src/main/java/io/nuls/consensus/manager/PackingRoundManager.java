@@ -129,7 +129,7 @@ public class PackingRoundManager {
 
         PocMeetingRound localThisRoundData = calcCurrentRound(header, header.getHeight(), roundData);
         if (null == localThisRoundData) {
-            ValidateResult.getFailedResult("cannot calc round info!");
+            return ValidateResult.getFailedResult("cannot calc round info!");
         }
         PocMeetingRound localPreRoundData;
         if (roundData.getRoundIndex() == preRoundData.getRoundIndex()) {
