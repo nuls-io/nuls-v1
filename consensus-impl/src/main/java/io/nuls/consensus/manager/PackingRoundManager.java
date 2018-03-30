@@ -83,8 +83,6 @@ public class PackingRoundManager {
     private AgentDataService agentDataService = NulsContext.getServiceBean(AgentDataService.class);
     private DepositDataService depositDataService = NulsContext.getServiceBean(DepositDataService.class);
     private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
-    private List<PocMeetingMember> seedList;
-
 
     private PackingRoundManager() {
     }
@@ -134,6 +132,7 @@ public class PackingRoundManager {
             localPreRoundData = localThisRoundData;
         } else {
             localPreRoundData = calcCurrentRound(preBlock.getHeader(), preBlock.getHeader().getHeight(), preRoundData);
+
             ValidateResult vr = checkThisRound(localPreRoundData, localThisRoundData, roundData, header);
             if (vr.isFailed()) {
                 return vr;
@@ -615,8 +614,11 @@ public class PackingRoundManager {
     private List<PocMeetingMember> getMemberList(long calcHeight, PocMeetingRound round, BlockHeader bestBlockHeader) {
         List<PocMeetingMember> memberList = new ArrayList<>();
         Na totalDeposit = Na.ZERO;
-        List<PocMeetingMember> seedMemberList = getDefaultSeedList();
-        for (PocMeetingMember member : seedMemberList) {
+        for (String address : csManager.getSeedNodeList()) {
+            PocMeetingMember member = new PocMeetingMember();
+            member.setAgentAddress(address);
+            member.setPackingAddress(address);
+            member.setCreditVal(1);
             member.setRoundStartTime(round.getStartTime());
             member.setRoundIndex(round.getIndex());
             memberList.add(member);
@@ -714,25 +716,6 @@ public class PackingRoundManager {
         return agentList;
     }
 
-    private List<PocMeetingMember> getDefaultSeedList() {
-        if (null != seedList) {
-            return seedList;
-        }
-        List<PocMeetingMember> seedList = new ArrayList<>();
-        if (csManager.getSeedNodeList() == null) {
-            return seedList;
-        }
-        for (String address : csManager.getSeedNodeList()) {
-            PocMeetingMember member = new PocMeetingMember();
-            member.setAgentAddress(address);
-            member.setPackingAddress(address);
-            member.setCreditVal(1);
-            seedList.add(member);
-        }
-        this.seedList = seedList;
-        return seedList;
-    }
-
     public PocMeetingRound getCurrentRound() {
         return currentRound;
     }
@@ -761,8 +744,8 @@ public class PackingRoundManager {
 
     public boolean isLocalHasSeed(List<Account> accountList) {
         for (Account account : accountList) {
-            for (PocMeetingMember seed : this.getDefaultSeedList()) {
-                if (seed.getAgentAddress().equals(account.getAddress().getBase58())) {
+            for (String seedAddress : csManager.getSeedNodeList()) {
+                if (seedAddress.equals(account.getAddress().getBase58())) {
                     return true;
                 }
             }

@@ -87,10 +87,10 @@ public class PocMeetingRound {
 
     public void setMemberList(List<PocMeetingMember> memberList) {
         this.memberList = memberList;
-        this.memberCount = memberList.size();
         if (null == memberList || memberList.isEmpty()) {
             throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "consensus member list is empty");
         }
+        this.memberCount = memberList.size();
         addressOrderMap.clear();
         for (int i = 0; i < memberList.size(); i++) {
             PocMeetingMember pmm = memberList.get(i);
