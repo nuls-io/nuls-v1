@@ -80,12 +80,11 @@ public class PocMeetingMember implements Comparable<PocMeetingMember> {
     }
 
     public String getSortValue() {
-        String hashHex = new Address(this.getAgentAddress()).hashHex();
         if (this.sortValue == null) {
-            return Sha256Hash.twiceOf((roundStartTime + hashHex).getBytes()).toString();
-        } else {
-            return Sha256Hash.twiceOf((sortValue + hashHex).getBytes()).toString();
+            String hashHex = new Address(this.getAgentAddress()).hashHex();
+            sortValue = Sha256Hash.twiceOf((roundStartTime + hashHex).getBytes()).toString();
         }
+        return sortValue;
     }
 
     public long getRoundStartTime() {
