@@ -87,7 +87,6 @@ public class PocMeetingRound {
             pmm.setRoundIndex(this.getIndex());
             pmm.setRoundStartTime(this.getStartTime());
             pmm.setIndexOfRound(i + 1);
-            pmm.setPackTime(pmm.getRoundStartTime() + PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000 * pmm.getIndexOfRound());
             addressOrderMap.put(pmm.getPackingAddress(), i+1);
         }
         this.memberCount = memberList.size();
