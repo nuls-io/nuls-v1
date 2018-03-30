@@ -67,13 +67,13 @@ public class PocMeetingRound {
     }
 
     public PocMeetingMember getMember(int order) {
-        if (order == 0) {
+        if (order < 0) {
             throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "the parameter is wrong:memberOrder");
         }
         if (null == memberList || memberList.isEmpty()) {
             throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "consensus member list is empty");
         }
-        return this.memberList.get(order - 1);
+        return this.memberList.get(order);
     }
 
     public void setMemberList(List<PocMeetingMember> memberList) {
@@ -126,14 +126,6 @@ public class PocMeetingRound {
 
     public void setTotalDeposit(Na totalDeposit) {
         this.totalDeposit = totalDeposit;
-    }
-
-    public Integer indexOf(String address) {
-        Integer index = addressOrderMap.get(address);
-        if (index == null) {
-            index = -1;
-        }
-        return index;
     }
 
     public List<PocMeetingMember> getMemberList() {
