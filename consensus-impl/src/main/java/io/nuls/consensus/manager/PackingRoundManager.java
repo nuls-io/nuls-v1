@@ -249,9 +249,11 @@ public class PackingRoundManager {
         long betweenTime = localThisRoundData.getStartTime() - localPreRoundData.getEndTime();
 
         long differenceOfRoundIndex = betweenTime / (localThisRoundData.getMemberCount() * 1000 * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND);
+        differenceOfRoundIndex = differenceOfRoundIndex + 1;
+
 
         long differenceOfPackingIndex = betweenTime % (localThisRoundData.getMemberCount() * 1000 * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND);
-        differenceOfPackingIndex = differenceOfPackingIndex / (1000 * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND) + 1;
+        differenceOfPackingIndex = differenceOfPackingIndex / (1000 * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND) ;
         if ((localThisRoundData.getIndex() - localPreRoundData.getIndex()) == differenceOfRoundIndex
                 && thisBlockRoundData.getPackingIndexOfRound() == (differenceOfPackingIndex + 1)) {
             return ValidateResult.getSuccessResult();
