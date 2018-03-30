@@ -30,6 +30,7 @@ import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -277,6 +278,12 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         UtxoData utxoData = (UtxoData) coinData;
         if (utxoData == null) {
             return;
+        }
+
+        if (tx.getType() == TransactionConstant.TX_TYPE_TRANSFER) {
+            Log.info("------------------transfer roll back------------------");
+            Log.info("tx:" + tx.getHash().getDigestHex());
+            Log.info("status:" + tx.getStatus().name());
         }
 
         Set<String> addressSet = new HashSet<>();
