@@ -139,11 +139,11 @@ public class ConsensusMeetingRunner implements Runnable {
                     Thread.sleep(10000L);
                 }
             } catch (Exception e) {
-                Log.error(e.getMessage());
+                Log.error(e);
                 try {
                     startMeeting();
                 } catch (Exception e1) {
-                    Log.error(e1.getMessage());
+                    Log.error(e1);
                 }
             }
         }
@@ -332,6 +332,7 @@ public class ConsensusMeetingRunner implements Runnable {
         punishTx(bestBlock, txList, self);
         CoinBaseTransaction coinBaseTransaction = packingRoundManager.createNewCoinBaseTx(self, txList, packingRoundManager.getCurrentRound());
         coinBaseTransaction.setScriptSig(accountService.createP2PKHScriptSigFromDigest(coinBaseTransaction.getHash(), packingRoundManager.getCurrentRound().getLocalPacker(), NulsContext.CACHED_PASSWORD_OF_WALLET).serialize());
+        txList.add(0,coinBaseTransaction);
     }
 
 
