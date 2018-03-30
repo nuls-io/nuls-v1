@@ -27,6 +27,7 @@
 package io.nuls.consensus.manager;
 
 import io.nuls.account.entity.Account;
+import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
@@ -125,20 +126,15 @@ public class PackingRoundManager {
             //When a block does not exist, it is temporarily validated.
             return ValidateResult.getSuccessResult();
         }
-
+        calc(preBlock);
         BlockRoundData preRoundData = new BlockRoundData(preBlock.getHeader().getExtend());
 
-        PocMeetingRound localPreRoundData = getRoundDataOrCalc(preBlock.getHeader(), preBlock.getHeader().getHeight(), preRoundData);
-        PocMeetingRound localThisRoundData = null;
-        if (localPreRoundData.getIndex() == roundData.getRoundIndex()) {
-            localThisRoundData = localPreRoundData;
+        PocMeetingRound localThisRoundData = this.currentRound;
+        PocMeetingRound localPreRoundData;
+        if (preRoundData.getRoundIndex() == roundData.getRoundIndex()) {
+            localPreRoundData = localThisRoundData;
         } else {
-            localThisRoundData = getRoundDataOrCalc(header, header.getHeight(), roundData);
-            //Verify that the time of the two turns is correct.
-            ValidateResult result = checkThisRound(localPreRoundData, localThisRoundData, roundData, header);
-            if (result.isFailed()) {
-                return result;
-            }
+            localPreRoundData = localThisRoundData.getPreRound();
         }
 
         if (roundData.getConsensusMemberCount() != localThisRoundData.getMemberCount()) {
@@ -228,7 +224,14 @@ public class PackingRoundManager {
                     return ValidateResult.getFailedResult("The block has wrong yellow punish Tx!address list size is wrong!");
                 }
                 for (String address : addressList) {
-                    if (!yellowPunishTx.getTxData().getAddressList().contains(address)) {
+                    boolean contains = false;
+                    for (Address addressObj : yellowPunishTx.getTxData().getAddressList()) {
+                        if (addressObj.getBase58().equals(address)) {
+                            contains = true;
+                            break;
+                        }
+                    }
+                    if (!contains) {
                         return ValidateResult.getFailedResult("The block has wrong yellow punish Tx!It has wrong address");
                     }
                 }
@@ -310,6 +313,7 @@ public class PackingRoundManager {
         CoinBaseTransaction tx;
         try {
             tx = new CoinBaseTransaction(data, null);
+            tx.setTime(member.getPackTime());
         } catch (NulsException e) {
             Log.error(e);
             throw new NulsRuntimeException(e);
@@ -521,7 +525,7 @@ public class PackingRoundManager {
             for (PocMeetingMember member : memberList) {
                 member.setRoundIndex(round.getIndex());
                 member.setRoundStartTime(round.getStartTime());
-                member.setSortValue(bestRoundData.getRoundEndTime()+"");
+                member.setSortValue(bestRoundData.getRoundEndTime() + "");
             }
         }
         return round;
