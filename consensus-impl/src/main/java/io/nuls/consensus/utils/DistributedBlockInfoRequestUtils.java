@@ -163,7 +163,14 @@ public class DistributedBlockInfoRequestUtils {
 
     private void calc() {
         if (null == nodeIdList || nodeIdList.isEmpty()) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "success list of nodes is empty!");
+            BlockInfo blockInfo = new BlockInfo();
+            blockInfo.setBestHeight(0);
+            blockInfo.setBestHash(NulsContext.getInstance().getGenesisBlock().getHeader().getHash());
+            blockInfo.putHash(0,blockInfo.getBestHash());
+            blockInfo.setNodeIdList(this.nodeIdList);
+            blockInfo.setFinished(true);
+            this.bestBlockInfo = blockInfo;
+            return;
         }
         int size = nodeIdList.size();
         int halfSize = (size + 1) / 2;

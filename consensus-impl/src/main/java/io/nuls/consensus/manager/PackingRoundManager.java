@@ -130,7 +130,7 @@ public class PackingRoundManager {
         } else {
             localThisRoundData = getRoundDataOrCalc(header, header.getHeight(), roundData);
             //Verify that the time of the two turns is correct.
-            ValidateResult result = checkThisRound(localPreRoundData, localThisRoundData, roundData);
+            ValidateResult result = checkThisRound(localPreRoundData, localThisRoundData, roundData, header);
             if (result.isFailed()) {
                 return result;
             }
@@ -240,7 +240,7 @@ public class PackingRoundManager {
      * @param localThisRoundData
      * @return
      */
-    private ValidateResult checkThisRound(PocMeetingRound localPreRoundData, PocMeetingRound localThisRoundData, BlockRoundData thisBlockRoundData) {
+    private ValidateResult checkThisRound(PocMeetingRound localPreRoundData, PocMeetingRound localThisRoundData, BlockRoundData thisBlockRoundData, BlockHeader header) {
         if (localPreRoundData.getEndTime() == localThisRoundData.getStartTime() && localPreRoundData.getIndex() == (localThisRoundData.getIndex() - 1)) {
             return ValidateResult.getSuccessResult();
         } else if (localPreRoundData.getIndex() == (localThisRoundData.getIndex() - 1)) {
@@ -251,12 +251,12 @@ public class PackingRoundManager {
         long differenceOfRoundIndex = betweenTime / (localThisRoundData.getMemberCount() * 1000 * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND);
 
         long differenceOfPackingIndex = betweenTime % (localThisRoundData.getMemberCount() * 1000 * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND);
-        differenceOfPackingIndex = differenceOfPackingIndex / (1000 * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND) ;
-        if(differenceOfPackingIndex>0){
-            differenceOfRoundIndex = differenceOfRoundIndex + 1;
+
+        if ((localThisRoundData.getIndex() - localPreRoundData.getIndex()) != differenceOfRoundIndex && 0 == differenceOfPackingIndex) {
+            return ValidateResult.getFailedResult("There's no docking between the two rounds.");
         }
-        if ((localThisRoundData.getIndex() - localPreRoundData.getIndex()) == differenceOfRoundIndex
-                && thisBlockRoundData.getPackingIndexOfRound() == (differenceOfPackingIndex + 1)) {
+        long indexOfRound = 1+ (header.getTime() - thisBlockRoundData.getRoundStartTime()) / (1000 * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND);
+        if (thisBlockRoundData.getPackingIndexOfRound() == indexOfRound) {
             return ValidateResult.getSuccessResult();
         }
         return ValidateResult.getFailedResult("There's no docking between the two rounds.");
@@ -450,8 +450,6 @@ public class PackingRoundManager {
         PocMeetingRound round = new PocMeetingRound();
         round.setIndex(bestRoundData.getRoundIndex() + 1);
         round.setStartTime(bestRoundData.getRoundEndTime());
-
-
         long calcHeight = 0L;
         if (bestRoundData.getPackingIndexOfRound() == bestRoundData.getConsensusMemberCount() || NulsContext.getInstance().getBestHeight() <= bestHeight) {
             calcHeight = bestHeight - PocConsensusConstant.CONFIRM_BLOCK_COUNT;
@@ -492,13 +490,13 @@ public class PackingRoundManager {
         round.setMemberCount(memberList.size());
         while (round.getEndTime() < TimeService.currentTimeMillis()) {
             long time = TimeService.currentTimeMillis() - round.getStartTime();
-            long roundTime = round.getEndTime() - round.getStartTime();
+            long roundTime = PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000L * round.getMemberCount();
             long index = time / roundTime;
             long startTime = round.getStartTime() + index * roundTime;
             round.setStartTime(startTime);
             round.setIndex(bestRoundData.getRoundIndex() + index);
         }
-        for(PocMeetingMember member:memberList){
+        for (PocMeetingMember member : memberList) {
             member.setRoundIndex(round.getIndex());
             member.setRoundStartTime(round.getStartTime());
 
