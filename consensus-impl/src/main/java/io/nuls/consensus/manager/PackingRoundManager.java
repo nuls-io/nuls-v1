@@ -281,7 +281,7 @@ public class PackingRoundManager {
         }
         long betweenTime = localThisRoundData.getStartTime() - localPreRoundData.getEndTime();
 
-        long differenceOfRoundIndex = betweenTime / (localThisRoundData.getMemberCount() * 1000 * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND);
+        long differenceOfRoundIndex = 1+betweenTime / (localThisRoundData.getMemberCount() * 1000 * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND);
 
         long differenceOfPackingIndex = betweenTime % (localThisRoundData.getMemberCount() * 1000 * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND);
 
@@ -538,7 +538,7 @@ public class PackingRoundManager {
         round.setMemberCount(memberList.size());
 
         boolean b = false;
-        if (round.getEndTime() < TimeService.currentTimeMillis()) {
+        while (round.getEndTime() < TimeService.currentTimeMillis()) {
             long time = TimeService.currentTimeMillis() - round.getStartTime();
             long roundTime = PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000L * round.getMemberCount();
             long index = time / roundTime;
