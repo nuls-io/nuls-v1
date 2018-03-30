@@ -125,12 +125,8 @@ public class DownloadDataUtils {
                 txs.add(tx);
             }
             block.setTxs(txs);
-            ValidateResult<RedPunishData> vResult = block.verify();
-            if (null == vResult || vResult.isFailed()) {
-                if (vResult.getLevel() == SeverityLevelEnum.FLAGRANT_FOUL) {
-                    RedPunishData redPunishData = vResult.getObject();
-                    ConsensusMeetingRunner.putPunishData(redPunishData);
-                }
+            ValidateResult vResult = block.verify();
+            if (vResult.isFailed()&&vResult.getErrorCode()!=ErrorCode.ORPHAN_BLOCK&&vResult.getErrorCode()!=ErrorCode.ORPHAN_TX) {
                 return;
             }
             blockManager.addBlock(block, false,nodeId);

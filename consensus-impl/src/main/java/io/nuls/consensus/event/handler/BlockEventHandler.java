@@ -59,7 +59,7 @@ public class BlockEventHandler extends AbstractEventHandler<BlockEvent> {
         }
 
         ValidateResult result = block.verify();
-        if (result.isFailed()&&result.getErrorCode()!= ErrorCode.ORPHAN_TX) {
+        if (result.isFailed()&&result.getErrorCode()!= ErrorCode.ORPHAN_TX&&result.getErrorCode()!= ErrorCode.ORPHAN_BLOCK) {
             if (result.getLevel() == SeverityLevelEnum.FLAGRANT_FOUL) {
                 networkService.blackNode(fromId, NodePo.YELLOW);
             }

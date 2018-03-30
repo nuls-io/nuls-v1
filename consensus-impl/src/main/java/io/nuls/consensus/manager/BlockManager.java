@@ -43,11 +43,13 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
+import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.service.intf.LedgerService;
 
@@ -104,7 +106,13 @@ public class BlockManager {
             return;
         }
         if (verify) {
-            block.verifyWithException();
+            ValidateResult result = block.verify();
+            if (result.isFailed() && result.getErrorCode() != ErrorCode.ORPHAN_BLOCK && result.getErrorCode() != ErrorCode.ORPHAN_TX) {
+                throw new NulsRuntimeException(result.getErrorCode(), result.getMessage());
+            } else if (result.isFailed()) {
+                blockCacheBuffer.cacheBlock(block);
+                return;
+            }
         }
         boolean success = confirmingBlockCacheManager.cacheBlock(block);
         if (!success) {
@@ -278,10 +286,10 @@ public class BlockManager {
 
     public Block getHighestBlock() {
         BlockHeaderChain chain = bifurcateProcessor.getLongestChain();
-        if(null==chain){
+        if (null == chain) {
             return null;
         }
-        HeaderDigest headerDigest = chain.getHeaderDigestList().get(chain.getHeaderDigestList().size()-1);
-        return   this.getBlock(headerDigest.getHash());
+        HeaderDigest headerDigest = chain.getHeaderDigestList().get(chain.getHeaderDigestList().size() - 1);
+        return this.getBlock(headerDigest.getHash());
     }
 }
