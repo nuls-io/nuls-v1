@@ -135,6 +135,9 @@ public class PackingRoundManager {
             localPreRoundData = localThisRoundData;
         } else {
             localPreRoundData = localThisRoundData.getPreRound();
+            if (localPreRoundData == null) {
+                localPreRoundData = calcCurrentRound(preBlock.getHeader(),preBlock.getHeader().getHeight(),preRoundData);
+            }
         }
 
         if (roundData.getConsensusMemberCount() != localThisRoundData.getMemberCount()) {
