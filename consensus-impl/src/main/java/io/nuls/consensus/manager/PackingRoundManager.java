@@ -536,6 +536,7 @@ public class PackingRoundManager {
         round.setMemberList(memberList);
 
         round.setMemberCount(memberList.size());
+
         boolean b = false;
         if (round.getEndTime() < TimeService.currentTimeMillis()) {
             long time = TimeService.currentTimeMillis() - round.getStartTime();
@@ -543,7 +544,7 @@ public class PackingRoundManager {
             long index = time / roundTime;
             long startTime = round.getStartTime() + index * roundTime;
             round.setStartTime(startTime);
-            round.setIndex(bestRoundData.getRoundIndex() + index);
+            round.setIndex(round.getIndex() + index);
             b = true;
         }
         if (b) {
@@ -552,6 +553,7 @@ public class PackingRoundManager {
                 member.setRoundStartTime(round.getStartTime());
             }
         }
+
         return round;
     }
 
@@ -582,21 +584,22 @@ public class PackingRoundManager {
                 } else {
                     Block firstBlock = getBlockService().getRoundFirstBlockFromDb(round.getIndex());
                     if (null == firstBlock) {
-                        long height = bestHeight - bestRoundData.getPackingIndexOfRound() + 1;
+                        firstBlock = new Block();
+                        firstBlock.setHeader(bestBlockHeader);
+
                         while (true) {
-                            BlockRoundData blockRoundData;
-                            if (height == bestBlockHeader.getHeight()) {
-                                blockRoundData = bestRoundData;
-                            } else {
-                                firstBlock = getBlockService().getBlock(height);
-                                blockRoundData = new BlockRoundData(firstBlock.getHeader().getExtend());
+                            String preHash = firstBlock.getHeader().getPreHash().getDigestHex();
+                            Block block = getBlockService().getBlock(preHash);
+                            if (null == block) {
+                                System.out.println();
                             }
-                            height++;
-                            if (blockRoundData.getRoundIndex() == round.getIndex()) {
+                            BlockRoundData blockRoundData = new BlockRoundData(block.getHeader().getExtend());
+                            if (blockRoundData.getRoundIndex() < round.getIndex()) {
                                 break;
+                            } else if (blockRoundData.getRoundIndex() == round.getIndex()) {
+                                firstBlock = block;
                             }
                         }
-
                     }
                     calcHeight = firstBlock.getHeader().getHeight() - PocConsensusConstant.CONFIRM_BLOCK_COUNT - 1;
                 }
