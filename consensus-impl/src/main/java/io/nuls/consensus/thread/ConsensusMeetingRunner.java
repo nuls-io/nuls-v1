@@ -375,6 +375,7 @@ public class ConsensusMeetingRunner implements Runnable {
         int packingIndex = 0;
 
         if (lastBlockRoundData.getPackingIndexOfRound() == lastBlockRoundData.getConsensusMemberCount()) {
+            roundIndex ++;
             packingIndex = 1;
         } else {
             packingIndex = lastBlockRoundData.getPackingIndexOfRound() + 1;
