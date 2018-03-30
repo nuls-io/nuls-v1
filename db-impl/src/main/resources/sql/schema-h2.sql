@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS `account` (
   `extend` varbinary(1024) DEFAULT NULL,
   `status` INT DEFAULT 0,
   PRIMARY KEY (`address`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ;
 
 CREATE TABLE IF NOT EXISTS `punish_log` (
   `id` varchar(32) NOT NULL,
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS `punish_log` (
   `height` bigint(14) NOT NULL,
   `time` bigint(14) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ;
 
 CREATE TABLE IF NOT EXISTS `block_header` (
   `hash` varchar(70) NOT NULL,
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `block_header` (
   `size` int(9) DEFAULT NULL,
   PRIMARY KEY (`hash`),
   UNIQUE KEY `block_height_idx` (`height`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ;
 
 CREATE TABLE IF NOT EXISTS `agent` (
   `id` varchar(70) NOT NULL,
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS `agent` (
   `start_time` bigint(14) NOT NULL,
   `commission_rate` decimal(14) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ;
 
 CREATE TABLE IF NOT EXISTS `deposit` (
   `id` varchar(70) NOT NULL,
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS `deposit` (
   `block_height` bigint(14) DEFAULT NULL,
   `tx_hash` varchar(70) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ;
 
 CREATE TABLE IF NOT EXISTS `node` (
   `id` VARCHAR(30) NOT NULL,
@@ -74,19 +74,19 @@ CREATE TABLE IF NOT EXISTS `node` (
   `status` int(1) NOT NULL,
   `magic_num` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ;
 
 CREATE TABLE IF NOT EXISTS `node_group` (
   `name` varchar(30) NOT NULL,
   PRIMARY KEY (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ;
 
 CREATE TABLE IF NOT EXISTS `node_group_relation` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `node_id` varchar(30) NOT NULL,
   `group_id` varchar(30) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ;
 
 CREATE TABLE IF NOT EXISTS `sub_chain` (
   `id` varchar(30) NOT NULL,
@@ -100,7 +100,7 @@ CREATE TABLE IF NOT EXISTS `sub_chain` (
   `sign` varbinary(1024) NOT NULL,
   `address_prefix` int(5) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ;
 
 CREATE TABLE IF NOT EXISTS `transaction` (
   `hash` varchar(70) NOT NULL,
@@ -113,9 +113,8 @@ CREATE TABLE IF NOT EXISTS `transaction` (
   `txData` varbinary(1024) DEFAULT NULL,
   `scriptSig` varbinary(255) DEFAULT NULL,
   `size` int(9) DEFAULT NULL,
-  PRIMARY KEY (`hash`),
- -- KEY `block_height_idx` (`block_height`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  PRIMARY KEY (`hash`)
+) ;
 
 CREATE TABLE IF NOT EXISTS `transaction_local` (
   `hash` varchar(70) NOT NULL,
@@ -129,15 +128,14 @@ CREATE TABLE IF NOT EXISTS `transaction_local` (
   `txData` varbinary(1024) DEFAULT NULL,
   `scriptSig` varbinary(255) DEFAULT NULL,
   `size` int(9) DEFAULT NULL,
-  PRIMARY KEY (`hash`),
---  KEY `block_height_id` (`block_height`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  PRIMARY KEY (`hash`)
+) ;
 
 CREATE TABLE IF NOT EXISTS `tx_account_relation` (
   `tx_hash` varchar(70) NOT NULL,
   `address` varchar(40) NOT NULL,
   PRIMARY KEY (`tx_hash`, `address`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ;
 
 CREATE TABLE IF NOT EXISTS `utxo_input` (
   `tx_hash` varchar(70) NOT NULL,
@@ -146,7 +144,7 @@ CREATE TABLE IF NOT EXISTS `utxo_input` (
   `from_index` int(5) NOT NULL,
   PRIMARY KEY (`tx_hash`,`in_index`),
   UNIQUE KEY `from_idx` (`from_hash`,`from_index`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ;
 
 CREATE TABLE IF NOT EXISTS `utxo_output` (
   `tx_hash` varchar(70) NOT NULL,
@@ -156,9 +154,8 @@ CREATE TABLE IF NOT EXISTS `utxo_output` (
   `status` tinyint(1) NOT NULL,
   `script` varbinary(1024) NOT NULL,
   `address` varchar(40) NOT NULL,
-  PRIMARY KEY (`tx_hash`,`out_index`),
- -- KEY `addres_idx` (`address`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  PRIMARY KEY (`tx_hash`,`out_index`)
+) ;
 
 CREATE TABLE IF NOT EXISTS `alias` (
   `alias` varchar(40) NOT NULL,
@@ -166,7 +163,7 @@ CREATE TABLE IF NOT EXISTS `alias` (
   `status` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`alias`),
   UNIQUE KEY `alias_address_idx` (`address`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ;
 
 create index IF NOT EXISTS block_height_idx on transaction(block_height);
 create index IF NOT EXISTS block_height_idx on transaction_local(block_height);
