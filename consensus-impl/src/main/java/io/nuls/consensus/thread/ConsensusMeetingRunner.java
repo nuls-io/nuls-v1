@@ -120,11 +120,11 @@ public class ConsensusMeetingRunner implements Runnable {
             return;
         }
         this.running = true;
-        boolean result = (TimeService.currentTimeMillis() - this.getBestBlock().getHeader().getTime()) <= 1000L;
+        boolean result = (TimeService.currentTimeMillis() - this.getBestBlock().getHeader().getTime()) <= 1000L*PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND;
         if (!result) {
             while (!checkBestHash()) {
                 try {
-                    Thread.sleep(10000L);
+                    Thread.sleep(1000L);
                 } catch (InterruptedException e) {
                     Log.error(e);
                 }

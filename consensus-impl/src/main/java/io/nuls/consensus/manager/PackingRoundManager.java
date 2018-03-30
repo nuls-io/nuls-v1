@@ -139,7 +139,7 @@ public class PackingRoundManager {
         if (roundData.getConsensusMemberCount() != localPreRoundData.getMemberCount()) {
             return ValidateResult.getFailedResult("The round data of the block is wrong!");
         }
-        if (roundData.getRoundStartTime() != localPreRoundData.getEndTime()) {
+        if (roundData.getRoundIndex()==(localPreRoundData.getIndex()+1)&&roundData.getRoundStartTime() != localPreRoundData.getEndTime()) {
             return ValidateResult.getFailedResult("The round data of the block is wrong!");
         }
         PocMeetingMember member = localPreRoundData.getMember(roundData.getPackingIndexOfRound());
