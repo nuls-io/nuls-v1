@@ -554,7 +554,6 @@ public class PackingRoundManager {
                 member.setRoundIndex(round.getIndex());
                 memberList.add(member);
             }
-            memberList.addAll(seedMemberList);
             List<Consensus<Agent>> agentList = getAgentList(calcHeight);
             Map<String, List<DepositPo>> depositMap = new HashMap<>();
             if (agentList.size() > 0) {
