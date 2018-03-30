@@ -312,7 +312,6 @@ public class ConsensusMeetingRunner implements Runnable {
             }
             ValidateResult result = tx.verify();
             if (result.isFailed()) {
-                Log.error(result.getMessage());
                 continue;
             }
             try {
