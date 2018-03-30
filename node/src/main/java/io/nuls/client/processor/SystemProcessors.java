@@ -66,6 +66,9 @@ public abstract class SystemProcessors implements CommandProcessor {
 
         @Override
         public boolean argsValidate(String[] args) {
+            int length = args.length;
+            if(length > 1)
+                return false;
             return true;
         }
 
@@ -144,6 +147,9 @@ public abstract class SystemProcessors implements CommandProcessor {
 
         @Override
         public boolean argsValidate(String[] args) {
+            int length = args.length;
+            if(length > 1)
+                return false;
             return true;
         }
 
