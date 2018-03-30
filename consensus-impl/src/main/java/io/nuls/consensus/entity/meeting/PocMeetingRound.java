@@ -67,13 +67,13 @@ public class PocMeetingRound {
     }
 
     public PocMeetingMember getMember(int order) {
-        if (order < 0) {
+        if (order == 0) {
             throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "the parameter is wrong:memberOrder");
         }
         if (null == memberList || memberList.isEmpty()) {
             throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "consensus member list is empty");
         }
-        return this.memberList.get(order);
+        return this.memberList.get(order-1);
     }
 
     public void setMemberList(List<PocMeetingMember> memberList) {
@@ -88,7 +88,7 @@ public class PocMeetingRound {
             pmm.setRoundStartTime(this.getStartTime());
             pmm.setIndexOfRound(i + 1);
             pmm.setPackTime(pmm.getRoundStartTime() + PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000 * pmm.getIndexOfRound());
-            addressOrderMap.put(pmm.getPackingAddress(), i);
+            addressOrderMap.put(pmm.getPackingAddress(), i+1);
         }
     }
 
