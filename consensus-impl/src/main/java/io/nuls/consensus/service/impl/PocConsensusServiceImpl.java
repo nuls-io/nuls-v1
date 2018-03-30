@@ -331,7 +331,6 @@ public class PocConsensusServiceImpl implements ConsensusService {
             agent.setPackingAddress(params.getPackingAddress());
             agent.setDeposit(Na.valueOf(params.getDeposit()));
             agent.setIntroduction(params.getIntroduction());
-            agent.setSeed(params.isSeed());
             agent.setCommissionRate(params.getCommissionRate());
             agent.setAgentName(params.getAgentName());
             try {

@@ -32,33 +32,33 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.tx.serivce.TransactionService;
 import io.nuls.db.dao.AccountAliasDataService;
 import io.nuls.db.entity.AliasPo;
+import io.nuls.db.transactional.annotation.DbSession;
+import io.nuls.db.transactional.annotation.PROPAGATION;
 
 /**
  * @author Niels
  * @date 2018/1/8
  */
+@DbSession(transactional = PROPAGATION.NONE)
 public class AliasTxService implements TransactionService<AliasTransaction> {
 
-    private static AliasTxService instance = new AliasTxService();
 
-    private AliasTxService() {
+    public AliasTxService() {
 
-    }
-
-    public static AliasTxService getInstance() {
-        return instance;
     }
 
 
     private AccountAliasDataService aliasDataService;
 
     @Override
+    @DbSession
     public void onRollback(AliasTransaction tx) throws NulsException {
         AliasPo po = AccountTool.toAliasPojo(tx.getTxData());
         getAliasDataService().rollbackAlias(po);
     }
 
     @Override
+    @DbSession
     public void onCommit(AliasTransaction tx) throws NulsException {
         Alias alias = tx.getTxData();
         alias.setStatus(1);

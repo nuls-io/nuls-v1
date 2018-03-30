@@ -37,6 +37,7 @@ public class DepositSearchParams extends Searchable {
     public static final String SEARCH_FIELD_ADDRESS = "address";
 
     public DepositSearchParams(Map<String, Object> params) {
+        this.addCondition("del_height",SearchOperator.eq,1);
         if (null == params) {
             return;
         }

@@ -252,4 +252,11 @@ public class BlockStorageService {
         }
         return value;
     }
+
+    public Long getRoundFirstBlockHeight(long roundIndex) {
+        return this.headerDao.getRoundFirstBlockHeight(roundIndex);
+    }
+    public Long getRoundLastBlockHeight(long roundIndex) {
+        return this.headerDao.getRoundLastBlockHeight(roundIndex);
+    }
 }

@@ -44,6 +44,16 @@ public class DepositPo {
 
     private String txHash;
 
+    private long delHeight;
+
+    public long getDelHeight() {
+        return delHeight;
+    }
+
+    public void setDelHeight(long delHeight) {
+        this.delHeight = delHeight;
+    }
+
     public String getTxHash() {
         return txHash;
     }

@@ -47,18 +47,12 @@ public class Agent extends BaseNulsData {
     private String introduction;
 
     private String agentName;
+
     private long startTime;
 
-    /**
-     * the following fields is for The account self(delegate Account)
-     */
+    private long blockHeight;
+
     private int status;
-    private long roundNo;
-    private long roundIndex;
-    private long roundStartTime;
-    private long roundEndTime;
-    //todo  Is it necessary
-    private boolean seed;
 
     @Override
     public int size() {
@@ -67,9 +61,8 @@ public class Agent extends BaseNulsData {
         size += Utils.sizeOfString(this.packingAddress);
         size += Utils.sizeOfDouble(this.commissionRate);
         size += Utils.sizeOfString(this.introduction);
-        size += Utils.sizeOfBoolean(seed);
         size += Utils.sizeOfString(agentName);
-        size +=Utils.sizeOfInt48();
+        size += Utils.sizeOfInt48();
         return size;
     }
 
@@ -79,7 +72,6 @@ public class Agent extends BaseNulsData {
         stream.writeString(packingAddress);
         stream.writeDouble(this.commissionRate);
         stream.writeString(this.introduction);
-        stream.writeBoolean(seed);
         stream.writeString(agentName);
         stream.writeInt48(startTime);
     }
@@ -90,7 +82,6 @@ public class Agent extends BaseNulsData {
         this.packingAddress = byteBuffer.readString();
         this.commissionRate = byteBuffer.readDouble();
         this.introduction = byteBuffer.readString();
-        this.seed = byteBuffer.readBoolean();
         this.agentName = byteBuffer.readString();
         this.startTime = byteBuffer.readInt48();
     }
@@ -119,37 +110,6 @@ public class Agent extends BaseNulsData {
         this.status = status;
     }
 
-    public long getRoundIndex() {
-        return roundIndex;
-    }
-
-    public void setRoundIndex(long roundIndex) {
-        this.roundIndex = roundIndex;
-    }
-
-    public long getRoundStartTime() {
-        return roundStartTime;
-    }
-
-    public void setRoundStartTime(long roundStartTime) {
-        this.roundStartTime = roundStartTime;
-    }
-
-    public long getRoundEndTime() {
-        return roundEndTime;
-    }
-
-    public void setRoundEndTime(long roundEndTime) {
-        this.roundEndTime = roundEndTime;
-    }
-
-    public long getRoundNo() {
-        return roundNo;
-    }
-
-    public void setRoundNo(long roundNo) {
-        this.roundNo = roundNo;
-    }
 
     public double getCommissionRate() {
         return commissionRate;
@@ -175,12 +135,12 @@ public class Agent extends BaseNulsData {
         this.startTime = startTime;
     }
 
-    public void setSeed(Boolean seed) {
-        this.seed = seed;
+    public long getBlockHeight() {
+        return blockHeight;
     }
 
-    public Boolean getSeed() {
-        return seed;
+    public void setBlockHeight(long blockHeight) {
+        this.blockHeight = blockHeight;
     }
 
     public String getAgentName() {

@@ -30,6 +30,7 @@ import io.nuls.db.entity.AgentPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.db.transactional.annotation.PROPAGATION;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -50,6 +51,17 @@ public class AgentDaoImpl extends BaseDaoImpl<AgentMapper, String, AgentPo> impl
     @Override
     public int updateSelective(AgentPo po) {
         return getMapper().updateByPrimaryKeySelective(po);
+    }
+    @Override
+    public List<AgentPo> getAllList(long blockHeight){
+        return this.getMapper().getAllList(blockHeight);
+    }
+    @Override
+    public int deleteById(String id, long blockHeight){
+        AgentPo agentPo = new AgentPo();
+        agentPo.setId(id);
+        agentPo.setDelHeight(blockHeight);
+        return this.getMapper().deleteByPrimaryKey(agentPo);
     }
 
 }

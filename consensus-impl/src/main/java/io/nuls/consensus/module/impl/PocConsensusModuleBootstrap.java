@@ -68,11 +68,11 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
         EventManager.putEvent(StopConsensusNotice.class);
         PocBlockValidatorManager.initHeaderValidators();
         PocBlockValidatorManager.initBlockValidators();
-        this.registerTransaction(TransactionConstant.TX_TYPE_REGISTER_AGENT, RegisterAgentTransaction.class, new RegisterAgentTxService());
-        this.registerTransaction(TransactionConstant.TX_TYPE_RED_PUNISH, RedPunishTransaction.class, new RedPunishTxService());
-        this.registerTransaction(TransactionConstant.TX_TYPE_YELLOW_PUNISH, YellowPunishTransaction.class, new YellowPunishTxService());
-        this.registerTransaction(TransactionConstant.TX_TYPE_JOIN_CONSENSUS, PocJoinConsensusTransaction.class, new JoinConsensusTxService());
-        this.registerTransaction(TransactionConstant.TX_TYPE_EXIT_CONSENSUS, PocExitConsensusTransaction.class, new ExitConsensusTxService());
+        this.registerTransaction(TransactionConstant.TX_TYPE_REGISTER_AGENT, RegisterAgentTransaction.class, RegisterAgentTxService.class);
+        this.registerTransaction(TransactionConstant.TX_TYPE_RED_PUNISH, RedPunishTransaction.class, RedPunishTxService.class);
+        this.registerTransaction(TransactionConstant.TX_TYPE_YELLOW_PUNISH, YellowPunishTransaction.class, YellowPunishTxService.class);
+        this.registerTransaction(TransactionConstant.TX_TYPE_JOIN_CONSENSUS, PocJoinConsensusTransaction.class,JoinConsensusTxService.class);
+        this.registerTransaction(TransactionConstant.TX_TYPE_EXIT_CONSENSUS, PocExitConsensusTransaction.class,ExitConsensusTxService.class);
         this.registerService(BlockServiceImpl.class);
         this.registerService(PocConsensusServiceImpl.class);
     }
@@ -138,14 +138,6 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
         }
         StringBuilder str = new StringBuilder();
         str.append("module:[consensus]:\n");
-        str.append("consensus status:");
-        ConsensusStatusInfo statusInfo = consensusManager.getConsensusStatusInfo();
-        if (null == statusInfo) {
-            str.append(ConsensusStatusEnum.NOT_IN.getText());
-        } else {
-            str.append(ConsensusStatusEnum.getConsensusStatusByCode(statusInfo.getStatus()).getText());
-        }
-        str.append("\n");
         str.append("thread count:");
         List<BaseThread> threadList = TaskManager.getThreadList(this.getModuleId());
         if (null == threadList) {

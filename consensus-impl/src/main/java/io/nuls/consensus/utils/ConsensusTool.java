@@ -110,7 +110,6 @@ public class ConsensusTool {
             return null;
         }
         Agent agent = new Agent();
-        agent.setStatus(ConsensusStatusEnum.WAITING.getCode());
         agent.setDeposit(Na.valueOf(po.getDeposit()));
         agent.setCommissionRate(po.getCommissionRate());
         agent.setPackingAddress(po.getPackingAddress());
@@ -118,6 +117,7 @@ public class ConsensusTool {
         agent.setStartTime(po.getStartTime());
         agent.setStatus(po.getStatus());
         agent.setAgentName(po.getAgentName());
+        agent.setBlockHeight(po.getBlockHeight());
         Consensus<Agent> ca = new ConsensusAgentImpl();
         ca.setAddress(po.getAgentAddress());
         ca.setHash(NulsDigestData.fromDigestHex(po.getId()));
@@ -147,6 +147,7 @@ public class ConsensusTool {
         }
         AgentPo po = new AgentPo();
         po.setAgentAddress(bean.getAddress());
+        po.setBlockHeight(bean.getExtend().getBlockHeight());
         po.setId(bean.getHexHash());
         po.setDeposit(bean.getExtend().getDeposit().getValue());
         po.setStartTime(bean.getExtend().getStartTime());

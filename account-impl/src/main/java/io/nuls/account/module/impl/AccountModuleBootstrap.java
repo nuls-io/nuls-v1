@@ -50,7 +50,7 @@ public class AccountModuleBootstrap extends AbstractAccountModule {
         EventManager.putEvent(SetAliasNotice.class);
         this.registerService(AccountServiceImpl.class);
         accountService = NulsContext.getServiceBean(AccountService.class);
-        this.registerTransaction(TransactionConstant.TX_TYPE_SET_ALIAS, AliasTransaction.class, AliasTxService.getInstance());
+        this.registerTransaction(TransactionConstant.TX_TYPE_SET_ALIAS, AliasTransaction.class, AliasTxService.class);
     }
 
     @Override

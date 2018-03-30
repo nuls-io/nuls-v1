@@ -74,9 +74,6 @@ public class ConsensusManager implements Runnable {
     private boolean partakePacking = false;
     private List<String> seedNodeList;
 
-    private PocMeetingRound currentRound;
-    private ConsensusStatusInfo consensusStatusInfo;
-
     private ConsensusManager() {
     }
 
@@ -134,7 +131,6 @@ public class ConsensusManager implements Runnable {
 
 
         consensusCacheManager = ConsensusCacheManager.getInstance();
-        consensusCacheManager.init();
         confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
         confirmingTxCacheManager.init();
         receivedTxCacheManager = ReceivedTxCacheManager.getInstance();
@@ -146,34 +142,7 @@ public class ConsensusManager implements Runnable {
 
     @Override
     public void run() {
-        this.initConsensusStatusInfo();
-    }
-
-    public void initConsensusStatusInfo() {
-        List<Consensus<Agent>> agentList = consensusCacheManager.getCachedAgentList();
-        ConsensusStatusInfo info = new ConsensusStatusInfo();
-        for (String address : NulsContext.LOCAL_ADDRESS_LIST) {
-            if (this.seedNodeList.contains(address)) {
-                info.setAccount(accountService.getAccount(address));
-                info.setStatus(ConsensusStatusEnum.IN.getCode());
-                info.setSeed(true);
-                break;
-            }
-            for (Consensus<Agent> agent : agentList) {
-                if (agent.getExtend().getPackingAddress().equals(address)) {
-                    info.setAccount(accountService.getAccount(address));
-                    info.setStatus(agent.getExtend().getStatus());
-                    info.setSeed(agent.getExtend().getSeed());
-                    if (ConsensusStatusEnum.NOT_IN.getCode() != info.getStatus()) {
-                        break;
-                    }
-                }
-            }
-        }
-        if (info.getAccount() == null) {
-            info.setStatus(ConsensusStatusEnum.NOT_IN.getCode());
-        }
-        this.consensusStatusInfo = info;
+        PackingRoundManager.getInstance().calc(NulsContext.getInstance().getBestBlock());
     }
 
     public void joinConsensusMeeting() {
@@ -189,16 +158,11 @@ public class ConsensusManager implements Runnable {
         TaskManager.createAndRunThread(NulsConstant.MODULE_ID_CONSENSUS, BlockPersistenceThread.THREAD_NAME, BlockPersistenceThread.getInstance());
     }
 
-    public ConsensusStatusInfo getConsensusStatusInfo() {
-        return consensusStatusInfo;
-    }
-
     public void startMaintenanceWork() {
         BlockMaintenanceThread blockMaintenanceThread = BlockMaintenanceThread.getInstance();
         try {
             blockMaintenanceThread.checkGenesisBlock();
             blockMaintenanceThread.syncBlock();
-
         } catch (Exception e) {
             Log.error(e.getMessage());
         } finally {
@@ -215,17 +179,8 @@ public class ConsensusManager implements Runnable {
         receivedTxCacheManager.clear();
     }
 
-    public void setCurrentRound(PocMeetingRound currentRound) {
-        this.currentRound = currentRound;
-    }
-
-    public PocMeetingRound getCurrentRound() {
-        return currentRound;
-    }
-
     public boolean isPartakePacking() {
-        boolean imIn = this.getConsensusStatusInfo() != null && this.getConsensusStatusInfo().getAccount() != null;
-        imIn = imIn && partakePacking && this.getConsensusStatusInfo().getStatus() == ConsensusStatusEnum.IN.getCode();
+        boolean imIn = partakePacking;
         return imIn;
     }
 

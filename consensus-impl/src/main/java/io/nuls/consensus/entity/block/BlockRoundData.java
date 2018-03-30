@@ -29,6 +29,7 @@ import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
+import io.nuls.core.utils.log.Log;
 
 import java.io.IOException;
 
@@ -50,8 +51,12 @@ public class BlockRoundData extends BaseNulsData {
         return roundStartTime + consensusMemberCount * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000L;
     }
 
-    public BlockRoundData(byte[] extend) throws NulsException {
-        this.parse(new NulsByteBuffer(extend));
+    public BlockRoundData(byte[] extend)  {
+        try {
+            this.parse(new NulsByteBuffer(extend));
+        } catch (NulsException e) {
+            Log.error(e);
+        }
     }
 
     public BlockRoundData() {

@@ -43,4 +43,8 @@ public interface BlockHeaderMapper extends BaseMapper<String, BlockHeaderPo> {
     List<Long> getSumOfRoundIndexOfYellowPunish(Map<String, Object> params);
 
     List<BlockHeaderPo> getBlockByAddress(Searchable searchable);
+
+    Long getRoundFirstBlockHeight(long roundIndex);
+
+    Long getRoundLastBlockHeight(long roundIndex);
 }

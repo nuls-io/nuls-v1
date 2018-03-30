@@ -43,6 +43,24 @@ public class AgentPo {
     private Long startTime;
     private Double commissionRate;
     private int status;
+    private long blockHeight;
+    private long delHeight;
+
+    public long getDelHeight() {
+        return delHeight;
+    }
+
+    public void setDelHeight(long delHeight) {
+        this.delHeight = delHeight;
+    }
+
+    public long getBlockHeight() {
+        return blockHeight;
+    }
+
+    public void setBlockHeight(long blockHeight) {
+        this.blockHeight = blockHeight;
+    }
 
     public String getId() {
         return id;

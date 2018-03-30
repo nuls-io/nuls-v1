@@ -26,10 +26,15 @@ package io.nuls.db.dao.impl.mybatis.mapper;
 import io.nuls.db.dao.impl.mybatis.common.BaseMapper;
 import io.nuls.db.entity.AgentPo;
 
+import java.util.List;
+
 /**
  * @author Niels
  * @date 2017/11/20
  */
-public interface AgentMapper extends BaseMapper<String,AgentPo> {
+public interface AgentMapper extends BaseMapper<String, AgentPo> {
 
+    List<AgentPo> getAllList(long blockHeight);
+
+    int deleteByPrimaryKey(AgentPo po);
 }

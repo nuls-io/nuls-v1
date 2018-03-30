@@ -107,4 +107,7 @@ public interface BlockHeaderService extends BaseDataService<String, BlockHeaderP
      * @return
      */
     List<Long> getListOfRoundIndexOfYellowPunish(String address, long startRoundIndex, long endRoundIndex);
+
+    Long getRoundFirstBlockHeight(long roundIndex);
+    Long getRoundLastBlockHeight(long roundIndex);
 }

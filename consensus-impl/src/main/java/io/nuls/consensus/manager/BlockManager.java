@@ -32,6 +32,8 @@ import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.consensus.entity.GetBlockParam;
 import io.nuls.consensus.entity.block.BifurcateProcessor;
+import io.nuls.consensus.entity.block.BlockHeaderChain;
+import io.nuls.consensus.entity.block.HeaderDigest;
 import io.nuls.consensus.event.GetBlockHeaderEvent;
 import io.nuls.consensus.event.GetBlockRequest;
 import io.nuls.consensus.service.intf.BlockService;
@@ -66,10 +68,11 @@ public class BlockManager {
     private EventBroadcaster eventBroadcaster;
     private LedgerService ledgerService;
 
-    private DownloadDataUtils downloadDataUtils = DownloadDataUtils.getInstance();
     private BifurcateProcessor bifurcateProcessor = BifurcateProcessor.getInstance();
     private ConfirmingTxCacheManager confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
     private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
+
+    private PackingRoundManager packingRoundManager = PackingRoundManager.getInstance();
 
     private long storedHeight;
     private long recievedMaxHeight;
@@ -163,6 +166,7 @@ public class BlockManager {
             }
         }
         txCacheManager.removeTx(block.getTxHashList());
+        packingRoundManager.calc(block);
     }
 
     private void rollbackTxList(List<Transaction> txList, int start, int end) {
@@ -189,6 +193,7 @@ public class BlockManager {
             return;
         }
         this.rollbackTxList(block.getTxs(), 0, block.getTxs().size());
+        packingRoundManager.calc(this.getBlock(block.getHeader().getPreHash().getDigestHex()));
         List<String> hashList = this.bifurcateProcessor.getHashList(block.getHeader().getHeight() - 1);
         if (hashList.size() > 1) {
             Block preBlock = confirmingBlockCacheManager.getBlock(block.getHeader().getPreHash().getDigestHex());
@@ -267,5 +272,14 @@ public class BlockManager {
     public void clear() {
         this.confirmingBlockCacheManager.clear();
         this.blockCacheBuffer.clear();
+    }
+
+    public Block getHighestBlock() {
+        BlockHeaderChain chain = bifurcateProcessor.getLongestChain();
+        if(null==chain){
+            return null;
+        }
+        HeaderDigest headerDigest = chain.getHeaderDigestList().get(chain.getHeaderDigestList().size()-1);
+        return   this.getBlock(headerDigest.getHash());
     }
 }

@@ -226,6 +226,29 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
+    public Long getRoundFirstBlockHeightFromDb(long roundIndex) {
+      return this.blockStorageService.getRoundLastBlockHeight(roundIndex);
+    }
+
+    @Override
+    public Block getRoundLastBlockFromDb(long roundIndex) {
+        Long height = this.blockStorageService.getRoundLastBlockHeight(roundIndex);
+        if(null==height){
+            return null;
+        }
+        return this.getBlock(height);
+    }
+
+    @Override
+    public Block getRoundFirstBlockFromDb(long roundIndex) {
+        Long height = this.blockStorageService.getRoundFirstBlockHeight(roundIndex);
+        if(null==height){
+            return null;
+        }
+        return this.getBlock(height);
+    }
+
+    @Override
     public long getPackingCount(String address) {
         return blockStorageService.getBlockCount(address, -1, -1);
     }

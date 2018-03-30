@@ -32,21 +32,26 @@ import io.nuls.core.tx.serivce.TransactionService;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.PunishLogDataService;
 import io.nuls.db.entity.PunishLogPo;
+import io.nuls.db.transactional.annotation.DbSession;
+import io.nuls.db.transactional.annotation.PROPAGATION;
 
 /**
  * @author Niels
  * @date 2018/1/8
  */
+@DbSession(transactional = PROPAGATION.NONE)
 public class RedPunishTxService implements TransactionService<RedPunishTransaction> {
     private PunishLogDataService punishLogDataService = NulsContext.getServiceBean(PunishLogDataService.class);
 
     @Override
+    @DbSession
     public void onRollback(RedPunishTransaction tx) throws NulsException {
         RedPunishData data = tx.getTxData();
         this.punishLogDataService.deleteByHeight(data.getHeight());
     }
 
     @Override
+    @DbSession
     public void onCommit(RedPunishTransaction tx) throws NulsException {
         RedPunishData data = tx.getTxData();
         PunishLogPo po = new PunishLogPo();

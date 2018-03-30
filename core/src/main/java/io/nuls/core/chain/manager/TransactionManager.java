@@ -45,14 +45,14 @@ import java.util.Map;
 public class TransactionManager {
 
     private static final Map<Integer, Class<? extends Transaction>> TX_MAP = new HashMap<>();
-    private static final Map<Class<? extends Transaction>, TransactionService> TX_SERVICE_MAP = new HashMap<>();
+    private static final Map<Class<? extends Transaction>, Class> TX_SERVICE_MAP = new HashMap<>();
 
-    public static final void putTx(int txType, Class<? extends Transaction> txClass, TransactionService txService) {
+    public static final void putTx(int txType, Class<? extends Transaction> txClass, Class<? extends TransactionService> txServiceClass) {
         if (TX_MAP.containsKey(txType)) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "Transaction type repeating!");
         }
         TX_MAP.put(txType, txClass);
-        TX_SERVICE_MAP.put(txClass, txService);
+        TX_SERVICE_MAP.put(txClass, txServiceClass);
     }
 
     public static final Class<? extends Transaction> getTxClass(int txType) {
@@ -87,6 +87,10 @@ public class TransactionManager {
     }
 
     public static TransactionService getService(Class<? extends Transaction> txClass) {
-        return TX_SERVICE_MAP.get(txClass);
+        Class<? extends TransactionService> txServiceClass = TX_SERVICE_MAP.get(txClass);
+        if (null == txServiceClass) {
+            return null;
+        }
+        return NulsContext.getServiceBean(txServiceClass);
     }
 }
