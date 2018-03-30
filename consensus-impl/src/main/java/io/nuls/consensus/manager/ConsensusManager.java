@@ -70,7 +70,6 @@ public class ConsensusManager {
     private ReceivedTxCacheManager receivedTxCacheManager;
     private OrphanTxCacheManager orphanTxCacheManager;
     private BlockStorageService blockStorageService = BlockStorageService.getInstance();
-    private AccountService accountService;
     private boolean partakePacking = false;
     private List<String> seedNodeList;
 
@@ -114,7 +113,6 @@ public class ConsensusManager {
 
     public void init() {
         loadConfigration();
-        accountService = NulsContext.getServiceBean(AccountService.class);
         if (this.partakePacking) {
             //todo
         }
