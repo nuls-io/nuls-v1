@@ -139,7 +139,7 @@ public class PackingRoundManager {
         if (roundData.getConsensusMemberCount() != localPreRoundData.getMemberCount()) {
             return ValidateResult.getFailedResult("The round data of the block is wrong!");
         }
-        if (roundData.getRoundIndex()==(localPreRoundData.getIndex()+1)&&roundData.getRoundStartTime() != localPreRoundData.getEndTime()) {
+        if (roundData.getRoundIndex() == (localPreRoundData.getIndex() + 1) && roundData.getRoundStartTime() != localPreRoundData.getEndTime()) {
             return ValidateResult.getFailedResult("The round data of the block is wrong!");
         }
         PocMeetingMember member = localThisRoundData.getMember(roundData.getPackingIndexOfRound());
@@ -248,12 +248,12 @@ public class PackingRoundManager {
         }
         long betweenTime = localThisRoundData.getStartTime() - localPreRoundData.getEndTime();
 
-        long differenceOfRoundIndex = betweenTime / (localThisRoundData.getMemberCount()*1000*PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND);
+        long differenceOfRoundIndex = betweenTime / (localThisRoundData.getMemberCount() * 1000 * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND);
+        differenceOfRoundIndex = differenceOfRoundIndex + 1;
 
-        long differenceOfPackingIndex = differenceOfRoundIndex % localThisRoundData.getMemberCount();
-        if(differenceOfPackingIndex>0){
-            differenceOfRoundIndex ++;
-        }
+
+        long differenceOfPackingIndex = betweenTime % (localThisRoundData.getMemberCount() * 1000 * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND);
+        differenceOfPackingIndex = differenceOfPackingIndex / (1000 * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND) + 1;
         if ((localThisRoundData.getIndex() - localPreRoundData.getIndex()) == differenceOfRoundIndex
                 && thisBlockRoundData.getPackingIndexOfRound() == (differenceOfPackingIndex + 1)) {
             return ValidateResult.getSuccessResult();
@@ -596,24 +596,24 @@ public class PackingRoundManager {
                 }
                 totalDeposit = totalDeposit.add(member.getTotalDeposit());
                 member.setCreditVal(calcCreditVal(member, round.getIndex() - 2));
-                if(member.getTotalDeposit().isGreaterThan(PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT)){
+                if (member.getTotalDeposit().isGreaterThan(PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT)) {
                     ca.getExtend().setStatus(ConsensusStatusEnum.IN.getCode());
                     memberList.add(member);
-                }else{
+                } else {
                     ca.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
                 }
                 consensusCacheManager.cacheAgent(ca);
                 agentSet.remove(ca.getHexHash());
-                for(Consensus<Deposit> cd:member.getDepositList()){
+                for (Consensus<Deposit> cd : member.getDepositList()) {
                     cd.getExtend().setStatus(ca.getExtend().getStatus());
                     consensusCacheManager.cacheDeposit(cd);
                     depositKeySet.remove(cd.getHexHash());
                 }
             }
-            for(String key:agentSet){
+            for (String key : agentSet) {
                 consensusCacheManager.removeAgent(key);
             }
-            for(String key:depositKeySet){
+            for (String key : depositKeySet) {
                 consensusCacheManager.removeDeposit(key);
             }
             round.setTotalDeposit(totalDeposit);
