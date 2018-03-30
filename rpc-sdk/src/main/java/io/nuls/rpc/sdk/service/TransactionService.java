@@ -35,15 +35,19 @@ public enum TransactionService {
     public RpcClientResult getTx(String hash){
         RpcClientResult result = getTxBase(hash);
         if(result.isSuccess()){
-            result.setData(new TransactionDto((Map<String, Object>)result.getData()));
+            if(null != result.getData()) {
+                result.setData(new TransactionDto((Map<String, Object>) result.getData()));
+            }
         }
         return result;
     }
 
     public RpcClientResult getTxNa2Nuls(String hash){
         RpcClientResult result = getTxBase(hash);
-        if(result.isSuccess()){
-            result.setData(new TransactionNa2NulsDto((Map<String, Object>)result.getData()));
+        if(result.isSuccess()) {
+            if (null != result.getData()){
+                result.setData(new TransactionNa2NulsDto((Map<String, Object>) result.getData()));
+            }
         }
         return result;
     }
@@ -57,20 +61,21 @@ public enum TransactionService {
         Map<String, String> params = new HashMap<>(2);
         params.put("address", String.valueOf(address));
         RpcClientResult result = restFul.get("/tx/list", params);
-
         return result;
     }
 
     public RpcClientResult getTxList(String address){
         RpcClientResult result = getTxListBase(address);
         if(result.isSuccess()){
-            Map<String, Object> page = (Map<String, Object>)result.getData();
-            List<Map<String, Object>> list = (List<Map<String, Object>>)page.get("list");
-            List<TransactionDto> transactionDtoList = new ArrayList<>(10);
-            for (Map<String, Object> map : list){
-                transactionDtoList.add(new TransactionDto(map));
+            if(null != result.getData()) {
+                Map<String, Object> page = (Map<String, Object>) result.getData();
+                List<Map<String, Object>> list = (List<Map<String, Object>>) page.get("list");
+                List<TransactionDto> transactionDtoList = new ArrayList<>(10);
+                for (Map<String, Object> map : list) {
+                    transactionDtoList.add(new TransactionDto(map));
+                }
+                result.setData(transactionDtoList);
             }
-            result.setData(transactionDtoList);
         }
         return result;
     }
@@ -78,13 +83,15 @@ public enum TransactionService {
     public RpcClientResult getTxListNa2Nuls(String address){
         RpcClientResult result = getTxListBase(address);
         if(result.isSuccess()){
-            Map<String, Object> page = (Map<String, Object>)result.getData();
-            List<Map<String, Object>> list = (List<Map<String, Object>>)page.get("list");
-            List<TransactionDto> transactionDtoList = new ArrayList<>(10);
-            for (Map<String, Object> map : list){
-                transactionDtoList.add(new TransactionNa2NulsDto(map));
+            if(null != result.getData()) {
+                Map<String, Object> page = (Map<String, Object>) result.getData();
+                List<Map<String, Object>> list = (List<Map<String, Object>>) page.get("list");
+                List<TransactionDto> transactionDtoList = new ArrayList<>(10);
+                for (Map<String, Object> map : list) {
+                    transactionDtoList.add(new TransactionNa2NulsDto(map));
+                }
+                result.setData(transactionDtoList);
             }
-            result.setData(transactionDtoList);
         }
         return result;
     }

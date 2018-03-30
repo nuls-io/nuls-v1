@@ -25,14 +25,18 @@ public enum ConsensusService {
     public RpcClientResult getConsensus(){
         RpcClientResult result = restFul.get("/consensus", null);
         if(result.isSuccess()){
-            result.setData(new ConsensusIntegratedDto((Map<String, Object>)result.getData()));
+            if(null != result.getData()) {
+                result.setData(new ConsensusIntegratedDto((Map<String, Object>) result.getData()));
+            }
         }
         return result;
     }
     public RpcClientResult getConsensusNa2Nuls(){
         RpcClientResult result = restFul.get("/consensus", null);
         if(result.isSuccess()){
-            result.setData(new ConsensusIntegratedNa2NulsDto((Map<String, Object>)result.getData()));
+            if(null != result.getData()) {
+                result.setData(new ConsensusIntegratedNa2NulsDto((Map<String, Object>) result.getData()));
+            }
         }
         return result;
     }
@@ -49,7 +53,9 @@ public enum ConsensusService {
     public RpcClientResult getConsensusAddress(String address){
         RpcClientResult result = getConsensusAddressBase(address);
         if(result.isSuccess()){
-            result.setData(new ConsensusAddressInfoDto((Map<String, Object>)result.getData()));
+            if(null != result.getData()) {
+                result.setData(new ConsensusAddressInfoDto((Map<String, Object>) result.getData()));
+            }
         }
         return result;
     }
@@ -57,7 +63,9 @@ public enum ConsensusService {
     public RpcClientResult getConsensusAddressNa2Nuls(String address){
         RpcClientResult result = getConsensusAddressBase(address);
         if(result.isSuccess()){
-            result.setData(new ConsensusAddressInfoNa2NulsDto((Map<String, Object>)result.getData()));
+            if(null != result.getData()) {
+                result.setData(new ConsensusAddressInfoNa2NulsDto((Map<String, Object>) result.getData()));
+            }
         }
         return result;
     }
@@ -125,7 +133,9 @@ public enum ConsensusService {
     public RpcClientResult getAgentNa2Nuls(String agentAddress) {
         RpcClientResult result = getAgentBase(agentAddress);
         if(result.isSuccess()){
-            result.setData(new ConsensusAgentInfoNa2NulsDto((Map<String, Object>)result.getData()));
+            if(null != result.getData()) {
+                result.setData(new ConsensusAgentInfoNa2NulsDto((Map<String, Object>) result.getData()));
+            }
         }
         return result;
     }
@@ -133,7 +143,9 @@ public enum ConsensusService {
     public RpcClientResult getAgentStatus() {
         RpcClientResult result = restFul.get("/consensus/agent/status" , null);
         if(result.isSuccess()){
-            result.setData(new ConsensusStatusDto((Map<String, Object>)result.getData()));
+            if(null != result.getData()) {
+                result.setData(new ConsensusStatusDto((Map<String, Object>) result.getData()));
+            }
         }
         return result;
     }
@@ -154,13 +166,15 @@ public enum ConsensusService {
     public RpcClientResult getAllAgent() {
         RpcClientResult result = restFul.get("/consensus/agent/list" , null);
         if(result.isSuccess()){
-            Map<String, Object> page = (Map<String, Object>)result.getData();
-            List<Map<String, Object>> list = (List<Map<String, Object>>)page.get("list");
-            List<ConsensusAgentListDto> consensusAgentListDtoList = new ArrayList<>(10);
-            for (Map<String, Object> map : list){
-                consensusAgentListDtoList.add(new ConsensusAgentListDto(map));
+            if(null != result.getData()) {
+                Map<String, Object> page = (Map<String, Object>) result.getData();
+                List<Map<String, Object>> list = (List<Map<String, Object>>) page.get("list");
+                List<ConsensusAgentListDto> consensusAgentListDtoList = new ArrayList<>(10);
+                for (Map<String, Object> map : list) {
+                    consensusAgentListDtoList.add(new ConsensusAgentListDto(map));
+                }
+                result.setData(consensusAgentListDtoList);
             }
-            result.setData(consensusAgentListDtoList);
         }
         return result;
     }
