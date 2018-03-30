@@ -33,7 +33,7 @@ public interface ConsensusCacheConstant {
     /**
      * 5 minutes alive
      */
-    int LIVE_TIME = 300;
+    int LIVE_TIME = 180;
 
     String BLOCK_HEADER_CACHE_NAME = "block-header-cache";
     String SMALL_BLOCK_CACHE_NAME = "small-block-cache";
