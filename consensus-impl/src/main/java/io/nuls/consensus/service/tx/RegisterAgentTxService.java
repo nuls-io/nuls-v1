@@ -53,9 +53,7 @@ public class RegisterAgentTxService implements TransactionService<RegisterAgentT
 
     @Override
     @DbSession
-    public void onRollback(RegisterAgentTransaction tx) throws NulsException {
-        this.manager.delAgent(tx.getTxData().getHexHash());
-        manager.delDepositByAgentHash(tx.getTxData().getHexHash());
+    public void onRollback(RegisterAgentTransaction tx)   {
         this.agentDataService.deleteById(tx.getTxData().getHexHash(),tx.getBlockHeight());
 
         DepositPo delPo = new DepositPo();
@@ -67,7 +65,6 @@ public class RegisterAgentTxService implements TransactionService<RegisterAgentT
     @Override
     @DbSession
     public void onCommit(RegisterAgentTransaction tx) throws NulsException {
-        manager.changeAgentStatusByHash(tx.getTxData().getHexHash(), ConsensusStatusEnum.WAITING);
         Consensus<Agent> ca = tx.getTxData();
         ca.getExtend().setBlockHeight(tx.getBlockHeight());
         ca.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
@@ -83,7 +80,7 @@ public class RegisterAgentTxService implements TransactionService<RegisterAgentT
     public void onApproval(RegisterAgentTransaction tx) throws NulsException {
         Consensus<Agent> ca = tx.getTxData();
         ca.getExtend().setBlockHeight(tx.getBlockHeight());
-        ca.getExtend().setStatus(ConsensusStatusEnum.NOT_IN.getCode());
+        ca.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
         manager.cacheAgent(ca);
 
     }

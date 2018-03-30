@@ -31,6 +31,7 @@ import io.nuls.consensus.entity.member.Deposit;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.crypto.Sha256Hash;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -50,7 +51,7 @@ public class PocMeetingMember implements Comparable<PocMeetingMember> {
     private double creditVal;
     private String sortValue;
     private Consensus<Agent> agentConsensus;
-    private List<Consensus<Deposit>> depositList;
+    private List<Consensus<Deposit>> depositList = new ArrayList<>();
     private Na totalDeposit = Na.ZERO;
     private Na ownDeposit = Na.ZERO;
     private double commissionRate;

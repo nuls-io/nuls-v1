@@ -102,7 +102,6 @@ public class ConsensusCacheManager {
         if (statusEnum.getCode() == ca.getExtend().getStatus()) {
             return;
         }
-        this.delAgent(agentHash);
         ca.getExtend().setStatus(statusEnum.getCode());
         this.cacheAgent(ca);
     }
