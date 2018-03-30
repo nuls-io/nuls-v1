@@ -126,19 +126,11 @@ public class PackingRoundManager {
             //When a block does not exist, it is temporarily validated.
             return ValidateResult.getSuccessResult();
         }
-        calc(preBlock);
         BlockRoundData preRoundData = new BlockRoundData(preBlock.getHeader().getExtend());
 
-        PocMeetingRound localThisRoundData = this.currentRound;
-        PocMeetingRound localPreRoundData;
-        if (preRoundData.getRoundIndex() == roundData.getRoundIndex()) {
-            localPreRoundData = localThisRoundData;
-        } else {
-            localPreRoundData = localThisRoundData.getPreRound();
-            if (localPreRoundData == null) {
-                localPreRoundData = calcCurrentRound(preBlock.getHeader(), preBlock.getHeader().getHeight(), preRoundData);
-            }
-        }
+        PocMeetingRound localThisRoundData =  calcCurrentRound(header, header.getHeight(), roundData);
+        PocMeetingRound localPreRoundData  = calcCurrentRound(preBlock.getHeader(), preBlock.getHeader().getHeight(), preRoundData);
+
 
         if (roundData.getConsensusMemberCount() != localThisRoundData.getMemberCount()) {
             return ValidateResult.getFailedResult("The round data of the block is wrong!");
@@ -415,7 +407,15 @@ public class PackingRoundManager {
     public synchronized void calc(Block bestBlock) {
         long bestHeight = bestBlock.getHeader().getHeight();
         BlockRoundData bestRoundData = new BlockRoundData(bestBlock.getHeader().getExtend());
-        if (null != currentRound && currentRound.getIndex() == bestRoundData.getRoundIndex() && bestRoundData.getPackingIndexOfRound() == bestRoundData.getConsensusMemberCount()) {
+        if (null == currentRound && bestRoundData.getPackingIndexOfRound() == bestRoundData.getConsensusMemberCount()) {
+            PocMeetingRound previousRound = calcCurrentRound(bestBlock.getHeader(), bestHeight, bestRoundData);
+            this.currentRound = calcNextRound(bestBlock.getHeader(), bestHeight, bestRoundData);
+            this.currentRound.setPreRound(previousRound);
+        } else if (null == currentRound) {
+            PocMeetingRound previousRound = calcPreviousRound(bestBlock.getHeader(), bestHeight, bestRoundData);
+            this.currentRound = calcCurrentRound(bestBlock.getHeader(), bestHeight, bestRoundData);
+            this.currentRound.setPreRound(previousRound);
+        }else if (null != currentRound && currentRound.getIndex() == bestRoundData.getRoundIndex() && bestRoundData.getPackingIndexOfRound() == bestRoundData.getConsensusMemberCount()) {
             PocMeetingRound previousRound = currentRound;
             this.currentRound = calcNextRound(bestBlock.getHeader(), bestHeight, bestRoundData);
             if (previousRound.getIndex() != (currentRound.getIndex() - 1)) {
@@ -439,14 +439,6 @@ public class PackingRoundManager {
         } else if (null != currentRound && currentRound.getIndex() < bestRoundData.getRoundIndex()) {
             this.recalc(bestBlock);
             return;
-        } else if (null == currentRound && bestRoundData.getPackingIndexOfRound() == bestRoundData.getConsensusMemberCount()) {
-            PocMeetingRound previousRound = calcCurrentRound(bestBlock.getHeader(), bestHeight, bestRoundData);
-            this.currentRound = calcNextRound(bestBlock.getHeader(), bestHeight, bestRoundData);
-            this.currentRound.setPreRound(previousRound);
-        } else if (null == currentRound) {
-            PocMeetingRound previousRound = calcPreviousRound(bestBlock.getHeader(), bestHeight, bestRoundData);
-            this.currentRound = calcCurrentRound(bestBlock.getHeader(), bestHeight, bestRoundData);
-            this.currentRound.setPreRound(previousRound);
         }
         List<Account> accountList = accountService.getAccountList();
         this.currentRound.calcLocalPacker(accountList);
