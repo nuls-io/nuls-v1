@@ -551,7 +551,7 @@ public class PackingRoundManager {
             List<PocMeetingMember> seedMemberList = getDefaultSeedList();
             for (PocMeetingMember member : seedMemberList) {
                 member.setRoundStartTime(round.getStartTime());
-                member.setRoundIndex(currentRound.getIndex());
+                member.setRoundIndex(round.getIndex());
                 memberList.add(member);
             }
             memberList.addAll(seedMemberList);
@@ -574,11 +574,11 @@ public class PackingRoundManager {
             for (Consensus<Agent> ca : agentList) {
                 PocMeetingMember member = new PocMeetingMember();
                 member.setAgentConsensus(ca);
-                member.setRoundIndex(currentRound.getIndex());
+                member.setRoundIndex(round.getIndex());
                 member.setAgentHash(ca.getHexHash());
                 member.setAgentAddress(ca.getAddress());
                 member.setPackingAddress(ca.getExtend().getPackingAddress());
-                member.setRoundStartTime(currentRound.getStartTime());
+                member.setRoundStartTime(round.getStartTime());
                 member.setOwnDeposit(ca.getExtend().getDeposit());
                 member.setCommissionRate(ca.getExtend().getCommissionRate());
                 totalDeposit = totalDeposit.add(ca.getExtend().getDeposit());
