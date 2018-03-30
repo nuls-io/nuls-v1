@@ -440,7 +440,6 @@ public class PackingRoundManager {
             round.setStartTime(bestRoundData.getRoundEndTime() - PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000 * memberList.size());
         }
         round.setMemberList(memberList);
-
         round.setMemberCount(memberList.size());
 
         return round;
@@ -497,6 +496,11 @@ public class PackingRoundManager {
             long startTime = round.getStartTime() + index * roundTime;
             round.setStartTime(startTime);
             round.setIndex(bestRoundData.getRoundIndex() + index);
+        }
+        for(PocMeetingMember member:memberList){
+            member.setRoundIndex(round.getIndex());
+            member.setRoundStartTime(round.getStartTime());
+
         }
         return round;
     }
