@@ -136,7 +136,7 @@ public class ConsensusMeetingRunner implements Runnable {
                 if (b) {
                     nextRound();
                 } else {
-                    Thread.sleep(10000L);
+                    Thread.sleep(1000L);
                 }
             } catch (Exception e) {
                 Log.error(e);
