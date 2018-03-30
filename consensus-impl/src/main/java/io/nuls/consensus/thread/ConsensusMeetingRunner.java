@@ -25,20 +25,16 @@ package io.nuls.consensus.thread;
 
 import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
-import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.consensus.constant.PocConsensusConstant;
-import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.RedPunishData;
 import io.nuls.consensus.entity.YellowPunishData;
 import io.nuls.consensus.entity.block.BlockData;
 import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.entity.meeting.PocMeetingMember;
 import io.nuls.consensus.entity.meeting.PocMeetingRound;
-import io.nuls.consensus.entity.member.Agent;
-import io.nuls.consensus.entity.member.Deposit;
 import io.nuls.consensus.entity.tx.RedPunishTransaction;
 import io.nuls.consensus.entity.tx.YellowPunishTransaction;
 import io.nuls.consensus.event.BlockHeaderEvent;
@@ -46,7 +42,6 @@ import io.nuls.consensus.event.notice.PackedBlockNotice;
 import io.nuls.consensus.manager.BlockManager;
 import io.nuls.consensus.manager.ConsensusManager;
 import io.nuls.consensus.manager.PackingRoundManager;
-import io.nuls.consensus.service.impl.PocBlockService;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.utils.BlockInfo;
 import io.nuls.consensus.utils.ConsensusTool;
@@ -56,7 +51,6 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.date.TimeService;
@@ -140,11 +134,7 @@ public class ConsensusMeetingRunner implements Runnable {
                 }
             } catch (Exception e) {
                 Log.error(e);
-                try {
-                    startMeeting();
-                } catch (Exception e1) {
-                    Log.error(e1);
-                }
+
             }
         }
     }
@@ -182,22 +172,22 @@ public class ConsensusMeetingRunner implements Runnable {
 
     private void nextRound() throws NulsException, IOException {
         packingRoundManager.calc(getBestBlock());
-        while (TimeService.currentTimeMillis() < (packingRoundManager.getCurrentRound().getStartTime())) {
+        PocMeetingRound round = packingRoundManager.getCurrentRound();
+        while (TimeService.currentTimeMillis() < round.getStartTime()) {
             try {
                 Thread.sleep(100L);
             } catch (InterruptedException e) {
                 Log.error(e);
             }
         }
-        boolean imIn = consensusManager.isPartakePacking() && packingRoundManager.getCurrentRound().getLocalPacker() != null;
+        boolean imIn = consensusManager.isPartakePacking() &&round.getLocalPacker() != null;
         if (imIn) {
-            startMeeting();
+            startMeeting(round);
         }
     }
 
-    private void startMeeting() throws NulsException, IOException {
-
-        PocMeetingMember self = packingRoundManager.getCurrentRound().getMember(packingRoundManager.getCurrentRound().getLocalPacker().getAddress().toString());
+    private void startMeeting(PocMeetingRound round) throws NulsException, IOException {
+        PocMeetingMember self = round.getMember(round.getLocalPacker().getAddress().toString());
         long timeUnit = 2000L;
         while (TimeService.currentTimeMillis() <= (self.getPackTime() - timeUnit)) {
             try {
@@ -206,11 +196,11 @@ public class ConsensusMeetingRunner implements Runnable {
                 Log.error(e);
             }
         }
-        packing(self);
+        packing(self,round);
     }
 
 
-    private void packing(PocMeetingMember self) throws NulsException, IOException {
+    private void packing(PocMeetingMember self,PocMeetingRound round) throws NulsException, IOException {
         Block bestBlock = this.getBestBlock();
         List<Transaction> txList = txCacheManager.getTxList();
         txList.sort(TxTimeComparator.getInstance());
@@ -218,10 +208,10 @@ public class ConsensusMeetingRunner implements Runnable {
         bd.setHeight(bestBlock.getHeader().getHeight() + 1);
         bd.setPreHash(bestBlock.getHeader().getHash());
         BlockRoundData roundData = new BlockRoundData();
-        roundData.setRoundIndex(packingRoundManager.getCurrentRound().getIndex());
-        roundData.setConsensusMemberCount(packingRoundManager.getCurrentRound().getMemberCount());
+        roundData.setRoundIndex(round.getIndex());
+        roundData.setConsensusMemberCount(round.getMemberCount());
         roundData.setPackingIndexOfRound(self.getIndexOfRound());
-        roundData.setRoundStartTime(packingRoundManager.getCurrentRound().getStartTime());
+        roundData.setRoundStartTime(round.getStartTime());
         bd.setRoundData(roundData);
         List<Integer> outTxList = new ArrayList<>();
         List<NulsDigestData> outHashList = new ArrayList<>();
@@ -261,10 +251,10 @@ public class ConsensusMeetingRunner implements Runnable {
         if (totalSize < PocConsensusConstant.MAX_BLOCK_SIZE) {
             addOrphanTx(txList, totalSize, self);
         }
-        addConsensusTx(bestBlock, txList, self);
+        addConsensusTx(bestBlock, txList, self,round);
         bd.setTxList(txList);
         Log.info("txCount:" + txList.size());
-        Block newBlock = ConsensusTool.createBlock(bd, packingRoundManager.getCurrentRound().getLocalPacker());
+        Block newBlock = ConsensusTool.createBlock(bd,round.getLocalPacker());
         ValidateResult result = newBlock.verify();
         if (result.isFailed()) {
             Log.warn("packing block error:" + result.getMessage());
@@ -328,20 +318,20 @@ public class ConsensusMeetingRunner implements Runnable {
      * @param txList    all tx of block
      * @param self      agent meeting data
      */
-    private void addConsensusTx(Block bestBlock, List<Transaction> txList, PocMeetingMember self) throws NulsException, IOException {
-        punishTx(bestBlock, txList, self);
-        CoinBaseTransaction coinBaseTransaction = packingRoundManager.createNewCoinBaseTx(self, txList, packingRoundManager.getCurrentRound());
-        coinBaseTransaction.setScriptSig(accountService.createP2PKHScriptSigFromDigest(coinBaseTransaction.getHash(), packingRoundManager.getCurrentRound().getLocalPacker(), NulsContext.CACHED_PASSWORD_OF_WALLET).serialize());
+    private void addConsensusTx(Block bestBlock, List<Transaction> txList, PocMeetingMember self,PocMeetingRound round) throws NulsException, IOException {
+        punishTx(bestBlock, txList, self,round);
+        CoinBaseTransaction coinBaseTransaction = packingRoundManager.createNewCoinBaseTx(self, txList,round);
+        coinBaseTransaction.setScriptSig(accountService.createP2PKHScriptSigFromDigest(coinBaseTransaction.getHash(), round.getLocalPacker(), NulsContext.CACHED_PASSWORD_OF_WALLET).serialize());
         txList.add(0,coinBaseTransaction);
     }
 
 
-    private void punishTx(Block bestBlock, List<Transaction> txList, PocMeetingMember self) throws NulsException, IOException {
-        redPunishTx(bestBlock, txList);
-        yellowPunishTx(bestBlock, txList, self);
+    private void punishTx(Block bestBlock, List<Transaction> txList, PocMeetingMember self,PocMeetingRound round) throws NulsException, IOException {
+        redPunishTx(bestBlock, txList,round);
+        yellowPunishTx(bestBlock, txList, self,round);
     }
 
-    private void redPunishTx(Block bestBlock, List<Transaction> txList) throws NulsException, IOException {
+    private void redPunishTx(Block bestBlock, List<Transaction> txList,PocMeetingRound round) throws NulsException, IOException {
         //todo check it
         for (long height : punishMap.keySet()) {
             RedPunishData data = punishMap.get(height);
@@ -354,12 +344,12 @@ public class ConsensusMeetingRunner implements Runnable {
             tx.setTime(TimeService.currentTimeMillis());
             tx.setFee(Na.ZERO);
             tx.setHash(NulsDigestData.calcDigestData(tx));
-            tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(), packingRoundManager.getCurrentRound().getLocalPacker(), NulsContext.CACHED_PASSWORD_OF_WALLET).serialize());
+            tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(),round.getLocalPacker(), NulsContext.CACHED_PASSWORD_OF_WALLET).serialize());
             txList.add(tx);
         }
     }
 
-    private void yellowPunishTx(Block bestBlock, List<Transaction> txList, PocMeetingMember self) throws NulsException, IOException {
+    private void yellowPunishTx(Block bestBlock, List<Transaction> txList, PocMeetingMember self,PocMeetingRound round) throws NulsException, IOException {
         BlockRoundData lastBlockRoundData = new BlockRoundData();
         try {
             lastBlockRoundData.parse(bestBlock.getHeader().getExtend());
@@ -380,7 +370,6 @@ public class ConsensusMeetingRunner implements Runnable {
             return;
         }
         List<Address> addressList = new ArrayList<>();
-        PocMeetingRound round = packingRoundManager.getCurrentRound();
         long roundIndex = lastBlockRoundData.getRoundIndex();
         int packingIndex = 0;
 
@@ -433,7 +422,7 @@ public class ConsensusMeetingRunner implements Runnable {
         punishTx.setTime(TimeService.currentTimeMillis());
         punishTx.setFee(Na.ZERO);
         punishTx.setHash(NulsDigestData.calcDigestData(punishTx));
-        punishTx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(punishTx.getHash(), packingRoundManager.getCurrentRound().getLocalPacker(), NulsContext.CACHED_PASSWORD_OF_WALLET).serialize());
+        punishTx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(punishTx.getHash(),round.getLocalPacker(), NulsContext.CACHED_PASSWORD_OF_WALLET).serialize());
         txList.add(punishTx);
     }
 
