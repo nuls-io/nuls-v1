@@ -151,10 +151,12 @@ public class BlockServiceImpl implements BlockService {
     @DbSession
     public boolean saveBlock(Block block) throws IOException {
         ValidateResult result = block.verify();
+        boolean b = false;
         if (result.isFailed() && result.getErrorCode() != ErrorCode.ORPHAN_TX && ErrorCode.ORPHAN_BLOCK != result.getErrorCode()) {
             throw new NulsRuntimeException(result.getErrorCode(), result.getMessage());
+        } else if (result.getErrorCode() == ErrorCode.ORPHAN_TX || ErrorCode.ORPHAN_BLOCK == result.getErrorCode()) {
+            b = true;
         }
-        boolean b = false;
         for (int x = 0; x < block.getHeader().getTxCount(); x++) {
             Transaction tx = block.getTxs().get(x);
             if (tx.getStatus() == TxStatusEnum.CACHED) {
