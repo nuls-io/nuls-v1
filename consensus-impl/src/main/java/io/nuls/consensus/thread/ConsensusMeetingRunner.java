@@ -389,6 +389,9 @@ public class ConsensusMeetingRunner implements Runnable {
             } else {
                 break;
             }
+            if(tempRound==null){
+                break;
+            }
             if (tempRound.getIndex() > round.getIndex()) {
                 break;
             }

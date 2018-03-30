@@ -125,6 +125,7 @@ public class PackingRoundManager {
             //When a block does not exist, it is temporarily validated.
             return ValidateResult.getSuccessResult();
         }
+
         BlockRoundData preRoundData = new BlockRoundData(preBlock.getHeader().getExtend());
 
         PocMeetingRound localPreRoundData = getRoundDataOrCalc(preBlock.getHeader(), preBlock.getHeader().getHeight(), preRoundData);
@@ -256,7 +257,7 @@ public class PackingRoundManager {
 
         long differenceOfPackingIndex = betweenTime % (localThisRoundData.getMemberCount() * 1000 * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND);
 
-        if ((localThisRoundData.getIndex() - localPreRoundData.getIndex()) != differenceOfRoundIndex && 0 == differenceOfPackingIndex) {
+        if (!((localThisRoundData.getIndex() - localPreRoundData.getIndex()) == differenceOfRoundIndex && 0 == differenceOfPackingIndex)) {
             return ValidateResult.getFailedResult("There's no docking between the two rounds.");
         }
         long indexOfRound = 1 + (header.getTime() - thisBlockRoundData.getRoundStartTime()) / (1000 * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND);
