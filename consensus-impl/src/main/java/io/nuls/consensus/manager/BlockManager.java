@@ -34,6 +34,7 @@ import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.consensus.entity.GetBlockParam;
 import io.nuls.consensus.entity.block.BifurcateProcessor;
 import io.nuls.consensus.entity.block.BlockHeaderChain;
+import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.entity.block.HeaderDigest;
 import io.nuls.consensus.event.GetBlockHeaderEvent;
 import io.nuls.consensus.event.GetBlockRequest;
@@ -96,6 +97,9 @@ public class BlockManager {
         if (block == null || block.getHeader() == null || block.getTxs() == null || block.getTxs().isEmpty()) {
             return;
         }
+        BlockRoundData roundData = new BlockRoundData(block.getHeader().getExtend());
+        Log.info("produce block:"+block.getHeader().getHash()+
+                ",\nheight("+block.getHeader().getHeight()+"),round("+roundData.getRoundIndex() +"),index("+roundData.getPackingIndexOfRound()+"),roundStart:"+roundData.getRoundStartTime());
         if (storedHeight == 0) {
             BlockService blockService = NulsContext.getServiceBean(BlockService.class);
             if (null != blockService) {
