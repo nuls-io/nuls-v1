@@ -67,7 +67,7 @@ public class AliasValidator implements NulsDataValidator<AliasTransaction> {
     @Override
     public ValidateResult validate(AliasTransaction tx) {
         Alias alias = tx.getTxData();
-        if (StringUtils.isBlank(alias.getAddress()) || new Address(alias.getAddress()).getHash().length != 23) {
+        if (!Address.validAddress(alias.getAddress())) {
             return ValidateResult.getFailedResult("The address format error");
         }
         if (!StringUtils.validAlias(alias.getAlias())) {
@@ -91,7 +91,7 @@ public class AliasValidator implements NulsDataValidator<AliasTransaction> {
         if (txList != null && tx.size() > 0) {
             for (Transaction trx : txList) {
                 Alias a = ((AliasTransaction) trx).getTxData();
-                if (alias.getAddress().equals(a.getAlias())) {
+                if (alias.getAddress().equals(a.getAddress())) {
                     return ValidateResult.getFailedResult("Alias has been set up ");
                 }
                 if (alias.getAlias().equals(a.getAlias())) {
