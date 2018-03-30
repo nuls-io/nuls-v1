@@ -143,11 +143,14 @@ public class ConsensusMeetingRunner implements Runnable {
 
     private boolean checkCondition() {
         List<Node> nodes = networkService.getAvailableNodes();
-        boolean result = nodes != null && nodes.size() >= MIN_NODE_COUNT;
-        result = result && NulsContext.getInstance().getNetBestBlockHeight() != null;
+        if(nodes == null || nodes.size() < MIN_NODE_COUNT){
+            return false;
+        }
+        if(NulsContext.getInstance().getNetBestBlockHeight() == null){
+            return false;
+        }
         boolean localIsSeed = packingRoundManager.isLocalHasSeed(accountService.getAccountList());
-        boolean synced = ((NulsContext.getInstance().getNetBestBlockHeight() > 0 || localIsSeed) && this.getBestBlock().getHeader().getHeight() >= NulsContext.getInstance().getNetBestBlockHeight());
-        result = result && synced;
+        boolean result = ((NulsContext.getInstance().getNetBestBlockHeight() > 0 || localIsSeed) && this.getBestBlock().getHeader().getHeight() >= NulsContext.getInstance().getNetBestBlockHeight());
         return result;
     }
 
@@ -298,6 +301,7 @@ public class ConsensusMeetingRunner implements Runnable {
         }
         txList.sort(TxTimeComparator.getInstance());
         List<NulsDigestData> outHashList = new ArrayList<>();
+        orphanTxList.sort(TxTimeComparator.getInstance());
         for (Transaction tx : orphanTxList) {
             if ((self.getPackTime() - TimeService.currentTimeMillis()) <= 100) {
                 break;
@@ -444,5 +448,4 @@ public class ConsensusMeetingRunner implements Runnable {
         punishTx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(punishTx.getHash(), round.getLocalPacker(), NulsContext.CACHED_PASSWORD_OF_WALLET).serialize());
         txList.add(punishTx);
     }
-
 }

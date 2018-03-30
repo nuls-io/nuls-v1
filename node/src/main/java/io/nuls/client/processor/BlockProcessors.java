@@ -51,25 +51,25 @@ public abstract class BlockProcessors implements CommandProcessor {
         @Override
         public String getHelp() {
             CommandBulider builder = new CommandBulider();
-            //TODO 翻译
             builder.newLine(getCommandDescription())
-                    .newLine("\t<hash> | <height> 区块哈希或者区块高度, 只输其一, 多输无效 - 必输");
+                    .newLine("\t<hash> | <height> get block header by hash or block height - Required");
             return builder.toString();
         }
 
         @Override
         public String getCommandDescription() {
-            //TODO 翻译
             return "getblockheader <hash> | <height>--get the block header with hash or height";
         }
 
         @Override
         public boolean argsValidate(String[] args) {
             int length = args.length;
-            if(length != 2)
+            if(length != 2) {
                 return false;
-            if(!CommandHelper.checkArgsIsNull(args))
+            }
+            if(!CommandHelper.checkArgsIsNull(args)) {
                 return false;
+            }
             return true;
         }
 
@@ -96,25 +96,25 @@ public abstract class BlockProcessors implements CommandProcessor {
         @Override
         public String getHelp() {
             CommandBulider builder = new CommandBulider();
-            //TODO 翻译
             builder.newLine(getCommandDescription())
-                    .newLine("\t<hash> | <height> 区块哈希或者区块高度, 只输其一, 多输无效 - 必输");
+                    .newLine("\t<hash> | <height> get block by hash or block height - Required");
             return builder.toString();
         }
 
         @Override
         public String getCommandDescription() {
-            //TODO 翻译
             return "getblock --get the block with hash or height";
         }
 
         @Override
         public boolean argsValidate(String[] args) {
             int length = args.length;
-            if(length != 2)
+            if(length != 2) {
                 return false;
-            if(!CommandHelper.checkArgsIsNull(args))
+            }
+            if(!CommandHelper.checkArgsIsNull(args)) {
                 return false;
+            }
             return true;
         }
 
@@ -150,15 +150,15 @@ public abstract class BlockProcessors implements CommandProcessor {
 
         @Override
         public String getCommandDescription() {
-            //TODO 翻译
             return "getbestblockheader --get the best block header";
         }
 
         @Override
         public boolean argsValidate(String[] args) {
             int length = args.length;
-            if(length > 1)
+            if(length > 1) {
                 return false;
+            }
             return true;
         }
 
@@ -180,30 +180,32 @@ public abstract class BlockProcessors implements CommandProcessor {
         @Override
         public String getHelp() {
             CommandBulider builder = new CommandBulider();
-            //TODO 翻译
             builder.newLine(getCommandDescription())
-                    .newLine("\t<pageSize> 每页条数 - 必输")
-                    .newLine("\t<pageNumber> 页码 - 必输");
+                    .newLine("\t<pageSize> pageSize - Required")
+                    .newLine("\t<pageNumber> pageNumber - Required");
             return builder.toString();
         }
 
         @Override
         public String getCommandDescription() {
-            //TODO 翻译
-            return "listblockheader <pageSize> <pageNumber>--查询区块头列表";
+            return "listblockheader <pageSize> <pageNumber>--get block header list";
         }
 
         @Override
         public boolean argsValidate(String[] args) {
             int length = args.length;
-            if(length != 3)
+            if(length != 3) {
                 return false;
-            if(!CommandHelper.checkArgsIsNull(args))
+            }
+            if(!CommandHelper.checkArgsIsNull(args)) {
                 return false;
-            if(!StringUtils.isNumeric(args[1]))
+            }
+            if(!StringUtils.isNumeric(args[1])) {
                 return false;
-            if(!StringUtils.isNumeric(args[2]))
+            }
+            if(!StringUtils.isNumeric(args[2])) {
                 return false;
+            }
             return true;
         }
 

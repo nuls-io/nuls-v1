@@ -32,7 +32,6 @@ import io.nuls.core.mesasge.NulsMessage;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.log.Log;
-import io.nuls.core.utils.log.MsgLog;
 import io.nuls.event.bus.service.intf.EventBusService;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Node;
@@ -118,7 +117,6 @@ public class ConnectionManager {
             for (NulsMessage message : list) {
                 if (MessageFilterChain.getInstance().doFilter(message)) {
                     BaseEvent event = EventManager.getInstance(message.getData());
-                    MsgLog.info("get(" + node.getId() + "):\n" + Hex.encode(message.getHeader().serialize()) + "--" + Hex.encode(message.getData()));
                     processMessage(event, node);
                 }
             }

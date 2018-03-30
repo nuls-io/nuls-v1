@@ -90,7 +90,7 @@ public abstract class ConsensusProcessors implements CommandProcessor {
         public String getHelp() {
             CommandBulider bulider = new CommandBulider();
             bulider.newLine(getCommandDescription())
-                    .newLine("\t<address> 钱包账户地址 -required");
+                    .newLine("\t<address> address -required");
             return bulider.toString();
         }
 
@@ -131,13 +131,13 @@ public abstract class ConsensusProcessors implements CommandProcessor {
         public String getHelp() {
             CommandBulider bulider = new CommandBulider();
             bulider.newLine(getCommandDescription())
-                    .newLine("\t<agentAddress>   申请账户的地址 -required")
-                    .newLine("\t<packingAddress>    打包地址    -required")
-                    .newLine("\t<commissionRate>    佣金比例    -required")
-                    .newLine("\t<deposit>   参与共识需要的总金额 -required")
-                    .newLine("\t<agentName> 节点名称    -required")
-                    .newLine("\t<password>  密码  -required")
-                    .newLine("\t<remark>    节点备注    -required");
+                    .newLine("\t<agentAddress>   agent owner address -required")
+                    .newLine("\t<packingAddress>    packing address    -required")
+                    .newLine("\t<commissionRate>    commission rate    -required")
+                    .newLine("\t<deposit>   amount you want to deposit -required")
+                    .newLine("\t<agentName>  your agent name    -required")
+                    .newLine("\t<password>  password  -required")
+                    .newLine("\t<remark>    introduction to your agent    -required");
             return bulider.toString();
         }
 
@@ -195,10 +195,10 @@ public abstract class ConsensusProcessors implements CommandProcessor {
         public String getHelp() {
             CommandBulider bulider = new CommandBulider();
             bulider.newLine(getCommandDescription())
-                    .newLine("\t<address>   参与共识账户的地址 -required")
-                    .newLine("\t<agentId>    共识节点的Id    -required")
-                    .newLine("\t<deposit>   参与共识的金额 -required")
-                    .newLine("\t<password>  密码  -required");
+                    .newLine("\t<address>   y -required")
+                    .newLine("\t<agentId>    the ID of agent    -required")
+                    .newLine("\t<deposit>   the amount you want to deposit-required")
+                    .newLine("\t<password>  password  -required");
             return bulider.toString();
         }
 
@@ -249,8 +249,8 @@ public abstract class ConsensusProcessors implements CommandProcessor {
         public String getHelp() {
             CommandBulider bulider = new CommandBulider();
             bulider.newLine(getCommandDescription())
-                    .newLine("\t<address>   账户的地址 -required")
-                    .newLine("\t<password>  密码  -required");
+                    .newLine("\t<address>   address -required")
+                    .newLine("\t<password>  password  -required");
             return bulider.toString();
         }
 
@@ -294,7 +294,7 @@ public abstract class ConsensusProcessors implements CommandProcessor {
         public String getHelp() {
             CommandBulider bulider = new CommandBulider();
             bulider.newLine(getCommandDescription())
-                    .newLine("\t<address>   节点拥有人地址 -required");
+                    .newLine("\t<address>   the address of an agent owner -required");
             return bulider.toString();
         }
 
@@ -368,9 +368,9 @@ public abstract class ConsensusProcessors implements CommandProcessor {
         public String getHelp() {
             CommandBulider bulider = new CommandBulider();
             bulider.newLine(getCommandDescription())
-                    .newLine("\t<address>   节点地址 -required")
-                    .newLine("\t<password>  密码  -required")
-                    .newLine("\t<txHash>  加入共识时的交易hash  -required");
+                    .newLine("\t<address>   address -required")
+                    .newLine("\t<password>  password  -required")
+                    .newLine("\t<txHash>  your deposit transaction hash  -required");
             return bulider.toString();
         }
 
