@@ -564,7 +564,7 @@ public class PackingRoundManager {
 
     private List<PocMeetingMember> getMemberList(long calcHeight, PocMeetingRound round, BlockHeader bestBlockHeader) {
         List<PocMeetingMember> memberList = new ArrayList<>();
-        if (calcHeight == 0) {
+        if (calcHeight <= 0) {
             round.setTotalDeposit(Na.ZERO);
             PocMeetingMember member = new PocMeetingMember();
             member.setPackingAddress(bestBlockHeader.getPackingAddress());
