@@ -29,6 +29,7 @@ package io.nuls.consensus.manager;
 import io.nuls.consensus.cache.manager.block.ConfirmingBlockCacheManager;
 import io.nuls.consensus.cache.manager.block.BlockCacheBuffer;
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
+import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.consensus.entity.GetBlockParam;
 import io.nuls.consensus.entity.block.BifurcateProcessor;
@@ -71,6 +72,7 @@ public class BlockManager {
     private BifurcateProcessor bifurcateProcessor = BifurcateProcessor.getInstance();
     private ConfirmingTxCacheManager confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
     private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
+    private OrphanTxCacheManager orphanTxCacheManager = OrphanTxCacheManager.getInstance();
 
     private long storedHeight;
     private long recievedMaxHeight;
@@ -164,6 +166,7 @@ public class BlockManager {
             }
         }
         txCacheManager.removeTx(block.getTxHashList());
+        orphanTxCacheManager.removeTx(block.getTxHashList());
         PackingRoundManager.getValidateInstance().calc(block);
     }
 
