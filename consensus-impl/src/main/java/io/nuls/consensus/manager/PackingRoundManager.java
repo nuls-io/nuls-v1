@@ -250,7 +250,10 @@ public class PackingRoundManager {
 
         long differenceOfRoundIndex = betweenTime / (localThisRoundData.getMemberCount()*1000*PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND);
 
-        long differenceOfPackingIndex = betweenTime % localThisRoundData.getMemberCount();
+        long differenceOfPackingIndex = differenceOfRoundIndex % localThisRoundData.getMemberCount();
+        if(differenceOfPackingIndex>0){
+            differenceOfRoundIndex ++;
+        }
         if ((localThisRoundData.getIndex() - localPreRoundData.getIndex()) == differenceOfRoundIndex
                 && thisBlockRoundData.getPackingIndexOfRound() == (differenceOfPackingIndex + 1)) {
             return ValidateResult.getSuccessResult();
