@@ -280,12 +280,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             return;
         }
 
-        if (tx.getType() == TransactionConstant.TX_TYPE_TRANSFER) {
-            Log.info("------------------transfer roll back------------------");
-            Log.info("tx:" + tx.getHash().getDigestHex());
-            Log.info("status:" + tx.getStatus().name());
-        }
-
         Set<String> addressSet = new HashSet<>();
         if (TxStatusEnum.AGREED.equals(tx.getStatus())) {
             for (UtxoInput input : utxoData.getInputs()) {
@@ -301,14 +295,19 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                     addressSet.add(from.getAddress());
                 }
             }
+            for (int i = utxoData.getOutputs().size() - 1; i >= 0; i--) {
+                UtxoOutput output = utxoData.getOutputs().get(i);
+                ledgerCacheService.removeUtxo(output.getKey());
+                addressSet.add(output.getAddress());
+            }
         } else if (tx.getStatus().equals(TxStatusEnum.CONFIRMED)) {
             //process output
             outputDataService.deleteByHash(tx.getHash().getDigestHex());
-//            for (int i = utxoData.getOutputs().size() - 1; i >= 0; i--) {
-//                UtxoOutput output = utxoData.getOutputs().get(i);
-//                ledgerCacheService.removeUtxo(output.getKey());
-//                addressSet.add(output.getAddress());
-//            }
+            for (int i = utxoData.getOutputs().size() - 1; i >= 0; i--) {
+                UtxoOutput output = utxoData.getOutputs().get(i);
+                ledgerCacheService.removeUtxo(output.getKey());
+                addressSet.add(output.getAddress());
+            }
 
             //process input
             //1. delete input (database)
@@ -331,6 +330,8 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             }
             relationDataService.deleteRelation(tx.getHash().getDigestHex(), addressSet);
         }
+
+
         for (String address : addressSet) {
             UtxoTransactionTool.getInstance().calcBalance(address, false);
         }
