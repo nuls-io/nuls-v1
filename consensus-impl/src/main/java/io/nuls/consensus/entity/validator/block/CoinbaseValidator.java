@@ -25,11 +25,15 @@
  */
 package io.nuls.consensus.entity.validator.block;
 
+import io.nuls.consensus.entity.block.BlockRoundData;
+import io.nuls.consensus.manager.ConsensusManager;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.constant.TransactionConstant;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 
@@ -40,6 +44,8 @@ import io.nuls.core.validate.ValidateResult;
 public class CoinbaseValidator implements NulsDataValidator<Block> {
 
     private static final CoinbaseValidator INSTANCE = new CoinbaseValidator();
+
+    private ConsensusManager consensusManager = ConsensusManager.getInstance();
 
     private CoinbaseValidator() {
     }
@@ -66,6 +72,17 @@ public class CoinbaseValidator implements NulsDataValidator<Block> {
                 return result;
             }
         }
+
+        BlockRoundData blockRound = null;
+        try {
+            blockRound = new BlockRoundData(block.getHeader().getExtend());
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+        if (null == blockRound) {
+            return ValidateResult.getFailedResult("Cann't get the round data!");
+        }
+        //todo 金额验证
 
 
         return ValidateResult.getSuccessResult();
