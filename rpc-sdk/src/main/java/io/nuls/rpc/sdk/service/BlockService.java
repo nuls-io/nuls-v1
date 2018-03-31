@@ -60,14 +60,16 @@ public enum BlockService {
     public RpcClientResult getBlock(String hash) {
         RpcClientResult result = getBlockBase(hash);
         if (result.isSuccess()) {
-            result.setData(new BlockDto((Map<String, Object>) result.getData(), true));
+            if(result.getData() != null)
+                result.setData(new BlockDto((Map<String, Object>) result.getData(), true));
         }
         return result;
     }
     public RpcClientResult getBlockNa2Nuls(String hash) {
         RpcClientResult result = getBlockBase(hash);
         if (result.isSuccess()) {
-            result.setData(new BlockNa2NulsDto((Map<String, Object>) result.getData(), true));
+            if(result.getData() != null)
+                result.setData(new BlockNa2NulsDto((Map<String, Object>) result.getData(), true));
         }
         return result;
     }
@@ -86,14 +88,16 @@ public enum BlockService {
     public RpcClientResult getBlock(int height) {
         RpcClientResult result = getBlockBase(height);
         if (result.isSuccess()) {
-            result.setData(new BlockDto((Map<String, Object>) result.getData(), true));
+            if(result.getData() != null)
+                result.setData(new BlockDto((Map<String, Object>) result.getData(), true));
         }
         return result;
     }
     public RpcClientResult getBlockNa2Nuls(int height) {
         RpcClientResult result = getBlockBase(height);
         if (result.isSuccess()) {
-            result.setData(new BlockNa2NulsDto((Map<String, Object>) result.getData(), true));
+            if(result.getData() != null)
+                result.setData(new BlockNa2NulsDto((Map<String, Object>) result.getData(), true));
         }
         return result;
     }
@@ -113,14 +117,16 @@ public enum BlockService {
     public RpcClientResult getBlockHeader(String hash) {
         RpcClientResult result = getBlockHeaderBase(hash);
         if (result.isSuccess()) {
-            result.setData(new BlockDto((Map<String, Object>) result.getData(), false));
+            if(result.getData() != null)
+                result.setData(new BlockDto((Map<String, Object>) result.getData(), false));
         }
         return result;
     }
     public RpcClientResult getBlockHeaderNa2Nuls(String hash) {
         RpcClientResult result = getBlockHeaderBase(hash);
         if (result.isSuccess()) {
-            result.setData(new BlockNa2NulsDto((Map<String, Object>) result.getData(), false));
+            if(result.getData() != null)
+                result.setData(new BlockNa2NulsDto((Map<String, Object>) result.getData(), false));
         }
         return result;
     }
@@ -138,14 +144,16 @@ public enum BlockService {
     public RpcClientResult getBlockHeader(int height) {
         RpcClientResult result = getBlockHeaderBase(height);
         if (result.isSuccess()) {
-            result.setData(new BlockDto((Map<String, Object>) result.getData(), false));
+            if(result.getData() != null)
+                result.setData(new BlockDto((Map<String, Object>) result.getData(), false));
         }
         return result;
     }
     public RpcClientResult getBlockHeaderNa2Nuls(int height) {
         RpcClientResult result = getBlockHeaderBase(height);
         if (result.isSuccess()) {
-            result.setData(new BlockNa2NulsDto((Map<String, Object>) result.getData(), false));
+            if(result.getData() != null)
+                result.setData(new BlockNa2NulsDto((Map<String, Object>) result.getData(), false));
         }
         return result;
     }
@@ -160,14 +168,16 @@ public enum BlockService {
     public RpcClientResult getBestBlockHeader() {
         RpcClientResult result = getBestBlockHeaderBase();
         if (result.isSuccess()) {
-            result.setData(new BlockDto((Map<String, Object>) result.getData(), false));
+            if(result.getData() != null)
+                result.setData(new BlockDto((Map<String, Object>) result.getData(), false));
         }
         return result;
     }
     public RpcClientResult getBestBlockHeaderNa2Nuls() {
         RpcClientResult result = getBestBlockHeaderBase();
         if (result.isSuccess()) {
-            result.setData(new BlockNa2NulsDto((Map<String, Object>) result.getData(), false));
+            if(result.getData() != null)
+                result.setData(new BlockNa2NulsDto((Map<String, Object>) result.getData(), false));
         }
         return result;
     }
@@ -197,14 +207,16 @@ public enum BlockService {
     public RpcClientResult listBlockHeader(int pageNumber, int pageSize) {
         RpcClientResult result = listBlockHeaderBase(pageNumber, pageSize);
         if (result.isSuccess()) {
-            Map<String, Object> dataMap = (Map<String, Object>)result.getData();
-            if(dataMap != null) {
-                List<Map<String, Object>> list = (List<Map<String, Object>>) dataMap.get("list");
-                List<BlockDto> blockDtoList = new ArrayList<>();
-                for (Map<String, Object> map : list) {
-                    blockDtoList.add(new BlockDto(map, false));
+            if(result.getData() != null) {
+                Map<String, Object> dataMap = (Map<String, Object>)result.getData();
+                if(dataMap != null) {
+                    List<Map<String, Object>> list = (List<Map<String, Object>>) dataMap.get("list");
+                    List<BlockDto> blockDtoList = new ArrayList<>();
+                    for (Map<String, Object> map : list) {
+                        blockDtoList.add(new BlockDto(map, false));
+                    }
+                    result.setData(blockDtoList);
                 }
-                result.setData(blockDtoList);
             }
         }
         return result;
@@ -212,14 +224,16 @@ public enum BlockService {
     public RpcClientResult listBlockHeaderNa2Nuls(int pageNumber, int pageSize) {
         RpcClientResult result = listBlockHeaderBase(pageNumber, pageSize);
         if (result.isSuccess()) {
-            Map<String, Object> dataMap = (Map<String, Object>)result.getData();
-            if(dataMap != null) {
-                List<Map<String, Object>> list = (List<Map<String, Object>>) dataMap.get("list");
-                List<BlockNa2NulsDto> blockNa2NulsDtoList = new ArrayList<>();
-                for (Map<String, Object> map : list) {
-                    blockNa2NulsDtoList.add(new BlockNa2NulsDto(map, false));
+            if(result.getData() != null) {
+                Map<String, Object> dataMap = (Map<String, Object>)result.getData();
+                if(dataMap != null) {
+                    List<Map<String, Object>> list = (List<Map<String, Object>>) dataMap.get("list");
+                    List<BlockNa2NulsDto> blockNa2NulsDtoList = new ArrayList<>();
+                    for (Map<String, Object> map : list) {
+                        blockNa2NulsDtoList.add(new BlockNa2NulsDto(map, false));
+                    }
+                    result.setData(blockNa2NulsDtoList);
                 }
-                result.setData(blockNa2NulsDtoList);
             }
         }
         return result;

@@ -19,7 +19,9 @@ public enum NetworkService {
     public RpcClientResult getnetworkinfo(){
         RpcClientResult result = restFul.get("/network/info", null);
         if(result.isSuccess()){
-            result.setData(new NetworkDto((Map<String, Object>)result.getData()));
+            if(null != result.getData()) {
+                result.setData(new NetworkDto((Map<String, Object>) result.getData()));
+            }
         }
         return result;
     }

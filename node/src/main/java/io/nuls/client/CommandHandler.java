@@ -26,8 +26,13 @@ package io.nuls.client;
 import io.nuls.client.constant.CommandConstant;
 import io.nuls.client.processor.*;
 import io.nuls.client.processor.intf.CommandProcessor;
+import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.cfg.ConfigLoader;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.rpc.constant.RpcConstant;
 import io.nuls.rpc.sdk.SdkManager;
@@ -91,14 +96,27 @@ public class CommandHandler {
     private void sdkInit() {
         String port = null;
         try {
+            NulsContext.MODULES_CONFIG = ConfigLoader.loadIni(NulsConstant.MODULES_CONFIG_FILE);
             port = NulsContext.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_PORT);
-        } catch (NulsException e) {
+        }catch (IOException e) {
+            Log.error("CommandHandler start failed", e);
+            throw new NulsRuntimeException(ErrorCode.FAILED, "CommandHandler start failed");
+        }catch (NulsException e) {
             // skip
         }
         if (StringUtils.isBlank(port)) {
             SdkManager.init("http://"+ RpcConstant.DEFAULT_IP + ":" + RpcConstant.DEFAULT_PORT);
         } else {
-            SdkManager.init("http://"+ RpcConstant.DEFAULT_IP + ":" + port);
+            /** release*/
+            //SdkManager.init("http://"+ RpcConstant.DEFAULT_IP + ":" + port);
+            /** test*/
+            String ip = null;
+            try {
+                ip = NulsContext.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, "test.server.ip");
+            } catch (NulsException e) {
+                ip = "192.168.1.201";
+            }
+            SdkManager.init("http://" + ip + ":" + port);
         }
 
     }
