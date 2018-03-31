@@ -86,9 +86,6 @@ public class SmallChangeThread implements Runnable {
 
         Log.info("--------------------------all utxo :--------------" + value);
         Log.info("--------------------------all utxo :--------------" + value);
-        Log.info("--------------------------all utxo :--------------" + value);
-        Log.info("--------------------------all utxo :--------------" + value);
-        Log.info("--------------------------all utxo :--------------" + value);
     }
 
     public void stop() {
