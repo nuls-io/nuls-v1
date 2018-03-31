@@ -112,7 +112,8 @@ public class BlockManager {
         if (verify) {
             ValidateResult result = block.verify();
             if (result.isFailed() && result.getErrorCode() != ErrorCode.ORPHAN_BLOCK && result.getErrorCode() != ErrorCode.ORPHAN_TX) {
-                throw new NulsRuntimeException(result.getErrorCode(), result.getMessage());
+                Log.debug("discard a block :"+result.getMessage());
+                return ;
             } else if (result.isFailed()) {
                 blockCacheBuffer.cacheBlock(block);
                 return;
