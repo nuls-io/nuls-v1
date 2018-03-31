@@ -271,7 +271,7 @@ public class ConsensusMeetingRunner implements Runnable {
         }
         addConsensusTx(bestBlock, txList, self, round);
         bd.setTxList(txList);
-        Log.info("txCount:" + txList.size());
+        Log.debug("txCount:" + txList.size());
         Block newBlock = ConsensusTool.createBlock(bd, round.getLocalPacker());
         ValidateResult result = newBlock.verify();
         if (result.isFailed()) {
