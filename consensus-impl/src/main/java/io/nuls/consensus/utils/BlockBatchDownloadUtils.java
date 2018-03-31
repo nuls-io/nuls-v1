@@ -202,7 +202,7 @@ public class BlockBatchDownloadUtils {
         this.eventBroadcaster.sendToNode(new GetBlockRequest(start, end), nodeId);
         status.setUpdateTime(System.currentTimeMillis());
         if (start != end) {
-            Log.info("download block :" + start + "-" + end + ",from : " + nodeId);
+            Log.debug("download block :" + start + "-" + end + ",from : " + nodeId);
         }
     }
 
