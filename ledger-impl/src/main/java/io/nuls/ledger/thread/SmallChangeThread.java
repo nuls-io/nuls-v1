@@ -75,17 +75,6 @@ public class SmallChangeThread implements Runnable {
 //        if (count >= LedgerConstant.SMALL_CHANGE_COUNT) {
 //            this.ledgerService.smallChange(list.subList(0, LedgerConstant.SMALL_CHANGE_COUNT));
 //        }
-
-        List<UtxoOutput> outputs = ledgerCacheService.getUtxoList();
-        long value = 0;
-        for (UtxoOutput output : outputs) {
-            if (output.isUsable() || output.isLocked()) {
-                value += output.getValue();
-            }
-        }
-
-        Log.info("--------------------------all utxo :--------------" + value);
-        Log.info("--------------------------all utxo :--------------" + value);
     }
 
     public void stop() {
