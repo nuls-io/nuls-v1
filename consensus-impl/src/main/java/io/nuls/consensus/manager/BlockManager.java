@@ -98,7 +98,7 @@ public class BlockManager {
             return;
         }
         BlockRoundData roundData = new BlockRoundData(block.getHeader().getExtend());
-        Log.info("cache block:"+block.getHeader().getHash()+
+        Log.debug("cache block:"+block.getHeader().getHash()+
                 ",\nheight("+block.getHeader().getHeight()+"),round("+roundData.getRoundIndex() +"),index("+roundData.getPackingIndexOfRound()+"),roundStart:"+roundData.getRoundStartTime());
         if (storedHeight == 0) {
             BlockService blockService = NulsContext.getServiceBean(BlockService.class);
@@ -179,7 +179,6 @@ public class BlockManager {
         }
         txCacheManager.removeTx(block.getTxHashList());
         orphanTxCacheManager.removeTx(block.getTxHashList());
-        PackingRoundManager.getValidateInstance().calc(block);
     }
 
     private void rollbackTxList(List<Transaction> txList, int start, int end) {
@@ -208,7 +207,6 @@ public class BlockManager {
         this.rollbackTxList(block.getTxs(), 0, block.getTxs().size());
         Block preBlock =this.getBlock(block.getHeader().getPreHash().getDigestHex());
         context.setBestBlock(preBlock);
-        PackingRoundManager.getValidateInstance().calc(preBlock);
         List<String> hashList = this.bifurcateProcessor.getHashList(block.getHeader().getHeight() - 1);
         if (hashList.size() > 1) {
             this.rollbackAppraval(preBlock);
