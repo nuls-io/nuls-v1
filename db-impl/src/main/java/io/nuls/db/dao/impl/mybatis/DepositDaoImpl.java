@@ -28,6 +28,7 @@ import io.nuls.db.dao.impl.mybatis.mapper.DepositMapper;
 import io.nuls.db.dao.impl.mybatis.params.DepositSearchParams;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import io.nuls.db.entity.DepositPo;
+import io.nuls.db.entity.UpdateDepositByAgentIdParam;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.db.transactional.annotation.PROPAGATION;
 
@@ -65,8 +66,8 @@ public class DepositDaoImpl extends BaseDaoImpl<DepositMapper, String, DepositPo
     }
 
     @Override
-    public int updateSelectiveByAgentHash(DepositPo po) {
-        return this.getMapper().updateSelectiveByAgentHash(po);
+    public int updateSelectiveByAgentHash(UpdateDepositByAgentIdParam param) {
+        return this.getMapper().updateSelectiveByAgentHash(param);
     }
 
     @Override
