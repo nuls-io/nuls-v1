@@ -29,6 +29,7 @@ import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.log.Log;
@@ -61,17 +62,13 @@ public class HeaderContinuityValidator implements NulsDataValidator<BlockHeader>
             }
             BlockHeader preHeader = null;
             try {
-                preHeader = NulsContext.getServiceBean(BlockService.class).getBlockHeader(header.getHeight() - 1);
+                preHeader = NulsContext.getServiceBean(BlockService.class).getBlockHeader(header.getPreHash().getDigestHex());
             } catch (NulsException e) {
                 //todo
                Log.error(e);
             }
             if (null == preHeader) {
-                break;
-            }
-            failed = !preHeader.getHash().equals(header.getPreHash());
-            if (failed) {
-                break;
+                return ValidateResult.getFailedResult(ErrorCode.ORPHAN_BLOCK);
             }
             BlockRoundData roundData = new BlockRoundData();
             try {
