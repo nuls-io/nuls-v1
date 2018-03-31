@@ -179,7 +179,6 @@ public class BlockManager {
         }
         txCacheManager.removeTx(block.getTxHashList());
         orphanTxCacheManager.removeTx(block.getTxHashList());
-        PackingRoundManager.getValidateInstance().calc(block);
     }
 
     private void rollbackTxList(List<Transaction> txList, int start, int end) {
@@ -208,7 +207,6 @@ public class BlockManager {
         this.rollbackTxList(block.getTxs(), 0, block.getTxs().size());
         Block preBlock =this.getBlock(block.getHeader().getPreHash().getDigestHex());
         context.setBestBlock(preBlock);
-        PackingRoundManager.getValidateInstance().calc(preBlock);
         List<String> hashList = this.bifurcateProcessor.getHashList(block.getHeader().getHeight() - 1);
         if (hashList.size() > 1) {
             this.rollbackAppraval(preBlock);
