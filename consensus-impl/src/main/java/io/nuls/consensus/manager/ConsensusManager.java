@@ -165,10 +165,11 @@ public class ConsensusManager {
 
     public void destroy() {
         blockCacheManager.clear();
-        this.temporaryCacheManager.clear();
+        temporaryCacheManager.clear();
         consensusCacheManager.clear();
         confirmingTxCacheManager.clear();
         receivedTxCacheManager.clear();
+        orphanTxCacheManager.clear();
     }
 
     public boolean isPartakePacking() {

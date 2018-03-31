@@ -285,6 +285,7 @@ public class BlockManager {
     public void clear() {
         this.confirmingBlockCacheManager.clear();
         this.blockCacheBuffer.clear();
+
     }
 
     public Block getHighestBlock() {
