@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,28 +21,42 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.db.dao;
 
-import io.nuls.db.entity.DepositPo;
-import io.nuls.db.entity.UpdateDepositByAgentIdParam;
-
-import java.util.List;
+package io.nuls.db.entity;
 
 /**
- *
  * @author Niels
- * @date 2017/11/20
+ * @date 2018/3/31
  */
-public interface DepositDataService extends BaseDataService<String, DepositPo> {
+public class UpdateDepositByAgentIdParam {
 
-    int deleteById(DepositPo po);
+    private String agentId;
+    private long oldDelHeight;
+    private long newDelHeight;
 
-    int deleteByAgentHash(DepositPo po);
+    public String getAgentId() {
+        return agentId;
+    }
 
-    int updateSelective(DepositPo po);
+    public void setAgentId(String agentId) {
+        this.agentId = agentId;
+    }
 
-    int updateSelectiveByAgentHash(UpdateDepositByAgentIdParam param);
+    public long getOldDelHeight() {
+        return oldDelHeight;
+    }
 
-    List<DepositPo> getAllList(long calcHeight);
+    public void setOldDelHeight(long oldDelHeight) {
+        this.oldDelHeight = oldDelHeight;
+    }
+
+    public long getNewDelHeight() {
+        return newDelHeight;
+    }
+
+    public void setNewDelHeight(long newDelHeight) {
+        this.newDelHeight = newDelHeight;
+    }
 }
