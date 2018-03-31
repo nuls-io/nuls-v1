@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -64,7 +64,7 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
 
     @Override
     @DbSession
-    public void onRollback(PocExitConsensusTransaction tx)   {
+    public void onRollback(PocExitConsensusTransaction tx) {
         Transaction joinTx = ledgerService.getTx(tx.getTxData());
         if (joinTx.getType() == TransactionConstant.TX_TYPE_REGISTER_AGENT) {
             RegisterAgentTransaction raTx = (RegisterAgentTransaction) joinTx;
@@ -77,8 +77,8 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
             this.ledgerService.unlockTxRollback(tx.getTxData().getDigestHex());
 
             DepositPo dpo = new DepositPo();
-            dpo.setId(raTx.getTxData().getHexHash());
-            dpo.setDelHeight(tx.getBlockHeight());
+            dpo.setAgentHash(ca.getHexHash());
+            dpo.setDelHeight(0L);
             this.depositDataService.updateSelectiveByAgentHash(dpo);
 
             //cache deposit
@@ -100,11 +100,10 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
         PocJoinConsensusTransaction pjcTx = (PocJoinConsensusTransaction) joinTx;
         Consensus<Deposit> cd = pjcTx.getTxData();
         cd.getExtend().setStatus(ConsensusStatusEnum.IN.getCode());
-        DepositPo dPo = this.depositDataService.get(cd.getHexHash());
-        if (dPo == null) {
-            dPo = ConsensusTool.depositToPojo(cd, tx.getHash().getDigestHex());
-            this.depositDataService.save(dPo);
-        }
+        DepositPo dpo = new DepositPo();
+        dpo.setId(cd.getHexHash());
+        dpo.setDelHeight(0L);
+        this.depositDataService.updateSelective(dpo);
         StopConsensusNotice notice = new StopConsensusNotice();
         notice.setEventBody(tx);
         NulsContext.getServiceBean(EventBroadcaster.class).publishToLocal(notice);
@@ -125,7 +124,7 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
             for (DepositPo po : poList) {
                 this.ledgerService.unlockTxSave(po.getTxHash(), 0);
             }
-            this.agentDataService.deleteById(raTx.getTxData().getHexHash(),tx.getBlockHeight());
+            this.agentDataService.deleteById(raTx.getTxData().getHexHash(), tx.getBlockHeight());
             DepositPo delPo = new DepositPo();
             delPo.setAgentHash(raTx.getTxData().getHexHash());
             delPo.setDelHeight(tx.getBlockHeight());
@@ -134,13 +133,16 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
         }
         PocJoinConsensusTransaction pjcTx = (PocJoinConsensusTransaction) joinTx;
         Consensus<Deposit> cd = pjcTx.getTxData();
-        this.depositDataService.delete(cd.getHexHash());
+        DepositPo dpo = new DepositPo();
+        dpo.setDelHeight(tx.getBlockHeight());
+        dpo.setId(cd.getHexHash());
+        this.depositDataService.deleteById(dpo);
         this.ledgerService.unlockTxSave(tx.getTxData().getDigestHex(), 0);
     }
 
     @Override
     @DbSession
-    public void onApproval(PocExitConsensusTransaction tx)  {
+    public void onApproval(PocExitConsensusTransaction tx) {
         Transaction joinTx = ledgerService.getTx(tx.getTxData());
         if (joinTx == null) {
             joinTx = ConfirmingTxCacheManager.getInstance().getTx(tx.getTxData());
