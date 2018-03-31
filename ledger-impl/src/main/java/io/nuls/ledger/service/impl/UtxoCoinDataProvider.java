@@ -279,6 +279,17 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         if (utxoData == null) {
             return;
         }
+        Log.info("----------------------roll back start--------------------" );
+        List<UtxoOutput> outputs = ledgerCacheService.getUtxoList();
+        long value = 0;
+        for (UtxoOutput output : outputs) {
+            if (output.isUsable() || output.isLocked()) {
+                value += output.getValue();
+            }
+        }
+
+        Log.info("--------------------------all utxo :--------------" + value);
+
 
         Set<String> addressSet = new HashSet<>();
         if (TxStatusEnum.AGREED.equals(tx.getStatus())) {
@@ -331,6 +342,16 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             relationDataService.deleteRelation(tx.getHash().getDigestHex(), addressSet);
         }
 
+        outputs = ledgerCacheService.getUtxoList();
+        value = 0;
+        for (UtxoOutput output : outputs) {
+            if (output.isUsable() || output.isLocked()) {
+                value += output.getValue();
+            }
+        }
+
+        Log.info("--------------------------all utxo :--------------" + value);
+        Log.info("----------------------rollback end----------------------------");
 
         for (String address : addressSet) {
             UtxoTransactionTool.getInstance().calcBalance(address, false);
