@@ -127,7 +127,7 @@ public class PackingRoundManager {
 
         PocMeetingRound localThisRoundData = calcCurrentRound(header, header.getHeight(), roundData);
         if (null == localThisRoundData) {
-            return ValidateResult.getFailedResult("cannot calc round info!");
+            return ValidateResult.getFailedResult(ErrorCode.ORPHAN_BLOCK);
         }
         PocMeetingRound localPreRoundData;
         if (roundData.getRoundIndex() == preRoundData.getRoundIndex()) {
@@ -135,7 +135,7 @@ public class PackingRoundManager {
         } else {
             localPreRoundData = calcCurrentRound(preBlock.getHeader(), preBlock.getHeader().getHeight(), preRoundData);
             if (null == localPreRoundData) {
-                return ValidateResult.getFailedResult("cann't calc pre round info");
+                return ValidateResult.getFailedResult(ErrorCode.ORPHAN_BLOCK);
             }
             ValidateResult vr = checkThisRound(localPreRoundData, localThisRoundData, roundData, header);
             if (vr.isFailed()) {
@@ -592,11 +592,11 @@ public class PackingRoundManager {
                     if (null == firstBlock) {
                         firstBlock = new Block();
                         firstBlock.setHeader(bestBlockHeader);
-
                         while (true) {
                             String preHash = firstBlock.getHeader().getPreHash().getDigestHex();
                             Block block = getBlockService().getBlock(preHash);
                             if (null == block) {
+                                //todo
                                 return null;
                             }
                             BlockRoundData blockRoundData = new BlockRoundData(block.getHeader().getExtend());

@@ -156,13 +156,14 @@ public class NodeDiscoverHandler implements Runnable {
             for (Node node : nodeList) {
                 if (node.getStatus() == 2) {
                     str.append(",");
-                    str.append(node.getIp());count++;
+                    str.append(node.getIp());
+                    count++;
                 }
             }
             if (str.toString().length() == 0) {
                 str.append(",");
             }
-            Log.info("nodes("+count+"):" + str.toString().substring(1));
+            Log.debug("nodes(" + count + "):" + str.toString().substring(1));
 
             GetVersionEvent event = new GetVersionEvent(network.getExternalPort());
             GetNodesIpEvent ipEvent = new GetNodesIpEvent();

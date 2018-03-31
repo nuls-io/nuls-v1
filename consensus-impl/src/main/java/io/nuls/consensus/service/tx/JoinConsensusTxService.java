@@ -61,7 +61,6 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
     @Override
     @DbSession
     public void onRollback(PocJoinConsensusTransaction tx) throws NulsException {
-        this.manager.delDeposit(tx.getTxData().getHexHash());
 
         DepositPo delPo = new DepositPo();
         delPo.setId(tx.getTxData().getHexHash());
@@ -72,7 +71,6 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
     @Override
     @DbSession
     public void onCommit(PocJoinConsensusTransaction tx) throws NulsException {
-        manager.changeDepositStatus(tx.getTxData().getHexHash(), ConsensusStatusEnum.WAITING);
         Consensus<Deposit> cd = tx.getTxData();
         cd.getExtend().setTxHash(tx.getHash().getDigestHex());
         cd.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
@@ -88,8 +86,6 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
             sum += depositPo.getDeposit();
         }
         if (sum >= PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT.getValue()) {
-            manager.changeAgentStatusByHash(tx.getTxData().getExtend().getAgentHash(), ConsensusStatusEnum.IN);
-            manager.changeDepositStatusByAgentHash(tx.getTxData().getExtend().getAgentHash(), ConsensusStatusEnum.IN);
             AgentPo daPo = this.accountDataService.get(cd.getExtend().getAgentHash());
             if (null == daPo) {
                 throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "the agent cannot find,agent hash:" + cd.getExtend().getAgentHash());

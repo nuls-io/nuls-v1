@@ -134,6 +134,7 @@ public enum ErrorCode {
     INVALID_OUTPUT("LED004", 70004),
     INVALID_AMOUNT("LED005", 70005),
     ORPHAN_TX("LED006", 70006),
+    ORPHAN_BLOCK("LED007", 70007),
     /**
      * messages
      */

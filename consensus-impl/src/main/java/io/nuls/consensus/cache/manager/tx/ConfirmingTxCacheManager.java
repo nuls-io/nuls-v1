@@ -24,6 +24,8 @@
 package io.nuls.consensus.cache.manager.tx;
 
 import io.nuls.cache.util.CacheMap;
+import io.nuls.consensus.constant.ConsensusCacheConstant;
+import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 
@@ -39,7 +41,6 @@ public class ConfirmingTxCacheManager {
     /**
      * 2 minutes alive
      */
-    private static final int LIVE_TIME = 120;
     private CacheMap<String, Transaction> txCache;
 
     private ConfirmingTxCacheManager() {
@@ -50,7 +51,7 @@ public class ConfirmingTxCacheManager {
     }
 
     public void init() {
-        txCache = new CacheMap<>(CACHE_NAME,64, LIVE_TIME, 0);
+        txCache = new CacheMap<>(CACHE_NAME,64, ConsensusCacheConstant.LIVE_TIME, 0);
     }
 
     public void putTxList(List<Transaction> txs) {

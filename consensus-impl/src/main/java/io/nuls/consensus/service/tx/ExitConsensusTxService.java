@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,7 +23,6 @@
  */
 package io.nuls.consensus.service.tx;
 
-import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.constant.PocConsensusConstant;
@@ -46,8 +45,6 @@ import io.nuls.db.dao.DepositDataService;
 import io.nuls.db.entity.AgentPo;
 import io.nuls.db.entity.DepositPo;
 import io.nuls.db.transactional.annotation.DbSession;
-import io.nuls.db.transactional.annotation.PROPAGATION;
-import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.service.intf.LedgerService;
 
@@ -61,30 +58,27 @@ import java.util.Map;
  */
 public class ExitConsensusTxService implements TransactionService<PocExitConsensusTransaction> {
 
-    private ConsensusCacheManager manager = ConsensusCacheManager.getInstance();
-
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     private AgentDataService agentDataService = NulsContext.getServiceBean(AgentDataService.class);
     private DepositDataService depositDataService = NulsContext.getServiceBean(DepositDataService.class);
 
     @Override
     @DbSession
-    public void onRollback(PocExitConsensusTransaction tx) throws NulsException {
+    public void onRollback(PocExitConsensusTransaction tx) {
         Transaction joinTx = ledgerService.getTx(tx.getTxData());
         if (joinTx.getType() == TransactionConstant.TX_TYPE_REGISTER_AGENT) {
             RegisterAgentTransaction raTx = (RegisterAgentTransaction) joinTx;
             Consensus<Agent> ca = raTx.getTxData();
             ca.getExtend().setBlockHeight(raTx.getBlockHeight());
             ca.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
-            manager.cacheAgent(ca);
             AgentPo agentPo = ConsensusTool.agentToPojo(ca);
             this.agentDataService.save(agentPo);
 
             this.ledgerService.unlockTxRollback(tx.getTxData().getDigestHex());
 
             DepositPo dpo = new DepositPo();
-            dpo.setId(raTx.getTxData().getHexHash());
-            dpo.setDelHeight(tx.getBlockHeight());
+            dpo.setAgentHash(ca.getHexHash());
+            dpo.setDelHeight(0L);
             this.depositDataService.updateSelectiveByAgentHash(dpo);
 
             //cache deposit
@@ -94,7 +88,6 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
             if (null != polist) {
                 for (DepositPo po : polist) {
                     Consensus<Deposit> cd = ConsensusTool.fromPojo(po);
-                    this.manager.cacheDeposit(cd);
                     this.ledgerService.unlockTxRollback(po.getTxHash());
                 }
             }
@@ -107,12 +100,10 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
         PocJoinConsensusTransaction pjcTx = (PocJoinConsensusTransaction) joinTx;
         Consensus<Deposit> cd = pjcTx.getTxData();
         cd.getExtend().setStatus(ConsensusStatusEnum.IN.getCode());
-        manager.cacheDeposit(cd);
-        DepositPo dPo = this.depositDataService.get(cd.getHexHash());
-        if (dPo == null) {
-            dPo = ConsensusTool.depositToPojo(cd, tx.getHash().getDigestHex());
-            this.depositDataService.save(dPo);
-        }
+        DepositPo dpo = new DepositPo();
+        dpo.setId(cd.getHexHash());
+        dpo.setDelHeight(0L);
+        this.depositDataService.updateSelective(dpo);
         StopConsensusNotice notice = new StopConsensusNotice();
         notice.setEventBody(tx);
         NulsContext.getServiceBean(EventBroadcaster.class).publishToLocal(notice);
@@ -125,8 +116,6 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
         Transaction joinTx = ledgerService.getTx(tx.getTxData());
         if (joinTx.getType() == TransactionConstant.TX_TYPE_REGISTER_AGENT) {
             RegisterAgentTransaction raTx = (RegisterAgentTransaction) joinTx;
-            manager.delAgent(raTx.getTxData().getHexHash());
-            manager.delDepositByAgentHash(raTx.getTxData().getHexHash());
 
             this.ledgerService.unlockTxSave(tx.getTxData().getDigestHex(), tx.getTime() + PocConsensusConstant.STOP_AGENT_DEPOSIT_LOCKED_TIME * 24 * 3600 * 1000);
             Map<String, Object> paramsMap = new HashMap<>();
@@ -135,7 +124,7 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
             for (DepositPo po : poList) {
                 this.ledgerService.unlockTxSave(po.getTxHash(), 0);
             }
-            this.agentDataService.deleteById(raTx.getTxData().getHexHash(),tx.getBlockHeight());
+            this.agentDataService.deleteById(raTx.getTxData().getHexHash(), tx.getBlockHeight());
             DepositPo delPo = new DepositPo();
             delPo.setAgentHash(raTx.getTxData().getHexHash());
             delPo.setDelHeight(tx.getBlockHeight());
@@ -144,28 +133,24 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
         }
         PocJoinConsensusTransaction pjcTx = (PocJoinConsensusTransaction) joinTx;
         Consensus<Deposit> cd = pjcTx.getTxData();
-        manager.delDeposit(cd.getHexHash());
-        this.depositDataService.delete(cd.getHexHash());
+        DepositPo dpo = new DepositPo();
+        dpo.setDelHeight(tx.getBlockHeight());
+        dpo.setId(cd.getHexHash());
+        this.depositDataService.deleteById(dpo);
         this.ledgerService.unlockTxSave(tx.getTxData().getDigestHex(), 0);
     }
 
     @Override
     @DbSession
-    public void onApproval(PocExitConsensusTransaction tx) throws NulsException {
+    public void onApproval(PocExitConsensusTransaction tx) {
         Transaction joinTx = ledgerService.getTx(tx.getTxData());
         if (joinTx == null) {
             joinTx = ConfirmingTxCacheManager.getInstance().getTx(tx.getTxData());
         }
         if (joinTx.getType() == TransactionConstant.TX_TYPE_REGISTER_AGENT) {
-            RegisterAgentTransaction raTx = (RegisterAgentTransaction) joinTx;
-            manager.changeAgentStatusByHash(raTx.getTxData().getHexHash(), ConsensusStatusEnum.NOT_IN);
-            manager.changeDepositStatusByAgentHash(raTx.getTxData().getHexHash(), ConsensusStatusEnum.NOT_IN);
             this.ledgerService.unlockTxApprove(tx.getTxData().getDigestHex(), tx.getTime() + PocConsensusConstant.STOP_AGENT_DEPOSIT_LOCKED_TIME * 24 * 3600 * 1000);
             return;
         }
-        PocJoinConsensusTransaction pjcTx = (PocJoinConsensusTransaction) joinTx;
-        Consensus<Deposit> cd = pjcTx.getTxData();
-        manager.changeDepositStatus(cd.getHexHash(), ConsensusStatusEnum.NOT_IN);
         this.ledgerService.unlockTxApprove(tx.getTxData().getDigestHex(), 0);
     }
 }

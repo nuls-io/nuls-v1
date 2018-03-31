@@ -46,6 +46,9 @@ public class GetBlockHandler extends AbstractEventHandler<GetBlockRequest> {
 
     @Override
     public void onEvent(GetBlockRequest event, String fromId) throws NulsException {
+        if(event.getEnd()>NulsContext.getInstance().getBestHeight()){
+            return ;
+        }
         List<Block> blockList = blockService.getBlockList(event.getStart(), event.getEnd());
         if(blockList.size()!=(event.getEnd()-event.getStart()+1)){
             Log.warn("count wrong!");

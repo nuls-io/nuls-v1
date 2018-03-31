@@ -29,10 +29,12 @@ package io.nuls.consensus.manager;
 import io.nuls.consensus.cache.manager.block.ConfirmingBlockCacheManager;
 import io.nuls.consensus.cache.manager.block.BlockCacheBuffer;
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
+import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.consensus.entity.GetBlockParam;
 import io.nuls.consensus.entity.block.BifurcateProcessor;
 import io.nuls.consensus.entity.block.BlockHeaderChain;
+import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.entity.block.HeaderDigest;
 import io.nuls.consensus.event.GetBlockHeaderEvent;
 import io.nuls.consensus.event.GetBlockRequest;
@@ -42,11 +44,13 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
+import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.service.intf.LedgerService;
 
@@ -71,6 +75,7 @@ public class BlockManager {
     private BifurcateProcessor bifurcateProcessor = BifurcateProcessor.getInstance();
     private ConfirmingTxCacheManager confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
     private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
+    private OrphanTxCacheManager orphanTxCacheManager = OrphanTxCacheManager.getInstance();
 
     private long storedHeight;
     private long recievedMaxHeight;
@@ -92,6 +97,9 @@ public class BlockManager {
         if (block == null || block.getHeader() == null || block.getTxs() == null || block.getTxs().isEmpty()) {
             return;
         }
+        BlockRoundData roundData = new BlockRoundData(block.getHeader().getExtend());
+        Log.debug("cache block:"+block.getHeader().getHash()+
+                ",\nheight("+block.getHeader().getHeight()+"),round("+roundData.getRoundIndex() +"),index("+roundData.getPackingIndexOfRound()+"),roundStart:"+roundData.getRoundStartTime());
         if (storedHeight == 0) {
             BlockService blockService = NulsContext.getServiceBean(BlockService.class);
             if (null != blockService) {
@@ -102,7 +110,13 @@ public class BlockManager {
             return;
         }
         if (verify) {
-            block.verifyWithException();
+            ValidateResult result = block.verify();
+            if (result.isFailed() && result.getErrorCode() != ErrorCode.ORPHAN_BLOCK && result.getErrorCode() != ErrorCode.ORPHAN_TX) {
+                throw new NulsRuntimeException(result.getErrorCode(), result.getMessage());
+            } else if (result.isFailed()) {
+                blockCacheBuffer.cacheBlock(block);
+                return;
+            }
         }
         boolean success = confirmingBlockCacheManager.cacheBlock(block);
         if (!success) {
@@ -164,7 +178,7 @@ public class BlockManager {
             }
         }
         txCacheManager.removeTx(block.getTxHashList());
-        PackingRoundManager.getValidateInstance().calc(block);
+        orphanTxCacheManager.removeTx(block.getTxHashList());
     }
 
     private void rollbackTxList(List<Transaction> txList, int start, int end) {
@@ -191,10 +205,10 @@ public class BlockManager {
             return;
         }
         this.rollbackTxList(block.getTxs(), 0, block.getTxs().size());
-        PackingRoundManager.getValidateInstance().calc(this.getBlock(block.getHeader().getPreHash().getDigestHex()));
+        Block preBlock =this.getBlock(block.getHeader().getPreHash().getDigestHex());
+        context.setBestBlock(preBlock);
         List<String> hashList = this.bifurcateProcessor.getHashList(block.getHeader().getHeight() - 1);
         if (hashList.size() > 1) {
-            Block preBlock = confirmingBlockCacheManager.getBlock(block.getHeader().getPreHash().getDigestHex());
             this.rollbackAppraval(preBlock);
         }
     }
@@ -274,10 +288,10 @@ public class BlockManager {
 
     public Block getHighestBlock() {
         BlockHeaderChain chain = bifurcateProcessor.getLongestChain();
-        if(null==chain){
+        if (null == chain) {
             return null;
         }
-        HeaderDigest headerDigest = chain.getHeaderDigestList().get(chain.getHeaderDigestList().size()-1);
-        return   this.getBlock(headerDigest.getHash());
+        HeaderDigest headerDigest = chain.getHeaderDigestList().get(chain.getHeaderDigestList().size() - 1);
+        return this.getBlock(headerDigest.getHash());
     }
 }

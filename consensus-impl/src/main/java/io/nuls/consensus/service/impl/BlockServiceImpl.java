@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -30,6 +30,7 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.dto.Page;
@@ -37,6 +38,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
+import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.ledger.service.intf.LedgerService;
@@ -148,8 +150,13 @@ public class BlockServiceImpl implements BlockService {
     @Override
     @DbSession
     public boolean saveBlock(Block block) throws IOException {
-        block.verifyWithException();
+        ValidateResult result = block.verify();
         boolean b = false;
+        if (result.isFailed() && result.getErrorCode() != ErrorCode.ORPHAN_TX && ErrorCode.ORPHAN_BLOCK != result.getErrorCode()) {
+            throw new NulsRuntimeException(result.getErrorCode(), result.getMessage());
+        } else if (result.getErrorCode() == ErrorCode.ORPHAN_TX || ErrorCode.ORPHAN_BLOCK == result.getErrorCode()) {
+            b = true;
+        }
         for (int x = 0; x < block.getHeader().getTxCount(); x++) {
             Transaction tx = block.getTxs().get(x);
             if (tx.getStatus() == TxStatusEnum.CACHED) {
@@ -169,6 +176,7 @@ public class BlockServiceImpl implements BlockService {
         }
         for (int x = 0; x < block.getHeader().getTxCount(); x++) {
             Transaction tx = block.getTxs().get(x);
+            tx.setIndex(x);
             if (tx.getStatus() == TxStatusEnum.AGREED) {
                 tx.setBlockHeight(block.getHeader().getHeight());
                 try {
@@ -227,13 +235,13 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public Long getRoundFirstBlockHeightFromDb(long roundIndex) {
-      return this.blockStorageService.getRoundLastBlockHeight(roundIndex);
+        return this.blockStorageService.getRoundLastBlockHeight(roundIndex);
     }
 
     @Override
     public Block getRoundLastBlockFromDb(long roundIndex) {
         Long height = this.blockStorageService.getRoundLastBlockHeight(roundIndex);
-        if(null==height){
+        if (null == height) {
             return null;
         }
         return this.getBlock(height);
@@ -242,7 +250,7 @@ public class BlockServiceImpl implements BlockService {
     @Override
     public Block getRoundFirstBlockFromDb(long roundIndex) {
         Long height = this.blockStorageService.getRoundFirstBlockHeight(roundIndex);
-        if(null==height){
+        if (null == height) {
             return null;
         }
         return this.getBlock(height);

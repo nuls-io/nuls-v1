@@ -271,7 +271,7 @@ public class ConsensusMeetingRunner implements Runnable {
         }
         addConsensusTx(bestBlock, txList, self, round);
         bd.setTxList(txList);
-        Log.info("txCount:" + txList.size());
+        Log.debug("txCount:" + txList.size());
         Block newBlock = ConsensusTool.createBlock(bd, round.getLocalPacker());
         ValidateResult result = newBlock.verify();
         if (result.isFailed()) {
@@ -281,6 +281,7 @@ public class ConsensusMeetingRunner implements Runnable {
             }
             return;
         }
+        Log.debug("produce block:"+newBlock.getHeader().getHash()+",\nheight("+newBlock.getHeader().getHeight()+"),round("+round.getIndex()+"),index("+self.getIndexOfRound()+"),roundStart:"+round.getStartTime());
         confirmingTxCacheManager.putTx(newBlock.getTxs().get(0));
         blockManager.addBlock(newBlock, false, null);
         BlockHeaderEvent event = new BlockHeaderEvent();
@@ -312,7 +313,6 @@ public class ConsensusMeetingRunner implements Runnable {
             }
             ValidateResult result = tx.verify();
             if (result.isFailed()) {
-                Log.error(result.getMessage());
                 continue;
             }
             try {
