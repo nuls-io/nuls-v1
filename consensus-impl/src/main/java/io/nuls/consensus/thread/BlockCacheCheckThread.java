@@ -69,6 +69,7 @@ public class BlockCacheCheckThread implements Runnable {
         if (b) {
             ConsensusManager consensusManager = ConsensusManager.getInstance();
             consensusManager.destroy();
+            NulsContext.getInstance().setBestBlock(blockService.getBlock(blockService.getLocalSavedHeight()));
             this.startTime = TimeService.currentTimeMillis();
         }
     }

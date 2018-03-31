@@ -111,11 +111,12 @@ public class BlockPersistenceThread implements Runnable {
             blockManager.removeBlock(block.getHeader().getHash().getDigestHex());
             return;
         }
-        boolean isSuccess ;
+        boolean isSuccess;
         try {
             isSuccess = blockService.saveBlock(block);
         } catch (Exception e) {
             ConsensusManager.getInstance().destroy();
+            NulsContext.getInstance().setBestBlock(blockService.getBlock(blockManager.getStoredHeight()));
             isSuccess = false;
         }
         if (isSuccess) {
