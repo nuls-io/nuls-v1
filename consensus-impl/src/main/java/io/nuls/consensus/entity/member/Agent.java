@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -26,7 +26,6 @@ package io.nuls.consensus.entity.member;
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.calc.DoubleUtils;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
@@ -60,7 +59,7 @@ public class Agent extends BaseNulsData {
         int size = 0;
         size += Utils.sizeOfLong(deposit.getValue());
         size += Utils.sizeOfString(this.packingAddress);
-        size += Utils.sizeOfDouble(DoubleUtils.round(this.commissionRate, 2));
+        size += Utils.sizeOfDouble(this.commissionRate);
         size += Utils.sizeOfString(this.introduction);
         size += Utils.sizeOfString(agentName);
         size += Utils.sizeOfInt48();
@@ -71,7 +70,7 @@ public class Agent extends BaseNulsData {
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeVarInt(deposit.getValue());
         stream.writeString(packingAddress);
-        stream.writeDouble(DoubleUtils.round(this.commissionRate, 2));
+        stream.writeDouble(this.commissionRate);
         stream.writeString(this.introduction);
         stream.writeString(agentName);
         stream.writeInt48(startTime);
@@ -81,7 +80,7 @@ public class Agent extends BaseNulsData {
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.deposit = Na.valueOf(byteBuffer.readVarInt());
         this.packingAddress = byteBuffer.readString();
-        this.commissionRate = DoubleUtils.round(byteBuffer.readDouble(), 2);
+        this.commissionRate = byteBuffer.readDouble();
         this.introduction = byteBuffer.readString();
         this.agentName = byteBuffer.readString();
         this.startTime = byteBuffer.readInt48();
