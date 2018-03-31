@@ -98,7 +98,7 @@ public class BlockManager {
             return;
         }
         BlockRoundData roundData = new BlockRoundData(block.getHeader().getExtend());
-        Log.info("cache block:"+block.getHeader().getHash()+
+        Log.debug("cache block:"+block.getHeader().getHash()+
                 ",\nheight("+block.getHeader().getHeight()+"),round("+roundData.getRoundIndex() +"),index("+roundData.getPackingIndexOfRound()+"),roundStart:"+roundData.getRoundStartTime());
         if (storedHeight == 0) {
             BlockService blockService = NulsContext.getServiceBean(BlockService.class);

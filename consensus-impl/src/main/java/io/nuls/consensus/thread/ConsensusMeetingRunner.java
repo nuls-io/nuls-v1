@@ -281,7 +281,7 @@ public class ConsensusMeetingRunner implements Runnable {
             }
             return;
         }
-        Log.info("produce block:"+newBlock.getHeader().getHash()+",\nheight("+newBlock.getHeader().getHeight()+"),round("+round.getIndex()+"),index("+self.getIndexOfRound()+"),roundStart:"+round.getStartTime());
+        Log.debug("produce block:"+newBlock.getHeader().getHash()+",\nheight("+newBlock.getHeader().getHeight()+"),round("+round.getIndex()+"),index("+self.getIndexOfRound()+"),roundStart:"+round.getStartTime());
         confirmingTxCacheManager.putTx(newBlock.getTxs().get(0));
         blockManager.addBlock(newBlock, false, null);
         BlockHeaderEvent event = new BlockHeaderEvent();

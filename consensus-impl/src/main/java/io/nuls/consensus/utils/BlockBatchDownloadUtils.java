@@ -271,7 +271,7 @@ public class BlockBatchDownloadUtils {
             ValidateResult result1 = block.verify();
             if (result1.isFailed() && result1.getErrorCode() != ErrorCode.ORPHAN_TX && result1.getErrorCode() != ErrorCode.ORPHAN_BLOCK) {
                 if (null != result1.getMessage()) {
-                    Log.info(result1.getMessage());
+                    Log.debug(result1.getMessage());
                 }
                 blockMap.remove(block.getHeader().getHeight());
                 try {
