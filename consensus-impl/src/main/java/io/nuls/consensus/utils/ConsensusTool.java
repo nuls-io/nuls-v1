@@ -199,7 +199,7 @@ public class ConsensusTool {
         header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
         header.setHash(NulsDigestData.calcDigestData(block.getHeader()));
         P2PKHScriptSig scriptSig = new P2PKHScriptSig();
-        NulsSignData signData = accountService.signDigest(header.getHash(), account, NulsContext.CACHED_PASSWORD_OF_WALLET);
+        NulsSignData signData = accountService.signDigest(header.getHash(), account, NulsContext.getCachedPasswordOfWallet());
         scriptSig.setSignData(signData);
         scriptSig.setPublicKey(account.getPubKey());
         header.setScriptSig(scriptSig);

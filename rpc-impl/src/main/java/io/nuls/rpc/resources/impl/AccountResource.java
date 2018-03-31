@@ -68,7 +68,7 @@ public class AccountResource {
         Result<List<String>> accountResult = accountService.createAccount(form.getCount(), form.getPassword());
         RpcResult result = new RpcResult(accountResult);
         if(result.isSuccess()){
-            NulsContext.CACHED_PASSWORD_OF_WALLET = form.getPassword();
+            NulsContext.setCachedPasswordOfWallet(form.getPassword());
         }
         return result;
     }
