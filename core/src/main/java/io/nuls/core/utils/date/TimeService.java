@@ -23,12 +23,17 @@
  */
 package io.nuls.core.utils.date;
 
+import com.fasterxml.jackson.databind.util.JSONPObject;
 import io.nuls.core.thread.manager.TaskManager;
+import io.nuls.core.utils.json.JSONUtils;
 import io.nuls.core.utils.log.Log;
+import io.nuls.core.utils.network.RequestUtil;
+import io.nuls.core.utils.str.StringUtils;
 
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -40,7 +45,7 @@ public class TimeService implements Runnable {
     private static TimeService INSTANCE = new TimeService();
 
     private TimeService() {
-        webTimeUrl = "http://www.baidu.com";
+        webTimeUrl = "http://time.inchain.org/now";
         READ_WRITE_LOCK = new ReentrantReadWriteLock();
         start();
     }
@@ -71,6 +76,12 @@ public class TimeService implements Runnable {
 
     private static ReentrantReadWriteLock READ_WRITE_LOCK;
 
+    public static void main(String[] args) {
+        TimeService s = new TimeService();
+        s.syncWebTime();
+
+    }
+
 
     public void start() {
         Log.info("----------- network timeService start -------------");
@@ -83,16 +94,22 @@ public class TimeService implements Runnable {
         READ_WRITE_LOCK.writeLock().lock();
         try {
             long localBeforeTime = System.currentTimeMillis();
-            URL url = new URL(webTimeUrl);
-            URLConnection connection = url.openConnection();
-            connection.connect();
-            long netTime = connection.getDate();
+
+//            URL url = new URL(webTimeUrl);
+//            URLConnection connection = url.openConnection();
+//            connection.connect();
+//            long netTime = connection.getDate();
+
+            String response = RequestUtil.doGet(webTimeUrl, "utf-8");
+            Map<String, Object> resMap = JSONUtils.json2map(response);
+            long netTime = (long) resMap.get("time");
 
             long localEndTime = System.currentTimeMillis();
 
             netTimeOffset = (netTime + (localEndTime - localBeforeTime) / 2) - localEndTime;
+
             lastSyncTime = localEndTime;
-        } catch (IOException e) {
+        } catch (Exception e) {
             // 1 minute later try again
             lastSyncTime = lastSyncTime + 60000L;
         } finally {
