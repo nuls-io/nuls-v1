@@ -76,13 +76,6 @@ public class TimeService implements Runnable {
 
     private static ReentrantReadWriteLock READ_WRITE_LOCK;
 
-    public static void main(String[] args) {
-        TimeService s = new TimeService();
-        s.syncWebTime();
-
-    }
-
-
     public void start() {
         Log.info("----------- network timeService start -------------");
         syncWebTime();
