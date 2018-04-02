@@ -80,6 +80,9 @@ public class WalletResouce {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult password(@FormParam("password") String password) {
         Result result = this.accountService.encryptAccount(password);
+        if(result.isSuccess()){
+            NulsContext.setCachedPasswordOfWallet(password);
+        }
         return new RpcResult(result);
     }
 
@@ -88,6 +91,9 @@ public class WalletResouce {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult password(AccountParamForm form) {
         Result result = this.accountService.changePassword(form.getPassword(), form.getNewPassword());
+        if(result.isSuccess()){
+            NulsContext.setCachedPasswordOfWallet(form.getNewPassword());
+        }
         return new RpcResult(result);
     }
 
@@ -133,7 +139,7 @@ public class WalletResouce {
                 form.getPrikey().length() > 100) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
-        NulsContext.CACHED_PASSWORD_OF_WALLET = form.getPassword();
+        NulsContext.setCachedPasswordOfWallet(form.getPassword());
 
         Result result = null;
         try {

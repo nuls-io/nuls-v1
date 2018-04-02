@@ -36,6 +36,7 @@ import io.nuls.consensus.service.impl.BlockServiceImpl;
 import io.nuls.consensus.service.impl.PocConsensusServiceImpl;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.service.tx.*;
+import io.nuls.consensus.thread.BlockCacheCheckThread;
 import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
@@ -87,7 +88,7 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
         consensusManager.startPersistenceWork();
 
         Log.info("the POC consensus module is started!");
-
+        TaskManager.createAndRunThread(this.getModuleId(),"block-cache-check",new BlockCacheCheckThread());
     }
 
 

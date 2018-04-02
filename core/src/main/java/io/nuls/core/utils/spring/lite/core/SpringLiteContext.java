@@ -72,7 +72,7 @@ public class SpringLiteContext {
                 BEAN_OK_MAP.put(key, BEAN_TEMP_MAP.get(key));
                 BEAN_TEMP_MAP.remove(key);
             } catch (Exception e) {
-                Log.warn(key+" autowire fields failed!");
+                Log.debug(key+" autowire fields failed!");
             }
         }
     }

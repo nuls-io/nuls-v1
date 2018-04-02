@@ -230,7 +230,7 @@ public class BlockMaintenanceThread implements Runnable {
         if (block.getHeader().getHeight() != netThisBlockInfo.getBestHeight()) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "answer not asked!");
         }
-        Log.warn("Rollback block start height:{},local has wrong blocks!", block.getHeader().getHeight());
+        Log.debug("Rollback block start height:{},local has wrong blocks!", block.getHeader().getHeight());
         //bifurcation
         rollbackBlock(block.getHeader().getHeight(), nodeIdList);
     }
