@@ -109,7 +109,7 @@ public class RoundManager {
         if (needCalcRound) {
             resultRound = calcNextRound(currentBlock, currentRoundData);
         } else  {
-            resultRound = ROUND_MAP.get(currentRoundData.getRoundIndex());
+            resultRound = this.currentRound;
         }
 
         if (resultRound.getPreRound() == null) {
