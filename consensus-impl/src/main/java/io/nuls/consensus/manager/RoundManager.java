@@ -184,6 +184,7 @@ public class RoundManager {
             member.setPackingAddress(address);
             member.setCreditVal(1);
             member.setRoundStartTime(round.getStartTime());
+            memberList.add(member);
         }
         List<Consensus<Agent>> agentList = getAgentList(startCalcHeight);
         Map<String, List<DepositPo>> depositMap = new HashMap<>();
