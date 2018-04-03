@@ -219,6 +219,10 @@ public class ConsensusMeetingRunner implements Runnable {
 
         if (thisIndex == 1) {
             PocMeetingRound preRound = round.getPreRound();
+            if(preRound == null) {
+                //FIXME
+                return true;
+            }
             preBlockPackingAddress = preRound.getMember(preRound.getMemberCount()).getPackingAddress();
         } else {
             preBlockPackingAddress = round.getMember(self.getIndexOfRound()).getPackingAddress();
