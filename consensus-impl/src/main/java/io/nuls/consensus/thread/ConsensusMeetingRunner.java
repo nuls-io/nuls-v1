@@ -144,7 +144,7 @@ public class ConsensusMeetingRunner implements Runnable {
             return;
         }
         PocMeetingMember member = round.getMember(myAccount.getAddress().getBase58());
-        if (!hasPacking && member.getPackStartTime() >= nowTime) {
+        if (!hasPacking && member.getPackStartTime() <= TimeService.currentTimeMillis()) {
             packing(member, round);
             hasPacking = true;
         }
