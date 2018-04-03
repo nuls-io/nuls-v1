@@ -23,12 +23,7 @@
  */
 package io.nuls.consensus.entity.validator.block;
 
-import io.nuls.consensus.manager.PackingRoundManager;
-import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.BlockHeader;
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 

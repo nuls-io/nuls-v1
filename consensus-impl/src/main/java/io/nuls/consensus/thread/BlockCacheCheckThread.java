@@ -48,14 +48,14 @@ public class BlockCacheCheckThread implements Runnable {
 
     @Override
     public void run() {
-        while (true) {
-            try {
-                checkCache();
-                Thread.sleep(10000L);
-            } catch (Exception e) {
-                Log.error(e);
-            }
-        }
+//        while (true) {
+//            try {
+//                checkCache();
+//                Thread.sleep(10000L);
+//            } catch (Exception e) {
+//                Log.error(e);
+//            }
+//        }
 
     }
 
