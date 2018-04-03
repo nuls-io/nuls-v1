@@ -301,7 +301,7 @@ public class RoundManager {
         CoinBaseTransaction tx;
         try {
             tx = new CoinBaseTransaction(data, null);
-            tx.setTime(member.getPackTime());
+            tx.setTime(member.getPackEndTime());
         } catch (NulsException e) {
             Log.error(e);
             throw new NulsRuntimeException(e);
