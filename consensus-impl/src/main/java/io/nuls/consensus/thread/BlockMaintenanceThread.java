@@ -41,6 +41,8 @@ import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.ledger.service.intf.LedgerService;
+import io.nuls.network.entity.Node;
+import io.nuls.network.service.NetworkService;
 import sun.applet.Main;
 
 import java.util.List;
@@ -49,7 +51,10 @@ import java.util.List;
  * @author Niels
  * @date 2017/11/10
  */
-public class BlockMaintenanceThread {
+public class BlockMaintenanceThread implements Runnable {
+
+    //todo 3
+    private static final int MIN_NODE_COUNT = 1;
 
     public static DistributedBlockInfoRequestUtils BEST_HEIGHT_FROM_NET = DistributedBlockInfoRequestUtils.getInstance();
 
@@ -58,8 +63,9 @@ public class BlockMaintenanceThread {
     private static BlockMaintenanceThread instance = new BlockMaintenanceThread();
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     private final BlockService blockService = NulsContext.getServiceBean(BlockService.class);
+    private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
+    private MaintenanceStatus status = MaintenanceStatus.READY;
 
-    private MaintenanceStatus status = MaintenanceStatus.FAILED;
     private long downloadHeight = 0L;
 
     private BlockMaintenanceThread() {
@@ -71,40 +77,59 @@ public class BlockMaintenanceThread {
 
     public synchronized void syncBlock() {
         this.status = MaintenanceStatus.DOWNLOADING;
-        BestCorrectBlock bestCorrectBlock = checkLocalBestCorrentBlock();
-        boolean doit = false;
-        long startHeight = 1;
-        do {
-            if (null == bestCorrectBlock.getLocalBestBlock() && bestCorrectBlock.getNetBestBlockInfo() == null) {
-                doit = true;
-                BlockInfo blockInfo = BEST_HEIGHT_FROM_NET.request(-1);
-                bestCorrectBlock.setNetBestBlockInfo(blockInfo);
-                break;
-            }
-            startHeight = bestCorrectBlock.getLocalBestBlock().getHeader().getHeight() + 1;
-            long interval = TimeService.currentTimeMillis() - bestCorrectBlock.getLocalBestBlock().getHeader().getTime();
-            if (interval < (PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 2000)) {
-                doit = false;
-                break;
-            }
+        while (true) {
+            BestCorrectBlock bestCorrectBlock = checkLocalBestCorrentBlock();
+            boolean doit = false;
+            long startHeight = 1;
+
+
+            do {
+                if (null == bestCorrectBlock.getLocalBestBlock() && bestCorrectBlock.getNetBestBlockInfo() == null) {
+                    doit = true;
+                    BlockInfo blockInfo = BEST_HEIGHT_FROM_NET.request(-1);
+                    bestCorrectBlock.setNetBestBlockInfo(blockInfo);
+                    break;
+                }
+                startHeight = bestCorrectBlock.getLocalBestBlock().getHeader().getHeight() + 1;
+                long interval = TimeService.currentTimeMillis() - bestCorrectBlock.getLocalBestBlock().getHeader().getTime();
+                if (interval < (PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 2000)) {
+                    doit = false;
+                    break;
+                }
+                if (null == bestCorrectBlock.getNetBestBlockInfo()) {
+                    bestCorrectBlock.setNetBestBlockInfo(BEST_HEIGHT_FROM_NET.request(0));
+                }
+                if (null == bestCorrectBlock.getNetBestBlockInfo()) {
+                    break;
+                }
+                if (bestCorrectBlock.getNetBestBlockInfo().getBestHeight() > bestCorrectBlock.getLocalBestBlock().getHeader().getHeight()) {
+                    doit = true;
+                    break;
+                }
+            } while (false);
+
+
             if (null == bestCorrectBlock.getNetBestBlockInfo()) {
-                bestCorrectBlock.setNetBestBlockInfo(BEST_HEIGHT_FROM_NET.request(0));
+                return;
             }
-            if (null == bestCorrectBlock.getNetBestBlockInfo()) {
+            if (doit) {
+                downloadBlocks(bestCorrectBlock.getNetBestBlockInfo().getNodeIdList(), startHeight, bestCorrectBlock.getNetBestBlockInfo().getBestHeight());
+            } else {
                 break;
             }
-            if (bestCorrectBlock.getNetBestBlockInfo().getBestHeight() > bestCorrectBlock.getLocalBestBlock().getHeader().getHeight()) {
-                doit = true;
-                break;
+            long start = TimeService.currentTimeMillis();
+            //todo
+            long timeout = (bestCorrectBlock.getNetBestBlockInfo().getBestHeight()-startHeight+1)*100;
+            while (NulsContext.getInstance().getBestHeight()<bestCorrectBlock.getNetBestBlockInfo().getBestHeight()){
+                if(TimeService.currentTimeMillis()>(timeout+start)){
+                    break;
+                }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    Log.error(e);
+                }
             }
-        } while (false);
-        if (null == bestCorrectBlock.getNetBestBlockInfo()) {
-            return;
-        }
-        if (doit) {
-            downloadBlocks(bestCorrectBlock.getNetBestBlockInfo().getNodeIdList(), startHeight, bestCorrectBlock.getNetBestBlockInfo().getBestHeight());
-        } else {
-            this.status = MaintenanceStatus.SUCCESS;
         }
     }
 
@@ -228,11 +253,37 @@ public class BlockMaintenanceThread {
             return MaintenanceStatus.FAILED;
         }
         if (status == MaintenanceStatus.DOWNLOADING && NulsContext.getInstance().getBestHeight() >= this.downloadHeight) {
-            return MaintenanceStatus.SUCCESS;
+            this.status = MaintenanceStatus.SUCCESS;
         }
-
-
         return status;
     }
 
+    public void setStatus(MaintenanceStatus status) {
+        this.status = status;
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                //todo failed
+                if (this.status == MaintenanceStatus.READY) {
+                    List<Node> nodeList = networkService.getAvailableNodes();
+                    if (nodeList.size() >= MIN_NODE_COUNT) {
+                        this.syncBlock();
+                    }
+                }
+            } catch (Exception e) {
+                Log.error(e);
+            }
+            try {
+                Thread.sleep(1000L);
+            } catch (InterruptedException e) {
+                Log.error(e);
+            }
+
+
+        }
+
+    }
 }

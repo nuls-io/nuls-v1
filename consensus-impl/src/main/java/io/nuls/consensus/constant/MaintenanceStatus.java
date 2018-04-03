@@ -6,6 +6,8 @@ package io.nuls.consensus.constant;
  */
 public enum MaintenanceStatus {
 
+    READY,
+
     SUCCESS,
 
     DOWNLOADING,

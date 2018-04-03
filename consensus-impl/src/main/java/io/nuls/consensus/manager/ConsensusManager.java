@@ -148,9 +148,11 @@ public class ConsensusManager {
         BlockMaintenanceThread blockMaintenanceThread = BlockMaintenanceThread.getInstance();
         try {
             blockMaintenanceThread.checkGenesisBlock();
-            blockMaintenanceThread.syncBlock();
         } catch (Exception e) {
             Log.error(e.getMessage());
+        } finally {
+            TaskManager.createAndRunThread(NulsConstant.MODULE_ID_CONSENSUS,
+                    BlockMaintenanceThread.THREAD_NAME, blockMaintenanceThread);
         }
     }
 

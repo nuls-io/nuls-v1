@@ -24,12 +24,14 @@
 package io.nuls.consensus.event.handler;
 
 import io.nuls.consensus.cache.manager.block.TemporaryCacheManager;
+import io.nuls.consensus.entity.GetBlockParam;
 import io.nuls.consensus.entity.GetSmallBlockParam;
 import io.nuls.consensus.event.BlockHeaderEvent;
 import io.nuls.consensus.event.GetSmallBlockRequest;
 import io.nuls.consensus.manager.BlockManager;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
@@ -59,6 +61,9 @@ public class BlockHeaderHandler extends AbstractEventHandler<BlockHeaderEvent> {
         }
        ValidateResult result = header.verify();
         if(result.isFailed()){
+            if(result.getErrorCode()== ErrorCode.ORPHAN_BLOCK){
+                //todo
+            }
             return;
         }
         GetSmallBlockRequest request = new GetSmallBlockRequest();
