@@ -143,6 +143,9 @@ public class StringUtils {
 
     private static final Pattern NUMBER_PATTERN = Pattern.compile("-?[0-9]+(\\.[0-9]+)?");
     public static boolean isNumber(String str) {
+        if(StringUtils.isBlank(str)){
+            return false;
+        }
         Matcher isNum = NUMBER_PATTERN.matcher(str);
         if (!isNum.matches()) {
             return false;
@@ -152,6 +155,9 @@ public class StringUtils {
 
     private static final Pattern GT_ZERO_NUMBER_PATTERN = Pattern.compile("([1-9][0-9]*(\\.\\d+)?)|(0\\.\\d*[1-9]+0*)");
     public static boolean isNumberGtZero(String str) {
+        if(StringUtils.isBlank(str)){
+            return false;
+        }
         Matcher isNum = GT_ZERO_NUMBER_PATTERN.matcher(str);
         if (!isNum.matches()) {
             return false;
