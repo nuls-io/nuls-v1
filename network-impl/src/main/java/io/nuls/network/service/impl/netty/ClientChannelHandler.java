@@ -6,6 +6,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.Log;
+import io.nuls.core.utils.network.IpUtil;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Node;
@@ -28,7 +29,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         String channelId = ctx.channel().id().asLongText();
         SocketChannel channel = (SocketChannel) ctx.channel();
-        String nodeId = channel.remoteAddress().getHostString() + ":" + channel.remoteAddress().getPort();
+        String nodeId = IpUtil.getNodeId(channel.remoteAddress());
         Node node = getNetworkService().getNode(nodeId);
         //check node exist
         if (node == null || (node != null && node.getStatus() != Node.WAIT)) {
@@ -55,7 +56,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         String channelId = ctx.channel().id().asLongText();
         SocketChannel channel = (SocketChannel) ctx.channel();
         NioChannelMap.remove(channelId);
-        String nodeId = channel.remoteAddress().getHostString() + ":" + channel.remoteAddress().getPort();
+        String nodeId = IpUtil.getNodeId(channel.remoteAddress());
         Node node = getNetworkService().getNode(nodeId);
         if (node != null) {
             if (node.getChannelId() == null || channelId.equals(node.getChannelId())) {
@@ -67,7 +68,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws UnsupportedEncodingException {
         SocketChannel channel = (SocketChannel) ctx.channel();
-        String nodeId = channel.remoteAddress().getHostString() + ":" + channel.remoteAddress().getPort();
+        String nodeId = IpUtil.getNodeId(channel.remoteAddress());
         Node node = getNetworkService().getNode(nodeId);
         if (node != null && node.isAlive()) {
             ByteBuf buf = (ByteBuf) msg;

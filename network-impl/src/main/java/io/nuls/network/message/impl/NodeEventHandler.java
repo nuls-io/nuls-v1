@@ -61,7 +61,7 @@ public class NodeEventHandler implements NetWorkEventHandler {
     public NetworkEventResult process(BaseEvent networkEvent, Node node) {
         NodeEvent event = (NodeEvent) networkEvent;
 
-        Map<String, Node> outNodes = networkService.getNodeGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP).getNodes();
+        Map<String, Node> outNodes = getNetworkService().getNodeGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP).getNodes();
         boolean exist = false;
         for (Node newNode : event.getEventBody().getNodes()) {
             exist = false;
