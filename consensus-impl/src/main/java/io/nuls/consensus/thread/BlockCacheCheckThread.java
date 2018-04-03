@@ -60,17 +60,16 @@ public class BlockCacheCheckThread implements Runnable {
     }
 
     private void checkCache() {
-        if (null == blockService) {
-            blockService = NulsContext.getServiceBean(BlockService.class);
-        }
-        Block block = blockService.getBlock(blockService.getLocalSavedHeight());
-        boolean b = (TimeService.currentTimeMillis() - startTime) > 300000;
-        b = b && (TimeService.currentTimeMillis() - block.getHeader().getTime()) > 300000;
-        if (b) {
-            ConsensusManager consensusManager = ConsensusManager.getInstance();
-            consensusManager.destroy();
-            NulsContext.getInstance().setBestBlock(blockService.getBlock(blockService.getLocalSavedHeight()));
-            this.startTime = TimeService.currentTimeMillis();
-        }
+//        if (null == blockService) {
+//            blockService = NulsContext.getServiceBean(BlockService.class);
+//        }
+//        Block block = blockService.getBlock(blockService.getLocalSavedHeight());
+//        boolean b = (TimeService.currentTimeMillis() - startTime) > 300000;
+//        b = b && (TimeService.currentTimeMillis() - block.getHeader().getTime()) > 300000;
+//        if (b) {
+//            ConsensusManager consensusManager = ConsensusManager.getInstance();
+//            consensusManager.destroy();
+//            this.startTime = TimeService.currentTimeMillis();
+//        }
     }
 }

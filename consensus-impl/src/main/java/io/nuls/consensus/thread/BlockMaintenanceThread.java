@@ -207,7 +207,7 @@ public class BlockMaintenanceThread {
             this.blockService.rollbackBlock(startHeight);
             long height = startHeight - 1;
             Block block = getPreBlock(height);
-            NulsContext.getInstance().setBestBlock(block);
+            NulsContext.getInstance().setBestBlock1(block);
             checkNeedRollback(block);
         } catch (NulsException e) {
             Log.error(e);

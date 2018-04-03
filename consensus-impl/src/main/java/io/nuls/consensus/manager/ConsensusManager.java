@@ -86,7 +86,7 @@ public class ConsensusManager {
         if (bestBlock == null) {
             bestBlock = genesisBlock;
         }
-        NulsContext.getInstance().setBestBlock(bestBlock);
+        NulsContext.getInstance().setBestBlock1(bestBlock);
 
         partakePacking = NulsContext.MODULES_CONFIG.getCfgValue(PocConsensusConstant.CFG_CONSENSUS_SECTION, PocConsensusConstant.PROPERTY_PARTAKE_PACKING, false);
         seedNodeList = new ArrayList<>();
