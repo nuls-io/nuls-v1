@@ -108,6 +108,7 @@ public class ConsensusMeetingRunner implements Runnable {
             return;
         }
         this.running = true;
+        //todo
         packingRoundManager.init();
         //wait the network synchronize complete and wait MeetingRound ready.
         waitReady();
@@ -465,7 +466,9 @@ public class ConsensusMeetingRunner implements Runnable {
             } else if (roundIndex == lastBlockRoundData.getRoundIndex()) {
                 tempRound = round.getPreRound();
                 if (null == tempRound) {
+                    //todo
                     System.out.println();
+                    break;
                 }
             } else {
                 break;
