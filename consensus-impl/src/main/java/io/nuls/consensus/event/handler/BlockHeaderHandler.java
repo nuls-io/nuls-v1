@@ -55,6 +55,7 @@ public class BlockHeaderHandler extends AbstractEventHandler<BlockHeaderEvent> {
             Log.warn("recieved a null blockHeader!");
             return;
         }
+        System.out.println("==========height:"+header.getHeight()+" , txCount:"+header.getTxCount()+" , hash:"+header.getHash().getDigestHex());
         Block block = blockManager.getBlock(header.getHash().getDigestHex());
         if (null != block) {
             return;
