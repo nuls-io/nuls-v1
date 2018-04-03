@@ -49,7 +49,7 @@ public class ReceivedTxCacheManager {
     }
 
     public void init() {
-        txCache = new CacheMap<>(CACHE_NAME, 64, ConsensusCacheConstant.LIVE_TIME, 0, new ReceivedTxCacheListener());
+        txCache = new CacheMap<>(CACHE_NAME, 64, 20, 0, new ReceivedTxCacheListener());
     }
 
     public boolean txExist(NulsDigestData hash) {
