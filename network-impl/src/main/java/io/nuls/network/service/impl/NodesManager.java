@@ -186,8 +186,9 @@ public class NodesManager implements Runnable {
                 removeNodeFromGroup(groupName, nodeId);
             }
             nodes.remove(nodeId);
-
             getNodeDao().removeNode(NodeTransferTool.toPojo(node));
+        } else {
+            getNodeDao().removeNode(nodeId);
         }
     }
 
