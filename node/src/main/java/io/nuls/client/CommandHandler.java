@@ -114,7 +114,7 @@ public class CommandHandler {
             try {
                 ip = NulsContext.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, "test.server.ip");
             } catch (NulsException e) {
-                ip = "192.168.1.201";
+                ip = RpcConstant.DEFAULT_IP;
             }
             SdkManager.init("http://" + ip + ":" + port);
         }
