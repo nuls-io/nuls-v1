@@ -459,7 +459,10 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             if (localPoList.size() > 0) {
                 txDao.saveLocalList(localPoList);
             }
-        } finally {
+        }catch (Exception e){
+            Log.error(e);
+            throw  e;
+        }finally {
             lock.unlock();
         }
         return false;
