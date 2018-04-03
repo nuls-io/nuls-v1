@@ -7,14 +7,12 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.Log;
-import io.nuls.core.utils.network.IpUtil;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeGroup;
 import io.nuls.network.service.NetworkService;
 
-import java.net.InetAddress;
 import java.nio.ByteBuffer;
 
 /**
@@ -28,26 +26,26 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-        SocketChannel socketChannel = (SocketChannel) ctx.channel();
-        String remoteIP = socketChannel.remoteAddress().getHostString();
-        Node node = getNetworkService().getNode(remoteIP);
+        SocketChannel channel = (SocketChannel) ctx.channel();
+        String remoteId = channel.remoteAddress().getHostString() + ":" + channel.remoteAddress().getPort();
+        Node node = getNetworkService().getNode(remoteId);
         if (node != null) {
             if (node.getStatus() == Node.CONNECT) {
                 ctx.channel().close();
                 return;
             }
             //When nodes try to connect to each other but not connected, select one of the smaller IP addresses as the server
-            if (node.getType() == Node.OUT) {
-                String localIP = InetAddress.getLocalHost().getHostAddress();
-                boolean isLocalServer = IpUtil.judgeIsLocalServer(localIP, remoteIP);
-
-                if (!isLocalServer) {
-                    ctx.channel().close();
-                    return;
-                } else {
-                    getNetworkService().removeNode(remoteIP);
-                }
-            }
+//            if (node.getType() == Node.OUT) {
+//                String localIP = InetAddress.getLocalHost().getHostAddress() +InetAddress.getLocalHost().get;
+//                boolean isLocalServer = IpUtil.judgeIsLocalServer(localIP, remoteIP);
+//
+//                if (!isLocalServer) {
+//                    ctx.channel().close();
+//                    return;
+//                } else {
+//                    getNetworkService().removeNode(remoteIP);
+//                }
+//            }
         }
         NodeGroup group = getNetworkService().getNodeGroup(NetworkConstant.NETWORK_NODE_IN_GROUP);
         if (group.size() > getNetworkService().getNetworkParam().maxInCount()) {
@@ -73,7 +71,8 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String channelId = ctx.channel().id().asLongText();
         NioChannelMap.remove(channelId);
-        Node node = getNetworkService().getNode(channel.remoteAddress().getHostString());
+        String nodeId = channel.remoteAddress().getHostString() + ":" + channel.remoteAddress().getPort();
+        Node node = getNetworkService().getNode(nodeId);
         if (node != null && channelId.equals(node.getChannelId())) {
             getNetworkService().removeNode(channel.remoteAddress().getHostString());
         }
