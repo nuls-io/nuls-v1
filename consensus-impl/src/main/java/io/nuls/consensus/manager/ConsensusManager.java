@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,7 +23,6 @@
  */
 package io.nuls.consensus.manager;
 
-import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.cache.manager.block.BlockCacheBuffer;
 import io.nuls.consensus.cache.manager.block.ConfirmingBlockCacheManager;
 import io.nuls.consensus.cache.manager.block.TemporaryCacheManager;
@@ -31,17 +30,12 @@ import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
-import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.constant.PocConsensusConstant;
-import io.nuls.consensus.entity.Consensus;
-import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.consensus.entity.genesis.GenesisBlock;
-import io.nuls.consensus.entity.meeting.PocMeetingRound;
-import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.service.impl.BlockStorageService;
 import io.nuls.consensus.thread.BlockMaintenanceThread;
 import io.nuls.consensus.thread.BlockPersistenceThread;
-import io.nuls.consensus.thread.ConsensusMeetingRunner;
+import io.nuls.consensus.thread.ConsensusMeetingRunner_New;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
@@ -139,8 +133,8 @@ public class ConsensusManager {
 
     public void joinConsensusMeeting() {
         TaskManager.createAndRunThread(NulsConstant.MODULE_ID_CONSENSUS,
-                ConsensusMeetingRunner.THREAD_NAME,
-                ConsensusMeetingRunner.getInstance());
+                ConsensusMeetingRunner_New.THREAD_NAME,
+                ConsensusMeetingRunner_New.getInstance());
     }
 
     /**
@@ -157,9 +151,6 @@ public class ConsensusManager {
             blockMaintenanceThread.syncBlock();
         } catch (Exception e) {
             Log.error(e.getMessage());
-        } finally {
-            TaskManager.createAndRunThread(NulsConstant.MODULE_ID_CONSENSUS,
-                    BlockMaintenanceThread.THREAD_NAME, blockMaintenanceThread);
         }
     }
 

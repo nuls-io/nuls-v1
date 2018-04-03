@@ -31,6 +31,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.MD5Util;
 import io.nuls.core.utils.json.JSONUtils;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.ledger.service.intf.LedgerService;
@@ -212,21 +213,21 @@ public class WalletResouce {
                 try {
                     read.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                   Log.error(e);
                 }
             }
             if (bufferedReader != null) {
                 try {
                     bufferedReader.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                   Log.error(e);
                 }
             }
             if (in != null) {
                 try {
                     in.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                   Log.error(e);
                 }
             }
         }

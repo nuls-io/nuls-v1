@@ -44,6 +44,8 @@ public class BifurcateProcessor {
 
     private ConfirmingBlockCacheManager confirmingBlockCacheManager = ConfirmingBlockCacheManager.getInstance();
 
+    private BlockHeaderChain approvingChain;
+
     private List<BlockHeaderChain> chainList = new CopyOnWriteArrayList<>();
     private long maxHeight;
 
