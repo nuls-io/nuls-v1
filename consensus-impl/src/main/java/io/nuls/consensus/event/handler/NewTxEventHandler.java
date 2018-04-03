@@ -68,7 +68,6 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
         if (null == tx) {
             return;
         }
-        boolean isMine = ledgerService.checkTxIsMySend(tx);
         ValidateResult result = tx.verify();
         if (result.isFailed()) {
             if (result.getErrorCode() == ErrorCode.ORPHAN_TX) {
@@ -84,6 +83,7 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
             }
             return;
         }
+        boolean isMine = ledgerService.checkTxIsMySend(tx);
         try {
             if (isMine) {
                 ledgerService.approvalTx(tx);
