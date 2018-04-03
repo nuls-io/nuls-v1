@@ -125,7 +125,7 @@ public class Node extends BaseNulsData {
     public int size() {
         int s = 0;
         s += VarInt.sizeOf(magicNumber);
-        s += VarInt.sizeOf(getSeverPort());
+        s += VarInt.sizeOf(severPort);
         s += 1;
         try {
             s += ip.getBytes(NulsContext.DEFAULT_ENCODING).length;
@@ -146,6 +146,7 @@ public class Node extends BaseNulsData {
     public void parse(NulsByteBuffer buffer) throws NulsException {
         magicNumber = (int) buffer.readVarInt();
         port = (int) buffer.readVarInt();
+        severPort = port;
         ip = new String(buffer.readByLengthByte());
         this.groupSet = ConcurrentHashMap.newKeySet();
     }
@@ -300,9 +301,9 @@ public class Node extends BaseNulsData {
     }
 
     public Integer getSeverPort() {
-        if(severPort == null) {
-            severPort = 0;
-        }
+        //if(severPort == null) {
+        //    severPort = 0;
+        //}
         return severPort;
     }
 
