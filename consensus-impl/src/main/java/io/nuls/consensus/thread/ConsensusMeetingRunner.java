@@ -50,8 +50,10 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
@@ -62,17 +64,14 @@ import io.nuls.network.entity.Node;
 import io.nuls.network.service.NetworkService;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Niels
  * @date 2017/12/15
  */
 public class ConsensusMeetingRunner implements Runnable {
-    private static final int MIN_NODE_COUNT = 2;
+    private static final int MIN_NODE_COUNT = 1;
     private NulsContext context = NulsContext.getInstance();
     public static final String THREAD_NAME = "Consensus-Meeting";
     private static final ConsensusMeetingRunner INSTANCE = new ConsensusMeetingRunner();
@@ -162,6 +161,9 @@ public class ConsensusMeetingRunner implements Runnable {
                 Block realBestBlock = blockManager.getBlock(newBlock.getHeader().getHeight());
                 List<NulsDigestData> txHashList = realBestBlock.getTxHashList();
                 for (Transaction transaction : newBlock.getTxs()) {
+                    if (transaction.getType() == TransactionConstant.TX_TYPE_COIN_BASE) {
+                        continue;
+                    }
                     if (txHashList.contains(transaction.getHash())) {
                         continue;
                     }
@@ -193,7 +195,7 @@ public class ConsensusMeetingRunner implements Runnable {
                 hasReceiveNewestBlock = hasReceiveNewestBlock(self, round);
                 if (hasReceiveNewestBlock) {
                     long sleepTime = time + timeout - TimeService.currentTimeMillis();
-                    if(sleepTime > 0) {
+                    if (sleepTime > 0) {
                         Thread.sleep(sleepTime);
                     }
                     break;
@@ -220,7 +222,7 @@ public class ConsensusMeetingRunner implements Runnable {
 
         if (thisIndex == 1) {
             PocMeetingRound preRound = round.getPreRound();
-            if(preRound == null) {
+            if (preRound == null) {
                 //FIXME
                 return true;
             }
@@ -284,6 +286,21 @@ public class ConsensusMeetingRunner implements Runnable {
         //TODO check
         hasPacking = false;
         packingRoundManager.resetCurrentMeetingRound();
+        PocMeetingRound round = packingRoundManager.getCurrentRound();
+        if (round != null) {
+            long myTime = 0;
+
+            Account myAccount = round.getLocalPacker();
+            if (myAccount != null) {
+
+                PocMeetingMember member = round.getMember(myAccount.getAddress().getBase58());
+                myTime = member.getPackStartTime();
+            }
+
+            System.out.println("meeting round reset , now time : " + DateUtil.convertDate(new Date(TimeService.currentTimeMillis()))
+                    + " , round end time : " + DateUtil.convertDate(new Date(round.getEndTime())) + " , my time is :" + DateUtil.convertDate(new Date(myTime)));
+            System.out.println("======================================");
+        }
     }
 
     private Block doPacking(PocMeetingMember self, PocMeetingRound round, long timeout) throws NulsException, IOException {
@@ -341,6 +358,8 @@ public class ConsensusMeetingRunner implements Runnable {
         bd.setTxList(txList);
         Log.debug("txCount:" + txList.size());
         Block newBlock = ConsensusTool.createBlock(bd, round.getLocalPacker());
+        System.out.printf("========height:" + newBlock.getHeader().getHeight() + ",time:" + DateUtil.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
+                DateUtil.convertDate(new Date(self.getPackEndTime())));
         ValidateResult result = newBlock.verify();
         if (result.isFailed()) {
             Log.warn("packing block error:" + result.getMessage());

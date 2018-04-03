@@ -84,7 +84,6 @@ public class RoundManager {
     public synchronized PocMeetingRound resetCurrentMeetingRound() {
         Block currentBlock = NulsContext.getInstance().getBestBlock();
         BlockRoundData currentRoundData = new BlockRoundData(currentBlock.getHeader().getExtend());
-        PocMeetingRound currentRound = ROUND_MAP.get(currentRoundData.getRoundIndex());
         boolean needCalcRound = false;
         do {
             if (null == currentRound) {
@@ -109,8 +108,8 @@ public class RoundManager {
         PocMeetingRound resultRound = null;
         if (needCalcRound) {
             resultRound = calcNextRound(currentBlock, currentRoundData);
-        } else if (null != ROUND_MAP.get(currentRoundData.getRoundIndex() + 1)) {
-            resultRound = ROUND_MAP.get(currentRoundData.getRoundIndex() + 1);
+        } else  {
+            resultRound = ROUND_MAP.get(currentRoundData.getRoundIndex());
         }
 
         if (resultRound.getPreRound() == null) {
