@@ -144,7 +144,7 @@ public class ConsensusMeetingRunner implements Runnable {
             return;
         }
         PocMeetingMember member = round.getMember(myAccount.getAddress().getBase58());
-        if (!hasPacking && member.getPackStartTime() >= nowTime) {
+        if (!hasPacking && member.getPackTime() >= nowTime) {
             packing(member, round);
             hasPacking = true;
         }
@@ -166,7 +166,7 @@ public class ConsensusMeetingRunner implements Runnable {
                     }
                     orphanTxCacheManager.putTx(transaction);
                 }
-                newBlock = doPacking(self, round, self.getPackEndTime() - TimeService.currentTimeMillis());
+                newBlock = doPacking(self, round, self.getPackTime() - TimeService.currentTimeMillis());
             }
             //todo info to debug
             Log.info("produce block:" + newBlock.getHeader().getHash() + ",\nheight(" + newBlock.getHeader().getHeight() + "),round(" + round.getIndex() + "),index(" + self.getIndexOfRound() + "),roundStart:" + round.getStartTime());
@@ -191,7 +191,10 @@ public class ConsensusMeetingRunner implements Runnable {
             while (!hasReceiveNewestBlock) {
                 hasReceiveNewestBlock = hasReceiveNewestBlock(self, round);
                 if (hasReceiveNewestBlock) {
-                    Thread.sleep(time + timeout - TimeService.currentTimeMillis());
+                    long sleepTime = time + timeout - TimeService.currentTimeMillis();
+                    if(sleepTime > 0) {
+                        Thread.sleep(sleepTime);
+                    }
                     break;
                 }
                 Thread.sleep(500l);
@@ -216,6 +219,10 @@ public class ConsensusMeetingRunner implements Runnable {
 
         if (thisIndex == 1) {
             PocMeetingRound preRound = round.getPreRound();
+            if(preRound == null) {
+                //FIXME
+                return true;
+            }
             preBlockPackingAddress = preRound.getMember(preRound.getMemberCount()).getPackingAddress();
         } else {
             preBlockPackingAddress = round.getMember(self.getIndexOfRound()).getPackingAddress();
@@ -296,7 +303,7 @@ public class ConsensusMeetingRunner implements Runnable {
         List<NulsDigestData> hashList = new ArrayList<>();
         long totalSize = 0L;
         for (int i = 0; i < txList.size(); i++) {
-            if ((self.getPackEndTime() - TimeService.currentTimeMillis()) <= timeout) {
+            if ((self.getPackTime() - TimeService.currentTimeMillis()) <= timeout) {
                 break;
             }
             Transaction tx = txList.get(i);
@@ -345,7 +352,7 @@ public class ConsensusMeetingRunner implements Runnable {
     }
 
     private void addOrphanTx(List<Transaction> txList, long totalSize, PocMeetingMember self) {
-        if ((self.getPackEndTime() - TimeService.currentTimeMillis()) <= 100) {
+        if ((self.getPackTime() - TimeService.currentTimeMillis()) <= 100) {
             return;
         }
         List<Transaction> orphanTxList = orphanTxCacheManager.getTxList();
@@ -356,7 +363,7 @@ public class ConsensusMeetingRunner implements Runnable {
         List<NulsDigestData> outHashList = new ArrayList<>();
         orphanTxList.sort(TxTimeComparator.getInstance());
         for (Transaction tx : orphanTxList) {
-            if ((self.getPackEndTime() - TimeService.currentTimeMillis()) <= 100) {
+            if ((self.getPackTime() - TimeService.currentTimeMillis()) <= 100) {
                 break;
             }
             totalSize += tx.size();
