@@ -59,6 +59,7 @@ public class RoundManager {
 
 
     private BlockService consensusBlockService;
+    private PocMeetingRound currentRound;
 
     public void init() {
         //load five(CACHE_COUNT) round from db on the start time ;
@@ -79,18 +80,6 @@ public class RoundManager {
     public static RoundManager getPackingRoundManager() {
         return INSTANCE;
     }
-
-
-    public PocMeetingRound getCurrentRound() {
-        Block currentBlock = NulsContext.getInstance().getBestBlock();
-        BlockRoundData currentRoundData = new BlockRoundData(currentBlock.getHeader().getExtend());
-        PocMeetingRound round = ROUND_MAP.get(currentRoundData.getRoundIndex());
-        if (null == round) {
-            round = resetCurrentMeetingRound();
-        }
-        return round;
-    }
-
 
     public synchronized PocMeetingRound resetCurrentMeetingRound() {
         Block currentBlock = NulsContext.getInstance().getBestBlock();
@@ -119,11 +108,9 @@ public class RoundManager {
         } while (false);
         PocMeetingRound resultRound = null;
         if (needCalcRound) {
-            if (null != ROUND_MAP.get(currentRoundData.getRoundIndex() + 1)) {
-                resultRound = ROUND_MAP.get(currentRoundData.getRoundIndex() + 1);
-            } else {
-                resultRound = calcNextRound(currentBlock, currentRoundData);
-            }
+            resultRound = calcNextRound(currentBlock, currentRoundData);
+        } else if (null != ROUND_MAP.get(currentRoundData.getRoundIndex() + 1)) {
+            resultRound = ROUND_MAP.get(currentRoundData.getRoundIndex() + 1);
         }
 
         if (resultRound.getPreRound() == null) {
@@ -132,6 +119,8 @@ public class RoundManager {
 
         List<Account> accountList = accountService.getAccountList();
         resultRound.calcLocalPacker(accountList);
+        this.currentRound = resultRound;
+        ROUND_MAP.put(resultRound.getIndex(), currentRound);
         return resultRound;
     }
 
@@ -364,4 +353,7 @@ public class RoundManager {
         return rewardList;
     }
 
+    public PocMeetingRound getCurrentRound() {
+        return currentRound;
+    }
 }

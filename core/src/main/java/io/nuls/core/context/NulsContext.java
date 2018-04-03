@@ -117,7 +117,7 @@ public class NulsContext {
     }
 
 
-    public void setBestBlock1(Block bestBlock) {
+    public void setBestBlock(Block bestBlock) {
         this.bestBlock = bestBlock;
     }
 

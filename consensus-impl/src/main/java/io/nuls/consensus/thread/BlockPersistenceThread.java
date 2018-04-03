@@ -116,7 +116,7 @@ public class BlockPersistenceThread implements Runnable {
             isSuccess = blockService.saveBlock(block);
         } catch (Exception e) {
             ConsensusManager.getInstance().destroy();
-            NulsContext.getInstance().setBestBlock1(blockService.getBlock(blockManager.getStoredHeight()));
+            NulsContext.getInstance().setBestBlock(blockService.getBlock(blockManager.getStoredHeight()));
             isSuccess = false;
         }
         if (isSuccess) {

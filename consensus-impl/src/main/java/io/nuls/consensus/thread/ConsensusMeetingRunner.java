@@ -108,7 +108,8 @@ public class ConsensusMeetingRunner implements Runnable {
             return;
         }
         this.running = true;
-
+        //todo
+        packingRoundManager.init();
         //wait the network synchronize complete and wait MeetingRound ready.
         waitReady();
 
@@ -144,7 +145,7 @@ public class ConsensusMeetingRunner implements Runnable {
             return;
         }
         PocMeetingMember member = round.getMember(myAccount.getAddress().getBase58());
-        if (!hasPacking && member.getPackStartTime() >= nowTime) {
+        if (!hasPacking && member.getPackStartTime() <= TimeService.currentTimeMillis()) {
             packing(member, round);
             hasPacking = true;
         }
@@ -191,7 +192,10 @@ public class ConsensusMeetingRunner implements Runnable {
             while (!hasReceiveNewestBlock) {
                 hasReceiveNewestBlock = hasReceiveNewestBlock(self, round);
                 if (hasReceiveNewestBlock) {
-                    Thread.sleep(time + timeout - TimeService.currentTimeMillis());
+                    long sleepTime = time + timeout - TimeService.currentTimeMillis();
+                    if(sleepTime > 0) {
+                        Thread.sleep(sleepTime);
+                    }
                     break;
                 }
                 Thread.sleep(500l);
@@ -216,6 +220,10 @@ public class ConsensusMeetingRunner implements Runnable {
 
         if (thisIndex == 1) {
             PocMeetingRound preRound = round.getPreRound();
+            if(preRound == null) {
+                //FIXME
+                return true;
+            }
             preBlockPackingAddress = preRound.getMember(preRound.getMemberCount()).getPackingAddress();
         } else {
             preBlockPackingAddress = round.getMember(self.getIndexOfRound()).getPackingAddress();
@@ -458,7 +466,9 @@ public class ConsensusMeetingRunner implements Runnable {
             } else if (roundIndex == lastBlockRoundData.getRoundIndex()) {
                 tempRound = round.getPreRound();
                 if (null == tempRound) {
+                    //todo
                     System.out.println();
+                    break;
                 }
             } else {
                 break;
