@@ -93,4 +93,8 @@ public class GetVersionEvent extends BaseEvent {
     public int getSeverPort() {
         return severPort;
     }
+
+    public void setSeverPort(int severPort) {
+        this.severPort = severPort;
+    }
 }
