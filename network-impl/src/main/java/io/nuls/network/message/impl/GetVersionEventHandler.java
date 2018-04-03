@@ -73,7 +73,7 @@ public class GetVersionEventHandler implements NetWorkEventHandler {
                 Thread.sleep(1000);
                 block = NulsContext.getInstance().getBestBlock();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+               Log.error(e);
             }
         }
 

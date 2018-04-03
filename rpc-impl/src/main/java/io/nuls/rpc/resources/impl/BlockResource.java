@@ -31,6 +31,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.ledger.service.intf.LedgerService;
@@ -117,7 +118,7 @@ public class BlockResource {
                 result.setData(new BlockDto(block, reward, fee));
             } catch (IOException e) {
                 //todo
-                e.printStackTrace();
+               Log.error(e);
             }
         }
         return result;
@@ -143,7 +144,7 @@ public class BlockResource {
                 result.setData(new BlockDto(block, reward, fee));
             } catch (IOException e) {
                 //todo
-                e.printStackTrace();
+               Log.error(e);
             }
         }
         return result;

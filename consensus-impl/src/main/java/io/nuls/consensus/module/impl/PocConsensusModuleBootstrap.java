@@ -81,7 +81,6 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
     @Override
     public void start() {
         consensusManager.init();
-        NulsContext.getInstance().setBestBlock(NulsContext.getServiceBean(BlockService.class).getLocalBestBlock());
         this.registerHandlers();
         this.consensusManager.startMaintenanceWork();
         consensusManager.joinConsensusMeeting();

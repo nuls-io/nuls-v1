@@ -147,7 +147,6 @@ public class BlockManager {
         if (bifurcateProcessor.getChainSize() == 1) {
             try {
                 this.appravalBlock(block);
-                context.setBestBlock(block);
                 this.lastAppravedHash = block.getHeader().getHash().getDigestHex();
                 checkNextblock(block.getHeader().getHash().getDigestHex());
             } catch (Exception e) {
@@ -207,7 +206,6 @@ public class BlockManager {
         }
         this.rollbackTxList(block.getTxs(), 0, block.getTxs().size());
         Block preBlock =this.getBlock(block.getHeader().getPreHash().getDigestHex());
-        context.setBestBlock(preBlock);
         List<String> hashList = this.bifurcateProcessor.getHashList(block.getHeader().getHeight() - 1);
         if (hashList.size() > 1) {
             this.rollbackAppraval(preBlock);
@@ -283,6 +281,7 @@ public class BlockManager {
     }
 
     public void clear() {
+        this.bifurcateProcessor.clear();
         this.confirmingBlockCacheManager.clear();
         this.blockCacheBuffer.clear();
 

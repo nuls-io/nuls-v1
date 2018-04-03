@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,31 +21,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.consensus.entity.validator.block;
+package io.nuls.ledger.thread;
 
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.validate.NulsDataValidator;
-import io.nuls.core.validate.ValidateResult;
+import io.nuls.core.utils.log.Log;
 
 /**
  * @author Niels
- * @date 2017/12/20
+ * @date 2017/11/13
  */
-public class BlockConsensusValidator implements NulsDataValidator<Block> {
-    private static BlockConsensusValidator INSTANCE = new BlockConsensusValidator();
+public class CheckUtxoUsable implements Runnable {
+    private static final CheckUtxoUsable INSTANCE = new CheckUtxoUsable();
 
-    //    private PackingRoundManager packingRoundManager = PackingRoundManager.getValidateInstance();
-    private BlockConsensusValidator() {
+    private CheckUtxoUsable( ) {
     }
 
-    public static BlockConsensusValidator getInstance() {
+    public static CheckUtxoUsable getInstance() {
         return INSTANCE;
     }
 
+    private boolean stop;
+
     @Override
-    public ValidateResult validate(Block block) {
-//todo         return packingRoundManager.validateBlock(block);
-        return ValidateResult.getSuccessResult();
+    public void run() {
+        stop = false;
+        while (!stop) {
+            try {
+                smallChange();
+            } catch (Exception e) {
+                Log.error(e);
+            }
+            try {
+                Thread.sleep(60000L);
+            } catch (InterruptedException e) {
+                Log.error(e);
+            }
+        }
+    }
+
+    private void smallChange() {
 
     }
+
+    public void stop() {
+        this.stop = true;
+    }
+
+
 }

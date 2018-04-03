@@ -57,8 +57,13 @@ public class TransactionDto {
         this.setTransferType(tx.getTransferType());
         this.setIndex(tx.getIndex());
         this.size = tx.getSize();
-        if (TxStatusEnum.CONFIRMED.equals(tx.getStatus())) {
+        if (this.blockHeight > 0 || TxStatusEnum.CONFIRMED.equals(tx.getStatus())) {
             this.confirmCount = bestBlockHeight - this.blockHeight;
+        } else {
+            this.confirmCount = 0L;
+        }
+        if (TxStatusEnum.CONFIRMED.equals(tx.getStatus())) {
+
             this.status = 1;
         } else {
             this.status = 0;

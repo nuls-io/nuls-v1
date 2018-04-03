@@ -148,20 +148,20 @@ public final class GenesisBlock extends Block {
         try {
             account = AccountTool.createAccount(priKey);
         } catch (NulsException e) {
-            e.printStackTrace();
+           Log.error(e);
         }
         AccountService accountService = NulsContext.getServiceBean(AccountService.class);
         P2PKHScriptSig scriptSig = null;
         try {
             scriptSig = accountService.createP2PKHScriptSigFromDigest(tx.getHash(), account, "");
         } catch (NulsException e) {
-            e.printStackTrace();
+           Log.error(e);
         }
 
         try {
             tx.setScriptSig(scriptSig.serialize());
         } catch (IOException e) {
-            e.printStackTrace();
+           Log.error(e);
         }
 
         List<Transaction> txlist = new ArrayList<>();

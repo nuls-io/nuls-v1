@@ -29,10 +29,7 @@ import io.nuls.consensus.entity.DownloadRound;
 import io.nuls.consensus.entity.NodeDownloadingStatus;
 import io.nuls.consensus.event.GetBlockRequest;
 import io.nuls.consensus.manager.BlockManager;
-import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.Result;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.date.TimeService;
@@ -63,7 +60,6 @@ public class BlockBatchDownloadUtils {
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
     private QueueService<String> queueService = new QueueService<>();
     private BlockManager blockManager = BlockManager.getInstance();
-    private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
 
 
     private ReceivedTxCacheManager receivedTxCacheManager = ReceivedTxCacheManager.getInstance();
@@ -79,7 +75,6 @@ public class BlockBatchDownloadUtils {
     private List<DownloadRound> roundList = new ArrayList<>();
     private DownloadRound currentRound;
     private List<String> nodeIdList;
-    private BlockInfo blocksHash;
 
     private Lock lock = new ReentrantLock();
 
@@ -115,7 +110,6 @@ public class BlockBatchDownloadUtils {
             }
             working = true;
             this.init(nodeIdList);
-            blocksHash = DistributedBlockInfoRequestUtils.getInstance().request(startHeight, endHeight, DOWNLOAD_BLOCKS_PER_TIME, nodeIdList);
             request(startHeight, endHeight);
             while (working) {
                 verify();
@@ -248,16 +242,7 @@ public class BlockBatchDownloadUtils {
             }
             return;
         }
-        Result result;
-        try {
-            result = checkHash();
-        } catch (InterruptedException e) {
-            Log.error(e);
-            return;
-        }
-        if (null == result || result.isFailed()) {
-            return;
-        }
+
         for (long i = currentRound.getStart(); i <= currentRound.getEnd(); i++) {
             Block block = blockMap.get(i);
             if (null == block) {
@@ -298,41 +283,6 @@ public class BlockBatchDownloadUtils {
             return;
         }
         this.sendRequest(height, height, this.queueService.take(queueId));
-    }
-
-    private void failedExecute(NodeDownloadingStatus nodeStatus) throws InterruptedException {
-        if (null == nodeStatus) {
-            return;
-        }
-        this.queueService.offer(queueId, nodeStatus.getNodeId());
-        for (long i = nodeStatus.getStart(); i <= nodeStatus.getEnd(); i++) {
-            if (nodeStatus.getDownloadedSet().contains(i)) {
-                continue;
-            }
-            failedExecute(i);
-        }
-    }
-
-    private Result checkHash() throws InterruptedException {
-        for (long i = currentRound.getStart(); i <= currentRound.getEnd(); i++) {
-            Block block = blockMap.get(i);
-            if (null == block) {
-                return Result.getFailed("data error");
-            }
-            if ((i - currentRound.getStart()) % DOWNLOAD_BLOCKS_PER_TIME == 0) {
-                NulsDigestData mustHash = blocksHash.getHash(block.getHeader().getHeight());
-                if (mustHash == null) {
-                    continue;
-                }
-                NulsDigestData hash = block.getHeader().getHash();
-                if (null == hash || null == mustHash || !mustHash.getDigestHex().equals(hash.getDigestHex())) {
-                    blockMap.remove(block.getHeader().getHeight());
-                    failedExecute(block.getHeader().getHeight());
-                    return Result.getFailed("hash wrong!");
-                }
-            }
-        }
-        return Result.getSuccess();
     }
 
     private void finished() {

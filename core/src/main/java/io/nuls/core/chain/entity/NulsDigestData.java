@@ -94,7 +94,7 @@ public class NulsDigestData extends BaseNulsData {
         try{
             this.digestBytes = byteBuffer.readByLengthByte();
         }catch (Exception e){
-            e.printStackTrace();
+           Log.error(e);
         }
     }
 

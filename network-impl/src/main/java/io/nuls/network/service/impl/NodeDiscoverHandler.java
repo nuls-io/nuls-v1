@@ -163,7 +163,7 @@ public class NodeDiscoverHandler implements Runnable {
             if (str.toString().length() == 0) {
                 str.append(",");
             }
-            Log.debug("nodes(" + count + "):" + str.toString().substring(1));
+            Log.info("nodes(" + count + "):" + str.toString().substring(1));
 
             GetVersionEvent event = new GetVersionEvent(network.getExternalPort());
             GetNodesIpEvent ipEvent = new GetNodesIpEvent();

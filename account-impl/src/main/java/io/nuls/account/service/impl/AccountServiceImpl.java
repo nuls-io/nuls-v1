@@ -748,14 +748,14 @@ public class AccountServiceImpl implements AccountService {
                 }
                 defaultAcct.lock();
             } catch (NulsException e) {
-                e.printStackTrace();
+               Log.error(e);
                 return Result.getFailed("ErrorCode.PASSWORD_IS_WRONG");
             }
         }
         try {
             account.encrypt(password);
         } catch (NulsException e) {
-            e.printStackTrace();
+           Log.error(e);
         }
 
         // save db
