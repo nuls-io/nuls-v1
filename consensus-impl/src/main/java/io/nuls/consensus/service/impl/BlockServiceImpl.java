@@ -23,6 +23,7 @@
  */
 package io.nuls.consensus.service.impl;
 
+import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.manager.BlockManager;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.utils.BlockHeightComparator;
@@ -63,7 +64,7 @@ public class BlockServiceImpl implements BlockService {
         try {
             return blockStorageService.getBlock(0);
         } catch (Exception e) {
-            e.printStackTrace();
+           Log.error(e);
             Log.error(e);
         }
         return null;
@@ -235,24 +236,26 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public Long getRoundFirstBlockHeightFromDb(long roundIndex) {
-        return this.blockStorageService.getRoundLastBlockHeight(roundIndex);
-    }
-
-    @Override
-    public Block getRoundLastBlockFromDb(long roundIndex) {
-        Long height = this.blockStorageService.getRoundLastBlockHeight(roundIndex);
-        if (null == height) {
-            return null;
-        }
-        return this.getBlock(height);
-    }
-
-    @Override
-    public Block getRoundFirstBlockFromDb(long roundIndex) {
+    public Block getRoundFirstBlock(Block bestBlock, long roundIndex) {
         Long height = this.blockStorageService.getRoundFirstBlockHeight(roundIndex);
         if (null == height) {
-            return null;
+            Block resultBlock = bestBlock;
+            String hashHex = resultBlock.getHeader().getPreHash().getDigestHex();
+            while (true) {
+                BlockRoundData roundData = new BlockRoundData(resultBlock.getHeader().getExtend());
+                if (roundData.getRoundIndex() > roundIndex) {
+                    break;
+                }
+                if (roundData.getRoundIndex() == roundIndex && roundData.getPackingIndexOfRound() == 1) {
+                    break;
+                }
+                resultBlock = getBlock(hashHex);
+                if (null == resultBlock) {
+                    throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "The block shouldn't be null");
+                }
+                hashHex = resultBlock.getHeader().getPreHash().getDigestHex();
+            }
+            return resultBlock;
         }
         return this.getBlock(height);
     }

@@ -53,7 +53,7 @@ public class ModularServiceMethodInterceptor implements MethodInterceptor {
 
     @Override
     public Object intercept(Object obj, Method method, Object[] params, MethodProxy methodProxy) throws Throwable {
-        Log.debug(method.toString());
+//        Log.debug(method.toString());
         threadLocal.set(0);
         Throwable throwable = null;
         while (threadLocal.get() < 100) {

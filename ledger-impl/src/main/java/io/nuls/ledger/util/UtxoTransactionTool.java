@@ -33,6 +33,7 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.date.TimeService;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.*;
@@ -256,7 +257,7 @@ public class UtxoTransactionTool {
                 ledgerCacheService.removeBalance(address);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+           Log.error(e);
         } finally {
             lock.unlock();
         }

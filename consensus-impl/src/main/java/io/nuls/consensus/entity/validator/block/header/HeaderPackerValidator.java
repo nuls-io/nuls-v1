@@ -23,7 +23,6 @@
  */
 package io.nuls.consensus.entity.validator.block.header;
 
-import io.nuls.consensus.manager.PackingRoundManager;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
@@ -34,7 +33,7 @@ import io.nuls.core.validate.ValidateResult;
  */
 public class HeaderPackerValidator implements NulsDataValidator<BlockHeader> {
     public static final HeaderPackerValidator INSTANCE = new HeaderPackerValidator();
-    public PackingRoundManager packingRoundManager = PackingRoundManager.getValidateInstance();
+//    public PackingRoundManager packingRoundManager = PackingRoundManager.getValidateInstance();
 
     private HeaderPackerValidator() {
     }
@@ -45,7 +44,8 @@ public class HeaderPackerValidator implements NulsDataValidator<BlockHeader> {
 
     @Override
     public ValidateResult validate(BlockHeader header) {
-        return packingRoundManager.validateBlockHeader(header);
+        return ValidateResult.getSuccessResult();
+//        return packingRoundManager.validateBlockHeader(header);
     }
 
 

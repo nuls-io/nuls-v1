@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,11 +23,13 @@
  */
 package io.nuls.consensus.thread;
 
+import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
+import io.nuls.consensus.constant.MaintenanceStatus;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.RedPunishData;
 import io.nuls.consensus.entity.YellowPunishData;
@@ -41,11 +43,8 @@ import io.nuls.consensus.event.BlockHeaderEvent;
 import io.nuls.consensus.event.notice.PackedBlockNotice;
 import io.nuls.consensus.manager.BlockManager;
 import io.nuls.consensus.manager.ConsensusManager;
-import io.nuls.consensus.manager.PackingRoundManager;
-import io.nuls.consensus.service.intf.BlockService;
-import io.nuls.consensus.utils.BlockInfo;
+import io.nuls.consensus.manager.RoundManager;
 import io.nuls.consensus.utils.ConsensusTool;
-import io.nuls.consensus.utils.DistributedBlockInfoRequestUtils;
 import io.nuls.consensus.utils.TxTimeComparator;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.Na;
@@ -61,10 +60,12 @@ import io.nuls.ledger.entity.tx.CoinBaseTransaction;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.network.entity.Node;
 import io.nuls.network.service.NetworkService;
-import org.spongycastle.util.Times;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Niels
@@ -78,17 +79,16 @@ public class ConsensusMeetingRunner implements Runnable {
     private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     private BlockManager blockManager = BlockManager.getInstance();
-    private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
     private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
     private OrphanTxCacheManager orphanTxCacheManager = OrphanTxCacheManager.getInstance();
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
     private boolean running = false;
+    private boolean hasPacking = false;
     private ConsensusManager consensusManager = ConsensusManager.getInstance();
-    private PackingRoundManager packingRoundManager = PackingRoundManager.getPackInstance();
+    private RoundManager packingRoundManager = RoundManager.getPackingRoundManager();
     private ConfirmingTxCacheManager confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
     private static Map<Long, RedPunishData> punishMap = new HashMap<>();
-    private long packingRoundIndex;
 
     private ConsensusMeetingRunner() {
     }
@@ -101,124 +101,184 @@ public class ConsensusMeetingRunner implements Runnable {
         punishMap.put(redPunishData.getHeight(), redPunishData);
     }
 
-    private Block getBestBlock() {
-        Block block = context.getBestBlock();
-        Block highestBlock = blockManager.getHighestBlock();
-        if (null != highestBlock && highestBlock.getHeader().getHeight() > block.getHeader().getHeight()) {
-            return highestBlock;
-        }
-        return block;
-    }
-
     @Override
     public void run() {
+
         if (running) {
             return;
         }
         this.running = true;
-        boolean result = (TimeService.currentTimeMillis() - this.getBestBlock().getHeader().getTime()) <= 1000L * PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND;
-        if (!result) {
-            while (!checkBestHash()) {
-                try {
-                    Thread.sleep(1000L);
-                } catch (InterruptedException e) {
-                    Log.error(e);
-                }
-            }
-        }
+
+        //wait the network synchronize complete and wait MeetingRound ready.
+        waitReady();
+
         while (running) {
             try {
-                boolean b = checkCondition();
-                if (b) {
-                    nextRound();
-                } else {
-                    Thread.sleep(1000L);
-                }
+                doWork();
             } catch (Exception e) {
                 Log.error(e);
-
+                Log.info("consensus throw error : " + e.getMessage());
             }
         }
     }
 
-    private boolean checkCondition() {
-        List<Node> nodes = networkService.getAvailableNodes();
-        if(nodes == null || nodes.size() < MIN_NODE_COUNT){
-            return false;
-        }
-        if(NulsContext.getInstance().getNetBestBlockHeight() == null){
-            return false;
-        }
-        boolean localIsSeed = packingRoundManager.isLocalHasSeed(accountService.getAccountList());
-        boolean result = ((NulsContext.getInstance().getNetBestBlockHeight() > 0 || localIsSeed) && this.getBestBlock().getHeader().getHeight() >= NulsContext.getInstance().getNetBestBlockHeight());
-        return result;
-    }
+    private void doWork() {
 
-    private boolean checkBestHash() {
-        BlockInfo blockInfo;
-        try {
-            blockInfo = DistributedBlockInfoRequestUtils.getInstance().request(-1, null);
-        } catch (Exception e) {
-            Log.error(e.getMessage());
-            return false;
-        }
-        if (blockInfo == null || blockInfo.getBestHash() == null) {
-            return false;
-        }
-        boolean result = blockInfo.getBestHeight() <= this.getBestBlock().getHeader().getHeight();
-        if (!result) {
-            return result;
-        }
-        Block localBlock = blockService.getBlock(blockInfo.getBestHeight());
-        result = null != localBlock &&
-                blockInfo.getBestHash().getDigestHex()
-                        .equals(localBlock.getHeader().getHash().getDigestHex());
-        return result;
-    }
-
-    private void nextRound() throws NulsException, IOException {
-        packingRoundManager.calc(getBestBlock());
         PocMeetingRound round = packingRoundManager.getCurrentRound();
-        if (this.packingRoundIndex == round.getIndex()) {
-            try {
-                Thread.sleep(1000L);
-            } catch (InterruptedException e) {
-                Log.error(e);
-            }
+
+        long nowTime = TimeService.currentTimeMillis();
+        //check current round is end
+        if (nowTime >= round.getEndTime()) {
+            resetCurrentMeetingRound();
             return;
         }
-        this.packingRoundIndex = round.getIndex();
-        while (TimeService.currentTimeMillis() < round.getStartTime()) {
-            try {
-                Thread.sleep(100L);
-            } catch (InterruptedException e) {
-                Log.error(e);
-            }
+
+        //current is legal work
+        if (!checkIsLegal()) {
+            return;
         }
-        boolean imIn = consensusManager.isPartakePacking() && round.getLocalPacker() != null;
-        if (imIn) {
-            startMeeting(round);
+
+        //check i am is a consensus node
+        Account myAccount = round.getLocalPacker();
+        if (myAccount == null) {
+            return;
+        }
+        PocMeetingMember member = round.getMember(myAccount.getAddress().getBase58());
+        if (!hasPacking && member.getRoundStartTime() >= nowTime) {
+            packing(member, round);
+            hasPacking = true;
+        }
+
+    }
+
+    private void packing(PocMeetingMember self, PocMeetingRound round) {
+        try {
+            boolean needCheckAgain = waitReceiveNewestBlock(self, round);
+
+            Block newBlock = doPacking(self, round, PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000 / 5);
+
+            if (needCheckAgain && hasReceiveNewestBlock(self, round)) {
+                Block realBestBlock = blockManager.getBlock(newBlock.getHeader().getHeight());
+                List<NulsDigestData> txHashList = realBestBlock.getTxHashList();
+                for (Transaction transaction : newBlock.getTxs()) {
+                    if (txHashList.contains(transaction.getHash())) {
+                        continue;
+                    }
+                    orphanTxCacheManager.putTx(transaction);
+                }
+                newBlock = doPacking(self, round, self.getPackTime() - TimeService.currentTimeMillis());
+            }
+            //todo info to debug
+            Log.info("produce block:" + newBlock.getHeader().getHash() + ",\nheight(" + newBlock.getHeader().getHeight() + "),round(" + round.getIndex() + "),index(" + self.getIndexOfRound() + "),roundStart:" + round.getStartTime());
+
+            broadcastNewBlock(newBlock);
+
+        } catch (NulsException e) {
+            Log.error(e);
+        } catch (IOException e) {
+            Log.error(e);
         }
     }
 
-    private void startMeeting(PocMeetingRound round) throws NulsException, IOException {
-        PocMeetingMember self = round.getMember(round.getLocalPacker().getAddress().toString());
-        long timeUnit = 3000L;
-        if (TimeService.currentTimeMillis() > self.getPackTime()) {
-            return;
+    private boolean waitReceiveNewestBlock(PocMeetingMember self, PocMeetingRound round) {
+
+        long time = TimeService.currentTimeMillis();
+        long timeout = PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000 / 2;
+
+        boolean hasReceiveNewestBlock = false;
+
+        try {
+            while (!hasReceiveNewestBlock) {
+                hasReceiveNewestBlock = hasReceiveNewestBlock(self, round);
+                if (hasReceiveNewestBlock) {
+                    Thread.sleep(time + timeout - TimeService.currentTimeMillis());
+                    break;
+                }
+                Thread.sleep(500l);
+                if (TimeService.currentTimeMillis() - time >= timeout) {
+                    break;
+                }
+            }
+        } catch (InterruptedException e) {
+            Log.error(e);
         }
-        while (TimeService.currentTimeMillis() <= (self.getPackTime() - timeUnit)) {
+
+        return !hasReceiveNewestBlock;
+    }
+
+    private boolean hasReceiveNewestBlock(PocMeetingMember self, PocMeetingRound round) {
+        Block bestBlock = getBestBlock();
+        String packingAddress = bestBlock.getHeader().getPackingAddress();
+
+        int thisIndex = self.getIndexOfRound();
+
+        String preBlockPackingAddress = null;
+
+        if (thisIndex == 1) {
+            PocMeetingRound preRound = round.getPreRound();
+            preBlockPackingAddress = preRound.getMember(preRound.getMemberCount()).getPackingAddress();
+        } else {
+            preBlockPackingAddress = round.getMember(self.getIndexOfRound()).getPackingAddress();
+        }
+
+        if (packingAddress.equals(preBlockPackingAddress)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private void broadcastNewBlock(Block newBlock) {
+        confirmingTxCacheManager.putTx(newBlock.getTxs().get(0));
+        blockManager.addBlock(newBlock, false, null);
+        BlockHeaderEvent event = new BlockHeaderEvent();
+        event.setEventBody(newBlock.getHeader());
+        eventBroadcaster.broadcastAndCache(event, false);
+        PackedBlockNotice notice = new PackedBlockNotice();
+        notice.setEventBody(newBlock.getHeader());
+        eventBroadcaster.publishToLocal(notice);
+    }
+
+    private boolean checkIsLegal() {
+        if (!consensusManager.isPartakePacking()) {
+            return false;
+        }
+        List<Node> nodes = networkService.getAvailableNodes();
+        if (nodes == null || nodes.size() < MIN_NODE_COUNT) {
+            return false;
+        }
+        if (NulsContext.getInstance().getNetBestBlockHeight() == null) {
+            return false;
+        }
+        return true;
+    }
+
+    private void waitReady() {
+
+        while (!isNetworkSynchronizeComplete()) {
             try {
-                Thread.sleep(100L);
+                Thread.sleep(200L);
             } catch (InterruptedException e) {
                 Log.error(e);
             }
         }
-        packing(self, round);
+
+        //read create new meeting round
+        resetCurrentMeetingRound();
     }
 
+    //network synchronize status
+    private boolean isNetworkSynchronizeComplete() {
+        return BlockMaintenanceThread.getInstance().getStatus() == MaintenanceStatus.SUCCESS;
+    }
 
-    private void packing(PocMeetingMember self, PocMeetingRound round) throws NulsException, IOException {
+    private void resetCurrentMeetingRound() {
+        //TODO check
+        hasPacking = false;
+        packingRoundManager.resetCurrentMeetingRound();
+    }
+
+    private Block doPacking(PocMeetingMember self, PocMeetingRound round, long timeout) throws NulsException, IOException {
         Block bestBlock = this.getBestBlock();
         List<Transaction> txList = txCacheManager.getTxList();
         txList.sort(TxTimeComparator.getInstance());
@@ -236,7 +296,7 @@ public class ConsensusMeetingRunner implements Runnable {
         List<NulsDigestData> hashList = new ArrayList<>();
         long totalSize = 0L;
         for (int i = 0; i < txList.size(); i++) {
-            if ((self.getPackTime() - TimeService.currentTimeMillis()) <= 100) {
+            if ((self.getPackTime() - TimeService.currentTimeMillis()) <= timeout) {
                 break;
             }
             Transaction tx = txList.get(i);
@@ -279,17 +339,9 @@ public class ConsensusMeetingRunner implements Runnable {
             for (Transaction tx : newBlock.getTxs()) {
                 ledgerService.rollbackTx(tx);
             }
-            return;
+            return null;
         }
-        Log.debug("produce block:"+newBlock.getHeader().getHash()+",\nheight("+newBlock.getHeader().getHeight()+"),round("+round.getIndex()+"),index("+self.getIndexOfRound()+"),roundStart:"+round.getStartTime());
-        confirmingTxCacheManager.putTx(newBlock.getTxs().get(0));
-        blockManager.addBlock(newBlock, false, null);
-        BlockHeaderEvent event = new BlockHeaderEvent();
-        event.setEventBody(newBlock.getHeader());
-        eventBroadcaster.broadcastAndCache(event, false);
-        PackedBlockNotice notice = new PackedBlockNotice();
-        notice.setEventBody(newBlock.getHeader());
-        eventBroadcaster.publishToLocal(notice);
+        return newBlock;
     }
 
     private void addOrphanTx(List<Transaction> txList, long totalSize, PocMeetingMember self) {
@@ -403,9 +455,9 @@ public class ConsensusMeetingRunner implements Runnable {
             PocMeetingRound tempRound;
             if (roundIndex == self.getRoundIndex()) {
                 tempRound = round;
-            } else if (roundIndex ==  lastBlockRoundData.getRoundIndex() ) {
+            } else if (roundIndex == lastBlockRoundData.getRoundIndex()) {
                 tempRound = round.getPreRound();
-                if(null==tempRound){
+                if (null == tempRound) {
                     System.out.println();
                 }
             } else {
@@ -447,5 +499,14 @@ public class ConsensusMeetingRunner implements Runnable {
         punishTx.setHash(NulsDigestData.calcDigestData(punishTx));
         punishTx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(punishTx.getHash(), round.getLocalPacker(), NulsContext.getCachedPasswordOfWallet()).serialize());
         txList.add(punishTx);
+    }
+
+    private Block getBestBlock() {
+        Block block = context.getBestBlock();
+        Block highestBlock = blockManager.getHighestBlock();
+        if (null != highestBlock && highestBlock.getHeader().getHeight() > block.getHeader().getHeight()) {
+            return highestBlock;
+        }
+        return block;
     }
 }
