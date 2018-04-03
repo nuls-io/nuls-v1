@@ -72,6 +72,7 @@ public class BlockCacheCheckThread implements Runnable {
             boolean b = (TimeService.currentTimeMillis() - startTime) > TIME_OUT;
             if (b) {
                 BlockMaintenanceThread.getInstance().setStatus(MaintenanceStatus.READY);
+                Log.info("set maintenance status to Ready==========================================");
             }
         }
 
