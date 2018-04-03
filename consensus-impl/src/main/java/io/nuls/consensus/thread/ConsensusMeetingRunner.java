@@ -240,7 +240,7 @@ public class ConsensusMeetingRunner implements Runnable {
     }
 
     private boolean checkIsLegal() {
-        if (consensusManager.isPartakePacking()) {
+        if (!consensusManager.isPartakePacking()) {
             return false;
         }
         List<Node> nodes = networkService.getAvailableNodes();
