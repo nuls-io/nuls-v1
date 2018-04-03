@@ -64,7 +64,7 @@ public class RoundManager {
         //load five(CACHE_COUNT) round from db on the start time ;
         Block bestBlock = NulsContext.getInstance().getBestBlock();
         BlockRoundData roundData = new BlockRoundData(bestBlock.getHeader().getExtend());
-        for (long i = roundData.getRoundIndex(); i >= 1 && i > roundData.getRoundIndex() - CACHE_COUNT; i--) {
+        for (long i = roundData.getRoundIndex(); i >= 1 && i >= roundData.getRoundIndex() - CACHE_COUNT; i--) {
             Block firstBlock = getBlockService().getRoundFirstBlock(bestBlock, i - 1);
             BlockRoundData thisRoundData = new BlockRoundData(firstBlock.getHeader().getExtend());
             PocMeetingRound round = calcRound(firstBlock.getHeader().getHeight(), i, thisRoundData.getRoundStartTime());
