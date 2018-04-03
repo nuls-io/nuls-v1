@@ -64,7 +64,7 @@ public class BlockServiceImpl implements BlockService {
         try {
             return blockStorageService.getBlock(0);
         } catch (Exception e) {
-           Log.error(e);
+            Log.error(e);
             Log.error(e);
         }
         return null;
@@ -236,6 +236,16 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
+    public long getPackingCount(String address) {
+        return blockStorageService.getBlockCount(address, -1, -1);
+    }
+
+    @Override
+    public Map<String, Object> getSumTxCount(String address, long roundStart, long roundEnd) {
+        return blockStorageService.getSumTxCount(address, roundStart, roundEnd);
+    }
+
+    @Override
     public Block getRoundFirstBlock(Block bestBlock, long roundIndex) {
         Long height = this.blockStorageService.getRoundFirstBlockHeight(roundIndex);
         if (null == height) {
@@ -258,16 +268,6 @@ public class BlockServiceImpl implements BlockService {
             return resultBlock;
         }
         return this.getBlock(height);
-    }
-
-    @Override
-    public long getPackingCount(String address) {
-        return blockStorageService.getBlockCount(address, -1, -1);
-    }
-
-    @Override
-    public Map<String, Object> getSumTxCount(String address, long roundStart, long roundEnd) {
-        return blockStorageService.getSumTxCount(address, roundStart, roundEnd);
     }
 
     private void rollback(List<Transaction> txs, int max) {
