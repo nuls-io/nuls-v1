@@ -191,6 +191,13 @@ public class NodesManager implements Runnable {
         }
     }
 
+    public void removeNodeFromMap(String nodeId, Node node) {
+        if (nodes.containsKey(nodeId)) {
+            nodes.remove(nodeId);
+            nodes.put(node.getId(), node);
+        }
+    }
+
     public void blackNode(String nodeId, int status) {
         if (nodes.containsKey(nodeId)) {
             Node node = nodes.get(nodeId);

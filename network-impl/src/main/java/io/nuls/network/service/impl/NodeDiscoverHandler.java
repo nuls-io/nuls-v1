@@ -167,7 +167,7 @@ public class NodeDiscoverHandler implements Runnable {
             }
             Log.info("nodes(" + count + "):" + str.toString().substring(1));
 
-            GetVersionEvent event = new GetVersionEvent(network.getExternalPort());
+            GetVersionEvent event = new GetVersionEvent(network.port());
             GetNodesIpEvent ipEvent = new GetNodesIpEvent();
             for (Node node : nodeList) {
                 if (node.isAlive()) {

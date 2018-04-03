@@ -49,6 +49,8 @@ public interface NetworkService {
 
     void removeNode(String nodeId,int type);
 
+    void changeNodeFromMap(String oldId, Node node);
+
     Node getNode(String nodeId);
 
     List<Node> getAvailableNodes();
