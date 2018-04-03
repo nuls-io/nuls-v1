@@ -28,11 +28,9 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-        SocketChannel channel = (SocketChannel) ctx.channel();
-        String remoteIP = channel.remoteAddress().getHostString();
-        String remoteId = remoteIP + ":" + channel.remoteAddress().getPort();
-
-        Node node = getNetworkService().getNode(remoteId);
+        SocketChannel socketChannel = (SocketChannel) ctx.channel();
+        String remoteIP = socketChannel.remoteAddress().getHostString();
+        Node node = getNetworkService().getNode(remoteIP);
         if (node != null) {
             if (node.getStatus() == Node.CONNECT) {
                 ctx.channel().close();
@@ -75,8 +73,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String channelId = ctx.channel().id().asLongText();
         NioChannelMap.remove(channelId);
-        String nodeId = channel.remoteAddress().getHostString() + ":" + channel.remoteAddress().getPort();
-        Node node = getNetworkService().getNode(nodeId);
+        Node node = getNetworkService().getNode(channel.remoteAddress().getHostString());
         if (node != null && channelId.equals(node.getChannelId())) {
             getNetworkService().removeNode(channel.remoteAddress().getHostString());
         }

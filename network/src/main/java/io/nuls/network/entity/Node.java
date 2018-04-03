@@ -287,9 +287,6 @@ public class Node extends BaseNulsData {
     }
 
     public String getId() {
-//        if (StringUtils.isBlank(id)) {
-//            id = ip + ":" + port;
-//        }
         return ip;
     }
 
