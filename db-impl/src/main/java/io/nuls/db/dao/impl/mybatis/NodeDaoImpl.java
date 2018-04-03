@@ -59,7 +59,7 @@ public class NodeDaoImpl extends BaseDaoImpl<NodeMapper, String, NodePo> impleme
         PageHelper.orderBy("last_fail_time asc");
         if (!keys.isEmpty()) {
             List<String> keyList = new ArrayList<>(keys);
-            searchable.addCondition("id", SearchOperator.notIn, keyList);
+            searchable.addCondition("ip", SearchOperator.notIn, keyList);
         }
         searchable.addCondition("status", SearchOperator.eq, 0);
         List<NodePo> list = getMapper().selectList(searchable);
