@@ -108,7 +108,7 @@ public class ConsensusMeetingRunner implements Runnable {
             return;
         }
         this.running = true;
-
+        packingRoundManager.init();
         //wait the network synchronize complete and wait MeetingRound ready.
         waitReady();
 

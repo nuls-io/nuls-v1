@@ -122,6 +122,7 @@ public class RoundManager {
         List<Account> accountList = accountService.getAccountList();
         resultRound.calcLocalPacker(accountList);
         this.currentRound = resultRound;
+        ROUND_MAP.put(resultRound.getIndex(),currentRound);
         return resultRound;
     }
 
