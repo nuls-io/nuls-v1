@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -27,6 +27,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.dto.Page;
+import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.BlockHeaderService;
 import io.nuls.db.dao.impl.mybatis.mapper.BlockHeaderMapper;
 import io.nuls.db.dao.impl.mybatis.params.BlockSearchParams;
@@ -157,6 +158,21 @@ public class BlockDaoImpl extends BaseDaoImpl<BlockHeaderMapper, String, BlockHe
     }
 
     @Override
+    public Map<String, Object> getSumTxCount(String address, long roundStart, long roundEnd) {
+        Searchable searchable = new Searchable();
+        if (StringUtils.isNotBlank(address)) {
+            searchable.addCondition("consensus_address", SearchOperator.eq, address);
+        }
+        if (roundStart > 0) {
+            searchable.addCondition("round_index", SearchOperator.gte, roundStart);
+        }
+        if (roundEnd > 0) {
+            searchable.addCondition("round_index", SearchOperator.lte, roundEnd);
+        }
+        return getMapper().getSumTxCount(searchable);
+    }
+
+    @Override
     public List<Long> getListOfRoundIndexOfYellowPunish(String address, long startRoundIndex, long endRoundIndex) {
         Map<String, Object> params = new HashMap<>();
         params.put("address", address);
@@ -170,6 +186,7 @@ public class BlockDaoImpl extends BaseDaoImpl<BlockHeaderMapper, String, BlockHe
     public Long getRoundFirstBlockHeight(long roundIndex) {
         return this.getMapper().getRoundFirstBlockHeight(roundIndex);
     }
+
     @Override
     public Long getRoundLastBlockHeight(long roundIndex) {
         return this.getMapper().getRoundLastBlockHeight(roundIndex);

@@ -12,7 +12,7 @@
         <result column="round_index" jdbcType="BIGINT" property="roundIndex"/>
         <result column="scriptSig" jdbcType="VARBINARY" property="scriptSig"/>
         <result column="extend" jdbcType="VARBINARY" property="extend"/>
-        <result column="size" jdbcType="INTEGER" property="size" />
+        <result column="size" jdbcType="INTEGER" property="size"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -70,6 +70,13 @@
         select count(hash) from block_header
         <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
     </select>
+
+    <select id="getSumTxCount" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultType="java.util.Map">
+        select count(1) as blockCount, sum(tx_count) as txCount
+        from block_header
+        <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
+    </select>
+
     <select id="getMaxHeight" resultType="long">
         select max(height) from block_header
     </select>
@@ -79,6 +86,7 @@
         where height >=#{startHeight,jdbcType=BIGINT}
         and height <= #{endHeight,jdbcType=BIGINT}
         and mod((height-#{startHeight,jdbcType=BIGINT}),#{split,jdbcType=BIGINT})=0
+
         ]]>
     </select>
     <select id="getSumOfRoundIndexOfYellowPunish" resultType="long" parameterType="java.util.Map">
@@ -90,10 +98,12 @@
         where r.address=#{address ,jdbcType=VARCHAR }
          and b.round_index>=#{startRoundIndex,jdbcType=BIGINT}
          and b.round_index <=#{endRoundIndex,jdbcType=BIGINT}
+
         ]]>
     </select>
 
-    <select id="getBlockByAddress" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultMap="BaseResultMap">
+    <select id="getBlockByAddress" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable"
+            resultMap="BaseResultMap">
         select b.*
         from agent a
         join block_header b on a.agent_address = b.consensus_address

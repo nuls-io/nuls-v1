@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -62,7 +62,7 @@ public class BlockStorageService {
 
     public Block getBlock(long height) throws Exception {
         Block block = blockCacheManager.getBlock(height);
-        if (null != block&&block.getTxs().size()==block.getHeader().getTxCount()) {
+        if (null != block && block.getTxs().size() == block.getHeader().getTxCount()) {
             return block;
         }
         BlockHeader header = getBlockHeader(height);
@@ -75,7 +75,7 @@ public class BlockStorageService {
         } catch (Exception e) {
             Log.error(e);
         }
-        if(header.getTxCount()!=txList.size()){
+        if (header.getTxCount() != txList.size()) {
             Log.warn("block has wrong tx size!");
         }
         return fillBlock(header, txList);
@@ -240,6 +240,10 @@ public class BlockStorageService {
         return this.headerDao.getCount(address, roundStart, roundEnd);
     }
 
+    public Map<String, Object> getSumTxCount(String address, long roundStart, long roundEnd) {
+        return headerDao.getSumTxCount(address, roundStart, roundEnd);
+    }
+
     public long getSumOfRoundIndexOfYellowPunish(String address, long startRoundIndex, long endRoundIndex) {
         //todo 是否需要查询内存
         List<Long> indexList = this.headerDao.getListOfRoundIndexOfYellowPunish(address, startRoundIndex, endRoundIndex);
@@ -256,6 +260,7 @@ public class BlockStorageService {
     public Long getRoundFirstBlockHeight(long roundIndex) {
         return this.headerDao.getRoundFirstBlockHeight(roundIndex);
     }
+
     public Long getRoundLastBlockHeight(long roundIndex) {
         return this.headerDao.getRoundLastBlockHeight(roundIndex);
     }
