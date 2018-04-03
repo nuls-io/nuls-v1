@@ -90,7 +90,7 @@ public class RoundManager {
                 needCalcRound = true;
                 break;
             }
-            if (currentRound.getEndTime() < TimeService.currentTimeMillis()) {
+            if (currentRound.getEndTime() <= TimeService.currentTimeMillis()) {
                 needCalcRound = true;
                 break;
             }
