@@ -50,9 +50,11 @@ public class DevNetworkParam extends AbstractNetworkParam {
 
         InetSocketAddress address1 = new InetSocketAddress("192.168.1.203", port);
         InetSocketAddress address2 = new InetSocketAddress("192.168.1.131", port);
+        InetSocketAddress address3 = new InetSocketAddress("192.168.1.204", port);
 
         seedNodes.add(address1);
         seedNodes.add(address2);
+        seedNodes.add(address3);
 
         this.messageFilter = DefaultMessageFilter.getInstance();
         this.messageHandlerFactory = DefaultNetWorkEventHandlerFactory.getInstance();
