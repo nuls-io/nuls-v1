@@ -37,8 +37,9 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
             return;
         }
 
-        Map<String, Node> outNodes = networkService.getNodeGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP).getNodes();
-        for (Node n : outNodes.values()) {
+        Map<String, Node> nodes = networkService.getNodes();
+
+        for (Node n : nodes.values()) {
             if (n.getIp().equals(channel.remoteAddress().getHostString()) && n.getPort() != channel.remoteAddress().getPort()) {
                 ctx.channel().close();
                 return;

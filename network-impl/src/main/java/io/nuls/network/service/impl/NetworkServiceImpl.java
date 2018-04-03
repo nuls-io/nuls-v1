@@ -45,10 +45,7 @@ import io.nuls.network.param.TestNetworkParam;
 import io.nuls.network.service.NetworkService;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author vivi
@@ -132,6 +129,11 @@ public class NetworkServiceImpl implements NetworkService {
     @Override
     public void changeNodeFromMap(String nodeId, Node node) {
         nodesManager.removeNodeFromMap(nodeId, node);
+    }
+
+    @Override
+    public Map<String, Node> getNodes() {
+        return nodesManager.getNodes();
     }
 
     @Override

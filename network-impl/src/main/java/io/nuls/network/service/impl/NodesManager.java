@@ -114,7 +114,6 @@ public class NodesManager implements Runnable {
             addNodeToGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP, node);
         }
 
-
         running = true;
         TaskManager.createAndRunThread(NulsConstant.MODULE_ID_NETWORK, "NetworkNodeManager", this);
         discoverHandler.start();

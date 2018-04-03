@@ -125,7 +125,7 @@ public class Node extends BaseNulsData {
     public int size() {
         int s = 0;
         s += VarInt.sizeOf(magicNumber);
-        s += VarInt.sizeOf(port);
+        s += VarInt.sizeOf(severPort);
         s += 1;
         try {
             s += ip.getBytes(NulsContext.DEFAULT_ENCODING).length;
@@ -138,7 +138,7 @@ public class Node extends BaseNulsData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.write(new VarInt(magicNumber).encode());
-        stream.write(new VarInt(port).encode());
+        stream.write(new VarInt(severPort).encode());
         stream.writeString(ip);
     }
 
