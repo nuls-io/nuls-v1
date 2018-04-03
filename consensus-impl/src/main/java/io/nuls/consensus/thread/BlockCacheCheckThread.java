@@ -25,10 +25,11 @@
  */
 package io.nuls.consensus.thread;
 
-import io.nuls.consensus.manager.BlockManager;
+import io.nuls.consensus.constant.MaintenanceStatus;
 import io.nuls.consensus.manager.ConsensusManager;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
+import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
@@ -39,8 +40,11 @@ import io.nuls.core.utils.log.Log;
  */
 public class BlockCacheCheckThread implements Runnable {
 
+    private static final long TIME_OUT = 60000;
+
     private long startTime;
-    private BlockService blockService;
+    private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
+    private NulsDigestData lastHash;
 
     public BlockCacheCheckThread() {
         this.startTime = TimeService.currentTimeMillis();
@@ -48,28 +52,29 @@ public class BlockCacheCheckThread implements Runnable {
 
     @Override
     public void run() {
-//        while (true) {
-//            try {
-//                checkCache();
-//                Thread.sleep(10000L);
-//            } catch (Exception e) {
-//                Log.error(e);
-//            }
-//        }
+        while (true) {
+            try {
+                checkCache();
+                Thread.sleep(10000L);
+            } catch (Exception e) {
+                Log.error(e);
+            }
+        }
 
     }
 
     private void checkCache() {
-//        if (null == blockService) {
-//            blockService = NulsContext.getServiceBean(BlockService.class);
-//        }
-//        Block block = blockService.getBlock(blockService.getLocalSavedHeight());
-//        boolean b = (TimeService.currentTimeMillis() - startTime) > 300000;
-//        b = b && (TimeService.currentTimeMillis() - block.getHeader().getTime()) > 300000;
-//        if (b) {
-//            ConsensusManager consensusManager = ConsensusManager.getInstance();
-//            consensusManager.destroy();
-//            this.startTime = TimeService.currentTimeMillis();
-//        }
+        Block block = NulsContext.getInstance().getBestBlock();
+        if (null == lastHash || !lastHash.equals(block.getHeader().getHash())) {
+            this.lastHash = block.getHeader().getHash();
+            this.startTime = TimeService.currentTimeMillis();
+        } else {
+            boolean b = (TimeService.currentTimeMillis() - startTime) > TIME_OUT;
+            if (b) {
+                BlockMaintenanceThread.getInstance().setStatus(MaintenanceStatus.READY);
+                Log.info("set maintenance status to Ready==========================================");
+            }
+        }
+
     }
 }
