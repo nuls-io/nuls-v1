@@ -108,11 +108,9 @@ public class RoundManager {
         } while (false);
         PocMeetingRound resultRound = null;
         if (needCalcRound) {
-            if (null != ROUND_MAP.get(currentRoundData.getRoundIndex() + 1)) {
-                resultRound = ROUND_MAP.get(currentRoundData.getRoundIndex() + 1);
-            } else {
-                resultRound = calcNextRound(currentBlock, currentRoundData);
-            }
+            resultRound = calcNextRound(currentBlock, currentRoundData);
+        } else if (null != ROUND_MAP.get(currentRoundData.getRoundIndex() + 1)) {
+            resultRound = ROUND_MAP.get(currentRoundData.getRoundIndex() + 1);
         }
 
         if (resultRound.getPreRound() == null) {
@@ -122,7 +120,7 @@ public class RoundManager {
         List<Account> accountList = accountService.getAccountList();
         resultRound.calcLocalPacker(accountList);
         this.currentRound = resultRound;
-        ROUND_MAP.put(resultRound.getIndex(),currentRound);
+        ROUND_MAP.put(resultRound.getIndex(), currentRound);
         return resultRound;
     }
 
