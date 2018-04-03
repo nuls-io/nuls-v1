@@ -47,7 +47,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
                     ctx.channel().close();
                     return;
                 } else {
-                    getNetworkService().removeNode(remoteIP);
+                    getNetworkService().removeNode(remoteId);
                 }
             }
         }
@@ -91,7 +91,8 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         SocketChannel channel = (SocketChannel) ctx.channel();
-        Node node = getNetworkService().getNode(channel.remoteAddress().getHostString());
+        String nodeId = channel.remoteAddress().getHostString() + ":" + channel.remoteAddress().getPort();
+        Node node = getNetworkService().getNode(nodeId);
         if (node != null && node.isAlive()) {
             ByteBuf buf = (ByteBuf) msg;
             byte[] bytes = new byte[buf.readableBytes()];
