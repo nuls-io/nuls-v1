@@ -171,6 +171,9 @@ public class ConsensusMeetingRunner implements Runnable {
                 }
                 newBlock = doPacking(self, round, self.getPackEndTime() - TimeService.currentTimeMillis());
             }
+            if (null == newBlock) {
+                return;
+            }
             //todo info to debug
             Log.info("produce block:" + newBlock.getHeader().getHash() + ",\nheight(" + newBlock.getHeader().getHeight() + "),round(" + round.getIndex() + "),index(" + self.getIndexOfRound() + "),roundStart:" + round.getStartTime());
 
@@ -254,10 +257,14 @@ public class ConsensusMeetingRunner implements Runnable {
             return false;
         }
         List<Node> nodes = networkService.getAvailableNodes();
-        if (nodes == null || nodes.size() < MIN_NODE_COUNT) {
+        if (nodes == null || nodes.size() ==0) {
+            BlockMaintenanceThread.getInstance().setStatus(MaintenanceStatus.READY);
             return false;
         }
-        if (NulsContext.getInstance().getNetBestBlockHeight() == null) {
+        if(nodes.size()<MIN_NODE_COUNT){
+            return false;
+        }
+        if (!isNetworkSynchronizeComplete()) {
             return false;
         }
         return true;

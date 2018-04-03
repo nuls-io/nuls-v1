@@ -73,6 +73,6 @@ public class BlockHeaderHandler extends AbstractEventHandler<BlockHeaderEvent> {
         request.setEventBody(param);
         eventBroadcaster.sendToNode(request, fromId);
         temporaryCacheManager.cacheBlockHeader(header);
-        eventBroadcaster.broadcastHashAndCacheAysn(event,false,fromId);
+//        eventBroadcaster.broadcastHashAndCacheAysn(event,false,fromId);
     }
 }
