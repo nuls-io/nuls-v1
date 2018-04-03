@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -32,6 +32,7 @@ import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.Result;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.dto.Page;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.ledger.entity.Balance;
@@ -67,7 +68,7 @@ public class AccountResource {
     public RpcResult create(AccountParamForm form) {
         Result<List<String>> accountResult = accountService.createAccount(form.getCount(), form.getPassword());
         RpcResult result = new RpcResult(accountResult);
-        if(result.isSuccess()){
+        if (result.isSuccess()) {
             NulsContext.setCachedPasswordOfWallet(form.getPassword());
         }
         return result;
@@ -115,14 +116,26 @@ public class AccountResource {
     @GET
     @Path("/list")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult accountList() {
-        RpcResult<List<AccountDto>> result = RpcResult.getSuccess();
-        List<Account> list = accountService.getAccountList();
+    public RpcResult accountList(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
+        if (pageNumber < 0 || pageSize < 0) {
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+        if (pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if (pageSize == 0) {
+            pageSize = 10;
+        }
+        Page<Account> page = accountService.getAccountList(pageNumber, pageSize);
         List<AccountDto> dtoList = new ArrayList<>();
-        for (Account account : list) {
+        for (Account account : page.getList()) {
             dtoList.add(new AccountDto(account));
         }
-        result.setData(dtoList);
+
+        Page<AccountDto> dtoPage = new Page<>(page);
+        dtoPage.setList(dtoList);
+        RpcResult result = RpcResult.getSuccess();
+        result.setData(dtoPage);
         return result;
     }
 
@@ -218,8 +231,8 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getAddress(@QueryParam("publicKey") String publicKey, @QueryParam("subChainId") Integer subChainId) {
 
-        if( subChainId<1 || subChainId >= 65535){
-            return RpcResult.getFailed(ErrorCode.CHAIN_ID_ERROR );
+        if (subChainId < 1 || subChainId >= 65535) {
+            return RpcResult.getFailed(ErrorCode.CHAIN_ID_ERROR);
         }
 
         Address address = new Address((short) subChainId.intValue(), Hex.decode(publicKey));

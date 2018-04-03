@@ -32,6 +32,7 @@ import io.nuls.db.entity.BlockHeaderPo;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Niels
@@ -73,4 +74,5 @@ public interface BlockService {
 
     long getPackingCount(String address);
 
+    Map<String, Object> getSumTxCount(String address, long roundStart, long roundEnd);
 }

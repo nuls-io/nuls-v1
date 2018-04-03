@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -304,9 +304,9 @@ public class PocConsensusServiceImpl implements ConsensusService {
         Balance balance = ledgerService.getBalance(address);
         map.put("reward", reward);
         map.put("joinAccountCount", joinedAgent.size());
-        if(null==balance||balance.getUsable()==null){
+        if (null == balance || balance.getUsable() == null) {
             map.put("usableBalance", 0);
-        }else{
+        } else {
             map.put("usableBalance", balance.getUsable().getValue());
         }
         map.put("rewardOfDay", rewardOfDay);
@@ -418,7 +418,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
             sum = 1;
         }
         page.setPages((int) ((page.getTotal() / pageSize) + sum));
-        List<Map<String,Object>> resultList = transList(sublist);
+        List<Map<String, Object>> resultList = transList(sublist);
         page.setList(resultList);
         return page;
     }
@@ -545,7 +545,10 @@ public class PocConsensusServiceImpl implements ConsensusService {
         map.put("startTime", ca.getExtend().getStartTime());
         map.put("creditRatio", 1);
         map.put("reward", ledgerService.getAgentReward(ca.getAddress(), 1));
-        map.put("packedCount", blockService.getPackingCount(ca.getExtend().getPackingAddress()));
+
+        Map<String, Object> countMap = blockService.getSumTxCount(ca.getExtend().getPackingAddress(), 0, 0);
+        map.put("packedCount", countMap.get("blockCount"));
+        map.put("txCount", countMap.get("txCount"));
         List<Consensus<Deposit>> deposits = this.consensusCacheManager.getCachedDepositListByAgentHash(ca.getHexHash());
         long totalDeposit = 0;
         Set<String> memberSet = new HashSet<>();

@@ -27,6 +27,7 @@ import io.nuls.core.dto.Page;
 import io.nuls.db.entity.BlockHeaderPo;
 
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -98,6 +99,8 @@ public interface BlockHeaderService extends BaseDataService<String, BlockHeaderP
      * @return
      */
     long getCount(String address, long roundStart, long roundEnd);
+
+    Map<String,Object> getSumTxCount(String address, long roundStart, long roundEnd);
 
     /**
      * use for POC consensus
