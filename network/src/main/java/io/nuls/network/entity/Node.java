@@ -59,6 +59,8 @@ public class Node extends BaseNulsData {
 
     private Integer port;
 
+    private Integer severPort;
+
     private Long lastTime;
 
     private Long lastFailTime;
@@ -295,5 +297,16 @@ public class Node extends BaseNulsData {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public Integer getSeverPort() {
+        if(severPort == null) {
+            severPort = 0;
+        }
+        return severPort;
+    }
+
+    public void setSeverPort(Integer severPort) {
+        this.severPort = severPort;
     }
 }

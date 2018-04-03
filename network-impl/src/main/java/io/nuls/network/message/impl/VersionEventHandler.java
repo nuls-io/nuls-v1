@@ -79,11 +79,8 @@ public class VersionEventHandler implements NetWorkEventHandler {
 
         if (!node.isHandShake()) {
             node.setStatus(Node.HANDSHAKE);
-            String oldId = node.getId();
-            node.setId(null);
-            node.setPort(event.getExternalPort());
-            getNetworkService().changeNodeFromMap(oldId, node);
 
+            node.setSeverPort(event.getSeverPort());
             node.setLastTime(TimeService.currentTimeMillis());
             getNodeDao().saveChange(NodeTransferTool.toPojo(node));
         }

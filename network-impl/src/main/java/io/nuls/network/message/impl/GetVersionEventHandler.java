@@ -79,10 +79,8 @@ public class GetVersionEventHandler implements NetWorkEventHandler {
 
         VersionEvent replyMessage = new VersionEvent(getNetworkService().getNetworkParam().port(),
                 block.getHeader().getHeight(), block.getHeader().getHash().getDigestHex());
-        String oldId = node.getId();
-        node.setId(null);
-        node.setPort(event.getExternalPort());
-        getNetworkService().changeNodeFromMap(oldId, node);
+
+        node.setSeverPort(event.getSeverPort());
         return new NetworkEventResult(true, replyMessage);
     }
 

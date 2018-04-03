@@ -32,7 +32,6 @@ import io.nuls.db.entity.NodePo;
  */
 public class NodeTransferTool {
 
-
     public static void toNode(Node node, NodePo po) {
         node.setId(po.getId());
         node.setFailCount(po.getFailCount());
@@ -46,10 +45,10 @@ public class NodeTransferTool {
 
     public static NodePo toPojo(Node node) {
         NodePo po = new NodePo();
-        po.setId(node.getId());
+        po.setId(node.getIp() + ":" + node.getSeverPort());
         po.setFailCount(node.getFailCount());
         po.setIp(node.getIp());
-        po.setPort(node.getPort());
+        po.setPort(node.getSeverPort());
         po.setLastTime(node.getLastTime());
         po.setMagicNum(node.getMagicNumber());
         po.setStatus(0);
