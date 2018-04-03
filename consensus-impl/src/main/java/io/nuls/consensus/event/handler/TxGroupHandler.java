@@ -30,7 +30,7 @@ import io.nuls.consensus.entity.TxGroup;
 import io.nuls.consensus.event.TxGroupEvent;
 import io.nuls.consensus.event.notice.AssembledBlockNotice;
 import io.nuls.consensus.manager.BlockManager;
-import io.nuls.consensus.thread.ConsensusMeetingRunner_New;
+import io.nuls.consensus.thread.ConsensusMeetingRunner;
 import io.nuls.consensus.utils.DownloadDataUtils;
 import io.nuls.core.chain.entity.*;
 import io.nuls.core.constant.ErrorCode;
@@ -87,7 +87,7 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
         if (null == vResult || (vResult.isFailed() && vResult.getErrorCode() != ErrorCode.ORPHAN_TX)) {
             if (vResult.getLevel() == SeverityLevelEnum.FLAGRANT_FOUL) {
                 RedPunishData data = vResult.getObject();
-                ConsensusMeetingRunner_New.putPunishData(data);
+                ConsensusMeetingRunner.putPunishData(data);
                 networkService.blackNode(fromId, NodePo.BLACK);
             } else {
                 networkService.removeNode(fromId, NodePo.YELLOW);

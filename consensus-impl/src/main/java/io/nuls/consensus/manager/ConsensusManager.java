@@ -35,7 +35,7 @@ import io.nuls.consensus.entity.genesis.GenesisBlock;
 import io.nuls.consensus.service.impl.BlockStorageService;
 import io.nuls.consensus.thread.BlockMaintenanceThread;
 import io.nuls.consensus.thread.BlockPersistenceThread;
-import io.nuls.consensus.thread.ConsensusMeetingRunner_New;
+import io.nuls.consensus.thread.ConsensusMeetingRunner;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
@@ -133,8 +133,8 @@ public class ConsensusManager {
 
     public void joinConsensusMeeting() {
         TaskManager.createAndRunThread(NulsConstant.MODULE_ID_CONSENSUS,
-                ConsensusMeetingRunner_New.THREAD_NAME,
-                ConsensusMeetingRunner_New.getInstance());
+                ConsensusMeetingRunner.THREAD_NAME,
+                ConsensusMeetingRunner.getInstance());
     }
 
     /**

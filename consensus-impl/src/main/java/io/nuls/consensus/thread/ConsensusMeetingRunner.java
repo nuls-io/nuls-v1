@@ -71,11 +71,11 @@ import java.util.Map;
  * @author Niels
  * @date 2017/12/15
  */
-public class ConsensusMeetingRunner_New implements Runnable {
+public class ConsensusMeetingRunner implements Runnable {
     private static final int MIN_NODE_COUNT = 2;
     private NulsContext context = NulsContext.getInstance();
     public static final String THREAD_NAME = "Consensus-Meeting";
-    private static final ConsensusMeetingRunner_New INSTANCE = new ConsensusMeetingRunner_New();
+    private static final ConsensusMeetingRunner INSTANCE = new ConsensusMeetingRunner();
     private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     private BlockManager blockManager = BlockManager.getInstance();
@@ -90,10 +90,10 @@ public class ConsensusMeetingRunner_New implements Runnable {
     private ConfirmingTxCacheManager confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
     private static Map<Long, RedPunishData> punishMap = new HashMap<>();
 
-    private ConsensusMeetingRunner_New() {
+    private ConsensusMeetingRunner() {
     }
 
-    public static ConsensusMeetingRunner_New getInstance() {
+    public static ConsensusMeetingRunner getInstance() {
         return INSTANCE;
     }
 
@@ -158,11 +158,18 @@ public class ConsensusMeetingRunner_New implements Runnable {
             Block newBlock = doPacking(self, round, PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000 / 5);
 
             if (needCheckAgain && hasReceiveNewestBlock(self, round)) {
-                //TODO
-//                newBlock = doPacking(self, round, -PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000 / 5);
+                Block realBestBlock = blockManager.getBlock(newBlock.getHeader().getHeight());
+                List<NulsDigestData> txHashList = realBestBlock.getTxHashList();
+                for (Transaction transaction : newBlock.getTxs()) {
+                    if (txHashList.contains(transaction.getHash())) {
+                        continue;
+                    }
+                    orphanTxCacheManager.putTx(transaction);
+                }
+                newBlock = doPacking(self, round, self.getPackTime() - TimeService.currentTimeMillis());
             }
-
-            Log.debug("produce block:" + newBlock.getHeader().getHash() + ",\nheight(" + newBlock.getHeader().getHeight() + "),round(" + round.getIndex() + "),index(" + self.getIndexOfRound() + "),roundStart:" + round.getStartTime());
+            //todo info to debug
+            Log.info("produce block:" + newBlock.getHeader().getHash() + ",\nheight(" + newBlock.getHeader().getHeight() + "),round(" + round.getIndex() + "),index(" + self.getIndexOfRound() + "),roundStart:" + round.getStartTime());
 
             broadcastNewBlock(newBlock);
 
