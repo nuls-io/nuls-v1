@@ -353,6 +353,8 @@ public class RoundManager {
     }
 
     public PocMeetingRound getCurrentRound() {
+        List<Account> accountList = accountService.getAccountList();
+        currentRound.calcLocalPacker(accountList);
         return currentRound;
     }
 }
