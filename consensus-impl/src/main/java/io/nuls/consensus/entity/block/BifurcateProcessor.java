@@ -71,12 +71,15 @@ public class BifurcateProcessor {
 
     private void checkIt() {
         int maxSize = 0;
+        BlockHeaderChain longestChain = null;
         for (BlockHeaderChain chain : chainList) {
             int listSize = chain.size();
             if (maxSize < listSize) {
                 maxSize = listSize;
+                longestChain = chain;
             }
         }
+        this.approvingChain = longestChain;
         Set<String> rightHashSet = new HashSet<>();
         Set<String> removeHashSet = new HashSet<>();
         for (int i = chainList.size() - 1; i >= 0; i--) {
@@ -152,11 +155,15 @@ public class BifurcateProcessor {
         }
         return new ArrayList<>(set);
     }
+
     public String getBlockHash(long height) {
-            HeaderDigest headerDigest = approvingChain.getHeaderDigest(height);
-            if (null != headerDigest) {
-                return headerDigest.getHash();
-            }
+        if (null == approvingChain) {
+            return null;
+        }
+        HeaderDigest headerDigest = approvingChain.getHeaderDigest(height);
+        if (null != headerDigest) {
+            return headerDigest.getHash();
+        }
         return null;
     }
 
