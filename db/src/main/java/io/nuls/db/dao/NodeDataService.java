@@ -40,4 +40,6 @@ public interface NodeDataService extends BaseDataService< String,NodePo> {
     void saveChange(NodePo po);
 
     void removeNode(NodePo po);
+
+    void removeNode(String nodeId);
 }

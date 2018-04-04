@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -29,6 +29,7 @@ import io.nuls.core.event.BaseEvent;
 import io.nuls.core.event.EventManager;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.mesasge.NulsMessage;
+import io.nuls.core.mesasge.NulsMessageHeader;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.log.Log;
@@ -116,8 +117,14 @@ public class ConnectionManager {
             }
             for (NulsMessage message : list) {
                 if (MessageFilterChain.getInstance().doFilter(message)) {
+                    NulsMessageHeader header = message.getHeader();
+                    if (node.getMagicNumber() == 0) {
+                        node.setMagicNumber(header.getMagicNumber());
+                    }
                     BaseEvent event = EventManager.getInstance(message.getData());
                     processMessage(event, node);
+                } else {
+                    networkService.removeNode(node.getId());
                 }
             }
         } catch (NulsException e) {
@@ -133,7 +140,7 @@ public class ConnectionManager {
     }
 
     private void processMessage(BaseEvent event, Node node) {
-        if(event == null) {
+        if (event == null) {
             Log.error("---------------------NulEvent is null--------------------------------");
             return;
         }

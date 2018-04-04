@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -30,7 +30,6 @@ import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.TaskManager;
-import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.NodeDataService;
 import io.nuls.network.constant.NetworkConstant;
@@ -109,10 +108,9 @@ public class NodesManager implements Runnable {
             nodes = getSeedNodes();
         }
         for (Node node : nodes) {
-            node.setType(Node.OUT);
-            node.setStatus(Node.WAIT);
             addNodeToGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP, node);
         }
+
         running = true;
         TaskManager.createAndRunThread(NulsConstant.MODULE_ID_NETWORK, "NetworkNodeManager", this);
         discoverHandler.start();
@@ -121,6 +119,11 @@ public class NodesManager implements Runnable {
     public List<Node> getSeedNodes() {
         if (seedNodes == null) {
             seedNodes = discoverHandler.getSeedNodes();
+        }
+        for(Node node :seedNodes) {
+            node.setStatus(Node.WAIT);
+            node.setMagicNumber(network.packetMagic());
+            node.setType(Node.OUT);
         }
         if (nodes.isEmpty()) {
             return seedNodes;
@@ -165,27 +168,37 @@ public class NodesManager implements Runnable {
     }
 
     public void removeNode(String nodeId, Integer type) {
-        if (nodes.containsKey(nodeId)) {
-            Node node = nodes.get(nodeId);
-            if (null != type && type != node.getType()) {
-                return;
-            }
-            //When other modules call the interface,  close channel first
-            if (StringUtils.isNotBlank(node.getChannelId())) {
-                SocketChannel channel = NioChannelMap.get(node.getChannelId());
-                if (channel != null) {
-                    channel.close();
+        lock.lock();
+        try {
+            if (nodes.containsKey(nodeId)) {
+                Node node = nodes.get(nodeId);
+
+                if (null != type && type != node.getType()) {
                     return;
                 }
-            }
+                //When other modules call the interface,  close channel first
+                if (StringUtils.isNotBlank(node.getChannelId())) {
+                    SocketChannel channel = NioChannelMap.get(node.getChannelId());
+                    if (channel != null) {
+                        channel.close();
+                        return;
+                    }
+                }
+                node.destroy();
+                for (String groupName : node.getGroupSet()) {
+                    removeNodeFromGroup(groupName, node.getId());
+                }
+                nodes.remove(node.getId());
+                getNodeDao().removeNode(NodeTransferTool.toPojo(node));
+            } else {
 
-            node.destroy();
-            for (String groupName : node.getGroupSet()) {
-                removeNodeFromGroup(groupName, nodeId);
+                getNodeDao().removeNode(nodeId);
             }
-            nodes.remove(nodeId);
+        } catch (Exception e) {
+            e.printStackTrace();
 
-            getNodeDao().removeNode(NodeTransferTool.toPojo(node));
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -236,8 +249,6 @@ public class NodesManager implements Runnable {
             if (nodes.isEmpty()) {
                 List<Node> nodes = getSeedNodes();
                 for (Node node : nodes) {
-                    node.setType(Node.OUT);
-                    node.setStatus(Node.WAIT);
                     addNodeToGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP, node);
                 }
             } else {
@@ -246,8 +257,7 @@ public class NodesManager implements Runnable {
                     List<Node> nodes = discoverHandler.getLocalNodes(network.maxOutCount() - group.size());
                     if (!nodes.isEmpty()) {
                         for (Node node : nodes) {
-                            node.setType(Node.OUT);
-                            node.setStatus(Node.WAIT);
+
                             addNodeToGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP, node);
                         }
                     } else {

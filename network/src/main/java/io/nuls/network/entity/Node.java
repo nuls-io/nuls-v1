@@ -59,6 +59,8 @@ public class Node extends BaseNulsData {
 
     private Integer port;
 
+    private Integer severPort;
+
     private Long lastTime;
 
     private Long lastFailTime;
@@ -86,29 +88,24 @@ public class Node extends BaseNulsData {
     private VersionEvent versionMessage;
 
     public Node() {
-        super();
-    }
-
-    public Node(AbstractNetworkParam network) {
-        this();
-        this.magicNumber = network.packetMagic();
         this.groupSet = ConcurrentHashMap.newKeySet();
     }
 
-    public Node(AbstractNetworkParam network, int type) {
-        this(network);
+    public Node(int type) {
+        this();
         this.type = type;
     }
 
-    public Node(AbstractNetworkParam network, int type, String ip, int port, String channelId) {
-        this(network, type);
+    public Node(int type, String ip, int port, String channelId) {
+        this(type);
         this.port = port;
         this.ip = ip;
         this.channelId = channelId;
     }
 
-    public Node(AbstractNetworkParam network, int type, InetSocketAddress socketAddress) {
-        this(network, type);
+    public Node(int magicNumber, int type, InetSocketAddress socketAddress) {
+        this(type);
+        this.magicNumber = magicNumber;
         this.port = socketAddress.getPort();
         this.ip = socketAddress.getHostString();
     }
@@ -123,7 +120,7 @@ public class Node extends BaseNulsData {
     public int size() {
         int s = 0;
         s += VarInt.sizeOf(magicNumber);
-        s += VarInt.sizeOf(port);
+        s += VarInt.sizeOf(severPort);
         s += 1;
         try {
             s += ip.getBytes(NulsContext.DEFAULT_ENCODING).length;
@@ -136,14 +133,15 @@ public class Node extends BaseNulsData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.write(new VarInt(magicNumber).encode());
-        stream.write(new VarInt(port).encode());
+        stream.write(new VarInt(getSeverPort()).encode());
         stream.writeString(ip);
     }
 
     @Override
     public void parse(NulsByteBuffer buffer) throws NulsException {
         magicNumber = (int) buffer.readVarInt();
-        port = (int) buffer.readVarInt();
+        severPort = (int) buffer.readVarInt();
+        port = severPort;
         ip = new String(buffer.readByLengthByte());
         this.groupSet = ConcurrentHashMap.newKeySet();
     }
@@ -287,10 +285,24 @@ public class Node extends BaseNulsData {
     }
 
     public String getId() {
-        return ip;
+        if (StringUtils.isBlank(id)) {
+            id = ip + ":" + port;
+        }
+        return id;
     }
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public Integer getSeverPort() {
+        //if(severPort == null) {
+        //    severPort = 0;
+        //}
+        return severPort;
+    }
+
+    public void setSeverPort(Integer severPort) {
+        this.severPort = severPort;
     }
 }
