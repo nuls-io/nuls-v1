@@ -8,7 +8,6 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.network.IpUtil;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
-import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Node;
 import io.nuls.network.service.NetworkService;
 
@@ -36,16 +35,15 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
             ctx.channel().close();
             return;
         }
-
         Map<String, Node> nodes = networkService.getNodes();
-
+        // If a node with the same IP already in nodes, being a out node, not add anymore
         for (Node n : nodes.values()) {
+            //both ip and port equals , it means the node is myself
             if (n.getIp().equals(channel.remoteAddress().getHostString()) && n.getPort() != channel.remoteAddress().getPort()) {
                 ctx.channel().close();
                 return;
             }
         }
-
         NioChannelMap.add(channelId, channel);
         node.setChannelId(channelId);
         node.setStatus(Node.CONNECT);

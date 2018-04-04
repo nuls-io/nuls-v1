@@ -30,7 +30,6 @@ import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.TaskManager;
-import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.NodeDataService;
 import io.nuls.network.constant.NetworkConstant;
@@ -109,8 +108,6 @@ public class NodesManager implements Runnable {
             nodes = getSeedNodes();
         }
         for (Node node : nodes) {
-            node.setType(Node.OUT);
-            node.setStatus(Node.WAIT);
             addNodeToGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP, node);
         }
 
@@ -245,8 +242,6 @@ public class NodesManager implements Runnable {
             if (nodes.isEmpty()) {
                 List<Node> nodes = getSeedNodes();
                 for (Node node : nodes) {
-                    node.setType(Node.OUT);
-                    node.setStatus(Node.WAIT);
                     addNodeToGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP, node);
                 }
             } else {
@@ -255,8 +250,7 @@ public class NodesManager implements Runnable {
                     List<Node> nodes = discoverHandler.getLocalNodes(network.maxOutCount() - group.size());
                     if (!nodes.isEmpty()) {
                         for (Node node : nodes) {
-                            node.setType(Node.OUT);
-                            node.setStatus(Node.WAIT);
+
                             addNodeToGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP, node);
                         }
                     } else {

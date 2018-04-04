@@ -88,29 +88,24 @@ public class Node extends BaseNulsData {
     private VersionEvent versionMessage;
 
     public Node() {
-        super();
-    }
-
-    public Node(AbstractNetworkParam network) {
-        this();
-        this.magicNumber = network.packetMagic();
         this.groupSet = ConcurrentHashMap.newKeySet();
     }
 
-    public Node(AbstractNetworkParam network, int type) {
-        this(network);
+    public Node(int type) {
+        this();
         this.type = type;
     }
 
-    public Node(AbstractNetworkParam network, int type, String ip, int port, String channelId) {
-        this(network, type);
+    public Node(int type, String ip, int port, String channelId) {
+        this(type);
         this.port = port;
         this.ip = ip;
         this.channelId = channelId;
     }
 
-    public Node(AbstractNetworkParam network, int type, InetSocketAddress socketAddress) {
-        this(network, type);
+    public Node(int magicNumber, int type, InetSocketAddress socketAddress) {
+        this(type);
+        this.magicNumber = magicNumber;
         this.port = socketAddress.getPort();
         this.ip = socketAddress.getHostString();
     }
