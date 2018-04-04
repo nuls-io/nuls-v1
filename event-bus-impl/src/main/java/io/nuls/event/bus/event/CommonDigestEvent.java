@@ -61,4 +61,8 @@ public class CommonDigestEvent extends io.nuls.core.event.BaseEvent<NulsDigestDa
         CommonDigestEvent event = new CommonDigestEvent(data);
         return event;
     }
+    @Override
+    public boolean needToRemoveDuplication() {
+        return true;
+    }
 }

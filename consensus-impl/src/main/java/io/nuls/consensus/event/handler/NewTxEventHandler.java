@@ -94,4 +94,5 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
             Log.error(e);
         }
     }
+
 }

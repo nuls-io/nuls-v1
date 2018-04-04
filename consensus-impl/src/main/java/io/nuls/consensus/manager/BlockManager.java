@@ -153,7 +153,9 @@ public class BlockManager {
             }
         } else {
             Block lastAppravedBlock = confirmingBlockCacheManager.getBlock(lastAppravedHash);
-           this.rollbackAppraval(lastAppravedBlock);
+            if(null!=lastAppravedBlock){
+                this.rollbackAppraval(lastAppravedBlock);
+            }
         }
         if (success){
             Set<String> keySet = blockCacheBuffer.getHeaderCacheMap().keySet();

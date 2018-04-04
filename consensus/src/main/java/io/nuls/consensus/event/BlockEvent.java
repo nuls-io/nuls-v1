@@ -54,5 +54,8 @@ public class BlockEvent extends BaseConsensusEvent<Block> {
         return data;
     }
 
-
+    @Override
+    public boolean needToRemoveDuplication() {
+        return true;
+    }
 }
