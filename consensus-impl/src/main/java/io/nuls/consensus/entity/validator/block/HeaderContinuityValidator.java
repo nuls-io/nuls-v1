@@ -32,6 +32,7 @@ import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.log.BlockLog;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
@@ -82,6 +83,7 @@ public class HeaderContinuityValidator implements NulsDataValidator<BlockHeader>
             long timeout = PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND*1000/2;
             failed = difference > timeout || difference < -timeout;
             if (failed) {
+                BlockLog.info("header validate failed:"+header.getHeight()+" , time difference："+difference);
                 break;
             }
         } while (false);
