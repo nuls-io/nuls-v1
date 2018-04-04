@@ -213,7 +213,7 @@ public class DistributedBlockInfoRequestUtils {
             }
             long timeout = 10000L;
 
-            if ( hashesMap.size() >= (4*nodeIdList.size() / 5)) {
+            if ((TimeService.currentTimeMillis() - startTime) > timeout&& hashesMap.size() >=(1+nodeIdList.size() / 2)) {
                 int maxSize = 0;
                 List<String> nodeIds = null;
                 try {
@@ -222,6 +222,14 @@ public class DistributedBlockInfoRequestUtils {
                         if(ids.size()>maxSize){
                             maxSize = ids.size();
                             nodeIds = ids;
+                        }else if(ids.size()==maxSize){
+                            BlockHashResponse response_a = hashesMap.get(nodeIds.get(0));
+                            long height_a = response_a.getBestHeight();
+                            BlockHashResponse response_b = hashesMap.get(ids.get(0));
+                            long height_b = response_b.getBestHeight();
+                            if(height_b>height_a){
+                                nodeIds = ids;
+                            }
                         }
                     }
                 } catch (Exception e) {

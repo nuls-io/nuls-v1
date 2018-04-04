@@ -24,6 +24,7 @@
 package io.nuls.consensus.thread;
 
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
+import io.nuls.consensus.constant.MaintenanceStatus;
 import io.nuls.consensus.manager.BlockManager;
 import io.nuls.consensus.manager.ConsensusManager;
 import io.nuls.consensus.service.intf.BlockService;
@@ -90,38 +91,26 @@ public class BlockPersistenceThread implements Runnable {
     private void doPersistence(long height) throws IOException {
         Block block = blockManager.getBlock(height);
         if (null == block) {
-            List<Node> nodeList = networkService.getAvailableNodes();
-            if (nodeList == null || nodeList.isEmpty()) {
-                return;
-            }
-            List<String> nodeIdList = new ArrayList<>();
-            for (Node node : nodeList) {
-                nodeIdList.add(node.getId());
-            }
-            try {
-                BlockBatchDownloadUtils.getInstance().request(nodeIdList, height, height);
-            } catch (InterruptedException e) {
-                Log.error(e);
-            }
+            BlockMaintenanceThread.getInstance().setStatus(MaintenanceStatus.READY);
             return;
         }
         if (block.getTxs().isEmpty()) {
             //todo why
             Log.warn("block has no tx!");
-            blockManager.removeBlock(block.getHeader().getHash().getDigestHex());
+            ConsensusManager.getInstance().destroy();
             return;
         }
         boolean isSuccess;
         try {
             isSuccess = blockService.saveBlock(block);
         } catch (Exception e) {
+            Log.error(e);
             ConsensusManager.getInstance().destroy();
             NulsContext.getInstance().setBestBlock(blockService.getBlock(blockManager.getStoredHeight()));
             isSuccess = false;
         }
         if (isSuccess) {
             blockManager.removeBlock(block.getHeader().getHash().getDigestHex());
-
             blockManager.setStoredHeight(height);
             txCacheManager.removeTxList(block.getTxHashList());
         }

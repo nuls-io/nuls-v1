@@ -56,6 +56,7 @@ import io.nuls.ledger.service.intf.LedgerService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Niels
@@ -78,7 +79,6 @@ public class BlockManager {
     private OrphanTxCacheManager orphanTxCacheManager = OrphanTxCacheManager.getInstance();
 
     private long storedHeight;
-    private long recievedMaxHeight;
     private String lastAppravedHash;
 
     private BlockManager() {
@@ -93,13 +93,13 @@ public class BlockManager {
         ledgerService = NulsContext.getServiceBean(LedgerService.class);
     }
 
-    public void addBlock(Block block, boolean verify, String nodeId) {
+    public synchronized void addBlock(Block block, boolean verify, String nodeId) {
         if (block == null || block.getHeader() == null || block.getTxs() == null || block.getTxs().isEmpty()) {
             return;
         }
         BlockRoundData roundData = new BlockRoundData(block.getHeader().getExtend());
-        Log.debug("cache block:"+block.getHeader().getHash()+
-                ",\nheight("+block.getHeader().getHeight()+"),round("+roundData.getRoundIndex() +"),index("+roundData.getPackingIndexOfRound()+"),roundStart:"+roundData.getRoundStartTime());
+        Log.debug("cache block:" + block.getHeader().getHash() +
+                ",\nheight(" + block.getHeader().getHeight() + "),round(" + roundData.getRoundIndex() + "),index(" + roundData.getPackingIndexOfRound() + "),roundStart:" + roundData.getRoundStartTime());
         if (storedHeight == 0) {
             BlockService blockService = NulsContext.getServiceBean(BlockService.class);
             if (null != blockService) {
@@ -112,30 +112,21 @@ public class BlockManager {
         if (verify) {
             ValidateResult result = block.verify();
             if (result.isFailed() && result.getErrorCode() != ErrorCode.ORPHAN_BLOCK && result.getErrorCode() != ErrorCode.ORPHAN_TX) {
-                Log.debug("discard a block :"+result.getMessage());
-                return ;
+                Log.debug("discard a block :" + result.getMessage());
+                return;
             } else if (result.isFailed()) {
                 blockCacheBuffer.cacheBlock(block);
                 return;
             }
         }
         boolean success = confirmingBlockCacheManager.cacheBlock(block);
-        if (!success) {
+        if (!success){
             blockCacheBuffer.cacheBlock(block);
             boolean hasPre = blockCacheBuffer.getBlock(block.getHeader().getPreHash().getDigestHex()) != null;
             if (!hasPre && null != nodeId) {
                 GetBlockRequest request = new GetBlockRequest();
                 GetBlockParam params = new GetBlockParam();
-                long height = block.getHeader().getHeight();
-                long localMaxHeight = this.bifurcateProcessor.getMaxHeight();
-                if (localMaxHeight < context.getBestHeight()) {
-                    localMaxHeight = context.getBestHeight();
-                }
-                if (height > localMaxHeight) {
-                    height = localMaxHeight + 1;
-                } else {
-                    height = height - 1;
-                }
+                long height = block.getHeader().getHeight() - 1;
                 params.setStart(height);
                 params.setEnd(height);
                 request.setEventBody(params);
@@ -143,9 +134,9 @@ public class BlockManager {
             }
             return;
         }
-       boolean needUpdateBestBlock = bifurcateProcessor.addHeader(block.getHeader());
-        if(needUpdateBestBlock){
-            NulsContext.getInstance().setBestBlock(block);
+        boolean needUpdateBestBlock = bifurcateProcessor.addHeader(block.getHeader());
+        if (needUpdateBestBlock) {
+            context.setBestBlock(block);
         }
         if (bifurcateProcessor.getChainSize() == 1) {
             try {
@@ -158,7 +149,21 @@ public class BlockManager {
                 return;
             }
         } else {
-            this.rollbackAppraval(block);
+            Block lastAppravedBlock = confirmingBlockCacheManager.getBlock(lastAppravedHash);
+           this.rollbackAppraval(lastAppravedBlock);
+        }
+        if (success){
+            Set<String> keySet = blockCacheBuffer.getHeaderCacheMap().keySet();
+            for(String key:keySet){
+                BlockHeader header = blockCacheBuffer.getBlockHeader(key);
+                if(header==null){
+                    continue;
+                }
+                if(header.getPreHash().getDigestHex().equals(block.getHeader().getHash())){
+                    Block nextBlock = blockCacheBuffer.getBlock(key);
+                    this.addBlock(nextBlock,true,null);
+                }
+            }
         }
     }
 
@@ -208,7 +213,8 @@ public class BlockManager {
             return;
         }
         this.rollbackTxList(block.getTxs(), 0, block.getTxs().size());
-        Block preBlock =this.getBlock(block.getHeader().getPreHash().getDigestHex());
+        this.lastAppravedHash = block.getHeader().getPreHash().getDigestHex();
+        Block preBlock = this.getBlock(lastAppravedHash);
         List<String> hashList = this.bifurcateProcessor.getHashList(block.getHeader().getHeight() - 1);
         if (hashList.size() > 1) {
             this.rollbackAppraval(preBlock);

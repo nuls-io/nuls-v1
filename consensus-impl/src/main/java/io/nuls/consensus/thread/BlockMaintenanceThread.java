@@ -77,6 +77,7 @@ public class BlockMaintenanceThread implements Runnable {
 
     public synchronized void syncBlock() {
         this.status = MaintenanceStatus.DOWNLOADING;
+        long lastDownloadHeight = 0L;
         while (true) {
             BestCorrectBlock bestCorrectBlock = checkLocalBestCorrentBlock();
             boolean doit = false;
@@ -113,15 +114,17 @@ public class BlockMaintenanceThread implements Runnable {
                 return;
             }
             if (doit) {
+                lastDownloadHeight = bestCorrectBlock.getNetBestBlockInfo().getBestHeight();
                 downloadBlocks(bestCorrectBlock.getNetBestBlockInfo().getNodeIdList(), startHeight, bestCorrectBlock.getNetBestBlockInfo().getBestHeight());
             } else {
+                this.downloadHeight = lastDownloadHeight;
                 break;
             }
             long start = TimeService.currentTimeMillis();
             //todo
-            long timeout = (bestCorrectBlock.getNetBestBlockInfo().getBestHeight()-startHeight+1)*100;
-            while (NulsContext.getInstance().getBestHeight()<bestCorrectBlock.getNetBestBlockInfo().getBestHeight()){
-                if(TimeService.currentTimeMillis()>(timeout+start)){
+            long timeout = (bestCorrectBlock.getNetBestBlockInfo().getBestHeight() - startHeight + 1) * 100;
+            while (NulsContext.getInstance().getBestHeight() < bestCorrectBlock.getNetBestBlockInfo().getBestHeight()) {
+                if (TimeService.currentTimeMillis() > (timeout + start)) {
                     break;
                 }
                 try {
@@ -136,7 +139,6 @@ public class BlockMaintenanceThread implements Runnable {
 
     private void downloadBlocks(List<String> nodeIdList, long startHeight, long endHeight) {
         BlockBatchDownloadUtils utils = BlockBatchDownloadUtils.getInstance();
-        this.downloadHeight = endHeight;
         try {
             utils.request(nodeIdList, startHeight, endHeight);
         } catch (InterruptedException e) {
@@ -252,7 +254,7 @@ public class BlockMaintenanceThread implements Runnable {
         if (this.status == null) {
             return MaintenanceStatus.FAILED;
         }
-        if (status == MaintenanceStatus.DOWNLOADING && NulsContext.getInstance().getBestHeight() >= this.downloadHeight) {
+        if (status == MaintenanceStatus.DOWNLOADING && NulsContext.getInstance().getBestHeight() >= this.downloadHeight && this.downloadHeight > 0) {
             this.status = MaintenanceStatus.SUCCESS;
         }
         return status;
