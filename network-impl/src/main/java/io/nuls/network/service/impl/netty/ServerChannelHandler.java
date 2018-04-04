@@ -55,7 +55,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
             int count = 0;
             for (Node n : networkService.getNodes().values()) {
                 if (n.getIp().equals(remoteIP)) {
-                    if (n.getType() == Node.OUT) {
+                    if (n.getType() == Node.OUT && n.getStatus() != Node.CLOSE) {
                         ctx.channel().close();
                         return;
                     } else {
