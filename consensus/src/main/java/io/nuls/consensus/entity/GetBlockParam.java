@@ -40,18 +40,16 @@ import java.io.IOException;
  */
 public class GetBlockParam extends BaseNulsData {
 
-    private long time;
     private long start;
     private long end;
 
     public GetBlockParam() {
-        this.time = TimeService.currentTimeMillis();
+
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += Utils.sizeOfInt48();
         size += Utils.sizeOfLong(start);
         size += Utils.sizeOfLong(end);
         return size;
@@ -59,14 +57,12 @@ public class GetBlockParam extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeInt48(time);
         stream.writeVarInt(start);
         stream.writeVarInt(end);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.time = byteBuffer.readInt48();
         this.start = byteBuffer.readVarInt();
         this.end = byteBuffer.readVarInt();
     }

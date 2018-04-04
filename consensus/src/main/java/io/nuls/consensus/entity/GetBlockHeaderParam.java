@@ -40,33 +40,26 @@ import java.io.IOException;
  */
 public class GetBlockHeaderParam extends BaseNulsData {
 
-    private long time;
     private long height;
 
     public GetBlockHeaderParam(Long height) {
-        this.time = TimeService.currentTimeMillis();
-        if(null!=height){
             this.height = height;
-        }
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += Utils.sizeOfInt48();
         size += Utils.sizeOfLong(height);
         return size;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeInt48(time);
         stream.writeVarInt(height);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.time = byteBuffer.readInt48();
         this.height = byteBuffer.readVarInt();
     }
 

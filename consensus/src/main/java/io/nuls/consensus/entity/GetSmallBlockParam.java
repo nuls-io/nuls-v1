@@ -41,30 +41,26 @@ import java.io.IOException;
  */
 public class GetSmallBlockParam extends BaseNulsData {
 
-    private long time;
     private NulsDigestData blockHash;
 
     public GetSmallBlockParam() {
-        this.time = TimeService.currentTimeMillis();
+
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += Utils.sizeOfInt48();
         size += Utils.sizeOfNulsData(blockHash);
         return size;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeInt48(time);
         stream.writeNulsData(blockHash);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.time = byteBuffer.readInt48();
         this.blockHash = byteBuffer.readHash();
     }
 

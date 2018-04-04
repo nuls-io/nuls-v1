@@ -42,19 +42,17 @@ import java.util.List;
  */
 public class GetTxGroupParam extends BaseNulsData {
 
-    private long time;
     private NulsDigestData blockHash;
 
     private List<NulsDigestData> txHashList = new ArrayList<>();
 
     public GetTxGroupParam() {
-        this.time = TimeService.currentTimeMillis();
+
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += Utils.sizeOfInt48();
         size += Utils.sizeOfNulsData(blockHash);
         size += VarInt.sizeOf(txHashList.size());
         size += this.getTxHashBytesLength();
@@ -63,7 +61,6 @@ public class GetTxGroupParam extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeInt48(time);
         stream.writeNulsData(blockHash);
         stream.writeVarInt(txHashList.size());
         for (NulsDigestData data : txHashList) {
@@ -73,7 +70,6 @@ public class GetTxGroupParam extends BaseNulsData {
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.time = byteBuffer.readInt48();
         this.blockHash = byteBuffer.readHash();
         long txCount = byteBuffer.readVarInt();
         this.txHashList = new ArrayList<>();
