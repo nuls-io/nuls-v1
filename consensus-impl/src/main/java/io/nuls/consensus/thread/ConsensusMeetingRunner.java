@@ -128,7 +128,7 @@ public class ConsensusMeetingRunner implements Runnable {
 
         long nowTime = TimeService.currentTimeMillis();
         //check current round is end
-        if (nowTime >= round.getEndTime()) {
+        if (null==round||nowTime >= round.getEndTime()) {
             resetCurrentMeetingRound();
             //sleep sometimes make sure not to run again
             try {
