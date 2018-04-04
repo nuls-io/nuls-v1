@@ -123,7 +123,7 @@ public class DistributedBlockInfoRequestUtils {
             nodeIdList.remove(nodeId);
             return false;
         }
-        if (this.askHeight != response.getBestHeight()) {
+        if (this.askHeight>0&&this.askHeight != response.getBestHeight()) {
             return false;
         }
         if (hashesMap.get(nodeId) == null) {
