@@ -118,7 +118,6 @@ public class ConsensusMeetingRunner implements Runnable {
                 doWork();
             } catch (Exception e) {
                 Log.error(e);
-                Log.info("consensus throw error : " + e.getMessage());
             }
         }
     }

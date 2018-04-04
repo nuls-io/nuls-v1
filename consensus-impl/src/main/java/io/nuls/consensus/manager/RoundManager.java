@@ -61,6 +61,7 @@ public class RoundManager {
 
     private BlockService consensusBlockService;
     private PocMeetingRound currentRound;
+    private boolean needReSet;
 
     public void init() {
         //load five(CACHE_COUNT) round from db on the start time ;
@@ -87,8 +88,9 @@ public class RoundManager {
         BlockRoundData currentRoundData = new BlockRoundData(currentBlock.getHeader().getExtend());
         boolean needCalcRound = false;
         do {
-            if (null == currentRound) {
+            if (null == currentRound || needReSet) {
                 needCalcRound = true;
+                needReSet = false;
                 break;
             }
             if (currentRound.getEndTime() <= TimeService.currentTimeMillis()) {
@@ -370,6 +372,6 @@ public class RoundManager {
     }
 
     public void reset() {
-        currentRound = null;
+        this.needReSet = true;
     }
 }
