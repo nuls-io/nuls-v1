@@ -95,7 +95,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
         Node node = getNetworkService().getNode(nodeId);
         if (node != null && channelId.equals(node.getChannelId())) {
-            getNetworkService().removeNode(channel.remoteAddress().getHostString());
+            getNetworkService().removeNode(nodeId);
         }
     }
 
