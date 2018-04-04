@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -47,7 +47,7 @@ import java.io.UnsupportedEncodingException;
  */
 public class VersionEvent extends io.nuls.core.event.BaseEvent {
 
-    private int externalPort;
+    private int severPort;
 
     private long bestBlockHeight;
 
@@ -60,9 +60,9 @@ public class VersionEvent extends io.nuls.core.event.BaseEvent {
         super(NulsConstant.MODULE_ID_NETWORK, NetworkConstant.NETWORK_VERSION_EVENT);
     }
 
-    public VersionEvent(int externalPort, long bestBlockHeight, String bestBlockHash) {
+    public VersionEvent(int severPort, long bestBlockHeight, String bestBlockHash) {
         this();
-        this.externalPort = externalPort;
+        this.severPort = severPort;
         this.bestBlockHeight = bestBlockHeight;
         this.bestBlockHash = bestBlockHash;
         this.nulsVersion = NulsContext.VERSION;
@@ -73,7 +73,7 @@ public class VersionEvent extends io.nuls.core.event.BaseEvent {
     public int size() {
         int s = 0;
         s += EventHeader.EVENT_HEADER_LENGTH;
-        s += VarInt.sizeOf(externalPort);
+        s += VarInt.sizeOf(severPort);
         s += VarInt.sizeOf(bestBlockHeight);
         s += Utils.sizeOfString(bestBlockHash);
         s += Utils.sizeOfString(nulsVersion);
@@ -83,7 +83,7 @@ public class VersionEvent extends io.nuls.core.event.BaseEvent {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeNulsData(getHeader());
-        stream.writeVarInt(externalPort);
+        stream.writeVarInt(severPort);
         stream.writeVarInt(bestBlockHeight);
         stream.writeString(bestBlockHash);
         stream.writeString(nulsVersion);
@@ -92,7 +92,7 @@ public class VersionEvent extends io.nuls.core.event.BaseEvent {
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.setHeader(byteBuffer.readNulsData(new EventHeader()));
-        externalPort = (int) byteBuffer.readVarInt();
+        severPort = (int) byteBuffer.readVarInt();
         bestBlockHeight = byteBuffer.readVarInt();
         bestBlockHash = byteBuffer.readString();
         nulsVersion = byteBuffer.readString();
@@ -113,7 +113,7 @@ public class VersionEvent extends io.nuls.core.event.BaseEvent {
         StringBuffer buffer = new StringBuffer();
         buffer.append("versionEvent:{");
         buffer.append(getHeader().toString());
-        buffer.append("externalPort:" + externalPort + ", ");
+        buffer.append("severPort:" + severPort + ", ");
         buffer.append("bestBlockHeight:" + bestBlockHeight + ", ");
         buffer.append("bestBlockHash:" + bestBlockHash + ", ");
         buffer.append("nulsVersion:" + nulsVersion + "}");
@@ -145,11 +145,13 @@ public class VersionEvent extends io.nuls.core.event.BaseEvent {
         this.nulsVersion = nulsVersion;
     }
 
-    public int getExternalPort() {
-        return externalPort;
+    public int getSeverPort() {
+        return severPort;
     }
 
-    public void setExternalPort(int externalPort) {
-        this.externalPort = externalPort;
+    public void setSeverPort(int severPort) {
+        this.severPort = severPort;
     }
+
+
 }

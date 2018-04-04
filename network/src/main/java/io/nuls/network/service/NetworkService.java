@@ -31,6 +31,7 @@ import io.nuls.network.entity.param.AbstractNetworkParam;
 
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -48,6 +49,8 @@ public interface NetworkService {
     void removeNode(String nodeId);
 
     void removeNode(String nodeId,int type);
+
+    Map<String, Node> getNodes();
 
     Node getNode(String nodeId);
 

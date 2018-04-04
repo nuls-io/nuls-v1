@@ -85,8 +85,11 @@ public class NodeDiscoverHandler implements Runnable {
             return nodes;
         }
         for (NodePo po : nodePos) {
-            Node node = new Node(network);
+            Node node = new Node();
             NodeTransferTool.toNode(node, po);
+            node.setType(Node.OUT);
+            node.setStatus(Node.WAIT);
+            node.setMagicNumber(network.packetMagic());
             nodes.add(node);
         }
         return nodes;
@@ -100,7 +103,7 @@ public class NodeDiscoverHandler implements Runnable {
             if (network.getLocalIps().contains(socketAddress.getHostString())) {
                 continue;
             }
-            seedNodes.add(new Node(network, Node.OUT, socketAddress));
+            seedNodes.add(new Node(network.packetMagic(), Node.OUT, socketAddress));
         }
         return seedNodes;
     }
@@ -165,7 +168,7 @@ public class NodeDiscoverHandler implements Runnable {
             }
             Log.info("nodes(" + count + "):" + str.toString().substring(1));
 
-            GetVersionEvent event = new GetVersionEvent(network.getExternalPort());
+            GetVersionEvent event = new GetVersionEvent(network.port());
             GetNodesIpEvent ipEvent = new GetNodesIpEvent();
             for (Node node : nodeList) {
                 if (node.isAlive()) {
