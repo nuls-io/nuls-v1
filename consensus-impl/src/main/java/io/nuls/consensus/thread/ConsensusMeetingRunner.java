@@ -315,6 +315,7 @@ public class ConsensusMeetingRunner implements Runnable {
     }
 
     private Block doPacking(PocMeetingMember self, PocMeetingRound round, long timeout) throws NulsException, IOException {
+
         Block bestBlock = this.getBestBlock();
         List<Transaction> txList = txCacheManager.getTxList();
         txList.sort(TxTimeComparator.getInstance());
@@ -326,6 +327,14 @@ public class ConsensusMeetingRunner implements Runnable {
         roundData.setConsensusMemberCount(round.getMemberCount());
         roundData.setPackingIndexOfRound(self.getIndexOfRound());
         roundData.setRoundStartTime(round.getStartTime());
+        StringBuilder str = new StringBuilder();
+        str.append(self.getPackingAddress());
+        str.append(" ,order:"+self.getIndexOfRound());
+        str.append(",packTime:"+new Date(self.getPackEndTime()).toLocaleString());
+        str.append("\n");
+        BlockLog.info("pack round:"+str);
+
+
         bd.setRoundData(roundData);
         List<Integer> outTxList = new ArrayList<>();
         List<NulsDigestData> outHashList = new ArrayList<>();

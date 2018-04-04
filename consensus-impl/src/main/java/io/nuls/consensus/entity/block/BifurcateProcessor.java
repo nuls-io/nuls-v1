@@ -141,7 +141,7 @@ public class BifurcateProcessor {
         }
     }
 
-    public List<String> getHashList(long height) {
+    public List<String> getAllHashList(long height) {
         Set<String> set = new HashSet<>();
         List<BlockHeaderChain> chainList1 = new ArrayList<>(this.chainList);
         for (BlockHeaderChain chain : chainList1) {
@@ -152,12 +152,19 @@ public class BifurcateProcessor {
         }
         return new ArrayList<>(set);
     }
+    public String getBlockHash(long height) {
+            HeaderDigest headerDigest = approvingChain.getHeaderDigest(height);
+            if (null != headerDigest) {
+                return headerDigest.getHash();
+            }
+        return null;
+    }
 
     public boolean processing(long height) {
         if (chainList.isEmpty()) {
             return false;
         }
-        List<String> hashList = this.getHashList(height);
+        List<String> hashList = this.getAllHashList(height);
         if (hashList.isEmpty()) {
             //Log.warn("lost a block:" + height);
             return false;

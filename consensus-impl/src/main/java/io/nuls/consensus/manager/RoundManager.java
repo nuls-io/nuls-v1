@@ -24,6 +24,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.calc.DoubleUtils;
 import io.nuls.core.utils.date.TimeService;
+import io.nuls.core.utils.log.BlockLog;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.AgentDataService;
 import io.nuls.db.dao.DepositDataService;
@@ -150,6 +151,16 @@ public class RoundManager {
             Collections.sort(memberList);
             round.setMemberList(memberList);
         }
+
+
+        StringBuilder str = new StringBuilder();
+        for(PocMeetingMember member:round.getMemberList()){
+            str.append(member.getPackingAddress());
+            str.append(" ,order:"+member.getIndexOfRound());
+            str.append(",packTime:"+new Date(member.getPackEndTime()).toLocaleString());
+            str.append("\n");
+        }
+        BlockLog.info("calc new round:index:"+round.getIndex()+"members:\n :"+str);
         return round;
     }
 

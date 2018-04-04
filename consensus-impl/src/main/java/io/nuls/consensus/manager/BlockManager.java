@@ -110,7 +110,7 @@ public class BlockManager {
             }
         }
         if (block.getHeader().getHeight() <= storedHeight) {
-            Log.info("discard block height:" + block.getHeader().getHeight() +", address:"+block.getHeader().getPackingAddress()+ ",from:" + nodeId);
+            Log.info("discard block height:" + block.getHeader().getHeight() + ", address:" + block.getHeader().getPackingAddress() + ",from:" + nodeId);
             return;
         }
         if (verify) {
@@ -126,7 +126,7 @@ public class BlockManager {
         boolean success = confirmingBlockCacheManager.cacheBlock(block);
         if (!success) {
             blockCacheBuffer.cacheBlock(block);
-            BlockLog.info("orphan cache block height:" +block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + block.getHeader().getPackingAddress());
+            BlockLog.info("orphan cache block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + block.getHeader().getPackingAddress());
             boolean hasPre = blockCacheBuffer.getBlock(block.getHeader().getPreHash().getDigestHex()) != null;
             if (!hasPre && null != nodeId) {
                 GetBlockRequest request = new GetBlockRequest();
@@ -222,16 +222,16 @@ public class BlockManager {
         this.rollbackTxList(block.getTxs(), 0, block.getTxs().size());
         this.lastAppravedHash = block.getHeader().getPreHash().getDigestHex();
         Block preBlock = this.getBlock(lastAppravedHash);
-        List<String> hashList = this.bifurcateProcessor.getHashList(block.getHeader().getHeight() - 1);
+        List<String> hashList = this.bifurcateProcessor.getAllHashList(block.getHeader().getHeight() - 1);
         if (hashList.size() > 1) {
             this.rollbackAppraval(preBlock);
         }
     }
 
     public Block getBlock(long height) {
-        List<String> hashList = this.bifurcateProcessor.getHashList(height);
-        if (hashList.size() == 1) {
-            return getBlock(hashList.get(0));
+        String hash = this.bifurcateProcessor.getBlockHash(height);
+        if (hash != null) {
+            return getBlock(hash);
         }
         return null;
     }
@@ -289,11 +289,11 @@ public class BlockManager {
     }
 
     public BlockHeader getBlockHeader(long height) {
-        List<String> list = this.bifurcateProcessor.getHashList(height);
-        if (list.size() != 1) {
+        String hash  = this.bifurcateProcessor.getBlockHash(height);
+        if (hash==null) {
             return null;
         }
-        return confirmingBlockCacheManager.getBlockHeader(list.get(0));
+        return confirmingBlockCacheManager.getBlockHeader(hash);
     }
 
     public void clear() {
