@@ -26,6 +26,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        Log.info("----------------------client channelActive ------------------------- ");
         String channelId = ctx.channel().id().asLongText();
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
@@ -36,7 +37,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
             return;
         }
         Map<String, Node> nodes = networkService.getNodes();
-        // If a node with the same IP already in nodes, being a out node, not add anymore
+        // If a node with the same IP already in nodes, as a out node, can not add anymore
         for (Node n : nodes.values()) {
             //both ip and port equals , it means the node is myself
             if (n.getIp().equals(channel.remoteAddress().getHostString()) && n.getPort() != channel.remoteAddress().getPort()) {
