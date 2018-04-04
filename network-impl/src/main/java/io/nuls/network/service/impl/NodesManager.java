@@ -163,28 +163,32 @@ public class NodesManager implements Runnable {
     }
 
     public void removeNode(String nodeId, Integer type) {
-        if (nodes.containsKey(nodeId)) {
-            Node node = nodes.get(nodeId);
-            if (null != type && type != node.getType()) {
-                return;
-            }
-            //When other modules call the interface,  close channel first
-            if (StringUtils.isNotBlank(node.getChannelId())) {
-                SocketChannel channel = NioChannelMap.get(node.getChannelId());
-                if (channel != null) {
-                    channel.close();
+        lock.lock();
+        try {
+            if (nodes.containsKey(nodeId)) {
+                Node node = nodes.get(nodeId);
+                if (null != type && type != node.getType()) {
                     return;
                 }
+                //When other modules call the interface,  close channel first
+                if (StringUtils.isNotBlank(node.getChannelId())) {
+                    SocketChannel channel = NioChannelMap.get(node.getChannelId());
+                    if (channel != null) {
+                        channel.close();
+                        return;
+                    }
+                }
+                node.destroy();
+                for (String groupName : node.getGroupSet()) {
+                    removeNodeFromGroup(groupName, node.getId());
+                }
+                nodes.remove(node.getId());
+                getNodeDao().removeNode(NodeTransferTool.toPojo(node));
+            } else {
+                getNodeDao().removeNode(nodeId);
             }
-
-            node.destroy();
-            for (String groupName : node.getGroupSet()) {
-                removeNodeFromGroup(groupName, node.getId());
-            }
-            nodes.remove(node.getId());
-            getNodeDao().removeNode(NodeTransferTool.toPojo(node));
-        } else {
-            getNodeDao().removeNode(nodeId);
+        } finally {
+            lock.unlock();
         }
     }
 
