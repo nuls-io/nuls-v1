@@ -247,7 +247,10 @@ public class ConsensusMeetingRunner implements Runnable {
         blockManager.addBlock(newBlock, false, null);
         BlockHeaderEvent event = new BlockHeaderEvent();
         event.setEventBody(newBlock.getHeader());
-        eventBroadcaster.broadcastAndCache(event, false);
+        List<String> nodeIdList = eventBroadcaster.broadcastAndCache(event, false);
+        for (String nodeId : nodeIdList) {
+            BlockLog.info("send block height:" + newBlock.getHeader().getHeight() + ", node:" + nodeId);
+        }
         PackedBlockNotice notice = new PackedBlockNotice();
         notice.setEventBody(newBlock.getHeader());
         eventBroadcaster.publishToLocal(notice);
