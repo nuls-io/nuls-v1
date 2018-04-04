@@ -66,12 +66,21 @@ public class BlockHeaderHandler extends AbstractEventHandler<BlockHeaderEvent> {
             return;
         }
        ValidateResult result = header.verify();
+        boolean isOrphan = result.getErrorCode()==ErrorCode.ORPHAN_TX||result.getErrorCode()==ErrorCode.ORPHAN_BLOCK;
+
+        System.out.println();
+        System.out.println("verify block : " +result.isFailed() + " , isOrphan : " + isOrphan);
+
+
         if(result.isFailed()){
-            boolean isOrphan = result.getErrorCode()==ErrorCode.ORPHAN_TX||result.getErrorCode()==ErrorCode.ORPHAN_BLOCK;
-            if(!isOrphan||(NulsContext.getInstance().getBestHeight()-header.getHeight())> PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND){
+            if(!isOrphan||(NulsContext.getInstance().getBestHeight()-header.getHeight())> PocConsensusConstant.CONFIRM_BLOCK_COUNT){
                 return;
             }
         }
+
+        System.out.println("process ");
+        System.out.println();
+
         GetSmallBlockRequest request = new GetSmallBlockRequest();
         GetSmallBlockParam param = new GetSmallBlockParam();
         param.setBlockHash(header.getHash());

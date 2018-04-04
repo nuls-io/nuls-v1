@@ -118,7 +118,6 @@ public class ConsensusMeetingRunner implements Runnable {
                 doWork();
             } catch (Exception e) {
                 Log.error(e);
-                Log.info("consensus throw error : " + e.getMessage());
             }
         }
     }
@@ -129,8 +128,14 @@ public class ConsensusMeetingRunner implements Runnable {
 
         long nowTime = TimeService.currentTimeMillis();
         //check current round is end
-        if (nowTime >= round.getEndTime()) {
+        if (null==round||nowTime >= round.getEndTime()) {
             resetCurrentMeetingRound();
+            //sleep sometimes make sure not to run again
+            try {
+                Thread.sleep(100l);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             return;
         }
 
@@ -377,11 +382,6 @@ public class ConsensusMeetingRunner implements Runnable {
         addConsensusTx(bestBlock, txList, self, round);
         bd.setTxList(txList);
         Log.debug("txCount:" + txList.size());
-        if(!self.getAgentAddress().equals(round.getLocalPacker().getAddress().getBase58())){
-            Log.error("======================================================================");
-            Log.error("======================================================================");
-            Log.error("======================================================================");
-        }
         Block newBlock = ConsensusTool.createBlock(bd, round.getLocalPacker());
         System.out.printf("========height:" + newBlock.getHeader().getHeight() + ",time:" + DateUtil.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
                 DateUtil.convertDate(new Date(self.getPackEndTime())));

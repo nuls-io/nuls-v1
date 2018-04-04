@@ -64,6 +64,10 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
     @Override
     public void onEvent(TxGroupEvent event, String fromId) {
         TxGroup txGroup = event.getEventBody();
+
+        System.out.println("get tx group request : " + event.getEventBody().getBlockHash().getDigestHex());
+
+
         BlockHeader header = temporaryCacheManager.getBlockHeader(txGroup.getBlockHash().getDigestHex());
         if (header == null) {
             return;
@@ -72,6 +76,9 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
         if (null == smallBlock) {
             return;
         }
+
+        System.out.println("get tx group request 1 ");
+
         Block block = new Block();
         block.setHeader(header);
         List<Transaction> txs = new ArrayList<>();
@@ -87,7 +94,7 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
         }
         block.setTxs(txs);
         ValidateResult<RedPunishData> vResult = block.verify();
-        if (null == vResult || (vResult.isFailed() && vResult.getErrorCode() != ErrorCode.ORPHAN_TX)) {
+        if (null == vResult || (vResult.isFailed() && vResult.getErrorCode() != ErrorCode.ORPHAN_TX&& vResult.getErrorCode() != ErrorCode.ORPHAN_BLOCK)) {
             if ( SeverityLevelEnum.FLAGRANT_FOUL==vResult.getLevel()) {
                 RedPunishData data = vResult.getObject();
                 ConsensusMeetingRunner.putPunishData(data);
@@ -95,6 +102,7 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
             } else {
                 networkService.removeNode(fromId, NodePo.YELLOW);
             }
+            System.out.println("get tx group request 2 ");
             return;
         }
         blockManager.addBlock(block, false, fromId);

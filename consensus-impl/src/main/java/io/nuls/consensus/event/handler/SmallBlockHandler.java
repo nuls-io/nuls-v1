@@ -60,8 +60,6 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
     private ReceivedTxCacheManager receivedTxCacheManager = ReceivedTxCacheManager.getInstance();
     private OrphanTxCacheManager orphanTxCacheManager = OrphanTxCacheManager.getInstance();
     private DownloadDataUtils downloadDataUtils = DownloadDataUtils.getInstance();
-    private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
-    private BlockManager blockManager = BlockManager.getInstance();
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
 
     @Override
@@ -70,6 +68,9 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
         if (result.isFailed()) {
             return;
         }
+
+        System.out.println("get smallblock request : " + event.getEventBody().getBlockHash().getDigestHex());
+
         temporaryCacheManager.cacheSmallBlock(event.getEventBody());
         downloadDataUtils.removeSmallBlock(event.getEventBody().getBlockHash().getDigestHex());
         GetTxGroupRequest request = new GetTxGroupRequest();
@@ -79,46 +80,6 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
             if (!receivedTxCacheManager.txExist(hash) && !orphanTxCacheManager.txExist(hash)) {
                 param.addHash(hash);
             }
-        }
-        if (param.getTxHashList().isEmpty()) {
-            BlockHeader header = temporaryCacheManager.getBlockHeader(event.getEventBody().getBlockHash().getDigestHex());
-            if (null == header) {
-                return;
-            }
-            Block block = new Block();
-            block.setHeader(header);
-            List<Transaction> txs = new ArrayList<>();
-            for (NulsDigestData txHash : event.getEventBody().getTxHashList()) {
-                Transaction tx = receivedTxCacheManager.getTx(txHash);
-
-                if (null == tx) {
-                    tx = orphanTxCacheManager.getTx(txHash);
-                }
-                if (null == tx) {
-                    throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
-                }
-                txs.add(tx);
-            }
-            block.setTxs(txs);
-            ValidateResult<RedPunishData> vResult = block.verify();
-            if (null == vResult || (vResult.isFailed() && vResult.getErrorCode() != ErrorCode.ORPHAN_TX)) {
-                if (vResult.getLevel() == SeverityLevelEnum.FLAGRANT_FOUL) {
-                    RedPunishData data = vResult.getObject();
-                    ConsensusMeetingRunner.putPunishData(data);
-                    networkService.blackNode(fromId, NodePo.BLACK);
-                } else {
-                    networkService.removeNode(fromId, NodePo.YELLOW);
-                }
-                return;
-            }
-
-            blockManager.addBlock(block, false, fromId);
-            downloadDataUtils.removeTxGroup(block.getHeader().getHash().getDigestHex());
-
-            BlockHeaderEvent headerEvent = new BlockHeaderEvent();
-            headerEvent.setEventBody(header);
-            eventBroadcaster.broadcastHashAndCacheAysn(headerEvent, false, fromId);
-            return;
         }
         request.setEventBody(param);
         this.eventBroadcaster.sendToNode(request, fromId);
