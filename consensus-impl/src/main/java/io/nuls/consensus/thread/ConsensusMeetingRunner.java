@@ -55,6 +55,7 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.date.TimeService;
+import io.nuls.core.utils.log.BlockLog;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
@@ -176,7 +177,7 @@ public class ConsensusMeetingRunner implements Runnable {
             }
             //todo info to debug
             Log.info("produce block:" + newBlock.getHeader().getHash() + ",\nheight(" + newBlock.getHeader().getHeight() + "),round(" + round.getIndex() + "),index(" + self.getIndexOfRound() + "),roundStart:" + round.getStartTime());
-
+            BlockLog.info("produce block height:" + newBlock.getHeader().getHeight() + ", preHash:" + newBlock.getHeader().getPreHash() + " , hash:" + newBlock.getHeader().getHash() + ", address:" + newBlock.getHeader().getPackingAddress());
             broadcastNewBlock(newBlock);
 
         } catch (NulsException e) {
@@ -257,11 +258,11 @@ public class ConsensusMeetingRunner implements Runnable {
             return false;
         }
         List<Node> nodes = networkService.getAvailableNodes();
-        if (nodes == null || nodes.size() ==0) {
+        if (nodes == null || nodes.size() == 0) {
             BlockMaintenanceThread.getInstance().setStatus(MaintenanceStatus.READY);
             return false;
         }
-        if(nodes.size()<MIN_NODE_COUNT){
+        if (nodes.size() < MIN_NODE_COUNT) {
             return false;
         }
         if (!isNetworkSynchronizeComplete()) {

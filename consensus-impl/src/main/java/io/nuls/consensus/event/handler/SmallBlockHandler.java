@@ -111,6 +111,7 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
                 }
                 return;
             }
+
             blockManager.addBlock(block, false, fromId);
             downloadDataUtils.removeTxGroup(block.getHeader().getHash().getDigestHex());
 

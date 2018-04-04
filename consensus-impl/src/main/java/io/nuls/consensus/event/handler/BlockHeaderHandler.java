@@ -33,6 +33,7 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.utils.log.BlockLog;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.handler.AbstractEventHandler;
@@ -55,6 +56,8 @@ public class BlockHeaderHandler extends AbstractEventHandler<BlockHeaderEvent> {
             Log.warn("recieved a null blockHeader!");
             return;
         }
+
+        BlockLog.info("recieve new block header height:" +header.getHeight() + ", preHash:" + header.getPreHash() + " , hash:" + header.getHash() + ", address:" + header.getPackingAddress());
         //todo 过早过晚的情况进行判断、处理
 
 
