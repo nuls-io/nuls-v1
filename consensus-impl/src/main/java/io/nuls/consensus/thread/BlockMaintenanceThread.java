@@ -276,7 +276,7 @@ public class BlockMaintenanceThread implements Runnable {
                     }
                 }
             } catch (Exception e) {
-                Log.error(e);
+                Log.error(e.getMessage());
             }
             try {
                 Thread.sleep(1000L);
