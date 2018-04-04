@@ -74,13 +74,16 @@ public class BifurcateProcessor {
     private void checkIt() {
         int maxSize = 0;
         BlockHeaderChain longestChain = null;
+        StringBuilder str = new StringBuilder("++++++++++++++++++++++++chain info:");
         for (BlockHeaderChain chain : chainList) {
+            str.append("+++++++++++\nchain:start-" + chain.getHeaderDigestList().get(0).getHeight() + ", end-" + chain.getHeaderDigestList().get(chain.size() - 1).getHeight());
             int listSize = chain.size();
             if (maxSize < listSize) {
                 maxSize = listSize;
                 longestChain = chain;
             }
         }
+        BlockLog.info(str.toString());
         if (this.approvingChain == null || !this.approvingChain.getId().equals(longestChain.getId())) {
             RoundManager.getPackingRoundManager().reset();
         }
@@ -112,10 +115,10 @@ public class BifurcateProcessor {
                 return false;
             }
         }
-        StringBuilder str = new StringBuilder("++++++++++++++++++++++++chain info:");
+
         for (int i = 0; i < this.chainList.size(); i++) {
             BlockHeaderChain chain = chainList.get(i);
-            str.append("+++++++++++\nchain" + i + ":start-" + chain.getHeaderDigestList().get(0).getHeight() + ", end-" + chain.getHeaderDigestList().get(chain.size() - 1));
+
             int index = chain.indexOf(header.getPreHash().getDigestHex(), header.getHeight() - 1);
             if (index == chain.size() - 1) {
                 chain.addHeader(header);
@@ -126,7 +129,7 @@ public class BifurcateProcessor {
                 return true;
             }
         }
-        BlockLog.info(str.toString());
+
         BlockHeaderChain chain = new BlockHeaderChain();
         chain.addHeader(header);
         chainList.add(chain);
