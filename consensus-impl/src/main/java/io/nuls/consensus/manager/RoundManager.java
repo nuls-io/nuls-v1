@@ -181,7 +181,7 @@ public class RoundManager {
             str.append(",packTime:" + new Date(member.getPackEndTime()).toLocaleString());
             str.append("\n");
         }
-        BlockLog.info("calc new round:index:" + round.getIndex() + "members:\n :" + str);
+        BlockLog.info("calc new round:index:" + round.getIndex() + " , start:"+new Date(round.getStartTime()).toLocaleString()+" , members:\n :" + str);
         return round;
     }
 
