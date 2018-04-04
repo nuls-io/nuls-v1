@@ -33,6 +33,7 @@ import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.log.BlockLog;
 
 import java.util.List;
 
@@ -76,6 +77,7 @@ public class ConfirmingBlockCacheManager {
         if (!headerCacheMap.isEmpty()&&!headerCacheMap.containsKey(block.getHeader().getPreHash().getDigestHex())) {
             return false;
         }
+        BlockLog.info("cache block height:" +block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + block.getHeader().getPackingAddress());
         String hash = block.getHeader().getHash().getDigestHex();
         headerCacheMap.put(hash, block.getHeader());
         txsCacheMap.put(hash, block.getTxs());

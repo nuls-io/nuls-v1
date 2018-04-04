@@ -99,7 +99,7 @@ public class BlockManager {
             BlockLog.warn("the block data error============================");
             return;
         }
-        BlockLog.info("cache block height:" +block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + block.getHeader().getPackingAddress());
+
         BlockRoundData roundData = new BlockRoundData(block.getHeader().getExtend());
         Log.debug("cache block:" + block.getHeader().getHash() +
                 ",\nheight(" + block.getHeader().getHeight() + "),round(" + roundData.getRoundIndex() + "),index(" + roundData.getPackingIndexOfRound() + "),roundStart:" + roundData.getRoundStartTime());
@@ -110,6 +110,7 @@ public class BlockManager {
             }
         }
         if (block.getHeader().getHeight() <= storedHeight) {
+            Log.info("discard block height:" + block.getHeader().getHeight() +", address:"+block.getHeader().getPackingAddress()+ ",from:" + nodeId);
             return;
         }
         if (verify) {
@@ -123,8 +124,9 @@ public class BlockManager {
             }
         }
         boolean success = confirmingBlockCacheManager.cacheBlock(block);
-        if (!success){
+        if (!success) {
             blockCacheBuffer.cacheBlock(block);
+            BlockLog.info("orphan cache block height:" +block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + block.getHeader().getPackingAddress());
             boolean hasPre = blockCacheBuffer.getBlock(block.getHeader().getPreHash().getDigestHex()) != null;
             if (!hasPre && null != nodeId) {
                 GetBlockRequest request = new GetBlockRequest();
@@ -153,20 +155,20 @@ public class BlockManager {
             }
         } else {
             Block lastAppravedBlock = confirmingBlockCacheManager.getBlock(lastAppravedHash);
-            if(null!=lastAppravedBlock){
+            if (null != lastAppravedBlock) {
                 this.rollbackAppraval(lastAppravedBlock);
             }
         }
-        if (success){
+        if (success) {
             Set<String> keySet = blockCacheBuffer.getHeaderCacheMap().keySet();
-            for(String key:keySet){
+            for (String key : keySet) {
                 BlockHeader header = blockCacheBuffer.getBlockHeader(key);
-                if(header==null){
+                if (header == null) {
                     continue;
                 }
-                if(header.getPreHash().getDigestHex().equals(block.getHeader().getHash())){
+                if (header.getPreHash().getDigestHex().equals(block.getHeader().getHash())) {
                     Block nextBlock = blockCacheBuffer.getBlock(key);
-                    this.addBlock(nextBlock,true,null);
+                    this.addBlock(nextBlock, true, null);
                 }
             }
         }
