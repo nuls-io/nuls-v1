@@ -159,7 +159,7 @@ public class NodeDiscoverHandler implements Runnable {
             for (Node node : nodeList) {
                 if (node.getStatus() == 2) {
                     str.append(",");
-                    str.append(node.getIp());
+                    str.append(node.getIp()+":" + node.getPort());
                     count++;
                 }
             }

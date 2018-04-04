@@ -14,7 +14,6 @@ import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeGroup;
 import io.nuls.network.service.NetworkService;
 
-import java.net.InetAddress;
 import java.nio.ByteBuffer;
 
 /**
@@ -77,7 +76,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        Log.info("----------------------server channelActive ------------------------- ");
+//        Log.info("----------------------server channelActive ------------------------- ");
         String channelId = ctx.channel().id().asLongText();
         SocketChannel channel = (SocketChannel) ctx.channel();
         NioChannelMap.add(channelId, channel);
@@ -88,7 +87,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        Log.info("----------------------server channelInactive ------------------------- ");
+//        Log.info("----------------------server channelInactive ------------------------- ");
         SocketChannel channel = (SocketChannel) ctx.channel();
         String channelId = ctx.channel().id().asLongText();
         NioChannelMap.remove(channelId);
@@ -101,7 +100,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        Log.info("---------------ServerChannelHandler exceptionCaught :" + cause.getMessage());
+//        Log.info("---------------ServerChannelHandler exceptionCaught :" + cause.getMessage());
         ctx.channel().close();
     }
 
