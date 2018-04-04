@@ -68,6 +68,9 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
         if (result.isFailed()) {
             return;
         }
+
+        System.out.println("get smallblock request : " + event.getEventBody().getBlockHash().getDigestHex());
+
         temporaryCacheManager.cacheSmallBlock(event.getEventBody());
         downloadDataUtils.removeSmallBlock(event.getEventBody().getBlockHash().getDigestHex());
         GetTxGroupRequest request = new GetTxGroupRequest();

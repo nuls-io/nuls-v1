@@ -130,6 +130,12 @@ public class ConsensusMeetingRunner implements Runnable {
         //check current round is end
         if (null==round||nowTime >= round.getEndTime()) {
             resetCurrentMeetingRound();
+            //sleep sometimes make sure not to run again
+            try {
+                Thread.sleep(100l);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             return;
         }
 
