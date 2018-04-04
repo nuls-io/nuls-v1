@@ -109,7 +109,7 @@ public class RoundManager {
         PocMeetingRound resultRound = null;
         if (needCalcRound) {
             resultRound = calcNextRound(currentBlock, currentRoundData);
-        } else  {
+        } else {
             resultRound = this.currentRound;
         }
 
@@ -154,13 +154,13 @@ public class RoundManager {
 
 
         StringBuilder str = new StringBuilder();
-        for(PocMeetingMember member:round.getMemberList()){
+        for (PocMeetingMember member : round.getMemberList()) {
             str.append(member.getPackingAddress());
-            str.append(" ,order:"+member.getIndexOfRound());
-            str.append(",packTime:"+new Date(member.getPackEndTime()).toLocaleString());
+            str.append(" ,order:" + member.getIndexOfRound());
+            str.append(",packTime:" + new Date(member.getPackEndTime()).toLocaleString());
             str.append("\n");
         }
-        BlockLog.info("calc new round:index:"+round.getIndex()+"members:\n :"+str);
+        BlockLog.info("calc new round:index:" + round.getIndex() + "members:\n :" + str);
         return round;
     }
 
@@ -367,5 +367,9 @@ public class RoundManager {
         List<Account> accountList = accountService.getAccountList();
         currentRound.calcLocalPacker(accountList);
         return currentRound;
+    }
+
+    public void reset() {
+        currentRound = null;
     }
 }

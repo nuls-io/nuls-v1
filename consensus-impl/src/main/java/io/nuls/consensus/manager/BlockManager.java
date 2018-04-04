@@ -128,14 +128,14 @@ public class BlockManager {
             blockCacheBuffer.cacheBlock(block);
             BlockLog.info("orphan cache block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + block.getHeader().getPackingAddress());
             boolean hasPre = blockCacheBuffer.getBlock(block.getHeader().getPreHash().getDigestHex()) != null;
-            if (!hasPre && null != nodeId) {
+            if (!hasPre) {
                 GetBlockRequest request = new GetBlockRequest();
                 GetBlockParam params = new GetBlockParam();
                 long height = block.getHeader().getHeight() - 1;
                 params.setStart(height);
                 params.setEnd(height);
                 request.setEventBody(params);
-                this.eventBroadcaster.sendToNode(request, nodeId);
+                this.eventBroadcaster.broadcastAndCacheAysn(request,false);
             }
             return;
         }
@@ -160,7 +160,6 @@ public class BlockManager {
                 this.rollbackAppraval(lastAppravedBlock);
             }
         }
-        if (success) {
             Set<String> keySet = blockCacheBuffer.getHeaderCacheMap().keySet();
             for (String key : keySet) {
                 BlockHeader header = blockCacheBuffer.getBlockHeader(key);
@@ -172,7 +171,6 @@ public class BlockManager {
                     this.addBlock(nextBlock, true, null);
                 }
             }
-        }
     }
 
     private void appravalBlock(Block block) {

@@ -247,6 +247,9 @@ public class ConsensusMeetingRunner implements Runnable {
         blockManager.addBlock(newBlock, false, null);
         BlockHeaderEvent event = new BlockHeaderEvent();
         event.setEventBody(newBlock.getHeader());
+        if(newBlock.getHeader().getHeight()>835&&newBlock.getHeader().getHeight()<=838){
+            return;
+        }
         List<String> nodeIdList = eventBroadcaster.broadcastAndCache(event, false);
         for (String nodeId : nodeIdList) {
             BlockLog.info("send block height:" + newBlock.getHeader().getHeight() + ", node:" + nodeId);
@@ -377,11 +380,6 @@ public class ConsensusMeetingRunner implements Runnable {
         addConsensusTx(bestBlock, txList, self, round);
         bd.setTxList(txList);
         Log.debug("txCount:" + txList.size());
-        if(!self.getAgentAddress().equals(round.getLocalPacker().getAddress().getBase58())){
-            Log.error("======================================================================");
-            Log.error("======================================================================");
-            Log.error("======================================================================");
-        }
         Block newBlock = ConsensusTool.createBlock(bd, round.getLocalPacker());
         System.out.printf("========height:" + newBlock.getHeader().getHeight() + ",time:" + DateUtil.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
                 DateUtil.convertDate(new Date(self.getPackEndTime())));

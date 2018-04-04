@@ -24,8 +24,10 @@
 package io.nuls.consensus.entity.block;
 
 import io.nuls.consensus.cache.manager.block.ConfirmingBlockCacheManager;
+import io.nuls.consensus.manager.RoundManager;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.utils.log.BlockLog;
 import io.nuls.core.utils.log.Log;
 
 import java.util.ArrayList;
@@ -79,6 +81,9 @@ public class BifurcateProcessor {
                 longestChain = chain;
             }
         }
+        if (this.approvingChain == null || !this.approvingChain.getId().equals(longestChain.getId())) {
+            RoundManager.getPackingRoundManager().reset();
+        }
         this.approvingChain = longestChain;
         Set<String> rightHashSet = new HashSet<>();
         Set<String> removeHashSet = new HashSet<>();
@@ -107,8 +112,10 @@ public class BifurcateProcessor {
                 return false;
             }
         }
+        StringBuilder str = new StringBuilder("++++++++++++++++++++++++chain info:");
         for (int i = 0; i < this.chainList.size(); i++) {
             BlockHeaderChain chain = chainList.get(i);
+            str.append("+++++++++++\nchain" + i + ":start-" + chain.getHeaderDigestList().get(0).getHeight() + ", end-" + chain.getHeaderDigestList().get(chain.size() - 1));
             int index = chain.indexOf(header.getPreHash().getDigestHex(), header.getHeight() - 1);
             if (index == chain.size() - 1) {
                 chain.addHeader(header);
@@ -119,6 +126,7 @@ public class BifurcateProcessor {
                 return true;
             }
         }
+        BlockLog.info(str.toString());
         BlockHeaderChain chain = new BlockHeaderChain();
         chain.addHeader(header);
         chainList.add(chain);
@@ -203,6 +211,9 @@ public class BifurcateProcessor {
             } else {
                 rightHashSet.addAll(chain.getHashSet());
             }
+        }
+        if (this.approvingChain == null || chainList.get(0).getId().equals(this.approvingChain.getId())) {
+            RoundManager.getPackingRoundManager().reset();
         }
 
         for (String hash : removeHashSet) {
