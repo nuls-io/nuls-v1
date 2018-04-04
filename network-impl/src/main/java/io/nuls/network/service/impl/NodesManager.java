@@ -184,19 +184,11 @@ public class NodesManager implements Runnable {
                         return;
                     }
                 }
-                if (node.getType() == Node.OUT) {
-                    System.out.println("---------------remove out node:" + node.getId());
-                }
                 node.destroy();
                 for (String groupName : node.getGroupSet()) {
                     removeNodeFromGroup(groupName, node.getId());
                 }
                 nodes.remove(node.getId());
-
-                Node node1 = nodes.get(node.getId());
-                if (node1 != null && node1.getType() == Node.OUT) {
-                    System.out.println("--------------- nodes remove out node:" + node.getId());
-                }
                 getNodeDao().removeNode(NodeTransferTool.toPojo(node));
             } else {
 
@@ -221,7 +213,6 @@ public class NodesManager implements Runnable {
     }
 
     public void addNodeToGroup(String groupName, Node node) {
-        System.out.println("-------------------add nodegroup :" + node.getId() + ",status:" + node.getStatus() + ",----" + System.currentTimeMillis());
         if (!nodeGroups.containsKey(groupName)) {
             throw new NulsRuntimeException(ErrorCode.NET_NODE_GROUP_NOT_FOUND);
         }
