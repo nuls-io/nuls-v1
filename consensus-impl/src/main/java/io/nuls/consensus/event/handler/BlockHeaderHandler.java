@@ -65,10 +65,13 @@ public class BlockHeaderHandler extends AbstractEventHandler<BlockHeaderEvent> {
         if (null != block) {
             return;
         }
+        if(header.getHeight()==574){
+            return;
+        }
        ValidateResult result = header.verify();
         if(result.isFailed()){
             boolean isOrphan = result.getErrorCode()==ErrorCode.ORPHAN_TX||result.getErrorCode()==ErrorCode.ORPHAN_BLOCK;
-            if(!isOrphan||(NulsContext.getInstance().getBestHeight()-header.getHeight())> PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND){
+            if(!isOrphan||(NulsContext.getInstance().getBestHeight()-header.getHeight())> PocConsensusConstant.CONFIRM_BLOCK_COUNT){
                 return;
             }
         }

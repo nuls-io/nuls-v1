@@ -33,10 +33,14 @@ import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * when the block cannot find preblock ,put it here
+ *
  * @author Niels
  * @date 2017/12/12
  */
@@ -46,7 +50,7 @@ public class BlockCacheBuffer {
 
     private CacheMap<String, BlockHeader> headerCacheMap;
     private CacheMap<String, List<Transaction>> txsCacheMap;
-    private CacheMap<String, String> preHashMap;
+    private CacheMap<String, Set<String>> preHashMap;
 
     private BlockCacheBuffer() {
     }
@@ -75,10 +79,16 @@ public class BlockCacheBuffer {
         String hash = block.getHeader().getHash().getDigestHex();
         headerCacheMap.put(hash, block.getHeader());
         txsCacheMap.put(hash, block.getTxs());
-        preHashMap.put(block.getHeader().getPreHash().getDigestHex(), hash);
+        String preHash = block.getHeader().getPreHash().getDigestHex();
+        Set<String> hashes = preHashMap.get(preHash);
+        if (null == hashes) {
+            hashes = new HashSet<>();
+        }
+        hashes.add(hash);
+        preHashMap.put(preHash, hashes);
     }
 
-    public String getNextHash(String preHash) {
+    public Set<String> getNextHash(String preHash) {
         if (null == preHashMap) {
             return null;
         }
@@ -116,6 +126,7 @@ public class BlockCacheBuffer {
     public void removeBlock(String hash) {
         this.txsCacheMap.remove(hash);
         this.headerCacheMap.remove(hash);
+
     }
 
     public CacheMap<String, BlockHeader> getHeaderCacheMap() {

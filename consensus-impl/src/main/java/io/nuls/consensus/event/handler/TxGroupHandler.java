@@ -87,7 +87,7 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
         }
         block.setTxs(txs);
         ValidateResult<RedPunishData> vResult = block.verify();
-        if (null == vResult || (vResult.isFailed() && vResult.getErrorCode() != ErrorCode.ORPHAN_TX)) {
+        if (null == vResult || (vResult.isFailed() && vResult.getErrorCode() != ErrorCode.ORPHAN_TX&& vResult.getErrorCode() != ErrorCode.ORPHAN_BLOCK)) {
             if ( SeverityLevelEnum.FLAGRANT_FOUL==vResult.getLevel()) {
                 RedPunishData data = vResult.getObject();
                 ConsensusMeetingRunner.putPunishData(data);

@@ -54,7 +54,7 @@ public class BlockCacheCheckThread implements Runnable {
     public void run() {
         while (true) {
             try {
-                checkCache();
+//                checkCache();
                 Thread.sleep(10000L);
             } catch (Exception e) {
                 Log.error(e);

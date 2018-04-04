@@ -149,6 +149,7 @@ public class BlockManager {
                 this.lastAppravedHash = block.getHeader().getHash().getDigestHex();
                 checkNextblock(block.getHeader().getHash().getDigestHex());
             } catch (Exception e) {
+                Log.error(e);
                 confirmingBlockCacheManager.removeBlock(block.getHeader().getHash().getDigestHex());
                 blockCacheBuffer.cacheBlock(block);
                 return;
@@ -250,16 +251,18 @@ public class BlockManager {
 
 
     private void checkNextblock(String hash) {
-        String nextHash = blockCacheBuffer.getNextHash(hash);
-        if (null == nextHash) {
+        Set<String> nextHashSet = blockCacheBuffer.getNextHash(hash);
+        if (null == nextHashSet || nextHashSet.isEmpty()) {
             return;
         }
-        Block block = blockCacheBuffer.getBlock(nextHash);
-        if (null == block) {
-            return;
+        for (String nextHash : nextHashSet) {
+            Block block = blockCacheBuffer.getBlock(nextHash);
+            if (null == block) {
+                return;
+            }
+            blockCacheBuffer.removeBlock(nextHash);
+            this.addBlock(block, true, null);
         }
-        blockCacheBuffer.removeBlock(nextHash);
-        this.addBlock(block, true, null);
     }
 
     public long getStoredHeight() {
@@ -289,8 +292,8 @@ public class BlockManager {
     }
 
     public BlockHeader getBlockHeader(long height) {
-        String hash  = this.bifurcateProcessor.getBlockHash(height);
-        if (hash==null) {
+        String hash = this.bifurcateProcessor.getBlockHash(height);
+        if (hash == null) {
             return null;
         }
         return confirmingBlockCacheManager.getBlockHeader(hash);
