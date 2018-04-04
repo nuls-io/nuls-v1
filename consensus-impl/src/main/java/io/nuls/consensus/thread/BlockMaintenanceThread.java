@@ -269,7 +269,7 @@ public class BlockMaintenanceThread implements Runnable {
         while (true) {
             try {
                 //todo failed
-                if (this.status == MaintenanceStatus.READY) {
+                if (this.status == MaintenanceStatus.READY||this.status==MaintenanceStatus.FAILED) {
                     List<Node> nodeList = networkService.getAvailableNodes();
                     if (nodeList.size() >= MIN_NODE_COUNT) {
                         this.syncBlock();
@@ -277,6 +277,7 @@ public class BlockMaintenanceThread implements Runnable {
                 }
             } catch (Exception e) {
                 Log.error(e.getMessage());
+                this.status=MaintenanceStatus.FAILED;
             }
             try {
                 Thread.sleep(1000L);
