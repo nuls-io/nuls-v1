@@ -50,8 +50,6 @@ public interface NetworkService {
 
     void removeNode(String nodeId,int type);
 
-    void changeNodeFromMap(String oldId, Node node);
-
     Map<String, Node> getNodes();
 
     Node getNode(String nodeId);

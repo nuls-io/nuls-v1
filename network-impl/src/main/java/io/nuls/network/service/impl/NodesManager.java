@@ -179,19 +179,12 @@ public class NodesManager implements Runnable {
 
             node.destroy();
             for (String groupName : node.getGroupSet()) {
-                removeNodeFromGroup(groupName, nodeId);
+                removeNodeFromGroup(groupName, node.getId());
             }
-            nodes.remove(nodeId);
+            nodes.remove(node.getId());
             getNodeDao().removeNode(NodeTransferTool.toPojo(node));
         } else {
             getNodeDao().removeNode(nodeId);
-        }
-    }
-
-    public void removeNodeFromMap(String nodeId, Node node) {
-        if (nodes.containsKey(nodeId)) {
-            nodes.remove(nodeId);
-            nodes.put(node.getId(), node);
         }
     }
 

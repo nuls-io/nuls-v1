@@ -127,11 +127,6 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
-    public void changeNodeFromMap(String nodeId, Node node) {
-        nodesManager.removeNodeFromMap(nodeId, node);
-    }
-
-    @Override
     public Map<String, Node> getNodes() {
         return nodesManager.getNodes();
     }

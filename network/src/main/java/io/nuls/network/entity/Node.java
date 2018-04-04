@@ -140,8 +140,7 @@ public class Node extends BaseNulsData {
     @Override
     public void parse(NulsByteBuffer buffer) throws NulsException {
         magicNumber = (int) buffer.readVarInt();
-        port = (int) buffer.readVarInt();
-        severPort = port;
+        severPort = (int) buffer.readVarInt();
         ip = new String(buffer.readByLengthByte());
         this.groupSet = ConcurrentHashMap.newKeySet();
     }
