@@ -24,6 +24,7 @@
 package io.nuls.consensus.event.handler;
 
 import io.nuls.consensus.cache.manager.block.TemporaryCacheManager;
+import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.GetBlockParam;
 import io.nuls.consensus.entity.GetSmallBlockParam;
 import io.nuls.consensus.event.BlockHeaderEvent;
@@ -60,21 +61,16 @@ public class BlockHeaderHandler extends AbstractEventHandler<BlockHeaderEvent> {
         BlockLog.info("recieve new block header height:" +header.getHeight() + ", preHash:" + header.getPreHash() + " , hash:" + header.getHash() + ", address:" + header.getPackingAddress());
         //todo 过早过晚的情况进行判断、处理
 
-
-
-
-
-        System.out.println("==========height:"+header.getHeight()+" , txCount:"+header.getTxCount()+" , hash:"+header.getHash().getDigestHex());
         Block block = blockManager.getBlock(header.getHash().getDigestHex());
         if (null != block) {
             return;
         }
        ValidateResult result = header.verify();
         if(result.isFailed()){
-            if(result.getErrorCode()== ErrorCode.ORPHAN_BLOCK){
-                //todo
+            boolean isOrphan = result.getErrorCode()==ErrorCode.ORPHAN_TX||result.getErrorCode()==ErrorCode.ORPHAN_BLOCK;
+            if(!isOrphan||(NulsContext.getInstance().getBestHeight()-header.getHeight())> PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND){
+                return;
             }
-            return;
         }
         GetSmallBlockRequest request = new GetSmallBlockRequest();
         GetSmallBlockParam param = new GetSmallBlockParam();

@@ -377,6 +377,11 @@ public class ConsensusMeetingRunner implements Runnable {
         addConsensusTx(bestBlock, txList, self, round);
         bd.setTxList(txList);
         Log.debug("txCount:" + txList.size());
+        if(!self.getAgentAddress().equals(round.getLocalPacker().getAddress().getBase58())){
+            Log.error("======================================================================");
+            Log.error("======================================================================");
+            Log.error("======================================================================");
+        }
         Block newBlock = ConsensusTool.createBlock(bd, round.getLocalPacker());
         System.out.printf("========height:" + newBlock.getHeader().getHeight() + ",time:" + DateUtil.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
                 DateUtil.convertDate(new Date(self.getPackEndTime())));
