@@ -341,9 +341,6 @@ public class BroadcastHandler {
             message = new NulsMessage(network.packetMagic(), event.serialize());
             int successCount = 0;
             for (Node node : nodeList) {
-                if(!"192.168.1.103".equals(node.getId())) {
-                    continue;
-                }
                 if (excludeNodeId != null && node.getId().equals(excludeNodeId)) {
                     continue;
                 }
