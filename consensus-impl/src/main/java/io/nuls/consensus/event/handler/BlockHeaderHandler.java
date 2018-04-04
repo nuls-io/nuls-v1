@@ -65,9 +65,6 @@ public class BlockHeaderHandler extends AbstractEventHandler<BlockHeaderEvent> {
         if (null != block) {
             return;
         }
-        if(header.getHeight()==574){
-            return;
-        }
        ValidateResult result = header.verify();
         if(result.isFailed()){
             boolean isOrphan = result.getErrorCode()==ErrorCode.ORPHAN_TX||result.getErrorCode()==ErrorCode.ORPHAN_BLOCK;
