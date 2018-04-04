@@ -71,14 +71,13 @@ public class GetTxGroupHandler extends AbstractEventHandler<GetTxGroupRequest> {
 
     private List<Transaction> getTxList(Block block, List<NulsDigestData> txHashList) {
         List<Transaction> txList = new ArrayList<>();
-        Map<String, Integer> allTxMap = new HashMap<>();
-        for (int i = 0; i < block.getHeader().getTxCount(); i++) {
-            Transaction tx = block.getTxs().get(i);
-            allTxMap.put(tx.getHash().getDigestHex(), i);
+
+        for (Transaction tx : block.getTxs()) {
+            if (txHashList.contains(tx.getHash())) {
+                txList.add(tx);
+            }
         }
-        for (NulsDigestData hash : txHashList) {
-            txList.add(block.getTxs().get(allTxMap.get(hash.getDigestHex())));
-        }
+
         if (txList.size() != txHashList.size()) {
             throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
         }
