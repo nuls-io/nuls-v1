@@ -182,7 +182,7 @@ public class RoundManager {
             str.append("\n");
         }
         BlockLog.info("calc new round:index:" + round.getIndex() + " , start:"+new Date(round.getStartTime()).toLocaleString()
-                +" , members:\n :" + str);
+                +", netTime:("+new Date(TimeService.currentTimeMillis()).toString()+") , members:\n :" + str);
         return round;
     }
 

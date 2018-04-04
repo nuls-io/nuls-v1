@@ -58,7 +58,7 @@ public class BlockHeaderHandler extends AbstractEventHandler<BlockHeaderEvent> {
             return;
         }
 
-        BlockLog.info("recieve new block header height:" +header.getHeight() + ", preHash:" + header.getPreHash() + " , hash:" + header.getHash() + ", address:" + header.getPackingAddress());
+        BlockLog.info("recieve new block from("+fromId+"), header height:" +header.getHeight() + ", preHash:" + header.getPreHash() + " , hash:" + header.getHash() + ", address:" + header.getPackingAddress());
         //todo 过早过晚的情况进行判断、处理
 
         Block block = blockManager.getBlock(header.getHash().getDigestHex());
