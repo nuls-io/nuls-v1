@@ -66,7 +66,7 @@ public class BlockMaintenanceThread implements Runnable {
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
     private MaintenanceStatus status = MaintenanceStatus.READY;
 
-    private long downloadHeight = 0L;
+    private long downloadHeight = -1L;
 
     private BlockMaintenanceThread() {
     }
@@ -254,7 +254,7 @@ public class BlockMaintenanceThread implements Runnable {
         if (this.status == null) {
             return MaintenanceStatus.FAILED;
         }
-        if (status == MaintenanceStatus.DOWNLOADING && NulsContext.getInstance().getBestHeight() >= this.downloadHeight && this.downloadHeight > 0) {
+        if (status == MaintenanceStatus.DOWNLOADING && NulsContext.getInstance().getBestHeight() >= this.downloadHeight && this.downloadHeight > -1L) {
             this.status = MaintenanceStatus.SUCCESS;
         }
         return status;
