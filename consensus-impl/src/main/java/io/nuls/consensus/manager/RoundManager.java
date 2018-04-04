@@ -37,6 +37,8 @@ import io.nuls.ledger.entity.tx.CoinBaseTransaction;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author: Niels Wang
@@ -63,9 +65,11 @@ public class RoundManager {
     private PocMeetingRound currentRound;
     private boolean needReSet;
 
+    private Lock lock = new ReentrantLock();
+
     public void init() {
         //load five(CACHE_COUNT) round from db on the start time ;
-        Block bestBlock = NulsContext.getInstance().getBestBlock();
+        Block bestBlock = getBestBlock();
         BlockRoundData roundData = new BlockRoundData(bestBlock.getHeader().getExtend());
         for (long i = roundData.getRoundIndex(); i >= 1 && i >= roundData.getRoundIndex() - CACHE_COUNT; i--) {
             Block firstBlock = getBlockService().getRoundFirstBlock(bestBlock, i - 1);
@@ -83,47 +87,52 @@ public class RoundManager {
         return INSTANCE;
     }
 
-    public synchronized PocMeetingRound resetCurrentMeetingRound() {
-        Block currentBlock = NulsContext.getInstance().getBestBlock();
-        BlockRoundData currentRoundData = new BlockRoundData(currentBlock.getHeader().getExtend());
-        boolean needCalcRound = false;
-        do {
-            if (null == currentRound || needReSet) {
+    public PocMeetingRound resetCurrentMeetingRound() {
+        lock.lock();
+        try {
+            Block currentBlock = getBestBlock();
+            BlockRoundData currentRoundData = new BlockRoundData(currentBlock.getHeader().getExtend());
+            boolean needCalcRound = false;
+            do {
+                if (null == currentRound || needReSet) {
+                    needCalcRound = true;
+                    needReSet = false;
+                    break;
+                }
+                if (currentRound.getEndTime() <= TimeService.currentTimeMillis()) {
+                    needCalcRound = true;
+                    break;
+                }
+                boolean thisIsLastBlockOfRound = currentRoundData.getPackingIndexOfRound() == currentRoundData.getConsensusMemberCount();
+                if (currentRound.getIndex() == currentRoundData.getRoundIndex() && !thisIsLastBlockOfRound) {
+                    needCalcRound = false;
+                    break;
+                }
+                if (currentRound.getIndex() == (currentRoundData.getRoundIndex() + 1) && thisIsLastBlockOfRound) {
+                    needCalcRound = false;
+                    break;
+                }
                 needCalcRound = true;
-                needReSet = false;
-                break;
+            } while (false);
+            PocMeetingRound resultRound = null;
+            if (needCalcRound) {
+                resultRound = calcNextRound(currentBlock, currentRoundData);
+            } else {
+                resultRound = this.currentRound;
             }
-            if (currentRound.getEndTime() <= TimeService.currentTimeMillis()) {
-                needCalcRound = true;
-                break;
-            }
-            boolean thisIsLastBlockOfRound = currentRoundData.getPackingIndexOfRound() == currentRoundData.getConsensusMemberCount();
-            if (currentRound.getIndex() == currentRoundData.getRoundIndex() && !thisIsLastBlockOfRound) {
-                needCalcRound = false;
-                break;
-            }
-            if (currentRound.getIndex() == (currentRoundData.getRoundIndex() + 1) && thisIsLastBlockOfRound) {
-                needCalcRound = false;
-                break;
-            }
-            needCalcRound = true;
-        } while (false);
-        PocMeetingRound resultRound = null;
-        if (needCalcRound) {
-            resultRound = calcNextRound(currentBlock, currentRoundData);
-        } else {
-            resultRound = this.currentRound;
-        }
 
-        if (resultRound.getPreRound() == null) {
-            resultRound.setPreRound(ROUND_MAP.get(currentRoundData.getRoundIndex() - 1));
-        }
+            if (resultRound.getPreRound() == null) {
+                resultRound.setPreRound(ROUND_MAP.get(currentRoundData.getRoundIndex() - 1));
+            }
 
-        List<Account> accountList = accountService.getAccountList();
-        resultRound.calcLocalPacker(accountList);
-        this.currentRound = resultRound;
-        ROUND_MAP.put(resultRound.getIndex(), resultRound);
-        return resultRound;
+            List<Account> accountList = accountService.getAccountList();
+            resultRound.calcLocalPacker(accountList);
+            this.currentRound = resultRound;
+            ROUND_MAP.put(resultRound.getIndex(), resultRound);
+            return resultRound;
+        }finally {
+            lock.unlock();
+        }
     }
 
 
@@ -134,6 +143,16 @@ public class RoundManager {
 //        }
         Block lastRoundFirstBlock = getBlockService().getRoundFirstBlock(calcBlock, blockRoundData.getRoundIndex());
         PocMeetingRound round = calcRound(lastRoundFirstBlock.getHeader().getHeight(), blockRoundData.getRoundIndex() + 1, blockRoundData.getRoundEndTime());
+
+        if(round.getStartTime()<TimeService.currentTimeMillis()){
+
+
+
+
+
+
+        }
+
         boolean needCalcOrder = false;
         while (round.getEndTime() <= TimeService.currentTimeMillis()) {
             long time = TimeService.currentTimeMillis() - round.getStartTime();
@@ -375,6 +394,22 @@ public class RoundManager {
     }
 
     public void reset() {
+        lock.lock();try{
         this.needReSet = true;
+        ROUND_MAP.clear();
+        this.init();}finally {
+            lock.unlock();
+        }
+    }
+
+
+
+    private Block getBestBlock() {
+        Block block = NulsContext.getInstance().getBestBlock();
+        Block highestBlock = BlockManager.getInstance().getHighestBlock();
+        if (null != highestBlock && highestBlock.getHeader().getHeight() > block.getHeader().getHeight()) {
+            return highestBlock;
+        }
+        return block;
     }
 }
