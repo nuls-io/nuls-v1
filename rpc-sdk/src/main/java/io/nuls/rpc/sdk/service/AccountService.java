@@ -156,7 +156,8 @@ public enum AccountService {
         RpcClientResult result = restFul.get("/account/list", null);
         if (result.isSuccess()) {
             if(result.getData() != null) {
-                List<Map<String, Object>> list = (List<Map<String, Object>>) result.getData();
+                Map<String, Object> page = (Map<String, Object>) result.getData();
+                List<Map<String, Object>> list = (List<Map<String, Object>>) page.get("list");
                 List<AccountDto> accountDtoList = new ArrayList<>();
                 for (Map<String, Object> map : list) {
                     accountDtoList.add(new AccountDto(map));
