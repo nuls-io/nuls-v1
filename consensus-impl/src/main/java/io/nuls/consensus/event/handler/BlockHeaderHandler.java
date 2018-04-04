@@ -81,9 +81,6 @@ public class BlockHeaderHandler extends AbstractEventHandler<BlockHeaderEvent> {
         System.out.println("process ");
         System.out.println();
 
-        if(header.getHeight() == 572) {
-            return;
-        }
         GetSmallBlockRequest request = new GetSmallBlockRequest();
         GetSmallBlockParam param = new GetSmallBlockParam();
         param.setBlockHash(header.getHash());
