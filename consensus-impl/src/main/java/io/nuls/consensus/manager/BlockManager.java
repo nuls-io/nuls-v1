@@ -100,6 +100,8 @@ public class BlockManager {
             return;
         }
 
+
+
         BlockRoundData roundData = new BlockRoundData(block.getHeader().getExtend());
         Log.debug("cache block:" + block.getHeader().getHash() +
                 ",\nheight(" + block.getHeader().getHeight() + "),round(" + roundData.getRoundIndex() + "),index(" + roundData.getPackingIndexOfRound() + "),roundStart:" + roundData.getRoundStartTime());
@@ -109,12 +111,23 @@ public class BlockManager {
                 storedHeight = blockService.getLocalSavedHeight();
             }
         }
+
+        System.out.println();
+        System.out.println();
+        System.out.println();
+
+
+        System.out.println("addBlock height: " + block.getHeader().getHeight() + " , storedHeight : " + storedHeight);
+
         if (block.getHeader().getHeight() <= storedHeight) {
             Log.info("discard block height:" + block.getHeader().getHeight() + ", address:" + block.getHeader().getPackingAddress() + ",from:" + nodeId);
             return;
         }
         if (verify) {
             ValidateResult result = block.verify();
+
+            System.out.println("verify block result is : " + result.isFailed());
+
             if (result.isFailed() && result.getErrorCode() != ErrorCode.ORPHAN_BLOCK && result.getErrorCode() != ErrorCode.ORPHAN_TX) {
                 Log.debug("discard a block :" + result.getMessage());
                 return;
@@ -124,6 +137,9 @@ public class BlockManager {
             }
         }
         boolean success = confirmingBlockCacheManager.cacheBlock(block);
+
+        System.out.println("cacheBlock result is : " + success);
+
         if (!success) {
             blockCacheBuffer.cacheBlock(block);
             BlockLog.info("orphan cache block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + block.getHeader().getPackingAddress());
@@ -140,16 +156,20 @@ public class BlockManager {
             return;
         }
         boolean needUpdateBestBlock = bifurcateProcessor.addHeader(block.getHeader());
+
+        System.out.println("needUpdateBestBlock result is : " + needUpdateBestBlock);
+
         if (needUpdateBestBlock) {
             context.setBestBlock(block);
         }
+        System.out.println("bifurcateProcessor : " + bifurcateProcessor.getChainSize());
         if (bifurcateProcessor.getChainSize() == 1) {
             try {
                 this.appravalBlock(block);
                 this.lastAppravedHash = block.getHeader().getHash().getDigestHex();
                 checkNextblock(block.getHeader().getHash().getDigestHex());
             } catch (Exception e) {
-                Log.error(e);
+                e.printStackTrace();
                 confirmingBlockCacheManager.removeBlock(block.getHeader().getHash().getDigestHex());
                 blockCacheBuffer.cacheBlock(block);
                 return;
@@ -173,13 +193,16 @@ public class BlockManager {
                 }
             }
         }
+
+        System.out.println();
+        System.out.println();
+        System.out.println();
     }
 
     private void appravalBlock(Block block) {
         for (int i = 0; i < block.getHeader().getTxCount(); i++) {
             Transaction tx = block.getTxs().get(i);
             tx.setBlockHeight(block.getHeader().getHeight());
-            tx.setIndex(i);
             tx.setIndex(i);
             if (tx.getStatus() == null || tx.getStatus() == TxStatusEnum.CACHED) {
                 try {
@@ -251,18 +274,16 @@ public class BlockManager {
 
 
     private void checkNextblock(String hash) {
-        Set<String> nextHashSet = blockCacheBuffer.getNextHash(hash);
-        if (null == nextHashSet || nextHashSet.isEmpty()) {
+        String nextHash = blockCacheBuffer.getNextHash(hash);
+        if (null == nextHash) {
             return;
         }
-        for (String nextHash : nextHashSet) {
-            Block block = blockCacheBuffer.getBlock(nextHash);
-            if (null == block) {
-                return;
-            }
-            blockCacheBuffer.removeBlock(nextHash);
-            this.addBlock(block, true, null);
+        Block block = blockCacheBuffer.getBlock(nextHash);
+        if (null == block) {
+            return;
         }
+        blockCacheBuffer.removeBlock(nextHash);
+        this.addBlock(block, true, null);
     }
 
     public long getStoredHeight() {
@@ -292,8 +313,8 @@ public class BlockManager {
     }
 
     public BlockHeader getBlockHeader(long height) {
-        String hash = this.bifurcateProcessor.getBlockHash(height);
-        if (hash == null) {
+        String hash  = this.bifurcateProcessor.getBlockHash(height);
+        if (hash==null) {
             return null;
         }
         return confirmingBlockCacheManager.getBlockHeader(hash);
