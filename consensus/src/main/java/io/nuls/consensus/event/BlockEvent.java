@@ -53,9 +53,4 @@ public class BlockEvent extends BaseConsensusEvent<Block> {
         data.setData(this.getEventBody().getHeader().getHeight());
         return data;
     }
-
-    @Override
-    public boolean needToRemoveDuplication() {
-        return true;
-    }
 }
