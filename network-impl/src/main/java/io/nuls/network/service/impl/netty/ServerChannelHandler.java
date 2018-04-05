@@ -14,6 +14,7 @@ import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeGroup;
 import io.nuls.network.service.NetworkService;
 
+import java.net.InetAddress;
 import java.nio.ByteBuffer;
 
 /**
@@ -100,7 +101,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-//        Log.info("---------------ServerChannelHandler exceptionCaught :" + cause.getMessage());
+        Log.info("---------------ServerChannelHandler exceptionCaught :" + cause.getMessage());
         ctx.channel().close();
     }
 

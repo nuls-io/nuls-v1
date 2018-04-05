@@ -41,16 +41,16 @@ public class NettyClient {
             if (future.isSuccess()) {
                 socketChannel = (SocketChannel) future.channel();
             } else {
-                getNetworkService().removeNode(node.getId(),node.getType());
+                getNetworkService().removeNode(node.getId(), node.getType());
             }
             future.channel().closeFuture().sync();
         } catch (Exception e) {
-//            Log.info("-------------NettyClient start error: " + e.getMessage() + ",port" + node.getPort());
+            Log.info("-------------NettyClient connecting error: " + e.getMessage());
             //maybe time out or refused or something
             if (socketChannel != null) {
                 socketChannel.close();
             }
-            getNetworkService().removeNode(node.getId(),node.getType());
+            getNetworkService().removeNode(node.getId(), node.getType());
         }
     }
 
