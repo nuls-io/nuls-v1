@@ -24,6 +24,7 @@
 package io.nuls.consensus.entity.block;
 
 import io.nuls.consensus.cache.manager.block.ConfirmingBlockCacheManager;
+import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.manager.RoundManager;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.context.NulsContext;
@@ -192,7 +193,7 @@ public class BifurcateProcessor {
         if (hashList.isEmpty()) {
             //Log.warn("lost a block:" + height);
             return false;
-        }else if(hashList.size()==1){
+        }else if(hashList.size()==1&&this.approvingChain.getFirstHd().getHash().equals(hashList.get(0))&&this.approvingChain.size()> PocConsensusConstant.CONFIRM_BLOCK_COUNT){
             return true;
         }
         int maxSize = 0;
