@@ -33,7 +33,7 @@ import io.nuls.core.validate.ValidateResult;
  * @date 2017/12/19
  */
 public class TxMaxSizeValidator implements NulsDataValidator<Transaction> {
-    public static final int MAX_STANDARD_TX_SIZE = 100000;
+    public static final int MAX_TX_SIZE = 100000;
     private static final TxMaxSizeValidator INSTANCE = new TxMaxSizeValidator();
 
     private TxMaxSizeValidator() {
@@ -45,7 +45,7 @@ public class TxMaxSizeValidator implements NulsDataValidator<Transaction> {
 
     @Override
     public ValidateResult validate(Transaction data) {
-        if (data.size() > MAX_STANDARD_TX_SIZE) {
+        if (data.size() > MAX_TX_SIZE) {
             return ValidateResult.getFailedResult(ErrorCode.DATA_SIZE_ERROR);
         }
         return ValidateResult.getSuccessResult();

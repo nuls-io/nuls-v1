@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -75,7 +75,7 @@ public enum ErrorCode {
     NET_NODE_GROUP_NOT_FOUND("NET008", 40008),
     NET_NODE_AREA_NOT_FOUND("NET009", 40009),
     NET_NODE_NOT_FOUND("NET010", 40010),
-    NET_BROADCAST_FAIL("NET011",40011),
+    NET_BROADCAST_FAIL("NET011", 40011),
     /**
      * ---- direct Exception code---
      **/
@@ -135,6 +135,7 @@ public enum ErrorCode {
     INVALID_AMOUNT("LED005", 70005),
     ORPHAN_TX("LED006", 70006),
     ORPHAN_BLOCK("LED007", 70007),
+    UTXO_NOT_FOUND("LED008", 70008),
     /**
      * messages
      */
