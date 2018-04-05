@@ -86,7 +86,7 @@ public class ConsensusMeetingRunner implements Runnable {
     private boolean running = false;
     private boolean hasPacking = false;
     private ConsensusManager consensusManager = ConsensusManager.getInstance();
-    private RoundManager packingRoundManager = RoundManager.getPackingRoundManager();
+    private RoundManager packingRoundManager = RoundManager.getInstance();
     private ConfirmingTxCacheManager confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
     private static Map<Long, RedPunishData> punishMap = new HashMap<>();
 

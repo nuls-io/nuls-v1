@@ -92,7 +92,7 @@ public class BifurcateProcessor {
         }
         BlockLog.info(str.toString());
         if (this.approvingChain == null || !this.approvingChain.getId().equals(longestChain.getId())) {
-            RoundManager.getPackingRoundManager().reset();
+            RoundManager.getInstance().reset();
         }
         this.approvingChain = longestChain;
         Set<String> rightHashSet = new HashSet<>();
@@ -225,7 +225,7 @@ public class BifurcateProcessor {
             }
         }
         if (this.approvingChain == null || !chainList.get(0).getId().equals(this.approvingChain.getId())) {
-            RoundManager.getPackingRoundManager().reset();
+            RoundManager.getInstance().reset();
         }
 
         for (String hash : removeHashSet) {
