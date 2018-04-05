@@ -215,7 +215,7 @@ public class BifurcateProcessor {
                 rightHashSet.addAll(chain.getHashSet());
             }
         }
-        if (this.approvingChain == null || chainList.get(0).getId().equals(this.approvingChain.getId())) {
+        if (this.approvingChain == null || !chainList.get(0).getId().equals(this.approvingChain.getId())) {
             RoundManager.getPackingRoundManager().reset();
         }
 
