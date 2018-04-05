@@ -47,33 +47,32 @@ public class GetBlockParam extends BaseNulsData {
     private long end;
 
     public GetBlockParam() {
-
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += Utils.sizeOfNulsData(preHash);
-        size += Utils.sizeOfNulsData(toHash);
         size += Utils.sizeOfLong(start);
         size += Utils.sizeOfLong(end);
+        size += Utils.sizeOfNulsData(preHash);
+        size += Utils.sizeOfNulsData(toHash);
         return size;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(preHash);
-        stream.writeNulsData(toHash);
         stream.writeVarInt(start);
         stream.writeVarInt(end);
+        stream.writeNulsData(preHash);
+        stream.writeNulsData(toHash);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.preHash = byteBuffer.readHash();
-        this.toHash = byteBuffer.readHash();
         this.start = byteBuffer.readVarInt();
         this.end = byteBuffer.readVarInt();
+        this.preHash = byteBuffer.readHash();
+        this.toHash = byteBuffer.readHash();
     }
 
     public NulsDigestData getPreHash() {

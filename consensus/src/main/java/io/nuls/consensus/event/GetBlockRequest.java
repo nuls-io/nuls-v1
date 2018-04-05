@@ -50,11 +50,13 @@ public class GetBlockRequest extends BaseConsensusEvent<GetBlockParam> {
         this.setEventBody(param);
     }
 
-    public GetBlockRequest(NulsDigestData preHash, NulsDigestData toHash) {
+    public GetBlockRequest(long start, long end, NulsDigestData preHash, NulsDigestData toHash) {
         this();
         GetBlockParam param = new GetBlockParam();
         param.setPreHash(preHash);
         param.setToHash(toHash);
+        param.setEnd(end);
+        param.setStart(start);
         this.setEventBody(param);
     }
 
