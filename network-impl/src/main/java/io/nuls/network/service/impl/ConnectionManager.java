@@ -124,6 +124,7 @@ public class ConnectionManager {
                     BaseEvent event = EventManager.getInstance(message.getData());
                     processMessage(event, node);
                 } else {
+                    Log.info("----------------magicNumber different remove node----------" + node.getId());
                     networkService.removeNode(node.getId());
                 }
             }

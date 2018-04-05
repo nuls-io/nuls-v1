@@ -39,6 +39,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.entity.NodePo;
 import io.nuls.event.bus.handler.AbstractEventHandler;
@@ -94,12 +95,13 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
         }
         block.setTxs(txs);
         ValidateResult<RedPunishData> vResult = block.verify();
-        if (null == vResult || (vResult.isFailed() && vResult.getErrorCode() != ErrorCode.ORPHAN_TX&& vResult.getErrorCode() != ErrorCode.ORPHAN_BLOCK)) {
-            if ( SeverityLevelEnum.FLAGRANT_FOUL==vResult.getLevel()) {
+        if (null == vResult || (vResult.isFailed() && vResult.getErrorCode() != ErrorCode.ORPHAN_TX && vResult.getErrorCode() != ErrorCode.ORPHAN_BLOCK)) {
+            if (SeverityLevelEnum.FLAGRANT_FOUL == vResult.getLevel()) {
                 RedPunishData data = vResult.getObject();
                 ConsensusMeetingRunner.putPunishData(data);
                 networkService.blackNode(fromId, NodePo.BLACK);
             } else {
+                Log.info("----------------TxGroupHandler remove node-------------" + fromId);
                 networkService.removeNode(fromId, NodePo.YELLOW);
             }
             System.out.println("get tx group request 2 ");
