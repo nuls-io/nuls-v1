@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -69,35 +69,32 @@ public class AliasValidator implements NulsDataValidator<AliasTransaction> {
     public ValidateResult validate(AliasTransaction tx) {
         Alias alias = tx.getTxData();
         if (!Address.validAddress(alias.getAddress())) {
-            return ValidateResult.getFailedResult("The address format error");
+            return ValidateResult.getFailedResult(ErrorCode.ADDRESS_ERROR);
         }
         if (!StringUtils.validAlias(alias.getAlias())) {
-            return ValidateResult.getFailedResult("The alias is between 3 to 20 characters");
+            return ValidateResult.getFailedResult(ErrorCode.ALIAS_ERROR);
         }
 
         long aliasValue = 0;
         UtxoData utxoData = (UtxoData) tx.getCoinData();
         for (UtxoInput input : utxoData.getInputs()) {
-            if (input.getFrom() == null) {
-                return ValidateResult.getFailedResult(ErrorCode.ORPHAN_TX);
-            }
             aliasValue += input.getFrom().getValue();
         }
 
-        if (aliasValue < AccountConstant.ALIAS_NA.add(getLedgerService().getTxFee(TransactionConstant.TX_TYPE_SET_ALIAS)).getValue()) {
-            return ValidateResult.getFailedResult("utxo not enough");
+        if (aliasValue < AccountConstant.ALIAS_NA.getValue() + tx.getFee().getValue()) {
+            return ValidateResult.getFailedResult(ErrorCode.INVALID_INPUT);
         }
 
         if (tx.getStatus() == TxStatusEnum.CACHED) {
             List<Transaction> txList = getLedgerService().getCacheTxList(TransactionConstant.TX_TYPE_SET_ALIAS);
             if (txList != null && tx.size() > 0) {
                 for (Transaction trx : txList) {
-                    if(trx.getHash().equals(tx.getHash())) {
+                    if (trx.getHash().equals(tx.getHash())) {
                         continue;
                     }
                     Alias a = ((AliasTransaction) trx).getTxData();
                     if (alias.getAddress().equals(a.getAddress())) {
-                        return ValidateResult.getFailedResult("Alias has been set up ");
+                        return ValidateResult.getFailedResult(ErrorCode.ACCOUNT_ALREADY_SET_ALIAS);
                     }
                     if (alias.getAlias().equals(a.getAlias())) {
                         return ValidateResult.getFailedResult("The alias has been occupied");
@@ -108,7 +105,7 @@ public class AliasValidator implements NulsDataValidator<AliasTransaction> {
 
         AliasPo aliasPo = getAliasDataService().get(alias.getAlias());
         if (aliasPo != null) {
-            return ValidateResult.getFailedResult("The alias has been occupied");
+            return ValidateResult.getFailedResult(ErrorCode.ALIAS_EXIST);
         }
         return ValidateResult.getSuccessResult();
     }

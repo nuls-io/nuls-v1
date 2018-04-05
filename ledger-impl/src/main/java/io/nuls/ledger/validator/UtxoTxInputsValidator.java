@@ -84,7 +84,7 @@ public class UtxoTxInputsValidator implements NulsDataValidator<AbstractCoinTran
             }
             byte[] user = p2PKHScriptSig.getSignerHash160();
             if (!Arrays.equals(owner, user)) {
-                return ValidateResult.getFailedResult(ErrorCode.INVALID_OUTPUT);
+                return ValidateResult.getFailedResult(ErrorCode.INVALID_INPUT);
             }
 
             return ValidateResult.getSuccessResult();

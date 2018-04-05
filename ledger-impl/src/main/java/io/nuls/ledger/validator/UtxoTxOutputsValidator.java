@@ -24,6 +24,7 @@
 package io.nuls.ledger.validator;
 
 import io.nuls.core.chain.entity.Na;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.ledger.entity.UtxoData;
@@ -56,14 +57,14 @@ public class UtxoTxOutputsValidator implements NulsDataValidator<AbstractCoinTra
         if (null != outputs && outputs.size() > MAX_OUTPUT_COUNT) {
             return ValidateResult.getFailedResult(ERROR_MESSAGE);
         }
-//
-//        if (null != outputs) {
-//            for (UtxoOutput output : outputs) {
-//                if (output.getValue() >= Na.MAX_NA_VALUE) {
-//                    return ValidateResult.getFailedResult()
-//                }
-//            }
-//        }
+
+        if (null != outputs) {
+            for (UtxoOutput output : outputs) {
+                if (output.getValue() >= Na.MAX_NA_VALUE) {
+                    return ValidateResult.getFailedResult(ErrorCode.INVALID_AMOUNT);
+                }
+            }
+        }
         return ValidateResult.getSuccessResult();
     }
 }
