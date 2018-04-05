@@ -131,9 +131,7 @@ public class BlockManager {
             if (!hasPre) {
                 GetBlockRequest request = new GetBlockRequest();
                 GetBlockParam params = new GetBlockParam();
-                long height = block.getHeader().getHeight() - 1;
-                params.setStart(height);
-                params.setEnd(height);
+                params.setToHash(block.getHeader().getPreHash());
                 request.setEventBody(params);
                 this.eventBroadcaster.broadcastAndCacheAysn(request,false);
             }

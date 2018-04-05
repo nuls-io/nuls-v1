@@ -39,6 +39,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.log.BlockLog;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.entity.NodePo;
@@ -112,7 +113,10 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
 
         BlockHeaderEvent headerEvent = new BlockHeaderEvent();
         headerEvent.setEventBody(header);
-        eventBroadcaster.broadcastHashAndCacheAysn(headerEvent, false, fromId);
+        List<String> addressList = eventBroadcaster.broadcastHashAndCache(headerEvent, false, fromId);
+        for (String address : addressList) {
+            BlockLog.info("forward blockHeader:(" + address + ")" + header.getHeight() + ", hash:" + header.getHash() + ", preHash:" + header.getPreHash() + ", packing:" + header.getPackingAddress());
+        }
 
         AssembledBlockNotice notice = new AssembledBlockNotice();
         notice.setEventBody(header);

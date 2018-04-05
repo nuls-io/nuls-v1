@@ -26,6 +26,7 @@
 package io.nuls.consensus.entity;
 
 import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.date.TimeService;
@@ -40,6 +41,8 @@ import java.io.IOException;
  */
 public class GetBlockParam extends BaseNulsData {
 
+    private NulsDigestData preHash;
+    private NulsDigestData toHash;
     private long start;
     private long end;
 
@@ -50,6 +53,8 @@ public class GetBlockParam extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
+        size += Utils.sizeOfNulsData(preHash);
+        size += Utils.sizeOfNulsData(toHash);
         size += Utils.sizeOfLong(start);
         size += Utils.sizeOfLong(end);
         return size;
@@ -57,14 +62,34 @@ public class GetBlockParam extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeNulsData(preHash);
+        stream.writeNulsData(toHash);
         stream.writeVarInt(start);
         stream.writeVarInt(end);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.preHash = byteBuffer.readHash();
+        this.toHash = byteBuffer.readHash();
         this.start = byteBuffer.readVarInt();
         this.end = byteBuffer.readVarInt();
+    }
+
+    public NulsDigestData getPreHash() {
+        return preHash;
+    }
+
+    public void setPreHash(NulsDigestData preHash) {
+        this.preHash = preHash;
+    }
+
+    public NulsDigestData getToHash() {
+        return toHash;
+    }
+
+    public void setToHash(NulsDigestData toHash) {
+        this.toHash = toHash;
     }
 
     public long getStart() {

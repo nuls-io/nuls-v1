@@ -6,9 +6,10 @@ import io.nuls.core.validate.ValidateResult;
 import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.UtxoInput;
 import io.nuls.ledger.entity.UtxoOutput;
+import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.ledger.entity.tx.TransferTransaction;
 
-public class TransferTxValidator implements NulsDataValidator<TransferTransaction> {
+public class TransferTxValidator implements NulsDataValidator<AbstractCoinTransaction> {
 
     private static TransferTxValidator instance = new TransferTxValidator();
 
@@ -21,7 +22,11 @@ public class TransferTxValidator implements NulsDataValidator<TransferTransactio
     }
 
     @Override
-    public ValidateResult validate(TransferTransaction tx) {
+    public ValidateResult validate(AbstractCoinTransaction tx) {
+        if(!(tx instanceof TransferTransaction)){
+            //todo 待完善
+            return ValidateResult.getSuccessResult();
+        }
         UtxoData data = (UtxoData) tx.getCoinData();
 
         long inTotal = 0;

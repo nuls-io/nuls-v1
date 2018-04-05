@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -47,7 +47,7 @@ public class BlockHeaderChain implements NulsCloneable {
     }
 
     public BlockHeaderChain getBifurcateChain(BlockHeader header) {
-        int index = indexOf(header.getPreHash().getDigestHex(), header.getHeight() - 1);
+        int index = indexOf(header.getPreHash().getDigestHex(), header.getHeight() - 1,header.getTime());
         if (index == -1) {
             return new BlockHeaderChain();
         }
@@ -55,24 +55,24 @@ public class BlockHeaderChain implements NulsCloneable {
         for (int i = 0; i <= index; i++) {
             list.add(headerDigestList.get(i));
         }
-        list.add(new HeaderDigest(header.getHash().getDigestHex(), header.getHeight()));
+        list.add(new HeaderDigest(header.getHash().getDigestHex(), header.getHeight(),header.getTime()));
         BlockHeaderChain chain = new BlockHeaderChain();
         chain.setHeaderDigestList(list);
         return chain;
     }
 
-    public int indexOf(String hash, long height) {
-        HeaderDigest hd = new HeaderDigest(hash, height);
+    public int indexOf(String hash, long height,long time) {
+        HeaderDigest hd = new HeaderDigest(hash, height,time);
         return headerDigestList.indexOf(hd);
     }
 
     public boolean addHeader(BlockHeader header) {
         lock.lock();
-        HeaderDigest hd = new HeaderDigest(header.getPreHash().getDigestHex(), header.getHeight() - 1);
+        HeaderDigest hd = new HeaderDigest(header.getPreHash().getDigestHex(), header.getHeight() - 1,header.getTime());
         if (!headerDigestList.isEmpty() && headerDigestList.indexOf(hd) != (headerDigestList.size() - 1)) {
             return false;
         }
-        headerDigestList.add(new HeaderDigest(header.getHash().getDigestHex(), header.getHeight()));
+        headerDigestList.add(new HeaderDigest(header.getHash().getDigestHex(), header.getHeight(),header.getTime()));
         lock.unlock();
         return true;
     }
@@ -81,15 +81,6 @@ public class BlockHeaderChain implements NulsCloneable {
         headerDigestList.clear();
     }
 
-    public HeaderDigest getFirst() {
-        lock.lock();
-        if (headerDigestList.size() < 1 + PocConsensusConstant.CONFIRM_BLOCK_COUNT) {
-            return null;
-        }
-        HeaderDigest headerDigest = headerDigestList.get(0);
-        lock.unlock();
-        return headerDigest;
-    }
 
     public void removeHeaderDigest(String hashHex) {
         for (HeaderDigest hd : headerDigestList) {
@@ -165,7 +156,7 @@ public class BlockHeaderChain implements NulsCloneable {
     }
 
     public boolean contains(BlockHeader header) {
-        return headerDigestList.contains(new HeaderDigest(header.getHash().getDigestHex(), header.getHeight()));
+        return headerDigestList.contains(new HeaderDigest(header.getHash().getDigestHex(), header.getHeight(),header.getTime()));
     }
 
     @Override
@@ -189,5 +180,15 @@ public class BlockHeaderChain implements NulsCloneable {
             hashSet.add(hd.getHash());
         }
         return hashSet;
+    }
+
+    public HeaderDigest getFirstHd() {
+        HeaderDigest headerDigest = headerDigestList.get(0);
+        return headerDigest;
+    }
+
+    public HeaderDigest getLastHd() {
+        HeaderDigest headerDigest = headerDigestList.get(headerDigestList.size() - 1);
+        return headerDigest;
     }
 }

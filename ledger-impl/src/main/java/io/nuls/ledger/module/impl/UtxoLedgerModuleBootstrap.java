@@ -83,7 +83,7 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
 
         CoinTransactionValidatorManager.addTxDefValidator(UtxoTxInputsValidator.getInstance());
         CoinTransactionValidatorManager.addTxDefValidator(UtxoTxOutputsValidator.getInstance());
-        CoinTransactionValidatorManager.addTxDefValidator(TransferTxValidator.getInstance());
+//        CoinTransactionValidatorManager.addTxDefValidator(TransferTxValidator.getInstance());
     }
 
     private void registerService() {

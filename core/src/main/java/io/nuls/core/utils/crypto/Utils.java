@@ -495,7 +495,7 @@ public class Utils {
         return VarInt.sizeOf(val);
     }
 
-    public static int sizeOfShort(Short val) {
+    public static int sizeOfNulsData(Short val) {
         return 2;
     }
 

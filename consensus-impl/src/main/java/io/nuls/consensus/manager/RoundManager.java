@@ -130,7 +130,7 @@ public class RoundManager {
             this.currentRound = resultRound;
             ROUND_MAP.put(resultRound.getIndex(), resultRound);
             return resultRound;
-        }finally {
+        } finally {
             lock.unlock();
         }
     }
@@ -144,11 +144,7 @@ public class RoundManager {
         Block lastRoundFirstBlock = getBlockService().getRoundFirstBlock(calcBlock, blockRoundData.getRoundIndex());
         PocMeetingRound round = calcRound(lastRoundFirstBlock.getHeader().getHeight(), blockRoundData.getRoundIndex() + 1, blockRoundData.getRoundEndTime());
 
-        if(round.getStartTime()<TimeService.currentTimeMillis()){
-
-
-
-
+        if (round.getStartTime() < TimeService.currentTimeMillis()) {
 
 
         }
@@ -181,8 +177,8 @@ public class RoundManager {
             str.append(",packTime:" + new Date(member.getPackEndTime()).toLocaleString());
             str.append("\n");
         }
-        BlockLog.info("calc new round:index:" + round.getIndex() + " , start:"+new Date(round.getStartTime()).toLocaleString()
-                +", netTime:("+new Date(TimeService.currentTimeMillis()).toString()+") , members:\n :" + str);
+        BlockLog.info("calc new round:index:" + round.getIndex() + " , start:" + new Date(round.getStartTime()).toLocaleString()
+                + ", netTime:(" + new Date(TimeService.currentTimeMillis()).toString() + ") , members:\n :" + str);
         return round;
     }
 
@@ -386,7 +382,7 @@ public class RoundManager {
     }
 
     public PocMeetingRound getCurrentRound() {
-        if(needReSet){
+        if (needReSet) {
             return null;
         }
         List<Account> accountList = accountService.getAccountList();
@@ -395,14 +391,21 @@ public class RoundManager {
     }
 
     public void reset() {
-        lock.lock();try{
-        this.needReSet = true;
-        ROUND_MAP.clear();
-        this.init();}finally {
+        lock.lock();
+        try {
+            Block bestBlock = getBestBlock();
+            BlockRoundData roundData = new BlockRoundData(bestBlock.getHeader().getExtend());
+            //todo 确定正确性
+            if (this.currentRound != null && roundData.getRoundIndex() == currentRound.getIndex() && roundData.getPackingIndexOfRound() != roundData.getConsensusMemberCount()) {
+                return;
+            }
+            this.needReSet = true;
+            ROUND_MAP.clear();
+            this.init();
+        } finally {
             lock.unlock();
         }
     }
-
 
 
     private Block getBestBlock() {

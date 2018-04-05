@@ -81,6 +81,12 @@ public class BifurcateProcessor {
             if (maxSize < listSize) {
                 maxSize = listSize;
                 longestChain = chain;
+            }else if(maxSize==listSize){
+                HeaderDigest hd = chain.getLastHd();
+                HeaderDigest hd_long = longestChain.getLastHd();
+                if(hd.getTime()<hd_long.getTime()){
+                    longestChain = chain;
+                }
             }
         }
         BlockLog.info(str.toString());
@@ -119,7 +125,7 @@ public class BifurcateProcessor {
         for (int i = 0; i < this.chainList.size(); i++) {
             BlockHeaderChain chain = chainList.get(i);
 
-            int index = chain.indexOf(header.getPreHash().getDigestHex(), header.getHeight() - 1);
+            int index = chain.indexOf(header.getPreHash().getDigestHex(), header.getHeight() - 1,header.getTime());
             if (index == chain.size() - 1) {
                 chain.addHeader(header);
                 return true;
@@ -186,6 +192,8 @@ public class BifurcateProcessor {
         if (hashList.isEmpty()) {
             //Log.warn("lost a block:" + height);
             return false;
+        }else if(hashList.size()==1){
+            return true;
         }
         int maxSize = 0;
         int secondMaxSize = 0;
