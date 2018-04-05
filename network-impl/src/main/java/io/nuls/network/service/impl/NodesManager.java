@@ -266,7 +266,7 @@ public class NodesManager implements Runnable {
                 }
             }
             try {
-                Thread.sleep(6000);
+                Thread.sleep(7000);
             } catch (InterruptedException e) {
 
             }
