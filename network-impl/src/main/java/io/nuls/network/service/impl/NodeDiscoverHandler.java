@@ -119,29 +119,33 @@ public class NodeDiscoverHandler implements Runnable {
     public void findOtherNode(int size) {
         GetNodeEvent event = new GetNodeEvent(size);
 
-        NodeGroup group = nodesManager.getNodeGroup(NetworkConstant.NETWORK_NODE_IN_GROUP);
-        if (group.getNodes().size() > 0) {
-            List<Node> nodeList = new ArrayList<>(group.getNodes().values());
-            Collections.shuffle(nodeList);
-            for (Node node : nodeList) {
-                if (node.isHandShake()) {
-                    broadcaster.broadcastToNode(event, node, true);
-                    break;
-                }
+        for(Node node : nodesManager.getNodes().values()) {
+            if (node.isHandShake()) {
+                broadcaster.broadcastToNode(event, node, true);
             }
         }
-
-        group = nodesManager.getNodeGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP);
-        if (group.getNodes().size() > 0) {
-            List<Node> nodeList = new ArrayList<>(group.getNodes().values());
-            Collections.shuffle(nodeList);
-            for (Node node : nodeList) {
-                if (node.isHandShake()) {
-                    broadcaster.broadcastToNode(event, node, true);
-                    break;
-                }
-            }
-        }
+//
+//        NodeGroup group = nodesManager.getNodeGroup(NetworkConstant.NETWORK_NODE_IN_GROUP);
+//        if (group.getNodes().size() > 0) {
+//            List<Node> nodeList = new ArrayList<>(group.getNodes().values());
+//            for (Node node : nodeList) {
+//                if (node.isHandShake()) {
+//                    broadcaster.broadcastToNode(event, node, true);
+//                }
+//            }
+//        }
+//
+//        group = nodesManager.getNodeGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP);
+//        if (group.getNodes().size() > 0) {
+//            List<Node> nodeList = new ArrayList<>(group.getNodes().values());
+//
+//            for (Node node : nodeList) {
+//                if (node.isHandShake()) {
+//                    broadcaster.broadcastToNode(event, node, true);
+//                    break;
+//                }
+//            }
+//        }
     }
 
     private static int count = 0;
