@@ -83,7 +83,7 @@ public class RoundManager {
     private RoundManager() {
     }
 
-    public static RoundManager getPackingRoundManager() {
+    public static RoundManager getInstance() {
         return INSTANCE;
     }
 
@@ -391,20 +391,20 @@ public class RoundManager {
     }
 
     public void reset() {
-        lock.lock();
-        try {
-            Block bestBlock = getBestBlock();
-            BlockRoundData roundData = new BlockRoundData(bestBlock.getHeader().getExtend());
-            //todo 确定正确性
-            if (this.currentRound != null && roundData.getRoundIndex() == currentRound.getIndex() && roundData.getPackingIndexOfRound() != roundData.getConsensusMemberCount()) {
-                return;
-            }
-            this.needReSet = true;
-            ROUND_MAP.clear();
-            this.init();
-        } finally {
-            lock.unlock();
-        }
+//        lock.lock();
+//        try {
+//            Block bestBlock = getBestBlock();
+//            BlockRoundData roundData = new BlockRoundData(bestBlock.getHeader().getExtend());
+//            //todo 确定正确性
+//            if (this.currentRound != null && roundData.getRoundIndex() == currentRound.getIndex() && roundData.getPackingIndexOfRound() != roundData.getConsensusMemberCount()) {
+//                return;
+//            }
+//            this.needReSet = true;
+//            ROUND_MAP.clear();
+//            this.init();
+//        } finally {
+//            lock.unlock();
+//        }
     }
 
 
@@ -415,5 +415,24 @@ public class RoundManager {
             return highestBlock;
         }
         return block;
+    }
+
+    public PocMeetingRound getRound(BlockRoundData roundData) {
+        //todo imp
+        PocMeetingRound round = ROUND_MAP.get(roundData.getRoundIndex());
+        if(null==round){
+//            Block bestBlock =
+
+
+
+
+
+
+
+
+//            round =    calcRound()
+
+        }
+        return round;
     }
 }
