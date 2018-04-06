@@ -261,7 +261,7 @@ public class BlockServiceImpl implements BlockService {
                 }
                 BlockRoundData roundData = new BlockRoundData(resultBlock.getHeader().getExtend());
                 if (roundData.getRoundIndex() > roundIndex) {
-                    break;
+                   continue;
                 }
                 if (roundData.getRoundIndex() == roundIndex && roundData.getPackingIndexOfRound() == 1) {
                     break;
