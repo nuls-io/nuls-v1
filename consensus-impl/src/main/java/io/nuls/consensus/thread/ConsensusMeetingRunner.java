@@ -119,6 +119,11 @@ public class ConsensusMeetingRunner implements Runnable {
             } catch (Exception e) {
                 Log.error(e);
             }
+             try{
+                Thread.sleep(100L);
+            }catch (Exception e){
+                Log.error(e);
+            }
         }
     }
 
