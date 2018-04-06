@@ -61,10 +61,6 @@ public class TxFieldValidator implements NulsDataValidator<Transaction> {
                 break;
             }
             //todo legnth  || data.getSign().getSignLength() == 0
-            if (tx.getScriptSig() == null) {
-                result = false;
-                break;
-            }
             if (tx.getIndex() < 0 || tx.getIndex() > MAX_TX_TYPE) {
                 result = false;
                 break;
