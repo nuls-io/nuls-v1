@@ -27,11 +27,10 @@
 package io.nuls.consensus.entity.validator.tx;
 
 import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
-import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
-import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 
@@ -51,7 +50,7 @@ public class AgentCountValidator implements NulsDataValidator<RegisterAgentTrans
         ValidateResult result = ValidateResult.getSuccessResult();
         Agent agent = tx.getTxData().getExtend();
         String agentName = agent.getAgentName();
-        List<Consensus<Agent>> caList = consensusCacheManager.getCachedAgentList();
+        List<Consensus<Agent>> caList = consensusCacheManager.getAliveAgentList(NulsContext.getInstance().getBestHeight());
         if (caList != null) {
             for (Consensus<Agent> ca : caList) {
                 if (ca.getHexHash().equals(tx.getTxData().getHexHash())) {

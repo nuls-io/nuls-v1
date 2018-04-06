@@ -55,7 +55,7 @@ public class AgentExistValidator implements NulsDataValidator<PocJoinConsensusTr
 
     @Override
     public ValidateResult validate(PocJoinConsensusTransaction tx) {
-        Consensus<Agent> ca = cacheManager.getCachedAgentByHash(tx.getTxData().getExtend().getAgentHash());
+        Consensus<Agent> ca = cacheManager.getAgentById(tx.getTxData().getExtend().getAgentHash());
         if(ca==null){
             AgentPo po = agentDataService.get(tx.getTxData().getExtend().getAgentHash());
             ca = ConsensusTool.fromPojo(po);

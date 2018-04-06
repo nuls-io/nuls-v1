@@ -23,6 +23,7 @@
  */
 package io.nuls.consensus.service.tx;
 
+import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.constant.PocConsensusConstant;
@@ -63,6 +64,8 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
     private AgentDataService agentDataService = NulsContext.getServiceBean(AgentDataService.class);
     private DepositDataService depositDataService = NulsContext.getServiceBean(DepositDataService.class);
 
+    private ConsensusCacheManager manager = ConsensusCacheManager.getInstance();
+
     @Override
     @DbSession
     public void onRollback(PocExitConsensusTransaction tx) {
@@ -99,6 +102,25 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
             CancelConsensusNotice notice = new CancelConsensusNotice();
             notice.setEventBody(tx);
             NulsContext.getServiceBean(EventBroadcaster.class).publishToLocal(notice);
+
+            Consensus<Agent> agent = manager.getAgentById(ca.getHexHash());
+            agent.setDelHeight(0L);
+            manager.putAgent(agent);
+
+            List<Consensus<Deposit>> depositList = manager.getAllDepositList();
+            for(Consensus<Deposit> depositConsensus:depositList){
+                if(!depositConsensus.getExtend().getAgentHash().equals(agent.getHexHash())){
+                    continue;
+                }
+                if(depositConsensus.getExtend().getBlockHeight()>joinTx.getBlockHeight()){
+                    continue;
+                }
+                if(depositConsensus.getDelHeight()<tx.getBlockHeight()){
+                    continue;
+                }
+                depositConsensus.setDelHeight(0L);
+                manager.putDeposit(depositConsensus);
+            }
             return;
         }
         PocJoinConsensusTransaction pjcTx = (PocJoinConsensusTransaction) joinTx;
@@ -112,6 +134,10 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
         notice.setEventBody(tx);
         NulsContext.getServiceBean(EventBroadcaster.class).publishToLocal(notice);
         this.ledgerService.unlockTxRollback(tx.getTxData().getDigestHex());
+
+        Consensus<Deposit> depositConsensus = manager.getDepositById(cd.getHexHash());
+        depositConsensus.setDelHeight(0L);
+        manager.putDeposit(depositConsensus);
     }
 
     @Override
@@ -133,6 +159,8 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
             delPo.setAgentHash(raTx.getTxData().getHexHash());
             delPo.setDelHeight(tx.getBlockHeight());
             this.depositDataService.deleteByAgentHash(delPo);
+            manager.delAgent(raTx.getTxData().getHexHash(),tx.getBlockHeight());
+            manager.delDepositByAgentId(raTx.getTxData().getHexHash(),tx.getBlockHeight());
             return;
         }
         PocJoinConsensusTransaction pjcTx = (PocJoinConsensusTransaction) joinTx;
@@ -142,6 +170,7 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
         dpo.setId(cd.getHexHash());
         this.depositDataService.deleteById(dpo);
         this.ledgerService.unlockTxSave(tx.getTxData().getDigestHex(), 0);
+        manager.delDeposit(pjcTx.getTxData().getHexHash(),tx.getBlockHeight());
     }
 
     @Override
@@ -153,8 +182,14 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
         }
         if (joinTx.getType() == TransactionConstant.TX_TYPE_REGISTER_AGENT) {
             this.ledgerService.unlockTxApprove(tx.getTxData().getDigestHex(), tx.getTime() + PocConsensusConstant.STOP_AGENT_DEPOSIT_LOCKED_TIME * 24 * 3600 * 1000);
+            RegisterAgentTransaction realTx = (RegisterAgentTransaction) joinTx;
+            manager.delAgent(realTx.getTxData().getHexHash(),tx.getBlockHeight());
+            manager.delDepositByAgentId(realTx.getTxData().getHexHash(),tx.getBlockHeight());
             return;
         }
+        PocJoinConsensusTransaction realTx = (PocJoinConsensusTransaction) joinTx;
         this.ledgerService.unlockTxApprove(tx.getTxData().getDigestHex(), 0);
+        manager.delDeposit(realTx.getTxData().getHexHash(),tx.getBlockHeight());
+
     }
 }

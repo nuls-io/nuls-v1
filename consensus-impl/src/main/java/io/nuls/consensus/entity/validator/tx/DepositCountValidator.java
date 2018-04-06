@@ -31,6 +31,7 @@ import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.member.Deposit;
 import io.nuls.consensus.entity.tx.PocJoinConsensusTransaction;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 
@@ -56,7 +57,7 @@ public class DepositCountValidator implements NulsDataValidator<PocJoinConsensus
     @Override
     public ValidateResult validate(PocJoinConsensusTransaction tx) {
         Consensus<Deposit> cd = tx.getTxData();
-        List<Consensus<Deposit>> list = consensusCacheManager.getCachedDepositListByAgentHash(cd.getExtend().getAgentHash());
+        List<Consensus<Deposit>> list = consensusCacheManager.getDepositListByAgentId(cd.getExtend().getAgentHash(), NulsContext.getInstance().getBestHeight());
         if (null != list && list.size() >= PocConsensusConstant.MAX_ACCEPT_NUM_OF_DEPOSIT) {
             return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_OVER_COUNT);
         }

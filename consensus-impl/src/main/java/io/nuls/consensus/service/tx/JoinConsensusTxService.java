@@ -101,9 +101,8 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
     @Override
     public void onApproval(PocJoinConsensusTransaction tx) throws NulsException {
         Consensus<Deposit> cd = tx.getTxData();
-        cd.getExtend().setStatus(ConsensusStatusEnum.NOT_IN.getCode());
+        cd.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
         cd.getExtend().setTxHash(tx.getHash().getDigestHex());
-        manager.cacheDeposit(cd);
-
+        manager.putDeposit(cd);
     }
 }

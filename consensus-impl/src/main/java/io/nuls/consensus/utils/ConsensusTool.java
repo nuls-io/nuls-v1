@@ -133,6 +133,7 @@ public class ConsensusTool {
         agent.setAgentName(po.getAgentName());
         agent.setBlockHeight(po.getBlockHeight());
         Consensus<Agent> ca = new ConsensusAgentImpl();
+        ca.setDelHeight(po.getDelHeight());
         ca.setAddress(po.getAgentAddress());
         ca.setHash(NulsDigestData.fromDigestHex(po.getId()));
         ca.setExtend(agent);
@@ -145,11 +146,13 @@ public class ConsensusTool {
         }
         Consensus<Deposit> ca = new ConsensusDepositImpl();
         ca.setAddress(po.getAddress());
+        ca.setDelHeight(po.getDelHeight());
         Deposit deposit = new Deposit();
         deposit.setAgentHash(po.getAgentHash());
         deposit.setDeposit(Na.valueOf(po.getDeposit()));
         deposit.setStartTime(po.getTime());
         deposit.setTxHash(po.getTxHash());
+        deposit.setBlockHeight(po.getBlockHeight());
         ca.setHash(NulsDigestData.fromDigestHex(po.getId()));
         ca.setExtend(deposit);
         return ca;
@@ -170,6 +173,7 @@ public class ConsensusTool {
         po.setStatus(bean.getExtend().getStatus());
         po.setAgentName(bean.getExtend().getAgentName());
         po.setCommissionRate(bean.getExtend().getCommissionRate());
+        po.setDelHeight(bean.getDelHeight());
         return po;
     }
 
@@ -184,6 +188,8 @@ public class ConsensusTool {
         po.setAgentHash(bean.getExtend().getAgentHash());
         po.setId(bean.getHexHash());
         po.setTxHash(txHash);
+        po.setDelHeight(bean.getDelHeight());
+        po.setBlockHeight(bean.getExtend().getBlockHeight());
         return po;
     }
 
@@ -268,9 +274,14 @@ public class ConsensusTool {
         }
         double totalAll = DoubleUtils.mul(localRound.getMemberCount(), PocConsensusConstant.BLOCK_REWARD.getValue());
         double commissionRate = DoubleUtils.div(self.getCommissionRate(), 100, 2);
-        double agentWeight = DoubleUtils.mul(self.getOwnDeposit().getValue() + self.getTotalDeposit().getValue(), self.getCreditVal());
-        double blockReword = totalFee + DoubleUtils.mul(totalAll, DoubleUtils.div(agentWeight, localRound.getTotalWeight()));
-
+        double agentWeight = DoubleUtils.mul(self.getOwnDeposit().getValue() + self.getTotalDeposit().getValue(), self.getCalcCreditVal());
+        double blockReword = totalFee;
+        if (localRound.getTotalWeight() > 0 && agentWeight > 0) {
+            blockReword = DoubleUtils.sum(blockReword, DoubleUtils.mul(totalAll, DoubleUtils.div(agentWeight, localRound.getTotalWeight())));
+        }
+        if(blockReword==0){
+            return rewardList;
+        }
         ConsensusReward agentReword = new ConsensusReward();
         agentReword.setAddress(self.getAgentAddress());
 
@@ -280,7 +291,7 @@ public class ConsensusTool {
         for (Consensus<Deposit> cd : self.getDepositList()) {
             if (cd.getAddress().equals(self.getAgentAddress())) {
                 caReward = caReward + DoubleUtils.mul(blockReword, DoubleUtils.div(cd.getExtend().getDeposit().getValue(), self.getTotalDeposit().getValue()));
-            }else{
+            } else {
                 ConsensusReward depositReward = rewardMap.get(cd.getAddress());
                 if (null == depositReward) {
                     depositReward = new ConsensusReward();
@@ -288,9 +299,9 @@ public class ConsensusTool {
                     rewardMap.put(cd.getAddress(), depositReward);
                 }
                 double reward = DoubleUtils.mul(blockReword, DoubleUtils.div(cd.getExtend().getDeposit().getValue(), self.getTotalDeposit().getValue()));
-                double fee = DoubleUtils.mul(reward,commissionRate);
+                double fee = DoubleUtils.mul(reward, commissionRate);
                 caReward = caReward + fee;
-                double hisReward = DoubleUtils.sub(reward,fee);
+                double hisReward = DoubleUtils.sub(reward, fee);
                 depositReward.setReward(depositReward.getReward().add(Na.valueOf(DoubleUtils.longValue(hisReward))));
             }
         }

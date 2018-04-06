@@ -148,8 +148,12 @@ public class PocMeetingMember implements Comparable<PocMeetingMember> {
         this.roundIndex = roundIndex;
     }
 
-    public double getCreditVal() {
+    public double getRealCreditVal() {
         return creditVal;
+    }
+
+    public double getCalcCreditVal() {
+        return creditVal < 0d ? 0D : this.creditVal;
     }
 
     public void setCreditVal(double creditVal) {

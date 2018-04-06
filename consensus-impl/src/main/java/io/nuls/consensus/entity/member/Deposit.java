@@ -44,6 +44,7 @@ public class Deposit extends BaseNulsData {
     private int status;
     private long startTime;
     private String txHash;
+    private long blockHeight;
 
     public long getStartTime() {
         return startTime;
@@ -106,5 +107,13 @@ public class Deposit extends BaseNulsData {
 
     public String getTxHash() {
         return txHash;
+    }
+
+    public long getBlockHeight() {
+        return blockHeight;
+    }
+
+    public void setBlockHeight(long blockHeight) {
+        this.blockHeight = blockHeight;
     }
 }

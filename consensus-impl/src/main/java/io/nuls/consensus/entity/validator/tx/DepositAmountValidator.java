@@ -33,8 +33,8 @@ import io.nuls.consensus.entity.tx.PocJoinConsensusTransaction;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.SeverityLevelEnum;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 
@@ -60,7 +60,7 @@ public class DepositAmountValidator implements NulsDataValidator<PocJoinConsensu
     public ValidateResult validate(PocJoinConsensusTransaction data) {
         Na limit = PocConsensusConstant.ENTRUSTER_DEPOSIT_LOWER_LIMIT;
         Na max = PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT;
-        List<Consensus<Deposit>> list = consensusCacheManager.getCachedDepositListByAgentHash(data.getTxData().getExtend().getAgentHash());
+        List<Consensus<Deposit>> list = consensusCacheManager.getDepositListByAgentId(data.getTxData().getExtend().getAgentHash(), NulsContext.getInstance().getBestHeight());
         if (list == null) {
             return ValidateResult.getSuccessResult();
         }
