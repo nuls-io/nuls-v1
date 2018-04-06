@@ -96,7 +96,7 @@ public class BlockManager {
         ledgerService = NulsContext.getServiceBean(LedgerService.class);
     }
 
-    public synchronized void addBlock(Block block, boolean verify, String nodeId) {
+    public void addBlock(Block block, boolean verify, String nodeId) {
         if (block == null || block.getHeader() == null || block.getTxs() == null || block.getTxs().isEmpty()) {
             BlockLog.warn("the block data error============================");
             return;
