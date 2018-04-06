@@ -75,7 +75,7 @@ public class BlockPersistenceThread implements Runnable {
                 if (success) {
                     doPersistence(height);
                 } else {
-                    Thread.sleep(1000L);
+                    Thread.sleep(5000L);
                 }
             } catch (Exception e) {
                 Log.error(e);
