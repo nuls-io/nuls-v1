@@ -67,9 +67,7 @@ public class NodeEventHandler implements NetWorkEventHandler {
         boolean exist = false;
         for (Node newNode : event.getEventBody().getNodes()) {
             exist = false;
-            if(IpUtil.getIps().contains(newNode.getIp())){
-                continue;
-            }
+
             for (Node outNode : outNodes.values()) {
                 if (outNode.getIp().equals(newNode.getIp())) {
                     exist = true;
