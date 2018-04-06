@@ -249,22 +249,28 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public Block getPreRoundFirstBlock(long roundIndex) {
+        //todo block-》blockheader
         Long height = this.blockStorageService.getRoundFirstBlockHeight(roundIndex);
         if (null == height) {
             Block resultBlock = getBestBlock();
+            Block preResultBlock = null;
             String hashHex = resultBlock.getHeader().getPreHash().getDigestHex();
             while (true) {
                 if (resultBlock.getHeader().getHeight() == 0) {
                     return resultBlock;
                 }
                 BlockRoundData roundData = new BlockRoundData(resultBlock.getHeader().getExtend());
-
                 if (roundData.getRoundIndex() > roundIndex) {
                     break;
                 }
                 if (roundData.getRoundIndex() == roundIndex && roundData.getPackingIndexOfRound() == 1) {
                     break;
                 }
+                if (roundData.getRoundIndex() < roundIndex) {
+                    resultBlock = preResultBlock;
+                    break;
+                }
+                preResultBlock = resultBlock;
                 resultBlock = getBlock(hashHex);
                 if (null == resultBlock) {
                     throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "The block shouldn't be null");
