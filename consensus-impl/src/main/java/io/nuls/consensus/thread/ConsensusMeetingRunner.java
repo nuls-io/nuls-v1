@@ -119,9 +119,9 @@ public class ConsensusMeetingRunner implements Runnable {
             } catch (Exception e) {
                 Log.error(e);
             }
-            try{
+            try {
                 Thread.sleep(100L);
-            }catch (Exception e){
+            } catch (Exception e) {
                 Log.error(e);
             }
         }
@@ -327,8 +327,8 @@ public class ConsensusMeetingRunner implements Runnable {
     private Block doPacking(PocMeetingMember self, PocMeetingRound round, long timeout) throws NulsException, IOException {
 
         Block bestBlock = this.getBestBlock();
-        List<Transaction> txList = txCacheManager.getTxList();
-        txList.sort(TxTimeComparator.getInstance());
+        List<Transaction> allTxList = txCacheManager.getTxList();
+        allTxList.sort(TxTimeComparator.getInstance());
         BlockData bd = new BlockData();
         bd.setHeight(bestBlock.getHeader().getHeight() + 1);
         bd.setPreHash(bestBlock.getHeader().getHash());
@@ -347,16 +347,15 @@ public class ConsensusMeetingRunner implements Runnable {
 
         bd.setRoundData(roundData);
         List<Integer> outTxList = new ArrayList<>();
+        List<Transaction> packingTxList = new ArrayList<>();
         List<NulsDigestData> outHashList = new ArrayList<>();
-        List<NulsDigestData> hashList = new ArrayList<>();
         long totalSize = 0L;
-        for (int i = 0; i < txList.size(); i++) {
+        for (int i = 0; i < allTxList.size(); i++) {
             if ((self.getPackEndTime() - TimeService.currentTimeMillis()) <= timeout) {
                 break;
             }
-            Transaction tx = txList.get(i);
-            totalSize += tx.size();
-            if (totalSize >= PocConsensusConstant.MAX_BLOCK_SIZE) {
+            Transaction tx = allTxList.get(i);
+            if ((totalSize + tx.size()) >= PocConsensusConstant.MAX_BLOCK_SIZE) {
                 break;
             }
             outHashList.add(tx.getHash());
@@ -373,20 +372,18 @@ public class ConsensusMeetingRunner implements Runnable {
                 outTxList.add(i);
                 continue;
             }
+            packingTxList.add(tx);
+            totalSize += tx.size();
             confirmingTxCacheManager.putTx(tx);
 
         }
-        txCacheManager.removeTx(hashList);
-        for (int i = outTxList.size() - 1; i >= 0; i--) {
-            txList.remove(i);
-        }
         txCacheManager.removeTx(outHashList);
         if (totalSize < PocConsensusConstant.MAX_BLOCK_SIZE) {
-            addOrphanTx(txList, totalSize, self);
+            addOrphanTx(packingTxList, totalSize, self);
         }
-        addConsensusTx(bestBlock, txList, self, round);
-        bd.setTxList(txList);
-        Log.debug("txCount:" + txList.size());
+        addConsensusTx(bestBlock, packingTxList, self, round);
+        bd.setTxList(packingTxList);
+        Log.debug("txCount:" + packingTxList.size());
         Block newBlock = ConsensusTool.createBlock(bd, round.getLocalPacker());
         System.out.printf("========height:" + newBlock.getHeader().getHeight() + ",time:" + DateUtil.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
                 DateUtil.convertDate(new Date(self.getPackEndTime())));
@@ -409,15 +406,14 @@ public class ConsensusMeetingRunner implements Runnable {
         if (null == orphanTxList || orphanTxList.isEmpty()) {
             return;
         }
-        txList.sort(TxTimeComparator.getInstance());
         List<NulsDigestData> outHashList = new ArrayList<>();
         orphanTxList.sort(TxTimeComparator.getInstance());
         for (Transaction tx : orphanTxList) {
-            if ((self.getPackEndTime() - TimeService.currentTimeMillis()) <= 100) {
+
+            if ((totalSize + tx.size()) >= PocConsensusConstant.MAX_BLOCK_SIZE) {
                 break;
             }
-            totalSize += tx.size();
-            if (totalSize >= PocConsensusConstant.MAX_BLOCK_SIZE) {
+            if ((self.getPackEndTime() - TimeService.currentTimeMillis()) <= 100) {
                 break;
             }
             ValidateResult result = tx.verify();
@@ -433,6 +429,7 @@ public class ConsensusMeetingRunner implements Runnable {
             }
             confirmingTxCacheManager.putTx(tx);
             txList.add(tx);
+            totalSize += tx.size();
             outHashList.add(tx.getHash());
         }
         orphanTxCacheManager.removeTx(outHashList);

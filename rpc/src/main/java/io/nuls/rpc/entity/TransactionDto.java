@@ -76,7 +76,9 @@ public class TransactionDto {
                 this.setRemark(Hex.encode(tx.getRemark()));
             }
         }
-        this.setScriptSig(Hex.encode(tx.getScriptSig()));
+        if(tx.getScriptSig()!=null){
+            this.setScriptSig(Hex.encode(tx.getScriptSig()));
+        }
 
         List<InputDto> inputs = new ArrayList<>();
         List<OutputDto> outputs = new ArrayList<>();
