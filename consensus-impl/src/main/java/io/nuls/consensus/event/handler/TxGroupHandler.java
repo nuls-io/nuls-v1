@@ -85,9 +85,11 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
         block.setHeader(header);
         List<Transaction> txs = new ArrayList<>();
         for (NulsDigestData txHash : smallBlock.getTxHashList()) {
-            Transaction tx = receivedTxCacheManager.getTx(txHash);
+            Transaction tx = txGroup.getTx(txHash.getDigestHex());
             if (null == tx) {
-                tx = txGroup.getTx(txHash.getDigestHex());
+                tx = receivedTxCacheManager.getTx(txHash);
+            }if (null == tx) {
+                tx = orphanTxCacheManager.getTx(txHash);
             }
             if (null == tx) {
                 throw new NulsRuntimeException(ErrorCode.DATA_ERROR);

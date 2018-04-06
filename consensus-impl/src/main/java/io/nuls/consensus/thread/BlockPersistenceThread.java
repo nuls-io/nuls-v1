@@ -110,8 +110,7 @@ public class BlockPersistenceThread implements Runnable {
             isSuccess = false;
         }
         if (isSuccess) {
-            blockManager.removeBlock(block.getHeader().getHash().getDigestHex());
-            blockManager.setStoredHeight(height);
+            blockManager.storedBlock(block);
             txCacheManager.removeTxList(block.getTxHashList());
         }
     }
