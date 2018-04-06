@@ -274,14 +274,16 @@ public class ConsensusTool {
         }
         double totalAll = DoubleUtils.mul(localRound.getMemberCount(), PocConsensusConstant.BLOCK_REWARD.getValue());
         double commissionRate = DoubleUtils.div(self.getCommissionRate(), 100, 2);
-        double agentWeight = DoubleUtils.mul(self.getOwnDeposit().getValue() + self.getTotalDeposit().getValue(), self.getCalcCreditVal());
+        double agentWeight = DoubleUtils.mul(self.getOwnDeposit().getValue() + self.getTotalDeposit().getValue(), self.getCreditVal());
         double blockReword = totalFee;
-        if (localRound.getTotalWeight() > 0 && agentWeight > 0) {
+        if (localRound.getTotalWeight() > 0d && agentWeight > 0d) {
             blockReword = DoubleUtils.sum(blockReword, DoubleUtils.mul(totalAll, DoubleUtils.div(agentWeight, localRound.getTotalWeight())));
         }
-        if(blockReword==0){
+
+        if(blockReword == 0d) {
             return rewardList;
         }
+
         ConsensusReward agentReword = new ConsensusReward();
         agentReword.setAddress(self.getAgentAddress());
 
@@ -384,7 +386,7 @@ public class ConsensusTool {
         data.setAddressList(addressList);
         data.setHeight(preBlock.getHeader().getHeight() + 1);
         punishTx.setTxData(data);
-        punishTx.setTime(TimeService.currentTimeMillis());
+        punishTx.setTime(self.getPackEndTime());
         punishTx.setFee(Na.ZERO);
         punishTx.setHash(NulsDigestData.calcDigestData(punishTx));
 //        punishTx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(punishTx.getHash(), round.getLocalPacker(), NulsContext.getCachedPasswordOfWallet()).serialize());
