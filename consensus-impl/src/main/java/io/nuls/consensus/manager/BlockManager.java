@@ -275,8 +275,16 @@ public class BlockManager {
         return this.bifurcateProcessor.processing(height);
     }
 
-    public void setStoredHeight(long storedHeight) {
-        this.storedHeight = storedHeight;
+    public void storedBlock(Block storedBlock) {
+        this.storedHeight = storedBlock.getHeader().getHeight();
+        List<String> hashList = this.bifurcateProcessor.getAllHashList(storedBlock.getHeader().getHeight());
+        String storedHash = storedBlock.getHeader().getHash().getDigestHex();
+        if(hashList.size()==1){
+            this.bifurcateProcessor.removeHash(storedHash);
+        }
+        confirmingBlockCacheManager.removeBlock(storedHash);
+        blockCacheBuffer.removeBlock(storedHash);
+
     }
 
     public void removeBlock(String hash) {

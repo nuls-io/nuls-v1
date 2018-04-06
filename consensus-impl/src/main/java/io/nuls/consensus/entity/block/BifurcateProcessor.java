@@ -80,10 +80,10 @@ public class BifurcateProcessor {
             if (maxSize < listSize) {
                 maxSize = listSize;
                 longestChain = chain;
-            }else if(maxSize==listSize){
+            } else if (maxSize == listSize) {
                 HeaderDigest hd = chain.getLastHd();
                 HeaderDigest hd_long = longestChain.getLastHd();
-                if(hd.getTime()<hd_long.getTime()){
+                if (hd.getTime() < hd_long.getTime()) {
                     longestChain = chain;
                 }
             }
@@ -124,7 +124,7 @@ public class BifurcateProcessor {
         for (int i = 0; i < this.chainList.size(); i++) {
             BlockHeaderChain chain = chainList.get(i);
 
-            int index = chain.indexOf(header.getPreHash().getDigestHex(), header.getHeight() - 1,header.getTime());
+            int index = chain.indexOf(header.getPreHash().getDigestHex(), header.getHeight() - 1, header.getTime());
             if (index == chain.size() - 1) {
                 chain.addHeader(header);
                 return true;
@@ -187,51 +187,14 @@ public class BifurcateProcessor {
         if (chainList.isEmpty()) {
             return false;
         }
-        List<String> hashList = this.getAllHashList(height);
-        if (hashList.isEmpty()) {
-            //Log.warn("lost a block:" + height);
+        this.checkIt();
+        if (null == approvingChain) {
             return false;
-        }else if(hashList.size()==1&&this.approvingChain.getFirstHd().getHash().equals(hashList.get(0))&&this.approvingChain.size()> PocConsensusConstant.CONFIRM_BLOCK_COUNT){
+        }
+        if (approvingChain.getLastHd() != null && approvingChain.getLastHd().getHeight() >= (height + PocConsensusConstant.CONFIRM_BLOCK_COUNT)) {
             return true;
         }
-        int maxSize = 0;
-        int secondMaxSize = 0;
-        for (BlockHeaderChain chain : chainList) {
-            int size = chain.size();
-            if (size > maxSize) {
-                secondMaxSize = maxSize;
-                maxSize = size;
-            } else if (size > secondMaxSize) {
-                secondMaxSize = size;
-            } else if (size == maxSize) {
-                secondMaxSize = size;
-            }
-        }
-        if (maxSize <= (secondMaxSize + 6)) {
-            return false;
-        }
-
-        Set<String> rightHashSet = new HashSet<>();
-        Set<String> removeHashSet = new HashSet<>();
-        for (int i = chainList.size() - 1; i >= 0; i--) {
-            BlockHeaderChain chain = chainList.get(i);
-            if (chain.size() < maxSize) {
-                removeHashSet.addAll(chain.getHashSet());
-                chainList.remove(i);
-            } else {
-                rightHashSet.addAll(chain.getHashSet());
-            }
-        }
-        if (this.approvingChain == null || !chainList.get(0).getId().equals(this.approvingChain.getId())) {
-            RoundManager.getInstance().reset();
-        }
-
-        for (String hash : removeHashSet) {
-            if (!rightHashSet.contains(hash)) {
-                confirmingBlockCacheManager.removeBlock(hash);
-            }
-        }
-        return true;
+        return false;
     }
 
     public int getHashSize() {
