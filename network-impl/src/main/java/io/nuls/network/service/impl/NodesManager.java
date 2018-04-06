@@ -30,6 +30,7 @@ import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.TaskManager;
+import io.nuls.core.utils.network.IpUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.NodeDataService;
 import io.nuls.network.constant.NetworkConstant;
@@ -104,8 +105,8 @@ public class NodesManager implements Runnable {
      */
     public void start() {
         List<Node> nodes = discoverHandler.getLocalNodes(network.maxOutCount());
-        if (nodes == null || nodes.isEmpty()) {
-            nodes = getSeedNodes();
+        if (nodes.size() < network.maxOutCount() / 2) {
+            nodes.addAll(getSeedNodes());
         }
         for (Node node : nodes) {
             addNodeToGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP, node);
@@ -213,6 +214,9 @@ public class NodesManager implements Runnable {
     }
 
     public void addNodeToGroup(String groupName, Node node) {
+        if (IpUtil.getIps().contains(node.getIp())) {
+            return;
+        }
         if (!nodeGroups.containsKey(groupName)) {
             throw new NulsRuntimeException(ErrorCode.NET_NODE_GROUP_NOT_FOUND);
         }
