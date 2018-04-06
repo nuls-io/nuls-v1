@@ -45,7 +45,7 @@ public class NettyClient {
             }
             future.channel().closeFuture().sync();
         } catch (Exception e) {
-            Log.info("-------------NettyClient connecting error: " + e.getMessage());
+            Log.debug("-------------NettyClient connecting error: " + e.getMessage());
             //maybe time out or refused or something
             if (socketChannel != null) {
                 socketChannel.close();

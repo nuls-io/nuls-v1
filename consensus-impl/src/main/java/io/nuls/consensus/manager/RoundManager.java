@@ -7,7 +7,6 @@ import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.block.BlockRoundData;
-import io.nuls.consensus.entity.meeting.ConsensusReward;
 import io.nuls.consensus.entity.meeting.PocMeetingMember;
 import io.nuls.consensus.entity.meeting.PocMeetingRound;
 import io.nuls.consensus.entity.member.Agent;
@@ -17,12 +16,7 @@ import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.Na;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.utils.calc.DoubleUtils;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.BlockLog;
 import io.nuls.core.utils.log.Log;
@@ -30,10 +24,6 @@ import io.nuls.db.dao.AgentDataService;
 import io.nuls.db.dao.DepositDataService;
 import io.nuls.db.entity.AgentPo;
 import io.nuls.db.entity.DepositPo;
-import io.nuls.ledger.entity.params.Coin;
-import io.nuls.ledger.entity.params.CoinTransferData;
-import io.nuls.ledger.entity.params.OperationType;
-import io.nuls.ledger.entity.tx.CoinBaseTransaction;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -72,7 +62,7 @@ public class RoundManager {
         Block bestBlock = getBestBlock();
         BlockRoundData roundData = new BlockRoundData(bestBlock.getHeader().getExtend());
         for (long i = roundData.getRoundIndex(); i >= 1 && i >= roundData.getRoundIndex() - CACHE_COUNT; i--) {
-            Block firstBlock = getBlockService().getRoundFirstBlock(bestBlock, i - 1);
+            Block firstBlock = getBlockService().getPreRoundFirstBlock(i - 1);
             BlockRoundData thisRoundData = new BlockRoundData(firstBlock.getHeader().getExtend());
             PocMeetingRound round = calcRound(firstBlock.getHeader().getHeight(), i, thisRoundData.getRoundStartTime());
             ROUND_MAP.put(round.getIndex(), round);
@@ -141,7 +131,7 @@ public class RoundManager {
 //        if(calcBlockRoundFinished){
 //        }else{
 //        }
-        Block lastRoundFirstBlock = getBlockService().getRoundFirstBlock(calcBlock, blockRoundData.getRoundIndex());
+        Block lastRoundFirstBlock = getBlockService().getPreRoundFirstBlock(blockRoundData.getRoundIndex());
         PocMeetingRound round = calcRound(lastRoundFirstBlock.getHeader().getHeight(), blockRoundData.getRoundIndex() + 1, blockRoundData.getRoundEndTime());
 
         if (round.getStartTime() < TimeService.currentTimeMillis()) {
@@ -174,10 +164,10 @@ public class RoundManager {
         for (PocMeetingMember member : round.getMemberList()) {
             str.append(member.getPackingAddress());
             str.append(" ,order:" + member.getIndexOfRound());
-            str.append(",packTime:" + new Date(member.getPackEndTime()).toLocaleString());
+            str.append(",packTime:" + new Date(member.getPackEndTime()));
             str.append("\n");
         }
-        BlockLog.info("calc new round:index:" + round.getIndex() + " , start:" + new Date(round.getStartTime()).toLocaleString()
+        BlockLog.info("calc new round:index:" + round.getIndex() + " , start:" + new Date(round.getStartTime())
                 + ", netTime:(" + new Date(TimeService.currentTimeMillis()).toString() + ") , members:\n :" + str);
         return round;
     }
@@ -227,7 +217,7 @@ public class RoundManager {
             member.setPackingAddress(ca.getExtend().getPackingAddress());
             member.setOwnDeposit(ca.getExtend().getDeposit());
             member.setCommissionRate(ca.getExtend().getCommissionRate());
-            totalDeposit = totalDeposit.add(ca.getExtend().getDeposit());
+
             List<DepositPo> depositPoList = depositMap.get(ca.getHexHash());
             if (depositPoList != null) {
                 List<Consensus<Deposit>> cdlist = new ArrayList<>();
@@ -238,10 +228,11 @@ public class RoundManager {
                 }
                 member.setDepositList(cdlist);
             }
-            totalDeposit = totalDeposit.add(member.getTotalDeposit());
             member.setCreditVal(calcCreditVal(member, round.getIndex() - 2));
-            if (member.getTotalDeposit().isGreaterThan(PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT)) {
+            if (member.getTotalDeposit().isGreaterOrEquals(PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT)) {
                 ca.getExtend().setStatus(ConsensusStatusEnum.IN.getCode());
+                totalDeposit = totalDeposit.add(ca.getExtend().getDeposit());
+                totalDeposit = totalDeposit.add(member.getTotalDeposit());
                 memberList.add(member);
             } else {
                 ca.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
@@ -303,84 +294,6 @@ public class RoundManager {
         return consensusBlockService;
     }
 
-
-    public CoinBaseTransaction createNewCoinBaseTx(PocMeetingMember member, List<Transaction> txList, PocMeetingRound localRound) {
-        CoinTransferData data = new CoinTransferData(OperationType.COIN_BASE, Na.ZERO);
-        List<ConsensusReward> rewardList = calcReward(txList, member, localRound);
-        Na total = Na.ZERO;
-        for (ConsensusReward reward : rewardList) {
-            Coin coin = new Coin();
-            coin.setNa(reward.getReward());
-            data.addTo(reward.getAddress(), coin);
-            total = total.add(reward.getReward());
-        }
-        data.setTotalNa(total);
-        CoinBaseTransaction tx;
-        try {
-            tx = new CoinBaseTransaction(data, null);
-            tx.setTime(member.getPackEndTime());
-        } catch (NulsException e) {
-            Log.error(e);
-            throw new NulsRuntimeException(e);
-        }
-        tx.setFee(Na.ZERO);
-        tx.setHash(NulsDigestData.calcDigestData(tx));
-        return tx;
-    }
-
-    private List<ConsensusReward> calcReward(List<Transaction> txList, PocMeetingMember self, PocMeetingRound localRound) {
-        List<ConsensusReward> rewardList = new ArrayList<>();
-        if (self.getOwnDeposit().getValue() == Na.ZERO.getValue()) {
-            long totalFee = 0;
-            for (Transaction tx : txList) {
-                totalFee += tx.getFee().getValue();
-            }
-            if (totalFee == 0L) {
-                return rewardList;
-            }
-            double caReward = totalFee;
-            ConsensusReward agentReword = new ConsensusReward();
-            agentReword.setAddress(self.getAgentAddress());
-            agentReword.setReward(Na.valueOf((long) caReward));
-            rewardList.add(agentReword);
-            return rewardList;
-        }
-        long totalFee = 0;
-        for (Transaction tx : txList) {
-            totalFee += tx.getFee().getValue();
-        }
-        double totalAll = DoubleUtils.mul(localRound.getMemberCount(), PocConsensusConstant.BLOCK_REWARD.getValue());
-
-        double blockReword = totalFee + DoubleUtils.mul(totalAll, DoubleUtils.div(self.getOwnDeposit().getValue() + self.getTotalDeposit().getValue(), localRound.getTotalDeposit().getValue()));
-
-        ConsensusReward agentReword = new ConsensusReward();
-        agentReword.setAddress(self.getAgentAddress());
-        double caReward = DoubleUtils.mul(blockReword, DoubleUtils.mul(DoubleUtils.div((localRound.getTotalDeposit().getValue() - self.getOwnDeposit().getValue()), localRound.getTotalDeposit().getValue()
-        ), DoubleUtils.round(self.getCommissionRate() / 100, 2)));
-        agentReword.setReward(Na.valueOf((long) caReward));
-        Map<String, ConsensusReward> rewardMap = new HashMap<>();
-        rewardMap.put(self.getAgentAddress(), agentReword);
-        double delegateCommissionRate = DoubleUtils.div((100 - self.getCommissionRate()), 100, 2);
-        for (Consensus<Deposit> cd : self.getDepositList()) {
-            double reward =
-                    DoubleUtils.mul(DoubleUtils.mul(blockReword, delegateCommissionRate),
-                            DoubleUtils.div(cd.getExtend().getDeposit().getValue(),
-                                    localRound.getTotalDeposit().getValue()));
-
-            ConsensusReward delegateReword = rewardMap.get(cd.getAddress());
-            if (null == delegateReword) {
-                delegateReword = new ConsensusReward();
-                delegateReword.setReward(Na.ZERO);
-            }
-            delegateReword.setAddress(cd.getAddress());
-            delegateReword.setReward(delegateReword.getReward().add(Na.valueOf((long) reward)));
-            rewardMap.put(cd.getAddress(), delegateReword);
-        }
-
-        rewardList.addAll(rewardMap.values());
-        return rewardList;
-    }
-
     public PocMeetingRound getCurrentRound() {
         if (needReSet) {
             return null;
@@ -417,21 +330,56 @@ public class RoundManager {
         return block;
     }
 
-    public PocMeetingRound getRound(BlockRoundData roundData) {
-        //todo imp
-        PocMeetingRound round = ROUND_MAP.get(roundData.getRoundIndex());
-        if(null==round){
-//            Block bestBlock =
+    public PocMeetingRound getRound(long preRoundIndex, long roundIndex, boolean needPreRound) {
+        PocMeetingRound round = ROUND_MAP.get(roundIndex);
+        Block preRoundFirstBlock = null;
+        BlockRoundData preRoundData = null;
+        if (null == round) {
+            Block bestBlock = getBestBlock();
+            BlockRoundData nowRoundData = new BlockRoundData(bestBlock.getHeader().getExtend());
+            if (nowRoundData.getRoundIndex() >= preRoundIndex) {
+                preRoundFirstBlock = getBlockService().getPreRoundFirstBlock(preRoundIndex);
+                if (null == preRoundFirstBlock) {
+                    return null;
+                }
+                preRoundData = new BlockRoundData(preRoundFirstBlock.getHeader().getExtend());
+                round = calcRound(preRoundFirstBlock.getHeader().getHeight(), roundIndex, preRoundData.getRoundEndTime());
+                if (roundIndex>(preRoundData.getRoundIndex()+1)) {
+                    long roundTime = PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000L * round.getMemberCount();
+                    long startTime = round.getStartTime() + (roundIndex-(preRoundData.getRoundIndex()+1)) * roundTime;
+                    round.setStartTime(startTime);
+                    List<PocMeetingMember> memberList = round.getMemberList();
+                    for (PocMeetingMember member : memberList) {
+                        member.setRoundStartTime(round.getStartTime());
+                    }
+                    Collections.sort(memberList);
+                    round.setMemberList(memberList);
+                }
+                ROUND_MAP.put(round.getIndex(), round);
+            } else {
+                return null;
+            }
+        }
+        if (needPreRound && round.getPreRound() == null) {
+            if (null == preRoundFirstBlock) {
+                Block firstBlock = getBlockService().getPreRoundFirstBlock(preRoundIndex);
+                if (null == firstBlock) {
+                    return null;
+                }
+                preRoundFirstBlock = firstBlock;
+                preRoundData = new BlockRoundData(preRoundFirstBlock.getHeader().getExtend());
+            }
+            if(preRoundFirstBlock.getHeader().getHeight()==0){
+                round.setPreRound(calcRound(0,1,preRoundData.getRoundStartTime()));
+                return round;
+            }
+            Block preblock = getBlockService().getBlock(preRoundFirstBlock.getHeader().getPreHash().getDigestHex());
+            if (null == preblock) {
+                return null;
+            }
+            BlockRoundData preBlockRoundData = new BlockRoundData(preblock.getHeader().getExtend());
 
-
-
-
-
-
-
-
-//            round =    calcRound()
-
+            round.setPreRound(getRound(preBlockRoundData.getRoundIndex(), preRoundIndex, false));
         }
         return round;
     }

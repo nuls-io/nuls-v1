@@ -116,7 +116,13 @@ public class ConsensusMeetingRunner implements Runnable {
         while (running) {
             try {
                 doWork();
+
             } catch (Exception e) {
+                Log.error(e);
+            }
+            try{
+                Thread.sleep(100L);
+            }catch (Exception e){
                 Log.error(e);
             }
         }
@@ -128,7 +134,7 @@ public class ConsensusMeetingRunner implements Runnable {
 
         long nowTime = TimeService.currentTimeMillis();
         //check current round is end
-        if (null==round||nowTime >= round.getEndTime()) {
+        if (null == round || nowTime >= round.getEndTime()) {
             resetCurrentMeetingRound();
             //sleep sometimes make sure not to run again
             try {
@@ -161,13 +167,13 @@ public class ConsensusMeetingRunner implements Runnable {
         try {
             boolean needCheckAgain = waitReceiveNewestBlock(self, round);
 
-            Block newBlock = doPacking(self, round, PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000 / 5);
+            Block newBlock = doPacking(self, round, PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000 / 2);
 
             if (needCheckAgain && hasReceiveNewestBlock(self, round)) {
                 Block realBestBlock = blockManager.getBlock(newBlock.getHeader().getHeight());
                 List<NulsDigestData> txHashList = realBestBlock.getTxHashList();
                 for (Transaction transaction : newBlock.getTxs()) {
-                    if (transaction.getType() == TransactionConstant.TX_TYPE_COIN_BASE) {
+                    if (transaction.getType() == TransactionConstant.TX_TYPE_COIN_BASE || transaction.getType() == TransactionConstant.TX_TYPE_YELLOW_PUNISH || transaction.getType() == TransactionConstant.TX_TYPE_RED_PUNISH) {
                         continue;
                     }
                     if (txHashList.contains(transaction.getHash())) {
@@ -175,7 +181,7 @@ public class ConsensusMeetingRunner implements Runnable {
                     }
                     orphanTxCacheManager.putTx(transaction);
                 }
-                newBlock = doPacking(self, round, self.getPackEndTime() - TimeService.currentTimeMillis());
+                newBlock = doPacking(self, round, self.getPackEndTime() - TimeService.currentTimeMillis() + PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000 / 4);
             }
             if (null == newBlock) {
                 return;
@@ -334,10 +340,10 @@ public class ConsensusMeetingRunner implements Runnable {
         roundData.setRoundStartTime(round.getStartTime());
         StringBuilder str = new StringBuilder();
         str.append(self.getPackingAddress());
-        str.append(" ,order:"+self.getIndexOfRound());
-        str.append(",packTime:"+new Date(self.getPackEndTime()).toLocaleString());
+        str.append(" ,order:" + self.getIndexOfRound());
+        str.append(",packTime:" + new Date(self.getPackEndTime()));
         str.append("\n");
-        BlockLog.info("pack round:"+str);
+        BlockLog.info("pack round:" + str);
 
 
         bd.setRoundData(roundData);
@@ -443,15 +449,18 @@ public class ConsensusMeetingRunner implements Runnable {
      */
     private void addConsensusTx(Block bestBlock, List<Transaction> txList, PocMeetingMember self, PocMeetingRound round) throws NulsException, IOException {
         punishTx(bestBlock, txList, self, round);
-        CoinBaseTransaction coinBaseTransaction = packingRoundManager.createNewCoinBaseTx(self, txList, round);
-        coinBaseTransaction.setScriptSig(accountService.createP2PKHScriptSigFromDigest(coinBaseTransaction.getHash(), round.getLocalPacker(), NulsContext.getCachedPasswordOfWallet()).serialize());
+        CoinBaseTransaction coinBaseTransaction = ConsensusTool.createCoinBaseTx(self, txList, round);
+//        coinBaseTransaction.setScriptSig(accountService.createP2PKHScriptSigFromDigest(coinBaseTransaction.getHash(), round.getLocalPacker(), NulsContext.getCachedPasswordOfWallet()).serialize());
         txList.add(0, coinBaseTransaction);
     }
 
 
     private void punishTx(Block bestBlock, List<Transaction> txList, PocMeetingMember self, PocMeetingRound round) throws NulsException, IOException {
         redPunishTx(bestBlock, txList, round);
-        yellowPunishTx(bestBlock, txList, self, round);
+        YellowPunishTransaction yellowPunishTransaction = ConsensusTool.createYellowPunishTx(bestBlock, self, round);
+        if (null != yellowPunishTransaction) {
+            txList.add(yellowPunishTransaction);
+        }
     }
 
     private void redPunishTx(Block bestBlock, List<Transaction> txList, PocMeetingRound round) throws NulsException, IOException {
@@ -470,89 +479,6 @@ public class ConsensusMeetingRunner implements Runnable {
             tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(), round.getLocalPacker(), NulsContext.getCachedPasswordOfWallet()).serialize());
             txList.add(tx);
         }
-    }
-
-    private void yellowPunishTx(Block bestBlock, List<Transaction> txList, PocMeetingMember self, PocMeetingRound round) throws NulsException, IOException {
-        BlockRoundData lastBlockRoundData = new BlockRoundData();
-        try {
-            lastBlockRoundData.parse(bestBlock.getHeader().getExtend());
-        } catch (NulsException e) {
-            Log.error(e);
-        }
-        // continuous blocks in the same round
-        boolean ok = (self.getRoundIndex() == lastBlockRoundData.getRoundIndex()) && (self.getIndexOfRound() == (1 + lastBlockRoundData.getPackingIndexOfRound()));
-
-        //continuous blocks between two rounds
-        ok = ok || (self.getRoundIndex() == (lastBlockRoundData.getRoundIndex() + 1)
-                && self.getIndexOfRound() == 1
-                && lastBlockRoundData.getPackingIndexOfRound() == lastBlockRoundData.getConsensusMemberCount());
-
-        //two rounds
-        ok = ok || (self.getRoundIndex() - 1) > lastBlockRoundData.getRoundIndex();
-        if (ok) {
-            return;
-        }
-        List<Address> addressList = new ArrayList<>();
-        long roundIndex = lastBlockRoundData.getRoundIndex();
-        int packingIndex = 0;
-
-        if (lastBlockRoundData.getPackingIndexOfRound() == lastBlockRoundData.getConsensusMemberCount()) {
-            roundIndex++;
-            packingIndex = 1;
-        } else {
-            packingIndex = lastBlockRoundData.getPackingIndexOfRound() + 1;
-        }
-
-        while (true) {
-            PocMeetingRound tempRound;
-            if (roundIndex == self.getRoundIndex()) {
-                tempRound = round;
-            } else if (roundIndex == lastBlockRoundData.getRoundIndex()) {
-                tempRound = round.getPreRound();
-                if (null == tempRound) {
-                    //todo
-                    System.out.println();
-                    break;
-                }
-            } else {
-                break;
-            }
-            if (tempRound.getIndex() > round.getIndex()) {
-                break;
-            }
-            if (tempRound.getIndex() == round.getIndex() && packingIndex >= self.getIndexOfRound()) {
-                break;
-            }
-            if (packingIndex > tempRound.getMemberCount()) {
-                roundIndex++;
-                packingIndex = 1;
-                continue;
-            }
-            PocMeetingMember member;
-            try {
-                member = tempRound.getMember(packingIndex);
-                if (null == member) {
-                    break;
-                }
-            } catch (Exception e) {
-                break;
-            }
-            packingIndex++;
-            addressList.add(Address.fromHashs(member.getAgentAddress()));
-        }
-        if (addressList.isEmpty()) {
-            return;
-        }
-        YellowPunishTransaction punishTx = new YellowPunishTransaction();
-        YellowPunishData data = new YellowPunishData();
-        data.setAddressList(addressList);
-        data.setHeight(bestBlock.getHeader().getHeight() + 1);
-        punishTx.setTxData(data);
-        punishTx.setTime(TimeService.currentTimeMillis());
-        punishTx.setFee(Na.ZERO);
-        punishTx.setHash(NulsDigestData.calcDigestData(punishTx));
-        punishTx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(punishTx.getHash(), round.getLocalPacker(), NulsContext.getCachedPasswordOfWallet()).serialize());
-        txList.add(punishTx);
     }
 
     private Block getBestBlock() {

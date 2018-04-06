@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -66,24 +66,33 @@ public final class GenesisBlock extends Block {
     private static final String address = "2CjGt6mMMwZpp1ajcfyEdUP5sQv9p2D";
     public static final String priKey = "009cf05b6b3fe8c09b84c13783140c0f1958e8841f8b6f894ef69431522bc65712";
 
-    private static GenesisBlock INSTANCE;
+    private static GenesisBlock INSTANCE = new GenesisBlock();
 
     private long blockTime;
 
+    private int status = 0;
+
     public static GenesisBlock getInstance() {
-        if (null == INSTANCE) {
+        if (INSTANCE.status == 0) {
             String json = null;
             try {
                 json = StringFileLoader.read(PocConsensusConstant.GENESIS_BLOCK_FILE);
             } catch (NulsException e) {
                 Log.error(e);
             }
-            INSTANCE = new GenesisBlock(json);
+            INSTANCE.init(json);
         }
         return INSTANCE;
     }
 
-    private GenesisBlock(String json) {
+    private GenesisBlock() {
+
+    }
+
+    private synchronized void init(String json) {
+        if (status > 0) {
+            return;
+        }
         Map<String, Object> jsonMap = null;
         try {
             jsonMap = JSONUtils.json2map(json);
@@ -99,6 +108,7 @@ public final class GenesisBlock extends Block {
         if (validateResult.isFailed()) {
             throw new NulsRuntimeException(validateResult.getErrorCode(), validateResult.getMessage());
         }
+        this.status = 1;
     }
 
     private void initGengsisTxs(Map<String, Object> jsonMap) {
@@ -148,20 +158,20 @@ public final class GenesisBlock extends Block {
         try {
             account = AccountTool.createAccount(priKey);
         } catch (NulsException e) {
-           Log.error(e);
+            Log.error(e);
         }
         AccountService accountService = NulsContext.getServiceBean(AccountService.class);
         P2PKHScriptSig scriptSig = null;
         try {
             scriptSig = accountService.createP2PKHScriptSigFromDigest(tx.getHash(), account, "");
         } catch (NulsException e) {
-           Log.error(e);
+            Log.error(e);
         }
 
         try {
             tx.setScriptSig(scriptSig.serialize());
         } catch (IOException e) {
-           Log.error(e);
+            Log.error(e);
         }
 
         List<Transaction> txlist = new ArrayList<>();

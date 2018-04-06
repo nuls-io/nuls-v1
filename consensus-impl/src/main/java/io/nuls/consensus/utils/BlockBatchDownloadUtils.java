@@ -188,9 +188,11 @@ public class BlockBatchDownloadUtils {
     }
 
     private void sendRequest(long start, long end, String nodeId) {
-        NodeDownloadingStatus status = new NodeDownloadingStatus();
-        status.setStart(start);
-        status.setEnd(end);
+        NodeDownloadingStatus status = nodeStatusMap.get(nodeId);
+        if (status == null) {
+            status = new NodeDownloadingStatus();
+        }
+        status.setDownloadingSet(start, end);
         status.setNodeId(nodeId);
         nodeStatusMap.put(nodeId, status);
         this.eventBroadcaster.sendToNode(new GetBlockRequest(start, end), nodeId);
@@ -209,6 +211,15 @@ public class BlockBatchDownloadUtils {
             }
             if (!status.containsHeight(block.getHeader().getHeight())) {
                 return false;
+            }
+            ValidateResult result1 = block.verify();
+            if (result1.isFailed() && result1.getErrorCode() != ErrorCode.ORPHAN_TX && result1.getErrorCode() != ErrorCode.ORPHAN_BLOCK) {
+                Log.info("recieve a block wrong!:" + nodeId + ",blockHash:" + block.getHeader().getHash());
+                this.nodeIdList.remove(nodeId);
+                if (nodeIdList.isEmpty()) {
+                    working = false;
+                }
+                return true;
             }
             blockMap.put(block.getHeader().getHeight(), block);
             status.downloaded(block.getHeader().getHeight());
@@ -259,6 +270,7 @@ public class BlockBatchDownloadUtils {
                     Log.debug(result1.getMessage());
                 }
                 blockMap.remove(block.getHeader().getHeight());
+
                 try {
                     failedExecute(block.getHeader().getHeight());
                 } catch (InterruptedException e) {
@@ -282,6 +294,9 @@ public class BlockBatchDownloadUtils {
         if (blockMap.containsKey(height)) {
             return;
         }
+//        if (this.queueService.size(queueId) == 0) {
+//            this.queueService.offerList(queueId, nodeIdList);
+//        }
         this.sendRequest(height, height, this.queueService.take(queueId));
     }
 

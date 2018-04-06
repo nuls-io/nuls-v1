@@ -31,6 +31,7 @@ import io.nuls.consensus.cache.manager.block.BlockCacheBuffer;
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
+import io.nuls.consensus.constant.MaintenanceStatus;
 import io.nuls.consensus.entity.GetBlockParam;
 import io.nuls.consensus.entity.block.BifurcateProcessor;
 import io.nuls.consensus.entity.block.BlockHeaderChain;
@@ -39,6 +40,7 @@ import io.nuls.consensus.entity.block.HeaderDigest;
 import io.nuls.consensus.event.GetBlockHeaderEvent;
 import io.nuls.consensus.event.GetBlockRequest;
 import io.nuls.consensus.service.intf.BlockService;
+import io.nuls.consensus.thread.BlockMaintenanceThread;
 import io.nuls.consensus.utils.DownloadDataUtils;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
@@ -119,22 +121,13 @@ public class BlockManager {
                 Log.debug("discard a block :" + result.getMessage());
                 return;
             } else if (result.isFailed()) {
-                blockCacheBuffer.cacheBlock(block);
+                cacheBlockToBuffer(block);
                 return;
             }
         }
         boolean success = confirmingBlockCacheManager.cacheBlock(block);
         if (!success) {
-            blockCacheBuffer.cacheBlock(block);
-            BlockLog.info("orphan cache block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + block.getHeader().getPackingAddress());
-            boolean hasPre = blockCacheBuffer.getBlock(block.getHeader().getPreHash().getDigestHex()) != null;
-            if (!hasPre) {
-                GetBlockRequest request = new GetBlockRequest();
-                GetBlockParam params = new GetBlockParam();
-                params.setToHash(block.getHeader().getPreHash());
-                request.setEventBody(params);
-                this.eventBroadcaster.broadcastAndCacheAysn(request,false);
-            }
+            cacheBlockToBuffer(block);
             return;
         }
         boolean needUpdateBestBlock = bifurcateProcessor.addHeader(block.getHeader());
@@ -169,6 +162,19 @@ public class BlockManager {
                     this.addBlock(nextBlock, true, null);
                 }
             }
+    }
+
+    private void cacheBlockToBuffer(Block block) {
+        blockCacheBuffer.cacheBlock(block);
+        BlockLog.info("orphan cache block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + block.getHeader().getPackingAddress());
+        boolean hasPre = blockCacheBuffer.getBlock(block.getHeader().getPreHash().getDigestHex()) != null;
+        if (!hasPre&& BlockMaintenanceThread.getInstance().getStatus()== MaintenanceStatus.SUCCESS) {
+            GetBlockRequest request = new GetBlockRequest();
+            GetBlockParam params = new GetBlockParam();
+            params.setToHash(block.getHeader().getPreHash());
+            request.setEventBody(params);
+            this.eventBroadcaster.broadcastAndCacheAysn(request,false);
+        }
     }
 
     private void appravalBlock(Block block) {

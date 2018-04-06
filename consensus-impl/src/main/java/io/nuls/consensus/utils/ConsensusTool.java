@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,31 +24,45 @@
 package io.nuls.consensus.utils;
 
 import io.nuls.account.entity.Account;
+import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
+import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.ConsensusAgentImpl;
 import io.nuls.consensus.entity.ConsensusDepositImpl;
+import io.nuls.consensus.entity.YellowPunishData;
 import io.nuls.consensus.entity.block.BlockData;
 import io.nuls.consensus.entity.block.BlockRoundData;
+import io.nuls.consensus.entity.meeting.ConsensusReward;
+import io.nuls.consensus.entity.meeting.PocMeetingMember;
+import io.nuls.consensus.entity.meeting.PocMeetingRound;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.member.Deposit;
+import io.nuls.consensus.entity.tx.YellowPunishTransaction;
 import io.nuls.core.chain.entity.*;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.script.P2PKHScriptSig;
+import io.nuls.core.utils.calc.DoubleUtils;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.db.entity.AgentPo;
 import io.nuls.db.entity.DepositPo;
+import io.nuls.ledger.entity.params.Coin;
+import io.nuls.ledger.entity.params.CoinTransferData;
+import io.nuls.ledger.entity.params.OperationType;
+import io.nuls.ledger.entity.tx.CoinBaseTransaction;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Niels
@@ -206,5 +220,164 @@ public class ConsensusTool {
         return block;
     }
 
+
+    public static CoinBaseTransaction createCoinBaseTx(PocMeetingMember member, List<Transaction> txList, PocMeetingRound localRound) {
+        CoinTransferData data = new CoinTransferData(OperationType.COIN_BASE, Na.ZERO);
+        List<ConsensusReward> rewardList = calcReward(txList, member, localRound);
+        Na total = Na.ZERO;
+        for (ConsensusReward reward : rewardList) {
+            Coin coin = new Coin();
+            coin.setNa(reward.getReward());
+            data.addTo(reward.getAddress(), coin);
+            total = total.add(reward.getReward());
+        }
+        data.setTotalNa(total);
+        CoinBaseTransaction tx;
+        try {
+            tx = new CoinBaseTransaction(data, null);
+            tx.setTime(member.getPackEndTime());
+        } catch (NulsException e) {
+            Log.error(e);
+            throw new NulsRuntimeException(e);
+        }
+        tx.setFee(Na.ZERO);
+        tx.setHash(NulsDigestData.calcDigestData(tx));
+        return tx;
+    }
+
+    private static List<ConsensusReward> calcReward(List<Transaction> txList, PocMeetingMember self, PocMeetingRound localRound) {
+        List<ConsensusReward> rewardList = new ArrayList<>();
+        if (self.getOwnDeposit().getValue() == Na.ZERO.getValue()) {
+            long totalFee = 0;
+            for (Transaction tx : txList) {
+                totalFee += tx.getFee().getValue();
+            }
+            if (totalFee == 0L) {
+                return rewardList;
+            }
+            double caReward = totalFee;
+            ConsensusReward agentReword = new ConsensusReward();
+            agentReword.setAddress(self.getAgentAddress());
+            agentReword.setReward(Na.valueOf((long) caReward));
+            rewardList.add(agentReword);
+            return rewardList;
+        }
+        long totalFee = 0;
+        for (Transaction tx : txList) {
+            totalFee += tx.getFee().getValue();
+        }
+        double totalAll = DoubleUtils.mul(localRound.getMemberCount(), PocConsensusConstant.BLOCK_REWARD.getValue());
+        double commissionRate = DoubleUtils.div(self.getCommissionRate(), 100, 2);
+        double blockReword = totalFee + DoubleUtils.mul(totalAll, DoubleUtils.div(self.getOwnDeposit().getValue() + self.getTotalDeposit().getValue(), localRound.getTotalDeposit().getValue()));
+
+        ConsensusReward agentReword = new ConsensusReward();
+        agentReword.setAddress(self.getAgentAddress());
+        double caReward = DoubleUtils.mul(blockReword, DoubleUtils.mul(DoubleUtils.div((localRound.getTotalDeposit().getValue() - self.getOwnDeposit().getValue()), localRound.getTotalDeposit().getValue()
+        ), commissionRate));
+        agentReword.setReward(Na.valueOf((long) caReward));
+        Map<String, ConsensusReward> rewardMap = new HashMap<>();
+        rewardMap.put(self.getAgentAddress(), agentReword);
+        double delegateCommissionRate = 1 - commissionRate;
+        double depositTotalReward= DoubleUtils.mul(blockReword, delegateCommissionRate);
+        for (Consensus<Deposit> cd : self.getDepositList()) {
+            double reward =
+                    DoubleUtils.mul(depositTotalReward,
+                            DoubleUtils.div(cd.getExtend().getDeposit().getValue(),
+                                    localRound.getTotalDeposit().getValue()));
+
+            ConsensusReward delegateReword = rewardMap.get(cd.getAddress());
+            if (null == delegateReword) {
+                delegateReword = new ConsensusReward();
+                delegateReword.setReward(Na.ZERO);
+                rewardMap.put(cd.getAddress(), delegateReword);
+            }
+            delegateReword.setAddress(cd.getAddress());
+            delegateReword.setReward(delegateReword.getReward().add(Na.valueOf((long) reward)));
+
+        }
+
+        rewardList.addAll(rewardMap.values());
+        return rewardList;
+    }
+
+
+    public static YellowPunishTransaction createYellowPunishTx(Block preBlock, PocMeetingMember self, PocMeetingRound round) throws NulsException, IOException {
+        BlockRoundData preBlockRoundData = new BlockRoundData(preBlock.getHeader().getExtend());
+        // continuous blocks in the same round
+        boolean ok = (self.getRoundIndex() == preBlockRoundData.getRoundIndex()) && (self.getIndexOfRound() == (1 + preBlockRoundData.getPackingIndexOfRound()));
+
+        //continuous blocks between two rounds
+        ok = ok || (self.getRoundIndex() == (preBlockRoundData.getRoundIndex() + 1)
+                && self.getIndexOfRound() == 1
+                && preBlockRoundData.getPackingIndexOfRound() == preBlockRoundData.getConsensusMemberCount());
+
+        //two rounds
+        ok = ok || (self.getRoundIndex() - 1) > preBlockRoundData.getRoundIndex();
+        if (ok) {
+            return null;
+        }
+        List<Address> addressList = new ArrayList<>();
+        long roundIndex = preBlockRoundData.getRoundIndex();
+
+        int packingIndex;
+
+        if (preBlockRoundData.getPackingIndexOfRound() == preBlockRoundData.getConsensusMemberCount()) {
+            roundIndex++;
+            packingIndex = 1;
+        } else {
+            packingIndex = preBlockRoundData.getPackingIndexOfRound() + 1;
+        }
+
+        while (true) {
+            PocMeetingRound tempRound;
+            if (roundIndex == self.getRoundIndex()) {
+                tempRound = round;
+            } else if (roundIndex == preBlockRoundData.getRoundIndex()) {
+                tempRound = round.getPreRound();
+                if (null == tempRound) {
+                    //todo
+                    System.out.println();
+                    break;
+                }
+            } else {
+                break;
+            }
+            if (tempRound.getIndex() > round.getIndex()) {
+                break;
+            }
+            if (tempRound.getIndex() == round.getIndex() && packingIndex >= self.getIndexOfRound()) {
+                break;
+            }
+            if (packingIndex > tempRound.getMemberCount()) {
+                roundIndex++;
+                packingIndex = 1;
+                continue;
+            }
+            PocMeetingMember member;
+            try {
+                member = tempRound.getMember(packingIndex);
+                if (null == member) {
+                    break;
+                }
+            } catch (Exception e) {
+                break;
+            }
+            packingIndex++;
+            addressList.add(Address.fromHashs(member.getAgentAddress()));
+        }
+        if (addressList.isEmpty()) {
+            return null;
+        }
+        YellowPunishTransaction punishTx = new YellowPunishTransaction();
+        YellowPunishData data = new YellowPunishData();
+        data.setAddressList(addressList);
+        data.setHeight(preBlock.getHeader().getHeight() + 1);
+        punishTx.setTxData(data);
+        punishTx.setTime(TimeService.currentTimeMillis());
+        punishTx.setFee(Na.ZERO);
+        punishTx.setHash(NulsDigestData.calcDigestData(punishTx));
+//        punishTx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(punishTx.getHash(), round.getLocalPacker(), NulsContext.getCachedPasswordOfWallet()).serialize());
+        return punishTx;
+    }
 }
 

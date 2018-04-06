@@ -27,9 +27,7 @@ import io.nuls.consensus.cache.manager.block.ConfirmingBlockCacheManager;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.manager.RoundManager;
 import io.nuls.core.chain.entity.BlockHeader;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.BlockLog;
-import io.nuls.core.utils.log.Log;
 
 import java.util.ArrayList;
 import java.util.HashSet;

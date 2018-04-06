@@ -248,16 +248,17 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public Block getRoundFirstBlock(Block bestBlock, long roundIndex) {
+    public Block getPreRoundFirstBlock(long roundIndex) {
         Long height = this.blockStorageService.getRoundFirstBlockHeight(roundIndex);
         if (null == height) {
-            Block resultBlock = bestBlock;
+            Block resultBlock = getBestBlock();
             String hashHex = resultBlock.getHeader().getPreHash().getDigestHex();
             while (true) {
                 if (resultBlock.getHeader().getHeight() == 0) {
                     return resultBlock;
                 }
                 BlockRoundData roundData = new BlockRoundData(resultBlock.getHeader().getExtend());
+
                 if (roundData.getRoundIndex() > roundIndex) {
                     break;
                 }
@@ -285,5 +286,14 @@ public class BlockServiceImpl implements BlockService {
             }
         }
 
+    }
+
+    private Block getBestBlock() {
+        Block block = NulsContext.getInstance().getBestBlock();
+        Block highestBlock = BlockManager.getInstance().getHighestBlock();
+        if (null != highestBlock && highestBlock.getHeader().getHeight() > block.getHeader().getHeight()) {
+            return highestBlock;
+        }
+        return block;
     }
 }
