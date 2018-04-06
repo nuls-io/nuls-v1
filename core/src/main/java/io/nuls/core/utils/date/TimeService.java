@@ -23,18 +23,12 @@
  */
 package io.nuls.core.utils.date;
 
-import com.fasterxml.jackson.databind.util.JSONPObject;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.json.JSONUtils;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.network.RequestUtil;
-import io.nuls.core.utils.str.StringUtils;
 
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.Map;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * @author vivi
@@ -46,7 +40,6 @@ public class TimeService implements Runnable {
 
     private TimeService() {
         webTimeUrl = "http://time.inchain.org/now";
-        READ_WRITE_LOCK = new ReentrantReadWriteLock();
         start();
     }
 
@@ -59,7 +52,7 @@ public class TimeService implements Runnable {
     /**
      * 时间偏移差距触发点，超过该值会导致本地时间重设，单位毫秒
      **/
-    public static final long TIME_OFFSET_BOUNDARY = 1000L;
+    public static final long TIME_OFFSET_BOUNDARY = 3000L;
 
     private static final long NET_REFRESH_TIME = 10 * 60 * 1000L;   // 10 minutes;
 
@@ -74,8 +67,6 @@ public class TimeService implements Runnable {
 
     private boolean running;
 
-    private static ReentrantReadWriteLock READ_WRITE_LOCK;
-
     public void start() {
         Log.info("----------- network timeService start -------------");
         syncWebTime();
@@ -84,14 +75,8 @@ public class TimeService implements Runnable {
     }
 
     private void syncWebTime() {
-        READ_WRITE_LOCK.writeLock().lock();
         try {
             long localBeforeTime = System.currentTimeMillis();
-
-//            URL url = new URL(webTimeUrl);
-//            URLConnection connection = url.openConnection();
-//            connection.connect();
-//            long netTime = connection.getDate();
 
             String response = RequestUtil.doGet(webTimeUrl, "utf-8");
             Map<String, Object> resMap = JSONUtils.json2map(response);
@@ -101,12 +86,11 @@ public class TimeService implements Runnable {
 
             netTimeOffset = (netTime + (localEndTime - localBeforeTime) / 2) - localEndTime;
 
-            lastSyncTime = localEndTime;
+            lastSyncTime = currentTimeMillis();
         } catch (Exception e) {
             // 1 minute later try again
+            Log.error("sync net time error : " + e.getMessage());
             lastSyncTime = lastSyncTime + 60000L;
-        } finally {
-            READ_WRITE_LOCK.writeLock().unlock();
         }
     }
 
@@ -134,12 +118,7 @@ public class TimeService implements Runnable {
     }
 
     public static long currentTimeMillis() {
-        READ_WRITE_LOCK.readLock().lock();
-        try {
-            return System.currentTimeMillis() + netTimeOffset;
-        } finally {
-            READ_WRITE_LOCK.readLock().unlock();
-        }
+        return System.currentTimeMillis() + netTimeOffset;
     }
 
     public static long currentTimeSeconds() {

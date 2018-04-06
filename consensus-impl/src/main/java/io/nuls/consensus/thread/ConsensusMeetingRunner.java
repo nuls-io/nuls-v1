@@ -116,7 +116,6 @@ public class ConsensusMeetingRunner implements Runnable {
         while (running) {
             try {
                 doWork();
-
             } catch (Exception e) {
                 Log.error(e);
             }
