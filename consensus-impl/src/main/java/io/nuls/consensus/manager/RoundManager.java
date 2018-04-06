@@ -63,8 +63,8 @@ public class RoundManager {
         BlockRoundData roundData = new BlockRoundData(bestBlock.getHeader().getExtend());
         for (long i = roundData.getRoundIndex(); i >= 1 && i >= roundData.getRoundIndex() - CACHE_COUNT; i--) {
             Block firstBlock = getBlockService().getPreRoundFirstBlock(i - 1);
-            BlockRoundData thisRoundData = new BlockRoundData(firstBlock.getHeader().getExtend());
-            PocMeetingRound round = calcRound(firstBlock.getHeader().getHeight(), i, thisRoundData.getRoundStartTime());
+            BlockRoundData preRoundData = new BlockRoundData(firstBlock.getHeader().getExtend());
+            PocMeetingRound round = calcRound(firstBlock.getHeader().getHeight(), i, preRoundData.getRoundEndTime());
             ROUND_MAP.put(round.getIndex(), round);
             Log.debug("load the round data index:{}", round.getIndex());
         }
@@ -78,9 +78,13 @@ public class RoundManager {
     }
 
     public PocMeetingRound resetCurrentMeetingRound() {
+        Block currentBlock = getBestBlock();
+        return getRoundByBlock(currentBlock);
+    }
+
+    public PocMeetingRound getRoundByBlock(Block currentBlock) {
         lock.lock();
         try {
-            Block currentBlock = getBestBlock();
             BlockRoundData currentRoundData = new BlockRoundData(currentBlock.getHeader().getExtend());
             boolean needCalcRound = false;
             do {
@@ -124,7 +128,6 @@ public class RoundManager {
             lock.unlock();
         }
     }
-
 
     private PocMeetingRound calcNextRound(Block calcBlock, BlockRoundData blockRoundData) {
 //        boolean calcBlockRoundFinished = blockRoundData.getRoundEndTime() < TimeService.currentTimeMillis() || blockRoundData.getConsensusMemberCount() == blockRoundData.getPackingIndexOfRound();
