@@ -120,7 +120,7 @@ public class NodesManager implements Runnable {
         if (seedNodes == null) {
             seedNodes = discoverHandler.getSeedNodes();
         }
-        for(Node node :seedNodes) {
+        for (Node node : seedNodes) {
             node.setStatus(Node.WAIT);
             node.setMagicNumber(network.packetMagic());
             node.setType(Node.OUT);
@@ -244,8 +244,8 @@ public class NodesManager implements Runnable {
      */
     @Override
     public void run() {
+        Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
         while (running) {
-            Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
             if (nodes.isEmpty()) {
                 List<Node> nodes = getSeedNodes();
                 for (Node node : nodes) {
@@ -257,7 +257,6 @@ public class NodesManager implements Runnable {
                     List<Node> nodes = discoverHandler.getLocalNodes(network.maxOutCount() - group.size());
                     if (!nodes.isEmpty()) {
                         for (Node node : nodes) {
-
                             addNodeToGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP, node);
                         }
                     } else {
