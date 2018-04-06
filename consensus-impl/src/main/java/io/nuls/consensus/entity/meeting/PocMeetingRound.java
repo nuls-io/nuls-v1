@@ -39,7 +39,7 @@ import java.util.Map;
  */
 public class PocMeetingRound {
     private Account localPacker;
-    private Na totalDeposit;
+    private double totalWeight;
     private long index;
     private long startTime;
     private int memberCount;
@@ -129,12 +129,13 @@ public class PocMeetingRound {
         this.index = index;
     }
 
-    public Na getTotalDeposit() {
-        return totalDeposit;
+
+    public double getTotalWeight() {
+        return totalWeight;
     }
 
-    public void setTotalDeposit(Na totalDeposit) {
-        this.totalDeposit = totalDeposit;
+    public void setTotalWeight(double totalWeight) {
+        this.totalWeight = totalWeight;
     }
 
     public List<PocMeetingMember> getMemberList() {

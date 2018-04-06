@@ -163,9 +163,9 @@ public class BlockServiceImpl implements BlockService {
         }
         for (int x = 0; x < block.getHeader().getTxCount(); x++) {
             Transaction tx = block.getTxs().get(x);
+            tx.setBlockHeight(block.getHeader().getHeight());
             if (tx.getStatus() == TxStatusEnum.CACHED) {
                 b = true;
-                tx.setBlockHeight(block.getHeader().getHeight());
                 try {
                     ledgerService.approvalTx(tx);
                 } catch (Exception e) {
@@ -181,8 +181,8 @@ public class BlockServiceImpl implements BlockService {
         for (int x = 0; x < block.getHeader().getTxCount(); x++) {
             Transaction tx = block.getTxs().get(x);
             tx.setIndex(x);
+            tx.setBlockHeight(block.getHeader().getHeight());
             if (tx.getStatus() == TxStatusEnum.AGREED) {
-                tx.setBlockHeight(block.getHeader().getHeight());
                 try {
                     ledgerService.commitTx(tx);
                 } catch (Exception e) {

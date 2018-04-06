@@ -268,34 +268,34 @@ public class ConsensusTool {
         }
         double totalAll = DoubleUtils.mul(localRound.getMemberCount(), PocConsensusConstant.BLOCK_REWARD.getValue());
         double commissionRate = DoubleUtils.div(self.getCommissionRate(), 100, 2);
-        double blockReword = totalFee + DoubleUtils.mul(totalAll, DoubleUtils.div(self.getOwnDeposit().getValue() + self.getTotalDeposit().getValue(), localRound.getTotalDeposit().getValue()));
+        double agentWeight = DoubleUtils.mul(self.getOwnDeposit().getValue() + self.getTotalDeposit().getValue(), self.getCreditVal());
+        double blockReword = totalFee + DoubleUtils.mul(totalAll, DoubleUtils.div(agentWeight, localRound.getTotalWeight()));
 
         ConsensusReward agentReword = new ConsensusReward();
         agentReword.setAddress(self.getAgentAddress());
-        double caReward = DoubleUtils.mul(blockReword, DoubleUtils.mul(DoubleUtils.div((localRound.getTotalDeposit().getValue() - self.getOwnDeposit().getValue()), localRound.getTotalDeposit().getValue()
-        ), commissionRate));
-        agentReword.setReward(Na.valueOf((long) caReward));
+
+        double caReward = DoubleUtils.mul(blockReword, DoubleUtils.div(self.getOwnDeposit().getValue(), self.getTotalDeposit().getValue()));
+
         Map<String, ConsensusReward> rewardMap = new HashMap<>();
-        rewardMap.put(self.getAgentAddress(), agentReword);
-        double delegateCommissionRate = 1 - commissionRate;
-        double depositTotalReward= DoubleUtils.mul(blockReword, delegateCommissionRate);
         for (Consensus<Deposit> cd : self.getDepositList()) {
-            double reward =
-                    DoubleUtils.mul(depositTotalReward,
-                            DoubleUtils.div(cd.getExtend().getDeposit().getValue(),
-                                    localRound.getTotalDeposit().getValue()));
-
-            ConsensusReward delegateReword = rewardMap.get(cd.getAddress());
-            if (null == delegateReword) {
-                delegateReword = new ConsensusReward();
-                delegateReword.setReward(Na.ZERO);
-                rewardMap.put(cd.getAddress(), delegateReword);
+            if (cd.getAddress().equals(self.getAgentAddress())) {
+                caReward = caReward + DoubleUtils.mul(blockReword, DoubleUtils.div(cd.getExtend().getDeposit().getValue(), self.getTotalDeposit().getValue()));
+            }else{
+                ConsensusReward depositReward = rewardMap.get(cd.getAddress());
+                if (null == depositReward) {
+                    depositReward = new ConsensusReward();
+                    depositReward.setAddress(cd.getAddress());
+                    rewardMap.put(cd.getAddress(), depositReward);
+                }
+                double reward = DoubleUtils.mul(blockReword, DoubleUtils.div(cd.getExtend().getDeposit().getValue(), self.getTotalDeposit().getValue()));
+                double fee = DoubleUtils.mul(reward,commissionRate);
+                caReward = caReward + fee;
+                double hisReward = DoubleUtils.sub(reward,fee);
+                depositReward.setReward(depositReward.getReward().add(Na.valueOf(DoubleUtils.longValue(hisReward))));
             }
-            delegateReword.setAddress(cd.getAddress());
-            delegateReword.setReward(delegateReword.getReward().add(Na.valueOf((long) reward)));
-
         }
-
+        agentReword.setReward(Na.valueOf(DoubleUtils.longValue(caReward)));
+        rewardMap.put(self.getAgentAddress(), agentReword);
         rewardList.addAll(rewardMap.values());
         return rewardList;
     }
