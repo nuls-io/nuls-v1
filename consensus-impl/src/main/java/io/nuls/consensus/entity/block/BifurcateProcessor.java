@@ -50,6 +50,8 @@ public class BifurcateProcessor {
     private List<BlockHeaderChain> chainList = new CopyOnWriteArrayList<>();
     private long maxHeight;
 
+    private long tempIndex = 0L;
+
     private BifurcateProcessor() {
     }
 
@@ -88,7 +90,10 @@ public class BifurcateProcessor {
                 }
             }
         }
-        BlockLog.info(str.toString());
+        if(tempIndex%10==0) {
+            BlockLog.info(str.toString());
+            tempIndex++;
+        }
         if (this.approvingChain == null || !this.approvingChain.getId().equals(longestChain.getId())) {
             RoundManager.getInstance().reset();
         }
