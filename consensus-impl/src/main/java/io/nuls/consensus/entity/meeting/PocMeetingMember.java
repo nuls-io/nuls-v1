@@ -94,6 +94,7 @@ public class PocMeetingMember implements Comparable<PocMeetingMember> {
 
     public void setRoundStartTime(long roundStartTime) {
         this.roundStartTime = roundStartTime;
+        this.sortValue = null;
     }
 
     public String getAgentHash() {

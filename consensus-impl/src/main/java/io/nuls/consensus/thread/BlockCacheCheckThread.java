@@ -40,7 +40,7 @@ import io.nuls.core.utils.log.Log;
  */
 public class BlockCacheCheckThread implements Runnable {
 
-    private static final long TIME_OUT = 60000;
+    private static final long TIME_OUT = 120000;
 
     private long startTime;
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
