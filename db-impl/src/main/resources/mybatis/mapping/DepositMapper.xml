@@ -41,7 +41,7 @@
         select
         <include refid="Base_Column_List"/>
         from deposit
-        where block_height &lt; #{delHeight,jdbcType=BIGINT} and (del_height = 0 or del_height &gt;
+        where block_height &lt;= #{delHeight,jdbcType=BIGINT} and (del_height = 0 or del_height &gt;
         #{delHeight,jdbcType=BIGINT})
     </select>
     <update id="deleteByPrimaryKey" parameterType="io.nuls.db.entity.DepositPo">
