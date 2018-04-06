@@ -380,7 +380,7 @@ public class ConsensusTool {
         data.setAddressList(addressList);
         data.setHeight(preBlock.getHeader().getHeight() + 1);
         punishTx.setTxData(data);
-        punishTx.setTime(TimeService.currentTimeMillis());
+        punishTx.setTime(self.getPackEndTime());
         punishTx.setFee(Na.ZERO);
         punishTx.setHash(NulsDigestData.calcDigestData(punishTx));
 //        punishTx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(punishTx.getHash(), round.getLocalPacker(), NulsContext.getCachedPasswordOfWallet()).serialize());
