@@ -66,8 +66,6 @@ public class BlockConsensusValidator implements NulsDataValidator<Block> {
     public ValidateResult validate(Block block) {
         if (block.getHeader().getHeight() == 0) {
             return ValidateResult.getSuccessResult();
-        }else if(block.getHeader().getHeight()>=1){
-            return ValidateResult.getSuccessResult();
         }
         BlockRoundData roundData = new BlockRoundData(block.getHeader().getExtend());
         BlockRoundData preBlockRoundData;
