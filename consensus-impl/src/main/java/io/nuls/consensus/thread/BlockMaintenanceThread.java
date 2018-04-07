@@ -276,7 +276,6 @@ public class BlockMaintenanceThread implements Runnable {
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
                 Log.error(e.getMessage());
                 this.status=MaintenanceStatus.FAILED;
             }

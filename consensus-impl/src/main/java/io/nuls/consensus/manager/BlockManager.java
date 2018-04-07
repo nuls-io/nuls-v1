@@ -151,29 +151,29 @@ public class BlockManager {
                 this.rollbackAppraval(lastAppravedBlock);
             }
         }
-            Set<String> keySet = blockCacheBuffer.getHeaderCacheMap().keySet();
-            for (String key : keySet) {
-                BlockHeader header = blockCacheBuffer.getBlockHeader(key);
-                if (header == null) {
-                    continue;
-                }
-                if (header.getPreHash().getDigestHex().equals(block.getHeader().getHash())) {
-                    Block nextBlock = blockCacheBuffer.getBlock(key);
-                    this.addBlock(nextBlock, true, null);
-                }
+        Set<String> keySet = blockCacheBuffer.getHeaderCacheMap().keySet();
+        for (String key : keySet) {
+            BlockHeader header = blockCacheBuffer.getBlockHeader(key);
+            if (header == null) {
+                continue;
             }
+            if (header.getPreHash().getDigestHex().equals(block.getHeader().getHash())) {
+                Block nextBlock = blockCacheBuffer.getBlock(key);
+                this.addBlock(nextBlock, true, null);
+            }
+        }
     }
 
     private void cacheBlockToBuffer(Block block) {
         blockCacheBuffer.cacheBlock(block);
         BlockLog.info("orphan cache block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + block.getHeader().getPackingAddress());
         boolean hasPre = blockCacheBuffer.getBlock(block.getHeader().getPreHash().getDigestHex()) != null;
-        if (!hasPre&& BlockMaintenanceThread.getInstance().getStatus()== MaintenanceStatus.SUCCESS) {
+        if (!hasPre) {
             GetBlockRequest request = new GetBlockRequest();
             GetBlockParam params = new GetBlockParam();
             params.setToHash(block.getHeader().getPreHash());
             request.setEventBody(params);
-            this.eventBroadcaster.broadcastAndCacheAysn(request,false);
+            this.eventBroadcaster.broadcastAndCacheAysn(request, false);
         }
     }
 
@@ -279,7 +279,7 @@ public class BlockManager {
         this.storedHeight = storedBlock.getHeader().getHeight();
         List<String> hashList = this.bifurcateProcessor.getAllHashList(storedBlock.getHeader().getHeight());
         String storedHash = storedBlock.getHeader().getHash().getDigestHex();
-        if(hashList.size()==1){
+        if (hashList.size() == 1) {
             this.bifurcateProcessor.removeHash(storedHash);
         }
         confirmingBlockCacheManager.removeBlock(storedHash);
