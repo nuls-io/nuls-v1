@@ -61,6 +61,9 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
     @Override
     @DbSession
     public void onRollback(PocJoinConsensusTransaction tx) throws NulsException {
+
+        manager.realDeleteDeposit(tx.getTxData().getHexHash());
+
         DepositPo delPo = new DepositPo();
         delPo.setId(tx.getTxData().getHexHash());
         delPo.setDelHeight(tx.getBlockHeight());
@@ -78,21 +81,6 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
         po.setBlockHeight(tx.getBlockHeight());
         po.setTime(tx.getTime());
         depositDataService.save(po);
-        Map<String, Object> paramsMap = new HashMap<>();
-        paramsMap.put("agentHash", cd.getExtend().getAgentHash());
-        List<DepositPo> poList = depositDataService.getList(paramsMap);
-        long sum = 0L;
-        for (DepositPo depositPo : poList) {
-            sum += depositPo.getDeposit();
-        }
-        if (sum >= PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT.getValue()) {
-            AgentPo daPo = this.accountDataService.get(cd.getExtend().getAgentHash());
-            if (null == daPo) {
-                throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "the agent cannot find,agent hash:" + cd.getExtend().getAgentHash());
-            }
-            daPo.setStatus(ConsensusStatusEnum.IN.getCode());
-            this.accountDataService.updateSelective(daPo);
-        }
         EntrustConsensusNotice notice = new EntrustConsensusNotice();
         notice.setEventBody(tx);
         NulsContext.getServiceBean(EventBroadcaster.class).publishToLocal(notice);

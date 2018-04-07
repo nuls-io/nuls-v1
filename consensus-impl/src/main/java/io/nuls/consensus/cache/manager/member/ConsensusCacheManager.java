@@ -136,6 +136,14 @@ public class ConsensusCacheManager {
         this.depositCache.put(depositId, cd);
     }
 
+    public void realDeleteAgent(String agentId){
+        this.agentCache.remove(agentId);
+    }
+
+    public void realDeleteDeposit(String depositId){
+        this.depositCache.remove(depositId);
+    }
+
     public void clear() {
         this.agentCache.clear();
         this.depositCache.clear();
