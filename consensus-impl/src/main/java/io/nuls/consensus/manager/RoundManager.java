@@ -338,8 +338,13 @@ public class RoundManager {
             str.append(",packEndTime:" + new Date(member.getPackEndTime()));
             str.append("\n");
         }
-        BlockLog.info("validate round:index:" + round.getIndex() +" ,preIndex:"+round.getPreRound().getIndex()+ " , start:" + new Date(round.getStartTime())
-                + ", netTime:(" + new Date(TimeService.currentTimeMillis()).toString() + ") , members:\n :" + str);
+        if(null==round.getPreRound()){
+            BlockLog.info("calc new round:index:" + round.getIndex() + " , start:" + new Date(round.getStartTime())
+                    + ", netTime:(" + new Date(TimeService.currentTimeMillis()).toString() + ") , members:\n :" + str);
+        }else {
+            BlockLog.info("calc new round:index:" + round.getIndex() + " ,preIndex:" + round.getPreRound().getIndex() + " , start:" + new Date(round.getStartTime())
+                    + ", netTime:(" + new Date(TimeService.currentTimeMillis()).toString() + ") , members:\n :" + str);
+        }
         return round;
     }
 }

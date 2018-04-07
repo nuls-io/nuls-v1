@@ -107,9 +107,10 @@ public class BlockMaintenanceThread implements Runnable {
                     break;
                 }
             } while (false);
-
+        //todo check it
 
             if (null == bestCorrectBlock.getNetBestBlockInfo()) {
+                this.downloadHeight = 0;
                 return;
             }
             if (doit) {
