@@ -44,7 +44,6 @@
         select
         <include refid="Base_Column_List"/>
         from agent
-        where block_height &lt;= #{value,jdbcType=BIGINT} and  (del_height=0 or del_height &gt; #{value,jdbcType=BIGINT})
     </select>
 
 

@@ -123,6 +123,7 @@ public class ConsensusManager {
 
 
         consensusCacheManager = ConsensusCacheManager.getInstance();
+        consensusCacheManager.init();
         confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
         confirmingTxCacheManager.init();
         receivedTxCacheManager = ReceivedTxCacheManager.getInstance();
