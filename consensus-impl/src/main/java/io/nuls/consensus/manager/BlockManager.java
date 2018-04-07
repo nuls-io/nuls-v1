@@ -197,7 +197,6 @@ public class BlockManager {
             Transaction tx = block.getTxs().get(i);
             tx.setBlockHeight(block.getHeader().getHeight());
             tx.setIndex(i);
-            tx.setIndex(i);
             if (tx.getStatus() == null || tx.getStatus() == TxStatusEnum.CACHED) {
                 try {
                     tx.verifyWithException();

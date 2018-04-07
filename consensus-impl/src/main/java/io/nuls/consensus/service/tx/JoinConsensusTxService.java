@@ -61,7 +61,6 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
     @Override
     @DbSession
     public void onRollback(PocJoinConsensusTransaction tx) throws NulsException {
-
         DepositPo delPo = new DepositPo();
         delPo.setId(tx.getTxData().getHexHash());
         delPo.setDelHeight(tx.getBlockHeight());
@@ -72,6 +71,7 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
     @DbSession
     public void onCommit(PocJoinConsensusTransaction tx) throws NulsException {
         Consensus<Deposit> cd = tx.getTxData();
+        cd.getExtend().setBlockHeight(tx.getBlockHeight());
         cd.getExtend().setTxHash(tx.getHash().getDigestHex());
         cd.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
         DepositPo po = ConsensusTool.depositToPojo(cd, tx.getHash().getDigestHex());
@@ -101,6 +101,7 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
     @Override
     public void onApproval(PocJoinConsensusTransaction tx) throws NulsException {
         Consensus<Deposit> cd = tx.getTxData();
+        cd.getExtend().setBlockHeight(tx.getBlockHeight());
         cd.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
         cd.getExtend().setTxHash(tx.getHash().getDigestHex());
         manager.putDeposit(cd);
