@@ -56,8 +56,6 @@ public class HeaderPackerValidator implements NulsDataValidator<BlockHeader> {
     public ValidateResult validate(BlockHeader header) {
         if (header.getHeight() == 0) {
             return ValidateResult.getSuccessResult();
-        }else if(header.getHeight()>=1){
-            return ValidateResult.getSuccessResult();
         }
         BlockRoundData roundData = new BlockRoundData(header.getExtend());
         BlockRoundData preBlockRoundData;

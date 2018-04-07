@@ -43,7 +43,6 @@ import io.nuls.core.validate.ValidateResult;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.network.entity.Node;
 import io.nuls.network.service.NetworkService;
-import sun.applet.Main;
 
 import java.util.List;
 
@@ -204,7 +203,7 @@ public class BlockMaintenanceThread implements Runnable {
                 }
                 Log.warn("Rollback block start height:{},local is highest and wrong!", localBestBlock.getHeader().getHeight());
                 //bifurcation
-                rollbackBlock(localBestBlock.getHeader().getHeight());
+                rollbackBlock(localBestBlock);
                 localBestBlock = this.blockService.getLocalBestBlock();
                 break;
             } else {
@@ -226,29 +225,21 @@ public class BlockMaintenanceThread implements Runnable {
         }
         Log.debug("Rollback block start height:{},local has wrong blocks!", block.getHeader().getHeight());
         //bifurcation
-        rollbackBlock(block.getHeader().getHeight());
+        rollbackBlock(block);
     }
 
-    private void rollbackBlock(long startHeight) {
+    private void rollbackBlock(Block block) {
         try {
-            this.blockService.rollbackBlock(startHeight);
-            long height = startHeight - 1;
-            Block block = getPreBlock(height);
-            NulsContext.getInstance().setBestBlock(block);
-            checkNeedRollback(block);
+            this.blockService.rollbackBlock(block.getHeader().getHash().getDigestHex());
+            Block preblock = this.blockService.getBlock(block.getHeader().getPreHash().getDigestHex());
+            NulsContext.getInstance().setBestBlock(blockService.getBestBlock());
+            checkNeedRollback(preblock);
         } catch (NulsException e) {
             Log.error(e);
             return;
         }
     }
 
-    private Block getPreBlock(long height) {
-        Block block = this.blockService.getBlock(height);
-        if (null == block) {
-            block = getPreBlock(height - 1);
-        }
-        return block;
-    }
 
     public MaintenanceStatus getStatus() {
         if (this.status == null) {

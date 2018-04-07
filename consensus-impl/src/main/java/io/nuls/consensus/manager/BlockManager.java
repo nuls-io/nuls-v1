@@ -26,22 +26,18 @@
 
 package io.nuls.consensus.manager;
 
-import io.nuls.consensus.cache.manager.block.ConfirmingBlockCacheManager;
 import io.nuls.consensus.cache.manager.block.BlockCacheBuffer;
+import io.nuls.consensus.cache.manager.block.ConfirmingBlockCacheManager;
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
-import io.nuls.consensus.constant.MaintenanceStatus;
 import io.nuls.consensus.entity.GetBlockParam;
 import io.nuls.consensus.entity.block.BifurcateProcessor;
 import io.nuls.consensus.entity.block.BlockHeaderChain;
 import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.entity.block.HeaderDigest;
-import io.nuls.consensus.event.GetBlockHeaderEvent;
 import io.nuls.consensus.event.GetBlockRequest;
 import io.nuls.consensus.service.intf.BlockService;
-import io.nuls.consensus.thread.BlockMaintenanceThread;
-import io.nuls.consensus.utils.DownloadDataUtils;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
@@ -98,18 +94,25 @@ public class BlockManager {
 
     public void addBlock(Block block, boolean verify, String nodeId) {
         if (block == null || block.getHeader() == null || block.getTxs() == null || block.getTxs().isEmpty()) {
-            BlockLog.warn("the block data error============================");
+            Log.warn("the block data error============================");
             return;
         }
 
         BlockRoundData roundData = new BlockRoundData(block.getHeader().getExtend());
         Log.debug("cache block:" + block.getHeader().getHash() +
                 ",\nheight(" + block.getHeader().getHeight() + "),round(" + roundData.getRoundIndex() + "),index(" + roundData.getPackingIndexOfRound() + "),roundStart:" + roundData.getRoundStartTime());
+        BlockHeader lastStoredBlockHeader = null;
+        BlockService blockService = NulsContext.getServiceBean(BlockService.class);
         if (storedHeight == 0) {
-            BlockService blockService = NulsContext.getServiceBean(BlockService.class);
-            if (null != blockService) {
-                storedHeight = blockService.getLocalSavedHeight();
-            }
+            storedHeight = blockService.getLocalSavedHeight();
+        }
+        try {
+            lastStoredBlockHeader = blockService.getBlockHeader(storedHeight);
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+        if (null == lastStoredBlockHeader) {
+            Log.warn("the lastStoredBlockHeader data error============================");
         }
         if (block.getHeader().getHeight() <= storedHeight) {
             Log.info("discard block height:" + block.getHeader().getHeight() + ", address:" + block.getHeader().getPackingAddress() + ",from:" + nodeId);
@@ -125,7 +128,17 @@ public class BlockManager {
                 return;
             }
         }
-        boolean success = confirmingBlockCacheManager.cacheBlock(block);
+        boolean success = false;
+        boolean canCache = true;
+        if (confirmingBlockCacheManager.getHeaderCacheMap().isEmpty() && !block.getHeader().getPreHash().getDigestHex().equals(NulsContext.getInstance().getBestBlock().getHeader().getHash().getDigestHex())) {
+            canCache = false;
+        }
+        if (!lastStoredBlockHeader.getHash().equals(block.getHeader().getPreHash()) && !confirmingBlockCacheManager.getHeaderCacheMap().containsKey(block.getHeader().getPreHash().getDigestHex())) {
+            canCache = false;
+        }
+        if (canCache) {
+            success = confirmingBlockCacheManager.cacheBlock(block);
+        }
         if (!success) {
             cacheBlockToBuffer(block);
             return;
@@ -179,7 +192,7 @@ public class BlockManager {
         }
     }
 
-    private void appravalBlock(Block block) {
+    public void appravalBlock(Block block) {
         for (int i = 0; i < block.getHeader().getTxCount(); i++) {
             Transaction tx = block.getTxs().get(i);
             tx.setBlockHeight(block.getHeader().getHeight());

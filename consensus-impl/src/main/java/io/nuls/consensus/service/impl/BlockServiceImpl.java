@@ -200,8 +200,8 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     @DbSession
-    public void rollbackBlock(long height) {
-        Block block = this.getBlock(height);
+    public void rollbackBlock(String hash) {
+        Block block = this.getBlock(hash);
         if (null == block) {
             return;
         }
@@ -291,13 +291,23 @@ public class BlockServiceImpl implements BlockService {
         }
 
     }
-
-    private Block getBestBlock() {
+    @Override
+    public Block getBestBlock() {
         Block block = NulsContext.getInstance().getBestBlock();
         Block highestBlock = BlockManager.getInstance().getHighestBlock();
         if (null != highestBlock && highestBlock.getHeader().getHeight() > block.getHeader().getHeight()) {
             return highestBlock;
         }
         return block;
+    }
+
+    @Override
+    public void approvalBlock(String hash) {
+        Block block = this.getBlock(hash);
+        if (null == block) {
+            Log.info("the block is null:" + block.getHeader().getHash());
+            return;
+        }
+        blockManager.appravalBlock(block);
     }
 }

@@ -24,7 +24,6 @@
 package io.nuls.consensus.thread;
 
 import io.nuls.account.entity.Account;
-import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
@@ -32,7 +31,6 @@ import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.consensus.constant.MaintenanceStatus;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.RedPunishData;
-import io.nuls.consensus.entity.YellowPunishData;
 import io.nuls.consensus.entity.block.BlockData;
 import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.entity.meeting.PocMeetingMember;
@@ -44,6 +42,7 @@ import io.nuls.consensus.event.notice.PackedBlockNotice;
 import io.nuls.consensus.manager.BlockManager;
 import io.nuls.consensus.manager.ConsensusManager;
 import io.nuls.consensus.manager.RoundManager;
+import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.consensus.utils.TxTimeComparator;
 import io.nuls.core.chain.entity.Block;
@@ -72,13 +71,13 @@ import java.util.*;
  * @date 2017/12/15
  */
 public class ConsensusMeetingRunner implements Runnable {
-    private static final int MIN_NODE_COUNT = 1;
-    private NulsContext context = NulsContext.getInstance();
+    private static final int MIN_NODE_COUNT = 2;
     public static final String THREAD_NAME = "Consensus-Meeting";
     private static final ConsensusMeetingRunner INSTANCE = new ConsensusMeetingRunner();
     private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     private BlockManager blockManager = BlockManager.getInstance();
+    private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
     private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
     private OrphanTxCacheManager orphanTxCacheManager = OrphanTxCacheManager.getInstance();
@@ -227,7 +226,7 @@ public class ConsensusMeetingRunner implements Runnable {
     }
 
     private boolean hasReceiveNewestBlock(PocMeetingMember self, PocMeetingRound round) {
-        Block bestBlock = getBestBlock();
+        Block bestBlock = this.blockService.getBestBlock();
         String packingAddress = bestBlock.getHeader().getPackingAddress();
 
         int thisIndex = self.getIndexOfRound();
@@ -326,7 +325,7 @@ public class ConsensusMeetingRunner implements Runnable {
 
     private Block doPacking(PocMeetingMember self, PocMeetingRound round, long timeout) throws NulsException, IOException {
 
-        Block bestBlock = this.getBestBlock();
+        Block bestBlock = this.blockService.getBestBlock();
         List<Transaction> allTxList = txCacheManager.getTxList();
         allTxList.sort(TxTimeComparator.getInstance());
         BlockData bd = new BlockData();
@@ -477,12 +476,4 @@ public class ConsensusMeetingRunner implements Runnable {
         }
     }
 
-    private Block getBestBlock() {
-        Block block = context.getBestBlock();
-        Block highestBlock = blockManager.getHighestBlock();
-        if (null != highestBlock && highestBlock.getHeader().getHeight() > block.getHeader().getHeight()) {
-            return highestBlock;
-        }
-        return block;
-    }
 }

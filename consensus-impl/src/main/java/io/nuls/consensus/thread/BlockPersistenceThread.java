@@ -28,16 +28,12 @@ import io.nuls.consensus.constant.MaintenanceStatus;
 import io.nuls.consensus.manager.BlockManager;
 import io.nuls.consensus.manager.ConsensusManager;
 import io.nuls.consensus.service.intf.BlockService;
-import io.nuls.consensus.utils.BlockBatchDownloadUtils;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.Log;
-import io.nuls.network.entity.Node;
 import io.nuls.network.service.NetworkService;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Niels

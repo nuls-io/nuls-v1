@@ -68,15 +68,6 @@ public class ConfirmingBlockCacheManager {
     }
 
     public boolean cacheBlock(Block block) {
-        if (null == block || null == block.getHeader() || block.getTxs().isEmpty()) {
-            throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "The block is wrong!");
-        }
-        if(headerCacheMap.isEmpty()&&!block.getHeader().getPreHash().getDigestHex().equals(NulsContext.getInstance().getBestBlock().getHeader().getHash().getDigestHex())){
-            return false;
-        }
-        if (!headerCacheMap.isEmpty()&&!headerCacheMap.containsKey(block.getHeader().getPreHash().getDigestHex())) {
-            return false;
-        }
         BlockLog.info("cache block height:" +block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + block.getHeader().getPackingAddress());
         String hash = block.getHeader().getHash().getDigestHex();
         headerCacheMap.put(hash, block.getHeader());

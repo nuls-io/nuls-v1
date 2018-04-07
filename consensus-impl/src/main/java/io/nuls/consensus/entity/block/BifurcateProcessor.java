@@ -26,8 +26,13 @@ package io.nuls.consensus.entity.block;
 import io.nuls.consensus.cache.manager.block.ConfirmingBlockCacheManager;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.manager.RoundManager;
+import io.nuls.consensus.service.intf.BlockService;
+import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.log.BlockLog;
+import io.nuls.core.utils.log.Log;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -90,12 +95,25 @@ public class BifurcateProcessor {
                 }
             }
         }
-        if(tempIndex%10==0) {
+        if (tempIndex % 10 == 0) {
             BlockLog.info(str.toString());
             tempIndex++;
         }
         if (this.approvingChain == null || !this.approvingChain.getId().equals(longestChain.getId())) {
             RoundManager.getInstance().reset();
+            BlockService blockService = NulsContext.getServiceBean(BlockService.class);
+            for (int i=approvingChain.size()-1;i>=0;i--) {
+                HeaderDigest hd = approvingChain.getHeaderDigestList().get(i);
+                try {
+                    blockService.rollbackBlock(hd.getHash());
+                } catch (NulsException e) {
+                    Log.error(e);
+                }
+            }
+            for(int i=0;i<longestChain.getHeaderDigestList().size();i++){
+                HeaderDigest hd = longestChain.getHeaderDigestList().get(i);
+                blockService.approvalBlock(hd.getHash());
+            }
         }
         this.approvingChain = longestChain;
         Set<String> rightHashSet = new HashSet<>();
