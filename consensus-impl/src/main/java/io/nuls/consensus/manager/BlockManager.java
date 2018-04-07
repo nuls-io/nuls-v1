@@ -208,7 +208,6 @@ public class BlockManager {
                 try {
                     tx.verifyWithException();
                     this.ledgerService.approvalTx(tx);
-                    confirmingTxCacheManager.putTx(tx);
                 } catch (NulsException e) {
                     rollbackTxList(block.getTxs(), 0, i);
                     Log.error(e);
@@ -221,6 +220,7 @@ public class BlockManager {
             } else if (tx.getType() == TransactionConstant.TX_TYPE_EXIT_CONSENSUS) {
                 NulsContext.getServiceBean(ExitConsensusTxService.class).onApproval((PocExitConsensusTransaction) tx);
             }
+            confirmingTxCacheManager.putTx(tx);
         }
         txCacheManager.removeTx(block.getTxHashList());
         orphanTxCacheManager.removeTx(block.getTxHashList());
