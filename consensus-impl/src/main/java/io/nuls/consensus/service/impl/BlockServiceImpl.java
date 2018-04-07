@@ -256,9 +256,6 @@ public class BlockServiceImpl implements BlockService {
             Block preResultBlock = null;
             String hashHex = resultBlock.getHeader().getPreHash().getDigestHex();
             while (true) {
-                if (resultBlock.getHeader().getHeight() == 0) {
-                    return resultBlock;
-                }
                 BlockRoundData roundData = new BlockRoundData(resultBlock.getHeader().getExtend());
 
                 if (roundData.getRoundIndex() == roundIndex && roundData.getPackingIndexOfRound() == 1) {
@@ -267,6 +264,9 @@ public class BlockServiceImpl implements BlockService {
                 if (roundData.getRoundIndex() < roundIndex) {
                     resultBlock = preResultBlock;
                     break;
+                }
+                if (resultBlock.getHeader().getHeight() == 0) {
+                    return resultBlock;
                 }
                 preResultBlock = resultBlock;
                 resultBlock = getBlock(hashHex);
