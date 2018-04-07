@@ -167,13 +167,15 @@ public class BlockManager {
     private void cacheBlockToBuffer(Block block) {
         blockCacheBuffer.cacheBlock(block);
         BlockLog.info("orphan cache block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + block.getHeader().getPackingAddress());
-        boolean hasPre = blockCacheBuffer.getBlock(block.getHeader().getPreHash().getDigestHex()) != null;
-        if (!hasPre) {
+        Block preBlock = blockCacheBuffer.getBlock(block.getHeader().getPreHash().getDigestHex());
+        if (preBlock == null) {
             GetBlockRequest request = new GetBlockRequest();
             GetBlockParam params = new GetBlockParam();
             params.setToHash(block.getHeader().getPreHash());
             request.setEventBody(params);
             this.eventBroadcaster.broadcastAndCacheAysn(request, false);
+        } else {
+            this.addBlock(preBlock, true, null);
         }
     }
 
