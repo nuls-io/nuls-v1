@@ -316,67 +316,32 @@ public class ConsensusTool {
 
     public static YellowPunishTransaction createYellowPunishTx(Block preBlock, PocMeetingMember self, PocMeetingRound round) throws NulsException, IOException {
         BlockRoundData preBlockRoundData = new BlockRoundData(preBlock.getHeader().getExtend());
-        // continuous blocks in the same round
-        boolean ok = (self.getRoundIndex() == preBlockRoundData.getRoundIndex()) && (self.getIndexOfRound() == (1 + preBlockRoundData.getPackingIndexOfRound()));
-
-        //continuous blocks between two rounds
-        ok = ok || (self.getRoundIndex() == (preBlockRoundData.getRoundIndex() + 1)
-                && self.getIndexOfRound() == 1
-                && preBlockRoundData.getPackingIndexOfRound() == preBlockRoundData.getConsensusMemberCount());
-
-        //two rounds
-        ok = ok || (self.getRoundIndex() - 1) > preBlockRoundData.getRoundIndex();
-        if (ok) {
+        if (self.getRoundIndex() - preBlockRoundData.getRoundIndex() >= 2) {
             return null;
         }
-        List<Address> addressList = new ArrayList<>();
-        long roundIndex = preBlockRoundData.getRoundIndex();
 
-        int packingIndex;
-
-        if (preBlockRoundData.getPackingIndexOfRound() == preBlockRoundData.getConsensusMemberCount()) {
-            roundIndex++;
-            packingIndex = 1;
-        } else {
-            packingIndex = preBlockRoundData.getPackingIndexOfRound() + 1;
+        int yellowCount = 0;
+        if(self.getRoundIndex() == preBlockRoundData.getRoundIndex() && self.getIndexOfRound() != preBlockRoundData.getPackingIndexOfRound() + 1) {
+            yellowCount = self.getIndexOfRound() - preBlockRoundData.getPackingIndexOfRound() - 1;
         }
 
-        while (true) {
-            PocMeetingRound tempRound;
-            if (roundIndex == self.getRoundIndex()) {
-                tempRound = round;
-            } else if (roundIndex == preBlockRoundData.getRoundIndex()) {
-                tempRound = round.getPreRound();
-                if (null == tempRound) {
-                    //todo
-                    System.out.println();
-                    break;
-                }
+        if(self.getRoundIndex() != preBlockRoundData.getRoundIndex() && (self.getIndexOfRound() != 1 || preBlockRoundData.getPackingIndexOfRound() != preBlockRoundData.getConsensusMemberCount())) {
+            yellowCount = self.getIndexOfRound() + preBlockRoundData.getConsensusMemberCount() - preBlockRoundData.getPackingIndexOfRound() -1;
+        }
+
+        if(yellowCount == 0) {
+            return null;
+        }
+
+        List<Address> addressList = new ArrayList<>();
+        for(int i = 1 ; i <= yellowCount ; i++) {
+            int index = self.getIndexOfRound() - i;
+            if(index > 0) {
+                addressList.add(Address.fromHashs(round.getMember(index).getAgentAddress()));
             } else {
-                break;
+                PocMeetingRound preRound = round.getPreRound();
+                addressList.add(Address.fromHashs(preRound.getMember(index + preRound.getMemberCount()).getAgentAddress()));
             }
-            if (tempRound.getIndex() > round.getIndex()) {
-                break;
-            }
-            if (tempRound.getIndex() == round.getIndex() && packingIndex >= self.getIndexOfRound()) {
-                break;
-            }
-            if (packingIndex > tempRound.getMemberCount()) {
-                roundIndex++;
-                packingIndex = 1;
-                continue;
-            }
-            PocMeetingMember member;
-            try {
-                member = tempRound.getMember(packingIndex);
-                if (null == member) {
-                    break;
-                }
-            } catch (Exception e) {
-                break;
-            }
-            packingIndex++;
-            addressList.add(Address.fromHashs(member.getAgentAddress()));
         }
         if (addressList.isEmpty()) {
             return null;
