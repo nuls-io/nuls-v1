@@ -53,7 +53,7 @@ import java.util.List;
 public class BlockMaintenanceThread implements Runnable {
 
     //todo 3
-    private static final int MIN_NODE_COUNT = 1;
+    private static final int MIN_NODE_COUNT = 2;
 
     public static DistributedBlockInfoRequestUtils BEST_HEIGHT_FROM_NET = DistributedBlockInfoRequestUtils.getInstance();
 
