@@ -56,9 +56,9 @@
         where height = #{height,jdbcType=BIGINT}
     </delete>
     <insert id="insert" parameterType="io.nuls.db.entity.PunishLogPo">
-    insert into punish_log (id, address, time,height,type)
+    insert into punish_log (id, address, time,height,type,round_index)
     values (#{id,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR}, #{time,jdbcType=INTEGER}
-    , #{height,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER})
+    , #{height,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER} , #{roundIndex,jdbcType=VARCHAR})
     </insert>
 
     <update id="updateByPrimaryKey" parameterType="io.nuls.db.entity.PunishLogPo">
