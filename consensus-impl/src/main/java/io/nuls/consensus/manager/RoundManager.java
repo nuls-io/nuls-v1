@@ -46,7 +46,6 @@ public class RoundManager {
 
     private BlockService consensusBlockService;
     private PocMeetingRound currentRound;
-    private boolean needReSet;
 
     private Lock lock = new ReentrantLock();
 
@@ -83,9 +82,8 @@ public class RoundManager {
             BlockRoundData currentRoundData = new BlockRoundData(currentBlock.getHeader().getExtend());
             boolean needCalcRound = false;
             do {
-                if (null == currentRound || needReSet) {
+                if (null == currentRound  ) {
                     needCalcRound = true;
-                    needReSet = false;
                     break;
                 }
                 if (currentRound.getEndTime() <= TimeService.currentTimeMillis()) {
@@ -256,30 +254,11 @@ public class RoundManager {
     }
 
     public PocMeetingRound getCurrentRound() {
-        if (needReSet) {
-            return null;
-        }
         List<Account> accountList = accountService.getAccountList();
         currentRound.calcLocalPacker(accountList);
         return currentRound;
     }
 
-    public void reset() {
-//        lock.lock();
-//        try {
-//            Block bestBlock = getBestBlock();
-//            BlockRoundData roundData = new BlockRoundData(bestBlock.getHeader().getExtend());
-//            //todo 确定正确性
-//            if (this.currentRound != null && roundData.getRoundIndex() == currentRound.getIndex() && roundData.getPackingIndexOfRound() != roundData.getConsensusMemberCount()) {
-//                return;
-//            }
-//            this.needReSet = true;
-//            ROUND_MAP.clear();
-//            this.init();
-//        } finally {
-//            lock.unlock();
-//        }
-    }
 
 
     private Block getBestBlock() {

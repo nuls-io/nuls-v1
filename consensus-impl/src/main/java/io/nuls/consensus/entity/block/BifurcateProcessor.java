@@ -99,8 +99,7 @@ public class BifurcateProcessor {
             BlockLog.info(str.toString());
             tempIndex++;
         }
-        if (this.approvingChain == null || !this.approvingChain.getId().equals(longestChain.getId())) {
-            RoundManager.getInstance().reset();
+        if (this.approvingChain != null || !this.approvingChain.getId().equals(longestChain.getId())) {
             BlockService blockService = NulsContext.getServiceBean(BlockService.class);
             for (int i=approvingChain.size()-1;i>=0;i--) {
                 HeaderDigest hd = approvingChain.getHeaderDigestList().get(i);
