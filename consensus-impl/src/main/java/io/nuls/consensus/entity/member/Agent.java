@@ -50,7 +50,7 @@ public class Agent extends BaseNulsData {
 
     private long startTime;
 
-    private long blockHeight;
+    private long blockHeight = -1L;
 
     private int status;
 

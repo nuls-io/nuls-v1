@@ -191,7 +191,7 @@ public class ConsensusCacheManager {
             if (ca.getDelHeight() != 0 && ca.getDelHeight() <= height) {
                 continue;
             }
-            if (ca.getExtend().getBlockHeight() >= height) {
+            if (ca.getExtend().getBlockHeight() >= height||ca.getExtend().getBlockHeight()<0) {
                 continue;
             }
             resultList.add(ca);
@@ -237,7 +237,7 @@ public class ConsensusCacheManager {
             if (cd.getDelHeight() != 0 && cd.getDelHeight() <= height) {
                 continue;
             }
-            if (cd.getExtend().getBlockHeight() >= height) {
+            if (cd.getExtend().getBlockHeight() >= height||cd.getExtend().getBlockHeight()<0) {
                 continue;
             }
             resultList.add(cd);
