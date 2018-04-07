@@ -165,7 +165,7 @@ public class ConsensusMeetingRunner implements Runnable {
         try {
             boolean needCheckAgain = waitReceiveNewestBlock(self, round);
 
-            Block newBlock = doPacking(self, round, PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000 / 2);
+            Block newBlock = doPacking(self, round);
 
             if (needCheckAgain && hasReceiveNewestBlock(self, round)) {
                 Block realBestBlock = blockManager.getBlock(newBlock.getHeader().getHeight());
@@ -179,7 +179,7 @@ public class ConsensusMeetingRunner implements Runnable {
                     }
                     orphanTxCacheManager.putTx(transaction);
                 }
-                newBlock = doPacking(self, round, self.getPackEndTime() - TimeService.currentTimeMillis() + PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000 / 4);
+                newBlock = doPacking(self, round);
             }
             if (null == newBlock) {
                 return;
@@ -213,7 +213,7 @@ public class ConsensusMeetingRunner implements Runnable {
                     }
                     break;
                 }
-                Thread.sleep(500l);
+                Thread.sleep(500L);
                 if (TimeService.currentTimeMillis() - time >= timeout) {
                     break;
                 }
@@ -323,7 +323,7 @@ public class ConsensusMeetingRunner implements Runnable {
         }
     }
 
-    private Block doPacking(PocMeetingMember self, PocMeetingRound round, long timeout) throws NulsException, IOException {
+    private Block doPacking(PocMeetingMember self, PocMeetingRound round) throws NulsException, IOException {
 
         Block bestBlock = this.blockService.getBestBlock();
         List<Transaction> allTxList = txCacheManager.getTxList();
@@ -350,7 +350,7 @@ public class ConsensusMeetingRunner implements Runnable {
         List<NulsDigestData> outHashList = new ArrayList<>();
         long totalSize = 0L;
         for (int i = 0; i < allTxList.size(); i++) {
-            if ((self.getPackEndTime() - TimeService.currentTimeMillis()) <= timeout) {
+            if ((self.getPackEndTime() - TimeService.currentTimeMillis()) <= 500L) {
                 break;
             }
             Transaction tx = allTxList.get(i);
@@ -382,7 +382,7 @@ public class ConsensusMeetingRunner implements Runnable {
         }
         addConsensusTx(bestBlock, packingTxList, self, round);
         bd.setTxList(packingTxList);
-        Log.debug("txCount:" + packingTxList.size());
+        Log.info("txCount:" + packingTxList.size());
         Block newBlock = ConsensusTool.createBlock(bd, round.getLocalPacker());
         System.out.printf("========height:" + newBlock.getHeader().getHeight() + ",time:" + DateUtil.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
                 DateUtil.convertDate(new Date(self.getPackEndTime())));
