@@ -177,6 +177,7 @@ public class RoundManager {
     }
 
     private PocMeetingRound calcRound(long startCalcHeight, long roundIndex, long startTIme, boolean updateCacheStatus) {
+        BlockLog.info("++++++++calcRound:height:"+startCalcHeight+" ,index:"+roundIndex);
         PocMeetingRound round = new PocMeetingRound();
         round.setIndex(roundIndex);
         round.setStartTime(startTIme);
