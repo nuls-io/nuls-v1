@@ -203,7 +203,6 @@ public class RoundManager {
             List<Consensus<Deposit>> cdlist = consensusCacheManager.getDepositListByAgentId(ca.getHexHash(), startCalcHeight);
             for (Consensus<Deposit> cd : cdlist) {
                 member.setTotalDeposit(member.getTotalDeposit().add(cd.getExtend().getDeposit()));
-                cdlist.add(cd);
             }
             member.setDepositList(cdlist);
             member.setCreditVal(calcCreditVal(member, round.getIndex() - 2));
