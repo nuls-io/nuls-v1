@@ -199,7 +199,9 @@ public class RoundManager {
             memberList.add(member);
         }
         List<Consensus<Agent>> agentList = consensusCacheManager.getAliveAgentList(startCalcHeight);
-
+        BlockLog.info("agent list cache:size:"+consensusCacheManager.agentKeySet().size());
+        BlockLog.info("deposit list cache:size:"+consensusCacheManager.depositKeySet().size());
+        BlockLog.info("get alive agent list form cache:size:"+agentList.size());
         for (Consensus<Agent> ca : agentList) {
             PocMeetingMember member = new PocMeetingMember();
             member.setAgentConsensus(ca);
@@ -210,6 +212,7 @@ public class RoundManager {
             member.setCommissionRate(ca.getExtend().getCommissionRate());
 
             List<Consensus<Deposit>> cdlist = consensusCacheManager.getDepositListByAgentId(ca.getHexHash(), startCalcHeight);
+            BlockLog.info("get alive depositlist by agentId:"+ca.getHexHash()+" , calcHeight:"+startCalcHeight+" ,resultSize:"+cdlist.size());
             for (Consensus<Deposit> cd : cdlist) {
                 member.setTotalDeposit(member.getTotalDeposit().add(cd.getExtend().getDeposit()));
             }
