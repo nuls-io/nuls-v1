@@ -250,10 +250,12 @@ public class RoundManager {
         }
         long blockCount = pocBlockService.getBlockCount(member.getPackingAddress(), roundStart, calcRoundIndex);
         long sumRoundVal = punishLogDataService.getCountByRounds(member.getAgentAddress(), roundStart, calcRoundIndex, PunishType.YELLOW.getCode());
-        double ability = blockCount / PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT;
+        double ability = DoubleUtils.div(blockCount , PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT);
 
-        double penalty = (PocConsensusConstant.CREDIT_MAGIC_NUM * sumRoundVal) / (PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT * PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT);
-        BlockLog.info(")))))))))))))creditVal:" + (ability - penalty) + ",member:" + member.getAgentAddress());
+        double penalty = DoubleUtils.div(DoubleUtils.mul(PocConsensusConstant.CREDIT_MAGIC_NUM , sumRoundVal),
+                        DoubleUtils.mul(PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT , PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT) );
+
+        BlockLog.info(")))))))))))))creditVal:" + DoubleUtils.sub(ability , penalty) + ",member:" + member.getAgentAddress());
         return ability - penalty;
     }
 
