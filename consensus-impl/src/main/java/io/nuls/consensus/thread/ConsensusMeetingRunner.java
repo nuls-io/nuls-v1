@@ -354,6 +354,7 @@ public class ConsensusMeetingRunner implements Runnable {
                 break;
             }
             Transaction tx = allTxList.get(i);
+            tx.setBlockHeight(bd.getHeight());
             if ((totalSize + tx.size()) >= PocConsensusConstant.MAX_BLOCK_SIZE) {
                 break;
             }

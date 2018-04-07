@@ -36,13 +36,20 @@ import io.nuls.consensus.entity.block.BifurcateProcessor;
 import io.nuls.consensus.entity.block.BlockHeaderChain;
 import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.entity.block.HeaderDigest;
+import io.nuls.consensus.entity.tx.PocExitConsensusTransaction;
+import io.nuls.consensus.entity.tx.PocJoinConsensusTransaction;
+import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
 import io.nuls.consensus.event.GetBlockRequest;
 import io.nuls.consensus.service.intf.BlockService;
+import io.nuls.consensus.service.tx.ExitConsensusTxService;
+import io.nuls.consensus.service.tx.JoinConsensusTxService;
+import io.nuls.consensus.service.tx.RegisterAgentTxService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
@@ -207,6 +214,12 @@ public class BlockManager {
                     Log.error(e);
                     throw new NulsRuntimeException(e);
                 }
+            } else if (tx.getType() == TransactionConstant.TX_TYPE_REGISTER_AGENT) {
+                NulsContext.getServiceBean(RegisterAgentTxService.class).onApproval((RegisterAgentTransaction) tx);
+            } else if (tx.getType() == TransactionConstant.TX_TYPE_JOIN_CONSENSUS) {
+                NulsContext.getServiceBean(JoinConsensusTxService.class).onApproval((PocJoinConsensusTransaction) tx);
+            } else if (tx.getType() == TransactionConstant.TX_TYPE_EXIT_CONSENSUS) {
+                NulsContext.getServiceBean(ExitConsensusTxService.class).onApproval((PocExitConsensusTransaction) tx);
             }
         }
         txCacheManager.removeTx(block.getTxHashList());
