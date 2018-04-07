@@ -185,38 +185,44 @@ public class ConsensusCacheManager {
      */
     public List<Consensus<Agent>> getAliveAgentList(long height) {
         List<Consensus<Agent>> agentList = new ArrayList<>(this.agentCache.values());
+        List<Consensus<Agent>> resultList = new ArrayList<>();
         for (int i = agentList.size() - 1; i >= 0; i--) {
             Consensus<Agent> ca = agentList.get(i);
             if (ca.getDelHeight() != 0 && ca.getDelHeight() <= height) {
-                agentList.remove(i);
+                continue;
             }
             if (ca.getExtend().getBlockHeight() > height) {
-                agentList.remove(i);
+                continue;
             }
+            resultList.add(ca);
         }
-        return this.agentCache.values();
+        return resultList;
     }
 
     public List<Consensus<Agent>> getAgentList(ConsensusStatusEnum status) {
         List<Consensus<Agent>> agentList = this.getAliveAgentList(NulsContext.getInstance().getBestHeight());
+        List<Consensus<Agent>> resultList = new ArrayList<>();
         for (int i = agentList.size() - 1; i >= 0; i--) {
             Consensus<Agent> ca = agentList.get(i);
             if (status.getCode() != ca.getExtend().getStatus()) {
-                agentList.remove(i);
+                continue;
             }
+            resultList.add(ca);
         }
-        return agentList;
+        return resultList;
     }
 
     public List<Consensus<Deposit>> getDepositList(ConsensusStatusEnum status) {
         List<Consensus<Deposit>> depositList = getAliveDepositList(NulsContext.getInstance().getBestHeight());
+        List<Consensus<Deposit>> resultList = new ArrayList<>();
         for (int i = depositList.size() - 1; i >= 0; i--) {
             Consensus<Deposit> ca = depositList.get(i);
             if (status.getCode() != ca.getExtend().getStatus()) {
-                depositList.remove(i);
+                continue;
             }
+            resultList.add(ca);
         }
-        return depositList;
+        return resultList;
     }
 
     public List<Consensus<Deposit>> getAllDepositList() {
@@ -225,39 +231,43 @@ public class ConsensusCacheManager {
 
     public List<Consensus<Deposit>> getAliveDepositList(long height) {
         List<Consensus<Deposit>> depositList = getAllDepositList();
+        List<Consensus<Deposit>> resultList = new ArrayList<>();
         for (int i = depositList.size() - 1; i >= 0; i--) {
             Consensus<Deposit> cd = depositList.get(i);
             if (cd.getDelHeight() != 0 && cd.getDelHeight() <= height) {
-                depositList.remove(i);
+                continue;
             }
             if (cd.getExtend().getBlockHeight() > height) {
-                depositList.remove(i);
+                continue;
             }
+            resultList.add(cd            );
         }
-        return depositList;
+        return resultList;
     }
 
 
     public List<Consensus<Deposit>> getDepositListByAddress(String address) {
-        List<Consensus<Deposit>> depositList = getAliveDepositList(NulsContext.getInstance().getBestHeight());
+        List<Consensus<Deposit>> depositList = getAliveDepositList(NulsContext.getInstance().getBestHeight()); List<Consensus<Deposit>> resultList = new ArrayList<>();
         for (int i = depositList.size() - 1; i >= 0; i--) {
             Consensus<Deposit> ca = depositList.get(i);
             if (!ca.getAddress().equals(address)) {
-                depositList.remove(i);
+               continue;
             }
+            resultList.add(ca);
         }
-        return depositList;
+        return resultList;
     }
 
     public List<Consensus<Deposit>> getDepositListByAgentId(String agentId, long height) {
-        List<Consensus<Deposit>> depositList = getAliveDepositList(height);
+        List<Consensus<Deposit>> depositList = getAliveDepositList(height);List<Consensus<Deposit>> resultList = new ArrayList<>();
         for (int i = depositList.size() - 1; i >= 0; i--) {
             Consensus<Deposit> ca = depositList.get(i);
             if (!ca.getExtend().getAgentHash().equals(agentId)) {
-                depositList.remove(i);
+                continue;
             }
+            resultList.add(ca);
         }
-        return depositList;
+        return resultList;
     }
 
 
