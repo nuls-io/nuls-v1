@@ -31,12 +31,13 @@
         <id column="id" property="id" jdbcType="VARCHAR"/>
         <result column="address" property="address" jdbcType="VARCHAR"/>
         <result column="time" property="time" jdbcType="BIGINT"/>
+        <result column="round_index" property="roundIndex" jdbcType="BIGINT"/>
         <result column="height" property="height" jdbcType="BIGINT"/>
         <result column="type" property="type" jdbcType="INTEGER"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-    id, address, time,height,type
+    id, address, time,height,type,round_index
   </sql>
 
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String">
@@ -66,4 +67,11 @@
      ,height = #{height,jdbcType=VARCHAR}, type = #{type,jdbcType=INTEGER}
     where id = #{id,jdbcType=VARCHAR}
     </update>
+
+    <select id="selectCount" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultType="java.lang.Long">
+        select count(id) from punish_log
+        <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
+    </select>
+
+
 </mapper>

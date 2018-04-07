@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS `punish_log` (
   `address` varchar(40) NOT NULL,
   `type` int(1) NOT NULL,
   `height` bigint(14) NOT NULL,
+  `round_index` bigint(14) NOT NULL,
   `time` bigint(14) NOT NULL,
   PRIMARY KEY (`id`)
 ) ;

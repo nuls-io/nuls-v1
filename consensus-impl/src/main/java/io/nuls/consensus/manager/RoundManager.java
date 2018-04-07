@@ -5,6 +5,7 @@ import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.constant.PocConsensusConstant;
+import io.nuls.consensus.constant.PunishType;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.entity.meeting.PocMeetingMember;
@@ -19,6 +20,7 @@ import io.nuls.core.utils.calc.DoubleUtils;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.BlockLog;
 import io.nuls.core.utils.log.Log;
+import io.nuls.db.dao.PunishLogDataService;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,6 +41,7 @@ public class RoundManager {
     private ConsensusManager csManager = ConsensusManager.getInstance();
     private PocBlockService pocBlockService = PocBlockService.getInstance();
     private ConsensusCacheManager consensusCacheManager = ConsensusCacheManager.getInstance();
+    private PunishLogDataService punishLogDataService = NulsContext.getServiceBean(PunishLogDataService.class);
 
 
     private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
@@ -82,7 +85,7 @@ public class RoundManager {
             BlockRoundData currentRoundData = new BlockRoundData(currentBlock.getHeader().getExtend());
             boolean needCalcRound = false;
             do {
-                if (null == currentRound  ) {
+                if (null == currentRound) {
                     needCalcRound = true;
                     break;
                 }
@@ -163,8 +166,13 @@ public class RoundManager {
             str.append(",packTime:" + new Date(member.getPackEndTime()));
             str.append("\n");
         }
-        BlockLog.info("calc new round:index:" + round.getIndex() + " , start:" + new Date(round.getStartTime())
-                + ", netTime:(" + new Date(TimeService.currentTimeMillis()).toString() + ") , members:\n :" + str);
+        if(null==round.getPreRound()){
+            BlockLog.info("calc new round:index:" + round.getIndex() + " , start:" + new Date(round.getStartTime())
+                    + ", netTime:(" + new Date(TimeService.currentTimeMillis()).toString() + ") , members:\n :" + str);
+        }else {
+            BlockLog.info("calc new round:index:" + round.getIndex() + " ,preIndex:" + round.getPreRound().getIndex() + " , start:" + new Date(round.getStartTime())
+                    + ", netTime:(" + new Date(TimeService.currentTimeMillis()).toString() + ") , members:\n :" + str);
+        }
         return round;
     }
 
@@ -216,7 +224,7 @@ public class RoundManager {
                     this.consensusCacheManager.updateAgentStatusById(ca.getHexHash(), ConsensusStatusEnum.IN);
                     this.consensusCacheManager.updateDepositStatusByAgentId(ca.getHexHash(), startCalcHeight, ConsensusStatusEnum.IN);
                 }
-            } else{
+            } else {
                 ca.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
                 if (updateCacheStatus) {
                     this.consensusCacheManager.updateAgentStatusById(ca.getHexHash(), ConsensusStatusEnum.WAITING);
@@ -237,7 +245,7 @@ public class RoundManager {
             roundStart = 0;
         }
         long blockCount = pocBlockService.getBlockCount(member.getPackingAddress(), roundStart, calcRoundIndex);
-        long sumRoundVal = pocBlockService.getSumOfRoundIndexOfYellowPunish(member.getAgentAddress(), roundStart, calcRoundIndex);
+        long sumRoundVal = punishLogDataService.getCountByRounds(member.getAgentAddress(), roundStart, calcRoundIndex, PunishType.YELLOW.getCode());
         double ability = blockCount / PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT;
 
         double penalty = (PocConsensusConstant.CREDIT_MAGIC_NUM * sumRoundVal) / (PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT * PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT);
@@ -257,7 +265,6 @@ public class RoundManager {
         currentRound.calcLocalPacker(accountList);
         return currentRound;
     }
-
 
 
     private Block getBestBlock() {
@@ -320,6 +327,15 @@ public class RoundManager {
 
             round.setPreRound(getRound(preBlockRoundData.getRoundIndex(), preRoundIndex, false));
         }
+        StringBuilder str = new StringBuilder();
+        for (PocMeetingMember member : round.getMemberList()) {
+            str.append(member.getPackingAddress());
+            str.append(" ,order:" + member.getIndexOfRound());
+            str.append(",packEndTime:" + new Date(member.getPackEndTime()));
+            str.append("\n");
+        }
+        BlockLog.info("validate round:index:" + round.getIndex() +" ,preIndex:"+round.getPreRound().getIndex()+ " , start:" + new Date(round.getStartTime())
+                + ", netTime:(" + new Date(TimeService.currentTimeMillis()).toString() + ") , members:\n :" + str);
         return round;
     }
 }

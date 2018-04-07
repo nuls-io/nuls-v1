@@ -44,7 +44,4 @@ public class PocBlockService  {
         return blockStorageService.getBlockCount(address,roundStart,roundEnd);
     }
 
-    public long getSumOfRoundIndexOfYellowPunish(String address,long startRoundIndex, long endRoundIndex) {
-        return blockStorageService.getSumOfRoundIndexOfYellowPunish(address,startRoundIndex,endRoundIndex);
-    }
 }

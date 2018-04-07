@@ -24,13 +24,19 @@
 package io.nuls.consensus.service.tx;
 
 import io.nuls.account.entity.Address;
+import io.nuls.consensus.constant.PunishType;
 import io.nuls.consensus.entity.YellowPunishData;
+import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.entity.tx.YellowPunishTransaction;
+import io.nuls.consensus.service.intf.BlockService;
+import io.nuls.core.chain.entity.Block;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.tx.serivce.TransactionService;
+import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.PunishLogDataService;
 import io.nuls.db.dao.TxAccountRelationDataService;
+import io.nuls.db.entity.PunishLogPo;
 import io.nuls.db.entity.TxAccountRelationPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.db.transactional.annotation.PROPAGATION;
@@ -49,6 +55,7 @@ public class YellowPunishTxService implements TransactionService<YellowPunishTra
 
     private TxAccountRelationDataService relationDataService = NulsContext.getServiceBean(TxAccountRelationDataService.class);
 
+
     @Override
     @DbSession
     public void onRollback(YellowPunishTransaction tx) throws NulsException {
@@ -64,20 +71,23 @@ public class YellowPunishTxService implements TransactionService<YellowPunishTra
 
     @Override
     @DbSession
-    public void onCommit(YellowPunishTransaction tx) throws NulsException {
+    public void onCommit(YellowPunishTransaction tx) {
         YellowPunishData data = tx.getTxData();
         String txHash = tx.getHash().getDigestHex();
         Set<String> set = new HashSet<>();
         for (Address address : data.getAddressList()) {
-//            PunishLogPo po = new PunishLogPo();
-//            po.setAddress(address.getBase58());
-//            po.setHeight(data.getHeight());
-//            po.setId(StringUtils.getNewUUID());
-//            po.setTime(tx.getTime());
-//            po.setType(PunishType.YELLOW.getCode());
-//            punishLogDataService.save(po);
+            PunishLogPo plpo = new PunishLogPo();
+            plpo.setAddress(address.getBase58());
+            plpo.setHeight(data.getHeight());
+            plpo.setId(StringUtils.getNewUUID());
+            plpo.setTime(tx.getTime());
+            Block block = NulsContext.getServiceBean(BlockService.class).getBlock(tx.getBlockHeight());
+            BlockRoundData roundData = new BlockRoundData(block.getHeader().getExtend());
+            plpo.setRoundIndex(roundData.getRoundIndex());
+            plpo.setType(PunishType.YELLOW.getCode());
+            punishLogDataService.save(plpo);
             String adrs = address.toString();
-            if(!set.add(adrs)){
+            if (!set.add(adrs)) {
                 continue;
             }
             TxAccountRelationPo po = new TxAccountRelationPo();
@@ -89,6 +99,6 @@ public class YellowPunishTxService implements TransactionService<YellowPunishTra
     }
 
     @Override
-    public void onApproval(YellowPunishTransaction tx) throws NulsException {
+    public void onApproval(YellowPunishTransaction tx) {
     }
 }

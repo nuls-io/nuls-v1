@@ -82,7 +82,7 @@ public class BifurcateProcessor {
         BlockHeaderChain longestChain = null;
         StringBuilder str = new StringBuilder("++++++++++++++++++++++++chain info:");
         for (BlockHeaderChain chain : chainList) {
-            str.append("+++++++++++\nchain:start-" + chain.getHeaderDigestList().get(0).getHeight() + ", end-" + chain.getHeaderDigestList().get(chain.size() - 1).getHeight());
+            str.append("\n+++++++++++chain:start-" + chain.getHeaderDigestList().get(0).getHeight() + ", end-" + chain.getHeaderDigestList().get(chain.size() - 1).getHeight());
             int listSize = chain.size();
             if (maxSize < listSize) {
                 maxSize = listSize;
@@ -95,10 +95,8 @@ public class BifurcateProcessor {
                 }
             }
         }
-        if (tempIndex % 10 == 0) {
             BlockLog.info(str.toString());
             tempIndex++;
-        }
         if (this.approvingChain != null && !this.approvingChain.getId().equals(longestChain.getId())) {
             BlockService blockService = NulsContext.getServiceBean(BlockService.class);
             for (int i=approvingChain.size()-1;i>=0;i--) {

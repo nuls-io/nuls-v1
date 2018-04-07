@@ -244,19 +244,6 @@ public class BlockStorageService {
         return headerDao.getSumTxCount(address, roundStart, roundEnd);
     }
 
-    public long getSumOfRoundIndexOfYellowPunish(String address, long startRoundIndex, long endRoundIndex) {
-        //todo 是否需要查询内存
-        List<Long> indexList = this.headerDao.getListOfRoundIndexOfYellowPunish(address, startRoundIndex, endRoundIndex);
-        if (null == indexList || indexList.isEmpty()) {
-            return 0L;
-        }
-        long value = 0;
-        for (Long index : indexList) {
-            value += (index - startRoundIndex + 1);
-        }
-        return value;
-    }
-
     public Long getRoundFirstBlockHeight(long roundIndex) {
         return this.headerDao.getRoundFirstBlockHeight(roundIndex);
     }
