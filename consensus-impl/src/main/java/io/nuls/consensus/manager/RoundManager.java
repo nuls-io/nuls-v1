@@ -109,7 +109,7 @@ public class RoundManager {
             }
 
             if (resultRound.getPreRound() == null) {
-                resultRound.setPreRound(ROUND_MAP.get(currentRoundData.getRoundIndex() - 1));
+                resultRound.setPreRound(ROUND_MAP.get(currentRoundData.getRoundIndex()));
             }
 
             List<Account> accountList = accountService.getAccountList();
