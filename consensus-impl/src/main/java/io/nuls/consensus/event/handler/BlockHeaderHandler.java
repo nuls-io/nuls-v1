@@ -24,6 +24,8 @@
 package io.nuls.consensus.event.handler;
 
 import io.nuls.consensus.cache.manager.block.TemporaryCacheManager;
+import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
+import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.GetBlockParam;
 import io.nuls.consensus.entity.GetSmallBlockParam;
@@ -57,7 +59,7 @@ public class BlockHeaderHandler extends AbstractEventHandler<BlockHeaderEvent> {
             Log.warn("recieved a null blockHeader!");
             return;
         }
-        BlockLog.info("recieve new block from("+fromId+"), header height:" +header.getHeight() + ", preHash:" + header.getPreHash() + " , hash:" + header.getHash() + ", address:" + header.getPackingAddress());
+        BlockLog.info("recieve new block from("+fromId+"), tx count : " + header.getTxCount() + " , tx pool count : " + ReceivedTxCacheManager.getInstance().getTxList().size() + " - " + OrphanTxCacheManager.getInstance().getTxList().size() + " , header height:" +header.getHeight() + ", preHash:" + header.getPreHash() + " , hash:" + header.getHash() + ", address:" + header.getPackingAddress());
 
         //todo 过早过晚的情况进行判断、处理
 
