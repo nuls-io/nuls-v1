@@ -191,7 +191,7 @@ public class ConsensusCacheManager {
             if (ca.getDelHeight() != 0 && ca.getDelHeight() <= height) {
                 continue;
             }
-            if (ca.getExtend().getBlockHeight() > height) {
+            if (ca.getExtend().getBlockHeight() >= height) {
                 continue;
             }
             resultList.add(ca);
@@ -237,21 +237,22 @@ public class ConsensusCacheManager {
             if (cd.getDelHeight() != 0 && cd.getDelHeight() <= height) {
                 continue;
             }
-            if (cd.getExtend().getBlockHeight() > height) {
+            if (cd.getExtend().getBlockHeight() >= height) {
                 continue;
             }
-            resultList.add(cd            );
+            resultList.add(cd);
         }
         return resultList;
     }
 
 
     public List<Consensus<Deposit>> getDepositListByAddress(String address) {
-        List<Consensus<Deposit>> depositList = getAliveDepositList(NulsContext.getInstance().getBestHeight()); List<Consensus<Deposit>> resultList = new ArrayList<>();
+        List<Consensus<Deposit>> depositList = getAliveDepositList(NulsContext.getInstance().getBestHeight());
+        List<Consensus<Deposit>> resultList = new ArrayList<>();
         for (int i = depositList.size() - 1; i >= 0; i--) {
             Consensus<Deposit> ca = depositList.get(i);
             if (!ca.getAddress().equals(address)) {
-               continue;
+                continue;
             }
             resultList.add(ca);
         }
@@ -259,7 +260,8 @@ public class ConsensusCacheManager {
     }
 
     public List<Consensus<Deposit>> getDepositListByAgentId(String agentId, long height) {
-        List<Consensus<Deposit>> depositList = getAliveDepositList(height);List<Consensus<Deposit>> resultList = new ArrayList<>();
+        List<Consensus<Deposit>> depositList = getAliveDepositList(height);
+        List<Consensus<Deposit>> resultList = new ArrayList<>();
         for (int i = depositList.size() - 1; i >= 0; i--) {
             Consensus<Deposit> ca = depositList.get(i);
             if (!ca.getExtend().getAgentHash().equals(agentId)) {
