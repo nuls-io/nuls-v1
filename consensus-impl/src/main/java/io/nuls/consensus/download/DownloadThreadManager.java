@@ -12,9 +12,9 @@ import io.nuls.network.entity.Node;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
-import java.util.Random;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Created by ln on 2018/4/8.

@@ -1,7 +1,6 @@
 package io.nuls.consensus.download;
 
 import io.nuls.core.chain.entity.Block;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.entity.Node;
 

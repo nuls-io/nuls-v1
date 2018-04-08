@@ -26,9 +26,11 @@ public class DownloadCacheHandler {
     }
 
     public static void receiveBlock(Block block) {
-        CompletableFuture<Block> future = blockCacher.get(block.getHeader().getHash().getDigestHex());
+        String hash = block.getHeader().getHash().getDigestHex();
+        CompletableFuture<Block> future = blockCacher.get(hash);
         if(future != null) {
             future.complete(block);
+            blockCacher.remove(hash);
         }
     }
 
@@ -42,16 +44,11 @@ public class DownloadCacheHandler {
     }
 
     public static void receiveHashes(BlockHashResponse hashes) {
-        CompletableFuture<BlockHashResponse> future = blockHashesCacher.get(hashes.getRequestEventHash().getDigestHex());
+        String key = hashes.getRequestEventHash().getDigestHex();
+        CompletableFuture<BlockHashResponse> future = blockHashesCacher.get(key);
         if(future != null) {
             future.complete(hashes);
+            blockHashesCacher.remove(key);
         }
-    }
-
-    public static void removeGetBlockHashesRequest(String requestHash){
-        blockHashesCacher.remove(requestHash);
-    }
-    public static void removeGetBlockRequest(String requestHash){
-        blockCacher.remove(requestHash);
     }
 }

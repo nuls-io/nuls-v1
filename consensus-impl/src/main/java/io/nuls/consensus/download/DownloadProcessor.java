@@ -1,20 +1,16 @@
 package io.nuls.consensus.download;
 
 import io.nuls.consensus.constant.DownloadStatus;
+import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.service.intf.BlockService;
-import io.nuls.consensus.utils.BlockInfo;
-import io.nuls.consensus.utils.DistributedBlockInfoRequestUtils;
 import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.NulsThreadFactory;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.date.TimeService;
-import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.queue.service.impl.QueueService;
 import io.nuls.network.entity.Node;
 import io.nuls.network.service.NetworkService;
@@ -23,7 +19,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -218,7 +213,7 @@ public class DownloadProcessor extends Thread {
 
         //check node size again
         nodeSize = networkService.getAvailableNodes().size();
-        if(nodeSize < MIN_NODE_COUNT) {
+        if(nodeSize < PocConsensusConstant.ALIVE_MIN_NODE_COUNT) {
             downloadStatus = DownloadStatus.WAIT;
             return;
         }

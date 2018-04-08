@@ -73,7 +73,6 @@ public class DownloadUtils {
                 Log.error(e);
                 throw e;
             }
-            DownloadCacheHandler.removeGetBlockRequest(endHash);
         } else {
             GetBlocksHashRequest hashesRequest = new GetBlocksHashRequest(startHeight, size);
             Future<BlockHashResponse> hashesFuture = DownloadCacheHandler.addGetBlockHashesRequest(hashesRequest.getHash().getDigestHex());
@@ -114,7 +113,6 @@ public class DownloadUtils {
                     Log.error(e);
                     throw e;
                 }
-                DownloadCacheHandler.removeGetBlockRequest(request.getHash().getDigestHex());
             }
         }
         return resultList;
