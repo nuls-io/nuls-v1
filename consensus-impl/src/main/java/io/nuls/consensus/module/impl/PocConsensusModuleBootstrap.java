@@ -23,9 +23,7 @@
  */
 package io.nuls.consensus.module.impl;
 
-import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.download.DownloadServiceImpl;
-import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.consensus.entity.tx.*;
 import io.nuls.consensus.entity.validator.PocBlockValidatorManager;
 import io.nuls.consensus.event.*;
@@ -36,18 +34,23 @@ import io.nuls.consensus.module.AbstractConsensusModule;
 import io.nuls.consensus.service.impl.BlockServiceImpl;
 import io.nuls.consensus.service.impl.PocConsensusServiceImpl;
 import io.nuls.consensus.service.intf.BlockService;
-import io.nuls.consensus.service.intf.DownloadService;
 import io.nuls.consensus.service.tx.*;
 import io.nuls.consensus.thread.BlockCacheCheckThread;
+import io.nuls.core.chain.entity.Block;
+import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.event.EventManager;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.BaseThread;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
+import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.service.intf.EventBusService;
 import io.nuls.ledger.event.TransactionEvent;
+import io.nuls.ledger.service.intf.LedgerService;
 
 import java.util.List;
 
@@ -86,6 +89,11 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
         consensusManager.init();
         this.registerHandlers();
 //        this.consensusManager.startMaintenanceWork();
+        try {
+            checkGenesisBlock();
+        } catch (Exception e) {
+            Log.error(e);
+        }
         consensusManager.joinConsensusMeeting();
         consensusManager.startPersistenceWork();
         consensusManager.startDownloadWork();
@@ -94,6 +102,29 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
         TaskManager.createAndRunThread(this.getModuleId(),"block-cache-check",new BlockCacheCheckThread());
     }
 
+    public void checkGenesisBlock() throws Exception {
+        Block genesisBlock = NulsContext.getInstance().getGenesisBlock();
+        ValidateResult result = genesisBlock.verify();
+        if (result.isFailed()) {
+            throw new NulsRuntimeException(ErrorCode.DATA_ERROR, result.getMessage());
+        }
+        BlockService blockService = NulsContext.getServiceBean(BlockService.class);
+        LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
+        Block localGenesisBlock = blockService.getGengsisBlock();
+        if (null == localGenesisBlock) {
+            for (Transaction tx : genesisBlock.getTxs()) {
+                ledgerService.approvalTx(tx);
+            }
+            blockService.saveBlock(genesisBlock);
+            return;
+        }
+        localGenesisBlock.verify();
+        String logicHash = genesisBlock.getHeader().getHash().getDigestHex();
+        String localHash = localGenesisBlock.getHeader().getHash().getDigestHex();
+        if (!logicHash.equals(localHash)) {
+            throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
+        }
+    }
 
     private void registerHandlers() {
         BlockEventHandler blockEventHandler = new BlockEventHandler();
