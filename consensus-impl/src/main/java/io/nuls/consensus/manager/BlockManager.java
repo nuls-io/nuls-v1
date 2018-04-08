@@ -32,6 +32,9 @@ import io.nuls.consensus.cache.manager.block.ConfirmingBlockCacheManager;
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
+import io.nuls.consensus.constant.DownloadStatus;
+import io.nuls.consensus.download.DownloadServiceImpl;
+import io.nuls.consensus.download.DownloadUtils;
 import io.nuls.consensus.entity.GetBlockParam;
 import io.nuls.consensus.entity.block.BifurcateProcessor;
 import io.nuls.consensus.entity.block.BlockHeaderChain;
@@ -42,6 +45,7 @@ import io.nuls.consensus.entity.tx.PocJoinConsensusTransaction;
 import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
 import io.nuls.consensus.event.GetBlockRequest;
 import io.nuls.consensus.service.intf.BlockService;
+import io.nuls.consensus.service.intf.DownloadService;
 import io.nuls.consensus.service.tx.ExitConsensusTxService;
 import io.nuls.consensus.service.tx.JoinConsensusTxService;
 import io.nuls.consensus.service.tx.RegisterAgentTxService;
@@ -84,6 +88,9 @@ public class BlockManager {
     private ConfirmingTxCacheManager confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
     private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
     private OrphanTxCacheManager orphanTxCacheManager = OrphanTxCacheManager.getInstance();
+
+    private DownloadUtils downloadUtils = new DownloadUtils();
+
 
     private long storedHeight;
     private String lastAppravedHash;
@@ -190,14 +197,9 @@ public class BlockManager {
         BlockLog.debug("orphan cache block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()));
         Block preBlock = blockCacheBuffer.getBlock(block.getHeader().getPreHash().getDigestHex());
         if (preBlock == null) {
-            GetBlockRequest request = new GetBlockRequest();
-            GetBlockParam params = new GetBlockParam();
-            params.setStartHash(block.getHeader().getPreHash());
-            params.setEndHash(block.getHeader().getPreHash());
-            params.setStart(block.getHeader().getHeight());
-            params.setSize(1);
-            request.setEventBody(params);
-            this.eventBroadcaster.broadcastAndCacheAysn(request, false);
+            if(NulsContext.getServiceBean(DownloadService.class).getStatus()!= DownloadStatus.DOWNLOADING){
+                downloadUtils.getBlockByHash(block.getHeader().getPreHash().getDigestHex());
+            }
         } else {
             this.addBlock(preBlock, true, null);
         }

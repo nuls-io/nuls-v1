@@ -94,15 +94,15 @@ public class BlockConsensusValidator implements NulsDataValidator<Block> {
             return ValidateResult.getFailedResult(ErrorCode.ORPHAN_BLOCK);
         }
 
-        ValidateResult result = this.checkCoinBaseTx(block.getTxs(), roundData, round);
-        if (result.isFailed()) {
-            return result;
-        }
+//        ValidateResult result = this.checkCoinBaseTx(block.getTxs(), roundData, round);
+//        if (result.isFailed()) {
+//            return result;
+//        }
         PocMeetingMember member = round.getMember(roundData.getPackingIndexOfRound());
         if (member == null || !member.getPackingAddress().equals(Address.fromHashs(block.getHeader().getPackingAddress()).getBase58())) {
             return ValidateResult.getFailedResult("round index is not inconsistent!");
         }
-        result = this.checkYellowPunishTx(block, roundData, preBlock, member, round);
+        ValidateResult result = this.checkYellowPunishTx(block, roundData, preBlock, member, round);
         return result;
 
     }
