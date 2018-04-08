@@ -47,7 +47,7 @@ public class BlockHeaderChain implements NulsCloneable {
     }
 
     public BlockHeaderChain getBifurcateChain(BlockHeader header) {
-        int index = indexOf(header.getPreHash().getDigestHex(), header.getHeight() - 1,header.getTime());
+        int index = indexOf(header.getPreHash().getDigestHex(), header.getHeight() - 1, header.getTime());
         if (index == -1) {
             return new BlockHeaderChain();
         }
@@ -55,24 +55,24 @@ public class BlockHeaderChain implements NulsCloneable {
         for (int i = 0; i <= index; i++) {
             list.add(headerDigestList.get(i));
         }
-        list.add(new HeaderDigest(header.getHash().getDigestHex(), header.getHeight(),header.getTime()));
+        list.add(new HeaderDigest(header.getHash().getDigestHex(), header.getHeight(), header.getTime()));
         BlockHeaderChain chain = new BlockHeaderChain();
         chain.setHeaderDigestList(list);
         return chain;
     }
 
-    public int indexOf(String hash, long height,long time) {
-        HeaderDigest hd = new HeaderDigest(hash, height,time);
+    public int indexOf(String hash, long height, long time) {
+        HeaderDigest hd = new HeaderDigest(hash, height, time);
         return headerDigestList.indexOf(hd);
     }
 
     public boolean addHeader(BlockHeader header) {
         lock.lock();
-        HeaderDigest hd = new HeaderDigest(header.getPreHash().getDigestHex(), header.getHeight() - 1,header.getTime());
+        HeaderDigest hd = new HeaderDigest(header.getPreHash().getDigestHex(), header.getHeight() - 1, header.getTime());
         if (!headerDigestList.isEmpty() && headerDigestList.indexOf(hd) != (headerDigestList.size() - 1)) {
             return false;
         }
-        headerDigestList.add(new HeaderDigest(header.getHash().getDigestHex(), header.getHeight(),header.getTime()));
+        headerDigestList.add(new HeaderDigest(header.getHash().getDigestHex(), header.getHeight(), header.getTime()));
         lock.unlock();
         return true;
     }
@@ -158,8 +158,9 @@ public class BlockHeaderChain implements NulsCloneable {
     public boolean contains(HeaderDigest hd) {
         return headerDigestList.contains(hd);
     }
+
     public boolean contains(BlockHeader header) {
-        return headerDigestList.contains(new HeaderDigest(header.getHash().getDigestHex(), header.getHeight(),header.getTime()));
+        return headerDigestList.contains(new HeaderDigest(header.getHash().getDigestHex(), header.getHeight(), header.getTime()));
     }
 
     @Override
@@ -191,7 +192,10 @@ public class BlockHeaderChain implements NulsCloneable {
     }
 
     public HeaderDigest getLastHd() {
-        HeaderDigest headerDigest = headerDigestList.get(headerDigestList.size() - 1);
-        return headerDigest;
+        try {
+            return headerDigestList.get(headerDigestList.size() - 1);
+        } catch (Exception e) {
+            return headerDigestList.get(headerDigestList.size() - 1);
+        }
     }
 }
