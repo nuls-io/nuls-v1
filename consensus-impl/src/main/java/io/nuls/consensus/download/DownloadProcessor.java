@@ -114,6 +114,8 @@ public class DownloadProcessor extends Thread {
 
             if(success) {
                 downloadStatus = DownloadStatus.SUCCESS;
+
+                checkIsNewest();
             } else {
                 downloadStatus = DownloadStatus.FAILED;
             }
@@ -122,6 +124,13 @@ public class DownloadProcessor extends Thread {
             downloadStatus = DownloadStatus.FAILED;
         } finally {
             blockQueue.destroyQueue(queueName);
+        }
+    }
+
+    private void checkIsNewest() {
+        NetworkNewestBlockInfos newestInfos = getNetworkNewestBlockInfos();
+        if(!blockService.getBestBlock().getHeader().getHash().getDigestHex().equals(newestInfos.getNetBestHash())) {
+            downloadStatus = DownloadStatus.WAIT;
         }
     }
 
