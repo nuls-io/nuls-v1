@@ -294,6 +294,8 @@ public class DownloadProcessor extends Thread {
         if(nodeSize < MIN_NODE_COUNT) {
             throw new NulsRuntimeException(ErrorCode.NET_NODE_NOT_FOUND);
         }
+
+        downloadStatus = DownloadStatus.READY;
     }
 
     private boolean checkNetworkAndStatus() {
