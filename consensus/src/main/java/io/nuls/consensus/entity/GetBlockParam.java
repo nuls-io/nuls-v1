@@ -51,8 +51,8 @@ public class GetBlockParam extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += Utils.sizeOfVarInt(start);
         size += Utils.sizeOfVarInt(this.size);
+        size += Utils.sizeOfVarInt(start);
         size += Utils.sizeOfNulsData(startHash);
         size += Utils.sizeOfNulsData(endHash);
         return size;
@@ -60,16 +60,16 @@ public class GetBlockParam extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeVarInt(start);
         stream.writeVarInt(size);
+        stream.writeVarInt(start);
         stream.writeNulsData(startHash);
         stream.writeNulsData(endHash);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.start = byteBuffer.readVarInt();
         this.size = byteBuffer.readVarInt();
+        this.start = byteBuffer.readVarInt();
         this.startHash = byteBuffer.readHash();
         this.endHash = byteBuffer.readHash();
     }
