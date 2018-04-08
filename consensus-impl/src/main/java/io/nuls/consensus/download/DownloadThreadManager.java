@@ -77,8 +77,10 @@ public class DownloadThreadManager implements Callable<Boolean> {
                 long start = startHeight + j * maxDowncount;
                 int size = maxDowncount;
 
-                if(start + size > netBestHeight) {
+                boolean isEnd = false;
+                if(start + size >= netBestHeight) {
                     size = (int) (netBestHeight - start) + 1;
+                    isEnd = true;
                 }
 
                 DownloadThread downloadThread = new DownloadThread(localBestHash, netBestHash, start, size, nodes.get(j));
@@ -87,6 +89,10 @@ public class DownloadThreadManager implements Callable<Boolean> {
                 executor.execute(new Thread(downloadThreadFuture));
 
                 futures.add(downloadThreadFuture);
+
+                if(isEnd) {
+                    break;
+                }
             }
         }
 
