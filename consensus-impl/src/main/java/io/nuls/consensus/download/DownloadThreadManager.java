@@ -111,7 +111,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
             ResultMessage result = task.get();
 
             List<Block> blockList = result.getBlockList();
-            if(blockList == null || blockList.size() ==0) {
+            if(blockList == null || blockList.size() == 0) {
                 DownloadThread downloadThread = new DownloadThread(localBestHash, netBestHash, result.getStartHeight(), result.getSize(), result.getNode());
 
                 FutureTask<ResultMessage> downloadThreadFuture = new FutureTask<ResultMessage>(downloadThread);
@@ -173,7 +173,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
 
         localBestBlock = blockService.getBestBlock();
 
-        checkRollback(localBestBlock, rollbackCount++);
+        checkRollback(localBestBlock, rollbackCount + 1);
     }
 
 }
