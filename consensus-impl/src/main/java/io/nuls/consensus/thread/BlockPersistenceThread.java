@@ -29,7 +29,9 @@ import io.nuls.consensus.manager.BlockManager;
 import io.nuls.consensus.manager.ConsensusManager;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.service.NetworkService;
 
@@ -88,13 +90,13 @@ public class BlockPersistenceThread implements Runnable {
         Block block = blockManager.getBlock(height);
         if (null == block) {
             BlockMaintenanceThread.getInstance().setStatus(MaintenanceStatus.READY);
-            return;
+            throw new NulsRuntimeException(ErrorCode.DATA_ERROR,"the block shouldn't be null!height:"+height);
         }
         if (block.getTxs().isEmpty()) {
             //todo why
             Log.warn("block has no tx!");
             ConsensusManager.getInstance().destroy();
-            return;
+            throw new NulsRuntimeException(ErrorCode.DATA_ERROR,"the block shouldn't be null!height:"+height);
         }
         boolean isSuccess;
         try {

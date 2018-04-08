@@ -62,8 +62,4 @@ public class BlockHeaderEvent extends BaseConsensusEvent<BlockHeader> {
         return data;
     }
 
-    @Override
-    public boolean needToRemoveDuplication() {
-        return true;
-    }
 }

@@ -102,6 +102,9 @@ public class BifurcateProcessor {
             List<HeaderDigest> hdList = new ArrayList<>(approvingChain.getHeaderDigestList());
             for (int i = hdList.size() - 1; i >= 0; i--) {
                 HeaderDigest hd = hdList.get(i);
+                if(longestChain.contains(hd)){
+                    break;
+                }
                 try {
                     blockService.rollbackBlock(hd.getHash());
                 } catch (NulsException e) {
@@ -111,6 +114,9 @@ public class BifurcateProcessor {
             List<HeaderDigest> longestHdList = new ArrayList<>(longestChain.getHeaderDigestList());
             for (int i = 0; i < longestHdList.size(); i++) {
                 HeaderDigest hd = longestHdList.get(i);
+                if(approvingChain.contains(hd)){
+                    continue;
+                }
                 blockService.approvalBlock(hd.getHash());
             }
         }
