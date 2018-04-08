@@ -77,13 +77,13 @@ public class SmallBlock extends BaseNulsData {
 
         this.txHashList = new ArrayList<>();
         long hashListSize = byteBuffer.readVarInt();
-        for (int i = 0; i < hashListSize - 1; i++) {
+        for (int i = 0; i < hashListSize; i++) {
             this.txHashList.add(byteBuffer.readHash());
         }
 
         this.subTxList = new ArrayList<>();
         long subTxListSize = byteBuffer.readVarInt();
-        for (int i = 0; i < subTxListSize - 1; i++) {
+        for (int i = 0; i < subTxListSize; i++) {
             Transaction tx = byteBuffer.readTransaction();
             tx.setBlockHeight(header.getHeight());
             this.subTxList.add(tx);
