@@ -66,20 +66,20 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
 
         System.out.println("get tx group request : " + event.getEventBody().getBlockHash().getDigestHex());
 
-        SmallBlock newBlock = temporaryCacheManager.getSmallBlock(txGroup.getBlockHash().getDigestHex());
-        if (newBlock == null) {
+        SmallBlock smallBlock = temporaryCacheManager.getSmallBlock(txGroup.getBlockHash().getDigestHex());
+        if (smallBlock == null) {
             return;
         }
-        BlockHeader header = newBlock.getHeader();
+        BlockHeader header = smallBlock.getHeader();
 
         System.out.println("get tx group request 1 ");
 
         Map<String, Transaction> txMap = new HashMap<>();
-        for (Transaction tx : newBlock.getSubTxList()) {
+        for (Transaction tx : smallBlock.getSubTxList()) {
             txMap.put(tx.getHash().getDigestHex(), tx);
         }
         List<NulsDigestData> needHashList = new ArrayList<>();
-        for (NulsDigestData hash : newBlock.getTxHashList()) {
+        for (NulsDigestData hash : smallBlock.getTxHashList()) {
             Transaction tx = txGroup.getTx(hash.getDigestHex());
             if (null == tx) {
                 tx = this.receivedTxCacheManager.getTx(hash);
@@ -108,11 +108,11 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
             return;
         }
 
-        Block block = ConsensusTool.assemblyBlock(header, txMap, newBlock.getTxHashList());
+        Block block = ConsensusTool.assemblyBlock(header, txMap, smallBlock.getTxHashList());
         blockManager.addBlock(block, true, fromId);
 
         SmallBlockEvent newBlockEvent = new SmallBlockEvent();
-        newBlockEvent.setEventBody(newBlock);
+        newBlockEvent.setEventBody(smallBlock);
         List<String> addressList = eventBroadcaster.broadcastHashAndCache(newBlockEvent, false, fromId);
         for (String address : addressList) {
             BlockLog.info("forward blockHeader:(" + address + ")" + header.getHeight() + ", hash:" + header.getHash() + ", preHash:" + header.getPreHash() + ", packing:" + header.getPackingAddress());

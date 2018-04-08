@@ -252,20 +252,20 @@ public class ConsensusMeetingRunner implements Runnable {
         confirmingTxCacheManager.putTx(block.getTxs().get(0));
         blockManager.addBlock(block, false, null);
         SmallBlockEvent event = new SmallBlockEvent();
-        SmallBlock newBlock = new SmallBlock();
-        newBlock.setHeader(block.getHeader());
+        SmallBlock smallBlock = new SmallBlock();
+        smallBlock.setHeader(block.getHeader());
         List<NulsDigestData> txHashList = new ArrayList<>();
         for (Transaction tx : block.getTxs()) {
             txHashList.add(tx.getHash());
             if (tx.getType() == TransactionConstant.TX_TYPE_COIN_BASE ||
                     tx.getType() == TransactionConstant.TX_TYPE_YELLOW_PUNISH ||
                     tx.getType() == TransactionConstant.TX_TYPE_RED_PUNISH) {
-                newBlock.addConsensusTx(tx);
+                smallBlock.addConsensusTx(tx);
             }
         }
-        newBlock.setTxHashList(txHashList);
+        smallBlock.setTxHashList(txHashList);
 
-        event.setEventBody(newBlock);
+        event.setEventBody(smallBlock);
         List<String> nodeIdList = eventBroadcaster.broadcastAndCache(event, false);
         for (String nodeId : nodeIdList) {
             BlockLog.info("send block height:" + block.getHeader().getHeight() + ", node:" + nodeId);
