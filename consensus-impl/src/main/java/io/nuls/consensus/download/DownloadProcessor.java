@@ -54,8 +54,6 @@ public class DownloadProcessor extends Thread {
     @Override
     public void run() {
 
-        System.out.println("---------");
-
         boolean isContinue = checkNetworkAndStatus();
 
         if(!isContinue) {
