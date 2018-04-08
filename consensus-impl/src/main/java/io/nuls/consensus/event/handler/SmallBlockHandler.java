@@ -24,64 +24,118 @@
 package io.nuls.consensus.event.handler;
 
 import io.nuls.consensus.cache.manager.block.TemporaryCacheManager;
+import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
+import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.GetTxGroupParam;
-import io.nuls.consensus.entity.RedPunishData;
-import io.nuls.consensus.event.BlockHeaderEvent;
+import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.event.GetTxGroupRequest;
 import io.nuls.consensus.event.SmallBlockEvent;
+import io.nuls.consensus.event.notice.AssembledBlockNotice;
 import io.nuls.consensus.manager.BlockManager;
-import io.nuls.consensus.thread.ConsensusMeetingRunner;
-import io.nuls.consensus.utils.DownloadDataUtils;
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.BlockHeader;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.Transaction;
+import io.nuls.consensus.utils.ConsensusTool;
+import io.nuls.core.chain.entity.*;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.date.TimeService;
+import io.nuls.core.utils.log.BlockLog;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
-import io.nuls.db.entity.NodePo;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
-import io.nuls.network.service.NetworkService;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author facjas
  * @date 2017/11/16
  */
 public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
-    private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
+
+    private TemporaryCacheManager temporaryCacheManagerBak = TemporaryCacheManager.getInstance();
+    private BlockManager blockManager = BlockManager.getInstance();
+    private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
+
+    private ConfirmingTxCacheManager confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
     private ReceivedTxCacheManager receivedTxCacheManager = ReceivedTxCacheManager.getInstance();
     private OrphanTxCacheManager orphanTxCacheManager = OrphanTxCacheManager.getInstance();
-    private DownloadDataUtils downloadDataUtils = DownloadDataUtils.getInstance();
-    private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
 
     @Override
     public void onEvent(SmallBlockEvent event, String fromId) {
-        ValidateResult result = event.getEventBody().verify();
-        if (result.isFailed()) {
+        SmallBlock smallBlock = event.getEventBody();
+        if (null == smallBlock) {
+            Log.warn("recieved a null smallBlock!");
+            return;
+        }
+        BlockHeader header = smallBlock.getHeader();
+        BlockLog.info("recieve new block from(" + fromId + "), tx count : " + header.getTxCount() + " , tx pool count : " + ReceivedTxCacheManager.getInstance().getTxList().size() + " - " + OrphanTxCacheManager.getInstance().getTxList().size() + " , header height:" + header.getHeight() + ", preHash:" + header.getPreHash() + " , hash:" + header.getHash() + ", address:" + header.getPackingAddress());
+
+        Block theBlock = blockManager.getBlock(header.getHash().getDigestHex());
+        if (null != theBlock) {
             return;
         }
 
-        System.out.println("get smallblock request : " + event.getEventBody().getBlockHash().getDigestHex());
+        //todo checkIt
+        if((TimeService.currentTimeMillis()-header.getTime())>PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND*1000L){
+            Log.info("It's too late:hash:"+header.getHash()+", height:"+header.getHeight()+", packer:"+header.getPackingAddress());
+            return ;
+        }
 
-        temporaryCacheManager.cacheSmallBlock(event.getEventBody());
-        downloadDataUtils.removeSmallBlock(event.getEventBody().getBlockHash().getDigestHex());
-        GetTxGroupRequest request = new GetTxGroupRequest();
-        GetTxGroupParam param = new GetTxGroupParam();
-        param.setBlockHash(event.getEventBody().getBlockHash());
-        for (NulsDigestData hash : event.getEventBody().getTxHashList()) {
-            if (!receivedTxCacheManager.txExist(hash) && !orphanTxCacheManager.txExist(hash)) {
+        ValidateResult result = header.verify();
+        boolean isOrphan = result.getErrorCode() == ErrorCode.ORPHAN_TX || result.getErrorCode() == ErrorCode.ORPHAN_BLOCK;
+
+        BlockLog.info("verify block result: " + result.isSuccess() + " , isOrphan : " + isOrphan);
+
+        if (result.isFailed() && (!isOrphan || (NulsContext.getInstance().getBestHeight() - header.getHeight()) > PocConsensusConstant.CONFIRM_BLOCK_COUNT)) {
+            BlockLog.warn("discard a SmallBlock:" + smallBlock.getHeader().getHash() + ", from:" + fromId + " ,reason:" + result.getMessage());
+            return;
+        }
+        Map<String, Transaction> txMap = new HashMap<>();
+        for (Transaction tx : smallBlock.getSubTxList()) {
+            txMap.put(tx.getHash().getDigestHex(), tx);
+        }
+        List<NulsDigestData> needHashList = new ArrayList<>();
+        for (NulsDigestData hash : smallBlock.getTxHashList()) {
+            Transaction tx = this.receivedTxCacheManager.getTx(hash);
+            if (null == tx) {
+                tx = orphanTxCacheManager.getTx(hash);
+            }
+            if (null == tx) {
+                tx = confirmingTxCacheManager.getTx(hash);
+            }
+            if (null == tx && txMap.get(hash) == null) {
+                needHashList.add(hash);
+                continue;
+            }
+            txMap.put(tx.getHash().getDigestHex(), tx);
+        }
+        if (!needHashList.isEmpty()) {
+            GetTxGroupRequest request = new GetTxGroupRequest();
+            GetTxGroupParam param = new GetTxGroupParam();
+            param.setBlockHash(header.getHash());
+            for (NulsDigestData hash : needHashList) {
                 param.addHash(hash);
             }
+            request.setEventBody(param);
+            this.eventBroadcaster.sendToNode(request, fromId);
+            temporaryCacheManagerBak.cacheSmallBlock(smallBlock);
+            return;
         }
-        request.setEventBody(param);
-        this.eventBroadcaster.sendToNode(request, fromId);
+        Block block = ConsensusTool.assemblyBlock(header, txMap, smallBlock.getTxHashList());
+        blockManager.addBlock(block, true, fromId);
+
+        List<String> addressList = this.eventBroadcaster.broadcastHashAndCache(event, false, fromId);
+        for (String address : addressList) {
+            BlockLog.info("forward blockHeader:(" + address + ")" + header.getHeight() + ", hash:" + header.getHash() + ", preHash:" + header.getPreHash() + ", packing:" + header.getPackingAddress());
+        }
+
+
+        AssembledBlockNotice notice = new AssembledBlockNotice();
+        notice.setEventBody(header);
+        eventBroadcaster.publishToLocal(notice);
     }
 }

@@ -204,6 +204,9 @@ public class BlockBatchDownloadUtils {
 
 
     public boolean downloadedBlock(String nodeId, Block block) {
+        if(!this.working){
+            return false;
+        }
         try {
             NodeDownloadingStatus status = nodeStatusMap.get(nodeId);
             if (null == status) {

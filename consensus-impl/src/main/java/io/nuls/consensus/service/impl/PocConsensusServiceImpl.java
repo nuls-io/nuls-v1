@@ -438,7 +438,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
             map.put("commissionRate", ca.getExtend().getCommissionRate());
             map.put("introduction", ca.getExtend().getIntroduction());
             map.put("startTime", ca.getExtend().getStartTime());
-            map.put("creditRatio", 1);
+            map.put("creditRatio", ca.getExtend().getCreditVal());
 
             long reward = ledgerService.getAgentReward(ca.getAddress(), 1);
             map.put("reward", reward);
@@ -544,7 +544,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
         map.put("commissionRate", ca.getExtend().getCommissionRate());
         map.put("introduction", ca.getExtend().getIntroduction());
         map.put("startTime", ca.getExtend().getStartTime());
-        map.put("creditRatio", 1);
+        map.put("creditRatio", ca.getExtend().getCreditVal());
         map.put("reward", ledgerService.getAgentReward(ca.getAddress(), 1));
 
         Map<String, Object> countMap = blockService.getSumTxCount(ca.getExtend().getPackingAddress(), 0, 0);

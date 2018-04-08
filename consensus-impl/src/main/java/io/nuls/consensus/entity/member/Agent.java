@@ -53,11 +53,12 @@ public class Agent extends BaseNulsData {
     private long blockHeight = -1L;
 
     private int status;
+    private double creditVal;
 
     @Override
     public int size() {
         int size = 0;
-        size += Utils.sizeOfLong(deposit.getValue());
+        size += Utils.sizeOfVarInt(deposit.getValue());
         size += Utils.sizeOfString(this.packingAddress);
         size += Utils.sizeOfDouble(this.commissionRate);
         size += Utils.sizeOfString(this.introduction);
@@ -149,5 +150,13 @@ public class Agent extends BaseNulsData {
 
     public void setAgentName(String agentName) {
         this.agentName = agentName;
+    }
+
+    public void setCreditVal(double creditVal) {
+        this.creditVal = creditVal;
+    }
+
+    public double getCreditVal() {
+        return creditVal;
     }
 }

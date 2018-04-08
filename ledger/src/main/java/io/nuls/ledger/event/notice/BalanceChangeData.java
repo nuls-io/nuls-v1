@@ -90,7 +90,7 @@ public class BalanceChangeData extends BaseNulsData {
         size += Utils.sizeOfString(address);
         size += 1;
         size += 1;
-        size += Utils.sizeOfLong(amount.getValue());
+        size += Utils.sizeOfVarInt(amount.getValue());
         return size;
     }
 

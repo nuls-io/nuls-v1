@@ -84,13 +84,6 @@ public abstract class BaseEvent<T extends BaseNulsData> extends BaseNulsData imp
         }
     }
 
-    /**
-     * Does it need to remove duplication;
-     */
-    public boolean needToRemoveDuplication() {
-        return false;
-    }
-
     protected abstract T parseEventBody(NulsByteBuffer byteBuffer) throws NulsException;
 
     public T getEventBody() {

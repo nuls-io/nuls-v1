@@ -30,6 +30,7 @@ import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
+import io.nuls.consensus.manager.ConsensusManager;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
@@ -44,7 +45,7 @@ import java.util.List;
 public class AgentCountValidator implements NulsDataValidator<RegisterAgentTransaction> {
 
     private ConsensusCacheManager consensusCacheManager = ConsensusCacheManager.getInstance();
-
+    private ConsensusManager consensusManager = ConsensusManager.getInstance();
     @Override
     public ValidateResult validate(RegisterAgentTransaction tx) {
         ValidateResult result = ValidateResult.getSuccessResult();
@@ -70,6 +71,9 @@ public class AgentCountValidator implements NulsDataValidator<RegisterAgentTrans
                 }
                 if (agentName.equals(ca.getExtend().getAgentName())) {
                     return ValidateResult.getFailedResult("AgentName repetition!");
+                }
+                if(consensusManager.getSeedNodeList().contains(tx.getTxData().getAddress())||consensusManager.getSeedNodeList().contains(agent.getPackingAddress())){
+                    return ValidateResult.getFailedResult("The address is a seed address");
                 }
             }
         }

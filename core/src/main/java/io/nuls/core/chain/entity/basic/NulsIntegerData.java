@@ -48,7 +48,7 @@ public class NulsIntegerData extends BasicTypeData<Integer> {
     }
     @Override
     public int size() {
-        return Utils.sizeOfInt(getVal());
+        return Utils.sizeOfVarInt(getVal());
     }
 
     @Override

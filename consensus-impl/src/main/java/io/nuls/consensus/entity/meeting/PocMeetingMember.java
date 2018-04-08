@@ -47,7 +47,7 @@ public class PocMeetingMember implements Comparable<PocMeetingMember> {
     /**
      * Starting from 1
      */
-    private int indexOfRound;
+    private int packingIndexOfRound;
     private double creditVal;
     private String sortValue;
     private Consensus<Agent> agentConsensus;
@@ -121,21 +121,21 @@ public class PocMeetingMember implements Comparable<PocMeetingMember> {
         this.packingAddress = packingAddress;
     }
 
-    public int getIndexOfRound() {
-        return indexOfRound;
+    public int getPackingIndexOfRound() {
+        return packingIndexOfRound;
     }
 
-    public void setIndexOfRound(int indexOfRound) {
-        this.indexOfRound = indexOfRound;
+    public void setPackingIndexOfRound(int packingIndexOfRound) {
+        this.packingIndexOfRound = packingIndexOfRound;
     }
 
     public long getPackStartTime() {
-        long packTime = PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000 * (this.getIndexOfRound() - 1) + roundStartTime;
+        long packTime = PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000 * (this.getPackingIndexOfRound() - 1) + roundStartTime;
         return packTime;
     }
 
     public long getPackEndTime() {
-        long packTime = PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000 * this.getIndexOfRound() + roundStartTime;
+        long packTime = PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000 * this.getPackingIndexOfRound() + roundStartTime;
         return packTime;
     }
 

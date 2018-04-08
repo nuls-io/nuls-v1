@@ -155,6 +155,9 @@ public class BlockHeaderChain implements NulsCloneable {
         return null;
     }
 
+    public boolean contains(HeaderDigest hd) {
+        return headerDigestList.contains(hd);
+    }
     public boolean contains(BlockHeader header) {
         return headerDigestList.contains(new HeaderDigest(header.getHash().getDigestHex(), header.getHeight(),header.getTime()));
     }

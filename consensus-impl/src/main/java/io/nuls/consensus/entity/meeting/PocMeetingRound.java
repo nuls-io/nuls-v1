@@ -25,7 +25,6 @@ package io.nuls.consensus.entity.meeting;
 
 import io.nuls.account.entity.Account;
 import io.nuls.consensus.constant.PocConsensusConstant;
-import io.nuls.core.chain.entity.Na;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
 
@@ -96,7 +95,7 @@ public class PocMeetingRound {
             PocMeetingMember pmm = memberList.get(i);
             pmm.setRoundIndex(this.getIndex());
             pmm.setRoundStartTime(this.getStartTime());
-            pmm.setIndexOfRound(i + 1);
+            pmm.setPackingIndexOfRound(i + 1);
             addressOrderMap.put(pmm.getPackingAddress(), i+1);
         }
     }

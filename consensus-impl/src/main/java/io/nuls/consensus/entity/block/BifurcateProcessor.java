@@ -95,20 +95,30 @@ public class BifurcateProcessor {
                 }
             }
         }
+        if(tempIndex%2==0) {
             BlockLog.info(str.toString());
             tempIndex++;
+        }
         if (this.approvingChain != null && !this.approvingChain.getId().equals(longestChain.getId())) {
             BlockService blockService = NulsContext.getServiceBean(BlockService.class);
-            for (int i=approvingChain.size()-1;i>=0;i--) {
-                HeaderDigest hd = approvingChain.getHeaderDigestList().get(i);
+            List<HeaderDigest> hdList = new ArrayList<>(approvingChain.getHeaderDigestList());
+            for (int i = hdList.size() - 1; i >= 0; i--) {
+                HeaderDigest hd = hdList.get(i);
+                if(longestChain.contains(hd)){
+                    break;
+                }
                 try {
                     blockService.rollbackBlock(hd.getHash());
                 } catch (NulsException e) {
                     Log.error(e);
                 }
             }
-            for(int i=0;i<longestChain.getHeaderDigestList().size();i++){
-                HeaderDigest hd = longestChain.getHeaderDigestList().get(i);
+            List<HeaderDigest> longestHdList = new ArrayList<>(longestChain.getHeaderDigestList());
+            for (int i = 0; i < longestHdList.size(); i++) {
+                HeaderDigest hd = longestHdList.get(i);
+                if(approvingChain.contains(hd)){
+                    continue;
+                }
                 blockService.approvalBlock(hd.getHash());
             }
         }

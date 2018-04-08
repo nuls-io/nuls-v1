@@ -78,9 +78,9 @@ public class UtxoData extends CoinData {
     private int getListByteSize(List list) {
         int size = 0;
         if (list == null) {
-            size += Utils.sizeOfInt(0);
+            size += Utils.sizeOfVarInt(0);
         } else {
-            size += Utils.sizeOfInt(list.size());
+            size += Utils.sizeOfVarInt(list.size());
             for (int i = 0; i < list.size(); i++) {
                 size += Utils.sizeOfNulsData((BaseNulsData) list.get(i));
             }

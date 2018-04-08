@@ -157,21 +157,13 @@ public class ConsensusCacheManager {
         }
     }
 
-    public void updateDepositStatusById(String depositId, ConsensusStatusEnum status) {
-        Consensus<Deposit> deposit = this.getDepositById(depositId);
-        if (deposit == null) {
-            throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "the deposit is not exist!:" + depositId);
-        }
-        deposit.getExtend().setStatus(status.getCode());
-        this.depositCache.put(deposit.getHexHash(), deposit);
-    }
-
-    public void updateAgentStatusById(String agentId, ConsensusStatusEnum status) {
+    public void updateAgentStatusById(String agentId, ConsensusStatusEnum status, double creditVal) {
         Consensus<Agent> agent = this.getAgentById(agentId);
         if (agent == null) {
             throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "the agent is not exist!:" + agentId);
         }
         agent.getExtend().setStatus(status.getCode());
+        agent.getExtend().setCreditVal(creditVal);
         this.putAgent(agent);
     }
 

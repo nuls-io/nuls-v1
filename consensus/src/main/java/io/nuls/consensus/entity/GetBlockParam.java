@@ -29,7 +29,6 @@ import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
-import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
@@ -52,8 +51,8 @@ public class GetBlockParam extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += Utils.sizeOfLong(start);
-        size += Utils.sizeOfLong(end);
+        size += Utils.sizeOfVarInt(start);
+        size += Utils.sizeOfVarInt(end);
         size += Utils.sizeOfNulsData(preHash);
         size += Utils.sizeOfNulsData(toHash);
         return size;

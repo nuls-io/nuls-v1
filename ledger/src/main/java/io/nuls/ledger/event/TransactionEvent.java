@@ -59,8 +59,4 @@ public class TransactionEvent extends io.nuls.core.event.BaseEvent<Transaction> 
         return data;
     }
 
-    @Override
-    public boolean needToRemoveDuplication() {
-        return true;
-    }
 }

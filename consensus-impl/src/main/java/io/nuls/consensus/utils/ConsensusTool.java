@@ -26,12 +26,8 @@ package io.nuls.consensus.utils;
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
-import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.constant.PocConsensusConstant;
-import io.nuls.consensus.entity.Consensus;
-import io.nuls.consensus.entity.ConsensusAgentImpl;
-import io.nuls.consensus.entity.ConsensusDepositImpl;
-import io.nuls.consensus.entity.YellowPunishData;
+import io.nuls.consensus.entity.*;
 import io.nuls.consensus.entity.block.BlockData;
 import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.entity.meeting.ConsensusReward;
@@ -89,7 +85,7 @@ public class ConsensusTool {
             }
         }
         po.setTxCount(header.getTxCount());
-        po.setConsensusAddress(header.getPackingAddress());
+        po.setConsensusAddress(Address.fromHashs(header.getPackingAddress()).getBase58());
         po.setExtend(header.getExtend());
         BlockRoundData data = new BlockRoundData();
         try {
@@ -108,7 +104,7 @@ public class ConsensusTool {
         BlockHeader header = new BlockHeader();
         header.setHash(NulsDigestData.fromDigestHex(po.getHash()));
         header.setMerkleHash(NulsDigestData.fromDigestHex(po.getMerkleHash()));
-        header.setPackingAddress(po.getConsensusAddress());
+        header.setPackingAddress(Address.fromHashs(po.getConsensusAddress()).getHash());
         header.setTxCount(po.getTxCount());
         header.setPreHash(NulsDigestData.fromDigestHex(po.getPreHash()));
         header.setTime(po.getCreateTime());
@@ -215,7 +211,7 @@ public class ConsensusTool {
             Transaction tx = blockData.getTxList().get(i);
             txHashList.add(tx.getHash());
         }
-        header.setPackingAddress(account.getAddress().toString());
+        header.setPackingAddress(account.getAddress().getHash());
         header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
         header.setHash(NulsDigestData.calcDigestData(block.getHeader()));
         P2PKHScriptSig scriptSig = new P2PKHScriptSig();
@@ -323,12 +319,12 @@ public class ConsensusTool {
         }
 
         int yellowCount = 0;
-        if(self.getRoundIndex() == preBlockRoundData.getRoundIndex() && self.getIndexOfRound() != preBlockRoundData.getPackingIndexOfRound() + 1) {
-            yellowCount = self.getIndexOfRound() - preBlockRoundData.getPackingIndexOfRound() - 1;
+        if(self.getRoundIndex() == preBlockRoundData.getRoundIndex() && self.getPackingIndexOfRound() != preBlockRoundData.getPackingIndexOfRound() + 1) {
+            yellowCount = self.getPackingIndexOfRound() - preBlockRoundData.getPackingIndexOfRound() - 1;
         }
 
-        if(self.getRoundIndex() != preBlockRoundData.getRoundIndex() && (self.getIndexOfRound() != 1 || preBlockRoundData.getPackingIndexOfRound() != preBlockRoundData.getConsensusMemberCount())) {
-            yellowCount = self.getIndexOfRound() + preBlockRoundData.getConsensusMemberCount() - preBlockRoundData.getPackingIndexOfRound() -1;
+        if(self.getRoundIndex() != preBlockRoundData.getRoundIndex() && (self.getPackingIndexOfRound() != 1 || preBlockRoundData.getPackingIndexOfRound() != preBlockRoundData.getConsensusMemberCount())) {
+            yellowCount = self.getPackingIndexOfRound() + preBlockRoundData.getConsensusMemberCount() - preBlockRoundData.getPackingIndexOfRound() -1;
         }
 
         if(yellowCount == 0) {
@@ -337,7 +333,7 @@ public class ConsensusTool {
 
         List<Address> addressList = new ArrayList<>();
         for(int i = 1 ; i <= yellowCount ; i++) {
-            int index = self.getIndexOfRound() - i;
+            int index = self.getPackingIndexOfRound() - i;
             if(index > 0) {
                 addressList.add(Address.fromHashs(round.getMember(index).getAgentAddress()));
             } else {
@@ -358,6 +354,21 @@ public class ConsensusTool {
         punishTx.setHash(NulsDigestData.calcDigestData(punishTx));
 //        punishTx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(punishTx.getHash(), round.getLocalPacker(), NulsContext.getCachedPasswordOfWallet()).serialize());
         return punishTx;
+    }
+
+    public static Block assemblyBlock(BlockHeader header,Map<String,Transaction> txMap ,List<NulsDigestData> txHashList){
+        Block block = new Block();
+        block.setHeader(header);
+        List<Transaction> txs = new ArrayList<>();
+        for (NulsDigestData txHash : txHashList) {
+            Transaction tx = txMap.get(txHash.getDigestHex());
+            if (null == tx) {
+                throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
+            }
+            txs.add(tx);
+        }
+        block.setTxs(txs);
+        return block;
     }
 }
 

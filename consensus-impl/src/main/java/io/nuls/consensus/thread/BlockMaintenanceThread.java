@@ -52,9 +52,6 @@ import java.util.List;
  */
 public class BlockMaintenanceThread implements Runnable {
 
-    //todo 3
-    private static final int MIN_NODE_COUNT = 2;
-
     public static DistributedBlockInfoRequestUtils BEST_HEIGHT_FROM_NET = DistributedBlockInfoRequestUtils.getInstance();
 
     public static final String THREAD_NAME = "block-maintenance";
@@ -74,8 +71,19 @@ public class BlockMaintenanceThread implements Runnable {
         return instance;
     }
 
+    public synchronized void sync(){
+
+
+
+
+
+
+
+    }
+
     public synchronized void syncBlock() {
         this.status = MaintenanceStatus.DOWNLOADING;
+
         long lastDownloadHeight = 0L;
         while (true) {
             BestCorrectBlock bestCorrectBlock = checkLocalBestCorrentBlock();
@@ -263,7 +271,7 @@ public class BlockMaintenanceThread implements Runnable {
                 //todo failed
                 if (this.status == MaintenanceStatus.READY||this.status==MaintenanceStatus.FAILED) {
                     List<Node> nodeList = networkService.getAvailableNodes();
-                    if (nodeList.size() >= MIN_NODE_COUNT) {
+                    if (nodeList.size() >= PocConsensusConstant.ALIVE_NODE_COUNT) {
                         this.syncBlock();
                     }
                 }

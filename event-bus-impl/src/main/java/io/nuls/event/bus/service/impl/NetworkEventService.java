@@ -61,12 +61,6 @@ public class NetworkEventService {
     }
 
     public void publish(BaseEvent event, String nodeId) {
-        if (event.needToRemoveDuplication()) {
-            boolean exist = eventCacheService.isKnown(event.getHash().getDigestHex());
-            if (exist) {
-                return;
-            }
-        }
         eventCacheService.cacheRecievedEventHash(event.getHash().getDigestHex());
         processorManager.offer(new ProcessData(event, nodeId));
 
