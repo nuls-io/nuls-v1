@@ -52,7 +52,7 @@ public class GetBlockParam extends BaseNulsData {
     public int size() {
         int size = 0;
         size += Utils.sizeOfVarInt(start);
-        size += Utils.sizeOfVarInt(size);
+        size += Utils.sizeOfVarInt(this.size);
         size += Utils.sizeOfNulsData(startHash);
         size += Utils.sizeOfNulsData(endHash);
         return size;
