@@ -196,7 +196,7 @@ public class DownloadProcessor extends Thread {
             throw new NulsRuntimeException(ErrorCode.NET_NODE_NOT_FOUND);
         }
 
-        return new NetworkNewestBlockInfos(nodes.get(0).getVersionMessage().getBestBlockHeight(), bestHash, nodes);
+        return new NetworkNewestBlockInfos(bestHeight, bestHash, nodes);
     }
 
     private void waitNetworkNotChange() throws NulsRuntimeException {
