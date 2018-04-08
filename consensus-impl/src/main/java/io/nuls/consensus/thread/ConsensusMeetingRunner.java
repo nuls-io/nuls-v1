@@ -68,7 +68,6 @@ import java.util.*;
  * @date 2017/12/15
  */
 public class ConsensusMeetingRunner implements Runnable {
-    private static final int MIN_NODE_COUNT = 2;
     public static final String THREAD_NAME = "Consensus-Meeting";
     private static final ConsensusMeetingRunner INSTANCE = new ConsensusMeetingRunner();
     private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
@@ -284,7 +283,7 @@ public class ConsensusMeetingRunner implements Runnable {
             BlockMaintenanceThread.getInstance().setStatus(MaintenanceStatus.READY);
             return false;
         }
-        if (nodes.size() < MIN_NODE_COUNT) {
+        if (nodes.size() < PocConsensusConstant.ALIVE_NODE_COUNT) {
             return false;
         }
         if (!isNetworkSynchronizeComplete()) {

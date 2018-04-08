@@ -95,8 +95,10 @@ public class BifurcateProcessor {
                 }
             }
         }
-        BlockLog.info(str.toString());
-        tempIndex++;
+        if(tempIndex%2==0) {
+            BlockLog.info(str.toString());
+            tempIndex++;
+        }
         if (this.approvingChain != null && !this.approvingChain.getId().equals(longestChain.getId())) {
             BlockService blockService = NulsContext.getServiceBean(BlockService.class);
             List<HeaderDigest> hdList = new ArrayList<>(approvingChain.getHeaderDigestList());
