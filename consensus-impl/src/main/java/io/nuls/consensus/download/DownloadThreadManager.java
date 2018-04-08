@@ -78,7 +78,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
                 int size = maxDowncount;
 
                 if(start + size > netBestHeight) {
-                    size = (int) (netBestHeight - start);
+                    size = (int) (netBestHeight - start) + 1;
                 }
 
                 DownloadThread downloadThread = new DownloadThread(localBestHash, netBestHash, start, size, nodes.get(j));
