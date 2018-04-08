@@ -109,7 +109,18 @@ public class DownloadThreadManager implements Callable<Boolean> {
 
         for (FutureTask<ResultMessage> task : futures) {
             ResultMessage result = task.get();
-            for(Block block : result.getBlockList()) {
+
+            List<Block> blockList = result.getBlockList();
+            if(blockList == null || blockList.size() ==0) {
+                DownloadThread downloadThread = new DownloadThread(localBestHash, netBestHash, result.getStartHeight(), result.getSize(), result.getNode());
+
+                FutureTask<ResultMessage> downloadThreadFuture = new FutureTask<ResultMessage>(downloadThread);
+                executor.execute(new Thread(downloadThreadFuture));
+
+                result = downloadThreadFuture.get();
+                blockList = result.getBlockList();
+            }
+            for(Block block : blockList) {
                 blockQueue.offer(queueName, block);
             }
         }

@@ -78,7 +78,7 @@ public class DownloadUtils {
             Future<BlockHashResponse> hashesFuture = DownloadCacheHandler.addGetBlockHashesRequest(hashesRequest.getHash().getDigestHex());
             BroadcastResult hashesResult = networkService.sendToNode(hashesRequest, node.getId(), true);
             if (!hashesResult.isSuccess()) {
-                return null;
+                return resultList;
             }
             BlockHashResponse response = null;
             try {
@@ -88,7 +88,7 @@ public class DownloadUtils {
                 throw e;
             }
             if (null == response || response.getHashList() == null || response.getHashList().size() != size) {
-                return null;
+                return resultList;
             }
             GetBlockRequest request = new GetBlockRequest(startHeight, (long) size,
                     response.getHashList().get(0), response.getBestHash());
@@ -99,7 +99,7 @@ public class DownloadUtils {
             }
             BroadcastResult result = networkService.sendToNode(request, node.getId(), true);
             if (!result.isSuccess()) {
-                return null;
+                return resultList;
             }
             for (Future<Block> future : futureList) {
                 try {
@@ -107,7 +107,7 @@ public class DownloadUtils {
                     if (block != null) {
                         resultList.add(block);
                     }else{
-                        return null;
+                        return resultList;
                     }
                 } catch (Exception e) {
                     Log.error(e);
