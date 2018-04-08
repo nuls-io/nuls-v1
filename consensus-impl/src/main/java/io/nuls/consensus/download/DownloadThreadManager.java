@@ -2,13 +2,19 @@ package io.nuls.consensus.download;
 
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.thread.manager.NulsThreadFactory;
+import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.queue.service.impl.QueueService;
 import io.nuls.network.entity.Node;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
+import java.util.Queue;
+import java.util.Random;
+import java.util.concurrent.*;
 
 /**
  * Created by ln on 2018/4/8.
@@ -22,6 +28,8 @@ public class DownloadThreadManager implements Callable<Boolean> {
     private QueueService<Block> blockQueue;
     private String queueName;
 
+    private int maxDowncount = 100;
+
     public DownloadThreadManager(NetworkNewestBlockInfos newestInfos, QueueService<Block> blockQueue, String queueName) {
         this.newestInfos = newestInfos;
         this.blockQueue = blockQueue;
@@ -31,15 +39,64 @@ public class DownloadThreadManager implements Callable<Boolean> {
     @Override
     public Boolean call() throws Exception {
 
+        System.out.println("============================");
+        System.out.println(newestInfos);
+        System.out.println("============================");
+
         boolean isContinue = checkFirstBlock();
 
         if(!isContinue) {
             return true;
         }
 
-        System.out.println("============================");
-        System.out.println(newestInfos);
-        System.out.println("============================");
+        List<Node> nodes = newestInfos.getNodes();
+        String netBestHash = newestInfos.getNetBestHash();
+        long netBestHeight = newestInfos.getNetBestHeight();
+
+        Block localBestBlock = blockService.getBestBlock();
+        String localBestHash = localBestBlock.getHeader().getHash().getDigestHex();
+        long localBestHeight = localBestBlock.getHeader().getHeight();
+
+        ThreadPoolExecutor executor = TaskManager.createThreadPool(nodes.size(), 0,
+                new NulsThreadFactory(NulsConstant.MODULE_ID_CONSENSUS, "download-thread"));
+
+        List<FutureTask<ResultMessage>> futures = new ArrayList<>();
+
+        long totalCount = netBestHeight - localBestHeight;
+
+        long laveCount = totalCount;
+
+        long downCount = (long) Math.floor(totalCount / maxDowncount);
+
+        for(long i = 0 ; i < downCount ; i++) {
+
+            long startHeight = localBestHeight + i * maxDowncount;
+
+            for(int j = 0 ; j < nodes.size() ; j ++) {
+
+                long start = startHeight + j * maxDowncount;
+                int size = maxDowncount;
+
+                if(start + size > netBestHeight) {
+                    size = (int) (netBestHeight - start);
+                }
+
+                DownloadThread downloadThread = new DownloadThread(localBestHash, netBestHash, start, size, nodes.get(j));
+
+                FutureTask<ResultMessage> downloadThreadFuture = new FutureTask<ResultMessage>(downloadThread);
+                executor.execute(new Thread(downloadThreadFuture));
+
+                futures.add(downloadThreadFuture);
+            }
+        }
+
+        for (FutureTask<ResultMessage> task : futures) {
+            ResultMessage result = task.get();
+            for(Block block : result.getBlockList()) {
+                blockQueue.offer(queueName, block);
+            }
+        }
+        executor.shutdown();
 
         return true;
     }
@@ -61,7 +118,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
         }
 
         //check need rollback
-        checkRollback(localBestBlock);
+//        checkRollback(localBestBlock);
         return true;
     }
 
