@@ -42,11 +42,7 @@ import java.util.List;
  */
 public class BlockHashResponse extends BaseNulsData {
 
-    public BlockHashResponse() {
-        time = TimeService.currentTimeMillis();
-    }
-
-    private long time;
+    private NulsDigestData requestEventHash;
 
     private List<Long> heightList = new ArrayList<>();
 
@@ -55,7 +51,7 @@ public class BlockHashResponse extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += Utils.sizeOfInt48();
+        size += Utils.sizeOfNulsData(requestEventHash);
         size += Utils.sizeOfVarInt(heightList.size());
         for (Long height : heightList) {
             size += Utils.sizeOfVarInt(height);
@@ -69,7 +65,7 @@ public class BlockHashResponse extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeInt48(time);
+        stream.writeNulsData(requestEventHash);
         stream.writeVarInt(heightList.size());
         for (Long height : heightList) {
             stream.writeVarInt(height);
@@ -82,7 +78,7 @@ public class BlockHashResponse extends BaseNulsData {
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.time = byteBuffer.readInt48();
+        this.requestEventHash = byteBuffer.readHash();
         long heightListSize = byteBuffer.readVarInt();
         if (heightListSize > 0) {
             this.heightList = new ArrayList<>();
@@ -122,12 +118,12 @@ public class BlockHashResponse extends BaseNulsData {
         hashList.add(hash);
     }
 
-    public void setHeightList(List<Long> heightList) {
-        this.heightList = heightList;
+    public NulsDigestData getRequestEventHash() {
+        return requestEventHash;
     }
 
-    public void setHashList(List<NulsDigestData> hashList) {
-        this.hashList = hashList;
+    public void setRequestEventHash(NulsDigestData requestEventHash) {
+        this.requestEventHash = requestEventHash;
     }
 
     public void merge(BlockHashResponse response) {

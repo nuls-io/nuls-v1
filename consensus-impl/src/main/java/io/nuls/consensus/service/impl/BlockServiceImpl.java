@@ -311,4 +311,19 @@ public class BlockServiceImpl implements BlockService {
         }
         blockManager.appravalBlock(block);
     }
+
+    @Override
+    public List<BlockHeaderPo> getBlockHashList(long start, long end) {
+        return blockStorageService.getBlockHashList(start,end);
+    }
+
+    @Override
+    public Block getBlockFromMyChain(long start) {
+        return blockStorageService.getBlockFromMyChain(start);
+    }
+
+    @Override
+    public Block getBlockFromMyChain(String hash) {
+        return blockStorageService.getBlockFromMyChain(hash);
+    }
 }

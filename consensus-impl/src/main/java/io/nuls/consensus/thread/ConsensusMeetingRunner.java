@@ -133,7 +133,7 @@ public class ConsensusMeetingRunner implements Runnable {
             resetCurrentMeetingRound();
             //sleep sometimes make sure not to run again
             try {
-                Thread.sleep(100l);
+                Thread.sleep(100L);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -284,7 +284,7 @@ public class ConsensusMeetingRunner implements Runnable {
             BlockMaintenanceThread.getInstance().setStatus(MaintenanceStatus.READY);
             return false;
         }
-        if (nodes.size() < PocConsensusConstant.ALIVE_NODE_COUNT) {
+        if (nodes.size() < PocConsensusConstant.ALIVE_MIN_NODE_COUNT) {
             return false;
         }
         if (!isNetworkSynchronizeComplete()) {

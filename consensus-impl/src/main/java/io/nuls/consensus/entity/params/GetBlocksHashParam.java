@@ -41,37 +41,29 @@ import java.io.IOException;
  * @date 2018/2/8
  */
 public class GetBlocksHashParam extends BaseNulsData {
-    private long time;
     private long start;
-    private long end;
-    private long split;
+    private long size;
 
     public GetBlocksHashParam(){
-        this.time = TimeService.currentTimeMillis();
     }
     @Override
     public int size() {
-        int size = Utils.sizeOfInt48();
+        int size = 0;
         size += Utils.sizeOfVarInt(start);
-        size +=Utils.sizeOfVarInt(end);
-        size += Utils.sizeOfVarInt(split);
+        size +=Utils.sizeOfVarInt(size);
         return size;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-         stream.writeInt48(time);
          stream.writeVarInt(start);
-         stream.writeVarInt(end);
-         stream.writeVarInt(split);
+         stream.writeVarInt(size);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-       this.time = byteBuffer.readInt48();
        this.start = byteBuffer.readVarInt();
-       this.end = byteBuffer.readVarInt();
-       this.split = byteBuffer.readVarInt();
+       this.size = byteBuffer.readVarInt();
     }
 
     public long getStart() {
@@ -82,25 +74,11 @@ public class GetBlocksHashParam extends BaseNulsData {
         this.start = start;
     }
 
-    public long getEnd() {
-        return end;
+    public long getSize() {
+        return size;
     }
 
-    public void setEnd(long end) {
-        this.end = end;
-    }
-
-    public long getSplit() {
-        return split;
-    }
-
-    public void setSplit(long split) {
-        this.split = split;
-    }
-
-    public static void main(String []args)throws Exception{
-        GetBlocksHashParam param = new GetBlocksHashParam();
-        param.parse(new NulsByteBuffer(Hex.decode("ffff1d50746101000000000100000100")));
-
+    public void setSize(long size) {
+        this.size = size;
     }
 }

@@ -87,6 +87,16 @@
         and height <= #{endHeight,jdbcType=BIGINT}
         and mod((height-#{startHeight,jdbcType=BIGINT}),#{split,jdbcType=BIGINT})=0
 
+
+
+        ]]>
+    </select>
+    <select id="getHashList" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT height, hash from block_header
+        <![CDATA[
+        where height >=#{startHeight,jdbcType=BIGINT}
+        and height <= #{endHeight,jdbcType=BIGINT}
+        ORDER BY height ASC
         ]]>
     </select>
     <select id="getSumOfRoundIndexOfYellowPunish" resultType="long" parameterType="java.util.Map">
@@ -98,6 +108,8 @@
         where r.address=#{address ,jdbcType=VARCHAR }
          and b.round_index>=#{startRoundIndex,jdbcType=BIGINT}
          and b.round_index <=#{endRoundIndex,jdbcType=BIGINT}
+
+
 
         ]]>
     </select>

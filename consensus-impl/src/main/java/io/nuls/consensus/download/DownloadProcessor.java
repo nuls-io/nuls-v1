@@ -1,6 +1,7 @@
 package io.nuls.consensus.download;
 
 import io.nuls.consensus.constant.DownloadStatus;
+import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.utils.BlockInfo;
 import io.nuls.consensus.utils.DistributedBlockInfoRequestUtils;
@@ -32,8 +33,6 @@ import java.util.concurrent.TimeUnit;
  * Created by ln on 2018/4/8.
  */
 public class DownloadProcessor extends Thread {
-
-    private static final int MIN_NODE_COUNT = 2;
 
     private static DownloadProcessor INSTANCE = new DownloadProcessor();
 
@@ -88,14 +87,14 @@ public class DownloadProcessor extends Thread {
 
         DownloadThreadManager downloadThreadManager = new DownloadThreadManager(newestInfos, blockQueue, queueName);
 
-        FutureTask<Boolean> threadManagerFuture = new FutureTask<Boolean>(downloadThreadManager);
+        FutureTask<Boolean> threadManagerFuture = new FutureTask<>(downloadThreadManager);
 
         TaskManager.createAndRunThread(NulsConstant.MODULE_ID_CONSENSUS, "download-thread-manager",
                 new Thread(threadManagerFuture));
 
         DownloadDataStorage downloadDataStorage = new DownloadDataStorage(blockQueue, queueName);
 
-        FutureTask<Boolean> dataStorageFuture = new FutureTask<Boolean>(downloadDataStorage);
+        FutureTask<Boolean> dataStorageFuture = new FutureTask<>(downloadDataStorage);
 
         TaskManager.createAndRunThread(NulsConstant.MODULE_ID_CONSENSUS, "download-data-storeage",
                 new Thread(dataStorageFuture));
@@ -266,16 +265,15 @@ public class DownloadProcessor extends Thread {
         int nodeSize = networkService.getAvailableNodes().size();
 
         long now = TimeService.currentTimeMillis();
-        long timeout = 10000;
+        long timeout = 10000L;
         while(true) {
+            if(TimeService.currentTimeMillis() - now >= timeout) {
+                break;
+            }
             int newNodeSize = networkService.getAvailableNodes().size();
             if(newNodeSize > nodeSize) {
                 now = TimeService.currentTimeMillis();
                 nodeSize = newNodeSize;
-            }
-
-            if(TimeService.currentTimeMillis() - now >= timeout) {
-                break;
             }
             try {
                 Thread.sleep(500l);
@@ -286,7 +284,7 @@ public class DownloadProcessor extends Thread {
 
         //check node size again
         nodeSize = networkService.getAvailableNodes().size();
-        if(nodeSize < MIN_NODE_COUNT) {
+        if(nodeSize < PocConsensusConstant.ALIVE_MIN_NODE_COUNT) {
             throw new NulsRuntimeException(ErrorCode.NET_NODE_NOT_FOUND);
         }
 
@@ -301,7 +299,7 @@ public class DownloadProcessor extends Thread {
             setDownloadStatus(DownloadStatus.WAIT);
             return false;
         }
-        if (nodes.size() < MIN_NODE_COUNT) {
+        if (nodes.size() < PocConsensusConstant.ALIVE_MIN_NODE_COUNT) {
             return false;
         }
 

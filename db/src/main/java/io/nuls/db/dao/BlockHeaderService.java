@@ -104,4 +104,6 @@ public interface BlockHeaderService extends BaseDataService<String, BlockHeaderP
 
     Long getRoundFirstBlockHeight(long roundIndex);
     Long getRoundLastBlockHeight(long roundIndex);
+
+    List<BlockHeaderPo> getBlockHashList(long start, long end);
 }

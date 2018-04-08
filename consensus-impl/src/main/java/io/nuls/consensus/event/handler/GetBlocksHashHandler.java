@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -32,6 +32,7 @@ import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.Log;
+import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 
@@ -44,59 +45,42 @@ import java.util.List;
  */
 public class GetBlocksHashHandler extends AbstractEventHandler<GetBlocksHashRequest> {
 
+    private static final int MAX_SIZE = 10000;
+
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
 
     @Override
     public void onEvent(GetBlocksHashRequest event, String fromId) {
-        if (event.getEventBody().getEnd() > NulsContext.getInstance().getBestBlock().getHeader().getHeight()) {
+        if (MAX_SIZE < event.getEventBody().getSize()) {
             return;
         }
-        boolean b = event.getEventBody().getStart() == event.getEventBody().getEnd();
-        if (b) {
-            BlockHashResponse response = new BlockHashResponse();
-            Block block;
-            if (event.getEventBody().getEnd() <= 0) {
-                block = NulsContext.getInstance().getBestBlock();
-            } else {
-                block = blockService.getBlock(event.getEventBody().getEnd());
-            }
-            if (null == block) {
-                Log.warn("block can not get:"+event.getEventBody().getEnd());
-                return;
-            }
+        long end = event.getEventBody().getStart() + event.getEventBody().getSize() - 1;
+        if (end > NulsContext.getInstance().getBestBlock().getHeader().getHeight()) {
+            //todo NOT-FOUND
+            return;
+        }
+        BlockHashResponse response = new BlockHashResponse();
+        response.setRequestEventHash(event.getHash());
+        if (1L == event.getEventBody().getSize() && event.getEventBody().getStart() <= 0L) {
+            Block block = NulsContext.getInstance().getBestBlock();
             response.put(block.getHeader().getHeight(), block.getHeader().getHash());
-            sendResponse(response, fromId);
         } else {
-            List<BlockHeader> list = this.blockService.getBlockHeaderList(event.getEventBody().getStart(), event.getEventBody().getEnd(), event.getEventBody().getSplit());
-            List<Long> resultHeightList = new ArrayList<>();
-            List<NulsDigestData> resultHashList = new ArrayList<>();
+            List<BlockHeaderPo> list = this.blockService.getBlockHashList(event.getEventBody().getStart(), end);
+            long lastHeight = 0L;
             for (int i = 0; i < list.size(); i++) {
-                resultHeightList.add(list.get(i).getHeight());
-                resultHashList.add(list.get(i).getHash());
+                BlockHeaderPo po = list.get(i);
+                response.put(po.getHeight(), NulsDigestData.fromDigestHex(po.getHash()));
+                lastHeight = po.getHeight();
             }
-            if (resultHeightList.isEmpty() || resultHeightList.get(resultHeightList.size() - 1) < event.getEventBody().getEnd()) {
-                Block block = this.blockService.getBlock(event.getEventBody().getEnd());
-                if(block==null){
-                    //todo why?
-                    Log.warn("block can not get:"+event.getEventBody().getEnd());
-                    return ;
+            if (lastHeight < end) {
+                for (long height = lastHeight + 1; height <= end; height++) {
+                    Block block = this.blockService.getBlock(height);
+                    response.put(block.getHeader().getHeight(), block.getHeader().getHash());
                 }
-                resultHeightList.add(block.getHeader().getHeight());
-                resultHashList.add(block.getHeader().getHash());
-            }
-            final int size = 50000;
-            for (int i = 0; i < resultHashList.size(); i += size) {
-                BlockHashResponse response = new BlockHashResponse();
-                int end = i + size;
-                if (end > resultHeightList.size()) {
-                    end = resultHeightList.size();
-                }
-                response.setHeightList(resultHeightList.subList(i, end));
-                response.setHashList(resultHashList.subList(i, end));
-                sendResponse(response, fromId);
             }
         }
+        sendResponse(response, fromId);
     }
 
     private void sendResponse(BlockHashResponse response, String fromId) {

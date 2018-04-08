@@ -42,21 +42,21 @@ public class GetBlockRequest extends BaseConsensusEvent<GetBlockParam> {
         super(ConsensusEventType.GET_BLOCK);
     }
 
-    public GetBlockRequest(long start, long end) {
+    public GetBlockRequest(long start, long size) {
         this();
         GetBlockParam param = new GetBlockParam();
-        param.setEnd(end);
+        param.setSize(size);
         param.setStart(start);
         this.setEventBody(param);
     }
 
-    public GetBlockRequest(long start, long end, NulsDigestData preHash, NulsDigestData toHash) {
+    public GetBlockRequest(long start, long size, NulsDigestData startHash, NulsDigestData endHash) {
         this();
         GetBlockParam param = new GetBlockParam();
-        param.setPreHash(preHash);
-        param.setToHash(toHash);
-        param.setEnd(end);
+        param.setSize(size);
         param.setStart(start);
+        param.setStartHash(startHash);
+        param.setEndHash(endHash);
         this.setEventBody(param);
     }
 
@@ -78,26 +78,26 @@ public class GetBlockRequest extends BaseConsensusEvent<GetBlockParam> {
         return this.getEventBody().getStart();
     }
 
-    public long getEnd() {
+    public long getSize() {
         if (null == this.getEventBody()) {
             return -1;
         }
-        return this.getEventBody().getEnd();
+        return this.getEventBody().getSize();
     }
 
 
-    public NulsDigestData getPreHash() {
+    public NulsDigestData getStartHash() {
         if (null == this.getEventBody()) {
             return null;
         }
-        return this.getEventBody().getPreHash();
+        return this.getEventBody().getStartHash();
     }
 
-    public NulsDigestData getToHash() {
+    public NulsDigestData getEndHash() {
         if (null == this.getEventBody()) {
             return null;
         }
-        return this.getEventBody().getToHash();
+        return this.getEventBody().getEndHash();
     }
 
 }

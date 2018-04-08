@@ -8,9 +8,6 @@ import io.nuls.core.utils.queue.service.impl.QueueService;
 import io.nuls.network.entity.Node;
 
 import java.util.List;
-import java.util.Queue;
-import java.util.Random;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
 
 /**

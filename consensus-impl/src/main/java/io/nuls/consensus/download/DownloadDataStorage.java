@@ -24,8 +24,8 @@ public class DownloadDataStorage implements Callable<Boolean> {
     @Override
     public Boolean call() throws Exception {
         try {
-            Block block = null;
-            while((block = blockQueue.take(queueName)) != null) {
+            Block block;
+            while ((block = blockQueue.take(queueName)) != null) {
                 BlockManager.getInstance().addBlock(block, true, null);
             }
             return true;

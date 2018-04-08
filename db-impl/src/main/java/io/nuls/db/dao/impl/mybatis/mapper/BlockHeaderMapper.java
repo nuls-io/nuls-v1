@@ -49,4 +49,6 @@ public interface BlockHeaderMapper extends BaseMapper<String, BlockHeaderPo> {
     Long getRoundLastBlockHeight(long roundIndex);
 
     Map<String, Object> getSumTxCount(Searchable searchable);
+
+    List<BlockHeaderPo> getBlockHashList(Map<String, Object> params);
 }

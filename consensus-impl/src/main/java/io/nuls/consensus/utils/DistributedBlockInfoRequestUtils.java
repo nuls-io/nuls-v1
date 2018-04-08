@@ -81,7 +81,7 @@ public class DistributedBlockInfoRequestUtils {
             hashesMap.clear();
             calcMap.clear();
             this.askHeight = height;
-            GetBlocksHashRequest event = new GetBlocksHashRequest(askHeight, askHeight, 1);
+            GetBlocksHashRequest event = new GetBlocksHashRequest(askHeight, askHeight);
             this.startTime = TimeService.currentTimeMillis();
             this.nodeIdList = new CopyOnWriteArrayList<>();
             List<Node> nodes = networkService.getAvailableNodes();

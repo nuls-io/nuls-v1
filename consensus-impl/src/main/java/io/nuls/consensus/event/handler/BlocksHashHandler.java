@@ -23,6 +23,7 @@
  */
 package io.nuls.consensus.event.handler;
 
+import io.nuls.consensus.download.DownloadCacheHandler;
 import io.nuls.consensus.event.BlocksHashEvent;
 import io.nuls.consensus.utils.DistributedBlockInfoRequestUtils;
 import io.nuls.core.utils.log.Log;
@@ -36,12 +37,14 @@ public class BlocksHashHandler extends AbstractEventHandler<BlocksHashEvent> {
 
     @Override
     public void onEvent(BlocksHashEvent event, String fromId) {
-        try {
-            DistributedBlockInfoRequestUtils.getInstance().addBlockHashResponse(fromId, event.getEventBody());
-        }catch (Exception e) {
-            Log.error(e);
-            throw e;
-        }
+//        try {
+//            DistributedBlockInfoRequestUtils.getInstance().addBlockHashResponse(fromId, event.getEventBody());
+//        }catch (Exception e) {
+//            Log.error(e);
+//            throw e;
+//        }
 
+
+        DownloadCacheHandler.receiveHashes(event.getEventBody());
     }
 }

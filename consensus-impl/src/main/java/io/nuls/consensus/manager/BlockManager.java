@@ -192,7 +192,10 @@ public class BlockManager {
         if (preBlock == null) {
             GetBlockRequest request = new GetBlockRequest();
             GetBlockParam params = new GetBlockParam();
-            params.setToHash(block.getHeader().getPreHash());
+            params.setStartHash(block.getHeader().getPreHash());
+            params.setEndHash(block.getHeader().getPreHash());
+            params.setStart(block.getHeader().getHeight());
+            params.setSize(1);
             request.setEventBody(params);
             this.eventBroadcaster.broadcastAndCacheAysn(request, false);
         } else {
@@ -345,11 +348,27 @@ public class BlockManager {
     }
 
     public Block getHighestBlock() {
-        BlockHeaderChain chain = bifurcateProcessor.getLongestChain();
+        BlockHeaderChain chain = bifurcateProcessor.getApprovingChain();
         if (null == chain) {
             return null;
         }
         HeaderDigest headerDigest = chain.getHeaderDigestList().get(chain.getHeaderDigestList().size() - 1);
         return this.getBlock(headerDigest.getHash());
+    }
+
+    public Block getBlockFromMyChain(long start) {
+        HeaderDigest hd = this.bifurcateProcessor.getApprovingChain().getHeaderDigest(start);
+        if (null == hd) {
+            return null;
+        }
+        return getBlock(hd.getHash());
+    }
+
+    public Block getBlockFromMyChain(String hash) {
+        HeaderDigest hd = this.bifurcateProcessor.getApprovingChain().getHeaderDigest(hash);
+        if (null == hd) {
+            return null;
+        }
+        return getBlock(hash);
     }
 }

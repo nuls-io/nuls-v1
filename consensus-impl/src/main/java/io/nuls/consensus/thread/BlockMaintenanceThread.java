@@ -271,7 +271,7 @@ public class BlockMaintenanceThread implements Runnable {
                 //todo failed
                 if (this.status == MaintenanceStatus.READY||this.status==MaintenanceStatus.FAILED) {
                     List<Node> nodeList = networkService.getAvailableNodes();
-                    if (nodeList.size() >= PocConsensusConstant.ALIVE_NODE_COUNT) {
+                    if (nodeList.size() >= PocConsensusConstant.ALIVE_MIN_NODE_COUNT) {
                         this.syncBlock();
                     }
                 }

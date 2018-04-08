@@ -29,9 +29,11 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.BlockHeaderService;
 import io.nuls.db.entity.BlockHeaderPo;
@@ -250,5 +252,73 @@ public class BlockStorageService {
 
     public Long getRoundLastBlockHeight(long roundIndex) {
         return this.headerDao.getRoundLastBlockHeight(roundIndex);
+    }
+
+    public List<BlockHeaderPo> getBlockHashList(long start, long end) {
+        return this.headerDao.getBlockHashList(start, end);
+    }
+
+    public Block getBlockFromMyChain(long height) {
+        Block block = this.blockCacheManager.getBlockFromMyChain(height);
+        if (null == block) {
+            BlockHeaderPo po = this.headerDao.getHeader(height);
+            BlockHeader header = null;
+            try {
+                header = ConsensusTool.fromPojo(po);
+            } catch (NulsException e) {
+                Log.error(e);
+            }
+            if (null == header) {
+                return null;
+            }
+            List<Transaction> txList = null;
+            try {
+                txList = ledgerService.getTxList(height);
+            } catch (Exception e) {
+                Log.error(e);
+            }
+            if (null == txList || txList.isEmpty()) {
+                return null;
+            }
+            if(header.getTxCount()!=txList.size()){
+                throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
+            }
+            block = new Block();
+            block.setHeader(header);
+            block.setTxs(txList);
+        }
+        return block;
+    }
+
+    public Block getBlockFromMyChain(String hash) {
+        Block block = this.blockCacheManager.getBlockFromMyChain(hash);
+        if (null == block) {
+            BlockHeaderPo po = this.headerDao.getHeader(hash);
+            List<Transaction> txList = null;
+            try {
+                txList = ledgerService.getTxList(hash);
+            } catch (Exception e) {
+                Log.error(e);
+            }
+            if (null == txList || txList.isEmpty()) {
+                return null;
+            }
+            BlockHeader header = null;
+            try {
+                header = ConsensusTool.fromPojo(po);
+            } catch (NulsException e) {
+                Log.error(e);
+            }
+            if (null == header) {
+                return null;
+            }
+            if(header.getTxCount()!=txList.size()){
+                throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
+            }
+            block = new Block();
+            block.setHeader(header);
+            block.setTxs(txList);
+        }
+        return block;
     }
 }

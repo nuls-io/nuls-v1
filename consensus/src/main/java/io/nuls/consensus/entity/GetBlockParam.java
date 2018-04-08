@@ -40,10 +40,10 @@ import java.io.IOException;
  */
 public class GetBlockParam extends BaseNulsData {
 
-    private NulsDigestData preHash;
-    private NulsDigestData toHash;
+    private NulsDigestData startHash;
+    private NulsDigestData endHash;
     private long start;
-    private long end;
+    private long size;
 
     public GetBlockParam() {
     }
@@ -52,42 +52,42 @@ public class GetBlockParam extends BaseNulsData {
     public int size() {
         int size = 0;
         size += Utils.sizeOfVarInt(start);
-        size += Utils.sizeOfVarInt(end);
-        size += Utils.sizeOfNulsData(preHash);
-        size += Utils.sizeOfNulsData(toHash);
+        size += Utils.sizeOfVarInt(size);
+        size += Utils.sizeOfNulsData(startHash);
+        size += Utils.sizeOfNulsData(endHash);
         return size;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeVarInt(start);
-        stream.writeVarInt(end);
-        stream.writeNulsData(preHash);
-        stream.writeNulsData(toHash);
+        stream.writeVarInt(size);
+        stream.writeNulsData(startHash);
+        stream.writeNulsData(endHash);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.start = byteBuffer.readVarInt();
-        this.end = byteBuffer.readVarInt();
-        this.preHash = byteBuffer.readHash();
-        this.toHash = byteBuffer.readHash();
+        this.size = byteBuffer.readVarInt();
+        this.startHash = byteBuffer.readHash();
+        this.endHash = byteBuffer.readHash();
     }
 
-    public NulsDigestData getPreHash() {
-        return preHash;
+    public NulsDigestData getStartHash() {
+        return startHash;
     }
 
-    public void setPreHash(NulsDigestData preHash) {
-        this.preHash = preHash;
+    public void setStartHash(NulsDigestData startHash) {
+        this.startHash = startHash;
     }
 
-    public NulsDigestData getToHash() {
-        return toHash;
+    public NulsDigestData getEndHash() {
+        return endHash;
     }
 
-    public void setToHash(NulsDigestData toHash) {
-        this.toHash = toHash;
+    public void setEndHash(NulsDigestData endHash) {
+        this.endHash = endHash;
     }
 
     public long getStart() {
@@ -98,11 +98,11 @@ public class GetBlockParam extends BaseNulsData {
         this.start = start;
     }
 
-    public long getEnd() {
-        return end;
+    public long getSize() {
+        return size;
     }
 
-    public void setEnd(long end) {
-        this.end = end;
+    public void setSize(long size) {
+        this.size = size;
     }
 }

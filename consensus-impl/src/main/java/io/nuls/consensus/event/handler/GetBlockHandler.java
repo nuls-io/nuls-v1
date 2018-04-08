@@ -23,6 +23,7 @@
  */
 package io.nuls.consensus.event.handler;
 
+import io.nuls.consensus.entity.GetBlockParam;
 import io.nuls.consensus.event.BlockEvent;
 import io.nuls.consensus.event.GetBlockRequest;
 import io.nuls.consensus.service.intf.BlockService;
@@ -44,72 +45,46 @@ import java.util.Map;
  * @date 2017/11/16
  */
 public class GetBlockHandler extends AbstractEventHandler<GetBlockRequest> {
-
+    private static final int MAX_SIZE = 10000;
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
 
     @Override
     public void onEvent(GetBlockRequest event, String fromId) throws NulsException {
-        if (event.getToHash() != null) {
-            askByHash(event, fromId);
+        GetBlockParam param = event.getEventBody();
+        if (param.getSize() > MAX_SIZE) {
             return;
         }
-        if (event.getEnd() > NulsContext.getInstance().getBestHeight()) {
+        if(param.getSize()==1){
+           Block block = this.blockService.getBlockFromMyChain(param.getStart());
+           if(null==block){
+               //todo NOT_FOUND
+               return;
+           }
+           sendBlock(block,fromId);
+           return;
+        }
+        Block chainStartBlock = this.blockService.getBlockFromMyChain(param.getStartHash().getDigestHex());
+        if(null==chainStartBlock){
+            //todo NOT_FOUND
             return;
         }
-        List<Block> blockList = blockService.getBlockList(event.getStart(), event.getEnd());
-        if (blockList.size() != (event.getEnd() - event.getStart() + 1)) {
-            Log.warn("count wrong!");
+        Block chainEndBlock = this.blockService.getBlockFromMyChain(param.getEndHash().getDigestHex());
+        if(null==chainEndBlock){
+            //todo NOT_FOUND
+            return;
         }
-        this.sendBlockList(blockList, fromId);
-    }
+        if(chainEndBlock.getHeader().getHeight()<chainStartBlock.getHeader().getHeight()){
+            return;
+        }
+        long end = param.getStart()+param.getSize()-1;
+        if(chainStartBlock.getHeader().getHeight()>param.getStart()||chainEndBlock.getHeader().getHeight()<end){
+            return;
+        }
 
-    private void askByHash(GetBlockRequest event, String fromId) throws NulsException {
-        Block block = blockService.getBlock(event.getToHash().getDigestHex());
-        if (null == block) {
-            Log.debug("I don't have the block:" + event.getToHash());
-            return;
-        }
-        if (event.getPreHash() == null || block.getHeader().getPreHash().equals(event.getPreHash())) {
-            sendBlock(block, fromId);
-            return;
-        }
-        Block preBlock = blockService.getBlock(event.getPreHash().getDigestHex());
-        if (null == preBlock) {
-            Log.debug("I don't have the block:" + event.getPreHash());
-            return;
-        }
-        List<Block> blockList = blockService.getBlockList(preBlock.getHeader().getHeight() + 1, block.getHeader().getHeight());
-        if (!blockList.isEmpty() && blockList.get(blockList.size() - 1).getHeader().getHash().equals(event.getToHash())) {
-            sendBlockList(blockList, fromId);
-            return;
-        }
-        List<Block> resultBlockList = new ArrayList<>();
-        Map<NulsDigestData, Block> blockMap = new HashMap<>();
-        for (Block b : blockList) {
-            blockMap.put(b.getHeader().getHash(), b);
-        }
-        resultBlockList.add(0, block);
-        boolean success = true;
-        String nextHash = block.getHeader().getPreHash().getDigestHex();
-        while (true) {
-            Block b = blockMap.get(nextHash);
-            if (b == null) {
-                b = blockService.getBlock(nextHash);
-            }
-            if (b == null) {
-                success = false;
-                break;
-            }
-            if (b.getHeader().getHash().equals(event.getPreHash())) {
-                break;
-            }
-            resultBlockList.add(0, b);
-            nextHash = b.getHeader().getPreHash().getDigestHex();
-        }
-        if (success) {
-            this.sendBlockList(resultBlockList, fromId);
-        }
+        List<Block> blockList = blockService.getBlockList(param.getStart(),end);
+
+        this.sendBlockList(blockList, fromId);
     }
 
     private void sendBlockList(List<Block> blockList, String nodeId) {
