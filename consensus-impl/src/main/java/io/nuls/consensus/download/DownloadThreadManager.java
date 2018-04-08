@@ -70,7 +70,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
 
         for(long i = 0 ; i < downCount ; i++) {
 
-            long startHeight = localBestHeight + i * maxDowncount;
+            long startHeight = localBestHeight + i * maxDowncount + 1;
 
             for(int j = 0 ; j < nodes.size() ; j ++) {
 
@@ -105,8 +105,13 @@ public class DownloadThreadManager implements Callable<Boolean> {
 
         Block localBestBlock = blockService.getBestBlock();
 
-        if(newestInfos.getNetBestHeight() == localBestBlock.getHeader().getHeight() &&
-                newestInfos.getNetBestHash().equals(localBestBlock.getHeader().getHash().getDigestHex())) {
+        if(localBestBlock.getHeader().getHeight() == 0) {
+            return true;
+        }
+
+        if(localBestBlock.getHeader().getHeight() == 0 ||
+                (newestInfos.getNetBestHeight() == localBestBlock.getHeader().getHeight() &&
+                newestInfos.getNetBestHash().equals(localBestBlock.getHeader().getHash().getDigestHex()))) {
             return true;
         }
 
@@ -118,7 +123,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
         }
 
         //check need rollback
-//        checkRollback(localBestBlock);
+        checkRollback(localBestBlock);
         return true;
     }
 
