@@ -29,6 +29,7 @@ import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
+import io.nuls.consensus.constant.DownloadStatus;
 import io.nuls.consensus.constant.MaintenanceStatus;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.RedPunishData;
@@ -44,6 +45,7 @@ import io.nuls.consensus.manager.BlockManager;
 import io.nuls.consensus.manager.ConsensusManager;
 import io.nuls.consensus.manager.RoundManager;
 import io.nuls.consensus.service.intf.BlockService;
+import io.nuls.consensus.service.intf.DownloadService;
 import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.consensus.utils.TxTimeComparator;
 import io.nuls.core.chain.entity.*;
@@ -76,6 +78,9 @@ public class ConsensusMeetingRunner implements Runnable {
     private BlockManager blockManager = BlockManager.getInstance();
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
+
+    private DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
+
     private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
     private OrphanTxCacheManager orphanTxCacheManager = OrphanTxCacheManager.getInstance();
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
@@ -309,7 +314,7 @@ public class ConsensusMeetingRunner implements Runnable {
 
     //network synchronize status
     private boolean isNetworkSynchronizeComplete() {
-        return BlockMaintenanceThread.getInstance().getStatus() == MaintenanceStatus.SUCCESS;
+        return downloadService.getStatus() == DownloadStatus.SUCCESS;
     }
 
     private void resetCurrentMeetingRound() {
