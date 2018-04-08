@@ -29,12 +29,13 @@ import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.ledger.entity.tx.AbstractNoneCoinTransaction;
 
 /**
  * @author Niels
  * @date 2017/12/4
  */
-public class YellowPunishTransaction extends Transaction<YellowPunishData> {
+public class YellowPunishTransaction extends AbstractNoneCoinTransaction<YellowPunishData> {
     public YellowPunishTransaction() {
         super(TransactionConstant.TX_TYPE_YELLOW_PUNISH);
         this.registerValidator(YellowPunishValidator.getInstance());

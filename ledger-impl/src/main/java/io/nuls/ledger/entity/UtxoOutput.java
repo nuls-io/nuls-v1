@@ -26,7 +26,6 @@ package io.nuls.ledger.entity;
 import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
@@ -37,8 +36,6 @@ import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.str.StringUtils;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by win10 on 2017/10/30.
@@ -205,25 +202,25 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
     }
 
     public boolean isUsable() {
-        return OutPutStatusEnum.UTXO_CONFIRM_UNSPEND == status || OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND == status;
+        return OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT == status || OutPutStatusEnum.UTXO_UNCONFIRMED_UNSPENT == status;
     }
 
     public boolean isSpend() {
-        return OutPutStatusEnum.UTXO_CONFIRM_SPEND == status || OutPutStatusEnum.UTXO_UNCONFIRM_SPEND == status;
+        return OutPutStatusEnum.UTXO_CONFIRMED_SPENT == status || OutPutStatusEnum.UTXO_UNCONFIRMED_SPENT == status;
     }
 
     public boolean isLocked() {
-        return OutPutStatusEnum.UTXO_CONFIRM_CONSENSUS_LOCK == status ||
-                OutPutStatusEnum.UTXO_UNCONFIRM_CONSENSUS_LOCK == status ||
-                OutPutStatusEnum.UTXO_CONFIRM_TIME_LOCK == status ||
-                OutPutStatusEnum.UTXO_UNCONFIRM_TIME_LOCK == status;
+        return OutPutStatusEnum.UTXO_CONFIRMED_CONSENSUS_LOCK == status ||
+                OutPutStatusEnum.UTXO_UNCONFIRMED_CONSENSUS_LOCK == status ||
+                OutPutStatusEnum.UTXO_CONFIRMED_TIME_LOCK == status ||
+                OutPutStatusEnum.UTXO_UNCONFIRMED_TIME_LOCK == status;
     }
 
     public boolean isConfirm() {
-        return OutPutStatusEnum.UTXO_CONFIRM_UNSPEND == status ||
-                OutPutStatusEnum.UTXO_CONFIRM_TIME_LOCK == status ||
-                OutPutStatusEnum.UTXO_CONFIRM_SPEND == status ||
-                OutPutStatusEnum.UTXO_CONFIRM_CONSENSUS_LOCK == status;
+        return OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT == status ||
+                OutPutStatusEnum.UTXO_CONFIRMED_TIME_LOCK == status ||
+                OutPutStatusEnum.UTXO_CONFIRMED_SPENT == status ||
+                OutPutStatusEnum.UTXO_CONFIRMED_CONSENSUS_LOCK == status;
     }
 
     public byte[] getOwner() {

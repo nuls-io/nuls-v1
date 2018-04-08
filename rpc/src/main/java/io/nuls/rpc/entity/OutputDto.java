@@ -31,11 +31,11 @@ public class OutputDto {
         this.type = output.getTxType();
         if (OutPutStatusEnum.UTXO_SPENT == output.getStatus()) {
             this.status = 3;
-        } else if (OutPutStatusEnum.UTXO_CONFIRM_CONSENSUS_LOCK == output.getStatus() ||
-                OutPutStatusEnum.UTXO_UNCONFIRM_CONSENSUS_LOCK == output.getStatus()) {
+        } else if (OutPutStatusEnum.UTXO_CONFIRMED_CONSENSUS_LOCK == output.getStatus() ||
+                OutPutStatusEnum.UTXO_UNCONFIRMED_CONSENSUS_LOCK == output.getStatus()) {
             this.status = 2;
-        } else if (OutPutStatusEnum.UTXO_CONFIRM_TIME_LOCK == output.getStatus() ||
-                OutPutStatusEnum.UTXO_UNCONFIRM_TIME_LOCK == output.getStatus()) {
+        } else if (OutPutStatusEnum.UTXO_CONFIRMED_TIME_LOCK == output.getStatus() ||
+                OutPutStatusEnum.UTXO_UNCONFIRMED_TIME_LOCK == output.getStatus()) {
             this.status = 1;
         } else {
             this.status = 0;

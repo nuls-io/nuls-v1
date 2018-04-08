@@ -30,7 +30,6 @@ import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
@@ -298,18 +297,18 @@ public class UtxoTransactionTool {
             if (output.isLocked()) {
                 // check lock by time
                 if (output.getLockTime() >= genesisTime && output.getLockTime() <= currentTime) {
-                    if (OutPutStatusEnum.UTXO_CONFIRM_TIME_LOCK.equals(output.getStatus())) {
-                        output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
-                    } else if (OutPutStatusEnum.UTXO_UNCONFIRM_TIME_LOCK.equals(output.getStatus())) {
-                        output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND);
+                    if (OutPutStatusEnum.UTXO_CONFIRMED_TIME_LOCK.equals(output.getStatus())) {
+                        output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT);
+                    } else if (OutPutStatusEnum.UTXO_UNCONFIRMED_TIME_LOCK.equals(output.getStatus())) {
+                        output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRMED_UNSPENT);
                     }
                 }
                 // check lock by height
                 else if (output.getLockTime() < genesisTime && output.getLockTime() >= bestHeight) {
-                    if (OutPutStatusEnum.UTXO_CONFIRM_TIME_LOCK.equals(output.getStatus())) {
-                        output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
-                    } else if (OutPutStatusEnum.UTXO_UNCONFIRM_TIME_LOCK.equals(output.getStatus())) {
-                        output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND);
+                    if (OutPutStatusEnum.UTXO_CONFIRMED_TIME_LOCK.equals(output.getStatus())) {
+                        output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT);
+                    } else if (OutPutStatusEnum.UTXO_UNCONFIRMED_TIME_LOCK.equals(output.getStatus())) {
+                        output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRMED_UNSPENT);
                     }
                 }
             }
