@@ -26,6 +26,7 @@
 
 package io.nuls.consensus.manager;
 
+import io.nuls.account.entity.Address;
 import io.nuls.consensus.cache.manager.block.BlockCacheBuffer;
 import io.nuls.consensus.cache.manager.block.ConfirmingBlockCacheManager;
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
@@ -122,7 +123,7 @@ public class BlockManager {
             Log.warn("the lastStoredBlockHeader data error============================");
         }
         if (block.getHeader().getHeight() <= storedHeight) {
-            Log.info("discard block height:" + block.getHeader().getHeight() + ", address:" + block.getHeader().getPackingAddress() + ",from:" + nodeId);
+            Log.info("discard block height:" + block.getHeader().getHeight() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()) + ",from:" + nodeId);
             return;
         }
         if (verify) {
@@ -186,7 +187,7 @@ public class BlockManager {
 
     private void cacheBlockToBuffer(Block block) {
         blockCacheBuffer.cacheBlock(block);
-        BlockLog.debug("orphan cache block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + block.getHeader().getPackingAddress());
+        BlockLog.debug("orphan cache block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()));
         Block preBlock = blockCacheBuffer.getBlock(block.getHeader().getPreHash().getDigestHex());
         if (preBlock == null) {
             GetBlockRequest request = new GetBlockRequest();

@@ -23,6 +23,7 @@
  */
 package io.nuls.consensus.entity.validator.block.header;
 
+import io.nuls.account.entity.Address;
 import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.entity.meeting.PocMeetingMember;
 import io.nuls.consensus.entity.meeting.PocMeetingRound;
@@ -85,7 +86,7 @@ public class HeaderPackerValidator implements NulsDataValidator<BlockHeader> {
             return ValidateResult.getFailedResult("round member count is not inconsistent!");
         }
         PocMeetingMember member = round.getMember(roundData.getPackingIndexOfRound());
-        if (member == null || !member.getPackingAddress().equals(header.getPackingAddress())) {
+        if (member == null || !member.getPackingAddress().equals(Address.fromHashs(header.getPackingAddress()).getBase58())) {
             return ValidateResult.getFailedResult("round index is not inconsistent!");
         }
         return ValidateResult.getSuccessResult();
