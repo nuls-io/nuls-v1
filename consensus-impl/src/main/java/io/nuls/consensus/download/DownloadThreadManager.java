@@ -1,17 +1,22 @@
 package io.nuls.consensus.download;
 
 import io.nuls.consensus.service.intf.BlockService;
+import io.nuls.consensus.service.intf.DownloadService;
 import io.nuls.core.chain.entity.Block;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.NulsThreadFactory;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.queue.service.impl.QueueService;
 import io.nuls.network.entity.Node;
+import io.nuls.network.service.NetworkService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -23,6 +28,8 @@ public class DownloadThreadManager implements Callable<Boolean> {
 
     private DownloadUtils downloadUtils = new DownloadUtils();
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
+    private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
+    private DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
 
     private NetworkNewestBlockInfos newestInfos;
     private QueueService<Block> blockQueue;
@@ -43,10 +50,14 @@ public class DownloadThreadManager implements Callable<Boolean> {
         System.out.println(newestInfos);
         System.out.println("============================");
 
-        boolean isContinue = checkFirstBlock();
+        try {
+            boolean isContinue = checkFirstBlock();
 
-        if(!isContinue) {
-            return true;
+            if (!isContinue) {
+                return true;
+            }
+        } catch (NulsRuntimeException e) {
+            return false;
         }
 
         List<Node> nodes = newestInfos.getNodes();
@@ -124,11 +135,11 @@ public class DownloadThreadManager implements Callable<Boolean> {
         }
 
         //check need rollback
-//        checkRollback(localBestBlock);
+        checkRollback(localBestBlock, 0);
         return true;
     }
 
-    private void checkRollback(Block localBestBlock) throws NulsException {
+    private void checkRollback(Block localBestBlock, int rollbackCount) throws NulsException {
         List<Node> nodes = newestInfos.getNodes();
 
         for(Node node : nodes) {
@@ -140,9 +151,18 @@ public class DownloadThreadManager implements Callable<Boolean> {
 
         blockService.rollbackBlock(localBestBlock.getHeader().getHash().getDigestHex());
 
+        if(rollbackCount > 10) {
+            Map<String, Node> nodesMap = networkService.getNodes();
+            for(Map.Entry<String, Node> entry : nodesMap.entrySet()) {
+                networkService.removeNode(entry.getValue().getId());
+            }
+            downloadService.reset();
+            throw new NulsRuntimeException(ErrorCode.FAILED);
+        }
+
         localBestBlock = blockService.getBestBlock();
 
-        checkRollback(localBestBlock);
+        checkRollback(localBestBlock, rollbackCount++);
     }
 
 }
