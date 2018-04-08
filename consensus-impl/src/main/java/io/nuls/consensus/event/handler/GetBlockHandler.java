@@ -56,7 +56,7 @@ public class GetBlockHandler extends AbstractEventHandler<GetBlockRequest> {
             return;
         }
         if(param.getSize()==1){
-           Block block = this.blockService.getBlockFromMyChain(param.getStart());
+           Block block = this.blockService.getBlockFromMyChain(param.getStartHash().getDigestHex());
            if(null==block){
                //todo NOT_FOUND
                return;
