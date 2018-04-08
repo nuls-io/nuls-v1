@@ -23,7 +23,6 @@
  */
 package io.nuls.consensus.service.intf;
 
-import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;

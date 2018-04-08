@@ -106,7 +106,7 @@
             resultMap="BaseResultMap">
         select b.*
         from agent a
-        join block_header b on a.agent_address = b.consensus_address
+        join block_header b on a.packing_address = b.consensus_address
         <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
     </select>
 

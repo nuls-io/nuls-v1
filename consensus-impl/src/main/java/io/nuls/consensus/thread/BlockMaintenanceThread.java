@@ -71,8 +71,19 @@ public class BlockMaintenanceThread implements Runnable {
         return instance;
     }
 
+    public synchronized void sync(){
+
+
+
+
+
+
+
+    }
+
     public synchronized void syncBlock() {
         this.status = MaintenanceStatus.DOWNLOADING;
+
         long lastDownloadHeight = 0L;
         while (true) {
             BestCorrectBlock bestCorrectBlock = checkLocalBestCorrentBlock();

@@ -225,13 +225,13 @@ public class RoundManager {
                 totalWeight = DoubleUtils.sum(totalWeight, DoubleUtils.mul(member.getTotalDeposit().getValue(), member.getCalcCreditVal()));
                 memberList.add(member);
                 if (updateCacheStatus) {
-                    this.consensusCacheManager.updateAgentStatusById(ca.getHexHash(), ConsensusStatusEnum.IN);
+                    this.consensusCacheManager.updateAgentStatusById(ca.getHexHash(), ConsensusStatusEnum.IN,member.getRealCreditVal());
                     this.consensusCacheManager.updateDepositStatusByAgentId(ca.getHexHash(), startCalcHeight, ConsensusStatusEnum.IN);
                 }
             } else {
                 ca.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
                 if (updateCacheStatus) {
-                    this.consensusCacheManager.updateAgentStatusById(ca.getHexHash(), ConsensusStatusEnum.WAITING);
+                    this.consensusCacheManager.updateAgentStatusById(ca.getHexHash(), ConsensusStatusEnum.WAITING,member.getRealCreditVal());
                     this.consensusCacheManager.updateDepositStatusByAgentId(ca.getHexHash(), startCalcHeight, ConsensusStatusEnum.WAITING);
                 }
             }
