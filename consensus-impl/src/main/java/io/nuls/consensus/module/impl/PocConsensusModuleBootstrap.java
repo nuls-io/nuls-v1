@@ -24,6 +24,7 @@
 package io.nuls.consensus.module.impl;
 
 import io.nuls.consensus.constant.ConsensusStatusEnum;
+import io.nuls.consensus.download.DownloadServiceImpl;
 import io.nuls.consensus.entity.ConsensusStatusInfo;
 import io.nuls.consensus.entity.tx.*;
 import io.nuls.consensus.entity.validator.PocBlockValidatorManager;
@@ -35,6 +36,7 @@ import io.nuls.consensus.module.AbstractConsensusModule;
 import io.nuls.consensus.service.impl.BlockServiceImpl;
 import io.nuls.consensus.service.impl.PocConsensusServiceImpl;
 import io.nuls.consensus.service.intf.BlockService;
+import io.nuls.consensus.service.intf.DownloadService;
 import io.nuls.consensus.service.tx.*;
 import io.nuls.consensus.thread.BlockCacheCheckThread;
 import io.nuls.core.constant.ModuleStatusEnum;
@@ -76,15 +78,17 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
         this.registerTransaction(TransactionConstant.TX_TYPE_EXIT_CONSENSUS, PocExitConsensusTransaction.class,ExitConsensusTxService.class);
         this.registerService(BlockServiceImpl.class);
         this.registerService(PocConsensusServiceImpl.class);
+        this.registerService(DownloadServiceImpl.class);
     }
 
     @Override
     public void start() {
         consensusManager.init();
         this.registerHandlers();
-        this.consensusManager.startMaintenanceWork();
+//        this.consensusManager.startMaintenanceWork();
         consensusManager.joinConsensusMeeting();
         consensusManager.startPersistenceWork();
+        consensusManager.startDownloadWork();
 
         Log.info("the POC consensus module is started!");
         TaskManager.createAndRunThread(this.getModuleId(),"block-cache-check",new BlockCacheCheckThread());

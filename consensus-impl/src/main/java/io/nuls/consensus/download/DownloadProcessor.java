@@ -76,9 +76,21 @@ public class DownloadProcessor extends Thread {
      */
     private void doSynchronize() {
 
+        if(downloadStatus != DownloadStatus.READY) {
+            return;
+        }
+
+        downloadStatus = DownloadStatus.DOWNLOADING;
+
         //查找网络大多数节点一致的最高区块hash
         //Finding the highest block hash consistent with most nodes in the network
         NetworkNewestBlockInfos newestInfos = getNetworkNewestBlockInfos();
+
+        if(newestInfos.getNodes().size() < 1) {
+            //TODO
+            downloadStatus = DownloadStatus.WAIT;
+            return;
+        }
 
         QueueService<Block> blockQueue = new QueueService<Block>();
 
@@ -100,12 +112,10 @@ public class DownloadProcessor extends Thread {
         TaskManager.createAndRunThread(NulsConstant.MODULE_ID_CONSENSUS, "download-data-storeage",
                 new Thread(dataStorageFuture));
 
-        downloadStatus = DownloadStatus.DOWNLOADING;
-
         try {
             Boolean downResult = threadManagerFuture.get();
 
-            blockQueue.offer(queueName, null);
+            blockQueue.offer(queueName, new Block());
 
             Boolean storageResult = dataStorageFuture.get();
 
@@ -116,10 +126,9 @@ public class DownloadProcessor extends Thread {
             } else {
                 downloadStatus = DownloadStatus.FAILED;
             }
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
+            downloadStatus = DownloadStatus.FAILED;
         } finally {
             blockQueue.destroyQueue(queueName);
         }
@@ -133,8 +142,6 @@ public class DownloadProcessor extends Thread {
     private NetworkNewestBlockInfos getNetworkNewestBlockInfos() {
 
         NetworkNewestBlockInfos infos = getNetworkNewestBlock();
-
-//        checkLocalBestCorrentBlock(infos);
 
         return infos;
     }
@@ -188,77 +195,6 @@ public class DownloadProcessor extends Thread {
         return new NetworkNewestBlockInfos(nodes.get(0).getVersionMessage().getBestBlockHeight(), bestHash, nodes);
     }
 
-    private void checkLocalBestCorrentBlock(NetworkNewestBlockInfos infos) {
-        Block localBestBlock = blockService.getLocalBestBlock();
-        do {
-            if (null == localBestBlock || localBestBlock.getHeader().getHeight() <= 1) {
-                break;
-            }
-            if (null == infos || infos.getNetBestHash() == null) {
-                break;
-            }
-            //same to network nodes
-            if (infos.getNetBestHeight() == localBestBlock.getHeader().getHeight() &&
-                    infos.getNetBestHash().equals(localBestBlock.getHeader().getHash())) {
-                break;
-            } else if (infos.getNetBestHeight() <= localBestBlock.getHeader().getHeight()) {
-                if (infos.getNetBestHeight() == 0) {
-                    break;
-                }
-                //local height is highest
-                BlockHeader header = null;
-                try {
-                    header = blockService.getBlockHeader(infos.getNetBestHeight());
-                } catch (NulsException e) {
-                    break;
-                }
-
-                if (null != header && header.getHash().equals(infos.getNetBestHash())) {
-                    break;
-                }
-                if (infos.getNodes().size() == 1) {
-                    throw new NulsRuntimeException(ErrorCode.FAILED, "node count not enough!");
-                }
-                Log.warn("Rollback block start height:{},local is highest and wrong!", localBestBlock.getHeader().getHeight());
-                //bifurcation
-                rollbackBlock(localBestBlock);
-                localBestBlock = this.blockService.getLocalBestBlock();
-                break;
-            } else {
-                checkNeedRollback(localBestBlock);
-                localBestBlock = this.blockService.getLocalBestBlock();
-            }
-        } while (false);
-
-        infos.setLocalBestHash(localBestBlock.getHeader().getHash().getDigestHex());
-        infos.setLocalBestHeight(localBestBlock.getHeader().getHeight());
-    }
-
-    private void checkNeedRollback(Block block) {
-        BlockInfo netThisBlockInfo = DistributedBlockInfoRequestUtils.getInstance().request(block.getHeader().getHeight());
-        if (netThisBlockInfo.getBestHash().equals(block.getHeader().getHash())) {
-            return;
-        }
-        if (block.getHeader().getHeight() != netThisBlockInfo.getBestHeight()) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "answer not asked!");
-        }
-        Log.debug("Rollback block start height:{},local has wrong blocks!", block.getHeader().getHeight());
-        //bifurcation
-        rollbackBlock(block);
-    }
-
-    private void rollbackBlock(Block block) {
-        try {
-            this.blockService.rollbackBlock(block.getHeader().getHash().getDigestHex());
-            Block preblock = this.blockService.getBlock(block.getHeader().getPreHash().getDigestHex());
-            NulsContext.getInstance().setBestBlock(blockService.getBestBlock());
-            checkNeedRollback(preblock);
-        } catch (NulsException e) {
-            Log.error(e);
-            return;
-        }
-    }
-
     private void waitNetworkNotChange() throws NulsRuntimeException {
         //等待10秒内节点没有变化（一般是增长），则开始同步
         //Wait for no change in the node within 10 seconds (usually growth), then start synchronization
@@ -287,9 +223,9 @@ public class DownloadProcessor extends Thread {
         //check node size again
         nodeSize = networkService.getAvailableNodes().size();
         if(nodeSize < MIN_NODE_COUNT) {
-            throw new NulsRuntimeException(ErrorCode.NET_NODE_NOT_FOUND);
+            downloadStatus = DownloadStatus.WAIT;
+            return;
         }
-
         downloadStatus = DownloadStatus.READY;
     }
 

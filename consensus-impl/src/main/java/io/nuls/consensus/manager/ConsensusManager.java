@@ -33,6 +33,7 @@ import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.genesis.GenesisBlock;
 import io.nuls.consensus.service.impl.BlockStorageService;
+import io.nuls.consensus.service.intf.DownloadService;
 import io.nuls.consensus.thread.BlockMaintenanceThread;
 import io.nuls.consensus.thread.BlockPersistenceThread;
 import io.nuls.consensus.thread.ConsensusMeetingRunner;
@@ -147,14 +148,18 @@ public class ConsensusManager {
 
     public void startMaintenanceWork() {
         BlockMaintenanceThread blockMaintenanceThread = BlockMaintenanceThread.getInstance();
-        try {
-            blockMaintenanceThread.checkGenesisBlock();
-        } catch (Exception e) {
-            Log.error(e.getMessage());
-        } finally {
-            TaskManager.createAndRunThread(NulsConstant.MODULE_ID_CONSENSUS,
-                    BlockMaintenanceThread.THREAD_NAME, blockMaintenanceThread);
+            try {
+                blockMaintenanceThread.checkGenesisBlock();
+            } catch (Exception e) {
+                Log.error(e.getMessage());
+            } finally {
+//                TaskManager.createAndRunThread(NulsConstant.MODULE_ID_CONSENSUS,
+//                    BlockMaintenanceThread.THREAD_NAME, blockMaintenanceThread);
         }
+    }
+
+    public void startDownloadWork() {
+        NulsContext.getServiceBean(DownloadService.class).start();
     }
 
     public void destroy() {

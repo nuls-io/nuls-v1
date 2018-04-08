@@ -26,6 +26,9 @@ public class DownloadDataStorage implements Callable<Boolean> {
         try {
             Block block = null;
             while((block = blockQueue.take(queueName)) != null) {
+                if(block.getHeader() == null) {
+                    break;
+                }
                 BlockManager.getInstance().addBlock(block, true, null);
             }
             return true;
