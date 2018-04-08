@@ -1,5 +1,6 @@
 package io.nuls.rpc.entity;
 
+import io.nuls.account.entity.Address;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.Transaction;
@@ -70,7 +71,7 @@ public class BlockDto {
         this.time = header.getTime();
         this.height = header.getHeight();
         this.txCount = header.getTxCount();
-        this.packingAddress = header.getPackingAddress();
+        this.packingAddress = Address.fromHashs(header.getPackingAddress()).getBase58();
         this.scriptSign = Hex.encode(header.getScriptSig().serialize());
         this.reward = reward;
         this.fee = fee;

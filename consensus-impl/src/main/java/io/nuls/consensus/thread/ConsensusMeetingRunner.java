@@ -24,6 +24,7 @@
 package io.nuls.consensus.thread;
 
 import io.nuls.account.entity.Account;
+import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
@@ -223,7 +224,7 @@ public class ConsensusMeetingRunner implements Runnable {
 
     private boolean hasReceiveNewestBlock(PocMeetingMember self, PocMeetingRound round) {
         Block bestBlock = this.blockService.getBestBlock();
-        String packingAddress = bestBlock.getHeader().getPackingAddress();
+        String packingAddress = Address.fromHashs(bestBlock.getHeader().getPackingAddress()).getBase58();
 
         int thisIndex = self.getPackingIndexOfRound();
 

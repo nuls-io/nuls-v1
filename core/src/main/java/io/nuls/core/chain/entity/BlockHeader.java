@@ -23,6 +23,7 @@
  */
 package io.nuls.core.chain.entity;
 
+import com.sun.jndi.cosnaming.IiopUrl;
 import io.nuls.core.chain.manager.BlockHeaderValidatorManager;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.script.P2PKHScriptSig;
@@ -51,7 +52,7 @@ public class BlockHeader extends BaseNulsData {
 
     private long txCount;
 
-    private String packingAddress;
+    private byte[] packingAddress;
 
     private P2PKHScriptSig scriptSign;
 
@@ -78,7 +79,7 @@ public class BlockHeader extends BaseNulsData {
         size += Utils.sizeOfVarInt(time);
         size += Utils.sizeOfVarInt(height);
         size += Utils.sizeOfVarInt(txCount);
-        size += Utils.sizeOfString(packingAddress);
+        size += Utils.sizeOfBytes(packingAddress);
         size += Utils.sizeOfBytes(extend);
         size += Utils.sizeOfNulsData(scriptSign);
         return size;
@@ -91,7 +92,7 @@ public class BlockHeader extends BaseNulsData {
         stream.writeVarInt(time);
         stream.writeVarInt(height);
         stream.writeVarInt(txCount);
-        stream.writeString(packingAddress);
+        stream.writeBytesWithLength(packingAddress);
         stream.writeBytesWithLength(extend);
         stream.writeNulsData(scriptSign);
     }
@@ -103,7 +104,7 @@ public class BlockHeader extends BaseNulsData {
         this.time = byteBuffer.readVarInt();
         this.height = byteBuffer.readVarInt();
         this.txCount = byteBuffer.readVarInt();
-        this.packingAddress = byteBuffer.readString();
+        this.packingAddress = byteBuffer.readByLengthByte();
         this.extend = byteBuffer.readByLengthByte();
         try {
             this.hash = NulsDigestData.calcDigestData(this.serialize());
@@ -170,12 +171,12 @@ public class BlockHeader extends BaseNulsData {
         this.scriptSign = scriptSign;
     }
 
-    public void setPackingAddress(String packingAddress) {
-        this.packingAddress = packingAddress;
+    public byte[] getPackingAddress() {
+        return packingAddress;
     }
 
-    public String getPackingAddress() {
-        return packingAddress;
+    public void setPackingAddress(byte[] packingAddress) {
+        this.packingAddress = packingAddress;
     }
 
     public byte[] getExtend() {

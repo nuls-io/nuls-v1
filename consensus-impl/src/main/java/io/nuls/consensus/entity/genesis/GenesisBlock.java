@@ -24,6 +24,7 @@
 package io.nuls.consensus.entity.genesis;
 
 import io.nuls.account.entity.Account;
+import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.account.util.AccountTool;
 import io.nuls.consensus.constant.PocConsensusConstant;
@@ -207,7 +208,12 @@ public final class GenesisBlock extends Block {
         } catch (IOException e) {
             Log.error(e);
         }
-        header.setPackingAddress(address);
+        try {
+            header.setPackingAddress(Address.fromHashs(address).getHash());
+        } catch (NulsException e) {
+            Log.error(e);
+            throw new NulsRuntimeException(e);
+        }
         header.setHash(NulsDigestData.calcDigestData(header));
 
         P2PKHScriptSig p2PKHScriptSig = new P2PKHScriptSig();

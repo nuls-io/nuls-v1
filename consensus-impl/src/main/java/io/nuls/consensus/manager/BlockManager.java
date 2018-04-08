@@ -128,7 +128,7 @@ public class BlockManager {
         if (verify) {
             ValidateResult result = block.verify();
             if (result.isFailed() && result.getErrorCode() != ErrorCode.ORPHAN_BLOCK && result.getErrorCode() != ErrorCode.ORPHAN_TX) {
-                Log.debug("discard a block :" + result.getMessage());
+                Log.info("discard a block :" + result.getMessage());
                 return;
             } else if (result.isFailed()) {
                 cacheBlockToBuffer(block);
@@ -186,7 +186,7 @@ public class BlockManager {
 
     private void cacheBlockToBuffer(Block block) {
         blockCacheBuffer.cacheBlock(block);
-        BlockLog.info("orphan cache block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + block.getHeader().getPackingAddress());
+        BlockLog.debug("orphan cache block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + block.getHeader().getPackingAddress());
         Block preBlock = blockCacheBuffer.getBlock(block.getHeader().getPreHash().getDigestHex());
         if (preBlock == null) {
             GetBlockRequest request = new GetBlockRequest();

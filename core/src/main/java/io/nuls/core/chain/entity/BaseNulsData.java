@@ -119,12 +119,6 @@ public abstract class BaseNulsData implements Serializable, Cloneable {
      */
     public final ValidateResult verify() {
         ValidateResult result = ValidatorManager.startDoValidator(this);
-        if (this instanceof Block) {
-            if (result.isFailed()) {
-                Block block = (Block) this;
-                BlockLog.info("verify block failed:" + result.getMessage() + ", height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + block.getHeader().getPackingAddress());
-            }
-        }
         return result;
     }
 

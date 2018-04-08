@@ -85,7 +85,7 @@ public class ConsensusTool {
             }
         }
         po.setTxCount(header.getTxCount());
-        po.setConsensusAddress(header.getPackingAddress());
+        po.setConsensusAddress(Address.fromHashs(header.getPackingAddress()).getBase58());
         po.setExtend(header.getExtend());
         BlockRoundData data = new BlockRoundData();
         try {
@@ -104,7 +104,7 @@ public class ConsensusTool {
         BlockHeader header = new BlockHeader();
         header.setHash(NulsDigestData.fromDigestHex(po.getHash()));
         header.setMerkleHash(NulsDigestData.fromDigestHex(po.getMerkleHash()));
-        header.setPackingAddress(po.getConsensusAddress());
+        header.setPackingAddress(Address.fromHashs(po.getConsensusAddress()).getHash());
         header.setTxCount(po.getTxCount());
         header.setPreHash(NulsDigestData.fromDigestHex(po.getPreHash()));
         header.setTime(po.getCreateTime());
@@ -211,7 +211,7 @@ public class ConsensusTool {
             Transaction tx = blockData.getTxList().get(i);
             txHashList.add(tx.getHash());
         }
-        header.setPackingAddress(account.getAddress().toString());
+        header.setPackingAddress(account.getAddress().getHash());
         header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
         header.setHash(NulsDigestData.calcDigestData(block.getHeader()));
         P2PKHScriptSig scriptSig = new P2PKHScriptSig();
