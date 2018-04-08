@@ -272,6 +272,9 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     public List<Transaction> getTxList(String blockHash) throws Exception {
         List<Transaction> txList = new ArrayList<>();
         List<TransactionPo> poList = txDao.getTxs(blockHash);
+        if(null==poList){
+            return txList;
+        }
         for (TransactionPo po : poList) {
             txList.add(UtxoTransferTool.toTransaction(po));
         }
