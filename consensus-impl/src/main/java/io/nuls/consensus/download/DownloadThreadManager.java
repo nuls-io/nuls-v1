@@ -66,11 +66,11 @@ public class DownloadThreadManager implements Callable<Boolean> {
 
         long laveCount = totalCount;
 
-        long downCount = (long) Math.floor(totalCount / maxDowncount);
+        long downCount = (long) Math.ceil((double) totalCount / maxDowncount);
 
         for(long i = 0 ; i < downCount ; i++) {
 
-            long startHeight = localBestHeight +1+ i * maxDowncount;
+            long startHeight = (localBestHeight + 1) + i * maxDowncount;
 
             for(int j = 0 ; j < nodes.size() ; j ++) {
 
