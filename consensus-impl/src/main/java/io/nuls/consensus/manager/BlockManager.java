@@ -365,6 +365,9 @@ public class BlockManager {
     }
 
     public Block getBlockFromMyChain(String hash) {
+        if(null==bifurcateProcessor||null==bifurcateProcessor.getApprovingChain()){
+            return null;
+        }
         HeaderDigest hd = this.bifurcateProcessor.getApprovingChain().getHeaderDigest(hash);
         if (null == hd) {
             return null;
