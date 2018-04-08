@@ -192,6 +192,10 @@ public class BlockHeaderChain implements NulsCloneable {
     }
 
     public HeaderDigest getLastHd() {
+        //todo
+        if(headerDigestList.size()==0){
+            return null;
+        }
         try {
             return headerDigestList.get(headerDigestList.size() - 1);
         } catch (Exception e) {
