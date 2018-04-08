@@ -122,8 +122,8 @@ public class DownloadThreadManager implements Callable<Boolean> {
 
         Block localBestBlock = blockService.getBestBlock();
 
-        if(newestInfos.getNetBestHeight() == localBestBlock.getHeader().getHeight() &&
-                newestInfos.getNetBestHash().equals(localBestBlock.getHeader().getHash().getDigestHex())) {
+        if(localBestBlock.getHeader().getHeight() == 0 || (newestInfos.getNetBestHeight() == localBestBlock.getHeader().getHeight() &&
+                newestInfos.getNetBestHash().equals(localBestBlock.getHeader().getHash().getDigestHex()))) {
             return true;
         }
 
