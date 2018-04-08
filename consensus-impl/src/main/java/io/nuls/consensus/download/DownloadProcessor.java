@@ -6,7 +6,6 @@ import io.nuls.consensus.entity.block.BestCorrectBlock;
 import io.nuls.consensus.module.impl.PocConsensusModuleBootstrap;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.thread.BlockMaintenanceThread;
-import io.nuls.consensus.thread.DataDownloadThread;
 import io.nuls.consensus.utils.BlockInfo;
 import io.nuls.consensus.utils.DistributedBlockInfoRequestUtils;
 import io.nuls.core.chain.entity.Block;
