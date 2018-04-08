@@ -354,7 +354,7 @@ public class BlockManager {
         if (null == chain) {
             return null;
         }
-        HeaderDigest headerDigest = chain.getHeaderDigestList().get(chain.getHeaderDigestList().size() - 1);
+        HeaderDigest headerDigest = chain.getLastHd();
         return this.getBlock(headerDigest.getHash());
     }
 
