@@ -356,12 +356,12 @@ public class ConsensusTool {
         return punishTx;
     }
 
-    public static Block assemblyBlock(BlockHeader header,Map<NulsDigestData,Transaction> txMap ,List<NulsDigestData> txHashList){
+    public static Block assemblyBlock(BlockHeader header,Map<String,Transaction> txMap ,List<NulsDigestData> txHashList){
         Block block = new Block();
         block.setHeader(header);
         List<Transaction> txs = new ArrayList<>();
         for (NulsDigestData txHash : txHashList) {
-            Transaction tx = txMap.get(txHash);
+            Transaction tx = txMap.get(txHash.getDigestHex());
             if (null == tx) {
                 throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
             }

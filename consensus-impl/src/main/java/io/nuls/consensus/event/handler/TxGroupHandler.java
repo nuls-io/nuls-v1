@@ -74,9 +74,9 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
 
         System.out.println("get tx group request 1 ");
 
-        Map<NulsDigestData, Transaction> txMap = new HashMap<>();
+        Map<String, Transaction> txMap = new HashMap<>();
         for (Transaction tx : newBlock.getSubTxList()) {
-            txMap.put(tx.getHash(), tx);
+            txMap.put(tx.getHash().getDigestHex(), tx);
         }
         List<NulsDigestData> needHashList = new ArrayList<>();
         for (NulsDigestData hash : newBlock.getTxHashList()) {
@@ -94,7 +94,7 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
                 needHashList.add(hash);
                 continue;
             }
-            txMap.put(tx.getHash(), tx);
+            txMap.put(tx.getHash().getDigestHex(), tx);
         }
         if (!needHashList.isEmpty()) {
             GetTxGroupRequest request = new GetTxGroupRequest();

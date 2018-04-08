@@ -94,9 +94,9 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
             BlockLog.warn("discard a SmallBlock:" + smallBlock.getHeader().getHash() + ", from:" + fromId + " ,reason:" + result.getMessage());
             return;
         }
-        Map<NulsDigestData, Transaction> txMap = new HashMap<>();
+        Map<String, Transaction> txMap = new HashMap<>();
         for (Transaction tx : smallBlock.getSubTxList()) {
-            txMap.put(tx.getHash(), tx);
+            txMap.put(tx.getHash().getDigestHex(), tx);
         }
         List<NulsDigestData> needHashList = new ArrayList<>();
         for (NulsDigestData hash : smallBlock.getTxHashList()) {
@@ -111,7 +111,7 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
                 needHashList.add(hash);
                 continue;
             }
-            txMap.put(tx.getHash(), tx);
+            txMap.put(tx.getHash().getDigestHex(), tx);
         }
         if (!needHashList.isEmpty()) {
             GetTxGroupRequest request = new GetTxGroupRequest();
