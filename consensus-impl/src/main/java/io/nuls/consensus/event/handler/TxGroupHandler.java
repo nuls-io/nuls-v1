@@ -23,6 +23,7 @@
  */
 package io.nuls.consensus.event.handler;
 
+import io.nuls.account.entity.Address;
 import io.nuls.consensus.cache.manager.block.TemporaryCacheManager;
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
@@ -115,7 +116,7 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
         newBlockEvent.setEventBody(smallBlock);
         List<String> addressList = eventBroadcaster.broadcastHashAndCache(newBlockEvent, false, fromId);
         for (String address : addressList) {
-            BlockLog.info("forward blockHeader:(" + address + ")" + header.getHeight() + ", hash:" + header.getHash() + ", preHash:" + header.getPreHash() + ", packing:" + header.getPackingAddress());
+            BlockLog.info("forward blockHeader:(" + address + ")" + header.getHeight() + ", hash:" + header.getHash() + ", preHash:" + header.getPreHash() + ", packing:" + Address.fromHashs(header.getPackingAddress()));
         }
 
         AssembledBlockNotice notice = new AssembledBlockNotice();

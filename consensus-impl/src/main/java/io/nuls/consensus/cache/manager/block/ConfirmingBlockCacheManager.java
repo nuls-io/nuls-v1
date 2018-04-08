@@ -25,14 +25,12 @@
  */
 package io.nuls.consensus.cache.manager.block;
 
+import io.nuls.account.entity.Address;
 import io.nuls.cache.util.CacheMap;
 import io.nuls.consensus.constant.ConsensusCacheConstant;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.BlockLog;
 
 import java.util.List;
@@ -68,7 +66,7 @@ public class ConfirmingBlockCacheManager {
     }
 
     public boolean cacheBlock(Block block) {
-        BlockLog.info("cache block height:" +block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + block.getHeader().getPackingAddress());
+        BlockLog.info("cache block height:" +block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()));
         String hash = block.getHeader().getHash().getDigestHex();
         headerCacheMap.put(hash, block.getHeader());
         txsCacheMap.put(hash, block.getTxs());
