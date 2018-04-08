@@ -91,7 +91,7 @@
 
         ]]>
     </select>
-    <select id="getHashList" resultMap="BaseResultMap" parameterType="java.util.Map">
+    <select id="getBlockHashList" resultMap="BaseResultMap" parameterType="java.util.Map">
         SELECT height, hash from block_header
         <![CDATA[
         where height >=#{startHeight,jdbcType=BIGINT}
