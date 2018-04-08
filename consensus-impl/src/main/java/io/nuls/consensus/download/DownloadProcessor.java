@@ -1,11 +1,7 @@
 package io.nuls.consensus.download;
 
 import io.nuls.consensus.constant.DownloadStatus;
-import io.nuls.consensus.constant.MaintenanceStatus;
-import io.nuls.consensus.entity.block.BestCorrectBlock;
-import io.nuls.consensus.module.impl.PocConsensusModuleBootstrap;
 import io.nuls.consensus.service.intf.BlockService;
-import io.nuls.consensus.thread.BlockMaintenanceThread;
 import io.nuls.consensus.utils.BlockInfo;
 import io.nuls.consensus.utils.DistributedBlockInfoRequestUtils;
 import io.nuls.core.chain.entity.Block;
@@ -15,19 +11,18 @@ import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.module.service.ModuleService;
 import io.nuls.core.thread.manager.NulsThreadFactory;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.queue.service.impl.QueueService;
-import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Node;
 import io.nuls.network.service.NetworkService;
-import org.spongycastle.util.Times;
 
-import java.sql.Time;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
