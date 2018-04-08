@@ -57,7 +57,7 @@ public class Agent extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += Utils.sizeOfLong(deposit.getValue());
+        size += Utils.sizeOfVarInt(deposit.getValue());
         size += Utils.sizeOfString(this.packingAddress);
         size += Utils.sizeOfDouble(this.commissionRate);
         size += Utils.sizeOfString(this.introduction);

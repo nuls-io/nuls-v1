@@ -75,9 +75,9 @@ public class BlockHeader extends BaseNulsData {
         int size = 0;
         size += Utils.sizeOfNulsData(preHash);
         size += Utils.sizeOfNulsData(merkleHash);
-        size += Utils.sizeOfLong(time);
-        size += Utils.sizeOfLong(height);
-        size += Utils.sizeOfLong(txCount);
+        size += Utils.sizeOfVarInt(time);
+        size += Utils.sizeOfVarInt(height);
+        size += Utils.sizeOfVarInt(txCount);
         size += Utils.sizeOfString(packingAddress);
         size += Utils.sizeOfBytes(extend);
         size += Utils.sizeOfNulsData(scriptSign);

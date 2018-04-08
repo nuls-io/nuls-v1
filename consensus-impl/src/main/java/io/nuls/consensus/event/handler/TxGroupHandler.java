@@ -24,31 +24,28 @@
 package io.nuls.consensus.event.handler;
 
 import io.nuls.consensus.cache.manager.block.TemporaryCacheManager;
+import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
-import io.nuls.consensus.entity.RedPunishData;
+import io.nuls.consensus.entity.GetTxGroupParam;
 import io.nuls.consensus.entity.TxGroup;
-import io.nuls.consensus.event.BlockHeaderEvent;
+import io.nuls.consensus.event.GetTxGroupRequest;
+import io.nuls.consensus.event.SmallBlockEvent;
 import io.nuls.consensus.event.TxGroupEvent;
 import io.nuls.consensus.event.notice.AssembledBlockNotice;
 import io.nuls.consensus.manager.BlockManager;
-import io.nuls.consensus.thread.ConsensusMeetingRunner;
-import io.nuls.consensus.utils.DownloadDataUtils;
+import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.core.chain.entity.*;
-import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.BlockLog;
-import io.nuls.core.utils.log.Log;
-import io.nuls.core.validate.ValidateResult;
-import io.nuls.db.entity.NodePo;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.network.service.NetworkService;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author facjas
@@ -57,9 +54,9 @@ import java.util.List;
 public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
     private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
     private ReceivedTxCacheManager receivedTxCacheManager = ReceivedTxCacheManager.getInstance();
+    private ConfirmingTxCacheManager confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
     private OrphanTxCacheManager orphanTxCacheManager = OrphanTxCacheManager.getInstance();
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
-    private DownloadDataUtils downloadDataUtils = DownloadDataUtils.getInstance();
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
     private BlockManager blockManager = BlockManager.getInstance();
 
@@ -69,53 +66,54 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
 
         System.out.println("get tx group request : " + event.getEventBody().getBlockHash().getDigestHex());
 
-
-        BlockHeader header = temporaryCacheManager.getBlockHeader(txGroup.getBlockHash().getDigestHex());
-        if (header == null) {
+        SmallBlock newBlock = temporaryCacheManager.getSmallBlock(txGroup.getBlockHash().getDigestHex());
+        if (newBlock == null) {
             return;
         }
-        SmallBlock smallBlock = temporaryCacheManager.getSmallBlock(header.getHash().getDigestHex());
-        if (null == smallBlock) {
-            return;
-        }
+        BlockHeader header = newBlock.getHeader();
 
         System.out.println("get tx group request 1 ");
 
-        Block block = new Block();
-        block.setHeader(header);
-        List<Transaction> txs = new ArrayList<>();
-        for (NulsDigestData txHash : smallBlock.getTxHashList()) {
-            Transaction tx = txGroup.getTx(txHash.getDigestHex());
-            if (null == tx) {
-                tx = receivedTxCacheManager.getTx(txHash);
-            }if (null == tx) {
-                tx = orphanTxCacheManager.getTx(txHash);
-            }
-            if (null == tx) {
-                throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
-            }
-            txs.add(tx);
+        Map<NulsDigestData, Transaction> txMap = new HashMap<>();
+        for (Transaction tx : newBlock.getSubTxList()) {
+            txMap.put(tx.getHash(), tx);
         }
-        block.setTxs(txs);
-        ValidateResult<RedPunishData> vResult = block.verify();
-        if (null == vResult || (vResult.isFailed() && vResult.getErrorCode() != ErrorCode.ORPHAN_TX && vResult.getErrorCode() != ErrorCode.ORPHAN_BLOCK)) {
-            if (SeverityLevelEnum.FLAGRANT_FOUL == vResult.getLevel()) {
-                RedPunishData data = vResult.getObject();
-                ConsensusMeetingRunner.putPunishData(data);
-                networkService.blackNode(fromId, NodePo.BLACK);
-            } else {
-                Log.info("----------------TxGroupHandler remove node-------------" + fromId);
-                networkService.removeNode(fromId, NodePo.YELLOW);
+        List<NulsDigestData> needHashList = new ArrayList<>();
+        for (NulsDigestData hash : newBlock.getTxHashList()) {
+            Transaction tx = txGroup.getTx(hash.getDigestHex());
+            if (null == tx) {
+                tx = this.receivedTxCacheManager.getTx(hash);
             }
-            System.out.println("get tx group request 2 ");
+            if (null == tx) {
+                tx = orphanTxCacheManager.getTx(hash);
+            }
+            if (null == tx) {
+                tx = confirmingTxCacheManager.getTx(hash);
+            }
+            if (null == tx && txMap.get(hash) == null) {
+                needHashList.add(hash);
+                continue;
+            }
+            txMap.put(tx.getHash(), tx);
+        }
+        if (!needHashList.isEmpty()) {
+            GetTxGroupRequest request = new GetTxGroupRequest();
+            GetTxGroupParam param = new GetTxGroupParam();
+            param.setBlockHash(header.getHash());
+            for (NulsDigestData hash : needHashList) {
+                param.addHash(hash);
+            }
+            request.setEventBody(param);
+            this.eventBroadcaster.sendToNode(request, fromId);
             return;
         }
-        blockManager.addBlock(block, false, fromId);
-        downloadDataUtils.removeTxGroup(block.getHeader().getHash().getDigestHex());
 
-        BlockHeaderEvent headerEvent = new BlockHeaderEvent();
-        headerEvent.setEventBody(header);
-        List<String> addressList = eventBroadcaster.broadcastHashAndCache(headerEvent, false, fromId);
+        Block block = ConsensusTool.assemblyBlock(header, txMap, newBlock.getTxHashList());
+        blockManager.addBlock(block, true, fromId);
+
+        SmallBlockEvent newBlockEvent = new SmallBlockEvent();
+        newBlockEvent.setEventBody(newBlock);
+        List<String> addressList = eventBroadcaster.broadcastHashAndCache(newBlockEvent, false, fromId);
         for (String address : addressList) {
             BlockLog.info("forward blockHeader:(" + address + ")" + header.getHeight() + ", hash:" + header.getHash() + ", preHash:" + header.getPreHash() + ", packing:" + header.getPackingAddress());
         }

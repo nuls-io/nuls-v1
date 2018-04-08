@@ -56,11 +56,11 @@ public class BlockHashResponse extends BaseNulsData {
     public int size() {
         int size = 0;
         size += Utils.sizeOfInt48();
-        size += Utils.sizeOfInt(heightList.size());
+        size += Utils.sizeOfVarInt(heightList.size());
         for (Long height : heightList) {
-            size += Utils.sizeOfLong(height);
+            size += Utils.sizeOfVarInt(height);
         }
-        size += Utils.sizeOfInt(hashList.size());
+        size += Utils.sizeOfVarInt(hashList.size());
         for (NulsDigestData hash : hashList) {
             size += Utils.sizeOfNulsData(hash);
         }

@@ -37,7 +37,7 @@ import io.nuls.consensus.entity.meeting.PocMeetingMember;
 import io.nuls.consensus.entity.meeting.PocMeetingRound;
 import io.nuls.consensus.entity.tx.RedPunishTransaction;
 import io.nuls.consensus.entity.tx.YellowPunishTransaction;
-import io.nuls.consensus.event.BlockHeaderEvent;
+import io.nuls.consensus.event.SmallBlockEvent;
 import io.nuls.consensus.event.notice.PackedBlockNotice;
 import io.nuls.consensus.manager.BlockManager;
 import io.nuls.consensus.manager.ConsensusManager;
@@ -45,10 +45,7 @@ import io.nuls.consensus.manager.RoundManager;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.consensus.utils.TxTimeComparator;
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.Na;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.chain.entity.*;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
@@ -185,9 +182,9 @@ public class ConsensusMeetingRunner implements Runnable {
                 return;
             }
             //todo info to debug
-            Log.info("produce block:" + newBlock.getHeader().getHash() + ",\nheight(" + newBlock.getHeader().getHeight() + "),round(" + round.getIndex() + "),index(" + self.getIndexOfRound() + "),roundStart:" + round.getStartTime());
+            Log.info("produce block:" + newBlock.getHeader().getHash() + ",\nheight(" + newBlock.getHeader().getHeight() + "),round(" + round.getIndex() + "),index(" + self.getPackingIndexOfRound() + "),roundStart:" + round.getStartTime());
             BlockLog.info("produce block height:" + newBlock.getHeader().getHeight() + ", preHash:" + newBlock.getHeader().getPreHash() + " , hash:" + newBlock.getHeader().getHash() + ", address:" + newBlock.getHeader().getPackingAddress());
-            broadcastNewBlock(newBlock);
+            broadcastSmallBlock(newBlock);
 
         } catch (NulsException e) {
             Log.error(e);
@@ -229,7 +226,7 @@ public class ConsensusMeetingRunner implements Runnable {
         Block bestBlock = this.blockService.getBestBlock();
         String packingAddress = bestBlock.getHeader().getPackingAddress();
 
-        int thisIndex = self.getIndexOfRound();
+        int thisIndex = self.getPackingIndexOfRound();
 
         String preBlockPackingAddress = null;
 
@@ -241,7 +238,7 @@ public class ConsensusMeetingRunner implements Runnable {
             }
             preBlockPackingAddress = preRound.getMember(preRound.getMemberCount()).getPackingAddress();
         } else {
-            preBlockPackingAddress = round.getMember(self.getIndexOfRound()).getPackingAddress();
+            preBlockPackingAddress = round.getMember(self.getPackingIndexOfRound()).getPackingAddress();
         }
 
         if (packingAddress.equals(preBlockPackingAddress)) {
@@ -251,17 +248,30 @@ public class ConsensusMeetingRunner implements Runnable {
         }
     }
 
-    private void broadcastNewBlock(Block newBlock) {
-        confirmingTxCacheManager.putTx(newBlock.getTxs().get(0));
-        blockManager.addBlock(newBlock, false, null);
-        BlockHeaderEvent event = new BlockHeaderEvent();
-        event.setEventBody(newBlock.getHeader());
+    private void broadcastSmallBlock(Block block) {
+        confirmingTxCacheManager.putTx(block.getTxs().get(0));
+        blockManager.addBlock(block, false, null);
+        SmallBlockEvent event = new SmallBlockEvent();
+        SmallBlock newBlock = new SmallBlock();
+        newBlock.setHeader(block.getHeader());
+        List<NulsDigestData> txHashList = new ArrayList<>();
+        for (Transaction tx : block.getTxs()) {
+            txHashList.add(tx.getHash());
+            if (tx.getType() == TransactionConstant.TX_TYPE_COIN_BASE ||
+                    tx.getType() == TransactionConstant.TX_TYPE_YELLOW_PUNISH ||
+                    tx.getType() == TransactionConstant.TX_TYPE_RED_PUNISH) {
+                newBlock.addConsensusTx(tx);
+            }
+        }
+        newBlock.setTxHashList(txHashList);
+
+        event.setEventBody(newBlock);
         List<String> nodeIdList = eventBroadcaster.broadcastAndCache(event, false);
         for (String nodeId : nodeIdList) {
-            BlockLog.info("send block height:" + newBlock.getHeader().getHeight() + ", node:" + nodeId);
+            BlockLog.info("send block height:" + block.getHeader().getHeight() + ", node:" + nodeId);
         }
         PackedBlockNotice notice = new PackedBlockNotice();
-        notice.setEventBody(newBlock.getHeader());
+        notice.setEventBody(block.getHeader());
         eventBroadcaster.publishToLocal(notice);
     }
 
@@ -334,11 +344,11 @@ public class ConsensusMeetingRunner implements Runnable {
         BlockRoundData roundData = new BlockRoundData();
         roundData.setRoundIndex(round.getIndex());
         roundData.setConsensusMemberCount(round.getMemberCount());
-        roundData.setPackingIndexOfRound(self.getIndexOfRound());
+        roundData.setPackingIndexOfRound(self.getPackingIndexOfRound());
         roundData.setRoundStartTime(round.getStartTime());
         StringBuilder str = new StringBuilder();
         str.append(self.getPackingAddress());
-        str.append(" ,order:" + self.getIndexOfRound());
+        str.append(" ,order:" + self.getPackingIndexOfRound());
         str.append(",packTime:" + new Date(self.getPackEndTime()));
         str.append("\n");
         BlockLog.info("pack round:" + str);

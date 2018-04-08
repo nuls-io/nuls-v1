@@ -49,7 +49,7 @@ public class NulsLongData extends BasicTypeData<Long> {
 
     @Override
     public int size() {
-        return Utils.sizeOfLong(getVal());
+        return Utils.sizeOfVarInt(getVal());
     }
 
     @Override

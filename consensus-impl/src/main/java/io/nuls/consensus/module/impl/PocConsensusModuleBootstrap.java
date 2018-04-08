@@ -95,17 +95,11 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
         BlockEventHandler blockEventHandler = new BlockEventHandler();
         eventBusService.subscribeEvent(BlockEvent.class, blockEventHandler);
 
-        BlockHeaderHandler blockHeaderHandler = new BlockHeaderHandler();
-        eventBusService.subscribeEvent(BlockHeaderEvent.class, blockHeaderHandler);
-
         GetBlockHandler getBlockHandler = new GetBlockHandler();
         eventBusService.subscribeEvent(GetBlockRequest.class, getBlockHandler);
 
         GetTxGroupHandler getTxGroupHandler = new GetTxGroupHandler();
         eventBusService.subscribeEvent(GetTxGroupRequest.class, getTxGroupHandler);
-
-        GetBlockHeaderHandler getBlockHeaderHandler = new GetBlockHeaderHandler();
-        eventBusService.subscribeEvent(GetBlockHeaderEvent.class, getBlockHeaderHandler);
 
         TxGroupHandler txGroupHandler = new TxGroupHandler();
         eventBusService.subscribeEvent(TxGroupEvent.class, txGroupHandler);
@@ -113,11 +107,11 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
         NewTxEventHandler newTxEventHandler = NewTxEventHandler.getInstance();
         eventBusService.subscribeEvent(TransactionEvent.class, newTxEventHandler);
 
+        SmallBlockHandler newBlockHandler = new SmallBlockHandler();
+        eventBusService.subscribeEvent(SmallBlockEvent.class,newBlockHandler);
 
         eventBusService.subscribeEvent(BlocksHashEvent.class, new BlocksHashHandler());
         eventBusService.subscribeEvent(GetBlocksHashRequest.class, new GetBlocksHashHandler());
-        eventBusService.subscribeEvent(GetSmallBlockRequest.class, new GetSmallBlockHandler());
-        eventBusService.subscribeEvent(SmallBlockEvent.class, new SmallBlockHandler());
     }
 
 

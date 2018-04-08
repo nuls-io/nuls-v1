@@ -162,7 +162,7 @@ public class RoundManager {
         StringBuilder str = new StringBuilder();
         for (PocMeetingMember member : round.getMemberList()) {
             str.append(member.getPackingAddress());
-            str.append(" ,order:" + member.getIndexOfRound());
+            str.append(" ,order:" + member.getPackingIndexOfRound());
             str.append(",packTime:" + new Date(member.getPackEndTime()));
             str.append("\n");
         }
@@ -336,7 +336,7 @@ public class RoundManager {
         StringBuilder str = new StringBuilder();
         for (PocMeetingMember member : round.getMemberList()) {
             str.append(member.getPackingAddress());
-            str.append(" ,order:" + member.getIndexOfRound());
+            str.append(" ,order:" + member.getPackingIndexOfRound());
             str.append(",packEndTime:" + new Date(member.getPackEndTime()));
             str.append("\n");
         }

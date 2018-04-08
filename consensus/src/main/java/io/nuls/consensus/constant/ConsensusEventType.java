@@ -36,4 +36,5 @@ public interface ConsensusEventType {
     short BLOCK_HEADER = 6;
     short GET_TX_GROUP = 7;
     short TX_GROUP = 8;
+    short NEW_BLOCK = 9;
 }
