@@ -30,6 +30,7 @@ import io.nuls.core.event.BaseEvent;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
+import io.nuls.core.utils.network.IpUtil;
 import io.nuls.db.dao.NodeDataService;
 import io.nuls.network.NetworkContext;
 import io.nuls.network.constant.NetworkConstant;
@@ -67,6 +68,7 @@ public class NetworkServiceImpl implements NetworkService {
 
     public NetworkServiceImpl() {
         this.network = getNetworkInstance();
+
         DefaultMessageFilter.getInstance().addMagicNum(network.packetMagic());
         MessageFilterChain.getInstance().addFilter(DefaultMessageFilter.getInstance());
         NulsContext.setMagicNumber(network.packetMagic());
@@ -98,6 +100,12 @@ public class NetworkServiceImpl implements NetworkService {
         try {
             connectionManager.init();
             nodesManager.init();
+            for (String ip : IpUtil.getIps()) {
+                if (isSeedNode(ip)) {
+                    network.setMaxInCount(network.maxInCount() * 3);
+                    nodesManager.setSeed(true);
+                }
+            }
         } catch (Exception e) {
             Log.error(e);
             throw new NulsRuntimeException(ErrorCode.NET_SERVER_START_ERROR);
@@ -161,6 +169,16 @@ public class NetworkServiceImpl implements NetworkService {
     @Override
     public boolean addNode(Node node) {
         return nodesManager.addNode(node);
+    }
+
+    @Override
+    public boolean isSeedNode(String ip) {
+        return nodesManager.isSeedNode(ip);
+    }
+
+    @Override
+    public boolean isSeed() {
+        return nodesManager.isSeed();
     }
 
     @Override

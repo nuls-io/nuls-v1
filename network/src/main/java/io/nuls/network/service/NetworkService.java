@@ -60,6 +60,10 @@ public interface NetworkService {
 
     boolean addNode(Node node);
 
+    boolean isSeedNode(String ip);
+
+    boolean isSeed();
+
     void handshakeNode(Node node);
 
     void blackNode(String nodeId, int status);

@@ -78,7 +78,7 @@ public abstract class AbstractNetworkParam {
         return maxInCount;
     }
 
-    public void maxInCount(int count) {
+    public void setMaxInCount(int count) {
         this.maxInCount = count;
     }
 
@@ -86,7 +86,7 @@ public abstract class AbstractNetworkParam {
         return maxOutCount;
     }
 
-    public void maxOutCount(int count) {
+    public void setMaxOutCount(int count) {
         this.maxOutCount = count;
     }
 
