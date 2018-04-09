@@ -83,8 +83,6 @@ public class BlockManager {
 
     private LedgerService ledgerService;
 
-    private DownloadService downloadService;
-
     private BifurcateProcessor bifurcateProcessor = BifurcateProcessor.getInstance();
     private ConfirmingTxCacheManager confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
     private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
@@ -103,7 +101,6 @@ public class BlockManager {
     }
 
     public void init() {
-        downloadService = NulsContext.getServiceBean(DownloadService.class);
         ledgerService = NulsContext.getServiceBean(LedgerService.class);
     }
 
@@ -182,7 +179,7 @@ public class BlockManager {
                 this.addBlock(nextBlock, true, null);
             }
         }
-        if(downloadService.getStatus()==DownloadStatus.DOWNLOADING){
+        if(NulsContext.getServiceBean(DownloadService.class).getStatus()==DownloadStatus.DOWNLOADING){
             Block savingBlock = this.getBlock(block.getHeader().getHeight()-6);
             if(null==savingBlock){
                 return true;
