@@ -49,6 +49,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Node extends BaseNulsData {
 
+    public static final int SAME_IP_MAX_COUNT = 10;
+    public static final int FAIL_MAX_COUNT = 20;
+
     private int magicNumber;
 
     private String channelId;
@@ -68,8 +71,6 @@ public class Node extends BaseNulsData {
     private Integer failCount;
 
     private Set<String> groupSet;
-
-    public static final int FAIL_COUNT = 20;
 
     /**
      * 1: inNode ,  2: outNode
@@ -175,14 +176,18 @@ public class Node extends BaseNulsData {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("{");
-        sb.append("ip: '" + getIp() + "',");
-        sb.append("port: " + getPort() + ",");
-        if (lastTime == null) {
-            lastTime = System.currentTimeMillis();
-        }
+//        sb.append("ip: '" + getIp() + "',");
+//        sb.append("port: " + getPort() + ",");
+        sb.append("id:" + getId() + ",");
+        sb.append("type:" + type + ",");
+        sb.append("status:" + status + "}");
 
-        sb.append("lastTime: " + DateUtil.convertDate(new Date(lastTime)) + ",");
-        sb.append("magicNumber: " + magicNumber + "}");
+//        if (lastTime == null) {
+//            lastTime = System.currentTimeMillis();
+//        }
+//
+//        sb.append("lastTime: " + DateUtil.convertDate(new Date(lastTime)) + ",");
+//        sb.append("magicNumber: " + magicNumber + "}");
         return sb.toString();
     }
 
