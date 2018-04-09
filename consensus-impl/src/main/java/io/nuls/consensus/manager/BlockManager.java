@@ -189,7 +189,7 @@ public class BlockManager {
             }
             boolean isSuccess;
             try {
-                isSuccess = blockService.saveBlock(block);
+                isSuccess = blockService.saveBlock(savingBlock);
             } catch (Exception e) {
                 Log.error(e);
                 ConsensusManager.getInstance().destroy();
