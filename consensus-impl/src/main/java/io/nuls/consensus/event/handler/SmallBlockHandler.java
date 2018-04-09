@@ -28,12 +28,14 @@ import io.nuls.consensus.cache.manager.block.TemporaryCacheManager;
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
+import io.nuls.consensus.constant.DownloadStatus;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.GetTxGroupParam;
 import io.nuls.consensus.event.GetTxGroupRequest;
 import io.nuls.consensus.event.SmallBlockEvent;
 import io.nuls.consensus.event.notice.AssembledBlockNotice;
 import io.nuls.consensus.manager.BlockManager;
+import io.nuls.consensus.service.intf.DownloadService;
 import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.core.chain.entity.*;
 import io.nuls.core.constant.ErrorCode;
@@ -59,6 +61,7 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
     private TemporaryCacheManager temporaryCacheManagerBak = TemporaryCacheManager.getInstance();
     private BlockManager blockManager = BlockManager.getInstance();
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
+    private DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
 
     private ConfirmingTxCacheManager confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
     private ReceivedTxCacheManager receivedTxCacheManager = ReceivedTxCacheManager.getInstance();
@@ -69,6 +72,10 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
         SmallBlock smallBlock = event.getEventBody();
         if (null == smallBlock) {
             Log.warn("recieved a null smallBlock!");
+            return;
+        }
+        if(downloadService.getStatus() != DownloadStatus.SUCCESS) {
+            Log.warn("recieved a smallBlock , and downloading skip");
             return;
         }
         BlockHeader header = smallBlock.getHeader();
