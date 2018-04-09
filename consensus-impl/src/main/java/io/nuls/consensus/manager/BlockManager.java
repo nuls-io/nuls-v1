@@ -92,7 +92,7 @@ public class BlockManager {
     private DownloadUtils downloadUtils = new DownloadUtils();
 
 
-    private long storedHeight;
+    private BlockHeader lastStoredHeader;
     private String lastAppravedHash;
 
     private BlockManager() {
@@ -107,7 +107,7 @@ public class BlockManager {
         ledgerService = NulsContext.getServiceBean(LedgerService.class);
     }
 
-    public boolean addBlock(Block block, boolean verify, String nodeId) {
+    public synchronized boolean addBlock(Block block, boolean verify, String nodeId) {
         if (block == null || block.getHeader() == null || block.getTxs() == null || block.getTxs().isEmpty()) {
             Log.warn("the block data error============================");
             return false;
@@ -116,20 +116,15 @@ public class BlockManager {
         BlockRoundData roundData = new BlockRoundData(block.getHeader().getExtend());
         Log.debug("cache block:" + block.getHeader().getHash() +
                 ",\nheight(" + block.getHeader().getHeight() + "),round(" + roundData.getRoundIndex() + "),index(" + roundData.getPackingIndexOfRound() + "),roundStart:" + roundData.getRoundStartTime());
-        BlockHeader lastStoredBlockHeader = null;
         BlockService blockService = NulsContext.getServiceBean(BlockService.class);
-        if (storedHeight == 0) {
-            storedHeight = blockService.getLocalSavedHeight();
+        if (lastStoredHeader == null) {
+            lastStoredHeader = blockService.getLocalBestBlock().getHeader();
         }
-        try {
-            lastStoredBlockHeader = blockService.getBlockHeader(storedHeight);
-        } catch (NulsException e) {
-            Log.error(e);
-        }
-        if (null == lastStoredBlockHeader) {
+
+        if (null == lastStoredHeader) {
             Log.warn("the lastStoredBlockHeader data error============================");
         }
-        if (block.getHeader().getHeight() <= storedHeight) {
+        if (block.getHeader().getHeight() <= lastStoredHeader.getHeight()) {
             Log.info("discard block height:" + block.getHeader().getHeight() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()) + ",from:" + nodeId);
             return false;
         }
@@ -148,7 +143,7 @@ public class BlockManager {
         if (confirmingBlockCacheManager.getHeaderCacheMap().isEmpty() && !block.getHeader().getPreHash().getDigestHex().equals(NulsContext.getInstance().getBestBlock().getHeader().getHash().getDigestHex())) {
             canCache = false;
         }
-        if (!lastStoredBlockHeader.getHash().equals(block.getHeader().getPreHash()) && !confirmingBlockCacheManager.getHeaderCacheMap().containsKey(block.getHeader().getPreHash().getDigestHex())) {
+        if (!this.lastStoredHeader.getHash().equals(block.getHeader().getPreHash()) && !confirmingBlockCacheManager.getHeaderCacheMap().containsKey(block.getHeader().getPreHash().getDigestHex())) {
             canCache = false;
         }
         if (canCache) {
@@ -311,7 +306,10 @@ public class BlockManager {
     }
 
     public long getStoredHeight() {
-        return storedHeight;
+        if (lastStoredHeader == null) {
+            lastStoredHeader = NulsContext.getServiceBean(BlockService.class).getLocalBestBlock().getHeader();
+        }
+        return lastStoredHeader.getHeight();
     }
 
     public boolean processingBifurcation(long height) {
@@ -319,7 +317,7 @@ public class BlockManager {
     }
 
     public void storedBlock(Block storedBlock) {
-        this.storedHeight = storedBlock.getHeader().getHeight();
+        this.lastStoredHeader = storedBlock.getHeader();
         List<String> hashList = this.bifurcateProcessor.getAllHashList(storedBlock.getHeader().getHeight());
         String storedHash = storedBlock.getHeader().getHash().getDigestHex();
         if (hashList.size() == 1) {
