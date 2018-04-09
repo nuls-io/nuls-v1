@@ -151,6 +151,7 @@ public class BlockManager {
         }
         boolean needUpdateBestBlock = bifurcateProcessor.addHeader(block.getHeader());
         if (needUpdateBestBlock) {
+            Log.error("++++++++++++++++++++++++:"+block.getHeader().getHeight()+",update best block");
             context.setBestBlock(block);
         }
         if (bifurcateProcessor.getChainSize() == 1) {

@@ -84,7 +84,7 @@ public class BifurcateProcessor {
             if (chain.size() == 0) {
                 continue;
             }
-            str.append("\n+++++++++++chain:start-" + chain.getHeaderDigestList().get(0).getHeight() + ", end-" + chain.getHeaderDigestList().get(chain.size() - 1).getHeight());
+            str.append("\n+++++++++++chain:start-" + chain.getHeaderDigestList().get(0).getHeight() + ", end-" + chain.getLastHd().getHeight());
             int listSize = chain.size();
             if (maxSize < listSize) {
                 maxSize = listSize;
@@ -135,7 +135,6 @@ public class BifurcateProcessor {
 
         for (int i = 0; i < this.chainList.size(); i++) {
             BlockHeaderChain chain = chainList.get(i);
-
             if (header.getPreHash().getDigestHex().equals(chain.getLastHd().getHash())) {
                 chain.addHeader(header);
                 return true;
