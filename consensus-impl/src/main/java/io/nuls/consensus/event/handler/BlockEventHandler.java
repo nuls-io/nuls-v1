@@ -56,7 +56,7 @@ public class BlockEventHandler extends AbstractEventHandler<BlockEvent> {
             Log.warn("recieved a null blockEvent form " + fromId);
             return;
         }
-        BlockLog.info("download block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + block.getHeader().getPackingAddress());
+        BlockLog.info("download("+fromId+") block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + block.getHeader().getPackingAddress());
 //        if (BlockBatchDownloadUtils.getInstance().downloadedBlock(fromId, block)) {
 //            return;
 //        }
