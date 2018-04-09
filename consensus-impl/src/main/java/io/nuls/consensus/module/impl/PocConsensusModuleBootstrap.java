@@ -147,6 +147,8 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
 
         eventBusService.subscribeEvent(BlocksHashEvent.class, new BlocksHashHandler());
         eventBusService.subscribeEvent(GetBlocksHashRequest.class, new GetBlocksHashHandler());
+
+        eventBusService.subscribeEvent(BlockNotFoundEvent.class,new BlockNotFoundHander());
     }
 
 

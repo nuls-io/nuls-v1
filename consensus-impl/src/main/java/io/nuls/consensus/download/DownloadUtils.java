@@ -80,7 +80,7 @@ public class DownloadUtils {
             if (!hashesResult.isSuccess()) {
                 return resultList;
             }
-            BlockHashResponse response = null;
+            BlockHashResponse response ;
             try {
                 response = hashesFuture.get(20L, TimeUnit.SECONDS);
             } catch (Exception e) {

@@ -2,6 +2,7 @@ package io.nuls.consensus.download;
 
 import io.nuls.consensus.entity.BlockHashResponse;
 import io.nuls.core.chain.entity.Block;
+import io.nuls.core.chain.entity.NulsDigestData;
 
 import java.util.HashMap;
 import java.util.List;
@@ -28,7 +29,7 @@ public class DownloadCacheHandler {
     public static void receiveBlock(Block block) {
         String hash = block.getHeader().getHash().getDigestHex();
         CompletableFuture<Block> future = blockCacher.get(hash);
-        if(future != null) {
+        if (future != null) {
             future.complete(block);
             blockCacher.remove(hash);
         }
@@ -46,9 +47,17 @@ public class DownloadCacheHandler {
     public static void receiveHashes(BlockHashResponse hashes) {
         String key = hashes.getRequestEventHash().getDigestHex();
         CompletableFuture<BlockHashResponse> future = blockHashesCacher.get(key);
-        if(future != null) {
+        if (future != null) {
             future.complete(hashes);
             blockHashesCacher.remove(key);
+        }
+    }
+
+    public static void notFoundBlock(String hash) {
+        CompletableFuture<Block> future = blockCacher.get(hash);
+        if (future != null) {
+            future.complete(null);
+            blockCacher.remove(hash);
         }
     }
 }

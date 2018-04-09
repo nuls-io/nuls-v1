@@ -58,7 +58,7 @@ public class GetBlockHandler extends AbstractEventHandler<GetBlockRequest> {
         if(param.getSize()==1){
            Block block = this.blockService.getBlockFromMyChain(param.getStartHash().getDigestHex());
            if(null==block){
-               //todo NOT_FOUND
+               sendNotFound(param.getStartHash(),fromId);
                return;
            }
            sendBlock(block,fromId);
@@ -66,12 +66,12 @@ public class GetBlockHandler extends AbstractEventHandler<GetBlockRequest> {
         }
         Block chainStartBlock = this.blockService.getBlockFromMyChain(param.getStartHash().getDigestHex());
         if(null==chainStartBlock){
-            //todo NOT_FOUND
+            sendNotFound(param.getStartHash(),fromId);
             return;
         }
         Block chainEndBlock = this.blockService.getBlockFromMyChain(param.getEndHash().getDigestHex());
         if(null==chainEndBlock){
-            //todo NOT_FOUND
+            sendNotFound(param.getEndHash(),fromId);
             return;
         }
         if(chainEndBlock.getHeader().getHeight()<chainStartBlock.getHeader().getHeight()){
@@ -79,12 +79,17 @@ public class GetBlockHandler extends AbstractEventHandler<GetBlockRequest> {
         }
         long end = param.getStart()+param.getSize()-1;
         if(chainStartBlock.getHeader().getHeight()>param.getStart()||chainEndBlock.getHeader().getHeight()<end){
+            sendNotFound(param.getStartHash(),fromId);
             return;
         }
 
         List<Block> blockList = blockService.getBlockList(param.getStart(),end);
 
         this.sendBlockList(blockList, fromId);
+    }
+
+    private void sendNotFound(NulsDigestData hash, String fromId) {
+
     }
 
     private void sendBlockList(List<Block> blockList, String nodeId) {
