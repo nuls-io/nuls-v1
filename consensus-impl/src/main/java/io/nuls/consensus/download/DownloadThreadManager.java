@@ -11,8 +11,10 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.NulsThreadFactory;
 import io.nuls.core.thread.manager.TaskManager;
+import io.nuls.core.utils.calc.DoubleUtils;
 import io.nuls.core.utils.queue.service.impl.QueueService;
 import io.nuls.network.entity.Node;
+import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.service.NetworkService;
 
 import java.util.ArrayList;
@@ -140,19 +142,25 @@ public class DownloadThreadManager implements Callable<Boolean> {
         }
 
         if(newestInfos.getNetBestHeight() < localBestBlock.getHeader().getHeight()) {
-            for(long i = localBestBlock.getHeader().getHeight() ; i <= newestInfos.getNetBestHeight(); i--) {
-                blockService.rollbackBlock(localBestBlock.getHeader().getHash().getDigestHex());
-                localBestBlock = blockService.getBestBlock();
+            if(DoubleUtils.div(newestInfos.getNodes().size(), networkService.getAvailableNodes().size(), 2) >= 0.8d && networkService.getAvailableNodes().size() >= networkService.getNetworkParam().maxOutCount()) {
+                for (long i = localBestBlock.getHeader().getHeight(); i <= newestInfos.getNetBestHeight(); i--) {
+                    blockService.rollbackBlock(localBestBlock.getHeader().getHash().getDigestHex());
+                    localBestBlock = blockService.getBestBlock();
+                }
+            } else {
+                try {
+                    Thread.sleep(60*1000l);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                resetNetwork();
+                return false;
             }
         }
 
         //check need rollback
-        if(newestInfos.getNodes().size() > PocConsensusConstant.ALIVE_MIN_NODE_COUNT) {
-            checkRollback(localBestBlock, 0);
-        } else {
-            resetNetwork();
-            return false;
-        }
+        checkRollback(localBestBlock, 0);
+
         return true;
     }
 
@@ -172,7 +180,12 @@ public class DownloadThreadManager implements Callable<Boolean> {
             }
         }
 
-        blockService.rollbackBlock(localBestBlock.getHeader().getHash().getDigestHex());
+        if(newestInfos.getNodes().size() >= PocConsensusConstant.ALIVE_MIN_NODE_COUNT) {
+            blockService.rollbackBlock(localBestBlock.getHeader().getHash().getDigestHex());
+        } else {
+            resetNetwork();
+            return;
+        }
 
         localBestBlock = blockService.getBestBlock();
 
