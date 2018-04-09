@@ -120,10 +120,6 @@ public class BlockManager {
         if (lastStoredHeader == null) {
             lastStoredHeader = blockService.getLocalBestBlock().getHeader();
         }
-
-        if (null == lastStoredHeader) {
-            Log.warn("the lastStoredBlockHeader data error============================");
-        }
         if (block.getHeader().getHeight() <= lastStoredHeader.getHeight()) {
             Log.info("discard block height:" + block.getHeader().getHeight() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()) + ",from:" + nodeId);
             return false;
@@ -318,6 +314,7 @@ public class BlockManager {
 
     public void storedBlock(Block storedBlock) {
         this.lastStoredHeader = storedBlock.getHeader();
+
         List<String> hashList = this.bifurcateProcessor.getAllHashList(storedBlock.getHeader().getHeight());
         String storedHash = storedBlock.getHeader().getHash().getDigestHex();
         if (hashList.size() == 1) {

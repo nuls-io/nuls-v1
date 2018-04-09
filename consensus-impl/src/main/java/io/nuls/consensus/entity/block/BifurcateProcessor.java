@@ -56,8 +56,6 @@ public class BifurcateProcessor {
     private List<BlockHeaderChain> chainList = new CopyOnWriteArrayList<>();
     private long maxHeight;
 
-    private long tempIndex = 0L;
-
     private BifurcateProcessor() {
     }
 
@@ -83,7 +81,7 @@ public class BifurcateProcessor {
         BlockHeaderChain longestChain = null;
         StringBuilder str = new StringBuilder("++++++++++++++++++++++++chain info:");
         for (BlockHeaderChain chain : chainList) {
-            if(chain.size()==0){
+            if (chain.size() == 0) {
                 continue;
             }
             str.append("\n+++++++++++chain:start-" + chain.getHeaderDigestList().get(0).getHeight() + ", end-" + chain.getHeaderDigestList().get(chain.size() - 1).getHeight());
@@ -99,16 +97,13 @@ public class BifurcateProcessor {
                 }
             }
         }
-        if(tempIndex%2==0) {
-            BlockLog.info(str.toString());
-            tempIndex++;
-        }
+        BlockLog.info(str.toString());
         if (this.approvingChain != null && !this.approvingChain.getId().equals(longestChain.getId())) {
             BlockService blockService = NulsContext.getServiceBean(BlockService.class);
             List<HeaderDigest> hdList = new ArrayList<>(approvingChain.getHeaderDigestList());
             for (int i = hdList.size() - 1; i >= 0; i--) {
                 HeaderDigest hd = hdList.get(i);
-                if(longestChain.contains(hd)){
+                if (longestChain.contains(hd)) {
                     break;
                 }
                 try {
@@ -120,30 +115,13 @@ public class BifurcateProcessor {
             List<HeaderDigest> longestHdList = new ArrayList<>(longestChain.getHeaderDigestList());
             for (int i = 0; i < longestHdList.size(); i++) {
                 HeaderDigest hd = longestHdList.get(i);
-                if(approvingChain.contains(hd)){
+                if (approvingChain.contains(hd)) {
                     continue;
                 }
                 blockService.approvalBlock(hd.getHash());
             }
         }
         this.approvingChain = longestChain;
-        Set<String> rightHashSet = new HashSet<>();
-        Set<String> removeHashSet = new HashSet<>();
-        for (int i = chainList.size() - 1; i >= 0; i--) {
-            BlockHeaderChain chain = chainList.get(i);
-            if (chain.size() < (maxSize - 6)) {
-                removeHashSet.addAll(chain.getHashSet());
-                this.chainList.remove(chain);
-            } else {
-                rightHashSet.addAll(chain.getHashSet());
-            }
-        }
-
-        for (String hash : removeHashSet) {
-            if (!rightHashSet.contains(hash)) {
-                confirmingBlockCacheManager.removeBlock(hash);
-            }
-        }
 
     }
 
@@ -158,17 +136,18 @@ public class BifurcateProcessor {
         for (int i = 0; i < this.chainList.size(); i++) {
             BlockHeaderChain chain = chainList.get(i);
 
-            int index = chain.indexOf(header.getPreHash().getDigestHex(), header.getHeight() - 1, header.getTime());
-            if (index == chain.size() - 1) {
+            if (header.getPreHash().getDigestHex().equals(chain.getLastHd().getHash())) {
                 chain.addHeader(header);
                 return true;
-            } else if (index >= 0) {
+            } else if (chain.contains(new HeaderDigest(header.getPreHash().getDigestHex(), header.getHeight() - 1, 0L))) {
                 BlockHeaderChain newChain = chain.getBifurcateChain(header);
                 chainList.add(newChain);
                 return true;
             }
         }
-
+        if (this.chainList.size() > 0) {
+            System.out.println();
+        }
         BlockHeaderChain chain = new BlockHeaderChain();
         chain.addHeader(header);
         chainList.add(chain);
@@ -225,6 +204,21 @@ public class BifurcateProcessor {
         if (null == approvingChain) {
             return false;
         }
+        Set<HeaderDigest> removeHashSet = new HashSet<>();
+        for (int i = chainList.size() - 1; i >= 0; i--) {
+            BlockHeaderChain chain = chainList.get(i);
+            if (chain.size() < (approvingChain.size() - 6)) {
+                removeHashSet.addAll(chain.getHeaderDigestList());
+                this.chainList.remove(chain);
+            }
+        }
+
+        for (HeaderDigest hd : removeHashSet) {
+            if (!approvingChain.contains(hd)) {
+                confirmingBlockCacheManager.removeBlock(hd.getHash());
+            }
+        }
+
         if (approvingChain.getLastHd() != null && approvingChain.getLastHd().getHeight() >= (height + PocConsensusConstant.CONFIRM_BLOCK_COUNT)) {
             return true;
         }

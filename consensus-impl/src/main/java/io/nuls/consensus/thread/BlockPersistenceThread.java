@@ -33,7 +33,6 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
-import io.nuls.network.service.NetworkService;
 
 import java.io.IOException;
 
@@ -47,7 +46,6 @@ public class BlockPersistenceThread implements Runnable {
     private BlockManager blockManager = BlockManager.getInstance();
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
     private ConfirmingTxCacheManager txCacheManager = ConfirmingTxCacheManager.getInstance();
-    private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
     private boolean running;
 
     private BlockPersistenceThread() {

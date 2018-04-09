@@ -41,6 +41,7 @@ public class BlockHeaderChain implements NulsCloneable {
     private final String id;
     private List<HeaderDigest> headerDigestList = new CopyOnWriteArrayList<>();
     private final ReentrantLock lock = new ReentrantLock();
+    private HeaderDigest lastHd ;
 
     public BlockHeaderChain() {
         this.id = StringUtils.getNewUUID();
@@ -61,7 +62,7 @@ public class BlockHeaderChain implements NulsCloneable {
         return chain;
     }
 
-    public int indexOf(String hash, long height, long time) {
+    private int indexOf(String hash, long height, long time) {
         HeaderDigest hd = new HeaderDigest(hash, height, time);
         return headerDigestList.indexOf(hd);
     }
@@ -72,7 +73,9 @@ public class BlockHeaderChain implements NulsCloneable {
         if (!headerDigestList.isEmpty() && headerDigestList.indexOf(hd) != (headerDigestList.size() - 1)) {
             return false;
         }
-        headerDigestList.add(new HeaderDigest(header.getHash().getDigestHex(), header.getHeight(), header.getTime()));
+        HeaderDigest newHd = new HeaderDigest(header.getHash().getDigestHex(), header.getHeight(), header.getTime());
+        headerDigestList.add(newHd);
+        this.lastHd = newHd;
         lock.unlock();
         return true;
     }
@@ -205,14 +208,6 @@ public class BlockHeaderChain implements NulsCloneable {
     }
 
     public HeaderDigest getLastHd() {
-        //todo
-        if (headerDigestList.size() == 0) {
-            return null;
-        }
-        try {
-            return headerDigestList.get(headerDigestList.size() - 1);
-        } catch (Exception e) {
-            return headerDigestList.get(headerDigestList.size() - 1);
-        }
+        return lastHd;
     }
 }

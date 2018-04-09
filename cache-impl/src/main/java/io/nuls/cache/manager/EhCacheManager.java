@@ -29,6 +29,7 @@ import io.nuls.cache.utils.EhcacheListener;
 import io.nuls.core.constant.NulsConstant;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
+import org.ehcache.config.EvictionAdvisor;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
 import org.ehcache.config.builders.CacheEventListenerConfigurationBuilder;
 import org.ehcache.config.builders.CacheManagerBuilder;

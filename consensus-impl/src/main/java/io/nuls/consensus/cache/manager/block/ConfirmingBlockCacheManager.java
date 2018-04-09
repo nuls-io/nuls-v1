@@ -32,6 +32,7 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.utils.log.BlockLog;
+import io.nuls.core.utils.log.Log;
 
 import java.util.List;
 
@@ -66,10 +67,13 @@ public class ConfirmingBlockCacheManager {
     }
 
     public boolean cacheBlock(Block block) {
-        BlockLog.info("cache block height:" +block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()));
         String hash = block.getHeader().getHash().getDigestHex();
         headerCacheMap.put(hash, block.getHeader());
         txsCacheMap.put(hash, block.getTxs());
+        BlockLog.info("cache block height:" +block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()));
+        if(null==headerCacheMap.get(hash)){
+            System.out.println();
+        }
         return true;
     }
 
@@ -100,6 +104,7 @@ public class ConfirmingBlockCacheManager {
     }
 
     public void removeBlock(String hash) {
+        Log.error("+++++++++++++++++++++++++++++++++++++:"+hash);
         this.txsCacheMap.remove(hash);
         this.headerCacheMap.remove(hash);
     }
