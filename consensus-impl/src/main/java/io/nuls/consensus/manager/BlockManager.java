@@ -197,7 +197,7 @@ public class BlockManager {
                 isSuccess = false;
             }
             if (isSuccess) {
-                this.storedBlock(block);
+                this.storedBlock(savingBlock);
                 confirmingTxCacheManager.removeTxList(block.getTxHashList());
             }
         }
