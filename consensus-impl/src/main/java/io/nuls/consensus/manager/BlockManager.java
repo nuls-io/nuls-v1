@@ -260,6 +260,10 @@ public class BlockManager {
         this.lastAppravedHash = block.getHeader().getPreHash().getDigestHex();
         Block preBlock = this.getBlock(lastAppravedHash);
         NulsContext.getInstance().setBestBlock(preBlock);
+//        List<String> hashList = this.bifurcateProcessor.getAllHashList(block.getHeader().getHeight() - 1);
+//        if (hashList.size() > 1) {
+//            this.rollbackAppraval(preBlock);
+//        }
     }
 
     public Block getBlock(long height) {
@@ -278,8 +282,16 @@ public class BlockManager {
         return block;
     }
 
-    public void rollback(Block block) {
+    public boolean rollback(Block block) {
+        String hash = block.getHeader().getHash().getDigestHex();
+        boolean result = confirmingBlockCacheManager.getHeaderCacheMap().containsKey(hash);
+        if (!result) {
+            return false;
+        }
         this.rollbackAppraval(block);
+        this.bifurcateProcessor.rollbackHash(hash);
+        confirmingBlockCacheManager.removeBlock(block.getHeader().getHash().getDigestHex());
+        return true;
     }
 
 

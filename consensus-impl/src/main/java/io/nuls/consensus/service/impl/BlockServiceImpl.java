@@ -206,10 +206,14 @@ public class BlockServiceImpl implements BlockService {
         if (null == block) {
             return;
         }
-        blockManager.rollback(block);
+        boolean result = this.blockManager.rollback(block);
+        if(result){
+            return;
+        }
         this.rollback(block.getTxs(), block.getTxs().size() - 1);
         this.ledgerService.deleteTx(block.getHeader().getHeight());
         blockStorageService.delete(block.getHeader().getHash().getDigestHex());
+        NulsContext.getInstance().setBestBlock(getBlock(block.getHeader().getPreHash().getDigestHex()));
     }
 
 

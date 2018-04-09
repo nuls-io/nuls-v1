@@ -29,6 +29,7 @@ import io.nuls.consensus.manager.RoundManager;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.log.BlockLog;
@@ -251,5 +252,11 @@ public class BifurcateProcessor {
         this.chainList.clear();
         this.approvingChain = null;
         this.maxHeight = 0;
+    }
+
+    public void rollbackHash(String hash) {
+        for (BlockHeaderChain chain : chainList) {
+            chain.rollbackHeaderDigest(hash);
+        }
     }
 }

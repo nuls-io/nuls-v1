@@ -100,6 +100,19 @@ public class BlockHeaderChain implements NulsCloneable {
         }
     }
 
+    public void rollbackHeaderDigest(String hash) {
+        for (int i = 0; i < headerDigestList.size(); i++) {
+            HeaderDigest headerDigest = headerDigestList.get(i);
+            if (headerDigest.getHash().equals(hash)) {
+                headerDigestList.remove(headerDigest);
+                for (int x = i + 1; x < headerDigestList.size(); x++) {
+                    headerDigestList.remove(x);
+                }
+                break;
+            }
+        }
+    }
+
     public HeaderDigest rollback() {
         lock.lock();
         if (headerDigestList.isEmpty()) {
@@ -193,7 +206,7 @@ public class BlockHeaderChain implements NulsCloneable {
 
     public HeaderDigest getLastHd() {
         //todo
-        if(headerDigestList.size()==0){
+        if (headerDigestList.size() == 0) {
             return null;
         }
         try {
