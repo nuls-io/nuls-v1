@@ -185,13 +185,14 @@ public class DownloadProcessor extends Thread {
             int count = entry.getValue();
             String hash = entry.getKey();
 
-            nodes = nodeMaps.get(hash);
-            long height = nodes.get(0).getVersionMessage().getBestBlockHeight();
+            List<Node> tempNodes = nodeMaps.get(hash);
+            long height = tempNodes.get(0).getVersionMessage().getBestBlockHeight();
 
             if(count > max || (count == max && bestHeight < height)) {
                 max = count;
                 bestHash = hash;
                 bestHeight = height;
+                nodes = tempNodes;
             }
         }
 
