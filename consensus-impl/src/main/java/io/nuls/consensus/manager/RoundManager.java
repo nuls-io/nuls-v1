@@ -337,14 +337,15 @@ public class RoundManager {
         for (PocMeetingMember member : round.getMemberList()) {
             str.append(member.getPackingAddress());
             str.append(" ,order:" + member.getPackingIndexOfRound());
+            str.append(" ,creditVal:"+member.getRealCreditVal());
             str.append(",packEndTime:" + new Date(member.getPackEndTime()));
             str.append("\n");
         }
         if(null==round.getPreRound()){
-            BlockLog.debug("calc new round:index:" + round.getIndex() + " , start:" + new Date(round.getStartTime())
+            BlockLog.info("calc new round:index:" + round.getIndex() + " , start:" + new Date(round.getStartTime())
                     + ", netTime:(" + new Date(TimeService.currentTimeMillis()).toString() + ") , members:\n :" + str);
         }else {
-            BlockLog.debug("calc new round:index:" + round.getIndex() + " ,preIndex:" + round.getPreRound().getIndex() + " , start:" + new Date(round.getStartTime())
+            BlockLog.info("calc new round:index:" + round.getIndex() + " ,preIndex:" + round.getPreRound().getIndex() + " , start:" + new Date(round.getStartTime())
                     + ", netTime:(" + new Date(TimeService.currentTimeMillis()).toString() + ") , members:\n :" + str);
         }
         return round;
