@@ -92,6 +92,7 @@ public class BlockManager {
 
 
     private BlockHeader lastStoredHeader;
+    private DownloadService downloadService;
 
     private BlockManager() {
     }
@@ -102,6 +103,7 @@ public class BlockManager {
 
     public void init() {
         ledgerService = NulsContext.getServiceBean(LedgerService.class);
+        this.downloadService = NulsContext.getServiceBean(DownloadService.class);
     }
 
     public synchronized boolean addBlock(Block block, boolean verify, String nodeId) {
@@ -179,8 +181,9 @@ public class BlockManager {
                 this.addBlock(nextBlock, true, null);
             }
         }
-        if(NulsContext.getServiceBean(DownloadService.class).getStatus()==DownloadStatus.DOWNLOADING){
-            Block savingBlock = this.getBlock(block.getHeader().getHeight()-6);
+        long savingHeight = block.getHeader().getHeight()-6;
+        if(this.downloadService.getStatus()==DownloadStatus.DOWNLOADING&&savingHeight>this.lastStoredHeader.getHeight()){
+            Block savingBlock = this.getBlock(savingHeight);
             if(null==savingBlock){
                 return true;
             }
