@@ -25,6 +25,8 @@ package io.nuls.core.context;
 
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.Na;
+import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.cfg.IniEntity;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
@@ -118,6 +120,9 @@ public class NulsContext {
 
 
     public void setBestBlock(Block bestBlock) {
+        if(bestBlock==null){
+            throw new NulsRuntimeException(ErrorCode.FAILED,"best block set to null!");
+        }
         this.bestBlock = bestBlock;
     }
 

@@ -359,7 +359,7 @@ public class NodesManager implements Runnable {
         Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
 
         while (running) {
-
+            System.out.println("------------------------------------------------------------------------"  );
             for (Node node : connectedNodes.values()) {
                 System.out.println("------------------------" + node.getId() + ",type:" + node.getType());
             }

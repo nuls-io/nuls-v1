@@ -81,7 +81,6 @@ public class BlockManager {
     private ConfirmingBlockCacheManager confirmingBlockCacheManager = ConfirmingBlockCacheManager.getInstance();
     private BlockCacheBuffer blockCacheBuffer = BlockCacheBuffer.getInstance();
 
-    private EventBroadcaster eventBroadcaster;
     private LedgerService ledgerService;
 
     private BifurcateProcessor bifurcateProcessor = BifurcateProcessor.getInstance();
@@ -93,7 +92,6 @@ public class BlockManager {
 
 
     private BlockHeader lastStoredHeader;
-    private String lastAppravedHash;
 
     private BlockManager() {
     }
@@ -103,7 +101,6 @@ public class BlockManager {
     }
 
     public void init() {
-        eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
         ledgerService = NulsContext.getServiceBean(LedgerService.class);
     }
 
@@ -157,7 +154,6 @@ public class BlockManager {
         if (bifurcateProcessor.getChainSize() == 1) {
             try {
                 this.appravalBlock(block);
-                this.lastAppravedHash = block.getHeader().getHash().getDigestHex();
                 checkNextblock(block.getHeader().getHash().getDigestHex());
             } catch (Exception e) {
                 Log.error(e);
@@ -165,12 +161,13 @@ public class BlockManager {
                 blockCacheBuffer.cacheBlock(block);
                 return false;
             }
-        } else {
-            Block lastAppravedBlock = confirmingBlockCacheManager.getBlock(lastAppravedHash);
-            if (null != lastAppravedBlock) {
-                this.rollbackAppraval(lastAppravedBlock);
-            }
         }
+//        else {
+//            Block lastAppravedBlock = confirmingBlockCacheManager.getBlock(lastAppravedHash);
+//            if (null != lastAppravedBlock) {
+//                this.rollbackAppraval(lastAppravedBlock);
+//            }
+//        }
         Set<String> keySet = blockCacheBuffer.getHeaderCacheMap().keySet();
         for (String key : keySet) {
             BlockHeader header = blockCacheBuffer.getBlockHeader(key);
@@ -249,9 +246,8 @@ public class BlockManager {
             return;
         }
         this.rollbackTxList(block.getTxs(), 0, block.getTxs().size());
-        this.lastAppravedHash = block.getHeader().getPreHash().getDigestHex();
-        Block preBlock = this.getBlock(lastAppravedHash);
-        NulsContext.getInstance().setBestBlock(preBlock);
+
+        NulsContext.getInstance().setBestBlock(this.getHighestBlock());
 //        List<String> hashList = this.bifurcateProcessor.getAllHashList(block.getHeader().getHeight() - 1);
 //        if (hashList.size() > 1) {
 //            this.rollbackAppraval(preBlock);
