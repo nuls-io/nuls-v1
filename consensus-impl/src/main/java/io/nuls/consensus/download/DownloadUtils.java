@@ -89,6 +89,7 @@ public class DownloadUtils {
                 throw e;
             }
             if (null == response || response.getHashList() == null || response.getHashList().size() != size) {
+                Log.warn("get blocks hashList({}-{}) failed:" + node.getId(),startHeight,size);
                 return resultList;
             }
             GetBlockRequest request = new GetBlockRequest(startHeight, (long) size,

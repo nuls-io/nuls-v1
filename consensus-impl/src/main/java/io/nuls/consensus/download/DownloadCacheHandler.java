@@ -56,14 +56,21 @@ public class DownloadCacheHandler {
     }
 
     public static void notFoundBlock(NotFound data) {
+        String hash = data.getHash().getDigestHex();
         if (data.getType()== NotFoundType.BLOCK) {
-            CompletableFuture<Block> future = blockCacher.get(data.getHash().getDigestHex());
+            CompletableFuture<Block> future = blockCacher.get(hash);
             if (future != null) {
                 future.complete(null);
-                blockCacher.remove(data.getHash().getDigestHex());
+                blockCacher.remove(hash);
             }
         }else if(data.getType()==NotFoundType.TRANSACTION){
             //todo
+        }else if(data.getType()==NotFoundType.HASHES){
+            CompletableFuture<BlockHashResponse> future = blockHashesCacher.get(hash);
+            if (future != null) {
+                future.complete(null);
+                blockHashesCacher.remove(hash);
+            }
         }
     }
 }

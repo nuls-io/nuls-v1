@@ -5,7 +5,7 @@ package io.nuls.consensus.constant;
  * @date: 2018/4/9
  */
 public enum NotFoundType {
-    BLOCK(1), TRANSACTION(2);
+    BLOCK(1), TRANSACTION(2), HASHES(3);
 
     private final int code;
 
@@ -23,6 +23,8 @@ public enum NotFoundType {
                 return BLOCK;
             case 2:
                 return TRANSACTION;
+            case 3:
+                return HASHES;
             default:
                 return null;
         }
