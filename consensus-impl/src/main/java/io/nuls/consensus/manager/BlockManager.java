@@ -106,15 +106,15 @@ public class BlockManager {
         this.downloadService = NulsContext.getServiceBean(DownloadService.class);
     }
 
-    public synchronized boolean addBlock(Block block, boolean verify, String nodeId) {
+    public boolean addBlock(Block block, boolean verify, String nodeId) {
         if (block == null || block.getHeader() == null || block.getTxs() == null || block.getTxs().isEmpty()) {
             Log.warn("the block data error============================");
             return false;
         }
 
         BlockRoundData roundData = new BlockRoundData(block.getHeader().getExtend());
-        Log.debug("cache block:" + block.getHeader().getHash() +
-                ",\nheight(" + block.getHeader().getHeight() + "),round(" + roundData.getRoundIndex() + "),index(" + roundData.getPackingIndexOfRound() + "),roundStart:" + roundData.getRoundStartTime());
+        //Log.debug("cache block:" + block.getHeader().getHash() +
+        //        ",\nheight(" + block.getHeader().getHeight() + "),round(" + roundData.getRoundIndex() + "),index(" + roundData.getPackingIndexOfRound() + "),roundStart:" + roundData.getRoundStartTime());
         BlockService blockService = NulsContext.getServiceBean(BlockService.class);
         if (lastStoredHeader == null) {
             lastStoredHeader = blockService.getLocalBestBlock().getHeader();
@@ -125,6 +125,7 @@ public class BlockManager {
         }
         if (verify) {
             ValidateResult result = block.verify();
+
             if (result.isFailed() && result.getErrorCode() != ErrorCode.ORPHAN_BLOCK && result.getErrorCode() != ErrorCode.ORPHAN_TX) {
                 Log.info("discard a block :" + result.getMessage());
                 return false;
@@ -150,7 +151,7 @@ public class BlockManager {
         }
         boolean needUpdateBestBlock = bifurcateProcessor.addHeader(block.getHeader());
         if (needUpdateBestBlock) {
-            Log.error("++++++++++++++++++++++++:"+block.getHeader().getHeight()+",update best block");
+            //Log.error("++++++++++++++++++++++++:"+block.getHeader().getHeight()+",update best block");
             context.setBestBlock(block);
         }
         if (bifurcateProcessor.getChainSize() == 1) {
@@ -210,11 +211,10 @@ public class BlockManager {
         Block preBlock = blockCacheBuffer.getBlock(block.getHeader().getPreHash().getDigestHex());
         if (preBlock == null) {
             if (this.downloadService.getStatus() != DownloadStatus.DOWNLOADING) {
-                downloadUtils.getBlockByHash(block.getHeader().getPreHash().getDigestHex());
+                preBlock = downloadUtils.getBlockByHash(block.getHeader().getPreHash().getDigestHex());
             }
-        } else {
-            this.addBlock(preBlock, true, null);
         }
+        this.addBlock(preBlock, true, null);
     }
 
     public void appravalBlock(Block block) {

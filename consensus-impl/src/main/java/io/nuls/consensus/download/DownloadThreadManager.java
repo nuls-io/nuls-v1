@@ -84,7 +84,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
 
         for(long i = 0 ; i < downCount ; i++) {
 
-            long startHeight = (localBestHeight + 1) + i * maxDowncount;
+            long startHeight = (localBestHeight + 1) + i * maxDowncount * nodes.size();
 
             for(int j = 0 ; j < nodes.size() ; j ++) {
 
