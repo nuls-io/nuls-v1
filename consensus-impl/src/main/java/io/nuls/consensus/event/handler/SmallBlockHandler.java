@@ -88,7 +88,7 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
         ValidateResult result = header.verify();
         boolean isOrphan = result.getErrorCode() == ErrorCode.ORPHAN_TX || result.getErrorCode() == ErrorCode.ORPHAN_BLOCK;
 
-        BlockLog.info("verify block result: " + result.isSuccess() + " , isOrphan : " + isOrphan);
+        BlockLog.info("verify block result: " + result.isSuccess() + " , verify message : " + result.getMessage() + " , isOrphan : " + isOrphan);
 
         if (result.isFailed() && (!isOrphan || (NulsContext.getInstance().getBestHeight() - header.getHeight()) > PocConsensusConstant.CONFIRM_BLOCK_COUNT)) {
             BlockLog.warn("discard a SmallBlock:" + smallBlock.getHeader().getHash() + ", from:" + fromId + " ,reason:" + result.getMessage());

@@ -62,7 +62,7 @@ public class DownloadUtils {
             Future<Block> future = DownloadCacheHandler.addGetBlockRequest(endHash);
             BroadcastResult result = networkService.sendToNode(request, node.getId(), true);
             if (!result.isSuccess()) {
-                return null;
+                return resultList;
             }
             try {
                 Block block = future.get(30L, TimeUnit.SECONDS);
