@@ -1,6 +1,8 @@
 package io.nuls.consensus.download;
 
+import io.nuls.consensus.constant.NotFoundType;
 import io.nuls.consensus.entity.BlockHashResponse;
+import io.nuls.consensus.entity.NotFound;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.NulsDigestData;
 
@@ -53,11 +55,15 @@ public class DownloadCacheHandler {
         }
     }
 
-    public static void notFoundBlock(String hash) {
-        CompletableFuture<Block> future = blockCacher.get(hash);
-        if (future != null) {
-            future.complete(null);
-            blockCacher.remove(hash);
+    public static void notFoundBlock(NotFound data) {
+        if (data.getType()== NotFoundType.BLOCK) {
+            CompletableFuture<Block> future = blockCacher.get(data.getHash().getDigestHex());
+            if (future != null) {
+                future.complete(null);
+                blockCacher.remove(data.getHash().getDigestHex());
+            }
+        }else if(data.getType()==NotFoundType.TRANSACTION){
+            //todo
         }
     }
 }

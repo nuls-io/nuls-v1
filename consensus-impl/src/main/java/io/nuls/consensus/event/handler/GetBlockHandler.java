@@ -23,9 +23,12 @@
  */
 package io.nuls.consensus.event.handler;
 
+import io.nuls.consensus.constant.NotFoundType;
 import io.nuls.consensus.entity.GetBlockParam;
+import io.nuls.consensus.entity.NotFound;
 import io.nuls.consensus.event.BlockEvent;
 import io.nuls.consensus.event.GetBlockRequest;
+import io.nuls.consensus.event.NotFoundEvent;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.NulsDigestData;
@@ -88,8 +91,14 @@ public class GetBlockHandler extends AbstractEventHandler<GetBlockRequest> {
         this.sendBlockList(blockList, fromId);
     }
 
-    private void sendNotFound(NulsDigestData hash, String fromId) {
-
+    private void sendNotFound(NulsDigestData hash, String nodeId) {
+        NotFoundEvent event = new NotFoundEvent();
+        NotFound data = new NotFound(NotFoundType.BLOCK,hash);
+        event.setEventBody(data);
+        boolean b = eventBroadcaster.sendToNode(event, nodeId);
+        if (!b) {
+            Log.warn("send not found failed:" + nodeId + ", hash:" + hash.getDigestHex());
+        }
     }
 
     private void sendBlockList(List<Block> blockList, String nodeId) {
