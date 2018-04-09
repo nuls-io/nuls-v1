@@ -110,15 +110,15 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
         }
 
         Block block = ConsensusTool.assemblyBlock(header, txMap, smallBlock.getTxHashList());
-        blockManager.addBlock(block, true, fromId);
-
-        SmallBlockEvent newBlockEvent = new SmallBlockEvent();
-        newBlockEvent.setEventBody(smallBlock);
-        List<String> addressList = eventBroadcaster.broadcastHashAndCache(newBlockEvent, false, fromId);
-        for (String address : addressList) {
-            BlockLog.info("forward blockHeader:(" + address + ")" + header.getHeight() + ", hash:" + header.getHash() + ", preHash:" + header.getPreHash() + ", packing:" + Address.fromHashs(header.getPackingAddress()));
+        boolean needForward = blockManager.addBlock(block, true, fromId);
+        if(needForward) {
+            SmallBlockEvent newBlockEvent = new SmallBlockEvent();
+            newBlockEvent.setEventBody(smallBlock);
+            List<String> addressList = eventBroadcaster.broadcastHashAndCache(newBlockEvent, false, fromId);
+            for (String address : addressList) {
+                BlockLog.info("forward blockHeader:(" + address + ")" + header.getHeight() + ", hash:" + header.getHash() + ", preHash:" + header.getPreHash() + ", packing:" + Address.fromHashs(header.getPackingAddress()));
+            }
         }
-
         AssembledBlockNotice notice = new AssembledBlockNotice();
         notice.setEventBody(header);
         eventBroadcaster.publishToLocal(notice);
