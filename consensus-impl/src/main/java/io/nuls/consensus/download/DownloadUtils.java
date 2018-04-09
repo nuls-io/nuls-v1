@@ -80,10 +80,11 @@ public class DownloadUtils {
             if (!hashesResult.isSuccess()) {
                 return resultList;
             }
-            BlockHashResponse response ;
+            BlockHashResponse response;
             try {
                 response = hashesFuture.get(20L, TimeUnit.SECONDS);
             } catch (Exception e) {
+                Log.error(node.getId() + ",start:" + startHeight + " , size:" + size);
                 Log.error(e);
                 throw e;
             }
@@ -106,10 +107,11 @@ public class DownloadUtils {
                     Block block = future.get(30L, TimeUnit.SECONDS);
                     if (block != null) {
                         resultList.add(block);
-                    }else{
+                    } else {
                         return resultList;
                     }
                 } catch (Exception e) {
+                    Log.error(node.getId() + ",start:" + startHeight + " , size:" + size);
                     Log.error(e);
                     throw e;
                 }

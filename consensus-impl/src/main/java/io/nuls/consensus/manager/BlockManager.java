@@ -214,7 +214,9 @@ public class BlockManager {
                 preBlock = downloadUtils.getBlockByHash(block.getHeader().getPreHash().getDigestHex());
             }
         }
-        this.addBlock(preBlock, true, null);
+        if(null!=preBlock){
+            this.addBlock(preBlock, true, null);
+        }
     }
 
     public void appravalBlock(Block block) {

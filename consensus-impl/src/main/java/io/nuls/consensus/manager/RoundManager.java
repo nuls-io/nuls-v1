@@ -257,8 +257,8 @@ public class RoundManager {
 
         double penalty = DoubleUtils.div(DoubleUtils.mul(PocConsensusConstant.CREDIT_MAGIC_NUM, sumRoundVal),
                 DoubleUtils.mul(PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT, PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT));
-        BlockLog.info(")))))))))))))creditVal:" + DoubleUtils.sub(ability, penalty) + ",member:" + member.getAgentAddress());
-        BlockLog.info(")))))))))))))blockCount:" + blockCount + ", start:" + roundStart + ",end:" + calcRoundIndex + ", yellowCount:" + sumRoundVal);
+        BlockLog.debug(")))))))))))))creditVal:" + DoubleUtils.sub(ability, penalty) + ",member:" + member.getAgentAddress());
+        BlockLog.debug(")))))))))))))blockCount:" + blockCount + ", start:" + roundStart + ",end:" + calcRoundIndex + ", yellowCount:" + sumRoundVal);
         return ability - penalty;
     }
 
@@ -345,10 +345,10 @@ public class RoundManager {
             str.append("\n");
         }
         if (null == round.getPreRound()) {
-            BlockLog.info("calc new round:index:" + round.getIndex() + " , start:" + new Date(round.getStartTime())
+            BlockLog.debug("calc new round:index:" + round.getIndex() + " , start:" + new Date(round.getStartTime())
                     + ", netTime:(" + new Date(TimeService.currentTimeMillis()).toString() + ") , members:\n :" + str);
         } else {
-            BlockLog.info("calc new round:index:" + round.getIndex() + " ,preIndex:" + round.getPreRound().getIndex() + " , start:" + new Date(round.getStartTime())
+            BlockLog.debug("calc new round:index:" + round.getIndex() + " ,preIndex:" + round.getPreRound().getIndex() + " , start:" + new Date(round.getStartTime())
                     + ", netTime:(" + new Date(TimeService.currentTimeMillis()).toString() + ") , members:\n :" + str);
         }
         return round;
