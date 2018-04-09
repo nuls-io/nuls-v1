@@ -9,12 +9,9 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.network.IpUtil;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
-import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Node;
-import io.nuls.network.entity.NodeGroup;
 import io.nuls.network.service.NetworkService;
 
-import java.net.InetAddress;
 import java.nio.ByteBuffer;
 
 /**
@@ -28,67 +25,69 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
+        Log.debug("---------------------- server channelRegistered ------------------------- ");
         SocketChannel channel = (SocketChannel) ctx.channel();
         String remoteIP = channel.remoteAddress().getHostString();
-        String remoteId = IpUtil.getNodeId(channel.remoteAddress());
-        Node node = getNetworkService().getNode(remoteId);
-        if (node != null) {
-            if (node.getStatus() == Node.CONNECT) {
-                ctx.channel().close();
-                return;
-            }
-            //When nodes try to connect to each other but not connected, select one of the smaller IP addresses as the server
-//            if (node.getType() == Node.OUT) {
-//                String localIP = InetAddress.getLocalHost().getHostAddress();
-//                boolean isLocalServer = IpUtil.judgeIsLocalServer(localIP, remoteIP);
+//        String remoteId = IpUtil.getNodeId(channel.remoteAddress());
+//        Node node = getNetworkService().getNode(remoteId);
+//        if (node != null) {
+//            if (node.getStatus() == Node.CONNECT) {
+//                ctx.channel().close();
+//                return;
+//            }
+//            //When nodes try to connect to each other but not connected, select one of the smaller IP addresses as the server
+////            if (node.getType() == Node.OUT) {
+////                String localIP = InetAddress.getLocalHost().getHostAddress();
+////                boolean isLocalServer = IpUtil.judgeIsLocalServer(localIP, remoteIP);
+////
+////                if (!isLocalServer) {
+////                    ctx.channel().close();
+////                    return;
+////                } else {
+////                    getNetworkService().removeNode(remoteId);
+////                }
+////            }
+//        } else {
+        // if has a node with same ip, and it's a out node, close this channel
+        // if More than 10 in nodes of the same IP, close this channel
+        int count = 0;
+        for (Node n : getNetworkService().getAvailableNodes()) {
+            if (n.getIp().equals(remoteIP)) {
+                count++;
+                if (count == 10) {
+                    ctx.channel().close();
+                    return;
+                }
 //
-//                if (!isLocalServer) {
+//                if (n.getType() == Node.OUT && n.getStatus() == Node.HANDSHAKE) {
 //                    ctx.channel().close();
 //                    return;
 //                } else {
-//                    getNetworkService().removeNode(remoteId);
+//                    count++;
+//                    if (count == 10) {
+//                        ctx.channel().close();
+//                        return;
+//                    }
 //                }
-//            }
-        } else {
-            // if has a node with same ip, and it's a out node, close this channel
-            // if More than 10 in nodes of the same IP, close this channel
-            int count = 0;
-            for (Node n : networkService.getNodes().values()) {
-                if (n.getIp().equals(remoteIP)) {
-                    if (n.getType() == Node.OUT && n.getStatus() != Node.CLOSE) {
-                        ctx.channel().close();
-                        return;
-                    } else {
-                        count++;
-                        if (count == 10) {
-                            ctx.channel().close();
-                            return;
-                        }
-                    }
-                }
             }
-        }
-        NodeGroup group = getNetworkService().getNodeGroup(NetworkConstant.NETWORK_NODE_IN_GROUP);
-        if (group.size() > getNetworkService().getNetworkParam().maxInCount()) {
-            ctx.channel().close();
-            return;
         }
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-//        Log.info("----------------------server channelActive ------------------------- ");
+        Log.debug("---------------------- server channelActive ------------------------- ");
         String channelId = ctx.channel().id().asLongText();
         SocketChannel channel = (SocketChannel) ctx.channel();
         NioChannelMap.add(channelId, channel);
         Node node = new Node(Node.IN, channel.remoteAddress().getHostString(), channel.remoteAddress().getPort(), channelId);
         node.setStatus(Node.CONNECT);
-        getNetworkService().addNodeToGroup(NetworkConstant.NETWORK_NODE_IN_GROUP, node);
+        getNetworkService().addNode(node);
+//        getNetworkService().addNodeToGroup(NetworkConstant.NETWORK_NODE_IN_GROUP, node);
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-//        Log.info("----------------------server channelInactive ------------------------- ");
+        Log.debug("---------------------- server channelInactive ------------------------- ");
         SocketChannel channel = (SocketChannel) ctx.channel();
         String channelId = ctx.channel().id().asLongText();
         NioChannelMap.remove(channelId);
@@ -101,7 +100,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        Log.info("---------------ServerChannelHandler exceptionCaught :" + cause.getMessage());
+        Log.debug("--------------- ServerChannelHandler exceptionCaught :" + cause.getMessage(), cause);
         ctx.channel().close();
     }
 

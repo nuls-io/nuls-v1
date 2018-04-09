@@ -30,11 +30,13 @@ import io.nuls.core.event.BaseEvent;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
+import io.nuls.db.dao.NodeDataService;
 import io.nuls.network.NetworkContext;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeGroup;
+import io.nuls.network.entity.NodeTransferTool;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.filter.impl.DefaultMessageFilter;
 import io.nuls.network.message.filter.MessageFilterChain;
@@ -60,6 +62,8 @@ public class NetworkServiceImpl implements NetworkService {
     private NodesManager nodesManager;
 
     private BroadcastHandler broadcaster;
+
+    private NodeDataService nodeDao;
 
     public NetworkServiceImpl() {
         this.network = getNetworkInstance();
@@ -118,12 +122,12 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public void removeNode(String nodeId) {
-        nodesManager.removeNode(nodeId, null);
+        nodesManager.removeNode(nodeId);
     }
 
     @Override
     public void removeNode(String nodeId, int type) {
-        nodesManager.removeNode(nodeId, type);
+        nodesManager.removeNode(nodeId);
     }
 
     @Override
@@ -155,13 +159,23 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
+    public boolean addNode(Node node) {
+        return nodesManager.addNode(node);
+    }
+
+    @Override
+    public void handshakeNode(Node node) {
+        nodesManager.handshakeNode(node);
+    }
+
+    @Override
     public void blackNode(String nodeId, int status) {
         nodesManager.blackNode(nodeId, status);
     }
 
     @Override
-    public void addNodeToGroup(String groupName, Node node) {
-        nodesManager.addNodeToGroup(groupName, node);
+    public boolean addNodeToGroup(String groupName, Node node) {
+        return nodesManager.addNodeToGroup(groupName, node);
     }
 
     @Override
@@ -230,6 +244,13 @@ public class NetworkServiceImpl implements NetworkService {
         }
 
         return MainNetworkParam.get();
+    }
+
+    private NodeDataService getNodeDao() {
+        if (nodeDao == null) {
+            nodeDao = NulsContext.getServiceBean(NodeDataService.class);
+        }
+        return nodeDao;
     }
 }
 

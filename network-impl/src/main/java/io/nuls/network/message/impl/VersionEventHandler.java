@@ -72,18 +72,17 @@ public class VersionEventHandler implements NetWorkEventHandler {
 //        cacheService.putEvent(key, event, true);
 
         if (event.getBestBlockHeight() < 0) {
+            node.setStatus(Node.BAD);
             throw new NetworkMessageException(ErrorCode.NET_MESSAGE_ERROR);
         }
+
+        node.setSeverPort(event.getSeverPort());
         node.setVersionMessage(event);
         checkVersion(event.getNulsVersion());
+        node.setLastTime(TimeService.currentTimeMillis());
 
-        if (!node.isHandShake()) {
-            node.setStatus(Node.HANDSHAKE);
+        getNetworkService().handshakeNode(node);
 
-            node.setSeverPort(event.getSeverPort());
-            node.setLastTime(TimeService.currentTimeMillis());
-            getNodeDao().saveChange(NodeTransferTool.toPojo(node));
-        }
         return null;
     }
 

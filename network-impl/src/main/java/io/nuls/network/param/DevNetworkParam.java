@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,15 +24,11 @@
 package io.nuls.network.param;
 
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.log.Log;
 import io.nuls.network.NetworkContext;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.filter.impl.DefaultMessageFilter;
 import io.nuls.network.message.DefaultNetWorkEventHandlerFactory;
-
-import java.net.InetSocketAddress;
 
 /**
  * @author vivi
@@ -48,27 +44,9 @@ public class DevNetworkParam extends AbstractNetworkParam {
         this.port = NulsContext.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_SERVER_PORT, 8003);
         this.packetMagic = NulsContext.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_MAGIC, 123456789);
 
-
-//        InetSocketAddress address0 = new InetSocketAddress("1120.77.241.8", port);
-//        InetSocketAddress address1 = new InetSocketAddress("39.108.121.242", port);
-//        InetSocketAddress address2 = new InetSocketAddress("101.132.33.140", port);
-//        InetSocketAddress address3 = new InetSocketAddress("116.62.135.185", port);
-//        InetSocketAddress address4 = new InetSocketAddress("116.62.117.200", port);
-//        InetSocketAddress address5 = new InetSocketAddress("47.92.4.19", port);
-
-        InetSocketAddress address0 = new InetSocketAddress("192.168.1.103", port);
-        InetSocketAddress address1 = new InetSocketAddress("192.168.1.188", port);
-        InetSocketAddress address2 = new InetSocketAddress("192.168.1.102", port);
-        InetSocketAddress address3 = new InetSocketAddress("192.168.1.157", port);
-        InetSocketAddress address4 = new InetSocketAddress("192.168.1.158", port);
-        InetSocketAddress address5 = new InetSocketAddress("192.168.1.159", port);
-        seedNodes.add(address0);
-        seedNodes.add(address1);
-        seedNodes.add(address2);
-        seedNodes.add(address3);
-        seedNodes.add(address4);
-        seedNodes.add(address5);
-
+        seedIpList.add("192.168.1.103");
+        seedIpList.add("192.168.1.188");
+//        seedIpList.add("192.168.1.204");
 
         this.messageFilter = DefaultMessageFilter.getInstance();
         this.messageHandlerFactory = DefaultNetWorkEventHandlerFactory.getInstance();

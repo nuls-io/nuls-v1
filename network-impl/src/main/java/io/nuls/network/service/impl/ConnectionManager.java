@@ -93,9 +93,13 @@ public class ConnectionManager {
     }
 
     public void connectionNode(Node node) {
+        if (network.getLocalIps().contains(node.getIp())) {
+            return;
+        }
         TaskManager.createAndRunThread(NulsConstant.MODULE_ID_NETWORK, "node connection", new Runnable() {
             @Override
             public void run() {
+                node.setStatus(Node.WAIT);
                 NettyClient client = new NettyClient(node);
                 client.start();
             }
@@ -124,7 +128,7 @@ public class ConnectionManager {
                     BaseEvent event = EventManager.getInstance(message.getData());
                     processMessage(event, node);
                 } else {
-                    Log.debug("----------------magicNumber different remove node----------" + node.getId());
+                    node.setStatus(Node.BAD);
                     networkService.removeNode(node.getId());
                 }
             }

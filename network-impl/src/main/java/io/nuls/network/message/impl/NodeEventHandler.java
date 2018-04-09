@@ -26,16 +26,13 @@ package io.nuls.network.message.impl;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.event.BaseEvent;
 import io.nuls.core.utils.network.IpUtil;
-import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Node;
 import io.nuls.network.message.NetworkCacheService;
 import io.nuls.network.message.NetworkEventResult;
 import io.nuls.network.message.entity.NodeEvent;
 import io.nuls.network.message.handler.NetWorkEventHandler;
 import io.nuls.network.service.NetworkService;
-import sun.nio.ch.Net;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -63,11 +60,12 @@ public class NodeEventHandler implements NetWorkEventHandler {
         NodeEvent event = (NodeEvent) networkEvent;
 
         Map<String, Node> outNodes = getNetworkService().getNodes();
-
         boolean exist = false;
         for (Node newNode : event.getEventBody().getNodes()) {
+            if (IpUtil.getIps().contains(newNode.getIp())) {
+                continue;
+            }
             exist = false;
-
             for (Node outNode : outNodes.values()) {
                 if (outNode.getIp().equals(newNode.getIp())) {
                     exist = true;
@@ -76,8 +74,9 @@ public class NodeEventHandler implements NetWorkEventHandler {
             }
             if (!exist) {
                 newNode.setType(Node.OUT);
-                newNode.setStatus(Node.WAIT);
-                getNetworkService().addNodeToGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP, newNode);
+                newNode.setStatus(Node.CLOSE);
+                newNode.setId(null);
+                getNetworkService().addNode(newNode);
             }
         }
         return null;
