@@ -26,6 +26,7 @@ package io.nuls.network.param;
 import io.nuls.core.context.NulsContext;
 import io.nuls.network.NetworkContext;
 import io.nuls.network.constant.NetworkConstant;
+import io.nuls.network.entity.Node;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.filter.impl.DefaultMessageFilter;
 import io.nuls.network.message.DefaultNetWorkEventHandlerFactory;
@@ -47,12 +48,8 @@ public class MainNetworkParam extends AbstractNetworkParam {
         this.port = NulsContext.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_SERVER_PORT, 8632);
         this.packetMagic = NulsContext.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_MAGIC, 936152748);
 
-        InetSocketAddress address1 = new InetSocketAddress("192.168.1.156", port);
-        InetSocketAddress address2 = new InetSocketAddress("192.168.1.157", port);
-        InetSocketAddress address3 = new InetSocketAddress("192.168.1.158", port);
-        seedNodes.add(address1);
-        seedNodes.add(address2);
-        seedNodes.add(address3);
+        seedIpList.add("192.168.1.131");
+        seedIpList.add("192.168.1.204");
 
         this.messageFilter = DefaultMessageFilter.getInstance();
         this.messageHandlerFactory = DefaultNetWorkEventHandlerFactory.getInstance();

@@ -66,27 +66,26 @@ public class GetNodeEventHandler implements NetWorkEventHandler {
 //        }
 //        cacheService.putEvent(key, event, false);
 
-        List<Node> list = getAvailableNodes(getNodeEvent.getLength(), node.getId());
+        List<Node> list = getAvailableNodes(getNodeEvent.getLength(), node.getIp());
         NodeEvent replyEvent = new NodeEvent(list);
         return new NetworkEventResult(true, replyEvent);
     }
 
 
-    private List<Node> getAvailableNodes(int length, String nodeId) {
+    private List<Node> getAvailableNodes(int length, String nodeIp) {
         List<Node> nodes = new ArrayList<>();
-        int count = 0;
         List<Node> availableNodes = getNetworkService().getAvailableNodes();
         Collections.shuffle(availableNodes);
         Set<String> ipSet = new HashSet<>();
-        ipSet.add(nodeId);
+        ipSet.add(nodeIp);
         for (Node node : availableNodes) {
             if (ipSet.contains(node.getIp())) {
                 continue;
             }
             ipSet.add(node.getIp());
+            node.setPort(node.getSeverPort());
             nodes.add(node);
-            count++;
-            if (count == length || count > 20) {
+            if (nodes.size() == length) {
                 break;
             }
         }

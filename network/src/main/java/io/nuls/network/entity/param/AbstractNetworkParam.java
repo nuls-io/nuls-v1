@@ -24,6 +24,7 @@
 package io.nuls.network.entity.param;
 
 import io.nuls.core.utils.network.IpUtil;
+import io.nuls.network.entity.Node;
 import io.nuls.network.message.NetworkEventHandlerFactory;
 import io.nuls.network.message.filter.NulsMessageFilter;
 
@@ -57,12 +58,12 @@ public abstract class AbstractNetworkParam {
 
     protected NetworkEventHandlerFactory messageHandlerFactory;
 
-    protected List<InetSocketAddress> seedNodes = new ArrayList<>();
+    protected List<String> seedIpList = new ArrayList<>();
 
     protected Set<String> localIps = IpUtil.getIps();
 
-    public List<InetSocketAddress> getSeedNodes() {
-        return seedNodes;
+    public List<String> getSeedIpList() {
+        return seedIpList;
     }
 
     public int port() {

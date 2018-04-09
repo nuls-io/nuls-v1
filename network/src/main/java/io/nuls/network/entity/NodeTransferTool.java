@@ -34,25 +34,21 @@ public class NodeTransferTool {
 
     public static void toNode(Node node, NodePo po) {
         node.setId(po.getId());
-        node.setFailCount(po.getFailCount());
+        node.setFailCount(0);
         node.setIp(po.getIp());
         node.setPort(po.getPort());
+        node.setSeverPort(po.getPort());
         node.setLastTime(po.getLastTime());
         node.setMagicNumber(po.getMagicNum());
-        node.setFailCount(po.getFailCount());
     }
+
 
     public static NodePo toPojo(Node node) {
         NodePo po = new NodePo();
-        if (node.getSeverPort() != null && node.getSeverPort() != 0) {
-            po.setId(node.getIp() + ":" + node.getSeverPort());
-            po.setPort(node.getSeverPort());
-        } else {
-            po.setId(node.getId());
-            po.setPort(node.getPort());
-        }
+        po.setId(node.getIp() + ":" + node.getSeverPort());
         po.setFailCount(node.getFailCount());
         po.setIp(node.getIp());
+        po.setPort(node.getSeverPort());
         po.setLastTime(node.getLastTime());
         po.setMagicNum(node.getMagicNumber());
         po.setStatus(0);

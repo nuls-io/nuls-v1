@@ -30,7 +30,8 @@ import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.TaskManager;
-import io.nuls.core.utils.network.IpUtil;
+import io.nuls.core.utils.date.DateUtil;
+import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.NodeDataService;
 import io.nuls.network.constant.NetworkConstant;
@@ -40,9 +41,7 @@ import io.nuls.network.entity.NodeTransferTool;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.service.impl.netty.NioChannelMap;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -54,11 +53,13 @@ public class NodesManager implements Runnable {
 
     private Map<String, NodeGroup> nodeGroups = new ConcurrentHashMap<>();
 
-    private Map<String, Node> nodes = new ConcurrentHashMap<>();
+    private Map<String, Node> disConnectNodes = new ConcurrentHashMap<>();
+
+    private Map<String, Node> canConnectNodes = new ConcurrentHashMap<>();
+
+    private Map<String, Node> connectedNodes = new ConcurrentHashMap<>();
 
     private ReentrantLock lock = new ReentrantLock();
-
-    private List<Node> seedNodes;
 
     private AbstractNetworkParam network;
 
@@ -73,6 +74,7 @@ public class NodesManager implements Runnable {
     private static NodesManager instance = new NodesManager();
 
     private NodesManager() {
+
     }
 
     public static NodesManager getInstance() {
@@ -104,143 +106,249 @@ public class NodesManager implements Runnable {
      * running node discovery thread
      */
     public void start() {
-        List<Node> nodes = discoverHandler.getLocalNodes(network.maxOutCount());
-        if (nodes.size() < network.maxOutCount() / 2) {
-            nodes.addAll(getSeedNodes());
-        }
+        List<Node> nodes = discoverHandler.getLocalNodes();
         for (Node node : nodes) {
-            addNodeToGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP, node);
+            addNode(node);
         }
-
+        if (nodes.size() < network.maxOutCount() / 2) {
+            for (Node node : getSeedNodes()) {
+                addNode(node);
+            }
+        }
         running = true;
         TaskManager.createAndRunThread(NulsConstant.MODULE_ID_NETWORK, "NetworkNodeManager", this);
         discoverHandler.start();
     }
 
     public List<Node> getSeedNodes() {
-        if (seedNodes == null) {
-            seedNodes = discoverHandler.getSeedNodes();
-        }
-        for (Node node : seedNodes) {
-            node.setStatus(Node.WAIT);
-            node.setMagicNumber(network.packetMagic());
-            node.setType(Node.OUT);
-        }
-        if (nodes.isEmpty()) {
-            return seedNodes;
-        } else {
-            List<Node> nodeList = new ArrayList<>();
-            for (Node node : seedNodes) {
-                if (!nodes.containsKey(node.getId())) {
-                    nodeList.add(node);
-                }
+        List<Node> seedNodes = new ArrayList<>();
+        for (String ip : network.getSeedIpList()) {
+            if (network.getLocalIps().contains(ip)) {
+                continue;
             }
-            return nodeList;
+            Node node = new Node(network.packetMagic(), Node.OUT, ip, network.port());
+            node.setStatus(Node.CLOSE);
+            node.setMagicNumber(network.packetMagic());
+            node.setSeverPort(node.getPort());
+            node.setFailCount(0);
+
+            seedNodes.add(node);
         }
+        return seedNodes;
     }
 
     public List<Node> getAvailableNodes() {
-        List<Node> nodeList = new ArrayList<>(nodes.values());
-        for (int i = nodeList.size() - 1; i >= 0; i--) {
-            Node node = nodeList.get(i);
-            if (!node.isHandShake()) {
-                nodeList.remove(node);
+        return new ArrayList<>(connectedNodes.values());
+    }
+
+    public List<Node> getConnectNode() {
+        List<Node> nodeList = new ArrayList<>();
+        for (Node node : disConnectNodes.values()) {
+            if (node.isAlive()) {
+                nodeList.add(node);
+            }
+        }
+        for (Node node : canConnectNodes.values()) {
+            if (node.isAlive()) {
+                nodeList.add(node);
             }
         }
         return nodeList;
     }
 
-    public Node getNode(String nodeId) {
-        return nodes.get(nodeId);
+    public Map<String, Node> getNodes() {
+        Map<String, Node> nodeMap = new HashMap<>();
+        nodeMap.putAll(disConnectNodes);
+        nodeMap.putAll(canConnectNodes);
+        nodeMap.putAll(connectedNodes);
+        return nodeMap;
     }
 
-    public void addNode(Node node) {
+    public Node getNode(String nodeId) {
+        Node node = disConnectNodes.get(nodeId);
+        if (node == null) {
+            node = canConnectNodes.get(nodeId);
+        }
+        if (node == null) {
+            node = connectedNodes.get(nodeId);
+        }
+        return node;
+    }
+
+    public boolean addNode(Node node) {
         lock.lock();
         try {
-            if (!nodes.containsKey(node.getId())) {
-                nodes.put(node.getId(), node);
-                if (node.getStatus() == Node.WAIT) {
-                    connectionManager.connectionNode(node);
+            if (!disConnectNodes.containsKey(node.getId()) &&
+                    !canConnectNodes.containsKey(node.getId()) &&
+                    !connectedNodes.containsKey(node.getId())) {
+                if (node.getType() == Node.IN) {
+                    disConnectNodes.put(node.getId(), node);
+                } else {
+                    Map<String, Node> nodeMap = getNodes();
+                    for (Node n : nodeMap.values()) {
+                        if (n.getIp().equals(node.getIp())) {
+                            return false;
+                        }
+                    }
+                    disConnectNodes.put(node.getId(), node);
                 }
             }
+            return true;
         } finally {
             lock.unlock();
         }
     }
 
-    public void removeNode(String nodeId, Integer type) {
+    public void removeNode(String nodeId) {
         lock.lock();
         try {
-            if (nodes.containsKey(nodeId)) {
-                Node node = nodes.get(nodeId);
+            Node node = disConnectNodes.get(nodeId);
+            if (node == null) {
+                node = canConnectNodes.get(nodeId);
+            }
+            if (node == null) {
+                node = connectedNodes.get(nodeId);
+            }
+            if (node == null) {
+                getNodeDao().removeNode(nodeId);
+                return;
+            }
 
-                if (null != type && type != node.getType()) {
+            if (StringUtils.isNotBlank(node.getChannelId())) {
+                SocketChannel channel = NioChannelMap.get(node.getChannelId());
+                if (channel != null) {
+                    channel.close();
                     return;
                 }
-                //When other modules call the interface,  close channel first
-                if (StringUtils.isNotBlank(node.getChannelId())) {
-                    SocketChannel channel = NioChannelMap.get(node.getChannelId());
-                    if (channel != null) {
-                        channel.close();
-                        return;
-                    }
-                }
-                node.destroy();
-                for (String groupName : node.getGroupSet()) {
-                    removeNodeFromGroup(groupName, node.getId());
-                }
-                nodes.remove(node.getId());
-                getNodeDao().removeNode(NodeTransferTool.toPojo(node));
-            } else {
+            }
 
+            for (String groupName : node.getGroupSet()) {
+                removeNodeFromGroup(groupName, node.getId());
+            }
+            //If it is a malicious node, or the node type is "IN",remove it at once
+            /**
+             * Because the port number is not reliable,
+             * the "IN" node will not attempt to connect again after the connection fails, so it should be removed from the map at once
+             */
+            if (node.getStatus() == Node.BAD || (node.getType() == Node.IN && !node.isCanConnect())) {
+                node.destroy();
+                connectedNodes.remove(nodeId);
+                disConnectNodes.remove(nodeId);
+                connectedNodes.remove(nodeId);
                 getNodeDao().removeNode(nodeId);
+                return;
+            }
+
+            node.destroy();
+            if (connectedNodes.containsKey(nodeId)) {
+                connectedNodes.remove(nodeId);
+            }
+            if (node.isCanConnect() && canConnectNodes.size() < network.maxOutCount() + network.maxInCount()) {
+                if (!canConnectNodes.containsKey(nodeId)) {
+                    for (Node n : canConnectNodes.values()) {
+                        if (node.getIp().equals(n.getIp())) {
+                            node.setFailCount(node.getFailCount() + 1);
+                            node.setLastFailTime(TimeService.currentTimeMillis() + DateUtil.MINUTE_TIME * node.getFailCount());
+                            return;
+                        }
+                    }
+                    node.setLastFailTime(TimeService.currentTimeMillis() + DateUtil.MINUTE_TIME * 10);
+                    node.setType(Node.OUT);
+                    canConnectNodes.put(nodeId, node);
+                    disConnectNodes.remove(nodeId);
+                }
+
+            } else if (node.getFailCount() >= 20) {
+                if (disConnectNodes.containsKey(nodeId)) {
+                    disConnectNodes.remove(nodeId);
+                }
+                getNodeDao().removeNode(nodeId);
+            } else {
+                node.setFailCount(node.getFailCount() + 1);
+                node.setLastFailTime(TimeService.currentTimeMillis() + DateUtil.MINUTE_TIME * node.getFailCount());
+                if (!disConnectNodes.containsKey(nodeId)) {
+                    disConnectNodes.put(nodeId, node);
+                    canConnectNodes.remove(nodeId);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
-
+            throw e;
         } finally {
             lock.unlock();
         }
     }
 
     public void blackNode(String nodeId, int status) {
-        if (nodes.containsKey(nodeId)) {
-            Node node = nodes.get(nodeId);
-            node.setStatus(status);
-            getNodeDao().removeNode(NodeTransferTool.toPojo(node));
-
-            removeNode(node.getId(), null);
-        }
+//        if (nodes.containsKey(nodeId)) {
+//            Node node = nodes.get(nodeId);
+//            node.setStatus(status);
+//            node.setFailCount(20);
+//            getNodeDao().removeNode(NodeTransferTool.toPojo(node));
+//
+//            removeNode(node.getId(), null);
+//        }
     }
 
-    public void addNodeToGroup(String groupName, Node node) {
-        if (IpUtil.getIps().contains(node.getIp())) {
-            return;
-        }
+    public boolean addNodeToGroup(String groupName, Node node) {
         if (!nodeGroups.containsKey(groupName)) {
             throw new NulsRuntimeException(ErrorCode.NET_NODE_GROUP_NOT_FOUND);
         }
         NodeGroup group = nodeGroups.get(groupName);
         if (groupName.equals(NetworkConstant.NETWORK_NODE_OUT_GROUP) &&
                 group.size() >= network.maxOutCount()) {
-            return;
+            return false;
         }
-
         if (groupName.equals(NetworkConstant.NETWORK_NODE_IN_GROUP) &&
                 group.size() >= network.maxInCount()) {
-            return;
+            return false;
         }
         node.getGroupSet().add(group.getName());
-        addNode(node);
         group.addNode(node);
+        return true;
     }
 
     public void removeNodeFromGroup(String groupName, String nodeId) {
         if (!nodeGroups.containsKey(groupName)) {
             return;
         }
-        NodeGroup group = nodeGroups.get(groupName);
-        group.removeNode(nodeId);
+        nodeGroups.get(groupName).removeNode(nodeId);
+    }
+
+    public void handshakeNode(Node node) {
+        boolean success = false;
+        if (node.getType() == Node.IN) {
+            success = addNodeToGroup(NetworkConstant.NETWORK_NODE_IN_GROUP, node);
+        } else if (node.getType() == Node.OUT) {
+            success = addNodeToGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP, node);
+        }
+        node.setFailCount(0);
+        if (!success) {
+            node.setCanConnect(true);
+            if (node.getType() == Node.IN) {
+                node.setType(Node.OUT);
+                node.setPort(node.getSeverPort());
+                node.setId(null);
+            }
+            getNodeDao().saveChange(NodeTransferTool.toPojo(node));
+            removeNode(node.getId());
+        } else {
+            node.setStatus(Node.HANDSHAKE);
+            if (disConnectNodes.containsKey(node.getId())) {
+                disConnectNodes.remove(node.getId());
+            }
+            if (canConnectNodes.containsKey(node.getId())) {
+                canConnectNodes.remove(node.getId());
+            }
+            connectedNodes.put(node.getId(), node);
+            getNodeDao().saveChange(NodeTransferTool.toPojo(node));
+        }
+
+    }
+
+
+    private boolean isSeedNode(String ip) {
+        return network.getSeedIpList().contains(ip);
     }
 
     /**
@@ -249,35 +357,67 @@ public class NodesManager implements Runnable {
     @Override
     public void run() {
         Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+
         while (running) {
-            if (nodes.isEmpty()) {
+
+            for (Node node : connectedNodes.values()) {
+                System.out.println("------------------------" + node.getId() + ",type:" + node.getType());
+            }
+
+            // check the connectedNodes, if it is empty, try to connect seed node,
+            // if connectedNode's count enough, closing the connection with the seed node
+            if (connectedNodes.isEmpty() && canConnectNodes.isEmpty()) {
                 List<Node> nodes = getSeedNodes();
                 for (Node node : nodes) {
-                    addNodeToGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP, node);
+                    if (!disConnectNodes.containsKey(node.getId())) {
+                        addNode(node);
+                    }
                 }
-            } else {
-                NodeGroup group = nodeGroups.get(NetworkConstant.NETWORK_NODE_OUT_GROUP);
-                if (group.size() < network.maxOutCount()) {
-                    List<Node> nodes = discoverHandler.getLocalNodes(network.maxOutCount() - group.size());
-                    if (!nodes.isEmpty()) {
-                        for (Node node : nodes) {
-                            addNodeToGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP, node);
-                        }
-                    } else {
-                        discoverHandler.findOtherNode(network.maxOutCount() - group.size());
+            } else if (connectedNodes.size() > network.maxOutCount()) {
+                removeSeedNode();
+            }
+
+            //unConnectNodes untime try to connect
+            for (Node node : disConnectNodes.values()) {
+                if (node.getType() == Node.OUT && node.getStatus() == Node.CLOSE) {
+
+                    if (node.getLastFailTime() < TimeService.currentTimeMillis() || isSeedNode(node.getIp())) {
+                        connectionManager.connectionNode(node);
                     }
                 }
             }
+            //canConnectNodes untime try to connect
+            int size = network.maxOutCount() - nodeGroups.get(NetworkConstant.NETWORK_NODE_OUT_GROUP).size();
+            for (Node node : canConnectNodes.values()) {
+                if (size > 0) {
+                    connectionManager.connectionNode(node);
+                    size--;
+                } else if (node.getLastFailTime() < TimeService.currentTimeMillis() && node.getStatus() == Node.CLOSE) {
+                    connectionManager.connectionNode(node);
+                }
+            }
+            size = network.maxOutCount() - nodeGroups.get(NetworkConstant.NETWORK_NODE_OUT_GROUP).size();
+            if (size > 0) {
+                discoverHandler.findOtherNode(size);
+            }
+
             try {
-                Thread.sleep(7000);
+                Thread.sleep(3500);
             } catch (InterruptedException e) {
 
             }
         }
     }
 
-    public Map<String, Node> getNodes() {
-        return nodes;
+    private void removeSeedNode() {
+        Collection<Node> nodes = connectedNodes.values();
+        for (String ip : network.getSeedIpList()) {
+            for (Node n : nodes) {
+                if (n.getIp().equals(ip)) {
+                    removeNode(n.getId());
+                }
+            }
+        }
     }
 
     public NodeGroup getNodeGroup(String groupName) {

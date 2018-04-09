@@ -69,6 +69,8 @@ public class Node extends BaseNulsData {
 
     private Set<String> groupSet;
 
+    public static final int FAIL_COUNT = 20;
+
     /**
      * 1: inNode ,  2: outNode
      */
@@ -83,7 +85,10 @@ public class Node extends BaseNulsData {
     public final static int CONNECT = 1;
     public final static int HANDSHAKE = 2;
     public final static int CLOSE = 3;
+    public final static int BAD = 4;
     private volatile int status;
+
+    private boolean canConnect;
 
     private VersionEvent versionMessage;
 
@@ -103,11 +108,11 @@ public class Node extends BaseNulsData {
         this.channelId = channelId;
     }
 
-    public Node(int magicNumber, int type, InetSocketAddress socketAddress) {
+    public Node(int magicNumber, int type, String ip, int port) {
         this(type);
         this.magicNumber = magicNumber;
-        this.port = socketAddress.getPort();
-        this.ip = socketAddress.getHostString();
+        this.port = port;
+        this.ip = ip;
     }
 
     public void destroy() {
@@ -304,5 +309,13 @@ public class Node extends BaseNulsData {
 
     public void setSeverPort(Integer severPort) {
         this.severPort = severPort;
+    }
+
+    public boolean isCanConnect() {
+        return canConnect;
+    }
+
+    public void setCanConnect(boolean canConnect) {
+        this.canConnect = canConnect;
     }
 }
