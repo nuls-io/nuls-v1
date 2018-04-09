@@ -55,8 +55,8 @@ public class ConfirmingBlockCacheManager {
     }
 
     public void init() {
-        txsCacheMap = new CacheMap<>(ConsensusCacheConstant.BLOCK_TXS_CACHE_NAME, 256, 0, 0);
-        headerCacheMap = new CacheMap<>(ConsensusCacheConstant.BLOCK_HEADER_CACHE_NAME, 64, 0, 0);
+        txsCacheMap = new CacheMap<>(ConsensusCacheConstant.BLOCK_TXS_CACHE_NAME, 256, 1000000, 1000000);
+        headerCacheMap = new CacheMap<>(ConsensusCacheConstant.BLOCK_HEADER_CACHE_NAME, 64, 1000000, 1000000);
     }
 
     public BlockHeader getBlockHeader(String hash) {
@@ -70,7 +70,7 @@ public class ConfirmingBlockCacheManager {
         String hash = block.getHeader().getHash().getDigestHex();
         headerCacheMap.put(hash, block.getHeader());
         txsCacheMap.put(hash, block.getTxs());
-        BlockLog.info("cache block height:" +block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()));
+        //BlockLog.info("cache block height:" +block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()));
         if(null==headerCacheMap.get(hash)){
             System.out.println();
         }
@@ -104,7 +104,6 @@ public class ConfirmingBlockCacheManager {
     }
 
     public void removeBlock(String hash) {
-        Log.error("+++++++++++++++++++++++++++++++++++++:"+hash);
         this.txsCacheMap.remove(hash);
         this.headerCacheMap.remove(hash);
     }

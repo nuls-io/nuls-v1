@@ -116,7 +116,7 @@ public class DownloadProcessor extends Thread {
                 downloadStatus = DownloadStatus.SUCCESS;
 
                 checkIsNewest();
-            } else {
+            } else if(downloadStatus != DownloadStatus.WAIT){
                 downloadStatus = DownloadStatus.FAILED;
             }
         } catch (Exception e) {
@@ -154,6 +154,9 @@ public class DownloadProcessor extends Thread {
         Map<String, List<Node>> nodeMaps = new HashMap<>();
 
         for(Node node : nodeList) {
+            System.out.println("--------------");
+            System.out.println(node.getId()+" : " + node.getVersionMessage().getBestBlockHeight() + " : " + node.getVersionMessage().getBestBlockHash());
+            System.out.println("--------------");
             String hash = node.getVersionMessage().getBestBlockHash();
 
             Integer statistics = statisticsMaps.get(hash);

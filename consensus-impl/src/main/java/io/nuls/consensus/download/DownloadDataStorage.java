@@ -29,7 +29,6 @@ public class DownloadDataStorage implements Callable<Boolean> {
                 if(block.getHeader() == null) {
                     break;
                 }
-                System.out.println("================"+block.getHeader().getHeight()+" , hash:"+block.getHeader().getHash());
                 BlockManager.getInstance().addBlock(block, true, null);
             }
             return true;

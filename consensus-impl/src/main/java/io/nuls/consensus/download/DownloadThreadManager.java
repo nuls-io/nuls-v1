@@ -1,5 +1,6 @@
 package io.nuls.consensus.download;
 
+import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.service.intf.DownloadService;
 import io.nuls.core.chain.entity.Block;
@@ -146,11 +147,22 @@ public class DownloadThreadManager implements Callable<Boolean> {
         }
 
         //check need rollback
-        checkRollback(localBestBlock, 0);
+        if(newestInfos.getNodes().size() > PocConsensusConstant.ALIVE_MIN_NODE_COUNT) {
+            checkRollback(localBestBlock, 0);
+        } else {
+            resetNetwork();
+            return false;
+        }
         return true;
     }
 
     private void checkRollback(Block localBestBlock, int rollbackCount) throws NulsException {
+
+        if(rollbackCount >= 10) {
+            resetNetwork();
+            return;
+        }
+
         List<Node> nodes = newestInfos.getNodes();
 
         for(Node node : nodes) {
@@ -162,18 +174,18 @@ public class DownloadThreadManager implements Callable<Boolean> {
 
         blockService.rollbackBlock(localBestBlock.getHeader().getHash().getDigestHex());
 
-        if(rollbackCount > 10) {
-            Map<String, Node> nodesMap = networkService.getNodes();
-            for(Map.Entry<String, Node> entry : nodesMap.entrySet()) {
-                networkService.removeNode(entry.getValue().getId());
-            }
-            downloadService.reset();
-            throw new NulsRuntimeException(ErrorCode.FAILED);
-        }
-
         localBestBlock = blockService.getBestBlock();
 
         checkRollback(localBestBlock, rollbackCount + 1);
+    }
+
+    private void resetNetwork() {
+        Map<String, Node> nodesMap = networkService.getNodes();
+        for(Map.Entry<String, Node> entry : nodesMap.entrySet()) {
+            networkService.removeNode(entry.getValue().getId());
+        }
+        downloadService.reset();
+        throw new NulsRuntimeException(ErrorCode.FAILED);
     }
 
 }
