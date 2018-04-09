@@ -49,4 +49,28 @@ public class ResultMessage {
     public List<Block> getBlockList() {
         return blockList;
     }
+
+    public void setStartHash(String startHash) {
+        this.startHash = startHash;
+    }
+
+    public void setEndHash(String endHash) {
+        this.endHash = endHash;
+    }
+
+    public void setStartHeight(long startHeight) {
+        this.startHeight = startHeight;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
+
+    public void setNode(Node node) {
+        this.node = node;
+    }
+
+    public void setBlockList(List<Block> blockList) {
+        this.blockList = blockList;
+    }
 }

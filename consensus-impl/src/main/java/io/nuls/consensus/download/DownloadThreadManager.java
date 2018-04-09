@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -111,25 +112,64 @@ public class DownloadThreadManager implements Callable<Boolean> {
         }
 
         for (FutureTask<ResultMessage> task : futures) {
-            ResultMessage result = task.get();
+            try {
+                ResultMessage result = task.get();
 
-            List<Block> blockList = result.getBlockList();
-            if(blockList == null || blockList.size() == 0) {
-                DownloadThread downloadThread = new DownloadThread(localBestHash, netBestHash, result.getStartHeight(), result.getSize(), result.getNode());
+                List<Block> blockList = result.getBlockList();
+                if (blockList == null || blockList.size() == 0) {
+                    blockList = retryDownload(executor, result);
+                }
 
-                FutureTask<ResultMessage> downloadThreadFuture = new FutureTask<ResultMessage>(downloadThread);
-                executor.execute(new Thread(downloadThreadFuture));
-
-                result = downloadThreadFuture.get();
-                blockList = result.getBlockList();
-            }
-            for(Block block : blockList) {
-                blockQueue.offer(queueName, block);
+                for(Block block : blockList) {
+                    blockQueue.offer(queueName, block);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("===========================");
+                System.out.println("===========================");
+                System.out.println("===========================");
+                System.out.println("===========================");
             }
         }
         executor.shutdown();
 
         return true;
+    }
+
+    private List<Block> retryDownload(ThreadPoolExecutor executor, ResultMessage result) throws InterruptedException, java.util.concurrent.ExecutionException {
+
+        //try download to other nodes
+        List<Node> otherNodes = new ArrayList<>();
+
+        Node defultNode = result.getNode();
+
+        for(Node node : newestInfos.getNodes()) {
+            if(!node.getId().equals(defultNode.getId())) {
+                otherNodes.add(node);
+            }
+        }
+
+        for(Node node : otherNodes) {
+            result.setNode(node);
+            List<Block> blockList = downloadBlockFromNode(executor, result);
+            if(blockList != null && blockList.size() > 0) {
+                return blockList;
+            }
+        }
+
+        //if fail , down again
+        result.setNode(defultNode);
+
+        return downloadBlockFromNode(executor, result);
+    }
+
+    private List<Block> downloadBlockFromNode(ThreadPoolExecutor executor, ResultMessage result) throws ExecutionException, InterruptedException {
+        DownloadThread downloadThread = new DownloadThread(result.getStartHash(), result.getEndHash(), result.getStartHeight(), result.getSize(), result.getNode());
+
+        FutureTask<ResultMessage> downloadThreadFuture = new FutureTask<ResultMessage>(downloadThread);
+        executor.execute(new Thread(downloadThreadFuture));
+
+        return downloadThreadFuture.get().getBlockList();
     }
 
     private boolean checkFirstBlock() throws NulsException {
