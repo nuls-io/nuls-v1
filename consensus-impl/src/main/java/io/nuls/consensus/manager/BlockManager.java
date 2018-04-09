@@ -209,7 +209,7 @@ public class BlockManager {
         BlockLog.info("orphan cache block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()));
         Block preBlock = blockCacheBuffer.getBlock(block.getHeader().getPreHash().getDigestHex());
         if (preBlock == null) {
-            if (NulsContext.getServiceBean(DownloadService.class).getStatus() != DownloadStatus.DOWNLOADING) {
+            if (this.downloadService.getStatus() != DownloadStatus.DOWNLOADING) {
                 downloadUtils.getBlockByHash(block.getHeader().getPreHash().getDigestHex());
             }
         } else {

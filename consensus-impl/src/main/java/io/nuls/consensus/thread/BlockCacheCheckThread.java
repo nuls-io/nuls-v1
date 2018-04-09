@@ -25,14 +25,20 @@
  */
 package io.nuls.consensus.thread;
 
+import io.nuls.consensus.constant.DownloadStatus;
 import io.nuls.consensus.constant.MaintenanceStatus;
 import io.nuls.consensus.manager.ConsensusManager;
 import io.nuls.consensus.service.intf.BlockService;
+import io.nuls.consensus.service.intf.DownloadService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
+import io.nuls.network.entity.Node;
+import io.nuls.network.service.NetworkService;
+
+import java.util.List;
 
 /**
  * @author Niels
@@ -43,7 +49,8 @@ public class BlockCacheCheckThread implements Runnable {
     private static final long TIME_OUT = 120000;
 
     private long startTime;
-    private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
+    private DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
+    private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
     private NulsDigestData lastHash;
 
     public BlockCacheCheckThread() {
@@ -70,11 +77,14 @@ public class BlockCacheCheckThread implements Runnable {
             this.startTime = TimeService.currentTimeMillis();
         } else {
             boolean b = (TimeService.currentTimeMillis() - startTime) > TIME_OUT;
-            BlockMaintenanceThread maintenanceThread = BlockMaintenanceThread.getInstance();
-            if (b && maintenanceThread.getStatus() == MaintenanceStatus.SUCCESS || maintenanceThread.getStatus() == MaintenanceStatus.FAILED) {
+            if (b) {
                 this.startTime = TimeService.currentTimeMillis();
-                maintenanceThread.setStatus(MaintenanceStatus.READY);
-                Log.info("set maintenance status to Ready==========================================");
+                List<Node> nodeList = this.networkService.getAvailableNodes();
+                for(Node node:nodeList){
+                    this.networkService.removeNode(node.getId());
+                }
+                downloadService.reset();
+                Log.info("download service reset==========================================");
             }
         }
 

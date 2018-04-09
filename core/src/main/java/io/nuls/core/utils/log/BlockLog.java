@@ -282,7 +282,7 @@ public final class BlockLog {
             }
         }
         //todo
-        logTrace.append("\n::::::::::::::::::::::::::");
+        logTrace.append("\n===");
         return logTrace.toString();
     }
 
