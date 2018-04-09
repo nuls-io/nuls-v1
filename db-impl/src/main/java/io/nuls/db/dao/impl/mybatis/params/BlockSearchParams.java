@@ -69,7 +69,7 @@ public class BlockSearchParams extends Searchable {
         }
 
         if (params.containsKey(SEARCH_FIELD_ROUND_START)) {
-            this.addCondition(SEARCH_FIELD_ROUND, SearchOperator.gte, params.get(SEARCH_FIELD_ROUND_START));
+            this.addCondition(SEARCH_FIELD_ROUND, SearchOperator.gt, params.get(SEARCH_FIELD_ROUND_START));
         }
         if (params.containsKey(SEARCH_FIELD_ROUND_END)) {
             this.addCondition(SEARCH_FIELD_ROUND, SearchOperator.lte, params.get(SEARCH_FIELD_ROUND_END));

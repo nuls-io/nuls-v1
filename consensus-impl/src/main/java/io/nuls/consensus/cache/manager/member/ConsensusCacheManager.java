@@ -157,13 +157,7 @@ public class ConsensusCacheManager {
         }
     }
 
-    public void updateAgentStatusById(String agentId, ConsensusStatusEnum status, double creditVal) {
-        Consensus<Agent> agent = this.getAgentById(agentId);
-        if (agent == null) {
-            throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "the agent is not exist!:" + agentId);
-        }
-        agent.getExtend().setStatus(status.getCode());
-        agent.getExtend().setCreditVal(creditVal);
+    public void updateAgent(  Consensus<Agent> agent) {
         this.putAgent(agent);
     }
 

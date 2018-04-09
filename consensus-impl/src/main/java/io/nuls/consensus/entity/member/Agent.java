@@ -55,6 +55,8 @@ public class Agent extends BaseNulsData {
     private int status;
     private double creditVal;
 
+    private long totalDeposit;
+
     @Override
     public int size() {
         int size = 0;
@@ -158,5 +160,13 @@ public class Agent extends BaseNulsData {
 
     public double getCreditVal() {
         return creditVal;
+    }
+
+    public long getTotalDeposit() {
+        return totalDeposit;
+    }
+
+    public void setTotalDeposit(long totalDeposit) {
+        this.totalDeposit = totalDeposit;
     }
 }

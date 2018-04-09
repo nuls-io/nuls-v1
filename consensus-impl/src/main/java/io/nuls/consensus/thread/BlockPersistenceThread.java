@@ -24,15 +24,18 @@
 package io.nuls.consensus.thread;
 
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
+import io.nuls.consensus.constant.DownloadStatus;
 import io.nuls.consensus.constant.MaintenanceStatus;
 import io.nuls.consensus.manager.BlockManager;
 import io.nuls.consensus.manager.ConsensusManager;
 import io.nuls.consensus.service.intf.BlockService;
+import io.nuls.consensus.service.intf.DownloadService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
+import io.nuls.network.service.NetworkService;
 
 import java.io.IOException;
 
@@ -45,6 +48,7 @@ public class BlockPersistenceThread implements Runnable {
     private static final BlockPersistenceThread INSTANCE = new BlockPersistenceThread();
     private BlockManager blockManager = BlockManager.getInstance();
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
+    private DownloadService downloadService  = NulsContext.getServiceBean(DownloadService.class);
     private ConfirmingTxCacheManager txCacheManager = ConfirmingTxCacheManager.getInstance();
     private boolean running;
 
@@ -68,7 +72,7 @@ public class BlockPersistenceThread implements Runnable {
                     height = blockService.getLocalSavedHeight() + 1;
                 }
                 boolean success = blockManager.processingBifurcation(height);
-                if (success) {
+                if (success&&this.downloadService.getStatus()!= DownloadStatus.DOWNLOADING) {
                     doPersistence(height);
                 } else {
                     Thread.sleep(5000L);

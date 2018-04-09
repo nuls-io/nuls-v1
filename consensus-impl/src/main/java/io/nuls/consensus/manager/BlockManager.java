@@ -83,6 +83,8 @@ public class BlockManager {
 
     private LedgerService ledgerService;
 
+    private DownloadService downloadService;
+
     private BifurcateProcessor bifurcateProcessor = BifurcateProcessor.getInstance();
     private ConfirmingTxCacheManager confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
     private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
@@ -101,6 +103,7 @@ public class BlockManager {
     }
 
     public void init() {
+        downloadService = NulsContext.getServiceBean(DownloadService.class);
         ledgerService = NulsContext.getServiceBean(LedgerService.class);
     }
 
@@ -154,7 +157,6 @@ public class BlockManager {
         if (bifurcateProcessor.getChainSize() == 1) {
             try {
                 this.appravalBlock(block);
-                checkNextblock(block.getHeader().getHash().getDigestHex());
             } catch (Exception e) {
                 Log.error(e);
                 confirmingBlockCacheManager.removeBlock(block.getHeader().getHash().getDigestHex());
@@ -162,6 +164,7 @@ public class BlockManager {
                 return false;
             }
         }
+        checkNextblock(block.getHeader().getHash().getDigestHex());
 //        else {
 //            Block lastAppravedBlock = confirmingBlockCacheManager.getBlock(lastAppravedHash);
 //            if (null != lastAppravedBlock) {
@@ -177,6 +180,25 @@ public class BlockManager {
             if (header.getPreHash().getDigestHex().equals(block.getHeader().getHash())) {
                 Block nextBlock = blockCacheBuffer.getBlock(key);
                 this.addBlock(nextBlock, true, null);
+            }
+        }
+        if(downloadService.getStatus()==DownloadStatus.DOWNLOADING){
+            Block savingBlock = this.getBlock(block.getHeader().getHeight()-6);
+            if(null==savingBlock){
+                return true;
+            }
+            boolean isSuccess;
+            try {
+                isSuccess = blockService.saveBlock(block);
+            } catch (Exception e) {
+                Log.error(e);
+                ConsensusManager.getInstance().destroy();
+                NulsContext.getInstance().setBestBlock(blockService.getBlock(this.getStoredHeight()));
+                isSuccess = false;
+            }
+            if (isSuccess) {
+                this.storedBlock(block);
+                confirmingTxCacheManager.removeTxList(block.getTxHashList());
             }
         }
         return true;
