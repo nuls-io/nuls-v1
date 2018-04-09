@@ -212,6 +212,11 @@ public class BlockManager {
         if (preBlock == null) {
             if (this.downloadService.getStatus() != DownloadStatus.DOWNLOADING) {
                 preBlock = downloadUtils.getBlockByHash(block.getHeader().getPreHash().getDigestHex());
+                if(null==preBlock){
+                    BlockLog.info("=-=-=-=-=-=-=Request-Failed:"+(block.getHeader().getHeight()-1)+",hash:"+block.getHeader().getPreHash().getDigestHex());
+                }else{
+                    BlockLog.info("=-=-=-=-=-=-=Request-Success:"+(block.getHeader().getHeight()-1)+",hash:"+block.getHeader().getPreHash().getDigestHex());
+                }
             }
         }
         if(null!=preBlock){
