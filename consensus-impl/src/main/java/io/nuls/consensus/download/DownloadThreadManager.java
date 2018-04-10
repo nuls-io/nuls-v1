@@ -12,6 +12,7 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.NulsThreadFactory;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.calc.DoubleUtils;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.queue.service.impl.QueueService;
 import io.nuls.network.entity.Node;
 import io.nuls.network.entity.param.AbstractNetworkParam;
@@ -20,10 +21,7 @@ import io.nuls.network.service.NetworkService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.*;
 
 /**
  * Created by ln on 2018/4/8.
@@ -112,19 +110,26 @@ public class DownloadThreadManager implements Callable<Boolean> {
         }
 
         for (FutureTask<ResultMessage> task : futures) {
+            ResultMessage result = null;
             try {
-                ResultMessage result = task.get();
-
-                List<Block> blockList = result.getBlockList();
-                if (blockList == null || blockList.size() == 0) {
-                    blockList = retryDownload(executor, result);
-                }
-
-                for(Block block : blockList) {
-                    blockQueue.offer(queueName, block);
-                }
+                result = task.get();
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.error(e);
+            }
+            List<Block> blockList = null;
+
+            if(result == null || (blockList = result.getBlockList()) == null || blockList.size() == 0) {
+                blockList = retryDownload(executor, result);
+            }
+
+            if(blockList == null) {
+                executor.shutdown();
+                resetNetwork();
+                return false;
+            }
+
+            for(Block block : blockList) {
+                blockQueue.offer(queueName, block);
             }
         }
         executor.shutdown();
@@ -165,7 +170,13 @@ public class DownloadThreadManager implements Callable<Boolean> {
         FutureTask<ResultMessage> downloadThreadFuture = new FutureTask<ResultMessage>(downloadThread);
         executor.execute(new Thread(downloadThreadFuture));
 
-        return downloadThreadFuture.get().getBlockList();
+        List<Block> blockList = null;
+        try {
+            blockList = downloadThreadFuture.get().getBlockList();
+        } catch (Exception e) {
+            Log.error(e);
+        }
+        return blockList;
     }
 
     private boolean checkFirstBlock() throws NulsException {
