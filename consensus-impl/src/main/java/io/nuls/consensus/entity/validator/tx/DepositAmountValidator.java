@@ -60,7 +60,8 @@ public class DepositAmountValidator implements NulsDataValidator<PocJoinConsensu
     public ValidateResult validate(PocJoinConsensusTransaction data) {
         Na limit = PocConsensusConstant.ENTRUSTER_DEPOSIT_LOWER_LIMIT;
         Na max = PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT;
-        List<Consensus<Deposit>> list = consensusCacheManager.getDepositListByAgentId(data.getTxData().getExtend().getAgentHash(), NulsContext.getInstance().getBestHeight());
+        //+2原因：验证的交易可能属于a高度，从cache中获取它之前的抵押时，只能获取某个高度之前的，所以是当前最新高度a-1之后的第二个高度
+        List<Consensus<Deposit>> list = consensusCacheManager.getDepositListByAgentId(data.getTxData().getExtend().getAgentHash(), NulsContext.getInstance().getBestHeight()+2);
         if (list == null) {
             return ValidateResult.getSuccessResult();
         }

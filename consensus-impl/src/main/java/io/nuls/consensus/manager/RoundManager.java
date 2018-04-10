@@ -178,7 +178,7 @@ public class RoundManager {
     }
 
     private PocMeetingRound calcRound(long startCalcHeight, long roundIndex, long startTIme, boolean updateCacheStatus) {
-        BlockLog.debug("++++++++calcRound:height:" + startCalcHeight + " ,index:" + roundIndex);
+        BlockLog.error("++++++++calcRound:height:" + startCalcHeight + " ,index:" + roundIndex);
         PocMeetingRound round = new PocMeetingRound();
         round.setIndex(roundIndex);
         round.setStartTime(startTIme);
@@ -291,7 +291,7 @@ public class RoundManager {
         PocMeetingRound round = ROUND_MAP.get(roundIndex);
         Block preRoundFirstBlock = null;
         BlockRoundData preRoundData = null;
-        if(BlockManager.getInstance().getStoredHeight()<(currentBlockHeader.getHeight()-PocConsensusConstant.CONFIRM_BLOCK_COUNT-1))
+        if(BlockManager.getInstance().getStoredHeight()<(currentBlockHeader.getHeight()-6))
         {
             Log.info("Round can't be calculated for the time being");
             return round;
@@ -357,9 +357,6 @@ public class RoundManager {
         } else {
             BlockLog.debug("calc new round:index:" + round.getIndex() + " ,preIndex:" + round.getPreRound().getIndex() + " , start:" + new Date(round.getStartTime())
                     + ", netTime:(" + new Date(TimeService.currentTimeMillis()).toString() + ") , members:\n :" + str);
-        }
-        if(round.getPreRound()!=null&&round.getStartTime()==round.getPreRound().getStartTime()){
-            System.out.println();
         }
         return round;
     }

@@ -135,8 +135,8 @@ public class BlockManager {
         if (verify) {
             ValidateResult result = block.verify();
 
-            if (canCache&&result.isFailed() && result.getErrorCode() != ErrorCode.ORPHAN_BLOCK && result.getErrorCode() != ErrorCode.ORPHAN_TX) {
-                Log.info("discard a block("+block.getHeader().getHeight()+","+block.getHeader().getHash()+") :" + result.getMessage());
+            if (canCache && result.isFailed() && result.getErrorCode() != ErrorCode.ORPHAN_BLOCK && result.getErrorCode() != ErrorCode.ORPHAN_TX) {
+                Log.info("discard a block(" + block.getHeader().getHeight() + "," + block.getHeader().getHash() + ") :" + result.getMessage());
                 return false;
             } else if (result.isFailed()) {
                 cacheBlockToBuffer(block);
@@ -183,10 +183,10 @@ public class BlockManager {
                 this.addBlock(nextBlock, true, null);
             }
         }
-        long savingHeight = block.getHeader().getHeight()-6;
-        if(this.downloadService.getStatus()==DownloadStatus.DOWNLOADING&&savingHeight>this.lastStoredHeader.getHeight()){
+        long savingHeight = block.getHeader().getHeight() - 6;
+        if (this.downloadService.getStatus() == DownloadStatus.DOWNLOADING && savingHeight > this.lastStoredHeader.getHeight()) {
             Block savingBlock = this.getBlock(savingHeight);
-            if(null==savingBlock){
+            if (null == savingBlock) {
                 return true;
             }
             boolean isSuccess;
@@ -213,14 +213,19 @@ public class BlockManager {
         if (preBlock == null) {
             if (this.downloadService.getStatus() != DownloadStatus.DOWNLOADING) {
                 preBlock = downloadUtils.getBlockByHash(block.getHeader().getPreHash().getDigestHex());
-                if(null==preBlock){
-                    BlockLog.debug("=-=-=-=-=-=-=Request-Failed:"+(block.getHeader().getHeight()-1)+",hash:"+block.getHeader().getPreHash().getDigestHex());
-                }else{
-                    BlockLog.debug("=-=-=-=-=-=-=Request-Success:"+(block.getHeader().getHeight()-1)+",hash:"+block.getHeader().getPreHash().getDigestHex());
+                if (null == preBlock) {
+                    BlockLog.debug("=-=-=-=-=-=-=Request-Failed:" + (block.getHeader().getHeight() - 1) + ",hash:" + block.getHeader().getPreHash().getDigestHex());
+                } else {
+                    BlockLog.debug("=-=-=-=-=-=-=Request-Success:" + (block.getHeader().getHeight() - 1) + ",hash:" + block.getHeader().getPreHash().getDigestHex());
                 }
             }
+        } else {
+            Block highestBlock = this.getHighestBlock();
+            if(null!=highestBlock){
+                this.checkNextblock(highestBlock.getHeader().getHash().getDigestHex());
+            }
         }
-        if(null!=preBlock){
+        if (null != preBlock) {
             this.addBlock(preBlock, true, null);
         }
     }

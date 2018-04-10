@@ -76,8 +76,17 @@ public class HeaderPackerValidator implements NulsDataValidator<BlockHeader> {
             }
         }
         PocMeetingRound round = roundManager.getRound(header,preBlockRoundData.getRoundIndex(), roundData.getRoundIndex(), true);
+
         if (null == round) {
             return ValidateResult.getFailedResult(ErrorCode.ORPHAN_BLOCK, "round is null");
+        }
+        PocMeetingRound roundTmp;
+        for (long r = round.getIndex(); r>100; r --){
+            roundTmp = round;
+            if(roundTmp.getIndex() - 1 != roundTmp.getPreRound().getIndex() && roundTmp.getPreRound().getIndex() != 1){
+                System.out.println("Round ERROR!!!!!!!!!!!!!!!!!!!!!");
+            }
+            roundTmp = roundTmp.getPreRound();
         }
         if (round.getStartTime() != roundData.getRoundStartTime()) {
             return ValidateResult.getFailedResult("round start time is not inconsistent!");
@@ -91,7 +100,6 @@ public class HeaderPackerValidator implements NulsDataValidator<BlockHeader> {
         }
         return ValidateResult.getSuccessResult();
     }
-
     public BlockService getBlockService() {
         if (null == blockService) {
             blockService = NulsContext.getServiceBean(BlockService.class);
