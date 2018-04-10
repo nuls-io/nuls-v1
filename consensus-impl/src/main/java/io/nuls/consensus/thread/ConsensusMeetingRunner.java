@@ -188,7 +188,7 @@ public class ConsensusMeetingRunner implements Runnable {
             }
             //todo info to debug
             Log.info("produce block:" + newBlock.getHeader().getHash() + ",\nheight(" + newBlock.getHeader().getHeight() + "),round(" + round.getIndex() + "),index(" + self.getPackingIndexOfRound() + "),roundStart:" + round.getStartTime());
-            BlockLog.info("produce block height:" + newBlock.getHeader().getHeight() + ", preHash:" + newBlock.getHeader().getPreHash() + " , hash:" + newBlock.getHeader().getHash() + ", address:" + Address.fromHashs(newBlock.getHeader().getPackingAddress()));
+            BlockLog.debug("produce block height:" + newBlock.getHeader().getHeight() + ", preHash:" + newBlock.getHeader().getPreHash() + " , hash:" + newBlock.getHeader().getHash() + ", address:" + Address.fromHashs(newBlock.getHeader().getPackingAddress()));
             broadcastSmallBlock(newBlock);
 
         } catch (NulsException e) {
@@ -273,7 +273,7 @@ public class ConsensusMeetingRunner implements Runnable {
         event.setEventBody(smallBlock);
         List<String> nodeIdList = eventBroadcaster.broadcastAndCache(event, false);
         for (String nodeId : nodeIdList) {
-            BlockLog.info("send block height:" + block.getHeader().getHeight() + ", node:" + nodeId);
+            BlockLog.debug("send block height:" + block.getHeader().getHeight() + ", node:" + nodeId);
         }
         PackedBlockNotice notice = new PackedBlockNotice();
         notice.setEventBody(block.getHeader());
@@ -356,7 +356,7 @@ public class ConsensusMeetingRunner implements Runnable {
         str.append(" ,order:" + self.getPackingIndexOfRound());
         str.append(",packTime:" + new Date(self.getPackEndTime()));
         str.append("\n");
-        BlockLog.info("pack round:" + str);
+        BlockLog.debug("pack round:" + str);
 
 
         bd.setRoundData(roundData);

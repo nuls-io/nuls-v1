@@ -101,9 +101,9 @@ public class BifurcateProcessor {
                 }
             }
         }
-        BlockLog.info(str.toString());
+        BlockLog.debug(str.toString());
         if(null==longestChain){
-            BlockLog.info("the longest chain not found!");
+            BlockLog.debug("the longest chain not found!");
             return;
         }
         if ( this.approvingChain != null && !this.approvingChain.getId().equals(longestChain.getId())) {

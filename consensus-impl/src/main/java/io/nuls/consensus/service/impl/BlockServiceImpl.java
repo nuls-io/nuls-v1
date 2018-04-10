@@ -154,7 +154,7 @@ public class BlockServiceImpl implements BlockService {
     @Override
     @DbSession
     public boolean saveBlock(Block block) throws IOException {
-        BlockLog.info("save block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()));
+        BlockLog.debug("save block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()));
         ValidateResult result = block.verify();
         boolean b = false;
         if (result.isFailed() && result.getErrorCode() != ErrorCode.ORPHAN_TX && ErrorCode.ORPHAN_BLOCK != result.getErrorCode()) {
@@ -165,7 +165,7 @@ public class BlockServiceImpl implements BlockService {
         for (int x = 0; x < block.getHeader().getTxCount(); x++) {
             Transaction tx = block.getTxs().get(x);
             tx.setBlockHeight(block.getHeader().getHeight());
-            if (tx.getStatus() == TxStatusEnum.CACHED) {
+            if (tx.getStatus()==null||tx.getStatus() == TxStatusEnum.CACHED) {
                 b = true;
                 try {
                     ledgerService.approvalTx(tx);

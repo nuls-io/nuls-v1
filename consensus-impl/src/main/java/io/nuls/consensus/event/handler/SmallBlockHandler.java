@@ -79,7 +79,7 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
             return;
         }
         BlockHeader header = smallBlock.getHeader();
-        BlockLog.info("recieve new block from(" + fromId + "), tx count : " + header.getTxCount() + " , tx pool count : " + ReceivedTxCacheManager.getInstance().getTxList().size() + " - " + OrphanTxCacheManager.getInstance().getTxList().size() + " , header height:" + header.getHeight() + ", preHash:" + header.getPreHash() + " , hash:" + header.getHash() + ", address:" + Address.fromHashs(header.getPackingAddress()));
+        BlockLog.debug("recieve new block from(" + fromId + "), tx count : " + header.getTxCount() + " , tx pool count : " + ReceivedTxCacheManager.getInstance().getTxList().size() + " - " + OrphanTxCacheManager.getInstance().getTxList().size() + " , header height:" + header.getHeight() + ", preHash:" + header.getPreHash() + " , hash:" + header.getHash() + ", address:" + Address.fromHashs(header.getPackingAddress()));
 
         Block theBlock = blockManager.getBlock(header.getHash().getDigestHex());
         if (null != theBlock) {
@@ -95,7 +95,7 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
         ValidateResult result = header.verify();
         boolean isOrphan = result.getErrorCode() == ErrorCode.ORPHAN_TX || result.getErrorCode() == ErrorCode.ORPHAN_BLOCK;
 
-        BlockLog.info("verify block result: " + result.isSuccess() + " , verify message : " + result.getMessage() + " , isOrphan : " + isOrphan);
+        BlockLog.debug("verify block result: " + result.isSuccess() + " , verify message : " + result.getMessage() + " , isOrphan : " + isOrphan);
 
         if (result.isFailed() && (!isOrphan || (NulsContext.getInstance().getBestHeight() - header.getHeight()) > PocConsensusConstant.CONFIRM_BLOCK_COUNT)) {
             BlockLog.warn("discard a SmallBlock:" + smallBlock.getHeader().getHash() + ", from:" + fromId + " ,reason:" + result.getMessage());
@@ -139,7 +139,7 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
             newBlockEvent.setEventBody(smallBlock);
             List<String> addressList = eventBroadcaster.broadcastHashAndCache(newBlockEvent, false, fromId);
             for (String address : addressList) {
-                BlockLog.info("forward blockHeader:(" + address + ")" + header.getHeight() + ", hash:" + header.getHash() + ", preHash:" + header.getPreHash() + ", packing:" + Address.fromHashs(header.getPackingAddress()));
+                BlockLog.debug("forward blockHeader:(" + address + ")" + header.getHeight() + ", hash:" + header.getHash() + ", preHash:" + header.getPreHash() + ", packing:" + Address.fromHashs(header.getPackingAddress()));
             }
         }
 

@@ -9,6 +9,7 @@ import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.log.BlockLog;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Node;
@@ -35,7 +36,11 @@ public class DownloadUtils {
             throw new NulsRuntimeException(ErrorCode.NET_NODE_NOT_FOUND);
         }
         Node node = nodes.get(new Random().nextInt(nodes.size()));
-        return getBlockByHash(hash, node);
+        Block block = getBlockByHash(hash, node);
+        if (block == null) {
+            BlockLog.debug("get Block failed hash:" + hash + " , form:" + node.getId());
+        }
+        return block;
     }
 
     public Block getBlockByHash(String hash, Node node) {
@@ -89,7 +94,7 @@ public class DownloadUtils {
                 throw e;
             }
             if (null == response || response.getHashList() == null || response.getHashList().size() != size) {
-                Log.warn("get blocks hashList({}-{}) failed:" + node.getId(),startHeight,size);
+                Log.warn("get blocks hashList({}-{}) failed:" + node.getId(), startHeight, size);
                 return resultList;
             }
             GetBlockRequest request = new GetBlockRequest(startHeight, (long) size,

@@ -109,7 +109,7 @@ public class BlockConsensusValidator implements NulsDataValidator<Block> {
     }
 
     private ValidateResult checkYellowPunishTx(Block newBlock, BlockRoundData roundData, Block preBlock, PocMeetingMember member, PocMeetingRound round) {
-        BlockLog.info("validate yellow punish tx("+newBlock.getHeader().getHeight()+")--"+round.toString());
+//        BlockLog.debug("validate yellow punish tx("+newBlock.getHeader().getHeight()+")--"+round.toString());
         YellowPunishTransaction yellowPunishTx = null;
         for (Transaction tx : newBlock.getTxs()) {
             if (tx.getType() == TransactionConstant.TX_TYPE_YELLOW_PUNISH) {
