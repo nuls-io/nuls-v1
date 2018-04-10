@@ -80,14 +80,16 @@ public class DownloadUtils {
             if (!hashesResult.isSuccess()) {
                 return resultList;
             }
-            BlockHashResponse response ;
+            BlockHashResponse response;
             try {
                 response = hashesFuture.get(20L, TimeUnit.SECONDS);
             } catch (Exception e) {
+                Log.error(node.getId() + ",start:" + startHeight + " , size:" + size);
                 Log.error(e);
                 throw e;
             }
             if (null == response || response.getHashList() == null || response.getHashList().size() != size) {
+                Log.warn("get blocks hashList({}-{}) failed:" + node.getId(),startHeight,size);
                 return resultList;
             }
             GetBlockRequest request = new GetBlockRequest(startHeight, (long) size,
@@ -106,10 +108,11 @@ public class DownloadUtils {
                     Block block = future.get(30L, TimeUnit.SECONDS);
                     if (block != null) {
                         resultList.add(block);
-                    }else{
+                    } else {
                         return resultList;
                     }
                 } catch (Exception e) {
+                    Log.error(node.getId() + ",start:" + startHeight + " , size:" + size);
                     Log.error(e);
                     throw e;
                 }

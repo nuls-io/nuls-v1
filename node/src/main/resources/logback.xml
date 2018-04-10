@@ -82,7 +82,7 @@
     <logger name="msgLog" level="ERROR" additivity="false">
         <appender-ref ref="MSG_FILE"/>
     </logger>
-    <logger name="io.nuls.core.utils.log.Log" level="ERROR" additivity="false">
+    <logger name="Log" level="ERROR" additivity="false">
         <appender-ref ref="ERROR_FILE"></appender-ref>
     </logger>
     <logger name="blockLog" level="INFO" additivity="false">

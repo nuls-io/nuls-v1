@@ -52,7 +52,7 @@ public class BlockHeaderChain implements NulsCloneable {
         if (index == -1) {
             return new BlockHeaderChain();
         }
-        List<HeaderDigest> list = headerDigestList.subList(0, index);
+        List<HeaderDigest> list = new CopyOnWriteArrayList<>(headerDigestList.subList(0, index));
         list.add(new HeaderDigest(header.getHash().getDigestHex(), header.getHeight(), header.getTime()));
         BlockHeaderChain chain = new BlockHeaderChain();
         chain.setHeaderDigestList(list);
@@ -204,6 +204,10 @@ public class BlockHeaderChain implements NulsCloneable {
     }
 
     public HeaderDigest getLastHd() {
+        if(null==lastHd){
+            List<HeaderDigest> list = new ArrayList<>(headerDigestList);
+            this.lastHd = list.get(list.size()-1);
+        }
         return lastHd;
     }
 }

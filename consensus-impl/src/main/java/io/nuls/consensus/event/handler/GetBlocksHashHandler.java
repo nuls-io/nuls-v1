@@ -23,9 +23,12 @@
  */
 package io.nuls.consensus.event.handler;
 
+import io.nuls.consensus.constant.NotFoundType;
 import io.nuls.consensus.entity.BlockHashResponse;
+import io.nuls.consensus.entity.NotFound;
 import io.nuls.consensus.event.BlocksHashEvent;
 import io.nuls.consensus.event.GetBlocksHashRequest;
+import io.nuls.consensus.event.NotFoundEvent;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
@@ -57,7 +60,9 @@ public class GetBlocksHashHandler extends AbstractEventHandler<GetBlocksHashRequ
         }
         long end = event.getEventBody().getStart() + event.getEventBody().getSize() - 1;
         if (end > NulsContext.getInstance().getBestBlock().getHeader().getHeight()) {
-            //todo NOT-FOUND
+            NotFoundEvent notFoundEvent  = new NotFoundEvent();
+            notFoundEvent.setEventBody(new NotFound(NotFoundType.HASHES,event.getHash()));
+            this.eventBroadcaster.sendToNode(notFoundEvent,fromId);
             return;
         }
         BlockHashResponse response = new BlockHashResponse();
