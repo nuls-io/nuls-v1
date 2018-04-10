@@ -291,7 +291,7 @@ public class RoundManager {
         PocMeetingRound round = ROUND_MAP.get(roundIndex);
         Block preRoundFirstBlock = null;
         BlockRoundData preRoundData = null;
-        if(BlockManager.getInstance().getStoredHeight()<(currentBlockHeader.getHeight()-6))
+        if(BlockManager.getInstance().getStoredHeight()<(currentBlockHeader.getHeight()-PocConsensusConstant.CONFIRM_BLOCK_COUNT-1))
         {
             Log.info("Round can't be calculated for the time being");
             return round;
