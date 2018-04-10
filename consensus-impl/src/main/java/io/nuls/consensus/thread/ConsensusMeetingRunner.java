@@ -313,6 +313,8 @@ public class ConsensusMeetingRunner implements Runnable {
             }
         }
 
+        packingRoundManager.clear();
+
         //read create new meeting round
         resetCurrentMeetingRound();
     }

@@ -171,7 +171,7 @@ public class RoundManager {
     }
 
     private PocMeetingRound calcRound(long startCalcHeight, long roundIndex, long startTIme, boolean updateCacheStatus) {
-        BlockLog.error("++++++++calcRound:height:" + startCalcHeight + " ,index:" + roundIndex);
+        //BlockLog.error("++++++++calcRound:height:" + startCalcHeight + " ,index:" + roundIndex);
         PocMeetingRound round = new PocMeetingRound();
         round.setIndex(roundIndex);
         round.setStartTime(startTIme);
@@ -354,5 +354,9 @@ public class RoundManager {
                     + ", netTime:(" + new Date(TimeService.currentTimeMillis()).toString() + ") , members:\n :" + str);
         }
         return round;
+    }
+
+    public void clear() {
+        ROUND_MAP.clear();
     }
 }
