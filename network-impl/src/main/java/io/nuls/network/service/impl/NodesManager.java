@@ -398,7 +398,13 @@ public class NodesManager implements Runnable {
             }
 
             //unConnectNodes untime try to connect
+            int count = 0;
             for (Node node : disConnectNodes.values()) {
+                count++;
+                if (count > 10) {
+                    removeNode(node.getId());
+                    continue;
+                }
                 if (node.getType() == Node.OUT && node.getStatus() == Node.CLOSE) {
                     if (node.getLastFailTime() < TimeService.currentTimeMillis() || isSeedNode(node.getIp())) {
                         connectionManager.connectionNode(node);
