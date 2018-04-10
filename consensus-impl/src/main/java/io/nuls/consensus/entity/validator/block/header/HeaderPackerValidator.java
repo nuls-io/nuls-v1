@@ -75,7 +75,7 @@ public class HeaderPackerValidator implements NulsDataValidator<BlockHeader> {
                 break;
             }
         }
-        PocMeetingRound round = roundManager.getRound(preBlockRoundData.getRoundIndex(), roundData.getRoundIndex(), true);
+        PocMeetingRound round = roundManager.getRound(header,preBlockRoundData.getRoundIndex(), roundData.getRoundIndex(), true);
         if (null == round) {
             return ValidateResult.getFailedResult(ErrorCode.ORPHAN_BLOCK, "round is null");
         }

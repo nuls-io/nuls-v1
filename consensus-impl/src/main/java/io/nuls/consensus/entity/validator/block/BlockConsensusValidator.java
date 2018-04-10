@@ -86,9 +86,9 @@ public class BlockConsensusValidator implements NulsDataValidator<Block> {
                 break;
             }
         }
-        PocMeetingRound round = roundManager.getRound(preBlockRoundData.getRoundIndex(), roundData.getRoundIndex(), true);
+        PocMeetingRound round = roundManager.getRound(block.getHeader(),preBlockRoundData.getRoundIndex(), roundData.getRoundIndex(), true);
         if (null == round) {
-            return ValidateResult.getFailedResult(ErrorCode.ORPHAN_BLOCK, "round is null");
+            return ValidateResult.getFailedResult(ErrorCode.ORPHAN_BLOCK, "Round can't be calculated for the time being!");
         }
         Block preBlock = getBlockService().getBlock(block.getHeader().getPreHash().getDigestHex());
         if (null == preBlock) {

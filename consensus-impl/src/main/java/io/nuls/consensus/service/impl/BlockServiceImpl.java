@@ -213,7 +213,7 @@ public class BlockServiceImpl implements BlockService {
         this.rollback(block.getTxs(), block.getTxs().size() - 1);
         this.ledgerService.deleteTx(block.getHeader().getHeight());
         blockStorageService.delete(block.getHeader().getHash().getDigestHex());
-        NulsContext.getInstance().setBestBlock(getHighestBlock());
+        NulsContext.getInstance().setBestBlock(this.getBestBlock());
     }
 
 
@@ -262,18 +262,21 @@ public class BlockServiceImpl implements BlockService {
             String hashHex = resultBlock.getHeader().getPreHash().getDigestHex();
             while (true) {
                 BlockRoundData roundData = new BlockRoundData(resultBlock.getHeader().getExtend());
-
                 if (roundData.getRoundIndex() == roundIndex && roundData.getPackingIndexOfRound() == 1) {
                     break;
                 }
                 if (roundData.getRoundIndex() < roundIndex) {
-                    resultBlock = preResultBlock;
+                    if (null != preResultBlock) {
+                        resultBlock = preResultBlock;
+                    }
                     break;
                 }
                 if (resultBlock.getHeader().getHeight() == 0) {
                     return resultBlock;
                 }
-                preResultBlock = resultBlock;
+                if (roundData.getRoundIndex() <= roundIndex) {
+                    preResultBlock = resultBlock;
+                }
                 resultBlock = getBlock(hashHex);
                 if (null == resultBlock) {
                     throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "The block shouldn't be null");
@@ -299,15 +302,6 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public Block getBestBlock() {
-        Block block = NulsContext.getInstance().getBestBlock();
-        Block highestBlock = BlockManager.getInstance().getHighestBlock();
-        if (null != highestBlock && highestBlock.getHeader().getHeight() > block.getHeader().getHeight()) {
-            return highestBlock;
-        }
-        return block;
-    }
-
-    public Block getHighestBlock() {
         Block highestBlock = BlockManager.getInstance().getHighestBlock();
         if (null == highestBlock) {
             highestBlock = this.getLocalBestBlock();

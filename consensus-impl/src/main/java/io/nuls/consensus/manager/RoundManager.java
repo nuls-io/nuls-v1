@@ -15,6 +15,7 @@ import io.nuls.consensus.entity.member.Deposit;
 import io.nuls.consensus.service.impl.PocBlockService;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
+import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.calc.DoubleUtils;
 import io.nuls.core.utils.date.TimeService;
@@ -285,10 +286,16 @@ public class RoundManager {
         return block;
     }
 
-    public PocMeetingRound getRound(long preRoundIndex, long roundIndex, boolean needPreRound) {
+    public PocMeetingRound getRound(BlockHeader currentBlockHeader , long preRoundIndex, long roundIndex, boolean needPreRound) {
+
         PocMeetingRound round = ROUND_MAP.get(roundIndex);
         Block preRoundFirstBlock = null;
         BlockRoundData preRoundData = null;
+        if(BlockManager.getInstance().getStoredHeight()<(currentBlockHeader.getHeight()-6))
+        {
+            Log.info("Round can't be calculated for the time being");
+            return round;
+        }
         if (null == round) {
             Block bestBlock = getBestBlock();
             BlockRoundData nowRoundData = new BlockRoundData(bestBlock.getHeader().getExtend());
@@ -334,7 +341,7 @@ public class RoundManager {
             }
             BlockRoundData preBlockRoundData = new BlockRoundData(preblock.getHeader().getExtend());
 
-            round.setPreRound(getRound(preBlockRoundData.getRoundIndex(), preRoundIndex, false));
+            round.setPreRound(getRound(currentBlockHeader,preBlockRoundData.getRoundIndex(), preRoundIndex, false));
         }
         StringBuilder str = new StringBuilder();
         for (PocMeetingMember member : round.getMemberList()) {
@@ -350,6 +357,9 @@ public class RoundManager {
         } else {
             BlockLog.debug("calc new round:index:" + round.getIndex() + " ,preIndex:" + round.getPreRound().getIndex() + " , start:" + new Date(round.getStartTime())
                     + ", netTime:(" + new Date(TimeService.currentTimeMillis()).toString() + ") , members:\n :" + str);
+        }
+        if(round.getPreRound()!=null&&round.getStartTime()==round.getPreRound().getStartTime()){
+            System.out.println();
         }
         return round;
     }
