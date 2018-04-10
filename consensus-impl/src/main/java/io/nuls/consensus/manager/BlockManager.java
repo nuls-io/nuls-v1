@@ -306,8 +306,8 @@ public class BlockManager {
         if (!result) {
             return false;
         }
-        this.rollbackAppraval(block);
         this.bifurcateProcessor.rollbackHash(hash);
+        this.rollbackAppraval(block);
         confirmingBlockCacheManager.removeBlock(block.getHeader().getHash().getDigestHex());
         return true;
     }
