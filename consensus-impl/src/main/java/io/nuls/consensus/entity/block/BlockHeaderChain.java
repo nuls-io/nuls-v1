@@ -208,7 +208,9 @@ public class BlockHeaderChain implements NulsCloneable {
     public HeaderDigest getLastHd() {
         if (null == lastHd) {
             List<HeaderDigest> list = new ArrayList<>(headerDigestList);
-            this.lastHd = list.get(list.size() - 1);
+            if(list.size() > 0) {
+                this.lastHd = list.get(list.size() - 1);
+            }
         }
         return lastHd;
     }
