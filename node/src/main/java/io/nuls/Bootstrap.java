@@ -69,7 +69,7 @@ public class Bootstrap {
                 Log.error(e);
             }
             if (null != NulsContext.getInstance().getBestBlock()) {
-                Log.info("node count : " + NulsContext.getServiceBean(NetworkService.class).getAvailableNodes().size() + "height:(" + NulsContext.getInstance().getBestBlock().getHeader().getHeight() + "),threadCount:{}", Thread.activeCount());
+                Log.info("node count:" + NulsContext.getServiceBean(NetworkService.class).getAvailableNodes().size() + ", height:(" + NulsContext.getInstance().getBestBlock().getHeader().getHeight() + "), threadCount:{}", Thread.activeCount());
             }
         }
     }
