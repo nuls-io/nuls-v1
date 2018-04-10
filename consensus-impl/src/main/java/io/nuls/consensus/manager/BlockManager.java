@@ -54,13 +54,18 @@ import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.thread.manager.NulsThreadFactory;
+import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.BlockLog;
 import io.nuls.core.utils.log.Log;
+import io.nuls.core.utils.queue.manager.QueueManager;
+import io.nuls.core.utils.queue.thread.StatusLogThread;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.service.intf.LedgerService;
@@ -68,6 +73,8 @@ import io.nuls.ledger.service.intf.LedgerService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Niels
@@ -104,6 +111,58 @@ public class BlockManager {
     public void init() {
         ledgerService = NulsContext.getServiceBean(LedgerService.class);
         this.downloadService = NulsContext.getServiceBean(DownloadService.class);
+
+        ScheduledExecutorService service = TaskManager.createScheduledThreadPool(new NulsThreadFactory(NulsConstant.MODULE_ID_CONSENSUS, "block-check-next-worker"));
+        service.scheduleAtFixedRate(new Runnable() {
+
+            private int count = 0;
+
+            @Override
+            public void run() {
+                try {
+                    checkNext();
+                } catch (Exception e) {
+                    Log.error(e);
+                }
+                try {
+                    checkPre();
+                } catch (Exception e) {
+                    Log.error(e);
+                }
+            }
+
+            private void checkPre() {
+                List<BlockHeader> headers = new ArrayList<>(blockCacheBuffer.getHeaderCacheMap().values());
+                for (BlockHeader header : headers) {
+                    String hash = header.getPreHash().getDigestHex();
+                    if (!blockCacheBuffer.getHeaderCacheMap().containsKey(hash) ||
+                            !confirmingBlockCacheManager.getHeaderCacheMap().containsKey(hash)) {
+                        Block preBlock = null;
+                        int count = 0;
+                        while (preBlock == null && count < 3) {
+                            count++;
+                            preBlock = downloadUtils.getBlockByHash(header.getPreHash().getDigestHex());
+                        }
+                        addBlock(preBlock, true, null);
+                    }
+                }
+            }
+
+            private void checkNext() {
+                while (count++ < 1000) {
+                    Block bestBlock = BlockManager.this.getHighestBlock();
+                    if (null == bestBlock) {
+                        return;
+                    }
+                    boolean b = checkNextblock(bestBlock.getHeader().getHash().getDigestHex());
+                    if (!b) {
+                        break;
+                    }
+                }
+            }
+        }, 60, 2, TimeUnit.SECONDS);
+
+
     }
 
     public boolean addBlock(Block block, boolean verify, String nodeId) {
@@ -165,7 +224,6 @@ public class BlockManager {
                 return false;
             }
         }
-        checkNextblock(block.getHeader().getHash().getDigestHex());
 //        else {
 //            Block lastAppravedBlock = confirmingBlockCacheManager.getBlock(lastAppravedHash);
 //            if (null != lastAppravedBlock) {
@@ -219,11 +277,6 @@ public class BlockManager {
                     BlockLog.debug("=-=-=-=-=-=-=Request-Success:" + (block.getHeader().getHeight() - 1) + ",hash:" + block.getHeader().getPreHash().getDigestHex());
                 }
             }
-        } else {
-            Block highestBlock = this.getHighestBlock();
-            if(null!=highestBlock){
-                this.checkNextblock(highestBlock.getHeader().getHash().getDigestHex());
-            }
         }
         if (null != preBlock) {
             this.addBlock(preBlock, true, null);
@@ -244,11 +297,11 @@ public class BlockManager {
                     Log.error(e);
                     throw new NulsRuntimeException(e);
                 }
-            } else if (tx.getType() == TransactionConstant.TX_TYPE_REGISTER_AGENT) {
+            } else if (tx.getType() == TransactionConstant.TX_TYPE_REGISTER_AGENT && ledgerService.checkTxIsMine(tx)) {
                 NulsContext.getServiceBean(RegisterAgentTxService.class).onApproval((RegisterAgentTransaction) tx);
-            } else if (tx.getType() == TransactionConstant.TX_TYPE_JOIN_CONSENSUS) {
+            } else if (tx.getType() == TransactionConstant.TX_TYPE_JOIN_CONSENSUS && ledgerService.checkTxIsMine(tx)) {
                 NulsContext.getServiceBean(JoinConsensusTxService.class).onApproval((PocJoinConsensusTransaction) tx);
-            } else if (tx.getType() == TransactionConstant.TX_TYPE_EXIT_CONSENSUS) {
+            } else if (tx.getType() == TransactionConstant.TX_TYPE_EXIT_CONSENSUS && ledgerService.checkTxIsMine(tx)) {
                 NulsContext.getServiceBean(ExitConsensusTxService.class).onApproval((PocExitConsensusTransaction) tx);
             }
             confirmingTxCacheManager.putTx(tx);
@@ -318,19 +371,22 @@ public class BlockManager {
     }
 
 
-    private void checkNextblock(String hash) {
+    private boolean checkNextblock(String hash) {
         Set<String> nextHashSet = blockCacheBuffer.getNextHash(hash);
         if (null == nextHashSet || nextHashSet.isEmpty()) {
-            return;
+            return false;
         }
+        boolean b = false;
         for (String nextHash : nextHashSet) {
             Block block = blockCacheBuffer.getBlock(nextHash);
             if (null == block) {
-                return;
+                return false;
             }
             blockCacheBuffer.removeBlock(nextHash);
             this.addBlock(block, true, null);
+            b = true;
         }
+        return b;
     }
 
     public long getStoredHeight() {

@@ -80,6 +80,9 @@ public class HeaderPackerValidator implements NulsDataValidator<BlockHeader> {
         if (null == round) {
             return ValidateResult.getFailedResult(ErrorCode.ORPHAN_BLOCK, "round is null");
         }
+        if(round.getPreRound().getIndex()!=preBlockRoundData.getRoundIndex()){
+            System.out.println();
+        }
         if (round.getStartTime() != roundData.getRoundStartTime()) {
             return ValidateResult.getFailedResult("round start time is not inconsistent!");
         }

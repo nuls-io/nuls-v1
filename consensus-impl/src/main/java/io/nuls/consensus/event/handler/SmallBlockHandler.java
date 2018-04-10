@@ -81,10 +81,10 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
         BlockHeader header = smallBlock.getHeader();
         BlockLog.debug("recieve new block from(" + fromId + "), tx count : " + header.getTxCount() + " , tx pool count : " + ReceivedTxCacheManager.getInstance().getTxList().size() + " - " + OrphanTxCacheManager.getInstance().getTxList().size() + " , header height:" + header.getHeight() + ", preHash:" + header.getPreHash() + " , hash:" + header.getHash() + ", address:" + Address.fromHashs(header.getPackingAddress()));
 
-        Block theBlock = blockManager.getBlock(header.getHash().getDigestHex());
-        if (null != theBlock) {
-            return;
-        }
+//        Block theBlock = blockManager.getBlock(header.getHash().getDigestHex());
+//        if (null != theBlock) {
+//            return;
+//        }
 
         //todo checkIt
         if ((TimeService.currentTimeMillis() - header.getTime()) > PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000L) {

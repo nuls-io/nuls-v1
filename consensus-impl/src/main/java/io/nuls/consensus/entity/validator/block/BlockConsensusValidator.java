@@ -90,6 +90,9 @@ public class BlockConsensusValidator implements NulsDataValidator<Block> {
         if (null == round) {
             return ValidateResult.getFailedResult(ErrorCode.ORPHAN_BLOCK, "Round can't be calculated for the time being!");
         }
+        if(round.getPreRound().getIndex()!=preBlockRoundData.getRoundIndex()){
+            System.out.println();
+        }
         Block preBlock = getBlockService().getBlock(block.getHeader().getPreHash().getDigestHex());
         if (null == preBlock) {
             return ValidateResult.getFailedResult(ErrorCode.ORPHAN_BLOCK);

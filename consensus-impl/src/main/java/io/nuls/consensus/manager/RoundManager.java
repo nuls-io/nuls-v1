@@ -51,7 +51,6 @@ public class RoundManager {
     private BlockService consensusBlockService;
     private PocMeetingRound currentRound;
 
-    private Lock lock = new ReentrantLock();
 
     public void init() {
         //load five(CACHE_COUNT) round from db on the start time ;
@@ -81,49 +80,48 @@ public class RoundManager {
     }
 
     public PocMeetingRound getRoundByBlock(Block currentBlock) {
-        lock.lock();
-        try {
-            BlockRoundData currentRoundData = new BlockRoundData(currentBlock.getHeader().getExtend());
-            boolean needCalcRound = false;
-            do {
-                if (null == currentRound) {
-                    needCalcRound = true;
-                    break;
-                }
-                if (currentRound.getEndTime() <= TimeService.currentTimeMillis()) {
-                    needCalcRound = true;
-                    break;
-                }
-                boolean thisIsLastBlockOfRound = currentRoundData.getPackingIndexOfRound() == currentRoundData.getConsensusMemberCount();
-                if (currentRound.getIndex() == currentRoundData.getRoundIndex() && !thisIsLastBlockOfRound) {
-                    needCalcRound = false;
-                    break;
-                }
-                if (currentRound.getIndex() == (currentRoundData.getRoundIndex() + 1) && thisIsLastBlockOfRound) {
-                    needCalcRound = false;
-                    break;
-                }
+        BlockRoundData currentRoundData = new BlockRoundData(currentBlock.getHeader().getExtend());
+        boolean needCalcRound = false;
+        do {
+            if (null == currentRound) {
                 needCalcRound = true;
-            } while (false);
-            PocMeetingRound resultRound = null;
-            if (needCalcRound) {
-                resultRound = calcNextRound(currentBlock, currentRoundData, true);
-            } else {
-                resultRound = this.currentRound;
+                break;
             }
-
-            if (resultRound.getPreRound() == null) {
-                resultRound.setPreRound(ROUND_MAP.get(currentRoundData.getRoundIndex()));
+            if (currentRound.getEndTime() <= TimeService.currentTimeMillis()) {
+                needCalcRound = true;
+                break;
             }
-
-            List<Account> accountList = accountService.getAccountList();
-            resultRound.calcLocalPacker(accountList);
-            this.currentRound = resultRound;
-            ROUND_MAP.put(resultRound.getIndex(), resultRound);
-            return resultRound;
-        } finally {
-            lock.unlock();
+            boolean thisIsLastBlockOfRound = currentRoundData.getPackingIndexOfRound() == currentRoundData.getConsensusMemberCount();
+            if (currentRound.getIndex() == currentRoundData.getRoundIndex() && !thisIsLastBlockOfRound) {
+                needCalcRound = false;
+                break;
+            }
+            if (currentRound.getIndex() == (currentRoundData.getRoundIndex() + 1) && thisIsLastBlockOfRound) {
+                needCalcRound = false;
+                break;
+            }
+            needCalcRound = true;
+        } while (false);
+        PocMeetingRound resultRound = null;
+        if (needCalcRound) {
+            resultRound = calcNextRound(currentBlock, currentRoundData, true);
+            BlockLog.debug("calc NextRound:" + resultRound.getIndex() + ", preIndex:" + currentRoundData.getRoundIndex());
+        } else {
+            resultRound = this.currentRound;
         }
+        if(!this.getBestBlock().getHeader().getHash().equals(currentBlock.getHeader().getHash())){
+            return this.getRoundByBlock(this.getBestBlock());
+        }
+        if (resultRound.getPreRound() == null) {
+            resultRound.setPreRound(ROUND_MAP.get(currentRoundData.getRoundIndex()));
+        }
+
+        List<Account> accountList = accountService.getAccountList();
+        resultRound.calcLocalPacker(accountList);
+        this.currentRound = resultRound;
+        ROUND_MAP.put(resultRound.getIndex(), resultRound);
+        return resultRound;
+
     }
 
     private PocMeetingRound calcNextRound(Block calcBlock, BlockRoundData blockRoundData, boolean updateCacheStatus) {
@@ -133,11 +131,6 @@ public class RoundManager {
 //        }
         Block lastRoundFirstBlock = getBlockService().getPreRoundFirstBlock(blockRoundData.getRoundIndex());
         PocMeetingRound round = calcRound(lastRoundFirstBlock.getHeader().getHeight(), blockRoundData.getRoundIndex() + 1, blockRoundData.getRoundEndTime(), updateCacheStatus);
-
-        if (round.getStartTime() < TimeService.currentTimeMillis()) {
-
-
-        }
 
         boolean needCalcOrder = false;
         while (round.getEndTime() <= TimeService.currentTimeMillis()) {
@@ -286,13 +279,12 @@ public class RoundManager {
         return block;
     }
 
-    public PocMeetingRound getRound(BlockHeader currentBlockHeader , long preRoundIndex, long roundIndex, boolean needPreRound) {
+    public PocMeetingRound getRound(BlockHeader currentBlockHeader, long preRoundIndex, long roundIndex, boolean needPreRound) {
 
         PocMeetingRound round = ROUND_MAP.get(roundIndex);
         Block preRoundFirstBlock = null;
         BlockRoundData preRoundData = null;
-        if(BlockManager.getInstance().getStoredHeight()<(currentBlockHeader.getHeight()-PocConsensusConstant.CONFIRM_BLOCK_COUNT-1))
-        {
+        if (BlockManager.getInstance().getStoredHeight() < (currentBlockHeader.getHeight() - PocConsensusConstant.CONFIRM_BLOCK_COUNT - 1)) {
             Log.debug("Round can't be calculated for the time being");
             return null;
         }
@@ -340,8 +332,11 @@ public class RoundManager {
                 return null;
             }
             BlockRoundData preBlockRoundData = new BlockRoundData(preblock.getHeader().getExtend());
-
-            round.setPreRound(getRound(currentBlockHeader,preBlockRoundData.getRoundIndex(), preRoundIndex, false));
+            PocMeetingRound preRound = getRound(currentBlockHeader, preBlockRoundData.getRoundIndex(), preRoundIndex, false);
+            if (preRound.getIndex() != preRoundIndex && preRoundIndex > 1) {
+                System.out.println();
+            }
+            round.setPreRound(preRound);
         }
         StringBuilder str = new StringBuilder();
         for (PocMeetingMember member : round.getMemberList()) {

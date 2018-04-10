@@ -32,6 +32,8 @@ import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.consensus.constant.DownloadStatus;
 import io.nuls.consensus.constant.MaintenanceStatus;
 import io.nuls.consensus.constant.PocConsensusConstant;
+import io.nuls.consensus.download.DownloadProcessor;
+import io.nuls.consensus.download.NetworkNewestBlockInfos;
 import io.nuls.consensus.entity.RedPunishData;
 import io.nuls.consensus.entity.block.BlockData;
 import io.nuls.consensus.entity.block.BlockRoundData;
@@ -296,6 +298,9 @@ public class ConsensusMeetingRunner implements Runnable {
             return false;
         }
         return true;
+//        NetworkNewestBlockInfos infos = DownloadProcessor.getInstance().getNetworkNewestBlock();
+//        Block bestBlock = blockService.getBestBlock();
+//        return infos.getNetBestHeight()<= bestBlock.getHeader().getHeight();
     }
 
     private void waitReady() {

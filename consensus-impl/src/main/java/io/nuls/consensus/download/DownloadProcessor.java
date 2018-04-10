@@ -146,7 +146,7 @@ public class DownloadProcessor extends Thread {
         return infos;
     }
 
-    private NetworkNewestBlockInfos getNetworkNewestBlock() {
+    public NetworkNewestBlockInfos getNetworkNewestBlock() {
 
         List<Node> nodeList = networkService.getAvailableNodes();
 
