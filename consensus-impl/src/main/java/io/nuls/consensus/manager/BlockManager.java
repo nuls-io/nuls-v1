@@ -123,17 +123,7 @@ public class BlockManager {
             Log.info("discard block height:" + block.getHeader().getHeight() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()) + ",from:" + nodeId);
             return false;
         }
-        if (verify) {
-            ValidateResult result = block.verify();
 
-            if (result.isFailed() && result.getErrorCode() != ErrorCode.ORPHAN_BLOCK && result.getErrorCode() != ErrorCode.ORPHAN_TX) {
-                Log.info("discard a block("+block.getHeader().getHeight()+","+block.getHeader().getHash()+") :" + result.getMessage());
-                return false;
-            } else if (result.isFailed()) {
-                cacheBlockToBuffer(block);
-                return false;
-            }
-        }
         boolean success = false;
         boolean canCache = true;
         if (confirmingBlockCacheManager.getHeaderCacheMap().isEmpty() && !block.getHeader().getPreHash().getDigestHex().equals(NulsContext.getInstance().getBestBlock().getHeader().getHash().getDigestHex())) {
@@ -141,6 +131,17 @@ public class BlockManager {
         }
         if (!this.lastStoredHeader.getHash().equals(block.getHeader().getPreHash()) && !confirmingBlockCacheManager.getHeaderCacheMap().containsKey(block.getHeader().getPreHash().getDigestHex())) {
             canCache = false;
+        }
+        if (verify) {
+            ValidateResult result = block.verify();
+
+            if (canCache&&result.isFailed() && result.getErrorCode() != ErrorCode.ORPHAN_BLOCK && result.getErrorCode() != ErrorCode.ORPHAN_TX) {
+                Log.info("discard a block("+block.getHeader().getHeight()+","+block.getHeader().getHash()+") :" + result.getMessage());
+                return false;
+            } else if (result.isFailed()) {
+                cacheBlockToBuffer(block);
+                return false;
+            }
         }
         if (canCache) {
             success = confirmingBlockCacheManager.cacheBlock(block);

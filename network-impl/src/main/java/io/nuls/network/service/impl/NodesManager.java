@@ -380,9 +380,9 @@ public class NodesManager implements Runnable {
 
         while (running) {
 
-            for (Node node : connectedNodes.values()) {
-                System.out.println(node.toString());
-            }
+//            for (Node node : connectedNodes.values()) {
+//                System.out.println(node.toString());
+//            }
 
             // check the connectedNodes, if it is empty, try to connect seed node,
             // if connectedNode's count enough, closing the connection with the seed node

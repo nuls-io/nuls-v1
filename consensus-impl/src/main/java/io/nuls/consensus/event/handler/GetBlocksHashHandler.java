@@ -72,7 +72,7 @@ public class GetBlocksHashHandler extends AbstractEventHandler<GetBlocksHashRequ
             response.put(block.getHeader().getHeight(), block.getHeader().getHash());
         } else {
             List<BlockHeaderPo> list = this.blockService.getBlockHashList(event.getEventBody().getStart(), end);
-            long lastHeight = 0L;
+            long lastHeight = event.getEventBody().getStart();
             for (int i = 0; i < list.size(); i++) {
                 BlockHeaderPo po = list.get(i);
                 response.put(po.getHeight(), NulsDigestData.fromDigestHex(po.getHash()));

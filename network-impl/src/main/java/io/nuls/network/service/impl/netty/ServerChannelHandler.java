@@ -95,13 +95,11 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         String channelId = ctx.channel().id().asLongText();
         NioChannelMap.remove(channelId);
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-        System.out.println("---------------------- server channelInactive ------------------------- " + nodeId);
         Node node = getNetworkService().getNode(nodeId);
         if (node != null) {
             if (channelId.equals(node.getChannelId())) {
                 getNetworkService().removeNode(nodeId);
             } else {
-                System.out.println("--------------sever channel id different----------------------" + channelId + "," + node.getChannelId());
                 System.out.println("--------------sever channel id different----------------------" + channelId + "," + node.getChannelId());
             }
         }

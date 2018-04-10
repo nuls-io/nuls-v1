@@ -207,13 +207,13 @@ public class BlockServiceImpl implements BlockService {
             return;
         }
         boolean result = this.blockManager.rollback(block);
-        if(result){
+        if (result) {
             return;
         }
         this.rollback(block.getTxs(), block.getTxs().size() - 1);
         this.ledgerService.deleteTx(block.getHeader().getHeight());
         blockStorageService.delete(block.getHeader().getHash().getDigestHex());
-        NulsContext.getInstance().setBestBlock(getBlock(block.getHeader().getPreHash().getDigestHex()));
+        NulsContext.getInstance().setBestBlock(getHighestBlock());
     }
 
 
@@ -296,6 +296,7 @@ public class BlockServiceImpl implements BlockService {
         }
 
     }
+
     @Override
     public Block getBestBlock() {
         Block block = NulsContext.getInstance().getBestBlock();
@@ -304,6 +305,14 @@ public class BlockServiceImpl implements BlockService {
             return highestBlock;
         }
         return block;
+    }
+
+    public Block getHighestBlock() {
+        Block highestBlock = BlockManager.getInstance().getHighestBlock();
+        if (null == highestBlock) {
+            highestBlock = this.getLocalBestBlock();
+        }
+        return highestBlock;
     }
 
     @Override
@@ -318,7 +327,7 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public List<BlockHeaderPo> getBlockHashList(long start, long end) {
-        return blockStorageService.getBlockHashList(start,end);
+        return blockStorageService.getBlockHashList(start, end);
     }
 
     @Override
