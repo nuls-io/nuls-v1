@@ -165,7 +165,7 @@ public class BlockServiceImpl implements BlockService {
         for (int x = 0; x < block.getHeader().getTxCount(); x++) {
             Transaction tx = block.getTxs().get(x);
             tx.setBlockHeight(block.getHeader().getHeight());
-            if (tx.getStatus() == TxStatusEnum.CACHED) {
+            if (tx.getStatus()==null||tx.getStatus() == TxStatusEnum.CACHED) {
                 b = true;
                 try {
                     ledgerService.approvalTx(tx);
