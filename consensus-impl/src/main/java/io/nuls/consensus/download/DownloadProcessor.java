@@ -112,10 +112,8 @@ public class DownloadProcessor extends Thread {
 
             boolean success = downResult != null && downResult.booleanValue() && storageResult != null && storageResult.booleanValue();
 
-            if(success) {
+            if(success && checkIsNewest()) {
                 downloadStatus = DownloadStatus.SUCCESS;
-
-                checkIsNewest();
             } else if(downloadStatus != DownloadStatus.WAIT){
                 downloadStatus = DownloadStatus.FAILED;
             }
@@ -127,11 +125,13 @@ public class DownloadProcessor extends Thread {
         }
     }
 
-    private void checkIsNewest() {
+    private boolean checkIsNewest() {
         NetworkNewestBlockInfos newestInfos = getNetworkNewestBlockInfos();
         if(!blockService.getBestBlock().getHeader().getHash().getDigestHex().equals(newestInfos.getNetBestHash())) {
             downloadStatus = DownloadStatus.WAIT;
+            return false;
         }
+        return true;
     }
 
     /**
