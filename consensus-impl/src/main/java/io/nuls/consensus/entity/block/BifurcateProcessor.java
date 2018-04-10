@@ -84,7 +84,11 @@ public class BifurcateProcessor {
             if (chain.size() == 0) {
                 continue;
             }
-            str.append("\n+++++++++++chain:start-" + chain.getHeaderDigestList().get(0).getHeight() + ", end-" + chain.getLastHd().getHeight());
+            String type = "";
+            if(approvingChain!=null&&chain.getId().equals(approvingChain)){
+                type = " approving ";
+            }
+            str.append("\n+++++++++++"+type+"chain:start-" + chain.getHeaderDigestList().get(0).getHeight() + ", end-" + chain.getLastHd().getHeight());
             int listSize = chain.size();
             if (maxSize < listSize) {
                 maxSize = listSize;
@@ -99,6 +103,7 @@ public class BifurcateProcessor {
         }
         BlockLog.info(str.toString());
         if(null==longestChain){
+            BlockLog.info("the longest chain not found!");
             return;
         }
         if ( this.approvingChain != null && !this.approvingChain.getId().equals(longestChain.getId())) {
