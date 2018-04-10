@@ -65,7 +65,7 @@ public class DownloadUtils {
             GetBlockRequest request = new GetBlockRequest(startHeight, (long) size,
                     NulsDigestData.fromDigestHex(startHash), NulsDigestData.fromDigestHex(endHash));
             Future<Block> future = DownloadCacheHandler.addGetBlockRequest(endHash);
-            BroadcastResult result = networkService.sendToNode(request, node.getId(), true);
+            BroadcastResult result = networkService.sendToNode(request, node.getId(), false);
             if (!result.isSuccess()) {
                 return resultList;
             }
@@ -75,13 +75,14 @@ public class DownloadUtils {
                     resultList.add(block);
                 }
             } catch (Exception e) {
+                Log.error(node.getId() + ",start:" + startHeight + " , size:" + size);
                 Log.error(e);
                 throw e;
             }
         } else {
             GetBlocksHashRequest hashesRequest = new GetBlocksHashRequest(startHeight, size);
             Future<BlockHashResponse> hashesFuture = DownloadCacheHandler.addGetBlockHashesRequest(hashesRequest.getHash().getDigestHex());
-            BroadcastResult hashesResult = networkService.sendToNode(hashesRequest, node.getId(), true);
+            BroadcastResult hashesResult = networkService.sendToNode(hashesRequest, node.getId(), false);
             if (!hashesResult.isSuccess()) {
                 return resultList;
             }
@@ -104,7 +105,7 @@ public class DownloadUtils {
                 Future<Block> future = DownloadCacheHandler.addGetBlockRequest(hash.getDigestHex());
                 futureList.add(future);
             }
-            BroadcastResult result = networkService.sendToNode(request, node.getId(), true);
+            BroadcastResult result = networkService.sendToNode(request, node.getId(), false);
             if (!result.isSuccess()) {
                 return resultList;
             }
