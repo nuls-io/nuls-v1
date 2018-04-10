@@ -34,6 +34,7 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.utils.log.BlockLog;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.event.bus.handler.AbstractEventHandler;
@@ -92,5 +93,8 @@ public class GetBlocksHashHandler extends AbstractEventHandler<GetBlocksHashRequ
         BlocksHashEvent event = new BlocksHashEvent();
         event.setEventBody(response);
         boolean result = eventBroadcaster.sendToNode(event, fromId);
+        if(!result){
+            BlockLog.warn("send block hashes to "+fromId +" failed!");
+        }
     }
 }
