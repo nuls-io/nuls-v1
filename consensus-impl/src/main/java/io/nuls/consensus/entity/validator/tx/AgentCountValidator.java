@@ -51,7 +51,8 @@ public class AgentCountValidator implements NulsDataValidator<RegisterAgentTrans
         ValidateResult result = ValidateResult.getSuccessResult();
         Agent agent = tx.getTxData().getExtend();
         String agentName = agent.getAgentName();
-        List<Consensus<Agent>> caList = consensusCacheManager.getAliveAgentList(NulsContext.getInstance().getBestHeight());
+        //+2原因：验证的交易可能属于a高度，从cache中获取它之前的抵押时，只能获取某个高度之前的，所以是当前最新高度a-1之后的第二个高度
+        List<Consensus<Agent>> caList = consensusCacheManager.getAliveAgentList(NulsContext.getInstance().getBestHeight()+2);
         if (caList != null) {
             for (Consensus<Agent> ca : caList) {
                 if (ca.getHexHash().equals(tx.getTxData().getHexHash())) {

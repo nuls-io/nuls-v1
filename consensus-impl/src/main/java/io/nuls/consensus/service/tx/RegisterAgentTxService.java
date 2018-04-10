@@ -55,6 +55,7 @@ public class RegisterAgentTxService implements TransactionService<RegisterAgentT
     public void onRollback(RegisterAgentTransaction tx) {
         this.agentDataService.deleteById(tx.getTxData().getHexHash(), tx.getBlockHeight());
         manager.realDeleteAgent(tx.getTxData().getHexHash());
+
         DepositPo delPo = new DepositPo();
         delPo.setAgentHash(tx.getTxData().getHexHash());
         delPo.setDelHeight(tx.getBlockHeight());
@@ -68,8 +69,10 @@ public class RegisterAgentTxService implements TransactionService<RegisterAgentT
         ca.getExtend().setBlockHeight(tx.getBlockHeight());
         ca.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
         manager.putAgent(ca);
+
         AgentPo po = ConsensusTool.agentToPojo(ca);
         agentDataService.save(po);
+
         RegisterAgentNotice notice = new RegisterAgentNotice();
         notice.setEventBody(tx);
         NulsContext.getServiceBean(EventBroadcaster.class).publishToLocal(notice);
