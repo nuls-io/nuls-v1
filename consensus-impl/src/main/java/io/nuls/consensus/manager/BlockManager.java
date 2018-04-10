@@ -208,15 +208,15 @@ public class BlockManager {
 
     private void cacheBlockToBuffer(Block block) {
         blockCacheBuffer.cacheBlock(block);
-        BlockLog.info("orphan cache block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()));
+        BlockLog.debug("orphan cache block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()));
         Block preBlock = blockCacheBuffer.getBlock(block.getHeader().getPreHash().getDigestHex());
         if (preBlock == null) {
             if (this.downloadService.getStatus() != DownloadStatus.DOWNLOADING) {
                 preBlock = downloadUtils.getBlockByHash(block.getHeader().getPreHash().getDigestHex());
                 if(null==preBlock){
-                    BlockLog.info("=-=-=-=-=-=-=Request-Failed:"+(block.getHeader().getHeight()-1)+",hash:"+block.getHeader().getPreHash().getDigestHex());
+                    BlockLog.debug("=-=-=-=-=-=-=Request-Failed:"+(block.getHeader().getHeight()-1)+",hash:"+block.getHeader().getPreHash().getDigestHex());
                 }else{
-                    BlockLog.info("=-=-=-=-=-=-=Request-Success:"+(block.getHeader().getHeight()-1)+",hash:"+block.getHeader().getPreHash().getDigestHex());
+                    BlockLog.debug("=-=-=-=-=-=-=Request-Success:"+(block.getHeader().getHeight()-1)+",hash:"+block.getHeader().getPreHash().getDigestHex());
                 }
             }
         }

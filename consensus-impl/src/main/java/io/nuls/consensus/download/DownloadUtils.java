@@ -38,7 +38,7 @@ public class DownloadUtils {
         Node node = nodes.get(new Random().nextInt(nodes.size()));
         Block block = getBlockByHash(hash, node);
         if (block == null) {
-            BlockLog.info("get Block failed hash:" + hash + " , form:" + node.getId());
+            BlockLog.debug("get Block failed hash:" + hash + " , form:" + node.getId());
         }
         return block;
     }
