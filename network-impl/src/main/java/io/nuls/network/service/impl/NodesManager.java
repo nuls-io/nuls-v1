@@ -32,6 +32,7 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.date.TimeService;
+import io.nuls.core.utils.network.IpUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.NodeDataService;
 import io.nuls.network.constant.NetworkConstant;
@@ -409,7 +410,11 @@ public class NodesManager implements Runnable {
                 }
                 if (node.getType() == Node.OUT && node.getStatus() == Node.CLOSE) {
                     if (node.getLastFailTime() < TimeService.currentTimeMillis() || isSeedNode(node.getIp())) {
-                        connectionManager.connectionNode(node);
+                        if (IpUtil.getIps().contains(node.getIp())) {
+                            disConnectNodes.remove(node.getId());
+                        } else {
+                            connectionManager.connectionNode(node);
+                        }
                     }
                 }
             }

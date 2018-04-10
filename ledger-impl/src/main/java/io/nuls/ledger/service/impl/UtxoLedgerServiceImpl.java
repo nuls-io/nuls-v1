@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -158,7 +158,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     public long getTxCount(Long blockHeight, String address, int txType) throws Exception {
         int count = 0;
-        List<Transaction> cacheTxList = getCacheTxList(address, txType);
+        List<Transaction> cacheTxList = getCacheTxs(address, txType);
         count += cacheTxList.size();
 
         boolean isLocal = NulsContext.LOCAL_ADDRESS_LIST.contains(address);
@@ -177,7 +177,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             txList = getLocalTxList(blockHeight, address, txType, pageNumber, pageSize);
         } else {
             txList = new ArrayList<>();
-            List<Transaction> cacheTxList = getCacheTxList(address, txType);
+            List<Transaction> cacheTxList = getCacheTxs(address, txType);
             txList.addAll(cacheTxList);
 
             List<TransactionPo> poList;
@@ -237,6 +237,24 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         return cacheTxList;
     }
 
+    private List<Transaction> getCacheTxs(String address, int txType) {
+        List<Transaction> cacheTxList = new ArrayList<>(txCacheService.getElementList(CONFIRM_TX_CACHE));
+        cacheTxList.addAll(txCacheService.getElementList(RECEIVE_TX_CACHE));
+        cacheTxList.addAll(txCacheService.getElementList(ORPHAN_TX_CACHE));
+        for (int i = cacheTxList.size() - 1; i >= 0; i--) {
+            Transaction tx = cacheTxList.get(i);
+            if (txType > 0 && tx.getType() != txType) {
+                cacheTxList.remove(i);
+                continue;
+            }
+            if (StringUtils.isNotBlank(address) && !checkTxIsMine(tx, address)) {
+                cacheTxList.remove(i);
+            }
+        }
+        Collections.sort(cacheTxList, TxTimeComparator.getInstance());
+        return cacheTxList;
+    }
+
     public List<Transaction> getLocalTxList(Long blockHeight, String address, int txType, int pageNumber, int pageSize) throws Exception {
         List<Transaction> txList = new ArrayList<>();
         List<Transaction> cacheTxList = getCacheTxList(address, txType);
@@ -272,7 +290,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     public List<Transaction> getTxList(String blockHash) throws Exception {
         List<Transaction> txList = new ArrayList<>();
         List<TransactionPo> poList = txDao.getTxs(blockHash);
-        if(null==poList){
+        if (null == poList) {
             return txList;
         }
         for (TransactionPo po : poList) {
@@ -461,10 +479,10 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             if (localPoList.size() > 0) {
                 txDao.saveLocalList(localPoList);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.error(e);
-            throw  e;
-        }finally {
+            throw e;
+        } finally {
             lock.unlock();
         }
         return false;
