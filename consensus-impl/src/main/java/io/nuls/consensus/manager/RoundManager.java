@@ -294,7 +294,7 @@ public class RoundManager {
         if(BlockManager.getInstance().getStoredHeight()<(currentBlockHeader.getHeight()-PocConsensusConstant.CONFIRM_BLOCK_COUNT-1))
         {
             Log.debug("Round can't be calculated for the time being");
-            return round;
+            return null;
         }
         if (null == round) {
             Block bestBlock = getBestBlock();
