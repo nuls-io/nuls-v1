@@ -27,7 +27,10 @@ import io.nuls.account.entity.Account;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.date.TimeService;
+import io.nuls.core.utils.log.BlockLog;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -147,6 +150,23 @@ public class PocMeetingRound {
                 this.localPacker = account;
                 return;
             }
+        }
+    }
+
+    public String toString(){
+        StringBuilder str = new StringBuilder();
+        for (PocMeetingMember member : this.getMemberList()) {
+            str.append(member.getPackingAddress());
+            str.append(" ,order:" + member.getPackingIndexOfRound());
+            str.append(",packTime:" + new Date(member.getPackEndTime()));
+            str.append("\n");
+        }
+        if (null == this.getPreRound()) {
+            return ("round:index:" + this.getIndex() + " , start:" + new Date(this.getStartTime())
+                    + ", netTime:(" + new Date(TimeService.currentTimeMillis()).toString() + ") , members:\n :" + str);
+        } else {
+            return ("round:index:" + this.getIndex() + " ,preIndex:" + this.getPreRound().getIndex() + " , start:" + new Date(this.getStartTime())
+                    + ", netTime:(" + new Date(TimeService.currentTimeMillis()).toString() + ") , members:\n :" + str);
         }
     }
 }

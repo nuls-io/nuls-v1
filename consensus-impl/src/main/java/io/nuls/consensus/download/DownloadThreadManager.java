@@ -125,10 +125,6 @@ public class DownloadThreadManager implements Callable<Boolean> {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                System.out.println("===========================");
-                System.out.println("===========================");
-                System.out.println("===========================");
-                System.out.println("===========================");
             }
         }
         executor.shutdown();

@@ -38,6 +38,7 @@ import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.log.BlockLog;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
@@ -108,6 +109,7 @@ public class BlockConsensusValidator implements NulsDataValidator<Block> {
     }
 
     private ValidateResult checkYellowPunishTx(Block newBlock, BlockRoundData roundData, Block preBlock, PocMeetingMember member, PocMeetingRound round) {
+        BlockLog.info("validate yellow punish tx("+newBlock.getHeader().getHeight()+")--"+round.toString());
         YellowPunishTransaction yellowPunishTx = null;
         for (Transaction tx : newBlock.getTxs()) {
             if (tx.getType() == TransactionConstant.TX_TYPE_YELLOW_PUNISH) {
