@@ -29,9 +29,6 @@ public class DownloadUtils {
 
     public Block getBlockByHash(long height, String hash) {
         List<Node> nodes = networkService.getAvailableNodes();
-        if (nodes == null || nodes.size() == 0) {
-            throw new NulsRuntimeException(ErrorCode.NET_NODE_NOT_FOUND);
-        }
         if (nodes == null) {
             throw new NulsRuntimeException(ErrorCode.NET_NODE_NOT_FOUND);
         }
@@ -42,6 +39,9 @@ public class DownloadUtils {
             } else if (height == node.getVersionMessage().getBestBlockHeight() && !node.getVersionMessage().getBestBlockHash().equals(hash)) {
                 nodes.remove(i);
             }
+        }
+        if(nodes.isEmpty()){
+            throw new NulsRuntimeException(ErrorCode.NET_NODE_NOT_FOUND);
         }
         Node node = nodes.get(new Random().nextInt(nodes.size()));
         Block block = getBlockByHash(hash, node);
