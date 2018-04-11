@@ -46,7 +46,7 @@ public class DevNetworkParam extends AbstractNetworkParam {
 
         seedIpList.add("192.168.1.103");
         seedIpList.add("192.168.1.102");
-        seedIpList.add("192.168.1.188");
+        seedIpList.add("192.168.1.201");
         seedIpList.add("192.168.1.156");
         this.messageFilter = DefaultMessageFilter.getInstance();
         this.messageHandlerFactory = DefaultNetWorkEventHandlerFactory.getInstance();
