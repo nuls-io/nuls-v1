@@ -300,10 +300,13 @@ public class BlockManager {
                     throw new NulsRuntimeException(e);
                 }
             } else if (tx.getType() == TransactionConstant.TX_TYPE_REGISTER_AGENT && ledgerService.checkTxIsMine(tx)) {
+                tx.verifyWithException();
                 NulsContext.getServiceBean(RegisterAgentTxService.class).onApproval((RegisterAgentTransaction) tx);
             } else if (tx.getType() == TransactionConstant.TX_TYPE_JOIN_CONSENSUS && ledgerService.checkTxIsMine(tx)) {
+                tx.verifyWithException();
                 NulsContext.getServiceBean(JoinConsensusTxService.class).onApproval((PocJoinConsensusTransaction) tx);
             } else if (tx.getType() == TransactionConstant.TX_TYPE_EXIT_CONSENSUS && ledgerService.checkTxIsMine(tx)) {
+                tx.verifyWithException();
                 NulsContext.getServiceBean(ExitConsensusTxService.class).onApproval((PocExitConsensusTransaction) tx);
             }
             confirmingTxCacheManager.putTx(tx);

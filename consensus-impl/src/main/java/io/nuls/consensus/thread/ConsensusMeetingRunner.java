@@ -416,7 +416,7 @@ public class ConsensusMeetingRunner implements Runnable {
         }
         txCacheManager.removeTx(outHashList);
         if (totalSize < PocConsensusConstant.MAX_BLOCK_SIZE) {
-            addOrphanTx(packingTxList, totalSize, self);
+            addOrphanTx(packingTxList, totalSize, self,bd.getHeight());
         }
         addConsensusTx(bestBlock, packingTxList, self, round);
         bd.setTxList(packingTxList);
@@ -435,7 +435,7 @@ public class ConsensusMeetingRunner implements Runnable {
         return newBlock;
     }
 
-    private void addOrphanTx(List<Transaction> txList, long totalSize, PocMeetingMember self) {
+    private void addOrphanTx(List<Transaction> txList, long totalSize, PocMeetingMember self,long blockHeight) {
         if ((self.getPackEndTime() - TimeService.currentTimeMillis()) <= 100) {
             return;
         }
@@ -446,7 +446,7 @@ public class ConsensusMeetingRunner implements Runnable {
         List<NulsDigestData> outHashList = new ArrayList<>();
         orphanTxList.sort(TxTimeComparator.getInstance());
         for (Transaction tx : orphanTxList) {
-
+            tx.setBlockHeight(blockHeight);
             if ((totalSize + tx.size()) >= PocConsensusConstant.MAX_BLOCK_SIZE) {
                 break;
             }
