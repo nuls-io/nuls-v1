@@ -86,12 +86,13 @@ public class ConsensusMeetingRunner implements Runnable {
     private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
     private OrphanTxCacheManager orphanTxCacheManager = OrphanTxCacheManager.getInstance();
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
-    private boolean running = false;
     private boolean hasPacking = false;
     private ConsensusManager consensusManager = ConsensusManager.getInstance();
     private RoundManager packingRoundManager = RoundManager.getInstance();
     private ConfirmingTxCacheManager confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
     private static Map<Long, RedPunishData> punishMap = new HashMap<>();
+
+    private boolean hasInit;
 
     private ConsensusMeetingRunner() {
     }
@@ -107,26 +108,13 @@ public class ConsensusMeetingRunner implements Runnable {
     @Override
     public void run() {
 
-        if (running) {
-            return;
-        }
-        this.running = true;
-        //todo
-        packingRoundManager.init();
-        //wait the network synchronize complete and wait MeetingRound ready.
-        waitReady();
+        try {
+            //wait the network synchronize complete and wait MeetingRound ready.
+            waitReady();
 
-        while (running) {
-            try {
-                doWork();
-            } catch (Exception e) {
-                Log.error(e);
-            }
-            try {
-                Thread.sleep(100L);
-            } catch (Exception e) {
-                Log.error(e);
-            }
+            doWork();
+        } catch (Exception e) {
+            Log.error(e);
         }
     }
 
@@ -134,16 +122,9 @@ public class ConsensusMeetingRunner implements Runnable {
 
         PocMeetingRound round = packingRoundManager.getCurrentRound();
 
-        long nowTime = TimeService.currentTimeMillis();
         //check current round is end
-        if (null == round || nowTime >= round.getEndTime()) {
+        if (null == round || round.getEndTime() < TimeService.currentTimeMillis()) {
             resetCurrentMeetingRound();
-            //sleep sometimes make sure not to run again
-            try {
-                Thread.sleep(100L);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
             return;
         }
 
@@ -163,6 +144,11 @@ public class ConsensusMeetingRunner implements Runnable {
             hasPacking = true;
         }
 
+    }
+
+    public void resetConsensus() {
+        initRound();
+        hasInit = false;
     }
 
     private void packing(PocMeetingMember self, PocMeetingRound round) {
@@ -287,11 +273,7 @@ public class ConsensusMeetingRunner implements Runnable {
             return false;
         }
         List<Node> nodes = networkService.getAvailableNodes();
-        if (nodes == null || nodes.size() == 0) {
-            BlockMaintenanceThread.getInstance().setStatus(MaintenanceStatus.READY);
-            return false;
-        }
-        if (nodes.size() < PocConsensusConstant.ALIVE_MIN_NODE_COUNT) {
+        if (nodes == null || nodes.size() == 0 || nodes.size() < PocConsensusConstant.ALIVE_MIN_NODE_COUNT) {
             return false;
         }
         if (!isNetworkSynchronizeComplete()) {
@@ -307,14 +289,20 @@ public class ConsensusMeetingRunner implements Runnable {
 
         while (!isNetworkSynchronizeComplete()) {
             try {
-                Thread.sleep(200L);
+                Thread.sleep(1000L);
             } catch (InterruptedException e) {
                 Log.error(e);
             }
         }
 
-        packingRoundManager.clear();
+        if(!hasInit) {
+            initRound();
+            hasInit = true;
+        }
+    }
 
+    private void initRound() {
+        packingRoundManager.clear();
         //read create new meeting round
         resetCurrentMeetingRound();
     }

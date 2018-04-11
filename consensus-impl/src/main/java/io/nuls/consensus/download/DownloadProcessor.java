@@ -241,11 +241,7 @@ public class DownloadProcessor extends Thread {
         //监控网络，如果掉线，重新连线后重新同步
         //Monitor the network, if it is dropped, reconnect after reconnecting
         List<Node> nodes = networkService.getAvailableNodes();
-        if (nodes == null || nodes.size() == 0) {
-            setDownloadStatus(DownloadStatus.WAIT);
-            return false;
-        }
-        if (nodes.size() < PocConsensusConstant.ALIVE_MIN_NODE_COUNT) {
+        if (nodes == null || nodes.size() == 0 || nodes.size() < PocConsensusConstant.ALIVE_MIN_NODE_COUNT) {
             return false;
         }
 
