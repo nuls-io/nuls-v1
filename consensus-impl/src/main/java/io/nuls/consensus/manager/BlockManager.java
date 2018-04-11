@@ -225,10 +225,6 @@ public class BlockManager {
             return false;
         }
         boolean needUpdateBestBlock = bifurcateProcessor.addHeader(block.getHeader());
-        if (needUpdateBestBlock) {
-            //Log.error("++++++++++++++++++++++++:"+block.getHeader().getHeight()+",update best block");
-            context.setBestBlock(block);
-        }
         if (bifurcateProcessor.getChainSize() == 1) {
             try {
                 this.appravalBlock(block);
@@ -238,6 +234,10 @@ public class BlockManager {
                 blockCacheBuffer.cacheBlock(block);
                 return false;
             }
+        }
+        if (needUpdateBestBlock) {
+            //Log.error("++++++++++++++++++++++++:"+block.getHeader().getHeight()+",update best block");
+            context.setBestBlock(block);
         }
 //        else {
 //            Block lastAppravedBlock = confirmingBlockCacheManager.getBlock(lastAppravedHash);
@@ -257,7 +257,7 @@ public class BlockManager {
             }
         }
         long savingHeight = block.getHeader().getHeight() - 6;
-        if (this.downloadService.getStatus() == DownloadStatus.DOWNLOADING && savingHeight > this.lastStoredHeader.getHeight()) {
+        if ( savingHeight > this.lastStoredHeader.getHeight()) {
             Block savingBlock = this.getBlock(savingHeight);
             if (null == savingBlock) {
                 return true;

@@ -42,7 +42,7 @@ public class PocBlockValidatorManager {
         BlockHeaderValidatorManager.addBlockDefValitor(HeaderHashValidator.getInstance());
         BlockHeaderValidatorManager.addBlockDefValitor(HeaderContinuityValidator.getInstance());
         BlockHeaderValidatorManager.addBlockDefValitor(HeaderSignValidator.getInstance());
-        BlockHeaderValidatorManager.addBlockDefValitor(HeaderPackerValidator.getInstance());
+//        BlockHeaderValidatorManager.addBlockDefValitor(HeaderPackerValidator.getInstance());
     }
 
     public static void initBlockValidators() {
@@ -57,7 +57,7 @@ public class PocBlockValidatorManager {
 
         BlockValidatorManager.addBlockDefValitor(BlockMerkleValidator.getInstance());
 
-        BlockValidatorManager.addBlockDefValitor(BlockConsensusValidator.getInstance());
+//        BlockValidatorManager.addBlockDefValitor(BlockConsensusValidator.getInstance());
 
     }
 }

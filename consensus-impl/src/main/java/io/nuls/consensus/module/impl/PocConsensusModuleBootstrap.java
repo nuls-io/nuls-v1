@@ -98,7 +98,7 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
             Log.error(e);
         }
         consensusManager.startConsensusWork();
-        consensusManager.startPersistenceWork();
+//        consensusManager.startPersistenceWork();
         consensusManager.startDownloadWork();
         consensusManager.startMonitorWork();
 

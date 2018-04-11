@@ -94,6 +94,7 @@ public class ConfirmingBlockCacheManager {
     }
 
     public void clear() {
+        BlockLog.debug("clear cached block hash！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！");
         this.txsCacheMap.clear();
         this.headerCacheMap.clear();
     }

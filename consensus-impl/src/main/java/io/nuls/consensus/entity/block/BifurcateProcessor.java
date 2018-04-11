@@ -243,13 +243,13 @@ public class BifurcateProcessor {
             }
         }
 
-        for (HeaderDigest hd : removeHashSet) {
-            if (!approvingChain.contains(hd)) {
-                Block block = confirmingBlockCacheManager.getBlock(hd.getHash());
-                confirmingBlockCacheManager.removeBlock(hd.getHash());
-                blockCacheBuffer.cacheBlock(block);
-            }
-        }
+//        for (HeaderDigest hd : removeHashSet) {
+//            if (!approvingChain.contains(hd)) {
+//                Block block = confirmingBlockCacheManager.getBlock(hd.getHash());
+//                confirmingBlockCacheManager.removeBlock(hd.getHash());
+//                blockCacheBuffer.cacheBlock(block);
+//            }
+//        }
 
         if (approvingChain.getLastHd() != null && approvingChain.getLastHd().getHeight() >= (height + PocConsensusConstant.CONFIRM_BLOCK_COUNT)) {
             return true;
