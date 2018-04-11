@@ -427,7 +427,12 @@ public class BlockManager {
     }
 
     public boolean processingBifurcation(long height) {
-        return this.bifurcateProcessor.processing(height);
+        lock.lock();
+        try {
+            return this.bifurcateProcessor.processing(height);
+        } finally {
+            lock.unlock();
+        }
     }
 
     public void storedBlock(Block storedBlock) {

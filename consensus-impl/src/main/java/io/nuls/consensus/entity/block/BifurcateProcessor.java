@@ -109,10 +109,12 @@ public class BifurcateProcessor {
             return;
         }
         BlockLog.debug(str.toString()+"\n the longest is:"+longestChain.getId());
-        if (this.approvingChain != null && !this.approvingChain.getId().equals(longestChain.getId())) {
+        BlockHeaderChain lastApprovingChain  = this.approvingChain;
+        this.approvingChain = longestChain;
+        if (lastApprovingChain != null && !lastApprovingChain.getId().equals(longestChain.getId())) {
             BlockService blockService = NulsContext.getServiceBean(BlockService.class);
             List<HeaderDigest> nextChain = new ArrayList<>(longestChain.getHeaderDigestList());
-            List<HeaderDigest> lastChain = new ArrayList<>(approvingChain.getHeaderDigestList());
+            List<HeaderDigest> lastChain = new ArrayList<>(lastApprovingChain.getHeaderDigestList());
             List<HeaderDigest> rollbackChain = new ArrayList<>();
 
             for(int i = lastChain.size()-1;i>=0;i--){
@@ -150,7 +152,6 @@ public class BifurcateProcessor {
 //                blockService.approvalBlock(hd.getHash());
 //            }
         }
-        this.approvingChain = longestChain;
 
     }
 
