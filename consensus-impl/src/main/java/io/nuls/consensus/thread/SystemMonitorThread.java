@@ -30,6 +30,7 @@ import io.nuls.consensus.constant.MaintenanceStatus;
 import io.nuls.consensus.manager.ConsensusManager;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.service.intf.DownloadService;
+import io.nuls.consensus.service.intf.SystemService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.context.NulsContext;
@@ -44,33 +45,50 @@ import java.util.List;
  * @author Niels
  * @date 2017/12/19
  */
-public class BlockCacheCheckThread implements Runnable {
+public class SystemMonitorThread implements Runnable {
 
     private static final long TIME_OUT = 120000;
 
     private long startTime;
-    private DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
+
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
+    private SystemService systemService = NulsContext.getServiceBean(SystemService.class);
+
     private NulsDigestData lastHash;
 
-    public BlockCacheCheckThread() {
+    public SystemMonitorThread() {
         this.startTime = TimeService.currentTimeMillis();
     }
 
     @Override
     public void run() {
-        while (true) {
-            try {
-                checkCache();
-                Thread.sleep(10000L);
-            } catch (Exception e) {
-                Log.error(e);
-            }
+        try {
+            doMonitor();
+        } catch (Exception e) {
+            Log.error(e);
         }
+    }
+
+    private void doMonitor() {
+
+        checkLocalBlockGrow();
+
+        checkNetworkIsDisconnected();
 
     }
 
-    private void checkCache() {
+    private void checkNetworkIsDisconnected() {
+        List<Node> nodes = networkService.getAvailableNodes();
+        if (nodes == null || nodes.size() == 0) {
+            systemService.resetSystem("the number of network connection nodes is 0");
+        }
+    }
+
+    /*
+     * Check if the local block grows
+     * 检查本地区块是否增长
+     */
+    private void checkLocalBlockGrow() {
         Block block = NulsContext.getInstance().getBestBlock();
         if (null == lastHash || !lastHash.equals(block.getHeader().getHash())) {
             this.lastHash = block.getHeader().getHash();
@@ -79,12 +97,8 @@ public class BlockCacheCheckThread implements Runnable {
             boolean b = (TimeService.currentTimeMillis() - startTime) > TIME_OUT;
             if (b) {
                 this.startTime = TimeService.currentTimeMillis();
-                List<Node> nodeList = this.networkService.getAvailableNodes();
-                for(Node node:nodeList){
-                    this.networkService.removeNode(node.getId());
-                }
-                downloadService.reset();
-                Log.info("download service reset==========================================");
+
+                systemService.resetSystem("the local block does not grow");
             }
         }
 

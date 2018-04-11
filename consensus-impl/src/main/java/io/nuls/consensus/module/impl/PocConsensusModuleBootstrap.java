@@ -33,9 +33,11 @@ import io.nuls.consensus.manager.ConsensusManager;
 import io.nuls.consensus.module.AbstractConsensusModule;
 import io.nuls.consensus.service.impl.BlockServiceImpl;
 import io.nuls.consensus.service.impl.PocConsensusServiceImpl;
+import io.nuls.consensus.service.impl.SystemServiceImpl;
 import io.nuls.consensus.service.intf.BlockService;
+import io.nuls.consensus.service.intf.SystemService;
 import io.nuls.consensus.service.tx.*;
-import io.nuls.consensus.thread.BlockCacheCheckThread;
+import io.nuls.consensus.thread.SystemMonitorThread;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
@@ -82,6 +84,7 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
         this.registerService(BlockServiceImpl.class);
         this.registerService(PocConsensusServiceImpl.class);
         this.registerService(DownloadServiceImpl.class);
+        this.registerService(SystemServiceImpl.class);
     }
 
     @Override
@@ -94,12 +97,12 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
         } catch (Exception e) {
             Log.error(e);
         }
-        consensusManager.joinConsensusMeeting();
+        consensusManager.startConsensusWork();
         consensusManager.startPersistenceWork();
         consensusManager.startDownloadWork();
+        consensusManager.startMonitorWork();
 
         Log.info("the POC consensus module is started!");
-        TaskManager.createAndRunThread(this.getModuleId(),"block-cache-check",new BlockCacheCheckThread());
     }
 
     public void checkGenesisBlock() throws Exception {

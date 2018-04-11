@@ -3,6 +3,7 @@ package io.nuls.consensus.download;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.service.intf.DownloadService;
+import io.nuls.consensus.service.intf.SystemService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
@@ -124,7 +125,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
 
             if(blockList == null) {
                 executor.shutdown();
-                resetNetwork();
+                resetNetwork("attempts to download blocks from all available nodes failed");
                 return false;
             }
 
@@ -195,12 +196,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
                     localBestBlock = blockService.getBestBlock();
                 }
             } else {
-                try {
-                    Thread.sleep(60*1000l);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                resetNetwork();
+                resetNetwork("The local block is higher than the network block, the number of connected nodes is not enough to allow the local rollback, so reset");
                 return false;
             }
         }
@@ -214,7 +210,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
     private void checkRollback(Block localBestBlock, int rollbackCount) throws NulsException {
 
         if(rollbackCount >= 10) {
-            resetNetwork();
+            resetNetwork("number of rollback blocks greater than 10 during download");
             return;
         }
 
@@ -230,7 +226,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
         if(newestInfos.getNodes().size() >= PocConsensusConstant.ALIVE_MIN_NODE_COUNT) {
             blockService.rollbackBlock(localBestBlock.getHeader().getHash().getDigestHex());
         } else {
-            resetNetwork();
+            resetNetwork("the number of available nodes is insufficient for rollback blocks");
             return;
         }
 
@@ -239,12 +235,8 @@ public class DownloadThreadManager implements Callable<Boolean> {
         checkRollback(localBestBlock, rollbackCount + 1);
     }
 
-    private void resetNetwork() {
-        Map<String, Node> nodesMap = networkService.getNodes();
-        for(Map.Entry<String, Node> entry : nodesMap.entrySet()) {
-            networkService.removeNode(entry.getValue().getId());
-        }
-        downloadService.reset();
+    private void resetNetwork(String reason) {
+        NulsContext.getServiceBean(SystemService.class).resetSystem(reason);
         throw new NulsRuntimeException(ErrorCode.FAILED);
     }
 
