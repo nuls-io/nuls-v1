@@ -143,7 +143,9 @@ public class BlockManager {
                             count++;
                             preBlock = downloadUtils.getBlockByHash(header.getPreHash().getDigestHex());
                         }
-                        addBlock(preBlock, true, null);
+                        if(null!=preBlock){
+                            addBlock(preBlock, true, null);
+                        }
                     }
                 }
             }
@@ -267,20 +269,20 @@ public class BlockManager {
     private void cacheBlockToBuffer(Block block) {
         blockCacheBuffer.cacheBlock(block);
         BlockLog.debug("orphan cache block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()));
-        Block preBlock = blockCacheBuffer.getBlock(block.getHeader().getPreHash().getDigestHex());
-        if (preBlock == null) {
-            if (this.downloadService.getStatus() != DownloadStatus.DOWNLOADING) {
-                preBlock = downloadUtils.getBlockByHash(block.getHeader().getPreHash().getDigestHex());
-                if (null == preBlock) {
-                    BlockLog.debug("=-=-=-=-=-=-=Request-Failed:" + (block.getHeader().getHeight() - 1) + ",hash:" + block.getHeader().getPreHash().getDigestHex());
-                } else {
-                    BlockLog.debug("=-=-=-=-=-=-=Request-Success:" + (block.getHeader().getHeight() - 1) + ",hash:" + block.getHeader().getPreHash().getDigestHex());
-                }
-            }
-        }
-        if (null != preBlock) {
-            this.addBlock(preBlock, true, null);
-        }
+//        Block preBlock = blockCacheBuffer.getBlock(block.getHeader().getPreHash().getDigestHex());
+//        if (preBlock == null) {
+//            if (this.downloadService.getStatus() != DownloadStatus.DOWNLOADING) {
+//                preBlock = downloadUtils.getBlockByHash(block.getHeader().getPreHash().getDigestHex());
+//                if (null == preBlock) {
+//                    BlockLog.debug("=-=-=-=-=-=-=Request-Failed:" + (block.getHeader().getHeight() - 1) + ",hash:" + block.getHeader().getPreHash().getDigestHex());
+//                } else {
+//                    BlockLog.debug("=-=-=-=-=-=-=Request-Success:" + (block.getHeader().getHeight() - 1) + ",hash:" + block.getHeader().getPreHash().getDigestHex());
+//                }
+//            }
+//        }
+//        if (null != preBlock) {
+//            this.addBlock(preBlock, true, null);
+//        }
     }
 
     public void appravalBlock(Block block) {
