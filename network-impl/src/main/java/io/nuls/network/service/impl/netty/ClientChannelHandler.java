@@ -29,7 +29,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         String channelId = ctx.channel().id().asLongText();
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-//        Log.info("----------------------client Active ---------------------- " + nodeId);
+        Log.info("----------------------client Active ---------------------- " + nodeId);
         Node node = getNetworkService().getNode(nodeId);
 
         Map<String, Node> nodes = networkService.getNodes();
@@ -60,7 +60,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         SocketChannel channel = (SocketChannel) ctx.channel();
         NioChannelMap.remove(channelId);
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-//        Log.info("----------------------client remove ------------------------- " + channelId);
+        Log.info("----------------------client remove ------------------------- " + nodeId);
         Node node = getNetworkService().getNode(nodeId);
         if (node != null) {
             if (node.getChannelId() == null || channelId.equals(node.getChannelId())) {
