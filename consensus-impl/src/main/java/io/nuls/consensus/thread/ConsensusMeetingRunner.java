@@ -57,6 +57,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.BlockLog;
+import io.nuls.core.utils.log.ConsensusLog;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
@@ -147,6 +148,7 @@ public class ConsensusMeetingRunner implements Runnable {
     }
 
     public void resetConsensus() {
+        ConsensusLog.info("重置共识");
         initRound();
         hasInit = false;
     }
@@ -302,6 +304,9 @@ public class ConsensusMeetingRunner implements Runnable {
     }
 
     private void initRound() {
+
+        ConsensusLog.info("初始化共识");
+
         packingRoundManager.clear();
         packingRoundManager.init();
         //read create new meeting round
@@ -314,10 +319,28 @@ public class ConsensusMeetingRunner implements Runnable {
     }
 
     private void resetCurrentMeetingRound() {
+
+
+
+
         //TODO check
         hasPacking = false;
         packingRoundManager.resetCurrentMeetingRound();
         PocMeetingRound round = packingRoundManager.getCurrentRound();
+
+        List<PocMeetingMember> list = round.getMemberList();
+
+        StringBuilder sb = new StringBuilder();
+
+        for (PocMeetingMember member : list) {
+            sb.append("agent: " + member.getAgentAddress() + "\n");
+            sb.append("packer: " + member.getPackingAddress() + "\n");
+            sb.append("index: " + member.getPackingIndexOfRound() + "\n");
+            sb.append("startTime: " + DateUtil.convertDate(new Date(member.getPackStartTime())) + "\n");
+        }
+
+        ConsensusLog.info("重新计算共识轮次，当前轮次 {} , 人数 {} , 开始时间 {} , 结束时间 {} , 打包者列表 :\n {}", round.getIndex(), round.getMemberCount(), DateUtil.convertDate(new Date(round.getStartTime())), DateUtil.convertDate(new Date(round.getEndTime())), sb.toString());
+
         if (round != null) {
             long myTime = 0;
 
@@ -326,11 +349,14 @@ public class ConsensusMeetingRunner implements Runnable {
 
                 PocMeetingMember member = round.getMember(myAccount.getAddress().getBase58());
                 myTime = member.getPackStartTime();
+
+                ConsensusLog.info("我的打包时间 {}", DateUtil.convertDate(new Date(myTime)));
             }
 
             System.out.println("meeting round reset , now time : " + DateUtil.convertDate(new Date(TimeService.currentTimeMillis()))
                     + " , round end time : " + DateUtil.convertDate(new Date(round.getEndTime())) + " , my time is :" + DateUtil.convertDate(new Date(myTime)));
             System.out.println("======================================");
+
         }
     }
 
