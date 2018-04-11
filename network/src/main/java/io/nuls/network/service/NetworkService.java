@@ -44,6 +44,8 @@ public interface NetworkService {
 
     void start();
 
+    void reset();
+
     void shutdown();
 
     void removeNode(String nodeId);
