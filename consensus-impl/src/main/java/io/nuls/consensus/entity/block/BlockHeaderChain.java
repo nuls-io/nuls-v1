@@ -51,7 +51,7 @@ public class BlockHeaderChain implements NulsCloneable {
         if (index == -1) {
             return new BlockHeaderChain();
         }
-        List<HeaderDigest> list = new CopyOnWriteArrayList<>(headerDigestList.subList(0, index));
+        List<HeaderDigest> list = new CopyOnWriteArrayList<>(headerDigestList.subList(0, index+1));
         list.add(new HeaderDigest(header.getHash().getDigestHex(), header.getHeight(), header.getTime()));
         BlockHeaderChain chain = new BlockHeaderChain();
         chain.setHeaderDigestList(list);

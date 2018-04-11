@@ -80,7 +80,7 @@ public class BifurcateProcessor {
     }
 
     private void checkIt() {
-        int maxSize = 0;
+        long maxHeight = 0L;
         BlockHeaderChain longestChain = null;
         StringBuilder str = new StringBuilder("++++++++++++++++++++++++chain info:");
         for (BlockHeaderChain chain : chainList) {
@@ -88,15 +88,15 @@ public class BifurcateProcessor {
                 continue;
             }
             String type = "";
-            if (approvingChain != null && chain.getId().equals(approvingChain)) {
+            if (approvingChain != null && chain.getId().equals(approvingChain.getId())) {
                 type = " approving ";
             }
             str.append("\nid:"+chain.getId()+"," + type + "chain:start-" + chain.getHeaderDigestList().get(0).getHeight() + ", end-" + chain.getLastHd().getHeight());
-            int listSize = chain.size();
-            if (maxSize < listSize) {
-                maxSize = listSize;
+            long height = chain.getLastHd().getHeight();
+            if (maxHeight < height) {
+                maxHeight = height;
                 longestChain = chain;
-            } else if (maxSize == listSize) {
+            } else if (maxHeight == height) {
                 HeaderDigest hd = chain.getLastHd();
                 HeaderDigest hd_long = longestChain.getLastHd();
                 if (hd.getTime() < hd_long.getTime()) {
