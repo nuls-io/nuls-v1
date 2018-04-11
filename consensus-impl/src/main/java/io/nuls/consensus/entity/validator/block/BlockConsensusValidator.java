@@ -102,7 +102,8 @@ public class BlockConsensusValidator implements NulsDataValidator<Block> {
             return ValidateResult.getFailedResult("round index is not inconsistent!");
         }
 
-        ValidateResult result = this.checkCoinBaseTx(block.getTxs(), roundData, round);
+        ValidateResult result = ValidateResult.getSuccessResult();
+        //this.checkCoinBaseTx(block.getTxs(), roundData, round);
         if (result.isFailed()) {
             return result;
         }
