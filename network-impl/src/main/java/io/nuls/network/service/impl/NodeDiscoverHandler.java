@@ -130,6 +130,7 @@ public class NodeDiscoverHandler implements Runnable {
         while (running) {
             count++;
             List<Node> nodeList = nodesManager.getConnectNode();
+            nodeList.addAll(nodesManager.getAvailableNodes());
 
             GetVersionEvent event = new GetVersionEvent(network.port());
             GetNodesIpEvent ipEvent = new GetNodesIpEvent();
