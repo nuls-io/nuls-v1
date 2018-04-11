@@ -1,7 +1,6 @@
 package io.nuls.consensus.download;
 
 import io.nuls.consensus.entity.BlockHashResponse;
-import io.nuls.consensus.event.BlocksHashEvent;
 import io.nuls.consensus.event.GetBlockRequest;
 import io.nuls.consensus.event.GetBlocksHashRequest;
 import io.nuls.core.chain.entity.Block;
@@ -18,10 +17,8 @@ import io.nuls.network.service.NetworkService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * Created by ln on 2018/4/8.
@@ -30,10 +27,21 @@ public class DownloadUtils {
 
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
 
-    public Block getBlockByHash(String hash) {
+    public Block getBlockByHash(long height, String hash) {
         List<Node> nodes = networkService.getAvailableNodes();
         if (nodes == null || nodes.size() == 0) {
             throw new NulsRuntimeException(ErrorCode.NET_NODE_NOT_FOUND);
+        }
+        if (nodes == null) {
+            throw new NulsRuntimeException(ErrorCode.NET_NODE_NOT_FOUND);
+        }
+        for (int i = nodes.size() - 1; i >= 0; i--) {
+            Node node = nodes.get(i);
+            if (node.getVersionMessage().getBestBlockHeight() < height) {
+                nodes.remove(i);
+            } else if (height == node.getVersionMessage().getBestBlockHeight() && !node.getVersionMessage().getBestBlockHash().equals(hash)) {
+                nodes.remove(i);
+            }
         }
         Node node = nodes.get(new Random().nextInt(nodes.size()));
         Block block = getBlockByHash(hash, node);
@@ -42,7 +50,6 @@ public class DownloadUtils {
         }
         return block;
     }
-
     public Block getBlockByHash(String hash, Node node) {
         List<Block> blocks = null;
         try {

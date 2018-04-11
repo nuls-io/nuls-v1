@@ -141,7 +141,7 @@ public class BlockManager {
                         int count = 0;
                         while (preBlock == null && count < 3) {
                             count++;
-                            preBlock = downloadUtils.getBlockByHash(header.getPreHash().getDigestHex());
+                            preBlock = downloadUtils.getBlockByHash(header.getHeight()-1,header.getPreHash().getDigestHex());
                         }
                         if(null!=preBlock){
                             addBlock(preBlock, true, null);
