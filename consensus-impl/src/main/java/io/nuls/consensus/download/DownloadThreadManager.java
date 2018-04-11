@@ -240,10 +240,11 @@ public class DownloadThreadManager implements Callable<Boolean> {
     }
 
     private void resetNetwork() {
-        Map<String, Node> nodesMap = networkService.getNodes();
-        for(Map.Entry<String, Node> entry : nodesMap.entrySet()) {
-            networkService.removeNode(entry.getValue().getId());
-        }
+//        Map<String, Node> nodesMap = networkService.getNodes();
+//        for(Map.Entry<String, Node> entry : nodesMap.entrySet()) {
+//            networkService.removeNode(entry.getValue().getId());
+//        }
+        networkService.reset();
         downloadService.reset();
         throw new NulsRuntimeException(ErrorCode.FAILED);
     }

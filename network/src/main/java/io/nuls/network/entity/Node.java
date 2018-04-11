@@ -91,6 +91,8 @@ public class Node extends BaseNulsData {
 
     private boolean canConnect;
 
+    private boolean reset;
+
     private VersionEvent versionMessage;
 
     public Node() {
@@ -322,5 +324,13 @@ public class Node extends BaseNulsData {
 
     public void setCanConnect(boolean canConnect) {
         this.canConnect = canConnect;
+    }
+
+    public boolean isReset() {
+        return reset;
+    }
+
+    public void setReset(boolean reset) {
+        this.reset = reset;
     }
 }

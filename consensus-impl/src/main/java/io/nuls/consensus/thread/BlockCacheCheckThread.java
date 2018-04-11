@@ -79,10 +79,11 @@ public class BlockCacheCheckThread implements Runnable {
             boolean b = (TimeService.currentTimeMillis() - startTime) > TIME_OUT;
             if (b) {
                 this.startTime = TimeService.currentTimeMillis();
-                List<Node> nodeList = this.networkService.getAvailableNodes();
-                for(Node node:nodeList){
-                    this.networkService.removeNode(node.getId());
-                }
+//                List<Node> nodeList = this.networkService.getAvailableNodes();
+//                for(Node node:nodeList){
+//                    this.networkService.removeNode(node.getId());
+//                }
+                networkService.reset();
                 downloadService.reset();
                 Log.info("download service reset==========================================");
             }

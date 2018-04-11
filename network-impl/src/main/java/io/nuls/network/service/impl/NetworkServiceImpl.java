@@ -124,6 +124,11 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
+    public void reset() {
+        nodesManager.reset();
+    }
+
+    @Override
     public void shutdown() {
         TaskManager.shutdownByModuleId(NulsConstant.MODULE_ID_NETWORK);
     }
