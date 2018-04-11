@@ -39,4 +39,6 @@ public interface AgentDataService extends BaseDataService<String, AgentPo> {
     List<AgentPo> getAllList(long blockHeight);
 
     int deleteById(String id, long blockHeight);
+
+    int realDeleteById(String id, long blockHeight);
 }

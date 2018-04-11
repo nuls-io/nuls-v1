@@ -91,7 +91,7 @@ public class BifurcateProcessor {
             if (approvingChain != null && chain.getId().equals(approvingChain)) {
                 type = " approving ";
             }
-            str.append("\n+++++++++++" + type + "chain:start-" + chain.getHeaderDigestList().get(0).getHeight() + ", end-" + chain.getLastHd().getHeight());
+            str.append("\nid:"+chain.getId()+"," + type + "chain:start-" + chain.getHeaderDigestList().get(0).getHeight() + ", end-" + chain.getLastHd().getHeight());
             int listSize = chain.size();
             if (maxSize < listSize) {
                 maxSize = listSize;
@@ -104,33 +104,48 @@ public class BifurcateProcessor {
                 }
             }
         }
-        BlockLog.debug(str.toString());
         if (null == longestChain) {
             BlockLog.debug("the longest chain not found!");
             return;
         }
+        BlockLog.debug(str.toString()+"\n the longest is:"+longestChain.getId());
         if (this.approvingChain != null && !this.approvingChain.getId().equals(longestChain.getId())) {
             BlockService blockService = NulsContext.getServiceBean(BlockService.class);
-            List<HeaderDigest> hdList = new ArrayList<>(approvingChain.getHeaderDigestList());
-            for (int i = hdList.size() - 1; i >= 0; i--) {
-                HeaderDigest hd = hdList.get(i);
-                if (longestChain.contains(hd)) {
-                    break;
+            List<HeaderDigest> nextChain = new ArrayList<>(longestChain.getHeaderDigestList());
+            List<HeaderDigest> lastChain = new ArrayList<>(approvingChain.getHeaderDigestList());
+            List<HeaderDigest> rollbackChain = new ArrayList<>();
+            for(HeaderDigest hd:lastChain){
+                if(!nextChain.contains(hd)){
+                    rollbackChain.add(hd);
                 }
+            }
+            for(int i = rollbackChain.size()-1;i>=0;i--){
                 try {
-                    blockService.rollbackBlock(hd.getHash());
+                    blockService.rollbackBlock(rollbackChain.get(i).getHash());
                 } catch (NulsException e) {
                     Log.error(e);
                 }
             }
-            List<HeaderDigest> longestHdList = new ArrayList<>(longestChain.getHeaderDigestList());
-            for (int i = 0; i < longestHdList.size(); i++) {
-                HeaderDigest hd = longestHdList.get(i);
-                if (approvingChain.contains(hd)) {
-                    continue;
-                }
-                blockService.approvalBlock(hd.getHash());
-            }
+//            List<HeaderDigest> hdList = new ArrayList<>(approvingChain.getHeaderDigestList());
+//            for (int i = hdList.size() - 1; i >= 0; i--) {
+//                HeaderDigest hd = hdList.get(i);
+//                if (longestChain.contains(hd)) {
+//                    break;
+//                }
+//                try {
+//                    blockService.rollbackBlock(hd.getHash());
+//                } catch (NulsException e) {
+//                    Log.error(e);
+//                }
+//            }
+//            List<HeaderDigest> longestHdList = new ArrayList<>(longestChain.getHeaderDigestList());
+//            for (int i = 0; i < longestHdList.size(); i++) {
+//                HeaderDigest hd = longestHdList.get(i);
+//                if (approvingChain.contains(hd)) {
+//                    continue;
+//                }
+//                blockService.approvalBlock(hd.getHash());
+//            }
         }
         this.approvingChain = longestChain;
 

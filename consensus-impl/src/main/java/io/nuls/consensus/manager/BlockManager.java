@@ -151,7 +151,7 @@ public class BlockManager {
             }
 
             private void checkNext() {
-                while (count++ < 1000) {
+                while (count++ < 100) {
                     Block bestBlock = BlockManager.this.getHighestBlock();
                     if (null == bestBlock) {
                         return;
@@ -162,7 +162,7 @@ public class BlockManager {
                     }
                 }
             }
-        }, 60, 2, TimeUnit.SECONDS);
+        }, 10, 2, TimeUnit.SECONDS);
 
 
     }
@@ -385,8 +385,10 @@ public class BlockManager {
                 return false;
             }
             blockCacheBuffer.removeBlock(nextHash);
-            this.addBlock(block, true, null);
-            b = true;
+            boolean result = this.addBlock(block, true, null);
+            if(result){
+                b = true;
+            }
         }
         return b;
     }

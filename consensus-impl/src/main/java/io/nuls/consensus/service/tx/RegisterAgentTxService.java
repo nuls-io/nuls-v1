@@ -56,6 +56,8 @@ public class RegisterAgentTxService implements TransactionService<RegisterAgentT
         this.agentDataService.deleteById(tx.getTxData().getHexHash(), tx.getBlockHeight());
         manager.realDeleteAgent(tx.getTxData().getHexHash());
 
+        agentDataService.realDeleteById(tx.getTxData().getHexHash(), 0);
+
         DepositPo delPo = new DepositPo();
         delPo.setAgentHash(tx.getTxData().getHexHash());
         delPo.setDelHeight(tx.getBlockHeight());

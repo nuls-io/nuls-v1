@@ -61,6 +61,16 @@ public class DepositDaoImpl extends BaseDaoImpl<DepositMapper, String, DepositPo
     }
 
     @Override
+    public int realDeleteById(DepositPo po) {
+        return this.getMapper().realDeleteByPrimaryKey(po);
+    }
+
+    @Override
+    public int realDeleteByAgentHash(DepositPo po) {
+        return this.getMapper().realDeleteByAgentHash(po);
+    }
+
+    @Override
     public int updateSelective(DepositPo po) {
         return this.getMapper().updateByPrimaryKeySelective(po);
     }

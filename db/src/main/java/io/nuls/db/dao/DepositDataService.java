@@ -39,6 +39,10 @@ public interface DepositDataService extends BaseDataService<String, DepositPo> {
 
     int deleteByAgentHash(DepositPo po);
 
+    int realDeleteById(DepositPo po);
+
+    int realDeleteByAgentHash(DepositPo po);
+
     int updateSelective(DepositPo po);
 
     int updateSelectiveByAgentHash(UpdateDepositByAgentIdParam param);
