@@ -142,13 +142,13 @@ public class ConsensusManager {
 
         threadPool = TaskManager.createScheduledThreadPool(1,
                 new NulsThreadFactory(NulsConstant.MODULE_ID_CONSENSUS, ConsensusMeetingRunner.THREAD_NAME));
-        threadPool.scheduleAtFixedRate(ConsensusMeetingRunner.getInstance(), 200,200, TimeUnit.MILLISECONDS);
+        threadPool.scheduleAtFixedRate(ConsensusMeetingRunner.getInstance(), 200, 200, TimeUnit.MILLISECONDS);
 
     }
 
     public void startMonitorWork() {
         //TODO open a separate thread pool
-        threadPool.scheduleAtFixedRate(new SystemMonitorThread(), 1000,1000, TimeUnit.MILLISECONDS);
+        threadPool.scheduleAtFixedRate(new SystemMonitorThread(), 1000, 1000, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -160,11 +160,11 @@ public class ConsensusManager {
 
     public void startMaintenanceWork() {
         BlockMaintenanceThread blockMaintenanceThread = BlockMaintenanceThread.getInstance();
-            try {
-                blockMaintenanceThread.checkGenesisBlock();
-            } catch (Exception e) {
-                Log.error(e.getMessage());
-            } finally {
+        try {
+            blockMaintenanceThread.checkGenesisBlock();
+        } catch (Exception e) {
+            Log.error(e.getMessage());
+        } finally {
 //                TaskManager.createAndRunThread(NulsConstant.MODULE_ID_CONSENSUS,
 //                    BlockMaintenanceThread.THREAD_NAME, blockMaintenanceThread);
         }
@@ -177,10 +177,11 @@ public class ConsensusManager {
     public void clearCache() {
         blockCacheManager.clear();
         temporaryCacheManager.clear();
-        consensusCacheManager.clear();
         confirmingTxCacheManager.clear();
         receivedTxCacheManager.clear();
         orphanTxCacheManager.clear();
+        consensusCacheManager.init();
+        ConsensusMeetingRunner.getInstance().resetConsensus();
     }
 
     public void destroy() {
