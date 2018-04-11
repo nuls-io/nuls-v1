@@ -174,14 +174,16 @@ public class ConsensusManager {
         NulsContext.getServiceBean(DownloadService.class).start();
     }
 
-    public void destroy() {
+    public void clearCache() {
         blockCacheManager.clear();
         temporaryCacheManager.clear();
         consensusCacheManager.clear();
         confirmingTxCacheManager.clear();
         receivedTxCacheManager.clear();
         orphanTxCacheManager.clear();
+    }
 
+    public void destroy() {
         threadPool.shutdown();
     }
 
