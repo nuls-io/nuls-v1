@@ -165,7 +165,8 @@ public class BifurcateProcessor {
 
         for (int i = 0; i < this.chainList.size(); i++) {
             BlockHeaderChain chain = chainList.get(i);
-            if (null!=chain.getLastHd()&&header.getPreHash().getDigestHex().equals(chain.getLastHd().getHash())) {
+            HeaderDigest lastHeader = chain.getLastHd();
+            if (null != lastHeader && header.getPreHash().getDigestHex().equals(lastHeader.getHash())) {
                 chain.addHeader(header);
                 return true;
             } else if (chain.contains(new HeaderDigest(header.getPreHash().getDigestHex(), header.getHeight() - 1, 0L))) {

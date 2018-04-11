@@ -65,7 +65,10 @@ public class BlockHeaderChain implements NulsCloneable {
 
     public boolean addHeader(BlockHeader header) {
         lock.lock();
-        if (null != getLastHd() && !this.getLastHd().getHash().equals(header.getPreHash().getDigestHex())) {
+
+        HeaderDigest lastHeader = getLastHd();
+
+        if (null != lastHeader && !lastHeader.getHash().equals(header.getPreHash().getDigestHex())) {
             return false;
         }
         HeaderDigest newHd = new HeaderDigest(header.getHash().getDigestHex(), header.getHeight(), header.getTime());
