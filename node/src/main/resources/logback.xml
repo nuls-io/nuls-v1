@@ -100,11 +100,11 @@
     <logger name="Log" level="ERROR" additivity="false">
         <appender-ref ref="ERROR_FILE"></appender-ref>
     </logger>
-    <logger name="blockLog" level="INFO" additivity="false">
+    <logger name="blockLog" level="DEBUG" additivity="false">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="BLOCK_FILE"></appender-ref>
     </logger>
-    <logger name="consensusLog" level="DEBUG" additivity="false">
+    <logger name="consensusLog" level="INFO" additivity="false">
         <appender-ref ref="CONSENSUS_FILE"></appender-ref>
     </logger>
 
