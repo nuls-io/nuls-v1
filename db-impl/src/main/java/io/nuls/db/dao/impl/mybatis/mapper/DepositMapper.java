@@ -41,6 +41,7 @@ public interface DepositMapper extends BaseMapper<String,DepositPo> {
 
     int updateSelectiveByAgentHash(UpdateDepositByAgentIdParam po);
 
+    int deleteByPrimaryKey(DepositPo po);
     int realDeleteByPrimaryKey(DepositPo po);
 
     List<DepositPo> getAllList(long blockHeight);
