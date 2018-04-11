@@ -66,7 +66,7 @@ public class BifurcateProcessor {
         return INSTANCE;
     }
 
-    public synchronized boolean addHeader(BlockHeader header) {
+    public boolean addHeader(BlockHeader header) {
         boolean needUpdateBestBlock = false;
         boolean result = add(header);
         if (result) {
@@ -114,10 +114,13 @@ public class BifurcateProcessor {
             List<HeaderDigest> nextChain = new ArrayList<>(longestChain.getHeaderDigestList());
             List<HeaderDigest> lastChain = new ArrayList<>(approvingChain.getHeaderDigestList());
             List<HeaderDigest> rollbackChain = new ArrayList<>();
-            for(HeaderDigest hd:lastChain){
-                if(!nextChain.contains(hd)){
-                    rollbackChain.add(hd);
+
+            for(int i = lastChain.size()-1;i>=0;i--){
+                HeaderDigest hd = lastChain.get(i);
+                if(nextChain.contains(hd)){
+                    break;
                 }
+                rollbackChain.add(hd);
             }
             for(int i = rollbackChain.size()-1;i>=0;i--){
                 try {
