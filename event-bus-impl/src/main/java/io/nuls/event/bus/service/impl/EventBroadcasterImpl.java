@@ -25,6 +25,7 @@ package io.nuls.event.bus.service.impl;
 
 import io.nuls.core.event.BaseEvent;
 import io.nuls.core.event.CommonStringEvent;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.event.bus.event.CommonDigestEvent;
 import io.nuls.event.bus.service.intf.EventBusService;
@@ -110,6 +111,9 @@ public class EventBroadcasterImpl implements EventBroadcaster {
     @Override
     public boolean sendToNode(BaseEvent event, String nodeId) {
         BroadcastResult result = networkService.sendToNode(event, nodeId, false);
+        if(!result.isSuccess()) {
+            Log.error("send to node fail reason: " + result.getMessage());
+        }
         return result.isSuccess();
     }
 
