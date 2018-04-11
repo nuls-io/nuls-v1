@@ -211,7 +211,7 @@ public class RoundManager {
                 member.setTotalDeposit(member.getTotalDeposit().add(cd.getExtend().getDeposit()));
             }
             member.setDepositList(cdlist);
-            member.setCreditVal(calcCreditVal(member, round.getIndex() - 2));
+            member.setCreditVal(calcCreditVal(member, startCalcHeight-PocConsensusConstant.CONFIRM_BLOCK_COUNT,round.getIndex() - 2));
             ca.getExtend().setCreditVal(member.getRealCreditVal());
             ca.getExtend().setTotalDeposit(member.getTotalDeposit().getValue());
             boolean isItIn = member.getTotalDeposit().isGreaterOrEquals(PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT);
@@ -237,7 +237,7 @@ public class RoundManager {
         return memberList;
     }
 
-    private double calcCreditVal(PocMeetingMember member, long calcRoundIndex) {
+    private double calcCreditVal(PocMeetingMember member,long startHeight, long calcRoundIndex) {
         if (calcRoundIndex == 0) {
             return 0;
         }
@@ -245,8 +245,8 @@ public class RoundManager {
         if (roundStart < 0) {
             roundStart = 0;
         }
-        long blockCount = pocBlockService.getBlockCount(member.getPackingAddress(), roundStart, calcRoundIndex);
-        long sumRoundVal = punishLogDataService.getCountByRounds(member.getAgentAddress(), roundStart, calcRoundIndex, PunishType.YELLOW.getCode());
+        long blockCount = pocBlockService.getBlockCount(member.getPackingAddress(), roundStart, calcRoundIndex,startHeight);
+        long sumRoundVal = punishLogDataService.getCountByRounds(member.getAgentAddress(), roundStart, calcRoundIndex,startHeight, PunishType.YELLOW.getCode());
         double ability = DoubleUtils.div(blockCount, PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT);
 
         double penalty = DoubleUtils.div(DoubleUtils.mul(PocConsensusConstant.CREDIT_MAGIC_NUM, sumRoundVal),

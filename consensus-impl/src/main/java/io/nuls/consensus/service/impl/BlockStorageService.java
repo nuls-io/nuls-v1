@@ -238,8 +238,8 @@ public class BlockStorageService {
     }
 
 
-    public long getBlockCount(String address, long roundStart, long roundEnd) {
-        return this.headerDao.getCount(address, roundStart, roundEnd);
+    public long getBlockCount(String address, long roundStart, long roundEnd,long startHeight) {
+        return this.headerDao.getCount(address, roundStart, roundEnd, startHeight);
     }
 
     public Map<String, Object> getSumTxCount(String address, long roundStart, long roundEnd) {

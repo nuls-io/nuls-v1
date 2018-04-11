@@ -98,7 +98,7 @@ public interface BlockHeaderService extends BaseDataService<String, BlockHeaderP
      * @param roundEnd
      * @return
      */
-    long getCount(String address, long roundStart, long roundEnd);
+    long getCount(String address, long roundStart, long roundEnd,long startHeight);
 
     Map<String,Object> getSumTxCount(String address, long roundStart, long roundEnd);
 

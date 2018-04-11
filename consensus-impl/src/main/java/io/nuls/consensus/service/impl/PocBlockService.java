@@ -40,8 +40,8 @@ public class PocBlockService  {
         return INSTANCE;
     }
 
-    public long getBlockCount(String address, long roundStart, long roundEnd) {
-        return blockStorageService.getBlockCount(address,roundStart,roundEnd);
+    public long getBlockCount(String address, long roundStart, long roundEnd,long startHeight) {
+        return blockStorageService.getBlockCount(address,roundStart,roundEnd,startHeight);
     }
 
 }

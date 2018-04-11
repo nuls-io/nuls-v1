@@ -244,7 +244,7 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public long getPackingCount(String address) {
-        return blockStorageService.getBlockCount(address, -1, -1);
+        return blockStorageService.getBlockCount(address, -1L, -1L,0L);
     }
 
     @Override

@@ -145,7 +145,7 @@ public class BlockDaoImpl extends BaseDaoImpl<BlockHeaderMapper, String, BlockHe
     }
 
     @Override
-    public long getCount(String address, long roundStart, long roundEnd) {
+    public long getCount(String address, long roundStart, long roundEnd,long endHeight) {
         Map<String, Object> map = new HashMap<>();
         map.put(BlockSearchParams.SEARCH_FIELD_ADDRESS, address);
         if (roundEnd >= 0) {
@@ -154,6 +154,7 @@ public class BlockDaoImpl extends BaseDaoImpl<BlockHeaderMapper, String, BlockHe
         if (roundStart >= 0) {
             map.put(BlockSearchParams.SEARCH_FIELD_ROUND_END, roundEnd);
         }
+        map.put(BlockSearchParams.SEARCH_FIELD_HEIGHT_END,endHeight);
         return getCount(map);
     }
 

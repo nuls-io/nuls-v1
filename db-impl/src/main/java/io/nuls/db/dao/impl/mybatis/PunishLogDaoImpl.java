@@ -57,12 +57,13 @@ public class PunishLogDaoImpl extends BaseDaoImpl<PunishLogMapper, String, Punis
     }
 
     @Override
-    public long getCountByRounds(String agentAddress, long startRoundIndex, long endRoundIndex,int punishType) {
+    public long getCountByRounds(String agentAddress, long startRoundIndex, long endRoundIndex,long startHeight,int punishType) {
         Searchable searchable = new Searchable();
         searchable.addCondition("address", SearchOperator.eq, agentAddress);
         searchable.addCondition("type", SearchOperator.eq,punishType);
         searchable.addCondition("round_index", SearchOperator.gte, startRoundIndex);
         searchable.addCondition("round_index", SearchOperator.lte, endRoundIndex);
+        searchable.addCondition("height", SearchOperator.lte, startHeight);
         return this.getMapper().selectCount(searchable);
     }
 }
