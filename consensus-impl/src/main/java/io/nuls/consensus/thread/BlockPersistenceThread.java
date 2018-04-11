@@ -98,7 +98,8 @@ public class BlockPersistenceThread implements Runnable {
             //todo why
             Log.warn("block has no tx!");
             ConsensusManager.getInstance().clearCache();
-            throw new NulsRuntimeException(ErrorCode.DATA_ERROR,"the block shouldn't be null!height:"+height);
+            NulsContext.getInstance().setBestBlock(blockService.getBlock(blockManager.getStoredHeight()));
+            throw new NulsRuntimeException(ErrorCode.DATA_ERROR,"the block txs shouldn't be null!height:"+height);
         }
         boolean isSuccess;
         try {

@@ -393,15 +393,7 @@ public class NodesManager implements Runnable {
     @Override
     public void run() {
         Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-        int c = 0;
         while (running) {
-            c++;
-            if (c == 8) {
-                for (Node node : connectedNodes.values()) {
-                    System.out.println(node.toString());
-                }
-                c = 0;
-            }
             // check the connectedNodes, if it is empty, try to connect seed node,
             // if connectedNode's count enough, closing the connection with the seed node
             if (connectedNodes.isEmpty() && canConnectNodes.isEmpty()) {

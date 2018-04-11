@@ -28,10 +28,11 @@ public class SystemServiceImpl implements SystemService {
         Log.info("Received a reset system request, reason: 【" + reason + "】");
 
         NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
-        List<Node> nodeList = networkService.getAvailableNodes();
-        for(Node node:nodeList){
-            networkService.removeNode(node.getId());
-        }
+        networkService.reset();
+//        List<Node> nodeList = networkService.getAvailableNodes();
+//        for(Node node:nodeList){
+//            networkService.removeNode(node.getId());
+//        }
 
         DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
         downloadService.reset();
