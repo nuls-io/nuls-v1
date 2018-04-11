@@ -65,15 +65,11 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
     public void onEvent(TxGroupEvent event, String fromId) {
         TxGroup txGroup = event.getEventBody();
 
-        System.out.println("get tx group request : " + event.getEventBody().getBlockHash().getDigestHex());
-
         SmallBlock smallBlock = temporaryCacheManager.getSmallBlock(txGroup.getBlockHash().getDigestHex());
         if (smallBlock == null) {
             return;
         }
         BlockHeader header = smallBlock.getHeader();
-
-        System.out.println("get tx group request 1 ");
 
         Map<String, Transaction> txMap = new HashMap<>();
         for (Transaction tx : smallBlock.getSubTxList()) {
