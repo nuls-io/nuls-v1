@@ -25,11 +25,6 @@
  */
 package io.nuls.consensus.thread;
 
-import io.nuls.consensus.constant.DownloadStatus;
-import io.nuls.consensus.constant.MaintenanceStatus;
-import io.nuls.consensus.manager.ConsensusManager;
-import io.nuls.consensus.service.intf.BlockService;
-import io.nuls.consensus.service.intf.DownloadService;
 import io.nuls.consensus.service.intf.SystemService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.NulsDigestData;
