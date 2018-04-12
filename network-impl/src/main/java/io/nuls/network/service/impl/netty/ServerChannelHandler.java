@@ -86,7 +86,6 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
             return;
         }
         HandshakeEvent event = new HandshakeEvent(NetworkConstant.HANDSHAKE_SEVER_TYPE);
-        System.out.println("---sever send handshake---" + node.getId());
         getNetworkService().sendToNode(event, nodeId, false);
     }
 
