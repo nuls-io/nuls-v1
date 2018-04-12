@@ -83,6 +83,8 @@ public class DownloadProcessor extends Thread {
             return;
         }
 
+        NulsContext.getInstance().setNetBestBlockHeight(newestInfos.getNetBestHeight());
+
         QueueService<Block> blockQueue = new QueueService<Block>();
 
         String queueName = "synchronize-block-queue";
