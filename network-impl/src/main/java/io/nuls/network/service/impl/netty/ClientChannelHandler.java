@@ -68,10 +68,12 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
             NioChannelMap.add(channelId, channel);
             node.setChannelId(channelId);
             node.setStatus(Node.CONNECT);
-            getNetworkService().addConnNode(node);
+            boolean result = getNetworkService().addConnNode(node);
+            if(!result) {
+                channel.close();
+            }
         } catch (Exception e) {
-            Log.debug(nodeId);
-            e.printStackTrace();
+            Log.info("client channelActive error: " + nodeId);
         }
 
     }
