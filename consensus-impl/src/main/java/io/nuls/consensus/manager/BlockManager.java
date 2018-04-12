@@ -212,7 +212,7 @@ public class BlockManager {
             if (canCache && result.isFailed() && result.getErrorCode() != ErrorCode.ORPHAN_BLOCK && result.getErrorCode() != ErrorCode.ORPHAN_TX) {
                 Log.info("discard a block(" + block.getHeader().getHeight() + "," + block.getHeader().getHash() + ") :" + result.getMessage());
                 return false;
-            } else if (result.isFailed()) {
+            } else if (result.isFailed() && result.getErrorCode() != ErrorCode.ORPHAN_TX) {
                 cacheBlockToBuffer(block);
                 return false;
             }
@@ -223,6 +223,8 @@ public class BlockManager {
         if (!success) {
             cacheBlockToBuffer(block);
             return false;
+        }else{
+            blockCacheBuffer.removeBlock(block.getHeader().getHash().getDigestHex());
         }
         boolean needUpdateBestBlock = bifurcateProcessor.addHeader(block.getHeader());
         if (bifurcateProcessor.getChainSize() == 1) {
