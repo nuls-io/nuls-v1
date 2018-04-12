@@ -46,10 +46,13 @@ public class HandshakeEventHandler implements NetWorkEventHandler {
         }
 
         if (!isSuccess) {
-            Log.debug("localInfo: "+socketChannel.localAddress().getHostString()+":" + socketChannel.localAddress().getPort());
-            Log.debug("handshake failed, close the connetion.");
-            socketChannel.close();
-            return null;
+            if (socketChannel != null) {
+                Log.debug("localInfo: " + socketChannel.localAddress().getHostString() + ":" + socketChannel.localAddress().getPort());
+                Log.debug("handshake failed, close the connetion.");
+
+                socketChannel.close();
+                return null;
+            }
         }
         if (!isServer) {
             handshakeEvent = new HandshakeEvent(NetworkConstant.HANDSHAKE_CLIENT_TYPE);
