@@ -483,7 +483,7 @@ public class Utils {
         return sizeOfBytes(bytes);
     }
 
-    public static int sizeOfLong(Long val) {
+    public static int sizeOfVarInt(Long val) {
         return VarInt.sizeOf(val);
     }
 
@@ -491,11 +491,11 @@ public class Utils {
         return NulsConstant.INT48_VALUE_LENGTH1;
     }
 
-    public static int sizeOfInt(Integer val) {
+    public static int sizeOfVarInt(Integer val) {
         return VarInt.sizeOf(val);
     }
 
-    public static int sizeOfShort(Short val) {
+    public static int sizeOfNulsData(Short val) {
         return 2;
     }
 

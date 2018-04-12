@@ -56,7 +56,7 @@ public class ServiceManager {
     public void regService(short moduleId, Class serviceClass) {
         AssertUtil.canNotEmpty(serviceClass, ErrorCode.NULL_PARAMETER);
         if (MODULE_ID_MAP.containsKey(serviceClass)) {
-            throw new NulsRuntimeException(ErrorCode.INTF_REPETITION);
+           return;
         }
         SpringLiteContext.putBean(serviceClass);
         Set<Class> set = MODULE_INTF_MAP.get(moduleId);

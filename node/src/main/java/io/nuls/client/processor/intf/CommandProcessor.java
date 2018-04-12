@@ -37,6 +37,8 @@ public interface CommandProcessor {
 
     String getCommand();
 
+    String getHelp();
+
     String getCommandDescription();
 
     boolean argsValidate(String[] args);

@@ -53,7 +53,9 @@ public class PasswordChangeNotice extends AccountNotice<Account> {
     @Override
     public NoticeData getNotice() {
         NoticeData data = new NoticeData();
-        data.setData(this.getEventBody().getAddress());
+        if(null!=this.getEventBody()){
+            data.setData(this.getEventBody().getAddress());
+        }
         data.setMessage(ErrorCode.WALLET_PASSWORD_CHANGED);
         return data;
     }

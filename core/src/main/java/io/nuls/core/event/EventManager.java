@@ -52,9 +52,6 @@ public class EventManager {
 
     public static void putEvent(Class<? extends BaseEvent> clazz) {
         try {
-            if (EVENT_MAP.values().contains(clazz)) {
-                return;
-            }
             BaseEvent event = clazz.newInstance();
             putEvent(event.getHeader().getModuleId(), event.getHeader().getEventType(), clazz);
         } catch (Exception e) {
@@ -65,9 +62,6 @@ public class EventManager {
     private static void putEvent(short moduleId, short type, Class<? extends BaseEvent> clazz) {
         if (type == 0) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "the event type cannot be 0!,module:" + moduleId + ",eventType:" + type);
-        }
-        if (EVENT_MAP.containsKey(moduleId + KEY_SPLIT + type)) {
-            return;
         }
         EVENT_MAP.put(moduleId + "_" + type, clazz);
         cacheDataClass(clazz);

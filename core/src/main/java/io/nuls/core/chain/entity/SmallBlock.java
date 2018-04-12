@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -37,48 +37,65 @@ import java.util.List;
  * @date 2018/1/2
  */
 public class SmallBlock extends BaseNulsData {
-    private NulsDigestData blockHash;
-    private long txCount;
+    private BlockHeader header;
     private List<NulsDigestData> txHashList;
+    private List<Transaction> subTxList = new ArrayList<>();
 
     @Override
     public int size() {
-        int size = Utils.sizeOfNulsData(blockHash);
-        size += Utils.sizeOfLong(txCount);
+        int size = header.size();
+        size += Utils.sizeOfVarInt(txHashList.size());
         for (NulsDigestData hash : txHashList) {
             size += Utils.sizeOfNulsData(hash);
+        }
+        size += Utils.sizeOfVarInt(subTxList.size());
+        for (Transaction tx : subTxList) {
+            size += Utils.sizeOfNulsData(tx);
         }
         return size;
     }
 
+    /**
+     * serialize important field
+     */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(blockHash);
-        stream.writeVarInt(txCount);
+        stream.writeNulsData(header);
+        stream.writeVarInt(txHashList.size());
         for (NulsDigestData hash : txHashList) {
             stream.writeNulsData(hash);
+        }
+        stream.writeVarInt(subTxList.size());
+        for (Transaction tx : subTxList) {
+            stream.writeNulsData(tx);
         }
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        blockHash = byteBuffer.readHash();
-        txCount = (int) byteBuffer.readVarInt();
-        List<NulsDigestData> hashList = new ArrayList<>();
-        for (int i = 0; i < txCount; i++) {
-            hashList.add(byteBuffer.readHash());
+        this.header = byteBuffer.readNulsData(new BlockHeader());
+
+        this.txHashList = new ArrayList<>();
+        long hashListSize = byteBuffer.readVarInt();
+        for (int i = 0; i < hashListSize; i++) {
+            this.txHashList.add(byteBuffer.readHash());
         }
-        if (!hashList.isEmpty()) {
-            this.txHashList = hashList;
+
+        this.subTxList = new ArrayList<>();
+        long subTxListSize = byteBuffer.readVarInt();
+        for (int i = 0; i < subTxListSize; i++) {
+            Transaction tx = byteBuffer.readTransaction();
+            tx.setBlockHeight(header.getHeight());
+            this.subTxList.add(tx);
         }
     }
 
-    public NulsDigestData getBlockHash() {
-        return blockHash;
+    public BlockHeader getHeader() {
+        return header;
     }
 
-    public void setBlockHash(NulsDigestData blockHash) {
-        this.blockHash = blockHash;
+    public void setHeader(BlockHeader header) {
+        this.header = header;
     }
 
     public List<NulsDigestData> getTxHashList() {
@@ -89,11 +106,12 @@ public class SmallBlock extends BaseNulsData {
         this.txHashList = txHashList;
     }
 
-    public long getTxCount() {
-        return txCount;
+    public List<Transaction> getSubTxList() {
+        return subTxList;
     }
 
-    public void setTxCount(long txCount) {
-        this.txCount = txCount;
+    public void addConsensusTx(Transaction tx) {
+        this.subTxList.add(tx);
     }
+
 }

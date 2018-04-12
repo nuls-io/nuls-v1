@@ -30,9 +30,9 @@ import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.date.TimeService;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.*;
@@ -112,7 +112,7 @@ public class UtxoTransactionTool {
      * @param tx
      * @return
      */
-    public boolean isMine(AbstractCoinTransaction tx) throws NulsException {
+    public boolean isMine(AbstractCoinTransaction tx) {
         if (NulsContext.LOCAL_ADDRESS_LIST.isEmpty()) {
             return false;
         }
@@ -150,7 +150,7 @@ public class UtxoTransactionTool {
      * @param tx
      * @return
      */
-    public boolean isMine(AbstractCoinTransaction tx, String address) throws NulsException {
+    public boolean isMine(AbstractCoinTransaction tx, String address) {
 
         UtxoData coinData = (UtxoData) tx.getCoinData();
         //check input
@@ -170,6 +170,45 @@ public class UtxoTransactionTool {
             for (UtxoOutput output : coinData.getOutputs()) {
                 if (output.getAddress().equals(address)) {
                     tx.setTransferType(Transaction.TRANSFER_RECEIVE);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean isMySend(AbstractCoinTransaction tx) {
+        if (NulsContext.LOCAL_ADDRESS_LIST.isEmpty()) {
+            return false;
+        }
+
+        UtxoData coinData = (UtxoData) tx.getCoinData();
+        //check input
+        if (coinData.getInputs() != null && !coinData.getInputs().isEmpty()) {
+            for (UtxoInput input : coinData.getInputs()) {
+                if (input.getFrom() == null) {
+                    continue;
+                }
+                if (NulsContext.LOCAL_ADDRESS_LIST.contains(input.getFrom().getAddress())) {
+                    tx.setTransferType(Transaction.TRANSFER_SEND);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean isMySend(AbstractCoinTransaction tx, String address) {
+
+        UtxoData coinData = (UtxoData) tx.getCoinData();
+        //check input
+        if (coinData.getInputs() != null && !coinData.getInputs().isEmpty()) {
+            for (UtxoInput input : coinData.getInputs()) {
+                if (input.getFrom() == null) {
+                    continue;
+                }
+                if (input.getFrom().getAddress().equals(address)) {
+                    tx.setTransferType(Transaction.TRANSFER_SEND);
                     return true;
                 }
             }
@@ -216,6 +255,8 @@ public class UtxoTransactionTool {
             if (balance.getUnSpends().isEmpty()) {
                 ledgerCacheService.removeBalance(address);
             }
+        } catch (Exception e) {
+           Log.error(e);
         } finally {
             lock.unlock();
         }
@@ -256,18 +297,18 @@ public class UtxoTransactionTool {
             if (output.isLocked()) {
                 // check lock by time
                 if (output.getLockTime() >= genesisTime && output.getLockTime() <= currentTime) {
-                    if (OutPutStatusEnum.UTXO_CONFIRM_TIME_LOCK.equals(output.getStatus())) {
-                        output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
-                    } else if (OutPutStatusEnum.UTXO_UNCONFIRM_TIME_LOCK.equals(output.getStatus())) {
-                        output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND);
+                    if (OutPutStatusEnum.UTXO_CONFIRMED_TIME_LOCK.equals(output.getStatus())) {
+                        output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT);
+                    } else if (OutPutStatusEnum.UTXO_UNCONFIRMED_TIME_LOCK.equals(output.getStatus())) {
+                        output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRMED_UNSPENT);
                     }
                 }
                 // check lock by height
                 else if (output.getLockTime() < genesisTime && output.getLockTime() >= bestHeight) {
-                    if (OutPutStatusEnum.UTXO_CONFIRM_TIME_LOCK.equals(output.getStatus())) {
-                        output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
-                    } else if (OutPutStatusEnum.UTXO_UNCONFIRM_TIME_LOCK.equals(output.getStatus())) {
-                        output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND);
+                    if (OutPutStatusEnum.UTXO_CONFIRMED_TIME_LOCK.equals(output.getStatus())) {
+                        output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT);
+                    } else if (OutPutStatusEnum.UTXO_UNCONFIRMED_TIME_LOCK.equals(output.getStatus())) {
+                        output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRMED_UNSPENT);
                     }
                 }
             }

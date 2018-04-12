@@ -29,6 +29,8 @@ import io.nuls.core.utils.crypto.Base58;
 
 import java.io.UnsupportedEncodingException;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -57,6 +59,9 @@ public class StringUtils {
         return UUID.randomUUID().toString().replaceAll("-", "");
     }
 
+    public static String formatStringPara(String para){
+        return  (isNull(para))?null:para.trim();
+    }
     /**
      * Check the difficulty of the password
      * length between 8 and 20, the combination of characters and numbers
@@ -115,5 +120,48 @@ public class StringUtils {
             xor ^= data[i];
         }
         return xor;
+    }
+
+    public static boolean validAddressSimple(String address) {
+        if (isBlank(address)){
+            return false;
+        }
+        if (address.length() > 40) {
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean isNumeric(String str) {
+        for (int i = 0, len = str.length(); i < len; i++) {
+            if (!Character.isDigit(str.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static final Pattern NUMBER_PATTERN = Pattern.compile("-?[0-9]+(\\.[0-9]+)?");
+    public static boolean isNumber(String str) {
+        if(StringUtils.isBlank(str)){
+            return false;
+        }
+        Matcher isNum = NUMBER_PATTERN.matcher(str);
+        if (!isNum.matches()) {
+            return false;
+        }
+        return true;
+    }
+
+    private static final Pattern GT_ZERO_NUMBER_PATTERN = Pattern.compile("([1-9][0-9]*(\\.\\d+)?)|(0\\.\\d*[1-9]+0*)");
+    public static boolean isNumberGtZero(String str) {
+        if(StringUtils.isBlank(str)){
+            return false;
+        }
+        Matcher isNum = GT_ZERO_NUMBER_PATTERN.matcher(str);
+        if (!isNum.matches()) {
+            return false;
+        }
+        return true;
     }
 }

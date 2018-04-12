@@ -40,23 +40,24 @@ public class PocBlockValidatorManager {
     public static void initHeaderValidators(){
         BlockHeaderValidatorManager.addBlockDefValitor(HeaderFieldValidator.getInstance());
         BlockHeaderValidatorManager.addBlockDefValitor(HeaderHashValidator.getInstance());
-        BlockHeaderValidatorManager.addBlockDefValitor(HeaderPackerValidator.getInstance());
-        BlockHeaderValidatorManager.addBlockDefValitor(HeaderSignValidator.getInstance());
         BlockHeaderValidatorManager.addBlockDefValitor(HeaderContinuityValidator.getInstance());
+        BlockHeaderValidatorManager.addBlockDefValitor(HeaderSignValidator.getInstance());
+//        BlockHeaderValidatorManager.addBlockDefValitor(HeaderPackerValidator.getInstance());
     }
 
     public static void initBlockValidators() {
+
+        BlockValidatorManager.addBlockDefValitor(BlockMaxSizeValidator.getInstance());
+
         BlockValidatorManager.addBlockDefValitor(BlockHeaderValidator.getInstance());
 
         BlockValidatorManager.addBlockDefValitor(BlockFieldValidator.getInstance());
 
-        BlockValidatorManager.addBlockDefValitor(BlockPackerValidator.getInstance());
-
-        BlockValidatorManager.addBlockDefValitor(BlockMaxSizeValidator.getInstance());
-
         BlockValidatorManager.addBlockDefValitor(BlockTxValidator.getInstance());
 
         BlockValidatorManager.addBlockDefValitor(BlockMerkleValidator.getInstance());
+
+//        BlockValidatorManager.addBlockDefValitor(BlockConsensusValidator.getInstance());
 
     }
 }

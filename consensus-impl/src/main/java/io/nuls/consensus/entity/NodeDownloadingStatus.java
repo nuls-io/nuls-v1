@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,6 +25,7 @@ package io.nuls.consensus.entity;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * @author Niels
@@ -33,8 +34,7 @@ import java.util.Set;
 public class NodeDownloadingStatus {
 
     private String nodeId;
-    private long start;
-    private long end;
+    private Set<Long> downloadingSet = new HashSet<>();
     private Set<Long> downloadedSet = new HashSet<>();
     private long updateTime;
 
@@ -46,21 +46,6 @@ public class NodeDownloadingStatus {
         this.nodeId = nodeId;
     }
 
-    public long getStart() {
-        return start;
-    }
-
-    public void setStart(long start) {
-        this.start = start;
-    }
-
-    public long getEnd() {
-        return end;
-    }
-
-    public void setEnd(long end) {
-        this.end = end;
-    }
 
     public long getUpdateTime() {
         return updateTime;
@@ -71,7 +56,7 @@ public class NodeDownloadingStatus {
     }
 
     public boolean containsHeight(long height) {
-        return height >= start && height <= end;
+        return downloadingSet.contains(height);
     }
 
     public synchronized void downloaded(long height) {
@@ -79,10 +64,12 @@ public class NodeDownloadingStatus {
     }
 
     public boolean finished() {
-        return downloadedSet.size()==(end-start+1);
+        return downloadedSet.size() == downloadingSet.size();
     }
 
-    public Set<Long> getDownloadedSet() {
-        return downloadedSet;
+    public void setDownloadingSet(long start, long end) {
+        for (long i = start; i <= end; i++) {
+            downloadingSet.add(i);
+        }
     }
 }

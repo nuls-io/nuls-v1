@@ -26,6 +26,8 @@
 
 package io.nuls.rpc.sdk.entity;
 
+import io.nuls.rpc.sdk.utils.StringUtils;
+
 import java.util.Map;
 
 /**
@@ -41,14 +43,14 @@ public class InputDto {
 
     private String address;
 
-    private Double value;
+    private Long value;
 
     public InputDto(Map<String, Object> map){
         index = (Integer) map.get("index");
         fromHash = (String) map.get("fromHash");
         fromIndex = (Integer) map.get("fromIndex");
         address = (String) map.get("address");
-        value = (Double) map.get("value");
+        value = StringUtils.parseLong(map.get("value"));
     }
 
     public Integer getIndex() {
@@ -57,22 +59,6 @@ public class InputDto {
 
     public void setIndex(Integer index) {
         this.index = index;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public Double getValue() {
-        return value;
-    }
-
-    public void setValue(Double value) {
-        this.value = value;
     }
 
     public String getFromHash() {
@@ -89,5 +75,21 @@ public class InputDto {
 
     public void setFromIndex(Integer fromIndex) {
         this.fromIndex = fromIndex;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public Long getValue() {
+        return value;
+    }
+
+    public void setValue(Long value) {
+        this.value = value;
     }
 }

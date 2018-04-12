@@ -27,11 +27,11 @@
 package io.nuls.consensus.entity.validator.tx;
 
 import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
-import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
-import io.nuls.core.constant.ErrorCode;
+import io.nuls.consensus.manager.ConsensusManager;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 
@@ -45,13 +45,14 @@ import java.util.List;
 public class AgentCountValidator implements NulsDataValidator<RegisterAgentTransaction> {
 
     private ConsensusCacheManager consensusCacheManager = ConsensusCacheManager.getInstance();
-
+    private ConsensusManager consensusManager = ConsensusManager.getInstance();
     @Override
     public ValidateResult validate(RegisterAgentTransaction tx) {
         ValidateResult result = ValidateResult.getSuccessResult();
         Agent agent = tx.getTxData().getExtend();
         String agentName = agent.getAgentName();
-        List<Consensus<Agent>> caList = consensusCacheManager.getCachedAgentList();
+        //+2原因：验证的交易可能属于a高度，从cache中获取它之前的抵押时，只能获取某个高度之前的，所以是当前最新高度a-1之后的第二个高度
+        List<Consensus<Agent>> caList = consensusCacheManager.getAliveAgentList(NulsContext.getInstance().getBestHeight()+2);
         if (caList != null) {
             for (Consensus<Agent> ca : caList) {
                 if (ca.getHexHash().equals(tx.getTxData().getHexHash())) {
@@ -71,6 +72,9 @@ public class AgentCountValidator implements NulsDataValidator<RegisterAgentTrans
                 }
                 if (agentName.equals(ca.getExtend().getAgentName())) {
                     return ValidateResult.getFailedResult("AgentName repetition!");
+                }
+                if(consensusManager.getSeedNodeList().contains(tx.getTxData().getAddress())||consensusManager.getSeedNodeList().contains(agent.getPackingAddress())){
+                    return ValidateResult.getFailedResult("The address is a seed address");
                 }
             }
         }

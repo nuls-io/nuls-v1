@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -54,6 +54,8 @@ import io.nuls.ledger.util.UtxoTransactionTool;
 import io.nuls.ledger.util.UtxoTransferTool;
 
 import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Niels
@@ -72,6 +74,8 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
     private AccountService accountService;
 
     private UtxoCoinManager coinManager = UtxoCoinManager.getInstance();
+
+    private Lock lock = new ReentrantLock();
 
     @Override
     public CoinData parse(NulsByteBuffer byteBuffer) throws NulsException {
@@ -93,6 +97,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         List<UtxoOutput> unSpends = new ArrayList<>();
         Set<String> addressSet = new HashSet<>();
         try {
+            lock.lock();
             //update inputs referenced utxo status
             for (int i = 0; i < utxoData.getInputs().size(); i++) {
                 UtxoInput input = utxoData.getInputs().get(i);
@@ -103,10 +108,10 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 if (!unSpend.isUsable()) {
                     throw new NulsRuntimeException(ErrorCode.UTXO_UNUSABLE);
                 }
-                if (OutPutStatusEnum.UTXO_CONFIRM_UNSPEND == unSpend.getStatus()) {
-                    unSpend.setStatus(OutPutStatusEnum.UTXO_CONFIRM_SPEND);
-                } else if (OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND == unSpend.getStatus()) {
-                    unSpend.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_SPEND);
+                if (OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT == unSpend.getStatus()) {
+                    unSpend.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_SPENT);
+                } else if (OutPutStatusEnum.UTXO_UNCONFIRMED_UNSPENT == unSpend.getStatus()) {
+                    unSpend.setStatus(OutPutStatusEnum.UTXO_UNCONFIRMED_SPENT);
                 }
                 unSpends.add(unSpend);
                 addressSet.add(unSpend.getAddress());
@@ -117,10 +122,10 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         } catch (Exception e) {
             //rollback
             for (UtxoOutput output : unSpends) {
-                if (OutPutStatusEnum.UTXO_CONFIRM_SPEND.equals(output.getStatus())) {
-                    ledgerCacheService.updateUtxoStatus(output.getKey(), OutPutStatusEnum.UTXO_CONFIRM_UNSPEND, OutPutStatusEnum.UTXO_CONFIRM_SPEND);
-                } else if (OutPutStatusEnum.UTXO_UNCONFIRM_SPEND.equals(output.getStatus())) {
-                    ledgerCacheService.updateUtxoStatus(output.getKey(), OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND, OutPutStatusEnum.UTXO_UNCONFIRM_SPEND);
+                if (OutPutStatusEnum.UTXO_CONFIRMED_SPENT.equals(output.getStatus())) {
+                    ledgerCacheService.updateUtxoStatus(output.getKey(), OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT, OutPutStatusEnum.UTXO_CONFIRMED_SPENT);
+                } else if (OutPutStatusEnum.UTXO_UNCONFIRMED_SPENT.equals(output.getStatus())) {
+                    ledgerCacheService.updateUtxoStatus(output.getKey(), OutPutStatusEnum.UTXO_UNCONFIRMED_UNSPENT, OutPutStatusEnum.UTXO_UNCONFIRMED_SPENT);
                 }
             }
             // remove cache new utxo
@@ -130,6 +135,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             }
             throw e;
         } finally {
+            lock.unlock();
             //calc balance
             for (String address : addressSet) {
                 UtxoTransactionTool.getInstance().calcBalance(address, false);
@@ -140,12 +146,12 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
     private void approveProcessOutput(List<UtxoOutput> outputs, Transaction tx, Set<String> addressSet) {
         for (int i = 0; i < outputs.size(); i++) {
             UtxoOutput output = outputs.get(i);
-            if (tx instanceof LockNulsTransaction && i == 0) {
-                output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_CONSENSUS_LOCK);
+            if (tx instanceof LockNulsTransaction && i == 0 && output.getLockTime() == 0) {
+                output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRMED_CONSENSUS_LOCK);
             } else if (output.getLockTime() > 0) {
-                output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_TIME_LOCK);
+                output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRMED_TIME_LOCK);
             } else {
-                output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND);
+                output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRMED_UNSPENT);
             }
             ledgerCacheService.putUtxo(output.getKey(), output);
             addressSet.add(output.getAddress());
@@ -168,7 +174,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         List<UtxoOutputPo> spendPoList = new ArrayList<>();
         List<TxAccountRelationPo> txRelations = new ArrayList<>();
         Set<String> addressSet = new HashSet<>();
-
+        lock.lock();
         try {
             processDataInput(utxoData, inputPoList, spends, spendPoList, addressSet);
 
@@ -184,14 +190,14 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                     throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "use a not legal utxo");
                 }
 
-                if (OutPutStatusEnum.UTXO_UNCONFIRM_CONSENSUS_LOCK == output.getStatus()) {
-                    output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_CONSENSUS_LOCK);
-                } else if (OutPutStatusEnum.UTXO_UNCONFIRM_TIME_LOCK == output.getStatus()) {
-                    output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_TIME_LOCK);
-                } else if (OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND == output.getStatus()) {
-                    output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
-                } else if (OutPutStatusEnum.UTXO_UNCONFIRM_SPEND == output.getStatus()) {
-                    output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_SPEND);
+                if (OutPutStatusEnum.UTXO_UNCONFIRMED_CONSENSUS_LOCK == output.getStatus()) {
+                    output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_CONSENSUS_LOCK);
+                } else if (OutPutStatusEnum.UTXO_UNCONFIRMED_TIME_LOCK == output.getStatus()) {
+                    output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_TIME_LOCK);
+                } else if (OutPutStatusEnum.UTXO_UNCONFIRMED_UNSPENT == output.getStatus()) {
+                    output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT);
+                } else if (OutPutStatusEnum.UTXO_UNCONFIRMED_SPENT == output.getStatus()) {
+                    output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_SPENT);
                 }
 
                 UtxoOutputPo outputPo = UtxoTransferTool.toOutputPojo(output);
@@ -227,6 +233,8 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 //                ledgerCacheService.updateUtxoStatus(spend.getKey(), UtxoOutput.UTXO_CONFIRM_LOCK, UtxoOutput.UTXO_SPENT);
 //            }
             throw e;
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -242,7 +250,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 throw new NulsRuntimeException(ErrorCode.DATA_NOT_FOUND, "the output is not exist!");
             }
             //change utxo status,
-            update = ledgerCacheService.updateUtxoStatus(spend.getKey(), OutPutStatusEnum.UTXO_SPENT, OutPutStatusEnum.UTXO_CONFIRM_SPEND);
+            update = ledgerCacheService.updateUtxoStatus(spend.getKey(), OutPutStatusEnum.UTXO_SPENT, OutPutStatusEnum.UTXO_CONFIRMED_SPENT);
             if (!update) {
                 Log.error("-----------------------------------save() input referenced status is" + spend.getStatus().name());
                 throw new NulsRuntimeException(ErrorCode.UTXO_STATUS_CHANGE);
@@ -258,13 +266,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         for (int i = 0; i < spends.size(); i++) {
             ledgerCacheService.removeUtxo(spends.get(i).getKey());
         }
-//        for (int i = 0; i < utxoData.getOutputs().size(); i++) {
-//            UtxoOutput output = utxoData.getOutputs().get(i);
-//            output = ledgerCacheService.getUtxo(output.getKey());
-//            if (output.getStatus() > 2) {
-//                output.setStatus(output.getStatus() - 3);
-//            }
-//        }
     }
 
     @Override
@@ -281,15 +282,19 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 UtxoOutput from = ledgerCacheService.getUtxo(input.getKey());
                 if (from != null) {
                     if (from.getStatus() == OutPutStatusEnum.UTXO_SPENT) {
-                        from.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
-                        addressSet.add(from.getAddress());
+                        from.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT);
+                    } else if (from.getStatus() == OutPutStatusEnum.UTXO_CONFIRMED_SPENT) {
+                        from.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT);
+                    } else if (from.getStatus() == OutPutStatusEnum.UTXO_UNCONFIRMED_SPENT) {
+                        from.setStatus(OutPutStatusEnum.UTXO_UNCONFIRMED_UNSPENT);
                     }
-//                    else if (from.getStatus() == OutPutStatusEnum.UTXO_CONFIRM_SPEND) {
-//                        from.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
-//                    } else if (from.getStatus() == OutPutStatusEnum.UTXO_UNCONFIRM_SPEND) {
-//                        from.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND);
-//                    }
+                    addressSet.add(from.getAddress());
                 }
+            }
+            for (int i = utxoData.getOutputs().size() - 1; i >= 0; i--) {
+                UtxoOutput output = utxoData.getOutputs().get(i);
+                ledgerCacheService.removeUtxo(output.getKey());
+                addressSet.add(output.getAddress());
             }
         } else if (tx.getStatus().equals(TxStatusEnum.CONFIRMED)) {
             //process output
@@ -321,6 +326,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             }
             relationDataService.deleteRelation(tx.getHash().getDigestHex(), addressSet);
         }
+
         for (String address : addressSet) {
             UtxoTransactionTool.getInstance().calcBalance(address, false);
         }
@@ -328,121 +334,129 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 
     @Override
     public CoinData createByTransferData(Transaction tx, CoinTransferData coinParam, String password) throws NulsException {
-        UtxoData utxoData = new UtxoData();
-        List<UtxoInput> inputs = new ArrayList<>();
-        List<UtxoOutput> outputs = new ArrayList<>();
-        // Na totalNa = Na.ZERO;
+        lock.lock();
+        try {
+            UtxoData utxoData = new UtxoData();
+            List<UtxoInput> inputs = new ArrayList<>();
+            List<UtxoOutput> outputs = new ArrayList<>();
+            // Na totalNa = Na.ZERO;
 
-        if (coinParam.getTotalNa().equals(Na.ZERO)) {
+            if (coinParam.getTotalNa().equals(Na.ZERO)) {
+                utxoData.setInputs(inputs);
+                utxoData.setOutputs(outputs);
+                return utxoData;
+            }
+
+            long inputValue = 0;
+            if (!coinParam.getFrom().isEmpty()) {
+                //find unSpends to create inputs for this tx
+                Na totalFee = Na.ZERO;
+                if (tx instanceof UnlockNulsTransaction) {
+                    totalFee = coinParam.getFee();
+                } else {
+                    totalFee = coinParam.getTotalNa().add(coinParam.getFee());
+                }
+
+                List<UtxoOutput> unSpends = coinManager.getAccountsUnSpend(coinParam.getFrom(), totalFee);
+                if (unSpends.isEmpty()) {
+                    throw new NulsException(ErrorCode.BALANCE_NOT_ENOUGH);
+                }
+
+                for (int i = 0; i < unSpends.size(); i++) {
+                    UtxoOutput output = unSpends.get(i);
+                    UtxoInput input = new UtxoInput();
+                    input.setFrom(output);
+                    input.setFromHash(output.getTxHash());
+                    input.setFromIndex(output.getIndex());
+                    input.setTxHash(tx.getHash());
+                    input.setIndex(i);
+                    inputValue += output.getValue();
+
+                    inputs.add(input);
+                }
+            }
+
+            //get EcKey for output's script
+            Account account = null;
+            byte[] priKey = null;
+            if (coinParam.getPriKey() != null) {
+                priKey = coinParam.getPriKey();
+            } else if (!coinParam.getFrom().isEmpty()) {
+                account = accountService.getAccount(coinParam.getFrom().get(0));
+                if (account == null) {
+                    throw new NulsException(ErrorCode.ACCOUNT_NOT_EXIST);
+                }
+                if (account.isEncrypted() && account.isLocked()) {
+                    if (!account.unlock(password)) {
+                        throw new NulsException(ErrorCode.PASSWORD_IS_WRONG);
+                    }
+                    priKey = account.getPriKey();
+                    account.lock();
+                } else {
+                    priKey = account.getPriKey();
+                }
+            }
+
+            //create outputs
+            int i = 0;
+            long outputValue = 0;
+            for (Map.Entry<String, List<Coin>> entry : coinParam.getToMap().entrySet()) {
+                String address = entry.getKey();
+                List<Coin> coinList = entry.getValue();
+                for (Coin coin : coinList) {
+                    UtxoOutput output = new UtxoOutput();
+                    output.setAddress(address);
+                    output.setValue(coin.getNa().getValue());
+                    if (output.getLockTime() > 0) {
+                        output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRMED_TIME_LOCK);
+                    } else if (tx instanceof LockNulsTransaction) {
+                        output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRMED_CONSENSUS_LOCK);
+                    } else {
+                        output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRMED_UNSPENT);
+                    }
+
+                    output.setIndex(i);
+                    P2PKHScript p2PKHScript = new P2PKHScript(new NulsDigestData(NulsDigestData.DIGEST_ALG_SHA160, new Address(address).getHash160()));
+                    output.setP2PKHScript(p2PKHScript);
+                    if (coin.getUnlockHeight() > 0) {
+                        output.setLockTime(coin.getUnlockHeight());
+                    } else if (coin.getUnlockTime() > 0) {
+                        output.setLockTime(coin.getUnlockTime());
+                    } else {
+                        output.setLockTime(0L);
+                    }
+                    output.setTxHash(tx.getHash());
+                    outputValue += output.getValue();
+                    outputs.add(output);
+
+                    i++;
+                }
+            }
+
+            //the balance leave to myself
+            long balance = 0;
+            if (outputValue > 0) {
+                balance = inputValue - outputValue - coinParam.getFee().getValue();
+            } else {
+                balance = inputValue - coinParam.getTotalNa().getValue() - coinParam.getFee().getValue();
+            }
+            if (balance > 0) {
+                UtxoOutput output = new UtxoOutput();
+                output.setAddress(inputs.get(0).getFrom().getAddress());
+                output.setValue(balance);
+                output.setIndex(i);
+                output.setTxHash(tx.getHash());
+                output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRMED_UNSPENT);
+                P2PKHScript p2PKHScript = new P2PKHScript(new NulsDigestData(NulsDigestData.DIGEST_ALG_SHA160, account.getHash160()));
+                output.setP2PKHScript(p2PKHScript);
+                outputs.add(output);
+            }
             utxoData.setInputs(inputs);
             utxoData.setOutputs(outputs);
             return utxoData;
+        } finally {
+            lock.unlock();
         }
-
-        long inputValue = 0;
-        if (!coinParam.getFrom().isEmpty()) {
-            //find unSpends to create inputs for this tx
-            Na totalFee = Na.ZERO;
-            if (tx instanceof UnlockNulsTransaction) {
-                totalFee = coinParam.getFee();
-            } else {
-                totalFee = coinParam.getTotalNa().add(coinParam.getFee());
-            }
-
-            List<UtxoOutput> unSpends = coinManager.getAccountsUnSpend(coinParam.getFrom(), totalFee);
-            if (unSpends.isEmpty()) {
-                throw new NulsException(ErrorCode.BALANCE_NOT_ENOUGH);
-            }
-
-            for (int i = 0; i < unSpends.size(); i++) {
-                UtxoOutput output = unSpends.get(i);
-                UtxoInput input = new UtxoInput();
-                input.setFrom(output);
-                input.setFromHash(output.getTxHash());
-                input.setFromIndex(output.getIndex());
-                input.setTxHash(tx.getHash());
-                input.setIndex(i);
-                inputValue += output.getValue();
-
-                inputs.add(input);
-            }
-        }
-
-        //get EcKey for output's script
-        Account account = null;
-        byte[] priKey = null;
-        if (coinParam.getPriKey() != null) {
-            priKey = coinParam.getPriKey();
-        } else if (!coinParam.getFrom().isEmpty()) {
-            account = accountService.getAccount(coinParam.getFrom().get(0));
-            if (account == null) {
-                throw new NulsException(ErrorCode.ACCOUNT_NOT_EXIST);
-            }
-            if (account.isEncrypted() && account.isLocked()) {
-                if (!account.unlock(password)) {
-                    throw new NulsException(ErrorCode.PASSWORD_IS_WRONG);
-                }
-                priKey = account.getPriKey();
-                account.lock();
-            } else {
-                priKey = account.getPriKey();
-            }
-        }
-
-        //create outputs
-        int i = 0;
-        long outputValue = 0;
-        for (Map.Entry<String, List<Coin>> entry : coinParam.getToMap().entrySet()) {
-            String address = entry.getKey();
-            List<Coin> coinList = entry.getValue();
-            for (Coin coin : coinList) {
-                UtxoOutput output = new UtxoOutput();
-                output.setAddress(address);
-                output.setValue(coin.getNa().getValue());
-                if (output.getLockTime() > 0) {
-                    output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_TIME_LOCK);
-                } else if (tx instanceof LockNulsTransaction) {
-                    output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_CONSENSUS_LOCK);
-                } else {
-                    output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND);
-                }
-
-                output.setIndex(i);
-                P2PKHScript p2PKHScript = new P2PKHScript(new NulsDigestData(NulsDigestData.DIGEST_ALG_SHA160, new Address(address).getHash160()));
-                output.setP2PKHScript(p2PKHScript);
-                if (coin.getUnlockHeight() > 0) {
-                    output.setLockTime(coin.getUnlockHeight());
-                } else if (coin.getUnlockTime() > 0) {
-                    output.setLockTime(coin.getUnlockTime());
-                } else {
-                    output.setLockTime(0L);
-                }
-                output.setTxHash(tx.getHash());
-                outputValue += output.getValue();
-                outputs.add(output);
-
-                i++;
-            }
-        }
-
-        //the balance leave to myself
-        long balance = inputValue - outputValue - coinParam.getFee().getValue();
-        if (balance > 0) {
-            UtxoOutput output = new UtxoOutput();
-            //todo script
-            output.setAddress(inputs.get(0).getFrom().getAddress());
-            output.setValue(balance);
-            output.setIndex(i);
-            output.setTxHash(tx.getHash());
-            output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND);
-            P2PKHScript p2PKHScript = new P2PKHScript(new NulsDigestData(NulsDigestData.DIGEST_ALG_SHA160, account.getHash160()));
-            output.setP2PKHScript(p2PKHScript);
-            outputs.add(output);
-        }
-
-        utxoData.setInputs(inputs);
-        utxoData.setOutputs(outputs);
-        return utxoData;
     }
 
     @Override
@@ -454,7 +468,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             }
         }
         if (tx instanceof LockNulsTransaction) {
-            utxoData.getOutputs().get(0).setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_CONSENSUS_LOCK);
+            utxoData.getOutputs().get(0).setStatus(OutPutStatusEnum.UTXO_UNCONFIRMED_CONSENSUS_LOCK);
         }
 //        Na totalNa = Na.ZERO;
 //        if (null != utxoData.getOutputs()) {

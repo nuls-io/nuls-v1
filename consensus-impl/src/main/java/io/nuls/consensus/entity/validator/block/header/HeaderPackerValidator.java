@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,30 +24,27 @@
 package io.nuls.consensus.entity.validator.block.header;
 
 import io.nuls.account.entity.Address;
-import io.nuls.account.util.AccountTool;
 import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.entity.meeting.PocMeetingMember;
 import io.nuls.consensus.entity.meeting.PocMeetingRound;
-import io.nuls.consensus.manager.ConsensusManager;
+import io.nuls.consensus.manager.RoundManager;
 import io.nuls.consensus.service.intf.BlockService;
-import io.nuls.consensus.thread.ConsensusMeetingRunner;
+import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
-
-import java.util.Arrays;
 
 /**
  * @author Niels
  * @date 2017/11/17
  */
 public class HeaderPackerValidator implements NulsDataValidator<BlockHeader> {
-    private static final String ERROR_MESSAGE = "block header packer check failed";
     public static final HeaderPackerValidator INSTANCE = new HeaderPackerValidator();
-    private ConsensusManager consensusManager = ConsensusManager.getInstance();
+    public RoundManager roundManager = RoundManager.getInstance();
+
+    public BlockService blockService;
 
     private HeaderPackerValidator() {
     }
@@ -58,62 +55,50 @@ public class HeaderPackerValidator implements NulsDataValidator<BlockHeader> {
 
     @Override
     public ValidateResult validate(BlockHeader header) {
-        BlockHeader preHeader = null;
-        try {
-            preHeader = NulsContext.getServiceBean(BlockService.class).getBlockHeader(header.getPreHash());
-        } catch (NulsException e) {
-            //todo
-        }
-
-        PocMeetingRound currentRound = consensusManager.getCurrentRound();
         if (header.getHeight() == 0) {
             return ValidateResult.getSuccessResult();
         }
-        if (preHeader == null) {
-            return ValidateResult.getSuccessResult();
-        }
-        BlockRoundData roundData = null;
-        try {
-            roundData = new BlockRoundData(preHeader.getExtend());
-        } catch (NulsException e) {
-            Log.error(e);
-            return ValidateResult.getFailedResult(e.getMessage());
-        }
-        if (null == currentRound) {
-            return ValidateResult.getSuccessResult();
-        }
-        if (currentRound.getIndex() == roundData.getRoundIndex() && currentRound.getMemberCount() > (roundData.getPackingIndexOfRound() + 1)) {
-            if (currentRound.indexOf(header.getPackingAddress()) <= roundData.getPackingIndexOfRound()) {
-                return ValidateResult.getFailedResult(ERROR_MESSAGE);
+        BlockRoundData roundData = new BlockRoundData(header.getExtend());
+        BlockRoundData preBlockRoundData;
+        String preHash = header.getPreHash().getDigestHex();
+        while (true) {
+            Block preBlock = getBlockService().getBlock(preHash);
+            if (null == preBlock) {
+                return ValidateResult.getFailedResult(ErrorCode.ORPHAN_BLOCK, "pre block not exist!");
+            }
+            preBlockRoundData = new BlockRoundData(preBlock.getHeader().getExtend());
+            preHash = preBlock.getHeader().getPreHash().getDigestHex();
+            if (preBlockRoundData.getRoundIndex() > roundData.getRoundIndex()) {
+                return ValidateResult.getFailedResult("block round calc wrong!");
+            }
+            if (preBlockRoundData.getRoundIndex() < roundData.getRoundIndex()) {
+                break;
             }
         }
+        PocMeetingRound round = roundManager.getRound(header,preBlockRoundData.getRoundIndex(), roundData.getRoundIndex(), true);
 
-        byte[] packingHash160 = AccountTool.getHash160ByAddress(header.getPackingAddress());
-        byte[] hash160InScriptSig = header.getScriptSig().getSignerHash160();
-
-        if(!Arrays.equals(packingHash160,hash160InScriptSig)){
-            return ValidateResult.getFailedResult(ERROR_MESSAGE);
+        if (null == round) {
+            return ValidateResult.getFailedResult(ErrorCode.ORPHAN_BLOCK, "round is null");
         }
-        BlockRoundData nowRoundData = null;
-        try {
-            nowRoundData = new BlockRoundData(header.getExtend());
-        } catch (NulsException e) {
-            Log.error(e);
-            return ValidateResult.getFailedResult(ERROR_MESSAGE);
+        if(round.getPreRound().getIndex()!=preBlockRoundData.getRoundIndex()){
+            System.out.println();
         }
-        if (!isAdjacent(roundData, nowRoundData)) {
-            return ValidateResult.getFailedResult(ERROR_MESSAGE);
+        if (round.getStartTime() != roundData.getRoundStartTime()) {
+            return ValidateResult.getFailedResult("round start time is not inconsistent!");
+        }
+        if (round.getMemberCount() != roundData.getConsensusMemberCount()) {
+            return ValidateResult.getFailedResult("round member count is not inconsistent!");
+        }
+        PocMeetingMember member = round.getMember(roundData.getPackingIndexOfRound());
+        if (member == null || !member.getPackingAddress().equals(Address.fromHashs(header.getPackingAddress()).getBase58())) {
+            return ValidateResult.getFailedResult("round index is not inconsistent!");
         }
         return ValidateResult.getSuccessResult();
     }
-
-    private boolean isAdjacent(BlockRoundData roundData, BlockRoundData nowRoundData) {
-//        if (roundData.getRoundIndex() == nowRoundData.getRoundIndex()) {
-//            return roundData.getPackingIndexOfRound() + 1 == nowRoundData.getPackingIndexOfRound();
-//        } else if (roundData.getRoundIndex() + 1 == nowRoundData.getRoundIndex()) {
-//            return 1 == nowRoundData.getPackingIndexOfRound();
-//        }
-//        return false;
-        return true;
+    public BlockService getBlockService() {
+        if (null == blockService) {
+            blockService = NulsContext.getServiceBean(BlockService.class);
+        }
+        return blockService;
     }
 }

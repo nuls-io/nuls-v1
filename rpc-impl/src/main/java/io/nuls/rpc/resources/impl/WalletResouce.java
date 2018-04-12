@@ -31,6 +31,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.MD5Util;
 import io.nuls.core.utils.json.JSONUtils;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.ledger.service.intf.LedgerService;
@@ -80,6 +81,9 @@ public class WalletResouce {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult password(@FormParam("password") String password) {
         Result result = this.accountService.encryptAccount(password);
+        if(result.isSuccess()){
+            NulsContext.setCachedPasswordOfWallet(password);
+        }
         return new RpcResult(result);
     }
 
@@ -88,6 +92,9 @@ public class WalletResouce {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult password(AccountParamForm form) {
         Result result = this.accountService.changePassword(form.getPassword(), form.getNewPassword());
+        if(result.isSuccess()){
+            NulsContext.setCachedPasswordOfWallet(form.getNewPassword());
+        }
         return new RpcResult(result);
     }
 
@@ -133,7 +140,7 @@ public class WalletResouce {
                 form.getPrikey().length() > 100) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
-        NulsContext.CACHED_PASSWORD_OF_WALLET = form.getPassword();
+        NulsContext.setCachedPasswordOfWallet(form.getPassword());
 
         Result result = null;
         try {
@@ -206,21 +213,21 @@ public class WalletResouce {
                 try {
                     read.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                   Log.error(e);
                 }
             }
             if (bufferedReader != null) {
                 try {
                     bufferedReader.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                   Log.error(e);
                 }
             }
             if (in != null) {
                 try {
                     in.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                   Log.error(e);
                 }
             }
         }

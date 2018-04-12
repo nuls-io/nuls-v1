@@ -57,8 +57,13 @@ public class TransactionDto {
         this.setTransferType(tx.getTransferType());
         this.setIndex(tx.getIndex());
         this.size = tx.getSize();
-        this.confirmCount = bestBlockHeight - this.blockHeight;
+        if (this.blockHeight > 0 || TxStatusEnum.CONFIRMED.equals(tx.getStatus())) {
+            this.confirmCount = bestBlockHeight - this.blockHeight;
+        } else {
+            this.confirmCount = 0L;
+        }
         if (TxStatusEnum.CONFIRMED.equals(tx.getStatus())) {
+
             this.status = 1;
         } else {
             this.status = 0;
@@ -71,7 +76,9 @@ public class TransactionDto {
                 this.setRemark(Hex.encode(tx.getRemark()));
             }
         }
-        this.setScriptSig(Hex.encode(tx.getScriptSig()));
+        if(tx.getScriptSig()!=null){
+            this.setScriptSig(Hex.encode(tx.getScriptSig()));
+        }
 
         List<InputDto> inputs = new ArrayList<>();
         List<OutputDto> outputs = new ArrayList<>();
@@ -116,7 +123,6 @@ public class TransactionDto {
             } else {
                 this.transferType = 1;
             }
-
             this.value = value;
         }
     }

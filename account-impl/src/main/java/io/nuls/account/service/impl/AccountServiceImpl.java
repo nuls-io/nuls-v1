@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -42,6 +42,7 @@ import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.*;
+import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.script.P2PKHScriptSig;
@@ -250,6 +251,29 @@ public class AccountServiceImpl implements AccountService {
         this.accountCacheService.putAccountList(list);
         NulsContext.LOCAL_ADDRESS_LIST = addressList;
         return list;
+    }
+
+    @Override
+    public Page<Account> getAccountList(int pageNumber, int pageSize) {
+        List<Account> list = this.accountCacheService.getAccountList();
+        if (list.isEmpty()) {
+            return new Page();
+        }
+
+        Page<Account> page = new Page<>(pageNumber, pageSize);
+        page.setTotal(list.size());
+        int start = (pageNumber - 1) * pageSize;
+        if (start >= list.size()) {
+            return page;
+        }
+
+        int end = pageNumber * pageSize;
+        if (end > list.size()) {
+            end = list.size();
+        }
+        list = list.subList(start, end);
+        page.setList(list);
+        return page;
     }
 
     @Override
@@ -551,15 +575,23 @@ public class AccountServiceImpl implements AccountService {
             }
 
             event.setEventBody(aliasTx);
-            eventBroadcaster.broadcastAndCache(event, true);
-            SetAliasNotice notice = new SetAliasNotice();
-            notice.setEventBody(aliasTx);
-            eventBroadcaster.publishToLocal(notice);
+            List<String> nodeList = eventBroadcaster.broadcastAndCache(event, true);
+            if (nodeList.size() > 0) {
+                SetAliasNotice notice = new SetAliasNotice();
+                notice.setEventBody(aliasTx);
+                eventBroadcaster.publishToLocal(notice);
+                Result result = Result.getSuccess();
+                result.setObject(aliasTx.getHash().getDigestHex());
+                return result;
+            } else {
+                Result result = Result.getFailed(ErrorCode.NET_BROADCAST_FAIL);
+                return result;
+            }
         } catch (Exception e) {
             Log.error(e);
             return new Result(false, e.getMessage());
         }
-        return new Result(true, "OK");
+
     }
 
     //    @Override
@@ -740,14 +772,14 @@ public class AccountServiceImpl implements AccountService {
                 }
                 defaultAcct.lock();
             } catch (NulsException e) {
-                e.printStackTrace();
+               Log.error(e);
                 return Result.getFailed("ErrorCode.PASSWORD_IS_WRONG");
             }
         }
         try {
             account.encrypt(password);
         } catch (NulsException e) {
-            e.printStackTrace();
+           Log.error(e);
         }
 
         // save db

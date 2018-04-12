@@ -25,6 +25,7 @@ package io.nuls.ledger.entity;
 
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.Na;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -77,9 +78,9 @@ public class UtxoData extends CoinData {
     private int getListByteSize(List list) {
         int size = 0;
         if (list == null) {
-            size += Utils.sizeOfInt(0);
+            size += Utils.sizeOfVarInt(0);
         } else {
-            size += Utils.sizeOfInt(list.size());
+            size += Utils.sizeOfVarInt(list.size());
             for (int i = 0; i < list.size(); i++) {
                 size += Utils.sizeOfNulsData((BaseNulsData) list.get(i));
             }
@@ -122,12 +123,14 @@ public class UtxoData extends CoinData {
     }
 
     @Override
-    public Na getTotalNa() {
+    public Na getTotalNa() throws NulsException {
         if (null == this.totalNa) {
             Set<String> addressSet = new HashSet<>();
-
             if (null != this.getInputs()) {
                 for (UtxoInput input : this.getInputs()) {
+                    if (input.getFrom() == null) {
+                        throw new NulsException(ErrorCode.ORPHAN_TX);
+                    }
                     addressSet.add(input.getFrom().getAddress());
                 }
             }

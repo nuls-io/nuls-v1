@@ -44,7 +44,6 @@ import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.UtxoInput;
 import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
-import io.nuls.ledger.entity.tx.LockNulsTransaction;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -76,17 +75,17 @@ public class UtxoTransferTool {
         if (po.getStatus() == UtxoOutputPo.USABLE) {
             if (po.getLockTime() > 0) {
                 if (po.getLockTime() >= genesisTime && po.getLockTime() > currentTime) {
-                    output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_TIME_LOCK);
+                    output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_TIME_LOCK);
                 } else if (po.getLockTime() < genesisTime && po.getLockTime() > bestHeight) {
-                    output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_TIME_LOCK);
+                    output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_TIME_LOCK);
                 } else {
-                    output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
+                    output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT);
                 }
             } else {
-                output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
+                output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT);
             }
         } else if (po.getStatus() == UtxoOutputPo.LOCKED) {
-            output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_CONSENSUS_LOCK);
+            output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_CONSENSUS_LOCK);
         } else if (po.getStatus() == UtxoOutputPo.SPENT) {
             output.setStatus(OutPutStatusEnum.UTXO_SPENT);
         }
@@ -112,7 +111,7 @@ public class UtxoTransferTool {
         }
         if (OutPutStatusEnum.UTXO_SPENT == output.getStatus()) {
             po.setStatus(UtxoOutputPo.SPENT);
-        } else if (OutPutStatusEnum.UTXO_CONFIRM_CONSENSUS_LOCK == output.getStatus()) {
+        } else if (OutPutStatusEnum.UTXO_CONFIRMED_CONSENSUS_LOCK == output.getStatus()) {
             po.setStatus(UtxoOutputPo.LOCKED);
         } else {
             po.setStatus(UtxoOutputPo.USABLE);

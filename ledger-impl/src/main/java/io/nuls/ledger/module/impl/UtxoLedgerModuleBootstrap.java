@@ -42,6 +42,7 @@ import io.nuls.ledger.service.impl.UtxoCoinDataProvider;
 import io.nuls.ledger.service.impl.UtxoCoinManager;
 import io.nuls.ledger.service.impl.UtxoLedgerServiceImpl;
 import io.nuls.ledger.service.intf.LedgerService;
+import io.nuls.ledger.thread.CheckTxExpireThread;
 import io.nuls.ledger.thread.SmallChangeThread;
 import io.nuls.ledger.validator.*;
 
@@ -75,21 +76,21 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
      * there validators any kind of transaction will be used
      */
     private void addNormalTxValidator() {
-        TransactionValidatorManager.addTxDefValidator(TxMaxSizeValidator.getInstance());
-        TransactionValidatorManager.addTxDefValidator(TxRemarkValidator.getInstance());
+//        TransactionValidatorManager.addTxDefValidator(TxMaxSizeValidator.getInstance());
+//        TransactionValidatorManager.addTxDefValidator(TxRemarkValidator.getInstance());
         TransactionValidatorManager.addTxDefValidator(TxFieldValidator.getInstance());
         TransactionValidatorManager.addTxDefValidator(TxSignValidator.getInstance());
 
         CoinTransactionValidatorManager.addTxDefValidator(UtxoTxInputsValidator.getInstance());
         CoinTransactionValidatorManager.addTxDefValidator(UtxoTxOutputsValidator.getInstance());
-        CoinTransactionValidatorManager.addTxDefValidator(AmountValidator.getInstance());
+//        CoinTransactionValidatorManager.addTxDefValidator(TransferTxValidator.getInstance());
     }
 
     private void registerService() {
-        this.registerTransaction(TransactionConstant.TX_TYPE_COIN_BASE, CoinBaseTransaction.class, CoinDataTxService.getInstance());
-        this.registerTransaction(TransactionConstant.TX_TYPE_TRANSFER, TransferTransaction.class, CoinDataTxService.getInstance());
-        this.registerTransaction(TransactionConstant.TX_TYPE_UNLOCK, UnlockNulsTransaction.class, CoinDataTxService.getInstance());
-        this.registerTransaction(TransactionConstant.TX_TYPE_LOCK, LockNulsTransaction.class, CoinDataTxService.getInstance());
+        this.registerTransaction(TransactionConstant.TX_TYPE_COIN_BASE, CoinBaseTransaction.class, CoinDataTxService.class);
+        this.registerTransaction(TransactionConstant.TX_TYPE_TRANSFER, TransferTransaction.class, CoinDataTxService.class);
+        this.registerTransaction(TransactionConstant.TX_TYPE_UNLOCK, UnlockNulsTransaction.class, CoinDataTxService.class);
+        this.registerTransaction(TransactionConstant.TX_TYPE_LOCK, LockNulsTransaction.class, CoinDataTxService.class);
         this.registerService(UtxoLedgerServiceImpl.class);
         this.registerService(UtxoCoinDataProvider.class);
     }
@@ -99,8 +100,8 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
         //cache the wallet's all accounts unSpend output
         coinManager.cacheAllUnSpendUtxo();
 
-        SmallChangeThread smallChangeThread = SmallChangeThread.getInstance();
-        TaskManager.createAndRunThread(this.getModuleId(), SmallChangeThread.class.getSimpleName(), smallChangeThread);
+        TaskManager.createAndRunThread(this.getModuleId(), SmallChangeThread.class.getSimpleName(), SmallChangeThread.getInstance());
+        TaskManager.createAndRunThread(this.getModuleId(), CheckTxExpireThread.class.getSimpleName(), CheckTxExpireThread.getInstance());
     }
 
     @Override

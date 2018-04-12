@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -37,6 +37,7 @@ import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
+import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.event.TransactionEvent;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.rpc.entity.OutputDto;
@@ -94,7 +95,10 @@ public class TransactionResource {
             return RpcResult.getFailed(ErrorCode.NULL_PARAMETER);
         }
         try {
-            Transaction tx = ledgerService.getTx(NulsDigestData.fromDigestHex(hash));
+            Transaction tx = ledgerService.getCacheTx(hash);
+            if (tx == null) {
+                tx = ledgerService.getTx(NulsDigestData.fromDigestHex(hash));
+            }
             if (tx == null) {
                 result = RpcResult.getFailed("not found");
             } else {
@@ -118,7 +122,7 @@ public class TransactionResource {
     public RpcResult list(@QueryParam("blockHeight") Long blockHeight,
                           @QueryParam("address") String address, @QueryParam("type") int type,
                           @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
-        if (blockHeight == null && StringUtils.isBlank(address) && type == 0) {
+        if (blockHeight == null && StringUtils.isBlank(address) && type == 0 && pageNumber == 0 && pageSize == 0) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         if ((blockHeight != null && blockHeight < 0) || type < 0 || pageNumber < 0 || pageSize < 0) {
@@ -190,13 +194,17 @@ public class TransactionResource {
             pageSize = 10;
         }
         //todo        ledgerService.getLockUtxo
-        List<UtxoOutputPo> poList = outputDataService.getLockUtxo(address, TimeService.currentTimeMillis(), pageNumber, pageSize);
+        Page<UtxoOutput> page = ledgerService.getLockUtxo(address, pageNumber, pageSize);
+
         List<OutputDto> dtoList = new ArrayList<>();
-        for (UtxoOutputPo po : poList) {
+        for (UtxoOutput po : page.getList()) {
             dtoList.add(new OutputDto(po));
         }
         RpcResult result = RpcResult.getSuccess();
-        result.setData(dtoList);
+
+        Page dtoPage = new Page(page);
+        dtoPage.setList(dtoList);
+        result.setData(dtoPage);
         return result;
     }
 

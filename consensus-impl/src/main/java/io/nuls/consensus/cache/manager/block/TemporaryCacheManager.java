@@ -27,14 +27,7 @@ package io.nuls.consensus.cache.manager.block;
 
 import io.nuls.cache.util.CacheMap;
 import io.nuls.consensus.constant.ConsensusCacheConstant;
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.SmallBlock;
-import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.exception.NulsRuntimeException;
-
-import java.util.List;
 
 /**
  * Used for sharing temporary data between multiple hander.
@@ -45,8 +38,7 @@ import java.util.List;
 public class TemporaryCacheManager {
     private static final TemporaryCacheManager INSTANCE = new TemporaryCacheManager();
 
-    private CacheMap<String, BlockHeader> headerCacheMap;
-    private CacheMap<String, SmallBlock> smallBlockCacheMap;
+    private CacheMap<String, SmallBlock> newBlockCacheMap;
 
     private TemporaryCacheManager() {
     }
@@ -56,52 +48,35 @@ public class TemporaryCacheManager {
     }
 
     public void init() {
-        headerCacheMap = new CacheMap<>("temp" + ConsensusCacheConstant.BLOCK_HEADER_CACHE_NAME, 64, ConsensusCacheConstant.LIVE_TIME, 0);
-        smallBlockCacheMap = new CacheMap<>("temp" + ConsensusCacheConstant.SMALL_BLOCK_CACHE_NAME, 32, ConsensusCacheConstant.LIVE_TIME, 0);
+        newBlockCacheMap = new CacheMap<>("temp" + ConsensusCacheConstant.NEW_BLOCK_CACHE_NAME, 64, ConsensusCacheConstant.LIVE_TIME, 0);
     }
 
-    public void cacheSmallBlock(SmallBlock smallBlock) {
-        smallBlockCacheMap.put(smallBlock.getBlockHash().getDigestHex(), smallBlock);
+
+    public void cacheSmallBlock(SmallBlock newBlock) {
+        newBlockCacheMap.put(newBlock.getHeader().getHash().getDigestHex(), newBlock);
     }
 
     public SmallBlock getSmallBlock(String hash) {
-        if (null == smallBlockCacheMap) {
+        if (null == newBlockCacheMap) {
             return null;
         }
-        return smallBlockCacheMap.get(hash);
-    }
-
-    public void removeSmallBlock(String hash) {
-        this.smallBlockCacheMap.remove(hash);
-    }
-
-    public void cacheBlockHeader(BlockHeader header) {
-        headerCacheMap.put(header.getHash().getDigestHex(), header);
-    }
-
-    public BlockHeader getBlockHeader(String hash) {
-        if (null == headerCacheMap) {
-            return null;
-        }
-        return headerCacheMap.get(hash);
+        return newBlockCacheMap.get(hash);
     }
 
     public void remove(String hash) {
-        if (null == headerCacheMap) {
+        if (null == newBlockCacheMap) {
             return;
         }
-        headerCacheMap.remove(hash);
+        newBlockCacheMap.remove(hash);
     }
 
 
     public void clear() {
-        this.smallBlockCacheMap.clear();
-        this.headerCacheMap.clear();
+        this.newBlockCacheMap.clear();
     }
 
     public void destroy() {
-        this.smallBlockCacheMap.destroy();
-        this.headerCacheMap.destroy();
+        this.newBlockCacheMap.destroy();
     }
 
 }

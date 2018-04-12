@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -29,9 +29,11 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.BlockHeaderService;
 import io.nuls.db.entity.BlockHeaderPo;
@@ -62,7 +64,7 @@ public class BlockStorageService {
 
     public Block getBlock(long height) throws Exception {
         Block block = blockCacheManager.getBlock(height);
-        if (null != block&&block.getTxs().size()==block.getHeader().getTxCount()) {
+        if (null != block && block.getTxs().size() == block.getHeader().getTxCount()) {
             return block;
         }
         BlockHeader header = getBlockHeader(height);
@@ -75,7 +77,7 @@ public class BlockStorageService {
         } catch (Exception e) {
             Log.error(e);
         }
-        if(header.getTxCount()!=txList.size()){
+        if (header.getTxCount() != txList.size()) {
             Log.warn("block has wrong tx size!");
         }
         return fillBlock(header, txList);
@@ -95,9 +97,6 @@ public class BlockStorageService {
             txList = ledgerService.getTxList(header.getHeight());
         } catch (Exception e) {
             Log.error(e);
-        }
-        if(txList.size()!=header.getTxCount()){
-            System.out.println();
         }
         return fillBlock(header, txList);
     }
@@ -154,9 +153,9 @@ public class BlockStorageService {
             List<Transaction> list = map.get(tx.getBlockHeight());
             if (null == list) {
                 list = new ArrayList<>();
+                map.put(tx.getBlockHeight(), list);
             }
             list.add(tx);
-            map.put(tx.getBlockHeight(), list);
         }
         return map;
     }
@@ -239,20 +238,87 @@ public class BlockStorageService {
     }
 
 
-    public long getBlockCount(String address, long roundStart, long roundEnd) {
-        return this.headerDao.getCount(address, roundStart, roundEnd);
+    public long getBlockCount(String address, long roundStart, long roundEnd,long startHeight) {
+        return this.headerDao.getCount(address, roundStart, roundEnd, startHeight);
     }
 
-    public long getSumOfRoundIndexOfYellowPunish(String address, long startRoundIndex, long endRoundIndex) {
-        //todo 是否需要查询内存
-        List<Long> indexList = this.headerDao.getListOfRoundIndexOfYellowPunish(address, startRoundIndex, endRoundIndex);
-        if (null == indexList || indexList.isEmpty()) {
-            return 0L;
+    public Map<String, Object> getSumTxCount(String address, long roundStart, long roundEnd) {
+        return headerDao.getSumTxCount(address, roundStart, roundEnd);
+    }
+
+    public Long getRoundFirstBlockHeight(long roundIndex) {
+        return this.headerDao.getRoundFirstBlockHeight(roundIndex);
+    }
+
+    public Long getRoundLastBlockHeight(long roundIndex) {
+        return this.headerDao.getRoundLastBlockHeight(roundIndex);
+    }
+
+    public List<BlockHeaderPo> getBlockHashList(long start, long end) {
+        return this.headerDao.getBlockHashList(start, end);
+    }
+
+    public Block getBlockFromMyChain(long height) {
+        Block block = this.blockCacheManager.getBlockFromMyChain(height);
+        if (null == block) {
+            BlockHeaderPo po = this.headerDao.getHeader(height);
+            BlockHeader header = null;
+            try {
+                header = ConsensusTool.fromPojo(po);
+            } catch (NulsException e) {
+                Log.error(e);
+            }
+            if (null == header) {
+                return null;
+            }
+            List<Transaction> txList = null;
+            try {
+                txList = ledgerService.getTxList(height);
+            } catch (Exception e) {
+                Log.error(e);
+            }
+            if (null == txList || txList.isEmpty()) {
+                return null;
+            }
+            if(header.getTxCount()!=txList.size()){
+                throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
+            }
+            block = new Block();
+            block.setHeader(header);
+            block.setTxs(txList);
         }
-        long value = 0;
-        for (Long index : indexList) {
-            value += (index - startRoundIndex + 1);
+        return block;
+    }
+
+    public Block getBlockFromMyChain(String hash) {
+        Block block = this.blockCacheManager.getBlockFromMyChain(hash);
+        if (null == block) {
+            BlockHeaderPo po = this.headerDao.getHeader(hash);
+            List<Transaction> txList = null;
+            try {
+                txList = ledgerService.getTxList(hash);
+            } catch (Exception e) {
+                Log.error(e);
+            }
+            if (null == txList || txList.isEmpty()) {
+                return null;
+            }
+            BlockHeader header = null;
+            try {
+                header = ConsensusTool.fromPojo(po);
+            } catch (NulsException e) {
+                Log.error(e);
+            }
+            if (null == header) {
+                return null;
+            }
+            if(header.getTxCount()!=txList.size()){
+                throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
+            }
+            block = new Block();
+            block.setHeader(header);
+            block.setTxs(txList);
         }
-        return value;
+        return block;
     }
 }

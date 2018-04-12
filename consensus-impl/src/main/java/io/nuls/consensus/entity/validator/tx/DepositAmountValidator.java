@@ -33,6 +33,8 @@ import io.nuls.consensus.entity.tx.PocJoinConsensusTransaction;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.SeverityLevelEnum;
+import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 
@@ -58,8 +60,9 @@ public class DepositAmountValidator implements NulsDataValidator<PocJoinConsensu
     public ValidateResult validate(PocJoinConsensusTransaction data) {
         Na limit = PocConsensusConstant.ENTRUSTER_DEPOSIT_LOWER_LIMIT;
         Na max = PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT;
-        List<Consensus<Deposit>> list = consensusCacheManager.getCachedDepositListByAgentHash(data.getTxData().getExtend().getAgentHash());
-        if(list==null){
+        //+2原因：验证的交易可能属于a高度，从cache中获取它之前的抵押时，只能获取某个高度之前的，所以是当前最新高度a-1之后的第二个高度
+        List<Consensus<Deposit>> list = consensusCacheManager.getDepositListByAgentId(data.getTxData().getExtend().getAgentHash(), NulsContext.getInstance().getBestHeight()+2);
+        if (list == null) {
             return ValidateResult.getSuccessResult();
         }
         Na total = Na.ZERO;
@@ -73,8 +76,12 @@ public class DepositAmountValidator implements NulsDataValidator<PocJoinConsensu
             return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_TOO_MUCH);
         }
 
-        if(!data.getTxData().getExtend().getDeposit().equals(data.getCoinData().getTotalNa())){
-            return ValidateResult.getFailedResult(SeverityLevelEnum.FLAGRANT_FOUL,ErrorCode.DEPOSIT_ERROR);
+        try {
+            if (!data.getTxData().getExtend().getDeposit().equals(data.getCoinData().getTotalNa())) {
+                return ValidateResult.getFailedResult(SeverityLevelEnum.FLAGRANT_FOUL, ErrorCode.DEPOSIT_ERROR);
+            }
+        } catch (NulsException e) {
+            return ValidateResult.getFailedResult(ErrorCode.ORPHAN_TX);
         }
         return ValidateResult.getSuccessResult();
     }

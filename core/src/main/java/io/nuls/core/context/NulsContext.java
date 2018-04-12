@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,9 +25,12 @@ package io.nuls.core.context;
 
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.Na;
+import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.cfg.IniEntity;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
+import io.nuls.core.utils.pass.PackingPasswordUtils;
 import io.nuls.core.utils.spring.lite.core.SpringLiteContext;
 
 import java.util.HashMap;
@@ -39,7 +42,7 @@ import java.util.Set;
  * @author Niels
  */
 public class NulsContext {
-    public static String CACHED_PASSWORD_OF_WALLET = "nuls123456";
+    private static String CACHED_PASSWORD_OF_WALLET = "nuls123456";
 
     private static final HashMap<String, Short> CHAIN_ID_MAP = new HashMap<String, Short>();
     public static String DEFAULT_ENCODING = "UTF-8";
@@ -117,6 +120,9 @@ public class NulsContext {
 
 
     public void setBestBlock(Block bestBlock) {
+        if(bestBlock==null){
+            throw new NulsRuntimeException(ErrorCode.FAILED,"best block set to null!");
+        }
         this.bestBlock = bestBlock;
     }
 
@@ -179,5 +185,15 @@ public class NulsContext {
             Log.error(e);
         }
         return null;
+    }
+
+    public static String getCachedPasswordOfWallet() {
+        return CACHED_PASSWORD_OF_WALLET;
+    }
+
+    public static void setCachedPasswordOfWallet(String cachedPasswordOfWallet) {
+        CACHED_PASSWORD_OF_WALLET = cachedPasswordOfWallet;
+        //todo A temporary solution;
+        PackingPasswordUtils.write(cachedPasswordOfWallet);
     }
 }

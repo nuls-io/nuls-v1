@@ -53,6 +53,4 @@ public class BlockEvent extends BaseConsensusEvent<Block> {
         data.setData(this.getEventBody().getHeader().getHeight());
         return data;
     }
-
-
 }

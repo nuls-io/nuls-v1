@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -75,34 +75,35 @@ public class NodeDiscoverHandler implements Runnable {
         TaskManager.createAndRunThread(NulsConstant.MODULE_ID_NETWORK, "NetworkNodeDiscover", this);
     }
 
-    // get nodes from local database
-    public List<Node> getLocalNodes(int size) {
-        Set<String> keys = nodesManager.getNodes().keySet();
-        List<NodePo> nodePos = getNodeDao().getNodePoList(size, keys);
+//    public List<Node> getLocalNodes() {
+//        Set<String> ipList = new HashSet<>();
+//        for (Node node : nodesManager.getNodes().values()) {
+//            ipList.add(node.getIp());
+//        }
+//        List<NodePo> nodePos = getNodeDao().getNodePoList(size, ipList);
+//
+//        List<Node> nodes = new ArrayList<>();
+//        if (nodePos == null || nodePos.isEmpty()) {
+//            return nodes;
+//        }
+//    }
 
+    // get nodes from local database
+    public List<Node> getLocalNodes() {
+        List<NodePo> nodePos = getNodeDao().getNodePoList(30);
         List<Node> nodes = new ArrayList<>();
         if (nodePos == null || nodePos.isEmpty()) {
             return nodes;
         }
         for (NodePo po : nodePos) {
-            Node node = new Node(network);
+            Node node = new Node();
             NodeTransferTool.toNode(node, po);
+            node.setType(Node.OUT);
+            node.setStatus(Node.CLOSE);
+            node.setMagicNumber(network.packetMagic());
             nodes.add(node);
         }
         return nodes;
-    }
-
-
-    public List<Node> getSeedNodes() {
-        List<Node> seedNodes = new ArrayList<>();
-        for (InetSocketAddress socketAddress : network.getSeedNodes()) {
-            // remove myself
-            if (network.getLocalIps().contains(socketAddress.getHostString())) {
-                continue;
-            }
-            seedNodes.add(new Node(network, Node.OUT, socketAddress));
-        }
-        return seedNodes;
     }
 
     /**
@@ -112,65 +113,31 @@ public class NodeDiscoverHandler implements Runnable {
      */
     public void findOtherNode(int size) {
         GetNodeEvent event = new GetNodeEvent(size);
-
-        NodeGroup group = nodesManager.getNodeGroup(NetworkConstant.NETWORK_NODE_IN_GROUP);
-        if (group.getNodes().size() > 0) {
-            List<Node> nodeList = new ArrayList<>(group.getNodes().values());
-            Collections.shuffle(nodeList);
-            for (Node node : nodeList) {
-                if (node.isHandShake()) {
-                    broadcaster.broadcastToNode(event, node, true);
-                    break;
-                }
-            }
-        }
-
-        group = nodesManager.getNodeGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP);
-        if (group.getNodes().size() > 0) {
-            List<Node> nodeList = new ArrayList<>(group.getNodes().values());
-            Collections.shuffle(nodeList);
-            for (Node node : nodeList) {
-                if (node.isHandShake()) {
-                    broadcaster.broadcastToNode(event, node, true);
-                    break;
-                }
-            }
+        for (Node node : nodesManager.getAvailableNodes()) {
+            broadcaster.broadcastToNode(event, node, true);
         }
     }
-
-
-    private static int count = 0;
 
     /**
      * do ping/pong and ask versionMessage
      */
+    private static int count = 0;
+
     @Override
     public void run() {
         Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
 
         while (running) {
             count++;
-            List<Node> nodeList = new ArrayList<>(nodesManager.getNodes().values());
-            StringBuilder str = new StringBuilder();
-            for (Node node : nodeList) {
-                if (node.getStatus() == 2) {
-                    str.append(",");
-                    str.append(node.getIp());
-                }
-            }
-            if (str.toString().length() == 0) {
-                str.append(",");
-            }
-            Log.info("nodes:" + str.toString().substring(1));
+            List<Node> nodeList = nodesManager.getConnectNode();
+            nodeList.addAll(nodesManager.getAvailableNodes());
 
-            GetVersionEvent event = new GetVersionEvent(network.getExternalPort());
+            GetVersionEvent event = new GetVersionEvent(network.port());
             GetNodesIpEvent ipEvent = new GetNodesIpEvent();
             for (Node node : nodeList) {
-                if (node.isAlive()) {
-                    broadcaster.broadcastToNode(event, node, true);
-                    if (count == 10) {
-                        broadcaster.broadcastToNode(ipEvent, node, true);
-                    }
+                broadcaster.broadcastToNode(event, node, true);
+                if (count == 10) {
+                    broadcaster.broadcastToNode(ipEvent, node, true);
                 }
             }
 
@@ -190,7 +157,7 @@ public class NodeDiscoverHandler implements Runnable {
             }
 
             try {
-                Thread.sleep(6000);
+                Thread.sleep(3500);
             } catch (InterruptedException e) {
                 Log.error(e);
             }

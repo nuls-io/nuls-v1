@@ -32,7 +32,7 @@ import io.nuls.core.chain.entity.Na;
 public class ConsensusReward {
 
     private String address;
-    private Na reward;
+    private Na reward = Na.ZERO;
     public ConsensusReward(){}
 
     public ConsensusReward(String address, Na reward) {

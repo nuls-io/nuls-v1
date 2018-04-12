@@ -25,6 +25,7 @@ package io.nuls.consensus.utils;
 
 import io.nuls.consensus.entity.BlockHashResponse;
 import io.nuls.consensus.event.GetBlocksHashRequest;
+import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
@@ -32,11 +33,14 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
+import io.nuls.network.entity.Node;
+import io.nuls.network.service.NetworkService;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -47,14 +51,15 @@ import java.util.concurrent.locks.ReentrantLock;
 public class DistributedBlockInfoRequestUtils {
     private static final DistributedBlockInfoRequestUtils INSTANCE = new DistributedBlockInfoRequestUtils();
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
-    private List<String> nodeIdList;
+    private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
+    private CopyOnWriteArrayList<String> nodeIdList;
     private Map<String, BlockHashResponse> hashesMap = new ConcurrentHashMap<>();
     /**
      * list order by answered time
      */
     private Map<String, List<String>> calcMap = new ConcurrentHashMap<>();
     private BlockInfo bestBlockInfo;
-    private long start, end, split;
+    private long askHeight;
     private Lock lock = new ReentrantLock();
     private boolean requesting;
     private long startTime;
@@ -68,46 +73,35 @@ public class DistributedBlockInfoRequestUtils {
 
     /**
      * default:0,get best height;
-     *
-     * @param height
-     * @param sendList
      */
-    public BlockInfo request(long height, List<String> sendList) {
-        return this.request(height, height, 1,nodeIdList);
-    }
-
-    public BlockInfo request(long start, long end, long split, List<String> sendList) {
+    public BlockInfo request(long height) {
         lock.lock();
         try {
             requesting = true;
             hashesMap.clear();
             calcMap.clear();
-            this.start = start;
-            this.end = end;
-            this.split = split;
-            GetBlocksHashRequest event = new GetBlocksHashRequest(start, end, split);
+            this.askHeight = height;
+            GetBlocksHashRequest event = new GetBlocksHashRequest(askHeight, askHeight);
             this.startTime = TimeService.currentTimeMillis();
-            if(null==sendList||sendList.isEmpty()){
-                nodeIdList = this.eventBroadcaster.broadcastAndCache(event, false);
-            }else{
-                this.nodeIdList = new ArrayList<>();
-                for(String nodeId:sendList){
-                    boolean result = this.eventBroadcaster.sendToNode(event,nodeId);
-                    if(result){
-                        this.nodeIdList.add(nodeId);
-                    }
-                }
+            this.nodeIdList = new CopyOnWriteArrayList<>();
+            List<Node> nodes = networkService.getAvailableNodes();
+            for (Node node : nodes) {
+                this.nodeIdList.add(node.getId());
             }
             if (nodeIdList.isEmpty()) {
                 return null;
             }
-            BlockInfo bi = this.getBlockInfo();
-            if (start == end && start <= 0 && bi.getNodeIdList().size() >= (nodeIdList.size() / 2)) {
-                if (bi == null) {
-                    NulsContext.getInstance().setNetBestBlockHeight(null);
+            for (String nodeId : nodeIdList) {
+                boolean result = this.eventBroadcaster.sendToNode(event, nodeId);
+                if (!result) {
+                    this.nodeIdList.remove(nodeId);
                 }
-                NulsContext.getInstance().setNetBestBlockHeight(bi.getBestHeight());
             }
+            BlockInfo bi = this.getBlockInfo();
+            if (bi == null) {
+                NulsContext.getInstance().setNetBestBlockHeight(null);
+            }
+            NulsContext.getInstance().setNetBestBlockHeight(bi.getBestHeight());
             return bi;
         } catch (Exception e) {
             throw e;
@@ -129,6 +123,9 @@ public class DistributedBlockInfoRequestUtils {
             nodeIdList.remove(nodeId);
             return false;
         }
+        if (this.askHeight>0&&this.askHeight != response.getBestHeight()) {
+            return false;
+        }
         if (hashesMap.get(nodeId) == null) {
             hashesMap.put(nodeId, response);
         } else {
@@ -136,9 +133,9 @@ public class DistributedBlockInfoRequestUtils {
             instance.merge(response);
             hashesMap.put(nodeId, instance);
         }
-        if (response.getHeightList().get(response.getHeightList().size() - 1) < end) {
-            return true;
-        }
+//        if (response.getHeightList().get(response.getHeightList().size() - 1) < end) {
+//            return true;
+//        }
         String key = response.getBestHash().getDigestHex();
         List<String> nodes = calcMap.get(key);
         if (null == nodes) {
@@ -154,7 +151,14 @@ public class DistributedBlockInfoRequestUtils {
 
     private void calc() {
         if (null == nodeIdList || nodeIdList.isEmpty()) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "success list of nodes is empty!");
+            BlockInfo blockInfo = new BlockInfo();
+            blockInfo.setBestHeight(0);
+            blockInfo.setBestHash(NulsContext.getInstance().getGenesisBlock().getHeader().getHash());
+            blockInfo.putHash(0, blockInfo.getBestHash());
+            blockInfo.setNodeIdList(this.nodeIdList);
+            blockInfo.setFinished(true);
+            this.bestBlockInfo = blockInfo;
+            return;
         }
         int size = nodeIdList.size();
         int halfSize = (size + 1) / 2;
@@ -197,18 +201,6 @@ public class DistributedBlockInfoRequestUtils {
         if (null != result) {
             bestBlockInfo = result;
         }
-//        else if (size == calcMap.size()) {
-//            try {
-//                Thread.sleep(2000L);
-//            } catch (InterruptedException e) {
-//                Log.error(e);
-//            }
-//            try {
-//                this.request(start, end, split);
-//            } catch (Exception e) {
-//                Log.error(e.getMessage());
-//            }
-//        }
 
     }
 
@@ -224,46 +216,48 @@ public class DistributedBlockInfoRequestUtils {
             }
             long timeout = 10000L;
 
-            if ((TimeService.currentTimeMillis() - startTime) > (timeout - 1000L) && hashesMap.size() >= ((nodeIdList.size() + 1) / 2) && start == end && start <= 0) {
-                long localHeight = NulsContext.getInstance().getBestBlock().getHeader().getHeight();
-                long minHeight = Long.MAX_VALUE;
-                NulsDigestData minHash = null;
-                List<String> nodeIds = new ArrayList<>();
+            if ((TimeService.currentTimeMillis() - startTime) > timeout && hashesMap.size() >= (1 + nodeIdList.size() / 2)) {
+                int maxSize = 0;
+                List<String> nodeIds = null;
                 try {
-                    for (String nodeId : hashesMap.keySet()) {
-                        BlockHashResponse response = hashesMap.get(nodeId);
-                        long height = response.getHeightList().get(0);
-                        NulsDigestData hash = response.getHashList().get(0);
-                        if (height >= localHeight) {
-                            if (height <= minHeight) {
-                                minHeight = height;
-                                minHash = hash;
+                    for (String key : calcMap.keySet()) {
+                        List<String> ids = calcMap.get(key);
+                        if (ids.size() > maxSize) {
+                            maxSize = ids.size();
+                            nodeIds = ids;
+                        } else if (ids.size() == maxSize) {
+                            BlockHashResponse response_a = hashesMap.get(nodeIds.get(0));
+                            long height_a = response_a.getBestHeight();
+                            BlockHashResponse response_b = hashesMap.get(ids.get(0));
+                            long height_b = response_b.getBestHeight();
+                            if (height_b > height_a) {
+                                nodeIds = ids;
                             }
-                            nodeIds.add(nodeId);
                         }
                     }
                 } catch (Exception e) {
                     break;
                 }
+                if (null == nodeIds || nodeIds.isEmpty()) {
+                    continue;
+                }
+                BlockHashResponse response = hashesMap.get(nodeIds.get(0));
                 BlockInfo result = new BlockInfo();
-                result.putHash(minHeight, minHash);
-                result.setBestHash(minHash);
-                result.setBestHeight(minHeight);
+                result.putHash(response.getBestHeight(), response.getBestHash());
+                result.setBestHash(response.getBestHash());
+                result.setBestHeight(response.getBestHeight());
                 result.setNodeIdList(nodeIds);
                 result.setFinished(true);
-                if (result.getBestHeight() < Long.MAX_VALUE) {
-                    bestBlockInfo = result;
-                } else {
-                    throw new NulsRuntimeException(ErrorCode.TIME_OUT);
-                }
-            } else if ((TimeService.currentTimeMillis() - startTime) > timeout && !(hashesMap.size() >= ((nodeIdList.size() + 1) / 2) && start == end && start <= 0)) {
+                bestBlockInfo = result;
+            } else if ((TimeService.currentTimeMillis() - startTime) > timeout) {
                 throw new NulsRuntimeException(ErrorCode.TIME_OUT);
+            } else {
+                calc();
             }
         }
         BlockInfo info = bestBlockInfo;
         bestBlockInfo = null;
         requesting = false;
         return info;
-
     }
 }

@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -30,11 +30,14 @@ import io.nuls.core.event.BaseEvent;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
+import io.nuls.core.utils.network.IpUtil;
+import io.nuls.db.dao.NodeDataService;
 import io.nuls.network.NetworkContext;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeGroup;
+import io.nuls.network.entity.NodeTransferTool;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.filter.impl.DefaultMessageFilter;
 import io.nuls.network.message.filter.MessageFilterChain;
@@ -45,10 +48,7 @@ import io.nuls.network.param.TestNetworkParam;
 import io.nuls.network.service.NetworkService;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author vivi
@@ -64,8 +64,11 @@ public class NetworkServiceImpl implements NetworkService {
 
     private BroadcastHandler broadcaster;
 
+    private NodeDataService nodeDao;
+
     public NetworkServiceImpl() {
         this.network = getNetworkInstance();
+
         DefaultMessageFilter.getInstance().addMagicNum(network.packetMagic());
         MessageFilterChain.getInstance().addFilter(DefaultMessageFilter.getInstance());
         NulsContext.setMagicNumber(network.packetMagic());
@@ -97,6 +100,12 @@ public class NetworkServiceImpl implements NetworkService {
         try {
             connectionManager.init();
             nodesManager.init();
+            for (String ip : IpUtil.getIps()) {
+                if (isSeedNode(ip)) {
+                    network.setMaxInCount(network.maxInCount() * 3);
+                    nodesManager.setSeed(true);
+                }
+            }
         } catch (Exception e) {
             Log.error(e);
             throw new NulsRuntimeException(ErrorCode.NET_SERVER_START_ERROR);
@@ -115,18 +124,28 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
+    public void reset() {
+        nodesManager.reset();
+    }
+
+    @Override
     public void shutdown() {
         TaskManager.shutdownByModuleId(NulsConstant.MODULE_ID_NETWORK);
     }
 
     @Override
     public void removeNode(String nodeId) {
-        nodesManager.removeNode(nodeId, null);
+        nodesManager.removeNode(nodeId);
     }
 
     @Override
     public void removeNode(String nodeId, int type) {
-        nodesManager.removeNode(nodeId, type);
+        nodesManager.removeNode(nodeId);
+    }
+
+    @Override
+    public Map<String, Node> getNodes() {
+        return nodesManager.getNodes();
     }
 
     @Override
@@ -153,13 +172,33 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
+    public boolean addNode(Node node) {
+        return nodesManager.addNode(node);
+    }
+
+    @Override
+    public boolean isSeedNode(String ip) {
+        return nodesManager.isSeedNode(ip);
+    }
+
+    @Override
+    public boolean isSeed() {
+        return nodesManager.isSeed();
+    }
+
+    @Override
+    public void handshakeNode(Node node) {
+        nodesManager.handshakeNode(node);
+    }
+
+    @Override
     public void blackNode(String nodeId, int status) {
         nodesManager.blackNode(nodeId, status);
     }
 
     @Override
-    public void addNodeToGroup(String groupName, Node node) {
-        nodesManager.addNodeToGroup(groupName, node);
+    public boolean addNodeToGroup(String groupName, Node node) {
+        return nodesManager.addNodeToGroup(groupName, node);
     }
 
     @Override
@@ -228,6 +267,13 @@ public class NetworkServiceImpl implements NetworkService {
         }
 
         return MainNetworkParam.get();
+    }
+
+    private NodeDataService getNodeDao() {
+        if (nodeDao == null) {
+            nodeDao = NulsContext.getServiceBean(NodeDataService.class);
+        }
+        return nodeDao;
     }
 }
 

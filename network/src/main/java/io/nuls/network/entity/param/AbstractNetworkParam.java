@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,6 +24,7 @@
 package io.nuls.network.entity.param;
 
 import io.nuls.core.utils.network.IpUtil;
+import io.nuls.network.entity.Node;
 import io.nuls.network.message.NetworkEventHandlerFactory;
 import io.nuls.network.message.filter.NulsMessageFilter;
 
@@ -53,18 +54,16 @@ public abstract class AbstractNetworkParam {
 
     protected int maxOutCount;
 
-    protected int externalPort;
-
     protected NulsMessageFilter messageFilter;
 
     protected NetworkEventHandlerFactory messageHandlerFactory;
 
-    protected List<InetSocketAddress> seedNodes = new ArrayList<>();
+    protected List<String> seedIpList = new ArrayList<>();
 
     protected Set<String> localIps = IpUtil.getIps();
 
-    public List<InetSocketAddress> getSeedNodes() {
-        return seedNodes;
+    public List<String> getSeedIpList() {
+        return seedIpList;
     }
 
     public int port() {
@@ -79,7 +78,7 @@ public abstract class AbstractNetworkParam {
         return maxInCount;
     }
 
-    public void maxInCount(int count) {
+    public void setMaxInCount(int count) {
         this.maxInCount = count;
     }
 
@@ -87,16 +86,8 @@ public abstract class AbstractNetworkParam {
         return maxOutCount;
     }
 
-    public void maxOutCount(int count) {
+    public void setMaxOutCount(int count) {
         this.maxOutCount = count;
-    }
-
-    public int getExternalPort() {
-        return externalPort;
-    }
-
-    public void setExternalPort(int externalPort) {
-        this.externalPort = externalPort;
     }
 
     public void setMessageFilter(NulsMessageFilter messageFilter) {

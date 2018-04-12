@@ -28,9 +28,11 @@ import io.nuls.db.dao.impl.mybatis.mapper.DepositMapper;
 import io.nuls.db.dao.impl.mybatis.params.DepositSearchParams;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import io.nuls.db.entity.DepositPo;
+import io.nuls.db.entity.UpdateDepositByAgentIdParam;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.db.transactional.annotation.PROPAGATION;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -49,8 +51,23 @@ public class DepositDaoImpl extends BaseDaoImpl<DepositMapper, String, DepositPo
     }
 
     @Override
-    public int deleteByAgentHash(String address) {
-        return this.getMapper().deleteByAgentHash(address);
+    public int deleteById(DepositPo po) {
+        return this.getMapper().deleteByPrimaryKey(po);
+    }
+
+    @Override
+    public int deleteByAgentHash(DepositPo po) {
+        return this.getMapper().deleteByAgentHash(po);
+    }
+
+    @Override
+    public int realDeleteById(DepositPo po) {
+        return this.getMapper().realDeleteByPrimaryKey(po);
+    }
+
+    @Override
+    public int realDeleteByAgentHash(DepositPo po) {
+        return this.getMapper().realDeleteByAgentHash(po);
     }
 
     @Override
@@ -59,7 +76,12 @@ public class DepositDaoImpl extends BaseDaoImpl<DepositMapper, String, DepositPo
     }
 
     @Override
-    public int updateSelectiveByAgentHash(DepositPo po) {
-        return this.getMapper().updateSelectiveByAgentHash(po);
+    public int updateSelectiveByAgentHash(UpdateDepositByAgentIdParam param) {
+        return this.getMapper().updateSelectiveByAgentHash(param);
+    }
+
+    @Override
+    public List<DepositPo> getAllList(long blockHeight) {
+        return this.getMapper().getAllList(blockHeight);
     }
 }

@@ -32,9 +32,13 @@ import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.ConsensusAgentImpl;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
+import io.nuls.core.context.NulsContext;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
+
+import java.io.UnsupportedEncodingException;
 
 /**
  * @author Niels
@@ -52,6 +56,19 @@ public class RegisterAgentFieldValidator implements NulsDataValidator<RegisterAg
         }
         if (agent.getAddress().equals(agent.getExtend().getPackingAddress())) {
             return ValidateResult.getFailedResult("It's not safe:agentAddress equals packingAddress");
+        }
+
+        if (StringUtils.isBlank(agent.getExtend().getAgentName())) {
+            return ValidateResult.getFailedResult("agent name can not be null!");
+        }
+
+        try {
+            if (agent.getExtend().getAgentName().getBytes(NulsContext.DEFAULT_ENCODING).length > 32) {
+                return ValidateResult.getFailedResult("agent name is too long!");
+            }
+        } catch (UnsupportedEncodingException e) {
+            Log.error(e);
+            return ValidateResult.getFailedResult(e.getMessage());
         }
 
         if (agent.getExtend().getStartTime() <= 0) {

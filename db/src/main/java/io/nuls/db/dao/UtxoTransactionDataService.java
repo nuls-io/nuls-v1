@@ -92,7 +92,7 @@ public interface UtxoTransactionDataService {
 
     long getAgentReward(String address, int type);
 
-    void unlockTxOutput(String txHash);
+    void unlockTxOutput(String txHash, long lockTime);
 
     void lockTxOutput(String txHash);
 }

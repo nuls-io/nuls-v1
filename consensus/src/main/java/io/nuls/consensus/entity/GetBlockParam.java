@@ -26,9 +26,9 @@
 package io.nuls.consensus.entity;
 
 import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
-import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 
@@ -40,35 +40,54 @@ import java.io.IOException;
  */
 public class GetBlockParam extends BaseNulsData {
 
-    private long time;
+    private NulsDigestData startHash;
+    private NulsDigestData endHash;
     private long start;
-    private long end;
+    private long size;
 
     public GetBlockParam() {
-        this.time = TimeService.currentTimeMillis();
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += Utils.sizeOfInt48();
-        size += Utils.sizeOfLong(start);
-        size += Utils.sizeOfLong(end);
+        size += Utils.sizeOfVarInt(this.size);
+        size += Utils.sizeOfVarInt(start);
+        size += Utils.sizeOfNulsData(startHash);
+        size += Utils.sizeOfNulsData(endHash);
         return size;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeInt48(time);
+        stream.writeVarInt(size);
         stream.writeVarInt(start);
-        stream.writeVarInt(end);
+        stream.writeNulsData(startHash);
+        stream.writeNulsData(endHash);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.time = byteBuffer.readInt48();
+        this.size = byteBuffer.readVarInt();
         this.start = byteBuffer.readVarInt();
-        this.end = byteBuffer.readVarInt();
+        this.startHash = byteBuffer.readHash();
+        this.endHash = byteBuffer.readHash();
+    }
+
+    public NulsDigestData getStartHash() {
+        return startHash;
+    }
+
+    public void setStartHash(NulsDigestData startHash) {
+        this.startHash = startHash;
+    }
+
+    public NulsDigestData getEndHash() {
+        return endHash;
+    }
+
+    public void setEndHash(NulsDigestData endHash) {
+        this.endHash = endHash;
     }
 
     public long getStart() {
@@ -79,11 +98,11 @@ public class GetBlockParam extends BaseNulsData {
         this.start = start;
     }
 
-    public long getEnd() {
-        return end;
+    public long getSize() {
+        return size;
     }
 
-    public void setEnd(long end) {
-        this.end = end;
+    public void setSize(long size) {
+        this.size = size;
     }
 }

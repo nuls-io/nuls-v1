@@ -41,35 +41,35 @@ import java.io.IOException;
  */
 public class GetVersionEvent extends BaseEvent {
 
-    private int externalPort;
+    private int severPort;
 
     public GetVersionEvent() {
         super(NulsConstant.MODULE_ID_NETWORK, NetworkConstant.NETWORK_GET_VERSION_EVENT);
     }
 
-    public GetVersionEvent(int externalPort) {
+    public GetVersionEvent(int severPort) {
         this();
-        this.externalPort = externalPort;
+        this.severPort = severPort;
     }
 
     @Override
     public int size() {
         int s = 0;
         s += EventHeader.EVENT_HEADER_LENGTH;
-        s += VarInt.sizeOf(externalPort);
+        s += VarInt.sizeOf(severPort);
         return s;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeNulsData(getHeader());
-        stream.writeVarInt(externalPort);
+        stream.writeVarInt(severPort);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.setHeader(byteBuffer.readNulsData(new EventHeader()));
-        externalPort = (int) byteBuffer.readVarInt();
+        severPort = (int) byteBuffer.readVarInt();
     }
 
     @Override
@@ -86,11 +86,15 @@ public class GetVersionEvent extends BaseEvent {
     public String toString() {
         StringBuffer buffer = new StringBuffer();
         buffer.append("getVersionEvent:{");
-        buffer.append("externalPort:" + externalPort + "}");
+        buffer.append("severPort:" + severPort + "}");
         return buffer.toString();
     }
 
-    public int getExternalPort() {
-        return externalPort;
+    public int getSeverPort() {
+        return severPort;
+    }
+
+    public void setSeverPort(int severPort) {
+        this.severPort = severPort;
     }
 }

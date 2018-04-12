@@ -30,10 +30,12 @@ package io.nuls.consensus.entity.block;
 public class HeaderDigest {
     private String hash;
     private long height;
+    private long time;
 
-    public HeaderDigest(String hash, long height) {
+    public HeaderDigest(String hash, long height,long time) {
         this.hash = hash;
         this.height = height;
+        this.time = time;
     }
 
     public String getHash() {
@@ -58,5 +60,13 @@ public class HeaderDigest {
             return false;
         }
         return this.getHeight() == ((HeaderDigest) obj).getHeight() && this.getHash().equals(((HeaderDigest) obj).getHash());
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
     }
 }

@@ -27,6 +27,7 @@ package io.nuls.db.dao.impl.mybatis;
 
 import io.nuls.db.dao.PunishLogDataService;
 import io.nuls.db.dao.impl.mybatis.mapper.PunishLogMapper;
+import io.nuls.db.dao.impl.mybatis.util.SearchOperator;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import io.nuls.db.entity.PunishLogPo;
 import io.nuls.db.transactional.annotation.DbSession;
@@ -53,5 +54,16 @@ public class PunishLogDaoImpl extends BaseDaoImpl<PunishLogMapper, String, Punis
     @Override
     public int deleteByHeight(long height) {
         return getMapper().deleteByHeight(height);
+    }
+
+    @Override
+    public long getCountByRounds(String agentAddress, long startRoundIndex, long endRoundIndex,long startHeight,int punishType) {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("address", SearchOperator.eq, agentAddress);
+        searchable.addCondition("type", SearchOperator.eq,punishType);
+        searchable.addCondition("round_index", SearchOperator.gte, startRoundIndex);
+        searchable.addCondition("round_index", SearchOperator.lte, endRoundIndex);
+        searchable.addCondition("height", SearchOperator.lte, startHeight);
+        return this.getMapper().selectCount(searchable);
     }
 }

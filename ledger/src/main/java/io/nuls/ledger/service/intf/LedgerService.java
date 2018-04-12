@@ -29,6 +29,7 @@ import io.nuls.core.chain.entity.Result;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
+import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.ledger.entity.Balance;
 
 import java.io.IOException;
@@ -56,6 +57,10 @@ public interface LedgerService {
 
     List<Transaction> getTxList(long height) throws Exception;
 
+    List<Transaction> getCacheTxList(int type);
+
+    Transaction getCacheTx(String txHash);
+
     Page<Transaction> getTxList(Long height, int type, int pageNum, int pageSize) throws Exception;
 
     Balance getBalance(String address);
@@ -76,9 +81,13 @@ public interface LedgerService {
 
     void saveTxInLocal(String address);
 
-    boolean checkTxIsMine(Transaction tx) throws NulsException;
+    boolean checkTxIsMine(Transaction tx);
 
-    boolean checkTxIsMine(Transaction tx, String address) throws NulsException;
+    boolean checkTxIsMine(Transaction tx, String address);
+
+    boolean checkTxIsMySend(Transaction tx);
+
+    boolean checkTxIsMySend(Transaction tx, String address);
 
     void rollbackTx(Transaction tx) throws NulsException;
 
@@ -96,6 +105,7 @@ public interface LedgerService {
 
     /**
      * get the last 24 hours coinbase transaction reward
+     *
      * @return
      */
     long getLastDayTimeReward();
@@ -104,9 +114,11 @@ public interface LedgerService {
 
     long getAgentReward(String address, int type);
 
-    void unlockTxApprove(String txHash);
+    void unlockTxApprove(String txHash, long rockTime);
 
-    void unlockTxSave(String txHash);
+    void unlockTxSave(String txHash, long lockTime);
 
     void unlockTxRollback(String txHash);
+
+    Page getLockUtxo(String address, Integer pageNumber, Integer pageSize);
 }

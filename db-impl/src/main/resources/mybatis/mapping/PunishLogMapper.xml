@@ -31,12 +31,13 @@
         <id column="id" property="id" jdbcType="VARCHAR"/>
         <result column="address" property="address" jdbcType="VARCHAR"/>
         <result column="time" property="time" jdbcType="BIGINT"/>
+        <result column="round_index" property="roundIndex" jdbcType="BIGINT"/>
         <result column="height" property="height" jdbcType="BIGINT"/>
         <result column="type" property="type" jdbcType="INTEGER"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-    id, address, time,height,type
+    id, address, time,height,type,round_index
   </sql>
 
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String">
@@ -50,14 +51,14 @@
     delete from punish_log
     where id = #{id,jdbcType=VARCHAR}
     </delete>
-    <delete id="deleteByHeight" parameterType="java.lang.Integer">
+    <delete id="deleteByHeight" parameterType="java.lang.Long">
         delete from punish_log
         where height = #{height,jdbcType=BIGINT}
     </delete>
     <insert id="insert" parameterType="io.nuls.db.entity.PunishLogPo">
-    insert into punish_log (id, address, time,height,type)
+    insert into punish_log (id, address, time,height,type,round_index)
     values (#{id,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR}, #{time,jdbcType=INTEGER}
-    , #{height,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER})
+    , #{height,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER} , #{roundIndex,jdbcType=VARCHAR})
     </insert>
 
     <update id="updateByPrimaryKey" parameterType="io.nuls.db.entity.PunishLogPo">
@@ -66,4 +67,11 @@
      ,height = #{height,jdbcType=VARCHAR}, type = #{type,jdbcType=INTEGER}
     where id = #{id,jdbcType=VARCHAR}
     </update>
+
+    <select id="selectCount" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultType="java.lang.Long">
+        select count(id) from punish_log
+        <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
+    </select>
+
+
 </mapper>

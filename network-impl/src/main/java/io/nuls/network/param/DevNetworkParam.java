@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,15 +24,11 @@
 package io.nuls.network.param;
 
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.log.Log;
 import io.nuls.network.NetworkContext;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.filter.impl.DefaultMessageFilter;
 import io.nuls.network.message.DefaultNetWorkEventHandlerFactory;
-
-import java.net.InetSocketAddress;
 
 /**
  * @author vivi
@@ -46,19 +42,12 @@ public class DevNetworkParam extends AbstractNetworkParam {
         this.maxInCount = NetworkContext.getNetworkConfig().getPropValue(NetworkConstant.NETWORK_NODE_MAX_IN, 20);
         this.maxOutCount = NetworkContext.getNetworkConfig().getPropValue(NetworkConstant.NETWORK_NODE_MAX_OUT, 10);
         this.port = NulsContext.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_SERVER_PORT, 8003);
-        this.externalPort = NulsContext.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_EXTER_PORT, 8003);
         this.packetMagic = NulsContext.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_MAGIC, 123456789);
 
-
-        InetSocketAddress address0 = new InetSocketAddress("192.168.1.156", port);
-        InetSocketAddress address1 = new InetSocketAddress("192.168.1.157", port);
-        InetSocketAddress address2 = new InetSocketAddress("192.168.1.158", port);
-
-        seedNodes.add(address0);
-        seedNodes.add(address1);
-        seedNodes.add(address2);
-
-
+        seedIpList.add("192.168.1.103");
+        seedIpList.add("192.168.1.102");
+        seedIpList.add("192.168.1.201");
+        seedIpList.add("192.168.1.156");
         this.messageFilter = DefaultMessageFilter.getInstance();
         this.messageHandlerFactory = DefaultNetWorkEventHandlerFactory.getInstance();
     }

@@ -26,6 +26,8 @@
 
 package io.nuls.rpc.resources.form;
 
+import io.nuls.core.utils.str.StringUtils;
+
 /**
  * @author Niels
  * @date 2018/3/14
@@ -52,7 +54,7 @@ public class CreateAgentForm {
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        this.password = StringUtils.formatStringPara(password);
     }
 
     public String getAgentAddress() {
@@ -60,7 +62,7 @@ public class CreateAgentForm {
     }
 
     public void setAgentAddress(String agentAddress) {
-        this.agentAddress = agentAddress;
+        this.agentAddress = StringUtils.formatStringPara(agentAddress);
     }
 
     public String getPackingAddress() {
@@ -68,7 +70,7 @@ public class CreateAgentForm {
     }
 
     public void setPackingAddress(String packingAddress) {
-        this.packingAddress = packingAddress;
+        this.packingAddress = StringUtils.formatStringPara(packingAddress);
     }
 
     public long getDeposit() {
@@ -84,7 +86,7 @@ public class CreateAgentForm {
     }
 
     public void setRemark(String remark) {
-        this.remark = remark;
+        this.remark = StringUtils.formatStringPara(remark);
     }
 
     public String getAgentName() {
@@ -92,6 +94,6 @@ public class CreateAgentForm {
     }
 
     public void setAgentName(String agentName) {
-        this.agentName = agentName;
+        this.agentName = StringUtils.formatStringPara(agentName);
     }
 }

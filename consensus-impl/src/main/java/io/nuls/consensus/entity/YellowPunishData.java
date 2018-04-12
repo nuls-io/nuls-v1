@@ -48,8 +48,8 @@ public class YellowPunishData extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += Utils.sizeOfLong(height);
-        size += Utils.sizeOfInt(addressList.size());
+        size += Utils.sizeOfVarInt(height);
+        size += Utils.sizeOfVarInt(addressList.size());
         size += Address.HASH_LENGTH * addressList.size();
         return size;
     }

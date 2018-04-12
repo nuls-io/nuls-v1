@@ -24,7 +24,6 @@
 package io.nuls.consensus.entity.validator.block.header;
 
 import io.nuls.core.chain.entity.BlockHeader;
-import io.nuls.core.utils.str.StringUtils;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 
@@ -57,7 +56,7 @@ public class HeaderFieldValidator implements NulsDataValidator<BlockHeader> {
                 failed = true;
                 break;
             }
-            if (StringUtils.isBlank(data.getPackingAddress())) {
+            if (null==data.getPackingAddress()) {
                 failed = true;
                 break;
             }

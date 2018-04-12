@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,12 +24,14 @@
 package io.nuls.consensus.entity.meeting;
 
 import io.nuls.account.entity.Address;
+import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.member.Deposit;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.crypto.Sha256Hash;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,21 +41,20 @@ import java.util.List;
 public class PocMeetingMember implements Comparable<PocMeetingMember> {
     private long roundIndex;
     private long roundStartTime;
+    private String agentAddress;
+    private String packingAddress;
+    private String agentHash;
     /**
      * Starting from 1
      */
-    private int indexOfRound;
-    private String agentHash;
-    private String agentAddress;
-    private String packerAddress;
-    private long packTime;
-
+    private int packingIndexOfRound;
     private double creditVal;
-
     private String sortValue;
     private Consensus<Agent> agentConsensus;
-    private List<Consensus<Deposit>> delegateList;
-    private Na totolEntrustDeposit = Na.ZERO;
+    private List<Consensus<Deposit>> depositList = new ArrayList<>();
+    private Na totalDeposit = Na.ZERO;
+    private Na ownDeposit = Na.ZERO;
+    private double commissionRate;
 
     public Consensus<Agent> getAgentConsensus() {
         return agentConsensus;
@@ -63,28 +64,28 @@ public class PocMeetingMember implements Comparable<PocMeetingMember> {
         this.agentConsensus = agentConsensus;
     }
 
-    public Na getTotolEntrustDeposit() {
-        return totolEntrustDeposit;
+    public Na getTotalDeposit() {
+        return totalDeposit;
     }
 
-    public void setTotolEntrustDeposit(Na totolEntrustDeposit) {
-        this.totolEntrustDeposit = totolEntrustDeposit;
+    public void setTotalDeposit(Na totalDeposit) {
+        this.totalDeposit = totalDeposit;
     }
 
-    public List<Consensus<Deposit>> getDelegateList() {
-        return delegateList;
+    public List<Consensus<Deposit>> getDepositList() {
+        return depositList;
     }
 
-    public void setDelegateList(List<Consensus<Deposit>> delegateList) {
-        this.delegateList = delegateList;
+    public void setDepositList(List<Consensus<Deposit>> depositList) {
+        this.depositList = depositList;
     }
 
     public String getSortValue() {
+        if (this.sortValue == null) {
+            String hashHex = new Address(this.getPackingAddress()).hashHex() + roundStartTime;
+            sortValue = Sha256Hash.twiceOf((hashHex).getBytes()).toString();
+        }
         return sortValue;
-    }
-
-    public void setSortValue(String sortValue) {
-        this.sortValue = sortValue;
     }
 
     public long getRoundStartTime() {
@@ -93,6 +94,7 @@ public class PocMeetingMember implements Comparable<PocMeetingMember> {
 
     public void setRoundStartTime(long roundStartTime) {
         this.roundStartTime = roundStartTime;
+        this.sortValue = null;
     }
 
     public String getAgentHash() {
@@ -111,29 +113,32 @@ public class PocMeetingMember implements Comparable<PocMeetingMember> {
         this.agentAddress = agentAddress;
     }
 
-    public String getPackerAddress() {
-        return packerAddress;
+    public String getPackingAddress() {
+        return packingAddress;
     }
 
-    public void setPackerAddress(String packerAddress) {
-        this.packerAddress = packerAddress;
+    public void setPackingAddress(String packingAddress) {
+        this.packingAddress = packingAddress;
     }
 
-    public int getIndexOfRound() {
-        return indexOfRound;
+    public int getPackingIndexOfRound() {
+        return packingIndexOfRound;
     }
 
-    public void setIndexOfRound(int indexOfRound) {
-        this.indexOfRound = indexOfRound;
+    public void setPackingIndexOfRound(int packingIndexOfRound) {
+        this.packingIndexOfRound = packingIndexOfRound;
     }
 
-    public long getPackTime() {
+    public long getPackStartTime() {
+        long packTime = PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000 * (this.getPackingIndexOfRound() - 1) + roundStartTime;
         return packTime;
     }
 
-    public void setPackTime(long packTime) {
-        this.packTime = packTime;
+    public long getPackEndTime() {
+        long packTime = PocConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000 * this.getPackingIndexOfRound() + roundStartTime;
+        return packTime;
     }
+
 
     public long getRoundIndex() {
         return roundIndex;
@@ -143,35 +148,36 @@ public class PocMeetingMember implements Comparable<PocMeetingMember> {
         this.roundIndex = roundIndex;
     }
 
-    public double getCreditVal() {
+    public double getRealCreditVal() {
         return creditVal;
+    }
+
+    public double getCalcCreditVal() {
+        return creditVal < 0d ? 0D : this.creditVal;
     }
 
     public void setCreditVal(double creditVal) {
         this.creditVal = creditVal;
     }
 
+    public Na getOwnDeposit() {
+        return ownDeposit;
+    }
+
+    public void setOwnDeposit(Na ownDeposit) {
+        this.ownDeposit = ownDeposit;
+    }
+
     @Override
     public int compareTo(PocMeetingMember o2) {
-        if (this.getSortValue() == null) {
-            String hashHex = new Address(this.getAgentAddress()).hashHex();
-            this.setSortValue(Sha256Hash.twiceOf((roundStartTime + hashHex).getBytes()).toString());
-        }
-        if (o2.getSortValue() == null) {
-            String hashHex = new Address(o2.getAgentAddress()).hashHex();
-            o2.setSortValue(Sha256Hash.twiceOf((o2.getRoundStartTime() + hashHex).getBytes()).toString());
-        }
         return this.getSortValue().compareTo(o2.getSortValue());
     }
 
-    public void calcDeposit() {
-        Na totolEntrustDeposit = Na.ZERO;
-        if(delegateList==null){
-            return;
-        }
-        for(Consensus<Deposit> dc:delegateList){
-            totolEntrustDeposit = totolEntrustDeposit .add(dc.getExtend().getDeposit());
-        }
-        this.totolEntrustDeposit = totolEntrustDeposit;
+    public double getCommissionRate() {
+        return commissionRate;
+    }
+
+    public void setCommissionRate(double commissionRate) {
+        this.commissionRate = commissionRate;
     }
 }

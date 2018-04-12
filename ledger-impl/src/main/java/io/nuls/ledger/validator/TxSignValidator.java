@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -26,6 +26,7 @@ package io.nuls.ledger.validator;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.script.P2PKHScript;
 import io.nuls.core.script.P2PKHScriptSig;
@@ -51,25 +52,30 @@ public class TxSignValidator implements NulsDataValidator<Transaction> {
 
     @Override
     public ValidateResult validate(Transaction tx) {
-        byte [] scriptSig = tx.getScriptSig();
+
+        if (tx.getType() == TransactionConstant.TX_TYPE_COIN_BASE || tx.getType() == TransactionConstant.TX_TYPE_YELLOW_PUNISH) {
+            return ValidateResult.getSuccessResult();
+        }
+
+        byte[] scriptSig = tx.getScriptSig();
         tx.setScriptSig(null);
         NulsDigestData nulsDigestData;
         try {
-             nulsDigestData = NulsDigestData.calcDigestData(tx.serialize());
-        }catch (Exception e){
+            nulsDigestData = NulsDigestData.calcDigestData(tx.serialize());
+        } catch (Exception e) {
             return ValidateResult.getFailedResult(ErrorCode.DATA_ERROR);
-        }finally {
+        } finally {
             tx.setScriptSig(scriptSig);
         }
-        if(!Arrays.equals(nulsDigestData.getDigestBytes(),tx.getHash().getDigestBytes())){
-            return ValidateResult.getFailedResult(ErrorCode.DATA_ERROR );
+        if (!Arrays.equals(nulsDigestData.getDigestBytes(), tx.getHash().getDigestBytes())) {
+            return ValidateResult.getFailedResult(ErrorCode.DATA_ERROR);
         }
 
         P2PKHScriptSig p2PKHScriptSig = null;
         try {
             p2PKHScriptSig = new NulsByteBuffer(scriptSig).readNulsData(new P2PKHScriptSig());
         } catch (NulsException e) {
-            return ValidateResult.getFailedResult(ErrorCode.SIGNATURE_ERROR );
+            return ValidateResult.getFailedResult(ErrorCode.SIGNATURE_ERROR);
         }
         return p2PKHScriptSig.verifySign(tx.getHash());
     }

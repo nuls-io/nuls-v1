@@ -47,7 +47,7 @@ public interface UtxoOutputMapper extends BaseMapper<Map<String, Object>, UtxoOu
 
     long getAgentReward(Searchable searchable);
 
-    void unlockTxOutput(String txHash);
+    void unlockTxOutput(@Param("txHash") String txHash, @Param("lockTime")long lockTime);
 
     void lockTxOutput(String txHash);
 }

@@ -44,7 +44,7 @@ public class EventDispatchThread extends BaseThread implements WorkHandler<Disru
 
     @Override
     public void onEvent(DisruptorEvent<ProcessData > event) throws Exception {
-        if (null == event) {
+        if (null == event||event.getData()==null) {
             Log.debug("did sth ....");
             return;
         }

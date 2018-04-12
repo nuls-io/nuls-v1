@@ -52,7 +52,7 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData {
 
     protected long time;
 
-    protected long blockHeight;
+    protected long blockHeight = -1L;
 
     protected Na fee;
 

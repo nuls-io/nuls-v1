@@ -84,7 +84,7 @@ public class ModuleRunner implements Runnable {
             Class clazz = Class.forName(moduleClass);
             module = (BaseModuleBootstrap) clazz.newInstance();
             module.setModuleName(this.moduleKey);
-            Log.info("load module:" + module.getInfo());
+            Log.debug("load module:" + module.getInfo());
         } while (false);
         ModuleManager.getInstance().regModule(module);
 

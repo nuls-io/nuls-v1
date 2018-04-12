@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -29,10 +29,8 @@ import io.nuls.core.chain.entity.Na;
  * @author Niels
  */
 public interface PocConsensusConstant {
-    //version
-    short POC_CONSENSUS_MODULE_VERSION = 0;
-    short MINIMUM_VERSION_SUPPORTED = 0;
 
+    int ALIVE_MIN_NODE_COUNT = 2;
 
     String CFG_CONSENSUS_SECTION = "consensus";
     String PROPERTY_PARTAKE_PACKING = "partake.packing";
@@ -67,7 +65,7 @@ public interface PocConsensusConstant {
     /**
      * unit:second
      */
-    int BLOCK_TIME_INTERVAL_SECOND = 3;
+    int BLOCK_TIME_INTERVAL_SECOND = 10;
 
     /**
      * default:2M
@@ -102,6 +100,7 @@ public interface PocConsensusConstant {
      */
     long RED_PUNISH_DEPOSIT_LOCKED_TIME = 90;
     long YELLOW_PUNISH_DEPOSIT_LOCKED_TIME = 3;
+    long STOP_AGENT_DEPOSIT_LOCKED_TIME = 3;
 
     /**
      * credit parameters

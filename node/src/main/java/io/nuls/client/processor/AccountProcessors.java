@@ -26,19 +26,24 @@
 
 package io.nuls.client.processor;
 
+import io.nuls.rpc.sdk.entity.BalanceNa2NulsDto;
 import io.nuls.client.entity.CommandResult;
+import io.nuls.client.helper.CommandBulider;
+import io.nuls.client.helper.CommandHelper;
 import io.nuls.client.processor.intf.CommandProcessor;
-import io.nuls.core.utils.param.AssertUtil;
+import io.nuls.core.utils.str.StringUtils;
+import io.nuls.rpc.sdk.entity.BalanceDto;
 import io.nuls.rpc.sdk.entity.RpcClientResult;
 import io.nuls.rpc.sdk.service.AccountService;
 
 /**
- * @author Niels
- * @date 2018/3/7
+ * @Desription:
+ * @Author: PierreLuo
+ * @Date: 2018/3/27
  */
 public abstract class AccountProcessors implements CommandProcessor {
 
-    protected AccountService accountService = new AccountService();
+    protected AccountService accountService = AccountService.ACCOUNT_SERVICE;
 
     /**
      * create accounts processor
@@ -51,16 +56,35 @@ public abstract class AccountProcessors implements CommandProcessor {
         }
 
         @Override
+        public String getHelp() {
+            CommandBulider builder = new CommandBulider();
+
+            builder.newLine(getCommandDescription())
+                    .newLine("\t<password> the password your wallet, Required")
+                    .newLine("\t<count> the count of account you want to create, Required");
+            return builder.toString();
+        }
+
+        @Override
         public String getCommandDescription() {
-            return "createaccount <password> <count> --create <count> accounts & Encrypting with with <password>";
+            return "createaccount <password> <count> --create <count> accounts , encrypted by <password>";
         }
 
         @Override
         public boolean argsValidate(String[] args) {
-            if (args.length != 3) {
+            int length = args.length;
+            if(length != 3) {
                 return false;
             }
-            AssertUtil.canNotEmpty(args[1]);
+            if(!CommandHelper.checkArgsIsNull(args)) {
+                return false;
+            }
+            // validate <count>
+            if(!StringUtils.isNumeric(args[2])) {
+                return false;
+            }
+            String pwd = args[1];
+            CommandHelper.checkAndConfirmPwd(pwd);
             return true;
         }
 
@@ -75,6 +99,49 @@ public abstract class AccountProcessors implements CommandProcessor {
     }
 
 
+
+    public static class GetAccount extends AccountProcessors {
+
+        @Override
+        public String getCommand() {
+            return "getaccount";
+        }
+
+        @Override
+        public String getHelp() {
+            CommandBulider builder = new CommandBulider();
+            builder.newLine(getCommandDescription())
+                    .newLine("\t<address> the account address - Required");
+            return builder.toString();
+        }
+
+        @Override
+        public String getCommandDescription() {
+            return "getaccount <address> --get account information";
+        }
+
+        @Override
+        public boolean argsValidate(String[] args) {
+            int length = args.length;
+            if(length != 2) {
+                return false;
+            }
+            if(!CommandHelper.checkArgsIsNull(args)) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public CommandResult execute(String[] args) {
+            RpcClientResult result = accountService.getBaseInfo(args[1]);
+            if (null == result) {
+                return CommandResult.getFailed("Failure to execute");
+            }
+            return CommandResult.getResult(result);
+        }
+    }
+
     /**
      * get the balance of a address
      */
@@ -82,26 +149,37 @@ public abstract class AccountProcessors implements CommandProcessor {
 
         @Override
         public String getCommand() {
-            return "balance";
+            return "getbalance";
+        }
+
+        @Override
+        public String getHelp() {
+            CommandBulider builder = new CommandBulider();
+            builder.newLine(getCommandDescription())
+                    .newLine("\t<address> the account address - require");
+            return builder.toString();
         }
 
         @Override
         public String getCommandDescription() {
-            return "balance <address> --get the balance of a address";
+            return "getbalance <address> --get the balance of a address";
         }
 
         @Override
         public boolean argsValidate(String[] args) {
-            if (args.length != 2) {
+            int length = args.length;
+            if(length != 2) {
                 return false;
             }
-            AssertUtil.canNotEmpty(args[1]);
+            if(!CommandHelper.checkArgsIsNull(args)) {
+                return false;
+            }
             return true;
         }
 
         @Override
         public CommandResult execute(String[] args) {
-            RpcClientResult result = accountService.getBalance(args[1]);
+            RpcClientResult result = accountService.getBalanceNa2Nuls(args[1]);
             if (null == result) {
                 return CommandResult.getFailed("Failure to execute");
             }
@@ -109,39 +187,260 @@ public abstract class AccountProcessors implements CommandProcessor {
         }
     }
 
-
-    /**
-     * get the balance of a address
-     */
-    public static class ImportAccount extends AccountProcessors {
+    public static class GetWalletBalance extends AccountProcessors {
 
         @Override
         public String getCommand() {
-            return "import";
+            return "getwalletbalance";
+        }
+
+        @Override
+        public String getHelp() {
+            CommandBulider builder = new CommandBulider();
+            builder.newLine(getCommandDescription());
+            return builder.toString();
         }
 
         @Override
         public String getCommandDescription() {
-            return "balance <prikey> <password> --import an account by prikey";
+            return "getwalletbalance --get total balance of all addresses in the wallet";
         }
 
         @Override
         public boolean argsValidate(String[] args) {
-            if (args.length != 3) {
+            int length = args.length;
+            if(length > 1) {
                 return false;
             }
-            AssertUtil.canNotEmpty(args[1]);
-            AssertUtil.canNotEmpty(args[2]);
             return true;
         }
 
         @Override
         public CommandResult execute(String[] args) {
-            RpcClientResult result = accountService.importAccount(args[1],args[2]);
+            RpcClientResult result = accountService.getTotalBalanceNa2Nuls();
             if (null == result) {
                 return CommandResult.getFailed("Failure to execute");
             }
             return CommandResult.getResult(result);
         }
     }
+
+    public static class ListAccount extends AccountProcessors {
+
+        @Override
+        public String getCommand() {
+            return "listaccount";
+        }
+
+        @Override
+        public String getHelp() {
+            CommandBulider builder = new CommandBulider();
+            builder.newLine(getCommandDescription());
+            return builder.toString();
+        }
+
+        @Override
+        public String getCommandDescription() {
+            return "listaccount --get all addresses in the wallet";
+        }
+
+        @Override
+        public boolean argsValidate(String[] args) {
+            int length = args.length;
+            if(length > 1) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public CommandResult execute(String[] args) {
+            RpcClientResult result = accountService.getAccountList();
+            if (null == result) {
+                return CommandResult.getFailed("Failure to execute");
+            }
+            return CommandResult.getResult(result);
+        }
+    }
+
+    public static class GetUTXO extends AccountProcessors {
+
+        @Override
+        public String getCommand() {
+            return "getutxo";
+        }
+
+        @Override
+        public String getHelp() {
+            CommandBulider builder = new CommandBulider();
+            builder.newLine(getCommandDescription())
+                    .newLine("\t<address> the account address - Required")
+                    .newLine("\t<amount> account, utxo - Required");
+            return builder.toString();
+        }
+
+        @Override
+        public String getCommandDescription() {
+            return "getutxo <address> <amount> --get a minimal list of UTXO,the total amount of which is greater than <amount>.";
+        }
+
+        @Override
+        public boolean argsValidate(String[] args) {
+            int length = args.length;
+            if(length != 3) {
+                return false;
+            }
+            if(!CommandHelper.checkArgsIsNull(args)) {
+                return false;
+            }
+            Long amount = CommandHelper.getLongAmount(args[2]);
+            if(amount == null) {
+                return false;
+            }
+            args[2] = amount.toString();
+            return true;
+        }
+
+        @Override
+        public CommandResult execute(String[] args) {
+            RpcClientResult result = accountService.getUTXONa2Nuls(args[1], Long.valueOf(args[2]));
+            if (null == result) {
+                return CommandResult.getFailed("Failure to execute");
+            }
+            return CommandResult.getResult(result);
+        }
+    }
+
+    public static class AliasAccount extends AccountProcessors {
+
+        @Override
+        public String getCommand() {
+            return "aliasaccount";
+        }
+
+        @Override
+        public String getHelp() {
+            CommandBulider builder = new CommandBulider();
+            builder.newLine(getCommandDescription())
+                    .newLine("\t<alias> alias - Required")
+                    .newLine("\t<address> address - Required")
+                    .newLine("\t<password> password - Required");
+            return builder.toString();
+        }
+
+        @Override
+        public String getCommandDescription() {
+            return "aliasaccount <alias> <address> <password>--create a nickname";
+        }
+
+        @Override
+        public boolean argsValidate(String[] args) {
+            int length = args.length;
+            if(length != 4) {
+                return false;
+            }
+            if(!CommandHelper.checkArgsIsNull(args)) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public CommandResult execute(String[] args) {
+            RpcClientResult result = accountService.setAlias(args[1], args[2], args[3]);
+            if (null == result) {
+                return CommandResult.getFailed("Failure to execute");
+            }
+            return CommandResult.getResult(result);
+        }
+    }
+
+    public static class GetPrivateKey extends AccountProcessors {
+
+        @Override
+        public String getCommand() {
+            return "getprivatekey";
+        }
+
+        @Override
+        public String getHelp() {
+            CommandBulider builder = new CommandBulider();
+            builder.newLine(getCommandDescription())
+                    .newLine("\t<address> address - Required")
+                    .newLine("\t<password> password - Required");
+            return builder.toString();
+        }
+
+        @Override
+        public String getCommandDescription() {
+            return "getprivatekey <address> <password>--get the private key of your account";
+        }
+
+        @Override
+        public boolean argsValidate(String[] args) {
+            int length = args.length;
+            if(length != 3) {
+                return false;
+            }
+            if(!CommandHelper.checkArgsIsNull(args)) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public CommandResult execute(String[] args) {
+            RpcClientResult result = accountService.getPrivateKey(args[1], args[2]);
+            if (null == result) {
+                return CommandResult.getFailed("Failure to execute");
+            }
+            return CommandResult.getResult(result);
+        }
+    }
+
+
+    public static class GetAsset extends AccountProcessors {
+
+        @Override
+        public String getCommand() {
+            return "getasset";
+        }
+
+        @Override
+        public String getHelp() {
+            CommandBulider builder = new CommandBulider();
+            builder.newLine(getCommandDescription())
+                    .newLine("\t<address> address - Required");
+            return builder.toString();
+        }
+
+        @Override
+        public String getCommandDescription() {
+            return "getasset <address>--get your assets";
+        }
+
+        @Override
+        public boolean argsValidate(String[] args) {
+            int length = args.length;
+            if(length != 2) {
+                return false;
+            }
+            if(!CommandHelper.checkArgsIsNull(args)) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public CommandResult execute(String[] args) {
+            RpcClientResult result = accountService.getAssetNa2Nuls(args[1]);
+            if (null == result) {
+                return CommandResult.getFailed("Failure to execute");
+            }
+            return CommandResult.getResult(result);
+        }
+    }
+
+
+
 }

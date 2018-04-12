@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -29,10 +29,7 @@ import io.nuls.consensus.entity.DownloadRound;
 import io.nuls.consensus.entity.NodeDownloadingStatus;
 import io.nuls.consensus.event.GetBlockRequest;
 import io.nuls.consensus.manager.BlockManager;
-import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.Result;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.date.TimeService;
@@ -57,13 +54,12 @@ public class BlockBatchDownloadUtils {
     /**
      * todo unit:ms
      */
-    private static final long DOWNLOAD_IDLE_TIME_OUT = 20000;
+    private static final long DOWNLOAD_IDLE_TIME_OUT = 1000;
 
     private static final BlockBatchDownloadUtils INSTANCE = new BlockBatchDownloadUtils();
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
     private QueueService<String> queueService = new QueueService<>();
     private BlockManager blockManager = BlockManager.getInstance();
-    private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
 
 
     private ReceivedTxCacheManager receivedTxCacheManager = ReceivedTxCacheManager.getInstance();
@@ -79,8 +75,6 @@ public class BlockBatchDownloadUtils {
     private List<DownloadRound> roundList = new ArrayList<>();
     private DownloadRound currentRound;
     private List<String> nodeIdList;
-    private BlockInfo blocksHash;
-    private long lastOperateTime;
 
     private Lock lock = new ReentrantLock();
 
@@ -114,20 +108,12 @@ public class BlockBatchDownloadUtils {
             if (working) {
                 return;
             }
-            this.lastOperateTime = TimeService.currentTimeMillis();
             working = true;
             this.init(nodeIdList);
-            blocksHash = DistributedBlockInfoRequestUtils.getInstance().request(startHeight, endHeight, DOWNLOAD_BLOCKS_PER_TIME,nodeIdList);
             request(startHeight, endHeight);
             while (working) {
-                if ((lastOperateTime + DOWNLOAD_IDLE_TIME_OUT) < TimeService.currentTimeMillis()) {
-                    verify();
-                }
-                if ((TimeService.currentTimeMillis() - lastOperateTime) >= 5000) {
-                    working = false;
-                    return;
-                }
-                Thread.sleep(100L);
+                verify();
+                Thread.sleep(500L);
             }
         } catch (Exception e) {
             Log.error(e.getMessage());
@@ -202,26 +188,41 @@ public class BlockBatchDownloadUtils {
     }
 
     private void sendRequest(long start, long end, String nodeId) {
-        NodeDownloadingStatus status = new NodeDownloadingStatus();
-        status.setStart(start);
-        status.setEnd(end);
+        NodeDownloadingStatus status = nodeStatusMap.get(nodeId);
+        if (status == null) {
+            status = new NodeDownloadingStatus();
+        }
+        status.setDownloadingSet(start, end);
         status.setNodeId(nodeId);
+        nodeStatusMap.put(nodeId, status);
         this.eventBroadcaster.sendToNode(new GetBlockRequest(start, end), nodeId);
         status.setUpdateTime(System.currentTimeMillis());
-        nodeStatusMap.put(nodeId, status);
-        Log.info("download block :" + start + "-" + end + ",from : " + nodeId);
+        if (start != end) {
+            Log.info("download block :" + start + "-" + end + ",from : " + nodeId);
+        }
     }
 
 
     public boolean downloadedBlock(String nodeId, Block block) {
+        if(!this.working){
+            return false;
+        }
         try {
             NodeDownloadingStatus status = nodeStatusMap.get(nodeId);
             if (null == status) {
                 return false;
             }
-            this.lastOperateTime = TimeService.currentTimeMillis();
             if (!status.containsHeight(block.getHeader().getHeight())) {
                 return false;
+            }
+            ValidateResult result1 = block.verify();
+            if (result1.isFailed() && result1.getErrorCode() != ErrorCode.ORPHAN_TX && result1.getErrorCode() != ErrorCode.ORPHAN_BLOCK) {
+                Log.info("recieve a block wrong!:" + nodeId + ",blockHash:" + block.getHeader().getHash());
+                this.nodeIdList.remove(nodeId);
+                if (nodeIdList.isEmpty()) {
+                    working = false;
+                }
+                return true;
             }
             blockMap.put(block.getHeader().getHeight(), block);
             status.downloaded(block.getHeader().getHeight());
@@ -229,7 +230,6 @@ public class BlockBatchDownloadUtils {
             if (status.finished()) {
                 this.queueService.offer(queueId, nodeId);
             }
-            verify();
         } catch (Exception e) {
             Log.error(e);
         }
@@ -237,39 +237,26 @@ public class BlockBatchDownloadUtils {
     }
 
     private synchronized void verify() {
-        boolean done = true;
-        if (nodeStatusMap.isEmpty()) {
-            working = false;
-            return;
-        }
-        for (NodeDownloadingStatus status : nodeStatusMap.values()) {
-            if (!done) {
-                break;
+        List<NodeDownloadingStatus> values = new ArrayList(nodeStatusMap.values());
+        for (NodeDownloadingStatus status : values) {
+            if (!status.finished() && status.getUpdateTime() < (TimeService.currentTimeMillis() - DOWNLOAD_IDLE_TIME_OUT)) {
+                this.queueService.offer(queueId, status.getNodeId());
             }
-            done = status.finished();
-            if (!done && status.getUpdateTime() < (TimeService.currentTimeMillis() - DOWNLOAD_IDLE_TIME_OUT)) {
-                nodeStatusMap.remove(status.getNodeId());
+        }
+        if (blockMap.size() != (currentRound.getEnd() - currentRound.getStart() + 1)) {
+            for (long i = currentRound.getStart(); i <= currentRound.getEnd(); i++) {
+                if (blockMap.containsKey(i)) {
+                    continue;
+                }
                 try {
-                    failedExecute(status);
+                    this.failedExecute(i);
                 } catch (InterruptedException e) {
                     Log.error(e);
                 }
-
             }
-        }
-        if (!done) {
             return;
         }
-        Result result;
-        try {
-            result = checkHash();
-        } catch (InterruptedException e) {
-            Log.error(e);
-            return;
-        }
-        if (null == result || result.isFailed()) {
-            return;
-        }
+
         for (long i = currentRound.getStart(); i <= currentRound.getEnd(); i++) {
             Block block = blockMap.get(i);
             if (null == block) {
@@ -277,16 +264,22 @@ public class BlockBatchDownloadUtils {
                 Log.error("cache block is null");
                 break;
             }
+            if (block.getHeader().getHeight() <= NulsContext.getInstance().getBestHeight()) {
+                continue;
+            }
             ValidateResult result1 = block.verify();
-            if (result1.isFailed() && result1.getErrorCode() != ErrorCode.ORPHAN_TX) {
+            if (result1.isFailed() && result1.getErrorCode() != ErrorCode.ORPHAN_TX && result1.getErrorCode() != ErrorCode.ORPHAN_BLOCK) {
                 if (null != result1.getMessage()) {
-                    Log.info(result1.getMessage());
+                    Log.debug(result1.getMessage());
                 }
+                blockMap.remove(block.getHeader().getHeight());
+
                 try {
                     failedExecute(block.getHeader().getHeight());
                 } catch (InterruptedException e) {
                     Log.error(e);
                 }
+                working = false;
                 return;
             }
             blockManager.addBlock(block, false, null);
@@ -298,53 +291,16 @@ public class BlockBatchDownloadUtils {
 
 
     private void failedExecute(long height) throws InterruptedException {
-        NodeDownloadingStatus status = null;
-        for (NodeDownloadingStatus status1 : nodeStatusMap.values()) {
-            if (status1.containsHeight(height)) {
-                status = status1;
-                break;
-            }
-        }
-        this.failedExecute(status);
-    }
-
-    private void failedExecute(NodeDownloadingStatus nodeStatus) throws InterruptedException {
-        if (null == nodeStatus) {
+        if (nodeIdList.isEmpty()) {
             return;
         }
-        this.nodeIdList.remove(nodeStatus.getNodeId());
-        this.queueService.remove(queueId, nodeStatus.getNodeId());
-        if (nodeIdList.isEmpty() || queueService.size(queueId) == 0) {
+        if (blockMap.containsKey(height)) {
             return;
         }
-        this.sendRequest(nodeStatus.getStart(), nodeStatus.getEnd(), this.queueService.take(queueId));
-    }
-
-    private Result checkHash() throws InterruptedException {
-        for (long i = currentRound.getStart(); i <= currentRound.getEnd(); i++) {
-            Block block = blockMap.get(i);
-            if (null == block) {
-                return Result.getFailed("data error");
-            }
-            if ((i - currentRound.getStart()) % DOWNLOAD_BLOCKS_PER_TIME == 0) {
-                NulsDigestData mustHash = blocksHash.getHash(block.getHeader().getHeight());
-                NulsDigestData hash = block.getHeader().getHash();
-                if (null == hash || null == mustHash || !mustHash.getDigestHex().equals(hash.getDigestHex())) {
-                    failedExecute(block.getHeader().getHeight());
-                    return Result.getFailed("hash wrong!");
-                }
-            }
-            String preHash = block.getHeader().getPreHash().getDigestHex();
-            Block preBlock = blockMap.get(block.getHeader().getHeight() - 1);
-            if (preBlock == null) {
-                preBlock = blockService.getBlock(preHash);
-            }
-            if (null == preBlock || preBlock.getHeader().getHeight() != (block.getHeader().getHeight() - 1)) {
-                failedExecute(block.getHeader().getHeight());
-                return Result.getFailed("prehash wrong!");
-            }
-        }
-        return Result.getSuccess();
+//        if (this.queueService.size(queueId) == 0) {
+//            this.queueService.offerList(queueId, nodeIdList);
+//        }
+        this.sendRequest(height, height, this.queueService.take(queueId));
     }
 
     private void finished() {
@@ -366,21 +322,7 @@ public class BlockBatchDownloadUtils {
     }
 
     private boolean roundFinished() {
-        boolean result = true;
-        for (String nodeId : currentRound.getNodeIdList()) {
-            if (!result) {
-                break;
-            }
-            try {
-                NodeDownloadingStatus status = nodeStatusMap.get(nodeId);
-                if (status != null) {
-                    result = status.finished();
-                }
-            } catch (Exception e) {
-                Log.error(e);
-            }
-        }
-        return result;
+        return blockMap.size() == (currentRound.getEnd() - currentRound.getStart() + 1);
     }
 
     public boolean isFinished() {

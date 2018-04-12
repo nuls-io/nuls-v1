@@ -23,6 +23,7 @@
  */
 package io.nuls.consensus.event.handler;
 
+import io.nuls.consensus.download.DownloadCacheHandler;
 import io.nuls.consensus.event.BlockEvent;
 import io.nuls.consensus.manager.BlockManager;
 import io.nuls.consensus.utils.BlockBatchDownloadUtils;
@@ -30,11 +31,14 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.utils.log.BlockLog;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.entity.NodePo;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.network.service.NetworkService;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author facjas
@@ -48,22 +52,18 @@ public class BlockEventHandler extends AbstractEventHandler<BlockEvent> {
     @Override
     public void onEvent(BlockEvent event, String fromId) {
         Block block = event.getEventBody();
-        if(null==block){
-            Log.warn("recieved a null blockEvent form "+fromId);
+        if (null == block) {
+            Log.warn("recieved a null blockEvent form " + fromId);
             return;
         }
-        ValidateResult result = block.verify();
-        if (result.isFailed()&&result.getErrorCode()!= ErrorCode.ORPHAN_TX) {
-            if (result.getLevel() == SeverityLevelEnum.FLAGRANT_FOUL) {
-                networkService.blackNode(fromId, NodePo.YELLOW);
-            }
-            Log.warn("recieved a wrong blockEvent:{},form:{}",result.getMessage(),fromId);
-            return;
-        }
-        if (BlockBatchDownloadUtils.getInstance().downloadedBlock(fromId, block)) {
-            return;
-        }
-        blockCacheManager.addBlock(block,false,fromId);
+        //BlockLog.debug("download("+fromId+") block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + block.getHeader().getPackingAddress());
+//        if (BlockBatchDownloadUtils.getInstance().downloadedBlock(fromId, block)) {
+//            return;
+//        }
+
+        //blockCacheManager.addBlock(block, true, fromId);
+
+        DownloadCacheHandler.receiveBlock(block);
 
     }
 }

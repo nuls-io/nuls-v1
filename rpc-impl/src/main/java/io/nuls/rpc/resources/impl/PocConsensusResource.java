@@ -108,7 +108,10 @@ public class PocConsensusResource {
     @Path("/address/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getInfo(@PathParam("address") String address) {
-        AssertUtil.canNotEmpty(address);
+
+        if(!Address.validAddress(StringUtils.formatStringPara(address))){
+            return RpcResult.getFailed(ErrorCode.ADDRESS_ERROR);
+        }
         RpcResult result = RpcResult.getSuccess();
 
         Map<String, Object> dataMap = consensusService.getConsensusInfo(address);
@@ -155,6 +158,10 @@ public class PocConsensusResource {
         AssertUtil.canNotEmpty(form.getDeposit());
         AssertUtil.canNotEmpty(form.getPassword());
         Map<String, Object> paramsMap = new HashMap<>();
+        if (!Address.validAddress(form.getAddress())) {
+            throw new NulsRuntimeException(ErrorCode.PARAMETER_ERROR);
+        }
+
         paramsMap.put("deposit", form.getDeposit());
         paramsMap.put("agentHash", form.getAgentId());
         Transaction tx = consensusService.startConsensus(form.getAddress(), form.getPassword(), paramsMap);
@@ -179,7 +186,7 @@ public class PocConsensusResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult profit(@QueryParam("address") String address) {
         Map<String, Object> map = new HashMap<>();
-        if ((address != null && !Address.validAddress(address))) {
+        if ( !Address.validAddress(address)) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         if (address == null) {
@@ -235,6 +242,10 @@ public class PocConsensusResource {
     @Path("/agent/{agentAddress}")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getAgentByAddress(@PathParam("agentAddress") String agentAddress) {
+        if ( !Address.validAddress(agentAddress)) {
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+
         RpcResult result = RpcResult.getSuccess();
         Map<String, Object> data = this.consensusService.getAgent(agentAddress);
         result.setData(data);
@@ -256,34 +267,6 @@ public class PocConsensusResource {
         if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
-//        Page<AgentInfo> listPage = new Page<>();
-//        if (temp == 1) {
-//            listPage.setPageNumber(pageNumber);
-//            listPage.setPageSize(pageSize);
-//            listPage.setTotal(pageSize * 3);
-//            listPage.setPages(3);
-//            List<AgentInfo> list = new ArrayList<>();
-//            for (int i = 0; i < pageSize; i++) {
-//                AgentInfo item = new AgentInfo();
-//                item.setCommissionRate(15);
-//                item.setCreditRatio(0.9);
-//                item.setStatus(2);
-//                item.setAgentId(StringUtils.getNewUUID());
-//                item.setMemberCount(3 + pageNumber);
-//                item.setOwndeposit(Na.parseNuls(50000 + pageNumber));
-//                item.setTotalDeposit(Na.parseNuls(300000 + pageNumber));
-//                item.setIntroduction("哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈" + pageNumber);
-//                item.setAgentAddress("2CYdNLysoMbPRc4Q5YsVreT99Q61ZSg");
-//                item.setAgentName("超级节点" + i + pageNumber);
-//                item.setStartTime(System.currentTimeMillis());
-//                item.setPackedCount(11234 + i * pageNumber);
-//                item.setReward(Na.parseNuls(1120 * i + pageNumber));
-//                list.add(item);
-//            }
-//            listPage.setList(list);
-//            result.setData(listPage);
-//            return result;
-//        }
 
         Page<Map<String, Object>> list = this.consensusService.getAgentList(null, address, null, null, pageNumber, pageSize);
         result.setData(list);
@@ -306,35 +289,6 @@ public class PocConsensusResource {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         RpcResult result = RpcResult.getSuccess();
-//        Page<DepositItem> listPage = new Page<>();
-//        if (temp == 1) {
-//            listPage.setPageNumber(pageNumber);
-//            listPage.setPageSize(pageSize);
-//            listPage.setTotal(pageSize * 3);
-//            listPage.setPages(3);
-//            List<DepositItem> list = new ArrayList<>();
-//            for (int i = 0; i < pageSize; i++) {
-//                DepositItem item = new DepositItem();
-//                item.setAddress(address);
-//                item.setAmount(1000000000);
-//                item.setDepositTime(System.currentTimeMillis());
-//                item.setStatus(2);
-//                item.setAgentName("二货节点" + i);
-//                if (StringUtils.isNotBlank(agentAddress)) {
-//                    item.setAgentAddress(agentAddress);
-//                } else {
-//                    try {
-//                        item.setAgentAddress(AccountTool.createAccount().getAddress().toString());
-//                    } catch (NulsException e) {
-//                        Log.error(e);
-//                    }
-//                }
-//                list.add(item);
-//            }
-//            listPage.setList(list);
-//            result.setData(listPage);
-//            return result;
-//        }
 
         Page<Map<String, Object>> page = this.consensusService.getDepositList(address, agentAddress, pageNumber, pageSize);
         result.setData(page);
@@ -347,6 +301,7 @@ public class PocConsensusResource {
     public RpcResult queryDepositListByAgentAddress(@PathParam("agentAddress") String agentAddress,
                                                     @QueryParam("pageNumber") Integer pageNumber, @QueryParam("pageSize") Integer pageSize) {
         AssertUtil.canNotEmpty(agentAddress);
+
         if (null == pageNumber || pageNumber == 0) {
             pageNumber = 1;
         }
@@ -357,31 +312,7 @@ public class PocConsensusResource {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         RpcResult result = RpcResult.getSuccess();
-//        Page<DepositItem> listPage = new Page<>();
-//        if (temp == 1) {
-//            listPage.setPageNumber(pageNumber);
-//            listPage.setPageSize(pageSize);
-//            listPage.setTotal(pageSize * 3);
-//            listPage.setPages(3);
-//            List<DepositItem> list = new ArrayList<>();
-//            for (int i = 0; i < pageSize; i++) {
-//                DepositItem item = new DepositItem();
-//                try {
-//                    item.setAddress(AccountTool.createAccount().getAddress().toString());
-//                } catch (NulsException e) {
-//                    Log.error(e);
-//                }
-//                item.setAgentName("二货节点" + i);
-//                item.setAmount(100000000 + i);
-//                item.setDepositTime(System.currentTimeMillis());
-//                item.setStatus(i / 2);
-//                item.setAgentAddress(agentAddress);
-//                list.add(item);
-//            }
-//            listPage.setList(list);
-//            result.setData(listPage);
-//            return result;
-//        }
+
         Page<Map<String, Object>> page = this.consensusService.getDepositList(null, agentAddress, pageNumber, pageSize);
         result.setData(page);
         return result;
@@ -392,13 +323,14 @@ public class PocConsensusResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getAllAgentStatusList() {
         RpcResult rpcResult = RpcResult.getSuccess();
-        List<AgentPo> polist = agentDataService.getList();
-        if (null == polist || polist.isEmpty()) {
+        List<AgentPo> poList = agentDataService.getList();
+        if (null == poList || poList.isEmpty()) {
             return rpcResult;
         }
-        Map<String, Integer> statusMap = new HashMap<>();
-        for (AgentPo po : polist) {
-            statusMap.put(po.getAgentAddress(), po.getStatus());
+        Map<String, Object> statusMap = new HashMap<>();
+        for (AgentPo po : poList) {
+            statusMap.put("agentAddress", po.getAgentAddress());
+            statusMap.put("status", po.getStatus());
         }
         return rpcResult.setData(statusMap);
     }
@@ -411,6 +343,10 @@ public class PocConsensusResource {
         AssertUtil.canNotEmpty(form.getTxHash());
         AssertUtil.canNotEmpty(form.getPassword());
         AssertUtil.canNotEmpty(form.getAddress());
+        if(!Address.validAddress(form.getAddress())){
+            return RpcResult.getFailed(ErrorCode.ADDRESS_ERROR);
+        }
+
         Map<String, Object> params = new HashMap<>();
         params.put("txHash", form.getTxHash());
         Transaction tx = null;

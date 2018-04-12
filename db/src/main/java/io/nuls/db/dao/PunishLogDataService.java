@@ -34,4 +34,6 @@ import io.nuls.db.entity.PunishLogPo;
 public interface PunishLogDataService extends BaseDataService<String, PunishLogPo> {
 
     int deleteByHeight(long height);
+
+    long getCountByRounds(String agentAddress, long startRoundIndex, long endRoundIndex,long startHeight,int punishType);
 }

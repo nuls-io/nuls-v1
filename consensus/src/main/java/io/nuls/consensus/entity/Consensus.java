@@ -47,6 +47,8 @@ public abstract class Consensus<T extends BaseNulsData> extends BaseNulsData imp
 
     private NulsDigestData hash;
 
+    private long delHeight;
+
     @Override
     public int size() {
         int size = 0;
@@ -112,5 +114,13 @@ public abstract class Consensus<T extends BaseNulsData> extends BaseNulsData imp
     @Override
     public Object copy() {
         return this;
+    }
+
+    public long getDelHeight() {
+        return delHeight;
+    }
+
+    public void setDelHeight(long delHeight) {
+        this.delHeight = delHeight;
     }
 }

@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -32,6 +32,7 @@ import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.Result;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.dto.Page;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.ledger.entity.Balance;
@@ -65,9 +66,11 @@ public class AccountResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult create(AccountParamForm form) {
-        NulsContext.CACHED_PASSWORD_OF_WALLET = form.getPassword();
         Result<List<String>> accountResult = accountService.createAccount(form.getCount(), form.getPassword());
         RpcResult result = new RpcResult(accountResult);
+        if (result.isSuccess()) {
+            NulsContext.setCachedPasswordOfWallet(form.getPassword());
+        }
         return result;
     }
 
@@ -77,7 +80,7 @@ public class AccountResource {
     public RpcResult get(@PathParam("address") String address) {
         RpcResult result;
         if (!Address.validAddress(address)) {
-            result = RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+            result = RpcResult.getFailed(ErrorCode.ADDRESS_ERROR);
             return result;
         }
         Account account = accountService.getAccount(address);
@@ -103,7 +106,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult alias(AccountParamForm form) {
         if (!Address.validAddress(form.getAddress())) {
-            return RpcResult.getFailed(ErrorCode.DATA_NOT_FOUND);
+            return RpcResult.getFailed(ErrorCode.ADDRESS_ERROR);
         }
         Result result = accountService.setAlias(form.getAddress(), form.getPassword(), form.getAlias());
         RpcResult rpcResult = new RpcResult(result);
@@ -113,14 +116,26 @@ public class AccountResource {
     @GET
     @Path("/list")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult accountList() {
-        RpcResult<List<AccountDto>> result = RpcResult.getSuccess();
-        List<Account> list = accountService.getAccountList();
+    public RpcResult accountList(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
+        if (pageNumber < 0 || pageSize < 0) {
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+        if (pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if (pageSize == 0) {
+            pageSize = 10;
+        }
+        Page<Account> page = accountService.getAccountList(pageNumber, pageSize);
         List<AccountDto> dtoList = new ArrayList<>();
-        for (Account account : list) {
+        for (Account account : page.getList()) {
             dtoList.add(new AccountDto(account));
         }
-        result.setData(dtoList);
+
+        Page<AccountDto> dtoPage = new Page<>(page);
+        dtoPage.setList(dtoList);
+        RpcResult result = RpcResult.getSuccess();
+        result.setData(dtoPage);
         return result;
     }
 
@@ -129,7 +144,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getBalance(@PathParam("address") String address) {
         if (!Address.validAddress(address)) {
-            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+            return RpcResult.getFailed(ErrorCode.ADDRESS_ERROR);
         }
         Balance balance = ledgerService.getBalance(address);
         RpcResult result = RpcResult.getSuccess();
@@ -188,8 +203,9 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getPrikey(AccountParamForm form) {
         if (!Address.validAddress(form.getAddress()) || !StringUtils.validPassword(form.getPassword())) {
-            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+            return RpcResult.getFailed(ErrorCode.ADDRESS_ERROR);
         }
+
         Result result = accountService.getPrivateKey(form.getAddress(), form.getPassword());
         return new RpcResult(result);
     }
@@ -199,7 +215,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getAssets(@PathParam("address") String address) {
         if (!Address.validAddress(address)) {
-            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+            return RpcResult.getFailed(ErrorCode.ADDRESS_ERROR);
         }
 
         Balance balance = ledgerService.getBalance(address);
@@ -214,6 +230,11 @@ public class AccountResource {
     @Path("/address")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getAddress(@QueryParam("publicKey") String publicKey, @QueryParam("subChainId") Integer subChainId) {
+
+        if (subChainId < 1 || subChainId >= 65535) {
+            return RpcResult.getFailed(ErrorCode.CHAIN_ID_ERROR);
+        }
+
         Address address = new Address((short) subChainId.intValue(), Hex.decode(publicKey));
         RpcResult result = RpcResult.getSuccess();
         result.setData(address.toString());
@@ -226,6 +247,13 @@ public class AccountResource {
     public RpcResult lock(@QueryParam("address") String address, @QueryParam("password") String password,
                           @QueryParam("amount") long amount, @QueryParam("remark") String remark,
                           @QueryParam("unlockTime") Long unlockTime) {
+        address = StringUtils.formatStringPara(address);
+        if (!Address.validAddress(address)) {
+            return RpcResult.getFailed(ErrorCode.ADDRESS_ERROR);
+        }
+
+        password = StringUtils.formatStringPara(password);
+
         Result lockResult = ledgerService.lock(address, password, Na.parseNuls(amount), unlockTime, remark);
         RpcResult result;
         if (lockResult.isSuccess()) {

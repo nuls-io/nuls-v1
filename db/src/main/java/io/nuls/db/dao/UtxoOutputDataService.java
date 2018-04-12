@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
  * @author Niels
  * @date 2017/11/20
  */
@@ -43,7 +42,9 @@ public interface UtxoOutputDataService extends BaseDataService<Map<String, Objec
 
     List<UtxoOutputPo> getAllUnSpend();
 
-    List<UtxoOutputPo> getLockUtxo(String address, Long beginTime, Integer pageNumber, Integer pageSize);
+    long getLockUtxoCount(String address, Long beginTime, Long bestHeight, Long genesisTime);
+
+    List<UtxoOutputPo> getLockUtxo(String address, Long beginTime, Long bestHeight, Long genesisTime, Integer start, Integer limit);
 
     List<UtxoOutputPo> getAccountUnSpend(String address);
 
@@ -61,7 +62,7 @@ public interface UtxoOutputDataService extends BaseDataService<Map<String, Objec
 
     long getAgentReward(String address, int type);
 
-    void unlockTxOutput(String txHash);
+    void unlockTxOutput(String txHash, long lockTime);
 
     void lockTxOutput(String txHash);
 }

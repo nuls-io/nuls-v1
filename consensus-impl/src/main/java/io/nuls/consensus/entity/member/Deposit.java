@@ -25,12 +25,10 @@ package io.nuls.consensus.entity.member;
 
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.Na;
-import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
-import io.nuls.core.utils.log.Log;
 
 import java.io.IOException;
 
@@ -44,6 +42,7 @@ public class Deposit extends BaseNulsData {
     private int status;
     private long startTime;
     private String txHash;
+    private long blockHeight = -1L;
 
     public long getStartTime() {
         return startTime;
@@ -72,7 +71,7 @@ public class Deposit extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += Utils.sizeOfLong(deposit.getValue());
+        size += Utils.sizeOfVarInt(deposit.getValue());
         size += Utils.sizeOfString(agentHash);
         size += Utils.sizeOfInt48();
         return size;
@@ -106,5 +105,13 @@ public class Deposit extends BaseNulsData {
 
     public String getTxHash() {
         return txHash;
+    }
+
+    public long getBlockHeight() {
+        return blockHeight;
+    }
+
+    public void setBlockHeight(long blockHeight) {
+        this.blockHeight = blockHeight;
     }
 }

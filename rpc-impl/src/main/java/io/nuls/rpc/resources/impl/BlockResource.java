@@ -31,6 +31,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.ledger.service.intf.LedgerService;
@@ -63,6 +64,10 @@ public class BlockResource {
     @Path("/header/height/{height}")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getHeaderByHeight(@PathParam("height") Integer height) throws NulsException, IOException {
+        if( height<0 || height > Integer.MAX_VALUE){
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR );
+        }
+
         RpcResult result = RpcResult.getSuccess();
         BlockHeader blockHeader = blockService.getBlockHeader(height);
         if (blockHeader == null) {
@@ -78,6 +83,11 @@ public class BlockResource {
     @Path("/header/hash/{hash}")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getHeader(@PathParam("hash") String hash) throws NulsException, IOException {
+        hash = StringUtils.formatStringPara(hash);
+        if(!StringUtils.validHash(hash)){
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR );
+        }
+
         RpcResult result = RpcResult.getSuccess();
         BlockHeader blockHeader = blockService.getBlockHeader(hash);
         if (blockHeader == null) {
@@ -108,7 +118,7 @@ public class BlockResource {
                 result.setData(new BlockDto(block, reward, fee));
             } catch (IOException e) {
                 //todo
-                e.printStackTrace();
+               Log.error(e);
             }
         }
         return result;
@@ -134,7 +144,7 @@ public class BlockResource {
                 result.setData(new BlockDto(block, reward, fee));
             } catch (IOException e) {
                 //todo
-                e.printStackTrace();
+               Log.error(e);
             }
         }
         return result;

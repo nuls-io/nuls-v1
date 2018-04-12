@@ -72,13 +72,13 @@ public class AgentComparator implements Comparator<Consensus<Agent>> {
     public int compare(Consensus<Agent> o1, Consensus<Agent> o2) {
         switch (sortType) {
             case DEPOSIT:
-                return (int) (o1.getExtend().getDeposit().getValue() - o2.getExtend().getDeposit().getValue());
+                return (int) -(o1.getExtend().getDeposit().getValue() - o2.getExtend().getDeposit().getValue());
             case COMMISSION_RATE:
-                return (int) (0 - (o1.getExtend().getCommissionRate() - o2.getExtend().getCommissionRate()));
+                return (int)  (o1.getExtend().getCommissionRate() - o2.getExtend().getCommissionRate());
             case CREDIT_VALUE:
-                //todo
+                return (int) (  o2.getExtend().getCreditVal()- o1.getExtend().getCreditVal());
             case DEPOSITABLE:
-                //todo
+                return (int)(o2.getExtend().getTotalDeposit()-o1.getExtend().getTotalDeposit());
         }
         return 0;
     }
