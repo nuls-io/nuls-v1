@@ -114,7 +114,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        Log.error("--------------- ClientChannelHandler exceptionCaught :" + cause.getMessage(), cause);
+        Log.info("--------------- ClientChannelHandler exceptionCaught :" + cause.getMessage());
         ctx.channel().close();
     }
 
