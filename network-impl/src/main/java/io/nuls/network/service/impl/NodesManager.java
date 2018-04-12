@@ -28,6 +28,7 @@ import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.thread.manager.TaskManager;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.network.IpUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.NodeDataService;
@@ -438,7 +439,7 @@ public class NodesManager implements Runnable {
         Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
         while (running) {
             count++;
-            if (count == 4) {
+            if (count == 2) {
                 count = 0;
                 System.out.println("disConnectNodes:");
                 for (Node node : disConnectNodes.values()) {
@@ -452,7 +453,7 @@ public class NodesManager implements Runnable {
                 System.out.println();
                 System.out.println("handShakeNodes:");
                 for (Node node : handShakeNodes.values()) {
-                    System.out.println(node.toString());
+                    Log.info(node.toString() + ",blockHeight:" + node.getVersionMessage().getBestBlockHeight());
                 }
             }
 
@@ -481,7 +482,7 @@ public class NodesManager implements Runnable {
             }
 
             try {
-                Thread.sleep(15000);
+                Thread.sleep(12000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
