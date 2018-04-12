@@ -38,6 +38,7 @@ import java.util.List;
 
 /**
  * cache block data
+ *
  * @author Niels
  * @date 2017/12/12
  */
@@ -70,8 +71,8 @@ public class ConfirmingBlockCacheManager {
         String hash = block.getHeader().getHash().getDigestHex();
         headerCacheMap.put(hash, block.getHeader());
         txsCacheMap.put(hash, block.getTxs());
-        BlockLog.debug("cache block height:" +block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()));
-        if(null==headerCacheMap.get(hash)){
+        BlockLog.debug("cache block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()));
+        if (null == headerCacheMap.get(hash)) {
             System.out.println();
         }
         return true;
@@ -105,7 +106,7 @@ public class ConfirmingBlockCacheManager {
     }
 
     public void removeBlock(String hash) {
-        BlockLog.debug("remove cached block hash:"+hash);
+        BlockLog.debug("remove cached block hash:" + hash);
         this.txsCacheMap.remove(hash);
         this.headerCacheMap.remove(hash);
     }

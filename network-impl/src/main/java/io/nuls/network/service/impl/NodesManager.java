@@ -133,6 +133,9 @@ public class NodesManager implements Runnable {
 
     public void reset() {
         System.out.println("------------------nodeManager reset--------------------");
+        for (Node node : disConnectNodes.values()) {
+            node.setFailCount(NetworkConstant.FAIL_MAX_COUNT);
+        }
         for (Node node : handShakeNodes.values()) {
             removeNode(node);
         }
@@ -436,7 +439,7 @@ public class NodesManager implements Runnable {
         Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
         while (running) {
             count++;
-            if (count == 2) {
+            if (count == 4) {
                 count = 0;
                 System.out.println("disConnectNodes:");
                 for (Node node : disConnectNodes.values()) {
