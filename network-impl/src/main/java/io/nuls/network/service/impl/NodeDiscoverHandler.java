@@ -43,6 +43,7 @@ import io.nuls.network.message.entity.GetNodesIpEvent;
 import io.nuls.network.message.entity.GetVersionEvent;
 
 import java.net.InetSocketAddress;
+import java.sql.Connection;
 import java.util.*;
 
 /**
@@ -114,7 +115,13 @@ public class NodeDiscoverHandler implements Runnable {
      */
     public void findOtherNode(int size) {
         GetNodeEvent event = new GetNodeEvent(size);
-        for (Node node : nodesManager.getAvailableNodes()) {
+        List<Node> nodeList = nodesManager.getAvailableNodes();
+        Collections.shuffle(nodeList);
+        for (int i = 0; i < nodeList.size(); i++) {
+            if (i == 2) {
+                break;
+            }
+            Node node = nodeList.get(i);
             broadcaster.broadcastToNode(event, node, true);
         }
     }

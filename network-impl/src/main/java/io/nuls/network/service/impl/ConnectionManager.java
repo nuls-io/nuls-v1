@@ -155,6 +155,7 @@ public class ConnectionManager {
             if (node.getStatus() != Node.HANDSHAKE && !isHandShakeMessage(event)) {
                 return;
             }
+            System.out.println("-----------processMessage------------node:" + node.getId());
             System.out.println("-----------processMessage------------moduleId: " + event.getHeader().getModuleId() + "," + "eventType:" + event.getHeader().getEventType());
             asynExecute(event, node);
         } else {

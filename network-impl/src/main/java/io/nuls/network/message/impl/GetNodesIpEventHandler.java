@@ -28,15 +28,11 @@ import io.nuls.core.event.BaseEvent;
 import io.nuls.network.entity.Node;
 import io.nuls.network.message.NetworkCacheService;
 import io.nuls.network.message.NetworkEventResult;
-import io.nuls.network.message.entity.GetNodeEvent;
-import io.nuls.network.message.entity.GetNodesIpEvent;
-import io.nuls.network.message.entity.NodeEvent;
 import io.nuls.network.message.entity.NodesIpEvent;
 import io.nuls.network.message.handler.NetWorkEventHandler;
 import io.nuls.network.service.NetworkService;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
