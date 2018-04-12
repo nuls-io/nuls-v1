@@ -47,6 +47,7 @@ import io.nuls.network.service.impl.netty.NettyServer;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -146,6 +147,7 @@ public class ConnectionManager {
         }
     }
 
+    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private void processMessage(BaseEvent event, Node node) {
         if (event == null) {
             Log.error("---------------------NulEvent is null--------------------------------");
@@ -155,7 +157,7 @@ public class ConnectionManager {
             if (node.getStatus() != Node.HANDSHAKE && !isHandShakeMessage(event)) {
                 return;
             }
-            System.out.println("-----------processMessage------------node:" + node.getId() + "------------moduleId: " + event.getHeader().getModuleId() + "," + "eventType:" + event.getHeader().getEventType());
+           // System.out.println( sdf.format(System.currentTimeMillis()) + "-----------processMessage------------node:" + node.getId() + "------------moduleId: " + event.getHeader().getModuleId() + "," + "eventType:" + event.getHeader().getEventType());
             asynExecute(event, node);
         } else {
             if (!node.isHandShake()) {
