@@ -4,6 +4,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
+import io.nuls.core.utils.log.Log;
 
 /**
  * @Desription:
@@ -27,7 +28,7 @@ public class HeartbeatServerHandler extends ChannelInboundHandlerAdapter {
                 type = "all idle";
             }
 
-            System.out.println( ctx.channel().remoteAddress()+"timeout type：" + type);
+            Log.info(ctx.channel().remoteAddress() + "timeout type：" + type);
             ctx.channel().close();
 
         } else {

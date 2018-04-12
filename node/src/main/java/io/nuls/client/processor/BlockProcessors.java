@@ -103,7 +103,7 @@ public abstract class BlockProcessors implements CommandProcessor {
 
         @Override
         public String getCommandDescription() {
-            return "getblock --get the block with hash or height";
+            return "getblock <hash> | <height> --get the block with hash or height";
         }
 
         @Override
