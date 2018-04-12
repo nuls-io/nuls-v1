@@ -256,52 +256,57 @@ public class NodesManager implements Runnable {
                 removeNodeFromGroup(groupName, node.getId());
             }
 
+            node.destroy();
+            connectedNodes.remove(nodeId);
+            disConnectNodes.remove(nodeId);
+            connectedNodes.remove(nodeId);
+            getNodeDao().removeNode(nodeId);
             //If it is a malicious node, or the node type is "IN",remove it at once
             /**
              * Because the port number is not reliable,
              * the "IN" node will not attempt to connect again after the connection fails, so it should be removed from the map at once
              */
-            if (node.getStatus() == Node.BAD || node.getType() == Node.IN) {
-                node.destroy();
-                connectedNodes.remove(nodeId);
-                disConnectNodes.remove(nodeId);
-                connectedNodes.remove(nodeId);
-                getNodeDao().removeNode(nodeId);
-                return;
-            }
-
-            node.destroy();
-            if (connectedNodes.containsKey(nodeId)) {
-                connectedNodes.remove(nodeId);
-            }
-            if (node.isCanConnect() && canConnectNodes.size() < network.maxOutCount() + network.maxInCount()) {
-                if (!canConnectNodes.containsKey(nodeId)) {
-                    for (Node n : canConnectNodes.values()) {
-                        if (node.getIp().equals(n.getIp())) {
-                            node.setFailCount(node.getFailCount() + 1);
-                            node.setLastFailTime(TimeService.currentTimeMillis() + DateUtil.MINUTE_TIME * node.getFailCount());
-                            return;
-                        }
-                    }
-                    node.setLastFailTime(TimeService.currentTimeMillis() + DateUtil.MINUTE_TIME * 1);
-                    node.setType(Node.OUT);
-                    canConnectNodes.put(nodeId, node);
-                    disConnectNodes.remove(nodeId);
-                }
-
-            } else if (node.getFailCount() >= 20) {
-                if (disConnectNodes.containsKey(nodeId)) {
-                    disConnectNodes.remove(nodeId);
-                }
-                getNodeDao().removeNode(nodeId);
-            } else {
-                node.setFailCount(node.getFailCount() + 1);
-                node.setLastFailTime(TimeService.currentTimeMillis() + 5000 * node.getFailCount());
-                if (!disConnectNodes.containsKey(nodeId)) {
-                    disConnectNodes.put(nodeId, node);
-                    canConnectNodes.remove(nodeId);
-                }
-            }
+//            if (node.getStatus() == Node.BAD || node.getType() == Node.IN) {
+//                node.destroy();
+//                connectedNodes.remove(nodeId);
+//                disConnectNodes.remove(nodeId);
+//                connectedNodes.remove(nodeId);
+//                getNodeDao().removeNode(nodeId);
+//                return;
+//            }
+//
+//            node.destroy();
+//            if (connectedNodes.containsKey(nodeId)) {
+//                connectedNodes.remove(nodeId);
+//            }
+//            if (node.isCanConnect() && canConnectNodes.size() < network.maxOutCount() + network.maxInCount()) {
+//                if (!canConnectNodes.containsKey(nodeId)) {
+//                    for (Node n : canConnectNodes.values()) {
+//                        if (node.getIp().equals(n.getIp())) {
+//                            node.setFailCount(node.getFailCount() + 1);
+//                            node.setLastFailTime(TimeService.currentTimeMillis() + DateUtil.MINUTE_TIME * node.getFailCount());
+//                            return;
+//                        }
+//                    }
+//                    node.setLastFailTime(TimeService.currentTimeMillis() + DateUtil.MINUTE_TIME * 1);
+//                    node.setType(Node.OUT);
+//                    canConnectNodes.put(nodeId, node);
+//                    disConnectNodes.remove(nodeId);
+//                }
+//
+//            } else if (node.getFailCount() >= 20) {
+//                if (disConnectNodes.containsKey(nodeId)) {
+//                    disConnectNodes.remove(nodeId);
+//                }
+//                getNodeDao().removeNode(nodeId);
+//            } else {
+//                node.setFailCount(node.getFailCount() + 1);
+//                node.setLastFailTime(TimeService.currentTimeMillis() + 5000 * node.getFailCount());
+//                if (!disConnectNodes.containsKey(nodeId)) {
+//                    disConnectNodes.put(nodeId, node);
+//                    canConnectNodes.remove(nodeId);
+//                }
+//            }
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
@@ -411,7 +416,7 @@ public class NodesManager implements Runnable {
             int count = 0;
             for (Node node : disConnectNodes.values()) {
                 count++;
-                if (count > 10) {
+                if (count > 20) {
                     removeNode(node.getId());
                     continue;
                 }
