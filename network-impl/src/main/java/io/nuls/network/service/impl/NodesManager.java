@@ -435,7 +435,7 @@ public class NodesManager implements Runnable {
         Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
         while (running) {
             count++;
-            if (count == 20) {
+            if (count == 5) {
                 count = 0;
                 System.out.println("disConnectNodes:");
                 for (Node node : disConnectNodes.values()) {
