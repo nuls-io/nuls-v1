@@ -101,7 +101,7 @@ public interface LedgerService {
 
     long getBlockReward(long blockHeight);
 
-    long getBlockFee(Long blockHeight);
+    Long getBlockFee(Long blockHeight);
 
     /**
      * get the last 24 hours coinbase transaction reward

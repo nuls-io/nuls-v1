@@ -169,7 +169,6 @@ public class NodesManager implements Runnable {
     public boolean addConnNode(Node node) {
         lock.lock();
         try {
-            System.out.println("addConnNode: " + node.toString());
             if (!connectedNodes.containsKey(node.getId()) && !handShakeNodes.containsKey(node.getId())) {
                 disConnectNodes.remove(node.getId());
                 connectedNodes.put(node.getId(), node);

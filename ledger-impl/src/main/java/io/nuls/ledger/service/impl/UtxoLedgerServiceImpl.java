@@ -609,7 +609,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public long getBlockFee(Long blockHeight) {
+    public Long getBlockFee(Long blockHeight) {
         return txDao.getBlockFee(blockHeight);
     }
 

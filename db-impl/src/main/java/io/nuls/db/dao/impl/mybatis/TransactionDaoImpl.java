@@ -179,7 +179,7 @@ public class TransactionDaoImpl extends BaseDaoImpl<TransactionMapper, String, T
     }
 
     @Override
-    public long getFeeByHeight(long blockHeight) {
+    public Long getFeeByHeight(long blockHeight) {
         return getMapper().getFeeByHeight(blockHeight);
     }
 
