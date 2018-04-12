@@ -161,6 +161,10 @@ public class ConsensusMeetingRunner implements Runnable {
             Block newBlock = doPacking(self, round);
 
             if (needCheckAgain && hasReceiveNewestBlock(self, round)) {
+
+
+
+
                 Block realBestBlock = blockManager.getBlock(newBlock.getHeader().getHeight());
                 List<NulsDigestData> txHashList = realBestBlock.getTxHashList();
                 for (Transaction transaction : newBlock.getTxs()) {
