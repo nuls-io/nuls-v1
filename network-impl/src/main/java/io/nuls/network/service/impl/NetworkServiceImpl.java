@@ -31,13 +31,11 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.network.IpUtil;
-import io.nuls.db.dao.NodeDataService;
 import io.nuls.network.NetworkContext;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeGroup;
-import io.nuls.network.entity.NodeTransferTool;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.filter.impl.DefaultMessageFilter;
 import io.nuls.network.message.filter.MessageFilterChain;
@@ -48,7 +46,10 @@ import io.nuls.network.param.TestNetworkParam;
 import io.nuls.network.service.NetworkService;
 
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author vivi
@@ -63,8 +64,6 @@ public class NetworkServiceImpl implements NetworkService {
     private NodesManager nodesManager;
 
     private BroadcastHandler broadcaster;
-
-    private NodeDataService nodeDao;
 
     public NetworkServiceImpl() {
         this.network = getNetworkInstance();
@@ -124,11 +123,6 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
-    public void reset() {
-        nodesManager.reset();
-    }
-
-    @Override
     public void shutdown() {
         TaskManager.shutdownByModuleId(NulsConstant.MODULE_ID_NETWORK);
     }
@@ -141,6 +135,11 @@ public class NetworkServiceImpl implements NetworkService {
     @Override
     public void removeNode(String nodeId, int type) {
         nodesManager.removeNode(nodeId);
+    }
+
+    @Override
+    public void deleteNode(String nodeId) {
+        nodesManager.deleteNode(nodeId);
     }
 
     @Override
@@ -177,6 +176,11 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
+    public boolean addConnNode(Node node) {
+        return nodesManager.addConnNode(node);
+    }
+
+    @Override
     public boolean isSeedNode(String ip) {
         return nodesManager.isSeedNode(ip);
     }
@@ -187,8 +191,8 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
-    public void handshakeNode(Node node) {
-        nodesManager.handshakeNode(node);
+    public boolean handshakeNode(String groupName, Node node) {
+        return nodesManager.handshakeNode(groupName, node);
     }
 
     @Override
@@ -257,6 +261,11 @@ public class NetworkServiceImpl implements NetworkService {
         connectionManager.receiveMessage(buffer, node);
     }
 
+    @Override
+    public void reset() {
+        nodesManager.reset();
+    }
+
     private AbstractNetworkParam getNetworkInstance() {
         String networkType = NetworkContext.getNetworkConfig().getPropValue(NetworkConstant.NETWORK_TYPE, "dev");
         if ("dev".equals(networkType)) {
@@ -269,11 +278,5 @@ public class NetworkServiceImpl implements NetworkService {
         return MainNetworkParam.get();
     }
 
-    private NodeDataService getNodeDao() {
-        if (nodeDao == null) {
-            nodeDao = NulsContext.getServiceBean(NodeDataService.class);
-        }
-        return nodeDao;
-    }
 }
 

@@ -23,6 +23,7 @@
  */
 package io.nuls.network.service.impl;
 
+import io.nuls.core.chain.entity.Block;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.thread.manager.TaskManager;
@@ -129,20 +130,20 @@ public class NodeDiscoverHandler implements Runnable {
 
         while (running) {
             count++;
-            List<Node> nodeList = nodesManager.getConnectNode();
-            nodeList.addAll(nodesManager.getAvailableNodes());
-
-            GetVersionEvent event = new GetVersionEvent(network.port());
+            List<Node> nodeList = nodesManager.getAvailableNodes();
+            Block block = NulsContext.getInstance().getBestBlock();
+            GetVersionEvent event = new GetVersionEvent(network.port(), block.getHeader().getHeight(), block.getHeader().getHash().getDigestHex());
             GetNodesIpEvent ipEvent = new GetNodesIpEvent();
             for (Node node : nodeList) {
-                broadcaster.broadcastToNode(event, node, true);
+                if (node.getType() == Node.OUT) {
+                    broadcaster.broadcastToNode(event, node, true);
+                }
                 if (count == 10) {
                     broadcaster.broadcastToNode(ipEvent, node, true);
                 }
             }
 
             long now = TimeService.currentTimeMillis();
-
             if (count == 10) {
                 count = 0;
                 List<String> list = new ArrayList<>();
@@ -157,7 +158,7 @@ public class NodeDiscoverHandler implements Runnable {
             }
 
             try {
-                Thread.sleep(3500);
+                Thread.sleep(10000);
             } catch (InterruptedException e) {
                 Log.error(e);
             }

@@ -49,20 +49,17 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Node extends BaseNulsData {
 
-    public static final int SAME_IP_MAX_COUNT = 10;
-    public static final int FAIL_MAX_COUNT = 20;
-
-    private int magicNumber;
-
-    private String channelId;
-
     private String id;
 
     private String ip;
 
     private Integer port;
 
-    private Integer severPort;
+    private Integer severPort = 0;
+
+    private int magicNumber;
+
+    private String channelId;
 
     private Long lastTime;
 
@@ -91,31 +88,31 @@ public class Node extends BaseNulsData {
 
     private boolean canConnect;
 
-    private boolean reset;
-
     private VersionEvent versionMessage;
 
     public Node() {
-        this.groupSet = ConcurrentHashMap.newKeySet();
+        this.status = CLOSE;
+        groupSet = ConcurrentHashMap.newKeySet();
     }
 
-    public Node(int type) {
+    public Node(String ip, int port, int type) {
         this();
+        this.ip = ip;
+        this.port = port;
+        if (type == Node.OUT) {
+            this.severPort = port;
+        }
         this.type = type;
     }
 
-    public Node(int type, String ip, int port, String channelId) {
-        this(type);
-        this.port = port;
-        this.ip = ip;
-        this.channelId = channelId;
+    public Node(String ip, int port, int severPort, int type) {
+        this(ip, port, type);
+        this.severPort = severPort;
     }
 
-    public Node(int magicNumber, int type, String ip, int port) {
-        this(type);
-        this.magicNumber = magicNumber;
-        this.port = port;
-        this.ip = ip;
+    public Node(String id, String ip, int port, int serverPort, int type) {
+        this(ip, port, serverPort, type);
+        this.id = id;
     }
 
     public void destroy() {
@@ -174,20 +171,29 @@ public class Node extends BaseNulsData {
         }
     }
 
+    public void addGroup(String groupName) {
+        this.groupSet.add(groupName);
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("{");
-//        sb.append("ip: '" + getIp() + "',");
-//        sb.append("port: " + getPort() + ",");
         sb.append("id:" + getId() + ",");
+        sb.append("ip: '" + getIp() + "',");
+        sb.append("port: " + getPort() + ",");
         sb.append("type:" + type + ",");
         sb.append("status:" + status + "}");
 
+//        sb.append("{");
+//        sb.append("ip: '" + getIp() + "',");
+//        sb.append("port: " + getPort() + ",");
+//        sb.append("id:" + getId() + ",");
+//        sb.append("type:" + type + ",");
+//        sb.append("status:" + status + "}");
 //        if (lastTime == null) {
 //            lastTime = System.currentTimeMillis();
 //        }
-//
 //        sb.append("lastTime: " + DateUtil.convertDate(new Date(lastTime)) + ",");
 //        sb.append("magicNumber: " + magicNumber + "}");
         return sb.toString();
@@ -297,9 +303,7 @@ public class Node extends BaseNulsData {
     }
 
     public String getId() {
-        if (StringUtils.isBlank(id)) {
-            id = ip + ":" + port;
-        }
+        id = ip + ":" + port;
         return id;
     }
 
@@ -308,9 +312,6 @@ public class Node extends BaseNulsData {
     }
 
     public Integer getSeverPort() {
-        //if(severPort == null) {
-        //    severPort = 0;
-        //}
         return severPort;
     }
 
@@ -324,13 +325,5 @@ public class Node extends BaseNulsData {
 
     public void setCanConnect(boolean canConnect) {
         this.canConnect = canConnect;
-    }
-
-    public boolean isReset() {
-        return reset;
-    }
-
-    public void setReset(boolean reset) {
-        this.reset = reset;
     }
 }

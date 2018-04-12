@@ -24,7 +24,6 @@
 package io.nuls.network.message.entity;
 
 import io.nuls.core.chain.entity.BaseNulsData;
-import io.nuls.core.chain.intf.NulsVersion;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
@@ -34,12 +33,9 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
-import io.nuls.core.utils.log.Log;
-import io.nuls.core.utils.str.StringUtils;
 import io.nuls.network.constant.NetworkConstant;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 
 /**
  * @author vivi

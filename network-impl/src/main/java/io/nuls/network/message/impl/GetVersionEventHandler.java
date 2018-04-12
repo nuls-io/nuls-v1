@@ -35,6 +35,8 @@ import io.nuls.network.message.entity.VersionEvent;
 import io.nuls.network.message.handler.NetWorkEventHandler;
 import io.nuls.network.service.NetworkService;
 
+import java.util.Random;
+
 /**
  * @author vivi
  * @date 2017/11/24.
@@ -77,11 +79,23 @@ public class GetVersionEventHandler implements NetWorkEventHandler {
             }
         }
 
+        VersionEvent versionEvent = new VersionEvent(event.getSeverPort(), event.getBestBlockHeight(), event.getBestBlockHash());
+        node.setSeverPort(event.getSeverPort());
+        node.setVersionMessage(versionEvent);
+        checkVersion(event.getNulsVersion());
+
         VersionEvent replyMessage = new VersionEvent(getNetworkService().getNetworkParam().port(),
                 block.getHeader().getHeight(), block.getHeader().getHash().getDigestHex());
 
-        node.setSeverPort(event.getSeverPort());
         return new NetworkEventResult(true, replyMessage);
+    }
+
+    private void checkVersion(String version) {
+        int newVersion = Integer.parseInt(version.replace(".", ""));
+        int myVersion = Integer.parseInt(NulsContext.VERSION.replace(".", ""));
+        if (newVersion > myVersion) {
+            NulsContext.NEWEST_VERSION = version;
+        }
     }
 
     private NetworkService getNetworkService() {

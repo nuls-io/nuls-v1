@@ -44,13 +44,13 @@ public interface NetworkService {
 
     void start();
 
-    void reset();
-
     void shutdown();
 
     void removeNode(String nodeId);
 
     void removeNode(String nodeId, int type);
+
+    void deleteNode(String nodeId);
 
     Map<String, Node> getNodes();
 
@@ -62,11 +62,13 @@ public interface NetworkService {
 
     boolean addNode(Node node);
 
+    boolean addConnNode(Node node);
+
     boolean isSeedNode(String ip);
 
     boolean isSeed();
 
-    void handshakeNode(Node node);
+    boolean handshakeNode(String groupName, Node node);
 
     void blackNode(String nodeId, int status);
 
@@ -93,5 +95,7 @@ public interface NetworkService {
     BroadcastResult sendToGroup(BaseEvent event, String groupName, String excludeNodeId, boolean asyn);
 
     void receiveMessage(ByteBuffer buffer, Node node);
+
+    void reset();
 
 }

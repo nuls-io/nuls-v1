@@ -71,7 +71,6 @@ public class GetNodeEventHandler implements NetWorkEventHandler {
         return new NetworkEventResult(true, replyEvent);
     }
 
-
     private List<Node> getAvailableNodes(int length, String nodeIp) {
         List<Node> nodes = new ArrayList<>();
         List<Node> availableNodes = getNetworkService().getAvailableNodes();
@@ -82,9 +81,12 @@ public class GetNodeEventHandler implements NetWorkEventHandler {
             if (ipSet.contains(node.getIp())) {
                 continue;
             }
+            Node newNode = new Node();
+            newNode.setIp(node.getIp());
+            newNode.setPort(node.getSeverPort());
+            newNode.setSeverPort(node.getSeverPort());
             ipSet.add(node.getIp());
-            node.setPort(node.getSeverPort());
-            nodes.add(node);
+            nodes.add(newNode);
             if (nodes.size() == length) {
                 break;
             }

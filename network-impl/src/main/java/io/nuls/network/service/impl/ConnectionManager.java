@@ -103,8 +103,9 @@ public class ConnectionManager {
                 NettyClient client = new NettyClient(node);
                 client.start();
             }
-        }, false);
+        }, true);
     }
+
 
     public void receiveMessage(ByteBuffer buffer, Node node) {
         List<NulsMessage> list;
@@ -125,6 +126,7 @@ public class ConnectionManager {
                     if (node.getMagicNumber() == 0) {
                         node.setMagicNumber(header.getMagicNumber());
                     }
+
                     BaseEvent event = EventManager.getInstance(message.getData());
                     processMessage(event, node);
                 } else {
@@ -194,11 +196,8 @@ public class ConnectionManager {
     }
 
     private boolean isHandShakeMessage(BaseEvent event) {
-        if (isNetworkEvent(event)) {
-            if (event.getHeader().getEventType() == NetworkConstant.NETWORK_GET_VERSION_EVENT
-                    || event.getHeader().getEventType() == NetworkConstant.NETWORK_VERSION_EVENT) {
-                return true;
-            }
+        if (isNetworkEvent(event) && event.getHeader().getEventType() == NetworkConstant.NETWORK_HANDSHAKE_EVENT) {
+            return true;
         }
         return false;
     }

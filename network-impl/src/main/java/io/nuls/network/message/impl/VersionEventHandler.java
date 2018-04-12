@@ -29,7 +29,6 @@ import io.nuls.core.event.BaseEvent;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.db.dao.NodeDataService;
 import io.nuls.network.entity.Node;
-import io.nuls.network.entity.NodeTransferTool;
 import io.nuls.network.exception.NetworkMessageException;
 import io.nuls.network.message.NetworkCacheService;
 import io.nuls.network.message.NetworkEventResult;
@@ -73,15 +72,14 @@ public class VersionEventHandler implements NetWorkEventHandler {
 
         if (event.getBestBlockHeight() < 0) {
             node.setStatus(Node.BAD);
-            throw new NetworkMessageException(ErrorCode.NET_MESSAGE_ERROR);
+            getNetworkService().removeNode(node.getId());
+            return null;
         }
 
         node.setSeverPort(event.getSeverPort());
         node.setVersionMessage(event);
         checkVersion(event.getNulsVersion());
-        node.setLastTime(TimeService.currentTimeMillis());
-
-        getNetworkService().handshakeNode(node);
+//        node.setLastTime(TimeService.currentTimeMillis());
 
         return null;
     }

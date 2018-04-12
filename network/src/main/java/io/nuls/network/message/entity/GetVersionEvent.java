@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,11 +24,13 @@
 package io.nuls.network.message.entity;
 
 import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.event.BaseEvent;
 import io.nuls.core.event.EventHeader;
 import io.nuls.core.event.NoticeData;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.network.constant.NetworkConstant;
@@ -43,13 +45,22 @@ public class GetVersionEvent extends BaseEvent {
 
     private int severPort;
 
+    private long bestBlockHeight;
+
+    private String bestBlockHash;
+
+    private String nulsVersion;
+
     public GetVersionEvent() {
         super(NulsConstant.MODULE_ID_NETWORK, NetworkConstant.NETWORK_GET_VERSION_EVENT);
     }
 
-    public GetVersionEvent(int severPort) {
+    public GetVersionEvent(int severPort, long bestBlockHeight, String bestBlockHash) {
         this();
         this.severPort = severPort;
+        this.bestBlockHeight = bestBlockHeight;
+        this.bestBlockHash = bestBlockHash;
+        this.nulsVersion = NulsContext.VERSION;
     }
 
     @Override
@@ -57,6 +68,9 @@ public class GetVersionEvent extends BaseEvent {
         int s = 0;
         s += EventHeader.EVENT_HEADER_LENGTH;
         s += VarInt.sizeOf(severPort);
+        s += VarInt.sizeOf(bestBlockHeight);
+        s += Utils.sizeOfString(bestBlockHash);
+        s += Utils.sizeOfString(nulsVersion);
         return s;
     }
 
@@ -64,12 +78,18 @@ public class GetVersionEvent extends BaseEvent {
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeNulsData(getHeader());
         stream.writeVarInt(severPort);
+        stream.writeVarInt(bestBlockHeight);
+        stream.writeString(bestBlockHash);
+        stream.writeString(nulsVersion);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.setHeader(byteBuffer.readNulsData(new EventHeader()));
         severPort = (int) byteBuffer.readVarInt();
+        bestBlockHeight = byteBuffer.readVarInt();
+        bestBlockHash = byteBuffer.readString();
+        nulsVersion = byteBuffer.readString();
     }
 
     @Override
@@ -86,7 +106,12 @@ public class GetVersionEvent extends BaseEvent {
     public String toString() {
         StringBuffer buffer = new StringBuffer();
         buffer.append("getVersionEvent:{");
-        buffer.append("severPort:" + severPort + "}");
+        buffer.append(getHeader().toString());
+        buffer.append("severPort:" + severPort + ", ");
+        buffer.append("bestBlockHeight:" + bestBlockHeight + ", ");
+        buffer.append("bestBlockHash:" + bestBlockHash + ", ");
+        buffer.append("nulsVersion:" + nulsVersion + "}");
+
         return buffer.toString();
     }
 
@@ -96,5 +121,29 @@ public class GetVersionEvent extends BaseEvent {
 
     public void setSeverPort(int severPort) {
         this.severPort = severPort;
+    }
+
+    public long getBestBlockHeight() {
+        return bestBlockHeight;
+    }
+
+    public void setBestBlockHeight(long bestBlockHeight) {
+        this.bestBlockHeight = bestBlockHeight;
+    }
+
+    public String getBestBlockHash() {
+        return bestBlockHash;
+    }
+
+    public void setBestBlockHash(String bestBlockHash) {
+        this.bestBlockHash = bestBlockHash;
+    }
+
+    public String getNulsVersion() {
+        return nulsVersion;
+    }
+
+    public void setNulsVersion(String nulsVersion) {
+        this.nulsVersion = nulsVersion;
     }
 }

@@ -56,4 +56,12 @@ public interface NetworkConstant {
     short NETWORK_NODE_EVENT = 04;
     short NETWORK_GET_NODEIP_EVENT = 05;
     short NETWORK_NODEIP_EVENT = 06;
+    short NETWORK_HANDSHAKE_EVENT = 07;
+
+
+    int SAME_IP_MAX_COUNT = 10;
+    int FAIL_MAX_COUNT = 10;
+
+    int HANDSHAKE_SEVER_TYPE = 2;
+    int HANDSHAKE_CLIENT_TYPE = 1;
 }
