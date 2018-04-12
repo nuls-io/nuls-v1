@@ -3,6 +3,7 @@ package io.nuls.network.message.impl;
 import io.netty.channel.socket.SocketChannel;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.event.BaseEvent;
+import io.nuls.core.utils.log.Log;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Node;
 import io.nuls.network.message.NetworkEventResult;
@@ -44,10 +45,9 @@ public class HandshakeEventHandler implements NetWorkEventHandler {
             isSuccess = getNetworkService().handshakeNode(NetworkConstant.NETWORK_NODE_IN_GROUP, node);
         }
 
-        // 握手失败，关闭连接
         if (!isSuccess) {
-            System.out.println("localInfo: "+socketChannel.localAddress().getHostString()+":" + socketChannel.localAddress().getPort());
-            System.out.println("握手失败，关闭连接");
+            Log.debug("localInfo: "+socketChannel.localAddress().getHostString()+":" + socketChannel.localAddress().getPort());
+            Log.debug("handshake failed, close the connetion.");
             socketChannel.close();
             return null;
         }
