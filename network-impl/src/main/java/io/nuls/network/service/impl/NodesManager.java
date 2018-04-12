@@ -132,6 +132,7 @@ public class NodesManager implements Runnable {
     }
 
     public void reset() {
+        System.out.println("------------------nodeManager reset--------------------");
         for (Node node : handShakeNodes.values()) {
             removeNode(node);
         }
@@ -435,7 +436,7 @@ public class NodesManager implements Runnable {
         Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
         while (running) {
             count++;
-            if (count == 20) {
+            if (count == 2) {
                 count = 0;
                 System.out.println("disConnectNodes:");
                 for (Node node : disConnectNodes.values()) {
