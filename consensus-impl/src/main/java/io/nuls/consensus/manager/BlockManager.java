@@ -245,17 +245,7 @@ public class BlockManager {
 //                this.rollbackAppraval(lastAppravedBlock);
 //            }
 //        }
-        Set<String> keySet = blockCacheBuffer.getHeaderCacheMap().keySet();
-        for (String key : keySet) {
-            BlockHeader header = blockCacheBuffer.getBlockHeader(key);
-            if (header == null) {
-                continue;
-            }
-            if (header.getPreHash().getDigestHex().equals(block.getHeader().getHash())) {
-                Block nextBlock = blockCacheBuffer.getBlock(key);
-                this.addBlock(nextBlock, true, null);
-            }
-        }
+
         long savingHeight = block.getHeader().getHeight() - 6;
         if ( savingHeight > this.lastStoredHeader.getHeight()) {
             Block savingBlock = this.getBlock(savingHeight);
