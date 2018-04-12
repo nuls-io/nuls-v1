@@ -42,7 +42,7 @@ import java.util.List;
  */
 public class SystemMonitorThread implements Runnable {
 
-    private static final long TIME_OUT = 120000;
+    private static final long TIME_OUT = 300000;
 
     private long startTime;
 
