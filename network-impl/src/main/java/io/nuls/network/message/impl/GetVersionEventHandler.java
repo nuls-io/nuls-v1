@@ -80,7 +80,6 @@ public class GetVersionEventHandler implements NetWorkEventHandler {
         }
 
         VersionEvent versionEvent = new VersionEvent(event.getSeverPort(), event.getBestBlockHeight(), event.getBestBlockHash());
-        node.setSeverPort(event.getSeverPort());
         node.setVersionMessage(versionEvent);
         checkVersion(event.getNulsVersion());
 

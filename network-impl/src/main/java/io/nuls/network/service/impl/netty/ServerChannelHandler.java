@@ -82,7 +82,9 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
             ctx.channel().close();
             return;
         }
-        HandshakeEvent event = new HandshakeEvent(NetworkConstant.HANDSHAKE_SEVER_TYPE);
+        Block bestBlock = NulsContext.getInstance().getBestBlock();
+        HandshakeEvent event = new HandshakeEvent(NetworkConstant.HANDSHAKE_SEVER_TYPE, getNetworkService().getNetworkParam().port(),
+                bestBlock.getHeader().getHeight(), bestBlock.getHeader().getHash().getDigestHex());
         getNetworkService().sendToNode(event, nodeId, false);
     }
 

@@ -76,10 +76,8 @@ public class VersionEventHandler implements NetWorkEventHandler {
             return null;
         }
 
-        node.setSeverPort(event.getSeverPort());
         node.setVersionMessage(event);
         checkVersion(event.getNulsVersion());
-//        node.setLastTime(TimeService.currentTimeMillis());
 
         return null;
     }
