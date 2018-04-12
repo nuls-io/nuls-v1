@@ -84,7 +84,7 @@ public interface UtxoTransactionDataService {
 
     long getBlockReward(long blockHeight);
 
-    long getBlockFee(long blockHeight);
+    Long getBlockFee(long blockHeight);
 
     long getLastDayTimeReward();
 

@@ -180,7 +180,7 @@ public class UtxoTransactionDaoImpl implements UtxoTransactionDataService {
     }
 
     @Override
-    public long getBlockFee(long blockHeight) {
+    public Long getBlockFee(long blockHeight) {
         return txDao.getFeeByHeight(blockHeight);
     }
 
