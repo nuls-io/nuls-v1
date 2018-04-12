@@ -329,8 +329,7 @@ public class PocConsensusResource {
         }
         Map<String, Object> statusMap = new HashMap<>();
         for (AgentPo po : poList) {
-            statusMap.put("agentAddress", po.getAgentAddress());
-            statusMap.put("status", po.getStatus());
+            statusMap.put(po.getAgentAddress(), po.getStatus());
         }
         return rpcResult.setData(statusMap);
     }
