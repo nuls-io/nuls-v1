@@ -11,6 +11,7 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.NulsThreadFactory;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.date.TimeService;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.queue.service.impl.QueueService;
 import io.nuls.network.entity.Node;
 import io.nuls.network.service.NetworkService;
@@ -120,7 +121,7 @@ public class DownloadProcessor extends Thread {
                 downloadStatus = DownloadStatus.FAILED;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
             downloadStatus = DownloadStatus.FAILED;
         } finally {
             blockQueue.destroyQueue(queueName);

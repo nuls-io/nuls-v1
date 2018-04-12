@@ -42,7 +42,7 @@ import java.util.Set;
  * @author Niels
  */
 public class NulsContext {
-    private static String CACHED_PASSWORD_OF_WALLET = "nuls123456";
+    private static String CACHED_PASSWORD_OF_WALLET  ;
 
     private static final HashMap<String, Short> CHAIN_ID_MAP = new HashMap<String, Short>();
     public static String DEFAULT_ENCODING = "UTF-8";
@@ -188,6 +188,12 @@ public class NulsContext {
     }
 
     public static String getCachedPasswordOfWallet() {
+        if(null==CACHED_PASSWORD_OF_WALLET){
+            CACHED_PASSWORD_OF_WALLET = PackingPasswordUtils.read();
+        }
+        if(null==CACHED_PASSWORD_OF_WALLET){
+            CACHED_PASSWORD_OF_WALLET = "nuls123456";
+        }
         return CACHED_PASSWORD_OF_WALLET;
     }
 

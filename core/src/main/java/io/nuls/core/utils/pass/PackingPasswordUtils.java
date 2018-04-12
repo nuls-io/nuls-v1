@@ -74,6 +74,7 @@ public class PackingPasswordUtils {
             output.flush();
             output.close();
         } catch (Exception e) {
+            Log.error(e);
         }
     }
 }
