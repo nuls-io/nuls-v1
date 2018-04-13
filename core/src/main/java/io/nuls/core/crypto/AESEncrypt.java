@@ -76,7 +76,6 @@ public class AESEncrypt {
 
         try {
             if (iv == null) {
-                iv = new byte[16];
                 iv = EncryptedData.DEFAULT_IV;
                 //SECURE_RANDOM.nextBytes(iv);
             }
