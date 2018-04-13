@@ -34,7 +34,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         Attribute<Node> nodeAttribute = channel.attr(key);
         Node node = nodeAttribute.get();
         if(node.getPort() == 0) {
-            System.out.println("===============================================");
+            Log.debug("port is zero!===============================================");
         }
 
         String nodeId = node == null ? null : node.getId();
