@@ -73,22 +73,13 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public long getLocalHeight() {
-        long height = NulsContext.getInstance().getBestHeight();
-        if (height == 0) {
-            height = blockStorageService.getBestHeight();
-        }
-        return height;
-    }
-
-    @Override
     public long getLocalSavedHeight() {
         return blockStorageService.getBestHeight();
     }
 
     @Override
     public Block getLocalBestBlock() {
-        Block block = getBlock(getLocalHeight());
+        Block block = getBlock(getLocalSavedHeight());
         if (null == block) {
             block = NulsContext.getInstance().getBestBlock();
         }

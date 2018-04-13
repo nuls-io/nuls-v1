@@ -42,8 +42,6 @@ public interface BlockService {
 
     Block getGengsisBlock();
 
-    long getLocalHeight();
-
     long getLocalSavedHeight();
 
     Block getLocalBestBlock();
