@@ -66,7 +66,8 @@ public class AESEncrypt {
      * @param plainBytes
      * @param iv
      * @param aesKey
-     * @return EncryptedData
+
+* @return EncryptedData
      */
     public static EncryptedData encrypt(byte[] plainBytes, byte[] iv, KeyParameter aesKey) throws NulsRuntimeException {
         Utils.checkNotNull(plainBytes);
@@ -75,7 +76,8 @@ public class AESEncrypt {
         try {
             if (iv == null) {
                 iv = new byte[16];
-                SECURE_RANDOM.nextBytes(iv);
+                iv = EncryptedData.DEFAULT_IV;
+                //SECURE_RANDOM.nextBytes(iv);
             }
 
             ParametersWithIV keyWithIv = new ParametersWithIV(aesKey, iv);
