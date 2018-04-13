@@ -15,6 +15,7 @@ import io.nuls.network.entity.Node;
 import io.nuls.network.service.NetworkService;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Future;
@@ -28,7 +29,8 @@ public class DownloadUtils {
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
 
     public Block getBlockByHash(long height, String hash) {
-        List<Node> nodes = networkService.getAvailableNodes();
+        Collection<Node> _nodes = networkService.getAvailableNodes();
+        List<Node> nodes = new ArrayList<>(_nodes);
         if (nodes == null) {
             throw new NulsRuntimeException(ErrorCode.NET_NODE_NOT_FOUND);
         }

@@ -33,6 +33,7 @@ import org.spongycastle.crypto.paddings.PaddedBufferedBlockCipher;
 import org.spongycastle.crypto.params.KeyParameter;
 import org.spongycastle.crypto.params.ParametersWithIV;
 
+import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
@@ -47,6 +48,7 @@ public class AESEncrypt {
     public static byte[] encrypt(byte[] plainBytes, String password) {
         EncryptedData ed = encrypt(plainBytes, new KeyParameter(Sha256Hash.hash(password.getBytes())));
         return ed.getEncryptedBytes();
+
     }
 
     /**
@@ -74,8 +76,8 @@ public class AESEncrypt {
 
         try {
             if (iv == null) {
-                iv = new byte[16];
-                SECURE_RANDOM.nextBytes(iv);
+                iv = EncryptedData.DEFAULT_IV;
+                //SECURE_RANDOM.nextBytes(iv);
             }
 
             ParametersWithIV keyWithIv = new ParametersWithIV(aesKey, iv);
@@ -97,6 +99,12 @@ public class AESEncrypt {
         byte [] defaultiv = new byte[16];
         EncryptedData data = new EncryptedData(defaultiv,dataToDecrypt);
         return decrypt(data,new KeyParameter(Sha256Hash.hash(password.getBytes())));
+    }
+
+    public static byte[] decrypt(byte[] dataToDecrypt,String password,String charset) throws UnsupportedEncodingException {
+        byte [] defaultiv = new byte[16];
+        EncryptedData data = new EncryptedData(defaultiv,dataToDecrypt);
+        return decrypt(data,new KeyParameter(Sha256Hash.hash(password.getBytes(charset))));
     }
 
     /**
@@ -129,15 +137,4 @@ public class AESEncrypt {
         }
     }
 
-    public static void main(String[] args) {
-        String str = "test 加密测试";
-
-        String pw = "sssssfds";
-
-        EncryptedData data = encrypt(str.getBytes(), new KeyParameter(Sha256Hash.hash(pw.getBytes())));
-        Log.debug(data.toString());
-
-        Log.debug(new String(decrypt(data, new KeyParameter(Sha256Hash.hash(pw.getBytes())))));
-
-    }
 }

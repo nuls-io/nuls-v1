@@ -34,6 +34,7 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.network.entity.Node;
 import io.nuls.network.service.NetworkService;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -73,7 +74,7 @@ public class SystemMonitorThread implements Runnable {
     }
 
     private void checkNetworkIsDisconnected() {
-        List<Node> nodes = networkService.getAvailableNodes();
+        Collection<Node> nodes = networkService.getAvailableNodes();
         if (nodes == null || nodes.size() == 0) {
             systemService.resetSystem("the number of network connection nodes is 0");
         }

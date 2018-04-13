@@ -16,10 +16,7 @@ import io.nuls.core.utils.queue.service.impl.QueueService;
 import io.nuls.network.entity.Node;
 import io.nuls.network.service.NetworkService;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -30,6 +27,9 @@ import java.util.concurrent.TimeUnit;
 public class DownloadProcessor extends Thread {
 
     private static DownloadProcessor INSTANCE = new DownloadProcessor();
+
+    private static long FAIL_RETRY_TIME = 30 * 1000L;
+    private long failedTime;
 
     private DownloadStatus downloadStatus = DownloadStatus.WAIT;
 
@@ -119,10 +119,12 @@ public class DownloadProcessor extends Thread {
                 downloadStatus = DownloadStatus.SUCCESS;
             } else if(downloadStatus != DownloadStatus.WAIT){
                 downloadStatus = DownloadStatus.FAILED;
+                failedTime = TimeService.currentTimeMillis();
             }
         } catch (Exception e) {
             Log.error(e);
             downloadStatus = DownloadStatus.FAILED;
+            failedTime = TimeService.currentTimeMillis();
         } finally {
             blockQueue.destroyQueue(queueName);
         }
@@ -151,7 +153,7 @@ public class DownloadProcessor extends Thread {
 
     public NetworkNewestBlockInfos getNetworkNewestBlock() {
 
-        List<Node> nodeList = networkService.getAvailableNodes();
+        Collection<Node> nodeList = networkService.getAvailableNodes();
 
         Map<String, Integer> statisticsMaps = new HashMap<>();
         Map<String, List<Node>> nodeMaps = new HashMap<>();
@@ -225,7 +227,7 @@ public class DownloadProcessor extends Thread {
                 break;
             }
             try {
-                Thread.sleep(500l);
+                Thread.sleep(500L);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -243,14 +245,20 @@ public class DownloadProcessor extends Thread {
     private boolean checkNetworkAndStatus() {
         //监控网络，如果掉线，重新连线后重新同步
         //Monitor the network, if it is dropped, reconnect after reconnecting
-        List<Node> nodes = networkService.getAvailableNodes();
+        Collection<Node> nodes = networkService.getAvailableNodes();
         if (nodes == null || nodes.size() == 0 || nodes.size() < PocConsensusConstant.ALIVE_MIN_NODE_COUNT) {
             return false;
         }
 
+        //if failed , retry
+        if(downloadStatus == DownloadStatus.FAILED && TimeService.currentTimeMillis() > failedTime + FAIL_RETRY_TIME) {
+            downloadStatus = DownloadStatus.WAIT;
+            return false;
+        }
         if(downloadStatus != DownloadStatus.WAIT) {
             return false;
         }
+
         return true;
     }
 
