@@ -194,7 +194,7 @@ public class BlockManager {
             lastStoredHeader = blockService.getLocalBestBlock().getHeader();
         }
         if (block.getHeader().getHeight() <= lastStoredHeader.getHeight()) {
-            Log.info("discard block height:" + block.getHeader().getHeight() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()) + ",from:" + nodeId);
+            Log.debug("discard block height:" + block.getHeader().getHeight() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()) + ",from:" + nodeId);
             return false;
         }
 
@@ -207,12 +207,11 @@ public class BlockManager {
             canCache = false;
         }
         if (verify) {
-            ValidateResult result = block.verify();
-
-            if (canCache && result.isFailed() && result.getErrorCode() != ErrorCode.ORPHAN_BLOCK && result.getErrorCode() != ErrorCode.ORPHAN_TX) {
+            ValidateResult result = block.getHeader().verify();
+            if (canCache && result.isFailed() && result.getErrorCode() != ErrorCode.ORPHAN_BLOCK) {
                 Log.info("discard a block(" + block.getHeader().getHeight() + "," + block.getHeader().getHash() + ") :" + result.getMessage());
                 return false;
-            } else if (result.isFailed() && result.getErrorCode() != ErrorCode.ORPHAN_TX) {
+            } else if (result.isFailed()) {
                 cacheBlockToBuffer(block);
                 return false;
             }
@@ -223,7 +222,7 @@ public class BlockManager {
         if (!success) {
             cacheBlockToBuffer(block);
             return false;
-        }else{
+        } else {
             blockCacheBuffer.removeBlock(block.getHeader().getHash().getDigestHex());
         }
         boolean needUpdateBestBlock = bifurcateProcessor.addHeader(block.getHeader());
@@ -249,7 +248,7 @@ public class BlockManager {
 //        }
 
         long savingHeight = block.getHeader().getHeight() - 6;
-        if ( savingHeight > this.lastStoredHeader.getHeight()) {
+        if (savingHeight > this.lastStoredHeader.getHeight()) {
             Block savingBlock = this.getBlock(savingHeight);
             if (null == savingBlock) {
                 return true;
