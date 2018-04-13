@@ -57,7 +57,7 @@ public class NodeDaoImpl extends BaseDaoImpl<NodeMapper, String, NodePo> impleme
         Searchable searchable = new Searchable();
         PageHelper.startPage(1, size);
         PageHelper.orderBy("last_fail_time asc");
-        if (!ipSet.isEmpty()) {
+        if (ipSet != null && !ipSet.isEmpty()) {
             List<String> keyList = new ArrayList<>(ipSet);
             searchable.addCondition("ip", SearchOperator.notIn, keyList);
         }
