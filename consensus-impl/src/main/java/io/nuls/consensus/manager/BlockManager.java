@@ -347,8 +347,12 @@ public class BlockManager {
             return;
         }
         this.rollbackTxList(block.getTxs(), 0, block.getTxs().size());
+        Block highestBlock = this.getHighestBlock();
+        if(null!=highestBlock){
+            NulsContext.getInstance().setBestBlock(highestBlock);
+        }
 
-        NulsContext.getInstance().setBestBlock(this.getHighestBlock());
+
 //        List<String> hashList = this.bifurcateProcessor.getAllHashList(block.getHeader().getHeight() - 1);
 //        if (hashList.size() > 1) {
 //            this.rollbackAppraval(preBlock);
