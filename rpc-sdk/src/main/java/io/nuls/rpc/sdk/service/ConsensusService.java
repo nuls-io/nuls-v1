@@ -143,11 +143,11 @@ public enum ConsensusService {
 
     public RpcClientResult getAgentStatus() {
         RpcClientResult result = restFul.get("/consensus/agent/status", null);
-        if (result.isSuccess()) {
-            if (null != result.getData()) {
-                result.setData(new ConsensusStatusDto((Map<String, Object>) result.getData()));
-            }
-        }
+        //if (result.isSuccess()) {
+        //    if (null != result.getData()) {
+        //        result.setData(new ConsensusStatusDto((Map<String, Object>) result.getData()));
+        //    }
+        //}
         return result;
     }
 
