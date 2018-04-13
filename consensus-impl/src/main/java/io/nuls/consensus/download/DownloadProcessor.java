@@ -16,10 +16,7 @@ import io.nuls.core.utils.queue.service.impl.QueueService;
 import io.nuls.network.entity.Node;
 import io.nuls.network.service.NetworkService;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -151,7 +148,7 @@ public class DownloadProcessor extends Thread {
 
     public NetworkNewestBlockInfos getNetworkNewestBlock() {
 
-        List<Node> nodeList = networkService.getAvailableNodes();
+        Collection<Node> nodeList = networkService.getAvailableNodes();
 
         Map<String, Integer> statisticsMaps = new HashMap<>();
         Map<String, List<Node>> nodeMaps = new HashMap<>();
@@ -243,7 +240,7 @@ public class DownloadProcessor extends Thread {
     private boolean checkNetworkAndStatus() {
         //监控网络，如果掉线，重新连线后重新同步
         //Monitor the network, if it is dropped, reconnect after reconnecting
-        List<Node> nodes = networkService.getAvailableNodes();
+        Collection<Node> nodes = networkService.getAvailableNodes();
         if (nodes == null || nodes.size() == 0 || nodes.size() < PocConsensusConstant.ALIVE_MIN_NODE_COUNT) {
             return false;
         }

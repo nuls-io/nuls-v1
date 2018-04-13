@@ -44,6 +44,7 @@ import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.network.entity.Node;
 import io.nuls.network.service.NetworkService;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -270,7 +271,7 @@ public class BlockMaintenanceThread implements Runnable {
             try {
                 //todo failed
                 if (this.status == MaintenanceStatus.READY||this.status==MaintenanceStatus.FAILED) {
-                    List<Node> nodeList = networkService.getAvailableNodes();
+                    Collection<Node> nodeList = networkService.getAvailableNodes();
                     if (nodeList.size() >= PocConsensusConstant.ALIVE_MIN_NODE_COUNT) {
                         this.syncBlock();
                     }

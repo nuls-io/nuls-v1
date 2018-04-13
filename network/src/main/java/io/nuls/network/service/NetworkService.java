@@ -30,6 +30,7 @@ import io.nuls.network.entity.NodeGroup;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 
 import java.nio.ByteBuffer;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -56,7 +57,7 @@ public interface NetworkService {
 
     Node getNode(String nodeId);
 
-    List<Node> getAvailableNodes();
+    Collection<Node> getAvailableNodes();
 
     Set<String> getNodesIp();
 

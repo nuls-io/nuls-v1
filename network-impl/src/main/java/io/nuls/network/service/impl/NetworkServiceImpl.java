@@ -46,10 +46,7 @@ import io.nuls.network.param.TestNetworkParam;
 import io.nuls.network.service.NetworkService;
 
 import java.nio.ByteBuffer;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author vivi
@@ -153,7 +150,7 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
-    public List<Node> getAvailableNodes() {
+    public Collection<Node> getAvailableNodes() {
         return nodesManager.getAvailableNodes();
     }
 
@@ -163,7 +160,7 @@ public class NetworkServiceImpl implements NetworkService {
         for (String ip : NetworkContext.ipMap.keySet()) {
             ipList.add(ip);
         }
-        List<Node> nodeList = getAvailableNodes();
+        Collection<Node> nodeList = getAvailableNodes();
         for (Node node : nodeList) {
             ipList.add(node.getIp());
         }

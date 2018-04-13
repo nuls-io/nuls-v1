@@ -73,7 +73,8 @@ public class GetNodeEventHandler implements NetWorkEventHandler {
 
     private List<Node> getAvailableNodes(int length, String nodeIp) {
         List<Node> nodes = new ArrayList<>();
-        List<Node> availableNodes = getNetworkService().getAvailableNodes();
+        Collection<Node> _availableNodes = getNetworkService().getAvailableNodes();
+        List<Node> availableNodes = new ArrayList<>(_availableNodes);
         Collections.shuffle(availableNodes);
         Set<String> ipSet = new HashSet<>();
         ipSet.add(nodeIp);

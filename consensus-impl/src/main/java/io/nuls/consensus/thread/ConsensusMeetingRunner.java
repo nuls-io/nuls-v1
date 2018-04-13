@@ -279,7 +279,7 @@ public class ConsensusMeetingRunner implements Runnable {
         if (!consensusManager.isPartakePacking()) {
             return false;
         }
-        List<Node> nodes = networkService.getAvailableNodes();
+        Collection<Node> nodes = networkService.getAvailableNodes();
         if (nodes == null || nodes.size() == 0 || nodes.size() < PocConsensusConstant.ALIVE_MIN_NODE_COUNT) {
             return false;
         }

@@ -88,7 +88,7 @@ public class Node extends BaseNulsData {
 
     private boolean canConnect;
 
-    private VersionEvent versionMessage;
+    private volatile VersionEvent versionMessage;
 
     public Node() {
         this.status = CLOSE;

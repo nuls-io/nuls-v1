@@ -385,8 +385,8 @@ public class NodesManager implements Runnable {
      */
 
 
-    public List<Node> getAvailableNodes() {
-        return new ArrayList<>(handShakeNodes.values());
+    public Collection<Node> getAvailableNodes() {
+        return handShakeNodes.values();
     }
 
     public List<Node> getConnectNode() {

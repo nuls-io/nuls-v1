@@ -33,6 +33,7 @@ import io.nuls.network.message.handler.NetWorkEventHandler;
 import io.nuls.network.service.NetworkService;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -57,7 +58,7 @@ public class GetNodesIpEventHandler implements NetWorkEventHandler {
 
     @Override
     public NetworkEventResult process(BaseEvent event, Node node) {
-        List<Node> availableNodes = getNetworkService().getAvailableNodes();
+        Collection<Node> availableNodes = getNetworkService().getAvailableNodes();
         List<String> ipList = new ArrayList<>();
         for (Node n : availableNodes) {
             ipList.add(n.getIp());

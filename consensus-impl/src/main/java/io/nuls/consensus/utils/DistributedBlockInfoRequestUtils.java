@@ -37,6 +37,7 @@ import io.nuls.network.entity.Node;
 import io.nuls.network.service.NetworkService;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -84,7 +85,7 @@ public class DistributedBlockInfoRequestUtils {
             GetBlocksHashRequest event = new GetBlocksHashRequest(askHeight, askHeight);
             this.startTime = TimeService.currentTimeMillis();
             this.nodeIdList = new CopyOnWriteArrayList<>();
-            List<Node> nodes = networkService.getAvailableNodes();
+            Collection<Node> nodes = networkService.getAvailableNodes();
             for (Node node : nodes) {
                 this.nodeIdList.add(node.getId());
             }
