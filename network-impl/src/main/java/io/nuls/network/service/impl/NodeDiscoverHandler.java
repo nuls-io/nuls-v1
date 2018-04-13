@@ -91,8 +91,8 @@ public class NodeDiscoverHandler implements Runnable {
 //    }
 
     // get nodes from local database
-    public List<Node> getLocalNodes() {
-        List<NodePo> nodePos = getNodeDao().getNodePoList(30);
+    public List<Node> getLocalNodes(int size, Set<String> ipSet) {
+        List<NodePo> nodePos = getNodeDao().getNodePoList(size, ipSet);
         List<Node> nodes = new ArrayList<>();
         if (nodePos == null || nodePos.isEmpty()) {
             return nodes;
