@@ -259,7 +259,7 @@ public class BlockManager {
                 isSuccess = blockService.saveBlock(savingBlock);
             } catch (Exception e) {
                 Log.error(e);
-                ConsensusManager.getInstance().destroy();
+                ConsensusManager.getInstance().clearCache();
                 NulsContext.getInstance().setBestBlock(blockService.getBlock(this.getStoredHeight()));
                 isSuccess = false;
             }
