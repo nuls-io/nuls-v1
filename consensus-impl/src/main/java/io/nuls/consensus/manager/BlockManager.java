@@ -233,7 +233,7 @@ public class BlockManager {
                 Log.error(e);
                 String hash = block.getHeader().getHash().getDigestHex();
                 confirmingBlockCacheManager.removeBlock(hash);
-                blockCacheBuffer.cacheBlock(block);
+                blockCacheBuffer.removeBlock(hash);
                 bifurcateProcessor.rollbackHash(hash);
                 return false;
             }
