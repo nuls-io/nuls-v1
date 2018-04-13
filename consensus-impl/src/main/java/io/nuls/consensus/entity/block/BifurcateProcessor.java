@@ -153,6 +153,17 @@ public class BifurcateProcessor {
 //            }
         }
 
+        if(null==approvingChain){
+            return;
+        }
+        Set<HeaderDigest> removeHashSet = new HashSet<>();
+        for (int i = chainList.size() - 1; i >= 0; i--) {
+            BlockHeaderChain chain = chainList.get(i);
+            if (chain.size() < (approvingChain.size() - 6)) {
+                removeHashSet.addAll(chain.getHeaderDigestList());
+                this.chainList.remove(chain);
+            }
+        }
     }
 
     private boolean add(BlockHeader header) {
