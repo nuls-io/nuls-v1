@@ -37,6 +37,7 @@ import io.nuls.network.service.impl.netty.NioChannelMap;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -334,7 +335,7 @@ public class BroadcastHandler {
 //        return broadcastToGroup(event,null ,groupName, excludeNodeId);
 //    }
 
-    private BroadcastResult broadcastToList(List<Node> nodeList, BaseEvent event, String excludeNodeId, boolean asyn) {
+    private BroadcastResult broadcastToList(Collection<Node> nodeList, BaseEvent event, String excludeNodeId, boolean asyn) {
         NulsMessage message;
         BroadcastResult result = new BroadcastResult();
         try {

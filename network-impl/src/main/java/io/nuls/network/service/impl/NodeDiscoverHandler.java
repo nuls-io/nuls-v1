@@ -115,7 +115,8 @@ public class NodeDiscoverHandler implements Runnable {
      */
     public void findOtherNode(int size) {
         GetNodeEvent event = new GetNodeEvent(size);
-        List<Node> nodeList = nodesManager.getAvailableNodes();
+        Collection<Node> _nodeList = nodesManager.getAvailableNodes();
+        List<Node> nodeList = new ArrayList<>(_nodeList);
         Collections.shuffle(nodeList);
         for (int i = 0; i < nodeList.size(); i++) {
             if (i == 2) {
@@ -137,7 +138,7 @@ public class NodeDiscoverHandler implements Runnable {
 
         while (running) {
             count++;
-            List<Node> nodeList = nodesManager.getAvailableNodes();
+            Collection<Node> nodeList = nodesManager.getAvailableNodes();
             Block block = NulsContext.getInstance().getBestBlock();
             GetVersionEvent event = new GetVersionEvent(network.port(), block.getHeader().getHeight(), block.getHeader().getHash().getDigestHex());
             GetNodesIpEvent ipEvent = new GetNodesIpEvent();
