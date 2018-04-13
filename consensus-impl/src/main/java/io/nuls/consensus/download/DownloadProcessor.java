@@ -28,6 +28,9 @@ public class DownloadProcessor extends Thread {
 
     private static DownloadProcessor INSTANCE = new DownloadProcessor();
 
+    private static long FAIL_RETRY_TIME = 30 * 1000L;
+    private long failedTime;
+
     private DownloadStatus downloadStatus = DownloadStatus.WAIT;
 
     private ScheduledThreadPoolExecutor threadPool;
@@ -116,10 +119,12 @@ public class DownloadProcessor extends Thread {
                 downloadStatus = DownloadStatus.SUCCESS;
             } else if(downloadStatus != DownloadStatus.WAIT){
                 downloadStatus = DownloadStatus.FAILED;
+                failedTime = TimeService.currentTimeMillis();
             }
         } catch (Exception e) {
             Log.error(e);
             downloadStatus = DownloadStatus.FAILED;
+            failedTime = TimeService.currentTimeMillis();
         } finally {
             blockQueue.destroyQueue(queueName);
         }
@@ -222,7 +227,7 @@ public class DownloadProcessor extends Thread {
                 break;
             }
             try {
-                Thread.sleep(500l);
+                Thread.sleep(500L);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -245,9 +250,15 @@ public class DownloadProcessor extends Thread {
             return false;
         }
 
+        //if failed , retry
+        if(downloadStatus == DownloadStatus.FAILED && TimeService.currentTimeMillis() > failedTime + FAIL_RETRY_TIME) {
+            downloadStatus = DownloadStatus.WAIT;
+            return false;
+        }
         if(downloadStatus != DownloadStatus.WAIT) {
             return false;
         }
+
         return true;
     }
 
