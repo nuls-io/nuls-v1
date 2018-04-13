@@ -1,18 +1,18 @@
 /**
  * MIT License
- **
+ * *
  * Copyright (c) 2017-2018 nuls.io
- **
+ * *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- **
+ * *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- **
+ * *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -146,7 +146,7 @@ public class BlockServiceImpl implements BlockService {
     @DbSession
     public boolean saveBlock(Block block) throws IOException {
         BlockLog.debug("save block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()));
-        ValidateResult result = block.verify();
+        ValidateResult result = block.getHeader().verify();
         boolean b = false;
         if (result.isFailed() && result.getErrorCode() != ErrorCode.ORPHAN_TX && ErrorCode.ORPHAN_BLOCK != result.getErrorCode()) {
             throw new NulsRuntimeException(result.getErrorCode(), result.getMessage());
@@ -156,9 +156,10 @@ public class BlockServiceImpl implements BlockService {
         for (int x = 0; x < block.getHeader().getTxCount(); x++) {
             Transaction tx = block.getTxs().get(x);
             tx.setBlockHeight(block.getHeader().getHeight());
-            if (tx.getStatus()==null||tx.getStatus() == TxStatusEnum.CACHED) {
+            if (tx.getStatus() == null || tx.getStatus() == TxStatusEnum.CACHED) {
                 b = true;
                 try {
+                    tx.verifyWithException();
                     ledgerService.approvalTx(tx);
                 } catch (Exception e) {
                     Log.error(e);
@@ -167,15 +168,13 @@ public class BlockServiceImpl implements BlockService {
                 }
             }
         }
-        if (b) {
-            block.verifyWithException();
-        }
         for (int x = 0; x < block.getHeader().getTxCount(); x++) {
             Transaction tx = block.getTxs().get(x);
             tx.setIndex(x);
             tx.setBlockHeight(block.getHeader().getHeight());
             if (tx.getStatus() == TxStatusEnum.AGREED) {
                 try {
+                    tx.verifyWithException();
                     ledgerService.commitTx(tx);
                 } catch (Exception e) {
                     Log.error(e);
@@ -198,10 +197,9 @@ public class BlockServiceImpl implements BlockService {
             return;
         }
         boolean result = this.blockManager.rollback(block);
-        if (result) {
-            return;
+        if (!result) {
+            this.rollback(block.getTxs(), block.getTxs().size() - 1);
         }
-        this.rollback(block.getTxs(), block.getTxs().size() - 1);
         this.ledgerService.deleteTx(block.getHeader().getHeight());
         blockStorageService.delete(block.getHeader().getHash().getDigestHex());
         NulsContext.getInstance().setBestBlock(this.getBestBlock());
@@ -235,7 +233,7 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public long getPackingCount(String address) {
-        return blockStorageService.getBlockCount(address, -1L, -1L,0L);
+        return blockStorageService.getBlockCount(address, -1L, -1L, 0L);
     }
 
     @Override
