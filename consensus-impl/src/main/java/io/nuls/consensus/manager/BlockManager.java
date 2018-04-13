@@ -149,7 +149,7 @@ public class BlockManager {
                         }
                         if (null != preBlock) {
                             addBlock(preBlock, true, null);
-                        }else{
+                        } else {
                             blockCacheBuffer.removeBlock(header.getHash().getDigestHex());
                         }
                     }
@@ -228,7 +228,7 @@ public class BlockManager {
             blockCacheBuffer.removeBlock(block.getHeader().getHash().getDigestHex());
         }
         boolean needUpdateBestBlock = bifurcateProcessor.addHeader(block.getHeader());
-        if (bifurcateProcessor.getChainSize() == 1) {
+        if (bifurcateProcessor.getApprovingChain() != null && bifurcateProcessor.getApprovingChain().contains(block.getHeader())) {
             try {
                 this.appravalBlock(block);
             } catch (Exception e) {

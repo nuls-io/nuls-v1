@@ -157,14 +157,8 @@ public class ConsensusMeetingRunner implements Runnable {
     private void packing(PocMeetingMember self, PocMeetingRound round) {
         try {
             boolean needCheckAgain = waitReceiveNewestBlock(self, round);
-
             Block newBlock = doPacking(self, round);
-
             if (needCheckAgain && hasReceiveNewestBlock(self, round)) {
-
-
-
-
                 Block realBestBlock = blockManager.getBlock(newBlock.getHeader().getHeight());
                 List<NulsDigestData> txHashList = realBestBlock.getTxHashList();
                 for (Transaction transaction : newBlock.getTxs()) {
@@ -181,8 +175,6 @@ public class ConsensusMeetingRunner implements Runnable {
             if (null == newBlock) {
                 return;
             }
-            //todo info to debug
-            Log.info("produce block:" + newBlock.getHeader().getHash() + ",\nheight(" + newBlock.getHeader().getHeight() + "),round(" + round.getIndex() + "),index(" + self.getPackingIndexOfRound() + "),roundStart:" + round.getStartTime());
             BlockLog.debug("produce block height:" + newBlock.getHeader().getHeight() + ", preHash:" + newBlock.getHeader().getPreHash() + " , hash:" + newBlock.getHeader().getHash() + ", address:" + Address.fromHashs(newBlock.getHeader().getPackingAddress()));
             broadcastSmallBlock(newBlock);
 
