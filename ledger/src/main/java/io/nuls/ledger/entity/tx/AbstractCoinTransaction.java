@@ -23,7 +23,6 @@
  */
 package io.nuls.ledger.entity.tx;
 
-import io.nuls.consensus.service.intf.ConsensusService;
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;

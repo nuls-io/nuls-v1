@@ -31,12 +31,17 @@
         <module>ledger-impl</module>
         <module>network</module>
         <module>network-impl</module>
-        <module>consensus</module>
-        <module>consensus-impl</module>
         <module>node</module>
         <module>event-bus</module>
         <module>event-bus-impl</module>
         <module>notify</module>
+        <module>consensus</module>
+        <module>consensus-impl/poc/poc-consensus</module>
+        <module>consensus-impl/poc/poc-consensus-impl</module>
+        <module>consensus-impl/poc/poc-consensus-protocol</module>
+        <module>consensus-impl/poc/poc-consensus-protocol-impl</module>
+        <module>protocol</module>
+        <module>protocol-impl/protocol-base</module>
     </modules>
     <build>
         <finalName>nuls</finalName>

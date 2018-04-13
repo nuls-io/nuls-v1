@@ -24,7 +24,7 @@
 package io.nuls.ledger.service.impl;
 
 import io.nuls.cache.service.intf.CacheService;
-import io.nuls.consensus.utils.TxTimeComparator;
+import io.nuls.protocol.utils.TxTimeComparator;
 import io.nuls.core.chain.entity.*;
 import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ErrorCode;

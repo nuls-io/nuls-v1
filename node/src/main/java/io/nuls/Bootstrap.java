@@ -23,9 +23,8 @@
  */
 package io.nuls;
 
-import io.nuls.consensus.service.intf.DownloadService;
+import io.nuls.protocol.intf.DownloadService;
 import io.nuls.core.MicroKernelBootstrap;
-import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;

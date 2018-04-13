@@ -46,7 +46,7 @@ public abstract class AccountProcessors implements CommandProcessor {
     protected AccountService accountService = AccountService.ACCOUNT_SERVICE;
 
     /**
-     * create accounts processor
+     * create accounts process
      */
     public static class CreateAccount extends AccountProcessors {
 

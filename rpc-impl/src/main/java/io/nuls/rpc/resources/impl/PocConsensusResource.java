@@ -25,7 +25,7 @@ package io.nuls.rpc.resources.impl;
 
 import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
-import io.nuls.consensus.service.intf.ConsensusService;
+import io.nuls.protocol.intf.ConsensusService;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;

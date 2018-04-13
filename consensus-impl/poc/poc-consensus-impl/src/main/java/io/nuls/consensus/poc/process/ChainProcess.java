@@ -1,0 +1,220 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017-2018 nuls.io
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+package io.nuls.consensus.poc.process;
+
+import io.nuls.consensus.poc.manager.ChainManager;
+import io.nuls.core.chain.entity.Block;
+import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.log.Log;
+import io.nuls.consensus.poc.container.ChainContainer;
+import io.nuls.poc.constant.ConsensusStatus;
+import io.nuls.poc.service.intf.ConsensusService;
+import io.nuls.protocol.intf.BlockService;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Created by ln on 2018/4/13.
+ */
+public class ChainProcess {
+
+    private ChainManager chainManager;
+
+    private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
+    private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
+
+    public ChainProcess(ChainManager chainManager) {
+        this.chainManager = chainManager;
+    }
+
+    public boolean process() throws IOException, NulsException {
+
+        if(consensusService.getConsensusStatus().ordinal() <= ConsensusStatus.RUNNING.ordinal()) {
+            return false;
+        }
+
+        //TODO set the best block into NulsContext
+        long newestBlockHeight = NulsContext.getInstance().getBestHeight();
+
+        ChainContainer newChain = null;
+
+        for(ChainContainer forkChain : chainManager.getChains()) {
+            long newChainHeight = forkChain.getChain().getEndBlockHeader().getHeight();
+            if(newChainHeight > newestBlockHeight + 6) {
+                if(newChain == null || newChain.getChain().getEndBlockHeader().getHeight() < newestBlockHeight) {
+                    newChain = forkChain;
+                }
+            }
+        }
+
+        if(newChain != null) {
+            ChainContainer resultChain = verifyNewChain(newChain);
+
+            if(resultChain == null) {
+                chainManager.getChains().remove(newChain);
+            } else {
+                //Verify pass, try to switch chain
+                //验证通过，尝试切换链
+                changeChain(resultChain);
+            }
+        }
+
+        //clear
+        clearExpiredChain();
+
+        return true;
+    }
+
+    /*
+     * Verify the block header information of the new chain, and if they all pass, start switching
+     * However, in the case that both are passed, it may also fail because the transaction is not verified.
+     * The transaction cannot be verified here because the data has not been rolled back
+     *
+     * 验证新链的区块头信息，如果都通过，才开始切换
+     * 但是都通过的情况下，也有可能失败，因为交易是没有经过验证的
+     * 这里不能同时验证交易，因为数据没有回滚
+     */
+    private ChainContainer verifyNewChain(ChainContainer needVerifyChain) {
+        //Verify the new chain, combined with the current latest chain, to get the status of the branch node
+        //验证新的链，结合当前最新的链，获取到分叉节点时的状态
+        ChainContainer forkChain = chainManager.getMasterChain().getBeforeTheForkChain(needVerifyChain);
+
+        //Combined with the new bifurcated block chain, combine and verify one by one
+        //结合新分叉的块链， 逐个组合并验证
+        for (Block forkBlock : needVerifyChain.getChain().getBlockList()) {
+            boolean success = forkChain.verifyAndAddBlock(forkBlock, true);
+            if(!success) {
+                return null;
+            }
+        }
+        return forkChain;
+    }
+
+    /*
+     * Switching the master chain to a new chain and verifying the block header before the switch is legal, so only the transactions in the block need to be verified here.
+     * In order to ensure the correctness of the transaction verification, you first need to roll back all blocks after the fork of the main chain, and then the new chain will start to go into storage.
+     * If the verification fails during the warehousing process, it means that the transaction in the block is illegal, then the new connection that proves the need to switch is not trusted.
+     * Once the new chain is not trusted, you need to add the previously rolled back block back
+     * This method needs to be synchronized with the add block method
+     *
+     * 把master链切换成新的链，切换之前已经做过区块头的验证，都是合法的，所以这里只需要验证区块里面的交易即可
+     * 为保证交易验证的正确性，首先需要回滚掉主链分叉点之后的所有区块，然后新链开始入库，入库过程中会做验证
+     * 如果入库过程中验证失败，说明是区块里面的交易不合法，那么证明需要切换的新连是不可信的
+     * 一旦出现新链不可信的情况，则需要把之前回滚掉的区块再添加回去
+     * 本方法需要和添加区块方法同步
+     */
+    private boolean changeChain(ChainContainer newChainContainer) throws NulsException, IOException {
+
+        if(newChainContainer == null) {
+            return false;
+        }
+
+        //Now the master chain, the forked chain after the switch, needs to be put into the list of chains to be verified.
+        //现在的主链，在切换之后的分叉链，需要放入待验证链列表里面
+        ChainContainer oldChain = chainManager.getMasterChain().getAfterTheForkChain(newChainContainer);
+
+        //rollback
+        List<Block> rollbackBlockList = oldChain.getChain().getBlockList();
+
+        //Need descending order
+        //需要降序排列
+        Collections.reverse(rollbackBlockList);
+
+        List<Block> rollbackList = new ArrayList<>();
+
+        for(Block rollbackBlock : rollbackBlockList) {
+            try {
+                boolean success = blockService.rollbackBlock(rollbackBlock);
+                if(success) {
+                    rollbackList.add(rollbackBlock);
+                }
+            } catch (Exception e) {
+                Collections.reverse(rollbackList);
+                for(Block block : rollbackList) {
+                    try {
+                        blockService.saveBlock(block);
+                    } catch (Exception ex) {
+                        Log.error("Rollback failed, failed to save block during recovery", ex);
+                        break;
+                    }
+                }
+                Log.error("Rollback failed during switch chain, skip this chain", e);
+                return false;
+            }
+        }
+
+        //add new block
+
+        List<Block> addBlockList = newChainContainer.getChain().getBlockList();
+
+        boolean changeSuccess = true;
+
+        List<Block> successList = new ArrayList<>();
+
+        //Need to sort in ascending order, the default is
+        //需要升序排列，默认就是
+        for(Block newBlock : addBlockList) {
+            try {
+                boolean success = blockService.saveBlock(newBlock);
+                if(success) {
+                    successList.add(newBlock);
+                } else {
+                    changeSuccess = false;
+                    break;
+                }
+            } catch (Exception e) {
+                Log.info("change fork chain error at save block, ", e);
+                changeSuccess = false;
+                break;
+            }
+        }
+
+        if(changeSuccess) {
+            chainManager.getChains().add(oldChain);
+            chainManager.setMasterChain(newChainContainer);
+        } else {
+            //Fallback status
+            //回退状态
+            Collections.reverse(successList);
+            for(Block rollBlock : successList) {
+                blockService.rollbackBlock(rollBlock);
+            }
+
+            Collections.reverse(rollbackBlockList);
+            for(Block addBlock : rollbackBlockList) {
+                blockService.saveBlock(addBlock);
+            }
+        }
+        return changeSuccess;
+    }
+
+    private void clearExpiredChain() {
+        //TODO
+    }
+}

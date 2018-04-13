@@ -33,7 +33,7 @@ import java.io.*;
 import java.net.URL;
 
 /**
- * Temporary processor
+ * Temporary process
  *
  * @author Niels
  * @date 2018/3/31

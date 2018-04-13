@@ -101,7 +101,6 @@
         <appender-ref ref="ERROR_FILE"></appender-ref>
     </logger>
     <logger name="blockLog" level="DEBUG" additivity="false">
-        <appender-ref ref="STDOUT"/>
         <appender-ref ref="BLOCK_FILE"></appender-ref>
     </logger>
     <logger name="consensusLog" level="INFO" additivity="false">
