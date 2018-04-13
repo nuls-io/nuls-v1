@@ -231,8 +231,10 @@ public class BlockManager {
                 this.appravalBlock(block);
             } catch (Exception e) {
                 Log.error(e);
-                confirmingBlockCacheManager.removeBlock(block.getHeader().getHash().getDigestHex());
+                String hash = block.getHeader().getHash().getDigestHex();
+                confirmingBlockCacheManager.removeBlock(hash);
                 blockCacheBuffer.cacheBlock(block);
+                bifurcateProcessor.rollbackHash(hash);
                 return false;
             }
         }
