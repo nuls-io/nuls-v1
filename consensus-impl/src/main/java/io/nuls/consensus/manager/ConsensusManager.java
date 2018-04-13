@@ -181,6 +181,11 @@ public class ConsensusManager {
         receivedTxCacheManager.clear();
         orphanTxCacheManager.clear();
         consensusCacheManager.init();
+        try {
+            NulsContext.getInstance().setBestBlock(blockStorageService.getBlock(blockStorageService.getBestHeight()));
+        } catch (Exception e) {
+            Log.error(e);
+        }
         ConsensusMeetingRunner.getInstance().resetConsensus();
     }
 

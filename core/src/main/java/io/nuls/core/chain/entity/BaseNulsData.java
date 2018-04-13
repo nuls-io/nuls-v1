@@ -83,7 +83,7 @@ public abstract class BaseNulsData implements Serializable, Cloneable {
             }
             byte[] bytes = bos.toByteArray();
             if (bytes.length != this.size()) {
-                throw new NulsRuntimeException(ErrorCode.FAILED, "序列化和size长度不一致：" + this.getClass());
+                throw new NulsRuntimeException(ErrorCode.FAILED, "date serialize error：" + this.getClass());
             }
             return bytes;
         } finally {
