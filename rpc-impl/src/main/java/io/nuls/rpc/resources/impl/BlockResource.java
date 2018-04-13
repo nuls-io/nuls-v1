@@ -181,7 +181,7 @@ public class BlockResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getBestBlockHash() throws IOException {
         RpcResult result = RpcResult.getSuccess();
-        result.setData(new BlockDto(blockService.getLocalBestBlock().getHeader(), 0, 0));
+        result.setData(new BlockDto(NulsContext.getInstance().getBestBlock().getHeader(), 0, 0));
         return result;
     }
 

@@ -53,14 +53,14 @@ public class NodeDaoImpl extends BaseDaoImpl<NodeMapper, String, NodePo> impleme
     }
 
     @Override
-    public List<NodePo> getNodePoList(int size) {
+    public List<NodePo> getNodePoList(int size, Set<String> ipSet) {
         Searchable searchable = new Searchable();
         PageHelper.startPage(1, size);
         PageHelper.orderBy("last_fail_time asc");
-//        if (!keys.isEmpty()) {
-//            List<String> keyList = new ArrayList<>(keys);
-//            searchable.addCondition("ip", SearchOperator.notIn, keyList);
-//        }
+        if (!ipSet.isEmpty()) {
+            List<String> keyList = new ArrayList<>(ipSet);
+            searchable.addCondition("ip", SearchOperator.notIn, keyList);
+        }
         searchable.addCondition("status", SearchOperator.eq, 0);
         List<NodePo> list = getMapper().selectList(searchable);
         return list;

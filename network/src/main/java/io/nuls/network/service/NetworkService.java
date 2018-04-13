@@ -28,6 +28,7 @@ import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeGroup;
 import io.nuls.network.entity.param.AbstractNetworkParam;
+import io.nuls.network.message.entity.VersionEvent;
 
 import java.nio.ByteBuffer;
 import java.util.Collection;
@@ -67,9 +68,11 @@ public interface NetworkService {
 
     boolean isSeedNode(String ip);
 
+    void saveNode(Node node);
+
     boolean isSeed();
 
-    boolean handshakeNode(String groupName, Node node);
+    boolean handshakeNode(String groupName, Node node, VersionEvent versionEvent);
 
     void blackNode(String nodeId, int status);
 

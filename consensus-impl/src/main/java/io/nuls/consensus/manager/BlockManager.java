@@ -143,12 +143,14 @@ public class BlockManager {
                             !confirmingBlockCacheManager.getHeaderCacheMap().containsKey(hash)) {
                         Block preBlock = null;
                         int count = 0;
-                        while (preBlock == null && count < 3) {
+                        while (preBlock == null && count < 5) {
                             count++;
                             preBlock = downloadUtils.getBlockByHash(header.getHeight() - 1, header.getPreHash().getDigestHex());
                         }
                         if (null != preBlock) {
                             addBlock(preBlock, true, null);
+                        }else{
+                            blockCacheBuffer.removeBlock(header.getHash().getDigestHex());
                         }
                     }
                 }

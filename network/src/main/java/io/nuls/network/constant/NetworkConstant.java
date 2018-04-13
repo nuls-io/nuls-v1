@@ -60,7 +60,7 @@ public interface NetworkConstant {
 
 
     int SAME_IP_MAX_COUNT = 10;
-    int FAIL_MAX_COUNT = 10;
+    int FAIL_MAX_COUNT = 6;
 
     int HANDSHAKE_SEVER_TYPE = 2;
     int HANDSHAKE_CLIENT_TYPE = 1;
