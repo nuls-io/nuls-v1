@@ -48,6 +48,7 @@ public class AESEncrypt {
     public static byte[] encrypt(byte[] plainBytes, String password) {
         EncryptedData ed = encrypt(plainBytes, new KeyParameter(Sha256Hash.hash(password.getBytes())));
         return ed.getEncryptedBytes();
+
     }
 
     /**
@@ -76,7 +77,8 @@ public class AESEncrypt {
         try {
             if (iv == null) {
                 iv = new byte[16];
-                SECURE_RANDOM.nextBytes(iv);
+                iv = EncryptedData.DEFAULT_IV;
+                //SECURE_RANDOM.nextBytes(iv);
             }
 
             ParametersWithIV keyWithIv = new ParametersWithIV(aesKey, iv);
