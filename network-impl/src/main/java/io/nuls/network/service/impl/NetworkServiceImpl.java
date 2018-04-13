@@ -1,18 +1,18 @@
 /**
  * MIT License
- **
+ * *
  * Copyright (c) 2017-2018 nuls.io
- **
+ * *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- **
+ * *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- **
+ * *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -38,6 +38,7 @@ import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeGroup;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.filter.impl.DefaultMessageFilter;
+import io.nuls.network.message.entity.VersionEvent;
 import io.nuls.network.message.filter.MessageFilterChain;
 import io.nuls.network.message.filter.NulsMessageFilter;
 import io.nuls.network.param.DevNetworkParam;
@@ -131,7 +132,8 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public void removeNode(String nodeId, int type) {
-        nodesManager.removeNode(nodeId);
+        System.out.println("----------removeHandshakeNode node------------");
+        nodesManager.removeHandshakeNode(nodeId);
     }
 
     @Override
@@ -183,13 +185,18 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
+    public void saveNode(Node node) {
+        nodesManager.saveNode(node);
+    }
+
+    @Override
     public boolean isSeed() {
         return nodesManager.isSeed();
     }
 
     @Override
-    public boolean handshakeNode(String groupName, Node node) {
-        return nodesManager.handshakeNode(groupName, node);
+    public boolean handshakeNode(String groupName, Node node, VersionEvent versionEvent) {
+        return nodesManager.handshakeNode(groupName, node, versionEvent);
     }
 
     @Override

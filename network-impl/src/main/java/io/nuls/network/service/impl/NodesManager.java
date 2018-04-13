@@ -1,18 +1,18 @@
 /**
  * MIT License
- **
+ * *
  * Copyright (c) 2017-2018 nuls.io
- **
+ * *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- **
+ * *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- **
+ * *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -32,11 +32,13 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.network.IpUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.NodeDataService;
+import io.nuls.db.entity.NodePo;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeGroup;
 import io.nuls.network.entity.NodeTransferTool;
 import io.nuls.network.entity.param.AbstractNetworkParam;
+import io.nuls.network.message.entity.VersionEvent;
 import io.nuls.network.service.impl.netty.NioChannelMap;
 
 import java.util.*;
@@ -56,6 +58,8 @@ public class NodesManager implements Runnable {
     private Map<String, Node> connectedNodes = new ConcurrentHashMap<>();
 
     private Map<String, Node> handShakeNodes = new ConcurrentHashMap<>();
+
+    private Set<String> outNodeIdSet = ConcurrentHashMap.newKeySet();
 
     private ReentrantLock lock = new ReentrantLock();
 
@@ -106,34 +110,18 @@ public class NodesManager implements Runnable {
      * running node discovery thread
      */
     public void start() {
-//        List<Node> nodes;
-//        if (isSeed) {
-//            nodes = getSeedNodes();
-//        } else {
-//            nodes = discoverHandler.getLocalNodes();
-//            if (nodes.size() < network.maxOutCount() / 2) {
-//                int size = network.maxOutCount() / 2 - nodes.size();
-//                int count = 0;
-//                for (Node node : getSeedNodes()) {
-//                    addNode(node);
-//                    count++;
-//                    if (count == size) {
-//                        break;
-//                    }
-//                }
-//            }
-//        }
-//        for (Node node : nodes) {
-//            addNode(node);
-//        }
-
+        List<Node> nodeList = discoverHandler.getLocalNodes(20, null);
+        nodeList.addAll(getSeedNodes());
+        for (Node node : nodeList) {
+            addNode(node);
+        }
         running = true;
-        TaskManager.createAndRunThread(NulsConstant.MODULE_ID_NETWORK, "NetworkNodeManager", this);
         discoverHandler.start();
+        TaskManager.createAndRunThread(NulsConstant.MODULE_ID_NETWORK, "NetworkNodeManager", this);
     }
 
     public void reset() {
-        System.out.println("------------------nodeManager reset--------------------");
+        Log.info("------------------network nodeManager reset--------------------");
         for (Node node : disConnectNodes.values()) {
             node.setFailCount(NetworkConstant.FAIL_MAX_COUNT);
         }
@@ -149,6 +137,9 @@ public class NodesManager implements Runnable {
         }
         lock.lock();
         try {
+            if (outNodeIdSet.contains(node.getId())) {
+                return false;
+            }
             if (!disConnectNodes.containsKey(node.getId()) &&
                     !connectedNodes.containsKey(node.getId()) &&
                     !handShakeNodes.containsKey(node.getId())) {
@@ -158,6 +149,7 @@ public class NodesManager implements Runnable {
                         return false;
                     }
                 }
+                outNodeIdSet.add(node.getId());
                 connectionManager.connectionNode(node);
                 return true;
             }
@@ -170,6 +162,7 @@ public class NodesManager implements Runnable {
     public boolean addConnNode(Node node) {
         lock.lock();
         try {
+
             if (!connectedNodes.containsKey(node.getId()) && !handShakeNodes.containsKey(node.getId())) {
                 disConnectNodes.remove(node.getId());
                 connectedNodes.put(node.getId(), node);
@@ -197,7 +190,6 @@ public class NodesManager implements Runnable {
                     }
                 }
                 removeNodeHandler(node);
-
             }
         } finally {
             lock.unlock();
@@ -233,6 +225,11 @@ public class NodesManager implements Runnable {
         return node;
     }
 
+    public Node getHandshakeNode(String nodeId) {
+        Node node = handShakeNodes.get(nodeId);
+        return node;
+    }
+
     public Map<String, Node> getNodes() {
         Map<String, Node> nodeMap = new HashMap<>();
         nodeMap.putAll(disConnectNodes);
@@ -258,9 +255,20 @@ public class NodesManager implements Runnable {
         if (node != null) {
             removeNode(node);
         } else {
-            //todo  remove database if it had
+            Log.info("------------remove node is null-----------" + nodeId);
+            getNodeDao().removeNode(nodeId);
+            outNodeIdSet.remove(nodeId);
+        }
+    }
 
-            //nodeDao.removeNode();
+    public void removeHandshakeNode(String nodeId) {
+        Node node = getHandshakeNode(nodeId);
+        if (node != null) {
+            removeNode(node);
+        } else {
+            Log.info("------------removeHandshakeNode node is null-----------" + nodeId);
+            outNodeIdSet.remove(node.getId());
+            getNodeDao().removeNode(nodeId);
         }
     }
 
@@ -274,6 +282,7 @@ public class NodesManager implements Runnable {
                     return;
                 }
             }
+            outNodeIdSet.remove(node.getId());
             node.destroy();
             removeNodeFromGroup(node);
             removeNodeHandler(node);
@@ -288,7 +297,7 @@ public class NodesManager implements Runnable {
             connectedNodes.remove(node.getId());
             handShakeNodes.remove(node.getId());
             if (node.getStatus() == Node.BAD) {
-                //todo  remove database
+                getNodeDao().removeNode(node.getPoId());
             }
             return;
         }
@@ -300,15 +309,14 @@ public class NodesManager implements Runnable {
             handShakeNodes.remove(node.getId());
         }
 
-        // 哪些情况会在dis里加入node
-        if (!disConnectNodes.containsKey(node.getId())) {
-            disConnectNodes.put(node.getId(), node);
-        }
-
         if (node.getFailCount() <= NetworkConstant.FAIL_MAX_COUNT) {
-            node.setLastFailTime(System.currentTimeMillis() + 5 * 1000 * node.getFailCount());
+            node.setLastFailTime(System.currentTimeMillis() + 10 * 1000 * node.getFailCount());
+            if (!disConnectNodes.containsKey(node.getId())) {
+                disConnectNodes.put(node.getId(), node);
+            }
         } else {
-            //todo remove database
+            disConnectNodes.remove(node.getId());
+            getNodeDao().removeNode(node.getPoId());
         }
     }
 
@@ -322,7 +330,13 @@ public class NodesManager implements Runnable {
         node.getGroupSet().clear();
     }
 
+    public void saveNode(Node node) {
+        NodePo po = NodeTransferTool.toPojo(node);
+        getNodeDao().saveChange(po);
+    }
+
     public void deleteNode(String nodeId) {
+        outNodeIdSet.remove(nodeId);
         disConnectNodes.remove(nodeId);
     }
 
@@ -335,19 +349,23 @@ public class NodesManager implements Runnable {
     }
 
 
-    private int getNodeFromDataBase(int size) {
-        return 0;
+    private void getNodeFromDataBase(int size) {
+        Set<String> ipSet = new HashSet<>();
+        for (Node node : getNodes().values()) {
+            ipSet.add(node.getIp());
+        }
+        List<Node> nodes = discoverHandler.getLocalNodes(size, ipSet);
+        for (Node node : nodes) {
+            addNode(node);
+        }
     }
 
     private void getNodeFromOther(int size) {
         discoverHandler.findOtherNode(size);
     }
 
-    /**
-     * @param node
-     * @return
-     */
-    public boolean handshakeNode(String groupName, Node node) {
+
+    public boolean handshakeNode(String groupName, Node node, VersionEvent versionEvent) {
         lock.lock();
         try {
             if (!checkFullHandShake(node)) {
@@ -356,20 +374,17 @@ public class NodesManager implements Runnable {
             if (!connectedNodes.containsKey(node.getId())) {
                 return false;
             }
-            connectedNodes.remove(node.getId());
             node.setStatus(Node.HANDSHAKE);
-            handShakeNodes.put(node.getId(), node);
+            node.setVersionMessage(versionEvent);
 
+            connectedNodes.remove(node.getId());
+            handShakeNodes.put(node.getId(), node);
             return addNodeToGroup(groupName, node);
         } finally {
             lock.unlock();
         }
     }
 
-    /**
-     * @param node
-     * @return
-     */
     private boolean checkFullHandShake(Node node) {
         if (node.getType() == Node.IN) {
             NodeGroup inGroup = getNodeGroup(NetworkConstant.NETWORK_NODE_IN_GROUP);
@@ -379,10 +394,6 @@ public class NodesManager implements Runnable {
             return outGroup.size() < network.maxOutCount();
         }
     }
-
-    /**
-     * -------------------------------华丽的分割线---------------------------
-     */
 
 
     public Collection<Node> getAvailableNodes() {
@@ -423,6 +434,21 @@ public class NodesManager implements Runnable {
         nodeGroups.get(groupName).removeNode(nodeId);
     }
 
+    private void removeSeedNode() {
+        Collection<Node> nodes = handShakeNodes.values();
+        int count = 0;
+        List<String> seedIpList = network.getSeedIpList();
+        Collections.shuffle(seedIpList);
+
+        for (Node n : nodes) {
+            if (seedIpList.contains(n.getIp())) {
+                count++;
+                if (count > 2) {
+                    removeNode(n);
+                }
+            }
+        }
+    }
 
     public boolean isSeedNode(String ip) {
         return network.getSeedIpList().contains(ip);
@@ -431,47 +457,38 @@ public class NodesManager implements Runnable {
     /**
      * check the nodes when closed try to connect other one
      */
-
-    int count = 0;
-
     @Override
     public void run() {
         Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
         while (running) {
-            count++;
-            if (count == 2) {
-                count = 0;
-                System.out.println("disConnectNodes:");
-                for (Node node : disConnectNodes.values()) {
-                    System.out.println(node.toString());
-                }
-                System.out.println();
-                System.out.println("connectedNodes:");
-                for (Node node : connectedNodes.values()) {
-                    System.out.println(node.toString());
-                }
-                System.out.println();
-                System.out.println("handShakeNodes:");
-                for (Node node : handShakeNodes.values()) {
-                    Log.info(node.toString() + ",blockHeight:" + node.getVersionMessage().getBestBlockHeight());
-                }
+            Log.info("disConnectNodes:" + disConnectNodes.size());
+            Log.info("disConnectNodes:" + connectedNodes.size());
+            Log.info("handShakeNodes:" + handShakeNodes.size());
+            for (Node node : handShakeNodes.values()) {
+                Log.info(node.toString() + ",blockHeight:" + node.getVersionMessage().getBestBlockHeight());
             }
-
-            if (connectedNodes.isEmpty() && handShakeNodes.size() <= 2) {
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if (handShakeNodes.size() <= 2) {
                 List<Node> seedNodes = getSeedNodes();
                 for (Node node : seedNodes) {
                     addNode(node);
                 }
-            } else {
-                NodeGroup outGroup = getNodeGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP);
-                if (outGroup.size() < network.maxOutCount()) {
-                    int size = network.maxOutCount() - handShakeNodes.size();
-                    if (size > 0) {
-                        getNodeFromDataBase(size);
-                        getNodeFromOther(size);
-                    }
+            } else if (handShakeNodes.size() > network.maxOutCount()) {
+                removeSeedNode();
+            }
+            NodeGroup outGroup = getNodeGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP);
+            if (outGroup.size() < network.maxOutCount()) {
+                int size = network.maxOutCount() - handShakeNodes.size();
+                if (size > 0) {
+                    getNodeFromDataBase(size);
+                    getNodeFromOther(size);
                 }
             }
+
 
             for (Node node : disConnectNodes.values()) {
                 if (node.getType() == Node.OUT && node.getStatus() == Node.CLOSE) {
@@ -481,28 +498,9 @@ public class NodesManager implements Runnable {
                 }
             }
 
-            try {
-                Thread.sleep(12000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
     }
 
-    private void removeSeedNode() {
-        Collection<Node> nodes = connectedNodes.values();
-        int count = 0;
-        for (String ip : network.getSeedIpList()) {
-            for (Node n : nodes) {
-                if (n.getIp().equals(ip)) {
-                    count++;
-                    if (count > 2) {
-                        removeNode(n);
-                    }
-                }
-            }
-        }
-    }
 
     public NodeGroup getNodeGroup(String groupName) {
         return nodeGroups.get(groupName);

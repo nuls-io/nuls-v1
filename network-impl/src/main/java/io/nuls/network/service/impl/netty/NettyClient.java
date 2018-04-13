@@ -2,6 +2,7 @@ package io.nuls.network.service.impl.netty;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -44,24 +45,30 @@ public class NettyClient {
                 .channel(NioSocketChannel.class)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.SO_KEEPALIVE, true)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000)
                 .handler(new NulsChannelInitializer<>(new ClientChannelHandler()));
     }
 
     public void start() {
         try {
-            ChannelFuture future = boot.connect(node.getIp(), node.getSeverPort()).sync();
-            if (future.isSuccess()) {
-                socketChannel = (SocketChannel) future.channel();
-            } else {
-                getNetworkService().removeNode(node.getId());
-            }
+            ChannelFuture future = boot.connect(node.getIp(), node.getSeverPort()).addListener(new ChannelFutureListener() {
+                @Override
+                public void operationComplete(ChannelFuture future) throws Exception {
+                    if (future.isSuccess()) {
+                        socketChannel = (SocketChannel) future.channel();
+                    } else {
+                        Log.info("Client connect to host error: " + future.cause() + ", remove node: " + node.getId());
+                        getNetworkService().removeNode(node.getId());
+                    }
+                }
+            });
             future.channel().closeFuture().sync();
         } catch (Exception e) {
-            Log.debug("-------------NettyClient start error: " + e.getMessage());
             //maybe time out or refused or something
             if (socketChannel != null) {
                 socketChannel.close();
             }
+            Log.error("Client start exception:" + e.getMessage() + ", remove node: " + node.getId());
             getNetworkService().removeNode(node.getId());
         }
     }

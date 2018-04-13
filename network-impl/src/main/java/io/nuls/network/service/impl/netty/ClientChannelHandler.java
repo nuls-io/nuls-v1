@@ -34,7 +34,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         Attribute<Node> nodeAttribute = channel.attr(key);
         Node node = nodeAttribute.get();
         if(node.getPort() == 0) {
-            System.out.println("===============================================");
+            Log.debug("port is zero!===============================================");
         }
 
         String nodeId = node == null ? null : node.getId();
@@ -90,6 +90,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         Node node = getNetworkService().getNode(nodeId);
         if (node != null) {
             if (node.getChannelId() == null || channelId.equals(node.getChannelId())) {
+                System.out.println(  "---------------client channelInactive remove node----------------" + nodeId);
                 getNetworkService().removeNode(node.getId());
             } else {
                 Log.debug("---------------- client channelId different----------------" + channelId + "," + node.getChannelId());
