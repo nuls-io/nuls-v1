@@ -191,7 +191,7 @@ public class BlockManager {
         //        ",\nheight(" + block.getHeader().getHeight() + "),round(" + roundData.getRoundIndex() + "),index(" + roundData.getPackingIndexOfRound() + "),roundStart:" + roundData.getRoundStartTime());
         BlockService blockService = NulsContext.getServiceBean(BlockService.class);
         if (lastStoredHeader == null) {
-            lastStoredHeader = blockService.getLocalBestBlock().getHeader();
+            lastStoredHeader = blockService.getBlock(blockService.getLocalSavedHeight()).getHeader();
         }
         if (block.getHeader().getHeight() <= lastStoredHeader.getHeight()) {
             Log.debug("discard block height:" + block.getHeader().getHeight() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()) + ",from:" + nodeId);

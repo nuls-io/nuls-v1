@@ -88,7 +88,7 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public Block getLocalBestBlock() {
-        Block block = getBlock(getLocalHeight());
+        Block block = getBlock(getLocalSavedHeight());
         if (null == block) {
             block = NulsContext.getInstance().getBestBlock();
         }
