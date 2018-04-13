@@ -53,6 +53,7 @@ public class NettyClient {
             if (future.isSuccess()) {
                 socketChannel = (SocketChannel) future.channel();
             } else {
+                System.out.println("---------------client start !success remove node-----------------" + node.getId());
                 getNetworkService().removeNode(node.getId());
             }
             future.channel().closeFuture().sync();
@@ -62,6 +63,7 @@ public class NettyClient {
             if (socketChannel != null) {
                 socketChannel.close();
             }
+            System.out.println("---------------client start exception remove node-----------------" + node.getId());
             getNetworkService().removeNode(node.getId());
         }
     }

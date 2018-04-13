@@ -46,6 +46,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
                         ctx.channel().close();
                         return;
                     } else {
+                        System.out.println("----------------sever client register each other remove node-----------------" + node.getId());
                         getNetworkService().removeNode(node.getId());
                     }
                 }
@@ -99,6 +100,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         Node node = getNetworkService().getNode(nodeId);
         if (node != null) {
             if (channelId.equals(node.getChannelId())) {
+                System.out.println("------------ sever channelInactive remove node-------------" + node.getId());
                 getNetworkService().removeNode(nodeId);
             } else {
                 Log.debug("--------------channel id different----------------------");

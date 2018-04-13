@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ * *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ * *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ * *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ * *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -27,19 +27,15 @@ import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
-import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.message.entity.VersionEvent;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.InetSocketAddress;
-import java.util.Date;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -88,7 +84,7 @@ public class Node extends BaseNulsData {
 
     private boolean canConnect;
 
-    private VersionEvent versionMessage;
+    private volatile VersionEvent versionMessage;
 
     public Node() {
         this.status = CLOSE;
@@ -304,6 +300,14 @@ public class Node extends BaseNulsData {
 
     public String getId() {
         id = ip + ":" + port;
+        return id;
+    }
+
+    public String getPoId() {
+        if (severPort == null || severPort == 0) {
+            severPort = port;
+        }
+        id = ip + ":" + severPort;
         return id;
     }
 
