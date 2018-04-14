@@ -348,7 +348,7 @@ public class BlockManager {
         }
         this.rollbackTxList(block.getTxs(), 0, block.getTxs().size());
         Block highestBlock = this.getHighestBlock();
-        if(null!=highestBlock){
+        if (null != highestBlock) {
             NulsContext.getInstance().setBestBlock(highestBlock);
         }
 
@@ -383,6 +383,7 @@ public class BlockManager {
             if (!result) {
                 return false;
             }
+            BlockLog.info("rollback block in cache:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()));
             this.bifurcateProcessor.rollbackHash(hash);
             this.rollbackAppraval(block);
             confirmingBlockCacheManager.removeBlock(block.getHeader().getHash().getDigestHex());

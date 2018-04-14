@@ -36,6 +36,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.tx.serivce.TransactionService;
 import io.nuls.core.utils.date.TimeService;
+import io.nuls.core.utils.log.BlockLog;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
@@ -469,6 +470,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 Transaction tx = txList.get(i);
                 boolean isMine = this.checkTxIsMine(tx);
                 TransactionPo po = UtxoTransferTool.toTransactionPojo(tx);
+                BlockLog.info("save Tx height:" + tx.getBlockHeight() + ", txHash:" + tx.getHash());
                 poList.add(po);
                 if (isMine) {
                     TransactionLocalPo localPo = UtxoTransferTool.toLocalTransactionPojo(tx);
