@@ -20,13 +20,12 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.calc.DoubleUtils;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.BlockLog;
+import io.nuls.core.utils.log.ConsensusLog;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.PunishLogDataService;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author: Niels Wang
@@ -58,7 +57,7 @@ public class RoundManager {
         BlockRoundData roundData = new BlockRoundData(bestBlock.getHeader().getExtend());
         boolean updateCacheStatus = true;
         for (long i = roundData.getRoundIndex(); i >= 1 && i >= roundData.getRoundIndex() - CACHE_COUNT; i--) {
-            Block firstBlock = getBlockService().getPreRoundFirstBlock(i - 1);
+            Block firstBlock = getBlockService().getRoundFirstBlock(i - 1);
             BlockRoundData preRoundData = new BlockRoundData(firstBlock.getHeader().getExtend());
             PocMeetingRound round = calcRound(firstBlock.getHeader().getHeight(), i, preRoundData.getRoundEndTime(), updateCacheStatus);
             ROUND_MAP.put(round.getIndex(), round);
@@ -129,7 +128,7 @@ public class RoundManager {
 //        if(calcBlockRoundFinished){
 //        }else{
 //        }
-        Block lastRoundFirstBlock = getBlockService().getPreRoundFirstBlock(blockRoundData.getRoundIndex());
+        Block lastRoundFirstBlock = getBlockService().getRoundFirstBlock(blockRoundData.getRoundIndex());
         PocMeetingRound round = calcRound(lastRoundFirstBlock.getHeader().getHeight(), blockRoundData.getRoundIndex() + 1, blockRoundData.getRoundEndTime(), updateCacheStatus);
 
         boolean needCalcOrder = false;
@@ -172,7 +171,7 @@ public class RoundManager {
     }
 
     private PocMeetingRound calcRound(long startCalcHeight, long roundIndex, long startTIme, boolean updateCacheStatus) {
-        //BlockLog.error("++++++++calcRound:height:" + startCalcHeight + " ,index:" + roundIndex);
+        ConsensusLog.info("++++++++calcRound:height:" + startCalcHeight + " ,index:" + roundIndex," ,startTime");
         PocMeetingRound round = new PocMeetingRound();
         round.setIndex(roundIndex);
         round.setStartTime(startTIme);
@@ -189,7 +188,7 @@ public class RoundManager {
             PocMeetingMember member = new PocMeetingMember();
             member.setAgentAddress(address);
             member.setPackingAddress(address);
-            member.setCreditVal(1);
+            member.setCreditVal(0);
             member.setRoundStartTime(round.getStartTime());
             memberList.add(member);
         }
@@ -205,7 +204,7 @@ public class RoundManager {
             member.setPackingAddress(ca.getExtend().getPackingAddress());
             member.setOwnDeposit(ca.getExtend().getDeposit());
             member.setCommissionRate(ca.getExtend().getCommissionRate());
-
+            member.setRoundStartTime(round.getStartTime());
             List<Consensus<Deposit>> cdlist = consensusCacheManager.getDepositListByAgentId(ca.getHexHash(), startCalcHeight);
             BlockLog.debug("get alive depositlist by agentId:" + ca.getHexHash() + " , calcHeight:" + startCalcHeight + " ,resultSize:" + cdlist.size());
             for (Consensus<Deposit> cd : cdlist) {
@@ -254,7 +253,7 @@ public class RoundManager {
                 DoubleUtils.mul(PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT, PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT));
         BlockLog.debug(")))))))))))))creditVal:" + DoubleUtils.sub(ability, penalty) + ",member:" + member.getAgentAddress());
         BlockLog.debug(")))))))))))))blockCount:" + blockCount + ", start:" + roundStart + ",end:" + calcRoundIndex + ", yellowCount:" + sumRoundVal);
-        return ability - penalty;
+        return DoubleUtils.sub(ability , penalty);
     }
 
     private BlockService getBlockService() {
@@ -293,7 +292,7 @@ public class RoundManager {
             Block bestBlock = getBestBlock();
             BlockRoundData nowRoundData = new BlockRoundData(bestBlock.getHeader().getExtend());
             if (nowRoundData.getRoundIndex() >= preRoundIndex) {
-                preRoundFirstBlock = getBlockService().getPreRoundFirstBlock(preRoundIndex);
+                preRoundFirstBlock = getBlockService().getRoundFirstBlock(preRoundIndex);
                 if (null == preRoundFirstBlock) {
                     return null;
                 }
@@ -317,7 +316,7 @@ public class RoundManager {
         }
         if (needPreRound && round.getPreRound() == null) {
             if (null == preRoundFirstBlock) {
-                Block firstBlock = getBlockService().getPreRoundFirstBlock(preRoundIndex);
+                Block firstBlock = getBlockService().getRoundFirstBlock(preRoundIndex);
                 if (null == firstBlock) {
                     return null;
                 }
