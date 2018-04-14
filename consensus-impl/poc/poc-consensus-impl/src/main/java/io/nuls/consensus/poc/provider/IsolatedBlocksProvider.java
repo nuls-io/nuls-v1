@@ -1,4 +1,4 @@
-/**
+/*
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -21,33 +21,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.consensus.event;
 
-import io.nuls.consensus.constant.ConsensusEventType;
-import io.nuls.consensus.entity.TxGroup;
-import io.nuls.core.event.NoticeData;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.io.NulsByteBuffer;
+package io.nuls.consensus.poc.provider;
+
+import io.nuls.core.chain.entity.Block;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * @author Niels
- * @date 2017/11/13
+ * Created by ln on 2018/4/14.
  */
-public class TxGroupEvent extends BaseConsensusEvent<TxGroup> {
+public class IsolatedBlocksProvider {
 
-    public TxGroupEvent() {
-        super(ConsensusEventType.TX_GROUP);
+    // Orphaned block caching, isolated block refers to the case where the previous block was not found
+    // 孤立区块的缓存，孤立区块是指找不到上一个块的情况
+    private List<Block> isolatedBlockList = new ArrayList<Block>();
+
+    public boolean addBlock(Block block) {
+        return isolatedBlockList.add(block);
     }
 
-    @Override
-    protected TxGroup parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
-        return byteBuffer.readNulsData(new TxGroup());
+    public Block get() {
+        if(isolatedBlockList == null || isolatedBlockList.size() == 0) {
+            return null;
+        }
+        return isolatedBlockList.get(0);
     }
-
-    @Override
-    public NoticeData getNotice() {
-        return null;
-    }
-
-
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -21,29 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.consensus.event;
 
-import io.nuls.core.chain.entity.BaseNulsData;
-import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.utils.log.Log;
+package io.nuls.consensus.poc.process;
+
+import io.nuls.consensus.poc.manager.ChainManager;
+import io.nuls.core.chain.entity.Block;
 
 /**
- * @author Niels
- * @date 2017/11/7
+ * Created by ln on 2018/4/14.
  */
-public abstract class BaseConsensusEvent<T extends BaseNulsData> extends io.nuls.core.event.BaseEvent<T> {
+public class IsolatedBlocksProcess {
 
-    public BaseConsensusEvent(short eventType) {
-        super(NulsConstant.MODULE_ID_CONSENSUS, eventType);
+    private ChainManager chainManager;
+
+    public IsolatedBlocksProcess(ChainManager chainManager) {
+        this.chainManager = chainManager;
     }
 
-    @Override
-    public Object copy() {
-        try {
-            return this.clone();
-        } catch (CloneNotSupportedException e) {
-            Log.error(e);
-            return null;
-        }
+    public void process(Block block) {
+        //TODO
+        // 孤立块的处理，获取上一个区块，并把当前区块放入ChainManager里面的孤立链里
     }
 }

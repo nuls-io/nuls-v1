@@ -40,16 +40,10 @@ public class ChainManager {
     private ChainContainer masterChain;
     private List<ChainContainer> chains;
 
-    // Orphaned block caching, isolated block refers to the case where the previous block was not found
-    // 孤立区块的缓存，孤立区块是指找不到上一个块的情况
-    private List<Block> temporaryBlockList;
+    private RoundManager roundManager;
 
     public void init() {
-        temporaryBlockList = new ArrayList<>();
-    }
-
-    public boolean addBlockIntoTemporaryList(Block block) {
-        return temporaryBlockList.add(block);
+        roundManager = new RoundManager(this);
     }
 
     public void clear() {
@@ -73,11 +67,4 @@ public class ChainManager {
         this.chains = chains;
     }
 
-    public List<Block> getTemporaryBlockList() {
-        return temporaryBlockList;
-    }
-
-    public void setTemporaryBlockList(List<Block> temporaryBlockList) {
-        this.temporaryBlockList = temporaryBlockList;
-    }
 }

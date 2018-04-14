@@ -26,18 +26,13 @@ package io.nuls.consensus.poc.scheduler;
 import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.manager.CacheManager;
 import io.nuls.consensus.poc.manager.ChainManager;
-import io.nuls.consensus.poc.process.BlockProcess;
-import io.nuls.consensus.poc.process.ChainProcess;
-import io.nuls.consensus.poc.process.ConsensusProcess;
-import io.nuls.consensus.poc.process.TxProcess;
+import io.nuls.consensus.poc.process.*;
 import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.consensus.poc.provider.ConsensusSystemProvider;
+import io.nuls.consensus.poc.provider.IsolatedBlocksProvider;
 import io.nuls.consensus.poc.provider.TxQueueProvider;
 import io.nuls.consensus.poc.service.PocConsensusService;
-import io.nuls.consensus.poc.task.BlockProcessTask;
-import io.nuls.consensus.poc.task.ChainProcessTask;
-import io.nuls.consensus.poc.task.ConsensusProcessTask;
-import io.nuls.consensus.poc.task.TxProcessTask;
+import io.nuls.consensus.poc.task.*;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.thread.manager.NulsThreadFactory;
@@ -85,13 +80,18 @@ public class MainControlScheduler {
         PocConsensusService pocConsensusService = NulsContext.getServiceBean(PocConsensusService.class);
         pocConsensusService.addProvider(blockQueueProvider, txQueueProvider);
 
-        threadPool = TaskManager.createScheduledThreadPool(4,
+        threadPool = TaskManager.createScheduledThreadPool(5,
                 new NulsThreadFactory(NulsConstant.MODULE_ID_CONSENSUS, "consensus-main-control"));
 
         chainManager = new ChainManager();
         cacheManager = new CacheManager(chainManager);
 
-        BlockProcess blockProcess = new BlockProcess(chainManager);
+
+        IsolatedBlocksProvider isolatedBlocksProvider = new IsolatedBlocksProvider();
+        IsolatedBlocksProcess isolatedBlocksProcess = new IsolatedBlocksProcess(chainManager);
+        threadPool.scheduleAtFixedRate(new IsolatedBlocksProcessTask(isolatedBlocksProcess, isolatedBlocksProvider), 1000L,1000L, TimeUnit.MILLISECONDS);
+
+        BlockProcess blockProcess = new BlockProcess(chainManager, isolatedBlocksProvider);
         threadPool.scheduleAtFixedRate(new BlockProcessTask(blockProcess, blockQueueProvider), 1000L,500L, TimeUnit.MILLISECONDS);
 
         TxProcess txProcess = new TxProcess();
@@ -100,7 +100,7 @@ public class MainControlScheduler {
         ChainProcess chainProcess = new ChainProcess(chainManager);
         threadPool.scheduleAtFixedRate(new ChainProcessTask(chainProcess), 1000L,200L, TimeUnit.MILLISECONDS);
 
-        ConsensusProcess consensusProcess = new ConsensusProcess();
+        ConsensusProcess consensusProcess = new ConsensusProcess(chainManager);
         threadPool.scheduleAtFixedRate(new ConsensusProcessTask(consensusProcess), 1000L,500L, TimeUnit.MILLISECONDS);
 
         initDatas();

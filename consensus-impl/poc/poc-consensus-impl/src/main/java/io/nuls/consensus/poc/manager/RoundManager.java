@@ -1,4 +1,4 @@
-/**
+/*
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -21,17 +21,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.consensus.constant;
+
+package io.nuls.consensus.poc.manager;
+
+import io.nuls.consensus.poc.container.ChainContainer;
+import io.nuls.consensus.poc.model.MeetingRound;
+import io.nuls.core.chain.entity.BlockHeader;
 
 /**
- * @author Niels
- * @date 2017/12/1
+ * Created by ln on 2018/4/14.
  */
-public interface ConsensusEventType {
-    short NOT_FOUND_HASH = 1;
-    short GET_BLOCK = 3;
-    short BLOCK = 4;
-    short GET_TX_GROUP = 7;
-    short TX_GROUP = 8;
-    short NEW_BLOCK = 9;
+public class RoundManager {
+
+    private ChainManager chainManager;
+
+    public RoundManager(ChainManager chainManager) {
+        this.chainManager = chainManager;
+    }
+
+    public MeetingRound calculation(ChainContainer chainContainer) {
+        return null;
+    }
+
+    public MeetingRound calculation(ChainContainer chainContainer, BlockHeader blockHeader) {
+        return null;
+    }
 }

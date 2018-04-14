@@ -1,4 +1,4 @@
-/**
+/*
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -21,34 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.consensus.utils;
 
-import io.nuls.core.chain.entity.Transaction;
+package io.nuls.consensus.poc.task;
 
-import java.util.Comparator;
+import io.nuls.consensus.poc.process.IsolatedBlocksProcess;
+import io.nuls.consensus.poc.provider.IsolatedBlocksProvider;
+import io.nuls.core.chain.entity.Block;
 
 /**
- * @author Niels
- * @date 2017/12/26
+ * Created by ln on 2018/4/14.
  */
-public class TxTimeComparator implements Comparator<Transaction> {
+public class IsolatedBlocksProcessTask implements Runnable {
 
-    private static  final TxTimeComparator INSTANCE = new TxTimeComparator();
-    private TxTimeComparator(){}
-    public static TxTimeComparator getInstance(){
-        return INSTANCE;
+    private IsolatedBlocksProcess isolatedBlocksProcess;
+    private IsolatedBlocksProvider isolatedBlocksProvider;
+
+    public IsolatedBlocksProcessTask(IsolatedBlocksProcess isolatedBlocksProcess, IsolatedBlocksProvider isolatedBlocksProvider) {
+        this.isolatedBlocksProcess = isolatedBlocksProcess;
+        this.isolatedBlocksProvider = isolatedBlocksProvider;
     }
 
     @Override
-    public int compare(Transaction o1, Transaction o2) {
-//        long key = o1.size() - o2.size();
-        long key = o1.getTime() - o2.getTime();
-        int val = 0;
-        if (key > 0) {
-            return 1;
-        } else if (key < 0) {
-            return -1;
+    public void run() {
+        Block block = isolatedBlocksProvider.get();
+        if(block == null) {
+            return;
         }
-        return val;
+        isolatedBlocksProcess.process(block);
     }
 }

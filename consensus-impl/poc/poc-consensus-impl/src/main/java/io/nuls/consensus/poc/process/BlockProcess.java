@@ -28,6 +28,7 @@ import io.nuls.consensus.poc.constant.BlockContainerStatus;
 import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.manager.ChainManager;
+import io.nuls.consensus.poc.provider.IsolatedBlocksProvider;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
@@ -45,9 +46,11 @@ public class BlockProcess {
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
 
     private ChainManager chainManager;
+    private IsolatedBlocksProvider isolatedBlocksProvider;
 
-    public BlockProcess(ChainManager chainManager) {
+    public BlockProcess(ChainManager chainManager, IsolatedBlocksProvider isolatedBlocksProvider) {
         this.chainManager = chainManager;
+        this.isolatedBlocksProvider = isolatedBlocksProvider;
     }
 
     public boolean process(BlockContainer blockContainer) throws IOException {
@@ -74,7 +77,7 @@ public class BlockProcess {
             }
             ChainContainer needVerifyChain = checkAndGetForkChain(block);
             if(needVerifyChain == null) {
-                chainManager.addBlockIntoTemporaryList(block);
+                isolatedBlocksProvider.addBlock(block);
             } else if(!chainManager.getChains().contains(needVerifyChain)) {
                 chainManager.getChains().add(needVerifyChain);
             }

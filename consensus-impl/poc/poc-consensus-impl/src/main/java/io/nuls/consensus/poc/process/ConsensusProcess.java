@@ -23,12 +23,31 @@
  */
 package io.nuls.consensus.poc.process;
 
+import io.nuls.consensus.poc.manager.ChainManager;
+import io.nuls.network.entity.Node;
+
+import java.util.List;
+
 /**
  * Created by ln on 2018/4/13.
  */
 public class ConsensusProcess {
 
+    private ChainManager chainManager;
+
+    public ConsensusProcess(ChainManager chainManager) {
+        this.chainManager = chainManager;
+    }
+
     public void process() {
 
+        boolean canPackage = checkCanPackage();
+
+
+    }
+
+    private boolean checkCanPackage() {
+
+        return true;
     }
 }
