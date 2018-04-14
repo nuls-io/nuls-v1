@@ -35,9 +35,10 @@ import io.nuls.consensus.entity.ConsensusDepositImpl;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.member.Deposit;
 import io.nuls.consensus.entity.params.JoinConsensusParam;
-import io.nuls.consensus.entity.tx.PocExitConsensusTransaction;
+import io.nuls.consensus.entity.tx.CancelDepositTransaction;
 import io.nuls.consensus.entity.tx.PocJoinConsensusTransaction;
 import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
+import io.nuls.consensus.entity.tx.StopAgentTransaction;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.service.intf.ConsensusService;
 import io.nuls.consensus.utils.AgentComparator;
@@ -190,22 +191,38 @@ public class PocConsensusServiceImpl implements ConsensusService {
             throw new NulsRuntimeException(ErrorCode.PASSWORD_IS_WRONG);
         }
         TransactionEvent event = new TransactionEvent();
-        CoinTransferData coinTransferData = new CoinTransferData(OperationType.UNLOCK, this.ledgerService.getTxFee(TransactionConstant.TX_TYPE_EXIT_CONSENSUS));
+        CoinTransferData coinTransferData = new CoinTransferData(OperationType.UNLOCK, this.ledgerService.getTxFee(TransactionConstant.TX_TYPE_CANCEL_DEPOSIT));
         if (joinTx.getType() == TransactionConstant.TX_TYPE_REGISTER_AGENT) {
+            coinTransferData = new CoinTransferData(OperationType.UNLOCK, this.ledgerService.getTxFee(TransactionConstant.TX_TYPE_STOP_AGENT));
             Map<String, Object> sData = new HashMap<>();
 
             sData.put("type", 1);
             sData.put("lockedTxHash", joinTx.getHash());
             sData.put("lockTime", PocConsensusConstant.STOP_AGENT_DEPOSIT_LOCKED_TIME * 24 * 3600 * 1000);
 
-
             coinTransferData.setSpecialData(sData);
+
+            coinTransferData.setTotalNa(Na.ZERO);
+            coinTransferData.addFrom(account.getAddress().toString());
+            StopAgentTransaction tx = new StopAgentTransaction(coinTransferData, password);
+            tx.setTxData(joinTx.getHash());
+            try {
+                tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
+            } catch (IOException e) {
+                Log.error(e);
+                throw new NulsRuntimeException(ErrorCode.HASH_ERROR, e);
+            }
+            tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(), account, password).serialize());
+            event.setEventBody(tx);
+            eventBroadcaster.broadcastHashAndCache(event, true);
+
+            return tx;
         }
 
 
         coinTransferData.setTotalNa(Na.ZERO);
         coinTransferData.addFrom(account.getAddress().toString());
-        PocExitConsensusTransaction tx = new PocExitConsensusTransaction(coinTransferData, password);
+        CancelDepositTransaction tx = new CancelDepositTransaction(coinTransferData, password);
         tx.setTxData(joinTx.getHash());
         try {
             tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));

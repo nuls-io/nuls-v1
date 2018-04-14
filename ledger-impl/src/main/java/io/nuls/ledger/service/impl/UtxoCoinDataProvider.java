@@ -337,11 +337,11 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         lock.lock();
 
         try {
-            if(coinParam.getSpecialData()!=null){
-
-
-                return SpecialUtils.();
-            }
+//            if(coinParam.getSpecialData()!=null){
+//
+//
+//                return SpecialUtils.();
+//            }
             UtxoData utxoData = new UtxoData();
             List<UtxoInput> inputs = new ArrayList<>();
             List<UtxoOutput> outputs = new ArrayList<>();
