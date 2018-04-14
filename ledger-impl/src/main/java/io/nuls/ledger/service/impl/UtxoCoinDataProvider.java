@@ -107,7 +107,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 if (null == unSpend) {
                     throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "the output is not exist!");
                 }
-                if (tx.getType() != TransactionConstant.TX_TYPE_EXIT_CONSENSUS) {
+                if (tx.getType() != TransactionConstant.TX_TYPE_STOP_AGENT) {
                     if (!unSpend.isUsable()) {
                         throw new NulsRuntimeException(ErrorCode.UTXO_UNUSABLE);
                     }
@@ -117,9 +117,14 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                         unSpend.setStatus(OutPutStatusEnum.UTXO_UNCONFIRMED_SPENT);
                     }
                 } else {
-                    if()
+                    if (unSpend.getStatus() == OutPutStatusEnum.UTXO_UNCONFIRMED_CONSENSUS_LOCK) {
+                        unSpend.setStatus(OutPutStatusEnum.UTXO_UNCONFIRMED_SPENT);
+                    } else if (unSpend.getStatus() == OutPutStatusEnum.UTXO_CONFIRMED_CONSENSUS_LOCK) {
+                        unSpend.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_SPENT);
+                    } else {
+                        throw new NulsRuntimeException(ErrorCode.UTXO_UNUSABLE);
+                    }
                 }
-
 
                 unSpends.add(unSpend);
                 addressSet.add(unSpend.getAddress());
@@ -130,10 +135,18 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         } catch (Exception e) {
             //rollback
             for (UtxoOutput output : unSpends) {
-                if (OutPutStatusEnum.UTXO_CONFIRMED_SPENT.equals(output.getStatus())) {
-                    ledgerCacheService.updateUtxoStatus(output.getKey(), OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT, OutPutStatusEnum.UTXO_CONFIRMED_SPENT);
-                } else if (OutPutStatusEnum.UTXO_UNCONFIRMED_SPENT.equals(output.getStatus())) {
-                    ledgerCacheService.updateUtxoStatus(output.getKey(), OutPutStatusEnum.UTXO_UNCONFIRMED_UNSPENT, OutPutStatusEnum.UTXO_UNCONFIRMED_SPENT);
+                if (tx.getType() != TransactionConstant.TX_TYPE_STOP_AGENT) {
+                    if (OutPutStatusEnum.UTXO_CONFIRMED_SPENT.equals(output.getStatus())) {
+                        ledgerCacheService.updateUtxoStatus(output.getKey(), OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT, OutPutStatusEnum.UTXO_CONFIRMED_SPENT);
+                    } else if (OutPutStatusEnum.UTXO_UNCONFIRMED_SPENT.equals(output.getStatus())) {
+                        ledgerCacheService.updateUtxoStatus(output.getKey(), OutPutStatusEnum.UTXO_UNCONFIRMED_UNSPENT, OutPutStatusEnum.UTXO_UNCONFIRMED_SPENT);
+                    }
+                } else {
+                    if (output.getStatus() == OutPutStatusEnum.UTXO_UNCONFIRMED_SPENT) {
+                        output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRMED_CONSENSUS_LOCK);
+                    } else if (output.getStatus() == OutPutStatusEnum.UTXO_CONFIRMED_SPENT) {
+                        output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_CONSENSUS_LOCK);
+                    }
                 }
             }
             // remove cache new utxo
@@ -184,7 +197,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         Set<String> addressSet = new HashSet<>();
         lock.lock();
         try {
-            processDataInput(utxoData, inputPoList, spends, spendPoList, addressSet);
+            processDataInput(utxoData, inputPoList, spends, spendPoList, addressSet, tx);
 
             List<UtxoOutputPo> outputPoList = new ArrayList<>();
             for (int i = 0; i < utxoData.getOutputs().size(); i++) {
@@ -249,7 +262,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
     //Check if the input referenced output has been spent
     private void processDataInput(UtxoData utxoData, List<UtxoInputPo> inputPoList,
                                   List<UtxoOutput> spends, List<UtxoOutputPo> spendPoList,
-                                  Set<String> addressSet) {
+                                  Set<String> addressSet, Transaction tx) {
         boolean update;
         for (int i = 0; i < utxoData.getInputs().size(); i++) {
             UtxoInput input = utxoData.getInputs().get(i);
@@ -258,7 +271,12 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 throw new NulsRuntimeException(ErrorCode.DATA_NOT_FOUND, "the output is not exist!");
             }
             //change utxo status,
-            update = ledgerCacheService.updateUtxoStatus(spend.getKey(), OutPutStatusEnum.UTXO_SPENT, OutPutStatusEnum.UTXO_CONFIRMED_SPENT);
+            if (tx.getType() == TransactionConstant.TX_TYPE_STOP_AGENT) {
+                update = ledgerCacheService.updateUtxoStatus(spend.getKey(), OutPutStatusEnum.UTXO_SPENT, OutPutStatusEnum.UTXO_CONFIRMED_CONSENSUS_LOCK);
+            } else {
+                update = ledgerCacheService.updateUtxoStatus(spend.getKey(), OutPutStatusEnum.UTXO_SPENT, OutPutStatusEnum.UTXO_CONFIRMED_SPENT);
+            }
+
             if (!update) {
                 Log.error("-----------------------------------save() input referenced status is" + spend.getStatus().name());
                 throw new NulsRuntimeException(ErrorCode.UTXO_STATUS_CHANGE);
@@ -292,9 +310,17 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                     if (from.getStatus() == OutPutStatusEnum.UTXO_SPENT) {
                         from.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT);
                     } else if (from.getStatus() == OutPutStatusEnum.UTXO_CONFIRMED_SPENT) {
-                        from.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT);
+                        if (tx.getType() == TransactionConstant.TX_TYPE_STOP_AGENT) {
+                            from.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_CONSENSUS_LOCK);
+                        } else {
+                            from.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT);
+                        }
                     } else if (from.getStatus() == OutPutStatusEnum.UTXO_UNCONFIRMED_SPENT) {
-                        from.setStatus(OutPutStatusEnum.UTXO_UNCONFIRMED_UNSPENT);
+                        if (tx.getType() == TransactionConstant.TX_TYPE_STOP_AGENT) {
+                            from.setStatus(OutPutStatusEnum.UTXO_UNCONFIRMED_CONSENSUS_LOCK);
+                        } else {
+                            from.setStatus(OutPutStatusEnum.UTXO_UNCONFIRMED_UNSPENT);
+                        }
                     }
                     addressSet.add(from.getAddress());
                 }
