@@ -213,6 +213,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
                 throw new NulsRuntimeException(ErrorCode.HASH_ERROR, e);
             }
             tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(), account, password).serialize());
+            tx.verifyWithException();
             event.setEventBody(tx);
             eventBroadcaster.broadcastHashAndCache(event, true);
 
@@ -231,6 +232,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
             throw new NulsRuntimeException(ErrorCode.HASH_ERROR, e);
         }
         tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(), account, password).serialize());
+        tx.verifyWithException();
         event.setEventBody(tx);
         eventBroadcaster.broadcastHashAndCache(event, true);
         return tx;
