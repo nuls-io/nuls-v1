@@ -149,7 +149,7 @@ public class BlockManager {
                         }
                         if (null != preBlock) {
                             addBlock(preBlock, true, null);
-                        }else{
+                        } else {
                             blockCacheBuffer.removeBlock(header.getHash().getDigestHex());
                         }
                     }
@@ -228,7 +228,7 @@ public class BlockManager {
             blockCacheBuffer.removeBlock(block.getHeader().getHash().getDigestHex());
         }
         boolean needUpdateBestBlock = bifurcateProcessor.addHeader(block.getHeader());
-        if (bifurcateProcessor.getChainSize() == 1) {
+        if (bifurcateProcessor.getApprovingChain() != null && bifurcateProcessor.getApprovingChain().contains(block.getHeader())) {
             try {
                 this.appravalBlock(block);
             } catch (Exception e) {
@@ -347,8 +347,12 @@ public class BlockManager {
             return;
         }
         this.rollbackTxList(block.getTxs(), 0, block.getTxs().size());
+        Block highestBlock = this.getHighestBlock();
+        if (null != highestBlock) {
+            NulsContext.getInstance().setBestBlock(highestBlock);
+        }
 
-        NulsContext.getInstance().setBestBlock(this.getHighestBlock());
+
 //        List<String> hashList = this.bifurcateProcessor.getAllHashList(block.getHeader().getHeight() - 1);
 //        if (hashList.size() > 1) {
 //            this.rollbackAppraval(preBlock);
@@ -379,6 +383,7 @@ public class BlockManager {
             if (!result) {
                 return false;
             }
+            BlockLog.info("rollback block in cache:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()));
             this.bifurcateProcessor.rollbackHash(hash);
             this.rollbackAppraval(block);
             confirmingBlockCacheManager.removeBlock(block.getHeader().getHash().getDigestHex());

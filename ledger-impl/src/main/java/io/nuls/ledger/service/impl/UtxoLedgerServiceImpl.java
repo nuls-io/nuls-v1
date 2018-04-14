@@ -36,6 +36,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.tx.serivce.TransactionService;
 import io.nuls.core.utils.date.TimeService;
+import io.nuls.core.utils.log.BlockLog;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
@@ -469,14 +470,17 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 Transaction tx = txList.get(i);
                 boolean isMine = this.checkTxIsMine(tx);
                 TransactionPo po = UtxoTransferTool.toTransactionPojo(tx);
+                BlockLog.info("save Tx height:" + tx.getBlockHeight() + ", txHash:" + tx.getHash()+" ,type;"+tx.getType()+", time:"+tx.getTime());
                 poList.add(po);
                 if (isMine) {
                     TransactionLocalPo localPo = UtxoTransferTool.toLocalTransactionPojo(tx);
                     localPoList.add(localPo);
                 }
             }
+
             txDao.saveTxList(poList);
             if (localPoList.size() > 0) {
+
                 txDao.saveLocalList(localPoList);
             }
         } catch (Exception e) {
@@ -578,6 +582,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     public void approvalTx(Transaction tx) throws NulsException {
+
         AssertUtil.canNotEmpty(tx, ErrorCode.NULL_PARAMETER);
         if (tx.getStatus() == TxStatusEnum.AGREED || tx.getStatus() == TxStatusEnum.CONFIRMED) {
             return;
