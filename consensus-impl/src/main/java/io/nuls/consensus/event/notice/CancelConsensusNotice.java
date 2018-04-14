@@ -27,7 +27,7 @@
 package io.nuls.consensus.event.notice;
 
 import io.nuls.consensus.constant.PocConsensusConstant;
-import io.nuls.consensus.entity.tx.PocExitConsensusTransaction;
+import io.nuls.consensus.entity.tx.CancelDepositTransaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.event.BaseEvent;
@@ -39,13 +39,13 @@ import io.nuls.core.utils.io.NulsByteBuffer;
  * @author Niels
  * @date 2018/3/8
  */
-public class CancelConsensusNotice extends BaseEvent<PocExitConsensusTransaction> {
+public class CancelConsensusNotice extends BaseEvent<CancelDepositTransaction> {
     public CancelConsensusNotice() {
         super(NulsConstant.MODULE_ID_CONSENSUS, PocConsensusConstant.NOTICE_CANCEL_CONSENSUS);
     }
 
     @Override
-    protected PocExitConsensusTransaction parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
+    protected CancelDepositTransaction parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
         return null;
     }
 

@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,21 +21,20 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
 package io.nuls.consensus.service.tx;
 
 import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
-import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.member.Deposit;
-import io.nuls.consensus.entity.tx.PocExitConsensusTransaction;
+import io.nuls.consensus.entity.tx.CancelDepositTransaction;
 import io.nuls.consensus.entity.tx.PocJoinConsensusTransaction;
 import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
 import io.nuls.consensus.event.notice.CancelConsensusNotice;
-import io.nuls.consensus.event.notice.StopConsensusNotice;
 import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.TransactionConstant;
@@ -58,7 +58,7 @@ import java.util.Map;
  * @author Niels
  * @date 2018/1/8
  */
-public class ExitConsensusTxService implements TransactionService<PocExitConsensusTransaction> {
+public class CancelDepositTxService implements TransactionService<CancelDepositTransaction> {
 
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     private AgentDataService agentDataService = NulsContext.getServiceBean(AgentDataService.class);
@@ -68,7 +68,7 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
 
     @Override
     @DbSession
-    public void onRollback(PocExitConsensusTransaction tx) {
+    public void onRollback(CancelDepositTransaction tx) {
         Transaction joinTx = ledgerService.getTx(tx.getTxData());
         if (joinTx.getType() == TransactionConstant.TX_TYPE_REGISTER_AGENT) {
             RegisterAgentTransaction raTx = (RegisterAgentTransaction) joinTx;
@@ -80,7 +80,7 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
             agentPo.setDelHeight(0L);
             this.agentDataService.updateSelective(agentPo);
 
-            this.ledgerService.unlockTxRollback(tx.getTxData().getDigestHex());
+//            this.ledgerService.unlockTxRollback(tx.getTxData().getDigestHex());
 
             UpdateDepositByAgentIdParam dpo = new UpdateDepositByAgentIdParam();
             dpo.setAgentId(ca.getHexHash());
@@ -130,9 +130,9 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
         dpo.setId(cd.getHexHash());
         dpo.setDelHeight(0L);
         this.depositDataService.updateSelective(dpo);
-        StopConsensusNotice notice = new StopConsensusNotice();
-        notice.setEventBody(tx);
-        NulsContext.getServiceBean(EventBroadcaster.class).publishToLocal(notice);
+//        StopConsensusNotice notice = new StopConsensusNotice();
+//        notice.setEventBody(tx);
+//        NulsContext.getServiceBean(EventBroadcaster.class).publishToLocal(notice);
         this.ledgerService.unlockTxRollback(tx.getTxData().getDigestHex());
 
         Consensus<Deposit> depositConsensus = manager.getDepositById(cd.getHexHash());
@@ -142,12 +142,12 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
 
     @Override
     @DbSession
-    public void onCommit(PocExitConsensusTransaction tx) throws NulsException {
+    public void onCommit(CancelDepositTransaction tx) throws NulsException {
         Transaction joinTx = ledgerService.getTx(tx.getTxData());
         if (joinTx.getType() == TransactionConstant.TX_TYPE_REGISTER_AGENT) {
             RegisterAgentTransaction raTx = (RegisterAgentTransaction) joinTx;
 
-            this.ledgerService.unlockTxSave(tx.getTxData().getDigestHex(), tx.getTime() + PocConsensusConstant.STOP_AGENT_DEPOSIT_LOCKED_TIME * 24 * 3600 * 1000);
+//            this.ledgerService.unlockTxSave(tx.getTxData().getDigestHex(), tx.getTime() + PocConsensusConstant.STOP_AGENT_DEPOSIT_LOCKED_TIME * 24 * 3600 * 1000);
             Map<String, Object> paramsMap = new HashMap<>();
             paramsMap.put("agentHash", raTx.getTxData().getHexHash());
             List<DepositPo> poList = depositDataService.getList(paramsMap);
@@ -175,13 +175,13 @@ public class ExitConsensusTxService implements TransactionService<PocExitConsens
 
     @Override
     @DbSession
-    public void onApproval(PocExitConsensusTransaction tx) {
+    public void onApproval(CancelDepositTransaction tx) {
         Transaction joinTx = ledgerService.getTx(tx.getTxData());
         if (joinTx == null) {
             joinTx = ConfirmingTxCacheManager.getInstance().getTx(tx.getTxData());
         }
         if (joinTx.getType() == TransactionConstant.TX_TYPE_REGISTER_AGENT) {
-            this.ledgerService.unlockTxApprove(tx.getTxData().getDigestHex(), tx.getTime() + PocConsensusConstant.STOP_AGENT_DEPOSIT_LOCKED_TIME * 24 * 3600 * 1000);
+//            this.ledgerService.unlockTxApprove(tx.getTxData().getDigestHex(), tx.getTime() + PocConsensusConstant.STOP_AGENT_DEPOSIT_LOCKED_TIME * 24 * 3600 * 1000);
             RegisterAgentTransaction realTx = (RegisterAgentTransaction) joinTx;
             manager.delAgent(realTx.getTxData().getHexHash(),tx.getBlockHeight());
             manager.delDepositByAgentId(realTx.getTxData().getHexHash(),tx.getBlockHeight());
