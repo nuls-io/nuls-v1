@@ -78,9 +78,6 @@ public class HeaderPackerValidator implements NulsDataValidator<BlockHeader> {
             if (preBlockRoundData.getRoundIndex() > roundData.getRoundIndex()) {
                 return ValidateResult.getFailedResult("block round calc wrong!");
             }
-            if(preBlockRoundData.getRoundIndex()==roundData.getRoundIndex()&&preBlockRoundData.getPackingIndexOfRound()>=roundData.getPackingIndexOfRound()){
-                return ValidateResult.getFailedResult(SeverityLevelEnum.FLAGRANT_FOUL,"the packing index of round is wrong");
-            }
             if (preBlockRoundData.getRoundIndex() < roundData.getRoundIndex()) {
                 break;
             }
