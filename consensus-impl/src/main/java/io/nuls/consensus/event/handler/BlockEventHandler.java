@@ -68,7 +68,7 @@ public class BlockEventHandler extends AbstractEventHandler<BlockEvent> {
             }
             if(cachedTx!=null&&cachedTx.getStatus()!=tx.getStatus()){
                 tx.setStatus(cachedTx.getStatus());
-                Log.error("the transaction status is wrong!");
+//                Log.error("the transaction status is wrong!");
             }
         }
         DownloadCacheHandler.receiveBlock(block);
