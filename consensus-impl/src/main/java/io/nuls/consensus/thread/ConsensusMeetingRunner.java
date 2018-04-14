@@ -162,17 +162,19 @@ public class ConsensusMeetingRunner implements Runnable {
             Block newBlock = doPacking(self, round);
             if (needCheckAgain && hasReceiveNewestBlock(self, round)) {
                 Block realBestBlock = blockManager.getBlock(newBlock.getHeader().getHeight());
-                List<NulsDigestData> txHashList = realBestBlock.getTxHashList();
-                for (Transaction transaction : newBlock.getTxs()) {
-                    if (transaction.getType() == TransactionConstant.TX_TYPE_COIN_BASE || transaction.getType() == TransactionConstant.TX_TYPE_YELLOW_PUNISH || transaction.getType() == TransactionConstant.TX_TYPE_RED_PUNISH) {
-                        continue;
+                if(null!=realBestBlock){
+                    List<NulsDigestData> txHashList = realBestBlock.getTxHashList();
+                    for (Transaction transaction : newBlock.getTxs()) {
+                        if (transaction.getType() == TransactionConstant.TX_TYPE_COIN_BASE || transaction.getType() == TransactionConstant.TX_TYPE_YELLOW_PUNISH || transaction.getType() == TransactionConstant.TX_TYPE_RED_PUNISH) {
+                            continue;
+                        }
+                        if (txHashList.contains(transaction.getHash())) {
+                            continue;
+                        }
+                        orphanTxCacheManager.putTx(transaction);
                     }
-                    if (txHashList.contains(transaction.getHash())) {
-                        continue;
-                    }
-                    orphanTxCacheManager.putTx(transaction);
+                    newBlock = doPacking(self, round);
                 }
-                newBlock = doPacking(self, round);
             }
             if (null == newBlock) {
                 return;
