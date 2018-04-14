@@ -120,7 +120,6 @@ public class ConsensusMeetingRunner implements Runnable {
     private void doWork() {
 
         PocMeetingRound round = packingRoundManager.getCurrentRound();
-        BlockLog.info("packing round:" + round.toString());
         //check current round is end
         if (null == round || round.getEndTime() < TimeService.currentTimeMillis()) {
             resetCurrentMeetingRound();
@@ -139,6 +138,7 @@ public class ConsensusMeetingRunner implements Runnable {
         }
         PocMeetingMember member = round.getMember(myAccount.getAddress().getBase58());
         if (!hasPacking && member.getPackStartTime() <= TimeService.currentTimeMillis()) {
+            BlockLog.info("packing round:" + round.toString());
             packing(member, round);
             hasPacking = true;
         }
