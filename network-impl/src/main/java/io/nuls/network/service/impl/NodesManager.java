@@ -255,7 +255,7 @@ public class NodesManager implements Runnable {
         if (node != null) {
             removeNode(node);
         } else {
-            Log.info("------------remove node is null-----------" + nodeId);
+//            Log.info("------------remove node is null-----------" + nodeId);
             getNodeDao().removeNode(nodeId);
             outNodeIdSet.remove(nodeId);
         }
@@ -266,7 +266,7 @@ public class NodesManager implements Runnable {
         if (node != null) {
             removeNode(node);
         } else {
-            Log.info("------------removeHandshakeNode node is null-----------" + nodeId);
+//            Log.info("------------removeHandshakeNode node is null-----------" + nodeId);
             outNodeIdSet.remove(node.getId());
             getNodeDao().removeNode(nodeId);
         }
@@ -461,11 +461,11 @@ public class NodesManager implements Runnable {
     public void run() {
         Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
         while (running) {
-            Log.info("disConnectNodes:" + disConnectNodes.size());
-            Log.info("disConnectNodes:" + connectedNodes.size());
-            Log.info("handShakeNodes:" + handShakeNodes.size());
+//            Log.info("disConnectNodes:" + disConnectNodes.size());
+//            Log.info("disConnectNodes:" + connectedNodes.size());
+//            Log.info("handShakeNodes:" + handShakeNodes.size());
             for (Node node : handShakeNodes.values()) {
-                Log.info(node.toString() + ",blockHeight:" + node.getVersionMessage().getBestBlockHeight());
+               // Log.info(node.toString() + ",blockHeight:" + node.getVersionMessage().getBestBlockHeight());
             }
             try {
                 Thread.sleep(10000);
