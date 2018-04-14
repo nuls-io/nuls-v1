@@ -174,7 +174,7 @@ public class ConsensusManager {
         NulsContext.getServiceBean(DownloadService.class).start();
     }
 
-    public synchronized void clearCache() {
+    public void clearCache() {
         blockCacheManager.clear();
         temporaryCacheManager.clear();
         confirmingTxCacheManager.clear();

@@ -70,9 +70,7 @@ import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.service.intf.LedgerService;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -522,5 +520,9 @@ public class BlockManager {
             return null;
         }
         return getBlock(hash);
+    }
+
+    public List<String> getAllHashList(long height) {
+        return this.bifurcateProcessor.getAllHashList(height);
     }
 }
