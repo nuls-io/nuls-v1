@@ -23,11 +23,10 @@
  */
 package io.nuls.core.utils.network;
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
-import java.util.HashSet;
-import java.util.Set;
+import io.nuls.core.utils.log.Log;
+
+import java.net.*;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -37,13 +36,85 @@ import java.util.regex.Pattern;
 public class IpUtil {
     private static final Pattern pattern = Pattern.compile("\\<dd class\\=\"fz24\">(.*?)\\<\\/dd>");
 
-    public static Set<String> getIps() {
-        Set<String> ips = new HashSet<>();
-        try {
-            ips.add(InetAddress.getLocalHost().getHostAddress());
-        } catch (UnknownHostException e) {
+    private static final Set<String> ips = new HashSet<>();
+
+    static {
+        List<String> localIPs = getLocalIP();
+        for(String ip : localIPs) {
+            ips.add(ip);
         }
+    }
+
+    public static Set<String> getIps() {
         return ips;
+    }
+
+
+    /**
+     * @return
+     */
+    private static ArrayList<String> getLocalIP() {
+        ArrayList<String> iplist = new ArrayList<>();
+        boolean loop = false;
+        String bindip;
+        Enumeration<?> network;
+        List<NetworkInterface> netlist = new ArrayList<>();
+        try {
+            network = NetworkInterface.getNetworkInterfaces();
+            while (network.hasMoreElements()) {
+                loop = true;
+                NetworkInterface ni = (NetworkInterface) network.nextElement();
+                if (ni.isLoopback()) {
+                    continue;
+                }
+                netlist.add(0, ni);
+                InetAddress ip;
+                for (NetworkInterface list : netlist) {
+                    if (loop == false) break;
+                    Enumeration<?> card = list.getInetAddresses();
+                    while (card.hasMoreElements()) {
+                        while (true) {
+                            ip = null;
+                            try {
+                                ip = (InetAddress) card.nextElement();
+                            } catch (Exception e) {
+
+                            }
+                            if (ip == null) {
+                                break;
+                            }
+                            if (!ip.isLoopbackAddress()) {
+                                if (ip.getHostAddress().equalsIgnoreCase("127.0.0.1")) {
+                                    continue;
+                                }
+                            }
+                            if (ip instanceof Inet6Address) {
+                                continue;
+                            }
+                            if (ip instanceof Inet4Address) {
+                                bindip = ip.getHostAddress();
+                                boolean addto = true;
+                                for (int n = 0; n < iplist.size(); n++) {
+                                    if (bindip.equals(iplist.get(n))) {
+                                        addto = false;
+                                        break;
+                                    }
+                                }
+                                if (addto) {
+                                    iplist.add(bindip);
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            // skip
+            Log.error("Get local IP error: " + e.getMessage());
+        }
+
+        return iplist;
     }
 
     /**
