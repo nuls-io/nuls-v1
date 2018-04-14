@@ -254,6 +254,10 @@ public class BlockManager {
             }
             boolean isSuccess;
             try {
+                if(!this.lastStoredHeader.getHash().equals(savingBlock.getHeader().getPreHash())){
+                    throw new NulsRuntimeException(ErrorCode.DATA_ERROR,"pre block lost!");
+                }
+                savingBlock.verifyWithException();
                 isSuccess = blockService.saveBlock(savingBlock);
             } catch (Exception e) {
                 Log.error(e);
