@@ -55,7 +55,6 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
     private ReceivedTxCacheManager receivedTxCacheManager = ReceivedTxCacheManager.getInstance();
     private ConfirmingTxCacheManager confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
     private OrphanTxCacheManager orphanTxCacheManager = OrphanTxCacheManager.getInstance();
-    private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
     private BlockManager blockManager = BlockManager.getInstance();
 
@@ -75,15 +74,15 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
         }
         List<NulsDigestData> needHashList = new ArrayList<>();
         for (NulsDigestData hash : smallBlock.getTxHashList()) {
-            Transaction tx = txGroup.getTx(hash.getDigestHex());
-            if (null == tx) {
-                tx = this.receivedTxCacheManager.getTx(hash);
-            }
+            Transaction tx = this.receivedTxCacheManager.getTx(hash);
             if (null == tx) {
                 tx = orphanTxCacheManager.getTx(hash);
             }
             if (null == tx) {
                 tx = confirmingTxCacheManager.getTx(hash);
+            }
+            if (null == tx) {
+                tx = txGroup.getTx(hash.getDigestHex());
             }
             if (null == tx && txMap.get(hash) == null) {
                 needHashList.add(hash);
