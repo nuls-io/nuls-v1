@@ -108,7 +108,7 @@ public class BlockDaoImpl extends BaseDaoImpl<BlockHeaderMapper, String, BlockHe
     }
 
     @Override
-    public Page<BlockHeaderPo> getBlockListByAddress(String nodeAddress, int type, int pageNumber, int pageSize) {
+    public Page<BlockHeaderPo> getBlockListByAddress(String nodeAddress, int type, int start,int limit) {
         Searchable searchable = new Searchable();
         if (type == 1) {
             searchable.addCondition("a.agent_address", SearchOperator.eq, nodeAddress);
@@ -116,30 +116,24 @@ public class BlockDaoImpl extends BaseDaoImpl<BlockHeaderMapper, String, BlockHe
             searchable.addCondition("a.packing_address", SearchOperator.eq, nodeAddress);
         }
 
-        PageHelper.startPage(pageNumber, pageSize);
+        PageHelper.offsetPage(start,limit);
         PageHelper.orderBy("b.height desc");
         List<BlockHeaderPo> blockList = getMapper().getBlockByAddress(searchable);
         PageInfo<BlockHeaderPo> pageInfo = new PageInfo<>(blockList);
         Page<BlockHeaderPo> page = new Page<>();
         page.setTotal(pageInfo.getTotal());
-        page.setPageNumber(pageNumber);
-        page.setPageSize(pageSize);
-        page.setPages(pageInfo.getPages());
         page.setList(blockList);
         return page;
     }
 
     @Override
-    public Page<BlockHeaderPo> getBlockHeaderList(int pageNumber, int pageSize) {
-        PageHelper.startPage(pageNumber, pageSize);
+    public Page<BlockHeaderPo> getBlockHeaderList(int start,int limit) {
+        PageHelper.offsetPage(start,limit);
         PageHelper.orderBy("height desc");
         List<BlockHeaderPo> blockList = getMapper().selectList(new Searchable());
         PageInfo<BlockHeaderPo> pageInfo = new PageInfo<>(blockList);
         Page<BlockHeaderPo> page = new Page<>();
         page.setTotal(pageInfo.getTotal());
-        page.setPageNumber(pageNumber);
-        page.setPageSize(pageSize);
-        page.setPages(pageInfo.getPages());
         page.setList(blockList);
         return page;
     }

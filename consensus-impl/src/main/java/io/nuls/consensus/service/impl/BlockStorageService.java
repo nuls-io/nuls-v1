@@ -229,12 +229,12 @@ public class BlockStorageService {
         return headerList;
     }
 
-    public Page<BlockHeaderPo> getBlocListByAddress(String nodeAddress, int type, int pageNumber, int pageSize) {
-        return headerDao.getBlockListByAddress(nodeAddress, type, pageNumber, pageSize);
+    public Page<BlockHeaderPo> getBlocListByAddress1(String nodeAddress, int type, int start, int limit) {
+        return headerDao.getBlockListByAddress(nodeAddress, type, start, limit);
     }
 
-    public Page<BlockHeaderPo> getBlockHeaderList(int pageNumber, int pageSize) {
-        return headerDao.getBlockHeaderList(pageNumber, pageSize);
+    public Page<BlockHeaderPo> getBlockHeaderList1(int start, int limit) {
+        return headerDao.getBlockHeaderList(start, limit);
     }
 
 
