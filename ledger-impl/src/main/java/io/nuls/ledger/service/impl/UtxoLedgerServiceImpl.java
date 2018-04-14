@@ -649,18 +649,24 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public void unlockTxApprove(String txHash, long rockTime) {
+    public void unlockTxApprove(String txHash, long lockTime, NulsDigestData unlockTxHash) {
         boolean b = true;
         int index = 0;
         while (b) {
             UtxoOutput output = ledgerCacheService.getUtxo(txHash + "-" + index);
             if (output != null) {
-                if (rockTime > 0) {
-                    if (OutPutStatusEnum.UTXO_UNCONFIRMED_CONSENSUS_LOCK == output.getStatus()) {
-                        output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRMED_TIME_LOCK);
-                    } else if (OutPutStatusEnum.UTXO_CONFIRMED_CONSENSUS_LOCK == output.getStatus()) {
-                        output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_TIME_LOCK);
+                if (lockTime > 0) {
+                    if (OutPutStatusEnum.UTXO_UNCONFIRMED_CONSENSUS_LOCK == output.getStatus() ||
+                            OutPutStatusEnum.UTXO_CONFIRMED_CONSENSUS_LOCK == output.getStatus()) {
+
+                        if (OutPutStatusEnum.UTXO_UNCONFIRMED_CONSENSUS_LOCK == output.getStatus()) {
+                            output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRMED_SPENT);
+                        } else if (OutPutStatusEnum.UTXO_CONFIRMED_CONSENSUS_LOCK == output.getStatus()) {
+                            output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_SPENT);
+                        }
                     }
+
+
                 } else {
                     if (OutPutStatusEnum.UTXO_UNCONFIRMED_CONSENSUS_LOCK == output.getStatus()) {
                         output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRMED_UNSPENT);
