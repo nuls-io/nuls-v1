@@ -511,7 +511,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             if (output == null) {
                 throw new NulsException(ErrorCode.UTXO_NOT_FOUND);
             }
-            if (output.getStatus() != OutPutStatusEnum.UTXO_CONFIRMED_CONSENSUS_LOCK ||
+            if (output.getStatus() != OutPutStatusEnum.UTXO_CONFIRMED_CONSENSUS_LOCK &&
                     output.getStatus() != OutPutStatusEnum.UTXO_UNCONFIRMED_CONSENSUS_LOCK) {
                 throw new NulsException(ErrorCode.UTXO_STATUS_CHANGE);
             }
