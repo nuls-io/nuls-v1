@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,35 +21,33 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.core.constant;
+package io.nuls.consensus.entity.tx;
+
+import io.nuls.core.chain.entity.NulsDigestData;
+import io.nuls.core.constant.TransactionConstant;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.ledger.entity.params.CoinTransferData;
+import io.nuls.ledger.entity.tx.UnlockNulsTransaction;
 
 /**
  * @author Niels
- * @date 2017/10/30
+ * @date 2017/12/4
  */
-public interface TransactionConstant {
+public class StopAgentTransaction extends UnlockNulsTransaction<NulsDigestData> {
 
-    int TX_TYPE_COIN_BASE = 1;
-    int TX_TYPE_TRANSFER = 2;
-    int TX_TYPE_LOCK = 3;
-    int TX_TYPE_UNLOCK = 4;
-    int TX_TYPE_SMALL_CHANGE = 5;
-    /**
-     * Account
-     */
-    int TX_TYPE_SET_ALIAS = 11;
-    int TX_TYPE_CHANGE_ALIAS = 12;
+    public StopAgentTransaction() {
+        super(TransactionConstant.TX_TYPE_STOP_AGENT);
+    }
 
-    /**
-     * CONSENSUS
-     */
-    int TX_TYPE_REGISTER_AGENT = 90;
-    int TX_TYPE_JOIN_CONSENSUS = 91;
-    int TX_TYPE_CANCEL_DEPOSIT = 92;
-    int TX_TYPE_STOP_AGENT = 95;
-    int TX_TYPE_YELLOW_PUNISH = 93;
-    int TX_TYPE_RED_PUNISH = 94;
+    public StopAgentTransaction(CoinTransferData params, String password) throws NulsException {
+        super(TransactionConstant.TX_TYPE_STOP_AGENT, params, password);
+    }
 
-    String TX_LIST = "TX_LIST";
+    @Override
+    public NulsDigestData parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readHash();
+    }
 }

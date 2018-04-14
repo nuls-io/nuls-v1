@@ -37,14 +37,16 @@ import io.nuls.consensus.entity.block.BifurcateProcessor;
 import io.nuls.consensus.entity.block.BlockHeaderChain;
 import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.entity.block.HeaderDigest;
-import io.nuls.consensus.entity.tx.PocExitConsensusTransaction;
+import io.nuls.consensus.entity.tx.CancelDepositTransaction;
 import io.nuls.consensus.entity.tx.PocJoinConsensusTransaction;
 import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
+import io.nuls.consensus.entity.tx.StopAgentTransaction;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.service.intf.DownloadService;
-import io.nuls.consensus.service.tx.ExitConsensusTxService;
+import io.nuls.consensus.service.tx.CancelDepositTxService;
 import io.nuls.consensus.service.tx.JoinConsensusTxService;
 import io.nuls.consensus.service.tx.RegisterAgentTxService;
+import io.nuls.consensus.service.tx.StopAgentTxService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
@@ -312,9 +314,12 @@ public class BlockManager {
             } else if (tx.getType() == TransactionConstant.TX_TYPE_JOIN_CONSENSUS && ledgerService.checkTxIsMine(tx)) {
                 tx.verifyWithException();
                 NulsContext.getServiceBean(JoinConsensusTxService.class).onApproval((PocJoinConsensusTransaction) tx);
-            } else if (tx.getType() == TransactionConstant.TX_TYPE_EXIT_CONSENSUS && ledgerService.checkTxIsMine(tx)) {
+            } else if (tx.getType() == TransactionConstant.TX_TYPE_STOP_AGENT && ledgerService.checkTxIsMine(tx)) {
                 tx.verifyWithException();
-                NulsContext.getServiceBean(ExitConsensusTxService.class).onApproval((PocExitConsensusTransaction) tx);
+                NulsContext.getServiceBean(StopAgentTxService.class).onApproval((StopAgentTransaction) tx);
+            } else if (tx.getType() == TransactionConstant.TX_TYPE_CANCEL_DEPOSIT && ledgerService.checkTxIsMine(tx)) {
+                tx.verifyWithException();
+                NulsContext.getServiceBean(CancelDepositTxService.class).onApproval((CancelDepositTransaction) tx);
             }
             confirmingTxCacheManager.putTx(tx);
         }

@@ -408,7 +408,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         long blockHeight = bestBlock.getHeader().getHeight();
         if (txType == TransactionConstant.TX_TYPE_COIN_BASE ||
                 txType == TransactionConstant.TX_TYPE_SMALL_CHANGE
-            //|| txType == TransactionConstant.TX_TYPE_EXIT_CONSENSUS
+                || txType == TransactionConstant.TX_TYPE_CANCEL_DEPOSIT
                 ) {
             return Na.ZERO;
         }
@@ -649,17 +649,17 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public void unlockTxApprove(String txHash, long rockTime) {
+    public void unlockTxApprove(String txHash, long lockTime) {
         boolean b = true;
         int index = 0;
         while (b) {
             UtxoOutput output = ledgerCacheService.getUtxo(txHash + "-" + index);
             if (output != null) {
-                if (rockTime > 0) {
+                if (lockTime > 0) {
                     if (OutPutStatusEnum.UTXO_UNCONFIRMED_CONSENSUS_LOCK == output.getStatus()) {
-                        output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRMED_TIME_LOCK);
+                        output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRMED_SPENT);
                     } else if (OutPutStatusEnum.UTXO_CONFIRMED_CONSENSUS_LOCK == output.getStatus()) {
-                        output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_TIME_LOCK);
+                        output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_SPENT);
                     }
                 } else {
                     if (OutPutStatusEnum.UTXO_UNCONFIRMED_CONSENSUS_LOCK == output.getStatus()) {

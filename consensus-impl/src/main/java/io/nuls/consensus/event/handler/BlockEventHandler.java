@@ -34,6 +34,7 @@ import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.handler.AbstractEventHandler;
+import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.network.service.NetworkService;
 
 /**
@@ -66,8 +67,11 @@ public class BlockEventHandler extends AbstractEventHandler<BlockEvent> {
             if (null == cachedTx) {
                 cachedTx = OrphanTxCacheManager.getInstance().getTx(tx.getHash());
             }
-            if(cachedTx!=null&&cachedTx.getStatus()!=tx.getStatus()){
+            if (cachedTx != null && cachedTx.getStatus() != tx.getStatus()) {
                 tx.setStatus(cachedTx.getStatus());
+                AbstractCoinTransaction coinTx = (AbstractCoinTransaction) tx;
+                AbstractCoinTransaction cachedCoinTx = (AbstractCoinTransaction) cachedTx;
+                coinTx.setCoinData(cachedCoinTx.getCoinData());
 //                Log.error("the transaction status is wrong!");
             }
         }

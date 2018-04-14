@@ -50,6 +50,8 @@ public class CoinTransferData {
 
     private Na fee;
 
+    private Map<String,Object> specialData;
+
     public CoinTransferData() {
         this.from = new ArrayList();
         this.toMap = new HashMap<>();
@@ -151,5 +153,13 @@ public class CoinTransferData {
 
     public void setType(OperationType type) {
         this.type = type;
+    }
+
+    public Map<String, Object> getSpecialData() {
+        return specialData;
+    }
+
+    public void setSpecialData(Map<String, Object> specialData) {
+        this.specialData = specialData;
     }
 }

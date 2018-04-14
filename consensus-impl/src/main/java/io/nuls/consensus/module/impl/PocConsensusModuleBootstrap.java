@@ -78,7 +78,8 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
         this.registerTransaction(TransactionConstant.TX_TYPE_RED_PUNISH, RedPunishTransaction.class, RedPunishTxService.class);
         this.registerTransaction(TransactionConstant.TX_TYPE_YELLOW_PUNISH, YellowPunishTransaction.class, YellowPunishTxService.class);
         this.registerTransaction(TransactionConstant.TX_TYPE_JOIN_CONSENSUS, PocJoinConsensusTransaction.class,JoinConsensusTxService.class);
-        this.registerTransaction(TransactionConstant.TX_TYPE_EXIT_CONSENSUS, PocExitConsensusTransaction.class,ExitConsensusTxService.class);
+        this.registerTransaction(TransactionConstant.TX_TYPE_STOP_AGENT, StopAgentTransaction.class,StopAgentTxService.class);
+        this.registerTransaction(TransactionConstant.TX_TYPE_CANCEL_DEPOSIT, CancelDepositTransaction.class,CancelDepositTxService.class);
         this.registerService(BlockServiceImpl.class);
         this.registerService(PocConsensusServiceImpl.class);
         this.registerService(DownloadServiceImpl.class);

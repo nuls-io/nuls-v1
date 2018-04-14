@@ -34,14 +34,14 @@ import io.nuls.ledger.entity.tx.UnlockNulsTransaction;
  * @author Niels
  * @date 2017/12/4
  */
-public class PocExitConsensusTransaction extends UnlockNulsTransaction<NulsDigestData> {
+public class CancelDepositTransaction extends UnlockNulsTransaction<NulsDigestData> {
 
-    public PocExitConsensusTransaction() {
-        super(TransactionConstant.TX_TYPE_EXIT_CONSENSUS);
+    public CancelDepositTransaction() {
+        super(TransactionConstant.TX_TYPE_CANCEL_DEPOSIT);
     }
 
-    public PocExitConsensusTransaction(CoinTransferData params, String password) throws NulsException {
-        super(TransactionConstant.TX_TYPE_EXIT_CONSENSUS, params, password);
+    public CancelDepositTransaction(CoinTransferData params, String password) throws NulsException {
+        super(TransactionConstant.TX_TYPE_CANCEL_DEPOSIT, params, password);
     }
 
     @Override
