@@ -270,13 +270,8 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             if (spend == null) {
                 throw new NulsRuntimeException(ErrorCode.DATA_NOT_FOUND, "the output is not exist!");
             }
-            //change utxo status,
-            if (tx.getType() == TransactionConstant.TX_TYPE_STOP_AGENT) {
-                update = ledgerCacheService.updateUtxoStatus(spend.getKey(), OutPutStatusEnum.UTXO_SPENT, OutPutStatusEnum.UTXO_CONFIRMED_CONSENSUS_LOCK);
-            } else {
-                update = ledgerCacheService.updateUtxoStatus(spend.getKey(), OutPutStatusEnum.UTXO_SPENT, OutPutStatusEnum.UTXO_CONFIRMED_SPENT);
-            }
 
+            update = ledgerCacheService.updateUtxoStatus(spend.getKey(), OutPutStatusEnum.UTXO_SPENT, OutPutStatusEnum.UTXO_CONFIRMED_SPENT);
             if (!update) {
                 Log.error("-----------------------------------save() input referenced status is" + spend.getStatus().name());
                 throw new NulsRuntimeException(ErrorCode.UTXO_STATUS_CHANGE);
