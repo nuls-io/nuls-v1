@@ -385,11 +385,13 @@ public class ConsensusMeetingRunner implements Runnable {
         long totalSize = 0L;
         for (int i = 0; i < allTxList.size(); i++) {
             if ((self.getPackEndTime() - TimeService.currentTimeMillis()) <= 500L) {
+                Log.info("=========================stop 0:time out!");
                 break;
             }
             Transaction tx = allTxList.get(i);
             tx.setBlockHeight(bd.getHeight());
             if ((totalSize + tx.size()) >= PocConsensusConstant.MAX_BLOCK_SIZE) {
+                Log.info("=========================stop 1:size too big!");
                 break;
             }
             outHashList.add(tx.getHash());
@@ -413,6 +415,7 @@ public class ConsensusMeetingRunner implements Runnable {
             confirmingTxCacheManager.putTx(tx);
 
         }
+        Log.info("=========================tx,total:"+allTxList.size()+", discard:"+outHashList.size());
         txCacheManager.removeTx(outHashList);
         if (totalSize < PocConsensusConstant.MAX_BLOCK_SIZE) {
             addOrphanTx(packingTxList, totalSize, self, bd.getHeight());
@@ -433,10 +436,12 @@ public class ConsensusMeetingRunner implements Runnable {
 
     private void addOrphanTx(List<Transaction> txList, long totalSize, PocMeetingMember self, long blockHeight) {
         if ((self.getPackEndTime() - TimeService.currentTimeMillis()) <= 100) {
+            Log.info("=========================stop 3:time out!");
             return;
         }
         List<Transaction> orphanTxList = orphanTxCacheManager.getTxList();
         if (null == orphanTxList || orphanTxList.isEmpty()) {
+            Log.info("=========================stop 4:orphan tx not exist!");
             return;
         }
         List<NulsDigestData> outHashList = new ArrayList<>();
@@ -444,9 +449,11 @@ public class ConsensusMeetingRunner implements Runnable {
         for (Transaction tx : orphanTxList) {
             tx.setBlockHeight(blockHeight);
             if ((totalSize + tx.size()) >= PocConsensusConstant.MAX_BLOCK_SIZE) {
+                Log.info("=========================stop 5:size too big!");
                 break;
             }
             if ((self.getPackEndTime() - TimeService.currentTimeMillis()) <= 100) {
+                Log.info("=========================stop 6:time out!");
                 break;
             }
             ValidateResult result = tx.verify();
@@ -465,6 +472,7 @@ public class ConsensusMeetingRunner implements Runnable {
             totalSize += tx.size();
             outHashList.add(tx.getHash());
         }
+        Log.info("=========================orphan tx,total:"+orphanTxList.size()+", take count:"+outHashList.size());
         orphanTxCacheManager.removeTx(outHashList);
     }
 
