@@ -311,17 +311,11 @@ public class ConsensusMeetingRunner implements Runnable {
         }
     }
 
-    private void initRound() {
+    private synchronized void initRound() {
 
         ConsensusLog.info("初始化共识");
 
-        packingRoundManager.clear();
-        packingRoundManager.init();
-
-        ConsensusCacheManager consensusCacheManager = ConsensusCacheManager.getInstance();
-        consensusCacheManager.clear();
-        consensusCacheManager.init();
-
+        packingRoundManager.clearAndInit();
         //read create new meeting round
         resetCurrentMeetingRound();
     }

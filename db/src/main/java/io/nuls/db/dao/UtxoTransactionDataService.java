@@ -66,6 +66,8 @@ public interface UtxoTransactionDataService {
 
     List<UtxoInputPo> getTxInputs(String txHash);
 
+    UtxoInputPo getTxInput(String fromHash, int fromIndex);
+
     List<UtxoOutputPo> getTxOutputs(String txHash);
 
     List<UtxoOutputPo> getAccountOutputs(String address, byte status);

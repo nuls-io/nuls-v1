@@ -37,5 +37,7 @@ public interface UtxoInputDataService extends BaseDataService<Map<String, Object
 
     List<UtxoInputPo> getTxInputs(String txHash);
 
+    UtxoInputPo getByFromHash(String fromHash, int fromIndex);
+
     void deleteByHash(String txHash);
 }
