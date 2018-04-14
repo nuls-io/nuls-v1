@@ -37,9 +37,14 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.tx.serivce.TransactionService;
 import io.nuls.db.dao.DepositDataService;
+import io.nuls.db.dao.TxAccountRelationDataService;
 import io.nuls.db.entity.DepositPo;
+import io.nuls.db.entity.TxAccountRelationPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.ledger.service.intf.LedgerService;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Niels
@@ -51,6 +56,9 @@ public class CancelDepositTxService implements TransactionService<CancelDepositT
     private DepositDataService depositDataService = NulsContext.getServiceBean(DepositDataService.class);
 
     private ConsensusCacheManager manager = ConsensusCacheManager.getInstance();
+
+    private TxAccountRelationDataService relationDataService = NulsContext.getServiceBean(TxAccountRelationDataService.class);
+
 
     @Override
     @DbSession
@@ -71,6 +79,10 @@ public class CancelDepositTxService implements TransactionService<CancelDepositT
         Consensus<Deposit> depositConsensus = manager.getDepositById(cd.getHexHash());
         depositConsensus.setDelHeight(0L);
         manager.putDeposit(depositConsensus);
+
+        Set<String> set = new HashSet<>();
+        set.add(cd.getAddress());
+        relationDataService.deleteRelation(tx.getHash().getDigestHex(), set);
     }
 
     @Override
@@ -85,6 +97,11 @@ public class CancelDepositTxService implements TransactionService<CancelDepositT
         this.depositDataService.deleteById(dpo);
         this.ledgerService.unlockTxSave(tx.getTxData().getDigestHex(), 0);
         manager.delDeposit(pjcTx.getTxData().getHexHash(), tx.getBlockHeight());
+
+        TxAccountRelationPo po = new TxAccountRelationPo();
+        po.setAddress(pjcTx.getTxData().getAddress());
+        po.setTxHash(tx.getHash().getDigestHex());
+        relationDataService.save(po);
     }
 
     @Override
