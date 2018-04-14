@@ -472,13 +472,16 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 TransactionPo po = UtxoTransferTool.toTransactionPojo(tx);
                 BlockLog.info("save Tx height:" + tx.getBlockHeight() + ", txHash:" + tx.getHash());
                 poList.add(po);
+                System.out.println("save block["+ po.getBlockHeight() +"]tx_"+i+"[:"+tx.getHash()+"],height["+ poList.get(i).getBlockHeight()+"],type:["+poList.get(i).getType()+"],creattime["+tx.getTime()+"]");
                 if (isMine) {
                     TransactionLocalPo localPo = UtxoTransferTool.toLocalTransactionPojo(tx);
                     localPoList.add(localPo);
                 }
             }
+
             txDao.saveTxList(poList);
             if (localPoList.size() > 0) {
+
                 txDao.saveLocalList(localPoList);
             }
         } catch (Exception e) {
@@ -580,6 +583,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     public void approvalTx(Transaction tx) throws NulsException {
+
         AssertUtil.canNotEmpty(tx, ErrorCode.NULL_PARAMETER);
         if (tx.getStatus() == TxStatusEnum.AGREED || tx.getStatus() == TxStatusEnum.CONFIRMED) {
             return;
