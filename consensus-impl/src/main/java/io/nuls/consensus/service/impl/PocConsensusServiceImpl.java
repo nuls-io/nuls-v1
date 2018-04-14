@@ -196,8 +196,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
 
             sData.put("type", 1);
             sData.put("lockedTxHash", joinTx.getHash());
-            sData.put("lockTime", TimeService.currentTimeMillis() + PocConsensusConstant.STOP_AGENT_DEPOSIT_LOCKED_TIME * 24 * 3600 * 1000);
-
+            sData.put("lockTime", PocConsensusConstant.STOP_AGENT_DEPOSIT_LOCKED_TIME * 24 * 3600 * 1000);
 
 
             coinTransferData.setSpecialData(sData);
