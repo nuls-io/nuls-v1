@@ -232,6 +232,8 @@ public class BlockManager {
                 bifurcateProcessor.rollbackHash(hash);
                 return false;
             }
+        }else{
+            this.rollbackAppraval(block);
         }
         if (needUpdateBestBlock) {
             //Log.error("++++++++++++++++++++++++:"+block.getHeader().getHeight()+",update best block");
