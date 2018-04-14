@@ -470,9 +470,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 Transaction tx = txList.get(i);
                 boolean isMine = this.checkTxIsMine(tx);
                 TransactionPo po = UtxoTransferTool.toTransactionPojo(tx);
-                BlockLog.info("save Tx height:" + tx.getBlockHeight() + ", txHash:" + tx.getHash());
+                BlockLog.info("save Tx height:" + tx.getBlockHeight() + ", txHash:" + tx.getHash()+" ,type;"+tx.getType()+", time:"+tx.getTime());
                 poList.add(po);
-                System.out.println("save block["+ po.getBlockHeight() +"]tx_"+i+"[:"+tx.getHash()+"],height["+ poList.get(i).getBlockHeight()+"],type:["+poList.get(i).getType()+"],creattime["+tx.getTime()+"]");
                 if (isMine) {
                     TransactionLocalPo localPo = UtxoTransferTool.toLocalTransactionPojo(tx);
                     localPoList.add(localPo);
