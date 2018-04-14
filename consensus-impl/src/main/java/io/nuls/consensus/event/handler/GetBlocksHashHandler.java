@@ -31,16 +31,13 @@ import io.nuls.consensus.event.GetBlocksHashRequest;
 import io.nuls.consensus.event.NotFoundEvent;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.BlockLog;
-import io.nuls.core.utils.log.Log;
 import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

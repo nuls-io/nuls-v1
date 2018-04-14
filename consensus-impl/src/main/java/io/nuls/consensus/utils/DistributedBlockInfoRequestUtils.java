@@ -25,7 +25,6 @@ package io.nuls.consensus.utils;
 
 import io.nuls.consensus.entity.BlockHashResponse;
 import io.nuls.consensus.event.GetBlocksHashRequest;
-import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;

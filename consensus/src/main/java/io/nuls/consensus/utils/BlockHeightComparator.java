@@ -26,7 +26,6 @@
 package io.nuls.consensus.utils;
 
 import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.Transaction;
 
 import java.util.Comparator;
 

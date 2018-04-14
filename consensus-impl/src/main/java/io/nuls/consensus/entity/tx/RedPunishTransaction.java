@@ -25,7 +25,6 @@ package io.nuls.consensus.entity.tx;
 
 import io.nuls.consensus.entity.RedPunishData;
 import io.nuls.consensus.entity.validator.tx.RedPunishValidator;
-import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;

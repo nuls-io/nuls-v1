@@ -28,9 +28,7 @@ package io.nuls.consensus.entity.params;
 
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
-import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 

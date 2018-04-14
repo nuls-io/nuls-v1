@@ -28,7 +28,6 @@ import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.date.TimeService;
-import io.nuls.core.utils.log.BlockLog;
 
 import java.util.Date;
 import java.util.HashMap;

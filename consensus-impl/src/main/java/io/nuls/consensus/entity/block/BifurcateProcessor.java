@@ -23,15 +23,10 @@
  */
 package io.nuls.consensus.entity.block;
 
-import io.nuls.consensus.cache.manager.block.BlockCacheBuffer;
-import io.nuls.consensus.cache.manager.block.ConfirmingBlockCacheManager;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.manager.BlockManager;
-import io.nuls.consensus.manager.RoundManager;
 import io.nuls.consensus.service.intf.BlockService;
-import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
-import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.log.BlockLog;

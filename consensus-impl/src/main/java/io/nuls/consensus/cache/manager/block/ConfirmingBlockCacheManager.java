@@ -32,7 +32,6 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.utils.log.BlockLog;
-import io.nuls.core.utils.log.Log;
 
 import java.util.List;
 

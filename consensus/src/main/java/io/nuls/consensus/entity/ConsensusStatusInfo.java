@@ -26,8 +26,6 @@ package io.nuls.consensus.entity;
 import io.nuls.account.entity.Account;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Niels

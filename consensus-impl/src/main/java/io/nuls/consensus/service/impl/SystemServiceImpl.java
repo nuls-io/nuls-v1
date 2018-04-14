@@ -6,11 +6,7 @@ import io.nuls.consensus.thread.ConsensusMeetingRunner;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
-import io.nuls.network.entity.Node;
 import io.nuls.network.service.NetworkService;
-
-import java.sql.Time;
-import java.util.List;
 
 /**
  * Created by ln on 2018/4/11.

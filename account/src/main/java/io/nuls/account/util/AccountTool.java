@@ -32,8 +32,6 @@ import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.EncryptedData;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.script.P2PKHScriptSig;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.date.TimeService;

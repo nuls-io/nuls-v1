@@ -23,8 +23,8 @@
  */
 package io.nuls.consensus.event.handler;
 
-import io.nuls.consensus.entity.TxGroup;
 import io.nuls.consensus.entity.GetTxGroupParam;
+import io.nuls.consensus.entity.TxGroup;
 import io.nuls.consensus.event.GetTxGroupRequest;
 import io.nuls.consensus.event.TxGroupEvent;
 import io.nuls.consensus.service.intf.BlockService;
@@ -34,15 +34,11 @@ import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
-import io.nuls.ledger.service.intf.LedgerService;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author facjas

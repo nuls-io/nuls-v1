@@ -31,7 +31,6 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
-import io.nuls.ledger.entity.tx.TransferTransaction;
 
 /**
  * @author vivi

@@ -24,7 +24,6 @@
 package io.nuls.consensus.entity.validator.block;
 
 import io.nuls.core.chain.entity.Block;
-import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 

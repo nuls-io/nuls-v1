@@ -23,13 +23,14 @@
  */
 package io.nuls.consensus.entity.block;
 
-import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.core.chain.entity.BlockHeader;
-import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.intf.NulsCloneable;
 import io.nuls.core.utils.str.StringUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantLock;
 

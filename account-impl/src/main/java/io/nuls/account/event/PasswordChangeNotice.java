@@ -29,8 +29,6 @@ package io.nuls.account.event;
 import io.nuls.account.constant.EventType;
 import io.nuls.account.entity.Account;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.event.BaseEvent;
 import io.nuls.core.event.NoticeData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;

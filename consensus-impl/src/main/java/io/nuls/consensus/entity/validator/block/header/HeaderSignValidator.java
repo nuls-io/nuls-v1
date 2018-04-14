@@ -23,17 +23,11 @@
  */
 package io.nuls.consensus.entity.validator.block.header;
 
-import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
-import io.nuls.core.chain.entity.*;
-import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.SeverityLevelEnum;
+import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
-
-import java.io.IOException;
 
 /**
  * @author Niels

@@ -23,7 +23,6 @@
  */
 package io.nuls.consensus.event.handler;
 
-import io.nuls.account.entity.Address;
 import io.nuls.consensus.cache.manager.block.TemporaryCacheManager;
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
@@ -38,7 +37,6 @@ import io.nuls.consensus.manager.BlockManager;
 import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.core.chain.entity.*;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.utils.log.BlockLog;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.network.service.NetworkService;
@@ -57,7 +55,6 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
     private ReceivedTxCacheManager receivedTxCacheManager = ReceivedTxCacheManager.getInstance();
     private ConfirmingTxCacheManager confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
     private OrphanTxCacheManager orphanTxCacheManager = OrphanTxCacheManager.getInstance();
-    private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
     private BlockManager blockManager = BlockManager.getInstance();
 
@@ -77,15 +74,15 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
         }
         List<NulsDigestData> needHashList = new ArrayList<>();
         for (NulsDigestData hash : smallBlock.getTxHashList()) {
-            Transaction tx = txGroup.getTx(hash.getDigestHex());
-            if (null == tx) {
-                tx = this.receivedTxCacheManager.getTx(hash);
-            }
+            Transaction tx = this.receivedTxCacheManager.getTx(hash);
             if (null == tx) {
                 tx = orphanTxCacheManager.getTx(hash);
             }
             if (null == tx) {
                 tx = confirmingTxCacheManager.getTx(hash);
+            }
+            if (null == tx) {
+                tx = txGroup.getTx(hash.getDigestHex());
             }
             if (null == tx && txMap.get(hash) == null) {
                 needHashList.add(hash);

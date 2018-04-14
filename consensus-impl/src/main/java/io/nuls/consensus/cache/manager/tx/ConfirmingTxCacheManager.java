@@ -25,7 +25,6 @@ package io.nuls.consensus.cache.manager.tx;
 
 import io.nuls.cache.util.CacheMap;
 import io.nuls.consensus.constant.ConsensusCacheConstant;
-import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 
