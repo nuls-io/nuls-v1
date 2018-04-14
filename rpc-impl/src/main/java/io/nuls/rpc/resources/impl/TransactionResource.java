@@ -62,8 +62,6 @@ import java.util.List;
 @Api(value = "/browse", description = "Transaction")
 public class TransactionResource {
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
-    private UtxoOutputDataService outputDataService = NulsContext.getServiceBean(UtxoOutputDataService.class);
-
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
 
     @POST

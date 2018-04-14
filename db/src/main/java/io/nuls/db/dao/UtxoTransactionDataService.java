@@ -23,7 +23,6 @@
  */
 package io.nuls.db.dao;
 
-import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.dto.Page;
 import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.entity.TransactionPo;
