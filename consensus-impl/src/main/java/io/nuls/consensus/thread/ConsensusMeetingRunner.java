@@ -436,12 +436,12 @@ public class ConsensusMeetingRunner implements Runnable {
 
     private void addOrphanTx(List<Transaction> txList, long totalSize, PocMeetingMember self, long blockHeight) {
         if ((self.getPackEndTime() - TimeService.currentTimeMillis()) <= 100) {
-            Log.info("=========================stop 3:time out!");
+            Log.debug("=========================stop 3:time out!");
             return;
         }
         List<Transaction> orphanTxList = orphanTxCacheManager.getTxList();
         if (null == orphanTxList || orphanTxList.isEmpty()) {
-            Log.info("=========================stop 4:orphan tx not exist!");
+            Log.debug("=========================stop 4:orphan tx not exist!");
             return;
         }
         List<NulsDigestData> outHashList = new ArrayList<>();
@@ -449,11 +449,11 @@ public class ConsensusMeetingRunner implements Runnable {
         for (Transaction tx : orphanTxList) {
             tx.setBlockHeight(blockHeight);
             if ((totalSize + tx.size()) >= PocConsensusConstant.MAX_BLOCK_SIZE) {
-                Log.info("=========================stop 5:size too big!");
+                Log.debug("=========================stop 5:size too big!");
                 break;
             }
             if ((self.getPackEndTime() - TimeService.currentTimeMillis()) <= 100) {
-                Log.info("=========================stop 6:time out!");
+                Log.debug("=========================stop 6:time out!");
                 break;
             }
             ValidateResult result = tx.verify();
@@ -472,7 +472,7 @@ public class ConsensusMeetingRunner implements Runnable {
             totalSize += tx.size();
             outHashList.add(tx.getHash());
         }
-        Log.info("=========================orphan tx,total:"+orphanTxList.size()+", take count:"+outHashList.size());
+        Log.debug("=========================orphan tx,total:"+orphanTxList.size()+", take count:"+outHashList.size());
         orphanTxCacheManager.removeTx(outHashList);
     }
 
