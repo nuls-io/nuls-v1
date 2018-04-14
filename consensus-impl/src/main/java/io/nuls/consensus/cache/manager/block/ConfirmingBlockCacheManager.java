@@ -72,9 +72,6 @@ public class ConfirmingBlockCacheManager {
         headerCacheMap.put(hash, block.getHeader());
         txsCacheMap.put(hash, block.getTxs());
         BlockLog.info("cache block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()));
-        if (null == headerCacheMap.get(hash)) {
-            System.out.println();
-        }
         return true;
     }
 

@@ -172,9 +172,6 @@ public class BifurcateProcessor {
                 return true;
             }
         }
-        if (this.chainList.size() > 0) {
-            System.out.println();
-        }
         BlockHeaderChain chain = new BlockHeaderChain();
         chain.addHeader(header);
         chainList.add(chain);
