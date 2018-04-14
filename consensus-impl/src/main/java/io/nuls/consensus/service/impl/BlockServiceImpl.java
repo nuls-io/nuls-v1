@@ -214,12 +214,13 @@ public class BlockServiceImpl implements BlockService {
     @Override
     public Page<BlockHeaderPo> getBlockHeaderList(String nodeAddress, int type, int pageNumber, int pageSize) {
         int start = pageNumber*pageSize-pageSize;
+        //todo 添加缓存数据
         return blockStorageService.getBlocListByAddress1(nodeAddress, type, start, pageSize);
     }
 
     @Override
     public Page<BlockHeaderPo> getBlockHeaderList(int pageNumber, int pageSize) {
-
+        //todo 添加缓存数据
 //        List<BlockHeaderPo> cachePoList = getCachePoList();
         int start = pageNumber*pageSize-pageSize;
         return blockStorageService.getBlockHeaderList1(start, pageSize);
