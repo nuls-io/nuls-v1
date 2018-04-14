@@ -27,14 +27,19 @@ import io.nuls.account.entity.Address;
 import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.entity.meeting.PocMeetingMember;
 import io.nuls.consensus.entity.meeting.PocMeetingRound;
+import io.nuls.consensus.manager.BlockManager;
 import io.nuls.consensus.manager.RoundManager;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Niels
@@ -45,6 +50,8 @@ public class HeaderPackerValidator implements NulsDataValidator<BlockHeader> {
     public RoundManager roundManager = RoundManager.getInstance();
 
     public BlockService blockService;
+
+    private BlockManager blockManager = BlockManager.getInstance();
 
     private HeaderPackerValidator() {
     }
@@ -80,9 +87,6 @@ public class HeaderPackerValidator implements NulsDataValidator<BlockHeader> {
         if (null == round) {
             return ValidateResult.getFailedResult(ErrorCode.ORPHAN_BLOCK, "round is null");
         }
-        if(round.getPreRound().getIndex()!=preBlockRoundData.getRoundIndex()){
-            System.out.println();
-        }
         if (round.getStartTime() != roundData.getRoundStartTime()) {
             return ValidateResult.getFailedResult("round start time is not inconsistent!");
         }
@@ -92,6 +96,16 @@ public class HeaderPackerValidator implements NulsDataValidator<BlockHeader> {
         PocMeetingMember member = round.getMember(roundData.getPackingIndexOfRound());
         if (member == null || !member.getPackingAddress().equals(Address.fromHashs(header.getPackingAddress()).getBase58())) {
             return ValidateResult.getFailedResult("round index is not inconsistent!");
+        }
+        List<String> hashList = blockManager.getAllHashList(header.getHeight());
+        hashList.remove(header.getHash().getDigestHex());
+        if(!hashList.isEmpty()) {
+            for (String hash : hashList) {
+                Block b = blockManager.getBlock(hash);
+                if(Arrays.equals(b.getHeader().getPackingAddress(),header.getPackingAddress())){
+                    return ValidateResult.getFailedResult(SeverityLevelEnum.FLAGRANT_FOUL,Address.fromHashs(header.getPackingAddress())+" packed two block:"+header.getHash()+","+b.getHeader().getHash());
+                }
+            }
         }
         return ValidateResult.getSuccessResult();
     }

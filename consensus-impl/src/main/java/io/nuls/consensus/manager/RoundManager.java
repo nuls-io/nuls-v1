@@ -26,6 +26,8 @@ import io.nuls.db.dao.PunishLogDataService;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author: Niels Wang
@@ -50,8 +52,22 @@ public class RoundManager {
     private BlockService consensusBlockService;
     private PocMeetingRound currentRound;
 
+    private Lock lock = new ReentrantLock();
+
 
     public void init() {
+        lock.lock();
+        try {
+            realInit();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    private void realInit() {
+        consensusCacheManager.clear();
+        consensusCacheManager.init();
+
         //load five(CACHE_COUNT) round from db on the start time ;
         Block bestBlock = getBestBlock();
         BlockRoundData roundData = new BlockRoundData(bestBlock.getHeader().getExtend());
@@ -74,11 +90,16 @@ public class RoundManager {
     }
 
     public PocMeetingRound resetCurrentMeetingRound() {
-        Block currentBlock = getBestBlock();
-        return getRoundByBlock(currentBlock);
+        lock.lock();
+        try {
+            Block currentBlock = getBestBlock();
+            return getRoundByBlock(currentBlock);
+        } finally {
+            lock.unlock();
+        }
     }
 
-    public PocMeetingRound getRoundByBlock(Block currentBlock) {
+    private PocMeetingRound getRoundByBlock(Block currentBlock) {
         BlockRoundData currentRoundData = new BlockRoundData(currentBlock.getHeader().getExtend());
         boolean needCalcRound = false;
         do {
@@ -108,7 +129,7 @@ public class RoundManager {
         } else {
             resultRound = this.currentRound;
         }
-        if(!this.getBestBlock().getHeader().getHash().equals(currentBlock.getHeader().getHash())){
+        if (!this.getBestBlock().getHeader().getHash().equals(currentBlock.getHeader().getHash())) {
             return this.getRoundByBlock(this.getBestBlock());
         }
         if (resultRound.getPreRound() == null) {
@@ -131,7 +152,7 @@ public class RoundManager {
         Block lastRoundFirstBlock = getBlockService().getRoundFirstBlock(blockRoundData.getRoundIndex());
         PocMeetingRound round = calcRound(lastRoundFirstBlock.getHeader().getHeight(), blockRoundData.getRoundIndex() + 1, blockRoundData.getRoundEndTime(), updateCacheStatus);
 
-        ConsensusLog.info("计算：根据的高度："+calcBlock.getHeader().getHeight()+",该块轮次："+blockRoundData.getRoundIndex()+",start:"+blockRoundData.getRoundStartTime()+", members:"+blockRoundData.getConsensusMemberCount()+",roundCount:"+round.getMemberCount());
+        ConsensusLog.info("计算：根据的高度：" + calcBlock.getHeader().getHeight() + ",该块轮次：" + blockRoundData.getRoundIndex() + ",start:" + blockRoundData.getRoundStartTime() + ", members:" + blockRoundData.getConsensusMemberCount() + ",roundCount:" + round.getMemberCount());
 
         boolean needCalcOrder = false;
         while (round.getEndTime() <= TimeService.currentTimeMillis()) {
@@ -157,7 +178,7 @@ public class RoundManager {
         StringBuilder str = new StringBuilder();
         for (PocMeetingMember member : round.getMemberList()) {
             str.append(member.getPackingAddress());
-            str.append(" ,creditVal:"+member.getRealCreditVal());
+            str.append(" ,creditVal:" + member.getRealCreditVal());
             str.append(" ,order:" + member.getPackingIndexOfRound());
             str.append(",packTime:" + new Date(member.getPackEndTime()));
             str.append("\n");
@@ -173,7 +194,7 @@ public class RoundManager {
     }
 
     private PocMeetingRound calcRound(long startCalcHeight, long roundIndex, long startTIme, boolean updateCacheStatus) {
-        ConsensusLog.info("++++++++calcRound:height:" + startCalcHeight + " ,index:" + roundIndex," ,startTime");
+        ConsensusLog.info("++++++++calcRound:height:" + startCalcHeight + " ,index:" + roundIndex, " ,startTime");
         PocMeetingRound round = new PocMeetingRound();
         round.setIndex(roundIndex);
         round.setStartTime(startTIme);
@@ -213,7 +234,7 @@ public class RoundManager {
                 member.setTotalDeposit(member.getTotalDeposit().add(cd.getExtend().getDeposit()));
             }
             member.setDepositList(cdlist);
-            member.setCreditVal(calcCreditVal(member, startCalcHeight-PocConsensusConstant.CONFIRM_BLOCK_COUNT,round.getIndex() - 2));
+            member.setCreditVal(calcCreditVal(member, startCalcHeight - PocConsensusConstant.CONFIRM_BLOCK_COUNT, round.getIndex() - 2));
             ca.getExtend().setCreditVal(member.getRealCreditVal());
             ca.getExtend().setTotalDeposit(member.getTotalDeposit().getValue());
             boolean isItIn = member.getTotalDeposit().isGreaterOrEquals(PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT);
@@ -239,7 +260,7 @@ public class RoundManager {
         return memberList;
     }
 
-    private double calcCreditVal(PocMeetingMember member,long startHeight, long calcRoundIndex) {
+    private double calcCreditVal(PocMeetingMember member, long startHeight, long calcRoundIndex) {
         if (calcRoundIndex == 0) {
             return 0;
         }
@@ -247,15 +268,15 @@ public class RoundManager {
         if (roundStart < 0) {
             roundStart = 0;
         }
-        long blockCount = pocBlockService.getBlockCount(member.getPackingAddress(), roundStart, calcRoundIndex,startHeight);
-        long sumRoundVal = punishLogDataService.getCountByRounds(member.getAgentAddress(), roundStart, calcRoundIndex,startHeight, PunishType.YELLOW.getCode());
+        long blockCount = pocBlockService.getBlockCount(member.getPackingAddress(), roundStart, calcRoundIndex, startHeight);
+        long sumRoundVal = punishLogDataService.getCountByRounds(member.getAgentAddress(), roundStart, calcRoundIndex, startHeight, PunishType.YELLOW.getCode());
         double ability = DoubleUtils.div(blockCount, PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT);
 
         double penalty = DoubleUtils.div(DoubleUtils.mul(PocConsensusConstant.CREDIT_MAGIC_NUM, sumRoundVal),
                 DoubleUtils.mul(PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT, PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT));
         BlockLog.debug(")))))))))))))creditVal:" + DoubleUtils.sub(ability, penalty) + ",member:" + member.getAgentAddress());
         BlockLog.debug(")))))))))))))blockCount:" + blockCount + ", start:" + roundStart + ",end:" + calcRoundIndex + ", yellowCount:" + sumRoundVal);
-        return DoubleUtils.sub(ability , penalty);
+        return DoubleUtils.sub(ability, penalty);
     }
 
     private BlockService getBlockService() {
@@ -282,6 +303,15 @@ public class RoundManager {
     }
 
     public PocMeetingRound getRound(BlockHeader currentBlockHeader, long preRoundIndex, long roundIndex, boolean needPreRound) {
+        lock.lock();
+        try {
+            return getTheRound(currentBlockHeader, preRoundIndex, roundIndex, needPreRound);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    private PocMeetingRound getTheRound(BlockHeader currentBlockHeader, long preRoundIndex, long roundIndex, boolean needPreRound) {
 
         PocMeetingRound round = ROUND_MAP.get(roundIndex);
         Block preRoundFirstBlock = null;
@@ -358,7 +388,13 @@ public class RoundManager {
         return round;
     }
 
-    public void clear() {
-        ROUND_MAP.clear();
+    public void clearAndInit() {
+        lock.lock();
+        try {
+            ROUND_MAP.clear();
+            this.realInit();
+        } finally {
+            lock.unlock();
+        }
     }
 }
