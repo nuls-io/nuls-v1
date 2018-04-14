@@ -21,15 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.protocol.base.service;
+package io.nuls.consensus.poc.protocol.service;
 
-import io.nuls.consensus.service.intf.ConsensusService;
-import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.dto.Page;
-import io.nuls.core.exception.NulsException;
-
-import java.io.IOException;
-import java.util.Map;
+import io.nuls.poc.service.intf.ConsensusService;
 
 /**
  * @author Niels

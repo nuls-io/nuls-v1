@@ -24,16 +24,13 @@
 
 package io.nuls.consensus.poc.task;
 
+import io.nuls.consensus.poc.constant.BlockContainerStatus;
 import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.process.BlockProcess;
 import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.consensus.poc.provider.ConsensusSystemProvider;
-import io.nuls.consensus.poc.provider.TxQueueProvider;
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.Log;
 import io.nuls.poc.constant.ConsensusStatus;
-import io.nuls.poc.service.intf.ConsensusService;
 
 import java.io.IOException;
 
@@ -44,7 +41,6 @@ public class BlockProcessTask implements Runnable {
 
     private BlockProcess blockProcess;
     private BlockQueueProvider blockQueueProvider;
-    private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
 
     public BlockProcessTask(BlockProcess blockProcess, BlockQueueProvider blockQueueProvider) {
         this.blockProcess = blockProcess;
@@ -54,13 +50,19 @@ public class BlockProcessTask implements Runnable {
     @Override
     public void run() {
         //wait consensus ready running
-        if(consensusService.getConsensusStatus().ordinal() <= ConsensusStatus.LOADINGCACHE.ordinal()) {
+        if(ConsensusSystemProvider.getConsensusStatus().ordinal() <= ConsensusStatus.LOADING_CACHE.ordinal()) {
             return;
         }
         BlockContainer blockContainer = null;
         while((blockContainer = blockQueueProvider.get()) != null) {
+
+            if(ConsensusSystemProvider.getConsensusStatus() == ConsensusStatus.WAIT_START &&
+                    blockContainer.getStatus() == BlockContainerStatus.RECEIVED) {
+                ConsensusSystemProvider.setConsensusStatus(ConsensusStatus.RUNNING);
+            }
+
             try {
-                blockProcess.process(blockContainer);
+                blockProcess.addBlock(blockContainer);
             } catch (IOException e) {
                 Log.error("add block fail , error : " + e.getMessage(), e);
             }

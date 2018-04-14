@@ -25,6 +25,7 @@ package io.nuls.poc.service.intf;
 
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.network.entity.Node;
 import io.nuls.poc.constant.ConsensusStatus;
 import io.nuls.core.chain.entity.BaseNulsData;
 
@@ -52,6 +53,14 @@ public interface ConsensusService {
     boolean newBlock(Block block);
 
     /**
+     * receive block from other peers
+     * @param block
+     * @param node
+     * @return boolean
+     */
+    boolean newBlock(Block block, Node node);
+
+    /**
      * synchronous block from other peers
      * @param block
      * @return boolean
@@ -61,4 +70,15 @@ public interface ConsensusService {
     ConsensusStatus getConsensusStatus();
 
     List<BaseNulsData> getMemoryTxs();
+
+    /**
+     * Gets a transaction from the memory pool, returns and removes it from the memory pool, or null if it does not exist
+     * The method is invoked by the service department, and the application scenario is to assemble a complete block from a memory acquisition transaction when a new block is generated.
+     *
+     * 从内存池中获取一笔交易，返回并从内存池中删除，如果不存在，则返回null
+     * 本方法供部调用，应用场景为接收到新区块产生时从内存获取交易组装完整的区块
+     *
+     * @return BaseNulsData
+     */
+    BaseNulsData getAndRemoveOfMemoryTxs(String hash);
 }

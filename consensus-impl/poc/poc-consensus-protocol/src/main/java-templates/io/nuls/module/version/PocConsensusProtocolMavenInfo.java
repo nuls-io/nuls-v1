@@ -32,7 +32,7 @@ import io.nuls.core.utils.spring.lite.annotation.MavenInfo;
  * @date: 2018/3/1
  */
 @MavenInfo
-public class PocConsensusMavenInfo implements NulsVersion {
+public class PocConsensusProtocolMavenInfo implements NulsVersion {
 
     public static final String VERSION = "${project.version}";
     public static final String GROUP_ID = "${project.groupId}";

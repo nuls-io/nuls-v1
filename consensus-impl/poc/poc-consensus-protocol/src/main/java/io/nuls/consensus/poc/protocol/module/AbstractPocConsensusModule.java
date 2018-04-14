@@ -21,11 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.protocol.base.module;
+package io.nuls.consensus.poc.protocol.module;
 
-import io.nuls.consensus.module.AbstractConsensusModule;
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.module.BaseModuleBootstrap;
+import io.nuls.poc.module.AbstractConsensusModule;
 
 /**
  * @author Niels

@@ -30,6 +30,7 @@ import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.queue.service.impl.QueueService;
+import io.nuls.poc.constant.ConsensusStatus;
 import io.nuls.protocol.constant.DownloadStatus;
 import io.nuls.protocol.intf.DownloadService;
 
@@ -45,7 +46,7 @@ public class BlockQueueProvider implements QueueProvider {
 
     private DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
 
-    private boolean downloadBlockQueueHasDestory = false;
+    private boolean downloadBlockQueueHasDestory;
 
     public BlockQueueProvider() {
         blockQueue = new QueueService<BlockContainer>();
@@ -57,23 +58,37 @@ public class BlockQueueProvider implements QueueProvider {
     public boolean put(Object data, boolean receive) {
         Lockers.OUTER_LOCK.lock();
         try {
-            if (data == null || !(data instanceof Block)) {
+            if (data == null || !(data instanceof Block || data instanceof BlockContainer)) {
                 return false;
             }
             BlockContainer blockContainer = null;
+
+            if(data instanceof BlockContainer) {
+                blockContainer = (BlockContainer) data;
+            }
 
             if (receive) {
                 int status = BlockContainerStatus.RECEIVED;
                 if(downloadService.getStatus() != DownloadStatus.SUCCESS) {
                     status = BlockContainerStatus.DOWNLOADING;
                 }
-                blockContainer = new BlockContainer((Block) data, status);
+
+                if(blockContainer == null) {
+                    blockContainer = new BlockContainer((Block) data, status);
+                } else {
+                    blockContainer.setStatus(status);
+                }
+
                 blockQueue.offer(QUEUE_NAME_RECEIVE, blockContainer);
             } else {
                 if (downloadBlockQueueHasDestory) {
                     createDownloadQueue();
                 }
-                blockContainer = new BlockContainer((Block) data, BlockContainerStatus.DOWNLOADING);
+                if(blockContainer == null) {
+                    blockContainer = new BlockContainer((Block) data, BlockContainerStatus.DOWNLOADING);
+                } else {
+                    blockContainer.setStatus(BlockContainerStatus.DOWNLOADING);
+                }
                 blockQueue.offer(QUEUE_NAME_DOWNLOAD, blockContainer);
             }
         } finally {
@@ -119,5 +134,6 @@ public class BlockQueueProvider implements QueueProvider {
 
     private void createDownloadQueue() {
         blockQueue.createQueue(QUEUE_NAME_DOWNLOAD, 20000l, false);
+        downloadBlockQueueHasDestory = false;
     }
 }

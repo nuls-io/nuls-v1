@@ -25,7 +25,9 @@
 package io.nuls.consensus.poc.manager;
 
 import io.nuls.consensus.poc.container.ChainContainer;
+import io.nuls.consensus.poc.model.Chain;
 import io.nuls.core.chain.entity.Block;
+import io.nuls.core.chain.entity.BlockHeader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,16 +41,73 @@ public class ChainManager {
 
     private ChainContainer masterChain;
     private List<ChainContainer> chains;
+    private List<ChainContainer> isolatedChains;
 
     private RoundManager roundManager;
 
-    public void init() {
-        roundManager = new RoundManager(this);
+    public ChainManager() {
+        chains = new ArrayList<>();
+        isolatedChains = new ArrayList<>();
+    }
+
+    public void newIsolatedChain(Block block) {
+        BlockHeader header = block.getHeader();
+
+        Chain isolatedChain = new Chain();
+        isolatedChain.setStartBlockHeader(header);
+        isolatedChain.setEndBlockHeader(header);
+        isolatedChain.getBlockHeaderList().add(header);
+        isolatedChain.getBlockList().add(block);
+
+        ChainContainer isolatedChainContainer = new ChainContainer(isolatedChain);
+        isolatedChains.add(isolatedChainContainer);
+    }
+
+    public boolean checkIsBeforeIsolatedChainAndAdd(Block block) {
+        BlockHeader header = block.getHeader();
+
+        boolean success = false;
+        for(ChainContainer chainContainer : isolatedChains) {
+            Chain chain = chainContainer.getChain();
+            if(header.getHash().equals(chain.getStartBlockHeader().getPreHash())) {
+                success = true;
+                chain.setStartBlockHeader(header);
+                chain.getBlockHeaderList().add(0, header);
+                chain.getBlockList().add(0, block);
+                break;
+            }
+        }
+        return success;
+    }
+
+    public boolean checkIsAfterIsolatedChainAndAdd(Block block) {
+        BlockHeader header = block.getHeader();
+
+        boolean success = false;
+        for(ChainContainer chainContainer : isolatedChains) {
+            Chain chain = chainContainer.getChain();
+            if(header.getPreHash().equals(chain.getEndBlockHeader().getHash())) {
+                success = true;
+                chain.setEndBlockHeader(header);
+                chain.getBlockHeaderList().add(header);
+                chain.getBlockList().add(block);
+                break;
+            }
+        }
+        return success;
+    }
+
+    public long getBestBlockHeight() {
+        if(masterChain == null || masterChain.getChain() == null || masterChain.getChain().getEndBlockHeader() == null) {
+            return 0l;
+        }
+        return masterChain.getChain().getEndBlockHeader().getHeight();
     }
 
     public void clear() {
         masterChain = null;
-        chains = null;
+        chains.clear();
+        isolatedChains.clear();
     }
 
     public ChainContainer getMasterChain() {
@@ -67,4 +126,15 @@ public class ChainManager {
         this.chains = chains;
     }
 
+    public RoundManager getRoundManager() {
+        return roundManager;
+    }
+
+    public List<ChainContainer> getIsolatedChains() {
+        return isolatedChains;
+    }
+
+    public void setRoundManager(RoundManager roundManager) {
+        this.roundManager = roundManager;
+    }
 }

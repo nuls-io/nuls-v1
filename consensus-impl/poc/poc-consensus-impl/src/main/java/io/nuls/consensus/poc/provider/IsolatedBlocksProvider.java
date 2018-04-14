@@ -24,6 +24,7 @@
 
 package io.nuls.consensus.poc.provider;
 
+import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.core.chain.entity.Block;
 
 import java.util.ArrayList;
@@ -36,13 +37,13 @@ public class IsolatedBlocksProvider {
 
     // Orphaned block caching, isolated block refers to the case where the previous block was not found
     // 孤立区块的缓存，孤立区块是指找不到上一个块的情况
-    private List<Block> isolatedBlockList = new ArrayList<Block>();
+    private List<BlockContainer> isolatedBlockList = new ArrayList<BlockContainer>();
 
-    public boolean addBlock(Block block) {
+    public boolean addBlock(BlockContainer block) {
         return isolatedBlockList.add(block);
     }
 
-    public Block get() {
+    public BlockContainer get() {
         if(isolatedBlockList == null || isolatedBlockList.size() == 0) {
             return null;
         }

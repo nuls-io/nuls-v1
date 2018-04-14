@@ -53,22 +53,20 @@ public class BlockProcess {
         this.isolatedBlocksProvider = isolatedBlocksProvider;
     }
 
-    public boolean process(BlockContainer blockContainer) throws IOException {
-        return addBlock(blockContainer.getBlock(), blockContainer.getStatus() == BlockContainerStatus.DOWNLOADING);
-    }
+    public boolean addBlock(BlockContainer blockContainer) throws IOException {
+        boolean isDownload = blockContainer.getStatus() == BlockContainerStatus.DOWNLOADING;
+        Block block = blockContainer.getBlock();
 
-    public boolean addBlock(Block block, boolean isDownload) throws IOException {
         if(chainManager.getMasterChain().verifyAndAddBlock(block, isDownload)) {
             boolean success = blockService.saveBlock(block);
             if(success) {
-                // 转播区块
-                // TODO
+                // 转发区块
+                forwardingBlock(blockContainer);
             } else {
-                chainManager.getMasterChain().removeBlock(block);
+                chainManager.getMasterChain().rollback();
                 // if save block fail, put in temporary cache
                 // TODO
             }
-
         } else {
             // Failed to block directly in the download
             // 下载中验证失败的区块直接丢弃
@@ -77,12 +75,16 @@ public class BlockProcess {
             }
             ChainContainer needVerifyChain = checkAndGetForkChain(block);
             if(needVerifyChain == null) {
-                isolatedBlocksProvider.addBlock(block);
+                isolatedBlocksProvider.addBlock(blockContainer);
             } else if(!chainManager.getChains().contains(needVerifyChain)) {
                 chainManager.getChains().add(needVerifyChain);
             }
         }
         return true;
+    }
+
+    private void forwardingBlock(BlockContainer blockContainer) {
+        //TODO
     }
 
     private ChainContainer checkAndGetForkChain(Block block) {

@@ -24,71 +24,62 @@
 
 package io.nuls.consensus.poc.manager;
 
+import io.nuls.consensus.poc.BaseTestCase;
 import io.nuls.consensus.poc.cache.CacheLoader;
 import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.entity.Agent;
-import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.entity.Deposit;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.List;
 
 /**
- * Created by ln on 2018/4/13.
+ * Created by ln on 2018/4/14.
  */
-public class CacheManager {
+public class CacheManagerTest extends BaseTestCase {
 
     private ChainManager chainManager;
+    private CacheManager cacheManager;
+    private RoundManager roundManager;
 
-    private CacheLoader cacheLoader = new CacheLoader();
+    @Before
+    public void init() {
+        chainManager = new ChainManager();
+        roundManager = new RoundManager(chainManager);
+        cacheManager = new CacheManager(chainManager);
 
-    public CacheManager(ChainManager chainManager) {
-        this.chainManager = chainManager;
+        CacheLoader cacheLoader = new CacheLoader() {
+            public List<Block> loadBlocks(int size) {
+                return blockList;
+            }
+            public List<BlockHeader> loadBlockHeaders(int size) {
+                return blockHeaderList;
+            }
+            public List<Agent> loadAgents() {
+                return agentList;
+            }
+            public List<Deposit> loadDepositList() {
+                return depositList;
+            }
+        };
+
+        cacheManager.setCacheLoader(cacheLoader);
     }
 
-    public void load() {
+    @Test
+    public void testLoad() {
+        cacheManager.load();
 
-        //TODO
-        //load storage data to memory
+        List<ChainContainer> chains = chainManager.getChains();
+        assert(chains.size() == 0);
 
-        List<BlockHeader> blockHeaderList = cacheLoader.loadBlockHeaders(200);
-        List<Block> blockList = cacheLoader.loadBlocks(8);
-        List<Agent> agentList = cacheLoader.loadAgents();
-        List<Deposit> depositList = cacheLoader.loadDepositList();
+        assert(chainManager.getMasterChain() != null);
 
-        Chain masterChain = new Chain();
+        long bestHeight = chainManager.getBestBlockHeight();
+        assert(bestHeight == 1l);
 
-        masterChain.setBlockHeaderList(blockHeaderList);
-        masterChain.setBlockList(blockList);
-
-        masterChain.setStartBlockHeader(blockList.get(0).getHeader());
-        masterChain.setEndBlockHeader(blockList.get(blockList.size() - 1).getHeader());
-
-//        masterChain.setAgentList(agentList);
-        //TODO
-
-        ChainContainer masterChainContainer = new ChainContainer(masterChain);
-
-        chainManager.setMasterChain(masterChainContainer);
-
-        chainManager.getRoundManager().calculationAndSet(masterChainContainer);
-    }
-
-    public void reload() {
-        clear();
-        load();
-    }
-
-    public void clear() {
-        chainManager.clear();
-    }
-
-    public CacheLoader getCacheLoader() {
-        return cacheLoader;
-    }
-
-    public void setCacheLoader(CacheLoader cacheLoader) {
-        this.cacheLoader = cacheLoader;
     }
 }

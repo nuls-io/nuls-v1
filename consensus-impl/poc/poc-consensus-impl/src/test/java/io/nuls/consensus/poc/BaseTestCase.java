@@ -21,18 +21,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.consensus.poc.protocol.module;
 
-import io.nuls.core.constant.NulsConstant;
-import io.nuls.poc.module.AbstractConsensusModule;
+package io.nuls.consensus.poc;
+
+import io.nuls.consensus.poc.entity.Agent;
+import io.nuls.consensus.poc.entity.Deposit;
+import io.nuls.core.chain.entity.Block;
+import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.core.chain.entity.NulsDigestData;
+import org.junit.Before;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * @author Niels
- * @date 2017/11/7
+ * Created by ln on 2018/4/14.
  */
-public abstract class AbstractPocConsensusModule extends AbstractConsensusModule {
-    public AbstractPocConsensusModule() {
-        super(NulsConstant.MODULE_ID_CONSENSUS);
-    }
+public class BaseTestCase {
 
+    protected List<Block> blockList = new ArrayList<>();
+    protected List<BlockHeader> blockHeaderList = new ArrayList<>();
+    protected List<Agent> agentList = new ArrayList<>();
+    protected List<Deposit> depositList = new ArrayList<>();
+
+    @Before
+    public void initDatas() {
+        BlockHeader header = new BlockHeader();
+        header.setPreHash(NulsDigestData.fromDigestHex("00000000000000000000000000000"));
+        header.setHeight(1l);
+        header.setTxCount(1);
+        header.setTime(1523709576806l);
+
+        Block block = new Block();
+        block.setHeader(header);
+
+        blockList.add(block);
+        blockHeaderList.add(header);
+    }
 }

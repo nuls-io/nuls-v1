@@ -22,19 +22,20 @@
  * SOFTWARE.
  */
 
-package io.nuls.consensus.poc.entity;
+package io.nuls.consensus.poc.model;
 
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.protocol.entity.Consensus;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by ln on 2018/4/13.
  */
-public class Chain implements Serializable {
+public class Chain implements Cloneable {
 
     private String id;
     private String preChainId;
@@ -47,6 +48,10 @@ public class Chain implements Serializable {
     private List<Consensus> allRedCardList;
     private List<Consensus> yellowCardList;
 
+    public Chain() {
+        blockHeaderList = new ArrayList<>();
+        blockList = new ArrayList<>();
+    }
 
     public void setId(String id) {
         this.id = id;
@@ -126,5 +131,10 @@ public class Chain implements Serializable {
 
     public void setYellowCardList(List<Consensus> yellowCardList) {
         this.yellowCardList = yellowCardList;
+    }
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 }

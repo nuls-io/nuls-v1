@@ -25,8 +25,12 @@
 package io.nuls.consensus.poc.cache;
 
 import io.nuls.cache.util.CacheMap;
+import io.nuls.consensus.poc.locker.Lockers;
+import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.utils.queue.service.impl.QueueService;
+
+import java.util.List;
 
 /**
  * Created by ln on 2018/4/13.
@@ -53,46 +57,118 @@ public final class TxMemoryPool {
     }
 
     public boolean add(Transaction tx, boolean isIsolated) {
-        //check Repeatability
-        String hash = tx.getHash().getDigestHex();
-        if(isolatedContainer.containsKey(hash) || container.containsKey(hash)) {
-            return false;
+        Lockers.TX_MEMORY_LOCK.lock();
+
+        try {
+            //check Repeatability
+            String hash = tx.getHash().getDigestHex();
+            if (isolatedContainer.containsKey(hash) || container.containsKey(hash)) {
+                return false;
+            }
+            if (isIsolated) {
+                isolatedContainer.put(hash, tx);
+                isolatedTxHashQueue.offer(CACHE_NAME_ISOLATED, hash);
+            } else {
+                container.put(hash, tx);
+                txHashQueue.offer(CACHE_NAME, hash);
+            }
+            return true;
+        } finally {
+            Lockers.TX_MEMORY_LOCK.unlock();
         }
-        if(isIsolated) {
-            isolatedContainer.put(hash, tx);
-            isolatedTxHashQueue.offer(CACHE_NAME_ISOLATED, hash);
-        } else {
-            container.put(hash, tx);
-            txHashQueue.offer(CACHE_NAME, hash);
-        }
-        return true;
     }
 
+    /**
+     * Get a transaction through hash, do not remove the memory pool after obtaining
+     *
+     * 通过hash获取某笔交易，获取之后不移除内存池
+     * @param hash
+     * @return Transaction
+     */
     public Transaction get(String hash) {
-        Transaction tx = container.get(hash);
-        if(tx == null) {
-            tx = isolatedContainer.get(hash);
+        Lockers.TX_MEMORY_LOCK.lock();
+
+        try {
+            Transaction tx = container.get(hash);
+            if (tx == null) {
+                tx = isolatedContainer.get(hash);
+            }
+            return tx;
+        } finally {
+            Lockers.TX_MEMORY_LOCK.unlock();
+        }
+    }
+
+    /**
+     * Get a transaction, the first transaction received, removed from the memory pool after acquisition
+     *
+     * 获取一笔交易，最先收到的交易，获取之后从内存池中移除
+     * @return Transaction
+     */
+    public Transaction get() {
+        Lockers.TX_MEMORY_LOCK.lock();
+
+        Transaction tx = null;
+        try {
+            String hash = txHashQueue.poll(CACHE_NAME);
+            if(hash != null) {
+                tx = container.get(hash);
+            } else {
+                hash = isolatedTxHashQueue.poll(CACHE_NAME_ISOLATED);
+                if (hash != null) {
+                    tx = isolatedContainer.get(hash);
+                }
+            }
+        } finally {
+            Lockers.TX_MEMORY_LOCK.unlock();
+        }
+
+        if(tx != null) {
+            remove(tx.getHash().getDigestHex());
+        }
+
+        return tx;
+    }
+
+    /**
+     * Get a transaction, removed from the memory pool after acquisition
+     *
+     * 获取一笔交易，获取之后从内存池中移除
+     * @return Transaction
+     */
+    public Transaction getAndRemove(String hash) {
+        Transaction tx = get(hash);
+        if(tx != null) {
+            remove(hash);
         }
         return tx;
     }
 
-    public Transaction get() {
-        //TODO
+    public List<Transaction> getAll() {
+        return container.values();
+    }
 
-        return null;
+    public List<Transaction> getAllIsolated() {
+        return isolatedContainer.values();
     }
 
     public boolean remove(String hash) {
-        if(container.containsKey(hash)) {
-            container.remove(hash);
-            txHashQueue.remove(CACHE_NAME, hash);
-            return true;
-        } else if(isolatedContainer.containsKey(hash)) {
-            isolatedContainer.remove(hash);
-            isolatedTxHashQueue.remove(CACHE_NAME_ISOLATED, hash);
-            return true;
+        Lockers.TX_MEMORY_LOCK.lock();
+
+        try {
+            if (container.containsKey(hash)) {
+                container.remove(hash);
+                txHashQueue.remove(CACHE_NAME, hash);
+                return true;
+            } else if (isolatedContainer.containsKey(hash)) {
+                isolatedContainer.remove(hash);
+                isolatedTxHashQueue.remove(CACHE_NAME_ISOLATED, hash);
+                return true;
+            }
+            return false;
+        } finally {
+            Lockers.TX_MEMORY_LOCK.unlock();
         }
-        return false;
     }
 
     public boolean exist(String hash) {
@@ -100,10 +176,16 @@ public final class TxMemoryPool {
     }
 
     public void clear() {
-        txHashQueue.clear(CACHE_NAME);
-        container.clear();
+        Lockers.TX_MEMORY_LOCK.lock();
 
-        isolatedTxHashQueue.clear(CACHE_NAME_ISOLATED);
-        isolatedContainer.clear();
+        try {
+            txHashQueue.clear(CACHE_NAME);
+            container.clear();
+
+            isolatedTxHashQueue.clear(CACHE_NAME_ISOLATED);
+            isolatedContainer.clear();
+        } finally {
+            Lockers.TX_MEMORY_LOCK.unlock();
+        }
     }
 }

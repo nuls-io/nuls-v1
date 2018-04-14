@@ -37,13 +37,24 @@ public class RoundManager {
 
     public RoundManager(ChainManager chainManager) {
         this.chainManager = chainManager;
+        chainManager.setRoundManager(this);
     }
 
-    public MeetingRound calculation(ChainContainer chainContainer) {
+    public MeetingRound calculationAndGet(ChainContainer chainContainer) {
         return null;
     }
 
+    public void calculationAndSet(ChainContainer chainContainer) {
+
+    }
+
     public MeetingRound calculation(ChainContainer chainContainer, BlockHeader blockHeader) {
+        return null;
+    }
+
+    public MeetingRound getCurrentRound() {
+        // TODO
+
         return null;
     }
 }

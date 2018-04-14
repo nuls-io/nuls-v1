@@ -34,4 +34,5 @@ public final class Lockers {
 
     public final static Lock OUTER_LOCK = new ReentrantLock();
 
+    public final static Lock TX_MEMORY_LOCK = new ReentrantLock();
 }

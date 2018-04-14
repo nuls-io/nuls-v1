@@ -24,8 +24,10 @@
 
 package io.nuls.consensus.poc.process;
 
+import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.core.chain.entity.Block;
+import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.log.Log;
@@ -37,6 +39,7 @@ import io.nuls.protocol.intf.BlockService;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -59,8 +62,11 @@ public class ChainProcess {
             return false;
         }
 
-        //TODO set the best block into NulsContext
-        long newestBlockHeight = NulsContext.getInstance().getBestHeight();
+        // Monitor the status of the isolated chain, if it is available, join the verification chain
+        // 监控孤立链的状态，如果有可连接的，则加入验证链里面
+        monitorIsolatedChains();
+
+        long newestBlockHeight = chainManager.getBestBlockHeight();
 
         ChainContainer newChain = null;
 
@@ -89,6 +95,62 @@ public class ChainProcess {
         clearExpiredChain();
 
         return true;
+    }
+
+    /**
+     * Monitor the isolated chain, if there is a connection with the main chain or the forked chain, the merged chain
+     *
+     * 监控孤立链，如果有和主链或者分叉链连上的情况，则合并链
+     */
+    private void monitorIsolatedChains() {
+        List<ChainContainer> isolatedChains = chainManager.getIsolatedChains();
+
+        Iterator<ChainContainer> iterator = isolatedChains.iterator();
+        while(iterator.hasNext()) {
+            ChainContainer isolatedChain = iterator.next();
+            if(checkIsolatedChainHasConnection(isolatedChain)) {
+                iterator.remove();
+            }
+        }
+    }
+
+    private boolean checkIsolatedChainHasConnection(ChainContainer isolatedChain) {
+        //判断该孤立链是否和主链相连
+        BlockHeader startBlockHeader = isolatedChain.getChain().getStartBlockHeader();
+
+        for(BlockHeader header : chainManager.getMasterChain().getChain().getBlockHeaderList()) {
+            if(startBlockHeader.getPreHash().equals(header.getHash()) && startBlockHeader.getHeight() == header.getHeight() + 1) {
+                //yes connectioned
+                isolatedChain.getChain().setPreChainId(chainManager.getMasterChain().getChain().getId());
+                chainManager.getChains().add(isolatedChain);
+                return true;
+            }
+        }
+
+        //判断该孤链是否和待验证的分叉链相连
+        for(ChainContainer forkChain : chainManager.getChains()) {
+
+            Chain chain = forkChain.getChain();
+            List<BlockHeader> blockHeaderList = chain.getBlockHeaderList();
+
+            for(BlockHeader header : blockHeaderList) {
+                if(startBlockHeader.getPreHash().equals(header.getHash()) && startBlockHeader.getHeight() == header.getHeight() + 1) {
+                    //yes connectioned
+                    isolatedChain.getChain().setPreChainId(chain.getPreChainId());
+                    isolatedChain.getChain().setStartBlockHeader(chain.getStartBlockHeader());
+
+                    int index = blockHeaderList.indexOf(header);
+
+                    isolatedChain.getChain().getBlockHeaderList().addAll(blockHeaderList.subList(0, index));
+                    isolatedChain.getChain().getBlockList().addAll(chain.getBlockList().subList(0, index));
+
+                    chainManager.getChains().add(isolatedChain);
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /*

@@ -31,13 +31,13 @@ import io.nuls.poc.constant.ConsensusStatus;
  */
 public class ConsensusSystemProvider {
 
-    private ConsensusStatus consensusStatus;
+    private static ConsensusStatus consensusStatus;
 
-    public ConsensusStatus getConsensusStatus() {
+    public static ConsensusStatus getConsensusStatus() {
         return consensusStatus;
     }
 
-    public void setConsensusStatus(ConsensusStatus consensusStatus) {
-        this.consensusStatus = consensusStatus;
+    public static void setConsensusStatus(ConsensusStatus consensusStatus) {
+        ConsensusSystemProvider.consensusStatus = consensusStatus;
     }
 }

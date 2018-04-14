@@ -24,6 +24,7 @@
 
 package io.nuls.consensus.poc.task;
 
+import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.process.IsolatedBlocksProcess;
 import io.nuls.consensus.poc.provider.IsolatedBlocksProvider;
 import io.nuls.core.chain.entity.Block;
@@ -43,10 +44,10 @@ public class IsolatedBlocksProcessTask implements Runnable {
 
     @Override
     public void run() {
-        Block block = isolatedBlocksProvider.get();
-        if(block == null) {
+        BlockContainer blockContainer = isolatedBlocksProvider.get();
+        if(blockContainer == null) {
             return;
         }
-        isolatedBlocksProcess.process(block);
+        isolatedBlocksProcess.process(blockContainer);
     }
 }

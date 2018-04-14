@@ -42,6 +42,10 @@ public class TxProcess {
 
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
 
+    public TxProcess(TxMemoryPool memoryPool) {
+        this.memoryPool = memoryPool;
+    }
+
 
     public void process(Transaction tx) {
 

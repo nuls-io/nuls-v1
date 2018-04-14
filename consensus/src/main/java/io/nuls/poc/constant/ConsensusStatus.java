@@ -33,10 +33,7 @@ public enum ConsensusStatus {
     // 警告，以下顺序不能调整，否则某些地方的判断会出错
 
     INITING,
-    LOADINGCACHE,
-    STARTING,
+    LOADING_CACHE,
+    WAIT_START,
     RUNNING,
-    PACKAGEING,
-    WAITPACKAGE,
-
 }

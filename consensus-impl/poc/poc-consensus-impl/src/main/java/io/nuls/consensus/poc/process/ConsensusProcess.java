@@ -23,10 +23,17 @@
  */
 package io.nuls.consensus.poc.process;
 
+import io.nuls.account.entity.Account;
+import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.manager.ChainManager;
-import io.nuls.network.entity.Node;
-
-import java.util.List;
+import io.nuls.consensus.poc.manager.RoundManager;
+import io.nuls.consensus.poc.model.MeetingMember;
+import io.nuls.consensus.poc.model.MeetingRound;
+import io.nuls.consensus.poc.provider.ConsensusSystemProvider;
+import io.nuls.core.context.NulsContext;
+import io.nuls.core.utils.date.TimeService;
+import io.nuls.network.service.NetworkService;
+import io.nuls.poc.constant.ConsensusStatus;
 
 /**
  * Created by ln on 2018/4/13.
@@ -34,19 +41,63 @@ import java.util.List;
 public class ConsensusProcess {
 
     private ChainManager chainManager;
+    private RoundManager roundManager;
+    private TxMemoryPool txMemoryPool;
 
-    public ConsensusProcess(ChainManager chainManager) {
+    private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
+
+    private boolean hasPacking;
+
+    public ConsensusProcess(ChainManager chainManager, RoundManager roundManager, TxMemoryPool txMemoryPool) {
         this.chainManager = chainManager;
+        this.roundManager = roundManager;
+        this.txMemoryPool = txMemoryPool;
     }
 
     public void process() {
 
         boolean canPackage = checkCanPackage();
 
+        if(!canPackage) {
+            return;
+        }
 
+        doWork();
+    }
+
+    private void doWork() {
+
+        MeetingRound round = roundManager.getCurrentRound();
+
+        //check i am is a consensus node
+        Account myAccount = round.getLocalPacker();
+        if (myAccount == null) {
+            return;
+        }
+        MeetingMember member = round.getMember(myAccount.getAddress().getBase58());
+        if (!hasPacking && member.getPackStartTime() <= TimeService.currentTimeMillis()) {
+            packing(member, round);
+            hasPacking = true;
+        }
+    }
+
+    private void packing(MeetingMember member, MeetingRound round) {
+        // TODO
     }
 
     private boolean checkCanPackage() {
+
+        // TODO load config
+
+        // wait consensus ready running
+        if(ConsensusSystemProvider.getConsensusStatus().ordinal() <= ConsensusStatus.WAIT_START.ordinal()) {
+            return false;
+        }
+
+        // check network status
+        if(networkService.getAvailableNodes().size() == 0) {
+            return false;
+        }
 
         return true;
     }

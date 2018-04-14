@@ -24,20 +24,32 @@
 
 package io.nuls.consensus.poc.cache;
 
+import io.nuls.consensus.poc.entity.Agent;
+import io.nuls.consensus.poc.entity.Deposit;
+import io.nuls.core.chain.entity.Block;
+import io.nuls.core.chain.entity.BlockHeader;
+
+import java.util.List;
+
 /**
  * Created by ln on 2018/4/13.
  */
 public class CacheLoader {
+    //TODO
 
-    public void init() {
-
+    public List<Block> loadBlocks(int size) {
+        return null;
     }
 
-    public void load() {
-
+    public List<BlockHeader> loadBlockHeaders(int size) {
+        return null;
     }
 
-    public void reload() {
+    public List<Agent> loadAgents() {
+        return null;
+    }
 
+    public List<Deposit> loadDepositList() {
+        return null;
     }
 }

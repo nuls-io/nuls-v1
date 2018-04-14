@@ -23,9 +23,11 @@
  */
 package io.nuls.consensus.poc.scheduler;
 
+import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.manager.CacheManager;
 import io.nuls.consensus.poc.manager.ChainManager;
+import io.nuls.consensus.poc.manager.RoundManager;
 import io.nuls.consensus.poc.process.*;
 import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.consensus.poc.provider.ConsensusSystemProvider;
@@ -49,14 +51,14 @@ public class MainControlScheduler {
 
     private static MainControlScheduler INSTANCE = new MainControlScheduler();
 
-    private ConsensusSystemProvider consensusSystemProvider;
-
     private ScheduledThreadPoolExecutor threadPool;
 
     private BlockQueueProvider blockQueueProvider;
     private TxQueueProvider txQueueProvider;
     private ChainManager chainManager;
+    private RoundManager roundManager;
     private CacheManager cacheManager;
+    private TxMemoryPool txMemoryPool;
 
     private MainControlScheduler() {
     }
@@ -67,8 +69,7 @@ public class MainControlScheduler {
 
     public boolean start() {
 
-        consensusSystemProvider = new ConsensusSystemProvider();
-        consensusSystemProvider.setConsensusStatus(ConsensusStatus.INITING);
+        ConsensusSystemProvider.setConsensusStatus(ConsensusStatus.INITING);
 
         //Create Queue Provider
         //创建队列提供器
@@ -81,10 +82,12 @@ public class MainControlScheduler {
         pocConsensusService.addProvider(blockQueueProvider, txQueueProvider);
 
         threadPool = TaskManager.createScheduledThreadPool(5,
-                new NulsThreadFactory(NulsConstant.MODULE_ID_CONSENSUS, "consensus-main-control"));
+                new NulsThreadFactory(NulsConstant.MODULE_ID_CONSENSUS, "consensus-poll-control"));
 
         chainManager = new ChainManager();
+        roundManager = new RoundManager(chainManager);
         cacheManager = new CacheManager(chainManager);
+        txMemoryPool = new TxMemoryPool();
 
 
         IsolatedBlocksProvider isolatedBlocksProvider = new IsolatedBlocksProvider();
@@ -94,13 +97,13 @@ public class MainControlScheduler {
         BlockProcess blockProcess = new BlockProcess(chainManager, isolatedBlocksProvider);
         threadPool.scheduleAtFixedRate(new BlockProcessTask(blockProcess, blockQueueProvider), 1000L,500L, TimeUnit.MILLISECONDS);
 
-        TxProcess txProcess = new TxProcess();
+        TxProcess txProcess = new TxProcess(txMemoryPool);
         threadPool.scheduleAtFixedRate(new TxProcessTask(txProcess, txQueueProvider), 1000L,200L, TimeUnit.MILLISECONDS);
 
         ChainProcess chainProcess = new ChainProcess(chainManager);
         threadPool.scheduleAtFixedRate(new ChainProcessTask(chainProcess), 1000L,200L, TimeUnit.MILLISECONDS);
 
-        ConsensusProcess consensusProcess = new ConsensusProcess(chainManager);
+        ConsensusProcess consensusProcess = new ConsensusProcess(chainManager, roundManager, txMemoryPool);
         threadPool.scheduleAtFixedRate(new ConsensusProcessTask(consensusProcess), 1000L,500L, TimeUnit.MILLISECONDS);
 
         initDatas();
@@ -128,11 +131,11 @@ public class MainControlScheduler {
         Lockers.OUTER_LOCK.lock();
         try {
 
-            consensusSystemProvider.setConsensusStatus(ConsensusStatus.LOADINGCACHE);
+            ConsensusSystemProvider.setConsensusStatus(ConsensusStatus.LOADING_CACHE);
 
             cacheManager.load();
 
-            consensusSystemProvider.setConsensusStatus(ConsensusStatus.STARTING);
+            ConsensusSystemProvider.setConsensusStatus(ConsensusStatus.WAIT_START);
 
         } finally {
             Lockers.OUTER_LOCK.unlock();
@@ -142,7 +145,6 @@ public class MainControlScheduler {
     private void clear() {
         Lockers.OUTER_LOCK.lock();
         try {
-            chainManager.clear();
             cacheManager.clear();
             txQueueProvider.clear();
             blockQueueProvider.clear();
@@ -151,7 +153,7 @@ public class MainControlScheduler {
         }
     }
 
-    public ConsensusSystemProvider getConsensusSystemProvider() {
-        return consensusSystemProvider;
+    public TxMemoryPool getTxMemoryPool() {
+        return txMemoryPool;
     }
 }

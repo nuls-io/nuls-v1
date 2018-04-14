@@ -25,6 +25,7 @@
 package io.nuls.consensus.poc.container;
 
 import io.nuls.core.chain.entity.Block;
+import io.nuls.network.entity.Node;
 
 /**
  * Created by ln on 2018/4/13.
@@ -32,12 +33,18 @@ import io.nuls.core.chain.entity.Block;
 public class BlockContainer {
 
     private Block block;
+    private Node node;
     private int status;
 
     public BlockContainer() {
     }
 
     public BlockContainer(Block block, int status) {
+        this.block = block;
+        this.status = status;
+    }
+
+    public BlockContainer(Block block, Node node, int status) {
         this.block = block;
         this.status = status;
     }
@@ -56,5 +63,13 @@ public class BlockContainer {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public Node getNode() {
+        return node;
+    }
+
+    public void setNode(Node node) {
+        this.node = node;
     }
 }
