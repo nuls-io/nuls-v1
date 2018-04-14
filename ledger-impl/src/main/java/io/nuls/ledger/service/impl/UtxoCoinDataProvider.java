@@ -335,7 +335,13 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
     @Override
     public CoinData createByTransferData(Transaction tx, CoinTransferData coinParam, String password) throws NulsException {
         lock.lock();
+
         try {
+            if(coinParam.getSpecialData()!=null){
+
+
+                return SpecialUtils.();
+            }
             UtxoData utxoData = new UtxoData();
             List<UtxoInput> inputs = new ArrayList<>();
             List<UtxoOutput> outputs = new ArrayList<>();
