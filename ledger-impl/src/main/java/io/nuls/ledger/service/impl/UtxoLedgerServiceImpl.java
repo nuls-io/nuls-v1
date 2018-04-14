@@ -1,18 +1,18 @@
 /**
  * MIT License
- **
+ * *
  * Copyright (c) 2017-2018 nuls.io
- **
+ * *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- **
+ * *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- **
+ * *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -106,6 +106,21 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         if (null == po) {
             return null;
         }
+        try {
+            return UtxoTransferTool.toTransaction(po);
+        } catch (Exception e) {
+            Log.error(e);
+        }
+        return null;
+    }
+
+    @Override
+    public Transaction getTx(String fromHash, int fromIndex) {
+        UtxoInputPo inputPo = txDao.getTxInput(fromHash, fromIndex);
+        if (inputPo == null) {
+            return null;
+        }
+        TransactionPo po = txDao.gettx(inputPo.getTxHash());
         try {
             return UtxoTransferTool.toTransaction(po);
         } catch (Exception e) {
@@ -470,7 +485,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 Transaction tx = txList.get(i);
                 boolean isMine = this.checkTxIsMine(tx);
                 TransactionPo po = UtxoTransferTool.toTransactionPojo(tx);
-                BlockLog.info("save Tx height:" + tx.getBlockHeight() + ", txHash:" + tx.getHash()+" ,type;"+tx.getType()+", time:"+tx.getTime());
+                BlockLog.info("save Tx height:" + tx.getBlockHeight() + ", txHash:" + tx.getHash() + " ,type;" + tx.getType() + ", time:" + tx.getTime());
                 poList.add(po);
                 if (isMine) {
                     TransactionLocalPo localPo = UtxoTransferTool.toLocalTransactionPojo(tx);

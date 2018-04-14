@@ -43,6 +43,8 @@ public interface LedgerService {
 
     Transaction getTx(NulsDigestData hash);
 
+    Transaction getTx(String fromHash, int fromIndex);
+
     Transaction getLocalTx(NulsDigestData hash);
 
     List<Transaction> getTxList(String address, int txType) throws Exception;

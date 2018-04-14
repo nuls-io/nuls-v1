@@ -36,4 +36,6 @@ import java.util.Map;
 public interface UtxoInputMapper extends BaseMapper<Map<String, Object>, UtxoInputPo> {
 
     void deleteBySearchable(Searchable searchable);
+
+    UtxoInputPo selectBySearchable(Searchable searchable);
 }
