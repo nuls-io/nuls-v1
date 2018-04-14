@@ -106,8 +106,10 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
             txMap.put(tx.getHash().getDigestHex(), tx);
         }
         List<NulsDigestData> needHashList = new ArrayList<>();
+        StringBuilder str = new StringBuilder("smallblock("+smallBlock.getHeader().getHash()+") contains:\n");
         for (NulsDigestData hash : smallBlock.getTxHashList()) {
             Transaction tx = this.receivedTxCacheManager.getTx(hash);
+            str.append("hash:"+hash + ",\n");
             if (null == tx) {
                 tx = orphanTxCacheManager.getTx(hash);
             }
@@ -120,6 +122,7 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
             }
             txMap.put(tx.getHash().getDigestHex(), tx);
         }
+        BlockLog.info(str.toString());
         if (!needHashList.isEmpty()) {
             GetTxGroupRequest request = new GetTxGroupRequest();
             GetTxGroupParam param = new GetTxGroupParam();

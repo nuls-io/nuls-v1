@@ -79,7 +79,7 @@ public class BifurcateProcessor {
     private void checkIt() {
         long maxHeight = 0L;
         BlockHeaderChain longestChain = null;
-        StringBuilder str = new StringBuilder("++++++++++++++++++++++++chain info:");
+        StringBuilder str = new StringBuilder("++++++++++++++++++++++++switch chain:");
         for (BlockHeaderChain chain : chainList) {
             if (chain.size() == 0) {
                 continue;
@@ -105,10 +105,10 @@ public class BifurcateProcessor {
             BlockLog.debug("the longest chain not found!");
             return;
         }
-        BlockLog.debug(str.toString() + "\n the longest is:" + longestChain.getId());
         BlockHeaderChain lastApprovingChain = this.approvingChain;
         this.approvingChain = longestChain;
         if (lastApprovingChain != null && !lastApprovingChain.getId().equals(longestChain.getId())) {
+            BlockLog.info(str.toString() + "\n the longest is:" + longestChain.getId());
             BlockService blockService = NulsContext.getServiceBean(BlockService.class);
             List<HeaderDigest> nextChain = new ArrayList<>(longestChain.getHeaderDigestList());
             List<HeaderDigest> lastChain = new ArrayList<>(lastApprovingChain.getHeaderDigestList());
@@ -171,9 +171,6 @@ public class BifurcateProcessor {
                 chainList.add(newChain);
                 return true;
             }
-        }
-        if (this.chainList.size() > 0) {
-            System.out.println();
         }
         BlockHeaderChain chain = new BlockHeaderChain();
         chain.addHeader(header);

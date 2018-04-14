@@ -145,19 +145,15 @@ public class BlockServiceImpl implements BlockService {
     @Override
     @DbSession
     public boolean saveBlock(Block block) throws IOException {
-        BlockLog.debug("save block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()));
+        BlockLog.info("save block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()));
         ValidateResult result = block.getHeader().verify();
-        boolean b = false;
         if (result.isFailed() && result.getErrorCode() != ErrorCode.ORPHAN_TX && ErrorCode.ORPHAN_BLOCK != result.getErrorCode()) {
             throw new NulsRuntimeException(result.getErrorCode(), result.getMessage());
-        } else if (result.getErrorCode() == ErrorCode.ORPHAN_TX || ErrorCode.ORPHAN_BLOCK == result.getErrorCode()) {
-            b = true;
         }
         for (int x = 0; x < block.getHeader().getTxCount(); x++) {
             Transaction tx = block.getTxs().get(x);
             tx.setBlockHeight(block.getHeader().getHeight());
             if (tx.getStatus() == null || tx.getStatus() == TxStatusEnum.CACHED) {
-                b = true;
                 try {
                     tx.verifyWithException();
                     ledgerService.approvalTx(tx);
@@ -200,6 +196,8 @@ public class BlockServiceImpl implements BlockService {
         if (!result) {
             this.rollback(block.getTxs(), block.getTxs().size() - 1);
         }
+
+        BlockLog.info("rollback block in db:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()));
         this.ledgerService.deleteTx(block.getHeader().getHeight());
         blockStorageService.delete(block.getHeader().getHash().getDigestHex());
         NulsContext.getInstance().setBestBlock(this.getBestBlock());
