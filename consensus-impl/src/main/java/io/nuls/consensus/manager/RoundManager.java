@@ -131,6 +131,8 @@ public class RoundManager {
         Block lastRoundFirstBlock = getBlockService().getRoundFirstBlock(blockRoundData.getRoundIndex());
         PocMeetingRound round = calcRound(lastRoundFirstBlock.getHeader().getHeight(), blockRoundData.getRoundIndex() + 1, blockRoundData.getRoundEndTime(), updateCacheStatus);
 
+        ConsensusLog.info("计算：根据的高度："+calcBlock.getHeader().getHeight()+",该块轮次："+blockRoundData.getRoundIndex()+", members:"+blockRoundData.getConsensusMemberCount()+",roundCount:"+round.getMemberCount());
+
         boolean needCalcOrder = false;
         while (round.getEndTime() <= TimeService.currentTimeMillis()) {
             long time = TimeService.currentTimeMillis() - round.getStartTime();
