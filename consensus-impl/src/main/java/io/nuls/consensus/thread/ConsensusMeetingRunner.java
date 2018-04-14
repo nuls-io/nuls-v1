@@ -141,7 +141,7 @@ public class ConsensusMeetingRunner implements Runnable {
             BlockLog.info("packing round:" + round.toString());
             packing(member, round);
             hasPacking = true;
-        }else{
+        } else {
             try {
                 Thread.sleep(100L);
             } catch (InterruptedException e) {
@@ -178,7 +178,6 @@ public class ConsensusMeetingRunner implements Runnable {
             if (null == newBlock) {
                 return;
             }
-            BlockLog.info("produce block height:" + newBlock.getHeader().getHeight() + ", preHash:" + newBlock.getHeader().getPreHash() + " , hash:" + newBlock.getHeader().getHash() + ", address:" + Address.fromHashs(newBlock.getHeader().getPackingAddress()));
             broadcastSmallBlock(newBlock);
 
         } catch (NulsException e) {
@@ -254,7 +253,7 @@ public class ConsensusMeetingRunner implements Runnable {
         List<NulsDigestData> txHashList = new ArrayList<>();
         str.append("txs:\n");
         for (Transaction tx : block.getTxs()) {
-            str.append(tx.getHash() + ",\n");
+            str.append(tx.getHash() + ",type：" + tx.getType() + ", time:" + tx.getTime() + "\n");
             txHashList.add(tx.getHash());
             if (tx.getType() == TransactionConstant.TX_TYPE_COIN_BASE ||
                     tx.getType() == TransactionConstant.TX_TYPE_YELLOW_PUNISH ||
@@ -494,9 +493,9 @@ public class ConsensusMeetingRunner implements Runnable {
         redPunishTx(bestBlock, txList, round);
         YellowPunishTransaction yellowPunishTransaction = ConsensusTool.createYellowPunishTx(bestBlock, self, round);
         if (null != yellowPunishTransaction) {
-            StringBuilder str = new StringBuilder("create yellowPunish:" + yellowPunishTransaction.getHash() + ",time:" + yellowPunishTransaction.getTime()+"\n");
+            StringBuilder str = new StringBuilder("create yellowPunish:" + yellowPunishTransaction.getHash() + ",time:" + yellowPunishTransaction.getTime() + "\n");
             for (Address address : yellowPunishTransaction.getTxData().getAddressList()) {
-                str.append(address.toString()+",\n");
+                str.append(address.toString() + ",\n");
             }
             txList.add(yellowPunishTransaction);
         }
