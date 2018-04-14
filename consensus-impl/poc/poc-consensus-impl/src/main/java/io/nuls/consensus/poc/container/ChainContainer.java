@@ -24,15 +24,22 @@
 
 package io.nuls.consensus.poc.container;
 
+import io.nuls.account.entity.Address;
 import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.model.MeetingRound;
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.BlockHeader;
-import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.chain.entity.*;
 import io.nuls.core.constant.TransactionConstant;
+import io.nuls.core.context.NulsContext;
+import io.nuls.db.entity.PunishLogPo;
+import io.nuls.ledger.service.intf.LedgerService;
+import io.nuls.protocol.base.constant.PunishReasonEnum;
+import io.nuls.protocol.base.constant.PunishType;
+import io.nuls.protocol.base.entity.RedPunishData;
+import io.nuls.protocol.base.entity.YellowPunishData;
+import io.nuls.protocol.base.entity.block.BlockRoundData;
 import io.nuls.protocol.base.entity.member.Agent;
-import io.nuls.protocol.base.entity.tx.PocJoinConsensusTransaction;
-import io.nuls.protocol.base.entity.tx.RegisterAgentTransaction;
+import io.nuls.protocol.base.entity.member.Deposit;
+import io.nuls.protocol.base.entity.tx.*;
 import io.nuls.protocol.entity.Consensus;
 
 import java.util.Collections;
@@ -48,6 +55,8 @@ public class ChainContainer implements Cloneable {
 
     private List<MeetingRound> roundList;
 
+    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
+
     public ChainContainer() {}
 
     public ChainContainer(Chain chain) {
@@ -55,7 +64,117 @@ public class ChainContainer implements Cloneable {
     }
 
     public boolean addBlock(Block block) {
-        //TODO
+
+        if(!chain.getEndBlockHeader().getHash().equals(block.getHeader().getPreHash())) {
+            return false;
+        }
+
+        List<Block> blockList = chain.getBlockList();
+        List<BlockHeader> blockHeaderList = chain.getBlockHeaderList();
+
+        List<Consensus<Agent>> agentList = chain.getAgentList();
+        List<Consensus<Deposit>> depositList = chain.getDepositList();
+        List<PunishLogPo> yellowList = chain.getYellowPunishList();
+
+        long height = block.getHeader().getHeight();
+
+        List<Transaction> txs = block.getTxs();
+        for(Transaction tx : txs) {
+            int txType = tx.getType();
+            if(txType == TransactionConstant.TX_TYPE_REGISTER_AGENT) {
+                // Registered agent transaction
+                // 注册代理交易
+                RegisterAgentTransaction registerAgentTx = (RegisterAgentTransaction) tx;
+                Consensus<Agent> ca = registerAgentTx.getTxData();
+                agentList.add(ca);
+            } else if(txType == TransactionConstant.TX_TYPE_JOIN_CONSENSUS) {
+                PocJoinConsensusTransaction joinConsensusTx = (PocJoinConsensusTransaction) tx;
+                Consensus<Deposit> cDeposit = joinConsensusTx.getTxData();
+                depositList.add(cDeposit);
+            } else if(txType == TransactionConstant.TX_TYPE_EXIT_CONSENSUS) {
+
+                PocExitConsensusTransaction exitConsensusTx = (PocExitConsensusTransaction) tx;
+                Transaction joinTx = ledgerService.getTx(exitConsensusTx.getTxData());
+
+                if (joinTx.getType() == TransactionConstant.TX_TYPE_REGISTER_AGENT) {
+
+                    RegisterAgentTransaction registerAgentTx = (RegisterAgentTransaction) tx;
+
+                    Iterator<Consensus<Deposit>> it = depositList.iterator();
+                    while(it.hasNext()) {
+                        Consensus<Deposit> tempDe = it.next();
+                        Deposit deposit = tempDe.getExtend();
+                        if(deposit.getAgentHash().equals(registerAgentTx.getHash())) {
+                            tempDe.setDelHeight(height);
+                        }
+                    }
+
+                    Iterator<Consensus<Agent>> ita = agentList.iterator();
+                    while(ita.hasNext()) {
+                        Consensus<Agent> tempCa = ita.next();
+                        if(tempCa.getHash().equals(registerAgentTx.getHash())) {
+                            tempCa.setDelHeight(height);
+                            break;
+                        }
+                    }
+                } else {
+                    PocJoinConsensusTransaction joinConsensusTx = (PocJoinConsensusTransaction) joinTx;
+                    Consensus<Deposit> cDeposit = joinConsensusTx.getTxData();
+
+                    Iterator<Consensus<Deposit>> it = depositList.iterator();
+                    while(it.hasNext()) {
+                        Consensus<Deposit> tempDe = it.next();
+                        if(tempDe.getHash().equals(cDeposit.getHash())) {
+                            tempDe.setDelHeight(height);
+                            break;
+                        }
+                    }
+                }
+
+            } else if(txType == TransactionConstant.TX_TYPE_YELLOW_PUNISH) {
+
+                YellowPunishData yellowPunishData = ((YellowPunishTransaction) tx).getTxData();
+
+                List<Address> addressList = yellowPunishData.getAddressList();
+
+                long roundIndex = new BlockRoundData(block.getHeader().getExtend()).getRoundIndex();
+
+                for(Address address : addressList) {
+                    PunishLogPo punishLogPo = new PunishLogPo();
+                    punishLogPo.setHeight(yellowPunishData.getHeight());
+                    punishLogPo.setAddress(address.getBase58());
+                    punishLogPo.setRoundIndex(roundIndex);
+                    punishLogPo.setTime(tx.getTime());
+                    punishLogPo.setType(PunishType.YELLOW.getCode());
+
+                    yellowList.add(punishLogPo);
+                }
+
+            } else if(txType == TransactionConstant.TX_TYPE_RED_PUNISH) {
+
+                RedPunishData redPunishData = ((RedPunishTransaction) tx).getTxData();
+
+                String address = redPunishData.getAddress();
+
+                long roundIndex = new BlockRoundData(block.getHeader().getExtend()).getRoundIndex();
+
+                PunishLogPo punishLogPo = new PunishLogPo();
+                punishLogPo.setHeight(redPunishData.getHeight());
+                punishLogPo.setAddress(address);
+                punishLogPo.setRoundIndex(roundIndex);
+                punishLogPo.setTime(tx.getTime());
+                punishLogPo.setType(PunishType.RED.getCode());
+
+                yellowList.add(punishLogPo);
+            }
+        }
+
+        chain.setEndBlockHeader(block.getHeader());
+        blockList.add(block);
+        blockHeaderList.add(block.getHeader());
+
+        //TODO 是否需要重新计算轮次 ？
+
         return true;
     }
 
@@ -93,39 +212,61 @@ public class ChainContainer implements Cloneable {
         BlockHeader rollbackBlockHeader = blockHeaderList.get(blockHeaderList.size() - 1);
         blockHeaderList.remove(rollbackBlockHeader);
 
-        //TODO update txs
-        List<Consensus> agentList = chain.getAgentList();
+        // update txs
+        List<Consensus<Agent>> agentList = chain.getAgentList();
+        List<Consensus<Deposit>> depositList = chain.getDepositList();
+        List<PunishLogPo> yellowList = chain.getYellowPunishList();
+        List<PunishLogPo> redPunishList = chain.getRedPunishList();
 
-        List<Transaction> txs = rollbackBlock.getTxs();
-        for(Transaction tx : txs) {
-            int txType = tx.getType();
-            if(txType == TransactionConstant.TX_TYPE_REGISTER_AGENT) {
+        long height = rollbackBlockHeader.getHeight();
 
-                //注册代理交易
-                RegisterAgentTransaction registerAgentTx = (RegisterAgentTransaction) tx;
-                Consensus<Agent> ca = registerAgentTx.getTxData();
-                Agent agent = ca.getExtend();
+        for(int i = agentList.size() - 1; i >= 0 ; i--) {
+            Consensus<Agent> agentConsensus = agentList.get(i);
+            Agent agent = agentConsensus.getExtend();
 
-                Iterator<Consensus> it = agentList.iterator();
-                while(it.hasNext()) {
-                    Consensus tempCa = it.next();
-                    if(tempCa.getHash().equals(ca.getHash())) {
-                        it.remove();
-                        break;
-                    }
-                }
+            if (agentConsensus.getDelHeight() == height) {
+                agentConsensus.setDelHeight(0);
+            }
 
-            } else if(txType == TransactionConstant.TX_TYPE_JOIN_CONSENSUS) {
-                PocJoinConsensusTransaction joinConsensusTx = (PocJoinConsensusTransaction) tx;
-
-            } else if(txType == TransactionConstant.TX_TYPE_EXIT_CONSENSUS) {
-
-            } else if(txType == TransactionConstant.TX_TYPE_YELLOW_PUNISH) {
-
-            } else if(txType == TransactionConstant.TX_TYPE_RED_PUNISH) {
-
+            if(agent.getBlockHeight() == height) {
+                depositList.remove(i);
             }
         }
+
+        for(int i = depositList.size() - 1; i >= 0 ; i--) {
+            Consensus<Deposit> tempDe = depositList.get(i);
+            Deposit deposit = tempDe.getExtend();
+
+            if (tempDe.getDelHeight() == height) {
+                tempDe.setDelHeight(0);
+            }
+
+            if(deposit.getBlockHeight() == height) {
+                depositList.remove(i);
+            }
+        }
+
+        for(int i = yellowList.size() - 1; i >= 0 ; i--) {
+            PunishLogPo tempYellow = yellowList.get(i);
+            if(tempYellow.getHeight() < height) {
+                break;
+            }
+            if (tempYellow.getHeight() == height) {
+                yellowList.remove(i);
+            }
+        }
+
+        for(int i = redPunishList.size() - 1; i >= 0 ; i--) {
+            PunishLogPo redPunish = redPunishList.get(i);
+            if(redPunish.getHeight() < height) {
+                break;
+            }
+            if (redPunish.getHeight() == height) {
+                redPunishList.remove(i);
+            }
+        }
+
+        //TODO 是否需要重新计算轮次 ？
 
         return true;
     }

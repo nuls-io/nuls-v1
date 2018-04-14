@@ -27,10 +27,11 @@ package io.nuls.consensus.poc.manager;
 import io.nuls.consensus.poc.BaseTestCase;
 import io.nuls.consensus.poc.cache.CacheLoader;
 import io.nuls.consensus.poc.container.ChainContainer;
-import io.nuls.consensus.poc.entity.Agent;
-import io.nuls.consensus.poc.entity.Deposit;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.protocol.base.entity.member.Agent;
+import io.nuls.protocol.base.entity.member.Deposit;
+import io.nuls.protocol.entity.Consensus;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -58,10 +59,10 @@ public class CacheManagerTest extends BaseTestCase {
             public List<BlockHeader> loadBlockHeaders(int size) {
                 return blockHeaderList;
             }
-            public List<Agent> loadAgents() {
+            public List<Consensus<Agent>> loadAgents() {
                 return agentList;
             }
-            public List<Deposit> loadDepositList() {
+            public List<Consensus<Deposit>> loadDepositList() {
                 return depositList;
             }
         };

@@ -26,11 +26,16 @@ package io.nuls.consensus.poc.manager;
 
 import io.nuls.consensus.poc.cache.CacheLoader;
 import io.nuls.consensus.poc.container.ChainContainer;
-import io.nuls.consensus.poc.entity.Agent;
 import io.nuls.consensus.poc.model.Chain;
-import io.nuls.consensus.poc.entity.Deposit;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.log.Log;
+import io.nuls.db.entity.PunishLogPo;
+import io.nuls.protocol.base.entity.member.Agent;
+import io.nuls.protocol.base.entity.member.Deposit;
+import io.nuls.protocol.entity.Consensus;
 
 import java.util.List;
 
@@ -49,13 +54,19 @@ public class CacheManager {
 
     public void load() {
 
-        //TODO
         //load storage data to memory
 
         List<BlockHeader> blockHeaderList = cacheLoader.loadBlockHeaders(200);
         List<Block> blockList = cacheLoader.loadBlocks(8);
-        List<Agent> agentList = cacheLoader.loadAgents();
-        List<Deposit> depositList = cacheLoader.loadDepositList();
+
+        if(blockHeaderList == null || blockHeaderList.size() == 0 || blockList == null || blockList.size() == 0) {
+            Log.error("load cache error ,not find the block info!");
+            throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "load cache error ,not find the block info!");
+        }
+        List<Consensus<Agent>> agentList = cacheLoader.loadAgents();
+        List<Consensus<Deposit>> depositList = cacheLoader.loadDepositList();
+        List<PunishLogPo> yellowPunishList = cacheLoader.loadYellowPunishList();
+        List<PunishLogPo> redPunishList = cacheLoader.loadRedPunishList();
 
         Chain masterChain = new Chain();
 
@@ -64,9 +75,10 @@ public class CacheManager {
 
         masterChain.setStartBlockHeader(blockList.get(0).getHeader());
         masterChain.setEndBlockHeader(blockList.get(blockList.size() - 1).getHeader());
-
-//        masterChain.setAgentList(agentList);
-        //TODO
+        masterChain.setAgentList(agentList);
+        masterChain.setDepositList(depositList);
+        masterChain.setYellowPunishList(yellowPunishList);
+        masterChain.setRedPunishList(redPunishList);
 
         ChainContainer masterChainContainer = new ChainContainer(masterChain);
 

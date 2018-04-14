@@ -24,11 +24,12 @@
 
 package io.nuls.consensus.poc;
 
-import io.nuls.consensus.poc.entity.Agent;
-import io.nuls.consensus.poc.entity.Deposit;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
+import io.nuls.protocol.base.entity.member.Agent;
+import io.nuls.protocol.base.entity.member.Deposit;
+import io.nuls.protocol.entity.Consensus;
 import org.junit.Before;
 
 import java.util.ArrayList;
@@ -41,8 +42,8 @@ public class BaseTestCase {
 
     protected List<Block> blockList = new ArrayList<>();
     protected List<BlockHeader> blockHeaderList = new ArrayList<>();
-    protected List<Agent> agentList = new ArrayList<>();
-    protected List<Deposit> depositList = new ArrayList<>();
+    protected List<Consensus<Agent>> agentList = new ArrayList<>();
+    protected List<Consensus<Deposit>> depositList = new ArrayList<>();
 
     @Before
     public void initDatas() {

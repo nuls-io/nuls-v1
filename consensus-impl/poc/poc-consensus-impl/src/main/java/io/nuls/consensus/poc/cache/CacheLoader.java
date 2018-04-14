@@ -24,10 +24,12 @@
 
 package io.nuls.consensus.poc.cache;
 
-import io.nuls.consensus.poc.entity.Agent;
-import io.nuls.consensus.poc.entity.Deposit;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.db.entity.PunishLogPo;
+import io.nuls.protocol.base.entity.member.Agent;
+import io.nuls.protocol.base.entity.member.Deposit;
+import io.nuls.protocol.entity.Consensus;
 
 import java.util.List;
 
@@ -45,11 +47,19 @@ public class CacheLoader {
         return null;
     }
 
-    public List<Agent> loadAgents() {
+    public List<Consensus<Agent>> loadAgents() {
         return null;
     }
 
-    public List<Deposit> loadDepositList() {
+    public List<Consensus<Deposit>> loadDepositList() {
+        return null;
+    }
+
+    public List<PunishLogPo> loadYellowPunishList() {
+        return null;
+    }
+
+    public List<PunishLogPo> loadRedPunishList() {
         return null;
     }
 }

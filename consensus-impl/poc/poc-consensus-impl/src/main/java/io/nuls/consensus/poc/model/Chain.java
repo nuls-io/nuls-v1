@@ -26,6 +26,10 @@ package io.nuls.consensus.poc.model;
 
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.db.entity.PunishLogPo;
+import io.nuls.protocol.base.entity.YellowPunishData;
+import io.nuls.protocol.base.entity.member.Agent;
+import io.nuls.protocol.base.entity.member.Deposit;
 import io.nuls.protocol.entity.Consensus;
 
 import java.io.Serializable;
@@ -43,10 +47,10 @@ public class Chain implements Cloneable {
     private BlockHeader endBlockHeader;
     private List<BlockHeader> blockHeaderList;
     private List<Block> blockList;
-    private List<Consensus> agentList;
-    private List<Consensus> depositList;
-    private List<Consensus> allRedCardList;
-    private List<Consensus> yellowCardList;
+    private List<Consensus<Agent>> agentList;
+    private List<Consensus<Deposit>> depositList;
+    private List<PunishLogPo> yellowPunishList;
+    private List<PunishLogPo> redPunishList;
 
     public Chain() {
         blockHeaderList = new ArrayList<>();
@@ -97,40 +101,40 @@ public class Chain implements Cloneable {
         return blockList;
     }
 
-    public List<Consensus> getAgentList() {
+    public List<Consensus<Agent>> getAgentList() {
         return agentList;
     }
 
-    public List<Consensus> getDepositList() {
+    public List<Consensus<Deposit>> getDepositList() {
         return depositList;
-    }
-
-    public List<Consensus> getAllRedCardList() {
-        return allRedCardList;
-    }
-
-    public List<Consensus> getYellowCardList() {
-        return yellowCardList;
     }
 
     public void setBlockList(List<Block> blockList) {
         this.blockList = blockList;
     }
 
-    public void setAgentList(List<Consensus> agentList) {
+    public void setAgentList(List<Consensus<Agent>> agentList) {
         this.agentList = agentList;
     }
 
-    public void setDepositList(List<Consensus> depositList) {
+    public void setDepositList(List<Consensus<Deposit>> depositList) {
         this.depositList = depositList;
     }
 
-    public void setAllRedCardList(List<Consensus> allRedCardList) {
-        this.allRedCardList = allRedCardList;
+    public List<PunishLogPo> getYellowPunishList() {
+        return yellowPunishList;
     }
 
-    public void setYellowCardList(List<Consensus> yellowCardList) {
-        this.yellowCardList = yellowCardList;
+    public void setYellowPunishList(List<PunishLogPo> yellowPunishList) {
+        this.yellowPunishList = yellowPunishList;
+    }
+
+    public List<PunishLogPo> getRedPunishList() {
+        return redPunishList;
+    }
+
+    public void setRedPunishList(List<PunishLogPo> redPunishList) {
+        this.redPunishList = redPunishList;
     }
 
     @Override
