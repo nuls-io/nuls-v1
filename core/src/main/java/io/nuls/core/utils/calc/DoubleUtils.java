@@ -120,14 +120,14 @@ public class DoubleUtils {
      * double 加法
      */
     public static double sum(double d1, double d2) {
-        return sum(createBigDecimal(d1), createBigDecimal(d2)).doubleValue();
+        return round(sum(createBigDecimal(d1), createBigDecimal(d2)).doubleValue());
     }
 
     /**
      * double 减法
      */
     public static double sub(double d1, double d2) {
-        return sub(createBigDecimal(d1), createBigDecimal(d2)).doubleValue();
+        return round(sub(createBigDecimal(d1), createBigDecimal(d2)).doubleValue());
     }
 
     /**

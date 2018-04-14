@@ -28,6 +28,7 @@ import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.manager.BlockManager;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.utils.BlockHeightComparator;
+import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
@@ -47,6 +48,7 @@ import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.ledger.service.intf.LedgerService;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -211,12 +213,31 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public Page<BlockHeaderPo> getBlockHeaderList(String nodeAddress, int type, int pageNumber, int pageSize) {
-        return blockStorageService.getBlocListByAddress(nodeAddress, type, pageNumber, pageSize);
+        int start = pageNumber*pageSize-pageSize;
+        //todo 添加缓存数据
+        return blockStorageService.getBlocListByAddress1(nodeAddress, type, start, pageSize);
     }
 
     @Override
     public Page<BlockHeaderPo> getBlockHeaderList(int pageNumber, int pageSize) {
-        return blockStorageService.getBlockHeaderList(pageNumber, pageSize);
+        //todo 添加缓存数据
+//        List<BlockHeaderPo> cachePoList = getCachePoList();
+        int start = pageNumber*pageSize-pageSize;
+        return blockStorageService.getBlockHeaderList1(start, pageSize);
+    }
+
+    private List<BlockHeaderPo> getCachePoList() {
+        long localHeight = this.getLocalSavedHeight();
+        List<BlockHeaderPo> poList = new ArrayList<>();
+        Block startBlock = NulsContext.getInstance().getBestBlock();
+        while (true){
+            if(startBlock.getHeader().getHeight()<=localHeight){
+                break;
+            }
+            poList.add(ConsensusTool.toPojo(startBlock.getHeader()));
+            startBlock = this.getBlock(startBlock.getHeader().getPreHash().getDigestHex());
+        }
+        return poList;
     }
 
     @Override
@@ -240,7 +261,7 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public Block getPreRoundFirstBlock(long roundIndex) {
+    public Block getRoundFirstBlock(long roundIndex) {
         //todo block-》blockheader
         Long height = this.blockStorageService.getRoundFirstBlockHeight(roundIndex);
         if (null == height) {

@@ -68,7 +68,7 @@ public interface BlockService {
 
     BlockHeader getBlockHeader(NulsDigestData hash) throws NulsException;
 
-    Block getPreRoundFirstBlock(long roundIndex);
+    Block getRoundFirstBlock(long roundIndex);
 
     long getPackingCount(String address);
 
