@@ -25,7 +25,9 @@ package io.nuls.consensus.utils;
 
 import io.nuls.core.chain.entity.NulsDigestData;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Niels

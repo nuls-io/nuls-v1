@@ -25,14 +25,10 @@ package io.nuls.consensus.entity.validator.block.header;
 
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.NulsSignData;
 import io.nuls.core.script.P2PKHScriptSig;
-import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
-
-import java.io.IOException;
 
 /**
  * @author Niels

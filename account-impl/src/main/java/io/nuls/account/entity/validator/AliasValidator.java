@@ -27,8 +27,6 @@ import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.entity.Address;
 import io.nuls.account.entity.Alias;
 import io.nuls.account.entity.tx.AliasTransaction;
-import io.nuls.cache.service.intf.CacheService;
-import io.nuls.core.chain.entity.Na;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TransactionConstant;

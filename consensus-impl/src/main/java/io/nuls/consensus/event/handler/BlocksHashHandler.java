@@ -25,8 +25,6 @@ package io.nuls.consensus.event.handler;
 
 import io.nuls.consensus.download.DownloadCacheHandler;
 import io.nuls.consensus.event.BlocksHashEvent;
-import io.nuls.consensus.utils.DistributedBlockInfoRequestUtils;
-import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 
 /**

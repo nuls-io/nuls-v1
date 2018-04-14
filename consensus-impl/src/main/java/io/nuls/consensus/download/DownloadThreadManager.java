@@ -16,13 +16,14 @@ import io.nuls.core.utils.calc.DoubleUtils;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.queue.service.impl.QueueService;
 import io.nuls.network.entity.Node;
-import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.service.NetworkService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Created by ln on 2018/4/8.

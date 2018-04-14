@@ -24,7 +24,6 @@
 package io.nuls.consensus.event;
 
 import io.nuls.consensus.constant.ConsensusEventType;
-import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.SmallBlock;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.event.NoticeData;

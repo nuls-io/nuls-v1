@@ -23,7 +23,6 @@
  */
 package io.nuls.account.entity;
 
-import io.nuls.account.util.AccountTool;
 import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.chain.intf.NulsCloneable;
@@ -32,7 +31,6 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.*;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Hex;
-import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;

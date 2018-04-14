@@ -23,7 +23,6 @@
  */
 package io.nuls.consensus.event.handler;
 
-import io.nuls.account.entity.Address;
 import io.nuls.consensus.cache.manager.block.TemporaryCacheManager;
 import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
@@ -38,7 +37,6 @@ import io.nuls.consensus.manager.BlockManager;
 import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.core.chain.entity.*;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.utils.log.BlockLog;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.network.service.NetworkService;

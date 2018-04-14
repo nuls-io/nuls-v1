@@ -27,7 +27,6 @@
 package io.nuls.consensus.utils;
 
 import io.nuls.consensus.entity.Consensus;
-import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.member.Deposit;
 
 import java.util.Comparator;

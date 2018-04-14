@@ -27,9 +27,7 @@
 package io.nuls.consensus.entity.validator.tx;
 
 import io.nuls.account.entity.Address;
-import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
-import io.nuls.consensus.entity.ConsensusAgentImpl;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
 import io.nuls.core.context.NulsContext;

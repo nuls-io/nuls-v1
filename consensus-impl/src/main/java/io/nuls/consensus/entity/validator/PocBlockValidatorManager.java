@@ -26,7 +26,6 @@ package io.nuls.consensus.entity.validator;
 import io.nuls.consensus.entity.validator.block.*;
 import io.nuls.consensus.entity.validator.block.header.HeaderFieldValidator;
 import io.nuls.consensus.entity.validator.block.header.HeaderHashValidator;
-import io.nuls.consensus.entity.validator.block.header.HeaderPackerValidator;
 import io.nuls.consensus.entity.validator.block.header.HeaderSignValidator;
 import io.nuls.core.chain.manager.BlockHeaderValidatorManager;
 import io.nuls.core.chain.manager.BlockValidatorManager;

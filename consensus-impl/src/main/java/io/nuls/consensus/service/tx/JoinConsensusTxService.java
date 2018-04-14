@@ -25,28 +25,20 @@ package io.nuls.consensus.service.tx;
 
 import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
-import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.member.Deposit;
 import io.nuls.consensus.entity.tx.PocJoinConsensusTransaction;
 import io.nuls.consensus.event.notice.EntrustConsensusNotice;
 import io.nuls.consensus.utils.ConsensusTool;
-import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.tx.serivce.TransactionService;
 import io.nuls.db.dao.AgentDataService;
 import io.nuls.db.dao.DepositDataService;
-import io.nuls.db.entity.AgentPo;
 import io.nuls.db.entity.DepositPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.db.transactional.annotation.PROPAGATION;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author Niels

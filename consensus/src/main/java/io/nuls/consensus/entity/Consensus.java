@@ -31,7 +31,6 @@ import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
-import org.apache.tools.ant.taskdefs.Basename;
 
 import java.io.IOException;
 

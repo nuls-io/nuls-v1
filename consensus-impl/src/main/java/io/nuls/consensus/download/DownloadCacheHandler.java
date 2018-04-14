@@ -4,10 +4,8 @@ import io.nuls.consensus.constant.NotFoundType;
 import io.nuls.consensus.entity.BlockHashResponse;
 import io.nuls.consensus.entity.NotFound;
 import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.NulsDigestData;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 

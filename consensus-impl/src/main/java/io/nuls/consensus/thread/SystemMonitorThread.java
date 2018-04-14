@@ -35,7 +35,6 @@ import io.nuls.network.entity.Node;
 import io.nuls.network.service.NetworkService;
 
 import java.util.Collection;
-import java.util.List;
 
 /**
  * @author Niels
