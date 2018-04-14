@@ -141,6 +141,12 @@ public class ConsensusMeetingRunner implements Runnable {
             BlockLog.info("packing round:" + round.toString());
             packing(member, round);
             hasPacking = true;
+        }else{
+            try {
+                Thread.sleep(100L);
+            } catch (InterruptedException e) {
+                Log.error(e);
+            }
         }
 
     }

@@ -109,7 +109,7 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
         StringBuilder str = new StringBuilder("smallblock("+smallBlock.getHeader().getHash()+") contains:\n");
         for (NulsDigestData hash : smallBlock.getTxHashList()) {
             Transaction tx = this.receivedTxCacheManager.getTx(hash);
-            str.append("hash:"+tx.getHash()+",type:"+tx.getType()+",time:"+tx.getTime()+",\n");
+            str.append("hash:"+hash + ",\n");
             if (null == tx) {
                 tx = orphanTxCacheManager.getTx(hash);
             }
