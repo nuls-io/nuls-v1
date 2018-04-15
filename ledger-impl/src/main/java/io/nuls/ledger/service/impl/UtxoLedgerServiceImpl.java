@@ -433,7 +433,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
             TransactionEvent event = new TransactionEvent();
             event.setEventBody(tx);
-            eventBroadcaster.broadcastAndCacheAysn(event, true);
+            eventBroadcaster.broadcastAndCache(event, true);
         } catch (Exception e) {
             Log.error(e);
             return new Result(false, e.getMessage());

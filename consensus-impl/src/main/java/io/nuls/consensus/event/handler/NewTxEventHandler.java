@@ -25,6 +25,7 @@ package io.nuls.consensus.event.handler;
 
 import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
+import io.nuls.consensus.cache.manager.tx.TxCacheManager;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.SeverityLevelEnum;
@@ -71,6 +72,10 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
         if (tx.getType() == TransactionConstant.TX_TYPE_COIN_BASE || tx.getType() == TransactionConstant.TX_TYPE_YELLOW_PUNISH || tx.getType() == TransactionConstant.TX_TYPE_RED_PUNISH) {
             return;
         }
+        if (TxCacheManager.TX_CACHE_MANAGER.getTx(tx.getHash()) != null) {
+            return;
+        }
+//        Log.info("receive tx:("+tx.getType()+"):["+fromId+"]"+tx.getHash());
         ValidateResult result = tx.verify();
         if (result.isFailed()) {
             if (result.getErrorCode() == ErrorCode.ORPHAN_TX) {
