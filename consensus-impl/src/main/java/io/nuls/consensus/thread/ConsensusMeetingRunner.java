@@ -162,7 +162,7 @@ public class ConsensusMeetingRunner implements Runnable {
             Block newBlock = doPacking(self, round);
             if (needCheckAgain && hasReceiveNewestBlock(self, round)) {
                 Block realBestBlock = blockManager.getBlock(newBlock.getHeader().getHeight());
-                if(null!=realBestBlock){
+                if (null != realBestBlock) {
                     List<NulsDigestData> txHashList = realBestBlock.getTxHashList();
                     for (Transaction transaction : newBlock.getTxs()) {
                         if (transaction.getType() == TransactionConstant.TX_TYPE_COIN_BASE || transaction.getType() == TransactionConstant.TX_TYPE_YELLOW_PUNISH || transaction.getType() == TransactionConstant.TX_TYPE_RED_PUNISH) {
@@ -381,9 +381,7 @@ public class ConsensusMeetingRunner implements Runnable {
         roundData.setRoundStartTime(round.getStartTime());
 
         bd.setRoundData(roundData);
-        List<Integer> outTxList = new ArrayList<>();
         List<Transaction> packingTxList = new ArrayList<>();
-        List<NulsDigestData> outHashList = new ArrayList<>();
         long totalSize = 0L;
         for (int i = 0; i < allTxList.size(); i++) {
             if ((self.getPackEndTime() - TimeService.currentTimeMillis()) <= 500L) {
@@ -396,29 +394,27 @@ public class ConsensusMeetingRunner implements Runnable {
                 Log.info("=========================stop 1:size too big!");
                 break;
             }
-            outHashList.add(tx.getHash());
             ValidateResult result = tx.verify();
             if (result.isFailed()) {
                 Log.error(result.getMessage());
-                outTxList.add(i);
-                BlockLog.info("discard tx:" + tx.getHash());
                 continue;
             }
             try {
                 ledgerService.approvalTx(tx);
             } catch (Exception e) {
                 Log.error(e);
-                outTxList.add(i);
-                BlockLog.info("discard tx:" + tx.getHash());
+                ledgerService.rollbackTx(tx);
                 continue;
             }
             packingTxList.add(tx);
             totalSize += tx.size();
             confirmingTxCacheManager.putTx(tx);
+            txCacheManager.removeTx(tx.getHash());
+
 
         }
-        Log.info("=========================tx,total:"+allTxList.size()+", discard:"+outHashList.size());
-        txCacheManager.removeTx(outHashList);
+        Log.info("=========================tx,total:" + allTxList.size());
+
         if (totalSize < PocConsensusConstant.MAX_BLOCK_SIZE) {
             addOrphanTx(packingTxList, totalSize, self, bd.getHeight());
         }
@@ -474,7 +470,7 @@ public class ConsensusMeetingRunner implements Runnable {
             totalSize += tx.size();
             outHashList.add(tx.getHash());
         }
-        Log.info("=========================orphan tx,total:"+orphanTxList.size()+", take count:"+outHashList.size());
+        Log.info("=========================orphan tx,total:" + orphanTxList.size() + ", take count:" + outHashList.size());
         orphanTxCacheManager.removeTx(outHashList);
     }
 

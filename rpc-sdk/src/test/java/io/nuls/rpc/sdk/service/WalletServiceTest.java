@@ -40,21 +40,21 @@ import static org.junit.Assert.*;
  */
 public class WalletServiceTest {
 
-//    @BeforeClass
+    @BeforeClass
     public static void init() {
         RestFulUtils.getInstance().setServerUri("http://127.0.0.1:8001");
     }
 
     WalletService walletService = WalletService.WALLET_SERVICE;
 
-//    @Test
+    @Test
     public void transfer() {
         int index = 0;
-        while (index++ < 10000) {
+        while (index++ < 1000) {
             RpcClientResult result = walletService.transfer("2Ciw3E1fhMLZZg8v7MLKTWQ2XWEVka1", "2CYqrm6rrZjSusn2NVe6pXjoeJE7x7k", 100000000L, "nuls123456", "test utxo");
             System.out.println(result.getMsg());
             try {
-                Thread.sleep(10);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

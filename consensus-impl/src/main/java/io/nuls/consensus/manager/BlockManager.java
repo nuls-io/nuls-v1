@@ -234,7 +234,7 @@ public class BlockManager {
                 bifurcateProcessor.rollbackHash(hash);
                 return false;
             }
-        }else{
+        } else {
             this.rollbackAppraval(block);
         }
         if (needUpdateBestBlock) {
@@ -256,8 +256,8 @@ public class BlockManager {
             }
             boolean isSuccess;
             try {
-                if(!this.lastStoredHeader.getHash().equals(savingBlock.getHeader().getPreHash())){
-                    throw new NulsRuntimeException(ErrorCode.DATA_ERROR,"pre block lost!");
+                if (!this.lastStoredHeader.getHash().equals(savingBlock.getHeader().getPreHash())) {
+                    throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "pre block lost!");
                 }
                 savingBlock.verifyWithException();
                 isSuccess = blockService.saveBlock(savingBlock);
@@ -340,8 +340,10 @@ public class BlockManager {
                 }
                 txHashList.add(tx.getHash());
             }
+            orphanTxCacheManager.putTx(tx);
         }
         confirmingTxCacheManager.removeTxList(txHashList);
+
     }
 
     private void rollbackAppraval(Block block) {
