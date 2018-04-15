@@ -101,46 +101,47 @@ public class ChainContainer implements Cloneable {
                 PocJoinConsensusTransaction joinConsensusTx = (PocJoinConsensusTransaction) tx;
                 Consensus<Deposit> cDeposit = joinConsensusTx.getTxData();
                 depositList.add(cDeposit);
-            } else if(txType == TransactionConstant.TX_TYPE_EXIT_CONSENSUS) {
+            } else if(txType == TransactionConstant.TX_TYPE_CANCEL_DEPOSIT) {
 
-                PocExitConsensusTransaction exitConsensusTx = (PocExitConsensusTransaction) tx;
-                Transaction joinTx = ledgerService.getTx(exitConsensusTx.getTxData());
+                CancelDepositTransaction cancelDepositTx = (CancelDepositTransaction) tx;
+                Transaction joinTx = ledgerService.getTx(cancelDepositTx.getTxData());
 
-                if (joinTx.getType() == TransactionConstant.TX_TYPE_REGISTER_AGENT) {
+                PocJoinConsensusTransaction pocJoinTx = (PocJoinConsensusTransaction) joinTx;
+                Consensus<Deposit> cDeposit = pocJoinTx.getTxData();
 
-                    RegisterAgentTransaction registerAgentTx = (RegisterAgentTransaction) tx;
-
-                    Iterator<Consensus<Deposit>> it = depositList.iterator();
-                    while(it.hasNext()) {
-                        Consensus<Deposit> tempDe = it.next();
-                        Deposit deposit = tempDe.getExtend();
-                        if(deposit.getAgentHash().equals(registerAgentTx.getHash())) {
-                            tempDe.setDelHeight(height);
-                        }
+                Iterator<Consensus<Deposit>> it = depositList.iterator();
+                while (it.hasNext()) {
+                    Consensus<Deposit> tempDe = it.next();
+                    if (tempDe.getHash().equals(cDeposit.getHash())) {
+                        tempDe.setDelHeight(height);
+                        break;
                     }
+                }
+            } else if(txType == TransactionConstant.TX_TYPE_STOP_AGENT) {
 
-                    Iterator<Consensus<Agent>> ita = agentList.iterator();
-                    while(ita.hasNext()) {
-                        Consensus<Agent> tempCa = ita.next();
-                        if(tempCa.getHash().equals(registerAgentTx.getHash())) {
-                            tempCa.setDelHeight(height);
-                            break;
-                        }
-                    }
-                } else {
-                    PocJoinConsensusTransaction joinConsensusTx = (PocJoinConsensusTransaction) joinTx;
-                    Consensus<Deposit> cDeposit = joinConsensusTx.getTxData();
+                StopAgentTransaction stopAgentTx = (StopAgentTransaction) tx;
+                Transaction joinTx = ledgerService.getTx(stopAgentTx.getTxData());
 
-                    Iterator<Consensus<Deposit>> it = depositList.iterator();
-                    while(it.hasNext()) {
-                        Consensus<Deposit> tempDe = it.next();
-                        if(tempDe.getHash().equals(cDeposit.getHash())) {
-                            tempDe.setDelHeight(height);
-                            break;
-                        }
+
+                RegisterAgentTransaction registerAgentTx = (RegisterAgentTransaction) joinTx;
+
+                Iterator<Consensus<Deposit>> it = depositList.iterator();
+                while(it.hasNext()) {
+                    Consensus<Deposit> tempDe = it.next();
+                    Deposit deposit = tempDe.getExtend();
+                    if(deposit.getAgentHash().equals(registerAgentTx.getHash())) {
+                        tempDe.setDelHeight(height);
                     }
                 }
 
+                Iterator<Consensus<Agent>> ita = agentList.iterator();
+                while(ita.hasNext()) {
+                    Consensus<Agent> tempCa = ita.next();
+                    if(tempCa.getHash().equals(registerAgentTx.getHash())) {
+                        tempCa.setDelHeight(height);
+                        break;
+                    }
+                }
             } else if(txType == TransactionConstant.TX_TYPE_YELLOW_PUNISH) {
 
                 YellowPunishData yellowPunishData = ((YellowPunishTransaction) tx).getTxData();
@@ -225,10 +226,10 @@ public class ChainContainer implements Cloneable {
 
         // Verify that the block round and time are correct
         // 验证区块轮次和时间是否正确
-        if(roundData.getRoundIndex() < currentRound.getIndex()) {
-            Log.error("block height " + blockHeader.getHeight() + " round index is error!");
-            return false;
-        }
+//        if(roundData.getRoundIndex() > currentRound.getIndex()) {
+//            Log.error("block height " + blockHeader.getHeight() + " round index is error!");
+//            return false;
+//        }
         if(roundData.getRoundIndex() == currentRound.getIndex() && roundData.getRoundStartTime() != currentRound.getStartTime()) {
             Log.error("block height " + blockHeader.getHeight() + " round startTime is error!");
             return false;
@@ -515,7 +516,11 @@ public class ChainContainer implements Cloneable {
         BlockRoundData bestRoundData = new BlockRoundData(bestBlockHeader.getExtend());
 
         if(startBlockHeader.getHeight() != 0l) {
-            startBlockHeader = getFirstBlockHeightOfPreRoundByRoundIndex(bestRoundData.getRoundIndex());
+            long roundIndex = bestRoundData.getRoundIndex();
+            if(bestRoundData.getConsensusMemberCount() == bestRoundData.getPackingIndexOfRound()) {
+                roundIndex += 1;
+            }
+            startBlockHeader = getFirstBlockHeightOfPreRoundByRoundIndex(roundIndex);
         }
 
         long nowTime = TimeService.currentTimeMillis();
@@ -543,11 +548,17 @@ public class ChainContainer implements Cloneable {
     private MeetingRound getNextRoundByExpectedRound(BlockRoundData roundData) {
         BlockHeader startBlockHeader = chain.getEndBlockHeader();
 
+        long roundIndex = roundData.getRoundIndex();
+        long roundStartTime = roundData.getRoundStartTime();
         if(startBlockHeader.getHeight() != 0l) {
-            startBlockHeader = getFirstBlockHeightOfPreRoundByRoundIndex(roundData.getRoundIndex());
+            if(roundData.getConsensusMemberCount() == roundData.getPackingIndexOfRound()) {
+                roundIndex += 1;
+                roundStartTime = roundData.getRoundEndTime();
+            }
+            startBlockHeader = getFirstBlockHeightOfPreRoundByRoundIndex(roundIndex);
         }
 
-        return calculationRound(startBlockHeader, roundData.getRoundIndex(), roundData.getRoundStartTime());
+        return calculationRound(startBlockHeader, roundIndex, roundStartTime);
     }
 
     private MeetingRound calculationRound(BlockHeader startBlockHeader, long index, long startTime) {
@@ -736,7 +747,8 @@ public class ChainContainer implements Cloneable {
                     startRoundIndex = currentRoundIndex;
                 }
                 if(currentRoundIndex < startRoundIndex) {
-                    firstBlockHeader = blockHeaderList.get(i + 1);
+//                    firstBlockHeader = blockHeaderList.get(i + 1);
+                    firstBlockHeader = blockHeaderList.get(i);
                     break;
                 }
             }

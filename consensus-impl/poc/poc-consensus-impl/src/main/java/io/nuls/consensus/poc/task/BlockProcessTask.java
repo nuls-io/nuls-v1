@@ -49,6 +49,14 @@ public class BlockProcessTask implements Runnable {
 
     @Override
     public void run() {
+        try {
+            doTask();
+        } catch (Exception e) {
+            Log.error(e);
+        }
+    }
+
+    private void doTask() {
         //wait consensus ready running
         if(ConsensusSystemProvider.getConsensusStatus().ordinal() <= ConsensusStatus.LOADING_CACHE.ordinal()) {
             return;

@@ -24,7 +24,6 @@
 package io.nuls.network.service.impl;
 
 import io.netty.channel.socket.SocketChannel;
-import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.thread.manager.TaskManager;
@@ -40,6 +39,7 @@ import io.nuls.network.entity.NodeTransferTool;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.message.entity.VersionEvent;
 import io.nuls.network.service.impl.netty.NioChannelMap;
+import io.nuls.protocol.base.constant.PocConsensusConstant;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

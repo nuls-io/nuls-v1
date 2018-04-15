@@ -93,7 +93,7 @@ public class ConsensusProcess {
 
         boolean canPackage = checkCanPackage();
 
-        if(!canPackage) {
+        if(!canPackage || false) {
             return;
         }
 
