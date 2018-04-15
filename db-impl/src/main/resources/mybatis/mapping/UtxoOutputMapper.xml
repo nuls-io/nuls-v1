@@ -93,7 +93,7 @@
 
     <update id="unlockTxOutput" >
         update utxo_output
-        set status = 0, lock_time =#{lockTime,jdbcType=BIGINT}
+        set status = 0
         where status = 1 and tx_hash = #{txHash,jdbcType=VARCHAR}
     </update>
 

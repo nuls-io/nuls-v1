@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ **
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ **
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ **
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ **
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -34,6 +34,8 @@ import io.nuls.network.message.entity.GetVersionEvent;
 import io.nuls.network.message.entity.VersionEvent;
 import io.nuls.network.message.handler.NetWorkEventHandler;
 import io.nuls.network.service.NetworkService;
+
+import java.util.Random;
 
 /**
  * @author vivi
@@ -77,11 +79,22 @@ public class GetVersionEventHandler implements NetWorkEventHandler {
             }
         }
 
+        VersionEvent versionEvent = new VersionEvent(event.getSeverPort(), event.getBestBlockHeight(), event.getBestBlockHash());
+        node.setVersionMessage(versionEvent);
+        checkVersion(event.getNulsVersion());
+
         VersionEvent replyMessage = new VersionEvent(getNetworkService().getNetworkParam().port(),
                 block.getHeader().getHeight(), block.getHeader().getHash().getDigestHex());
 
-        node.setSeverPort(event.getSeverPort());
         return new NetworkEventResult(true, replyMessage);
+    }
+
+    private void checkVersion(String version) {
+        int newVersion = Integer.parseInt(version.replace(".", ""));
+        int myVersion = Integer.parseInt(NulsContext.VERSION.replace(".", ""));
+        if (newVersion > myVersion) {
+            NulsContext.NEWEST_VERSION = version;
+        }
     }
 
     private NetworkService getNetworkService() {

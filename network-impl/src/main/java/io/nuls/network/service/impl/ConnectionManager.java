@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ **
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ **
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ **
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ **
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -47,6 +47,7 @@ import io.nuls.network.service.impl.netty.NettyServer;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -103,8 +104,9 @@ public class ConnectionManager {
                 NettyClient client = new NettyClient(node);
                 client.start();
             }
-        }, false);
+        }, true);
     }
+
 
     public void receiveMessage(ByteBuffer buffer, Node node) {
         List<NulsMessage> list;
@@ -125,15 +127,18 @@ public class ConnectionManager {
                     if (node.getMagicNumber() == 0) {
                         node.setMagicNumber(header.getMagicNumber());
                     }
+
                     BaseEvent event = EventManager.getInstance(message.getData());
                     processMessage(event, node);
                 } else {
                     node.setStatus(Node.BAD);
+                    System.out.println("-------------------- receive message filter remove node ---------------------------");
                     networkService.removeNode(node.getId());
                 }
             }
         } catch (NulsException e) {
             //todo
+            Log.error("--------remoteAddress: " + node.getId());
             Log.error(e);
         } catch (Exception e) {
             //todo
@@ -144,6 +149,7 @@ public class ConnectionManager {
         }
     }
 
+    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private void processMessage(BaseEvent event, Node node) {
         if (event == null) {
 //            Log.error("---------------------NulEvent is null--------------------------------");
@@ -153,6 +159,7 @@ public class ConnectionManager {
             if (node.getStatus() != Node.HANDSHAKE && !isHandShakeMessage(event)) {
                 return;
             }
+           // System.out.println( sdf.format(System.currentTimeMillis()) + "-----------processMessage------------node:" + node.getId() + "------------moduleId: " + event.getHeader().getModuleId() + "," + "eventType:" + event.getHeader().getEventType());
             asynExecute(event, node);
         } else {
             if (!node.isHandShake()) {
@@ -194,11 +201,8 @@ public class ConnectionManager {
     }
 
     private boolean isHandShakeMessage(BaseEvent event) {
-        if (isNetworkEvent(event)) {
-            if (event.getHeader().getEventType() == NetworkConstant.NETWORK_GET_VERSION_EVENT
-                    || event.getHeader().getEventType() == NetworkConstant.NETWORK_VERSION_EVENT) {
-                return true;
-            }
+        if (isNetworkEvent(event) && event.getHeader().getEventType() == NetworkConstant.NETWORK_HANDSHAKE_EVENT) {
+            return true;
         }
         return false;
     }

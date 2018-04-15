@@ -27,7 +27,10 @@
 package io.nuls.core.utils.pass;
 
 import io.nuls.core.crypto.AESEncrypt;
+import io.nuls.core.crypto.EncryptedData;
+import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.utils.log.Log;
+import org.spongycastle.crypto.params.KeyParameter;
 
 import java.io.*;
 import java.net.URL;
@@ -56,7 +59,7 @@ public class PackingPasswordUtils {
             byte[] bytes = new byte[input.available()];
             input.read(bytes);
             input.close();
-            password = new String(AESEncrypt.decrypt(bytes, "nulsnulsnuls"), "UTF-8");
+            password = new String(AESEncrypt.decrypt(bytes, "nulsnulsnuls","UTF-8"), "UTF-8");
             return password;
         } catch (Exception e) {
             return null;
@@ -66,14 +69,21 @@ public class PackingPasswordUtils {
     public static void write(String password) {
         try {
             PackingPasswordUtils.password = password;
-            byte[] passBytes = AESEncrypt.encrypt(password.getBytes("UTF-8"), "nulsnulsnuls");
+            EncryptedData passBytes = AESEncrypt.encrypt(password.getBytes("UTF-8"),new byte[16], new KeyParameter(Sha256Hash.hash("nulsnulsnuls".getBytes("UTF-8"))));
             URL url = PackingPasswordUtils.class.getClassLoader().getResource("");
             File file = new File(url.getPath() + "/nuls.info");
             OutputStream output = new FileOutputStream(file);
-            output.write(passBytes);
+            output.write(passBytes.getEncryptedBytes());
             output.flush();
             output.close();
         } catch (Exception e) {
+            Log.error(e);
         }
+    }
+
+    public static void main(String[] args) {
+        write("nuls123123");
+        String pwd = read();
+        System.out.println(pwd);
     }
 }

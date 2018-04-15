@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ * *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ * *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ * *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ * *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -27,19 +27,15 @@ import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
-import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.message.entity.VersionEvent;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.InetSocketAddress;
-import java.util.Date;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -49,20 +45,17 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Node extends BaseNulsData {
 
-    public static final int SAME_IP_MAX_COUNT = 10;
-    public static final int FAIL_MAX_COUNT = 20;
-
-    private int magicNumber;
-
-    private String channelId;
-
     private String id;
 
     private String ip;
 
     private Integer port;
 
-    private Integer severPort;
+    private Integer severPort = 0;
+
+    private int magicNumber;
+
+    private String channelId;
 
     private Long lastTime;
 
@@ -91,31 +84,31 @@ public class Node extends BaseNulsData {
 
     private boolean canConnect;
 
-    private boolean reset;
-
-    private VersionEvent versionMessage;
+    private volatile VersionEvent versionMessage;
 
     public Node() {
-        this.groupSet = ConcurrentHashMap.newKeySet();
+        this.status = CLOSE;
+        groupSet = ConcurrentHashMap.newKeySet();
     }
 
-    public Node(int type) {
+    public Node(String ip, int port, int type) {
         this();
+        this.ip = ip;
+        this.port = port;
+        if (type == Node.OUT) {
+            this.severPort = port;
+        }
         this.type = type;
     }
 
-    public Node(int type, String ip, int port, String channelId) {
-        this(type);
-        this.port = port;
-        this.ip = ip;
-        this.channelId = channelId;
+    public Node(String ip, int port, int severPort, int type) {
+        this(ip, port, type);
+        this.severPort = severPort;
     }
 
-    public Node(int magicNumber, int type, String ip, int port) {
-        this(type);
-        this.magicNumber = magicNumber;
-        this.port = port;
-        this.ip = ip;
+    public Node(String id, String ip, int port, int serverPort, int type) {
+        this(ip, port, serverPort, type);
+        this.id = id;
     }
 
     public void destroy() {
@@ -174,20 +167,29 @@ public class Node extends BaseNulsData {
         }
     }
 
+    public void addGroup(String groupName) {
+        this.groupSet.add(groupName);
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("{");
-//        sb.append("ip: '" + getIp() + "',");
-//        sb.append("port: " + getPort() + ",");
         sb.append("id:" + getId() + ",");
+        sb.append("ip: '" + getIp() + "',");
+        sb.append("port: " + getPort() + ",");
         sb.append("type:" + type + ",");
         sb.append("status:" + status + "}");
 
+//        sb.append("{");
+//        sb.append("ip: '" + getIp() + "',");
+//        sb.append("port: " + getPort() + ",");
+//        sb.append("id:" + getId() + ",");
+//        sb.append("type:" + type + ",");
+//        sb.append("status:" + status + "}");
 //        if (lastTime == null) {
 //            lastTime = System.currentTimeMillis();
 //        }
-//
 //        sb.append("lastTime: " + DateUtil.convertDate(new Date(lastTime)) + ",");
 //        sb.append("magicNumber: " + magicNumber + "}");
         return sb.toString();
@@ -297,9 +299,15 @@ public class Node extends BaseNulsData {
     }
 
     public String getId() {
-        if (StringUtils.isBlank(id)) {
-            id = ip + ":" + port;
+        id = ip + ":" + port;
+        return id;
+    }
+
+    public String getPoId() {
+        if (severPort == null || severPort == 0) {
+            severPort = port;
         }
+        id = ip + ":" + severPort;
         return id;
     }
 
@@ -308,9 +316,6 @@ public class Node extends BaseNulsData {
     }
 
     public Integer getSeverPort() {
-        //if(severPort == null) {
-        //    severPort = 0;
-        //}
         return severPort;
     }
 
@@ -324,13 +329,5 @@ public class Node extends BaseNulsData {
 
     public void setCanConnect(boolean canConnect) {
         this.canConnect = canConnect;
-    }
-
-    public boolean isReset() {
-        return reset;
-    }
-
-    public void setReset(boolean reset) {
-        this.reset = reset;
     }
 }

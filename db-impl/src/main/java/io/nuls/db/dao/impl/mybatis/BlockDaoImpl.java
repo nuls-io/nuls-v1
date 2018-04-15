@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ **
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ **
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ **
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ **
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -108,7 +108,7 @@ public class BlockDaoImpl extends BaseDaoImpl<BlockHeaderMapper, String, BlockHe
     }
 
     @Override
-    public Page<BlockHeaderPo> getBlockListByAddress(String nodeAddress, int type, int pageNumber, int pageSize) {
+    public Page<BlockHeaderPo> getBlockListByAddress(String nodeAddress, int type, int start,int limit) {
         Searchable searchable = new Searchable();
         if (type == 1) {
             searchable.addCondition("a.agent_address", SearchOperator.eq, nodeAddress);
@@ -116,30 +116,24 @@ public class BlockDaoImpl extends BaseDaoImpl<BlockHeaderMapper, String, BlockHe
             searchable.addCondition("a.packing_address", SearchOperator.eq, nodeAddress);
         }
 
-        PageHelper.startPage(pageNumber, pageSize);
+        PageHelper.offsetPage(start,limit);
         PageHelper.orderBy("b.height desc");
         List<BlockHeaderPo> blockList = getMapper().getBlockByAddress(searchable);
         PageInfo<BlockHeaderPo> pageInfo = new PageInfo<>(blockList);
         Page<BlockHeaderPo> page = new Page<>();
         page.setTotal(pageInfo.getTotal());
-        page.setPageNumber(pageNumber);
-        page.setPageSize(pageSize);
-        page.setPages(pageInfo.getPages());
         page.setList(blockList);
         return page;
     }
 
     @Override
-    public Page<BlockHeaderPo> getBlockHeaderList(int pageNumber, int pageSize) {
-        PageHelper.startPage(pageNumber, pageSize);
+    public Page<BlockHeaderPo> getBlockHeaderList(int start,int limit) {
+        PageHelper.offsetPage(start,limit);
         PageHelper.orderBy("height desc");
         List<BlockHeaderPo> blockList = getMapper().selectList(new Searchable());
         PageInfo<BlockHeaderPo> pageInfo = new PageInfo<>(blockList);
         Page<BlockHeaderPo> page = new Page<>();
         page.setTotal(pageInfo.getTotal());
-        page.setPageNumber(pageNumber);
-        page.setPageSize(pageSize);
-        page.setPages(pageInfo.getPages());
         page.setList(blockList);
         return page;
     }

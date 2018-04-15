@@ -28,15 +28,12 @@ import io.nuls.core.event.BaseEvent;
 import io.nuls.network.entity.Node;
 import io.nuls.network.message.NetworkCacheService;
 import io.nuls.network.message.NetworkEventResult;
-import io.nuls.network.message.entity.GetNodeEvent;
-import io.nuls.network.message.entity.GetNodesIpEvent;
-import io.nuls.network.message.entity.NodeEvent;
 import io.nuls.network.message.entity.NodesIpEvent;
 import io.nuls.network.message.handler.NetWorkEventHandler;
 import io.nuls.network.service.NetworkService;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -61,7 +58,7 @@ public class GetNodesIpEventHandler implements NetWorkEventHandler {
 
     @Override
     public NetworkEventResult process(BaseEvent event, Node node) {
-        List<Node> availableNodes = getNetworkService().getAvailableNodes();
+        Collection<Node> availableNodes = getNetworkService().getAvailableNodes();
         List<String> ipList = new ArrayList<>();
         for (Node n : availableNodes) {
             ipList.add(n.getIp());

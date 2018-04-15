@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ **
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ **
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ **
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ **
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -28,8 +28,10 @@ import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeGroup;
 import io.nuls.network.entity.param.AbstractNetworkParam;
+import io.nuls.network.message.entity.VersionEvent;
 
 import java.nio.ByteBuffer;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,29 +46,33 @@ public interface NetworkService {
 
     void start();
 
-    void reset();
-
     void shutdown();
 
     void removeNode(String nodeId);
 
     void removeNode(String nodeId, int type);
 
+    void deleteNode(String nodeId);
+
     Map<String, Node> getNodes();
 
     Node getNode(String nodeId);
 
-    List<Node> getAvailableNodes();
+    Collection<Node> getAvailableNodes();
 
     Set<String> getNodesIp();
 
     boolean addNode(Node node);
 
+    boolean addConnNode(Node node);
+
     boolean isSeedNode(String ip);
+
+    void saveNode(Node node);
 
     boolean isSeed();
 
-    void handshakeNode(Node node);
+    boolean handshakeNode(String groupName, Node node, VersionEvent versionEvent);
 
     void blackNode(String nodeId, int status);
 
@@ -93,5 +99,7 @@ public interface NetworkService {
     BroadcastResult sendToGroup(BaseEvent event, String groupName, String excludeNodeId, boolean asyn);
 
     void receiveMessage(ByteBuffer buffer, Node node);
+
+    void reset();
 
 }

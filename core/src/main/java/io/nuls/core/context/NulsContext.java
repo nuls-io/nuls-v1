@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ **
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ **
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ **
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ **
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -42,7 +42,7 @@ import java.util.Set;
  * @author Niels
  */
 public class NulsContext {
-    private static String CACHED_PASSWORD_OF_WALLET = "nuls123456";
+    private static String CACHED_PASSWORD_OF_WALLET  ;
 
     private static final HashMap<String, Short> CHAIN_ID_MAP = new HashMap<String, Short>();
     public static String DEFAULT_ENCODING = "UTF-8";
@@ -188,6 +188,12 @@ public class NulsContext {
     }
 
     public static String getCachedPasswordOfWallet() {
+        if(null==CACHED_PASSWORD_OF_WALLET){
+            CACHED_PASSWORD_OF_WALLET = PackingPasswordUtils.read();
+        }
+        if(null==CACHED_PASSWORD_OF_WALLET){
+            CACHED_PASSWORD_OF_WALLET = "nuls123456";
+        }
         return CACHED_PASSWORD_OF_WALLET;
     }
 

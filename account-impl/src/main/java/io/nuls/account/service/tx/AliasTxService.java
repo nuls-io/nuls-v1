@@ -36,7 +36,6 @@ import io.nuls.core.tx.serivce.TransactionService;
 import io.nuls.db.dao.AccountAliasDataService;
 import io.nuls.db.entity.AliasPo;
 import io.nuls.db.transactional.annotation.DbSession;
-import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.db.transactional.annotation.PROPAGATION;
 
 /**

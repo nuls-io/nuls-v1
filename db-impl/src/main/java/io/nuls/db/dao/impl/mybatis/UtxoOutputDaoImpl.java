@@ -220,8 +220,8 @@ public class UtxoOutputDaoImpl extends BaseDaoImpl<UtxoOutputMapper, Map<String,
     }
 
     @Override
-    public void unlockTxOutput(String txHash, long lockTime) {
-        getMapper().unlockTxOutput(txHash, lockTime);
+    public void unlockTxOutput(String txHash) {
+        getMapper().unlockTxOutput(txHash);
     }
 
     @Override

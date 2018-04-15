@@ -158,6 +158,7 @@ public class MeetingRound {
             str.append(member.getPackingAddress());
             str.append(" ,order:" + member.getPackingIndexOfRound());
             str.append(",packTime:" + new Date(member.getPackEndTime()));
+            str.append(",creditVal:"+member.getRealCreditVal());
             str.append("\n");
         }
         if (null == this.getPreRound()) {

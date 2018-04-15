@@ -50,11 +50,4 @@ public class GetEventBodyEvent extends io.nuls.core.event.BaseEvent<NulsDigestDa
         return null;
     }
 
-    @Override
-    public Object copy() {
-        GetEventBodyEvent event = new GetEventBodyEvent();
-        NulsDigestData data = new NulsDigestData(this.getEventBody().getWholeBytes());
-        event.setEventBody(data);
-        return event;
-    }
 }

@@ -45,7 +45,8 @@ public interface TransactionConstant {
      */
     int TX_TYPE_REGISTER_AGENT = 90;
     int TX_TYPE_JOIN_CONSENSUS = 91;
-    int TX_TYPE_EXIT_CONSENSUS = 92;
+    int TX_TYPE_CANCEL_DEPOSIT = 92;
+    int TX_TYPE_STOP_AGENT = 95;
     int TX_TYPE_YELLOW_PUNISH = 93;
     int TX_TYPE_RED_PUNISH = 94;
 

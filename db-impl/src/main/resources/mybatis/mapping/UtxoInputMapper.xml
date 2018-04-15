@@ -4,7 +4,7 @@
   <resultMap id="BaseResultMap" type="io.nuls.db.entity.UtxoInputPo">
     <id column="tx_hash" jdbcType="VARCHAR" property="txHash" />
     <id column="in_index" jdbcType="INTEGER" property="inIndex" />
-    <result column="from_hash" jdbcType="VARCHAR" property="fromIndex" />
+    <result column="from_hash" jdbcType="VARCHAR" property="fromHash" />
     <result column="from_index" jdbcType="INTEGER" property="fromIndex" />
   </resultMap>
 
@@ -66,4 +66,11 @@
     delete from utxo_input
     <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
   </delete>
+
+  <select id="selectBySearchable" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from utxo_input
+    <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
+  </select>
 </mapper>

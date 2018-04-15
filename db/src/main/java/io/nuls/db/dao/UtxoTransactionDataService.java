@@ -23,7 +23,6 @@
  */
 package io.nuls.db.dao;
 
-import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.dto.Page;
 import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.entity.TransactionPo;
@@ -66,7 +65,10 @@ public interface UtxoTransactionDataService {
 
     List<UtxoInputPo> getTxInputs(String txHash);
 
+    UtxoInputPo getTxInput(String fromHash, int fromIndex);
+
     List<UtxoOutputPo> getTxOutputs(String txHash);
+
 
     List<UtxoOutputPo> getAccountOutputs(String address, byte status);
 
@@ -84,7 +86,7 @@ public interface UtxoTransactionDataService {
 
     long getBlockReward(long blockHeight);
 
-    long getBlockFee(long blockHeight);
+    Long getBlockFee(long blockHeight);
 
     long getLastDayTimeReward();
 
@@ -92,7 +94,7 @@ public interface UtxoTransactionDataService {
 
     long getAgentReward(String address, int type);
 
-    void unlockTxOutput(String txHash, long lockTime);
+    void unlockTxOutput(String txHash);
 
     void lockTxOutput(String txHash);
 }

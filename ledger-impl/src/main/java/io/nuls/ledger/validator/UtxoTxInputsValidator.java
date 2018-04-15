@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ * *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ * *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ * *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ * *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,11 +24,13 @@
 package io.nuls.ledger.validator;
 
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.script.P2PKHScriptSig;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
+import io.nuls.ledger.entity.OutPutStatusEnum;
 import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.UtxoInput;
 import io.nuls.ledger.entity.UtxoOutput;
@@ -66,7 +68,12 @@ public class UtxoTxInputsValidator implements NulsDataValidator<AbstractCoinTran
             }
 
             if (tx.getStatus() == TxStatusEnum.CACHED) {
-                if (!output.isUsable()) {
+                if (tx.getType() == TransactionConstant.TX_TYPE_STOP_AGENT) {
+                    if (output.getStatus() != OutPutStatusEnum.UTXO_UNCONFIRMED_CONSENSUS_LOCK &&
+                            output.getStatus() != OutPutStatusEnum.UTXO_CONFIRMED_CONSENSUS_LOCK) {
+                        return ValidateResult.getFailedResult(ErrorCode.UTXO_STATUS_CHANGE);
+                    }
+                } else if (!output.isUsable()) {
                     return ValidateResult.getFailedResult(ErrorCode.UTXO_STATUS_CHANGE);
                 }
             } else if (tx.getStatus() == TxStatusEnum.AGREED) {
