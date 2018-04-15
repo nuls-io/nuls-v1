@@ -676,6 +676,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     @DbSession
     public void unlockTxRollback(String txHash) {
+        Log.info("-------------- exit agent unlockTxRollback  ------------------txHash:" + txHash);
         UtxoOutput output = ledgerCacheService.getUtxo(txHash + "-" + 0);
         if (output != null) {
             if (OutPutStatusEnum.UTXO_UNCONFIRMED_UNSPENT == output.getStatus()) {
