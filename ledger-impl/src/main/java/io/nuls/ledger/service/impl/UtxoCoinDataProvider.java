@@ -78,7 +78,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 
     private UtxoCoinManager coinManager = UtxoCoinManager.getInstance();
 
-    private Lock lock = new ReentrantLock();
+    private static Lock lock = new ReentrantLock();
 
     @Override
     public CoinData parse(NulsByteBuffer byteBuffer) throws NulsException {
