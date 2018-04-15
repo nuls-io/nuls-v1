@@ -576,17 +576,22 @@ public class AccountServiceImpl implements AccountService {
             }
 
             event.setEventBody(aliasTx);
-            List<String> nodeList = eventBroadcaster.broadcastAndCache(event, true);
-            if (nodeList.size() > 0) {
-                SetAliasNotice notice = new SetAliasNotice();
-                notice.setEventBody(aliasTx);
-                eventBroadcaster.publishToLocal(notice);
-                Result result = Result.getSuccess();
-                result.setObject(aliasTx.getHash().getDigestHex());
-                return result;
-            } else {
-                Result result = Result.getFailed(ErrorCode.NET_BROADCAST_FAIL);
-                return result;
+            boolean b  = eventBroadcaster.publishToLocal(event);
+//            if (nodeList.size() > 0) {
+//                SetAliasNotice notice = new SetAliasNotice();
+//                notice.setEventBody(aliasTx);
+//                eventBroadcaster.publishToLocal(notice);
+//                Result result = Result.getSuccess();
+//                result.setObject(aliasTx.getHash().getDigestHex());
+//                return result;
+//            } else {
+//                Result result = Result.getFailed(ErrorCode.NET_BROADCAST_FAIL);
+//                return result;
+//            }
+            if(b){
+                return Result.getSuccess();
+            }else{
+                return Result.getFailed("publish failed!");
             }
         } catch (Exception e) {
             Log.error(e);

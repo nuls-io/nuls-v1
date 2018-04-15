@@ -49,11 +49,11 @@ public class EventBroadcasterImpl implements EventBroadcaster {
     private EventBusService eventBusService;
 
     @Override
-    public List<String> broadcastHashAndCache(BaseEvent event, boolean needToSelf) {
+    public List<String> broadcastHashAndCache(BaseEvent event) {
         BroadcastResult result = this.networkService.sendToAllNode(new CommonDigestEvent(event.getHash()),false);
-        if (needToSelf) {
-            eventBusService.publishLocalEvent(event);
-        }
+//        if (needToSelf) {
+//            eventBusService.publishLocalEvent(event);
+//        }
         if (result.isSuccess()) {
             eventCacheService.cacheSendedEvent(event);
         }
@@ -61,11 +61,11 @@ public class EventBroadcasterImpl implements EventBroadcaster {
     }
 
     @Override
-    public List<String> broadcastHashAndCache(BaseEvent event, boolean needToSelf, String excludeNodeId) {
+    public List<String> broadcastHashAndCache(BaseEvent event, String excludeNodeId) {
         BroadcastResult result = this.networkService.sendToAllNode(new CommonDigestEvent(event.getHash()), excludeNodeId, false);
-        if (needToSelf) {
-            eventBusService.publishLocalEvent(event);
-        }
+//        if (needToSelf) {
+//            eventBusService.publishLocalEvent(event);
+//        }
         if (result.isSuccess()) {
             eventCacheService.cacheSendedEvent(event);
         }
@@ -85,11 +85,11 @@ public class EventBroadcasterImpl implements EventBroadcaster {
     }
 
     @Override
-    public List<String> broadcastAndCache(BaseEvent event, boolean needToSelf, String excludeNodeId) {
+    public List<String> broadcastAndCache(BaseEvent event, String excludeNodeId) {
         BroadcastResult result = networkService.sendToAllNode(event, excludeNodeId, false);
-        if (needToSelf) {
-            eventBusService.publishLocalEvent(event);
-        }
+//        if (needToSelf) {
+//            eventBusService.publishLocalEvent(event);
+//        }
         if (result.isSuccess()) {
             eventCacheService.cacheSendedEvent(event);
         }
@@ -97,11 +97,11 @@ public class EventBroadcasterImpl implements EventBroadcaster {
     }
 
     @Override
-    public List<String> broadcastAndCache(BaseEvent event, boolean needToSelf) {
+    public List<String> broadcastAndCache(BaseEvent event) {
         BroadcastResult result = networkService.sendToAllNode(event, false);
-        if (needToSelf) {
-            eventBusService.publishLocalEvent(event);
-        }
+//        if (needToSelf) {
+//            eventBusService.publishLocalEvent(event);
+//        }
         if (result.isSuccess()) {
             eventCacheService.cacheSendedEvent(event);
         }
@@ -118,11 +118,11 @@ public class EventBroadcasterImpl implements EventBroadcaster {
     }
 
     @Override
-    public boolean broadcastHashAndCacheAysn(BaseEvent event, boolean needToSelf, String excludeNodeId) {
+    public boolean broadcastHashAndCacheAysn(BaseEvent event, String excludeNodeId) {
         BroadcastResult result = this.networkService.sendToAllNode(new CommonDigestEvent(event.getHash()), excludeNodeId, true);
-        if (needToSelf) {
-            eventBusService.publishLocalEvent(event);
-        }
+//        if (needToSelf) {
+//            eventBusService.publishLocalEvent(event);
+//        }
         if (result.isSuccess()) {
             eventCacheService.cacheSendedEvent(event);
         }
@@ -130,11 +130,11 @@ public class EventBroadcasterImpl implements EventBroadcaster {
     }
 
     @Override
-    public boolean broadcastAndCacheAysn(BaseEvent event, boolean needToSelf) {
+    public boolean broadcastAndCacheAysn(BaseEvent event) {
         BroadcastResult result = networkService.sendToAllNode(event, true);
-        if (needToSelf) {
-            eventBusService.publishLocalEvent(event);
-        }
+//        if (needToSelf) {
+//            eventBusService.publishLocalEvent(event);
+//        }
         if (result.isSuccess()) {
             eventCacheService.cacheSendedEvent(event);
         }

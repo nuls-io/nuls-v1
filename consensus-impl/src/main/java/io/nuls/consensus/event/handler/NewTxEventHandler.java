@@ -77,7 +77,7 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
         if (result.isFailed()) {
             if (result.getErrorCode() == ErrorCode.ORPHAN_TX) {
                 txCacheManager.putTxToOrphanCache(tx);
-                eventBroadcaster.broadcastHashAndCacheAysn(event, false, fromId);
+                eventBroadcaster.broadcastHashAndCacheAysn(event, fromId);
                 return;
             }
             if (result.getLevel() == SeverityLevelEnum.NORMAL_FOUL) {
@@ -93,8 +93,10 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
                 ledgerService.approvalTx(tx);
             }
             txCacheManager.putTxToReceivedCache(tx);
-            if (!isMine) {
-                eventBroadcaster.broadcastHashAndCacheAysn(event, false, fromId);
+            if (isMine) {
+                eventBroadcaster.broadcastAndCache(event);
+            } else {
+                eventBroadcaster.broadcastHashAndCacheAysn(event, fromId);
             }
         } catch (Exception e) {
             Log.error(e);

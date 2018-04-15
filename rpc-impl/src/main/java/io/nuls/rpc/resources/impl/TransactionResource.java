@@ -80,8 +80,8 @@ public class TransactionResource {
         }
         TransactionEvent event = new TransactionEvent();
         event.setEventBody(tx);
-        List<String> list = eventBroadcaster.broadcastAndCache(event, true);
-        return RpcResult.getSuccess().setData(list);
+        boolean b = eventBroadcaster.publishToLocal(event);
+        return RpcResult.getSuccess().setData(b);
 
     }
 

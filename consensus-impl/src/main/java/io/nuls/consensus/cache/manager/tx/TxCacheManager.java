@@ -56,14 +56,17 @@ public enum TxCacheManager {
     }
 
     public void putTxToOrphanCache(Transaction tx) {
+        BlockLog.info("put orphan:{} ==================================================", tx.getHash());
         orphanTxCacheManager.putTx(tx);
     }
 
     public void putTxToReceivedCache(Transaction tx) {
+        BlockLog.info("put received:{} ==================================================", tx.getHash());
         receivedTxCacheManager.putTx(tx);
     }
 
     public void putTxToConfirmingCache(Transaction tx) {
+        BlockLog.info("put confirming:{} ==================================================", tx.getHash());
         confirmingTxCacheManager.putTx(tx);
     }
 

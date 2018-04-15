@@ -264,7 +264,7 @@ public class ConsensusMeetingRunner implements Runnable {
         smallBlock.setTxHashList(txHashList);
         BlockLog.info(str.toString());
         event.setEventBody(smallBlock);
-        List<String> nodeIdList = eventBroadcaster.broadcastAndCache(event, false);
+        List<String> nodeIdList = eventBroadcaster.broadcastAndCache(event);
         StringBuilder strb = new StringBuilder("send block height:" + block.getHeader().getHeight() + ", hash:" + block.getHeader().getHash());
         for (String nodeId : nodeIdList) {
             strb.append("\n" + ", node:" + nodeId);

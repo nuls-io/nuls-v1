@@ -1,12 +1,11 @@
 package io.nuls.consensus.service.impl;
 
+import io.nuls.consensus.manager.ConsensusManager;
 import io.nuls.consensus.service.intf.DownloadService;
 import io.nuls.consensus.service.intf.SystemService;
-import io.nuls.consensus.thread.ConsensusMeetingRunner;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
-import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.network.service.NetworkService;
 
 /**
@@ -39,10 +38,7 @@ public class SystemServiceImpl implements SystemService {
         DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
         downloadService.reset();
 
-        NulsContext.getServiceBean(LedgerService.class).resetLedgerCache();
-
-        ConsensusMeetingRunner consensusMeetingRunner = ConsensusMeetingRunner.getInstance();
-        consensusMeetingRunner.resetConsensus();
+        ConsensusManager.getInstance().clearCache();
 
         Log.info("---------------reset end----------------");
 

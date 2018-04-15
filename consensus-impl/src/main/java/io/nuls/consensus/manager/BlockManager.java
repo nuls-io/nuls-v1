@@ -329,6 +329,7 @@ public class BlockManager {
             Transaction tx = txList.get(i);
             if (tx.getStatus() == TxStatusEnum.AGREED) {
                 try {
+
                     ledgerService.rollbackTx(tx);
 
                 } catch (NulsException e) {

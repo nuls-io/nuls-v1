@@ -131,7 +131,7 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
         if(needForward) {
             SmallBlockEvent newBlockEvent = new SmallBlockEvent();
             newBlockEvent.setEventBody(smallBlock);
-            List<String> addressList = eventBroadcaster.broadcastHashAndCache(newBlockEvent, false, fromId);
+            List<String> addressList = eventBroadcaster.broadcastHashAndCache(newBlockEvent,  fromId);
 //            for (String address : addressList) {
 //                BlockLog.debug("forward blockHeader:(" + address + ")" + header.getHeight() + ", hash:" + header.getHash() + ", preHash:" + header.getPreHash() + ", packing:" + Address.fromHashs(header.getPackingAddress()));
 //            }
