@@ -69,6 +69,7 @@ public interface UtxoTransactionDataService {
 
     List<UtxoOutputPo> getTxOutputs(String txHash);
 
+
     List<UtxoOutputPo> getAccountOutputs(String address, byte status);
 
     List<UtxoOutputPo> getAccountUnSpend(String address);
@@ -93,7 +94,7 @@ public interface UtxoTransactionDataService {
 
     long getAgentReward(String address, int type);
 
-    void unlockTxOutput(String txHash, long lockTime);
+    void unlockTxOutput(String txHash);
 
     void lockTxOutput(String txHash);
 }

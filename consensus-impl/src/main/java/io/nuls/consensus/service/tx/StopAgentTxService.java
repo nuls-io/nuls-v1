@@ -135,7 +135,7 @@ public class StopAgentTxService implements TransactionService<StopAgentTransacti
         paramsMap.put("agentHash", raTx.getTxData().getHexHash());
         List<DepositPo> poList = depositDataService.getList(paramsMap);
         for (DepositPo po : poList) {
-            this.ledgerService.unlockTxSave(po.getTxHash(), 0);
+            this.ledgerService.unlockTxSave(po.getTxHash());
         }
         this.agentDataService.deleteById(raTx.getTxData().getHexHash(), tx.getBlockHeight());
         DepositPo delPo = new DepositPo();

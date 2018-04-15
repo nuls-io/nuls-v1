@@ -116,9 +116,9 @@ public interface LedgerService {
 
     long getAgentReward(String address, int type);
 
-    void unlockTxApprove(String txHash, long rockTime);
+    void unlockTxApprove(String txHash);
 
-    void unlockTxSave(String txHash, long lockTime);
+    void unlockTxSave(String txHash);
 
     void unlockTxRollback(String txHash);
 

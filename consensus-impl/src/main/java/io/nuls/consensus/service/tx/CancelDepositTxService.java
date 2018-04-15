@@ -95,7 +95,7 @@ public class CancelDepositTxService implements TransactionService<CancelDepositT
         dpo.setDelHeight(tx.getBlockHeight());
         dpo.setId(cd.getHexHash());
         this.depositDataService.deleteById(dpo);
-        this.ledgerService.unlockTxSave(tx.getTxData().getDigestHex(), 0);
+        this.ledgerService.unlockTxSave(tx.getTxData().getDigestHex());
         manager.delDeposit(pjcTx.getTxData().getHexHash(), tx.getBlockHeight());
 
         TxAccountRelationPo po = new TxAccountRelationPo();
@@ -112,7 +112,7 @@ public class CancelDepositTxService implements TransactionService<CancelDepositT
             joinTx = ConfirmingTxCacheManager.getInstance().getTx(tx.getTxData());
         }
         PocJoinConsensusTransaction realTx = (PocJoinConsensusTransaction) joinTx;
-        this.ledgerService.unlockTxApprove(tx.getTxData().getDigestHex(), 0);
+        this.ledgerService.unlockTxApprove(tx.getTxData().getDigestHex());
         manager.delDeposit(realTx.getTxData().getHexHash(), tx.getBlockHeight());
 
     }
