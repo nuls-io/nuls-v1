@@ -23,6 +23,7 @@
  */
 package io.nuls.protocol.base.event.handler;
 
+import io.nuls.poc.service.intf.ConsensusService;
 import io.nuls.protocol.base.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.protocol.base.cache.manager.tx.OrphanTxCacheManager;
 import io.nuls.protocol.entity.GetTxGroupParam;
@@ -58,6 +59,7 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
     private BlockManager blockManager = BlockManager.getInstance();
+    private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
 
     @Override
     public void onEvent(TxGroupEvent event, String fromId) {
@@ -104,7 +106,9 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
         }
 
         Block block = ConsensusTool.assemblyBlock(header, txMap, smallBlock.getTxHashList());
-        boolean needForward = blockManager.addBlock(block, true, fromId);
+
+//        boolean needForward = blockManager.addBlock(block, true, fromId);
+        boolean needForward = consensusService.newBlock(block, networkService.getNode(fromId));
         if(needForward) {
             SmallBlockEvent newBlockEvent = new SmallBlockEvent();
             newBlockEvent.setEventBody(smallBlock);

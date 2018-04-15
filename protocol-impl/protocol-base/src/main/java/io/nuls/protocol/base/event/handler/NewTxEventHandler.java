@@ -23,6 +23,7 @@
  */
 package io.nuls.protocol.base.event.handler;
 
+import io.nuls.poc.service.intf.ConsensusService;
 import io.nuls.protocol.base.cache.manager.tx.OrphanTxCacheManager;
 import io.nuls.protocol.base.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.core.chain.entity.Transaction;
@@ -53,6 +54,7 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
+    private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
 
     private NewTxEventHandler() {
     }
@@ -95,7 +97,9 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
             if (isMine) {
                 ledgerService.approvalTx(tx, null);
             }
-            cacheManager.putTx(tx);
+//            cacheManager.putTx(tx);
+            consensusService.newTx(tx);
+
             eventBroadcaster.broadcastHashAndCacheAysn(event, false, fromId);
         } catch (Exception e) {
             Log.error(e);

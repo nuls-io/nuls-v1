@@ -24,14 +24,16 @@
 package io.nuls.protocol.base.event.handler;
 
 import io.nuls.account.entity.Address;
+import io.nuls.network.service.NetworkService;
+import io.nuls.poc.service.intf.ConsensusService;
 import io.nuls.protocol.base.cache.manager.tx.ConfirmingTxCacheManager;
 import io.nuls.protocol.base.cache.manager.tx.OrphanTxCacheManager;
-import io.nuls.protocol.base.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.protocol.entity.GetTxGroupParam;
 import io.nuls.protocol.event.GetTxGroupRequest;
 import io.nuls.protocol.base.event.notice.AssembledBlockNotice;
 import io.nuls.protocol.base.manager.BlockManager;
 import io.nuls.protocol.base.cache.manager.block.TemporaryCacheManager;
+import io.nuls.protocol.base.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.protocol.constant.DownloadStatus;
 import io.nuls.protocol.base.constant.PocConsensusConstant;
 import io.nuls.protocol.event.SmallBlockEvent;
@@ -66,6 +68,8 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
     private ConfirmingTxCacheManager confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
     private ReceivedTxCacheManager receivedTxCacheManager = ReceivedTxCacheManager.getInstance();
     private OrphanTxCacheManager orphanTxCacheManager = OrphanTxCacheManager.getInstance();
+    private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
+    private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
 
     @Override
     public void onEvent(SmallBlockEvent event, String fromId) {
@@ -133,7 +137,9 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
             return;
         }
         Block block = ConsensusTool.assemblyBlock(header, txMap, smallBlock.getTxHashList());
-        boolean needForward = blockManager.addBlock(block, true, fromId);
+//        boolean needForward = blockManager.addBlock(block, true, fromId);
+
+        boolean needForward = consensusService.newBlock(block, networkService.getNode(fromId));
         if(needForward) {
             SmallBlockEvent newBlockEvent = new SmallBlockEvent();
             newBlockEvent.setEventBody(smallBlock);
