@@ -75,9 +75,9 @@ public class Bootstrap {
                 Log.info("height:(" + NulsContext.getInstance().getBestBlock().getHeader().getHeight() + "), threadCount:{}, downloadStatus: {}", Thread.activeCount(), NulsContext.getServiceBean(DownloadService.class).getStatus());
             }
             Collection<Node> nodes = NulsContext.getServiceBean(NetworkService.class).getAvailableNodes();
-            for(Node node:nodes){
-                Log.info("height:"+node.getVersionMessage().getBestBlockHeight()+",hash:"+node.getVersionMessage().getBestBlockHash()+",node:"+node.getId());
-            }
+//            for(Node node:nodes){
+//                Log.info("height:"+node.getVersionMessage().getBestBlockHeight()+",hash:"+node.getVersionMessage().getBestBlockHash()+",node:"+node.getId());
+//            }
         }
     }
 

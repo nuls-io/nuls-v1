@@ -25,7 +25,6 @@ package io.nuls.consensus.cache.manager.tx;
 
 import io.nuls.cache.util.CacheMap;
 import io.nuls.consensus.cache.manager.tx.listener.ReceivedTxCacheListener;
-import io.nuls.consensus.constant.ConsensusCacheConstant;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 
@@ -49,7 +48,7 @@ class ReceivedTxCacheManager {
     }
 
     public void init() {
-        txCache = new CacheMap<>(CACHE_NAME, 64, ConsensusCacheConstant.LIVE_TIME, 0, new ReceivedTxCacheListener());
+        txCache = new CacheMap<>(CACHE_NAME, 64, 0, 0, new ReceivedTxCacheListener());
     }
 
     public boolean txExist(NulsDigestData hash) {

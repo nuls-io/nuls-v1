@@ -37,6 +37,7 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.script.P2PKHScript;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.utils.log.BlockLog;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.db.dao.TxAccountRelationDataService;
@@ -125,7 +126,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                         throw new NulsRuntimeException(ErrorCode.UTXO_UNUSABLE);
                     }
                 }
-
+                BlockLog.info("use utxo:txHash:"+tx.getHash()+", utxoKey:"+unSpend.getKey());
                 unSpends.add(unSpend);
                 addressSet.add(unSpend.getAddress());
             }

@@ -29,6 +29,7 @@ package io.nuls.consensus.cache.manager.tx;
 import io.nuls.cache.util.CacheMap;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.utils.log.BlockLog;
 
 import java.util.List;
 
@@ -68,27 +69,36 @@ public enum TxCacheManager {
 
     public void removeTxFromReceivedCache(NulsDigestData hash) {
         receivedTxCacheManager.removeTx(hash);
+        BlockLog.info("remove received:{} ==================================================", hash);
     }
 
     public void removeTxFromConfirmingCache(NulsDigestData hash) {
         confirmingTxCacheManager.removeTx(hash);
+        BlockLog.info("remove Confirming:{} ==================================================", hash);
     }
 
     public void removeTxFromOrphanCache(NulsDigestData hash) {
         orphanTxCacheManager.removeTx(hash);
+        BlockLog.info("remove Orphan:{} ==================================================", hash);
     }
 
 
     public void removeTxesFromReceivedCache(List<NulsDigestData> txHashList) {
-        receivedTxCacheManager.removeTx(txHashList);
+        for(NulsDigestData hash:txHashList){
+            removeTxFromReceivedCache(hash);
+        }
     }
 
     public void removeTxesFromConfirmingCache(List<NulsDigestData> txHashList) {
-        confirmingTxCacheManager.removeTxList(txHashList);
+        for(NulsDigestData hash:txHashList){
+            removeTxFromConfirmingCache(hash);
+        }
     }
 
     public void removeTxesFromOrphanCache(List<NulsDigestData> txHashList) {
-        orphanTxCacheManager.removeTx(txHashList);
+        for(NulsDigestData hash:txHashList){
+            removeTxFromOrphanCache(hash);
+        }
     }
 
     public List<Transaction> getTxListFromReceivedCache() {
@@ -119,6 +129,7 @@ public enum TxCacheManager {
     }
 
     public void clear() {
+        BlockLog.info("clear all tx cache ==================================================");
         this.receivedTxCacheManager.clear();
         this.confirmingTxCacheManager.clear();
         this.orphanTxCacheManager.clear();

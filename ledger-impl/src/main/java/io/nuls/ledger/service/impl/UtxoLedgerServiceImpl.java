@@ -51,7 +51,10 @@ import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.constant.LedgerConstant;
-import io.nuls.ledger.entity.*;
+import io.nuls.ledger.entity.Balance;
+import io.nuls.ledger.entity.OutPutStatusEnum;
+import io.nuls.ledger.entity.UtxoData;
+import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.params.OperationType;
@@ -760,5 +763,11 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             clazz = clazz.getSuperclass();
         }
         return list;
+    }
+
+    @Override
+    public void resetLedgerCache() {
+        ledgerCacheService.clear();
+        UtxoCoinManager.getInstance().cacheAllUnSpendUtxo();
     }
 }
