@@ -671,6 +671,10 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     public void unlockTxSave(String txHash) {
         Log.info("-------------- exit agent unlockTxSave  ------------------txHash:" + txHash);
         txDao.unlockTxOutput(txHash);
+        String key = txHash + "-" + 0;
+        UtxoOutput output = ledgerCacheService.getUtxo(key);
+        ledgerCacheService.removeUtxo(key);
+        UtxoTransactionTool.getInstance().calcBalance(output.getAddress(), false);
     }
 
     @Override
