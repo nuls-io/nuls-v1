@@ -72,7 +72,7 @@ public class DepositAmountValidator implements NulsDataValidator<PocJoinConsensu
         if (limit.isGreaterThan(data.getTxData().getExtend().getDeposit())) {
             return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_NOT_ENOUGH);
         }
-        if (max.isLessThan(total)) {
+        if (max.isLessThan(total.subtract(data.getTxData().getExtend().getDeposit()))) {
             return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_TOO_MUCH);
         }
 
