@@ -92,7 +92,7 @@ public class EventManager {
         try {
             event.parse(new NulsByteBuffer(bytes));
         } catch (Exception e) {
-            Log.error(e);
+            Log.error(Arrays.toString(bytes), e);
             throw e;
         }
         return event;
