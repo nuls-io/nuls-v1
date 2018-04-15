@@ -303,7 +303,7 @@ public class BlockManager {
                 try {
                     tx.verifyWithException();
                     this.ledgerService.approvalTx(tx);
-                } catch (NulsException e) {
+                } catch (Exception e) {
                     rollbackTxList(block.getTxs(), 0, i);
                     Log.error(e);
                     throw new NulsRuntimeException(e);
@@ -342,7 +342,6 @@ public class BlockManager {
             }
         }
         confirmingTxCacheManager.removeTxList(txHashList);
-
     }
 
     private void rollbackAppraval(Block block) {
