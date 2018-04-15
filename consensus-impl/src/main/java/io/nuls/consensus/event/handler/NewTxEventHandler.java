@@ -75,7 +75,7 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
         if (TxCacheManager.TX_CACHE_MANAGER.getTx(tx.getHash()) != null) {
             return;
         }
-        Log.info("receive tx:("+tx.getType()+"):["+fromId+"]"+tx.getHash());
+//        Log.info("receive tx:("+tx.getType()+"):["+fromId+"]"+tx.getHash());
         ValidateResult result = tx.verify();
         if (result.isFailed()) {
             if (result.getErrorCode() == ErrorCode.ORPHAN_TX) {
