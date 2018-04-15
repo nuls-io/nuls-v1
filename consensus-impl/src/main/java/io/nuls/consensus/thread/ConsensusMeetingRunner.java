@@ -298,8 +298,7 @@ public class ConsensusMeetingRunner implements Runnable {
         while (!isNetworkSynchronizeComplete()) {
             try {
                 Thread.sleep(1000L);
-
-                BlockLog.info("wait for network synchronize complete,status:" + downloadService.getStatus());
+//                BlockLog.info("wait for network synchronize complete,status:" + downloadService.getStatus());
             } catch (InterruptedException e) {
                 Log.error(e);
             }
