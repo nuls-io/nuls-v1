@@ -26,6 +26,7 @@ package io.nuls.consensus.entity.validator.block;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 
@@ -52,6 +53,9 @@ public class BlockMaxSizeValidator implements NulsDataValidator<Block> {
         }
         long length = 0L;
         for (Transaction tx : data.getTxs()) {
+            if(tx.getType()== TransactionConstant.TX_TYPE_COIN_BASE||tx.getType()== TransactionConstant.TX_TYPE_YELLOW_PUNISH||tx.getType()== TransactionConstant.TX_TYPE_RED_PUNISH){
+                continue;
+            }
             length += tx.size();
         }
         if (length >= PocConsensusConstant.MAX_BLOCK_SIZE) {
