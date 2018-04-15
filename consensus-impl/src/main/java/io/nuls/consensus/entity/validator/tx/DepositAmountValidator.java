@@ -33,6 +33,7 @@ import io.nuls.consensus.entity.tx.PocJoinConsensusTransaction;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.SeverityLevelEnum;
+import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.validate.NulsDataValidator;
@@ -61,7 +62,7 @@ public class DepositAmountValidator implements NulsDataValidator<PocJoinConsensu
         Na limit = PocConsensusConstant.ENTRUSTER_DEPOSIT_LOWER_LIMIT;
         Na max = PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT;
         //+2原因：验证的交易可能属于a高度，从cache中获取它之前的抵押时，只能获取某个高度之前的，所以是当前最新高度a-1之后的第二个高度
-        List<Consensus<Deposit>> list = consensusCacheManager.getDepositListByAgentId(data.getTxData().getExtend().getAgentHash(), NulsContext.getInstance().getBestHeight()+2);
+        List<Consensus<Deposit>> list = consensusCacheManager.getDepositListByAgentId(data.getTxData().getExtend().getAgentHash(), NulsContext.getInstance().getBestHeight() + 2);
         if (list == null) {
             return ValidateResult.getSuccessResult();
         }
@@ -72,7 +73,10 @@ public class DepositAmountValidator implements NulsDataValidator<PocJoinConsensu
         if (limit.isGreaterThan(data.getTxData().getExtend().getDeposit())) {
             return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_NOT_ENOUGH);
         }
-        if (max.isLessThan(total.subtract(data.getTxData().getExtend().getDeposit()))) {
+
+        if (data.getStatus() == TxStatusEnum.CACHED && max.isLessThan(total)) {
+            return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_TOO_MUCH);
+        } else if (data.getStatus() != TxStatusEnum.CACHED && max.isLessThan(total.subtract(data.getTxData().getExtend().getDeposit()))) {
             return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_TOO_MUCH);
         }
 
