@@ -1,6 +1,7 @@
 package io.nuls.rpc.entity;
 
 import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.crypto.Hex;
@@ -100,6 +101,10 @@ public class TransactionDto {
 
     public TransactionDto(Transaction tx, String address) {
         this(tx);
+        if(tx.getType() >= TransactionConstant.TX_TYPE_REGISTER_AGENT) {
+            this.value = 0L;
+            return;
+        }
         if (StringUtils.isNotBlank(address)) {
             boolean isTransfer = false;
             long value = 0;
