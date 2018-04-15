@@ -36,10 +36,10 @@ import io.nuls.core.utils.crypto.Hex;
 public class AccountToolTest {
     @org.junit.Test
     public void createAccount() throws Exception {
-        for( int i=0;i<10;i++) {
+        for( int i=0;i<100;i++) {
             Account account = AccountTool.createAccount();
-//            System.out.println("address:"+account.getAddress().getBase58());
-//            System.out.println("priKey :"+Hex.encode(account.getPriKey()));
+            System.out.println("address:"+account.getAddress().getBase58());
+            System.out.println("priKey :"+Hex.encode(account.getPriKey()));
         }
     }
 
