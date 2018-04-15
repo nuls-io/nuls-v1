@@ -69,6 +69,9 @@ public class BlockEventHandler extends AbstractEventHandler<BlockEvent> {
             }
             if (cachedTx != null && cachedTx.getStatus() != tx.getStatus()) {
                 tx.setStatus(cachedTx.getStatus());
+                if(!(tx instanceof AbstractCoinTransaction)){
+                    continue;
+                }
                 AbstractCoinTransaction coinTx = (AbstractCoinTransaction) tx;
                 AbstractCoinTransaction cachedCoinTx = (AbstractCoinTransaction) cachedTx;
                 coinTx.setCoinData(cachedCoinTx.getCoinData());
