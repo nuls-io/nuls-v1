@@ -344,6 +344,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 cacheTxList.remove(i);
                 continue;
             }
+            UtxoTransactionTool.getInstance().setTxhashToUtxo(tx);
         }
         return cacheTxList;
     }
