@@ -25,6 +25,7 @@
 
 package io.nuls.notify.module;
 
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.event.BaseEvent;
 import io.nuls.core.module.BaseModuleBootstrap;
@@ -42,7 +43,7 @@ public class NotifyModuleBootstrap extends BaseModuleBootstrap {
     short port;
 
     public NotifyModuleBootstrap() {
-        super((short) 10);
+        super((short) NulsConstant.MODULE_ID_NOTIFY);
     }
 
     @Override

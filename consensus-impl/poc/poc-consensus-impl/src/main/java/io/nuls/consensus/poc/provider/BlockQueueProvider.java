@@ -121,6 +121,16 @@ public class BlockQueueProvider implements QueueProvider {
         return blockContainer;
     }
 
+    public long size() {
+        long size = blockQueue.size(QUEUE_NAME_RECEIVE);
+
+        if(!downloadBlockQueueHasDestory) {
+            size += blockQueue.size(QUEUE_NAME_DOWNLOAD);
+        }
+
+        return size;
+    }
+
     @Override
     public void clear() {
         blockQueue.clear(QUEUE_NAME_DOWNLOAD);

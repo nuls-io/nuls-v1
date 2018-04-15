@@ -60,8 +60,10 @@ public class BlockProcess {
         if(chainManager.getMasterChain().verifyAndAddBlock(block, isDownload)) {
             boolean success = blockService.saveBlock(block);
             if(success) {
+                NulsContext.getInstance().setBestBlock(block);
                 // 转发区块
                 forwardingBlock(blockContainer);
+                return true;
             } else {
                 chainManager.getMasterChain().rollback();
                 // if save block fail, put in temporary cache
@@ -80,7 +82,7 @@ public class BlockProcess {
                 chainManager.getChains().add(needVerifyChain);
             }
         }
-        return true;
+        return false;
     }
 
     private void forwardingBlock(BlockContainer blockContainer) {

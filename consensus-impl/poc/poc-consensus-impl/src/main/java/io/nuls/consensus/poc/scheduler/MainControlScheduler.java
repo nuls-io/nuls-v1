@@ -39,7 +39,9 @@ import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.thread.manager.NulsThreadFactory;
 import io.nuls.core.thread.manager.TaskManager;
+import io.nuls.core.utils.log.ConsensusLog;
 import io.nuls.poc.constant.ConsensusStatus;
+import io.nuls.protocol.entity.Consensus;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -103,8 +105,8 @@ public class MainControlScheduler {
         ChainProcess chainProcess = new ChainProcess(chainManager);
         threadPool.scheduleAtFixedRate(new ChainProcessTask(chainProcess), 1000L,200L, TimeUnit.MILLISECONDS);
 
-        ConsensusProcess consensusProcess = new ConsensusProcess(chainManager, roundManager, txMemoryPool);
-        threadPool.scheduleAtFixedRate(new ConsensusProcessTask(consensusProcess), 1000L,500L, TimeUnit.MILLISECONDS);
+        ConsensusProcess consensusProcess = new ConsensusProcess(chainManager, roundManager, txMemoryPool, blockProcess);
+        threadPool.scheduleAtFixedRate(new ConsensusProcessTask(consensusProcess), 1000L,1000L, TimeUnit.MILLISECONDS);
 
         initDatas();
 
@@ -135,9 +137,11 @@ public class MainControlScheduler {
 
             cacheManager.load();
 
-            ConsensusSystemProvider.setConsensusStatus(ConsensusStatus.WAIT_START);
-
+        } catch (Exception e) {
+            //TODO 缓存加载失败的处理
+            ConsensusLog.error(e);
         } finally {
+            ConsensusSystemProvider.setConsensusStatus(ConsensusStatus.WAIT_START);
             Lockers.OUTER_LOCK.unlock();
         }
     }

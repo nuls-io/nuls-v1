@@ -137,4 +137,8 @@ public class ChainManager {
     public void setRoundManager(RoundManager roundManager) {
         this.roundManager = roundManager;
     }
+
+    public Block getBestBlock() {
+        return masterChain.getBestBlock();
+    }
 }

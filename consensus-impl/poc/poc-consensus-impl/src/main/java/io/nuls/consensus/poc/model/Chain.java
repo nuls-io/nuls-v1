@@ -141,4 +141,11 @@ public class Chain implements Cloneable {
     protected Object clone() throws CloneNotSupportedException {
         return super.clone();
     }
+
+    public Block getBestBlock() {
+        if(blockList == null || blockList.size() == 0) {
+            return null;
+        }
+        return blockList.get(blockList.size() - 1);
+    }
 }

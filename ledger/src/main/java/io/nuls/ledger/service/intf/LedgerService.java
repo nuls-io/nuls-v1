@@ -23,10 +23,7 @@
  */
 package io.nuls.ledger.service.intf;
 
-import io.nuls.core.chain.entity.Na;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.Result;
-import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.chain.entity.*;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.db.entity.UtxoOutputPo;
@@ -89,11 +86,11 @@ public interface LedgerService {
 
     boolean checkTxIsMySend(Transaction tx, String address);
 
-    void rollbackTx(Transaction tx) throws NulsException;
+    void rollbackTx(Transaction tx, Block block) throws NulsException;
 
-    void commitTx(Transaction tx) throws NulsException;
+    void commitTx(Transaction tx, Block block) throws NulsException;
 
-    void approvalTx(Transaction tx) throws NulsException;
+    void approvalTx(Transaction tx, Block block) throws NulsException;
 
     void deleteTx(Transaction tx);
 

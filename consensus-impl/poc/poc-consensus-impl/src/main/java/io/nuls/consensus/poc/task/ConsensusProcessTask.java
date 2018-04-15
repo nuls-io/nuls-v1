@@ -24,6 +24,7 @@
 package io.nuls.consensus.poc.task;
 
 import io.nuls.consensus.poc.process.ConsensusProcess;
+import io.nuls.core.utils.log.ConsensusLog;
 
 /**
  * Created by ln on 2018/4/13.
@@ -38,6 +39,15 @@ public class ConsensusProcessTask implements Runnable {
 
     @Override
     public void run() {
-        consensusProcess.process();
+        try {
+            consensusProcess.process();
+        } catch (Exception e) {
+            ConsensusLog.error(e);
+            try {
+                Thread.sleep(1000l);
+            } catch (InterruptedException e1) {
+                e1.printStackTrace();
+            }
+        }
     }
 }

@@ -34,7 +34,7 @@ import io.nuls.core.module.BaseModuleBootstrap;
  */
 public abstract class AbstractConsensusModule extends BaseModuleBootstrap {
     public AbstractConsensusModule() {
-        super(NulsConstant.MODULE_ID_CACHE);
+        super(NulsConstant.MODULE_ID_CONSENSUS);
     }
     public AbstractConsensusModule(short moduleId) {
         super(moduleId);

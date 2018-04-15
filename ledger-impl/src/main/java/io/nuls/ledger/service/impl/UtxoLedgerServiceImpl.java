@@ -448,7 +448,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         } catch (Exception e) {
             Log.error(e);
             try {
-                rollbackTx(tx);
+                rollbackTx(tx, null);
             } catch (NulsException e1) {
                 Log.error(e1);
             }
@@ -550,41 +550,41 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
 
-    public void rollbackTx(Transaction tx) throws NulsException {
+    public void rollbackTx(Transaction tx, Block block) throws NulsException {
         AssertUtil.canNotEmpty(tx, ErrorCode.NULL_PARAMETER);
         if (tx.getStatus() == TxStatusEnum.CACHED) {
             return;
         }
         List<TransactionService> serviceList = getServiceList(tx.getClass());
         for (TransactionService service : serviceList) {
-            service.onRollback(tx);
+            service.onRollback(tx, block);
         }
         tx.setStatus(TxStatusEnum.CACHED);
     }
 
     @Override
     @DbSession
-    public void commitTx(Transaction tx) throws NulsException {
+    public void commitTx(Transaction tx, Block block) throws NulsException {
         AssertUtil.canNotEmpty(tx, ErrorCode.NULL_PARAMETER);
         if (tx.getStatus() != TxStatusEnum.AGREED) {
             return;
         }
         List<TransactionService> serviceList = getServiceList(tx.getClass());
         for (TransactionService service : serviceList) {
-            service.onCommit(tx);
+            service.onCommit(tx, block);
         }
         tx.setStatus(TxStatusEnum.CONFIRMED);
     }
 
     @Override
-    public void approvalTx(Transaction tx) throws NulsException {
+    public void approvalTx(Transaction tx, Block block) throws NulsException {
         AssertUtil.canNotEmpty(tx, ErrorCode.NULL_PARAMETER);
         if (tx.getStatus() == TxStatusEnum.AGREED || tx.getStatus() == TxStatusEnum.CONFIRMED) {
             return;
         }
         List<TransactionService> serviceList = getServiceList(tx.getClass());
         for (TransactionService service : serviceList) {
-            service.onApproval(tx);
+            service.onApproval(tx, block);
         }
         tx.setStatus(TxStatusEnum.AGREED);
     }

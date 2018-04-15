@@ -29,6 +29,7 @@ import io.nuls.consensus.poc.cache.CacheLoader;
 import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.core.exception.NulsException;
 import io.nuls.protocol.base.entity.member.Agent;
 import io.nuls.protocol.base.entity.member.Deposit;
 import io.nuls.protocol.entity.Consensus;
@@ -71,7 +72,7 @@ public class CacheManagerTest extends BaseTestCase {
     }
 
     @Test
-    public void testLoad() {
+    public void testLoad() throws NulsException {
         cacheManager.load();
 
         List<ChainContainer> chains = chainManager.getChains();

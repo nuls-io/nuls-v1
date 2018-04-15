@@ -24,13 +24,26 @@
 
 package io.nuls.consensus.poc.cache;
 
+import io.nuls.consensus.poc.utils.ConsensusTool;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.core.context.NulsContext;
+import io.nuls.core.dto.Page;
+import io.nuls.core.exception.NulsException;
+import io.nuls.db.dao.AgentDataService;
+import io.nuls.db.dao.DepositDataService;
+import io.nuls.db.dao.PunishLogDataService;
+import io.nuls.db.entity.AgentPo;
+import io.nuls.db.entity.BlockHeaderPo;
+import io.nuls.db.entity.DepositPo;
 import io.nuls.db.entity.PunishLogPo;
 import io.nuls.protocol.base.entity.member.Agent;
 import io.nuls.protocol.base.entity.member.Deposit;
 import io.nuls.protocol.entity.Consensus;
+import io.nuls.protocol.intf.BlockService;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -39,27 +52,90 @@ import java.util.List;
 public class CacheLoader {
     //TODO
 
-    public List<Block> loadBlocks(int size) {
-        return null;
+    private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
+    private AgentDataService agentDataService = NulsContext.getServiceBean(AgentDataService.class);
+    private DepositDataService depositDataService = NulsContext.getServiceBean(DepositDataService.class);
+    private PunishLogDataService punishLogDataService = NulsContext.getServiceBean(PunishLogDataService.class);
+
+    public List<Block> loadBlocks(int size) throws NulsException {
+
+        Block block = blockService.getLocalBestBlock();
+
+        long bestBlockHeight = block.getHeader().getHeight();
+
+        List<Block> blockList = blockService.getBlockList(bestBlockHeight - size + 1, bestBlockHeight);
+
+        return blockList;
     }
 
     public List<BlockHeader> loadBlockHeaders(int size) {
-        return null;
+
+        //TODO
+
+        Block block = blockService.getLocalBestBlock();
+
+        long bestBlockHeight = block.getHeader().getHeight();
+
+        List<BlockHeader> blockHeaderList = new ArrayList<>();
+        Page<BlockHeaderPo> page = blockService.getBlockHeaderList(1, (int) bestBlockHeight);
+
+        List<BlockHeaderPo> list = page.getList();
+        for(BlockHeaderPo blockHeaderPo : list) {
+            try {
+                blockHeaderList.add(ConsensusTool.fromPojo(blockHeaderPo));
+            } catch (NulsException e) {
+                e.printStackTrace();
+            }
+        }
+
+        Collections.reverse(blockHeaderList);
+
+        return blockHeaderList;
     }
 
     public List<Consensus<Agent>> loadAgents() {
-        return null;
+
+        Block block = blockService.getLocalBestBlock();
+
+        long bestBlockHeight = block.getHeader().getHeight();
+
+        List<AgentPo> list = agentDataService.getAllList(bestBlockHeight);
+
+        List<Consensus<Agent>> agentList = new ArrayList<>();
+
+        for(AgentPo agentPo : list) {
+            agentList.add(ConsensusTool.fromPojo(agentPo));
+        }
+
+        return agentList;
     }
 
     public List<Consensus<Deposit>> loadDepositList() {
-        return null;
+        Block block = blockService.getLocalBestBlock();
+
+        long bestBlockHeight = block.getHeader().getHeight();
+
+        List<DepositPo> list = depositDataService.getAllList(bestBlockHeight);
+
+        List<Consensus<Deposit>> depositList = new ArrayList<>();
+
+        for(DepositPo depositPo : list) {
+            depositList.add(ConsensusTool.fromPojo(depositPo));
+        }
+
+        return depositList;
     }
 
     public List<PunishLogPo> loadYellowPunishList() {
-        return null;
+        //TODO
+//
+//        List<PunishLogPo> list = punishLogDataService.getList();
+//
+//        return list;
+        return new ArrayList<>();
     }
 
     public List<PunishLogPo> loadRedPunishList() {
-        return null;
+        return new ArrayList<>();
     }
 }

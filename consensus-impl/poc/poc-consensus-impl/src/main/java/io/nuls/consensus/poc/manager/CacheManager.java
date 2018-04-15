@@ -30,6 +30,7 @@ import io.nuls.consensus.poc.model.Chain;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.entity.PunishLogPo;
@@ -52,7 +53,7 @@ public class CacheManager {
         this.chainManager = chainManager;
     }
 
-    public void load() {
+    public void load() throws NulsException {
 
         //load storage data to memory
 
@@ -84,10 +85,10 @@ public class CacheManager {
 
         chainManager.setMasterChain(masterChainContainer);
 
-        chainManager.getRoundManager().calculationAndSet(masterChainContainer);
+        chainManager.getMasterChain().resetRound(false);
     }
 
-    public void reload() {
+    public void reload() throws NulsException {
         clear();
         load();
     }

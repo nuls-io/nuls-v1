@@ -23,6 +23,7 @@
  */
 package io.nuls.core.tx.serivce;
 
+import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.exception.NulsException;
 
@@ -32,9 +33,9 @@ import io.nuls.core.exception.NulsException;
  */
 public interface TransactionService<T extends Transaction> {
 
-    void onRollback(T tx) throws NulsException;
+    void onRollback(T tx, Block block) throws NulsException;
 
-    void onCommit(T tx) throws NulsException;
+    void onCommit(T tx, Block block) throws NulsException;
 
-    void onApproval(T tx) throws NulsException;
+    void onApproval(T tx, Block block) throws NulsException;
 }

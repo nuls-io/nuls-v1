@@ -23,6 +23,7 @@
  */
 package io.nuls.ledger.entity.listener;
 
+import io.nuls.core.chain.entity.Block;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.tx.serivce.TransactionService;
@@ -40,13 +41,13 @@ public class CoinDataTxService implements TransactionService<AbstractCoinTransac
 
     @Override
     @DbSession
-    public void onRollback(AbstractCoinTransaction tx) {
+    public void onRollback(AbstractCoinTransaction tx, Block block) {
         tx.getCoinDataProvider().rollback(tx.getCoinData(), tx);
     }
 
     @Override
     @DbSession
-    public void onCommit(AbstractCoinTransaction tx) {
+    public void onCommit(AbstractCoinTransaction tx, Block block) {
         try {
             tx.getCoinDataProvider().save(tx.getCoinData(), tx);
         } catch (NulsException e) {
@@ -57,7 +58,7 @@ public class CoinDataTxService implements TransactionService<AbstractCoinTransac
 
     @Override
     @DbSession
-    public void onApproval(AbstractCoinTransaction tx) {
+    public void onApproval(AbstractCoinTransaction tx, Block block) {
         try {
             tx.getCoinDataProvider().approve(tx.getCoinData(), tx);
         } catch (NulsException e) {

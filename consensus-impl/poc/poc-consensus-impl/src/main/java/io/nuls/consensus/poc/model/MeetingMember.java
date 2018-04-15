@@ -25,10 +25,10 @@ package io.nuls.consensus.poc.model;
 
 import io.nuls.account.entity.Address;
 import io.nuls.consensus.poc.constant.ConsensusConstant;
-import io.nuls.consensus.poc.entity.Agent;
-import io.nuls.consensus.poc.entity.Deposit;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.crypto.Sha256Hash;
+import io.nuls.protocol.base.entity.member.Agent;
+import io.nuls.protocol.base.entity.member.Deposit;
 import io.nuls.protocol.entity.Consensus;
 
 import java.util.ArrayList;

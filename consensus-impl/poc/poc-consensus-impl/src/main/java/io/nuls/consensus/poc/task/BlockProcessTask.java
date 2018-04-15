@@ -53,6 +53,12 @@ public class BlockProcessTask implements Runnable {
         if(ConsensusSystemProvider.getConsensusStatus().ordinal() <= ConsensusStatus.LOADING_CACHE.ordinal()) {
             return;
         }
+
+        //系统启动，本地高度和网络高度一致，不需要下载区块时，系统需要知道并设置共识状态为运行中
+        if(ConsensusSystemProvider.getConsensusStatus() == ConsensusStatus.WAIT_START && blockQueueProvider.size() == 0L) {
+            ConsensusSystemProvider.setConsensusStatus(ConsensusStatus.RUNNING);
+        }
+
         BlockContainer blockContainer = null;
         while((blockContainer = blockQueueProvider.get()) != null) {
 

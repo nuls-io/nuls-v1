@@ -28,6 +28,7 @@ import io.nuls.account.entity.Alias;
 import io.nuls.account.entity.tx.AliasTransaction;
 import io.nuls.account.service.impl.AccountCacheService;
 import io.nuls.account.util.AccountTool;
+import io.nuls.core.chain.entity.Block;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
@@ -57,7 +58,7 @@ public class AliasTxService implements TransactionService<AliasTransaction> {
 
     @Override
     @DbSession
-    public void onRollback(AliasTransaction tx) throws NulsException {
+    public void onRollback(AliasTransaction tx, Block block) throws NulsException {
         AliasPo po = AccountTool.toAliasPojo(tx.getTxData());
         getAliasDataService().rollbackAlias(po);
         Account account = accountCacheService.getAccountByAddress(po.getAddress());
@@ -69,7 +70,7 @@ public class AliasTxService implements TransactionService<AliasTransaction> {
 
     @Override
     @DbSession
-    public void onCommit(AliasTransaction tx) throws NulsException {
+    public void onCommit(AliasTransaction tx, Block block) throws NulsException {
         Alias alias = tx.getTxData();
         alias.setStatus(1);
         getAliasDataService().saveAlias(AccountTool.toAliasPojo(alias));
@@ -82,7 +83,7 @@ public class AliasTxService implements TransactionService<AliasTransaction> {
 
     @Override
     @DbSession
-    public void onApproval(AliasTransaction tx) throws NulsException {
+    public void onApproval(AliasTransaction tx, Block block) throws NulsException {
         Alias alias = tx.getTxData();
         AliasPo po = getAliasDataService().getAlias(alias.getAlias());
         if (po != null) {
