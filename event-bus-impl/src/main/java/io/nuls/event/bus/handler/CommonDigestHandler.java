@@ -52,7 +52,7 @@ public class CommonDigestHandler extends AbstractEventHandler<CommonDigestEvent>
             return;
         }
 //        Log.info("get event:" + event.getEventBody() + ", " + fromId);
-        eventCacheService.cacheSendedEvent(event);
+        eventCacheService.cacheSendedEvent(getEventBodyEvent);
         eventBroadcaster.sendToNode(getEventBodyEvent, fromId);
     }
 }
