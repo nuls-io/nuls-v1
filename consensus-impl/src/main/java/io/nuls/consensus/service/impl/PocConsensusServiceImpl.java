@@ -382,6 +382,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
     public Page<Map<String, Object>> getAgentList(String keyword, String depositAddress, String agentAddress,
                                                   String sortType, Integer pageNumber, Integer pageSize) {
         List<Consensus<Agent>> agentList = this.consensusCacheManager.getAliveAgentList(NulsContext.getInstance().getBestHeight());
+        agentList.addAll(this.consensusCacheManager.getUnconfirmedAgentList());
         filterAgentList(agentList, agentAddress, depositAddress, keyword);
 
         Page<Map<String, Object>> page = new Page<>();
@@ -492,6 +493,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
     @Override
     public Page<Map<String, Object>> getDepositList(String address, String agentAddress, Integer pageNumber, Integer pageSize) {
         List<Consensus<Deposit>> depositList = this.consensusCacheManager.getAliveDepositList(NulsContext.getInstance().getBestHeight());
+        depositList.addAll(this.consensusCacheManager.getUnconfirmedDepositList());
         boolean isAddress = Address.validAddress(address);
         Consensus<Agent> agent = null;
         if (Address.validAddress(agentAddress)) {

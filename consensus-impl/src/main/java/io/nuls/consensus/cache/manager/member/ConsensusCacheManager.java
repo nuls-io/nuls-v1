@@ -1,18 +1,18 @@
 /**
  * MIT License
- **
+ * *
  * Copyright (c) 2017-2018 nuls.io
- **
+ * *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- **
+ * *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- **
+ * *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -136,11 +136,11 @@ public class ConsensusCacheManager {
         this.depositCache.put(depositId, cd);
     }
 
-    public void realDeleteAgent(String agentId){
+    public void realDeleteAgent(String agentId) {
         this.agentCache.remove(agentId);
     }
 
-    public void realDeleteDeposit(String depositId){
+    public void realDeleteDeposit(String depositId) {
         this.depositCache.remove(depositId);
     }
 
@@ -157,7 +157,7 @@ public class ConsensusCacheManager {
         }
     }
 
-    public void updateAgent(  Consensus<Agent> agent) {
+    public void updateAgent(Consensus<Agent> agent) {
         this.putAgent(agent);
     }
 
@@ -185,12 +185,36 @@ public class ConsensusCacheManager {
             if (ca.getDelHeight() != 0 && ca.getDelHeight() <= height) {
                 continue;
             }
-            if (ca.getExtend().getBlockHeight() >= height||ca.getExtend().getBlockHeight()<0) {
+            if (ca.getExtend().getBlockHeight() >= height || ca.getExtend().getBlockHeight() < 0) {
                 continue;
             }
             resultList.add(ca);
         }
         return resultList;
+    }
+
+    public List<Consensus<Agent>> getUnconfirmedAgentList() {
+        List<Consensus<Agent>> list = new ArrayList<>();
+        List<Consensus<Agent>> allList = this.agentCache.values();
+        for (Consensus<Agent> ca : allList) {
+            if (ca.getExtend().getBlockHeight() < 0) {
+                list.add(ca);
+            }
+        }
+
+        return list;
+    }
+
+
+    public List<Consensus<Deposit>> getUnconfirmedDepositList() {
+        List<Consensus<Deposit>> list = new ArrayList<>();
+        List<Consensus<Deposit>> allList = this.depositCache.values();
+        for (Consensus<Deposit> ca : allList) {
+            if (ca.getExtend().getBlockHeight() < 0) {
+                list.add(ca);
+            }
+        }
+        return list;
     }
 
     public List<Consensus<Agent>> getAgentList(ConsensusStatusEnum status) {
@@ -231,7 +255,7 @@ public class ConsensusCacheManager {
             if (cd.getDelHeight() != 0 && cd.getDelHeight() <= height) {
                 continue;
             }
-            if (cd.getExtend().getBlockHeight() >= height||cd.getExtend().getBlockHeight()<0) {
+            if (cd.getExtend().getBlockHeight() >= height || cd.getExtend().getBlockHeight() < 0) {
                 continue;
             }
             resultList.add(cd);
