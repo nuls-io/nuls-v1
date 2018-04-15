@@ -31,8 +31,10 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.module.service.ModuleService;
 import io.nuls.core.utils.log.Log;
+import io.nuls.network.entity.Node;
 import io.nuls.network.service.NetworkService;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,7 +72,11 @@ public class Bootstrap {
                 Log.error(e);
             }
             if (null != NulsContext.getInstance().getBestBlock()) {
-                Log.info("node: " + NulsContext.getServiceBean(NetworkService.class).getAvailableNodes().size() + ", height:(" + NulsContext.getInstance().getBestBlock().getHeader().getHeight() + "), threadCount:{}, downloadStatus: {}", Thread.activeCount(), NulsContext.getServiceBean(DownloadService.class).getStatus());
+                Log.info("height:(" + NulsContext.getInstance().getBestBlock().getHeader().getHeight() + "), threadCount:{}, downloadStatus: {}", Thread.activeCount(), NulsContext.getServiceBean(DownloadService.class).getStatus());
+            }
+            Collection<Node> nodes = NulsContext.getServiceBean(NetworkService.class).getAvailableNodes();
+            for(Node node:nodes){
+                Log.info("height:"+node.getVersionMessage().getBestBlockHeight()+",hash:"+node.getVersionMessage().getBestBlockHash()+",node:"+node.getId());
             }
         }
     }
