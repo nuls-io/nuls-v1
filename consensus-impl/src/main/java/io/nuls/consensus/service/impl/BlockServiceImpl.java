@@ -24,8 +24,11 @@
 package io.nuls.consensus.service.impl;
 
 import io.nuls.account.entity.Address;
+import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
 import io.nuls.consensus.cache.manager.tx.TxCacheManager;
+import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.block.BlockRoundData;
+import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.manager.BlockManager;
 import io.nuls.consensus.service.intf.BlockService;
 import io.nuls.consensus.utils.BlockHeightComparator;
@@ -49,10 +52,7 @@ import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.ledger.service.intf.LedgerService;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Niels
@@ -215,29 +215,78 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public Page<BlockHeaderPo> getBlockHeaderList(String nodeAddress, int type, int pageNumber, int pageSize) {
-        int start = pageNumber*pageSize-pageSize;
-        //todo 添加缓存数据
-        return blockStorageService.getBlocListByAddress1(nodeAddress, type, start, pageSize);
+        List<BlockHeaderPo> resultList = null;
+        List<BlockHeaderPo> cachePoList = getCachePoList(nodeAddress, type);
+        int start = pageNumber * pageSize - pageSize;
+        int end = start + pageSize;
+        int limit = pageSize;
+        if (end <= cachePoList.size()) {
+            Page<BlockHeaderPo> page = new Page<>();
+            page.setList(cachePoList.subList(start, end));
+            if(null==nodeAddress){
+                page.setTotal(NulsContext.getInstance().getBestHeight() + 1);
+            }else{
+                Page<BlockHeaderPo> tempPage = blockStorageService.getBlocListByAddress1(nodeAddress, type, 1, 1);
+                page.setTotal(tempPage.getTotal()+cachePoList.size());
+            }
+            page.setPageNumber(pageNumber);
+            page.setPageSize(pageSize);
+            page.setPages((int) (page.getTotal() / pageSize + 1));
+            return page;
+        } else if (start < cachePoList.size()) {
+            resultList = cachePoList.subList(start, cachePoList.size());
+            limit = pageSize - cachePoList.size() - start;
+            start = cachePoList.size();
+        } else {
+            start = start - cachePoList.size();
+        }
+        Page<BlockHeaderPo> page;
+        if (null == nodeAddress) {
+            page = blockStorageService.getBlockHeaderList1(start, limit);
+        } else {
+            page = blockStorageService.getBlocListByAddress1(nodeAddress, type, start, limit);
+        }
+        if (null != resultList && !resultList.isEmpty()) {
+            page.getList().addAll(0, resultList);
+            page.setTotal(page.getTotal() + cachePoList.size());
+        }
+        page.setPageNumber(pageNumber);
+        page.setPageSize(pageSize);
+        page.setPages((int) (page.getTotal() / pageSize + 1));
+        return page;
     }
 
     @Override
     public Page<BlockHeaderPo> getBlockHeaderList(int pageNumber, int pageSize) {
-        //todo 添加缓存数据
-//        List<BlockHeaderPo> cachePoList = getCachePoList();
-        int start = pageNumber*pageSize-pageSize;
-        return blockStorageService.getBlockHeaderList1(start, pageSize);
+        return getBlockHeaderList(null, 0, pageNumber, pageSize);
     }
 
-    private List<BlockHeaderPo> getCachePoList() {
+    private List<BlockHeaderPo> getCachePoList(String nodeAddress, int type) {
         long localHeight = this.getLocalSavedHeight();
         List<BlockHeaderPo> poList = new ArrayList<>();
+
+        String packingAddress = null;
+        if (null != nodeAddress && type == 1) {
+            Consensus<Agent> ca = ConsensusCacheManager.getInstance().getAgentByAddress(nodeAddress);
+            if (null != ca) {
+                packingAddress = ca.getExtend().getPackingAddress();
+            }
+        } else if (null != nodeAddress) {
+            packingAddress = nodeAddress;
+        }
+
+
         Block startBlock = NulsContext.getInstance().getBestBlock();
-        while (true){
-            if(startBlock.getHeader().getHeight()<=localHeight){
+        while (true) {
+            if (startBlock.getHeader().getHeight() <= localHeight) {
                 break;
             }
-            poList.add(ConsensusTool.toPojo(startBlock.getHeader()));
             startBlock = this.getBlock(startBlock.getHeader().getPreHash().getDigestHex());
+            if (null == packingAddress) {
+                poList.add(ConsensusTool.toPojo(startBlock.getHeader()));
+            } else if (packingAddress.equals(Address.fromHashs(startBlock.getHeader().getPackingAddress()).getBase58())) {
+                poList.add(ConsensusTool.toPojo(startBlock.getHeader()));
+            }
         }
         return poList;
     }
