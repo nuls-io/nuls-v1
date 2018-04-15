@@ -58,7 +58,6 @@ public class AccountResource {
 
     private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
-    private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
 
     public AccountResource() {
     }
