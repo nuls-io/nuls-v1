@@ -29,9 +29,7 @@ package io.nuls.consensus.manager;
 import io.nuls.account.entity.Address;
 import io.nuls.consensus.cache.manager.block.BlockCacheBuffer;
 import io.nuls.consensus.cache.manager.block.ConfirmingBlockCacheManager;
-import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
-import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
-import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
+import io.nuls.consensus.cache.manager.tx.TxCacheManager;
 import io.nuls.consensus.download.DownloadUtils;
 import io.nuls.consensus.entity.block.BifurcateProcessor;
 import io.nuls.consensus.entity.block.BlockHeaderChain;
@@ -88,9 +86,7 @@ public class BlockManager {
     private LedgerService ledgerService;
 
     private BifurcateProcessor bifurcateProcessor = BifurcateProcessor.getInstance();
-    private ConfirmingTxCacheManager confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
-    private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
-    private OrphanTxCacheManager orphanTxCacheManager = OrphanTxCacheManager.getInstance();
+    private TxCacheManager txCacheManager = TxCacheManager.TX_CACHE_MANAGER;
 
     private DownloadUtils downloadUtils = new DownloadUtils();
 
@@ -269,7 +265,7 @@ public class BlockManager {
             }
             if (isSuccess) {
                 this.storedBlock(savingBlock);
-                confirmingTxCacheManager.removeTxList(block.getTxHashList());
+                txCacheManager.removeTxesFromConfirmingCache(block.getTxHashList());
             }
         }
         return true;
@@ -321,10 +317,10 @@ public class BlockManager {
                 tx.verifyWithException();
                 NulsContext.getServiceBean(CancelDepositTxService.class).onApproval((CancelDepositTransaction) tx);
             }
-            confirmingTxCacheManager.putTx(tx);
+            txCacheManager.putTxToConfirmingCache(tx);
         }
-        txCacheManager.removeTx(block.getTxHashList());
-        orphanTxCacheManager.removeTx(block.getTxHashList());
+        txCacheManager.removeTxesFromReceivedCache(block.getTxHashList());
+        txCacheManager.removeTxesFromOrphanCache(block.getTxHashList());
     }
 
     private void rollbackTxList(List<Transaction> txList, int start, int end) {
@@ -340,9 +336,9 @@ public class BlockManager {
                 }
                 txHashList.add(tx.getHash());
             }
-            orphanTxCacheManager.putTx(tx);
+            txCacheManager.putTxToOrphanCache(tx);
         }
-        confirmingTxCacheManager.removeTxList(txHashList);
+        txCacheManager.removeTxesFromConfirmingCache(txHashList);
 
     }
 

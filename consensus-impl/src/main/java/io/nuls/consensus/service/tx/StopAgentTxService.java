@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,21 +24,15 @@
 package io.nuls.consensus.service.tx;
 
 import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
-import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
+import io.nuls.consensus.cache.manager.tx.TxCacheManager;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
-import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.member.Agent;
 import io.nuls.consensus.entity.member.Deposit;
-import io.nuls.consensus.entity.tx.StopAgentTransaction;
-import io.nuls.consensus.entity.tx.PocJoinConsensusTransaction;
 import io.nuls.consensus.entity.tx.RegisterAgentTransaction;
 import io.nuls.consensus.entity.tx.StopAgentTransaction;
-import io.nuls.consensus.event.notice.CancelConsensusNotice;
-import io.nuls.consensus.event.notice.StopConsensusNotice;
 import io.nuls.consensus.utils.ConsensusTool;
 import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.tx.serivce.TransactionService;
@@ -48,7 +42,6 @@ import io.nuls.db.entity.AgentPo;
 import io.nuls.db.entity.DepositPo;
 import io.nuls.db.entity.UpdateDepositByAgentIdParam;
 import io.nuls.db.transactional.annotation.DbSession;
-import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.service.intf.LedgerService;
 
 import java.util.HashMap;
@@ -112,7 +105,7 @@ public class StopAgentTxService implements TransactionService<StopAgentTransacti
             if (!depositConsensus.getExtend().getAgentHash().equals(agent.getHexHash())) {
                 continue;
             }
-            if (depositConsensus.getExtend().getBlockHeight() > joinTx.getBlockHeight()) {
+            if (depositConsensus.getExtend().getBlockHeight() > tx.getBlockHeight()) {
                 continue;
             }
             if (depositConsensus.getDelHeight() < tx.getBlockHeight()) {
@@ -130,13 +123,24 @@ public class StopAgentTxService implements TransactionService<StopAgentTransacti
         Transaction joinTx = ledgerService.getTx(tx.getTxData());
         RegisterAgentTransaction raTx = (RegisterAgentTransaction) joinTx;
 
-//            this.ledgerService.unlockTxSave(tx.getTxData().getDigestHex(), tx.getTime() + PocConsensusConstant.STOP_AGENT_DEPOSIT_LOCKED_TIME * 24 * 3600 * 1000);
-        Map<String, Object> paramsMap = new HashMap<>();
-        paramsMap.put("agentHash", raTx.getTxData().getHexHash());
-        List<DepositPo> poList = depositDataService.getList(paramsMap);
-        for (DepositPo po : poList) {
-            this.ledgerService.unlockTxSave(po.getTxHash());
+        List<Consensus<Deposit>> depositList = manager.getAllDepositList();
+        for (Consensus<Deposit> depositConsensus : depositList) {
+            if (!depositConsensus.getExtend().getAgentHash().equals(raTx.getTxData().getHexHash())) {
+                continue;
+            }
+            if (depositConsensus.getExtend().getBlockHeight() > tx.getBlockHeight()) {
+                continue;
+            }
+            if (depositConsensus.getDelHeight() < tx.getBlockHeight()) {
+                continue;
+            }
+            ledgerService.unlockTxSave(raTx.getHash().getDigestHex());
         }
+
+
+
+
+
         this.agentDataService.deleteById(raTx.getTxData().getHexHash(), tx.getBlockHeight());
         DepositPo delPo = new DepositPo();
         delPo.setAgentHash(raTx.getTxData().getHexHash());
@@ -152,7 +156,7 @@ public class StopAgentTxService implements TransactionService<StopAgentTransacti
     public void onApproval(StopAgentTransaction tx) {
         Transaction joinTx = ledgerService.getTx(tx.getTxData());
         if (joinTx == null) {
-            joinTx = ConfirmingTxCacheManager.getInstance().getTx(tx.getTxData());
+            joinTx = TxCacheManager.TX_CACHE_MANAGER.getTx(tx.getTxData());
         }
 //            this.ledgerService.unlockTxApprove(tx.getTxData().getDigestHex(), tx.getTime() + PocConsensusConstant.STOP_AGENT_DEPOSIT_LOCKED_TIME * 24 * 3600 * 1000);
         RegisterAgentTransaction realTx = (RegisterAgentTransaction) joinTx;

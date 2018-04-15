@@ -35,7 +35,7 @@ import java.util.List;
  * @author Niels
  * @date 2018/1/5
  */
-public class ReceivedTxCacheManager {
+class ReceivedTxCacheManager {
     private static ReceivedTxCacheManager INSTANCE = new ReceivedTxCacheManager();
     private static final String CACHE_NAME = "Received-tx-cache";
     private CacheMap<String, Transaction> txCache;
@@ -56,7 +56,7 @@ public class ReceivedTxCacheManager {
         if (txCache == null || hash == null) {
             return false;
         }
-        return null != txCache.get(hash.getDigestHex());
+        return txCache.containsKey(hash.getDigestHex());
     }
 
     public Transaction getTx(NulsDigestData txHash) {
@@ -84,5 +84,9 @@ public class ReceivedTxCacheManager {
         for (NulsDigestData hash : txHashList) {
             this.removeTx(hash);
         }
+    }
+
+    public CacheMap<String, Transaction> getTxCache() {
+        return txCache;
     }
 }

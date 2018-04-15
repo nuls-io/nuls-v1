@@ -1,18 +1,18 @@
 /**
  * MIT License
- **
+ * *
  * Copyright (c) 2017-2018 nuls.io
- **
+ * *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- **
+ * *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- **
+ * *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,7 +23,7 @@
  */
 package io.nuls.consensus.thread;
 
-import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
+import io.nuls.consensus.cache.manager.tx.TxCacheManager;
 import io.nuls.consensus.constant.DownloadStatus;
 import io.nuls.consensus.constant.MaintenanceStatus;
 import io.nuls.consensus.manager.BlockManager;
@@ -47,8 +47,8 @@ public class BlockPersistenceThread implements Runnable {
     private static final BlockPersistenceThread INSTANCE = new BlockPersistenceThread();
     private BlockManager blockManager = BlockManager.getInstance();
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
-    private DownloadService downloadService  = NulsContext.getServiceBean(DownloadService.class);
-    private ConfirmingTxCacheManager txCacheManager = ConfirmingTxCacheManager.getInstance();
+    private DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
+    private TxCacheManager txCacheManager = TxCacheManager.TX_CACHE_MANAGER;
     private boolean running;
 
     private BlockPersistenceThread() {
@@ -71,7 +71,7 @@ public class BlockPersistenceThread implements Runnable {
                     height = blockService.getLocalSavedHeight() + 1;
                 }
                 boolean success = blockManager.processingBifurcation(height);
-                if (success&&this.downloadService.getStatus()!= DownloadStatus.DOWNLOADING) {
+                if (success && this.downloadService.getStatus() != DownloadStatus.DOWNLOADING) {
                     doPersistence(height);
                 } else {
                     Thread.sleep(5000L);
@@ -91,14 +91,14 @@ public class BlockPersistenceThread implements Runnable {
         Block block = blockManager.getBlock(height);
         if (null == block) {
             BlockMaintenanceThread.getInstance().setStatus(MaintenanceStatus.READY);
-            throw new NulsRuntimeException(ErrorCode.DATA_ERROR,"the block shouldn't be null!height:"+height);
+            throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "the block shouldn't be null!height:" + height);
         }
         if (block.getTxs().isEmpty()) {
             //todo why
             Log.warn("block has no tx!");
             ConsensusManager.getInstance().clearCache();
             NulsContext.getInstance().setBestBlock(blockService.getBlock(blockManager.getStoredHeight()));
-            throw new NulsRuntimeException(ErrorCode.DATA_ERROR,"the block txs shouldn't be null!height:"+height);
+            throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "the block txs shouldn't be null!height:" + height);
         }
         boolean isSuccess;
         try {
@@ -111,7 +111,7 @@ public class BlockPersistenceThread implements Runnable {
         }
         if (isSuccess) {
             blockManager.storedBlock(block);
-            txCacheManager.removeTxList(block.getTxHashList());
+            txCacheManager.removeTxesFromConfirmingCache(block.getTxHashList());
         }
     }
 

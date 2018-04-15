@@ -26,8 +26,11 @@
 
 package io.nuls.consensus.cache.manager.tx;
 
+import io.nuls.cache.util.CacheMap;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
+
+import java.util.List;
 
 /**
  * @author: Niels Wang
@@ -49,5 +52,106 @@ public enum TxCacheManager {
             tx = orphanTxCacheManager.getTx(hash);
         }
         return tx;
+    }
+
+    public void putTxToOrphanCache(Transaction tx) {
+        orphanTxCacheManager.putTx(tx);
+    }
+
+    public void putTxToReceivedCache(Transaction tx) {
+        receivedTxCacheManager.putTx(tx);
+    }
+
+    public void putTxToConfirmingCache(Transaction tx) {
+        confirmingTxCacheManager.putTx(tx);
+    }
+
+    public void removeTxFromReceivedCache(NulsDigestData hash) {
+        receivedTxCacheManager.removeTx(hash);
+    }
+
+    public void removeTxFromConfirmingCache(NulsDigestData hash) {
+        confirmingTxCacheManager.removeTx(hash);
+    }
+
+    public void removeTxFromOrphanCache(NulsDigestData hash) {
+        orphanTxCacheManager.removeTx(hash);
+    }
+
+
+    public void removeTxesFromReceivedCache(List<NulsDigestData> txHashList) {
+        receivedTxCacheManager.removeTx(txHashList);
+    }
+
+    public void removeTxesFromConfirmingCache(List<NulsDigestData> txHashList) {
+        confirmingTxCacheManager.removeTxList(txHashList);
+    }
+
+    public void removeTxesFromOrphanCache(List<NulsDigestData> txHashList) {
+        orphanTxCacheManager.removeTx(txHashList);
+    }
+
+    public List<Transaction> getTxListFromReceivedCache() {
+        return receivedTxCacheManager.getTxList();
+    }
+
+    public List<Transaction> getTxListFromOrphanCache() {
+        return orphanTxCacheManager.getTxList();
+    }
+
+    public CacheMap<String, Transaction> getReceivedCacheMap() {
+        return receivedTxCacheManager.getTxCache();
+    }
+
+    public CacheMap<String, Transaction> getOrphanCacheMap() {
+        return orphanTxCacheManager.getTxCache();
+    }
+
+    public CacheMap<String, Transaction> getConfirmingCacheMap() {
+        return confirmingTxCacheManager.getTxCache();
+    }
+
+    public void init() {
+        this.receivedTxCacheManager.init();
+        this.confirmingTxCacheManager.init();
+        this.orphanTxCacheManager.init();
+
+    }
+
+    public void clear() {
+        this.receivedTxCacheManager.clear();
+        this.confirmingTxCacheManager.clear();
+        this.orphanTxCacheManager.clear();
+
+    }
+
+    public boolean isNotExistInReceivedCache(NulsDigestData hash) {
+        return !receivedTxCacheManager.txExist(hash);
+    }
+
+    public boolean isNotExistInConfirmingCache(NulsDigestData hash) {
+        return !confirmingTxCacheManager.txExist(hash);
+    }
+
+    public boolean isNotExistInOrphanCache(NulsDigestData hash) {
+        return !orphanTxCacheManager.txExist(hash);
+    }
+
+    public boolean isExistInOrphanCache(NulsDigestData hash) {
+        return orphanTxCacheManager.txExist(hash);
+    }
+
+    public boolean isExistInReceivedCache(NulsDigestData hash) {
+        return receivedTxCacheManager.txExist(hash);
+    }
+
+    public boolean isExistInConfirmingCache(NulsDigestData hash) {
+        return confirmingTxCacheManager.txExist(hash);
+    }
+
+    public void putTxListToConfirmingCache(List<Transaction> txs) {
+        for (Transaction tx : txs) {
+            putTxToConfirmingCache(tx);
+        }
     }
 }

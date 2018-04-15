@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -34,7 +34,7 @@ import java.util.List;
  * @author Niels
  * @date 2018/1/5
  */
-public class ConfirmingTxCacheManager {
+class ConfirmingTxCacheManager {
     private static ConfirmingTxCacheManager INSTANCE = new ConfirmingTxCacheManager();
     private static final String CACHE_NAME = "Confirming-tx-cache";
     /**
@@ -50,7 +50,7 @@ public class ConfirmingTxCacheManager {
     }
 
     public void init() {
-        txCache = new CacheMap<>(CACHE_NAME,64, ConsensusCacheConstant.LIVE_TIME, 0);
+        txCache = new CacheMap<>(CACHE_NAME, 64, ConsensusCacheConstant.LIVE_TIME, 0);
     }
 
     public void putTxList(List<Transaction> txs) {
@@ -70,13 +70,25 @@ public class ConfirmingTxCacheManager {
     }
 
     public Transaction getTx(NulsDigestData hash) {
-        if(null==hash){
+        if (null == hash) {
             return null;
         }
         return txCache.get(hash.getDigestHex());
     }
 
     public void putTx(Transaction tx) {
-        this.txCache.put(tx.getHash().getDigestHex(),tx);
+        this.txCache.put(tx.getHash().getDigestHex(), tx);
+    }
+
+    public void removeTx(NulsDigestData hash) {
+        txCache.remove(hash.getDigestHex());
+    }
+
+    public CacheMap<String, Transaction> getTxCache() {
+        return txCache;
+    }
+
+    public boolean txExist(NulsDigestData hash) {
+        return txCache.containsKey(hash.getDigestHex());
     }
 }

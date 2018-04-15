@@ -27,9 +27,7 @@ import io.nuls.consensus.cache.manager.block.BlockCacheBuffer;
 import io.nuls.consensus.cache.manager.block.ConfirmingBlockCacheManager;
 import io.nuls.consensus.cache.manager.block.TemporaryCacheManager;
 import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
-import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
-import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
-import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
+import io.nuls.consensus.cache.manager.tx.TxCacheManager;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.genesis.GenesisBlock;
 import io.nuls.consensus.service.impl.BlockStorageService;
@@ -65,9 +63,7 @@ public class ConsensusManager {
 
     private BlockManager blockCacheManager;
     private ConsensusCacheManager consensusCacheManager;
-    private ConfirmingTxCacheManager confirmingTxCacheManager;
-    private ReceivedTxCacheManager receivedTxCacheManager;
-    private OrphanTxCacheManager orphanTxCacheManager;
+    private TxCacheManager txCacheManager = TxCacheManager.TX_CACHE_MANAGER;
     private BlockStorageService blockStorageService = BlockStorageService.getInstance();
     private boolean partakePacking = false;
     private List<String> seedNodeList;
@@ -130,12 +126,7 @@ public class ConsensusManager {
 
         consensusCacheManager = ConsensusCacheManager.getInstance();
         consensusCacheManager.init();
-        confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
-        confirmingTxCacheManager.init();
-        receivedTxCacheManager = ReceivedTxCacheManager.getInstance();
-        receivedTxCacheManager.init();
-        orphanTxCacheManager = OrphanTxCacheManager.getInstance();
-        orphanTxCacheManager.init();
+        txCacheManager.init();
     }
 
     public void startConsensusWork() {
@@ -177,9 +168,7 @@ public class ConsensusManager {
     public void clearCache() {
         blockCacheManager.clear();
         temporaryCacheManager.clear();
-        confirmingTxCacheManager.clear();
-        receivedTxCacheManager.clear();
-        orphanTxCacheManager.clear();
+        txCacheManager.clear();
         consensusCacheManager.init();
         try {
             NulsContext.getInstance().setBestBlock(blockStorageService.getBlock(blockStorageService.getBestHeight()));

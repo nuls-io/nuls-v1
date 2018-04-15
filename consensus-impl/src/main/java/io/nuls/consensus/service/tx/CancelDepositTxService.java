@@ -26,7 +26,7 @@
 package io.nuls.consensus.service.tx;
 
 import io.nuls.consensus.cache.manager.member.ConsensusCacheManager;
-import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
+import io.nuls.consensus.cache.manager.tx.TxCacheManager;
 import io.nuls.consensus.constant.ConsensusStatusEnum;
 import io.nuls.consensus.entity.Consensus;
 import io.nuls.consensus.entity.member.Deposit;
@@ -109,7 +109,7 @@ public class CancelDepositTxService implements TransactionService<CancelDepositT
     public void onApproval(CancelDepositTransaction tx) {
         Transaction joinTx = ledgerService.getTx(tx.getTxData());
         if (joinTx == null) {
-            joinTx = ConfirmingTxCacheManager.getInstance().getTx(tx.getTxData());
+            joinTx = TxCacheManager.TX_CACHE_MANAGER.getTx(tx.getTxData());
         }
         PocJoinConsensusTransaction realTx = (PocJoinConsensusTransaction) joinTx;
         this.ledgerService.unlockTxApprove(tx.getTxData().getDigestHex());

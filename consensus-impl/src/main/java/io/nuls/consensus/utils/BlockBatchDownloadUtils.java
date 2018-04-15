@@ -23,8 +23,7 @@
  */
 package io.nuls.consensus.utils;
 
-import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
-import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
+import io.nuls.consensus.cache.manager.tx.TxCacheManager;
 import io.nuls.consensus.entity.DownloadRound;
 import io.nuls.consensus.entity.NodeDownloadingStatus;
 import io.nuls.consensus.event.GetBlockRequest;
@@ -62,8 +61,7 @@ public class BlockBatchDownloadUtils {
     private BlockManager blockManager = BlockManager.getInstance();
 
 
-    private ReceivedTxCacheManager receivedTxCacheManager = ReceivedTxCacheManager.getInstance();
-    private ConfirmingTxCacheManager confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
+    private TxCacheManager txCacheManager = TxCacheManager.TX_CACHE_MANAGER;
 
     private String queueId = StringUtils.getNewUUID();
 
@@ -283,8 +281,8 @@ public class BlockBatchDownloadUtils {
                 return;
             }
             blockManager.addBlock(block, false, null);
-            receivedTxCacheManager.removeTx(block.getTxHashList());
-            confirmingTxCacheManager.putTxList(block.getTxs());
+            txCacheManager.putTxListToConfirmingCache(block.getTxs());
+            txCacheManager.removeTxesFromReceivedCache(block.getTxHashList());
         }
         finished();
     }

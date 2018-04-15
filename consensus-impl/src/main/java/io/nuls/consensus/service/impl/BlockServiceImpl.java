@@ -24,7 +24,7 @@
 package io.nuls.consensus.service.impl;
 
 import io.nuls.account.entity.Address;
-import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
+import io.nuls.consensus.cache.manager.tx.TxCacheManager;
 import io.nuls.consensus.entity.block.BlockRoundData;
 import io.nuls.consensus.manager.BlockManager;
 import io.nuls.consensus.service.intf.BlockService;
@@ -47,7 +47,6 @@ import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.ledger.service.intf.LedgerService;
-import org.apache.tools.ant.taskdefs.condition.Or;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -62,7 +61,7 @@ import java.util.Map;
 public class BlockServiceImpl implements BlockService {
     private BlockStorageService blockStorageService = BlockStorageService.getInstance();
     private BlockManager blockManager = BlockManager.getInstance();
-    private OrphanTxCacheManager orphanTxCacheManager = OrphanTxCacheManager.getInstance();
+    private TxCacheManager txCacheManager = TxCacheManager.TX_CACHE_MANAGER;
     @Autowired
     private LedgerService ledgerService;
 
@@ -307,7 +306,7 @@ public class BlockServiceImpl implements BlockService {
             } catch (NulsException e) {
                 Log.error(e);
             }
-            orphanTxCacheManager.putTx(tx);
+            txCacheManager.putTxToOrphanCache(tx);
         }
 
     }

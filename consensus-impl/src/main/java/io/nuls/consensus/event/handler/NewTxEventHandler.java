@@ -23,8 +23,6 @@
  */
 package io.nuls.consensus.event.handler;
 
-import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
-import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.consensus.cache.manager.tx.TxCacheManager;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
@@ -48,8 +46,7 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
 
     private static NewTxEventHandler INSTANCE = new NewTxEventHandler();
 
-    private ReceivedTxCacheManager cacheManager = ReceivedTxCacheManager.getInstance();
-    private OrphanTxCacheManager orphanTxCacheManager = OrphanTxCacheManager.getInstance();
+    private TxCacheManager txCacheManager = TxCacheManager.TX_CACHE_MANAGER;
 
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
@@ -79,7 +76,7 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
         ValidateResult result = tx.verify();
         if (result.isFailed()) {
             if (result.getErrorCode() == ErrorCode.ORPHAN_TX) {
-                orphanTxCacheManager.putTx(tx);
+                txCacheManager.putTxToOrphanCache(tx);
                 eventBroadcaster.broadcastHashAndCacheAysn(event, false, fromId);
                 return;
             }
@@ -95,7 +92,7 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
             if (isMine) {
                 ledgerService.approvalTx(tx);
             }
-            cacheManager.putTx(tx);
+            txCacheManager.putTxToReceivedCache(tx);
             if (!isMine) {
                 eventBroadcaster.broadcastHashAndCacheAysn(event, false, fromId);
             }

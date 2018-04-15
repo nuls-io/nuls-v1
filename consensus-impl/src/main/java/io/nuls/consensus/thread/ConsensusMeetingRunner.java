@@ -26,9 +26,7 @@ package io.nuls.consensus.thread;
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
-import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
-import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
-import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
+import io.nuls.consensus.cache.manager.tx.TxCacheManager;
 import io.nuls.consensus.constant.DownloadStatus;
 import io.nuls.consensus.constant.PocConsensusConstant;
 import io.nuls.consensus.entity.RedPunishData;
@@ -81,13 +79,12 @@ public class ConsensusMeetingRunner implements Runnable {
 
     private DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
 
-    private ReceivedTxCacheManager txCacheManager = ReceivedTxCacheManager.getInstance();
-    private OrphanTxCacheManager orphanTxCacheManager = OrphanTxCacheManager.getInstance();
+    private TxCacheManager txCacheManager = TxCacheManager.TX_CACHE_MANAGER;
+
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
     private boolean hasPacking = false;
     private ConsensusManager consensusManager = ConsensusManager.getInstance();
     private RoundManager packingRoundManager = RoundManager.getInstance();
-    private ConfirmingTxCacheManager confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
     private static Map<Long, RedPunishData> punishMap = new HashMap<>();
 
     private boolean hasInit;
@@ -171,7 +168,9 @@ public class ConsensusMeetingRunner implements Runnable {
                         if (txHashList.contains(transaction.getHash())) {
                             continue;
                         }
-                        orphanTxCacheManager.putTx(transaction);
+                        if (txCacheManager.isNotExistInOrphanCache(transaction.getHash())) {
+                            txCacheManager.putTxToOrphanCache(transaction);
+                        }
                     }
                     newBlock = doPacking(self, round);
                 }
@@ -246,7 +245,7 @@ public class ConsensusMeetingRunner implements Runnable {
     private void broadcastSmallBlock(Block block) {
         StringBuilder str = new StringBuilder();
         str.append("produce a Block: height:" + block.getHeader().getHeight() + ", hash:" + block.getHeader().getHash() + " ,packingAddress:" + Address.fromHashs(block.getHeader().getPackingAddress()));
-        confirmingTxCacheManager.putTx(block.getTxs().get(0));
+        txCacheManager.putTxToConfirmingCache(block.getTxs().get(0));
         blockManager.addBlock(block, false, null);
         SmallBlockEvent event = new SmallBlockEvent();
         SmallBlock smallBlock = new SmallBlock();
@@ -369,7 +368,7 @@ public class ConsensusMeetingRunner implements Runnable {
     private Block doPacking(PocMeetingMember self, PocMeetingRound round) throws NulsException, IOException {
 
         Block bestBlock = this.blockService.getBestBlock();
-        List<Transaction> allTxList = txCacheManager.getTxList();
+        List<Transaction> allTxList = txCacheManager.getTxListFromReceivedCache();
         allTxList.sort(TxTimeComparator.getInstance());
         BlockData bd = new BlockData();
         bd.setHeight(bestBlock.getHeader().getHeight() + 1);
@@ -408,10 +407,8 @@ public class ConsensusMeetingRunner implements Runnable {
             }
             packingTxList.add(tx);
             totalSize += tx.size();
-            confirmingTxCacheManager.putTx(tx);
-            txCacheManager.removeTx(tx.getHash());
-
-
+            txCacheManager.putTxToConfirmingCache(tx);
+            txCacheManager.removeTxFromReceivedCache(tx.getHash());
         }
         Log.info("=========================tx,total:" + allTxList.size());
 
@@ -437,7 +434,7 @@ public class ConsensusMeetingRunner implements Runnable {
             Log.info("=========================stop 3:time out!");
             return;
         }
-        List<Transaction> orphanTxList = orphanTxCacheManager.getTxList();
+        List<Transaction> orphanTxList = txCacheManager.getTxListFromOrphanCache();
         if (null == orphanTxList || orphanTxList.isEmpty()) {
             Log.info("=========================stop 4:orphan tx not exist!");
             return;
@@ -465,13 +462,13 @@ public class ConsensusMeetingRunner implements Runnable {
                 Log.error(e);
                 continue;
             }
-            confirmingTxCacheManager.putTx(tx);
+            txCacheManager.putTxToConfirmingCache(tx);
             txList.add(tx);
             totalSize += tx.size();
             outHashList.add(tx.getHash());
         }
         Log.info("=========================orphan tx,total:" + orphanTxList.size() + ", take count:" + outHashList.size());
-        orphanTxCacheManager.removeTx(outHashList);
+        txCacheManager.removeTxesFromOrphanCache(outHashList);
     }
 
 

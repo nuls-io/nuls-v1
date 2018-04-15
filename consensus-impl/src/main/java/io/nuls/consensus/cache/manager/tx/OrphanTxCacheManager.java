@@ -35,7 +35,7 @@ import java.util.List;
  * @author Niels
  * @date 2018/1/5
  */
-public class OrphanTxCacheManager {
+class OrphanTxCacheManager {
     private static OrphanTxCacheManager INSTANCE = new OrphanTxCacheManager();
     private static final String CACHE_NAME = "Orphan-tx-cache";
     private CacheMap<String, Transaction> txCache;
@@ -53,7 +53,7 @@ public class OrphanTxCacheManager {
     }
 
     public boolean txExist(NulsDigestData hash) {
-        return null != txCache.get(hash.getDigestHex());
+        return txCache.containsKey(hash.getDigestHex());
     }
 
     public Transaction getTx(NulsDigestData txHash) {
@@ -77,5 +77,12 @@ public class OrphanTxCacheManager {
 
     public void putTx(Transaction tx) {
         txCache.put(tx.getHash().getDigestHex(), tx);
+    }
+
+    public void removeTx(NulsDigestData hash) {
+        txCache.remove(hash.getDigestHex());
+    }
+    public CacheMap<String, Transaction> getTxCache() {
+        return txCache;
     }
 }

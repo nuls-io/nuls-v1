@@ -23,19 +23,14 @@
  */
 package io.nuls.consensus.event.handler;
 
-import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
-import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
-import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
+import io.nuls.consensus.cache.manager.tx.TxCacheManager;
 import io.nuls.consensus.download.DownloadCacheHandler;
 import io.nuls.consensus.event.BlockEvent;
-import io.nuls.consensus.manager.BlockManager;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
-import io.nuls.network.service.NetworkService;
 
 /**
  * @author facjas
@@ -43,8 +38,7 @@ import io.nuls.network.service.NetworkService;
  */
 public class BlockEventHandler extends AbstractEventHandler<BlockEvent> {
 
-    private BlockManager blockCacheManager = BlockManager.getInstance();
-    private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
+    private TxCacheManager txCacheManager = TxCacheManager.TX_CACHE_MANAGER;
 
     @Override
     public void onEvent(BlockEvent event, String fromId) {
@@ -53,23 +47,12 @@ public class BlockEventHandler extends AbstractEventHandler<BlockEvent> {
             Log.warn("recieved a null blockEvent form " + fromId);
             return;
         }
-        //BlockLog.debug("download("+fromId+") block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + block.getHeader().getPackingAddress());
-//        if (BlockBatchDownloadUtils.getInstance().downloadedBlock(fromId, block)) {
-//            return;
-//        }
 
-        //blockCacheManager.addBlock(block, true, fromId);
         for (Transaction tx : block.getTxs()) {
-            Transaction cachedTx = ConfirmingTxCacheManager.getInstance().getTx(tx.getHash());
-            if (null == cachedTx) {
-                cachedTx = ReceivedTxCacheManager.getInstance().getTx(tx.getHash());
-            }
-            if (null == cachedTx) {
-                cachedTx = OrphanTxCacheManager.getInstance().getTx(tx.getHash());
-            }
+            Transaction cachedTx = txCacheManager.getTx(tx.getHash());
             if (cachedTx != null && cachedTx.getStatus() != tx.getStatus()) {
                 tx.setStatus(cachedTx.getStatus());
-                if(!(tx instanceof AbstractCoinTransaction)){
+                if (!(tx instanceof AbstractCoinTransaction)) {
                     continue;
                 }
                 AbstractCoinTransaction coinTx = (AbstractCoinTransaction) tx;

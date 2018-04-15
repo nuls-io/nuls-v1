@@ -24,9 +24,7 @@
 package io.nuls.consensus.event.handler;
 
 import io.nuls.consensus.cache.manager.block.TemporaryCacheManager;
-import io.nuls.consensus.cache.manager.tx.ConfirmingTxCacheManager;
-import io.nuls.consensus.cache.manager.tx.OrphanTxCacheManager;
-import io.nuls.consensus.cache.manager.tx.ReceivedTxCacheManager;
+import io.nuls.consensus.cache.manager.tx.TxCacheManager;
 import io.nuls.consensus.entity.GetTxGroupParam;
 import io.nuls.consensus.entity.TxGroup;
 import io.nuls.consensus.event.GetTxGroupRequest;
@@ -39,7 +37,6 @@ import io.nuls.core.chain.entity.*;
 import io.nuls.core.context.NulsContext;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
-import io.nuls.network.service.NetworkService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,9 +49,7 @@ import java.util.Map;
  */
 public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
     private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
-    private ReceivedTxCacheManager receivedTxCacheManager = ReceivedTxCacheManager.getInstance();
-    private ConfirmingTxCacheManager confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
-    private OrphanTxCacheManager orphanTxCacheManager = OrphanTxCacheManager.getInstance();
+   private TxCacheManager txCacheManager = TxCacheManager.TX_CACHE_MANAGER;
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
     private BlockManager blockManager = BlockManager.getInstance();
 
@@ -74,13 +69,7 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
         }
         List<NulsDigestData> needHashList = new ArrayList<>();
         for (NulsDigestData hash : smallBlock.getTxHashList()) {
-            Transaction tx = this.receivedTxCacheManager.getTx(hash);
-            if (null == tx) {
-                tx = orphanTxCacheManager.getTx(hash);
-            }
-            if (null == tx) {
-                tx = confirmingTxCacheManager.getTx(hash);
-            }
+            Transaction tx = txCacheManager.getTx(hash);
             if (null == tx) {
                 tx = txGroup.getTx(hash.getDigestHex());
             }
