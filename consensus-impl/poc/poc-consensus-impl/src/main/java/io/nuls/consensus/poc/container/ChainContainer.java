@@ -214,13 +214,22 @@ public class ChainContainer implements Cloneable {
             return false;
         }
 
+        BlockRoundData roundData = new BlockRoundData(blockHeader.getExtend());
+
         MeetingRound currentRound = getCurrentRound();
+        
+        if(isDownload && currentRound.getIndex() > roundData.getRoundIndex()) {
+            for(int i = roundList.size() - 1 ; i >= 0 ; i--) {
+                currentRound = roundList.get(i);
+                if(currentRound.getIndex() == roundData.getRoundIndex()) {
+                    break;
+                }
+            }
+        }
 
         if(currentRound == null) {
             currentRound = resetRound(!isDownload);
         }
-
-        BlockRoundData roundData = new BlockRoundData(blockHeader.getExtend());
 
         boolean hasChangeRound = false;
 
