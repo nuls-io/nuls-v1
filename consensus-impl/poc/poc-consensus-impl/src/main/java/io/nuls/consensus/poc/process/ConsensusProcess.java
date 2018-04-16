@@ -135,7 +135,7 @@ public class ConsensusProcess {
         if (!hasPacking && member.getPackStartTime() < TimeService.currentTimeMillis() && member.getPackEndTime() > TimeService.currentTimeMillis()) {
             hasPacking = true;
             try {
-                Log.info("当前网络时间： " + DateUtil.convertDate(new Date(TimeService.currentTimeMillis())) + " , 我的打包开始时间: " +
+                Log.debug("当前网络时间： " + DateUtil.convertDate(new Date(TimeService.currentTimeMillis())) + " , 我的打包开始时间: " +
                         DateUtil.convertDate(new Date(member.getPackStartTime()))+ " , 我的打包结束时间: " +
                         DateUtil.convertDate(new Date(member.getPackEndTime())) + " , 当前轮开始时间: " +
                         DateUtil.convertDate(new Date(round.getStartTime()))+ " , 当前轮结束开始时间: " +
@@ -157,7 +157,8 @@ public class ConsensusProcess {
     }
 
     private void packing(MeetingMember member, MeetingRound round) throws IOException, NulsException {
-        Log.info(round.toString());
+        Log.debug(round.toString());
+
         Block block = doPacking(member, round);
         boolean success = saveBlock(block);
         if(success) {

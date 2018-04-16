@@ -336,8 +336,13 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public boolean rollbackBlock(Block rollBlock) {
+    public boolean rollbackBlock(Block block) {
         //TODO
-        return false;
+        this.rollback(block.getTxs(), block.getTxs().size() - 1);
+        this.ledgerService.deleteTx(block.getHeader().getHeight());
+        blockStorageService.delete(block.getHeader().getHash().getDigestHex());
+        NulsContext.getInstance().setBestBlock(this.getBestBlock());
+
+        return true;
     }
 }

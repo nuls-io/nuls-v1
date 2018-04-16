@@ -39,6 +39,7 @@ import io.nuls.db.dao.BlockHeaderService;
 import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.ledger.service.intf.LedgerService;
 
+import javax.xml.ws.EndpointReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -189,7 +190,16 @@ public class BlockStorageService {
     public void save(Block block) {
         BlockHeader header = block.getHeader();
         header.setSize(block.size());
-        headerDao.save(ConsensusTool.toPojo(header));
+        try {
+            int count = headerDao.save(ConsensusTool.toPojo(header));
+            if (count == 0) {
+                Log.error("=======================");
+                throw new NulsRuntimeException(ErrorCode.FAILED, "保存出错，高度：" + header.getHeight());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.error(e);
+        }
     }
 
     public void delete(String hash) {
