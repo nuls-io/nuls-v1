@@ -58,7 +58,7 @@ public class TxProcess {
             // 转发交易
             TransactionEvent txEvent = new TransactionEvent();
             txEvent.setEventBody(tx);
-            eventBroadcaster.broadcastHashAndCache(txEvent,false);
+            eventBroadcaster.broadcastHashAndCache(txEvent);
 
         } else if(result.isFailed() && ErrorCode.ORPHAN_TX == result.getErrorCode()) {
             memoryPool.add(tx, true);

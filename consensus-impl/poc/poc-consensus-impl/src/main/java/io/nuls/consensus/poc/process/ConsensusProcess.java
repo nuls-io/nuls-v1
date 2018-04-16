@@ -188,7 +188,7 @@ public class ConsensusProcess {
         smallBlock.setTxHashList(txHashList);
 
         event.setEventBody(smallBlock);
-        List<String> nodeIdList = eventBroadcaster.broadcastAndCache(event, false);
+        List<String> nodeIdList = eventBroadcaster.broadcastAndCache(event);
         for (String nodeId : nodeIdList) {
             ConsensusLog.debug("send block height:" + block.getHeader().getHeight() + ", node:" + nodeId);
         }

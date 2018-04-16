@@ -285,9 +285,9 @@ public class BlockServiceImpl implements BlockService {
         }
         for (; i >= 0; i--) {
             Transaction tx = txs.get(i);
-            if (tx.getType() != TransactionConstant.TX_TYPE_COIN_BASE && tx.getType() != TransactionConstant.TX_TYPE_YELLOW_PUNISH && tx.getType() != TransactionConstant.TX_TYPE_RED_PUNISH) {
-                txCacheManager.putTxToOrphanCache(tx);
-            }
+//todo            if (tx.getType() != TransactionConstant.TX_TYPE_COIN_BASE && tx.getType() != TransactionConstant.TX_TYPE_YELLOW_PUNISH && tx.getType() != TransactionConstant.TX_TYPE_RED_PUNISH) {
+//                txCacheManager.putTxToOrphanCache(tx);
+//            }
             if (tx.getStatus() == TxStatusEnum.AGREED && !ledgerService.checkTxIsMySend(tx)) {
                 continue;
             }

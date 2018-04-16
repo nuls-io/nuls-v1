@@ -67,15 +67,13 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
         if (tx.getType() == TransactionConstant.TX_TYPE_COIN_BASE || tx.getType() == TransactionConstant.TX_TYPE_YELLOW_PUNISH || tx.getType() == TransactionConstant.TX_TYPE_RED_PUNISH) {
             return;
         }
-        if (TxCacheManager.TX_CACHE_MANAGER.getTx(tx.getHash()) != null) {
-            return;
-        }
+//        if (TxCacheManager.TX_CACHE_MANAGER.getTx(tx.getHash()) != null) {
+//            return;
+//        }
 //        Log.info("receive tx:("+tx.getType()+"):["+fromId+"]"+tx.getHash());
         ValidateResult result = tx.verify();
         if (result.isFailed()) {
             if (result.getErrorCode() == ErrorCode.ORPHAN_TX) {
-                eventBroadcaster.broadcastHashAndCacheAysn(event, false, fromId);
-                txCacheManager.putTxToOrphanCache(tx);
                 eventBroadcaster.broadcastHashAndCacheAysn(event, fromId);
                 return;
             }
@@ -92,8 +90,6 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
                 ledgerService.approvalTx(tx, null);
             }
             consensusService.newTx(tx);
-            eventBroadcaster.broadcastHashAndCacheAysn(event, false, fromId);
-            txCacheManager.putTxToReceivedCache(tx);
             if (isMine) {
                 eventBroadcaster.broadcastAndCache(event);
             } else {

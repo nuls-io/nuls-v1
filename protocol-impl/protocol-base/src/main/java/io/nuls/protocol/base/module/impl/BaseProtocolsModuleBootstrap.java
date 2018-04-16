@@ -24,34 +24,28 @@
 package io.nuls.protocol.base.module.impl;
 
 
-import io.nuls.protocol.base.entity.tx.*;
-import io.nuls.protocol.base.event.*;
-import io.nuls.protocol.base.event.handler.*;
-import io.nuls.protocol.base.event.notice.*;
-import io.nuls.protocol.event.*;
-import io.nuls.protocol.base.service.impl.BlockServiceImpl;
-import io.nuls.protocol.base.service.impl.PocConsensusServiceImpl;
-import io.nuls.protocol.base.service.tx.*;
-import io.nuls.protocol.base.download.DownloadServiceImpl;
-import io.nuls.protocol.base.entity.validator.PocBlockValidatorManager;
-import io.nuls.protocol.base.manager.ConsensusManager;
-import io.nuls.protocol.base.service.impl.SystemServiceImpl;
-import io.nuls.protocol.intf.BlockService;
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.event.EventManager;
-import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.BaseThread;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
-import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.service.intf.EventBusService;
 import io.nuls.ledger.event.TransactionEvent;
-import io.nuls.ledger.service.intf.LedgerService;
+import io.nuls.protocol.base.download.DownloadServiceImpl;
+import io.nuls.protocol.base.entity.tx.*;
+import io.nuls.protocol.base.entity.validator.PocBlockValidatorManager;
+import io.nuls.protocol.base.event.BlocksHashEvent;
+import io.nuls.protocol.base.event.GetBlocksHashRequest;
+import io.nuls.protocol.base.event.handler.*;
+import io.nuls.protocol.base.event.notice.*;
+import io.nuls.protocol.base.manager.ConsensusManager;
+import io.nuls.protocol.base.service.impl.BlockServiceImpl;
+import io.nuls.protocol.base.service.impl.PocConsensusServiceImpl;
+import io.nuls.protocol.base.service.impl.SystemServiceImpl;
+import io.nuls.protocol.base.service.tx.*;
+import io.nuls.protocol.event.*;
 import io.nuls.protocol.module.AbstractProtocolModule;
 
 import java.util.List;

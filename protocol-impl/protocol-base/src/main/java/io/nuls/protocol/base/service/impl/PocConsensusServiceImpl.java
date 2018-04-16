@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.consensus.service.impl;
+package io.nuls.protocol.base.service.impl;
 
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
@@ -31,7 +31,6 @@ import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TransactionConstant;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -49,7 +48,6 @@ import io.nuls.ledger.entity.params.OperationType;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.ledger.event.TransactionEvent;
 import io.nuls.ledger.service.intf.LedgerService;
-import io.nuls.protocol.base.constant.ConsensusStatusEnum;
 import io.nuls.protocol.base.constant.PocConsensusConstant;
 import io.nuls.protocol.base.entity.ConsensusAgentImpl;
 import io.nuls.protocol.base.entity.ConsensusDepositImpl;
@@ -60,8 +58,6 @@ import io.nuls.protocol.base.entity.tx.CancelDepositTransaction;
 import io.nuls.protocol.base.entity.tx.PocJoinConsensusTransaction;
 import io.nuls.protocol.base.entity.tx.RegisterAgentTransaction;
 import io.nuls.protocol.base.entity.tx.StopAgentTransaction;
-import io.nuls.protocol.base.utils.AgentComparator;
-import io.nuls.protocol.base.utils.DepositComparator;
 import io.nuls.protocol.entity.Consensus;
 import io.nuls.protocol.intf.BlockService;
 import io.nuls.protocol.intf.ConsensusService;
@@ -489,25 +485,25 @@ public class PocConsensusServiceImpl implements ConsensusService {
 
     @Override
     public Page<Map<String, Object>> getDepositList(String address, String agentAddress, Integer pageNumber, Integer pageSize) {
-        List<Consensus<Deposit>> depositList = this.consensusCacheManager.getAliveDepositList(NulsContext.getInstance().getBestHeight());
-        depositList.addAll(this.consensusCacheManager.getUnconfirmedDepositList());
-        boolean isAddress = Address.validAddress(address);
-        Consensus<Agent> agent = null;
-        if (Address.validAddress(agentAddress)) {
-            agent = this.consensusCacheManager.getAgentByAddress(agentAddress);
-            if (null == agent) {
-                depositList.clear();
-            }
-        }
-        for (int i = depositList.size() - 1; i >= 0; i--) {
-            Consensus<Deposit> cd = depositList.get(i);
-            if (isAddress && !cd.getAddress().equals(address)) {
-                depositList.remove(i);
-            }else
-            if (null != agent && !cd.getExtend().getAgentHash().equals(agent.getHexHash())) {
-                depositList.remove(i);
-            }
-        }
+//        List<Consensus<Deposit>> depositList = this.consensusCacheManager.getAliveDepositList(NulsContext.getInstance().getBestHeight());
+//        depositList.addAll(this.consensusCacheManager.getUnconfirmedDepositList());
+//        boolean isAddress = Address.validAddress(address);
+//        Consensus<Agent> agent = null;
+//        if (Address.validAddress(agentAddress)) {
+//            agent = this.consensusCacheManager.getAgentByAddress(agentAddress);
+//            if (null == agent) {
+//                depositList.clear();
+//            }
+//        }
+//        for (int i = depositList.size() - 1; i >= 0; i--) {
+//            Consensus<Deposit> cd = depositList.get(i);
+//            if (isAddress && !cd.getAddress().equals(address)) {
+//                depositList.remove(i);
+//            }else
+//            if (null != agent && !cd.getExtend().getAgentHash().equals(agent.getHexHash())) {
+//                depositList.remove(i);
+//            }
+//        }
         Page<Map<String, Object>> page = new Page<>();
 //        int start = pageNumber * pageSize - pageSize;
 //        if (depositList.isEmpty() || start >= depositList.size()) {
