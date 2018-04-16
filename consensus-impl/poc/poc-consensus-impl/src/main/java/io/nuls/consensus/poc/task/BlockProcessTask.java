@@ -26,6 +26,7 @@ package io.nuls.consensus.poc.task;
 
 import io.nuls.consensus.poc.constant.BlockContainerStatus;
 import io.nuls.consensus.poc.container.BlockContainer;
+import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.process.BlockProcess;
 import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.consensus.poc.provider.ConsensusSystemProvider;
@@ -54,10 +55,13 @@ public class BlockProcessTask implements Runnable {
 
     @Override
     public void run() {
+        Lockers.CHAIN_LOCK.lock();
         try {
             doTask();
         } catch (Exception e) {
             Log.error(e);
+        } finally {
+            Lockers.CHAIN_LOCK.unlock();
         }
     }
 

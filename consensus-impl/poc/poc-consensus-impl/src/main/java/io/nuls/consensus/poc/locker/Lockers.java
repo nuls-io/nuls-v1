@@ -37,4 +37,6 @@ public final class Lockers {
     public final static Lock TX_MEMORY_LOCK = new ReentrantLock();
 
     public final static Lock ROUND_LOCK = new ReentrantLock();
+
+    public final static Lock CHAIN_LOCK = new ReentrantLock();
 }

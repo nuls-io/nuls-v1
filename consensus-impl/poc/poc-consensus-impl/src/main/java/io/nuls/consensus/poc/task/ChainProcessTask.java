@@ -24,8 +24,10 @@
 
 package io.nuls.consensus.poc.task;
 
+import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.process.ChainProcess;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.log.Log;
 
 import java.io.IOException;
 
@@ -42,10 +44,13 @@ public class ChainProcessTask implements Runnable {
 
     @Override
     public void run() {
+        Lockers.CHAIN_LOCK.lock();
         try {
             chainProcess.process();
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
+        } finally {
+            Lockers.CHAIN_LOCK.unlock();
         }
     }
 }

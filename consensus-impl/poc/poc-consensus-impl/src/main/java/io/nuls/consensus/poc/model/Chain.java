@@ -26,6 +26,7 @@ package io.nuls.consensus.poc.model;
 
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.entity.PunishLogPo;
 import io.nuls.protocol.base.entity.YellowPunishData;
 import io.nuls.protocol.base.entity.member.Agent;
@@ -55,6 +56,7 @@ public class Chain implements Cloneable {
     public Chain() {
         blockHeaderList = new ArrayList<>();
         blockList = new ArrayList<>();
+        id = StringUtils.getNewUUID();
     }
 
     public void setId(String id) {

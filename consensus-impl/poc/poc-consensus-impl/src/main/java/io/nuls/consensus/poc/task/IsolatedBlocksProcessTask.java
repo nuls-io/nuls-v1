@@ -25,6 +25,7 @@
 package io.nuls.consensus.poc.task;
 
 import io.nuls.consensus.poc.container.BlockContainer;
+import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.process.IsolatedBlocksProcess;
 import io.nuls.consensus.poc.provider.IsolatedBlocksProvider;
 import io.nuls.core.chain.entity.Block;
@@ -47,10 +48,13 @@ public class IsolatedBlocksProcessTask implements Runnable {
 
     @Override
     public void run() {
+        Lockers.CHAIN_LOCK.lock();
         try {
             doTask();
         } catch (Exception e) {
             Log.error(e);
+        } finally {
+            Lockers.CHAIN_LOCK.unlock();
         }
     }
 

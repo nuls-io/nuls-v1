@@ -70,9 +70,15 @@ public class ChainProcess {
 
         ChainContainer newChain = null;
 
-        for(ChainContainer forkChain : chainManager.getChains()) {
+        Iterator<ChainContainer> iterator = chainManager.getChains().iterator();
+        while(iterator.hasNext()) {
+            ChainContainer forkChain = iterator.next();
+            if(forkChain.getChain() == null || forkChain.getChain().getStartBlockHeader() == null || forkChain.getChain().getEndBlockHeader() == null) {
+                iterator.remove();
+                continue;
+            }
             long newChainHeight = forkChain.getChain().getEndBlockHeader().getHeight();
-            if(newChainHeight > newestBlockHeight + 6) {
+            if(newChainHeight > newestBlockHeight + 3) {
                 if(newChain == null || newChain.getChain().getEndBlockHeader().getHeight() < newestBlockHeight) {
                     newChain = forkChain;
                 }
@@ -87,7 +93,10 @@ public class ChainProcess {
             } else {
                 //Verify pass, try to switch chain
                 //验证通过，尝试切换链
-                changeChain(resultChain);
+                boolean success = changeChain(resultChain, newChain);
+                if(success) {
+                    chainManager.getChains().remove(newChain);
+                }
             }
         }
 
@@ -125,6 +134,11 @@ public class ChainProcess {
             if(startBlockHeader.getPreHash().equals(header.getHash()) && startBlockHeader.getHeight() == header.getHeight() + 1) {
                 //yes connectioned
                 isolatedChain.getChain().setPreChainId(chainManager.getMasterChain().getChain().getId());
+
+                List<Block> isolatedChainBlockList = isolatedChain.getChain().getBlockList();
+
+                isolatedChain.getChain().setStartBlockHeader(isolatedChainBlockList.get(0).getHeader());
+                isolatedChain.getChain().setEndBlockHeader(isolatedChainBlockList.get(isolatedChainBlockList.size() - 1).getHeader());
                 chainManager.getChains().add(isolatedChain);
                 return true;
             }
@@ -195,15 +209,15 @@ public class ChainProcess {
      * 一旦出现新链不可信的情况，则需要把之前回滚掉的区块再添加回去
      * 本方法需要和添加区块方法同步
      */
-    private boolean changeChain(ChainContainer newChainContainer) throws NulsException, IOException {
+    private boolean changeChain(ChainContainer newMasterChain, ChainContainer originalForkChain) throws NulsException, IOException {
 
-        if(newChainContainer == null) {
+        if(newMasterChain == null || originalForkChain == null) {
             return false;
         }
 
         //Now the master chain, the forked chain after the switch, needs to be put into the list of chains to be verified.
         //现在的主链，在切换之后的分叉链，需要放入待验证链列表里面
-        ChainContainer oldChain = chainManager.getMasterChain().getAfterTheForkChain(newChainContainer);
+        ChainContainer oldChain = chainManager.getMasterChain().getAfterTheForkChain(originalForkChain);
 
         //rollback
         List<Block> rollbackBlockList = oldChain.getChain().getBlockList();
@@ -237,7 +251,7 @@ public class ChainProcess {
 
         //add new block
 
-        List<Block> addBlockList = newChainContainer.getChain().getBlockList();
+        List<Block> addBlockList = originalForkChain.getChain().getBlockList();
 
         boolean changeSuccess = true;
 
@@ -262,8 +276,14 @@ public class ChainProcess {
         }
 
         if(changeSuccess) {
-            chainManager.getChains().add(oldChain);
-            chainManager.setMasterChain(newChainContainer);
+            chainManager.setMasterChain(newMasterChain);
+            newMasterChain.getRoundList().clear();
+            newMasterChain.resetRound(false);
+            NulsContext.getInstance().setBestBlock(newMasterChain.getBestBlock());
+
+            if(oldChain.getChain().getBlockList().size() > 0) {
+                chainManager.getChains().add(oldChain);
+            }
         } else {
             //Fallback status
             //回退状态
