@@ -73,7 +73,6 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
             return;
         }
         BlockHeader header = smallBlock.getHeader();
-        Log.info("recieve new block from(" + fromId + "), tx count : " + header.getTxCount() + " , tx pool count : " + consensusService.getMemoryTxs().size() + " , header height:" + header.getHeight() + ", preHash:" + header.getPreHash() + " , hash:" + header.getHash() + ", address:" + Address.fromHashs(header.getPackingAddress()));
 //        BlockLog.info("recieve new block from(" + fromId + "), tx count : " + header.getTxCount() + " , tx pool count : " + ReceivedTxCacheManager.getInstance().getTxList().size() + " - " + OrphanTxCacheManager.getInstance().getTxList().size() + " , header height:" + header.getHeight() + ", preHash:" + header.getPreHash() + " , hash:" + header.getHash() + ", address:" + Address.fromHashs(header.getPackingAddress()));
 
 //        Block theBlock = blockManager.getBlock(header.getHash().getDigestHex());
@@ -90,7 +89,8 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
         ValidateResult result = header.verify();
         boolean isOrphan = result.getErrorCode() == ErrorCode.ORPHAN_TX || result.getErrorCode() == ErrorCode.ORPHAN_BLOCK;
 
-        BlockLog.debug("verify block result: " + result.isSuccess() + " , verify message : " + result.getMessage() + " , isOrphan : " + isOrphan);
+        BlockLog.debug("recieve new block from(" + fromId + "), tx count : " + header.getTxCount() + " , tx pool count : " + consensusService.getMemoryTxs().size() + " , header height:" + header.getHeight() + ", preHash:" + header.getPreHash() + " , hash:" + header.getHash() + ", address:" + Address.fromHashs(header.getPackingAddress()) +
+                "\n and verify block result: " + result.isSuccess() + " , verify message : " + result.getMessage() + " , isOrphan : " + isOrphan);
 
         if (result.isFailed() && (!isOrphan || (NulsContext.getInstance().getBestHeight() - header.getHeight()) > PocConsensusConstant.CONFIRM_BLOCK_COUNT)) {
             BlockLog.debug("discard a SmallBlock:" + smallBlock.getHeader().getHash() + ", from:" + fromId + " ,reason:" + result.getMessage());
