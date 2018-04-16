@@ -28,6 +28,9 @@ import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.process.IsolatedBlocksProcess;
 import io.nuls.consensus.poc.provider.IsolatedBlocksProvider;
 import io.nuls.core.chain.entity.Block;
+import io.nuls.core.utils.log.Log;
+
+import java.io.IOException;
 
 /**
  * Created by ln on 2018/4/14.
@@ -44,6 +47,14 @@ public class IsolatedBlocksProcessTask implements Runnable {
 
     @Override
     public void run() {
+        try {
+            doTask();
+        } catch (Exception e) {
+            Log.error(e);
+        }
+    }
+
+    private void doTask() throws IOException {
         BlockContainer blockContainer = isolatedBlocksProvider.get();
         if(blockContainer == null) {
             return;

@@ -97,6 +97,7 @@ public class MainControlScheduler {
         threadPool.scheduleAtFixedRate(new IsolatedBlocksProcessTask(isolatedBlocksProcess, isolatedBlocksProvider), 1000L,1000L, TimeUnit.MILLISECONDS);
 
         BlockProcess blockProcess = new BlockProcess(chainManager, isolatedBlocksProvider);
+        isolatedBlocksProcess.setBlockProcess(blockProcess);
         threadPool.scheduleAtFixedRate(new BlockProcessTask(blockProcess, blockQueueProvider), 1000L,500L, TimeUnit.MILLISECONDS);
 
         TxProcess txProcess = new TxProcess(txMemoryPool);

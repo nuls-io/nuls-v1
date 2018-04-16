@@ -24,6 +24,7 @@
 
 package io.nuls.consensus.poc.process;
 
+import io.nuls.consensus.poc.constant.BlockContainerStatus;
 import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.core.chain.entity.Block;
@@ -34,8 +35,10 @@ import io.nuls.core.utils.calc.DoubleUtils;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.service.NetworkService;
+import io.nuls.protocol.base.download.DownloadUtils;
 import io.nuls.protocol.event.GetBlockRequest;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Future;
@@ -46,6 +49,7 @@ import java.util.concurrent.Future;
 public class IsolatedBlocksProcess {
 
     private ChainManager chainManager;
+    private BlockProcess blockProcess;
 
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
 
@@ -53,7 +57,7 @@ public class IsolatedBlocksProcess {
         this.chainManager = chainManager;
     }
 
-    public void process(BlockContainer blockContainer) {
+    public void process(BlockContainer blockContainer) throws IOException {
 
         Block block = blockContainer.getBlock();
 
@@ -86,18 +90,29 @@ public class IsolatedBlocksProcess {
         foundPreviousBlock(blockContainer);
     }
 
-    private void foundPreviousBlock(BlockContainer blockContainer) {
+    private void foundPreviousBlock(BlockContainer blockContainer) throws IOException {
 
         if(blockContainer.getNode() == null) {
             Log.warn("Handling an Orphan Block Error, Unknown Source Node");
             return;
         }
 
-        BlockHeader header = blockContainer.getBlock().getHeader();
+//        BlockHeader header = blockContainer.getBlock().getHeader();
+//
+//        GetBlockRequest request = new GetBlockRequest(header.getHeight()-1, 1,
+//                header.getPreHash(), header.getPreHash());
+//
+//        networkService.sendToNode(request, blockContainer.getNode().getId(), false);
 
-        GetBlockRequest request = new GetBlockRequest(header.getHeight()-1, 1,
-                header.getPreHash(), header.getPreHash());
+        Block preBlock = new DownloadUtils().getBlockByHash(blockContainer.getBlock().getHeader().getPreHash().getDigestHex(), blockContainer.getNode());
+        if(preBlock != null) {
+            blockProcess.addBlock(new BlockContainer(preBlock, blockContainer.getNode(), BlockContainerStatus.DOWNLOADING));
+        } else {
+            //TODO 失败情况的处理
+        }
+    }
 
-        networkService.sendToNode(request, blockContainer.getNode().getId(), false);
+    public void setBlockProcess(BlockProcess blockProcess) {
+        this.blockProcess = blockProcess;
     }
 }
