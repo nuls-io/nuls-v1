@@ -631,8 +631,7 @@ public class ChainContainer implements Cloneable {
 
         round.calcLocalPacker(accountService.getAccountList());
 
-        ConsensusLog.debug("calculation||index:{},startTime:{},startHeight:{},hash:{}",index,startTime,startBlockHeader.getHeight(),startBlockHeader.getHash());
-        ConsensusLog.debug(round.toString());
+        ConsensusLog.debug("calculation||index:{},startTime:{},startHeight:{},hash:{}\n" + round.toString(), index, startTime, startBlockHeader.getHeight(), startBlockHeader.getHash());
         return round;
     }
 
