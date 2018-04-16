@@ -100,10 +100,10 @@ public class MainControlScheduler {
         threadPool.scheduleAtFixedRate(new BlockProcessTask(blockProcess, blockQueueProvider), 1000L,500L, TimeUnit.MILLISECONDS);
 
         TxProcess txProcess = new TxProcess(txMemoryPool);
-        threadPool.scheduleAtFixedRate(new TxProcessTask(txProcess, txQueueProvider), 1000L,200L, TimeUnit.MILLISECONDS);
+        threadPool.scheduleAtFixedRate(new TxProcessTask(txProcess, txQueueProvider), 1000L,500L, TimeUnit.MILLISECONDS);
 
         ChainProcess chainProcess = new ChainProcess(chainManager);
-        threadPool.scheduleAtFixedRate(new ChainProcessTask(chainProcess), 1000L,200L, TimeUnit.MILLISECONDS);
+        threadPool.scheduleAtFixedRate(new ChainProcessTask(chainProcess), 1000L,500L, TimeUnit.MILLISECONDS);
 
         ConsensusProcess consensusProcess = new ConsensusProcess(chainManager, roundManager, txMemoryPool, blockProcess);
         threadPool.scheduleAtFixedRate(new ConsensusProcessTask(consensusProcess), 1000L,1000L, TimeUnit.MILLISECONDS);

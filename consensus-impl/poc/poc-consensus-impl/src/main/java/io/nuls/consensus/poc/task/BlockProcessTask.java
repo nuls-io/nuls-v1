@@ -29,8 +29,11 @@ import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.process.BlockProcess;
 import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.consensus.poc.provider.ConsensusSystemProvider;
+import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.Log;
 import io.nuls.poc.constant.ConsensusStatus;
+import io.nuls.protocol.constant.DownloadStatus;
+import io.nuls.protocol.intf.DownloadService;
 
 import java.io.IOException;
 
@@ -41,6 +44,8 @@ public class BlockProcessTask implements Runnable {
 
     private BlockProcess blockProcess;
     private BlockQueueProvider blockQueueProvider;
+
+    private DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
 
     public BlockProcessTask(BlockProcess blockProcess, BlockQueueProvider blockQueueProvider) {
         this.blockProcess = blockProcess;
@@ -63,14 +68,14 @@ public class BlockProcessTask implements Runnable {
         }
 
         //系统启动，本地高度和网络高度一致，不需要下载区块时，系统需要知道并设置共识状态为运行中
-        if(ConsensusSystemProvider.getConsensusStatus() == ConsensusStatus.WAIT_START && blockQueueProvider.size() == 0L) {
+        if(downloadService.getStatus() == DownloadStatus.SUCCESS && ConsensusSystemProvider.getConsensusStatus() == ConsensusStatus.WAIT_START && blockQueueProvider.size() == 0L) {
             ConsensusSystemProvider.setConsensusStatus(ConsensusStatus.RUNNING);
         }
 
         BlockContainer blockContainer = null;
         while((blockContainer = blockQueueProvider.get()) != null) {
 
-            if(ConsensusSystemProvider.getConsensusStatus() == ConsensusStatus.WAIT_START &&
+            if(downloadService.getStatus() == DownloadStatus.SUCCESS && ConsensusSystemProvider.getConsensusStatus() == ConsensusStatus.WAIT_START &&
                     blockContainer.getStatus() == BlockContainerStatus.RECEIVED) {
                 ConsensusSystemProvider.setConsensusStatus(ConsensusStatus.RUNNING);
             }
