@@ -30,6 +30,7 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.log.ChainLog;
 import io.nuls.core.utils.log.Log;
 import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.poc.constant.ConsensusStatus;
@@ -86,9 +87,14 @@ public class ChainProcess {
         }
 
         if(newChain != null) {
+
+            ChainLog.debug("discover the fork chain {} : start {} - {} , end {} - {} , exceed the master {} - {} - {}, start verify the fork chian", newChain.getChain().getId(), newChain.getChain().getStartBlockHeader().getHeight(), newChain.getChain().getStartBlockHeader().getHash(), newChain.getChain().getEndBlockHeader().getHeight(), newChain.getChain().getEndBlockHeader().getHash(), chainManager.getMasterChain().getChain().getId(), chainManager.getBestBlockHeight(), chainManager.getBestBlock().getHeader().getHash());
+
             ChainContainer resultChain = verifyNewChain(newChain);
 
             if(resultChain == null) {
+                ChainLog.debug("verify the fork chain fail {} remove it", newChain.getChain().getId());
+
                 chainManager.getChains().remove(newChain);
             } else {
                 //Verify pass, try to switch chain
@@ -97,6 +103,9 @@ public class ChainProcess {
                 if(success) {
                     chainManager.getChains().remove(newChain);
                 }
+
+                ChainLog.debug("verify the fork chain {} success, change master chain result : {} , new master chain is {} : {} - {}", newChain.getChain().getId(), success, chainManager.getBestBlock().getHeader().getHeight(), chainManager.getBestBlock().getHeader().getHash());
+
             }
         }
 
@@ -140,6 +149,9 @@ public class ChainProcess {
                 isolatedChain.getChain().setStartBlockHeader(isolatedChainBlockList.get(0).getHeader());
                 isolatedChain.getChain().setEndBlockHeader(isolatedChainBlockList.get(isolatedChainBlockList.size() - 1).getHeader());
                 chainManager.getChains().add(isolatedChain);
+
+                ChainLog.debug("discover the IsolatedChain {} : start {} - {} , end {} - {} , connection the master chain of {} - {} - {}, move into the fork chians", isolatedChain.getChain().getId(), startBlockHeader.getHeight(), startBlockHeader.getHash().getDigestHex(), isolatedChain.getChain().getEndBlockHeader().getHeight(), isolatedChain.getChain().getEndBlockHeader().getHash(), chainManager.getMasterChain().getChain().getId(), chainManager.getMasterChain().getChain().getBestBlock().getHeader().getHeight(), chainManager.getMasterChain().getChain().getBestBlock().getHeader().getHash());
+
                 return true;
             }
         }
@@ -163,6 +175,9 @@ public class ChainProcess {
                     isolatedChain.getChain().getBlockList().addAll(chain.getBlockList().subList(0, index));
 
                     chainManager.getChains().add(isolatedChain);
+
+                    ChainLog.debug("discover the IsolatedChain {} : start {} - {} , end {} - {} , connection the fork chain of : start {} - {} , end {} - {}, move into the fork chians", isolatedChain.getChain().getId(), startBlockHeader.getHeight(), startBlockHeader.getHash().getDigestHex(), isolatedChain.getChain().getEndBlockHeader().getHeight(), isolatedChain.getChain().getEndBlockHeader().getHash(), chainManager.getMasterChain().getChain().getId(), chain.getStartBlockHeader().getHeight(), chain.getStartBlockHeader().getHash(), chain.getEndBlockHeader().getHeight(), chain.getEndBlockHeader().getHash());
+
                     return true;
                 }
             }
@@ -222,6 +237,8 @@ public class ChainProcess {
         //rollback
         List<Block> rollbackBlockList = oldChain.getChain().getBlockList();
 
+        ChainLog.debug("rollback the master chain , need rollback block count is {}, master chain is {} : {} - {} , storage best block : {} - {}", rollbackBlockList.size(), chainManager.getMasterChain().getChain().getId(), chainManager.getBestBlock().getHeader().getHeight(), chainManager.getBestBlock().getHeader().getHash(), blockService.getBestBlock().getHeader().getHeight(), blockService.getBestBlock().getHeader().getHash());
+
         //Need descending order
         //需要降序排列
         Collections.reverse(rollbackBlockList);
@@ -249,6 +266,8 @@ public class ChainProcess {
             }
         }
 
+        ChainLog.debug("rollback complete, success count is {} , now storage best block : {} - {}", rollbackList.size(), blockService.getBestBlock().getHeader().getHeight(), blockService.getBestBlock().getHeader().getHash());
+
         //add new block
 
         List<Block> addBlockList = originalForkChain.getChain().getBlockList();
@@ -274,6 +293,8 @@ public class ChainProcess {
                 break;
             }
         }
+
+        ChainLog.debug("add new blocks complete, result {}, success count is {} , now storage best block : {} - {}", changeSuccess, successList.size(), blockService.getBestBlock().getHeader().getHeight(), blockService.getBestBlock().getHeader().getHash());
 
         if(changeSuccess) {
             chainManager.setMasterChain(newMasterChain);

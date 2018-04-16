@@ -35,6 +35,7 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.utils.log.ChainLog;
 import io.nuls.core.utils.log.Log;
 import io.nuls.poc.constant.ConsensusStatus;
 import io.nuls.protocol.intf.BlockService;
@@ -87,6 +88,9 @@ public class BlockProcess {
             }
             ChainContainer needVerifyChain = checkAndGetForkChain(block);
             if(needVerifyChain == null) {
+
+                ChainLog.debug("add block {} - {} in queue", block.getHeader().getHeight(), block.getHeader().getHash().getDigestHex());
+
                 isolatedBlocksProvider.addBlock(blockContainer);
             } else if(!chainManager.getChains().contains(needVerifyChain)) {
                 chainManager.getChains().add(needVerifyChain);
