@@ -33,6 +33,7 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.utils.log.Log;
 import io.nuls.protocol.intf.BlockService;
 
 import java.io.IOException;
@@ -58,7 +59,12 @@ public class BlockProcess {
         Block block = blockContainer.getBlock();
 
         if(chainManager.getMasterChain().verifyAndAddBlock(block, isDownload)) {
-            boolean success = blockService.saveBlock(block);
+            boolean success = false;
+            try {
+                success = blockService.saveBlock(block);
+            } catch(Exception e) {
+                Log.error("save block error : " + e.getMessage(), e);
+            }
             if(success) {
                 NulsContext.getInstance().setBestBlock(block);
                 // 转发区块
