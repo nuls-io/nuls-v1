@@ -481,14 +481,21 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     public boolean saveTxList(List<Transaction> txList) throws IOException {
         lock.lock();
         try {
+            boolean isMine;
             List<TransactionPo> poList = new ArrayList<>();
             List<TransactionLocalPo> localPoList = new ArrayList<>();
             for (int i = 0; i < txList.size(); i++) {
                 Transaction tx = txList.get(i);
-                boolean isMine = this.checkTxIsMine(tx);
+
                 TransactionPo po = UtxoTransferTool.toTransactionPojo(tx);
                 BlockLog.info("save Tx height:" + tx.getBlockHeight() + ", txHash:" + tx.getHash() + " ,type;" + tx.getType() + ", time:" + tx.getTime());
                 poList.add(po);
+                isMine = false;
+                if (tx.getType() == TransactionConstant.TX_TYPE_CANCEL_DEPOSIT) {
+                    isMine = tx.isMine();
+                } else {
+                    isMine = this.checkTxIsMine(tx);
+                }
                 if (isMine) {
                     TransactionLocalPo localPo = UtxoTransferTool.toLocalTransactionPojo(tx);
                     localPoList.add(localPo);
