@@ -230,6 +230,9 @@ public class ChainContainer implements Cloneable {
 //            Log.error("block height " + blockHeader.getHeight() + " round index is error!");
 //            return false;
 //        }
+
+        Log.info(currentRound.toString());
+
         if(roundData.getRoundIndex() == currentRound.getIndex() && roundData.getRoundStartTime() != currentRound.getStartTime()) {
             Log.error("block height " + blockHeader.getHeight() + " round startTime is error!");
             return false;
@@ -246,6 +249,8 @@ public class ChainContainer implements Cloneable {
             currentRound = getNextRound(roundData, !isDownload);
             hasChangeRound = true;
         }
+
+        Log.info("-----------" + currentRound.toString());
 
         if(roundData.getConsensusMemberCount() != currentRound.getMemberCount()) {
             Log.error("block height " + blockHeader.getHeight() + " packager count is error!");

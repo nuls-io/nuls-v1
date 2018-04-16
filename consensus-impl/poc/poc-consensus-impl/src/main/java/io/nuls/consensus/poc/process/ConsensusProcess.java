@@ -148,6 +148,7 @@ public class ConsensusProcess {
     }
 
     private void packing(MeetingMember member, MeetingRound round) throws IOException, NulsException {
+        Log.info(round.toString());
         Block block = doPacking(member, round);
         boolean success = saveBlock(block);
         if(success) {

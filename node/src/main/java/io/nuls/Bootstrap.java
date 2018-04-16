@@ -23,6 +23,7 @@
  */
 package io.nuls;
 
+import io.nuls.poc.service.intf.ConsensusService;
 import io.nuls.protocol.intf.BlockService;
 import io.nuls.protocol.intf.DownloadService;
 import io.nuls.core.MicroKernelBootstrap;
@@ -70,7 +71,7 @@ public class Bootstrap {
                 Log.error(e);
             }
             if (null != NulsContext.getInstance().getBestBlock()) {
-                Log.info("node: " + NulsContext.getServiceBean(NetworkService.class).getAvailableNodes().size() + ", height:(" + NulsContext.getServiceBean(BlockService.class).getLocalBestBlock().getHeader().getHeight() + "), threadCount:{}, downloadStatus: {}", Thread.activeCount(), NulsContext.getServiceBean(DownloadService.class).getStatus());
+                Log.info("node: " + NulsContext.getServiceBean(NetworkService.class).getAvailableNodes().size() + ", height:(" + NulsContext.getServiceBean(BlockService.class).getLocalBestBlock().getHeader().getHeight() + "), threadCount:{}, consensusStatus: {}, downloadStatus: {}", Thread.activeCount(), NulsContext.getServiceBean(ConsensusService.class).getConsensusStatus(), NulsContext.getServiceBean(DownloadService.class).getStatus());
             }
         }
     }

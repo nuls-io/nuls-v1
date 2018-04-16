@@ -109,7 +109,7 @@ public class BlockQueueProvider implements QueueProvider {
             }
 
             boolean hasDownloadSuccess = downloadService.getStatus() == DownloadStatus.SUCCESS;
-            if (blockContainer == null && hasDownloadSuccess) {
+            if (blockContainer == null && hasDownloadSuccess && !downloadBlockQueueHasDestory) {
                 downloadBlockQueueHasDestory = true;
                 blockQueue.destroyQueue(QUEUE_NAME_DOWNLOAD);
             } else if (hasDownloadSuccess) {
