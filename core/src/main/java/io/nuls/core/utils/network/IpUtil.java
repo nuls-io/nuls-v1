@@ -147,6 +147,8 @@ public class IpUtil {
     }
 
     public static String getNodeId(InetSocketAddress socketAddress) {
+        if(socketAddress == null)
+            return null;
         return socketAddress.getHostString() + ":" + socketAddress.getPort();
     }
 }
