@@ -185,19 +185,8 @@ public class BlockStorageService {
         headerDao.delete(hash);
     }
 
-    public List<BlockHeader> getBlockHeaderList(long startHeight, long endHeight, long split) {
-        List<BlockHeaderPo> strList = this.headerDao.getHashList(startHeight, endHeight, split);
-        Map<Long, BlockHeader> headerMap = new HashMap<>();
-        for (BlockHeaderPo po : strList) {
-            BlockHeader header = new BlockHeader();
-            header.setHash(NulsDigestData.fromDigestHex(po.getHash()));
-            header.setHeight(po.getHeight());
-            headerMap.put(po.getHeight(), header);
-        }
-        if ((endHeight - startHeight + 1) == headerMap.size()) {
-            return new ArrayList<>(headerMap.values());
-        }
-        throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "the count of block header is wrong!");
+    public List<BlockHeaderPo> getBlockHeaderList(long startHeight, long endHeight) {
+        return this.headerDao.getHeaderList(startHeight, endHeight);
     }
 
     public Page<BlockHeaderPo> getBlocListByAddress(String nodeAddress, int type, int pageNumber, int pageSize) {

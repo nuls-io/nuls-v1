@@ -37,20 +37,18 @@ import io.nuls.db.entity.AgentPo;
 import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.db.entity.DepositPo;
 import io.nuls.db.entity.PunishLogPo;
+import io.nuls.protocol.base.constant.PunishType;
 import io.nuls.protocol.base.entity.member.Agent;
 import io.nuls.protocol.base.entity.member.Deposit;
 import io.nuls.protocol.entity.Consensus;
 import io.nuls.protocol.intf.BlockService;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by ln on 2018/4/13.
  */
 public class CacheLoader {
-    //TODO
 
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
     private AgentDataService agentDataService = NulsContext.getServiceBean(AgentDataService.class);
@@ -74,26 +72,19 @@ public class CacheLoader {
     }
 
     public List<BlockHeader> loadBlockHeaders(int size) {
-
-        //TODO
-
         Block block = blockService.getLocalBestBlock();
 
         long bestBlockHeight = block.getHeader().getHeight();
 
         List<BlockHeader> blockHeaderList = new ArrayList<>();
-        Page<BlockHeaderPo> page = blockService.getBlockHeaderList(1, (int) bestBlockHeight);
-
-        List<BlockHeaderPo> list = page.getList();
-        for(BlockHeaderPo blockHeaderPo : list) {
+        List<BlockHeaderPo> list = blockService.getBlockHeaderList(bestBlockHeight - size + 1, bestBlockHeight);
+        for (BlockHeaderPo blockHeaderPo : list) {
             try {
-                blockHeaderList.add(ConsensusTool.fromPojo(blockHeaderPo));
+                blockHeaderList.add(0, ConsensusTool.fromPojo(blockHeaderPo));
             } catch (NulsException e) {
                 e.printStackTrace();
             }
         }
-
-        Collections.reverse(blockHeaderList);
 
         return blockHeaderList;
     }
@@ -108,7 +99,7 @@ public class CacheLoader {
 
         List<Consensus<Agent>> agentList = new ArrayList<>();
 
-        for(AgentPo agentPo : list) {
+        for (AgentPo agentPo : list) {
             agentList.add(ConsensusTool.fromPojo(agentPo));
         }
 
@@ -124,7 +115,7 @@ public class CacheLoader {
 
         List<Consensus<Deposit>> depositList = new ArrayList<>();
 
-        for(DepositPo depositPo : list) {
+        for (DepositPo depositPo : list) {
             depositList.add(ConsensusTool.fromPojo(depositPo));
         }
 
@@ -132,15 +123,20 @@ public class CacheLoader {
     }
 
     public List<PunishLogPo> loadYellowPunishList() {
-        //TODO
-//
-//        List<PunishLogPo> list = punishLogDataService.getList();
-//
-//        return list;
-        return new ArrayList<>();
+        Map<String, Object> params = new HashMap<>();
+
+        params.put("type", PunishType.YELLOW.getCode());
+
+        List<PunishLogPo> list = punishLogDataService.getList(params);
+        return list;
     }
 
     public List<PunishLogPo> loadRedPunishList() {
-        return new ArrayList<>();
+        Map<String, Object> params = new HashMap<>();
+
+        params.put("type", PunishType.RED.getCode());
+
+        List<PunishLogPo> list = punishLogDataService.getList(params);
+        return list;
     }
 }

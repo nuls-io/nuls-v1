@@ -296,7 +296,6 @@ public class ChainContainer implements Cloneable {
     // 验证conbase交易和处罚交易
     private boolean verifyBaseTx(Block block, MeetingRound currentRound, MeetingMember member) {
         List<Transaction> txs = block.getTxs();
-        //TODO
         Transaction tx = txs.get(0);
         if (tx.getType() != TransactionConstant.TX_TYPE_COIN_BASE) {
             Log.error("Coinbase transaction order wrong!");

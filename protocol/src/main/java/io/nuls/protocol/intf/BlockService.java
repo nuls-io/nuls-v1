@@ -62,7 +62,7 @@ public interface BlockService {
 
     void rollbackBlock(String hash) throws NulsException;
 
-    List<BlockHeader> getBlockHeaderList(long start, long end, long split);
+    List<BlockHeaderPo> getBlockHeaderList(long start, long end);
 
     Page<BlockHeaderPo> getBlockHeaderList(String nodeAddress, int type, int pageNumber, int pageSize);
 
