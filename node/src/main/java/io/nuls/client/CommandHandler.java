@@ -80,7 +80,7 @@ public class CommandHandler {
         register(new ConsensusProcessors.Deposit());
         register(new ConsensusProcessors.GetAgent());
         register(new ConsensusProcessors.GetAgentStatus());
-        register(new ConsensusProcessors.StopAgent());
+        //register(new ConsensusProcessors.StopAgent());
         register(new ConsensusProcessors.Withdraw());
         register(new ConsensusProcessors.GetAllAgents());
 
