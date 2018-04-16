@@ -95,7 +95,7 @@ public class IsolatedBlocksProcess {
 
         BlockHeader header = blockContainer.getBlock().getHeader();
 
-        GetBlockRequest request = new GetBlockRequest(header.getHeight(), 1,
+        GetBlockRequest request = new GetBlockRequest(header.getHeight()-1, 1,
                 header.getPreHash(), header.getPreHash());
 
         networkService.sendToNode(request, blockContainer.getNode().getId(), false);
