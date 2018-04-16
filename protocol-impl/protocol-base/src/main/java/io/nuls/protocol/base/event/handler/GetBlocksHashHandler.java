@@ -91,7 +91,7 @@ public class GetBlocksHashHandler extends AbstractEventHandler<GetBlocksHashRequ
         event.setEventBody(response);
         boolean result = eventBroadcaster.sendToNode(event, fromId);
         if(!result){
-            BlockLog.warn("send block hashes to "+fromId +" failed!");
+            BlockLog.debug("send block hashes to "+fromId +" failed!");
         }
     }
 }

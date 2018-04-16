@@ -72,11 +72,7 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
 //        }
 //        Log.info("receive tx:("+tx.getType()+"):["+fromId+"]"+tx.getHash());
         ValidateResult result = tx.verify();
-        if (result.isFailed()) {
-            if (result.getErrorCode() == ErrorCode.ORPHAN_TX) {
-                eventBroadcaster.broadcastHashAndCacheAysn(event, fromId);
-                return;
-            }
+        if (result.isFailed()&&result.getErrorCode() != ErrorCode.ORPHAN_TX) {
             if (result.getLevel() == SeverityLevelEnum.NORMAL_FOUL) {
                 networkService.removeNode(fromId);
             } else if (result.getLevel() == SeverityLevelEnum.FLAGRANT_FOUL) {

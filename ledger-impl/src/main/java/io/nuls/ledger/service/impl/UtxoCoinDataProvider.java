@@ -126,7 +126,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                         throw new NulsRuntimeException(ErrorCode.UTXO_UNUSABLE);
                     }
                 }
-                BlockLog.info("use utxo:txHash:"+tx.getHash()+", utxoKey:"+unSpend.getKey());
+                BlockLog.debug("use utxo:txHash:"+tx.getHash()+", utxoKey:"+unSpend.getKey());
                 unSpends.add(unSpend);
                 addressSet.add(unSpend.getAddress());
             }

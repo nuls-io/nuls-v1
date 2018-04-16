@@ -582,7 +582,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         if (tx.getStatus() == TxStatusEnum.CACHED) {
             return;
         }
-        BlockLog.info("rollback tx ==================================================", tx.getHash());
+        BlockLog.debug("rollback tx ==================================================", tx.getHash());
         List<TransactionService> serviceList = getServiceList(tx.getClass());
         for (TransactionService service : serviceList) {
             service.onRollback(tx, block);

@@ -93,7 +93,7 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
         BlockLog.debug("verify block result: " + result.isSuccess() + " , verify message : " + result.getMessage() + " , isOrphan : " + isOrphan);
 
         if (result.isFailed() && (!isOrphan || (NulsContext.getInstance().getBestHeight() - header.getHeight()) > PocConsensusConstant.CONFIRM_BLOCK_COUNT)) {
-            BlockLog.warn("discard a SmallBlock:" + smallBlock.getHeader().getHash() + ", from:" + fromId + " ,reason:" + result.getMessage());
+            BlockLog.debug("discard a SmallBlock:" + smallBlock.getHeader().getHash() + ", from:" + fromId + " ,reason:" + result.getMessage());
             return;
         }
         Map<String, Transaction> txMap = new HashMap<>();
