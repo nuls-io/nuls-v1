@@ -23,14 +23,18 @@
  */
 package io.nuls.protocol.base.event.handler;
 
+import io.nuls.poc.service.intf.ConsensusService;
 import io.nuls.protocol.base.manager.BlockManager;
 import io.nuls.protocol.base.download.DownloadCacheHandler;
+import io.nuls.protocol.constant.DownloadStatus;
+import io.nuls.protocol.entity.Consensus;
 import io.nuls.protocol.event.BlockEvent;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.network.service.NetworkService;
+import io.nuls.protocol.intf.DownloadService;
 
 /**
  * @author facjas
@@ -40,6 +44,8 @@ public class BlockEventHandler extends AbstractEventHandler<BlockEvent> {
 
     private BlockManager blockCacheManager = BlockManager.getInstance();
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
+    private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
+    private DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
 
     @Override
     public void onEvent(BlockEvent event, String fromId) {
@@ -55,7 +61,11 @@ public class BlockEventHandler extends AbstractEventHandler<BlockEvent> {
 
         //blockCacheManager.addBlock(block, true, fromId);
 
-        DownloadCacheHandler.receiveBlock(block);
+        if(downloadService.getStatus() != DownloadStatus.SUCCESS) {
+            DownloadCacheHandler.receiveBlock(block);
+        } else {
+            consensusService.addBlock(block);
+        }
 
     }
 }
