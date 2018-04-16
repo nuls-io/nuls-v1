@@ -40,6 +40,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.calc.DoubleUtils;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.BlockLog;
+import io.nuls.core.utils.log.ConsensusLog;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.entity.PunishLogPo;
@@ -631,6 +632,8 @@ public class ChainContainer implements Cloneable {
 
         round.calcLocalPacker(accountService.getAccountList());
 
+        ConsensusLog.debug("calculation||index:{},startTime:{},startHeight:{},hash:{}",index,startTime,startBlockHeader.getHeight(),startBlockHeader.getHash());
+        ConsensusLog.debug(round.toString());
         return round;
     }
 

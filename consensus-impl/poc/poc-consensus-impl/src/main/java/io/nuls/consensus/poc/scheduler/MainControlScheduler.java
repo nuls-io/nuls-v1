@@ -39,9 +39,8 @@ import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.thread.manager.NulsThreadFactory;
 import io.nuls.core.thread.manager.TaskManager;
-import io.nuls.core.utils.log.ConsensusLog;
+import io.nuls.core.utils.log.Log;
 import io.nuls.poc.constant.ConsensusStatus;
-import io.nuls.protocol.entity.Consensus;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -140,7 +139,7 @@ public class MainControlScheduler {
 
         } catch (Exception e) {
             //TODO 缓存加载失败的处理
-            ConsensusLog.error(e);
+            Log.error(e);
         } finally {
             ConsensusSystemProvider.setConsensusStatus(ConsensusStatus.WAIT_START);
             Lockers.OUTER_LOCK.unlock();

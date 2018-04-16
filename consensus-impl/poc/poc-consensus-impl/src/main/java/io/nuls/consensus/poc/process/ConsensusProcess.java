@@ -33,33 +33,27 @@ import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
 import io.nuls.consensus.poc.provider.ConsensusSystemProvider;
 import io.nuls.consensus.poc.utils.ConsensusTool;
-import io.nuls.core.chain.entity.*;
+import io.nuls.core.chain.entity.Block;
+import io.nuls.core.chain.entity.NulsDigestData;
+import io.nuls.core.chain.entity.SmallBlock;
+import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.date.TimeService;
-import io.nuls.core.utils.log.BlockLog;
-import io.nuls.core.utils.log.ConsensusLog;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.tx.CoinBaseTransaction;
 import io.nuls.network.service.NetworkService;
 import io.nuls.poc.constant.ConsensusStatus;
-import io.nuls.poc.service.intf.ConsensusService;
 import io.nuls.protocol.base.constant.PocConsensusConstant;
-import io.nuls.protocol.base.entity.RedPunishData;
 import io.nuls.protocol.base.entity.block.BlockData;
 import io.nuls.protocol.base.entity.block.BlockRoundData;
-import io.nuls.protocol.base.entity.meeting.PocMeetingMember;
-import io.nuls.protocol.base.entity.meeting.PocMeetingRound;
-import io.nuls.protocol.base.entity.tx.RedPunishTransaction;
 import io.nuls.protocol.base.entity.tx.YellowPunishTransaction;
 import io.nuls.protocol.base.event.notice.PackedBlockNotice;
-import io.nuls.protocol.entity.Consensus;
 import io.nuls.protocol.event.SmallBlockEvent;
-import io.nuls.protocol.utils.TxTimeComparator;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -164,7 +158,7 @@ public class ConsensusProcess {
         if(success) {
             broadcastSmallBlock(block);
         } else {
-            ConsensusLog.error("make a block, but save block error");
+            Log.error("make a block, but save block error");
         }
     }
 
@@ -190,7 +184,7 @@ public class ConsensusProcess {
         event.setEventBody(smallBlock);
         List<String> nodeIdList = eventBroadcaster.broadcastAndCache(event);
         for (String nodeId : nodeIdList) {
-            ConsensusLog.debug("send block height:" + block.getHeader().getHeight() + ", node:" + nodeId);
+            Log.debug("send block height:" + block.getHeader().getHeight() + ", node:" + nodeId);
         }
         PackedBlockNotice notice = new PackedBlockNotice();
         notice.setEventBody(block.getHeader());
@@ -215,7 +209,7 @@ public class ConsensusProcess {
         str.append(" ,order:" + self.getPackingIndexOfRound());
         str.append(",packTime:" + new Date(self.getPackEndTime()));
         str.append("\n");
-        ConsensusLog.debug("pack round:" + str);
+        Log.debug("pack round:" + str);
 
         bd.setRoundData(roundData);
 
@@ -234,7 +228,7 @@ public class ConsensusProcess {
                 try {
                     Thread.sleep(100l);
                 } catch (InterruptedException e) {
-                    ConsensusLog.error("packaging error ", e);
+                    Log.error("packaging error ", e);
                 }
                 continue;
             }
@@ -249,7 +243,7 @@ public class ConsensusProcess {
             outHashList.add(tx.getHash());
             ValidateResult result = tx.verify();
             if (result.isFailed()) {
-                ConsensusLog.error(result.getMessage());
+                Log.debug(result.getMessage());
                 continue;
             }
 
@@ -264,7 +258,7 @@ public class ConsensusProcess {
 
         Block newBlock = ConsensusTool.createBlock(bd, round.getLocalPacker());
 
-        ConsensusLog.debug("make block height:" + newBlock.getHeader().getHeight() + ",txCount: " + newBlock.getTxs().size() + ", time:" + DateUtil.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
+        Log.debug("make block height:" + newBlock.getHeader().getHeight() + ",txCount: " + newBlock.getTxs().size() + ", time:" + DateUtil.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
                 DateUtil.convertDate(new Date(self.getPackEndTime())));
 
         return newBlock;
