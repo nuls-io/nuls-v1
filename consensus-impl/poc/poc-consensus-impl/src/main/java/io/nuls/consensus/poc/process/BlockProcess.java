@@ -120,7 +120,7 @@ public class BlockProcess {
         NulsDigestData preHash = block.getHeader().getPreHash();
         if(blockHeader.getHash().equals(preHash)) {
             chainContainer.getChain().setEndBlockHeader(block.getHeader());
-            chainContainer.addBlock(block);
+            chainContainer.getChain().getBlockList().add(block);
             return chainContainer;
         }
 
@@ -129,9 +129,9 @@ public class BlockProcess {
         for(BlockHeader header : headerList) {
             if(header.getHash().equals(preHash)) {
                 ChainContainer forkChain = new ChainContainer();
-                forkChain.addBlock(block);
-                chainContainer.getChain().setStartBlockHeader(block.getHeader());
-                chainContainer.getChain().setEndBlockHeader(block.getHeader());
+                forkChain.getChain().getBlockList().add(block);
+                forkChain.getChain().setStartBlockHeader(block.getHeader());
+                forkChain.getChain().setEndBlockHeader(block.getHeader());
                 return forkChain;
             }
         }
