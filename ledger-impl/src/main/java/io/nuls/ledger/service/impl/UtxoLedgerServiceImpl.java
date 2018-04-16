@@ -678,7 +678,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         txDao.unlockTxOutput(txHash);
         String key = txHash + "-" + 0;
         UtxoOutput output = ledgerCacheService.getUtxo(key);
-        ledgerCacheService.removeUtxo(key);
+        output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT);
         UtxoTransactionTool.getInstance().calcBalance(output.getAddress(), false);
     }
 

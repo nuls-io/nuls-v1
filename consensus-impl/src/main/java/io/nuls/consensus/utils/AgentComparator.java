@@ -71,14 +71,39 @@ public class AgentComparator implements Comparator<Consensus<Agent>> {
     @Override
     public int compare(Consensus<Agent> o1, Consensus<Agent> o2) {
         switch (sortType) {
-            case DEPOSIT:
-                return (int) -(o1.getExtend().getDeposit().getValue() - o2.getExtend().getDeposit().getValue());
-            case COMMISSION_RATE:
-                return (int)  (o1.getExtend().getCommissionRate() - o2.getExtend().getCommissionRate());
-            case CREDIT_VALUE:
-                return (int) (  o2.getExtend().getCreditVal()- o1.getExtend().getCreditVal());
-            case DEPOSITABLE:
-                return (int)(o2.getExtend().getTotalDeposit()-o1.getExtend().getTotalDeposit());
+            case DEPOSIT: {
+                //return (int) -(o1.getExtend().getDeposit().getValue() - o2.getExtend().getDeposit().getValue());
+                if (o1.getExtend().getDeposit().getValue() < o2.getExtend().getDeposit().getValue()) {
+                    return 1;
+                } else if (o1.getExtend().getDeposit().getValue() == o2.getExtend().getDeposit().getValue()) {
+                    return 0;
+                }
+                return -1;
+            }
+            case COMMISSION_RATE: {
+                if(o1.getExtend().getCommissionRate() < o2.getExtend().getCommissionRate()) {
+                    return -1;
+                }else if(o1.getExtend().getCommissionRate() == o2.getExtend().getCommissionRate()) {
+                    return 0;
+                }
+                return 1;
+            }
+            case CREDIT_VALUE: {
+                if(o2.getExtend().getCreditVal() < o1.getExtend().getCreditVal()) {
+                    return -1;
+                }else if(o2.getExtend().getCreditVal() == o1.getExtend().getCreditVal()) {
+                    return 0;
+                }
+                return 1;
+            }
+            case DEPOSITABLE: {
+                if(o2.getExtend().getTotalDeposit() < o1.getExtend().getTotalDeposit()) {
+                    return -1;
+                }else if(o2.getExtend().getTotalDeposit() == o1.getExtend().getTotalDeposit()) {
+                    return 0;
+                }
+                return 1;
+            }
         }
         return 0;
     }
