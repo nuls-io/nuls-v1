@@ -65,7 +65,7 @@ public interface ConsensusConstant {
     /**
      * unit:second
      */
-    int BLOCK_TIME_INTERVAL_SECOND = 5;
+    int BLOCK_TIME_INTERVAL_SECOND = 2;
 
     /**
      * default:2M
