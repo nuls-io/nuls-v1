@@ -47,6 +47,6 @@ public class IsolatedBlocksProvider {
         if(isolatedBlockList == null || isolatedBlockList.size() == 0) {
             return null;
         }
-        return isolatedBlockList.get(0);
+        return isolatedBlockList.remove(0);
     }
 }
