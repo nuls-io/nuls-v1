@@ -220,7 +220,7 @@ public class AccountResource {
         Balance balance = ledgerService.getBalance(address);
         RpcResult result = RpcResult.getSuccess();
         List<AssetDto> dtoList = new ArrayList<>();
-        dtoList.add(new AssetDto("Nuls", balance));
+        dtoList.add(new AssetDto("NULS", balance));
         result.setData(dtoList);
         return result;
     }
