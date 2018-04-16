@@ -28,6 +28,7 @@ import io.nuls.consensus.poc.constant.BlockContainerStatus;
 import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.manager.ChainManager;
+import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.provider.ConsensusSystemProvider;
 import io.nuls.consensus.poc.provider.IsolatedBlocksProvider;
 import io.nuls.core.chain.entity.Block;
@@ -74,6 +75,7 @@ public class BlockProcess {
                 return true;
             } else {
                 chainManager.getMasterChain().rollback();
+                NulsContext.getInstance().setBestBlock(chainManager.getBestBlock());
                 // if save block fail, put in temporary cache
                 // TODO
             }
@@ -130,6 +132,7 @@ public class BlockProcess {
         for(BlockHeader header : headerList) {
             if(header.getHash().equals(preHash)) {
                 ChainContainer forkChain = new ChainContainer();
+                forkChain.setChain(new Chain());
                 forkChain.getChain().getBlockList().add(block);
                 forkChain.getChain().getBlockHeaderList().add(block.getHeader());
                 forkChain.getChain().setStartBlockHeader(block.getHeader());
