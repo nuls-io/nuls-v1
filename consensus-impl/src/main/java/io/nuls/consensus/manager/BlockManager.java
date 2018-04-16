@@ -337,7 +337,9 @@ public class BlockManager {
                 }
                 txHashList.add(tx.getHash());
             }
-            txCacheManager.putTxToOrphanCache(tx);
+            if(tx.getType()!=TransactionConstant.TX_TYPE_COIN_BASE&&tx.getType()!=TransactionConstant.TX_TYPE_YELLOW_PUNISH&&tx.getType()!=TransactionConstant.TX_TYPE_RED_PUNISH){
+                txCacheManager.putTxToOrphanCache(tx);
+            }
         }
         txCacheManager.removeTxesFromConfirmingCache(txHashList);
 
