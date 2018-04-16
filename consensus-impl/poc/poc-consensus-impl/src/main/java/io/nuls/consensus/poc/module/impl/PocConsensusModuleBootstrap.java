@@ -23,7 +23,6 @@
  */
 package io.nuls.consensus.poc.module.impl;
 
-import io.nuls.consensus.poc.manager.CacheManager;
 import io.nuls.consensus.poc.module.AbstractPocConsensusModule;
 import io.nuls.consensus.poc.service.impl.PocConsensusServiceImpl;
 import io.nuls.core.chain.entity.Block;

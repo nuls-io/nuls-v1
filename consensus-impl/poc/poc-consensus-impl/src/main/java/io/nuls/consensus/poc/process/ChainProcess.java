@@ -58,7 +58,7 @@ public class ChainProcess {
 
     public boolean process() throws IOException, NulsException {
 
-        if(consensusService.getConsensusStatus().ordinal() <= ConsensusStatus.RUNNING.ordinal()) {
+        if(consensusService.getConsensusStatus().ordinal() < ConsensusStatus.RUNNING.ordinal()) {
             return false;
         }
 

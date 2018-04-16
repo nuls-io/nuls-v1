@@ -517,7 +517,7 @@ public class ChainContainer implements Cloneable {
 
         if(startBlockHeader.getHeight() != 0l) {
             long roundIndex = bestRoundData.getRoundIndex();
-            if(bestRoundData.getConsensusMemberCount() == bestRoundData.getPackingIndexOfRound()) {
+            if(bestRoundData.getConsensusMemberCount() == bestRoundData.getPackingIndexOfRound()||TimeService.currentTimeMillis()>=bestRoundData.getRoundEndTime()) {
                 roundIndex += 1;
             }
             startBlockHeader = getFirstBlockHeightOfPreRoundByRoundIndex(roundIndex);
@@ -551,10 +551,10 @@ public class ChainContainer implements Cloneable {
         long roundIndex = roundData.getRoundIndex();
         long roundStartTime = roundData.getRoundStartTime();
         if(startBlockHeader.getHeight() != 0l) {
-            if(roundData.getConsensusMemberCount() == roundData.getPackingIndexOfRound()) {
-                roundIndex += 1;
-                roundStartTime = roundData.getRoundEndTime();
-            }
+//            if(roundData.getConsensusMemberCount() == roundData.getPackingIndexOfRound()) {
+//                roundIndex += 1;
+//                roundStartTime = roundData.getRoundEndTime();
+//            }
             startBlockHeader = getFirstBlockHeightOfPreRoundByRoundIndex(roundIndex);
         }
 
@@ -747,14 +747,15 @@ public class ChainContainer implements Cloneable {
                     startRoundIndex = currentRoundIndex;
                 }
                 if(currentRoundIndex < startRoundIndex) {
-//                    firstBlockHeader = blockHeaderList.get(i + 1);
-                    firstBlockHeader = blockHeaderList.get(i);
+                    firstBlockHeader = blockHeaderList.get(i + 1);
+//                    firstBlockHeader = blockHeaderList.get(i);
                     break;
                 }
             }
         }
         if(firstBlockHeader == null) {
             firstBlockHeader = chain.getEndBlockHeader();
+            Log.warn("the first block of pre round not found");
         }
         return firstBlockHeader;
     }
