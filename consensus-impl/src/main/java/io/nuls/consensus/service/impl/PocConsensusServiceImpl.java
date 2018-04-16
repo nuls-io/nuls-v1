@@ -506,7 +506,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
             Consensus<Deposit> cd = depositList.get(i);
             if (isAddress && !cd.getAddress().equals(address)) {
                 depositList.remove(i);
-            }
+            }else
             if (null != agent && !cd.getExtend().getAgentHash().equals(agent.getHexHash())) {
                 depositList.remove(i);
             }
