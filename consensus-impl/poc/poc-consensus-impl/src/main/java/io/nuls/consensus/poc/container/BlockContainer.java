@@ -46,6 +46,7 @@ public class BlockContainer {
 
     public BlockContainer(Block block, Node node, int status) {
         this.block = block;
+        this.node = node;
         this.status = status;
     }
 
