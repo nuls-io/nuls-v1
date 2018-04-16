@@ -118,7 +118,10 @@ public class ChainProcess {
         //判断该孤立链是否和主链相连
         BlockHeader startBlockHeader = isolatedChain.getChain().getStartBlockHeader();
 
-        for(BlockHeader header : chainManager.getMasterChain().getChain().getBlockHeaderList()) {
+        List<BlockHeader> blockHeaderList = chainManager.getMasterChain().getChain().getBlockHeaderList();
+
+        for(int i = 0 ; i < blockHeaderList.size() ; i++) {
+            BlockHeader header = blockHeaderList.get(i);
             if(startBlockHeader.getPreHash().equals(header.getHash()) && startBlockHeader.getHeight() == header.getHeight() + 1) {
                 //yes connectioned
                 isolatedChain.getChain().setPreChainId(chainManager.getMasterChain().getChain().getId());
@@ -131,9 +134,10 @@ public class ChainProcess {
         for(ChainContainer forkChain : chainManager.getChains()) {
 
             Chain chain = forkChain.getChain();
-            List<BlockHeader> blockHeaderList = chain.getBlockHeaderList();
+            blockHeaderList = chain.getBlockHeaderList();
 
-            for(BlockHeader header : blockHeaderList) {
+            for(int i = 0 ; i < blockHeaderList.size() ; i++) {
+                BlockHeader header = blockHeaderList.get(i);
                 if(startBlockHeader.getPreHash().equals(header.getHash()) && startBlockHeader.getHeight() == header.getHeight() + 1) {
                     //yes connectioned
                     isolatedChain.getChain().setPreChainId(chain.getPreChainId());
