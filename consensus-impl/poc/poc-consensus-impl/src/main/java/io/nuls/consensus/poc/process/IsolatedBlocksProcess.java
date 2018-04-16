@@ -88,6 +88,7 @@ public class IsolatedBlocksProcess {
         chainManager.newIsolatedChain(block);
 
         foundPreviousBlock(blockContainer);
+
     }
 
     private void foundPreviousBlock(BlockContainer blockContainer) throws IOException {

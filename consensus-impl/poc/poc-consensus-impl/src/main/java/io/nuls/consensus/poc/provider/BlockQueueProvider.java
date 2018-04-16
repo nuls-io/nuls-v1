@@ -63,17 +63,17 @@ public class BlockQueueProvider implements QueueProvider {
             }
             BlockContainer blockContainer = null;
 
-            if(data instanceof BlockContainer) {
+            if (data instanceof BlockContainer) {
                 blockContainer = (BlockContainer) data;
             }
 
             if (receive) {
                 int status = BlockContainerStatus.RECEIVED;
-                if(downloadService.getStatus() != DownloadStatus.SUCCESS) {
+                if (downloadService.getStatus() != DownloadStatus.SUCCESS) {
                     status = BlockContainerStatus.DOWNLOADING;
                 }
 
-                if(blockContainer == null) {
+                if (blockContainer == null) {
                     blockContainer = new BlockContainer((Block) data, status);
                 } else {
                     blockContainer.setStatus(status);
@@ -84,7 +84,7 @@ public class BlockQueueProvider implements QueueProvider {
                 if (downloadBlockQueueHasDestory) {
                     createDownloadQueue();
                 }
-                if(blockContainer == null) {
+                if (blockContainer == null) {
                     blockContainer = new BlockContainer((Block) data, BlockContainerStatus.DOWNLOADING);
                 } else {
                     blockContainer.setStatus(BlockContainerStatus.DOWNLOADING);
@@ -112,7 +112,7 @@ public class BlockQueueProvider implements QueueProvider {
             if (blockContainer == null && hasDownloadSuccess && !downloadBlockQueueHasDestory) {
                 downloadBlockQueueHasDestory = true;
                 blockQueue.destroyQueue(QUEUE_NAME_DOWNLOAD);
-            } else if (hasDownloadSuccess) {
+            } else if (hasDownloadSuccess && blockContainer == null) {
                 blockContainer = blockQueue.poll(QUEUE_NAME_RECEIVE);
             }
         } finally {
@@ -124,7 +124,7 @@ public class BlockQueueProvider implements QueueProvider {
     public long size() {
         long size = blockQueue.size(QUEUE_NAME_RECEIVE);
 
-        if(!downloadBlockQueueHasDestory) {
+        if (!downloadBlockQueueHasDestory) {
             size += blockQueue.size(QUEUE_NAME_DOWNLOAD);
         }
 
