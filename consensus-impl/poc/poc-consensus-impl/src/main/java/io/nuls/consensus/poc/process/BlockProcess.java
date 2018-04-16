@@ -28,12 +28,14 @@ import io.nuls.consensus.poc.constant.BlockContainerStatus;
 import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.manager.ChainManager;
+import io.nuls.consensus.poc.provider.ConsensusSystemProvider;
 import io.nuls.consensus.poc.provider.IsolatedBlocksProvider;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.Log;
+import io.nuls.poc.constant.ConsensusStatus;
 import io.nuls.protocol.intf.BlockService;
 
 import java.io.IOException;
@@ -78,7 +80,7 @@ public class BlockProcess {
         } else {
             // Failed to block directly in the download
             // 下载中验证失败的区块直接丢弃
-            if(isDownload) {
+            if(isDownload && ConsensusStatus.RUNNING != ConsensusSystemProvider.getConsensusStatus()) {
                 return false;
             }
             ChainContainer needVerifyChain = checkAndGetForkChain(block);

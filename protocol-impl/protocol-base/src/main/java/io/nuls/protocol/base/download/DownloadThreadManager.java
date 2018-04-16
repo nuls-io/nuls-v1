@@ -75,6 +75,8 @@ public class DownloadThreadManager implements Callable<Boolean> {
         System.out.println(newestInfos);
         System.out.println("============================");
 
+        if(1==1)return true;
+
         try {
             boolean isContinue = checkFirstBlock();
 

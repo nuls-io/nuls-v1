@@ -148,7 +148,11 @@ public class DownloadProcessor extends Thread {
 
     private boolean checkIsNewest() {
         NetworkNewestBlockInfos newestInfos = getNetworkNewestBlockInfos();
-        if(!blockService.getBestBlock().getHeader().getHash().getDigestHex().equals(newestInfos.getNetBestHash())) {
+//        if(!blockService.getBestBlock().getHeader().getHash().getDigestHex().equals(newestInfos.getNetBestHash())) {
+//            downloadStatus = DownloadStatus.WAIT;
+//            return false;
+//        }
+        if(newestInfos.getNetBestHeight() > blockService.getLocalBestBlock().getHeader().getHeight()) {
             downloadStatus = DownloadStatus.WAIT;
             return false;
         }
