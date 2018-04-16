@@ -24,8 +24,6 @@
 package io.nuls.protocol.base.event.handler;
 
 import io.nuls.poc.service.intf.ConsensusService;
-import io.nuls.protocol.base.cache.manager.tx.OrphanTxCacheManager;
-import io.nuls.protocol.base.cache.manager.tx.ReceivedTxCacheManager;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.SeverityLevelEnum;
@@ -48,9 +46,6 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
 
     private static NewTxEventHandler INSTANCE = new NewTxEventHandler();
 
-    private ReceivedTxCacheManager cacheManager = ReceivedTxCacheManager.getInstance();
-    private OrphanTxCacheManager orphanTxCacheManager = OrphanTxCacheManager.getInstance();
-
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
@@ -66,7 +61,6 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
     @Override
     public void onEvent(TransactionEvent event, String fromId) {
         Transaction tx = event.getEventBody();
-
         if (null == tx) {
             return;
         }
@@ -76,16 +70,10 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
         ValidateResult result = tx.verify();
         if (result.isFailed()) {
             if (result.getErrorCode() == ErrorCode.ORPHAN_TX) {
-                orphanTxCacheManager.putTx(tx);
                 eventBroadcaster.broadcastHashAndCacheAysn(event, false, fromId);
                 return;
             }
             if (result.getLevel() == SeverityLevelEnum.NORMAL_FOUL) {
-                Log.info("-----------------------------------------------newTxHandler remove node:" + fromId);
-                Log.info("-----------------------------------------------newTxHandler remove node:" + fromId);
-                Log.info("-----------------------------------------------newTxHandler remove node:" + fromId);
-                Log.info("-----------------------------------------------newTxHandler remove node:" + fromId);
-                Log.info("-----------------------------------------------newTxHandler remove node:" + fromId);
                 networkService.removeNode(fromId);
             } else if (result.getLevel() == SeverityLevelEnum.FLAGRANT_FOUL) {
                 networkService.blackNode(fromId, NodePo.BLACK);
@@ -97,9 +85,7 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
             if (isMine) {
                 ledgerService.approvalTx(tx, null);
             }
-//            cacheManager.putTx(tx);
             consensusService.newTx(tx);
-
             eventBroadcaster.broadcastHashAndCacheAysn(event, false, fromId);
         } catch (Exception e) {
             Log.error(e);

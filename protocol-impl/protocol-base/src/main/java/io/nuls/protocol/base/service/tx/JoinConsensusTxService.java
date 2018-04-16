@@ -27,7 +27,6 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.protocol.base.constant.ConsensusStatusEnum;
 import io.nuls.protocol.base.entity.member.Deposit;
 import io.nuls.protocol.base.entity.tx.PocJoinConsensusTransaction;
-import io.nuls.protocol.base.cache.manager.member.ConsensusCacheManager;
 import io.nuls.protocol.entity.Consensus;
 import io.nuls.protocol.base.event.notice.EntrustConsensusNotice;
 import io.nuls.protocol.base.utils.ConsensusTool;
@@ -47,7 +46,7 @@ import io.nuls.event.bus.service.intf.EventBroadcaster;
  */
 @DbSession(transactional = PROPAGATION.NONE)
 public class JoinConsensusTxService implements TransactionService<PocJoinConsensusTransaction> {
-    private ConsensusCacheManager manager = ConsensusCacheManager.getInstance();
+//    private ConsensusCacheManager manager = ConsensusCacheManager.getInstance();
     private DepositDataService depositDataService = NulsContext.getServiceBean(DepositDataService.class);
     private AgentDataService accountDataService = NulsContext.getServiceBean(AgentDataService.class);
 
@@ -55,7 +54,7 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
     @DbSession
     public void onRollback(PocJoinConsensusTransaction tx, Block block) throws NulsException {
 
-        manager.realDeleteDeposit(tx.getTxData().getHexHash());
+//        manager.realDeleteDeposit(tx.getTxData().getHexHash());
 
         DepositPo delPo = new DepositPo();
         delPo.setId(tx.getTxData().getHexHash());
@@ -81,10 +80,10 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
 
     @Override
     public void onApproval(PocJoinConsensusTransaction tx, Block block) {
-        Consensus<Deposit> cd = tx.getTxData();
-        cd.getExtend().setBlockHeight(tx.getBlockHeight());
-        cd.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
-        cd.getExtend().setTxHash(tx.getHash().getDigestHex());
-        manager.putDeposit(cd);
+//        Consensus<Deposit> cd = tx.getTxData();
+//        cd.getExtend().setBlockHeight(tx.getBlockHeight());
+//        cd.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
+//        cd.getExtend().setTxHash(tx.getHash().getDigestHex());
+//        manager.putDeposit(cd);
     }
 }

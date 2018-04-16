@@ -35,8 +35,6 @@ import io.nuls.db.entity.DepositPo;
 import io.nuls.db.entity.UpdateDepositByAgentIdParam;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.ledger.service.intf.LedgerService;
-import io.nuls.protocol.base.cache.manager.member.ConsensusCacheManager;
-import io.nuls.protocol.base.cache.manager.tx.TxCacheManager;
 import io.nuls.protocol.base.constant.ConsensusStatusEnum;
 import io.nuls.protocol.base.entity.member.Agent;
 import io.nuls.protocol.base.entity.member.Deposit;
@@ -59,7 +57,6 @@ public class StopAgentTxService implements TransactionService<StopAgentTransacti
     private AgentDataService agentDataService = NulsContext.getServiceBean(AgentDataService.class);
     private DepositDataService depositDataService = NulsContext.getServiceBean(DepositDataService.class);
 
-    private ConsensusCacheManager manager = ConsensusCacheManager.getInstance();
 
     @Override
     @DbSession
@@ -97,24 +94,6 @@ public class StopAgentTxService implements TransactionService<StopAgentTransacti
 //            notice.setEventBody(tx);
 //            NulsContext.getServiceBean(EventBroadcaster.class).publishToLocal(notice);
 
-        Consensus<Agent> agent = manager.getAgentById(ca.getHexHash());
-        agent.setDelHeight(0L);
-        manager.putAgent(agent);
-
-        List<Consensus<Deposit>> depositList = manager.getAllDepositList();
-        for (Consensus<Deposit> depositConsensus : depositList) {
-            if (!depositConsensus.getExtend().getAgentHash().equals(agent.getHexHash())) {
-                continue;
-            }
-            if (depositConsensus.getExtend().getBlockHeight() > tx.getBlockHeight()) {
-                continue;
-            }
-            if (depositConsensus.getDelHeight() < tx.getBlockHeight()) {
-                continue;
-            }
-            depositConsensus.setDelHeight(0L);
-            manager.putDeposit(depositConsensus);
-        }
 
     }
 
@@ -123,20 +102,19 @@ public class StopAgentTxService implements TransactionService<StopAgentTransacti
     public void onCommit(StopAgentTransaction tx, Block block) throws NulsException {
         Transaction joinTx = ledgerService.getTx(tx.getTxData());
         RegisterAgentTransaction raTx = (RegisterAgentTransaction) joinTx;
-
-        List<Consensus<Deposit>> depositList = manager.getAllDepositList();
-        for (Consensus<Deposit> depositConsensus : depositList) {
-            if (!depositConsensus.getExtend().getAgentHash().equals(raTx.getTxData().getHexHash())) {
-                continue;
-            }
-            if (depositConsensus.getExtend().getBlockHeight() > tx.getBlockHeight()) {
-                continue;
-            }
-            if (depositConsensus.getDelHeight() < tx.getBlockHeight()) {
-                continue;
-            }
-            ledgerService.unlockTxSave(depositConsensus.getExtend().getTxHash());
-        }
+//
+//        for (Consensus<Deposit> depositConsensus : depositList) {
+//            if (!depositConsensus.getExtend().getAgentHash().equals(raTx.getTxData().getHexHash())) {
+//                continue;
+//            }
+//            if (depositConsensus.getExtend().getBlockHeight() > tx.getBlockHeight()) {
+//                continue;
+//            }
+//            if (depositConsensus.getDelHeight() < tx.getBlockHeight()) {
+//                continue;
+//            }
+//            ledgerService.unlockTxSave(depositConsensus.getExtend().getTxHash());
+//        }
 
 
 
@@ -147,23 +125,12 @@ public class StopAgentTxService implements TransactionService<StopAgentTransacti
         delPo.setAgentHash(raTx.getTxData().getHexHash());
         delPo.setDelHeight(tx.getBlockHeight());
         this.depositDataService.deleteByAgentHash(delPo);
-        manager.delAgent(raTx.getTxData().getHexHash(), tx.getBlockHeight());
-        manager.delDepositByAgentId(raTx.getTxData().getHexHash(), tx.getBlockHeight());
 
     }
 
     @Override
     @DbSession
     public void onApproval(StopAgentTransaction tx, Block block) {
-        Transaction joinTx = ledgerService.getTx(tx.getTxData());
-        if (joinTx == null) {
-            joinTx = TxCacheManager.TX_CACHE_MANAGER.getTx(tx.getTxData());
-        }
-//            this.ledgerService.unlockTxApprove(tx.getTxData().getDigestHex(), tx.getTime() + PocConsensusConstant.STOP_AGENT_DEPOSIT_LOCKED_TIME * 24 * 3600 * 1000);
-        RegisterAgentTransaction realTx = (RegisterAgentTransaction) joinTx;
-        manager.delAgent(realTx.getTxData().getHexHash(), tx.getBlockHeight());
-        manager.delDepositByAgentId(realTx.getTxData().getHexHash(), tx.getBlockHeight());
-
 
     }
 }

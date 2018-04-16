@@ -78,16 +78,8 @@ public interface BlockService {
 
     Block getBestBlock();
 
-    void approvalBlock(String hash);
 
     List<BlockHeaderPo> getBlockHashList(long start, long end);
-
-    /**
-     * get the block from approvingChain;
-     * @param start
-     * @return
-     */
-    Block getBlockFromMyChain(long start);
 
     /**
      * get the block from approvingChain;

@@ -24,21 +24,6 @@
 package io.nuls.protocol.base.event.handler;
 
 import io.nuls.account.entity.Address;
-import io.nuls.network.service.NetworkService;
-import io.nuls.poc.service.intf.ConsensusService;
-import io.nuls.protocol.base.cache.manager.tx.ConfirmingTxCacheManager;
-import io.nuls.protocol.base.cache.manager.tx.OrphanTxCacheManager;
-import io.nuls.protocol.entity.GetTxGroupParam;
-import io.nuls.protocol.event.GetTxGroupRequest;
-import io.nuls.protocol.base.event.notice.AssembledBlockNotice;
-import io.nuls.protocol.base.manager.BlockManager;
-import io.nuls.protocol.base.cache.manager.block.TemporaryCacheManager;
-import io.nuls.protocol.base.cache.manager.tx.ReceivedTxCacheManager;
-import io.nuls.protocol.constant.DownloadStatus;
-import io.nuls.protocol.base.constant.PocConsensusConstant;
-import io.nuls.protocol.event.SmallBlockEvent;
-import io.nuls.protocol.intf.DownloadService;
-import io.nuls.protocol.base.utils.ConsensusTool;
 import io.nuls.core.chain.entity.*;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
@@ -48,6 +33,16 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
+import io.nuls.network.service.NetworkService;
+import io.nuls.poc.service.intf.ConsensusService;
+import io.nuls.protocol.base.constant.PocConsensusConstant;
+import io.nuls.protocol.base.event.notice.AssembledBlockNotice;
+import io.nuls.protocol.base.utils.ConsensusTool;
+import io.nuls.protocol.constant.DownloadStatus;
+import io.nuls.protocol.entity.GetTxGroupParam;
+import io.nuls.protocol.event.GetTxGroupRequest;
+import io.nuls.protocol.event.SmallBlockEvent;
+import io.nuls.protocol.intf.DownloadService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,14 +55,9 @@ import java.util.Map;
  */
 public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
 
-    private TemporaryCacheManager temporaryCacheManagerBak = TemporaryCacheManager.getInstance();
-    private BlockManager blockManager = BlockManager.getInstance();
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
     private DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
 
-    private ConfirmingTxCacheManager confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
-    private ReceivedTxCacheManager receivedTxCacheManager = ReceivedTxCacheManager.getInstance();
-    private OrphanTxCacheManager orphanTxCacheManager = OrphanTxCacheManager.getInstance();
     private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
 
@@ -78,12 +68,13 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
             Log.warn("recieved a null smallBlock!");
             return;
         }
-        if(downloadService.getStatus() != DownloadStatus.SUCCESS) {
+        if (downloadService.getStatus() != DownloadStatus.SUCCESS) {
             Log.warn("recieved a smallBlock , and downloading skip");
             return;
         }
         BlockHeader header = smallBlock.getHeader();
-        Log.info("recieve new block from(" + fromId + "), tx count : " + header.getTxCount() + " , tx pool count : " + ReceivedTxCacheManager.getInstance().getTxList().size() + " - " + OrphanTxCacheManager.getInstance().getTxList().size() + " , header height:" + header.getHeight() + ", preHash:" + header.getPreHash() + " , hash:" + header.getHash() + ", address:" + Address.fromHashs(header.getPackingAddress()));
+        Log.info("recieve new block from(" + fromId + "), tx count : " + header.getTxCount() + " , tx pool count : " + consensusService.getMemoryTxs().size() + " , header height:" + header.getHeight() + ", preHash:" + header.getPreHash() + " , hash:" + header.getHash() + ", address:" + Address.fromHashs(header.getPackingAddress()));
+//        BlockLog.info("recieve new block from(" + fromId + "), tx count : " + header.getTxCount() + " , tx pool count : " + ReceivedTxCacheManager.getInstance().getTxList().size() + " - " + OrphanTxCacheManager.getInstance().getTxList().size() + " , header height:" + header.getHeight() + ", preHash:" + header.getPreHash() + " , hash:" + header.getHash() + ", address:" + Address.fromHashs(header.getPackingAddress()));
 
 //        Block theBlock = blockManager.getBlock(header.getHash().getDigestHex());
 //        if (null != theBlock) {
@@ -111,18 +102,11 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
         }
         List<NulsDigestData> needHashList = new ArrayList<>();
         for (NulsDigestData hash : smallBlock.getTxHashList()) {
-            Transaction tx = this.receivedTxCacheManager.getTx(hash);
-            if (null == tx) {
-                tx = orphanTxCacheManager.getTx(hash);
-            }
-            if (null == tx) {
-                tx = confirmingTxCacheManager.getTx(hash);
-            }
-            if (null == tx && txMap.get(hash) == null) {
+            Transaction tx = null;
+            if (null == tx && txMap.get(hash.getDigestHex()) == null) {
                 needHashList.add(hash);
                 continue;
             }
-            txMap.put(tx.getHash().getDigestHex(), tx);
         }
         if (!needHashList.isEmpty()) {
             GetTxGroupRequest request = new GetTxGroupRequest();
@@ -133,14 +117,13 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
             }
             request.setEventBody(param);
             this.eventBroadcaster.sendToNode(request, fromId);
-            temporaryCacheManagerBak.cacheSmallBlock(smallBlock);
             return;
         }
         Block block = ConsensusTool.assemblyBlock(header, txMap, smallBlock.getTxHashList());
 //        boolean needForward = blockManager.addBlock(block, true, fromId);
 
         boolean needForward = consensusService.newBlock(block, networkService.getNode(fromId));
-        if(needForward) {
+        if (needForward) {
             SmallBlockEvent newBlockEvent = new SmallBlockEvent();
             newBlockEvent.setEventBody(smallBlock);
             List<String> addressList = eventBroadcaster.broadcastHashAndCache(newBlockEvent, false, fromId);

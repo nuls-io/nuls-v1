@@ -34,8 +34,6 @@ import io.nuls.db.entity.DepositPo;
 import io.nuls.db.entity.TxAccountRelationPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.ledger.service.intf.LedgerService;
-import io.nuls.protocol.base.cache.manager.member.ConsensusCacheManager;
-import io.nuls.protocol.base.cache.manager.tx.TxCacheManager;
 import io.nuls.protocol.base.constant.ConsensusStatusEnum;
 import io.nuls.protocol.base.entity.member.Deposit;
 import io.nuls.protocol.base.entity.tx.CancelDepositTransaction;
@@ -54,7 +52,7 @@ public class CancelDepositTxService implements TransactionService<CancelDepositT
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     private DepositDataService depositDataService = NulsContext.getServiceBean(DepositDataService.class);
 
-    private ConsensusCacheManager manager = ConsensusCacheManager.getInstance();
+//    private ConsensusCacheManager manager = ConsensusCacheManager.getInstance();
 
     private TxAccountRelationDataService relationDataService = NulsContext.getServiceBean(TxAccountRelationDataService.class);
 
@@ -75,9 +73,9 @@ public class CancelDepositTxService implements TransactionService<CancelDepositT
 //        NulsContext.getServiceBean(EventBroadcaster.class).publishToLocal(notice);
         this.ledgerService.unlockTxRollback(tx.getTxData().getDigestHex());
 
-        Consensus<Deposit> depositConsensus = manager.getDepositById(cd.getHexHash());
-        depositConsensus.setDelHeight(0L);
-        manager.putDeposit(depositConsensus);
+//        Consensus<Deposit> depositConsensus = manager.getDepositById(cd.getHexHash());
+//        depositConsensus.setDelHeight(0L);
+//        manager.putDeposit(depositConsensus);
 
         Set<String> set = new HashSet<>();
         set.add(cd.getAddress());
@@ -95,7 +93,7 @@ public class CancelDepositTxService implements TransactionService<CancelDepositT
         dpo.setId(cd.getHexHash());
         this.depositDataService.deleteById(dpo);
         this.ledgerService.unlockTxSave(tx.getTxData().getDigestHex());
-        manager.delDeposit(pjcTx.getTxData().getHexHash(), tx.getBlockHeight());
+//        manager.delDeposit(pjcTx.getTxData().getHexHash(), tx.getBlockHeight());
 
         TxAccountRelationPo po = new TxAccountRelationPo();
         po.setAddress(pjcTx.getTxData().getAddress());
@@ -106,13 +104,13 @@ public class CancelDepositTxService implements TransactionService<CancelDepositT
     @Override
     @DbSession
     public void onApproval(CancelDepositTransaction tx, Block block) {
-        Transaction joinTx = ledgerService.getTx(tx.getTxData());
-        if (joinTx == null) {
-            joinTx = TxCacheManager.TX_CACHE_MANAGER.getTx(tx.getTxData());
-        }
-        PocJoinConsensusTransaction realTx = (PocJoinConsensusTransaction) joinTx;
-        this.ledgerService.unlockTxApprove(tx.getTxData().getDigestHex());
-        manager.delDeposit(realTx.getTxData().getHexHash(), tx.getBlockHeight());
+//        Transaction joinTx = ledgerService.getTx(tx.getTxData());
+//        if (joinTx == null) {
+//            joinTx = TxCacheManager.TX_CACHE_MANAGER.getTx(tx.getTxData());
+//        }
+//        PocJoinConsensusTransaction realTx = (PocJoinConsensusTransaction) joinTx;
+//        this.ledgerService.unlockTxApprove(tx.getTxData().getDigestHex());
+//        manager.delDeposit(realTx.getTxData().getHexHash(), tx.getBlockHeight());
 
     }
 }

@@ -23,7 +23,6 @@
  */
 package io.nuls.protocol.base.entity.validator.tx;
 
-import io.nuls.protocol.base.cache.manager.member.ConsensusCacheManager;
 import io.nuls.protocol.entity.Consensus;
 import io.nuls.protocol.base.entity.member.Agent;
 import io.nuls.protocol.base.entity.tx.PocJoinConsensusTransaction;
@@ -43,7 +42,6 @@ public class AgentExistValidator implements NulsDataValidator<PocJoinConsensusTr
 
     private static final AgentExistValidator INSTANCE = new AgentExistValidator();
 
-    private ConsensusCacheManager cacheManager = ConsensusCacheManager.getInstance();
     private AgentDataService agentDataService = NulsContext.getServiceBean(AgentDataService.class);
 
     private AgentExistValidator() {
@@ -55,14 +53,14 @@ public class AgentExistValidator implements NulsDataValidator<PocJoinConsensusTr
 
     @Override
     public ValidateResult validate(PocJoinConsensusTransaction tx) {
-        Consensus<Agent> ca = cacheManager.getAgentById(tx.getTxData().getExtend().getAgentHash());
-        if(ca==null){
-            AgentPo po = agentDataService.get(tx.getTxData().getExtend().getAgentHash());
-            ca = ConsensusTool.fromPojo(po);
-        }
-        if (ca == null) {
-            return ValidateResult.getFailedResult(ErrorCode.ORPHAN_TX,"Agent is not exist!");
-        }
+//        Consensus<Agent> ca = cacheManager.getAgentById(tx.getTxData().getExtend().getAgentHash());
+//        if(ca==null){
+//            AgentPo po = agentDataService.get(tx.getTxData().getExtend().getAgentHash());
+//            ca = ConsensusTool.fromPojo(po);
+//        }
+//        if (ca == null) {
+//            return ValidateResult.getFailedResult(ErrorCode.ORPHAN_TX,"Agent is not exist!");
+//        }
         return ValidateResult.getSuccessResult();
     }
 }

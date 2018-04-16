@@ -26,7 +26,6 @@ package io.nuls.protocol.base.service.tx;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.protocol.base.constant.ConsensusStatusEnum;
 import io.nuls.protocol.base.entity.member.Agent;
-import io.nuls.protocol.base.cache.manager.member.ConsensusCacheManager;
 import io.nuls.protocol.entity.Consensus;
 import io.nuls.protocol.base.entity.tx.RegisterAgentTransaction;
 import io.nuls.protocol.base.event.notice.RegisterAgentNotice;
@@ -47,7 +46,6 @@ import io.nuls.event.bus.service.intf.EventBroadcaster;
  */
 @DbSession(transactional = PROPAGATION.NONE)
 public class RegisterAgentTxService implements TransactionService<RegisterAgentTransaction> {
-    private ConsensusCacheManager manager = ConsensusCacheManager.getInstance();
     private AgentDataService agentDataService = NulsContext.getServiceBean(AgentDataService.class);
     private DepositDataService depositDataService = NulsContext.getServiceBean(DepositDataService.class);
 
@@ -55,7 +53,6 @@ public class RegisterAgentTxService implements TransactionService<RegisterAgentT
     @DbSession
     public void onRollback(RegisterAgentTransaction tx, Block block) {
         this.agentDataService.deleteById(tx.getTxData().getHexHash(), tx.getBlockHeight());
-        manager.realDeleteAgent(tx.getTxData().getHexHash());
 
         agentDataService.realDeleteById(tx.getTxData().getHexHash(), 0);
 
@@ -71,7 +68,6 @@ public class RegisterAgentTxService implements TransactionService<RegisterAgentT
         Consensus<Agent> ca = tx.getTxData();
         ca.getExtend().setBlockHeight(tx.getBlockHeight());
         ca.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
-        manager.putAgent(ca);
 
         AgentPo po = ConsensusTool.agentToPojo(ca);
         agentDataService.save(po);
@@ -84,10 +80,5 @@ public class RegisterAgentTxService implements TransactionService<RegisterAgentT
 
     @Override
     public void onApproval(RegisterAgentTransaction tx, Block block) {
-        Consensus<Agent> ca = tx.getTxData();
-        ca.getExtend().setBlockHeight(tx.getBlockHeight());
-        ca.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
-        manager.putAgent(ca);
-
     }
 }

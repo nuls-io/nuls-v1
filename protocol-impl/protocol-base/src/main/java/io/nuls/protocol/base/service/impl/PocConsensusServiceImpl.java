@@ -49,7 +49,6 @@ import io.nuls.ledger.entity.params.OperationType;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.ledger.event.TransactionEvent;
 import io.nuls.ledger.service.intf.LedgerService;
-import io.nuls.protocol.base.cache.manager.member.ConsensusCacheManager;
 import io.nuls.protocol.base.constant.ConsensusStatusEnum;
 import io.nuls.protocol.base.constant.PocConsensusConstant;
 import io.nuls.protocol.base.entity.ConsensusAgentImpl;
@@ -85,8 +84,6 @@ public class PocConsensusServiceImpl implements ConsensusService {
     private LedgerService ledgerService;
     @Autowired
     private BlockService blockService;
-
-    private ConsensusCacheManager consensusCacheManager = ConsensusCacheManager.getInstance();
 
     private Transaction registerAgent(Agent agent, Account account, String password) throws IOException, NulsException {
         TransactionEvent event = new TransactionEvent();
@@ -240,27 +237,27 @@ public class PocConsensusServiceImpl implements ConsensusService {
 
     @Override
     public Map<String, Object> getConsensusInfo() {
-        List<Consensus<Agent>> agentList = consensusCacheManager.getAgentList(ConsensusStatusEnum.IN);
-        List<Consensus<Deposit>> depositList = consensusCacheManager.getDepositList(ConsensusStatusEnum.IN);
-
-        long totalDeposit = 0L;
-        Set<String> memberSet = new HashSet<>();
-        for (Consensus<Agent> agent : agentList) {
-            totalDeposit += agent.getExtend().getDeposit().getValue();
-            memberSet.add(agent.getAddress());
-        }
-        for (Consensus<Deposit> deposit : depositList) {
-            totalDeposit += deposit.getExtend().getDeposit().getValue();
-            memberSet.add(deposit.getAddress());
-        }
-        //calc last 24h reward
-        long rewardOfDay = ledgerService.getLastDayTimeReward();
-
+//        List<Consensus<Agent>> agentList = consensusCacheManager.getAgentList(ConsensusStatusEnum.IN);
+//        List<Consensus<Deposit>> depositList = consensusCacheManager.getDepositList(ConsensusStatusEnum.IN);
+//
+//        long totalDeposit = 0L;
+//        Set<String> memberSet = new HashSet<>();
+//        for (Consensus<Agent> agent : agentList) {
+//            totalDeposit += agent.getExtend().getDeposit().getValue();
+//            memberSet.add(agent.getAddress());
+//        }
+//        for (Consensus<Deposit> deposit : depositList) {
+//            totalDeposit += deposit.getExtend().getDeposit().getValue();
+//            memberSet.add(deposit.getAddress());
+//        }
+//        //calc last 24h reward
+//        long rewardOfDay = ledgerService.getLastDayTimeReward();
+//
         Map<String, Object> map = new HashMap<>();
-        map.put("agentCount", agentList.size());
-        map.put("rewardOfDay", rewardOfDay);
-        map.put("totalDeposit", totalDeposit);
-        map.put("memberCount", memberSet.size());
+//        map.put("agentCount", agentList.size());
+//        map.put("rewardOfDay", rewardOfDay);
+//        map.put("totalDeposit", totalDeposit);
+//        map.put("memberCount", memberSet.size());
         return map;
     }
 
@@ -281,25 +278,25 @@ public class PocConsensusServiceImpl implements ConsensusService {
         long rewardOfDay = 0;
         long usableBalance = 0;
         Set<String> joinedAgent = new HashSet<>();
-        for (Account account : accountList) {
-            Consensus<Agent> agent = this.consensusCacheManager.getAgentByAddress(account.getAddress().toString());
-            List<Consensus<Deposit>> depositList = this.consensusCacheManager.getDepositListByAddress(account.getAddress().toString());
-
-            for (Consensus<Deposit> cd : depositList) {
-                totalDeposit += cd.getExtend().getDeposit().getValue();
-                joinedAgent.add(cd.getExtend().getAgentHash());
-            }
-            if (null != agent) {
-                agentCount++;
-                totalDeposit += agent.getExtend().getDeposit().getValue();
-            }
-            reward += ledgerService.getAccountReward(account.getAddress().getBase58(), 0);
-            rewardOfDay += ledgerService.getAccountReward(account.getAddress().getBase58(), lastDayTime);
-            Balance balance = ledgerService.getBalance(account.getAddress().getBase58());
-            if (balance != null) {
-                usableBalance += balance.getUsable().getValue();
-            }
-        }
+//        for (Account account : accountList) {
+//            Consensus<Agent> agent = this.consensusCacheManager.getAgentByAddress(account.getAddress().toString());
+//            List<Consensus<Deposit>> depositList = this.consensusCacheManager.getDepositListByAddress(account.getAddress().toString());
+//
+//            for (Consensus<Deposit> cd : depositList) {
+//                totalDeposit += cd.getExtend().getDeposit().getValue();
+//                joinedAgent.add(cd.getExtend().getAgentHash());
+//            }
+//            if (null != agent) {
+//                agentCount++;
+//                totalDeposit += agent.getExtend().getDeposit().getValue();
+//            }
+//            reward += ledgerService.getAccountReward(account.getAddress().getBase58(), 0);
+//            rewardOfDay += ledgerService.getAccountReward(account.getAddress().getBase58(), lastDayTime);
+//            Balance balance = ledgerService.getBalance(account.getAddress().getBase58());
+//            if (balance != null) {
+//                usableBalance += balance.getUsable().getValue();
+//            }
+//        }
         Map<String, Object> map = new HashMap<>();
         map.put("agentCount", agentCount);
         map.put("totalDeposit", totalDeposit);
@@ -314,28 +311,28 @@ public class PocConsensusServiceImpl implements ConsensusService {
         if (!Address.validAddress(address)) {
             return null;
         }
-        Consensus<Agent> agent = this.consensusCacheManager.getAgentByAddress(address);
-        List<Consensus<Deposit>> depositList = this.consensusCacheManager.getDepositListByAddress(address);
-        long totalDeposit = 0;
-        Set<String> joinedAgent = new HashSet<>();
-        for (Consensus<Deposit> cd : depositList) {
-            totalDeposit += cd.getExtend().getDeposit().getValue();
-            joinedAgent.add(cd.getExtend().getAgentHash());
-        }
+//        Consensus<Agent> agent = this.consensusCacheManager.getAgentByAddress(address);
+//        List<Consensus<Deposit>> depositList = this.consensusCacheManager.getDepositListByAddress(address);
+//        long totalDeposit = 0;
+//        Set<String> joinedAgent = new HashSet<>();
+//        for (Consensus<Deposit> cd : depositList) {
+//            totalDeposit += cd.getExtend().getDeposit().getValue();
+//            joinedAgent.add(cd.getExtend().getAgentHash());
+//        }
         Map<String, Object> map = new HashMap<>();
-        if (null != agent) {
-            map.put("agentCount", 1);
-//            totalDeposit += agent.getExtend().getDeposit().getValue();
-        } else {
-            map.put("agentCount", 0);
-        }
-        map.put("totalDeposit", totalDeposit);
+//        if (null != agent) {
+//            map.put("agentCount", 1);
+////            totalDeposit += agent.getExtend().getDeposit().getValue();
+//        } else {
+//            map.put("agentCount", 0);
+//        }
+//        map.put("totalDeposit", totalDeposit);
         long lastDayTime = TimeService.currentTimeMillis() - DateUtil.DATE_TIME;
         long reward = ledgerService.getAccountReward(address, 0);
         long rewardOfDay = ledgerService.getAccountReward(address, lastDayTime);
         Balance balance = ledgerService.getBalance(address);
         map.put("reward", reward);
-        map.put("joinAccountCount", joinedAgent.size());
+//        map.put("joinAccountCount", joinedAgent.size());
         if (null == balance || balance.getUsable() == null) {
             map.put("usableBalance", 0);
         } else {
@@ -381,78 +378,78 @@ public class PocConsensusServiceImpl implements ConsensusService {
     @Override
     public Page<Map<String, Object>> getAgentList(String keyword, String depositAddress, String agentAddress,
                                                   String sortType, Integer pageNumber, Integer pageSize) {
-        List<Consensus<Agent>> agentList = this.consensusCacheManager.getAliveAgentList(NulsContext.getInstance().getBestHeight());
-        agentList.addAll(this.consensusCacheManager.getUnconfirmedAgentList());
-        filterAgentList(agentList, agentAddress, depositAddress, keyword);
-
+//        List<Consensus<Agent>> agentList = this.consensusCacheManager.getAliveAgentList(NulsContext.getInstance().getBestHeight());
+//        agentList.addAll(this.consensusCacheManager.getUnconfirmedAgentList());
+//        filterAgentList(agentList, agentAddress, depositAddress, keyword);
+//
         Page<Map<String, Object>> page = new Page<>();
-        int start = pageNumber * pageSize - pageSize;
-
-        if (agentList.isEmpty() || start >= agentList.size()) {
-            if (StringUtils.isNotBlank(depositAddress)) {
-                Consensus<Agent> ca = consensusCacheManager.getAgentByAddress(depositAddress);
-                if (null != ca) {
-                    agentList.add(0, ca);
-                }
-            }
-            page.setPageNumber(pageNumber);
-            page.setPageSize(pageSize);
-            page.setTotal(agentList.size());
-            int sum = 0;
-            if (page.getTotal() % pageSize > 0) {
-                sum = 1;
-            }
-            page.setList(transList(agentList));
-            page.setPages((int) ((page.getTotal() / pageSize) + sum));
-            return page;
-        }
-
-        int end = pageNumber * pageSize;
-        if (end > agentList.size()) {
-            end = agentList.size();
-        }
-
-        int type = AgentComparator.COMMISSION_RATE;
-        if ("owndeposit".equals(sortType)) {
-            type = AgentComparator.DEPOSIT;
-        } else if ("commissionRate".equals(sortType)) {
-            type = AgentComparator.COMMISSION_RATE;
-        } else if ("creditRatio".equals(sortType)) {
-            type = AgentComparator.CREDIT_VALUE;
-        } else if ("totalDeposit".equals(sortType)) {
-            type = AgentComparator.DEPOSITABLE;
-        }
-        Collections.sort(agentList, AgentComparator.getInstance(type));
-
-        if (StringUtils.isNotBlank(depositAddress)) {
-            boolean b = true;
-            for (int i = 0; i < agentList.size(); i++) {
-                Consensus<Agent> ca = agentList.get(i);
-                if (ca.getAddress().equals(depositAddress)) {
-                    agentList.remove(i);
-                    agentList.add(0, ca);
-                    b = false;
-                    break;
-                }
-            }
-            if (b) {
-                Consensus<Agent> ca = consensusCacheManager.getAgentByAddress(depositAddress);
-                if (null != ca) {
-                    agentList.add(0, ca);
-                }
-            }
-        }
-        List<Consensus<Agent>> sublist = agentList.subList(start, end);
-        page.setPageNumber(pageNumber);
-        page.setPageSize(pageSize);
-        page.setTotal(agentList.size());
-        int sum = 0;
-        if (page.getTotal() % pageSize > 0) {
-            sum = 1;
-        }
-        page.setPages((int) ((page.getTotal() / pageSize) + sum));
-        List<Map<String, Object>> resultList = transList(sublist);
-        page.setList(resultList);
+//        int start = pageNumber * pageSize - pageSize;
+//
+//        if (agentList.isEmpty() || start >= agentList.size()) {
+//            if (StringUtils.isNotBlank(depositAddress)) {
+//                Consensus<Agent> ca = consensusCacheManager.getAgentByAddress(depositAddress);
+//                if (null != ca) {
+//                    agentList.add(0, ca);
+//                }
+//            }
+//            page.setPageNumber(pageNumber);
+//            page.setPageSize(pageSize);
+//            page.setTotal(agentList.size());
+//            int sum = 0;
+//            if (page.getTotal() % pageSize > 0) {
+//                sum = 1;
+//            }
+//            page.setList(transList(agentList));
+//            page.setPages((int) ((page.getTotal() / pageSize) + sum));
+//            return page;
+//        }
+//
+//        int end = pageNumber * pageSize;
+//        if (end > agentList.size()) {
+//            end = agentList.size();
+//        }
+//
+//        int type = AgentComparator.COMMISSION_RATE;
+//        if ("owndeposit".equals(sortType)) {
+//            type = AgentComparator.DEPOSIT;
+//        } else if ("commissionRate".equals(sortType)) {
+//            type = AgentComparator.COMMISSION_RATE;
+//        } else if ("creditRatio".equals(sortType)) {
+//            type = AgentComparator.CREDIT_VALUE;
+//        } else if ("totalDeposit".equals(sortType)) {
+//            type = AgentComparator.DEPOSITABLE;
+//        }
+//        Collections.sort(agentList, AgentComparator.getInstance(type));
+//
+//        if (StringUtils.isNotBlank(depositAddress)) {
+//            boolean b = true;
+//            for (int i = 0; i < agentList.size(); i++) {
+//                Consensus<Agent> ca = agentList.get(i);
+//                if (ca.getAddress().equals(depositAddress)) {
+//                    agentList.remove(i);
+//                    agentList.add(0, ca);
+//                    b = false;
+//                    break;
+//                }
+//            }
+//            if (b) {
+//                Consensus<Agent> ca = consensusCacheManager.getAgentByAddress(depositAddress);
+//                if (null != ca) {
+//                    agentList.add(0, ca);
+//                }
+//            }
+//        }
+//        List<Consensus<Agent>> sublist = agentList.subList(start, end);
+//        page.setPageNumber(pageNumber);
+//        page.setPageSize(pageSize);
+//        page.setTotal(agentList.size());
+//        int sum = 0;
+//        if (page.getTotal() % pageSize > 0) {
+//            sum = 1;
+//        }
+//        page.setPages((int) ((page.getTotal() / pageSize) + sum));
+//        List<Map<String, Object>> resultList = transList(sublist);
+//        page.setList(resultList);
         return page;
     }
 
@@ -475,13 +472,13 @@ public class PocConsensusServiceImpl implements ConsensusService {
             long reward = ledgerService.getAgentReward(ca.getAddress(), 1);
             map.put("reward", reward);
             map.put("packedCount", blockService.getPackingCount(ca.getExtend().getPackingAddress()));
-            List<Consensus<Deposit>> deposits = this.consensusCacheManager.getDepositListByAgentId(ca.getHexHash(), NulsContext.getInstance().getBestHeight());
+//            List<Consensus<Deposit>> deposits = this.consensusCacheManager.getDepositListByAgentId(ca.getHexHash(), NulsContext.getInstance().getBestHeight());
             long totalDeposit = 0;
             Set<String> memberSet = new HashSet<>();
-            for (Consensus<Deposit> cd : deposits) {
-                totalDeposit += cd.getExtend().getDeposit().getValue();
-                memberSet.add(cd.getAddress());
-            }
+//            for (Consensus<Deposit> cd : deposits) {
+//                totalDeposit += cd.getExtend().getDeposit().getValue();
+//                memberSet.add(cd.getAddress());
+//            }
             map.put("totalDeposit", totalDeposit);
             map.put("memberCount", memberSet.size());
             resultList.add(map);
@@ -492,106 +489,106 @@ public class PocConsensusServiceImpl implements ConsensusService {
 
     @Override
     public Page<Map<String, Object>> getDepositList(String address, String agentAddress, Integer pageNumber, Integer pageSize) {
-        List<Consensus<Deposit>> depositList = this.consensusCacheManager.getAliveDepositList(NulsContext.getInstance().getBestHeight());
-        depositList.addAll(this.consensusCacheManager.getUnconfirmedDepositList());
-        boolean isAddress = Address.validAddress(address);
-        Consensus<Agent> agent = null;
-        if (Address.validAddress(agentAddress)) {
-            agent = this.consensusCacheManager.getAgentByAddress(agentAddress);
-            if (null == agent) {
-                depositList.clear();
-            }
-        }
-        for (int i = depositList.size() - 1; i >= 0; i--) {
-            Consensus<Deposit> cd = depositList.get(i);
-            if (isAddress && !cd.getAddress().equals(address)) {
-                depositList.remove(i);
-            }
-            if (null != agent && !cd.getExtend().getAgentHash().equals(agent.getHexHash())) {
-                depositList.remove(i);
-            }
-        }
+//        List<Consensus<Deposit>> depositList = this.consensusCacheManager.getAliveDepositList(NulsContext.getInstance().getBestHeight());
+//        depositList.addAll(this.consensusCacheManager.getUnconfirmedDepositList());
+//        boolean isAddress = Address.validAddress(address);
+//        Consensus<Agent> agent = null;
+//        if (Address.validAddress(agentAddress)) {
+//            agent = this.consensusCacheManager.getAgentByAddress(agentAddress);
+//            if (null == agent) {
+//                depositList.clear();
+//            }
+//        }
+//        for (int i = depositList.size() - 1; i >= 0; i--) {
+//            Consensus<Deposit> cd = depositList.get(i);
+//            if (isAddress && !cd.getAddress().equals(address)) {
+//                depositList.remove(i);
+//            }
+//            if (null != agent && !cd.getExtend().getAgentHash().equals(agent.getHexHash())) {
+//                depositList.remove(i);
+//            }
+//        }
         Page<Map<String, Object>> page = new Page<>();
-        int start = pageNumber * pageSize - pageSize;
-        if (depositList.isEmpty() || start >= depositList.size()) {
-            page.setPageNumber(pageNumber);
-            page.setPageSize(pageSize);
-            page.setTotal(depositList.size());
-            int sum = 0;
-            if (page.getTotal() % pageSize > 0) {
-                sum = 1;
-            }
-            page.setPages((int) ((page.getTotal() / pageSize) + sum));
-            return page;
-        }
-        int end = pageNumber * pageSize;
-        if (end > depositList.size()) {
-            end = depositList.size();
-        }
-
-        Collections.sort(depositList, DepositComparator.getInstance());
-        List<Consensus<Deposit>> sublist = depositList.subList(start, end);
-        page.setPageNumber(pageNumber);
-        page.setPageSize(pageSize);
-        page.setTotal(depositList.size());
-        int sum = 0;
-        if (page.getTotal() % pageSize > 0) {
-            sum = 1;
-        }
-        page.setPages((int) ((page.getTotal() / pageSize) + sum));
-        List<Map<String, Object>> resultList = new ArrayList<>();
-        for (Consensus<Deposit> cd : sublist) {
-            if (agent == null || !agent.getHexHash().equals(cd.getExtend().getAgentHash())) {
-                agent = this.consensusCacheManager.getAgentById(cd.getExtend().getAgentHash());
-            }
-            Map<String, Object> map = new HashMap<>();
-            map.put("agentId", cd.getExtend().getAgentHash());
-            map.put("agentName", agent.getExtend().getAgentName());
-            map.put("agentAddress", agent.getAddress());
-            map.put("txHash", cd.getExtend().getTxHash());
-            map.put("agentAddressAlias", null);
-            map.put("address", cd.getAddress());
-            map.put("status", cd.getExtend().getStatus());
-            map.put("depositTime", cd.getExtend().getStartTime());
-            map.put("amount", cd.getExtend().getDeposit().getValue());
-            resultList.add(map);
-        }
-        page.setList(resultList);
+//        int start = pageNumber * pageSize - pageSize;
+//        if (depositList.isEmpty() || start >= depositList.size()) {
+//            page.setPageNumber(pageNumber);
+//            page.setPageSize(pageSize);
+//            page.setTotal(depositList.size());
+//            int sum = 0;
+//            if (page.getTotal() % pageSize > 0) {
+//                sum = 1;
+//            }
+//            page.setPages((int) ((page.getTotal() / pageSize) + sum));
+//            return page;
+//        }
+//        int end = pageNumber * pageSize;
+//        if (end > depositList.size()) {
+//            end = depositList.size();
+//        }
+//
+//        Collections.sort(depositList, DepositComparator.getInstance());
+//        List<Consensus<Deposit>> sublist = depositList.subList(start, end);
+//        page.setPageNumber(pageNumber);
+//        page.setPageSize(pageSize);
+//        page.setTotal(depositList.size());
+//        int sum = 0;
+//        if (page.getTotal() % pageSize > 0) {
+//            sum = 1;
+//        }
+//        page.setPages((int) ((page.getTotal() / pageSize) + sum));
+//        List<Map<String, Object>> resultList = new ArrayList<>();
+//        for (Consensus<Deposit> cd : sublist) {
+//            if (agent == null || !agent.getHexHash().equals(cd.getExtend().getAgentHash())) {
+//                agent = this.consensusCacheManager.getAgentById(cd.getExtend().getAgentHash());
+//            }
+//            Map<String, Object> map = new HashMap<>();
+//            map.put("agentId", cd.getExtend().getAgentHash());
+//            map.put("agentName", agent.getExtend().getAgentName());
+//            map.put("agentAddress", agent.getAddress());
+//            map.put("txHash", cd.getExtend().getTxHash());
+//            map.put("agentAddressAlias", null);
+//            map.put("address", cd.getAddress());
+//            map.put("status", cd.getExtend().getStatus());
+//            map.put("depositTime", cd.getExtend().getStartTime());
+//            map.put("amount", cd.getExtend().getDeposit().getValue());
+//            resultList.add(map);
+//        }
+//        page.setList(resultList);
         return page;
     }
 
     @Override
     public Map<String, Object> getAgent(String agentAddress) {
-        Consensus<Agent> ca = this.consensusCacheManager.getAgentByAddress(agentAddress);
-        if (ca == null) {
-            return null;
-        }
+//        Consensus<Agent> ca = this.consensusCacheManager.getAgentByAddress(agentAddress);
+//        if (ca == null) {
+//            return null;
+//        }
         Map<String, Object> map = new HashMap<>();
-        map.put("agentId", ca.getHexHash());
-        map.put("agentName", ca.getExtend().getAgentName());
-        map.put("packingAddress", ca.getExtend().getPackingAddress());
-        map.put("agentAddress", ca.getAddress());
-        map.put("agentAddressAlias", null);
-        map.put("status", ca.getExtend().getStatus());
-        map.put("owndeposit", ca.getExtend().getDeposit().getValue());
-        map.put("commissionRate", ca.getExtend().getCommissionRate());
-        map.put("introduction", ca.getExtend().getIntroduction());
-        map.put("startTime", ca.getExtend().getStartTime());
-        map.put("creditRatio", ca.getExtend().getCreditVal());
-        map.put("reward", ledgerService.getAgentReward(ca.getAddress(), 1));
-
-        Map<String, Object> countMap = blockService.getSumTxCount(ca.getExtend().getPackingAddress(), 0, 0);
-        map.put("packedCount", countMap.get("blockCount"));
-        map.put("txCount", countMap.get("txCount"));
-        List<Consensus<Deposit>> deposits = this.consensusCacheManager.getDepositListByAgentId(ca.getHexHash(), NulsContext.getInstance().getBestHeight());
-        long totalDeposit = 0;
-        Set<String> memberSet = new HashSet<>();
-        for (Consensus<Deposit> cd : deposits) {
-            totalDeposit += cd.getExtend().getDeposit().getValue();
-            memberSet.add(cd.getAddress());
-        }
-        map.put("totalDeposit", totalDeposit);
-        map.put("memberCount", memberSet.size());
+//        map.put("agentId", ca.getHexHash());
+//        map.put("agentName", ca.getExtend().getAgentName());
+//        map.put("packingAddress", ca.getExtend().getPackingAddress());
+//        map.put("agentAddress", ca.getAddress());
+//        map.put("agentAddressAlias", null);
+//        map.put("status", ca.getExtend().getStatus());
+//        map.put("owndeposit", ca.getExtend().getDeposit().getValue());
+//        map.put("commissionRate", ca.getExtend().getCommissionRate());
+//        map.put("introduction", ca.getExtend().getIntroduction());
+//        map.put("startTime", ca.getExtend().getStartTime());
+//        map.put("creditRatio", ca.getExtend().getCreditVal());
+//        map.put("reward", ledgerService.getAgentReward(ca.getAddress(), 1));
+//
+//        Map<String, Object> countMap = blockService.getSumTxCount(ca.getExtend().getPackingAddress(), 0, 0);
+//        map.put("packedCount", countMap.get("blockCount"));
+//        map.put("txCount", countMap.get("txCount"));
+//        List<Consensus<Deposit>> deposits = this.consensusCacheManager.getDepositListByAgentId(ca.getHexHash(), NulsContext.getInstance().getBestHeight());
+//        long totalDeposit = 0;
+//        Set<String> memberSet = new HashSet<>();
+//        for (Consensus<Deposit> cd : deposits) {
+//            totalDeposit += cd.getExtend().getDeposit().getValue();
+//            memberSet.add(cd.getAddress());
+//        }
+//        map.put("totalDeposit", totalDeposit);
+//        map.put("memberCount", memberSet.size());
         return map;
     }
 
@@ -604,19 +601,19 @@ public class PocConsensusServiceImpl implements ConsensusService {
                 }
             }
         }
-        if (Address.validAddress(depositAddress)) {
-            List<Consensus<Deposit>> depositList = this.consensusCacheManager.getDepositListByAddress(depositAddress);
-            Set<String> agentHashSet = new HashSet<>();
-            for (Consensus<Deposit> cd : depositList) {
-                agentHashSet.add(cd.getExtend().getAgentHash());
-            }
-            for (int i = agentList.size() - 1; i >= 0; i--) {
-                Consensus<Agent> consensus = agentList.get(i);
-                if (!agentHashSet.contains(consensus.getHexHash())) {
-                    agentList.remove(i);
-                }
-            }
-        }
+//        if (Address.validAddress(depositAddress)) {
+//            List<Consensus<Deposit>> depositList = this.consensusCacheManager.getDepositListByAddress(depositAddress);
+//            Set<String> agentHashSet = new HashSet<>();
+//            for (Consensus<Deposit> cd : depositList) {
+//                agentHashSet.add(cd.getExtend().getAgentHash());
+//            }
+//            for (int i = agentList.size() - 1; i >= 0; i--) {
+//                Consensus<Agent> consensus = agentList.get(i);
+//                if (!agentHashSet.contains(consensus.getHexHash())) {
+//                    agentList.remove(i);
+//                }
+//            }
+//        }
         if (StringUtils.isNotBlank(keyword)) {
             for (int i = agentList.size() - 1; i >= 0; i--) {
                 Consensus<Agent> consensus = agentList.get(i);

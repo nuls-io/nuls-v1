@@ -23,24 +23,20 @@
  */
 package io.nuls.protocol.base.event.handler;
 
-import io.nuls.poc.service.intf.ConsensusService;
-import io.nuls.protocol.base.cache.manager.tx.ConfirmingTxCacheManager;
-import io.nuls.protocol.base.cache.manager.tx.OrphanTxCacheManager;
-import io.nuls.protocol.entity.GetTxGroupParam;
-import io.nuls.protocol.entity.TxGroup;
-import io.nuls.protocol.base.event.notice.AssembledBlockNotice;
-import io.nuls.protocol.base.manager.BlockManager;
-import io.nuls.protocol.base.cache.manager.block.TemporaryCacheManager;
-import io.nuls.protocol.base.cache.manager.tx.ReceivedTxCacheManager;
-import io.nuls.protocol.event.GetTxGroupRequest;
-import io.nuls.protocol.event.SmallBlockEvent;
-import io.nuls.protocol.event.TxGroupEvent;
-import io.nuls.protocol.base.utils.ConsensusTool;
 import io.nuls.core.chain.entity.*;
 import io.nuls.core.context.NulsContext;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.network.service.NetworkService;
+import io.nuls.poc.service.intf.ConsensusService;
+import io.nuls.protocol.base.cache.manager.block.TemporaryCacheManager;
+import io.nuls.protocol.base.event.notice.AssembledBlockNotice;
+import io.nuls.protocol.base.utils.ConsensusTool;
+import io.nuls.protocol.entity.GetTxGroupParam;
+import io.nuls.protocol.entity.TxGroup;
+import io.nuls.protocol.event.GetTxGroupRequest;
+import io.nuls.protocol.event.SmallBlockEvent;
+import io.nuls.protocol.event.TxGroupEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,13 +48,10 @@ import java.util.Map;
  * @date 2017/11/16
  */
 public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
+
     private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
-    private ReceivedTxCacheManager receivedTxCacheManager = ReceivedTxCacheManager.getInstance();
-    private ConfirmingTxCacheManager confirmingTxCacheManager = ConfirmingTxCacheManager.getInstance();
-    private OrphanTxCacheManager orphanTxCacheManager = OrphanTxCacheManager.getInstance();
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
-    private BlockManager blockManager = BlockManager.getInstance();
     private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
 
     @Override
@@ -78,15 +71,15 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
         List<NulsDigestData> needHashList = new ArrayList<>();
         for (NulsDigestData hash : smallBlock.getTxHashList()) {
             Transaction tx = txGroup.getTx(hash.getDigestHex());
-            if (null == tx) {
-                tx = this.receivedTxCacheManager.getTx(hash);
-            }
-            if (null == tx) {
-                tx = orphanTxCacheManager.getTx(hash);
-            }
-            if (null == tx) {
-                tx = confirmingTxCacheManager.getTx(hash);
-            }
+//            if (null == tx) {
+//                tx = this.receivedTxCacheManager.getTx(hash);
+//            }
+//            if (null == tx) {
+//                tx = orphanTxCacheManager.getTx(hash);
+//            }
+//            if (null == tx) {
+//                tx = confirmingTxCacheManager.getTx(hash);
+//            }
             if (null == tx && txMap.get(hash) == null) {
                 needHashList.add(hash);
                 continue;

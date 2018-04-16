@@ -62,10 +62,11 @@ public class IsolatedBlocksProcess {
         Block block = blockContainer.getBlock();
 
         // 只处理本地误差100个块以内的孤块
+
         long bestBlockHeight = chainManager.getBestBlockHeight();
-        if(Math.abs(bestBlockHeight - block.getHeader().getHeight()) > 100) {
-            return;
-        }
+//todo        if(Math.abs(bestBlockHeight - block.getHeader().getHeight()) > 100) {
+//            return;
+//        }
 
         // Checks if the current orphaned block is connected to an existing orphaned chain
         // 检查当前孤立块是否和已经存在的孤立链连接

@@ -24,11 +24,6 @@
 package io.nuls.protocol.base.service.impl;
 
 import io.nuls.account.entity.Address;
-import io.nuls.core.utils.log.ConsensusLog;
-import io.nuls.protocol.base.entity.block.BlockRoundData;
-import io.nuls.protocol.base.manager.BlockManager;
-import io.nuls.protocol.intf.BlockService;
-import io.nuls.protocol.utils.BlockHeightComparator;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
@@ -39,13 +34,16 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.utils.log.BlockLog;
+import io.nuls.core.utils.log.ConsensusLog;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.ledger.service.intf.LedgerService;
+import io.nuls.protocol.base.entity.block.BlockRoundData;
+import io.nuls.protocol.intf.BlockService;
+import io.nuls.protocol.utils.BlockHeightComparator;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -58,7 +56,6 @@ import java.util.Map;
  */
 public class BlockServiceImpl implements BlockService {
     private BlockStorageService blockStorageService = BlockStorageService.getInstance();
-    private BlockManager blockManager = BlockManager.getInstance();
     @Autowired
     private LedgerService ledgerService;
 
@@ -134,13 +131,11 @@ public class BlockServiceImpl implements BlockService {
             long currentMaxHeight = blockList.get(blockList.size() - 1).getHeader().getHeight();
             while (currentMaxHeight < endHeight) {
                 long next = currentMaxHeight + 1;
-                Block block = blockManager.getBlock(next);
-                if (null == block) {
-                    try {
-                        block = blockStorageService.getBlock(next);
-                    } catch (Exception e) {
-                        Log.error(e);
-                    }
+                Block block = null;
+                try {
+                    block = blockStorageService.getBlock(next);
+                } catch (Exception e) {
+                    Log.error(e);
                 }
                 if (null != block) {
                     blockList.add(block);
@@ -166,7 +161,7 @@ public class BlockServiceImpl implements BlockService {
         for (int x = 0; x < block.getHeader().getTxCount(); x++) {
             Transaction tx = block.getTxs().get(x);
             tx.setBlockHeight(block.getHeader().getHeight());
-            if (tx.getStatus()==null||tx.getStatus() == TxStatusEnum.CACHED) {
+            if (tx.getStatus() == null || tx.getStatus() == TxStatusEnum.CACHED) {
                 b = true;
                 try {
                     ledgerService.approvalTx(tx, block);
@@ -207,10 +202,6 @@ public class BlockServiceImpl implements BlockService {
         if (null == block) {
             return;
         }
-        boolean result = this.blockManager.rollback(block);
-        if (result) {
-            return;
-        }
         this.rollback(block.getTxs(), block.getTxs().size() - 1);
         this.ledgerService.deleteTx(block.getHeader().getHeight());
         blockStorageService.delete(block.getHeader().getHash().getDigestHex());
@@ -236,16 +227,13 @@ public class BlockServiceImpl implements BlockService {
     @Override
     public BlockHeader getBlockHeader(NulsDigestData hash) throws NulsException {
         String hashHex = hash.getDigestHex();
-        BlockHeader header = blockManager.getBlockHeader(hashHex);
-        if (null == header) {
-            header = blockStorageService.getBlockHeader(hashHex);
-        }
-        return header;
+
+        return blockStorageService.getBlockHeader(hashHex);
     }
 
     @Override
     public long getPackingCount(String address) {
-        return blockStorageService.getBlockCount(address, -1L, -1L,0L);
+        return blockStorageService.getBlockCount(address, -1L, -1L, 0L);
     }
 
     @Override
@@ -303,36 +291,25 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public Block getBestBlock() {
-        Block highestBlock = BlockManager.getInstance().getHighestBlock();
-        if (null == highestBlock) {
-            highestBlock = this.getLocalBestBlock();
-        }
-        return highestBlock;
+
+        return this.getLocalBestBlock();
     }
 
-    @Override
-    public void approvalBlock(String hash) {
-        Block block = this.getBlock(hash);
-        if (null == block) {
-            Log.info("the block is null:" + block.getHeader().getHash());
-            return;
-        }
-        blockManager.appravalBlock(block);
-    }
 
     @Override
     public List<BlockHeaderPo> getBlockHashList(long start, long end) {
         return blockStorageService.getBlockHashList(start, end);
     }
 
-    @Override
-    public Block getBlockFromMyChain(long start) {
-        return blockStorageService.getBlockFromMyChain(start);
-    }
 
     @Override
     public Block getBlockFromMyChain(String hash) {
-        return blockStorageService.getBlockFromMyChain(hash);
+        try {
+            return blockStorageService.getBlock(hash);
+        } catch (Exception e) {
+            Log.error(e);
+            return null;
+        }
     }
 
     @Override

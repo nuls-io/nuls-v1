@@ -24,9 +24,9 @@
 
 package io.nuls.protocol.base.service.impl;
 
+import io.nuls.poc.service.intf.ConsensusService;
 import io.nuls.protocol.intf.DownloadService;
 import io.nuls.protocol.intf.SystemService;
-import io.nuls.protocol.base.thread.ConsensusMeetingRunner;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.service.NetworkService;
@@ -58,8 +58,7 @@ public class SystemServiceImpl implements SystemService {
         DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
         downloadService.reset();
 
-        ConsensusMeetingRunner consensusMeetingRunner = ConsensusMeetingRunner.getInstance();
-        consensusMeetingRunner.resetConsensus();
+        NulsContext.getServiceBean(ConsensusService.class).restart();
 
         Log.info("---------------reset end----------------");
 

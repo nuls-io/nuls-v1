@@ -23,7 +23,6 @@
  */
 package io.nuls.protocol.base.service.impl;
 
-import io.nuls.protocol.base.manager.BlockManager;
 import io.nuls.protocol.base.utils.ConsensusTool;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
@@ -54,7 +53,6 @@ public class BlockStorageService {
 
     private BlockHeaderService headerDao = NulsContext.getServiceBean(BlockHeaderService.class);
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
-    private BlockManager blockCacheManager = BlockManager.getInstance();
 
     private BlockStorageService() {
     }
@@ -64,10 +62,7 @@ public class BlockStorageService {
     }
 
     public Block getBlock(long height) throws Exception {
-        Block block = blockCacheManager.getBlock(height);
-        if (null != block && block.getTxs().size() == block.getHeader().getTxCount()) {
-            return block;
-        }
+
         BlockHeader header = getBlockHeader(height);
         if (null == header) {
             return null;
@@ -85,10 +80,6 @@ public class BlockStorageService {
     }
 
     public Block getBlock(String hash) throws Exception {
-        Block block = blockCacheManager.getBlock(hash);
-        if (null != block) {
-            return block;
-        }
         BlockHeader header = getBlockHeader(hash);
         if (null == header) {
             return null;
@@ -162,23 +153,11 @@ public class BlockStorageService {
     }
 
     public BlockHeader getBlockHeader(long height) throws NulsException {
-        BlockHeader header = blockCacheManager.getBlockHeader(height);
-        if (null != header) {
-            return header;
-        }
         BlockHeaderPo po = this.headerDao.getHeader(height);
         return ConsensusTool.fromPojo(po);
     }
 
     public BlockHeader getBlockHeader(String hash) throws NulsException {
-        BlockHeader header = blockCacheManager.getBlockHeader(hash);
-        if (null != header) {
-            return header;
-        }
-        Block block = blockCacheManager.getBlock(hash);
-        if (null != block) {
-            return block.getHeader();
-        }
         BlockHeaderPo po = this.headerDao.getHeader(hash);
         return ConsensusTool.fromPojo(po);
     }
@@ -203,7 +182,6 @@ public class BlockStorageService {
     }
 
     public void delete(String hash) {
-        blockCacheManager.removeBlock(hash);
         headerDao.delete(hash);
     }
 
@@ -219,24 +197,7 @@ public class BlockStorageService {
         if ((endHeight - startHeight + 1) == headerMap.size()) {
             return new ArrayList<>(headerMap.values());
         }
-        List<BlockHeader> headerList = new ArrayList<>();
-        for (long i = startHeight; i <= endHeight; i++) {
-            if (headerMap.containsKey(i)) {
-                headerList.add(headerMap.get(i));
-                continue;
-            }
-            BlockHeader header = blockCacheManager.getBlockHeader(i);
-            if (null == header) {
-                Block block = blockCacheManager.getBlock(i);
-                if (null != block) {
-                    header = block.getHeader();
-                }
-            }
-            if (null != header) {
-                headerList.add(header);
-            }
-        }
-        return headerList;
+        throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "the count of block header is wrong!");
     }
 
     public Page<BlockHeaderPo> getBlocListByAddress(String nodeAddress, int type, int pageNumber, int pageSize) {
@@ -248,7 +209,7 @@ public class BlockStorageService {
     }
 
 
-    public long getBlockCount(String address, long roundStart, long roundEnd,long startHeight) {
+    public long getBlockCount(String address, long roundStart, long roundEnd, long startHeight) {
         return this.headerDao.getCount(address, roundStart, roundEnd, startHeight);
     }
 
@@ -260,75 +221,8 @@ public class BlockStorageService {
         return this.headerDao.getRoundFirstBlockHeight(roundIndex);
     }
 
-    public Long getRoundLastBlockHeight(long roundIndex) {
-        return this.headerDao.getRoundLastBlockHeight(roundIndex);
-    }
-
     public List<BlockHeaderPo> getBlockHashList(long start, long end) {
         return this.headerDao.getBlockHashList(start, end);
     }
 
-    public Block getBlockFromMyChain(long height) {
-        Block block = this.blockCacheManager.getBlockFromMyChain(height);
-        if (null == block) {
-            BlockHeaderPo po = this.headerDao.getHeader(height);
-            BlockHeader header = null;
-            try {
-                header = ConsensusTool.fromPojo(po);
-            } catch (NulsException e) {
-                Log.error(e);
-            }
-            if (null == header) {
-                return null;
-            }
-            List<Transaction> txList = null;
-            try {
-                txList = ledgerService.getTxList(height);
-            } catch (Exception e) {
-                Log.error(e);
-            }
-            if (null == txList || txList.isEmpty()) {
-                return null;
-            }
-            if(header.getTxCount()!=txList.size()){
-                throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
-            }
-            block = new Block();
-            block.setHeader(header);
-            block.setTxs(txList);
-        }
-        return block;
-    }
-
-    public Block getBlockFromMyChain(String hash) {
-        Block block = this.blockCacheManager.getBlockFromMyChain(hash);
-        if (null == block) {
-            BlockHeaderPo po = this.headerDao.getHeader(hash);
-            List<Transaction> txList = null;
-            try {
-                txList = ledgerService.getTxList(hash);
-            } catch (Exception e) {
-                Log.error(e);
-            }
-            if (null == txList || txList.isEmpty()) {
-                return null;
-            }
-            BlockHeader header = null;
-            try {
-                header = ConsensusTool.fromPojo(po);
-            } catch (NulsException e) {
-                Log.error(e);
-            }
-            if (null == header) {
-                return null;
-            }
-            if(header.getTxCount()!=txList.size()){
-                throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
-            }
-            block = new Block();
-            block.setHeader(header);
-            block.setTxs(txList);
-        }
-        return block;
-    }
 }

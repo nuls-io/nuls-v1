@@ -24,7 +24,6 @@
 package io.nuls.protocol.base.entity.validator.tx;
 
 import io.nuls.protocol.base.entity.tx.PocJoinConsensusTransaction;
-import io.nuls.protocol.base.cache.manager.member.ConsensusCacheManager;
 import io.nuls.protocol.base.constant.PocConsensusConstant;
 import io.nuls.protocol.entity.Consensus;
 import io.nuls.protocol.base.entity.member.Deposit;
@@ -45,7 +44,6 @@ import java.util.List;
 public class DepositAmountValidator implements NulsDataValidator<PocJoinConsensusTransaction> {
 
     private static final DepositAmountValidator INSTANCE = new DepositAmountValidator();
-    private ConsensusCacheManager consensusCacheManager = ConsensusCacheManager.getInstance();
 
     private DepositAmountValidator() {
     }
@@ -59,28 +57,28 @@ public class DepositAmountValidator implements NulsDataValidator<PocJoinConsensu
         Na limit = PocConsensusConstant.ENTRUSTER_DEPOSIT_LOWER_LIMIT;
         Na max = PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT;
         //+2原因：验证的交易可能属于a高度，从cache中获取它之前的抵押时，只能获取某个高度之前的，所以是当前最新高度a-1之后的第二个高度
-        List<Consensus<Deposit>> list = consensusCacheManager.getDepositListByAgentId(data.getTxData().getExtend().getAgentHash(), NulsContext.getInstance().getBestHeight()+2);
-        if (list == null) {
-            return ValidateResult.getSuccessResult();
-        }
-        Na total = Na.ZERO;
-        for (Consensus<Deposit> cd : list) {
-            total = total.add(cd.getExtend().getDeposit());
-        }
-        if (limit.isGreaterThan(data.getTxData().getExtend().getDeposit())) {
-            return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_NOT_ENOUGH);
-        }
-        if (max.isLessThan(total)) {
-            return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_TOO_MUCH);
-        }
-
-        try {
-            if (!data.getTxData().getExtend().getDeposit().equals(data.getCoinData().getTotalNa())) {
-                return ValidateResult.getFailedResult(SeverityLevelEnum.FLAGRANT_FOUL, ErrorCode.DEPOSIT_ERROR);
-            }
-        } catch (NulsException e) {
-            return ValidateResult.getFailedResult(ErrorCode.ORPHAN_TX);
-        }
+//        List<Consensus<Deposit>> list = consensusCacheManager.getDepositListByAgentId(data.getTxData().getExtend().getAgentHash(), NulsContext.getInstance().getBestHeight()+2);
+//        if (list == null) {
+//            return ValidateResult.getSuccessResult();
+//        }
+//        Na total = Na.ZERO;
+//        for (Consensus<Deposit> cd : list) {
+//            total = total.add(cd.getExtend().getDeposit());
+//        }
+//        if (limit.isGreaterThan(data.getTxData().getExtend().getDeposit())) {
+//            return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_NOT_ENOUGH);
+//        }
+//        if (max.isLessThan(total)) {
+//            return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_TOO_MUCH);
+//        }
+//
+//        try {
+//            if (!data.getTxData().getExtend().getDeposit().equals(data.getCoinData().getTotalNa())) {
+//                return ValidateResult.getFailedResult(SeverityLevelEnum.FLAGRANT_FOUL, ErrorCode.DEPOSIT_ERROR);
+//            }
+//        } catch (NulsException e) {
+//            return ValidateResult.getFailedResult(ErrorCode.ORPHAN_TX);
+//        }
         return ValidateResult.getSuccessResult();
     }
 

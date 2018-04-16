@@ -23,23 +23,19 @@
  */
 package io.nuls.protocol.base.event.handler;
 
-import io.nuls.protocol.base.manager.BlockManager;
-import io.nuls.protocol.base.download.DownloadCacheHandler;
-import io.nuls.protocol.event.BlockEvent;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.network.service.NetworkService;
+import io.nuls.protocol.base.download.DownloadCacheHandler;
+import io.nuls.protocol.event.BlockEvent;
 
 /**
  * @author facjas
  * @date 2017/11/16
  */
 public class BlockEventHandler extends AbstractEventHandler<BlockEvent> {
-
-    private BlockManager blockCacheManager = BlockManager.getInstance();
-    private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
 
     @Override
     public void onEvent(BlockEvent event, String fromId) {
@@ -48,14 +44,7 @@ public class BlockEventHandler extends AbstractEventHandler<BlockEvent> {
             Log.warn("recieved a null blockEvent form " + fromId);
             return;
         }
-        //BlockLog.debug("download("+fromId+") block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + block.getHeader().getPackingAddress());
-//        if (BlockBatchDownloadUtils.getInstance().downloadedBlock(fromId, block)) {
-//            return;
-//        }
-
-        //blockCacheManager.addBlock(block, true, fromId);
 
         DownloadCacheHandler.receiveBlock(block);
-
     }
 }

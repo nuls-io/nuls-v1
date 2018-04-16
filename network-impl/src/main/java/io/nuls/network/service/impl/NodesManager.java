@@ -244,7 +244,7 @@ public class NodesManager implements Runnable {
         Set<String> localIp = IpUtil.getIps();
         for (String ip : network.getSeedIpList()) {
             if (!localIp.contains(ip)) {
-                seedNodes.add(new Node(ip, network.port(), network.port(), Node.OUT));
+                seedNodes.add(new Node(ip, 8003,8003, Node.OUT));
             }
         }
         return seedNodes;
