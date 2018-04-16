@@ -44,9 +44,7 @@ public class ChainProcessTask implements Runnable {
     public void run() {
         try {
             chainProcess.process();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (NulsException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
