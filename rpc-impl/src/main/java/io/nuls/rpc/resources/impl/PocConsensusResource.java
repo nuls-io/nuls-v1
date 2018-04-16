@@ -170,7 +170,7 @@ public class PocConsensusResource {
 
 
     @POST
-    @Path("/agent/stop")
+//    @Path("/agent/stop")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult stopAgent(StopAgentForm form) throws NulsException, IOException {
         AssertUtil.canNotEmpty(form);
@@ -222,16 +222,16 @@ public class PocConsensusResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getAgentList(@QueryParam("pageNumber") Integer pageNumber, @QueryParam("pageSize") Integer pageSize,
                                   @QueryParam("keyword") String keyword, @QueryParam("sortType") String sortType) {
-
+        if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
         if (null == pageNumber || pageNumber == 0) {
             pageNumber = 1;
         }
         if (null == pageSize || pageSize == 0) {
             pageSize = 10;
         }
-        if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
-            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
-        }
+
         RpcResult result = RpcResult.getSuccess();
         Page<Map<String, Object>> list = this.consensusService.getAgentList(keyword, null, null, sortType, pageNumber, pageSize);
         result.setData(list);

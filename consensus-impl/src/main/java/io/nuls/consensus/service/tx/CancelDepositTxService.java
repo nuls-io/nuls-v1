@@ -102,6 +102,10 @@ public class CancelDepositTxService implements TransactionService<CancelDepositT
         po.setAddress(pjcTx.getTxData().getAddress());
         po.setTxHash(tx.getHash().getDigestHex());
         relationDataService.save(po);
+
+        if (NulsContext.LOCAL_ADDRESS_LIST.contains(pjcTx.getTxData().getAddress())) {
+            tx.setMine(true);
+        }
     }
 
     @Override

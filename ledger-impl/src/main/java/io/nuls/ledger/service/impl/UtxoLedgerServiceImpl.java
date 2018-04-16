@@ -51,7 +51,10 @@ import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.constant.LedgerConstant;
-import io.nuls.ledger.entity.*;
+import io.nuls.ledger.entity.Balance;
+import io.nuls.ledger.entity.OutPutStatusEnum;
+import io.nuls.ledger.entity.UtxoData;
+import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.params.OperationType;
@@ -432,7 +435,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
             TransactionEvent event = new TransactionEvent();
             event.setEventBody(tx);
-            eventBroadcaster.broadcastAndCache(event, true);
+            eventBroadcaster.publishToLocal(event);
         } catch (Exception e) {
             Log.error(e);
             return new Result(false, e.getMessage());
@@ -458,7 +461,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             tx.verify();
             TransactionEvent event = new TransactionEvent();
             event.setEventBody(tx);
-            eventBroadcaster.broadcastAndCacheAysn(event, true);
+            eventBroadcaster.publishToLocal(event);
 
         } catch (Exception e) {
             Log.error(e);
@@ -478,14 +481,21 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     public boolean saveTxList(List<Transaction> txList) throws IOException {
         lock.lock();
         try {
+            boolean isMine;
             List<TransactionPo> poList = new ArrayList<>();
             List<TransactionLocalPo> localPoList = new ArrayList<>();
             for (int i = 0; i < txList.size(); i++) {
                 Transaction tx = txList.get(i);
-                boolean isMine = this.checkTxIsMine(tx);
+
                 TransactionPo po = UtxoTransferTool.toTransactionPojo(tx);
 
                 poList.add(po);
+                isMine = false;
+                if (tx.getType() == TransactionConstant.TX_TYPE_CANCEL_DEPOSIT) {
+                    isMine = tx.isMine();
+                } else {
+                    isMine = this.checkTxIsMine(tx);
+                }
                 if (isMine) {
                     TransactionLocalPo localPo = UtxoTransferTool.toLocalTransactionPojo(tx);
                     localPoList.add(localPo);
@@ -572,6 +582,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         if (tx.getStatus() == TxStatusEnum.CACHED) {
             return;
         }
+        BlockLog.info("rollback tx ==================================================", tx.getHash());
         List<TransactionService> serviceList = getServiceList(tx.getClass());
         for (TransactionService service : serviceList) {
             service.onRollback(tx, block);
@@ -672,7 +683,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         txDao.unlockTxOutput(txHash);
         String key = txHash + "-" + 0;
         UtxoOutput output = ledgerCacheService.getUtxo(key);
-        ledgerCacheService.removeUtxo(key);
+        output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT);
         UtxoTransactionTool.getInstance().calcBalance(output.getAddress(), false);
     }
 
@@ -758,5 +769,11 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             clazz = clazz.getSuperclass();
         }
         return list;
+    }
+
+    @Override
+    public void resetLedgerCache() {
+        ledgerCacheService.clear();
+        UtxoCoinManager.getInstance().cacheAllUnSpendUtxo();
     }
 }

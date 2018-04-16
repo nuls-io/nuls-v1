@@ -42,8 +42,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @author Niels
  * @date 2017/11/17
  */
-public class
-LedgerCacheService {
+public class LedgerCacheService {
     private static LedgerCacheService instance = new LedgerCacheService();
     private CacheService<String, Balance> cacheService;
     private CacheService<String, UtxoOutput> utxoCacheService;

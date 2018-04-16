@@ -151,7 +151,7 @@
         update agent
         <set>
             <if test="agentAddress != null">
-                agent_address = #{packingAddress,jdbcType=VARCHAR},
+                agent_address = #{agentAddress,jdbcType=VARCHAR},
             </if>
             <if test="packingAddress != null">
                 packing_address = #{packingAddress,jdbcType=VARCHAR},

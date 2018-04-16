@@ -67,10 +67,16 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
         if (tx.getType() == TransactionConstant.TX_TYPE_COIN_BASE || tx.getType() == TransactionConstant.TX_TYPE_YELLOW_PUNISH || tx.getType() == TransactionConstant.TX_TYPE_RED_PUNISH) {
             return;
         }
+        if (TxCacheManager.TX_CACHE_MANAGER.getTx(tx.getHash()) != null) {
+            return;
+        }
+//        Log.info("receive tx:("+tx.getType()+"):["+fromId+"]"+tx.getHash());
         ValidateResult result = tx.verify();
         if (result.isFailed()) {
             if (result.getErrorCode() == ErrorCode.ORPHAN_TX) {
                 eventBroadcaster.broadcastHashAndCacheAysn(event, false, fromId);
+                txCacheManager.putTxToOrphanCache(tx);
+                eventBroadcaster.broadcastHashAndCacheAysn(event, fromId);
                 return;
             }
             if (result.getLevel() == SeverityLevelEnum.NORMAL_FOUL) {
@@ -87,6 +93,12 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
             }
             consensusService.newTx(tx);
             eventBroadcaster.broadcastHashAndCacheAysn(event, false, fromId);
+            txCacheManager.putTxToReceivedCache(tx);
+            if (isMine) {
+                eventBroadcaster.broadcastAndCache(event);
+            } else {
+                eventBroadcaster.broadcastHashAndCacheAysn(event, fromId);
+            }
         } catch (Exception e) {
             Log.error(e);
         }

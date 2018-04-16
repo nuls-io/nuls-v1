@@ -40,12 +40,12 @@ public interface EventBroadcaster {
      * @param event
      * @return
      */
-    List<String> broadcastHashAndCache(BaseEvent event, boolean needToSelf);
+    List<String> broadcastHashAndCache(BaseEvent event);
 
 
-    List<String> broadcastHashAndCache(BaseEvent event, boolean needToSelf, String excludeNodeId);
+    List<String> broadcastHashAndCache(BaseEvent event, String excludeNodeId);
 
-    boolean broadcastHashAndCacheAysn(BaseEvent event, boolean needToSelf, String excludeNodeId);
+    boolean broadcastHashAndCacheAysn(BaseEvent event, String excludeNodeId);
 
     /**
      * broadcast to nodes except "excludeNodeId"
@@ -54,17 +54,17 @@ public interface EventBroadcaster {
      * @param excludeNodeId
      * @return
      */
-    List<String> broadcastAndCache(BaseEvent event, boolean needToSelf, String excludeNodeId);
+    List<String> broadcastAndCache(BaseEvent event, String excludeNodeId);
 
     /**
      * broadcast msg ,no need to pass the message
      *
      * @param event
      */
-    List<String> broadcastAndCache(BaseEvent event, boolean needToSelf);
+    List<String> broadcastAndCache(BaseEvent event);
 
 
-    boolean broadcastAndCacheAysn(BaseEvent event, boolean needToSelf);
+    boolean broadcastAndCacheAysn(BaseEvent event);
 
     /**
      * send msg to one node

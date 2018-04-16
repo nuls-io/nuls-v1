@@ -120,4 +120,6 @@ public interface LedgerService {
     void unlockTxRollback(String txHash);
 
     Page getLockUtxo(String address, Integer pageNumber, Integer pageSize);
+
+    void resetLedgerCache();
 }

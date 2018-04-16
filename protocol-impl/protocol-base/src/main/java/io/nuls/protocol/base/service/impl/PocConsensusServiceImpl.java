@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.protocol.base.service.impl;
+package io.nuls.consensus.service.impl;
 
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
@@ -111,8 +111,8 @@ public class PocConsensusServiceImpl implements ConsensusService {
         tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(), account, password).serialize());
         tx.verifyWithException();
         event.setEventBody(tx);
-        List<String> nodeList = eventBroadcaster.broadcastHashAndCache(event, true);
-        if (null == nodeList || nodeList.isEmpty()) {
+        boolean b  = eventBroadcaster.publishToLocal(event);
+        if (!b) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "broadcast transaction failed!");
         }
         return tx;
@@ -153,8 +153,8 @@ public class PocConsensusServiceImpl implements ConsensusService {
         tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(), account, password).serialize());
         tx.verifyWithException();
         event.setEventBody(tx);
-        List<String> nodeList = eventBroadcaster.broadcastAndCache(event, true);
-        if (null == nodeList || nodeList.isEmpty()) {
+        boolean b = eventBroadcaster.publishToLocal(event);
+        if (!b) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "broadcast transaction failed!");
         }
         return tx;
@@ -212,7 +212,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
             tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(), account, password).serialize());
             tx.verifyWithException();
             event.setEventBody(tx);
-            eventBroadcaster.broadcastHashAndCache(event, true);
+            eventBroadcaster.publishToLocal(event);
 
             return tx;
         }
@@ -231,7 +231,7 @@ public class PocConsensusServiceImpl implements ConsensusService {
         tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(), account, password).serialize());
         tx.verifyWithException();
         event.setEventBody(tx);
-        eventBroadcaster.broadcastHashAndCache(event, true);
+        eventBroadcaster.publishToLocal(event);
         return tx;
     }
 
@@ -489,25 +489,25 @@ public class PocConsensusServiceImpl implements ConsensusService {
 
     @Override
     public Page<Map<String, Object>> getDepositList(String address, String agentAddress, Integer pageNumber, Integer pageSize) {
-//        List<Consensus<Deposit>> depositList = this.consensusCacheManager.getAliveDepositList(NulsContext.getInstance().getBestHeight());
-//        depositList.addAll(this.consensusCacheManager.getUnconfirmedDepositList());
-//        boolean isAddress = Address.validAddress(address);
-//        Consensus<Agent> agent = null;
-//        if (Address.validAddress(agentAddress)) {
-//            agent = this.consensusCacheManager.getAgentByAddress(agentAddress);
-//            if (null == agent) {
-//                depositList.clear();
-//            }
-//        }
-//        for (int i = depositList.size() - 1; i >= 0; i--) {
-//            Consensus<Deposit> cd = depositList.get(i);
-//            if (isAddress && !cd.getAddress().equals(address)) {
-//                depositList.remove(i);
-//            }
-//            if (null != agent && !cd.getExtend().getAgentHash().equals(agent.getHexHash())) {
-//                depositList.remove(i);
-//            }
-//        }
+        List<Consensus<Deposit>> depositList = this.consensusCacheManager.getAliveDepositList(NulsContext.getInstance().getBestHeight());
+        depositList.addAll(this.consensusCacheManager.getUnconfirmedDepositList());
+        boolean isAddress = Address.validAddress(address);
+        Consensus<Agent> agent = null;
+        if (Address.validAddress(agentAddress)) {
+            agent = this.consensusCacheManager.getAgentByAddress(agentAddress);
+            if (null == agent) {
+                depositList.clear();
+            }
+        }
+        for (int i = depositList.size() - 1; i >= 0; i--) {
+            Consensus<Deposit> cd = depositList.get(i);
+            if (isAddress && !cd.getAddress().equals(address)) {
+                depositList.remove(i);
+            }else
+            if (null != agent && !cd.getExtend().getAgentHash().equals(agent.getHexHash())) {
+                depositList.remove(i);
+            }
+        }
         Page<Map<String, Object>> page = new Page<>();
 //        int start = pageNumber * pageSize - pageSize;
 //        if (depositList.isEmpty() || start >= depositList.size()) {

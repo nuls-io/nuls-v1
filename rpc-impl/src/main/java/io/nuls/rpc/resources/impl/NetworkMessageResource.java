@@ -63,7 +63,7 @@ public class NetworkMessageResource {
     public RpcResult broadcast(String message) {
         CommonStringEvent event = new CommonStringEvent();
         event.setMessage(message);
-        eventBroadcaster.broadcastAndCacheAysn(event, false);
+        eventBroadcaster.broadcastAndCacheAysn(event);
         return RpcResult.getSuccess();
     }
 

@@ -26,6 +26,7 @@ package io.nuls.core.thread.manager;
 import io.nuls.core.thread.BaseThread;
 import io.nuls.core.thread.cache.TaskTable;
 import io.nuls.core.utils.aop.AopUtils;
+import io.nuls.core.utils.log.Log;
 
 import java.util.List;
 import java.util.concurrent.*;
@@ -93,6 +94,10 @@ public class TaskManager {
         }
         if (TEMPORARY_THREAD_POOL == null) {
             throw new RuntimeException("temporary thread pool not initialized yet");
+        }
+        BlockingQueue<Runnable> blockingQueue = TEMPORARY_THREAD_POOL.getQueue();
+        if(blockingQueue.size() > 200) {
+            Log.info("Task Queue 100 Size Warning!!! Task info is " + runnable.toString());
         }
         TEMPORARY_THREAD_POOL.execute(runnable);
     }
