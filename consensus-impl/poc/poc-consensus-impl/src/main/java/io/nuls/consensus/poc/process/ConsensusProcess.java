@@ -131,17 +131,26 @@ public class ConsensusProcess {
             return;
         }
         MeetingMember member = round.getMember(myAccount.getAddress().getBase58());
+
         if (!hasPacking && member.getPackStartTime() < TimeService.currentTimeMillis() && member.getPackEndTime() > TimeService.currentTimeMillis()) {
             hasPacking = true;
             try {
+                Log.info("当前网络时间： " + DateUtil.convertDate(new Date(TimeService.currentTimeMillis())) + " , 我的打包开始时间: " +
+                        DateUtil.convertDate(new Date(member.getPackStartTime()))+ " , 我的打包结束时间: " +
+                        DateUtil.convertDate(new Date(member.getPackEndTime())) + " , 当前轮开始时间: " +
+                        DateUtil.convertDate(new Date(round.getStartTime()))+ " , 当前轮结束开始时间: " +
+                        DateUtil.convertDate(new Date(round.getEndTime())));
                 packing(member, round);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            try {
-                Thread.sleep(10000l);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+
+            while(member.getPackEndTime() > TimeService.currentTimeMillis()) {
+                try {
+                    Thread.sleep(500l);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
             hasPacking = false;
         }

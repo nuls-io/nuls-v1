@@ -217,7 +217,7 @@ public class ChainContainer implements Cloneable {
         BlockRoundData roundData = new BlockRoundData(blockHeader.getExtend());
 
         MeetingRound currentRound = getCurrentRound();
-        
+
         if(isDownload && currentRound.getIndex() > roundData.getRoundIndex()) {
             for(int i = roundList.size() - 1 ; i >= 0 ; i--) {
                 currentRound = roundList.get(i);
