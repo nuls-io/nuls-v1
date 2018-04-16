@@ -349,8 +349,12 @@ public class BlockServiceImpl implements BlockService {
     }
 
     private void rollback(List<Transaction> txs, int max) {
-        for (int x = max; x >= 0; x--) {
-            Transaction tx = txs.get(x);
+        int i = max;
+        if(max>=txs.size()){
+            i = txs.size()-1;
+        }
+        for (; i >=0; i--) {
+            Transaction tx = txs.get(i);
             try {
                 ledgerService.rollbackTx(tx);
             } catch (NulsException e) {

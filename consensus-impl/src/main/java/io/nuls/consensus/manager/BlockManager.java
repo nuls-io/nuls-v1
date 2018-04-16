@@ -325,7 +325,11 @@ public class BlockManager {
 
     private void rollbackTxList(List<Transaction> txList, int start, int end) {
         List<NulsDigestData> txHashList = new ArrayList<>();
-        for (int i = end; i >=0; i--) {
+        int i = end;
+        if(end>=txList.size()){
+            i = txList.size()-1;
+        }
+        for (; i >=0; i--) {
             Transaction tx = txList.get(i);
             if (tx.getStatus() == TxStatusEnum.AGREED) {
                 try {
