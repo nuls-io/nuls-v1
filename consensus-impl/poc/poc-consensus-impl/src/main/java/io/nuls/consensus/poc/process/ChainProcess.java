@@ -43,10 +43,14 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import static sun.misc.Version.print;
+
 /**
  * Created by ln on 2018/4/13.
  */
 public class ChainProcess {
+
+    private long time = 0l;
 
     private ChainManager chainManager;
 
@@ -62,6 +66,8 @@ public class ChainProcess {
         if(consensusService.getConsensusStatus().ordinal() < ConsensusStatus.RUNNING.ordinal()) {
             return false;
         }
+
+        printChainStatusLog();
 
         // Monitor the status of the isolated chain, if it is available, join the verification chain
         // 监控孤立链的状态，如果有可连接的，则加入验证链里面
@@ -113,6 +119,99 @@ public class ChainProcess {
         clearExpiredChain();
 
         return true;
+    }
+
+    private void printChainStatusLog() {
+        if(chainManager.getMasterChain() == null || chainManager.getMasterChain().getChain() == null || chainManager.getMasterChain().getChain().getEndBlockHeader() == null) {
+            return;
+        }
+
+        if(time == 0l) {
+            printLog();
+        } else if(System.currentTimeMillis() - time > 5 * 60 * 1000L) {
+            printLog();
+        }
+    }
+
+    private void printLog() {
+        time = System.currentTimeMillis();
+
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("=========================\n");
+
+        sb.append("Master Chain Status : \n");
+        sb.append(getChainStatus(chainManager.getMasterChain()));
+
+        sb.append("\n");
+
+        List<ChainContainer> chains = chainManager.getChains();
+
+        if(chains != null && chains.size() > 0) {
+            sb.append("fork chains : \n");
+            for(ChainContainer chain : chains) {
+                sb.append(getChainStatus(chain));
+            }
+            sb.append("\n");
+        }
+
+        List<ChainContainer> iss = chainManager.getIsolatedChains();
+
+        if(iss != null && iss.size() > 0) {
+            sb.append("isolated chains : \n");
+            for(ChainContainer chain : iss) {
+                sb.append(getChainStatus(chain));
+            }
+            sb.append("\n");
+        }
+
+        sb.append("=========================\n");
+
+        ChainLog.debug(sb.toString());
+    }
+
+    private String getChainStatus(ChainContainer chain) {
+        StringBuilder sb = new StringBuilder();
+
+        if(chain == null || chain.getChain() == null ) {
+            return sb.toString();
+        }
+
+        sb.append("id: " + chain.getChain().getId() +"\n");
+
+        if(chain.getChain().getStartBlockHeader() == null) {
+            sb.append("start Block Header is null \n");
+        } else {
+            sb.append("start height : " + chain.getChain().getStartBlockHeader().getHeight() + " \n");
+            sb.append("start hash : " + chain.getChain().getStartBlockHeader().getHash() + " \n");
+        }
+        if(chain.getChain().getEndBlockHeader() == null) {
+            sb.append("end Block Header is null \n");
+        } else {
+            sb.append("end height : " + chain.getChain().getEndBlockHeader().getHeight() + " \n");
+            sb.append("end hash : " + chain.getChain().getEndBlockHeader().getHash() + " \n");
+        }
+
+        List<BlockHeader> blockHeaderList = chain.getChain().getBlockHeaderList();
+
+        if(blockHeaderList != null && blockHeaderList.size() > 0) {
+            sb.append("start blockHeaders height : " + blockHeaderList.get(0).getHeight() + " \n");
+            sb.append("end blockHeaders height : " + blockHeaderList.get(blockHeaderList.size() - 1).getHeight() + " \n");
+            sb.append("start blockHeaders hash : " + blockHeaderList.get(0).getHash() + " \n");
+            sb.append("end blockHeaders hash : " + blockHeaderList.get(blockHeaderList.size() - 1).getHash() + " \n");
+        }
+
+        List<Block> block = chain.getChain().getBlockList();
+
+        if(block != null && block.size() > 0) {
+            sb.append("start blocks height : " + block.get(0).getHeader().getHeight() + " \n");
+            sb.append("end blocks height : " + block.get(block.size() - 1).getHeader().getHeight() + " \n");
+            sb.append("start blocks hash : " + block.get(0).getHeader().getHash() + " \n");
+            sb.append("end blocks hash : " + block.get(block.size() - 1).getHeader().getHash() + " \n");
+        }
+        sb.append("\n");
+
+        return sb.toString();
     }
 
     /**
