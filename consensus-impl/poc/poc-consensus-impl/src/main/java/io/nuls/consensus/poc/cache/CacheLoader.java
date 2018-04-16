@@ -127,7 +127,7 @@ public class CacheLoader {
 
         params.put("type", PunishType.YELLOW.getCode());
 
-        List<PunishLogPo> list = punishLogDataService.getList(params);
+        List<PunishLogPo> list = new ArrayList<>();//todo punishLogDataService.getList(params);
         return list;
     }
 
@@ -136,7 +136,7 @@ public class CacheLoader {
 
         params.put("type", PunishType.RED.getCode());
 
-        List<PunishLogPo> list = punishLogDataService.getList(params);
+        List<PunishLogPo> list = new ArrayList<>();//todo punishLogDataService.getList(params);
         return list;
     }
 }
