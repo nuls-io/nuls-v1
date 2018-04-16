@@ -331,7 +331,7 @@ public class BlockManager {
         }
         for (; i >=0; i--) {
             Transaction tx = txList.get(i);
-            if (tx.getStatus() == TxStatusEnum.AGREED) {
+            if (tx.getStatus() == TxStatusEnum.AGREED&&!ledgerService.checkTxIsMySend(tx)) {
                 try {
                     ledgerService.rollbackTx(tx);
                 } catch (NulsException e) {

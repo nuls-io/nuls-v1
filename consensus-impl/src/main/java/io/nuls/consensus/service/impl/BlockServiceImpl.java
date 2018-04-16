@@ -350,19 +350,23 @@ public class BlockServiceImpl implements BlockService {
 
     private void rollback(List<Transaction> txs, int max) {
         int i = max;
-        if(max>=txs.size()){
-            i = txs.size()-1;
+        if (max >= txs.size()) {
+            i = txs.size() - 1;
         }
-        for (; i >=0; i--) {
+        for (; i >= 0; i--) {
             Transaction tx = txs.get(i);
+            if (tx.getType() != TransactionConstant.TX_TYPE_COIN_BASE && tx.getType() != TransactionConstant.TX_TYPE_YELLOW_PUNISH && tx.getType() != TransactionConstant.TX_TYPE_RED_PUNISH) {
+                txCacheManager.putTxToOrphanCache(tx);
+            }
+            if (tx.getStatus() == TxStatusEnum.AGREED && !ledgerService.checkTxIsMySend(tx)) {
+                continue;
+            }
             try {
                 ledgerService.rollbackTx(tx);
             } catch (NulsException e) {
                 Log.error(e);
             }
-            if (tx.getType() != TransactionConstant.TX_TYPE_COIN_BASE && tx.getType() != TransactionConstant.TX_TYPE_YELLOW_PUNISH && tx.getType() != TransactionConstant.TX_TYPE_RED_PUNISH) {
-                txCacheManager.putTxToOrphanCache(tx);
-            }
+
         }
 
     }
