@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ **
  * Copyright (c) 2017-2018 nuls.io
- *
+ **
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ **
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ **
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -28,9 +28,12 @@ import ch.qos.logback.classic.Level;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.date.DateUtil;
+import io.nuls.core.utils.date.TimeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,11 +45,11 @@ import java.util.Map;
  * @author Niels
  * @date [2017年9月25日]
  */
-public final class MsgLog {
+public final class ChainLog {
     /**
      * 日志对象
      */
-    private static final Logger LOG = LoggerFactory.getLogger("msgLog");
+    private static final Logger LOG = LoggerFactory.getLogger("chainLog");
 
     /**
      * 日志级别
@@ -61,7 +64,7 @@ public final class MsgLog {
     /**
      * 不允许实例化该类
      */
-    private MsgLog() {
+    private ChainLog() {
     }
 
     @Override
@@ -117,139 +120,6 @@ public final class MsgLog {
         }
     }
 
-    /**
-     * 提供info级别基本的日志输出
-     *
-     * @param msg 需要显示的消息
-     */
-    public static void info(String msg) {
-        String logContent = isStringBlank(getId()) ? (getLogTrace() + ":" + msg)
-                : (getLogTrace() + "[" + getId() + "]" + ":" + msg);
-        LOG.info(logContent);
-    }
-
-    public static void info(String msg, Object... objs) {
-        String logContent = isStringBlank(getId()) ? (getLogTrace() + ":" + msg)
-                : (getLogTrace() + "[" + getId() + "]" + ":" + msg);
-        LOG.info(logContent, objs);
-    }
-
-    /**
-     * 提供info级别基本的日志输出
-     *
-     * @param msg       需要显示的消息
-     * @param throwable 异常信息
-     */
-    public static void info(String msg, Throwable throwable) {
-        String logContent = isStringBlank(getId()) ? (getLogTrace() + ":" + msg)
-                : (getLogTrace() + "[" + getId() + "]" + ":" + msg);
-        if (!(throwable instanceof NulsException) || !(throwable instanceof NulsRuntimeException)) {
-            throwable = new NulsException(ErrorCode.FAILED, throwable);
-        }
-        LOG.info(logContent, throwable);
-    }
-
-    /**
-     * 提供warn级别基本的日志输出
-     *
-     * @param msg 需要显示的消息
-     */
-    public static void warn(String msg) {
-        String logContent = isStringBlank(getId()) ? (getLogTrace() + ":" + msg)
-                : (getLogTrace() + "[" + getId() + "]" + ":" + msg);
-        LOG.warn(logContent);
-    }
-
-    public static void warn(String msg, Object... objs) {
-        String logContent = isStringBlank(getId()) ? (getLogTrace() + ":" + msg)
-                : (getLogTrace() + "[" + getId() + "]" + ":" + msg);
-        LOG.warn(logContent, objs);
-    }
-
-    /**
-     * 提供warn级别基本的日志输出
-     *
-     * @param msg       需要显示的消息
-     * @param throwable 异常信息
-     */
-    public static void warn(String msg, Throwable throwable) {
-        String logContent = isStringBlank(getId()) ? (getLogTrace() + ":" + msg)
-                : (getLogTrace() + "[" + getId() + "]" + ":" + msg);
-        if (!(throwable instanceof NulsException) || !(throwable instanceof NulsRuntimeException)) {
-            throwable = new NulsException(ErrorCode.FAILED, throwable);
-        }
-        LOG.warn(logContent, throwable);
-    }
-
-    /**
-     * 提供error级别基本的日志输出
-     *
-     * @param msg 需要显示的消息
-     */
-    public static void error(String msg) {
-        String logContent = isStringBlank(getId()) ? (getLogTrace() + ":" + msg)
-                : (getLogTrace() + "[" + getId() + "]" + ":" + msg);
-        LOG.error(logContent);
-    }
-
-
-    public static void error(String msg, Object... objs) {
-        String logContent = isStringBlank(getId()) ? (getLogTrace() + ":" + msg)
-                : (getLogTrace() + "[" + getId() + "]" + ":" + msg);
-        LOG.error(logContent, objs);
-    }
-
-    /**
-     * 提供error级别基本的日志输出
-     *
-     * @param msg       需要显示的消息
-     * @param throwable 异常信息
-     */
-    public static void error(String msg, Throwable throwable) {
-        String logContent = isStringBlank(getId()) ? (getLogTrace() + ":" + msg)
-                : (getLogTrace() + "[" + getId() + "]" + ":" + msg);
-        if (!(throwable instanceof NulsException) || !(throwable instanceof NulsRuntimeException)) {
-            throwable = new NulsException(ErrorCode.FAILED, throwable);
-        }
-        LOG.error(logContent, throwable);
-    }
-
-    public static void error(Throwable throwable) {
-        String logContent = isStringBlank(getId()) ? (getLogTrace() + ":")
-                : (getLogTrace() + "[" + getId() + "]" + ":");
-        if (!(throwable instanceof NulsException) || !(throwable instanceof NulsRuntimeException)) {
-            throwable = new NulsException(ErrorCode.FAILED, throwable);
-        }
-        LOG.error(logContent, throwable);
-    }
-
-    /**
-     * 提供trace级别基本的日志输出
-     *
-     * @param msg 需要显示的消息
-     */
-    public static void trace(String msg) {
-        String logContent = isStringBlank(getId()) ? (getLogTrace() + ":" + msg)
-                : (getLogTrace() + "[" + getId() + "]" + ":" + msg);
-        LOG.trace(logContent);
-    }
-
-    /**
-     * 提供trace级别基本的日志输出
-     *
-     * @param msg       需要显示的消息
-     * @param throwable 异常信息
-     */
-    public static void trace(String msg, Throwable throwable) {
-        String logContent = isStringBlank(getId()) ? (getLogTrace() + ":" + msg)
-                : (getLogTrace() + "[" + getId() + "]" + ":" + msg);
-        if (!(throwable instanceof NulsException) || !(throwable instanceof NulsRuntimeException)) {
-            throwable = new NulsException(ErrorCode.FAILED, throwable);
-        }
-        LOG.trace(logContent, throwable);
-    }
-
-
     private static boolean isStringBlank(String val) {
         return null == val || val.trim().isEmpty();
     }
@@ -266,6 +136,7 @@ public final class MsgLog {
             // index为3上一级调用的堆栈信息，index为1和2都为Log类自己调两次（可忽略），index为0为主线程触发（可忽略）
             StackTraceElement ste = stack[3];
             if (ste != null) {
+                logTrace.append("[" + DateUtil.convertDate(new Date(TimeService.currentTimeMillis())) + "]");
                 // 获取类名、方法名、日志的代码行数
                 logTrace.append(ste.getClassName());
                 logTrace.append('.');
@@ -277,7 +148,8 @@ public final class MsgLog {
                 logTrace.append(')');
             }
         }
-
+        //todo
+        logTrace.append("\n===");
         return logTrace.toString();
     }
 

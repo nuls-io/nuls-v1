@@ -45,7 +45,7 @@
     <appender name="BLOCK_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!--日志文件输出的文件名-->
-            <FileNamePattern>${LOG_HOME}/${LOG_FILE}.%d{yyyy-MM-dd}.block.log</FileNamePattern>
+            <FileNamePattern>${LOG_HOME}/block.%d{yyyy-MM-dd}.log</FileNamePattern>
             <!--日志文件保留天数-->
             <MaxFileSize>100MB</MaxFileSize>
             <MaxHistory>7</MaxHistory>
@@ -60,7 +60,7 @@
     <appender name="CONSENSUS_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!--日志文件输出的文件名-->
-            <FileNamePattern>${LOG_HOME}/${LOG_FILE}.%d{yyyy-MM-dd}.consensus.log</FileNamePattern>
+            <FileNamePattern>${LOG_HOME}/consensus.%d{yyyy-MM-dd}.log</FileNamePattern>
             <!--日志文件保留天数-->
             <MaxFileSize>100MB</MaxFileSize>
             <MaxHistory>7</MaxHistory>
@@ -72,10 +72,10 @@
     </appender>
 
     <!-- 按照每天生成日志文件 -->
-    <appender name="MSG_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="CHAIN_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!--日志文件输出的文件名-->
-            <FileNamePattern>${LOG_HOME}/${MSG_FILE}.%d{yyyy-MM-dd}.log</FileNamePattern>
+            <FileNamePattern>${LOG_HOME}/chain.%d{yyyy-MM-dd}.log</FileNamePattern>
             <!--日志文件保留天数-->
             <MaxFileSize>100MB</MaxFileSize>
             <MaxHistory>7</MaxHistory>
@@ -94,16 +94,15 @@
     <logger name="org.apache.ibatis" level="debug" additivity="false"/>
     <logger name="org.ehcache" level="info" additivity="false"/>
     <logger name="io.nuls.db.dao.impl.mybatis.mapper" level="debug" additivity="false"/>
-    <logger name="msgLog" level="ERROR" additivity="false">
-        <appender-ref ref="MSG_FILE"/>
-    </logger>
-    <logger name="Log" level="ERROR" additivity="false">
-        <appender-ref ref="ERROR_FILE"></appender-ref>
-    </logger>
+
     <logger name="blockLog" level="DEBUG" additivity="false">
         <appender-ref ref="BLOCK_FILE"></appender-ref>
     </logger>
-    <logger name="consensusLog" level="INFO" additivity="false">
+    <logger name="chainLog" level="DEBUG" additivity="false">
+        <appender-ref ref="CHAIN_FILE"></appender-ref>
+    </logger>
+
+    <logger name="consensusLog" level="DEBUG" additivity="false">
         <appender-ref ref="CONSENSUS_FILE"></appender-ref>
     </logger>
 
