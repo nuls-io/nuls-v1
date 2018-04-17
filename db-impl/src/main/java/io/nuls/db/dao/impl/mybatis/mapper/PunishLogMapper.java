@@ -28,7 +28,11 @@ package io.nuls.db.dao.impl.mybatis.mapper;
 import io.nuls.db.dao.impl.mybatis.common.BaseMapper;
 import io.nuls.db.entity.PunishLogPo;
 
+import java.util.List;
+
 public interface PunishLogMapper extends BaseMapper<String, PunishLogPo> {
 
     int deleteByHeight(long height);
+
+    List<PunishLogPo> getListByType(int type);
 }

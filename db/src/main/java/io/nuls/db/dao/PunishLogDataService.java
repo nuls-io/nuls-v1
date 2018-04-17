@@ -27,6 +27,8 @@ package io.nuls.db.dao;
 
 import io.nuls.db.entity.PunishLogPo;
 
+import java.util.List;
+
 /**
  * @author vivi
  * @date 2017/12/13.
@@ -36,4 +38,6 @@ public interface PunishLogDataService extends BaseDataService<String, PunishLogP
     int deleteByHeight(long height);
 
     long getCountByRounds(String agentAddress, long startRoundIndex, long endRoundIndex,long startHeight,int punishType);
+
+    List<PunishLogPo> getListByType(int type);
 }
