@@ -23,19 +23,11 @@
  */
 package io.nuls.protocol.base.entity.validator.tx;
 
-import io.nuls.protocol.base.entity.tx.PocJoinConsensusTransaction;
-import io.nuls.protocol.base.constant.PocConsensusConstant;
-import io.nuls.protocol.entity.Consensus;
-import io.nuls.protocol.base.entity.member.Deposit;
 import io.nuls.core.chain.entity.Na;
-import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.SeverityLevelEnum;
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
-
-import java.util.List;
+import io.nuls.protocol.base.constant.PocConsensusConstant;
+import io.nuls.protocol.base.entity.tx.PocJoinConsensusTransaction;
 
 /**
  * @author Niels

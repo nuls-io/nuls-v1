@@ -65,7 +65,7 @@ public interface PocConsensusConstant {
     /**
      * unit:second
      */
-    int BLOCK_TIME_INTERVAL_SECOND = 2;
+    int BLOCK_TIME_INTERVAL_SECOND = 10;
 
     /**
      * default:2M
