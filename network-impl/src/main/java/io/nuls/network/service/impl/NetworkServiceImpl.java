@@ -282,5 +282,10 @@ public class NetworkServiceImpl implements NetworkService {
         return MainNetworkParam.get();
     }
 
+
+    @Override
+    public void validateFirstUnConnectedNode(String nodeId) {
+        nodesManager.validateFirstUnConnectedNode(nodeId);
+    }
 }
 

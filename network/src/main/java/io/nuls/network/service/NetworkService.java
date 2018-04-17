@@ -102,4 +102,5 @@ public interface NetworkService {
 
     void reset();
 
+    void validateFirstUnConnectedNode(String nodeId);
 }
