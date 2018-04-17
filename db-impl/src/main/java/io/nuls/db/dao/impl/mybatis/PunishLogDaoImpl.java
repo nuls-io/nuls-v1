@@ -33,6 +33,7 @@ import io.nuls.db.entity.PunishLogPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.db.transactional.annotation.PROPAGATION;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -76,5 +77,9 @@ public class PunishLogDaoImpl extends BaseDaoImpl<PunishLogMapper, String, Punis
         searchable.addCondition("round_index", SearchOperator.lte, endRoundIndex);
         searchable.addCondition("height", SearchOperator.lte, startHeight);
         return this.getMapper().selectCount(searchable);
+    }
+    @Override
+    public List<PunishLogPo> getListByType(int type) {
+        return getMapper().getListByType(type);
     }
 }

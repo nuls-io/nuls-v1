@@ -123,20 +123,12 @@ public class CacheLoader {
     }
 
     public List<PunishLogPo> loadYellowPunishList() {
-        Map<String, Object> params = new HashMap<>();
-
-        params.put("type", PunishType.YELLOW.getCode());
-
-        List<PunishLogPo> list = new ArrayList<>();//todo punishLogDataService.getList(params);
+        List<PunishLogPo> list = punishLogDataService.getListByType(PunishType.YELLOW.getCode());
         return list;
     }
 
     public List<PunishLogPo> loadRedPunishList() {
-        Map<String, Object> params = new HashMap<>();
-
-        params.put("type", PunishType.RED.getCode());
-
-        List<PunishLogPo> list = new ArrayList<>();//todo punishLogDataService.getList(params);
+        List<PunishLogPo> list = punishLogDataService.getListByType(PunishType.RED.getCode());
         return list;
     }
 }
