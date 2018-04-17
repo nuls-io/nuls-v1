@@ -30,7 +30,7 @@ import io.nuls.core.chain.entity.Na;
  */
 public interface PocConsensusConstant {
 
-    int ALIVE_MIN_NODE_COUNT = 1;
+    int ALIVE_MIN_NODE_COUNT = 2;
 
     String CFG_CONSENSUS_SECTION = "consensus";
     String PROPERTY_PARTAKE_PACKING = "partake.packing";
@@ -65,7 +65,7 @@ public interface PocConsensusConstant {
     /**
      * unit:second
      */
-    int BLOCK_TIME_INTERVAL_SECOND = 1;
+    int BLOCK_TIME_INTERVAL_SECOND = 5;
 
     /**
      * default:2M
