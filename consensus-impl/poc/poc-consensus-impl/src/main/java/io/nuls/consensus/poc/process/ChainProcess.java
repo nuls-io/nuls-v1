@@ -73,9 +73,9 @@ public class ChainProcess {
         // 监控孤立链的状态，如果有可连接的，则加入验证链里面
         monitorIsolatedChains();
 
-        long newestBlockHeight = chainManager.getBestBlockHeight();
+        long newestBlockHeight = chainManager.getBestBlockHeight() + 3;
 
-        ChainContainer newChain = null;
+        ChainContainer newChain = chainManager.getMasterChain();
 
         Iterator<ChainContainer> iterator = chainManager.getChains().iterator();
         while(iterator.hasNext()) {
@@ -85,14 +85,13 @@ public class ChainProcess {
                 continue;
             }
             long newChainHeight = forkChain.getChain().getEndBlockHeader().getHeight();
-            if(newChainHeight > newestBlockHeight + 3) {
-                if(newChain == null || newChain.getChain().getEndBlockHeader().getHeight() < newestBlockHeight) {
-                    newChain = forkChain;
-                }
+            if(newChainHeight > newestBlockHeight || (newChainHeight == newestBlockHeight && forkChain.getChain().getEndBlockHeader().getTime() < newChain.getChain().getEndBlockHeader().getTime())) {
+                newChain = forkChain;
+                newestBlockHeight = newChainHeight;
             }
         }
 
-        if(newChain != null) {
+        if(!newChain.equals(chainManager.getMasterChain())) {
 
             ChainLog.debug("discover the fork chain {} : start {} - {} , end {} - {} , exceed the master {} - {} - {}, start verify the fork chian", newChain.getChain().getId(), newChain.getChain().getStartBlockHeader().getHeight(), newChain.getChain().getStartBlockHeader().getHash(), newChain.getChain().getEndBlockHeader().getHeight(), newChain.getChain().getEndBlockHeader().getHash(), chainManager.getMasterChain().getChain().getId(), chainManager.getBestBlockHeight(), chainManager.getBestBlock().getHeader().getHash());
 
@@ -232,33 +231,39 @@ public class ChainProcess {
     }
 
     private boolean checkIsolatedChainHasConnection(ChainContainer isolatedChain) {
-        //判断该孤立链是否和主链相连
+        // Determine whether the isolated chain is connected to the main chain
+        // 判断该孤立链是否和主链相连
         BlockHeader startBlockHeader = isolatedChain.getChain().getStartBlockHeader();
 
         List<BlockHeader> blockHeaderList = chainManager.getMasterChain().getChain().getBlockHeaderList();
 
-        for(int i = 0 ; i < blockHeaderList.size() ; i++) {
+        int count = blockHeaderList.size() > 100 ? 100 : blockHeaderList.size();
+        for(int i = blockHeaderList.size() - 1 ; i >= blockHeaderList.size() - count ; i--) {
             BlockHeader header = blockHeaderList.get(i);
             if(startBlockHeader.getPreHash().equals(header.getHash()) && startBlockHeader.getHeight() == header.getHeight() + 1) {
                 //yes connectioned
                 isolatedChain.getChain().setPreChainId(chainManager.getMasterChain().getChain().getId());
 
-                List<Block> isolatedChainBlockList = isolatedChain.getChain().getBlockList();
-
-                isolatedChain.getChain().setStartBlockHeader(isolatedChainBlockList.get(0).getHeader());
-                isolatedChain.getChain().setEndBlockHeader(isolatedChainBlockList.get(isolatedChainBlockList.size() - 1).getHeader());
                 chainManager.getChains().add(isolatedChain);
 
                 ChainLog.debug("discover the IsolatedChain {} : start {} - {} , end {} - {} , connection the master chain of {} - {} - {}, move into the fork chians", isolatedChain.getChain().getId(), startBlockHeader.getHeight(), startBlockHeader.getHash().getDigestHex(), isolatedChain.getChain().getEndBlockHeader().getHeight(), isolatedChain.getChain().getEndBlockHeader().getHash(), chainManager.getMasterChain().getChain().getId(), chainManager.getMasterChain().getChain().getBestBlock().getHeader().getHeight(), chainManager.getMasterChain().getChain().getBestBlock().getHeader().getHash());
 
                 return true;
+            } else if(startBlockHeader.getHeight() > header.getHeight()) {
+                break;
             }
         }
 
-        //判断该孤链是否和待验证的分叉链相连
+        // Determine whether the lone chain is connected to the forked chain to be verified
+        // 判断该孤链是否和待验证的分叉链相连
         for(ChainContainer forkChain : chainManager.getChains()) {
 
             Chain chain = forkChain.getChain();
+
+            if(startBlockHeader.getHeight() > chain.getEndBlockHeader().getHeight() + 1 || startBlockHeader.getHeight() <= chain.getEndBlockHeader().getHeight()) {
+                break;
+            }
+
             blockHeaderList = chain.getBlockHeaderList();
 
             for(int i = 0 ; i < blockHeaderList.size() ; i++) {
@@ -268,17 +273,34 @@ public class ChainProcess {
                     isolatedChain.getChain().setPreChainId(chain.getPreChainId());
                     isolatedChain.getChain().setStartBlockHeader(chain.getStartBlockHeader());
 
-                    int index = blockHeaderList.indexOf(header);
-
-                    isolatedChain.getChain().getBlockHeaderList().addAll(blockHeaderList.subList(0, index));
-                    isolatedChain.getChain().getBlockList().addAll(chain.getBlockList().subList(0, index));
+                    isolatedChain.getChain().getBlockHeaderList().addAll(0, blockHeaderList.subList(0, i));
+                    isolatedChain.getChain().getBlockList().addAll(0, chain.getBlockList().subList(0, i));
 
                     chainManager.getChains().add(isolatedChain);
+
+                    if(i == blockHeaderList.size() - 1) {
+                        chainManager.getChains().remove(forkChain);
+                    }
 
                     ChainLog.debug("discover the IsolatedChain {} : start {} - {} , end {} - {} , connection the fork chain of : start {} - {} , end {} - {}, move into the fork chians", isolatedChain.getChain().getId(), startBlockHeader.getHeight(), startBlockHeader.getHash().getDigestHex(), isolatedChain.getChain().getEndBlockHeader().getHeight(), isolatedChain.getChain().getEndBlockHeader().getHash(), chainManager.getMasterChain().getChain().getId(), chain.getStartBlockHeader().getHeight(), chain.getStartBlockHeader().getHash(), chain.getEndBlockHeader().getHeight(), chain.getEndBlockHeader().getHash());
 
                     return true;
+                } else if(startBlockHeader.getHeight() == header.getHeight() + 1) {
+                    break;
                 }
+            }
+        }
+
+        // Determine whether the isolated chains are connected
+        // 判断孤立链之间是否相连
+        for(ChainContainer iso : chainManager.getIsolatedChains()) {
+            if(iso.getChain().getEndBlockHeader().getHash().equals(isolatedChain.getChain().getStartBlockHeader().getPreHash()) &&
+                    iso.getChain().getEndBlockHeader().getHeight() + 1 == isolatedChain.getChain().getStartBlockHeader().getHeight()) {
+                Chain chain = iso.getChain();
+                chain.setEndBlockHeader(isolatedChain.getChain().getEndBlockHeader());
+                chain.getBlockHeaderList().addAll(isolatedChain.getChain().getBlockHeaderList());
+                chain.getBlockList().addAll(isolatedChain.getChain().getBlockList());
+                return true;
             }
         }
 

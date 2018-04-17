@@ -42,6 +42,7 @@ import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.BlockLog;
 import io.nuls.core.utils.log.ConsensusLog;
 import io.nuls.core.utils.log.Log;
+import io.nuls.core.utils.str.StringUtils;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.entity.PunishLogPo;
 import io.nuls.ledger.entity.tx.CoinBaseTransaction;
@@ -83,7 +84,8 @@ public class ChainContainer implements Cloneable {
 
     public boolean addBlock(Block block) {
 
-        if (!chain.getEndBlockHeader().getHash().equals(block.getHeader().getPreHash())) {
+        if (!chain.getEndBlockHeader().getHash().equals(block.getHeader().getPreHash()) ||
+                chain.getEndBlockHeader().getHeight() + 1 != block.getHeader().getHeight()) {
             return false;
         }
 
@@ -436,30 +438,44 @@ public class ChainContainer implements Cloneable {
      */
     public ChainContainer getBeforeTheForkChain(ChainContainer chainContainer) {
 
-        ChainContainer newChain = null;
-        try {
-            newChain = (ChainContainer) this.clone();
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
+        Chain newChain = new Chain();
+        newChain.setId(chainContainer.getChain().getId());
+        newChain.setStartBlockHeader(chain.getStartBlockHeader());
+        newChain.setEndBlockHeader(chain.getEndBlockHeader());
+        newChain.setBlockHeaderList(new ArrayList(chain.getBlockHeaderList()));
+        newChain.setBlockList(new ArrayList<>(chain.getBlockList()));
+
+        if(chain.getAgentList() != null) {
+            newChain.setAgentList(new ArrayList<>(chain.getAgentList()));
         }
+        if(chain.getDepositList() != null) {
+            newChain.setDepositList(new ArrayList<>(chain.getDepositList()));
+        }
+        if(chain.getYellowPunishList() != null) {
+            newChain.setYellowPunishList(new ArrayList<>(chain.getYellowPunishList()));
+        }
+        if(chain.getRedPunishList() != null) {
+            newChain.setRedPunishList(new ArrayList<>(chain.getRedPunishList()));
+        }
+        ChainContainer newChainContainer = new ChainContainer(newChain);
 
         // Bifurcation
         // 分叉点
         BlockHeader pointBlockHeader = chainContainer.getChain().getStartBlockHeader();
 
-        List<Block> blockList = newChain.getChain().getBlockList();
+        List<Block> blockList = newChain.getBlockList();
         for (int i = blockList.size() - 1; i >= 0; i--) {
             Block block = blockList.get(i);
             if (pointBlockHeader.getPreHash().equals(block.getHeader().getHash())) {
                 break;
             }
-            newChain.rollback();
+            newChainContainer.rollback();
         }
 
-        newChain.getRoundList().clear();
-        newChain.resetRound(false);
+        newChainContainer.getRoundList().clear();
+        newChainContainer.resetRound(false);
 
-        return newChain;
+        return newChainContainer;
     }
 
     /**
@@ -484,19 +500,21 @@ public class ChainContainer implements Cloneable {
         for (int i = 0; i < blockList.size(); i++) {
 
             BlockHeader blockHeader = blockHeaderList.get(i);
-            if (pointBlockHeader.getPreHash().equals(blockHeader.getHash())) {
-                canAdd = true;
-                if (i + 1 < blockHeaderList.size()) {
-                    chain.setStartBlockHeader(blockHeaderList.get(i + 1));
-                    chain.setPreChainId(chainContainer.getChain().getId());
-                    chain.setEndBlockHeader(getChain().getEndBlockHeader());
-                }
-                continue;
-            }
+
             if (canAdd) {
                 Block block = blockList.get(i);
                 chain.getBlockList().add(block);
                 chain.getBlockHeaderList().add(blockHeader);
+            }
+
+            if (pointBlockHeader.getPreHash().equals(blockHeader.getHash())) {
+                canAdd = true;
+                if (i + 1 < blockHeaderList.size()) {
+                    chain.setStartBlockHeader(blockHeaderList.get(i + 1));
+                    chain.setEndBlockHeader(getChain().getEndBlockHeader());
+                    chain.setPreChainId(chainContainer.getChain().getId());
+                }
+                continue;
             }
         }
         return new ChainContainer(chain);

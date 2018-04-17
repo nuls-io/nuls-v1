@@ -105,14 +105,14 @@ public class BlockProcess {
 
     private ChainContainer checkAndGetForkChain(Block block) {
         // check the preHash is in the master chain
-        ChainContainer forkChain = getForkChain(chainManager.getMasterChain(), block);
+        ChainContainer forkChain = getForkChain(chainManager.getMasterChain(), block, false);
         if(forkChain != null) {
             return forkChain;
         }
 
         // check the preHash is in the waitVerifyChainList
         for(ChainContainer waitVerifyChain : chainManager.getChains()) {
-            forkChain = getForkChain(waitVerifyChain, block);
+            forkChain = getForkChain(waitVerifyChain, block, true);
             if(forkChain != null) {
                 break;
             }
@@ -120,7 +120,7 @@ public class BlockProcess {
         return forkChain;
     }
 
-    private ChainContainer getForkChain(ChainContainer chainContainer, Block block) {
+    private ChainContainer getForkChain(ChainContainer chainContainer, Block block, boolean inForkChain) {
         BlockHeader blockHeader = chainContainer.getChain().getEndBlockHeader();
 
         NulsDigestData preHash = block.getHeader().getPreHash();
@@ -133,14 +133,25 @@ public class BlockProcess {
 
         List<BlockHeader> headerList = chainContainer.getChain().getBlockHeaderList();
 
-        for(BlockHeader header : headerList) {
+        for(int i = 0 ; i < headerList.size() ; i++) {
+            BlockHeader header = headerList.get(i);
             if(header.getHash().equals(preHash)) {
+
+                List<Block> blockList = chainContainer.getChain().getBlockList();
+
                 ChainContainer forkChain = new ChainContainer();
-                forkChain.setChain(new Chain());
-                forkChain.getChain().getBlockList().add(block);
-                forkChain.getChain().getBlockHeaderList().add(block.getHeader());
-                forkChain.getChain().setStartBlockHeader(block.getHeader());
-                forkChain.getChain().setEndBlockHeader(block.getHeader());
+                Chain newForkChain = new Chain();
+                newForkChain.getBlockList().addAll(blockList.subList(0, i));
+                newForkChain.getBlockList().add(block);
+
+                newForkChain.getBlockHeaderList().addAll(headerList.subList(0, i));
+                newForkChain.getBlockHeaderList().add(block.getHeader());
+
+                newForkChain.setStartBlockHeader(block.getHeader());
+                newForkChain.setEndBlockHeader(block.getHeader());
+
+                forkChain.setChain(newForkChain);
+
                 return forkChain;
             }
         }
