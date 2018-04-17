@@ -38,6 +38,8 @@ import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.ChainLog;
 import io.nuls.core.utils.log.Log;
 import io.nuls.poc.constant.ConsensusStatus;
+import io.nuls.protocol.intf.BlockService;
+import org.apache.tools.ant.taskdefs.condition.IsFailure;
 
 import java.io.IOException;
 import java.util.List;
@@ -104,14 +106,14 @@ public class BlockProcess {
 
     private ChainContainer checkAndGetForkChain(Block block) {
         // check the preHash is in the master chain
-        ChainContainer forkChain = getForkChain(chainManager.getMasterChain(), block);
+        ChainContainer forkChain = getForkChain(chainManager.getMasterChain(), block, false);
         if(forkChain != null) {
             return forkChain;
         }
 
         // check the preHash is in the waitVerifyChainList
         for(ChainContainer waitVerifyChain : chainManager.getChains()) {
-            forkChain = getForkChain(waitVerifyChain, block);
+            forkChain = getForkChain(waitVerifyChain, block, true);
             if(forkChain != null) {
                 break;
             }
@@ -119,11 +121,11 @@ public class BlockProcess {
         return forkChain;
     }
 
-    private ChainContainer getForkChain(ChainContainer chainContainer, Block block) {
+    private ChainContainer getForkChain(ChainContainer chainContainer, Block block, boolean inForkChain) {
         BlockHeader blockHeader = chainContainer.getChain().getEndBlockHeader();
 
         NulsDigestData preHash = block.getHeader().getPreHash();
-        if(blockHeader.getHash().equals(preHash)) {
+        if(blockHeader.getHash().equals(preHash) && inForkChain) {
             chainContainer.getChain().setEndBlockHeader(block.getHeader());
             chainContainer.getChain().getBlockHeaderList().add(block.getHeader());
             chainContainer.getChain().getBlockList().add(block);
@@ -132,14 +134,28 @@ public class BlockProcess {
 
         List<BlockHeader> headerList = chainContainer.getChain().getBlockHeaderList();
 
-        for(BlockHeader header : headerList) {
+        for(int i = 0 ; i < headerList.size() ; i++) {
+            BlockHeader header = headerList.get(i);
             if(header.getHash().equals(preHash)) {
+
+                List<Block> blockList = chainContainer.getChain().getBlockList();
+
                 ChainContainer forkChain = new ChainContainer();
-                forkChain.setChain(new Chain());
-                forkChain.getChain().getBlockList().add(block);
-                forkChain.getChain().getBlockHeaderList().add(block.getHeader());
-                forkChain.getChain().setStartBlockHeader(block.getHeader());
-                forkChain.getChain().setEndBlockHeader(block.getHeader());
+                Chain newForkChain = new Chain();
+
+                if(inForkChain) {
+                    newForkChain.getBlockList().addAll(blockList.subList(0, i));
+                    newForkChain.getBlockHeaderList().addAll(headerList.subList(0, i));
+                }
+
+                newForkChain.getBlockList().add(block);
+                newForkChain.getBlockHeaderList().add(block.getHeader());
+
+                newForkChain.setStartBlockHeader(block.getHeader());
+                newForkChain.setEndBlockHeader(block.getHeader());
+
+                forkChain.setChain(newForkChain);
+
                 return forkChain;
             }
         }

@@ -21,12 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.consensus.poc.protocol.constant;
+package io.nuls.consensus.poc.constant;
 
 /**
  * @author Niels
- * @date 2017/12/1
  */
-public interface ConsensusEventType {
+public interface ConsensusConstant {
+
+    /**
+     * unit:second
+     */
+    int BLOCK_TIME_INTERVAL_SECOND = 10;
 
 }

@@ -74,7 +74,6 @@ public class ChainManager {
                 chain.setStartBlockHeader(header);
                 chain.getBlockHeaderList().add(0, header);
                 chain.getBlockList().add(0, block);
-                break;
             }
         }
         return success;
@@ -83,18 +82,16 @@ public class ChainManager {
     public boolean checkIsAfterIsolatedChainAndAdd(Block block) {
         BlockHeader header = block.getHeader();
 
-        boolean success = false;
         for(ChainContainer chainContainer : isolatedChains) {
             Chain chain = chainContainer.getChain();
             if(header.getPreHash().equals(chain.getEndBlockHeader().getHash())) {
-                success = true;
                 chain.setEndBlockHeader(header);
                 chain.getBlockHeaderList().add(header);
                 chain.getBlockList().add(block);
-                break;
+                return true;
             }
         }
-        return success;
+        return false;
     }
 
     public long getBestBlockHeight() {

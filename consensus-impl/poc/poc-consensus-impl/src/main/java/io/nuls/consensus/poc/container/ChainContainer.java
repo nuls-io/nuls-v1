@@ -26,18 +26,24 @@ package io.nuls.consensus.poc.container;
 
 import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
+import io.nuls.consensus.poc.constant.ConsensusConstant;
 import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
 import io.nuls.consensus.poc.utils.ConsensusTool;
 import io.nuls.core.chain.entity.*;
+import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.calc.DoubleUtils;
 import io.nuls.core.utils.date.TimeService;
+import io.nuls.core.utils.log.BlockLog;
 import io.nuls.core.utils.log.ConsensusLog;
 import io.nuls.core.utils.log.Log;
+import io.nuls.core.utils.str.StringUtils;
+import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.entity.PunishLogPo;
 import io.nuls.ledger.entity.tx.CoinBaseTransaction;
 import io.nuls.ledger.service.intf.LedgerService;
@@ -47,12 +53,14 @@ import io.nuls.protocol.base.constant.PunishType;
 import io.nuls.protocol.base.entity.RedPunishData;
 import io.nuls.protocol.base.entity.YellowPunishData;
 import io.nuls.protocol.base.entity.block.BlockRoundData;
+import io.nuls.protocol.base.entity.meeting.PocMeetingMember;
 import io.nuls.protocol.base.entity.member.Agent;
 import io.nuls.protocol.base.entity.member.Deposit;
 import io.nuls.protocol.base.entity.tx.*;
 import io.nuls.protocol.base.manager.ConsensusManager;
 import io.nuls.protocol.entity.Consensus;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -76,7 +84,8 @@ public class ChainContainer implements Cloneable {
 
     public boolean addBlock(Block block) {
 
-        if (!chain.getEndBlockHeader().getHash().equals(block.getHeader().getPreHash())) {
+        if (!chain.getEndBlockHeader().getHash().equals(block.getHeader().getPreHash()) ||
+                chain.getEndBlockHeader().getHeight() + 1 != block.getHeader().getHeight()) {
             return false;
         }
 
@@ -429,30 +438,44 @@ public class ChainContainer implements Cloneable {
      */
     public ChainContainer getBeforeTheForkChain(ChainContainer chainContainer) {
 
-        ChainContainer newChain = null;
-        try {
-            newChain = (ChainContainer) this.clone();
-        } catch (CloneNotSupportedException e) {
-            Log.error(e);
+        Chain newChain = new Chain();
+        newChain.setId(chainContainer.getChain().getId());
+        newChain.setStartBlockHeader(chain.getStartBlockHeader());
+        newChain.setEndBlockHeader(chain.getEndBlockHeader());
+        newChain.setBlockHeaderList(new ArrayList(chain.getBlockHeaderList()));
+        newChain.setBlockList(new ArrayList<>(chain.getBlockList()));
+
+        if(chain.getAgentList() != null) {
+            newChain.setAgentList(new ArrayList<>(chain.getAgentList()));
         }
+        if(chain.getDepositList() != null) {
+            newChain.setDepositList(new ArrayList<>(chain.getDepositList()));
+        }
+        if(chain.getYellowPunishList() != null) {
+            newChain.setYellowPunishList(new ArrayList<>(chain.getYellowPunishList()));
+        }
+        if(chain.getRedPunishList() != null) {
+            newChain.setRedPunishList(new ArrayList<>(chain.getRedPunishList()));
+        }
+        ChainContainer newChainContainer = new ChainContainer(newChain);
 
         // Bifurcation
         // 分叉点
         BlockHeader pointBlockHeader = chainContainer.getChain().getStartBlockHeader();
 
-        List<Block> blockList = newChain.getChain().getBlockList();
+        List<Block> blockList = newChain.getBlockList();
         for (int i = blockList.size() - 1; i >= 0; i--) {
             Block block = blockList.get(i);
             if (pointBlockHeader.getPreHash().equals(block.getHeader().getHash())) {
                 break;
             }
-            newChain.rollback();
+            newChainContainer.rollback();
         }
 
-        newChain.getRoundList().clear();
-        newChain.resetRound(false);
+        newChainContainer.getRoundList().clear();
+        newChainContainer.resetRound(false);
 
-        return newChain;
+        return newChainContainer;
     }
 
     /**
@@ -477,19 +500,21 @@ public class ChainContainer implements Cloneable {
         for (int i = 0; i < blockList.size(); i++) {
 
             BlockHeader blockHeader = blockHeaderList.get(i);
-            if (pointBlockHeader.getPreHash().equals(blockHeader.getHash())) {
-                canAdd = true;
-                if (i + 1 < blockHeaderList.size()) {
-                    chain.setStartBlockHeader(blockHeaderList.get(i + 1));
-                    chain.setPreChainId(chainContainer.getChain().getId());
-                    chain.setEndBlockHeader(getChain().getEndBlockHeader());
-                }
-                continue;
-            }
+
             if (canAdd) {
                 Block block = blockList.get(i);
                 chain.getBlockList().add(block);
                 chain.getBlockHeaderList().add(blockHeader);
+            }
+
+            if (pointBlockHeader.getPreHash().equals(blockHeader.getHash())) {
+                canAdd = true;
+                if (i + 1 < blockHeaderList.size()) {
+                    chain.setStartBlockHeader(blockHeaderList.get(i + 1));
+                    chain.setEndBlockHeader(getChain().getEndBlockHeader());
+                    chain.setPreChainId(chainContainer.getChain().getId());
+                }
+                continue;
             }
         }
         return new ChainContainer(chain);
