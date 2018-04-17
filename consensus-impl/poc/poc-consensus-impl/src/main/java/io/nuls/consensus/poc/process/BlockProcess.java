@@ -39,6 +39,7 @@ import io.nuls.core.utils.log.ChainLog;
 import io.nuls.core.utils.log.Log;
 import io.nuls.poc.constant.ConsensusStatus;
 import io.nuls.protocol.intf.BlockService;
+import org.apache.tools.ant.taskdefs.condition.IsFailure;
 
 import java.io.IOException;
 import java.util.List;
@@ -124,7 +125,7 @@ public class BlockProcess {
         BlockHeader blockHeader = chainContainer.getChain().getEndBlockHeader();
 
         NulsDigestData preHash = block.getHeader().getPreHash();
-        if(blockHeader.getHash().equals(preHash) && !inForkChain) {
+        if(blockHeader.getHash().equals(preHash) && inForkChain) {
             chainContainer.getChain().setEndBlockHeader(block.getHeader());
             chainContainer.getChain().getBlockHeaderList().add(block.getHeader());
             chainContainer.getChain().getBlockList().add(block);
@@ -141,10 +142,13 @@ public class BlockProcess {
 
                 ChainContainer forkChain = new ChainContainer();
                 Chain newForkChain = new Chain();
-                newForkChain.getBlockList().addAll(blockList.subList(0, i));
-                newForkChain.getBlockList().add(block);
 
-                newForkChain.getBlockHeaderList().addAll(headerList.subList(0, i));
+                if(inForkChain) {
+                    newForkChain.getBlockList().addAll(blockList.subList(0, i));
+                    newForkChain.getBlockHeaderList().addAll(headerList.subList(0, i));
+                }
+
+                newForkChain.getBlockList().add(block);
                 newForkChain.getBlockHeaderList().add(block.getHeader());
 
                 newForkChain.setStartBlockHeader(block.getHeader());

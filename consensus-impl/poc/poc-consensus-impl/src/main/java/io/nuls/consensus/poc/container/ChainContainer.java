@@ -259,7 +259,7 @@ public class ChainContainer implements Cloneable {
                 Log.error("block height " + blockHeader.getHeight() + " round startTime is error, greater than current time!");
                 return false;
             }
-            if (!isDownload && (roundData.getRoundStartTime() + (roundData.getPackingIndexOfRound() + 1) * ConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000L) > TimeService.currentTimeMillis()) {
+            if (!isDownload && (roundData.getRoundStartTime() + roundData.getPackingIndexOfRound() * ConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000L) > TimeService.currentTimeMillis()) {
                 Log.error("block height " + blockHeader.getHeight() + " is the block of the future and received in advance!");
                 return false;
             }
