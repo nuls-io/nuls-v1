@@ -310,7 +310,7 @@ public class NodesManager implements Runnable {
         }
 
         if (node.getFailCount() <= NetworkConstant.FAIL_MAX_COUNT) {
-            node.setLastFailTime(System.currentTimeMillis() + 10 * 1000 * node.getFailCount());
+            //node.setLastFailTime(TimeService.currentTimeMillis() + 10 * 1000 * node.getFailCount());
             if (!disConnectNodes.containsKey(node.getId())) {
                 disConnectNodes.put(node.getId(), node);
             }
@@ -464,9 +464,9 @@ public class NodesManager implements Runnable {
 //            Log.info("disConnectNodes:" + disConnectNodes.size());
 //            Log.info("disConnectNodes:" + connectedNodes.size());
 //            Log.info("handShakeNodes:" + handShakeNodes.size());
-            for (Node node : handShakeNodes.values()) {
+            //for (Node node : handShakeNodes.values()) {
                // Log.info(node.toString() + ",blockHeight:" + node.getVersionMessage().getBestBlockHeight());
-            }
+            //}
             try {
                 Thread.sleep(10000);
             } catch (InterruptedException e) {
@@ -492,9 +492,10 @@ public class NodesManager implements Runnable {
 
             for (Node node : disConnectNodes.values()) {
                 if (node.getType() == Node.OUT && node.getStatus() == Node.CLOSE) {
-                    if (node.getLastFailTime() <= System.currentTimeMillis()) {
+                    /*if (node.getLastFailTime() <= TimeService.currentTimeMillis()) {
                         connectionManager.connectionNode(node);
-                    }
+                    }*/
+                    connectionManager.connectionNode(node);
                 }
             }
 
