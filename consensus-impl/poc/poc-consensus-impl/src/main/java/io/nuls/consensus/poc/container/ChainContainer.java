@@ -440,7 +440,7 @@ public class ChainContainer implements Cloneable {
         try {
             newChain = (ChainContainer) this.clone();
         } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
+            Log.error(e);
         }
 
         // Bifurcation

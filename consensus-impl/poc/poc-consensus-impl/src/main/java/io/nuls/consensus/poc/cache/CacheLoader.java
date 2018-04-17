@@ -30,6 +30,7 @@ import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.AgentDataService;
 import io.nuls.db.dao.DepositDataService;
 import io.nuls.db.dao.PunishLogDataService;
@@ -82,7 +83,7 @@ public class CacheLoader {
             try {
                 blockHeaderList.add(0, ConsensusTool.fromPojo(blockHeaderPo));
             } catch (NulsException e) {
-                e.printStackTrace();
+                Log.error(e);
             }
         }
 

@@ -176,7 +176,7 @@ public class BlockStorageService {
                 throw new NulsRuntimeException(ErrorCode.FAILED, "保存出错，高度：" + header.getHeight());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
             Log.error(e);
         }
     }

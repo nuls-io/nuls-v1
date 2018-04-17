@@ -63,7 +63,7 @@ public class PocConsensusModuleBootstrap extends AbstractPocConsensusModule {
         try {
             NulsContext.getServiceBean(PocConsensusServiceImpl.class).startup();
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
         }
 
         Log.info("the POC consensus module is started!");

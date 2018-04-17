@@ -26,6 +26,7 @@
 
 package io.nuls.rpc.sdk.utils;
 
+import io.nuls.core.utils.log.Log;
 import io.nuls.rpc.sdk.entity.RpcClientResult;
 import io.nuls.rpc.sdk.service.WalletService;
 import io.nuls.rpc.sdk.utils.RestFulUtils;
@@ -57,7 +58,7 @@ public class WalletServiceTest {
             try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.error(e);
             }
         }
 

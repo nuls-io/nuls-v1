@@ -1,5 +1,6 @@
 package io.nuls.rpc.sdk.service;
 
+import io.nuls.core.utils.log.Log;
 import io.nuls.rpc.sdk.entity.*;
 import io.nuls.rpc.sdk.params.CreateAgentParams;
 import io.nuls.rpc.sdk.params.WithdrawParams;
@@ -83,7 +84,7 @@ public enum ConsensusService {
             AssertUtil.canNotEmpty(params.getRemark());
             return restFul.post("/consensus/agent", JSONUtils.obj2json(params));
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
             return RpcClientResult.getFailed(e.getMessage());
         }
     }
@@ -97,7 +98,7 @@ public enum ConsensusService {
             AssertUtil.canNotEmpty(params.getAgentId());
             return restFul.post("/consensus/deposit", JSONUtils.obj2json(params));
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
             return RpcClientResult.getFailed(e.getMessage());
         }
     }
@@ -108,7 +109,7 @@ public enum ConsensusService {
             AssertUtil.canNotEmpty(params.getPassword());
             return restFul.post("/consensus/agent/stop", JSONUtils.obj2json(params));
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
             return RpcClientResult.getFailed(e.getMessage());
         }
     }
@@ -117,7 +118,7 @@ public enum ConsensusService {
         try {
             AssertUtil.canNotEmpty(agentAddress);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
             return RpcClientResult.getFailed(e.getMessage());
         }
         return restFul.get("/consensus/agent/" + agentAddress, null);
@@ -154,7 +155,7 @@ public enum ConsensusService {
             AssertUtil.canNotEmpty(params.getPassword());
             return restFul.post("/consensus/withdraw", JSONUtils.obj2json(params));
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
             return RpcClientResult.getFailed(e.getMessage());
         }
     }

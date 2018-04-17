@@ -136,14 +136,14 @@ public class ConsensusProcess {
                         DateUtil.convertDate(new Date(round.getEndTime())));
                 packing(member, round);
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.error(e);
             }
 
             while(member.getPackEndTime() > TimeService.currentTimeMillis()) {
                 try {
                     Thread.sleep(500l);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    Log.error(e);
                 }
             }
             hasPacking = false;

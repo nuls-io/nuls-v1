@@ -24,6 +24,7 @@
 
 package io.nuls.protocol.base.download;
 
+import io.nuls.core.utils.log.Log;
 import io.nuls.protocol.constant.DownloadStatus;
 import io.nuls.protocol.base.constant.PocConsensusConstant;
 import io.nuls.protocol.intf.BlockService;
@@ -140,7 +141,7 @@ public class DownloadProcessor extends Thread {
                 downloadStatus = DownloadStatus.FAILED;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
             downloadStatus = DownloadStatus.FAILED;
         } finally {
             blockQueue.destroyQueue(queueName);
@@ -250,7 +251,7 @@ public class DownloadProcessor extends Thread {
             try {
                 Thread.sleep(500l);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.error(e);
             }
         }
 

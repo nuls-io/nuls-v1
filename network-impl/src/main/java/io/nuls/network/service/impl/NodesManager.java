@@ -470,7 +470,7 @@ public class NodesManager implements Runnable {
             try {
                 Thread.sleep(10000);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.error(e);
             }
             if (handShakeNodes.size() <= 2) {
                 List<Node> seedNodes = getSeedNodes();
