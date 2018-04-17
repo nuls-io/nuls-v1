@@ -46,11 +46,8 @@ import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.params.OperationType;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
-import io.nuls.ledger.event.TransactionEvent;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.protocol.base.constant.PocConsensusConstant;
-import io.nuls.protocol.base.entity.ConsensusAgentImpl;
-import io.nuls.protocol.base.entity.ConsensusDepositImpl;
 import io.nuls.protocol.base.entity.member.Agent;
 import io.nuls.protocol.base.entity.member.Deposit;
 import io.nuls.protocol.base.entity.params.JoinConsensusParam;
@@ -59,8 +56,6 @@ import io.nuls.protocol.base.entity.tx.PocJoinConsensusTransaction;
 import io.nuls.protocol.base.entity.tx.RegisterAgentTransaction;
 import io.nuls.protocol.base.entity.tx.StopAgentTransaction;
 import io.nuls.protocol.entity.Consensus;
-import io.nuls.protocol.intf.BlockService;
-import io.nuls.protocol.intf.ConsensusService;
 
 import java.io.IOException;
 import java.util.*;
@@ -69,7 +64,7 @@ import java.util.*;
  * @author Niels
  * @date 2017/11/9
  */
-public class PocConsensusServiceImpl implements ConsensusService {
+public class PocConsensusServiceImpl {
 
 
     @Autowired

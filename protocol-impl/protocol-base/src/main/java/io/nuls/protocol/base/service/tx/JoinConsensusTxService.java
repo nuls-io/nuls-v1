@@ -29,7 +29,6 @@ import io.nuls.protocol.base.entity.member.Deposit;
 import io.nuls.protocol.base.entity.tx.PocJoinConsensusTransaction;
 import io.nuls.protocol.entity.Consensus;
 import io.nuls.protocol.base.event.notice.EntrustConsensusNotice;
-import io.nuls.protocol.base.utils.ConsensusTool;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.tx.serivce.TransactionService;

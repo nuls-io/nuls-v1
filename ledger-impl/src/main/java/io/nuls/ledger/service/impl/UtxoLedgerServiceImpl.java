@@ -24,6 +24,7 @@
 package io.nuls.ledger.service.impl;
 
 import io.nuls.cache.service.intf.CacheService;
+import io.nuls.protocol.event.TransactionEvent;
 import io.nuls.protocol.utils.TxTimeComparator;
 import io.nuls.core.chain.entity.*;
 import io.nuls.core.chain.manager.TransactionManager;
@@ -61,7 +62,6 @@ import io.nuls.ledger.entity.params.OperationType;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.entity.tx.TransferTransaction;
-import io.nuls.ledger.event.TransactionEvent;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.ledger.util.UtxoTransactionTool;
 import io.nuls.ledger.util.UtxoTransferTool;

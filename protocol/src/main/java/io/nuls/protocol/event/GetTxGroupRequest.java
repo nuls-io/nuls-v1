@@ -23,8 +23,8 @@
  */
 package io.nuls.protocol.event;
 
+import io.nuls.protocol.constant.ProtocolEventType;
 import io.nuls.protocol.entity.GetTxGroupParam;
-import io.nuls.protocol.constant.ConsensusEventType;
 import io.nuls.core.event.NoticeData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -35,11 +35,11 @@ import io.nuls.core.utils.io.NulsByteBuffer;
  * @author Niels
  * @date 2017/11/13
  */
-public class GetTxGroupRequest extends BaseConsensusEvent<GetTxGroupParam> {
+public class GetTxGroupRequest extends BaseProtocolEvent<GetTxGroupParam> {
 
 
     public GetTxGroupRequest() {
-        super(ConsensusEventType.GET_TX_GROUP);
+        super(ProtocolEventType.GET_TX_GROUP);
     }
 
 

@@ -24,7 +24,6 @@
 package io.nuls.protocol.base.cache.manager.block;
 
 import io.nuls.cache.util.CacheMap;
-import io.nuls.protocol.base.constant.ConsensusCacheConstant;
 import io.nuls.core.chain.entity.SmallBlock;
 
 /**
@@ -36,7 +35,7 @@ import io.nuls.core.chain.entity.SmallBlock;
 public class TemporaryCacheManager {
     private static final TemporaryCacheManager INSTANCE = new TemporaryCacheManager();
 
-    private CacheMap<String, SmallBlock> newBlockCacheMap;
+    private CacheMap<String, SmallBlock> smallBlockCacheMap;
 
     private TemporaryCacheManager() {
     }
@@ -46,35 +45,36 @@ public class TemporaryCacheManager {
     }
 
     public void init() {
-        newBlockCacheMap = new CacheMap<>("temp" + ConsensusCacheConstant.NEW_BLOCK_CACHE_NAME, 64, ConsensusCacheConstant.LIVE_TIME, 0);
+        //live time is 100 blocks time;
+        smallBlockCacheMap = new CacheMap<>("temp-small-block-cache" , 64, 1000, 0);
     }
 
 
     public void cacheSmallBlock(SmallBlock newBlock) {
-        newBlockCacheMap.put(newBlock.getHeader().getHash().getDigestHex(), newBlock);
+        smallBlockCacheMap.put(newBlock.getHeader().getHash().getDigestHex(), newBlock);
     }
 
     public SmallBlock getSmallBlock(String hash) {
-        if (null == newBlockCacheMap) {
+        if (null == smallBlockCacheMap) {
             return null;
         }
-        return newBlockCacheMap.get(hash);
+        return smallBlockCacheMap.get(hash);
     }
 
     public void remove(String hash) {
-        if (null == newBlockCacheMap) {
+        if (null == smallBlockCacheMap) {
             return;
         }
-        newBlockCacheMap.remove(hash);
+        smallBlockCacheMap.remove(hash);
     }
 
 
     public void clear() {
-        this.newBlockCacheMap.clear();
+        this.smallBlockCacheMap.clear();
     }
 
     public void destroy() {
-        this.newBlockCacheMap.destroy();
+        this.smallBlockCacheMap.destroy();
     }
 
 }

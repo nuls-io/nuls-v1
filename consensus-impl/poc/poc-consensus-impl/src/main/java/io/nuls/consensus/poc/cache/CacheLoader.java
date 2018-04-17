@@ -28,7 +28,6 @@ import io.nuls.consensus.poc.utils.ConsensusTool;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.AgentDataService;
@@ -42,7 +41,6 @@ import io.nuls.protocol.base.constant.PunishType;
 import io.nuls.protocol.base.entity.member.Agent;
 import io.nuls.protocol.base.entity.member.Deposit;
 import io.nuls.protocol.entity.Consensus;
-import io.nuls.protocol.intf.BlockService;
 
 import java.util.*;
 

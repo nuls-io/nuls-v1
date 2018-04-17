@@ -21,44 +21,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.protocol.entity;
+package io.nuls.protocol.event;
 
-import io.nuls.account.entity.Account;
-
-import java.io.Serializable;
+import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.utils.log.Log;
 
 /**
  * @author Niels
  * @date 2017/11/7
  */
-public class ConsensusStatusInfo implements Serializable {
-    private Account account;
-    private int status;
-    private boolean seed;
+public abstract class BaseProtocolEvent<T extends BaseNulsData> extends io.nuls.core.event.BaseEvent<T> {
 
-    public boolean isSeed() {
-        return seed;
+    public BaseProtocolEvent(short eventType) {
+        super(NulsConstant.MODULE_ID_PROTOCOL, eventType);
     }
 
-    public void setSeed(boolean seed) {
-        this.seed = seed;
+    @Override
+    public Object copy() {
+        try {
+            return this.clone();
+        } catch (CloneNotSupportedException e) {
+            Log.error(e);
+            return null;
+        }
     }
-
-    public Account getAccount() {
-        return account;
-    }
-
-    public void setAccount(Account account) {
-        this.account = account;
-    }
-
-
-    public int getStatus() {
-        return status;
-    }
-
-    public void setStatus(int status) {
-        this.status = status;
-    }
-
 }

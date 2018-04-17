@@ -25,19 +25,18 @@ package io.nuls.consensus.poc.service.impl;
 
 import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.container.BlockContainer;
-import io.nuls.consensus.poc.context.ConsensusContext;
-import io.nuls.consensus.poc.entity.Agent;
 import io.nuls.consensus.poc.provider.ConsensusSystemProvider;
 import io.nuls.consensus.poc.provider.QueueProvider;
+import io.nuls.consensus.poc.scheduler.MainControlScheduler;
 import io.nuls.consensus.poc.service.PocConsensusService;
+import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.network.entity.Node;
 import io.nuls.poc.constant.ConsensusStatus;
-import io.nuls.core.chain.entity.BaseNulsData;
-import io.nuls.consensus.poc.scheduler.MainControlScheduler;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by ln on 2018/4/13.
@@ -107,12 +106,6 @@ public class PocConsensusServiceImpl implements PocConsensusService {
     @Override
     public BaseNulsData getAndRemoveOfMemoryTxs(String hash) {
         return mainControlScheduler.getTxMemoryPool().getAndRemove(hash);
-    }
-
-    @Override
-    public List<Agent> getAgentList() {
-        //TODO
-        return null;
     }
 
     @Override

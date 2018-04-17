@@ -24,24 +24,18 @@
 package io.nuls.protocol.base.manager;
 
 import io.nuls.core.chain.entity.Block;
-import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.thread.manager.NulsThreadFactory;
-import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.protocol.base.constant.PocConsensusConstant;
 import io.nuls.protocol.base.entity.genesis.GenesisBlock;
 import io.nuls.protocol.base.service.impl.BlockStorageService;
-import io.nuls.protocol.base.thread.SystemMonitorThread;
-import io.nuls.protocol.intf.DownloadService;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author Niels

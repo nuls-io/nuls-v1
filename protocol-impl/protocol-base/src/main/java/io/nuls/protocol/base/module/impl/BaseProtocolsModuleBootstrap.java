@@ -32,7 +32,6 @@ import io.nuls.core.thread.BaseThread;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.service.intf.EventBusService;
-import io.nuls.ledger.event.TransactionEvent;
 import io.nuls.protocol.base.download.DownloadServiceImpl;
 import io.nuls.protocol.base.entity.tx.*;
 import io.nuls.protocol.base.entity.validator.PocBlockValidatorManager;

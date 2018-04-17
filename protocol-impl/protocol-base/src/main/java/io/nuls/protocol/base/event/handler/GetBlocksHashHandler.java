@@ -28,7 +28,6 @@ import io.nuls.protocol.base.entity.BlockHashResponse;
 import io.nuls.protocol.entity.NotFound;
 import io.nuls.protocol.base.event.GetBlocksHashRequest;
 import io.nuls.protocol.event.NotFoundEvent;
-import io.nuls.protocol.intf.BlockService;
 import io.nuls.protocol.base.event.BlocksHashEvent;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.NulsDigestData;

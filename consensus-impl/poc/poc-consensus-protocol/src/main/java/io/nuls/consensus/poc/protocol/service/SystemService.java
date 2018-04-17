@@ -21,16 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.consensus.poc.constant;
+
+package io.nuls.consensus.poc.protocol.service;
 
 /**
- * @author Niels
+ * Created by ln on 2018/4/11.
  */
-public interface ConsensusConstant {
+public interface SystemService {
 
     /**
-     * unit:second
+     * 重置系统，包括重置网络、同步、共识
+     * Reset the system, including resetting the network, synchronization, consensus
+     * @param reason
+     * @return boolean
      */
-    int BLOCK_TIME_INTERVAL_SECOND = 10;
-
+    boolean resetSystem(String reason);
 }

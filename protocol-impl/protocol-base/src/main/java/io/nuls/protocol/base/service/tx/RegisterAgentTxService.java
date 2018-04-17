@@ -29,7 +29,6 @@ import io.nuls.protocol.base.entity.member.Agent;
 import io.nuls.protocol.entity.Consensus;
 import io.nuls.protocol.base.entity.tx.RegisterAgentTransaction;
 import io.nuls.protocol.base.event.notice.RegisterAgentNotice;
-import io.nuls.protocol.base.utils.ConsensusTool;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.tx.serivce.TransactionService;
 import io.nuls.db.dao.AgentDataService;

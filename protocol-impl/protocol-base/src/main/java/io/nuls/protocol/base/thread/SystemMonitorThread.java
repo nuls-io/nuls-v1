@@ -23,7 +23,6 @@
  */
 package io.nuls.protocol.base.thread;
 
-import io.nuls.protocol.intf.SystemService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.context.NulsContext;
@@ -32,9 +31,7 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.network.entity.Node;
 import io.nuls.network.service.NetworkService;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * @author Niels

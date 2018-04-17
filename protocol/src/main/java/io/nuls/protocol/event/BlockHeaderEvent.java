@@ -21,34 +21,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.protocol.utils;
+package io.nuls.protocol.event;
 
-import io.nuls.core.chain.entity.Transaction;
-
-import java.util.Comparator;
+import io.nuls.core.chain.entity.Block;
+import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.core.event.NoticeData;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.protocol.constant.ProtocolEventType;
 
 /**
  * @author Niels
- * @date 2017/12/26
+ * @date 2017/11/13
  */
-public class TxTimeComparator implements Comparator<Transaction> {
-
-    private static  final TxTimeComparator INSTANCE = new TxTimeComparator();
-    private TxTimeComparator(){}
-    public static TxTimeComparator getInstance(){
-        return INSTANCE;
+public class BlockHeaderEvent extends BaseProtocolEvent<BlockHeader> {
+    public BlockHeaderEvent() {
+        super(ProtocolEventType.BLOCK_HEADER);
     }
 
     @Override
-    public int compare(Transaction o1, Transaction o2) {
-//        long key = o1.size() - o2.size();
-        long key = o1.getTime() - o2.getTime();
-        int val = 0;
-        if (key > 0) {
-            return 1;
-        } else if (key < 0) {
-            return -1;
+    protected BlockHeader parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new BlockHeader());
+    }
+
+    @Override
+    public NoticeData getNotice() {
+        if (this.getEventBody() == null) {
+            return null;
         }
-        return val;
+        NoticeData data = new NoticeData();
+        data.setData(this.getEventBody().getHeight());
+        return data;
     }
 }

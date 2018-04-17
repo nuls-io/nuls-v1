@@ -21,21 +21,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package io.nuls.protocol.utils;
 
-package io.nuls.protocol.intf;
+import io.nuls.core.chain.entity.Block;
 
-import io.nuls.protocol.constant.DownloadStatus;
+import java.util.Comparator;
 
 /**
- * Created by ln on 2018/4/8.
+ * @author Niels
+ * @date 2017/12/26
  */
-public interface DownloadService {
+public class BlockHeightComparatorBak implements Comparator<Block> {
 
-    boolean start();
+    private static final BlockHeightComparatorBak INSTANCE = new BlockHeightComparatorBak();
 
-    boolean stop();
+    private BlockHeightComparatorBak() {
+    }
 
-    boolean reset();
+    public static BlockHeightComparatorBak getInstance() {
+        return INSTANCE;
+    }
 
-    DownloadStatus getStatus();
+    @Override
+    public int compare(Block o1, Block o2) {
+        if (o1 == null || o1.getHeader() == null) {
+            return 1;
+        } else if (o2 == null || o2.getHeader() == null) {
+            return -1;
+        }
+        long key = o1.getHeader().getHeight() - o2.getHeader().getHeight();
+        int val = 0;
+        if (key > 0) {
+            return 1;
+        } else if (key < 0) {
+            return -1;
+        }
+        return val;
+    }
 }

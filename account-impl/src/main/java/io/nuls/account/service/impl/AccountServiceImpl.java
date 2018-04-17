@@ -67,7 +67,6 @@ import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.params.OperationType;
-import io.nuls.ledger.event.TransactionEvent;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.ledger.util.UtxoTransferTool;
 

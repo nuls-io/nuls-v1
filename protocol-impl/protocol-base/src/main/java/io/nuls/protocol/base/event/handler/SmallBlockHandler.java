@@ -37,12 +37,10 @@ import io.nuls.network.service.NetworkService;
 import io.nuls.poc.service.intf.ConsensusService;
 import io.nuls.protocol.base.constant.PocConsensusConstant;
 import io.nuls.protocol.base.event.notice.AssembledBlockNotice;
-import io.nuls.protocol.base.utils.ConsensusTool;
 import io.nuls.protocol.constant.DownloadStatus;
 import io.nuls.protocol.entity.GetTxGroupParam;
 import io.nuls.protocol.event.GetTxGroupRequest;
 import io.nuls.protocol.event.SmallBlockEvent;
-import io.nuls.protocol.intf.DownloadService;
 
 import java.util.ArrayList;
 import java.util.HashMap;

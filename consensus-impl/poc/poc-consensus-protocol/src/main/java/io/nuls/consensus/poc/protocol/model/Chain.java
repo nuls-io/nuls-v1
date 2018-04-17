@@ -22,18 +22,14 @@
  * SOFTWARE.
  */
 
-package io.nuls.consensus.poc.model;
+package io.nuls.consensus.poc.protocol.model;
 
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.entity.PunishLogPo;
-import io.nuls.protocol.base.entity.YellowPunishData;
-import io.nuls.protocol.base.entity.member.Agent;
-import io.nuls.protocol.base.entity.member.Deposit;
 import io.nuls.protocol.entity.Consensus;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 

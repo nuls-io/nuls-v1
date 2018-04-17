@@ -24,7 +24,6 @@
 package io.nuls.protocol.base.entity.tx;
 
 import io.nuls.protocol.entity.Consensus;
-import io.nuls.protocol.base.entity.ConsensusAgentImpl;
 import io.nuls.protocol.base.entity.member.Agent;
 import io.nuls.protocol.base.entity.validator.tx.AccountCreditValidator;
 import io.nuls.protocol.base.entity.validator.tx.AgentCountValidator;

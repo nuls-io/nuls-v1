@@ -25,11 +25,10 @@ package io.nuls.protocol.base.event.handler;
 
 import io.nuls.protocol.constant.NotFoundType;
 import io.nuls.protocol.entity.NotFound;
-import io.nuls.protocol.entity.GetBlockParam;
+import io.nuls.protocol.entity.GetBlockDataParam;
 import io.nuls.protocol.event.BlockEvent;
 import io.nuls.protocol.event.GetBlockRequest;
 import io.nuls.protocol.event.NotFoundEvent;
-import io.nuls.protocol.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.context.NulsContext;
@@ -51,7 +50,7 @@ public class GetBlockHandler extends AbstractEventHandler<GetBlockRequest> {
 
     @Override
     public void onEvent(GetBlockRequest event, String fromId) throws NulsException {
-        GetBlockParam param = event.getEventBody();
+        GetBlockDataParam param = event.getEventBody();
         if (param.getSize() > MAX_SIZE) {
             return;
         }

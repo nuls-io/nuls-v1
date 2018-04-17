@@ -21,14 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.consensus.poc.protocol.service;
 
-import io.nuls.poc.service.intf.ConsensusService;
+package io.nuls.consensus.poc.protocol.model;
+
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.protocol.entity.Consensus;
 
 /**
  * @author Niels
- * @date 2017/11/7
+ * @date 2018/3/12
  */
-public interface PocConsensusService extends ConsensusService {
+public class ConsensusDepositImpl extends Consensus<Deposit> {
 
+    @Override
+    protected Deposit parseExtend(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new Deposit());
+    }
 }

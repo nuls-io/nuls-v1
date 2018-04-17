@@ -1,18 +1,18 @@
-/*
+/**
  * MIT License
- *
+ * *
  * Copyright (c) 2017-2018 nuls.io
- *
+ * *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,19 +21,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package io.nuls.protocol.event;
 
-package io.nuls.protocol.intf;
+import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.chain.manager.TransactionManager;
+import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.event.NoticeData;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.protocol.constant.ProtocolEventType;
 
 /**
- * Created by ln on 2018/4/11.
+ * @author Niels
+ * @date 2017/11/8
  */
-public interface SystemService {
+public class TransactionEvent extends BaseProtocolEvent<Transaction> {
 
-    /**
-     * 重置系统，包括重置网络、同步、共识
-     * Reset the system, including resetting the network, synchronization, consensus
-     * @param reason
-     * @return boolean
-     */
-    boolean resetSystem(String reason);
+    public TransactionEvent() {
+        super(ProtocolEventType.NEW_TX_EVENT);
+    }
+
+    @Override
+    protected Transaction parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
+        try {
+            return TransactionManager.getInstance(byteBuffer);
+        } catch (Exception e) {
+            throw new NulsException(e);
+        }
+    }
+
+    @Override
+    public NoticeData getNotice() {
+        NoticeData data = new NoticeData();
+        data.setMessage(ErrorCode.NEW_TX_RECIEVED);
+        data.setData(this.getEventBody().getHash().getDigestHex());
+        return data;
+    }
+
 }

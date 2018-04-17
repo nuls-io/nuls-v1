@@ -42,7 +42,6 @@ import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.protocol.base.entity.block.BlockRoundData;
-import io.nuls.protocol.intf.BlockService;
 import io.nuls.protocol.utils.BlockHeightComparator;
 
 import java.io.IOException;

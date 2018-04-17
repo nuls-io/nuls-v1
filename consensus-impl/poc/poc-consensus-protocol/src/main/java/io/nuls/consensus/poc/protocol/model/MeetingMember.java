@@ -21,14 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.consensus.poc.model;
+package io.nuls.consensus.poc.protocol.model;
 
 import io.nuls.account.entity.Address;
-import io.nuls.consensus.poc.constant.ConsensusConstant;
 import io.nuls.core.chain.entity.Na;
 import io.nuls.core.crypto.Sha256Hash;
-import io.nuls.protocol.base.entity.member.Agent;
-import io.nuls.protocol.base.entity.member.Deposit;
+import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.entity.Consensus;
 
 import java.util.ArrayList;
@@ -130,12 +128,12 @@ public class MeetingMember implements Comparable<MeetingMember> {
     }
 
     public long getPackStartTime() {
-        long packTime = ConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000 * (this.getPackingIndexOfRound() - 1) + roundStartTime;
+        long packTime = ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND * 1000 * (this.getPackingIndexOfRound() - 1) + roundStartTime;
         return packTime;
     }
 
     public long getPackEndTime() {
-        long packTime = ConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000 * this.getPackingIndexOfRound() + roundStartTime;
+        long packTime = ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND * 1000 * this.getPackingIndexOfRound() + roundStartTime;
         return packTime;
     }
 

@@ -23,7 +23,6 @@
  */
 package io.nuls.protocol.base.entity.tx;
 
-import io.nuls.protocol.base.entity.ConsensusDepositImpl;
 import io.nuls.protocol.base.entity.validator.tx.AgentExistValidator;
 import io.nuls.protocol.entity.Consensus;
 import io.nuls.protocol.base.entity.member.Deposit;

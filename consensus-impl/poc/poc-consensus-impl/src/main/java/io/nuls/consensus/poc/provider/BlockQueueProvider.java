@@ -30,9 +30,7 @@ import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.queue.service.impl.QueueService;
-import io.nuls.poc.constant.ConsensusStatus;
 import io.nuls.protocol.constant.DownloadStatus;
-import io.nuls.protocol.intf.DownloadService;
 
 /**
  * Created by ln on 2018/4/13.

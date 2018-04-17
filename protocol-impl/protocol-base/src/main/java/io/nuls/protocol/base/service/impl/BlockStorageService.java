@@ -23,10 +23,8 @@
  */
 package io.nuls.protocol.base.service.impl;
 
-import io.nuls.protocol.base.utils.ConsensusTool;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
-import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
@@ -38,7 +36,6 @@ import io.nuls.db.dao.BlockHeaderService;
 import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.ledger.service.intf.LedgerService;
 
-import javax.xml.ws.EndpointReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

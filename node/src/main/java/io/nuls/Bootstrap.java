@@ -24,8 +24,6 @@
 package io.nuls;
 
 import io.nuls.poc.service.intf.ConsensusService;
-import io.nuls.protocol.intf.BlockService;
-import io.nuls.protocol.intf.DownloadService;
 import io.nuls.core.MicroKernelBootstrap;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.context.NulsContext;

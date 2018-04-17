@@ -40,7 +40,6 @@ import io.nuls.protocol.base.entity.member.Agent;
 import io.nuls.protocol.base.entity.member.Deposit;
 import io.nuls.protocol.base.entity.tx.RegisterAgentTransaction;
 import io.nuls.protocol.base.entity.tx.StopAgentTransaction;
-import io.nuls.protocol.base.utils.ConsensusTool;
 import io.nuls.protocol.entity.Consensus;
 
 import java.util.HashMap;

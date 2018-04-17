@@ -26,23 +26,18 @@ package io.nuls.consensus.poc.container;
 
 import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
-import io.nuls.consensus.poc.constant.ConsensusConstant;
 import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
 import io.nuls.consensus.poc.utils.ConsensusTool;
 import io.nuls.core.chain.entity.*;
-import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.context.NulsContext;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.calc.DoubleUtils;
 import io.nuls.core.utils.date.TimeService;
-import io.nuls.core.utils.log.BlockLog;
 import io.nuls.core.utils.log.ConsensusLog;
 import io.nuls.core.utils.log.Log;
-import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.entity.PunishLogPo;
 import io.nuls.ledger.entity.tx.CoinBaseTransaction;
 import io.nuls.ledger.service.intf.LedgerService;
@@ -52,14 +47,12 @@ import io.nuls.protocol.base.constant.PunishType;
 import io.nuls.protocol.base.entity.RedPunishData;
 import io.nuls.protocol.base.entity.YellowPunishData;
 import io.nuls.protocol.base.entity.block.BlockRoundData;
-import io.nuls.protocol.base.entity.meeting.PocMeetingMember;
 import io.nuls.protocol.base.entity.member.Agent;
 import io.nuls.protocol.base.entity.member.Deposit;
 import io.nuls.protocol.base.entity.tx.*;
 import io.nuls.protocol.base.manager.ConsensusManager;
 import io.nuls.protocol.entity.Consensus;
 
-import java.io.IOException;
 import java.util.*;
 
 /**

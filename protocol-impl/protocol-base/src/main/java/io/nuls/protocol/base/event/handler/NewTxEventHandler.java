@@ -34,7 +34,6 @@ import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.entity.NodePo;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
-import io.nuls.ledger.event.TransactionEvent;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.network.service.NetworkService;
 

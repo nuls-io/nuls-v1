@@ -31,7 +31,6 @@ import io.nuls.network.service.NetworkService;
 import io.nuls.poc.service.intf.ConsensusService;
 import io.nuls.protocol.base.cache.manager.block.TemporaryCacheManager;
 import io.nuls.protocol.base.event.notice.AssembledBlockNotice;
-import io.nuls.protocol.base.utils.ConsensusTool;
 import io.nuls.protocol.entity.GetTxGroupParam;
 import io.nuls.protocol.entity.TxGroup;
 import io.nuls.protocol.event.GetTxGroupRequest;

@@ -21,41 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.protocol.intf;
 
-import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.dto.Page;
-import io.nuls.core.exception.NulsException;
+package io.nuls.consensus.poc.protocol.service;
 
-import java.io.IOException;
-import java.util.Map;
+import io.nuls.protocol.constant.DownloadStatus;
 
 /**
- * @author Niels
- * @date 2017/11/7
+ * Created by ln on 2018/4/8.
  */
-public interface ConsensusService {
+public interface DownloadService {
 
-    Transaction startConsensus(String agentAddress, String password, Map<String, Object> paramsMap) throws NulsException;
+    boolean start();
 
-    Transaction stopConsensus(String address, String password, Map<String, Object> paramsMap) throws NulsException, IOException;
+    boolean stop();
 
-    Map<String, Object> getConsensusInfo();
+    boolean reset();
 
-    Map<String, Object> getConsensusInfo(String address);
-
-    /**
-     * for client Customized
-     * @param keyword
-     * @param sortType
-     * @param pageNumber
-     * @param pageSize
-     * @return
-     */
-
-    Page<Map<String,Object>> getAgentList(String keyword, String address,String agentAddress, String sortType, Integer pageNumber, Integer pageSize);
-
-    Page<Map<String,Object>> getDepositList(String address, String agentAddress, Integer pageNumber, Integer pageSize);
-
-    Map<String,Object> getAgent(String agentAddress);
+    DownloadStatus getStatus();
 }

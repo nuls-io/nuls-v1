@@ -21,22 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.protocol.base.constant;
+package io.nuls.consensus.poc.protocol.constant;
 
 /**
  * @author Niels
- * @date 2018/1/9
+ * @date 2017/12/1
  */
-public interface ConsensusCacheConstant {
+public interface ConsensusEventType {
 
-
-    /**
-     * 5 minutes alive
-     */
-    int LIVE_TIME = 180;
-
-    String NEW_BLOCK_CACHE_NAME = "new-block-cache";
-    String BLOCK_HEADER_CACHE_NAME = "block-header-cache";
-    String SMALL_BLOCK_CACHE_NAME = "small-block-cache";
-    String BLOCK_TXS_CACHE_NAME = "block-txs-cache";
 }

@@ -25,7 +25,6 @@ package io.nuls.protocol.base.entity.validator.block;
 
 import io.nuls.protocol.base.constant.PocConsensusConstant;
 import io.nuls.protocol.base.entity.block.BlockRoundData;
-import io.nuls.protocol.intf.BlockService;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.constant.ErrorCode;

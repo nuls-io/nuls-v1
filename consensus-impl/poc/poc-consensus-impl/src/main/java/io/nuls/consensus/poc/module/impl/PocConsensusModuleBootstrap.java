@@ -36,7 +36,6 @@ import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.ledger.service.intf.LedgerService;
-import io.nuls.protocol.intf.BlockService;
 
 import java.util.List;
 

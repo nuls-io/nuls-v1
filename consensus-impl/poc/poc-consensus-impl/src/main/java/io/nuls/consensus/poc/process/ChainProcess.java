@@ -35,7 +35,6 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.poc.constant.ConsensusStatus;
 import io.nuls.poc.service.intf.ConsensusService;
-import io.nuls.protocol.intf.BlockService;
 
 import java.io.IOException;
 import java.util.ArrayList;

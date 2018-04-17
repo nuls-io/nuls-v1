@@ -36,14 +36,14 @@ import java.io.IOException;
  * @author Niels
  * @date 2017/12/18
  */
-public class GetBlockParam extends BaseNulsData {
+public class GetBlockDataParam extends BaseNulsData {
 
     private NulsDigestData startHash;
     private NulsDigestData endHash;
     private long start;
     private long size;
 
-    public GetBlockParam() {
+    public GetBlockDataParam() {
     }
 
     @Override

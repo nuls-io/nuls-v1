@@ -33,6 +33,8 @@ import java.util.List;
  */
 public class ConsensusContext {
 
+    //todo impl
+
     private static ConsensusStatus consensusStatus;
 
     public static ConsensusStatus getConsensusStatus() {

@@ -28,7 +28,6 @@ import io.nuls.protocol.base.constant.PunishType;
 import io.nuls.protocol.base.entity.YellowPunishData;
 import io.nuls.protocol.base.entity.block.BlockRoundData;
 import io.nuls.protocol.base.entity.tx.YellowPunishTransaction;
-import io.nuls.protocol.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;

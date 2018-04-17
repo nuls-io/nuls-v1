@@ -24,14 +24,12 @@
 
 package io.nuls.consensus.poc.process;
 
-import com.sun.org.apache.regexp.internal.REUtil;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
-import io.nuls.ledger.event.TransactionEvent;
 
 /**
  * Created by ln on 2018/4/13.

@@ -27,7 +27,6 @@ package io.nuls.protocol.base.download;
 import io.nuls.core.utils.log.Log;
 import io.nuls.protocol.constant.DownloadStatus;
 import io.nuls.protocol.base.constant.PocConsensusConstant;
-import io.nuls.protocol.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;

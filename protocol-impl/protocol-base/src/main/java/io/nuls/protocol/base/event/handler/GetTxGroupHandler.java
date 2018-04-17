@@ -27,7 +27,6 @@ import io.nuls.protocol.entity.GetTxGroupParam;
 import io.nuls.protocol.entity.TxGroup;
 import io.nuls.protocol.event.GetTxGroupRequest;
 import io.nuls.protocol.event.TxGroupEvent;
-import io.nuls.protocol.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.chain.entity.Transaction;

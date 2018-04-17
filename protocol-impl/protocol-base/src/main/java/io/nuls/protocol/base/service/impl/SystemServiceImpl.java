@@ -25,8 +25,6 @@
 package io.nuls.protocol.base.service.impl;
 
 import io.nuls.poc.service.intf.ConsensusService;
-import io.nuls.protocol.intf.DownloadService;
-import io.nuls.protocol.intf.SystemService;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.service.NetworkService;

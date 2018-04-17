@@ -23,7 +23,7 @@
  */
 package io.nuls.protocol.event;
 
-import io.nuls.protocol.constant.ConsensusEventType;
+import io.nuls.protocol.constant.ProtocolEventType;
 import io.nuls.protocol.entity.TxGroup;
 import io.nuls.core.event.NoticeData;
 import io.nuls.core.exception.NulsException;
@@ -33,10 +33,10 @@ import io.nuls.core.utils.io.NulsByteBuffer;
  * @author Niels
  * @date 2017/11/13
  */
-public class TxGroupEvent extends BaseConsensusEvent<TxGroup> {
+public class TxGroupEvent extends BaseProtocolEvent<TxGroup> {
 
     public TxGroupEvent() {
-        super(ConsensusEventType.TX_GROUP);
+        super(ProtocolEventType.TX_GROUP);
     }
 
     @Override

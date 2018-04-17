@@ -23,16 +23,11 @@
  */
 package io.nuls.protocol.base.entity.validator.tx;
 
-import io.nuls.protocol.entity.Consensus;
-import io.nuls.protocol.base.entity.member.Agent;
 import io.nuls.protocol.base.entity.tx.PocJoinConsensusTransaction;
-import io.nuls.protocol.base.utils.ConsensusTool;
-import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.context.NulsContext;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.dao.AgentDataService;
-import io.nuls.db.entity.AgentPo;
 
 /**
  * @author Niels

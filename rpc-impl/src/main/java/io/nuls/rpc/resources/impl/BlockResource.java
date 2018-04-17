@@ -24,7 +24,6 @@
 package io.nuls.rpc.resources.impl;
 
 import io.nuls.account.entity.Address;
-import io.nuls.protocol.intf.BlockService;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.Transaction;

@@ -2,17 +2,17 @@
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
- *  
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *  
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *  
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.consensus.poc.model;
+package io.nuls.consensus.poc.protocol.model;
 
 import io.nuls.account.entity.Account;
-import io.nuls.consensus.poc.constant.ConsensusConstant;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.date.TimeService;
+import io.nuls.protocol.constant.ProtocolConstant;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -65,7 +65,7 @@ public class MeetingRound {
     }
 
     public long getEndTime() {
-        return startTime + memberCount * ConsensusConstant.BLOCK_TIME_INTERVAL_SECOND * 1000L;
+        return startTime + memberCount * ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND * 1000L;
     }
 
     public int getMemberCount() {
@@ -83,7 +83,7 @@ public class MeetingRound {
         if (null == memberList || memberList.isEmpty()) {
             throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "consensus member list is empty");
         }
-        return this.memberList.get(order-1);
+        return this.memberList.get(order - 1);
     }
 
     public void setMemberList(List<MeetingMember> memberList) {
@@ -98,7 +98,7 @@ public class MeetingRound {
             pmm.setRoundIndex(this.getIndex());
             pmm.setRoundStartTime(this.getStartTime());
             pmm.setPackingIndexOfRound(i + 1);
-            addressOrderMap.put(pmm.getPackingAddress(), i+1);
+            addressOrderMap.put(pmm.getPackingAddress(), i + 1);
         }
     }
 
@@ -152,13 +152,13 @@ public class MeetingRound {
         }
     }
 
-    public String toString(){
+    public String toString() {
         StringBuilder str = new StringBuilder();
         for (MeetingMember member : this.getMemberList()) {
             str.append(member.getPackingAddress());
             str.append(" ,order:" + member.getPackingIndexOfRound());
             str.append(",packTime:" + new Date(member.getPackEndTime()));
-            str.append(",creditVal:"+member.getRealCreditVal());
+            str.append(",creditVal:" + member.getRealCreditVal());
             str.append("\n");
         }
         if (null == this.getPreRound()) {

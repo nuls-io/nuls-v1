@@ -21,14 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.consensus.poc.protocol.service;
+package io.nuls.protocol.utils;
 
-import io.nuls.poc.service.intf.ConsensusService;
+import io.nuls.core.chain.entity.Transaction;
+
+import java.util.Comparator;
 
 /**
  * @author Niels
- * @date 2017/11/7
+ * @date 2017/12/26
  */
-public interface PocConsensusService extends ConsensusService {
+public class TxTimeComparatorBak implements Comparator<Transaction> {
 
+    private static  final TxTimeComparatorBak INSTANCE = new TxTimeComparatorBak();
+    private TxTimeComparatorBak(){}
+    public static TxTimeComparatorBak getInstance(){
+        return INSTANCE;
+    }
+
+    @Override
+    public int compare(Transaction o1, Transaction o2) {
+//        long key = o1.size() - o2.size();
+        long key = o1.getTime() - o2.getTime();
+        int val = 0;
+        if (key > 0) {
+            return 1;
+        } else if (key < 0) {
+            return -1;
+        }
+        return val;
+    }
 }

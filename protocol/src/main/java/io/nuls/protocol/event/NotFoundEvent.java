@@ -24,8 +24,8 @@
 
 package io.nuls.protocol.event;
 
+import io.nuls.protocol.constant.ProtocolEventType;
 import io.nuls.protocol.entity.NotFound;
-import io.nuls.protocol.constant.ConsensusEventType;
 import io.nuls.core.event.NoticeData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
@@ -34,9 +34,9 @@ import io.nuls.core.utils.io.NulsByteBuffer;
  * @author: Niels Wang
  * @date: 2018/4/9
  */
-public class NotFoundEvent extends BaseConsensusEvent<NotFound> {
+public class NotFoundEvent extends BaseProtocolEvent<NotFound> {
     public NotFoundEvent() {
-        super(ConsensusEventType.NOT_FOUND_HASH);
+        super(ProtocolEventType.NOT_FOUND_EVENT);
     }
 
     @Override

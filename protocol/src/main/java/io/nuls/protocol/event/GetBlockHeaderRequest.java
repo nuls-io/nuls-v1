@@ -23,12 +23,12 @@
  */
 package io.nuls.protocol.event;
 
-import io.nuls.protocol.constant.ProtocolEventType;
-import io.nuls.protocol.entity.GetBlockDataParam;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.event.NoticeData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.protocol.constant.ProtocolEventType;
+import io.nuls.protocol.entity.GetBlockDataParam;
 
 /**
  * get block by height.
@@ -36,13 +36,13 @@ import io.nuls.core.utils.io.NulsByteBuffer;
  * @author Niels
  * @date 2017/11/13
  */
-public class GetBlockRequest extends BaseProtocolEvent<GetBlockDataParam> {
+public class GetBlockHeaderRequest extends BaseProtocolEvent<GetBlockDataParam> {
 
-    public GetBlockRequest() {
-        super(ProtocolEventType.GET_BLOCK);
+    public GetBlockHeaderRequest() {
+        super(ProtocolEventType.GET_BLOCK_HEADER);
     }
 
-    public GetBlockRequest(long start, long size) {
+    public GetBlockHeaderRequest(long start, long size) {
         this();
         GetBlockDataParam param = new GetBlockDataParam();
         param.setSize(size);
@@ -50,7 +50,7 @@ public class GetBlockRequest extends BaseProtocolEvent<GetBlockDataParam> {
         this.setEventBody(param);
     }
 
-    public GetBlockRequest(long start, long size, NulsDigestData startHash, NulsDigestData endHash) {
+    public GetBlockHeaderRequest(long start, long size, NulsDigestData startHash, NulsDigestData endHash) {
         this();
         GetBlockDataParam param = new GetBlockDataParam();
         param.setSize(size);
