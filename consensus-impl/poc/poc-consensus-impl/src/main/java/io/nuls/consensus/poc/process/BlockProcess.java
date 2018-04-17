@@ -124,7 +124,7 @@ public class BlockProcess {
         BlockHeader blockHeader = chainContainer.getChain().getEndBlockHeader();
 
         NulsDigestData preHash = block.getHeader().getPreHash();
-        if(blockHeader.getHash().equals(preHash)) {
+        if(blockHeader.getHash().equals(preHash) && !inForkChain) {
             chainContainer.getChain().setEndBlockHeader(block.getHeader());
             chainContainer.getChain().getBlockHeaderList().add(block.getHeader());
             chainContainer.getChain().getBlockList().add(block);

@@ -261,7 +261,7 @@ public class ChainProcess {
             Chain chain = forkChain.getChain();
 
             if(startBlockHeader.getHeight() > chain.getEndBlockHeader().getHeight() + 1 || startBlockHeader.getHeight() <= chain.getEndBlockHeader().getHeight()) {
-                break;
+                continue;
             }
 
             blockHeaderList = chain.getBlockHeaderList();
