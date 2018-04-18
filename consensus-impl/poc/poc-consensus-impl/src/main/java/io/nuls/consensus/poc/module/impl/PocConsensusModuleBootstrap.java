@@ -28,7 +28,9 @@ import io.nuls.consensus.poc.module.AbstractPocConsensusModule;
 import io.nuls.consensus.poc.protocol.context.ConsensusContext;
 import io.nuls.consensus.poc.protocol.event.notice.*;
 import io.nuls.consensus.poc.protocol.service.BlockService;
+import io.nuls.consensus.poc.protocol.tx.*;
 import io.nuls.consensus.poc.service.impl.PocConsensusServiceImpl;
+import io.nuls.consensus.poc.service.impl.tx.*;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.constant.NulsConstant;
@@ -39,11 +41,14 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.service.intf.EventBusService;
 import io.nuls.ledger.service.intf.LedgerService;
+import io.nuls.protocol.constant.TransactionConstant;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.event.*;
 import io.nuls.protocol.event.manager.EventManager;
 import io.nuls.protocol.model.Block;
 import io.nuls.protocol.model.Transaction;
+import io.nuls.protocol.service.intf.TransactionService;
+import io.nuls.protocol.utils.TransactionManager;
 
 import java.util.List;
 
@@ -64,10 +69,21 @@ public class PocConsensusModuleBootstrap extends AbstractPocConsensusModule {
         EventManager.putEvent(RegisterAgentNotice.class);
         EventManager.putEvent(StopConsensusNotice.class);
 
+        this.registerTransaction(TransactionConstant.TX_TYPE_REGISTER_AGENT, RegisterAgentTransaction.class, RegisterAgentTxService.class);
+        this.registerTransaction(TransactionConstant.TX_TYPE_RED_PUNISH, RedPunishTransaction.class, RedPunishTxService.class);
+        this.registerTransaction(TransactionConstant.TX_TYPE_YELLOW_PUNISH, YellowPunishTransaction.class, YellowPunishTxService.class);
+        this.registerTransaction(TransactionConstant.TX_TYPE_JOIN_CONSENSUS, PocJoinConsensusTransaction.class,JoinConsensusTxService.class);
+        this.registerTransaction(TransactionConstant.TX_TYPE_STOP_AGENT, StopAgentTransaction.class,StopAgentTxService.class);
+        this.registerTransaction(TransactionConstant.TX_TYPE_CANCEL_DEPOSIT, CancelDepositTransaction.class,CancelDepositTxService.class);
+
         this.waitForDependencyInited(NulsConstant.MODULE_ID_PROTOCOL);
         this.registerService(PocConsensusServiceImpl.class);
     }
 
+    protected final void registerTransaction(int txType, Class<? extends Transaction> txClass, Class<? extends TransactionService> txServiceClass) {
+        this.registerService(txServiceClass);
+        TransactionManager.putTx(txType, txClass, txServiceClass);
+    }
     @Override
     public void start() {
         try {
