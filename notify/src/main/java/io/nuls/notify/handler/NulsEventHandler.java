@@ -25,7 +25,7 @@
 
 package io.nuls.notify.handler;
 
-import io.nuls.core.event.BaseEvent;
+import io.nuls.protocol.event.base.BaseEvent;
 import io.nuls.core.utils.json.JSONUtils;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.handler.AbstractEventHandler;

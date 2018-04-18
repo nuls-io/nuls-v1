@@ -24,8 +24,8 @@
 
 package io.nuls.protocol.base.download;
 
+import io.nuls.consensus.poc.protocol.service.DownloadService;
 import io.nuls.protocol.constant.DownloadStatus;
-import io.nuls.protocol.intf.DownloadService;
 
 /**
  * Created by ln on 2018/4/8.

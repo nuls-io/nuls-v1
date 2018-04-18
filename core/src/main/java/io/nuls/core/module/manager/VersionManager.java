@@ -1,17 +1,24 @@
 package io.nuls.core.module.manager;
 
-import io.nuls.core.chain.intf.NulsVersion;
+import io.nuls.core.cfg.NulsConfig;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.intf.NulsVersion;
 import io.nuls.core.utils.io.HttpDownloadUtils;
 import io.nuls.core.utils.json.JSONUtils;
 import io.nuls.core.utils.log.Log;
+import io.nuls.core.utils.spring.lite.core.SpringLiteContext;
 import io.nuls.core.utils.str.VersionUtils;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author: Niels Wang
@@ -31,7 +38,13 @@ public class VersionManager {
             //devlopment
             return;
         }
-        List<NulsVersion> versionList = NulsContext.getServiceBeanList(NulsVersion.class);
+        List<NulsVersion> versionList = null;
+        try {
+            versionList = SpringLiteContext.getBeanList(NulsVersion.class);
+        } catch (Exception e) {
+            Log.error(e);
+            throw new NulsException(e);
+        }
         String localVersion = null;
         for (NulsVersion version : versionList) {
             if (null == localVersion) {
@@ -43,10 +56,10 @@ public class VersionManager {
                 continue;
             }
         }
-        NulsContext.VERSION = localVersion;
+        NulsConfig.VERSION = localVersion;
         String jsonStr = null;
         try {
-            jsonStr = new String(HttpDownloadUtils.download(HIGHEST_VERDION_FILE_URL), NulsContext.DEFAULT_ENCODING);
+            jsonStr = new String(HttpDownloadUtils.download(HIGHEST_VERDION_FILE_URL), NulsConfig.DEFAULT_ENCODING);
         } catch (IOException e) {
             Log.error(e);
             return;
@@ -61,7 +74,7 @@ public class VersionManager {
         String version = (String) map.get("version");
         String sign = (String) map.get("sign");
         //todo 验证签名
-        NulsContext.NEWEST_VERSION = version;
+        NulsConfig.NEWEST_VERSION = version;
         //todo 自动更新开关
         boolean autoUpdate = true;
         if (VersionUtils.equalsWith(version, localVersion)) {
@@ -78,7 +91,7 @@ public class VersionManager {
     private static void updateFile(String oldVersion, String newVersion, List<NulsVersion> versionList, URL libsUrl) throws NulsException, IOException {
         String jsonStr = null;
         try {
-            jsonStr = new String(HttpDownloadUtils.download(VERDION_JSON_URL), NulsContext.DEFAULT_ENCODING);
+            jsonStr = new String(HttpDownloadUtils.download(VERDION_JSON_URL), NulsConfig.DEFAULT_ENCODING);
         } catch (IOException e) {
             Log.error(e);
             throw new NulsException(ErrorCode.FAILED, "Download version json faild!");

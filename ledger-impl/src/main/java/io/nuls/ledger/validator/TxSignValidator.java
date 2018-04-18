@@ -23,16 +23,15 @@
  */
 package io.nuls.ledger.validator;
 
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.script.P2PKHScript;
-import io.nuls.core.script.P2PKHScriptSig;
-import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
+import io.nuls.protocol.constant.TransactionConstant;
+import io.nuls.protocol.model.NulsDigestData;
+import io.nuls.protocol.model.Transaction;
+import io.nuls.protocol.script.P2PKHScriptSig;
+import io.nuls.protocol.utils.io.NulsByteBuffer;
 
 import java.util.Arrays;
 

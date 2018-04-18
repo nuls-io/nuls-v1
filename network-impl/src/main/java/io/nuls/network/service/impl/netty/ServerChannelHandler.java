@@ -5,16 +5,15 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.network.IpUtil;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Node;
-import io.nuls.network.message.entity.GetVersionEvent;
 import io.nuls.network.message.entity.HandshakeEvent;
 import io.nuls.network.service.NetworkService;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.model.Block;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;

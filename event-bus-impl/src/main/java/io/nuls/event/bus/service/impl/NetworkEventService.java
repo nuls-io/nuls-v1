@@ -23,14 +23,14 @@
  */
 package io.nuls.event.bus.service.impl;
 
-import io.nuls.core.event.BaseEvent;
-import io.nuls.core.event.EventManager;
+import io.nuls.protocol.event.base.BaseEvent;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.constant.EventBusConstant;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.event.bus.processor.manager.ProcessData;
 import io.nuls.event.bus.processor.manager.ProcessorManager;
+import io.nuls.protocol.event.manager.EventManager;
 
 /**
  * @author Niels

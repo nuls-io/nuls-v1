@@ -23,20 +23,32 @@
  */
 package io.nuls.consensus.poc.module.impl;
 
+import io.nuls.consensus.poc.handler.*;
 import io.nuls.consensus.poc.module.AbstractPocConsensusModule;
+import io.nuls.consensus.poc.protocol.context.ConsensusContext;
+import io.nuls.consensus.poc.protocol.event.notice.*;
+import io.nuls.consensus.poc.protocol.service.BlockService;
+import io.nuls.consensus.poc.protocol.tx.*;
 import io.nuls.consensus.poc.service.impl.PocConsensusServiceImpl;
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.Transaction;
+import io.nuls.consensus.poc.service.impl.tx.*;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.ModuleStatusEnum;
-import io.nuls.core.context.NulsContext;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.BaseThread;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
+import io.nuls.event.bus.service.intf.EventBusService;
 import io.nuls.ledger.service.intf.LedgerService;
-import io.nuls.protocol.intf.BlockService;
+import io.nuls.protocol.constant.TransactionConstant;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.event.*;
+import io.nuls.protocol.event.manager.EventManager;
+import io.nuls.protocol.model.Block;
+import io.nuls.protocol.model.Transaction;
+import io.nuls.protocol.service.intf.TransactionService;
+import io.nuls.protocol.utils.TransactionManager;
 
 import java.util.List;
 
@@ -46,52 +58,66 @@ import java.util.List;
  */
 public class PocConsensusModuleBootstrap extends AbstractPocConsensusModule {
 
+    private EventBusService eventBusService = NulsContext.getServiceBean(EventBusService.class);
+
     @Override
     public void init() {
-        this.registerService(PocConsensusServiceImpl.class);
+        EventManager.putEvent(AssembledBlockNotice.class);
+        EventManager.putEvent(CancelConsensusNotice.class);
+        EventManager.putEvent(EntrustConsensusNotice.class);
+        EventManager.putEvent(PackedBlockNotice.class);
+        EventManager.putEvent(RegisterAgentNotice.class);
+        EventManager.putEvent(StopConsensusNotice.class);
 
+        this.registerTransaction(TransactionConstant.TX_TYPE_REGISTER_AGENT, RegisterAgentTransaction.class, RegisterAgentTxService.class);
+        this.registerTransaction(TransactionConstant.TX_TYPE_RED_PUNISH, RedPunishTransaction.class, RedPunishTxService.class);
+        this.registerTransaction(TransactionConstant.TX_TYPE_YELLOW_PUNISH, YellowPunishTransaction.class, YellowPunishTxService.class);
+        this.registerTransaction(TransactionConstant.TX_TYPE_JOIN_CONSENSUS, PocJoinConsensusTransaction.class,JoinConsensusTxService.class);
+        this.registerTransaction(TransactionConstant.TX_TYPE_STOP_AGENT, StopAgentTransaction.class,StopAgentTxService.class);
+        this.registerTransaction(TransactionConstant.TX_TYPE_CANCEL_DEPOSIT, CancelDepositTransaction.class,CancelDepositTxService.class);
+
+        this.waitForDependencyInited(NulsConstant.MODULE_ID_PROTOCOL);
+        this.registerService(PocConsensusServiceImpl.class);
     }
 
+    protected final void registerTransaction(int txType, Class<? extends Transaction> txClass, Class<? extends TransactionService> txServiceClass) {
+        this.registerService(txServiceClass);
+        TransactionManager.putTx(txType, txClass, txServiceClass);
+    }
     @Override
     public void start() {
         try {
-            checkGenesisBlock();
+            NulsContext.getServiceBean(PocConsensusServiceImpl.class).startup();
         } catch (Exception e) {
             Log.error(e);
         }
 
-        try {
-            NulsContext.getServiceBean(PocConsensusServiceImpl.class).startup();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+        this.registerHandlers();
         Log.info("the POC consensus module is started!");
     }
 
-    public void checkGenesisBlock() throws Exception {
-        Block genesisBlock = NulsContext.getInstance().getGenesisBlock();
-        ValidateResult result = genesisBlock.verify();
-        if (result.isFailed()) {
-            throw new NulsRuntimeException(ErrorCode.DATA_ERROR, result.getMessage());
-        }
-        BlockService blockService = NulsContext.getServiceBean(BlockService.class);
-        LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
-        Block localGenesisBlock = blockService.getGengsisBlock();
-        if (null == localGenesisBlock) {
-            for (Transaction tx : genesisBlock.getTxs()) {
-                ledgerService.approvalTx(tx, genesisBlock);
-            }
-            blockService.saveBlock(genesisBlock);
-            return;
-        }
-        localGenesisBlock.verify();
-        String logicHash = genesisBlock.getHeader().getHash().getDigestHex();
-        String localHash = localGenesisBlock.getHeader().getHash().getDigestHex();
-        if (!logicHash.equals(localHash)) {
-            throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
-        }
+
+    private void registerHandlers() {
+
+
+        GetBlockHandler getBlockHandler = new GetBlockHandler();
+        eventBusService.subscribeEvent(GetBlockRequest.class, getBlockHandler);
+
+        GetTxGroupHandler getTxGroupHandler = new GetTxGroupHandler();
+        eventBusService.subscribeEvent(GetTxGroupRequest.class, getTxGroupHandler);
+
+        TxGroupHandler txGroupHandler = new TxGroupHandler();
+        eventBusService.subscribeEvent(TxGroupEvent.class, txGroupHandler);
+
+        NewTxEventHandler newTxEventHandler = NewTxEventHandler.getInstance();
+        eventBusService.subscribeEvent(TransactionEvent.class, newTxEventHandler);
+
+        SmallBlockHandler newBlockHandler = new SmallBlockHandler();
+        eventBusService.subscribeEvent(SmallBlockEvent.class, newBlockHandler);
     }
+
+
+
 
     @Override
     public void shutdown() {

@@ -23,8 +23,6 @@
  */
 package io.nuls.core.constant;
 
-import io.nuls.core.context.NulsContext;
-
 /**
  * SYSTEM CONSTANT
  *

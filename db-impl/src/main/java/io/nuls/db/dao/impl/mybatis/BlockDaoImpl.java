@@ -25,7 +25,6 @@ package io.nuls.db.dao.impl.mybatis;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.dto.Page;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.BlockHeaderService;
@@ -34,11 +33,9 @@ import io.nuls.db.dao.impl.mybatis.params.BlockSearchParams;
 import io.nuls.db.dao.impl.mybatis.util.SearchOperator;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import io.nuls.db.entity.BlockHeaderPo;
-import io.nuls.db.entity.TransactionPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.db.transactional.annotation.PROPAGATION;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

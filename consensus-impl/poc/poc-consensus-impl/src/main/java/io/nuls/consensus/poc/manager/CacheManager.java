@@ -25,18 +25,18 @@
 package io.nuls.consensus.poc.manager;
 
 import io.nuls.consensus.poc.cache.CacheLoader;
-import io.nuls.consensus.poc.container.ChainContainer;
-import io.nuls.consensus.poc.model.Chain;
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.consensus.poc.protocol.model.Agent;
+import io.nuls.consensus.poc.protocol.model.Chain;
+import io.nuls.consensus.poc.protocol.model.Deposit;
+import io.nuls.consensus.poc.protocol.model.container.ChainContainer;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.entity.PunishLogPo;
-import io.nuls.protocol.base.entity.member.Agent;
-import io.nuls.protocol.base.entity.member.Deposit;
-import io.nuls.protocol.entity.Consensus;
+import io.nuls.protocol.event.entity.Consensus;
+import io.nuls.protocol.model.Block;
+import io.nuls.protocol.model.BlockHeader;
 
 import java.util.List;
 

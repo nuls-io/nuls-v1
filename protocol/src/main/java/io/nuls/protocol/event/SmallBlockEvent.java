@@ -23,21 +23,21 @@
  */
 package io.nuls.protocol.event;
 
-import io.nuls.protocol.constant.ConsensusEventType;
-import io.nuls.core.chain.entity.SmallBlock;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.event.NoticeData;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
+import io.nuls.protocol.constant.ProtocolEventType;
+import io.nuls.protocol.event.base.NoticeData;
+import io.nuls.protocol.model.SmallBlock;
+import io.nuls.protocol.utils.io.NulsByteBuffer;
 
 /**
  * @author Niels
  * @date 2017/11/13
  */
-public class SmallBlockEvent extends BaseConsensusEvent<SmallBlock> {
+public class SmallBlockEvent extends BaseProtocolEvent<SmallBlock> {
     public SmallBlockEvent() {
-        super(ConsensusEventType.NEW_BLOCK);
+        super(ProtocolEventType.NEW_BLOCK);
     }
 
     public SmallBlockEvent(SmallBlock newBlock) {

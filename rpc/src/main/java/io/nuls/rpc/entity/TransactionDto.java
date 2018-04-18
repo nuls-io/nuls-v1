@@ -1,15 +1,16 @@
 package io.nuls.rpc.entity;
 
-import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.constant.TransactionConstant;
-import io.nuls.core.constant.TxStatusEnum;
-import io.nuls.core.context.NulsContext;
+import io.nuls.core.cfg.NulsConfig;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.UtxoInput;
 import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
+import io.nuls.protocol.constant.TransactionConstant;
+import io.nuls.protocol.constant.TxStatusEnum;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.model.Transaction;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -72,7 +73,7 @@ public class TransactionDto {
 
         if (tx.getRemark() != null) {
             try {
-                this.setRemark(new String(tx.getRemark(), NulsContext.DEFAULT_ENCODING));
+                this.setRemark(new String(tx.getRemark(), NulsConfig.DEFAULT_ENCODING));
             } catch (UnsupportedEncodingException e) {
                 this.setRemark(Hex.encode(tx.getRemark()));
             }

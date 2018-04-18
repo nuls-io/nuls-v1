@@ -23,12 +23,9 @@
  */
 package io.nuls.ledger.thread;
 
-import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.Log;
 import io.nuls.ledger.service.intf.LedgerService;
-
-import java.util.List;
+import io.nuls.protocol.context.NulsContext;
 
 /**
  * @author Niels

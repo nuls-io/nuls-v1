@@ -24,8 +24,8 @@
 
 package io.nuls.consensus.poc.provider;
 
-import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.utils.queue.service.impl.QueueService;
+import io.nuls.protocol.model.Transaction;
 
 /**
  * Created by ln on 2018/4/13.

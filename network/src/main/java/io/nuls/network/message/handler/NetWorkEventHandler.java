@@ -23,9 +23,9 @@
  */
 package io.nuls.network.message.handler;
 
-import io.nuls.core.event.BaseEvent;
 import io.nuls.network.entity.Node;
 import io.nuls.network.message.NetworkEventResult;
+import io.nuls.protocol.event.base.BaseEvent;
 
 /**
  * @author vivi

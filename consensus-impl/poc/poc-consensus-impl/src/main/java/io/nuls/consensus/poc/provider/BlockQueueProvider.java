@@ -25,14 +25,13 @@
 package io.nuls.consensus.poc.provider;
 
 import io.nuls.consensus.poc.constant.BlockContainerStatus;
-import io.nuls.consensus.poc.container.BlockContainer;
-import io.nuls.consensus.poc.locker.Lockers;
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.context.NulsContext;
+import io.nuls.consensus.poc.protocol.locker.Lockers;
+import io.nuls.consensus.poc.protocol.model.container.BlockContainer;
+import io.nuls.consensus.poc.protocol.service.DownloadService;
 import io.nuls.core.utils.queue.service.impl.QueueService;
-import io.nuls.poc.constant.ConsensusStatus;
 import io.nuls.protocol.constant.DownloadStatus;
-import io.nuls.protocol.intf.DownloadService;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.model.Block;
 
 /**
  * Created by ln on 2018/4/13.
@@ -44,12 +43,12 @@ public class BlockQueueProvider implements QueueProvider {
 
     private QueueService<BlockContainer> blockQueue;
 
-    private DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
+    private DownloadService downloadService;
 
     private boolean downloadBlockQueueHasDestory;
 
     public BlockQueueProvider() {
-        blockQueue = new QueueService<BlockContainer>();
+        blockQueue = new QueueService<>();
         blockQueue.createQueue(QUEUE_NAME_RECEIVE, 2000l, false);
         createDownloadQueue();
     }
@@ -69,7 +68,7 @@ public class BlockQueueProvider implements QueueProvider {
 
             if (receive) {
                 int status = BlockContainerStatus.RECEIVED;
-                if (downloadService.getStatus() != DownloadStatus.SUCCESS) {
+                if (getDownloadService() .getStatus() != DownloadStatus.SUCCESS) {
                     status = BlockContainerStatus.DOWNLOADING;
                 }
 
@@ -108,7 +107,7 @@ public class BlockQueueProvider implements QueueProvider {
                 blockContainer = blockQueue.poll(QUEUE_NAME_DOWNLOAD);
             }
 
-            boolean hasDownloadSuccess = downloadService.getStatus() == DownloadStatus.SUCCESS;
+            boolean hasDownloadSuccess = getDownloadService() .getStatus() == DownloadStatus.SUCCESS;
             if (blockContainer == null && hasDownloadSuccess && !downloadBlockQueueHasDestory) {
                 downloadBlockQueueHasDestory = true;
                 blockQueue.destroyQueue(QUEUE_NAME_DOWNLOAD);
@@ -145,5 +144,12 @@ public class BlockQueueProvider implements QueueProvider {
     private void createDownloadQueue() {
         blockQueue.createQueue(QUEUE_NAME_DOWNLOAD, 20000l, false);
         downloadBlockQueueHasDestory = false;
+    }
+
+    public DownloadService getDownloadService() {
+        if(null==downloadService){
+            this.downloadService =  NulsContext.getServiceBean(DownloadService.class);
+        }
+        return downloadService;
     }
 }

@@ -23,13 +23,11 @@
  */
 package io.nuls.network.message.impl;
 
-import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.event.BaseEvent;
-import io.nuls.core.utils.date.TimeService;
+import io.nuls.core.cfg.NulsConfig;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.event.base.BaseEvent;
 import io.nuls.db.dao.NodeDataService;
 import io.nuls.network.entity.Node;
-import io.nuls.network.exception.NetworkMessageException;
 import io.nuls.network.message.NetworkCacheService;
 import io.nuls.network.message.NetworkEventResult;
 import io.nuls.network.message.entity.VersionEvent;
@@ -85,9 +83,9 @@ public class VersionEventHandler implements NetWorkEventHandler {
 
     private void checkVersion(String version) {
         int newVersion = Integer.parseInt(version.replace(".", ""));
-        int myVersion = Integer.parseInt(NulsContext.VERSION.replace(".", ""));
+        int myVersion = Integer.parseInt(NulsConfig.VERSION.replace(".", ""));
         if (newVersion > myVersion) {
-            NulsContext.NEWEST_VERSION = version;
+            NulsConfig.NEWEST_VERSION = version;
         }
     }
 

@@ -23,18 +23,18 @@
  */
 package io.nuls.event.bus.event;
 
-import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.event.NoticeData;
+import io.nuls.protocol.event.base.NoticeData;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.event.bus.constant.EventConstant;
+import io.nuls.protocol.model.NulsDigestData;
+import io.nuls.protocol.utils.io.NulsByteBuffer;
 
 /**
  * @author Niels
  * @date 2017/12/8
  */
-public class GetEventBodyEvent extends io.nuls.core.event.BaseEvent<NulsDigestData> {
+public class GetEventBodyEvent extends io.nuls.protocol.event.base.BaseEvent<NulsDigestData> {
 
     public GetEventBodyEvent() {
         super(NulsConstant.MODULE_ID_EVENT_BUS, EventConstant.EVENT_TYPE_GET_EVENT_BODY_EVENT);

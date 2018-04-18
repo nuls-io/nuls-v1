@@ -26,13 +26,13 @@ package io.nuls.consensus.poc.manager;
 
 import io.nuls.consensus.poc.BaseTestCase;
 import io.nuls.consensus.poc.cache.CacheLoader;
-import io.nuls.consensus.poc.container.ChainContainer;
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.consensus.poc.protocol.model.Agent;
+import io.nuls.consensus.poc.protocol.model.Deposit;
+import io.nuls.consensus.poc.protocol.model.container.ChainContainer;
 import io.nuls.core.exception.NulsException;
-import io.nuls.protocol.base.entity.member.Agent;
-import io.nuls.protocol.base.entity.member.Deposit;
-import io.nuls.protocol.entity.Consensus;
+import io.nuls.protocol.event.entity.Consensus;
+import io.nuls.protocol.model.Block;
+import io.nuls.protocol.model.BlockHeader;
 import org.junit.Before;
 import org.junit.Test;
 

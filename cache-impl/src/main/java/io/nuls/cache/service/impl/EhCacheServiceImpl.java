@@ -28,9 +28,9 @@ import io.nuls.cache.entity.CacheElement;
 import io.nuls.cache.listener.intf.NulsCacheListener;
 import io.nuls.cache.manager.EhCacheManager;
 import io.nuls.cache.service.intf.CacheService;
-import io.nuls.core.chain.intf.NulsCloneable;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.model.intf.NulsCloneable;
 import org.ehcache.Cache;
 
 import java.io.Serializable;

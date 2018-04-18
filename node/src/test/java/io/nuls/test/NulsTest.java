@@ -23,11 +23,6 @@
  */
 package io.nuls.test;
 
-import io.nuls.account.entity.Address;
-import io.nuls.account.entity.Alias;
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.crypto.ECKey;
-import io.nuls.core.utils.crypto.Utils;
 import org.junit.Test;
 
 /**

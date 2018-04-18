@@ -23,9 +23,7 @@
  */
 package io.nuls.network.service.impl;
 
-import io.nuls.core.chain.entity.Block;
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.date.TimeService;
@@ -33,17 +31,15 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.NodeDataService;
 import io.nuls.db.entity.NodePo;
 import io.nuls.network.NetworkContext;
-import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Node;
-import io.nuls.network.entity.NodeGroup;
 import io.nuls.network.entity.NodeTransferTool;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.message.entity.GetNodeEvent;
 import io.nuls.network.message.entity.GetNodesIpEvent;
 import io.nuls.network.message.entity.GetVersionEvent;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.model.Block;
 
-import java.net.InetSocketAddress;
-import java.sql.Connection;
 import java.util.*;
 
 /**

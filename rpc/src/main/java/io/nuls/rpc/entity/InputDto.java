@@ -1,7 +1,5 @@
 package io.nuls.rpc.entity;
 
-import io.nuls.account.entity.Address;
-import io.nuls.core.chain.entity.Na;
 import io.nuls.ledger.entity.UtxoInput;
 
 public class InputDto {

@@ -23,11 +23,9 @@
  */
 package io.nuls.ledger.entity;
 
-import io.nuls.core.chain.entity.BaseNulsData;
-import io.nuls.core.chain.entity.Na;
-import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.exception.NulsException;
+import io.nuls.protocol.model.BaseNulsData;
+import io.nuls.protocol.model.Na;
 
 /**
  * @author Niels

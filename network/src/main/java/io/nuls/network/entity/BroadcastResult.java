@@ -23,7 +23,7 @@
  */
 package io.nuls.network.entity;
 
-import io.nuls.core.chain.intf.NulsCloneable;
+import io.nuls.core.model.intf.NulsCloneable;
 
 import java.util.ArrayList;
 import java.util.List;

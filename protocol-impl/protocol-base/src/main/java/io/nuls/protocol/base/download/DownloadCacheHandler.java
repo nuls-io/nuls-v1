@@ -25,9 +25,9 @@
 package io.nuls.protocol.base.download;
 
 import io.nuls.protocol.constant.NotFoundType;
-import io.nuls.protocol.base.entity.BlockHashResponse;
-import io.nuls.protocol.entity.NotFound;
-import io.nuls.core.chain.entity.Block;
+import io.nuls.protocol.event.entity.BlockHashResponse;
+import io.nuls.protocol.event.entity.NotFound;
+import io.nuls.protocol.model.Block;
 
 import java.util.HashMap;
 import java.util.Map;

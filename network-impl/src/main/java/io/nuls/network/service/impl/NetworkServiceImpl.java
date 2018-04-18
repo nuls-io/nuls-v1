@@ -25,8 +25,8 @@ package io.nuls.network.service.impl;
 
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.event.BaseEvent;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.event.base.BaseEvent;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
@@ -282,5 +282,10 @@ public class NetworkServiceImpl implements NetworkService {
         return MainNetworkParam.get();
     }
 
+
+    @Override
+    public void validateFirstUnConnectedNode(String nodeId) {
+        nodesManager.validateFirstUnConnectedNode(nodeId);
+    }
 }
 

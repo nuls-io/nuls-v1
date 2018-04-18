@@ -23,7 +23,7 @@
  */
 package io.nuls.network.constant;
 
-import io.nuls.core.mesasge.NulsMessageHeader;
+import io.nuls.protocol.mesasge.NulsMessageHeader;
 
 /**
  * @author vivi

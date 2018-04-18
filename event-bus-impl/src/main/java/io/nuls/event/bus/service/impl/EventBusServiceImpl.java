@@ -23,16 +23,15 @@
  */
 package io.nuls.event.bus.service.impl;
 
-import io.nuls.core.event.BaseEvent;
-import io.nuls.core.event.EventManager;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.constant.EventCategoryEnum;
 import io.nuls.event.bus.handler.AbstractEventHandler;
-import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.event.bus.handler.intf.NulsEventHandler;
 import io.nuls.event.bus.service.entity.EventItem;
 import io.nuls.event.bus.service.intf.EventBusService;
+import io.nuls.protocol.event.base.BaseEvent;
+import io.nuls.protocol.event.manager.EventManager;
 
 import java.util.ArrayList;
 import java.util.HashSet;

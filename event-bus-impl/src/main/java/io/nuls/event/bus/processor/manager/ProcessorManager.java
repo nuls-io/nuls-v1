@@ -25,31 +25,28 @@ package io.nuls.event.bus.processor.manager;
 
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.event.BaseEvent;
-import io.nuls.core.event.EventManager;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.module.service.ModuleService;
 import io.nuls.core.thread.manager.NulsThreadFactory;
 import io.nuls.core.thread.manager.TaskManager;
-import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.event.bus.constant.EventBusConstant;
 import io.nuls.event.bus.handler.intf.NulsEventHandler;
-import io.nuls.event.bus.module.intf.AbstractEventBusModule;
 import io.nuls.event.bus.processor.thread.EventDispatchThread;
 import io.nuls.event.bus.processor.thread.NulsEventCall;
 import io.nuls.event.bus.utils.disruptor.DisruptorEvent;
 import io.nuls.event.bus.utils.disruptor.DisruptorUtil;
+import io.nuls.protocol.event.base.BaseEvent;
+import io.nuls.protocol.event.manager.EventManager;
 
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
 
 /**
  * @author Niels
  * @date 2017/11/6
  */
-public class ProcessorManager<E extends io.nuls.core.event.BaseEvent, H extends NulsEventHandler<? extends BaseEvent>> {
+public class ProcessorManager<E extends io.nuls.protocol.event.base.BaseEvent, H extends NulsEventHandler<? extends BaseEvent>> {
     private final Map<String, H> handlerMap = new HashMap<>();
     private final Map<Class, Set<String>> eventHandlerMapping = new HashMap<>();
     private DisruptorUtil<DisruptorEvent<ProcessData<E>>> disruptorService = DisruptorUtil.getInstance();

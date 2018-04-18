@@ -23,7 +23,7 @@
  */
 package io.nuls.ledger.entity;
 
-import io.nuls.core.chain.entity.Na;
+import io.nuls.protocol.model.Na;
 
 import java.io.Serializable;
 

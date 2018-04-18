@@ -23,7 +23,8 @@
  */
 package io.nuls.cache.entity;
 
-import io.nuls.core.chain.intf.NulsCloneable;
+
+import io.nuls.core.model.intf.NulsCloneable;
 
 /**
  *

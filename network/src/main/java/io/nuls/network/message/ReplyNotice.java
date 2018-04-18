@@ -23,17 +23,18 @@
  */
 package io.nuls.network.message;
 
-import io.nuls.core.chain.entity.basic.NulsBytesData;
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.event.NoticeData;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.protocol.event.base.BaseEvent;
+import io.nuls.protocol.event.base.NoticeData;
+import io.nuls.protocol.model.basic.NulsBytesData;
+import io.nuls.protocol.utils.io.NulsByteBuffer;
 
 /**
  * @author vivi
  * @date 2017/12/10.
  */
-public class ReplyNotice extends io.nuls.core.event.BaseEvent<NulsBytesData> {
+public class ReplyNotice extends BaseEvent<NulsBytesData> {
 
     public ReplyNotice() {
         super(NulsConstant.MODULE_ID_NETWORK, (short) 1);

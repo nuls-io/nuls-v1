@@ -23,6 +23,8 @@
  */
 package io.nuls.core.utils.spring.lite.core;
 
+import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.core.utils.spring.lite.annotation.Interceptor;
@@ -227,13 +229,13 @@ public class SpringLiteContext {
         }
     }
 
-    public static <T> T getBean(Class<T> beanClass) throws Exception {
+    public static <T> T getBean(Class<T> beanClass) {
         Set<String> nameSet = CLASS_NAME_SET_MAP.get(beanClass);
         if (null == nameSet || nameSet.isEmpty()) {
-            throw new Exception("Can't find bean of " + beanClass.getName());
+            throw new NulsRuntimeException(ErrorCode.DATA_ERROR,"Can't find bean of " + beanClass.getName());
         }
         if (nameSet.size() > 1) {
-            throw new Exception("There are " + nameSet.size() + " beans of " + beanClass.getName());
+            throw new NulsRuntimeException(ErrorCode.DATA_ERROR,"There are " + nameSet.size() + " beans of " + beanClass.getName());
         }
         T value = null;
         String beanName = null;

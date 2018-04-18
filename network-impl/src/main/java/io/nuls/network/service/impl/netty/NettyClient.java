@@ -9,10 +9,10 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.AttributeKey;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.entity.Node;
 import io.nuls.network.service.NetworkService;
+import io.nuls.protocol.context.NulsContext;
 
 
 public class NettyClient {
@@ -58,6 +58,7 @@ public class NettyClient {
                         socketChannel = (SocketChannel) future.channel();
                     } else {
                         Log.info("Client connect to host error: " + future.cause() + ", remove node: " + node.getId());
+                        getNetworkService().validateFirstUnConnectedNode(node.getId());
                         getNetworkService().removeNode(node.getId());
                     }
                 }
@@ -69,6 +70,7 @@ public class NettyClient {
                 socketChannel.close();
             }
             Log.error("Client start exception:" + e.getMessage() + ", remove node: " + node.getId());
+            getNetworkService().validateFirstUnConnectedNode(node.getId());
             getNetworkService().removeNode(node.getId());
         }
     }

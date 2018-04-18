@@ -23,18 +23,13 @@
  */
 package io.nuls.ledger.validator;
 
-import io.nuls.core.chain.entity.Na;
-import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.constant.TransactionConstant;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.ledger.entity.UtxoData;
-import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
-import io.nuls.ledger.entity.tx.TransferTransaction;
+import io.nuls.protocol.constant.TransactionConstant;
+import io.nuls.protocol.model.Na;
 
 /**
  * author Facjas

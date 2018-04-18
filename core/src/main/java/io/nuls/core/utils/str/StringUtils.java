@@ -23,9 +23,7 @@
  */
 package io.nuls.core.utils.str;
 
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.crypto.Base58;
+import io.nuls.core.cfg.NulsConfig;
 
 import java.io.UnsupportedEncodingException;
 import java.util.UUID;
@@ -90,7 +88,7 @@ public class StringUtils {
                 return false;
             }
             alias = alias.trim();
-            byte[] aliasBytes = alias.getBytes(NulsContext.DEFAULT_ENCODING);
+            byte[] aliasBytes = alias.getBytes(NulsConfig.DEFAULT_ENCODING);
             if (aliasBytes.length < 3 || aliasBytes.length > 20) {
                 return false;
             }

@@ -23,14 +23,14 @@
  */
 package io.nuls.rpc.resources.impl;
 
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.event.CommonStringEvent;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeGroup;
 import io.nuls.network.service.NetworkService;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.event.base.CommonStringEvent;
 import io.nuls.rpc.entity.InfoDto;
 import io.nuls.rpc.entity.RpcResult;
 import io.swagger.annotations.Api;
@@ -40,7 +40,6 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import java.util.List;
 import java.util.Set;
 
 /**

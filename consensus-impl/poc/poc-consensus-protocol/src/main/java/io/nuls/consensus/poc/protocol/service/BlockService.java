@@ -23,12 +23,12 @@
  */
 package io.nuls.consensus.poc.protocol.service;
 
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.BlockHeader;
-import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.db.entity.BlockHeaderPo;
+import io.nuls.protocol.model.Block;
+import io.nuls.protocol.model.BlockHeader;
+import io.nuls.protocol.model.NulsDigestData;
 
 import java.io.IOException;
 import java.util.List;
@@ -41,8 +41,6 @@ import java.util.Map;
 public interface BlockService {
 
     Block getGengsisBlock();
-
-    long getLocalSavedHeight();
 
     Block getLocalBestBlock();
 
@@ -58,34 +56,18 @@ public interface BlockService {
 
     boolean saveBlock(Block block) throws IOException;
 
-    void rollbackBlock(String hash) throws NulsException;
-
-    List<BlockHeader> getBlockHeaderList(long start, long end, long split);
+    boolean rollbackBlock(String hash) throws NulsException;
 
     Page<BlockHeaderPo> getBlockHeaderList(String nodeAddress, int type, int pageNumber, int pageSize);
 
     Page<BlockHeaderPo> getBlockHeaderList(int pageNumber, int pageSize);
-
-    BlockHeader getBlockHeader(NulsDigestData hash) throws NulsException;
-
-    Block getRoundFirstBlock(long roundIndex);
+    List<BlockHeaderPo> getBlockHeaderList(long startHeight,long endHeight);
 
     long getPackingCount(String address);
 
-    Map<String, Object> getSumTxCount(String address, long roundStart, long roundEnd);
-
     Block getBestBlock();
 
-    void approvalBlock(String hash);
-
     List<BlockHeaderPo> getBlockHashList(long start, long end);
-
-    /**
-     * get the block from approvingChain;
-     * @param start
-     * @return
-     */
-    Block getBlockFromMyChain(long start);
 
     /**
      * get the block from approvingChain;

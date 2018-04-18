@@ -23,13 +23,13 @@
  */
 package io.nuls.ledger.entity;
 
-import io.nuls.core.chain.entity.BaseNulsData;
-import io.nuls.core.chain.entity.Na;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
-import io.nuls.core.utils.io.NulsByteBuffer;
-import io.nuls.core.utils.io.NulsOutputStreamBuffer;
+import io.nuls.protocol.model.BaseNulsData;
+import io.nuls.protocol.model.Na;
+import io.nuls.protocol.utils.io.NulsByteBuffer;
+import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
 
 import java.io.IOException;
 import java.util.ArrayList;

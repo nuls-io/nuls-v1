@@ -23,9 +23,9 @@
  */
 package io.nuls.network.message.impl;
 
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.event.BaseEvent;
+import io.nuls.core.cfg.NulsConfig;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.event.base.BaseEvent;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.entity.Node;
 import io.nuls.network.message.NetworkCacheService;
@@ -34,8 +34,7 @@ import io.nuls.network.message.entity.GetVersionEvent;
 import io.nuls.network.message.entity.VersionEvent;
 import io.nuls.network.message.handler.NetWorkEventHandler;
 import io.nuls.network.service.NetworkService;
-
-import java.util.Random;
+import io.nuls.protocol.model.Block;
 
 /**
  * @author vivi
@@ -91,9 +90,9 @@ public class GetVersionEventHandler implements NetWorkEventHandler {
 
     private void checkVersion(String version) {
         int newVersion = Integer.parseInt(version.replace(".", ""));
-        int myVersion = Integer.parseInt(NulsContext.VERSION.replace(".", ""));
+        int myVersion = Integer.parseInt(NulsConfig.VERSION.replace(".", ""));
         if (newVersion > myVersion) {
-            NulsContext.NEWEST_VERSION = version;
+            NulsConfig.NEWEST_VERSION = version;
         }
     }
 

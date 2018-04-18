@@ -24,15 +24,14 @@
 package io.nuls.ledger.service.impl;
 
 import io.nuls.cache.service.intf.CacheService;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.entity.OutPutStatusEnum;
 import io.nuls.ledger.entity.UtxoBalance;
 import io.nuls.ledger.entity.UtxoOutput;
+import io.nuls.protocol.context.NulsContext;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;

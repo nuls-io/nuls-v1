@@ -24,19 +24,19 @@
 
 package io.nuls.protocol.base.download;
 
-import io.nuls.network.entity.Node;
-import io.nuls.protocol.base.entity.BlockHashResponse;
-import io.nuls.protocol.base.event.GetBlocksHashRequest;
-import io.nuls.protocol.event.GetBlockRequest;
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.BlockLog;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.entity.BroadcastResult;
+import io.nuls.network.entity.Node;
 import io.nuls.network.service.NetworkService;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.event.GetBlockRequest;
+import io.nuls.protocol.event.GetBlocksHashRequest;
+import io.nuls.protocol.event.entity.BlockHashResponse;
+import io.nuls.protocol.model.Block;
+import io.nuls.protocol.model.NulsDigestData;
 
 import java.util.ArrayList;
 import java.util.Collection;

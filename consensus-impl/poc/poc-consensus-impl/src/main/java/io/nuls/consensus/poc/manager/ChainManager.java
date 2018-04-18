@@ -24,10 +24,10 @@
 
 package io.nuls.consensus.poc.manager;
 
-import io.nuls.consensus.poc.container.ChainContainer;
-import io.nuls.consensus.poc.model.Chain;
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.BlockHeader;
+import io.nuls.consensus.poc.protocol.model.Chain;
+import io.nuls.consensus.poc.protocol.model.container.ChainContainer;
+import io.nuls.protocol.model.Block;
+import io.nuls.protocol.model.BlockHeader;
 
 import java.util.ArrayList;
 import java.util.List;

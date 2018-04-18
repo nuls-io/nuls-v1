@@ -23,16 +23,9 @@
  */
 package io.nuls.ledger.util;
 
-import io.nuls.core.chain.entity.Na;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.chain.manager.TransactionManager;
-import io.nuls.core.constant.TxStatusEnum;
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.script.P2PKHScript;
+import io.nuls.core.cfg.NulsConfig;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.date.TimeService;
-import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.entity.TransactionLocalPo;
@@ -44,6 +37,14 @@ import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.UtxoInput;
 import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
+import io.nuls.protocol.constant.TxStatusEnum;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.model.Na;
+import io.nuls.protocol.model.NulsDigestData;
+import io.nuls.protocol.model.Transaction;
+import io.nuls.protocol.script.P2PKHScript;
+import io.nuls.protocol.utils.TransactionManager;
+import io.nuls.protocol.utils.io.NulsByteBuffer;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -160,7 +161,7 @@ public class UtxoTransferTool {
             po.setTxData(tx.getTxData().serialize());
         }
         if (null != tx.getRemark()) {
-            po.setRemark(new String(tx.getRemark(), NulsContext.DEFAULT_ENCODING));
+            po.setRemark(new String(tx.getRemark(), NulsConfig.DEFAULT_ENCODING));
         }
         if (null != tx.getFee()) {
             po.setFee(tx.getFee().getValue());
@@ -184,7 +185,7 @@ public class UtxoTransferTool {
             po.setTxData(tx.getTxData().serialize());
         }
         if (null != tx.getRemark()) {
-            po.setRemark(new String(tx.getRemark(), NulsContext.DEFAULT_ENCODING));
+            po.setRemark(new String(tx.getRemark(), NulsConfig.DEFAULT_ENCODING));
         }
         if (null != tx.getFee()) {
             po.setFee(tx.getFee().getValue());
@@ -203,7 +204,7 @@ public class UtxoTransferTool {
         tx.setSize(po.getSize());
         tx.setScriptSig(po.getScriptSig());
         if (StringUtils.isNotBlank(po.getRemark())) {
-            tx.setRemark(po.getRemark().getBytes(NulsContext.DEFAULT_ENCODING));
+            tx.setRemark(po.getRemark().getBytes(NulsConfig.DEFAULT_ENCODING));
         }
         if (null != po.getTxData()) {
             tx.setTxData(tx.parseTxData(new NulsByteBuffer(po.getTxData())));
@@ -224,7 +225,7 @@ public class UtxoTransferTool {
         tx.setSize(po.getSize());
         tx.setScriptSig(po.getScriptSig());
         if (StringUtils.isNotBlank(po.getRemark())) {
-            tx.setRemark(po.getRemark().getBytes(NulsContext.DEFAULT_ENCODING));
+            tx.setRemark(po.getRemark().getBytes(NulsConfig.DEFAULT_ENCODING));
         }
         if (null != po.getTxData()) {
             tx.parseTxData(new NulsByteBuffer(po.getTxData()));

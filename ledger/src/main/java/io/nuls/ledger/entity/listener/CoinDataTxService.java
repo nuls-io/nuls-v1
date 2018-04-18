@@ -23,14 +23,14 @@
  */
 package io.nuls.ledger.entity.listener;
 
-import io.nuls.core.chain.entity.Block;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.tx.serivce.TransactionService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.db.transactional.annotation.PROPAGATION;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
+import io.nuls.protocol.model.Block;
+import io.nuls.protocol.service.intf.TransactionService;
 
 /**
  * @author Niels

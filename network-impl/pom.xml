@@ -6,7 +6,8 @@
 
     <groupId>io.nuls</groupId>
     <artifactId>network-impl</artifactId>
-    <version>1.0.0</version>
+    <version>0.8.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -30,22 +31,22 @@
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>network</artifactId>
-            <version>1.0.0</version>
+            <version>0.8.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>core</artifactId>
-            <version>1.0.0</version>
+            <version>0.8.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>db</artifactId>
-            <version>1.0.0</version>
+            <version>0.8.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>protocol-base</artifactId>
-            <version>1.0.0</version>
+            <version>0.8.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <build>

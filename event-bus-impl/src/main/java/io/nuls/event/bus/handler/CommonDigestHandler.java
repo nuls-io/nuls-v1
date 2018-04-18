@@ -23,13 +23,11 @@
  */
 package io.nuls.event.bus.handler;
 
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.event.CommonDigestEvent;
 import io.nuls.event.bus.event.GetEventBodyEvent;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.event.bus.service.impl.EventCacheService;
-import io.nuls.event.bus.service.impl.EventBroadcasterImpl;
+import io.nuls.protocol.context.NulsContext;
 
 /**
  * @author Niels

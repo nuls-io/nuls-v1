@@ -23,12 +23,12 @@
  */
 package io.nuls.protocol.event;
 
-import io.nuls.protocol.constant.ConsensusEventType;
-import io.nuls.protocol.entity.GetBlockParam;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.event.NoticeData;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.protocol.constant.ProtocolEventType;
+import io.nuls.protocol.event.base.NoticeData;
+import io.nuls.protocol.event.entity.GetBlockDataParam;
+import io.nuls.protocol.model.NulsDigestData;
+import io.nuls.protocol.utils.io.NulsByteBuffer;
 
 /**
  * get block by height.
@@ -36,15 +36,15 @@ import io.nuls.core.utils.io.NulsByteBuffer;
  * @author Niels
  * @date 2017/11/13
  */
-public class GetBlockRequest extends BaseConsensusEvent<GetBlockParam> {
+public class GetBlockRequest extends BaseProtocolEvent<GetBlockDataParam> {
 
     public GetBlockRequest() {
-        super(ConsensusEventType.GET_BLOCK);
+        super(ProtocolEventType.GET_BLOCK);
     }
 
     public GetBlockRequest(long start, long size) {
         this();
-        GetBlockParam param = new GetBlockParam();
+        GetBlockDataParam param = new GetBlockDataParam();
         param.setSize(size);
         param.setStart(start);
         this.setEventBody(param);
@@ -52,7 +52,7 @@ public class GetBlockRequest extends BaseConsensusEvent<GetBlockParam> {
 
     public GetBlockRequest(long start, long size, NulsDigestData startHash, NulsDigestData endHash) {
         this();
-        GetBlockParam param = new GetBlockParam();
+        GetBlockDataParam param = new GetBlockDataParam();
         param.setSize(size);
         param.setStart(start);
         param.setStartHash(startHash);
@@ -62,8 +62,8 @@ public class GetBlockRequest extends BaseConsensusEvent<GetBlockParam> {
 
 
     @Override
-    protected GetBlockParam parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
-        return byteBuffer.readNulsData(new GetBlockParam());
+    protected GetBlockDataParam parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new GetBlockDataParam());
     }
 
     @Override

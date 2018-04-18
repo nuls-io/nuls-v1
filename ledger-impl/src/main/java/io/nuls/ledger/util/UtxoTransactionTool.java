@@ -25,11 +25,8 @@ package io.nuls.ledger.util;
 
 import io.nuls.account.entity.Account;
 import io.nuls.account.service.intf.AccountService;
-import io.nuls.core.chain.entity.Na;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.cfg.NulsConfig;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
@@ -43,6 +40,10 @@ import io.nuls.ledger.entity.tx.TransferTransaction;
 import io.nuls.ledger.event.notice.BalanceChangeData;
 import io.nuls.ledger.event.notice.BalanceChangeNotice;
 import io.nuls.ledger.service.impl.LedgerCacheService;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.model.Na;
+import io.nuls.protocol.model.NulsDigestData;
+import io.nuls.protocol.model.Transaction;
 
 import java.util.List;
 import java.util.concurrent.locks.Lock;
@@ -81,7 +82,7 @@ public class UtxoTransactionTool {
         }
         TransferTransaction tx = new TransferTransaction(transferData, password);
         if (StringUtils.isNotBlank(remark)) {
-            tx.setRemark(remark.getBytes(NulsContext.DEFAULT_ENCODING));
+            tx.setRemark(remark.getBytes(NulsConfig.DEFAULT_ENCODING));
         }
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
         AccountService accountService = getAccountService();
@@ -93,7 +94,7 @@ public class UtxoTransactionTool {
     public LockNulsTransaction createLockNulsTx(CoinTransferData transferData, String password, String remark) throws Exception {
         LockNulsTransaction tx = new LockNulsTransaction(transferData, password);
         if (StringUtils.isNotBlank(remark)) {
-            tx.setRemark(remark.getBytes(NulsContext.DEFAULT_ENCODING));
+            tx.setRemark(remark.getBytes(NulsConfig.DEFAULT_ENCODING));
         }
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
         AccountService accountService = getAccountService();

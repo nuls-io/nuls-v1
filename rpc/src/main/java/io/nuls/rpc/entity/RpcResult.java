@@ -24,8 +24,8 @@
 package io.nuls.rpc.entity;
 
 
-import io.nuls.core.chain.entity.Result;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.model.Result;
 import io.nuls.core.utils.json.JSONUtils;
 import io.nuls.core.utils.log.Log;
 

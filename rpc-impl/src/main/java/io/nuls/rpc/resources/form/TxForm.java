@@ -26,11 +26,11 @@
 
 package io.nuls.rpc.resources.form;
 
-import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.utils.crypto.Hex;
-import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.str.StringUtils;
+import io.nuls.protocol.model.Transaction;
+import io.nuls.protocol.utils.TransactionManager;
+import io.nuls.protocol.utils.io.NulsByteBuffer;
 
 /**
  * @author Niels

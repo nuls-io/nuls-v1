@@ -23,11 +23,11 @@
  */
 package io.nuls.poc.service.intf;
 
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.Transaction;
 import io.nuls.network.entity.Node;
 import io.nuls.poc.constant.ConsensusStatus;
-import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.protocol.model.BaseNulsData;
+import io.nuls.protocol.model.Block;
+import io.nuls.protocol.model.Transaction;
 
 import java.util.List;
 

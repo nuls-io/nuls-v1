@@ -23,11 +23,14 @@
  */
 package io.nuls.consensus.poc.service;
 
-import io.nuls.consensus.poc.entity.Agent;
 import io.nuls.consensus.poc.provider.QueueProvider;
+import io.nuls.core.dto.Page;
+import io.nuls.core.exception.NulsException;
 import io.nuls.poc.service.intf.ConsensusService;
+import io.nuls.protocol.model.Transaction;
 
-import java.util.List;
+import java.io.IOException;
+import java.util.Map;
 
 /**
  * @author Niels
@@ -35,7 +38,29 @@ import java.util.List;
  */
 public interface PocConsensusService extends ConsensusService {
 
-    List<Agent> getAgentList();
-
     void addProvider(QueueProvider blockQueueProvider, QueueProvider txQueueProvider);
+
+    //todo 更改参数类型
+    Transaction startConsensus(String agentAddress, String password, Map<String, Object> paramsMap) throws NulsException;
+
+    //todo 更改参数类型
+    Transaction stopConsensus(String address, String password, Map<String, Object> paramsMap) throws NulsException, IOException;
+
+    //todo 返回值类型
+    Map<String, Object> getConsensusInfo();
+
+    //todo 返回值类型
+    Map<String, Object> getConsensusInfo(String address);
+
+    /**
+     * for client Customized
+     */
+    //todo 返回值类型
+    Page<Map<String, Object>> getAgentList(String keyword, String address, String agentAddress, String sortType, Integer pageNumber, Integer pageSize);
+
+    //todo 返回值类型
+    Page<Map<String, Object>> getDepositList(String address, String agentAddress, Integer pageNumber, Integer pageSize);
+
+    //todo 返回值类型
+    Map<String, Object> getAgent(String agentAddress);
 }

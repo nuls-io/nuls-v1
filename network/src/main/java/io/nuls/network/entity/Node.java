@@ -23,16 +23,16 @@
  */
 package io.nuls.network.entity;
 
-import io.nuls.core.chain.entity.BaseNulsData;
-import io.nuls.core.context.NulsContext;
+import io.nuls.core.cfg.NulsConfig;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.date.TimeService;
-import io.nuls.core.utils.io.NulsByteBuffer;
-import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.network.message.entity.VersionEvent;
+import io.nuls.protocol.model.BaseNulsData;
+import io.nuls.protocol.utils.io.NulsByteBuffer;
+import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -124,7 +124,7 @@ public class Node extends BaseNulsData {
         s += VarInt.sizeOf(severPort);
         s += 1;
         try {
-            s += ip.getBytes(NulsContext.DEFAULT_ENCODING).length;
+            s += ip.getBytes(NulsConfig.DEFAULT_ENCODING).length;
         } catch (UnsupportedEncodingException e) {
             Log.error(e);
         }

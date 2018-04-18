@@ -23,18 +23,18 @@
  */
 package io.nuls.account.entity;
 
-import io.nuls.core.chain.entity.BaseNulsData;
-import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.chain.intf.NulsCloneable;
+import io.nuls.core.cfg.NulsConfig;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.*;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.intf.NulsCloneable;
 import io.nuls.core.utils.crypto.Hex;
-import io.nuls.core.utils.io.NulsByteBuffer;
-import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
+import io.nuls.protocol.model.BaseNulsData;
+import io.nuls.protocol.model.Transaction;
+import io.nuls.protocol.utils.io.NulsByteBuffer;
+import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
 import org.spongycastle.crypto.params.KeyParameter;
 
 import java.io.IOException;
@@ -186,7 +186,7 @@ public class Account extends BaseNulsData implements NulsCloneable {
 
         if (StringUtils.isNotBlank(alias)) {
             try {
-                s += alias.getBytes(NulsContext.DEFAULT_ENCODING).length + 1;
+                s += alias.getBytes(NulsConfig.DEFAULT_ENCODING).length + 1;
             } catch (UnsupportedEncodingException e) {
                 Log.error(e);
             }
@@ -194,7 +194,7 @@ public class Account extends BaseNulsData implements NulsCloneable {
             s++;
         }
         try {
-            s += address.getBase58().getBytes(NulsContext.DEFAULT_ENCODING).length;
+            s += address.getBase58().getBytes(NulsConfig.DEFAULT_ENCODING).length;
         } catch (UnsupportedEncodingException e) {
             Log.error(e);
         }

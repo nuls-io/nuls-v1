@@ -6,12 +6,12 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.network.IpUtil;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.network.entity.Node;
 import io.nuls.network.service.NetworkService;
+import io.nuls.protocol.context.NulsContext;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;

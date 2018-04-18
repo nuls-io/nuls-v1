@@ -24,20 +24,21 @@
 
 package io.nuls.protocol.base.download;
 
-import io.nuls.protocol.constant.DownloadStatus;
-import io.nuls.protocol.base.constant.PocConsensusConstant;
-import io.nuls.protocol.intf.BlockService;
-import io.nuls.core.chain.entity.Block;
+import io.nuls.consensus.poc.protocol.constant.PocConsensusConstant;
+import io.nuls.consensus.poc.protocol.service.BlockService;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.NulsThreadFactory;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.date.TimeService;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.queue.service.impl.QueueService;
 import io.nuls.network.entity.Node;
 import io.nuls.network.service.NetworkService;
+import io.nuls.protocol.constant.DownloadStatus;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.model.Block;
 
 import java.util.*;
 import java.util.concurrent.FutureTask;
@@ -140,7 +141,7 @@ public class DownloadProcessor extends Thread {
                 downloadStatus = DownloadStatus.FAILED;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
             downloadStatus = DownloadStatus.FAILED;
         } finally {
             blockQueue.destroyQueue(queueName);
@@ -250,7 +251,7 @@ public class DownloadProcessor extends Thread {
             try {
                 Thread.sleep(500l);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.error(e);
             }
         }
 

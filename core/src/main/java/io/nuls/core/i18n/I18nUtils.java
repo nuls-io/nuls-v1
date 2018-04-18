@@ -23,11 +23,9 @@
  */
 package io.nuls.core.i18n;
 
+import io.nuls.core.cfg.NulsConfig;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 
@@ -66,7 +64,7 @@ public class I18nUtils {
                 for (File file : folderFile.listFiles()) {
                     InputStream is = new FileInputStream(file);
                     Properties prop = new Properties();
-                    prop.load(new InputStreamReader(is, NulsContext.DEFAULT_ENCODING));
+                    prop.load(new InputStreamReader(is, NulsConfig.DEFAULT_ENCODING));
                     String key = file.getName().replace(".properties", "");
                     ALL_MAPPING.put(key, prop);
                 }

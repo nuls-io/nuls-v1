@@ -28,15 +28,15 @@ import io.nuls.account.entity.Alias;
 import io.nuls.account.entity.tx.AliasTransaction;
 import io.nuls.account.service.impl.AccountCacheService;
 import io.nuls.account.util.AccountTool;
-import io.nuls.core.chain.entity.Block;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.tx.serivce.TransactionService;
 import io.nuls.db.dao.AccountAliasDataService;
 import io.nuls.db.entity.AliasPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.db.transactional.annotation.PROPAGATION;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.model.Block;
+import io.nuls.protocol.service.intf.TransactionService;
 
 /**
  * @author Niels

@@ -23,8 +23,8 @@
  */
 package io.nuls.rpc.aop;
 
+import io.nuls.core.cfg.NulsConfig;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
@@ -79,7 +79,7 @@ public class RpcServerFilter implements ContainerRequestFilter, ContainerRespons
     private boolean whiteSheetVerifier(Request request) {
         String ips = null;
         try {
-            ips = NulsContext.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_REQUEST_WHITE_SHEET);
+            ips = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_REQUEST_WHITE_SHEET);
         } catch (NulsException e) {
             Log.error(e);
         }
