@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package io.nuls.consensus.poc.protocol.model.container;
+package io.nuls.consensus.poc.container;
 
 import io.nuls.network.entity.Node;
 import io.nuls.protocol.model.Block;

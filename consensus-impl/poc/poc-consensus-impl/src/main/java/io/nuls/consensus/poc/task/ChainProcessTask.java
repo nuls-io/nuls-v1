@@ -24,8 +24,8 @@
 
 package io.nuls.consensus.poc.task;
 
+import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.process.ChainProcess;
-import io.nuls.consensus.poc.protocol.locker.Lockers;
 import io.nuls.core.utils.log.Log;
 
 /**

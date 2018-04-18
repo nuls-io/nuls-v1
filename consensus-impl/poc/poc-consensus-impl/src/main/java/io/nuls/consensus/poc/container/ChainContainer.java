@@ -22,15 +22,16 @@
  * SOFTWARE.
  */
 
-package io.nuls.consensus.poc.protocol.model.container;
+package io.nuls.consensus.poc.container;
 
 import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
+import io.nuls.consensus.poc.locker.Lockers;
+import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.protocol.constant.ConsensusStatusEnum;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.protocol.constant.PunishType;
 import io.nuls.consensus.poc.protocol.context.ConsensusContext;
-import io.nuls.consensus.poc.protocol.locker.Lockers;
 import io.nuls.consensus.poc.protocol.model.*;
 import io.nuls.consensus.poc.protocol.model.block.BlockRoundData;
 import io.nuls.consensus.poc.protocol.tx.*;

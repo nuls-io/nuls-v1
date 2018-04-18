@@ -33,11 +33,11 @@ import io.nuls.consensus.poc.provider.*;
 import io.nuls.consensus.poc.service.PocConsensusService;
 import io.nuls.consensus.poc.task.*;
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.thread.manager.NulsThreadFactory;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
 import io.nuls.poc.constant.ConsensusStatus;
+import io.nuls.protocol.context.NulsContext;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;

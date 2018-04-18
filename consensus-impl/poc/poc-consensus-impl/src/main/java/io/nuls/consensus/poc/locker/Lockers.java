@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package io.nuls.consensus.poc.protocol.locker;
+package io.nuls.consensus.poc.locker;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;

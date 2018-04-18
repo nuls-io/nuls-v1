@@ -2,13 +2,13 @@ package io.nuls.consensus.poc.process;
 
 import io.nuls.consensus.poc.constant.BlockContainerStatus;
 import io.nuls.consensus.poc.container.BlockContainer;
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.ChainLog;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.entity.Node;
 import io.nuls.network.service.NetworkService;
 import io.nuls.protocol.base.download.DownloadUtils;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.model.Block;
 
 import java.io.IOException;
 

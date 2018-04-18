@@ -22,8 +22,10 @@
  * SOFTWARE.
  */
 
-package io.nuls.consensus.poc.protocol.model;
+package io.nuls.consensus.poc.model;
 
+import io.nuls.consensus.poc.protocol.model.Agent;
+import io.nuls.consensus.poc.protocol.model.Deposit;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.entity.PunishLogPo;
 import io.nuls.protocol.event.entity.Consensus;

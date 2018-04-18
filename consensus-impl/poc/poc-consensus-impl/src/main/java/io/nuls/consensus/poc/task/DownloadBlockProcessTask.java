@@ -26,11 +26,11 @@ package io.nuls.consensus.poc.task;
 
 import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.process.DownloadBlockProcess;
+import io.nuls.consensus.poc.protocol.service.DownloadService;
 import io.nuls.consensus.poc.provider.DownloadBlockProvider;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.Log;
 import io.nuls.protocol.constant.DownloadStatus;
-import io.nuls.protocol.intf.DownloadService;
+import io.nuls.protocol.context.NulsContext;
 
 /**
  * Created by ln on 2018/4/13.

@@ -24,27 +24,16 @@
 
 package io.nuls.consensus.poc.process;
 
-import io.nuls.consensus.poc.constant.BlockContainerStatus;
 import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.provider.DownloadBlockProvider;
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.BlockHeader;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.utils.calc.DoubleUtils;
 import io.nuls.core.utils.log.ChainLog;
-import io.nuls.core.utils.log.Log;
-import io.nuls.network.entity.BroadcastResult;
-import io.nuls.network.service.NetworkService;
-import io.nuls.protocol.base.download.DownloadUtils;
-import io.nuls.protocol.event.GetBlockRequest;
+import io.nuls.protocol.model.Block;
+import io.nuls.protocol.model.BlockHeader;
+import io.nuls.protocol.model.NulsDigestData;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Future;
 
 /**
  * Created by ln on 2018/4/14.
