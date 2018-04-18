@@ -26,7 +26,9 @@ package io.nuls.consensus.poc.process;
 
 import io.nuls.consensus.poc.constant.BlockContainerStatus;
 import io.nuls.consensus.poc.container.BlockContainer;
+import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.manager.ChainManager;
+import io.nuls.consensus.poc.provider.DownloadBlockProvider;
 import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
@@ -52,7 +54,7 @@ public class IsolatedBlocksProcess {
     private ChainManager chainManager;
     private BlockProcess blockProcess;
 
-    private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
+    private DownloadBlockProvider downloadBlockProvider;
 
     public IsolatedBlocksProcess(ChainManager chainManager) {
         this.chainManager = chainManager;
@@ -68,6 +70,13 @@ public class IsolatedBlocksProcess {
 //todo        if(Math.abs(bestBlockHeight - block.getHeader().getHeight()) > 100) {
 //            return;
 //        }
+
+        // Because it is not possible to ensure that there will be repeated reception, priority is given to
+        // 因为不能确保是否会有重复收到的情况，所以在此优先去重
+        boolean hasExist = checkHasExist(blockContainer);
+        if(hasExist) {
+            return;
+        }
 
         ChainLog.debug("process isolated block, bestblockheight:{}, isolated {} - {}", bestBlockHeight, block.getHeader().getHeight(), block.getHeader().getHash().getDigestHex());
 
@@ -103,34 +112,42 @@ public class IsolatedBlocksProcess {
 
     }
 
-    private void foundPreviousBlock(BlockContainer blockContainer) throws IOException {
+    private void foundPreviousBlock(BlockContainer blockContainer) {
+        downloadBlockProvider.put(blockContainer);
+    }
 
-        if(blockContainer.getNode() == null) {
-            Log.warn("Handling an Orphan Block Error, Unknown Source Node");
-            return;
+
+    /*
+     * Check the existence of this block from the forked chain and the isolated chain
+     * 从分叉链和孤立链中检查，是否存在该区块
+     */
+    private boolean checkHasExist(BlockContainer blockContainer) {
+        NulsDigestData hash = blockContainer.getBlock().getHeader().getHash();
+
+        for(ChainContainer chainContainer : chainManager.getIsolatedChains()) {
+            for(BlockHeader header : chainContainer.getChain().getBlockHeaderList()) {
+                if(header.getHash().equals(hash)) {
+                    return true;
+                }
+            }
         }
 
-//        BlockHeader header = blockContainer.getBlock().getHeader();
-//
-//        GetBlockRequest request = new GetBlockRequest(header.getHeight()-1, 1,
-//                header.getPreHash(), header.getPreHash());
-//
-//        networkService.sendToNode(request, blockContainer.getNode().getId(), false);
-
-        Block preBlock = new DownloadUtils().getBlockByHash(blockContainer.getBlock().getHeader().getPreHash().getDigestHex(), blockContainer.getNode());
-        if(preBlock != null) {
-            ChainLog.debug("get pre block success {} - {}", preBlock.getHeader().getHeight(), preBlock.getHeader().getHash().getDigestHex());
-
-            blockProcess.addBlock(new BlockContainer(preBlock, blockContainer.getNode(), BlockContainerStatus.DOWNLOADING));
-        } else {
-
-            ChainLog.debug("get pre block fail {} - {}", preBlock.getHeader().getHeight(), preBlock.getHeader().getHash().getDigestHex());
-
-            //TODO 失败情况的处理
+        for(ChainContainer chainContainer : chainManager.getChains()) {
+            for(BlockHeader header : chainContainer.getChain().getBlockHeaderList()) {
+                if(header.getHash().equals(hash)) {
+                    return true;
+                }
+            }
         }
+
+        return false;
     }
 
     public void setBlockProcess(BlockProcess blockProcess) {
         this.blockProcess = blockProcess;
+    }
+
+    public void setDownloadBlockProvider(DownloadBlockProvider downloadBlockProvider) {
+        this.downloadBlockProvider = downloadBlockProvider;
     }
 }

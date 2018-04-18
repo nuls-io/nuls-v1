@@ -29,10 +29,7 @@ import io.nuls.consensus.poc.manager.CacheManager;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.manager.RoundManager;
 import io.nuls.consensus.poc.process.*;
-import io.nuls.consensus.poc.provider.BlockQueueProvider;
-import io.nuls.consensus.poc.provider.ConsensusSystemProvider;
-import io.nuls.consensus.poc.provider.IsolatedBlocksProvider;
-import io.nuls.consensus.poc.provider.TxQueueProvider;
+import io.nuls.consensus.poc.provider.*;
 import io.nuls.consensus.poc.service.PocConsensusService;
 import io.nuls.consensus.poc.task.*;
 import io.nuls.core.constant.NulsConstant;
@@ -82,7 +79,7 @@ public class MainControlScheduler {
         PocConsensusService pocConsensusService = NulsContext.getServiceBean(PocConsensusService.class);
         pocConsensusService.addProvider(blockQueueProvider, txQueueProvider);
 
-        threadPool = TaskManager.createScheduledThreadPool(5,
+        threadPool = TaskManager.createScheduledThreadPool(6,
                 new NulsThreadFactory(NulsConstant.MODULE_ID_CONSENSUS, "consensus-poll-control"));
 
         chainManager = new ChainManager();
@@ -107,6 +104,12 @@ public class MainControlScheduler {
 
         ConsensusProcess consensusProcess = new ConsensusProcess(chainManager, roundManager, txMemoryPool, blockProcess);
         threadPool.scheduleAtFixedRate(new ConsensusProcessTask(consensusProcess), 1000L,1000L, TimeUnit.MILLISECONDS);
+
+        DownloadBlockProcess downloadBlockProcess = new DownloadBlockProcess();
+        DownloadBlockProvider downloadBlockProvider = new DownloadBlockProvider();
+        isolatedBlocksProcess.setDownloadBlockProvider(downloadBlockProvider);
+        downloadBlockProcess.setBlockProcess(blockProcess);
+        threadPool.scheduleAtFixedRate(new DownloadBlockProcessTask(downloadBlockProcess, downloadBlockProvider), 1000L,1000L, TimeUnit.MILLISECONDS);
 
         initDatas();
 

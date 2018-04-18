@@ -68,10 +68,10 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
             Log.warn("recieved a null smallBlock!");
             return;
         }
-        if (downloadService.getStatus() != DownloadStatus.SUCCESS) {
-            Log.warn("recieved a smallBlock , and downloading skip");
-            return;
-        }
+//        if (downloadService.getStatus() != DownloadStatus.SUCCESS) {
+//            Log.warn("recieved a smallBlock , and downloading skip");
+//            return;
+//        }
         BlockHeader header = smallBlock.getHeader();
 //        BlockLog.info("recieve new block from(" + fromId + "), tx count : " + header.getTxCount() + " , tx pool count : " + ReceivedTxCacheManager.getInstance().getTxList().size() + " - " + OrphanTxCacheManager.getInstance().getTxList().size() + " , header height:" + header.getHeight() + ", preHash:" + header.getPreHash() + " , hash:" + header.getHash() + ", address:" + Address.fromHashs(header.getPackingAddress()));
 

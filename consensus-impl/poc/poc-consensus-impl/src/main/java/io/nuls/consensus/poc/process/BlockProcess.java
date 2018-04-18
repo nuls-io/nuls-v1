@@ -35,6 +35,7 @@ import io.nuls.core.chain.entity.Block;
 import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.chain.entity.NulsDigestData;
 import io.nuls.core.context.NulsContext;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.log.ChainLog;
 import io.nuls.core.utils.log.Log;
 import io.nuls.poc.constant.ConsensusStatus;
@@ -87,14 +88,13 @@ public class BlockProcess {
             if(isDownload && ConsensusStatus.RUNNING != ConsensusSystemProvider.getConsensusStatus()) {
                 return false;
             }
-            ChainContainer needVerifyChain = checkAndGetForkChain(block);
-            if(needVerifyChain == null) {
+
+            boolean hasFoundForkChain = checkAndAddForkChain(block);
+            if(!hasFoundForkChain) {
 
                 ChainLog.debug("add block {} - {} in queue", block.getHeader().getHeight(), block.getHeader().getHash().getDigestHex());
 
                 isolatedBlocksProvider.addBlock(blockContainer);
-            } else if(!chainManager.getChains().contains(needVerifyChain)) {
-                chainManager.getChains().add(needVerifyChain);
             }
         }
         return false;
@@ -104,49 +104,31 @@ public class BlockProcess {
         //TODO
     }
 
-    private ChainContainer checkAndGetForkChain(Block block) {
+    private boolean checkAndAddForkChain(Block block) {
         // check the preHash is in the master chain
-        ChainContainer forkChain = getForkChain(chainManager.getMasterChain(), block, false);
-        if(forkChain != null) {
-            return forkChain;
+        boolean hasFoundForkChain = checkForkChainFromMasterChain(block);
+        if(hasFoundForkChain) {
+            return hasFoundForkChain;
         }
-
-        // check the preHash is in the waitVerifyChainList
-        for(ChainContainer waitVerifyChain : chainManager.getChains()) {
-            forkChain = getForkChain(waitVerifyChain, block, true);
-            if(forkChain != null) {
-                break;
-            }
-        }
-        return forkChain;
+        return checkForkChainFromForkChains(block);
     }
 
-    private ChainContainer getForkChain(ChainContainer chainContainer, Block block, boolean inForkChain) {
-        BlockHeader blockHeader = chainContainer.getChain().getEndBlockHeader();
+    private boolean checkForkChainFromMasterChain(Block block) {
 
-        NulsDigestData preHash = block.getHeader().getPreHash();
-        if(blockHeader.getHash().equals(preHash) && inForkChain) {
-            chainContainer.getChain().setEndBlockHeader(block.getHeader());
-            chainContainer.getChain().getBlockHeaderList().add(block.getHeader());
-            chainContainer.getChain().getBlockList().add(block);
-            return chainContainer;
-        }
+        BlockHeader blockHeader = block.getHeader();
 
-        List<BlockHeader> headerList = chainContainer.getChain().getBlockHeaderList();
+        Chain masterChain = chainManager.getMasterChain().getChain();
+        List<BlockHeader> headerList = masterChain.getBlockHeaderList();
 
-        for(int i = 0 ; i < headerList.size() ; i++) {
+        for(int i = headerList.size() - 1 ; i >= 0 ; i--) {
             BlockHeader header = headerList.get(i);
-            if(header.getHash().equals(preHash)) {
 
-                List<Block> blockList = chainContainer.getChain().getBlockList();
+            if(header.getHash().equals(blockHeader.getHash())) {
+                // found a same block , return true
+               return true;
+            } else if(header.getHash().equals(blockHeader.getPreHash())) {
 
-                ChainContainer forkChain = new ChainContainer();
                 Chain newForkChain = new Chain();
-
-                if(inForkChain) {
-                    newForkChain.getBlockList().addAll(blockList.subList(0, i));
-                    newForkChain.getBlockHeaderList().addAll(headerList.subList(0, i));
-                }
 
                 newForkChain.getBlockList().add(block);
                 newForkChain.getBlockHeaderList().add(block.getHeader());
@@ -154,11 +136,68 @@ public class BlockProcess {
                 newForkChain.setStartBlockHeader(block.getHeader());
                 newForkChain.setEndBlockHeader(block.getHeader());
 
-                forkChain.setChain(newForkChain);
+                chainManager.getChains().add(new ChainContainer(newForkChain));
+                return true;
+            }
 
-                return forkChain;
+            if(header.getHeight() < blockHeader.getHeight()) {
+                break;
             }
         }
-        return null;
+        return false;
     }
+
+    private boolean checkForkChainFromForkChains(Block block) {
+
+        BlockHeader blockHeader = block.getHeader();
+        NulsDigestData preHash = blockHeader.getPreHash();
+
+        // check the preHash is in the waitVerifyChainList
+        for(ChainContainer chainContainer : chainManager.getChains()) {
+
+            Chain forkChain = chainContainer.getChain();
+            List<BlockHeader> headerList = forkChain.getBlockHeaderList();
+
+            for(int i = headerList.size() - 1 ; i >= 0 ; i--) {
+                BlockHeader header = headerList.get(i);
+
+                if(header.getHash().equals(blockHeader.getHash())) {
+                    // found a same block , return true
+                    return true;
+                } else if(header.getHash().equals(preHash)) {
+
+                    // Check whether it is forked or connected. If it is a connection, add it.
+                    // 检查是分叉还是连接，如果是连接，则加上即可
+                    if(i == headerList.size() - 1) {
+                        chainContainer.getChain().setEndBlockHeader(block.getHeader());
+                        chainContainer.getChain().getBlockHeaderList().add(block.getHeader());
+                        chainContainer.getChain().getBlockList().add(block);
+                        return true;
+                    }
+
+                    // The block is again forked in the forked chain
+                    // 该块是在分叉链中再次进行的分叉
+                    List<Block> blockList = forkChain.getBlockList();
+
+                    Chain newForkChain = new Chain();
+
+                    newForkChain.getBlockList().addAll(blockList.subList(0, i));
+                    newForkChain.getBlockHeaderList().addAll(headerList.subList(0, i));
+
+                    newForkChain.getBlockList().add(block);
+                    newForkChain.getBlockHeaderList().add(block.getHeader());
+
+                    newForkChain.setStartBlockHeader(forkChain.getStartBlockHeader());
+                    newForkChain.setEndBlockHeader(block.getHeader());
+
+                    chainManager.getChains().add(new ChainContainer(newForkChain));
+                    return true;
+                } else if(header.getHeight() < blockHeader.getHeight()) {
+                    break;
+                }
+            }
+        }
+        return false;
+    }
+
 }

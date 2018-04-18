@@ -364,6 +364,9 @@ public class ChainContainer implements Cloneable {
         blockList.remove(rollbackBlock);
 
         List<BlockHeader> blockHeaderList = chain.getBlockHeaderList();
+        if(blockHeaderList.size() == 1) {
+            Log.error("=========");
+        }
         chain.setEndBlockHeader(blockHeaderList.get(blockHeaderList.size() - 2));
         BlockHeader rollbackBlockHeader = blockHeaderList.get(blockHeaderList.size() - 1);
         blockHeaderList.remove(rollbackBlockHeader);
@@ -442,7 +445,7 @@ public class ChainContainer implements Cloneable {
         newChain.setId(chainContainer.getChain().getId());
         newChain.setStartBlockHeader(chain.getStartBlockHeader());
         newChain.setEndBlockHeader(chain.getEndBlockHeader());
-        newChain.setBlockHeaderList(new ArrayList(chain.getBlockHeaderList()));
+        newChain.setBlockHeaderList(new ArrayList<>(chain.getBlockHeaderList()));
         newChain.setBlockList(new ArrayList<>(chain.getBlockList()));
 
         if(chain.getAgentList() != null) {
@@ -465,6 +468,9 @@ public class ChainContainer implements Cloneable {
 
         List<Block> blockList = newChain.getBlockList();
         for (int i = blockList.size() - 1; i >= 0; i--) {
+            if(i == 1) {
+                Log.error("==============");
+            }
             Block block = blockList.get(i);
             if (pointBlockHeader.getPreHash().equals(block.getHeader().getHash())) {
                 break;
