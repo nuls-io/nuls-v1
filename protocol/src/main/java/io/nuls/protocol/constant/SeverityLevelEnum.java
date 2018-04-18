@@ -21,16 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.consensus.poc.constant;
+package io.nuls.protocol.constant;
 
 /**
  * @author Niels
  */
-public interface ConsensusConstant {
+public enum SeverityLevelEnum {
 
+    WRONG,
+
+    NORMAL_FOUL,
     /**
-     * unit:second
+     * Flagrant Foul
      */
-    int BLOCK_TIME_INTERVAL_SECOND = 5;
-
+    FLAGRANT_FOUL;
 }

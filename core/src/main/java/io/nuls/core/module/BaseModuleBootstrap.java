@@ -120,4 +120,8 @@ public abstract class BaseModuleBootstrap {
     public void setModuleName(String moduleName) {
         this.moduleName = moduleName;
     }
+
+    protected void waitForDependency(short ...moduleIds){
+
+    }
 }
