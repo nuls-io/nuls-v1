@@ -31,8 +31,8 @@ import io.nuls.core.i18n.I18nUtils;
  */
 public enum ConsensusStatusEnum {
     NOT_IN(0, 69999),
-    IN(2, 69998),
-    WAITING(1, 69997);
+    WAITING(1, 69997),
+    IN(2, 69998);
     private final int code;
     private final int textCode;
 
@@ -56,12 +56,12 @@ public enum ConsensusStatusEnum {
 
     public static ConsensusStatusEnum getConsensusStatusByCode(int code) {
         switch (code) {
-            case 2:
-                return IN;
-            case 1:
-                return WAITING;
             case 0:
                 return NOT_IN;
+            case 1:
+                return WAITING;
+            case 2:
+                return IN;
             default:
                 return null;
         }

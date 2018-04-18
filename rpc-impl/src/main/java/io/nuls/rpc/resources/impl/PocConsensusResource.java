@@ -23,19 +23,41 @@
  */
 package io.nuls.rpc.resources.impl;
 
+import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
+import io.nuls.consensus.poc.service.PocConsensusService;
+import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.dto.Page;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.date.DateUtil;
+import io.nuls.core.utils.date.TimeService;
+import io.nuls.core.utils.log.Log;
+import io.nuls.core.utils.param.AssertUtil;
+import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.AgentDataService;
 import io.nuls.db.dao.UtxoOutputDataService;
+import io.nuls.db.entity.AgentPo;
+import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.ledger.service.intf.LedgerService;
+import io.nuls.protocol.constant.TransactionConstant;
 import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.model.Na;
+import io.nuls.protocol.model.Transaction;
 import io.nuls.rpc.entity.RpcResult;
+import io.nuls.rpc.resources.dto.WholeNetConsensusInfoDTO;
+import io.nuls.rpc.resources.form.CreateAgentForm;
+import io.nuls.rpc.resources.form.DepositForm;
+import io.nuls.rpc.resources.form.StopAgentForm;
+import io.nuls.rpc.resources.form.WithdrawForm;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -45,34 +67,31 @@ import java.util.Map;
 @Path("/consensus")
 @Api(value = "/browse", description = "Consensus")
 public class PocConsensusResource {
-    //    private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
-    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
-    private UtxoOutputDataService outputDataService = NulsContext.getServiceBean(UtxoOutputDataService.class);
-    private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
+    private PocConsensusService consensusService = NulsContext.getServiceBean(PocConsensusService.class);
 
     private AgentDataService agentDataService = NulsContext.getServiceBean(AgentDataService.class);
 
     public PocConsensusResource() {
     }
 
-    //
-//    @GET
-//    @Produces(MediaType.APPLICATION_JSON)
-//    @ApiOperation("Get the whole network consensus infomation!")
-//    public RpcResult getWholeInfo() {
-//        RpcResult result = RpcResult.getSuccess();
-//        WholeNetConsensusInfoDTO dto = new WholeNetConsensusInfoDTO();
-//
-//        Map<String, Object> map = this.consensusService.getConsensusInfo();
-//        dto.setAgentCount((Integer) map.get("agentCount"));
-//        dto.setRewardOfDay((Long) map.get("rewardOfDay"));
-//        dto.setTotalDeposit((Long) map.get("totalDeposit"));
-//        dto.setConsensusAccountNumber((Integer) map.get("memberCount"));
-//        result.setData(dto);
-//        return result;
-//
-//    }
-//
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation("Get the whole network consensus infomation!")
+    public RpcResult getWholeInfo() {
+        RpcResult result = RpcResult.getSuccess();
+        WholeNetConsensusInfoDTO dto = new WholeNetConsensusInfoDTO();
+
+        Map<String, Object> map = this.consensusService.getConsensusInfo();
+        dto.setAgentCount((Integer) map.get("agentCount"));
+        dto.setRewardOfDay((Long) map.get("rewardOfDay"));
+        dto.setTotalDeposit((Long) map.get("totalDeposit"));
+        dto.setConsensusAccountNumber((Integer) map.get("memberCount"));
+        result.setData(dto);
+        return result;
+
+    }
+
     @GET
     @Path("/local")
     @Produces(MediaType.APPLICATION_JSON)
@@ -83,89 +102,89 @@ public class PocConsensusResource {
         return result;
     }
 
-//    @GET
-//    @Path("/address/{address}")
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public RpcResult getInfo(@PathParam("address") String address) {
-//
-//        if(!Address.validAddress(StringUtils.formatStringPara(address))){
-//            return RpcResult.getFailed(ErrorCode.ADDRESS_ERROR);
-//        }
-//        RpcResult result = RpcResult.getSuccess();
-//
-//        Map<String, Object> dataMap = consensusService.getConsensusInfo(address);
-//        result.setData(dataMap);
-//        return result;
-//    }
-//
-//    @POST
-//    @Path("/agent")
-//    @Produces(MediaType.APPLICATION_JSON)
-//    @ApiOperation("Create an agent for consensus!")
-//    public RpcResult createAgent(CreateAgentForm form) throws NulsException {
-//        AssertUtil.canNotEmpty(form);
-//        AssertUtil.canNotEmpty(form.getAgentAddress());
-//        AssertUtil.canNotEmpty(form.getAgentName());
-//        AssertUtil.canNotEmpty(form.getPackingAddress());
-//        AssertUtil.canNotEmpty(form.getDeposit());
-//        AssertUtil.canNotEmpty(form.getRemark());
-//        AssertUtil.canNotEmpty(form.getPassword());
-//
-//        if (!Address.validAddress(form.getPackingAddress()) || !Address.validAddress(form.getAgentAddress())) {
-//            throw new NulsRuntimeException(ErrorCode.PARAMETER_ERROR);
-//        }
-//
-//        Map<String, Object> paramsMap = new HashMap<>();
-//        paramsMap.put("deposit", form.getDeposit());
-//        paramsMap.put("packingAddress", form.getPackingAddress());
-//        paramsMap.put("introduction", form.getRemark());
-//        paramsMap.put("commissionRate", form.getCommissionRate());
-//        paramsMap.put("agentName", form.getAgentName());
-//        Transaction tx = consensusService.startConsensus(form.getAgentAddress(), form.getPassword(), paramsMap);
-//        return RpcResult.getSuccess().setData(tx.getHash().getDigestHex());
-//    }
-//
-//
-//    @POST
-//    @Path("/deposit")
-//    @Produces(MediaType.APPLICATION_JSON)
-//    @ApiOperation("deposit nuls to a bank!")
-//    public RpcResult depositToAgent(DepositForm form) throws NulsException {
-//        AssertUtil.canNotEmpty(form);
-//        AssertUtil.canNotEmpty(form.getAddress());
-//        AssertUtil.canNotEmpty(form.getAgentId());
-//        AssertUtil.canNotEmpty(form.getDeposit());
-//        AssertUtil.canNotEmpty(form.getPassword());
-//        Map<String, Object> paramsMap = new HashMap<>();
-//        if (!Address.validAddress(form.getAddress())) {
-//            throw new NulsRuntimeException(ErrorCode.PARAMETER_ERROR);
-//        }
-//
-//        paramsMap.put("deposit", form.getDeposit());
-//        paramsMap.put("agentHash", form.getAgentId());
-//        Transaction tx = consensusService.startConsensus(form.getAddress(), form.getPassword(), paramsMap);
-//        return RpcResult.getSuccess().setData(tx.getHash().getDigestHex());
-//    }
-//
-//
-//    @POST
-////    @Path("/agent/stop")
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public RpcResult stopAgent(StopAgentForm form) throws NulsException, IOException {
-//        AssertUtil.canNotEmpty(form);
-//        AssertUtil.canNotEmpty(form.getAddress());
-//        AssertUtil.canNotEmpty(form.getPassword());
-//        Transaction tx = consensusService.stopConsensus(form.getAddress(), form.getPassword(), null);
-//        return RpcResult.getSuccess().setData(tx.getHash().getDigestHex());
-//    }
-//
+    @GET
+    @Path("/address/{address}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult getInfo(@PathParam("address") String address) {
+
+        if (!Address.validAddress(StringUtils.formatStringPara(address))) {
+            return RpcResult.getFailed(ErrorCode.ADDRESS_ERROR);
+        }
+        RpcResult result = RpcResult.getSuccess();
+
+        Map<String, Object> dataMap = consensusService.getConsensusInfo(address);
+        result.setData(dataMap);
+        return result;
+    }
+
+    @POST
+    @Path("/agent")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation("Create an agent for consensus!")
+    public RpcResult createAgent(CreateAgentForm form) throws NulsException {
+        AssertUtil.canNotEmpty(form);
+        AssertUtil.canNotEmpty(form.getAgentAddress());
+        AssertUtil.canNotEmpty(form.getAgentName());
+        AssertUtil.canNotEmpty(form.getPackingAddress());
+        AssertUtil.canNotEmpty(form.getDeposit());
+        AssertUtil.canNotEmpty(form.getRemark());
+        AssertUtil.canNotEmpty(form.getPassword());
+
+        if (!Address.validAddress(form.getPackingAddress()) || !Address.validAddress(form.getAgentAddress())) {
+            throw new NulsRuntimeException(ErrorCode.PARAMETER_ERROR);
+        }
+
+        Map<String, Object> paramsMap = new HashMap<>();
+        paramsMap.put("deposit", form.getDeposit());
+        paramsMap.put("packingAddress", form.getPackingAddress());
+        paramsMap.put("introduction", form.getRemark());
+        paramsMap.put("commissionRate", form.getCommissionRate());
+        paramsMap.put("agentName", form.getAgentName());
+        Transaction tx = consensusService.startConsensus(form.getAgentAddress(), form.getPassword(), paramsMap);
+        return RpcResult.getSuccess().setData(tx.getHash().getDigestHex());
+    }
+
+
+    @POST
+    @Path("/deposit")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation("deposit nuls to a bank!")
+    public RpcResult depositToAgent(DepositForm form) throws NulsException {
+        AssertUtil.canNotEmpty(form);
+        AssertUtil.canNotEmpty(form.getAddress());
+        AssertUtil.canNotEmpty(form.getAgentId());
+        AssertUtil.canNotEmpty(form.getDeposit());
+        AssertUtil.canNotEmpty(form.getPassword());
+        Map<String, Object> paramsMap = new HashMap<>();
+        if (!Address.validAddress(form.getAddress())) {
+            throw new NulsRuntimeException(ErrorCode.PARAMETER_ERROR);
+        }
+
+        paramsMap.put("deposit", form.getDeposit());
+        paramsMap.put("agentHash", form.getAgentId());
+        Transaction tx = consensusService.startConsensus(form.getAddress(), form.getPassword(), paramsMap);
+        return RpcResult.getSuccess().setData(tx.getHash().getDigestHex());
+    }
+
+
+    @POST
+    @Path("/agent/stop")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult stopAgent(StopAgentForm form) throws NulsException, IOException {
+        AssertUtil.canNotEmpty(form);
+        AssertUtil.canNotEmpty(form.getAddress());
+        AssertUtil.canNotEmpty(form.getPassword());
+        Transaction tx = consensusService.stopConsensus(form.getAddress(), form.getPassword(), null);
+        return RpcResult.getSuccess().setData(tx.getHash().getDigestHex());
+    }
+
 //
 //    @GET
 //    @Path("/profit")
 //    @Produces(MediaType.APPLICATION_JSON)
 //    public RpcResult profit(@QueryParam("address") String address) {
 //        Map<String, Object> map = new HashMap<>();
-//        if ( !Address.validAddress(address)) {
+//        if (!Address.validAddress(address)) {
 //            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
 //        }
 //        if (address == null) {
@@ -194,149 +213,149 @@ public class PocConsensusResource {
 //        rpcResult.setData(map);
 //        return rpcResult;
 //    }
-//
-//
-//    @GET
-//    @Path("/agent/list")
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public RpcResult getAgentList(@QueryParam("pageNumber") Integer pageNumber, @QueryParam("pageSize") Integer pageSize,
-//                                  @QueryParam("keyword") String keyword, @QueryParam("sortType") String sortType) {
-//        if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
-//            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
-//        }
-//        if (null == pageNumber || pageNumber == 0) {
-//            pageNumber = 1;
-//        }
-//        if (null == pageSize || pageSize == 0) {
-//            pageSize = 10;
-//        }
-//
-//        RpcResult result = RpcResult.getSuccess();
-//        Page<Map<String, Object>> list = this.consensusService.getAgentList(keyword, null, null, sortType, pageNumber, pageSize);
-//        result.setData(list);
-//        return result;
-//    }
-//
-//    @GET
-//    @Path("/agent/{agentAddress}")
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public RpcResult getAgentByAddress(@PathParam("agentAddress") String agentAddress) {
-//        if ( !Address.validAddress(agentAddress)) {
-//            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
-//        }
-//
-//        RpcResult result = RpcResult.getSuccess();
-//        Map<String, Object> data = this.consensusService.getAgent(agentAddress);
-//        result.setData(data);
-//        return result;
-//    }
-//
-//    @GET
-//    @Path("/agent/address/{address}")
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public RpcResult getAgentListByDepositAddress(@QueryParam("pageNumber") Integer pageNumber, @QueryParam("pageSize") Integer pageSize, @PathParam("address") String address) {
-//        RpcResult result = RpcResult.getSuccess();
-//
-//        if (null == pageNumber || pageNumber == 0) {
-//            pageNumber = 1;
-//        }
-//        if (null == pageSize || pageSize == 0) {
-//            pageSize = 10;
-//        }
-//        if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
-//            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
-//        }
-//
-//        Page<Map<String, Object>> list = this.consensusService.getAgentList(null, address, null, null, pageNumber, pageSize);
-//        result.setData(list);
-//        return result;
-//    }
-//
-//    @GET
-//    @Path("/deposit/address/{address}")
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public RpcResult getDepositListByAddress(@PathParam("address") String address,
-//                                             @QueryParam("pageNumber") Integer pageNumber, @QueryParam("pageSize") Integer pageSize, @QueryParam("agentAddress") String agentAddress) {
-//        AssertUtil.canNotEmpty(address);
-//        if (null == pageNumber || pageNumber == 0) {
-//            pageNumber = 1;
-//        }
-//        if (null == pageSize || pageSize == 0) {
-//            pageSize = 10;
-//        }
-//        if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
-//            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
-//        }
-//        RpcResult result = RpcResult.getSuccess();
-//
-//        Page<Map<String, Object>> page = this.consensusService.getDepositList(address, agentAddress, pageNumber, pageSize);
-//        result.setData(page);
-//        return result;
-//    }
-//
-//    @GET
-//    @Path("/deposit/agent/{agentAddress}")
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public RpcResult queryDepositListByAgentAddress(@PathParam("agentAddress") String agentAddress,
-//                                                    @QueryParam("pageNumber") Integer pageNumber, @QueryParam("pageSize") Integer pageSize) {
-//        AssertUtil.canNotEmpty(agentAddress);
-//
-//        if (null == pageNumber || pageNumber == 0) {
-//            pageNumber = 1;
-//        }
-//        if (null == pageSize || pageSize == 0) {
-//            pageSize = 10;
-//        }
-//        if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
-//            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
-//        }
-//        RpcResult result = RpcResult.getSuccess();
-//
-//        Page<Map<String, Object>> page = this.consensusService.getDepositList(null, agentAddress, pageNumber, pageSize);
-//        result.setData(page);
-//        return result;
-//    }
-//
-//    @GET
-//    @Path("/agent/status")
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public RpcResult getAllAgentStatusList() {
-//        RpcResult rpcResult = RpcResult.getSuccess();
-//        List<AgentPo> poList = agentDataService.getList();
-//        if (null == poList || poList.isEmpty()) {
-//            return rpcResult;
-//        }
-//        Map<String, Object> statusMap = new HashMap<>();
-//        for (AgentPo po : poList) {
-//            statusMap.put(po.getAgentAddress(), po.getStatus());
-//        }
-//        return rpcResult.setData(statusMap);
-//    }
-//
-//    @POST
-//    @Path("/withdraw")
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public RpcResult exitConsensus(WithdrawForm form) {
-//        AssertUtil.canNotEmpty(form);
-//        AssertUtil.canNotEmpty(form.getTxHash());
-//        AssertUtil.canNotEmpty(form.getPassword());
-//        AssertUtil.canNotEmpty(form.getAddress());
-//        if(!Address.validAddress(form.getAddress())){
-//            return RpcResult.getFailed(ErrorCode.ADDRESS_ERROR);
-//        }
-//
-//        Map<String, Object> params = new HashMap<>();
-//        params.put("txHash", form.getTxHash());
-//        Transaction tx = null;
-//        try {
-//            tx = consensusService.stopConsensus(form.getAddress(), form.getPassword(), params);
-//        } catch (NulsException e) {
-//            Log.error(e);
-//            return RpcResult.getFailed(e.getMessage());
-//        } catch (IOException e) {
-//            Log.error(e);
-//            return RpcResult.getFailed(e.getMessage());
-//        }
-//        return RpcResult.getSuccess().setData(tx.getHash().getDigestHex());
-//    }
+
+
+    @GET
+    @Path("/agent/list")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult getAgentList(@QueryParam("pageNumber") Integer pageNumber, @QueryParam("pageSize") Integer pageSize,
+                                  @QueryParam("keyword") String keyword, @QueryParam("sortType") String sortType) {
+        if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+        if (null == pageNumber || pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if (null == pageSize || pageSize == 0) {
+            pageSize = 10;
+        }
+
+        RpcResult result = RpcResult.getSuccess();
+        Page<Map<String, Object>> list = this.consensusService.getAgentList(keyword, null, null, sortType, pageNumber, pageSize);
+        result.setData(list);
+        return result;
+    }
+
+    @GET
+    @Path("/agent/{agentAddress}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult getAgentByAddress(@PathParam("agentAddress") String agentAddress) {
+        if (!Address.validAddress(agentAddress)) {
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+
+        RpcResult result = RpcResult.getSuccess();
+        Map<String, Object> data = this.consensusService.getAgent(agentAddress);
+        result.setData(data);
+        return result;
+    }
+
+    @GET
+    @Path("/agent/address/{address}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult getAgentListByDepositAddress(@QueryParam("pageNumber") Integer pageNumber, @QueryParam("pageSize") Integer pageSize, @PathParam("address") String address) {
+        RpcResult result = RpcResult.getSuccess();
+
+        if (null == pageNumber || pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if (null == pageSize || pageSize == 0) {
+            pageSize = 10;
+        }
+        if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+
+        Page<Map<String, Object>> list = this.consensusService.getAgentList(null, address, null, null, pageNumber, pageSize);
+        result.setData(list);
+        return result;
+    }
+
+    @GET
+    @Path("/deposit/address/{address}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult getDepositListByAddress(@PathParam("address") String address,
+                                             @QueryParam("pageNumber") Integer pageNumber, @QueryParam("pageSize") Integer pageSize, @QueryParam("agentAddress") String agentAddress) {
+        AssertUtil.canNotEmpty(address);
+        if (null == pageNumber || pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if (null == pageSize || pageSize == 0) {
+            pageSize = 10;
+        }
+        if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+        RpcResult result = RpcResult.getSuccess();
+
+        Page<Map<String, Object>> page = this.consensusService.getDepositList(address, agentAddress, pageNumber, pageSize);
+        result.setData(page);
+        return result;
+    }
+
+    @GET
+    @Path("/deposit/agent/{agentAddress}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult queryDepositListByAgentAddress(@PathParam("agentAddress") String agentAddress,
+                                                    @QueryParam("pageNumber") Integer pageNumber, @QueryParam("pageSize") Integer pageSize) {
+        AssertUtil.canNotEmpty(agentAddress);
+
+        if (null == pageNumber || pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if (null == pageSize || pageSize == 0) {
+            pageSize = 10;
+        }
+        if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+        RpcResult result = RpcResult.getSuccess();
+
+        Page<Map<String, Object>> page = this.consensusService.getDepositList(null, agentAddress, pageNumber, pageSize);
+        result.setData(page);
+        return result;
+    }
+
+    @GET
+    @Path("/agent/status")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult getAllAgentStatusList() {
+        RpcResult rpcResult = RpcResult.getSuccess();
+        List<AgentPo> poList = agentDataService.getList();
+        if (null == poList || poList.isEmpty()) {
+            return rpcResult;
+        }
+        Map<String, Object> statusMap = new HashMap<>();
+        for (AgentPo po : poList) {
+            statusMap.put(po.getAgentAddress(), po.getStatus());
+        }
+        return rpcResult.setData(statusMap);
+    }
+
+    @POST
+    @Path("/withdraw")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcResult exitConsensus(WithdrawForm form) {
+        AssertUtil.canNotEmpty(form);
+        AssertUtil.canNotEmpty(form.getTxHash());
+        AssertUtil.canNotEmpty(form.getPassword());
+        AssertUtil.canNotEmpty(form.getAddress());
+        if (!Address.validAddress(form.getAddress())) {
+            return RpcResult.getFailed(ErrorCode.ADDRESS_ERROR);
+        }
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("txHash", form.getTxHash());
+        Transaction tx = null;
+        try {
+            tx = consensusService.stopConsensus(form.getAddress(), form.getPassword(), params);
+        } catch (NulsException e) {
+            Log.error(e);
+            return RpcResult.getFailed(e.getMessage());
+        } catch (IOException e) {
+            Log.error(e);
+            return RpcResult.getFailed(e.getMessage());
+        }
+        return RpcResult.getSuccess().setData(tx.getHash().getDigestHex());
+    }
 }

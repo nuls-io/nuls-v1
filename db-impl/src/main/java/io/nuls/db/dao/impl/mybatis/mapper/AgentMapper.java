@@ -34,8 +34,10 @@ import java.util.List;
  */
 public interface AgentMapper extends BaseMapper<String, AgentPo> {
 
-    List<AgentPo> getAllList(long blockHeight);
-
     int deleteByPrimaryKey(AgentPo po);
     int realDeleteByPrimaryKey(AgentPo po);
+
+    List<AgentPo> getAllList();
+
+    List<AgentPo> getEffectiveList(AgentPo agentPo);
 }

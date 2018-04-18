@@ -44,5 +44,7 @@ public interface DepositMapper extends BaseMapper<String,DepositPo> {
     int deleteByPrimaryKey(DepositPo po);
     int realDeleteByPrimaryKey(DepositPo po);
 
-    List<DepositPo> getAllList(long blockHeight);
+    List<DepositPo> getAllList();
+
+    List<DepositPo> getEffectiveList(DepositPo po);
 }

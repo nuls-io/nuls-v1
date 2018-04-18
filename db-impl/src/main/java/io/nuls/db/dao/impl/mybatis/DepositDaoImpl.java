@@ -81,7 +81,17 @@ public class DepositDaoImpl extends BaseDaoImpl<DepositMapper, String, DepositPo
     }
 
     @Override
-    public List<DepositPo> getAllList(long blockHeight) {
-        return this.getMapper().getAllList(blockHeight);
+    public List<DepositPo> getAllList( ) {
+        return this.getMapper().getAllList( );
+    }
+
+    @Override
+    public List<DepositPo> getEffectiveList(String address, long blockHeight, String agentId, Integer status) {
+        DepositPo po = new DepositPo();
+        po.setBlockHeight(blockHeight);
+        po.setAgentHash(agentId);
+        po.setAddress(address);
+        po.setStatus(status);
+        return this.getMapper().getEffectiveList(po);
     }
 }

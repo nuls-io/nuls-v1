@@ -36,7 +36,9 @@ public interface AgentDataService extends BaseDataService<String, AgentPo> {
 
     int updateSelective(AgentPo po);
 
-    List<AgentPo> getAllList(long blockHeight);
+    List<AgentPo> getAllList();
+
+    List<AgentPo> getEffectiveList(String address, long blockHeight, Integer status);
 
     int deleteById(String id, long blockHeight);
 

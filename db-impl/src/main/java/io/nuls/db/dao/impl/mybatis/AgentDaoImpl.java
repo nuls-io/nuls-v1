@@ -54,8 +54,17 @@ public class AgentDaoImpl extends BaseDaoImpl<AgentMapper, String, AgentPo> impl
     }
 
     @Override
-    public List<AgentPo> getAllList(long blockHeight) {
-        return this.getMapper().getAllList(blockHeight);
+    public List<AgentPo> getAllList() {
+        return this.getMapper().getAllList();
+    }
+
+    @Override
+    public List<AgentPo> getEffectiveList(String agentAddress, long blockHeight, Integer status) {
+        AgentPo po = new AgentPo();
+        po.setBlockHeight(blockHeight);
+        po.setAgentAddress(agentAddress);
+        po.setStatus(status);
+        return this.getMapper().getEffectiveList(po);
     }
 
     @Override
