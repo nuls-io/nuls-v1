@@ -24,23 +24,35 @@
 package io.nuls.protocol.base.module.impl;
 
 
+import io.nuls.consensus.poc.protocol.context.ConsensusContext;
+import io.nuls.consensus.poc.protocol.service.BlockService;
 import io.nuls.consensus.poc.protocol.service.DownloadService;
+import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
+import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.service.intf.EventBusService;
+import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.protocol.base.download.DownloadServiceImpl;
 import io.nuls.protocol.base.handler.BlockEventHandler;
 import io.nuls.protocol.base.handler.BlocksHashHandler;
 import io.nuls.protocol.base.handler.GetBlocksHashHandler;
 import io.nuls.protocol.base.handler.NotFoundHander;
 import io.nuls.protocol.base.service.impl.BlockServiceImpl;
+import io.nuls.protocol.base.service.impl.BlockStorageService;
 import io.nuls.protocol.base.service.impl.SystemServiceImpl;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.event.BlockEvent;
 import io.nuls.protocol.event.BlocksHashEvent;
 import io.nuls.protocol.event.GetBlocksHashRequest;
 import io.nuls.protocol.event.NotFoundEvent;
+import io.nuls.protocol.model.Block;
+import io.nuls.protocol.model.Transaction;
 import io.nuls.protocol.module.AbstractProtocolModule;
+
+import java.io.IOException;
 
 /**
  * @author Niels
@@ -52,16 +64,59 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
 
     @Override
     public void init() {
+        this.waitForDependencyInited(NulsConstant.MODULE_ID_CACHE,NulsConstant.MODULE_ID_DB,NulsConstant.MODULE_ID_EVENT_BUS);
+        ConsensusContext.initConfiguration();
         this.registerService(BlockServiceImpl.class);
-        this.registerService(DownloadServiceImpl.class);
+        Block bestBlock = null;
+        try {
+            BlockStorageService service = BlockStorageService.getInstance();
+            bestBlock = service.getBlock(service.getBestHeight());
+        } catch (Exception e) {
+            Log.error(e);
+        }
+        if (null != bestBlock) {
+            NulsContext.getInstance().setBestBlock(bestBlock);
+        }
         this.registerService(SystemServiceImpl.class);
+        this.registerService(DownloadServiceImpl.class);
     }
 
     @Override
     public void start() {
+        this.checkGenesisBlock();
+
+
         this.initHandlers();
         NulsContext.getServiceBean(DownloadService.class).start();
         Log.info("the protocol module is started!");
+    }
+
+    public void checkGenesisBlock() {
+        Block genesisBlock = NulsContext.getInstance().getGenesisBlock();
+        ValidateResult result = genesisBlock.verify();
+        if (result.isFailed()) {
+            throw new NulsRuntimeException(ErrorCode.DATA_ERROR, result.getMessage());
+        }
+        BlockService blockService = NulsContext.getServiceBean(BlockService.class);
+//        LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
+        Block localGenesisBlock = blockService.getGengsisBlock();
+        if (null == localGenesisBlock) {
+//            for (Transaction tx : genesisBlock.getTxs()) {
+//                ledgerService.approvalTx(tx, genesisBlock);
+//            }
+            try {
+                blockService.saveBlock(genesisBlock);
+            } catch (IOException e) {
+                throw new NulsRuntimeException(e);
+            }
+            return;
+        }
+        localGenesisBlock.verify();
+        String logicHash = genesisBlock.getHeader().getHash().getDigestHex();
+        String localHash = localGenesisBlock.getHeader().getHash().getDigestHex();
+        if (!logicHash.equals(localHash)) {
+            throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
+        }
     }
 
     private void initHandlers() {

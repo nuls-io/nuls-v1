@@ -25,10 +25,12 @@ package io.nuls.consensus.poc.module.impl;
 
 import io.nuls.consensus.poc.handler.*;
 import io.nuls.consensus.poc.module.AbstractPocConsensusModule;
+import io.nuls.consensus.poc.protocol.context.ConsensusContext;
 import io.nuls.consensus.poc.protocol.service.BlockService;
 import io.nuls.consensus.poc.service.impl.PocConsensusServiceImpl;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.ModuleStatusEnum;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.BaseThread;
 import io.nuls.core.thread.manager.TaskManager;
@@ -36,7 +38,6 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.service.intf.EventBusService;
 import io.nuls.ledger.service.intf.LedgerService;
-import io.nuls.protocol.base.service.impl.BlockServiceImpl;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.event.*;
 import io.nuls.protocol.model.Block;
@@ -54,22 +55,12 @@ public class PocConsensusModuleBootstrap extends AbstractPocConsensusModule {
 
     @Override
     public void init() {
-
-        this.registerService(BlockServiceImpl.class);
+        this.waitForDependencyInited(NulsConstant.MODULE_ID_PROTOCOL);
         this.registerService(PocConsensusServiceImpl.class);
-
-        this.registerService(PocConsensusServiceImpl.class);
-
     }
 
     @Override
     public void start() {
-        try {
-            checkGenesisBlock();
-        } catch (Exception e) {
-            Log.error(e);
-        }
-
         try {
             NulsContext.getServiceBean(PocConsensusServiceImpl.class).startup();
         } catch (Exception e) {
@@ -101,29 +92,7 @@ public class PocConsensusModuleBootstrap extends AbstractPocConsensusModule {
     }
 
 
-    public void checkGenesisBlock() throws Exception {
-        Block genesisBlock = NulsContext.getInstance().getGenesisBlock();
-        ValidateResult result = genesisBlock.verify();
-        if (result.isFailed()) {
-            throw new NulsRuntimeException(ErrorCode.DATA_ERROR, result.getMessage());
-        }
-        BlockService blockService = NulsContext.getServiceBean(BlockService.class);
-        LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
-        Block localGenesisBlock = blockService.getGengsisBlock();
-        if (null == localGenesisBlock) {
-            for (Transaction tx : genesisBlock.getTxs()) {
-                ledgerService.approvalTx(tx, genesisBlock);
-            }
-            blockService.saveBlock(genesisBlock);
-            return;
-        }
-        localGenesisBlock.verify();
-        String logicHash = genesisBlock.getHeader().getHash().getDigestHex();
-        String localHash = localGenesisBlock.getHeader().getHash().getDigestHex();
-        if (!logicHash.equals(localHash)) {
-            throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
-        }
-    }
+
 
     @Override
     public void shutdown() {

@@ -70,8 +70,13 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public Block getLocalBestBlock() {
-        // todo auto-generated method stub(niels)
-        return null;
+         long height = this.blockStorageService.getBestHeight();
+        try {
+            return blockStorageService.getBlock(height);
+        } catch (Exception e) {
+            Log.error(e);
+            return null;
+        }
     }
 
     @Override

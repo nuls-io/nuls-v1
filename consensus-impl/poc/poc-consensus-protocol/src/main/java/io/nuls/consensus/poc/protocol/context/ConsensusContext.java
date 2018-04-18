@@ -47,7 +47,6 @@ public class ConsensusContext {
     //todo impl
 
     private static ConsensusStatus consensusStatus;
-    private static BlockService blockService = NulsContext.getServiceBean(BlockService.class);
 
     public static ConsensusStatus getConsensusStatus() {
         return consensusStatus;
@@ -61,18 +60,9 @@ public class ConsensusContext {
     private static List<String> seedNodeList;
 
     public static void initConfiguration() {
-        Block bestBlock = null;
+
         Block genesisBlock = GenesisBlock.getInstance();
         NulsContext.getInstance().setGenesisBlock(genesisBlock);
-        try {
-            bestBlock = blockService.getLocalBestBlock();
-        } catch (Exception e) {
-            Log.error(e);
-        }
-        if (bestBlock == null) {
-            bestBlock = genesisBlock;
-        }
-        NulsContext.getInstance().setBestBlock(bestBlock);
 
         partakePacking = NulsConfig.MODULES_CONFIG.getCfgValue(PocConsensusConstant.CFG_CONSENSUS_SECTION, PocConsensusConstant.PROPERTY_PARTAKE_PACKING, false);
         seedNodeList = new ArrayList<>();

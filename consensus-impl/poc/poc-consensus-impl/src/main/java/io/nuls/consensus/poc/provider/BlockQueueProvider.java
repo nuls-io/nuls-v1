@@ -43,7 +43,7 @@ public class BlockQueueProvider implements QueueProvider {
 
     private QueueService<BlockContainer> blockQueue;
 
-    private DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
+    private DownloadService downloadService;
 
     private boolean downloadBlockQueueHasDestory;
 
@@ -68,7 +68,7 @@ public class BlockQueueProvider implements QueueProvider {
 
             if (receive) {
                 int status = BlockContainerStatus.RECEIVED;
-                if (downloadService.getStatus() != DownloadStatus.SUCCESS) {
+                if (getDownloadService() .getStatus() != DownloadStatus.SUCCESS) {
                     status = BlockContainerStatus.DOWNLOADING;
                 }
 
@@ -107,7 +107,7 @@ public class BlockQueueProvider implements QueueProvider {
                 blockContainer = blockQueue.poll(QUEUE_NAME_DOWNLOAD);
             }
 
-            boolean hasDownloadSuccess = downloadService.getStatus() == DownloadStatus.SUCCESS;
+            boolean hasDownloadSuccess = getDownloadService() .getStatus() == DownloadStatus.SUCCESS;
             if (blockContainer == null && hasDownloadSuccess && !downloadBlockQueueHasDestory) {
                 downloadBlockQueueHasDestory = true;
                 blockQueue.destroyQueue(QUEUE_NAME_DOWNLOAD);
@@ -144,5 +144,12 @@ public class BlockQueueProvider implements QueueProvider {
     private void createDownloadQueue() {
         blockQueue.createQueue(QUEUE_NAME_DOWNLOAD, 20000l, false);
         downloadBlockQueueHasDestory = false;
+    }
+
+    public DownloadService getDownloadService() {
+        if(null==downloadService){
+            this.downloadService =  NulsContext.getServiceBean(DownloadService.class);
+        }
+        return downloadService;
     }
 }

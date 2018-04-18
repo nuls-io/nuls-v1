@@ -24,6 +24,7 @@
 package io.nuls.network.module.impl;
 
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.log.Log;
@@ -49,6 +50,7 @@ public class NetworkModuleBootstrap extends AbstractNetworkModule {
 
     @Override
     public void init() {
+        this.waitForDependencyInited(NulsConstant.MODULE_ID_DB,NulsConstant.MODULE_ID_CACHE);
         this.registerEvent();
         try {
             NetworkContext.setNetworkConfig(ConfigLoader.loadProperties(NetworkConstant.NETWORK_PROPERTIES));

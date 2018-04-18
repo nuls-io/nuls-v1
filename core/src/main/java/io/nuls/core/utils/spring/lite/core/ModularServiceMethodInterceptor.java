@@ -74,12 +74,12 @@ public class ModularServiceMethodInterceptor implements MethodInterceptor {
             fillAnnotationList(annotationList, clazz, method);
             BaseModuleBootstrap module = ServiceManager.getInstance().getModule(clazz);
             if (module == null) {
-                throw new BeanStatusException(ErrorCode.DATA_ERROR, "Access to a service of an un start module!" + method.toString());
+                throw new BeanStatusException(ErrorCode.DATA_ERROR, "Access to a service of an un start module!["+className+"]" + method.toString());
             }
             if (module.getModuleId() != NulsConstant.MODULE_ID_MICROKERNEL &&
                     module.getStatus() != ModuleStatusEnum.STARTING &&
                     module.getStatus() != ModuleStatusEnum.RUNNING) {
-                throw new BeanStatusException(ErrorCode.DATA_ERROR, "Access to a service of an un start module!" + method.toString());
+                throw new BeanStatusException(ErrorCode.DATA_ERROR, "Access to a service of an un start module!["+module.getModuleName()+"]"  + method.toString());
             }
             boolean isOk = SpringLiteContext.checkBeanOk(obj);
             if (!isOk) {

@@ -71,6 +71,7 @@ public class NulsContext {
         while (genesisBlock == null) {
             try {
                 Thread.sleep(100L);
+                System.out.println("获取创世块为空！");
             } catch (InterruptedException e) {
             }
         }
@@ -131,14 +132,15 @@ public class NulsContext {
 
     private static <T> T getServiceBean(Class<T> tClass, long l) {
         try {
-            Thread.sleep(300L);
+            Thread.sleep(100L);
+            System.out.println("获取service失败！"+tClass);
         } catch (InterruptedException e1) {
             Log.error(e1);
         }
         try {
             return SpringLiteContext.getBean(tClass);
         } catch (Exception e) {
-            if (l > 20000) {
+            if (l > 1200) {
                 Log.error(e);
                 return null;
             }
