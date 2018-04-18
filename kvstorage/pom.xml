@@ -3,11 +3,13 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <groupId>io.nuls</groupId>
-    <artifactId>network</artifactId>
+    <artifactId>kvstorage</artifactId>
     <version>0.8.0-SNAPSHOT</version>
     <packaging>jar</packaging>
+
+    <name>kvstorage</name>
+    <url>http://nuls.io</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -18,28 +20,14 @@
 
     <dependencies>
         <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>core</artifactId>
-            <version>0.8.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>io.nuls</groupId>
-            <artifactId>event-bus</artifactId>
-            <version>0.8.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>io.nuls</groupId>
-            <artifactId>db</artifactId>
-            <version>0.8.0-SNAPSHOT</version>
-        </dependency>
-        <!--<dependency>-->
-            <!--<groupId>io.nuls</groupId>-->
-            <!--<artifactId>db</artifactId>-->
-            <!--<version>0.8.0-SNAPSHOT</version>-->
-        <!--</dependency>-->
-        <dependency>
-            <groupId>io.nuls</groupId>
-            <artifactId>cache</artifactId>
             <version>0.8.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
@@ -65,5 +53,7 @@
             </plugin>
         </plugins>
     </build>
+
+
 
 </project>
