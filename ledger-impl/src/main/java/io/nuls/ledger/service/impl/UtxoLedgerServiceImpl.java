@@ -325,7 +325,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     @DbSession
-    public boolean saveTxList(List<Transaction> txList) throws IOException {
+    public void saveTxList(List<Transaction> txList) throws IOException {
         lock.lock();
         try {
             boolean isMine;
@@ -333,11 +333,9 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             List<TransactionLocalPo> localPoList = new ArrayList<>();
             for (int i = 0; i < txList.size(); i++) {
                 Transaction tx = txList.get(i);
-
                 TransactionPo po = UtxoTransferTool.toTransactionPojo(tx);
 
                 poList.add(po);
-                isMine = false;
                 if (tx.getType() == TransactionConstant.TX_TYPE_CANCEL_DEPOSIT) {
                     isMine = tx.isMine();
                 } else {
@@ -359,6 +357,12 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         } finally {
             lock.unlock();
         }
+    }
+
+    @Override
+    public boolean saveLocalTx(Transaction tx) throws IOException {
+        TransactionLocalPo localPo = UtxoTransferTool.toLocalTransactionPojo(tx);
+        txDao.save(localPo);
         return false;
     }
 

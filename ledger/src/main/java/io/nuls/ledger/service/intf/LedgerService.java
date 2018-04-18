@@ -73,7 +73,9 @@ public interface LedgerService {
      */
     Result lock(String address, String password, Na amount, long unlockTime, String remark);
 
-    boolean saveTxList(List<Transaction> txList) throws IOException;
+    void saveTxList(List<Transaction> txList) throws IOException;
+
+    boolean saveLocalTx(Transaction tx) throws IOException;
 
     void saveTxInLocal(String address);
 
