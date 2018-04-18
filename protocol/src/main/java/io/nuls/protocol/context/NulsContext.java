@@ -71,7 +71,6 @@ public class NulsContext {
         while (genesisBlock == null) {
             try {
                 Thread.sleep(100L);
-                System.out.println("获取创世块为空！");
             } catch (InterruptedException e) {
             }
         }
@@ -133,7 +132,7 @@ public class NulsContext {
     private static <T> T getServiceBean(Class<T> tClass, long l) {
         try {
             Thread.sleep(100L);
-            System.out.println("获取service失败！"+tClass);
+//            System.out.println("获取service失败！"+tClass);
         } catch (InterruptedException e1) {
             Log.error(e1);
         }
