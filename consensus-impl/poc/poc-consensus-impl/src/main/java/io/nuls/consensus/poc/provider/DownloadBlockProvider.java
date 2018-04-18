@@ -22,21 +22,42 @@
  * SOFTWARE.
  */
 
-package io.nuls.consensus.poc.protocol.locker;
+package io.nuls.consensus.poc.provider;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import io.nuls.consensus.poc.container.BlockContainer;
+import io.nuls.core.utils.queue.service.impl.QueueService;
 
 /**
  * Created by ln on 2018/4/13.
  */
-public final class Lockers {
+public class DownloadBlockProvider {
 
-    public final static Lock OUTER_LOCK = new ReentrantLock();
+    private final static String QUEUE_NAME = "download-isolated-block-queue";
 
-    public final static Lock TX_MEMORY_LOCK = new ReentrantLock();
+    private QueueService<BlockContainer> blockQueue;
 
-    public final static Lock ROUND_LOCK = new ReentrantLock();
+    public DownloadBlockProvider() {
+        blockQueue = new QueueService<>();
+        blockQueue.createQueue(QUEUE_NAME, 2000l, false);
+    }
 
-    public final static Lock CHAIN_LOCK = new ReentrantLock();
+    public boolean put(BlockContainer blockContainer) {
+        if (blockContainer == null || blockContainer.getBlock() == null) {
+            return false;
+        }
+        blockQueue.offer(QUEUE_NAME, blockContainer);
+        return true;
+    }
+
+    public BlockContainer get() throws InterruptedException {
+        return blockQueue.take(QUEUE_NAME);
+    }
+
+    public void clear() {
+        blockQueue.clear(QUEUE_NAME);
+    }
+
+    public void destory() {
+        blockQueue.destroyQueue(QUEUE_NAME);
+    }
 }

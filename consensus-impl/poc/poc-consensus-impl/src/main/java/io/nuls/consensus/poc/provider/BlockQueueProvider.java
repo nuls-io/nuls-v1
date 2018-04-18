@@ -25,8 +25,8 @@
 package io.nuls.consensus.poc.provider;
 
 import io.nuls.consensus.poc.constant.BlockContainerStatus;
-import io.nuls.consensus.poc.protocol.locker.Lockers;
-import io.nuls.consensus.poc.protocol.model.container.BlockContainer;
+import io.nuls.consensus.poc.container.BlockContainer;
+import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.protocol.service.DownloadService;
 import io.nuls.core.utils.queue.service.impl.QueueService;
 import io.nuls.protocol.constant.DownloadStatus;

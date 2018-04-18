@@ -22,32 +22,21 @@
  * SOFTWARE.
  */
 
-package io.nuls.consensus.poc.task;
+package io.nuls.consensus.poc.locker;
 
-import io.nuls.consensus.poc.locker.Lockers;
-import io.nuls.consensus.poc.process.ChainProcess;
-import io.nuls.core.utils.log.Log;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by ln on 2018/4/13.
  */
-public class ChainProcessTask implements Runnable {
+public final class Lockers {
 
-    private ChainProcess chainProcess;
+    public final static Lock OUTER_LOCK = new ReentrantLock();
 
-    public ChainProcessTask(ChainProcess chainProcess) {
-        this.chainProcess = chainProcess;
-    }
+    public final static Lock TX_MEMORY_LOCK = new ReentrantLock();
 
-    @Override
-    public void run() {
-        Lockers.CHAIN_LOCK.lock();
-        try {
-            chainProcess.process();
-        } catch (Exception e) {
-            Log.error(e);
-        } finally {
-            Lockers.CHAIN_LOCK.unlock();
-        }
-    }
+    public final static Lock ROUND_LOCK = new ReentrantLock();
+
+    public final static Lock CHAIN_LOCK = new ReentrantLock();
 }

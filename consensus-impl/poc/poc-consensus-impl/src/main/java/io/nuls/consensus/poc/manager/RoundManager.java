@@ -24,8 +24,8 @@
 
 package io.nuls.consensus.poc.manager;
 
+import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.protocol.model.MeetingRound;
-import io.nuls.consensus.poc.protocol.model.container.ChainContainer;
 import io.nuls.protocol.model.BlockHeader;
 
 /**

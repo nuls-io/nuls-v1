@@ -24,7 +24,7 @@
 
 package io.nuls.consensus.poc.provider;
 
-import io.nuls.consensus.poc.protocol.model.container.BlockContainer;
+import io.nuls.consensus.poc.container.BlockContainer;
 
 import java.util.ArrayList;
 import java.util.List;

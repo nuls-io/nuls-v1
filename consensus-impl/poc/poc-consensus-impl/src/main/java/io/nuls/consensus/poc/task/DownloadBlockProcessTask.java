@@ -24,30 +24,44 @@
 
 package io.nuls.consensus.poc.task;
 
-import io.nuls.consensus.poc.locker.Lockers;
-import io.nuls.consensus.poc.process.ChainProcess;
+import io.nuls.consensus.poc.container.BlockContainer;
+import io.nuls.consensus.poc.process.DownloadBlockProcess;
+import io.nuls.consensus.poc.protocol.service.DownloadService;
+import io.nuls.consensus.poc.provider.DownloadBlockProvider;
 import io.nuls.core.utils.log.Log;
+import io.nuls.protocol.constant.DownloadStatus;
+import io.nuls.protocol.context.NulsContext;
 
 /**
  * Created by ln on 2018/4/13.
  */
-public class ChainProcessTask implements Runnable {
+public class DownloadBlockProcessTask implements Runnable {
 
-    private ChainProcess chainProcess;
+    private DownloadBlockProcess downloadBlockProcess;
+    private DownloadBlockProvider downloadBlockProvider;
 
-    public ChainProcessTask(ChainProcess chainProcess) {
-        this.chainProcess = chainProcess;
+    private DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
+
+    public DownloadBlockProcessTask(DownloadBlockProcess downloadBlockProcess, DownloadBlockProvider downloadBlockProvider) {
+        this.downloadBlockProcess = downloadBlockProcess;
+        this.downloadBlockProvider = downloadBlockProvider;
     }
 
     @Override
     public void run() {
-        Lockers.CHAIN_LOCK.lock();
         try {
-            chainProcess.process();
+            doTask();
         } catch (Exception e) {
             Log.error(e);
-        } finally {
-            Lockers.CHAIN_LOCK.unlock();
         }
+    }
+
+    private void doTask() throws Exception {
+        //wait consensus ready running
+        if(downloadService.getStatus() != DownloadStatus.SUCCESS) {
+            return;
+        }
+        BlockContainer blockContainer = downloadBlockProvider.get();
+        downloadBlockProcess.process(blockContainer);
     }
 }

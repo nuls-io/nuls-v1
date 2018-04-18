@@ -24,9 +24,9 @@
 
 package io.nuls.consensus.poc.process;
 
+import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.manager.ChainManager;
-import io.nuls.consensus.poc.protocol.model.Chain;
-import io.nuls.consensus.poc.protocol.model.container.ChainContainer;
+import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.protocol.service.BlockService;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.log.ChainLog;

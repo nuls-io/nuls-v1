@@ -25,7 +25,7 @@
 package io.nuls.consensus.poc.cache;
 
 import io.nuls.cache.util.CacheMap;
-import io.nuls.consensus.poc.protocol.locker.Lockers;
+import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.core.utils.queue.service.impl.QueueService;
 import io.nuls.protocol.model.Transaction;
 
