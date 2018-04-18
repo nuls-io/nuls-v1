@@ -39,8 +39,11 @@ import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.model.Na;
 import io.nuls.rpc.entity.*;
+import io.nuls.rpc.resources.form.AccountAliasForm;
+import io.nuls.rpc.resources.form.AccountCreateForm;
 import io.nuls.rpc.resources.form.AccountParamForm;
-import io.swagger.annotations.Api;
+import io.nuls.rpc.resources.form.AccountPrikeyForm;
+import io.swagger.annotations.*;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -63,7 +66,12 @@ public class AccountResource {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult create(AccountParamForm form) {
+    @ApiOperation(value = "创建账户", notes = "Nuls_RPC_API文档[3.3.1]")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = ArrayList.class)
+    })
+    public RpcResult create(@ApiParam(name = "账户表单数据", value = "JSONFormat", required = true)
+                                        AccountCreateForm form) {
         Result<List<String>> accountResult = accountService.createAccount(form.getCount(), form.getPassword());
         RpcResult result = new RpcResult(accountResult);
         if (result.isSuccess()) {
@@ -75,7 +83,12 @@ public class AccountResource {
     @GET
     @Path("/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult get(@PathParam("address") String address) {
+    @ApiOperation(value = "查询账户信息", notes = "Nuls_RPC_API文档[3.3.2]")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = AccountDto.class)
+    })
+    public RpcResult get(@ApiParam(name = "address", value = "账户地址 ，缺省时默认为所有账户",required = true)
+                             @PathParam("address") String address) {
         RpcResult result;
         if (!Address.validAddress(address)) {
             result = RpcResult.getFailed(ErrorCode.ADDRESS_ERROR);
@@ -102,7 +115,12 @@ public class AccountResource {
     @POST
     @Path("/alias")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult alias(AccountParamForm form) {
+    @ApiOperation(value = "设置别名", notes = "Nuls_RPC_API文档[3.3.6]")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = RpcResult.class)
+    })
+    public RpcResult alias(@ApiParam(name = "设置别名表单数据", value = "JSONFormat", required = true)
+                                       AccountAliasForm form) {
         if (!Address.validAddress(form.getAddress())) {
             return RpcResult.getFailed(ErrorCode.ADDRESS_ERROR);
         }
@@ -114,7 +132,10 @@ public class AccountResource {
     @GET
     @Path("/list")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult accountList(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
+    public RpcResult accountList(@ApiParam(name="pageNumber",value="页码")
+                                     @QueryParam("pageNumber") int pageNumber,
+                                 @ApiParam(name="pageSize",value="每页条数")
+                                 @QueryParam("pageSize") int pageSize) {
         if (pageNumber < 0 || pageSize < 0) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
@@ -199,7 +220,12 @@ public class AccountResource {
     @POST
     @Path("/prikey")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult getPrikey(AccountParamForm form) {
+    @ApiOperation(value = "查询私钥", notes = "Nuls_RPC_API文档[3.3.7] 查询账户私钥，只能查询本地创建或导入的账户")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = String.class)
+    })
+    public RpcResult getPrikey(@ApiParam(name = "查询私钥表单数据", value = "JSON格式", required = true)
+                                           AccountPrikeyForm form) {
         if (!Address.validAddress(form.getAddress()) || !StringUtils.validPassword(form.getPassword())) {
             return RpcResult.getFailed(ErrorCode.ADDRESS_ERROR);
         }
