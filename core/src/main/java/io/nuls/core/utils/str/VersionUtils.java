@@ -44,6 +44,8 @@ public class VersionUtils {
         if (StringUtils.isBlank(version0) || StringUtils.isBlank(version1)) {
             throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "version is null");
         }
+        version0 = version0.replace("-SNAPSHOT","");
+        version1 = version1.replace("-SNAPSHOT","");
         String[] array0 = version0.split("\\.");
         String[] array1 = version1.split("\\.");
         if (array0.length != 3 || array1.length != 3) {
