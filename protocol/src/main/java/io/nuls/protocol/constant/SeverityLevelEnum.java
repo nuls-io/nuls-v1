@@ -1,4 +1,4 @@
-/**
+/*
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -21,19 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.protocol.constant;
+package io.nuls.consensus.poc.constant;
 
 /**
  * @author Niels
- * @date 2017/12/19
  */
-public enum SeverityLevelEnum {
+public interface ConsensusConstant {
 
-    WRONG,
-
-    NORMAL_FOUL,
     /**
-     * Flagrant Foul
+     * unit:second
      */
-    FLAGRANT_FOUL;
+    int BLOCK_TIME_INTERVAL_SECOND = 5;
+
 }
