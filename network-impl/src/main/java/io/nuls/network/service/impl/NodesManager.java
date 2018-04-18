@@ -478,7 +478,7 @@ public class NodesManager implements Runnable {
                // Log.info(node.toString() + ",blockHeight:" + node.getVersionMessage().getBestBlockHeight());
             //}
 
-            if(firstUnConnectedNodes.size() > 50) {
+            if(firstUnConnectedNodes.size() > 20) {
                 firstUnConnectedNodes.clear();
             }
             try {
