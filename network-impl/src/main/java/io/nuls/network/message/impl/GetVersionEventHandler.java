@@ -24,6 +24,7 @@
 package io.nuls.network.message.impl;
 
 import io.nuls.core.cfg.NulsConfig;
+import io.nuls.core.utils.str.VersionUtils;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.event.base.BaseEvent;
 import io.nuls.core.utils.log.Log;
@@ -89,9 +90,7 @@ public class GetVersionEventHandler implements NetWorkEventHandler {
     }
 
     private void checkVersion(String version) {
-        int newVersion = Integer.parseInt(version.replace(".", ""));
-        int myVersion = Integer.parseInt(NulsConfig.VERSION.replace(".", ""));
-        if (newVersion > myVersion) {
+        if (VersionUtils.higherThan(version,NulsConfig.VERSION)) {
             NulsConfig.NEWEST_VERSION = version;
         }
     }

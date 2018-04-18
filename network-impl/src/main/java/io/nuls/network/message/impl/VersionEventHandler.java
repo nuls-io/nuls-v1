@@ -1,18 +1,18 @@
 /**
  * MIT License
- **
+ * *
  * Copyright (c) 2017-2018 nuls.io
- **
+ * *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- **
+ * *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- **
+ * *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,6 +24,7 @@
 package io.nuls.network.message.impl;
 
 import io.nuls.core.cfg.NulsConfig;
+import io.nuls.core.utils.str.VersionUtils;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.event.base.BaseEvent;
 import io.nuls.db.dao.NodeDataService;
@@ -33,6 +34,7 @@ import io.nuls.network.message.NetworkEventResult;
 import io.nuls.network.message.entity.VersionEvent;
 import io.nuls.network.message.handler.NetWorkEventHandler;
 import io.nuls.network.service.NetworkService;
+import sun.misc.Version;
 
 /**
  * @author vivi
@@ -82,9 +84,7 @@ public class VersionEventHandler implements NetWorkEventHandler {
 
 
     private void checkVersion(String version) {
-        int newVersion = Integer.parseInt(version.replace(".", ""));
-        int myVersion = Integer.parseInt(NulsConfig.VERSION.replace(".", ""));
-        if (newVersion > myVersion) {
+        if (VersionUtils.higherThan(version, NulsConfig.VERSION)) {
             NulsConfig.NEWEST_VERSION = version;
         }
     }
