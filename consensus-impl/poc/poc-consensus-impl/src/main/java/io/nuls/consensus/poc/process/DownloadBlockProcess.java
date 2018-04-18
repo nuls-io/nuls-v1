@@ -38,7 +38,7 @@ public class DownloadBlockProcess {
             addBlock(new BlockContainer(preBlock, blockContainer.getNode(), BlockContainerStatus.DOWNLOADING));
             return true;
         } else {
-            ChainLog.debug("get pre block fail {} - {}", preBlock.getHeader().getHeight(), preBlock.getHeader().getHash().getDigestHex());
+            //ChainLog.debug("get pre block fail {} - {}", preBlock.getHeader().getHeight(), preBlock.getHeader().getHash().getDigestHex());
 
             //失败情况的处理，从其它所以可用的节点去获取，如果都不成功，那么就失败，包括本次失败的节点，再次获取一次
             for(Node node : networkService.getAvailableNodes()) {

@@ -495,23 +495,21 @@ public class ChainContainer implements Cloneable {
         Chain chain = new Chain();
 
         List<Block> blockList = getChain().getBlockList();
-        List<BlockHeader> blockHeaderList = getChain().getBlockHeaderList();
 
         boolean canAdd = false;
         for (int i = 0; i < blockList.size(); i++) {
 
-            BlockHeader blockHeader = blockHeaderList.get(i);
+            Block block = blockList.get(i);
 
             if (canAdd) {
-                Block block = blockList.get(i);
                 chain.getBlockList().add(block);
-                chain.getBlockHeaderList().add(blockHeader);
+                chain.getBlockHeaderList().add(block.getHeader());
             }
 
-            if (pointBlockHeader.getPreHash().equals(blockHeader.getHash())) {
+            if (pointBlockHeader.getPreHash().equals(block.getHeader().getHash())) {
                 canAdd = true;
-                if (i + 1 < blockHeaderList.size()) {
-                    chain.setStartBlockHeader(blockHeaderList.get(i + 1));
+                if (i + 1 < blockList.size()) {
+                    chain.setStartBlockHeader(blockList.get(i + 1).getHeader());
                     chain.setEndBlockHeader(getChain().getEndBlockHeader());
                     chain.setPreChainId(chainContainer.getChain().getId());
                 }
