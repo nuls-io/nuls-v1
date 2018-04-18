@@ -56,9 +56,9 @@ public enum ConsensusStatusEnum {
 
     public static ConsensusStatusEnum getConsensusStatusByCode(int code) {
         switch (code) {
-            case 1:
-                return IN;
             case 2:
+                return IN;
+            case 1:
                 return WAITING;
             case 0:
                 return NOT_IN;
