@@ -247,4 +247,8 @@ public class BlockServiceImpl implements BlockService {
         }
     }
 
+    @Override
+    public Map<String, Object> getSumTxCount(String packingAddress, long startRoundIndex, long endRoundIndex) {
+        return blockStorageService.getSumTxCount(packingAddress, startRoundIndex, endRoundIndex);
+    }
 }

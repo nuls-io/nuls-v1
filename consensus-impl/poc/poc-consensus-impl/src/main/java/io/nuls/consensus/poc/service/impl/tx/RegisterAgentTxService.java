@@ -52,14 +52,14 @@ public class RegisterAgentTxService implements TransactionService<RegisterAgentT
     @Override
     @DbSession
     public void onRollback(RegisterAgentTransaction tx, Block block) {
-        this.agentDataService.deleteById(tx.getTxData().getHexHash(), tx.getBlockHeight());
+//        this.agentDataService.deleteById(tx.getTxData().getHexHash(), tx.getBlockHeight());
 
         agentDataService.realDeleteById(tx.getTxData().getHexHash(), 0);
 
         DepositPo delPo = new DepositPo();
         delPo.setAgentHash(tx.getTxData().getHexHash());
         delPo.setDelHeight(tx.getBlockHeight());
-        this.depositDataService.deleteByAgentHash(delPo);
+        this.depositDataService.realDeleteByAgentHash(delPo);
     }
 
     @Override

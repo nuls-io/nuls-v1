@@ -29,6 +29,7 @@ import io.nuls.consensus.poc.protocol.model.Deposit;
 import io.nuls.consensus.poc.protocol.tx.RegisterAgentTransaction;
 import io.nuls.consensus.poc.protocol.tx.StopAgentTransaction;
 import io.nuls.consensus.poc.protocol.utils.ConsensusTool;
+import io.nuls.consensus.poc.service.PocConsensusService;
 import io.nuls.core.exception.NulsException;
 import io.nuls.db.dao.AgentDataService;
 import io.nuls.db.dao.DepositDataService;
@@ -54,6 +55,7 @@ import java.util.Map;
 public class StopAgentTxService implements TransactionService<StopAgentTransaction> {
 
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
+    private PocConsensusService pocConsensusService = NulsContext.getServiceBean(PocConsensusService.class);
     private AgentDataService agentDataService = NulsContext.getServiceBean(AgentDataService.class);
     private DepositDataService depositDataService = NulsContext.getServiceBean(DepositDataService.class);
 
@@ -102,23 +104,20 @@ public class StopAgentTxService implements TransactionService<StopAgentTransacti
     public void onCommit(StopAgentTransaction tx, Block block) throws NulsException {
         Transaction joinTx = ledgerService.getTx(tx.getTxData());
         RegisterAgentTransaction raTx = (RegisterAgentTransaction) joinTx;
-//
-//        for (Consensus<Deposit> depositConsensus : depositList) {
-//            if (!depositConsensus.getExtend().getAgentHash().equals(raTx.getTxData().getHexHash())) {
-//                continue;
-//            }
-//            if (depositConsensus.getExtend().getBlockHeight() > tx.getBlockHeight()) {
-//                continue;
-//            }
-//            if (depositConsensus.getDelHeight() < tx.getBlockHeight()) {
-//                continue;
-//            }
-//            ledgerService.unlockTxSave(depositConsensus.getExtend().getTxHash());
-//        }
 
-
-
-
+        List<Consensus<Deposit>> depositList = pocConsensusService.getEffectiveDepositList(null, raTx.getTxData().getHexHash(), block.getHeader().getHeight(), null);
+        for (Consensus<Deposit> depositConsensus : depositList) {
+            if (!depositConsensus.getExtend().getAgentHash().equals(raTx.getTxData().getHexHash())) {
+                continue;
+            }
+            if (depositConsensus.getExtend().getBlockHeight() > tx.getBlockHeight()) {
+                continue;
+            }
+            if (depositConsensus.getDelHeight() < tx.getBlockHeight()) {
+                continue;
+            }
+            ledgerService.unlockTxSave(depositConsensus.getExtend().getTxHash());
+        }
 
         this.agentDataService.deleteById(raTx.getTxData().getHexHash(), tx.getBlockHeight());
         DepositPo delPo = new DepositPo();

@@ -28,6 +28,7 @@ import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.container.BlockContainer;
+import io.nuls.consensus.poc.protocol.constant.ConsensusStatusEnum;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.protocol.event.entity.JoinConsensusParam;
 import io.nuls.consensus.poc.protocol.model.Agent;
@@ -594,7 +595,7 @@ public class PocConsensusServiceImpl implements PocConsensusService {
         boolean isAddress = Address.validAddress(address);
         Consensus<Agent> agent = null;
         if (Address.validAddress(agentAddress)) {
-            agent = this.consensusCacheManager.getAgentByAddress(agentAddress);
+            agent = this.getAgentByAddress(agentAddress);
             if (null == agent) {
                 depositList.clear();
             }
@@ -639,7 +640,7 @@ public class PocConsensusServiceImpl implements PocConsensusService {
         List<Map<String, Object>> resultList = new ArrayList<>();
         for (Consensus<Deposit> cd : sublist) {
             if (agent == null || !agent.getHexHash().equals(cd.getExtend().getAgentHash())) {
-                agent = this.consensusCacheManager.getAgentById(cd.getExtend().getAgentHash());
+                agent = this.getAgentById(cd.getExtend().getAgentHash());
             }
             Map<String, Object> map = new HashMap<>();
             map.put("agentId", cd.getExtend().getAgentHash());
@@ -656,6 +657,7 @@ public class PocConsensusServiceImpl implements PocConsensusService {
         page.setList(resultList);
         return page;
     }
+
 
     @Override
     public Map<String, Object> getAgent(String agentAddress) {
@@ -680,7 +682,7 @@ public class PocConsensusServiceImpl implements PocConsensusService {
         Map<String, Object> countMap = blockService.getSumTxCount(ca.getExtend().getPackingAddress(), 0, 0);
         map.put("packedCount", countMap.get("blockCount"));
         map.put("txCount", countMap.get("txCount"));
-        List<Consensus<Deposit>> deposits = this.consensusCacheManager.getDepositListByAgentId(ca.getHexHash(), NulsContext.getInstance().getBestHeight());
+        List<Consensus<Deposit>> deposits = this.getEffectiveDepositList(null,ca.getHexHash(), NulsContext.getInstance().getBestHeight(),null);
         long totalDeposit = 0;
         Set<String> memberSet = new HashSet<>();
         for (Consensus<Deposit> cd : deposits) {
@@ -772,5 +774,11 @@ public class PocConsensusServiceImpl implements PocConsensusService {
             throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "the address has agents more than one!");
         }
         return agentList.get(0);
+    }
+
+
+    private Consensus<Agent> getAgentById(String agentHash) {
+        AgentPo po = this.agentDataService.get(agentHash);
+        return ConsensusTool.fromPojo(po);
     }
 }

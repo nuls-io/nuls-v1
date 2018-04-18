@@ -59,7 +59,7 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
         DepositPo delPo = new DepositPo();
         delPo.setId(tx.getTxData().getHexHash());
         delPo.setDelHeight(tx.getBlockHeight());
-        depositDataService.deleteById(delPo);
+        depositDataService.realDeleteById(delPo);
     }
 
     @Override
@@ -69,10 +69,12 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
         cd.getExtend().setBlockHeight(tx.getBlockHeight());
         cd.getExtend().setTxHash(tx.getHash().getDigestHex());
         cd.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
+
         DepositPo po = ConsensusTool.depositToPojo(cd, tx.getHash().getDigestHex());
         po.setBlockHeight(tx.getBlockHeight());
         po.setTime(tx.getTime());
         depositDataService.save(po);
+
         EntrustConsensusNotice notice = new EntrustConsensusNotice();
         notice.setEventBody(tx);
         NulsContext.getServiceBean(EventBroadcaster.class).publishToLocal(notice);
