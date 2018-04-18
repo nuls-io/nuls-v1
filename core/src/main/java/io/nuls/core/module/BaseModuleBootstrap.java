@@ -23,13 +23,10 @@
  */
 package io.nuls.core.module;
 
-import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.chain.manager.TransactionManager;
+import io.nuls.core.cfg.NulsConfig;
 import io.nuls.core.constant.ModuleStatusEnum;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.module.manager.ServiceManager;
-import io.nuls.core.tx.serivce.TransactionService;
 import io.nuls.core.utils.log.Log;
 
 /**
@@ -96,7 +93,7 @@ public abstract class BaseModuleBootstrap {
 
     protected final String getModuleCfgProperty(String section, String property) {
         try {
-            return NulsContext.MODULES_CONFIG.getCfgValue(section, property);
+            return NulsConfig.MODULES_CONFIG.getCfgValue(section, property);
         } catch (NulsException e) {
             Log.error(e);
             return null;
@@ -107,10 +104,10 @@ public abstract class BaseModuleBootstrap {
         ServiceManager.getInstance().regService(this.moduleId, serviceClass);
     }
 
-    protected final void registerTransaction(int txType, Class<? extends Transaction> txClass, Class<? extends TransactionService> txServiceClass) {
-        this.registerService(txServiceClass);
-        TransactionManager.putTx(txType, txClass, txServiceClass);
-    }
+//    protected final void registerTransaction(int txType, Class<? extends Transaction> txClass, Class<? extends TransactionService> txServiceClass) {
+//        this.registerService(txServiceClass);
+//        TransactionManager.putTx(txType, txClass, txServiceClass);
+//    }
 
     public Class<? extends BaseModuleBootstrap> getModuleClass() {
         return this.getClass();

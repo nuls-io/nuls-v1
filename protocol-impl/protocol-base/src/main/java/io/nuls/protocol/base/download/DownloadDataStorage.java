@@ -24,11 +24,11 @@
 
 package io.nuls.protocol.base.download;
 
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.queue.service.impl.QueueService;
 import io.nuls.poc.service.intf.ConsensusService;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.model.Block;
 
 import java.util.concurrent.Callable;
 

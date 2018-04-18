@@ -27,11 +27,7 @@ import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.entity.Address;
 import io.nuls.account.entity.Alias;
 import io.nuls.account.entity.tx.AliasTransaction;
-import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.TransactionConstant;
-import io.nuls.core.constant.TxStatusEnum;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
@@ -40,6 +36,10 @@ import io.nuls.db.entity.AliasPo;
 import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.UtxoInput;
 import io.nuls.ledger.service.intf.LedgerService;
+import io.nuls.protocol.constant.TransactionConstant;
+import io.nuls.protocol.constant.TxStatusEnum;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.model.Transaction;
 
 import java.util.List;
 

@@ -24,10 +24,11 @@
 
 package io.nuls.consensus.poc.cache;
 
-import io.nuls.consensus.poc.utils.ConsensusTool;
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.BlockHeader;
-import io.nuls.core.context.NulsContext;
+import io.nuls.consensus.poc.protocol.constant.PunishType;
+import io.nuls.consensus.poc.protocol.model.Agent;
+import io.nuls.consensus.poc.protocol.model.Deposit;
+import io.nuls.consensus.poc.protocol.service.BlockService;
+import io.nuls.consensus.poc.protocol.utils.ConsensusTool;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.AgentDataService;
@@ -37,12 +38,13 @@ import io.nuls.db.entity.AgentPo;
 import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.db.entity.DepositPo;
 import io.nuls.db.entity.PunishLogPo;
-import io.nuls.protocol.base.constant.PunishType;
-import io.nuls.protocol.base.entity.member.Agent;
-import io.nuls.protocol.base.entity.member.Deposit;
-import io.nuls.protocol.entity.Consensus;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.event.entity.Consensus;
+import io.nuls.protocol.model.Block;
+import io.nuls.protocol.model.BlockHeader;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by ln on 2018/4/13.

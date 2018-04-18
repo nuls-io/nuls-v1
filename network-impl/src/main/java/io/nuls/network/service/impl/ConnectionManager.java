@@ -24,14 +24,8 @@
 package io.nuls.network.service.impl;
 
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.event.BaseEvent;
-import io.nuls.core.event.EventManager;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.mesasge.NulsMessage;
-import io.nuls.core.mesasge.NulsMessageHeader;
 import io.nuls.core.thread.manager.TaskManager;
-import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.service.intf.EventBusService;
 import io.nuls.network.constant.NetworkConstant;
@@ -44,6 +38,11 @@ import io.nuls.network.message.handler.NetWorkEventHandler;
 import io.nuls.network.service.NetworkService;
 import io.nuls.network.service.impl.netty.NettyClient;
 import io.nuls.network.service.impl.netty.NettyServer;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.event.base.BaseEvent;
+import io.nuls.protocol.event.manager.EventManager;
+import io.nuls.protocol.mesasge.NulsMessage;
+import io.nuls.protocol.mesasge.NulsMessageHeader;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

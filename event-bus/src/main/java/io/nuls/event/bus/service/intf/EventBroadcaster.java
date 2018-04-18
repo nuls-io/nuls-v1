@@ -23,8 +23,7 @@
  */
 package io.nuls.event.bus.service.intf;
 
-import io.nuls.core.event.BaseEvent;
-import io.nuls.core.event.CommonStringEvent;
+import io.nuls.protocol.event.base.BaseEvent;
 
 import java.util.List;
 

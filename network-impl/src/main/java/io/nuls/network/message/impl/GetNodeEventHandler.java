@@ -23,8 +23,6 @@
  */
 package io.nuls.network.message.impl;
 
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.event.BaseEvent;
 import io.nuls.network.entity.Node;
 import io.nuls.network.message.NetworkCacheService;
 import io.nuls.network.message.NetworkEventResult;
@@ -32,6 +30,8 @@ import io.nuls.network.message.entity.GetNodeEvent;
 import io.nuls.network.message.entity.NodeEvent;
 import io.nuls.network.message.handler.NetWorkEventHandler;
 import io.nuls.network.service.NetworkService;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.event.base.BaseEvent;
 
 import java.util.*;
 

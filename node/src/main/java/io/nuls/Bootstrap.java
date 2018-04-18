@@ -23,14 +23,17 @@
  */
 package io.nuls;
 
-import io.nuls.poc.service.intf.ConsensusService;
+import io.nuls.consensus.poc.protocol.service.BlockService;
+import io.nuls.consensus.poc.protocol.service.DownloadService;
 import io.nuls.core.MicroKernelBootstrap;
+import io.nuls.core.cfg.NulsConfig;
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.module.service.ModuleService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.service.NetworkService;
+import io.nuls.poc.service.intf.ConsensusService;
+import io.nuls.protocol.context.NulsContext;
 
 import java.util.HashMap;
 import java.util.List;
@@ -89,12 +92,12 @@ public class Bootstrap {
 
     private static Map<String, String> getModuleBootstrapClass() throws NulsException {
         Map<String, String> map = new HashMap<>();
-        List<String> moduleNameList = NulsContext.MODULES_CONFIG.getSectionList();
+        List<String> moduleNameList = NulsConfig.MODULES_CONFIG.getSectionList();
         if (null == moduleNameList || moduleNameList.isEmpty()) {
             return map;
         }
         for (String moduleName : moduleNameList) {
-            String className = NulsContext.MODULES_CONFIG.getCfgValue(moduleName, NulsConstant.MODULE_BOOTSTRAP_KEY);
+            String className = NulsConfig.MODULES_CONFIG.getCfgValue(moduleName, NulsConstant.MODULE_BOOTSTRAP_KEY);
             map.put(moduleName, className);
         }
         return map;

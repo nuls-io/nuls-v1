@@ -23,11 +23,11 @@
  */
 package io.nuls.event.bus.service.intf;
 
-import io.nuls.core.event.BaseEvent;
 import io.nuls.core.exception.NulsException;
 import io.nuls.event.bus.constant.EventCategoryEnum;
 import io.nuls.event.bus.handler.intf.NulsEventHandler;
 import io.nuls.event.bus.service.entity.EventItem;
+import io.nuls.protocol.event.base.BaseEvent;
 
 import java.util.List;
 
@@ -37,7 +37,7 @@ import java.util.List;
  */
 public interface EventBusService {
 
-    String subscribeEvent( Class<? extends BaseEvent> eventClass, NulsEventHandler<? extends BaseEvent> eventHandler);
+    String subscribeEvent(Class<? extends BaseEvent> eventClass, NulsEventHandler<? extends BaseEvent> eventHandler);
 
     void unsubscribeEvent(String subcribeId);
 

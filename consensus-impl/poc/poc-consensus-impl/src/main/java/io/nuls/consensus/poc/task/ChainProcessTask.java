@@ -24,12 +24,9 @@
 
 package io.nuls.consensus.poc.task;
 
-import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.process.ChainProcess;
-import io.nuls.core.exception.NulsException;
+import io.nuls.consensus.poc.protocol.locker.Lockers;
 import io.nuls.core.utils.log.Log;
-
-import java.io.IOException;
 
 /**
  * Created by ln on 2018/4/13.

@@ -29,9 +29,9 @@ package io.nuls.account.event;
 import io.nuls.account.constant.EventType;
 import io.nuls.account.entity.tx.AliasTransaction;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.event.NoticeData;
+import io.nuls.protocol.event.base.NoticeData;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.protocol.utils.io.NulsByteBuffer;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -24,8 +24,8 @@
 package io.nuls.event.bus.service.impl;
 
 import io.nuls.cache.service.intf.CacheService;
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.event.BaseEvent;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.event.base.BaseEvent;
 
 /**
  * @author Niels

@@ -23,13 +23,13 @@
  */
 package io.nuls.protocol.event;
 
-import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.event.NoticeData;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.protocol.constant.ProtocolEventType;
+import io.nuls.protocol.event.base.NoticeData;
+import io.nuls.protocol.model.Transaction;
+import io.nuls.protocol.utils.TransactionManager;
+import io.nuls.protocol.utils.io.NulsByteBuffer;
 
 /**
  * @author Niels

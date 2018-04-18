@@ -23,15 +23,12 @@
  */
 package io.nuls.network.param;
 
-import io.nuls.core.context.NulsContext;
+import io.nuls.core.cfg.NulsConfig;
 import io.nuls.network.NetworkContext;
 import io.nuls.network.constant.NetworkConstant;
-import io.nuls.network.entity.Node;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.filter.impl.DefaultMessageFilter;
 import io.nuls.network.message.DefaultNetWorkEventHandlerFactory;
-
-import java.net.InetSocketAddress;
 
 /**
  * @author vivi
@@ -44,8 +41,8 @@ public class TestNetworkParam extends AbstractNetworkParam {
     private TestNetworkParam() {
         this.maxInCount = NetworkContext.getNetworkConfig().getPropValue(NetworkConstant.NETWORK_NODE_MAX_IN, 20);
         this.maxOutCount = NetworkContext.getNetworkConfig().getPropValue(NetworkConstant.NETWORK_NODE_MAX_OUT, 10);
-        this.port = NulsContext.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_SERVER_PORT, 8005);
-        this.packetMagic = NulsContext.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_MAGIC, 123456781);
+        this.port = NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_SERVER_PORT, 8005);
+        this.packetMagic = NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_MAGIC, 123456781);
 
         seedIpList.add("192.168.1.131");
         seedIpList.add("192.168.1.204");

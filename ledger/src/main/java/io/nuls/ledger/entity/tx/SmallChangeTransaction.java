@@ -23,16 +23,10 @@
  */
 package io.nuls.ledger.entity.tx;
 
-import io.nuls.core.chain.entity.BaseNulsData;
-import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.ledger.entity.params.CoinTransferData;
-
-import java.util.Arrays;
+import io.nuls.protocol.constant.TransactionConstant;
+import io.nuls.protocol.model.BaseNulsData;
 
 /**
  * @author Niels

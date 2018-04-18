@@ -23,12 +23,11 @@
  */
 package io.nuls.ledger.service.intf;
 
-import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.ledger.entity.CoinData;
 import io.nuls.ledger.entity.params.CoinTransferData;
-import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
+import io.nuls.protocol.model.Transaction;
+import io.nuls.protocol.utils.io.NulsByteBuffer;
 
 /**
  * @author Niels

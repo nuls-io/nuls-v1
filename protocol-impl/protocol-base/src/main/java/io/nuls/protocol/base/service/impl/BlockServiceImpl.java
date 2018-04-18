@@ -24,13 +24,9 @@
 package io.nuls.protocol.base.service.impl;
 
 import io.nuls.account.entity.Address;
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.BlockHeader;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.Transaction;
+import io.nuls.consensus.poc.protocol.model.block.BlockRoundData;
+import io.nuls.consensus.poc.protocol.service.BlockService;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.TxStatusEnum;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -41,11 +37,14 @@ import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.ledger.service.intf.LedgerService;
-import io.nuls.protocol.base.entity.block.BlockRoundData;
-import io.nuls.protocol.utils.BlockHeightComparator;
+import io.nuls.protocol.constant.TxStatusEnum;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.model.Block;
+import io.nuls.protocol.model.BlockHeader;
+import io.nuls.protocol.model.NulsDigestData;
+import io.nuls.protocol.model.Transaction;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -70,26 +69,9 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public long getLocalHeight() {
-        long height = NulsContext.getInstance().getBestHeight();
-        if (height == 0) {
-            height = blockStorageService.getBestHeight();
-        }
-        return height;
-    }
-
-    @Override
-    public long getLocalSavedHeight() {
-        return blockStorageService.getBestHeight();
-    }
-
-    @Override
     public Block getLocalBestBlock() {
-        Block block = getBlock(getLocalHeight());
-        if (null == block) {
-            block = NulsContext.getInstance().getBestBlock();
-        }
-        return block;
+        // todo auto-generated method stub(niels)
+        return null;
     }
 
     @Override
@@ -126,22 +108,6 @@ public class BlockServiceImpl implements BlockService {
     @Override
     public List<Block> getBlockList(long startHeight, long endHeight) throws NulsException {
         List<Block> blockList = blockStorageService.getBlockList(startHeight, endHeight);
-        if (blockList.size() < (endHeight - startHeight + 1)) {
-            long currentMaxHeight = blockList.get(blockList.size() - 1).getHeader().getHeight();
-            while (currentMaxHeight < endHeight) {
-                long next = currentMaxHeight + 1;
-                Block block = null;
-                try {
-                    block = blockStorageService.getBlock(next);
-                } catch (Exception e) {
-                    Log.error(e);
-                }
-                if (null != block) {
-                    blockList.add(block);
-                }
-            }
-        }
-        Collections.sort(blockList, BlockHeightComparator.getInstance());
         return blockList;
     }
 
@@ -196,22 +162,18 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     @DbSession
-    public void rollbackBlock(String hash) {
+    public boolean rollbackBlock(String hash) {
         Block block = this.getBlock(hash);
         if (null == block) {
-            return;
+            return false;
         }
         this.rollback(block.getTxs(), block.getTxs().size() - 1);
         this.ledgerService.deleteTx(block.getHeader().getHeight());
         blockStorageService.delete(block.getHeader().getHash().getDigestHex());
         NulsContext.getInstance().setBestBlock(this.getBestBlock());
+        return true;
     }
 
-
-    @Override
-    public List<BlockHeaderPo> getBlockHeaderList(long startHeight, long endHeight ) {
-        return blockStorageService.getBlockHeaderList(startHeight, endHeight);
-    }
 
     @Override
     public Page<BlockHeaderPo> getBlockHeaderList(String nodeAddress, int type, int pageNumber, int pageSize) {
@@ -224,56 +186,14 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public BlockHeader getBlockHeader(NulsDigestData hash) throws NulsException {
-        String hashHex = hash.getDigestHex();
-
-        return blockStorageService.getBlockHeader(hashHex);
+    public List<BlockHeaderPo> getBlockHeaderList(long startHeight, long endHeight) {
+        return blockStorageService.getBlockHeaderList(startHeight, endHeight);
     }
+
 
     @Override
     public long getPackingCount(String address) {
         return blockStorageService.getBlockCount(address, -1L, -1L, 0L);
-    }
-
-    @Override
-    public Map<String, Object> getSumTxCount(String address, long roundStart, long roundEnd) {
-        return blockStorageService.getSumTxCount(address, roundStart, roundEnd);
-    }
-
-    @Override
-    public Block getPreRoundFirstBlock(long roundIndex) {
-        //todo block-》blockheader
-        Long height = this.blockStorageService.getRoundFirstBlockHeight(roundIndex);
-        if (null == height) {
-            Block resultBlock = getBestBlock();
-            Block preResultBlock = null;
-            String hashHex = resultBlock.getHeader().getPreHash().getDigestHex();
-            while (true) {
-                BlockRoundData roundData = new BlockRoundData(resultBlock.getHeader().getExtend());
-                if (roundData.getRoundIndex() == roundIndex && roundData.getPackingIndexOfRound() == 1) {
-                    break;
-                }
-                if (roundData.getRoundIndex() < roundIndex) {
-                    if (null != preResultBlock) {
-                        resultBlock = preResultBlock;
-                    }
-                    break;
-                }
-                if (resultBlock.getHeader().getHeight() == 0) {
-                    return resultBlock;
-                }
-                if (roundData.getRoundIndex() <= roundIndex) {
-                    preResultBlock = resultBlock;
-                }
-                resultBlock = getBlock(hashHex);
-                if (null == resultBlock) {
-                    throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "The block shouldn't be null");
-                }
-                hashHex = resultBlock.getHeader().getPreHash().getDigestHex();
-            }
-            return resultBlock;
-        }
-        return this.getBlock(height);
     }
 
     private void rollback(List<Transaction> txs, int max) {
@@ -322,14 +242,4 @@ public class BlockServiceImpl implements BlockService {
         }
     }
 
-    @Override
-    public boolean rollbackBlock(Block block) {
-        //TODO
-        this.rollback(block.getTxs(), block.getTxs().size() - 1);
-        this.ledgerService.deleteTx(block.getHeader().getHeight());
-        blockStorageService.delete(block.getHeader().getHash().getDigestHex());
-        NulsContext.getInstance().setBestBlock(this.getBestBlock());
-
-        return true;
-    }
 }

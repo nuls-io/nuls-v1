@@ -25,8 +25,8 @@
 package io.nuls.consensus.poc.protocol.model;
 
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.io.NulsByteBuffer;
-import io.nuls.protocol.entity.Consensus;
+import io.nuls.protocol.event.entity.Consensus;
+import io.nuls.protocol.utils.io.NulsByteBuffer;
 
 /**
  * @author Niels

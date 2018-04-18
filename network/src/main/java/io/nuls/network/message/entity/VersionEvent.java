@@ -23,17 +23,19 @@
  */
 package io.nuls.network.message.entity;
 
-import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.cfg.NulsConfig;
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
-import io.nuls.core.event.EventHeader;
-import io.nuls.core.event.NoticeData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
-import io.nuls.core.utils.io.NulsByteBuffer;
-import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.network.constant.NetworkConstant;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.event.base.BaseEvent;
+import io.nuls.protocol.event.base.EventHeader;
+import io.nuls.protocol.event.base.NoticeData;
+import io.nuls.protocol.model.BaseNulsData;
+import io.nuls.protocol.utils.io.NulsByteBuffer;
+import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
 
 import java.io.IOException;
 
@@ -41,7 +43,7 @@ import java.io.IOException;
  * @author vivi
  * @Date 2017.11.01
  */
-public class VersionEvent extends io.nuls.core.event.BaseEvent {
+public class VersionEvent extends BaseEvent {
 
     private int severPort;
 
@@ -61,7 +63,7 @@ public class VersionEvent extends io.nuls.core.event.BaseEvent {
         this.severPort = severPort;
         this.bestBlockHeight = bestBlockHeight;
         this.bestBlockHash = bestBlockHash;
-        this.nulsVersion = NulsContext.VERSION;
+        this.nulsVersion = NulsConfig.VERSION;
     }
 
 

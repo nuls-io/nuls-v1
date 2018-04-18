@@ -29,9 +29,10 @@ import io.nuls.account.module.intf.AbstractAccountModule;
 import io.nuls.account.service.impl.AccountServiceImpl;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.account.service.tx.AliasTxService;
-import io.nuls.core.constant.TransactionConstant;
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.event.EventManager;
+import io.nuls.protocol.constant.TransactionConstant;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.event.manager.EventManager;
+import io.nuls.protocol.utils.TransactionManager;
 
 /**
  * @author Niels
@@ -50,8 +51,11 @@ public class AccountModuleBootstrap extends AbstractAccountModule {
         EventManager.putEvent(SetAliasNotice.class);
         this.registerService(AccountServiceImpl.class);
         accountService = NulsContext.getServiceBean(AccountService.class);
-        this.registerTransaction(TransactionConstant.TX_TYPE_SET_ALIAS, AliasTransaction.class, AliasTxService.class);
+        this.registerService(AliasTxService.class);
+        TransactionManager.putTx(TransactionConstant.TX_TYPE_SET_ALIAS, AliasTransaction.class, AliasTxService.class);
     }
+
+
 
     @Override
     public void start() {

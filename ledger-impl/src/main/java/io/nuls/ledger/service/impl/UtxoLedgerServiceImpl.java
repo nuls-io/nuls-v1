@@ -24,18 +24,11 @@
 package io.nuls.ledger.service.impl;
 
 import io.nuls.cache.service.intf.CacheService;
-import io.nuls.protocol.event.TransactionEvent;
-import io.nuls.protocol.utils.TxTimeComparator;
-import io.nuls.core.chain.entity.*;
-import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.TransactionConstant;
-import io.nuls.core.constant.TxStatusEnum;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.tx.serivce.TransactionService;
+import io.nuls.core.model.Result;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.BlockLog;
 import io.nuls.core.utils.log.Log;
@@ -65,6 +58,17 @@ import io.nuls.ledger.entity.tx.TransferTransaction;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.ledger.util.UtxoTransactionTool;
 import io.nuls.ledger.util.UtxoTransferTool;
+import io.nuls.protocol.constant.TransactionConstant;
+import io.nuls.protocol.constant.TxStatusEnum;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.event.TransactionEvent;
+import io.nuls.protocol.model.Block;
+import io.nuls.protocol.model.Na;
+import io.nuls.protocol.model.NulsDigestData;
+import io.nuls.protocol.model.Transaction;
+import io.nuls.protocol.service.intf.TransactionService;
+import io.nuls.protocol.utils.TransactionManager;
+import io.nuls.protocol.utils.TxTimeComparator;
 
 import java.io.IOException;
 import java.util.*;
@@ -530,7 +534,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 continue;
             }
 
-            localPo = new TransactionLocalPo(po);
+            localPo = new TransactionLocalPo(po, Transaction.TRANSFER_RECEIVE);
             for (UtxoInputPo inputPo : po.getInputs()) {
                 if (inputPo.getFromOutPut().getAddress().equals(address)) {
                     localPo.setTransferType(Transaction.TRANSFER_SEND);

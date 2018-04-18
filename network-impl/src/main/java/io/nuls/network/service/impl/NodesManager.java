@@ -24,8 +24,8 @@
 package io.nuls.network.service.impl;
 
 import io.netty.channel.socket.SocketChannel;
+import io.nuls.core.cfg.NulsConfig;
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.network.IpUtil;
@@ -39,7 +39,7 @@ import io.nuls.network.entity.NodeTransferTool;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.message.entity.VersionEvent;
 import io.nuls.network.service.impl.netty.NioChannelMap;
-import io.nuls.protocol.base.constant.PocConsensusConstant;
+import io.nuls.protocol.context.NulsContext;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -96,7 +96,7 @@ public class NodesManager implements Runnable {
         nodeGroups.put(inNodes.getName(), inNodes);
         nodeGroups.put(outNodes.getName(), outNodes);
 
-        boolean isConsensus = NulsContext.MODULES_CONFIG.getCfgValue(PocConsensusConstant.CFG_CONSENSUS_SECTION, PocConsensusConstant.PROPERTY_PARTAKE_PACKING, false);
+        boolean isConsensus = NulsConfig.MODULES_CONFIG.getCfgValue("consensus", "partake.packing", false);
         if (isConsensus) {
             NodeGroup consensusNodes = new NodeGroup(NetworkConstant.NETWORK_NODE_CONSENSUS_GROUP);
             nodeGroups.put(consensusNodes.getName(), consensusNodes);

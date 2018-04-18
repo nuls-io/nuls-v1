@@ -24,13 +24,12 @@
 package io.nuls.consensus.poc.service;
 
 import io.nuls.consensus.poc.provider.QueueProvider;
-import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.poc.service.intf.ConsensusService;
+import io.nuls.protocol.model.Transaction;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 /**

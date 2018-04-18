@@ -23,8 +23,6 @@
  */
 package io.nuls.event.bus.module.impl;
 
-import io.nuls.core.context.NulsContext;
-import io.nuls.event.bus.constant.EventBusConstant;
 import io.nuls.event.bus.event.CommonDigestEvent;
 import io.nuls.event.bus.event.GetEventBodyEvent;
 import io.nuls.event.bus.service.impl.*;
@@ -32,7 +30,7 @@ import io.nuls.event.bus.service.intf.*;
 import io.nuls.event.bus.handler.CommonDigestHandler;
 import io.nuls.event.bus.handler.GetEventBodyHandler;
 import io.nuls.event.bus.module.intf.AbstractEventBusModule;
-import io.nuls.network.message.ReplyNotice;
+import io.nuls.protocol.context.NulsContext;
 
 /**
  * @author Niels

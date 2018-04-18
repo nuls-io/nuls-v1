@@ -23,9 +23,9 @@
  */
 package io.nuls.account.entity;
 
-import io.nuls.core.chain.entity.KeyValue;
 import io.nuls.core.utils.json.JSONUtils;
 import io.nuls.core.utils.log.Log;
+import io.nuls.protocol.model.KeyValue;
 
 import java.io.UnsupportedEncodingException;
 

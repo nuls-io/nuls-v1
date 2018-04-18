@@ -23,7 +23,7 @@
  */
 package io.nuls.network.message;
 
-import io.nuls.core.event.BaseEvent;
+import io.nuls.protocol.event.base.BaseEvent;
 
 /**
  * @author vivi

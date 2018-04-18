@@ -24,11 +24,11 @@
 package io.nuls.consensus.poc.scheduler;
 
 import io.nuls.consensus.poc.cache.TxMemoryPool;
-import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.manager.CacheManager;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.manager.RoundManager;
 import io.nuls.consensus.poc.process.*;
+import io.nuls.consensus.poc.protocol.locker.Lockers;
 import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.consensus.poc.provider.ConsensusSystemProvider;
 import io.nuls.consensus.poc.provider.IsolatedBlocksProvider;
@@ -36,11 +36,11 @@ import io.nuls.consensus.poc.provider.TxQueueProvider;
 import io.nuls.consensus.poc.service.PocConsensusService;
 import io.nuls.consensus.poc.task.*;
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.thread.manager.NulsThreadFactory;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
 import io.nuls.poc.constant.ConsensusStatus;
+import io.nuls.protocol.context.NulsContext;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;

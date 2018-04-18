@@ -23,7 +23,7 @@
  */
 package io.nuls.network.message;
 
-import io.nuls.core.event.BaseEvent;
+import io.nuls.protocol.event.base.BaseEvent;
 import io.nuls.network.message.entity.*;
 import io.nuls.network.message.handler.NetWorkEventHandler;
 import io.nuls.network.message.impl.*;

@@ -26,9 +26,9 @@
 
 package io.nuls.account.event;
 
-import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.event.BaseEvent;
+import io.nuls.protocol.event.base.BaseEvent;
+import io.nuls.protocol.model.BaseNulsData;
 
 /**
  * @author Niels

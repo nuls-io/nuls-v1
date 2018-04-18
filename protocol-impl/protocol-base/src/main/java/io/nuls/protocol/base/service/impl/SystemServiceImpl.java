@@ -24,10 +24,12 @@
 
 package io.nuls.protocol.base.service.impl;
 
-import io.nuls.poc.service.intf.ConsensusService;
-import io.nuls.core.context.NulsContext;
+import io.nuls.consensus.poc.protocol.service.DownloadService;
+import io.nuls.consensus.poc.protocol.service.SystemService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.service.NetworkService;
+import io.nuls.poc.service.intf.ConsensusService;
+import io.nuls.protocol.context.NulsContext;
 
 /**
  * Created by ln on 2018/4/11.

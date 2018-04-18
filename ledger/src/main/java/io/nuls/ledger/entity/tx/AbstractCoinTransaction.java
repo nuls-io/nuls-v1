@@ -23,18 +23,12 @@
  */
 package io.nuls.ledger.entity.tx;
 
-import io.nuls.core.chain.entity.BaseNulsData;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.date.TimeService;
-import io.nuls.core.utils.io.NulsByteBuffer;
-import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.ledger.entity.CoinData;
@@ -42,6 +36,12 @@ import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.validator.CoinDataValidator;
 import io.nuls.ledger.entity.validator.CoinTransactionValidatorManager;
 import io.nuls.ledger.service.intf.CoinDataProvider;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.model.BaseNulsData;
+import io.nuls.protocol.model.NulsDigestData;
+import io.nuls.protocol.model.Transaction;
+import io.nuls.protocol.utils.io.NulsByteBuffer;
+import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
 
 import java.io.IOException;
 import java.util.Arrays;

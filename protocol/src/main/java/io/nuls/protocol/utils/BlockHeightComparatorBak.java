@@ -23,7 +23,7 @@
  */
 package io.nuls.protocol.utils;
 
-import io.nuls.core.chain.entity.Block;
+import io.nuls.protocol.model.Block;
 
 import java.util.Comparator;
 
@@ -31,6 +31,7 @@ import java.util.Comparator;
  * @author Niels
  * @date 2017/12/26
  */
+//todo
 public class BlockHeightComparatorBak implements Comparator<Block> {
 
     private static final BlockHeightComparatorBak INSTANCE = new BlockHeightComparatorBak();

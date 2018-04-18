@@ -24,26 +24,27 @@
 package io.nuls.rpc.resources.impl;
 
 import io.nuls.account.entity.Address;
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.BlockHeader;
-import io.nuls.core.chain.entity.Transaction;
+import io.nuls.consensus.poc.protocol.service.BlockService;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.ledger.service.intf.LedgerService;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.model.Block;
+import io.nuls.protocol.model.BlockHeader;
+import io.nuls.protocol.model.Transaction;
 import io.nuls.rpc.entity.BlockDto;
 import io.nuls.rpc.entity.RpcResult;
 import io.swagger.annotations.Api;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.io.IOException;
 
 /**
  * @author Niels

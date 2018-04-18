@@ -23,9 +23,8 @@
  */
 package io.nuls.ledger.entity;
 
-import io.nuls.core.chain.entity.Na;
+import io.nuls.protocol.model.Na;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 

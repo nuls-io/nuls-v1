@@ -23,10 +23,10 @@
  */
 package io.nuls.event.bus.handler.intf;
 
-import io.nuls.core.event.BaseEvent;
 import io.nuls.core.exception.NulsException;
 import io.nuls.event.bus.filter.NulsEventFilter;
 import io.nuls.event.bus.filter.NulsEventFilterChain;
+import io.nuls.protocol.event.base.BaseEvent;
 
 /**
  * @author Niels

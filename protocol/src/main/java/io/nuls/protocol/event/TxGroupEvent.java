@@ -23,11 +23,11 @@
  */
 package io.nuls.protocol.event;
 
-import io.nuls.protocol.constant.ProtocolEventType;
-import io.nuls.protocol.entity.TxGroup;
-import io.nuls.core.event.NoticeData;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.protocol.constant.ProtocolEventType;
+import io.nuls.protocol.event.base.NoticeData;
+import io.nuls.protocol.event.entity.TxGroup;
+import io.nuls.protocol.utils.io.NulsByteBuffer;
 
 /**
  * @author Niels

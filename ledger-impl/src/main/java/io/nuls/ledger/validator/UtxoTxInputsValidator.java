@@ -24,10 +24,7 @@
 package io.nuls.ledger.validator;
 
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.TransactionConstant;
-import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.script.P2PKHScriptSig;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.ledger.entity.OutPutStatusEnum;
@@ -35,6 +32,9 @@ import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.UtxoInput;
 import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
+import io.nuls.protocol.constant.TransactionConstant;
+import io.nuls.protocol.constant.TxStatusEnum;
+import io.nuls.protocol.script.P2PKHScriptSig;
 
 import java.util.Arrays;
 

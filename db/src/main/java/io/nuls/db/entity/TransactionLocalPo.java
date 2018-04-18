@@ -23,8 +23,6 @@
  */
 package io.nuls.db.entity;
 
-import io.nuls.core.chain.entity.Transaction;
-
 import java.util.List;
 
 /**
@@ -62,14 +60,14 @@ public class TransactionLocalPo {
     public TransactionLocalPo() {
     }
 
-    public TransactionLocalPo(TransactionPo tx) {
+    public TransactionLocalPo(TransactionPo tx,int transferType) {
         this.hash = tx.getHash();
         this.type = tx.getType();
         this.txIndex = tx.getTxIndex();
         this.blockHeight = tx.getBlockHeight();
         this.createTime = tx.getCreateTime();
         this.fee = tx.getFee();
-        this.transferType = Transaction.TRANSFER_RECEIVE;
+        this.transferType = transferType;
         this.remark = tx.getRemark();
         this.txData = tx.getTxData();
         this.scriptSig = tx.getScriptSig();

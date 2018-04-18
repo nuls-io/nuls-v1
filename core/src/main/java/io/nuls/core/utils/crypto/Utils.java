@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,13 +23,13 @@
  */
 package io.nuls.core.utils.crypto;
 
-import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.cfg.NulsConfig;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.model.intf.NulsData;
 import io.nuls.core.utils.log.Log;
 import org.spongycastle.crypto.digests.RIPEMD160Digest;
 
@@ -48,7 +48,7 @@ public class Utils {
     /**
      * @auther somebody
      */
-    public static final Charset CHARSET = Charset.forName(NulsContext.DEFAULT_ENCODING);
+    public static final Charset CHARSET = Charset.forName(NulsConfig.DEFAULT_ENCODING);
     private static final int MAGIC_8 = 8;
     private static final int MAGIC_0X80 = 0x80;
     /**
@@ -470,12 +470,12 @@ public class Utils {
     }
 
     public static int sizeOfString(String val) {
-        if(null==val){
+        if (null == val) {
             return 1;
         }
         byte[] bytes;
         try {
-            bytes = val.getBytes(NulsContext.DEFAULT_ENCODING);
+            bytes = val.getBytes(NulsConfig.DEFAULT_ENCODING);
         } catch (UnsupportedEncodingException e) {
             Log.error(e);
             throw new NulsRuntimeException(e);
@@ -495,10 +495,6 @@ public class Utils {
         return VarInt.sizeOf(val);
     }
 
-    public static int sizeOfNulsData(Short val) {
-        return 2;
-    }
-
     public static int sizeOfBoolean(Boolean val) {
         return 1;
     }
@@ -510,7 +506,7 @@ public class Utils {
         return VarInt.sizeOf((val).length) + (val).length;
     }
 
-    public static int sizeOfNulsData(BaseNulsData val) {
+    public static int sizeOfNulsData(NulsData val) {
         if (null == val) {
             return NulsConstant.PLACE_HOLDER.length;
         }

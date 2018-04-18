@@ -26,9 +26,9 @@ package io.nuls.client;
 import io.nuls.client.constant.CommandConstant;
 import io.nuls.client.processor.*;
 import io.nuls.client.processor.intf.CommandProcessor;
+import io.nuls.core.cfg.NulsConfig;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.cfg.ConfigLoader;
@@ -38,7 +38,9 @@ import io.nuls.rpc.constant.RpcConstant;
 import io.nuls.rpc.sdk.SdkManager;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.TreeMap;
 
 /**
  * @author Niels
@@ -96,8 +98,8 @@ public class CommandHandler {
     private void sdkInit() {
         String port = null;
         try {
-            NulsContext.MODULES_CONFIG = ConfigLoader.loadIni(NulsConstant.MODULES_CONFIG_FILE);
-            port = NulsContext.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_PORT);
+            NulsConfig.MODULES_CONFIG = ConfigLoader.loadIni(NulsConstant.MODULES_CONFIG_FILE);
+            port = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_PORT);
         }catch (IOException e) {
             Log.error("CommandHandler start failed", e);
             throw new NulsRuntimeException(ErrorCode.FAILED, "CommandHandler start failed");
@@ -112,7 +114,7 @@ public class CommandHandler {
             /** test*/
             String ip = null;
             try {
-                ip = NulsContext.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, "test.server.ip");
+                ip = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, "test.server.ip");
             } catch (NulsException e) {
                 ip = RpcConstant.DEFAULT_IP;
             }

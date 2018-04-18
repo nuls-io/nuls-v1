@@ -25,12 +25,13 @@
 package io.nuls.consensus.poc.provider;
 
 import io.nuls.consensus.poc.constant.BlockContainerStatus;
-import io.nuls.consensus.poc.container.BlockContainer;
-import io.nuls.consensus.poc.locker.Lockers;
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.context.NulsContext;
+import io.nuls.consensus.poc.protocol.locker.Lockers;
+import io.nuls.consensus.poc.protocol.model.container.BlockContainer;
+import io.nuls.consensus.poc.protocol.service.DownloadService;
 import io.nuls.core.utils.queue.service.impl.QueueService;
 import io.nuls.protocol.constant.DownloadStatus;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.model.Block;
 
 /**
  * Created by ln on 2018/4/13.
@@ -47,7 +48,7 @@ public class BlockQueueProvider implements QueueProvider {
     private boolean downloadBlockQueueHasDestory;
 
     public BlockQueueProvider() {
-        blockQueue = new QueueService<BlockContainer>();
+        blockQueue = new QueueService<>();
         blockQueue.createQueue(QUEUE_NAME_RECEIVE, 2000l, false);
         createDownloadQueue();
     }

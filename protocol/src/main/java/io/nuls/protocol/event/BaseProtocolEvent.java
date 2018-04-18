@@ -23,15 +23,16 @@
  */
 package io.nuls.protocol.event;
 
-import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.utils.log.Log;
+import io.nuls.protocol.event.base.BaseEvent;
+import io.nuls.protocol.model.BaseNulsData;
 
 /**
  * @author Niels
  * @date 2017/11/7
  */
-public abstract class BaseProtocolEvent<T extends BaseNulsData> extends io.nuls.core.event.BaseEvent<T> {
+public abstract class BaseProtocolEvent<T extends BaseNulsData> extends BaseEvent<T> {
 
     public BaseProtocolEvent(short eventType) {
         super(NulsConstant.MODULE_ID_PROTOCOL, eventType);

@@ -24,13 +24,9 @@
 
 package io.nuls.consensus.poc.task;
 
-import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.process.TxProcess;
 import io.nuls.consensus.poc.provider.TxQueueProvider;
-import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.utils.log.Log;
-
-import java.io.IOException;
+import io.nuls.protocol.model.Transaction;
 
 /**
  * Created by ln on 2018/4/13.

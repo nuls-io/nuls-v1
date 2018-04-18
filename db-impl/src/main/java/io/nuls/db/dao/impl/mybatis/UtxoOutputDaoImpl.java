@@ -25,7 +25,6 @@ package io.nuls.db.dao.impl.mybatis;
 
 import com.github.pagehelper.PageHelper;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.date.TimeService;
@@ -182,7 +181,7 @@ public class UtxoOutputDaoImpl extends BaseDaoImpl<UtxoOutputMapper, Map<String,
     @Override
     public long getRewardByBlockHeight(long height) {
         Searchable searchable = new Searchable();
-        searchable.addCondition("a.type", SearchOperator.eq, TransactionConstant.TX_TYPE_COIN_BASE);
+        searchable.addCondition("a.type", SearchOperator.eq, 1);
         searchable.addCondition("a.block_height", SearchOperator.eq, height);
         return getMapper().getCoinBaseReward(searchable);
     }
@@ -191,7 +190,7 @@ public class UtxoOutputDaoImpl extends BaseDaoImpl<UtxoOutputMapper, Map<String,
     public long getLastDayTimeReward() {
         Searchable searchable = new Searchable();
         long lastDayTime = TimeService.currentTimeMillis() - DateUtil.DATE_TIME;
-        searchable.addCondition("a.type", SearchOperator.eq, TransactionConstant.TX_TYPE_COIN_BASE);
+        searchable.addCondition("a.type", SearchOperator.eq, 1);
         searchable.addCondition("a.create_time", SearchOperator.gt, lastDayTime);
         return getMapper().getCoinBaseReward(searchable);
     }
@@ -199,7 +198,7 @@ public class UtxoOutputDaoImpl extends BaseDaoImpl<UtxoOutputMapper, Map<String,
     @Override
     public long getAccountReward(String address, long lastTime) {
         Searchable searchable = new Searchable();
-        searchable.addCondition("a.type", SearchOperator.eq, TransactionConstant.TX_TYPE_COIN_BASE);
+        searchable.addCondition("a.type", SearchOperator.eq, 1);
         searchable.addCondition("b.address", SearchOperator.eq, address);
         if (lastTime > 0) {
             searchable.addCondition("a.create_time", SearchOperator.gt, lastTime);
@@ -210,7 +209,7 @@ public class UtxoOutputDaoImpl extends BaseDaoImpl<UtxoOutputMapper, Map<String,
     @Override
     public long getAgentReward(String address, int type) {
         Searchable searchable = new Searchable();
-        searchable.addCondition("c.type", SearchOperator.eq, TransactionConstant.TX_TYPE_COIN_BASE);
+        searchable.addCondition("c.type", SearchOperator.eq, 1);
         if (type == 1) {
             searchable.addCondition("a.agent_address", SearchOperator.eq, address);
         } else {

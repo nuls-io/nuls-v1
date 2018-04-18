@@ -24,10 +24,7 @@
 package io.nuls.rpc.resources.impl;
 
 import io.nuls.account.entity.Address;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
@@ -40,7 +37,10 @@ import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.ledger.util.UtxoTransactionTool;
+import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.event.TransactionEvent;
+import io.nuls.protocol.model.NulsDigestData;
+import io.nuls.protocol.model.Transaction;
 import io.nuls.rpc.entity.OutputDto;
 import io.nuls.rpc.entity.RpcResult;
 import io.nuls.rpc.entity.TransactionDto;

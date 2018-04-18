@@ -23,10 +23,10 @@
  */
 package io.nuls.ledger.validator;
 
-import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
+import io.nuls.protocol.model.Transaction;
 
 /**
  * @author Niels

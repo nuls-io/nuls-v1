@@ -23,7 +23,7 @@
  */
 package io.nuls.db.dao;
 
-import io.nuls.core.chain.entity.Result;
+import io.nuls.core.model.Result;
 import io.nuls.db.entity.AccountPo;
 import io.nuls.db.entity.AliasPo;
 

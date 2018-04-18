@@ -15,4 +15,6 @@ public interface ProtocolEventType {
     short TX_GROUP = 8;
     short NEW_BLOCK = 9;
     short NEW_TX_EVENT = 2;
+    short EVENT_TYPE_GET_BLOCKS_HASH = 10;
+    short EVENT_TYPE_BLOCKS_HASH = 11;
 }

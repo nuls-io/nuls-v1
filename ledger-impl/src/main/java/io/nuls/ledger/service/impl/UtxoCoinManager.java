@@ -23,7 +23,6 @@
  */
 package io.nuls.ledger.service.impl;
 
-import io.nuls.core.chain.entity.Na;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.db.entity.UtxoOutputPo;
@@ -31,6 +30,8 @@ import io.nuls.ledger.entity.UtxoBalance;
 import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.util.UtxoTransactionTool;
 import io.nuls.ledger.util.UtxoTransferTool;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.model.Na;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -56,7 +57,7 @@ public class UtxoCoinManager {
 
     private LedgerCacheService ledgerCacheService = LedgerCacheService.getInstance();
 
-    private UtxoOutputDataService outputDataService;
+    private UtxoOutputDataService outputDataService = NulsContext.getServiceBean(UtxoOutputDataService.class);
 
     private Lock lock = new ReentrantLock();
 
@@ -168,7 +169,4 @@ public class UtxoCoinManager {
         return unSpends;
     }
 
-    public void setOutputDataService(UtxoOutputDataService outputDataService) {
-        this.outputDataService = outputDataService;
-    }
 }

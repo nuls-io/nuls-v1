@@ -1,9 +1,8 @@
 package io.nuls.network.message.impl;
 
 import io.netty.channel.socket.SocketChannel;
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.event.BaseEvent;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.event.base.BaseEvent;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Node;
@@ -13,6 +12,7 @@ import io.nuls.network.message.entity.VersionEvent;
 import io.nuls.network.message.handler.NetWorkEventHandler;
 import io.nuls.network.service.NetworkService;
 import io.nuls.network.service.impl.netty.NioChannelMap;
+import io.nuls.protocol.model.Block;
 
 public class HandshakeEventHandler implements NetWorkEventHandler {
 

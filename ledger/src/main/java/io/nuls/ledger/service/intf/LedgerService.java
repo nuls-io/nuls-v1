@@ -23,11 +23,14 @@
  */
 package io.nuls.ledger.service.intf;
 
-import io.nuls.core.chain.entity.*;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
-import io.nuls.db.entity.UtxoOutputPo;
+import io.nuls.core.model.Result;
 import io.nuls.ledger.entity.Balance;
+import io.nuls.protocol.model.Block;
+import io.nuls.protocol.model.Na;
+import io.nuls.protocol.model.NulsDigestData;
+import io.nuls.protocol.model.Transaction;
 
 import java.io.IOException;
 import java.util.List;

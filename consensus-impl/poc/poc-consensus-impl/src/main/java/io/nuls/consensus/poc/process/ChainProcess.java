@@ -24,25 +24,24 @@
 
 package io.nuls.consensus.poc.process;
 
-import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.manager.ChainManager;
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.BlockHeader;
-import io.nuls.core.context.NulsContext;
+import io.nuls.consensus.poc.protocol.model.Chain;
+import io.nuls.consensus.poc.protocol.model.container.ChainContainer;
+import io.nuls.consensus.poc.protocol.service.BlockService;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.log.ChainLog;
 import io.nuls.core.utils.log.Log;
-import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.poc.constant.ConsensusStatus;
 import io.nuls.poc.service.intf.ConsensusService;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.model.Block;
+import io.nuls.protocol.model.BlockHeader;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-
-import static sun.misc.Version.print;
 
 /**
  * Created by ln on 2018/4/13.
@@ -367,7 +366,7 @@ public class ChainProcess {
 
         for(Block rollbackBlock : rollbackBlockList) {
             try {
-                boolean success = blockService.rollbackBlock(rollbackBlock);
+                boolean success = blockService.rollbackBlock(rollbackBlock.getHeader().getHash().getDigestHex());
                 if(success) {
                     rollbackList.add(rollbackBlock);
                 }
@@ -430,7 +429,7 @@ public class ChainProcess {
             //回退状态
             Collections.reverse(successList);
             for(Block rollBlock : successList) {
-                blockService.rollbackBlock(rollBlock);
+                blockService.rollbackBlock(rollBlock.getHeader().getHash().getDigestHex());
             }
 
             Collections.reverse(rollbackBlockList);

@@ -24,16 +24,16 @@
 package io.nuls.ledger.entity;
 
 import io.nuls.account.entity.Address;
-import io.nuls.core.chain.entity.BaseNulsData;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.script.P2PKHScript;
 import io.nuls.core.utils.crypto.Utils;
-import io.nuls.core.utils.io.NulsByteBuffer;
-import io.nuls.core.utils.io.NulsOutputStreamBuffer;
 import io.nuls.core.utils.str.StringUtils;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.model.BaseNulsData;
+import io.nuls.protocol.model.NulsDigestData;
+import io.nuls.protocol.script.P2PKHScript;
+import io.nuls.protocol.utils.io.NulsByteBuffer;
+import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
 
 import java.io.IOException;
 
@@ -102,7 +102,7 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
         lockTime = byteBuffer.readInt48();
         p2PKHScript = byteBuffer.readNulsData(new P2PKHScript());
 
-        Address addressObj = new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), this.getOwner());
+        Address addressObj = new Address(NulsContext.DEFAULT_CHAIN_ID, this.getOwner());
 
         this.address = addressObj.toString();
     }

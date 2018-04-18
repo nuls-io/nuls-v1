@@ -26,12 +26,12 @@ package io.nuls.account.service.intf;
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.account.entity.Alias;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.NulsSignData;
-import io.nuls.core.chain.entity.Result;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.script.P2PKHScriptSig;
+import io.nuls.core.model.Result;
+import io.nuls.protocol.model.NulsDigestData;
+import io.nuls.protocol.model.NulsSignData;
+import io.nuls.protocol.script.P2PKHScriptSig;
 
 import java.util.List;
 

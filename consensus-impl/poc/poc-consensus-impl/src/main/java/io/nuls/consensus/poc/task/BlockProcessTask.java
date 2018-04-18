@@ -25,15 +25,16 @@
 package io.nuls.consensus.poc.task;
 
 import io.nuls.consensus.poc.constant.BlockContainerStatus;
-import io.nuls.consensus.poc.container.BlockContainer;
-import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.process.BlockProcess;
+import io.nuls.consensus.poc.protocol.locker.Lockers;
+import io.nuls.consensus.poc.protocol.model.container.BlockContainer;
+import io.nuls.consensus.poc.protocol.service.DownloadService;
 import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.consensus.poc.provider.ConsensusSystemProvider;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.Log;
 import io.nuls.poc.constant.ConsensusStatus;
 import io.nuls.protocol.constant.DownloadStatus;
+import io.nuls.protocol.context.NulsContext;
 
 import java.io.IOException;
 

@@ -23,7 +23,7 @@
  */
 package io.nuls.network.message.filter;
 
-import io.nuls.core.mesasge.NulsMessage;
+import io.nuls.protocol.mesasge.NulsMessage;
 
 /**
  * @author vivi

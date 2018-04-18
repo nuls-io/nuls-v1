@@ -24,9 +24,9 @@
 
 package io.nuls.protocol.base.download;
 
-import io.nuls.core.chain.entity.Block;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.entity.Node;
+import io.nuls.protocol.model.Block;
 
 import java.util.List;
 import java.util.concurrent.Callable;

@@ -24,10 +24,10 @@
 package io.nuls.consensus.poc.protocol.model;
 
 import io.nuls.account.entity.Address;
-import io.nuls.core.chain.entity.Na;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.protocol.constant.ProtocolConstant;
-import io.nuls.protocol.entity.Consensus;
+import io.nuls.protocol.event.entity.Consensus;
+import io.nuls.protocol.model.Na;
 
 import java.util.ArrayList;
 import java.util.List;

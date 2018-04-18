@@ -23,16 +23,15 @@
  */
 package io.nuls.event.bus.service.impl;
 
-import io.nuls.core.event.BaseEvent;
-import io.nuls.core.event.CommonStringEvent;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.event.bus.event.CommonDigestEvent;
-import io.nuls.event.bus.service.intf.EventBusService;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
+import io.nuls.event.bus.service.intf.EventBusService;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Node;
 import io.nuls.network.service.NetworkService;
+import io.nuls.protocol.event.base.BaseEvent;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -23,8 +23,8 @@
  */
 package io.nuls.rpc.resources.impl;
 
+import io.nuls.core.cfg.NulsConfig;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.i18n.I18nUtils;
 import io.nuls.core.module.service.ModuleService;
@@ -69,8 +69,8 @@ public class SystemResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult getVersion() {
         VersionDto rpcVersion = new VersionDto();
-        rpcVersion.setMyVersion(NulsContext.VERSION);
-        rpcVersion.setNewestVersion(NulsContext.NEWEST_VERSION);
+        rpcVersion.setMyVersion(NulsConfig.VERSION);
+        rpcVersion.setNewestVersion(NulsConfig.NEWEST_VERSION);
         return RpcResult.getSuccess().setData(rpcVersion);
     }
 

@@ -24,11 +24,11 @@
 
 package io.nuls.consensus.poc.protocol.model;
 
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.BlockHeader;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.entity.PunishLogPo;
-import io.nuls.protocol.entity.Consensus;
+import io.nuls.protocol.event.entity.Consensus;
+import io.nuls.protocol.model.Block;
+import io.nuls.protocol.model.BlockHeader;
 
 import java.util.ArrayList;
 import java.util.List;

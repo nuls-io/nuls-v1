@@ -24,11 +24,10 @@
 
 package io.nuls.consensus.poc.task;
 
-import io.nuls.consensus.poc.container.BlockContainer;
-import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.process.IsolatedBlocksProcess;
+import io.nuls.consensus.poc.protocol.locker.Lockers;
+import io.nuls.consensus.poc.protocol.model.container.BlockContainer;
 import io.nuls.consensus.poc.provider.IsolatedBlocksProvider;
-import io.nuls.core.chain.entity.Block;
 import io.nuls.core.utils.log.Log;
 
 import java.io.IOException;

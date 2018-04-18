@@ -24,12 +24,12 @@
 
 package io.nuls.consensus.poc;
 
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.BlockHeader;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.protocol.base.entity.member.Agent;
-import io.nuls.protocol.base.entity.member.Deposit;
-import io.nuls.protocol.entity.Consensus;
+import io.nuls.consensus.poc.protocol.model.Agent;
+import io.nuls.consensus.poc.protocol.model.Deposit;
+import io.nuls.protocol.event.entity.Consensus;
+import io.nuls.protocol.model.Block;
+import io.nuls.protocol.model.BlockHeader;
+import io.nuls.protocol.model.NulsDigestData;
 import org.junit.Before;
 
 import java.util.ArrayList;

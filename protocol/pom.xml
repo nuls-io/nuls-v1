@@ -29,11 +29,6 @@
             <artifactId>core</artifactId>
             <version>1.0.0</version>
         </dependency>
-        <dependency>
-            <groupId>io.nuls</groupId>
-            <artifactId>account</artifactId>
-            <version>1.0.0</version>
-        </dependency>
     </dependencies>
     <build>
     <plugins>

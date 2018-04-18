@@ -23,7 +23,7 @@
  */
 package io.nuls.ledger.entity.params;
 
-import io.nuls.core.chain.entity.Na;
+import io.nuls.protocol.model.Na;
 
 /**
  * @author Niels

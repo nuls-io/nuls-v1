@@ -23,9 +23,8 @@
  */
 package io.nuls.ledger.entity.params;
 
-import io.nuls.core.chain.entity.Na;
 import io.nuls.core.utils.str.StringUtils;
-import io.nuls.ledger.entity.CoinData;
+import io.nuls.protocol.model.Na;
 
 import java.util.ArrayList;
 import java.util.HashMap;
