@@ -23,7 +23,6 @@
  */
 package io.nuls.ledger.service.impl;
 
-import io.nuls.cache.service.intf.CacheService;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
@@ -68,10 +67,12 @@ import io.nuls.protocol.model.NulsDigestData;
 import io.nuls.protocol.model.Transaction;
 import io.nuls.protocol.service.intf.TransactionService;
 import io.nuls.protocol.utils.TransactionManager;
-import io.nuls.protocol.utils.TxTimeComparator;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -90,23 +91,10 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Autowired
     private EventBroadcaster eventBroadcaster;
 
-    private static final String RECEIVE_TX_CACHE = "Received-tx-cache";
-
-    private static final String CONFIRM_TX_CACHE = "Confirming-tx-cache";
-
-    private static final String ORPHAN_TX_CACHE = "Orphan-tx-cache";
-    @Autowired
-    private CacheService<String, Transaction> txCacheService;
-
     private Lock lock = new ReentrantLock();
 
     @Override
     public Transaction getTx(NulsDigestData hash) {
-        Transaction tx = getTxFromCache(hash);
-        if (tx != null) {
-            return tx;
-        }
-
         TransactionPo po = txDao.gettx(hash.getDigestHex());
         if (null == po) {
             return null;
@@ -135,32 +123,11 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public Transaction getLocalTx(NulsDigestData hash) {
-        Transaction tx = getTxFromCache(hash);
-        if (tx != null) {
-            return tx;
-        }
-
-        TransactionLocalPo po = txDao.getLocaltx(hash.getDigestHex());
-        if (null == po) {
-            return null;
-        }
-        try {
-            return UtxoTransferTool.toTransaction(po);
-        } catch (Exception e) {
-            Log.error(e);
-        }
-        return null;
-    }
-
-    @Override
     public List<Transaction> getTxList(String address, int txType) throws Exception {
         if (StringUtils.isBlank(address) && txType == 0) {
             throw new NulsRuntimeException(ErrorCode.PARAMETER_ERROR);
         }
         List<Transaction> txList = new ArrayList<>();
-        List<Transaction> cacheTxList = getCacheTxList(address, txType);
-        txList.addAll(cacheTxList);
 
         if (StringUtils.isNotBlank(address) && NulsContext.LOCAL_ADDRESS_LIST.contains(address)) {
             List<TransactionLocalPo> poList = txDao.getLocalTxs(null, address, txType, 0, 0);
@@ -178,15 +145,12 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     public long getTxCount(Long blockHeight, String address, int txType) throws Exception {
-        int count = 0;
-        List<Transaction> cacheTxList = getCacheTxs(address, txType);
-        count += cacheTxList.size();
-
+        long count = 0;
         boolean isLocal = NulsContext.LOCAL_ADDRESS_LIST.contains(address);
         if (isLocal) {
-            count += txDao.getLocalTxsCount(blockHeight, address, txType);
+            count = txDao.getLocalTxsCount(blockHeight, address, txType);
         } else {
-            count += txDao.getTxsCount(blockHeight, address, txType);
+            count = txDao.getTxsCount(blockHeight, address, txType);
         }
         return count;
     }
@@ -198,29 +162,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             txList = getLocalTxList(blockHeight, address, txType, pageNumber, pageSize);
         } else {
             txList = new ArrayList<>();
-            List<Transaction> cacheTxList = getCacheTxs(address, txType);
-            txList.addAll(cacheTxList);
-
             List<TransactionPo> poList;
-            if (pageNumber == 0 && pageSize == 0) {
-                poList = txDao.getTxs(blockHeight, address, txType, 0, 0);
-                for (TransactionPo po : poList) {
-                    txList.add(UtxoTransferTool.toTransaction(po));
-                }
-                return txList;
-            }
-
-            int start = (pageNumber - 1) * pageSize;
-            if (txList.size() >= start + pageSize) {
-                return txList.subList(start, start + pageSize);
-            } else if (start < txList.size()) {
-                txList = txList.subList(start, txList.size());
-                start = 0;
-                pageSize = pageSize - txList.size();
-            } else {
-                start = start - txList.size();
-            }
-            poList = txDao.getTxs(blockHeight, address, txType, start, pageSize);
+            poList = txDao.getTxs(blockHeight, address, txType, pageNumber, pageSize);
             for (TransactionPo po : poList) {
                 txList.add(UtxoTransferTool.toTransaction(po));
             }
@@ -228,79 +171,9 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         return txList;
     }
 
-    private Transaction getTxFromCache(NulsDigestData hash) {
-        List<Transaction> cacheTxList = new ArrayList<>(txCacheService.getElementList(CONFIRM_TX_CACHE));
-        cacheTxList.addAll(txCacheService.getElementList(RECEIVE_TX_CACHE));
-        cacheTxList.addAll(txCacheService.getElementList(ORPHAN_TX_CACHE));
-        for (Transaction tx : cacheTxList) {
-            if (hash.equals(tx.getHash())) {
-                return tx;
-            }
-        }
-        return null;
-    }
-
-    private List<Transaction> getCacheTxList(String address, int txType) {
-        List<Transaction> cacheTxList = new ArrayList<>(txCacheService.getElementList(CONFIRM_TX_CACHE));
-        cacheTxList.addAll(txCacheService.getElementList(RECEIVE_TX_CACHE));
-        cacheTxList.addAll(txCacheService.getElementList(ORPHAN_TX_CACHE));
-        for (int i = cacheTxList.size() - 1; i >= 0; i--) {
-            Transaction tx = cacheTxList.get(i);
-            if (txType > 0 && tx.getType() != txType) {
-                cacheTxList.remove(i);
-                continue;
-            }
-            if (StringUtils.isNotBlank(address) && !checkTxIsMySend(tx, address)) {
-                cacheTxList.remove(i);
-            }
-        }
-        Collections.sort(cacheTxList, TxTimeComparator.getInstance());
-        return cacheTxList;
-    }
-
-    private List<Transaction> getCacheTxs(String address, int txType) {
-        List<Transaction> cacheTxList = new ArrayList<>(txCacheService.getElementList(CONFIRM_TX_CACHE));
-        cacheTxList.addAll(txCacheService.getElementList(RECEIVE_TX_CACHE));
-        cacheTxList.addAll(txCacheService.getElementList(ORPHAN_TX_CACHE));
-        for (int i = cacheTxList.size() - 1; i >= 0; i--) {
-            Transaction tx = cacheTxList.get(i);
-            if (txType > 0 && tx.getType() != txType) {
-                cacheTxList.remove(i);
-                continue;
-            }
-            if (StringUtils.isNotBlank(address) && !checkTxIsMine(tx, address)) {
-                cacheTxList.remove(i);
-            }
-        }
-        Collections.sort(cacheTxList, TxTimeComparator.getInstance());
-        return cacheTxList;
-    }
-
     public List<Transaction> getLocalTxList(Long blockHeight, String address, int txType, int pageNumber, int pageSize) throws Exception {
         List<Transaction> txList = new ArrayList<>();
-        List<Transaction> cacheTxList = getCacheTxList(address, txType);
-        txList.addAll(cacheTxList);
-
-        List<TransactionLocalPo> poList;
-        if (pageNumber == 0 && pageSize == 0) {
-            poList = txDao.getLocalTxs(blockHeight, address, txType, 0, 0);
-            for (TransactionLocalPo po : poList) {
-                txList.add(UtxoTransferTool.toTransaction(po));
-            }
-            return txList;
-        }
-
-        int start = (pageNumber - 1) * pageSize;
-        if (txList.size() >= start + pageSize) {
-            return txList.subList(start, start + pageSize);
-        } else if (start < txList.size()) {
-            txList = txList.subList(start, txList.size());
-            start = 0;
-            pageSize = pageSize - txList.size();
-        } else {
-            start = start - txList.size();
-        }
-        poList = txDao.getLocalTxs(blockHeight, address, txType, start, pageSize);
+        List<TransactionLocalPo> poList = txDao.getLocalTxs(blockHeight, address, txType, pageNumber, pageSize);
         for (TransactionLocalPo po : poList) {
             txList.add(UtxoTransferTool.toTransaction(po));
         }
@@ -338,36 +211,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             txList.add(UtxoTransferTool.toTransaction(po));
         }
         return txList;
-    }
-
-    @Override
-    public List<Transaction> getCacheTxList(int type) {
-        List<Transaction> cacheTxList = new ArrayList<>(txCacheService.getElementList(CONFIRM_TX_CACHE));
-        cacheTxList.addAll(txCacheService.getElementList(RECEIVE_TX_CACHE));
-        cacheTxList.addAll(txCacheService.getElementList(ORPHAN_TX_CACHE));
-        for (int i = cacheTxList.size() - 1; i >= 0; i--) {
-            Transaction tx = cacheTxList.get(i);
-            if (type > 0 && tx.getType() != type) {
-                cacheTxList.remove(i);
-                continue;
-            }
-            UtxoTransactionTool.getInstance().setTxhashToUtxo(tx);
-        }
-        return cacheTxList;
-    }
-
-    @Override
-    public Transaction getCacheTx(String txHash) {
-        Transaction tx = txCacheService.getElement(ORPHAN_TX_CACHE, txHash);
-        if (tx != null) {
-            return tx;
-        }
-        tx = txCacheService.getElement(RECEIVE_TX_CACHE, txHash);
-        if (tx != null) {
-            return tx;
-        }
-        tx = txCacheService.getElement(CONFIRM_TX_CACHE, txHash);
-        return tx;
     }
 
     @Override
@@ -720,20 +563,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     public Page<UtxoOutput> getLockUtxo(String address, Integer pageNumber, Integer pageSize) {
         List<UtxoOutput> lockOutputs = new ArrayList<>();
-
-        List<Transaction> txCacheList = getCacheTxList(address, 0);
-        for (Transaction tx : txCacheList) {
-            if (checkTxIsMine(tx, address)) {
-                UtxoData utxoData = (UtxoData) ((AbstractCoinTransaction) tx).getCoinData();
-                for (UtxoOutput output : utxoData.getOutputs()) {
-                    if (output.getAddress().equals(address) && output.isLocked()) {
-                        output.setCreateTime(tx.getTime());
-                        output.setTxType(tx.getType());
-                        lockOutputs.add(output);
-                    }
-                }
-            }
-        }
 
         long count = outputDataService.getLockUtxoCount(address, TimeService.currentTimeMillis(), NulsContext.getInstance().getBestHeight(),
                 NulsContext.getInstance().getGenesisBlock().getHeader().getTime());

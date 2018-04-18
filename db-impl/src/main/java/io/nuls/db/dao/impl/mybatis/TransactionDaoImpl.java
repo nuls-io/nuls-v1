@@ -119,7 +119,7 @@ public class TransactionDaoImpl extends BaseDaoImpl<TransactionMapper, String, T
     }
 
     @Override
-    public List<TransactionPo> getTxs(Long blockHeight, String address, int type, int start, int limit) {
+    public List<TransactionPo> getTxs(Long blockHeight, String address, int type, int pageNumber, int pageSize) {
         Searchable searchable = new Searchable();
 //        Condition condition = Condition.custom("(e.address = c.address or e.address = d.address)");
 //        searchable.addCondition(condition);
@@ -132,11 +132,11 @@ public class TransactionDaoImpl extends BaseDaoImpl<TransactionMapper, String, T
         if (StringUtils.isNotBlank(address)) {
             searchable.addCondition("e.address", SearchOperator.eq, address);
         }
-        if (start == 0 & limit == 0) {
+        if (pageNumber == 0 & pageSize == 0) {
             PageHelper.orderBy("a.create_time desc, b.in_index asc, c.out_index asc");
             return getMapper().selectByAddress(searchable);
         }
-        PageHelper.offsetPage(start, limit);
+        PageHelper.startPage(pageNumber, pageSize);
         PageHelper.orderBy("a.create_time desc");
         List<String> txHashList = getMapper().selectTxHashListRelation(searchable);
         if (txHashList.isEmpty()) {

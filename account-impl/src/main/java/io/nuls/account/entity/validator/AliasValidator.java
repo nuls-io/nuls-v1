@@ -82,24 +82,24 @@ public class AliasValidator implements NulsDataValidator<AliasTransaction> {
         if (aliasValue < AccountConstant.ALIAS_NA.getValue() + tx.getFee().getValue()) {
             return ValidateResult.getFailedResult(ErrorCode.INVALID_INPUT);
         }
-
-        if (tx.getStatus() == TxStatusEnum.CACHED) {
-            List<Transaction> txList = getLedgerService().getCacheTxList(TransactionConstant.TX_TYPE_SET_ALIAS);
-            if (txList != null && tx.size() > 0) {
-                for (Transaction trx : txList) {
-                    if (trx.getHash().equals(tx.getHash())) {
-                        continue;
-                    }
-                    Alias a = ((AliasTransaction) trx).getTxData();
-                    if (alias.getAddress().equals(a.getAddress())) {
-                        return ValidateResult.getFailedResult(ErrorCode.ACCOUNT_ALREADY_SET_ALIAS);
-                    }
-                    if (alias.getAlias().equals(a.getAlias())) {
-                        return ValidateResult.getFailedResult("The alias has been occupied");
-                    }
-                }
-            }
-        }
+//
+//        if (tx.getStatus() == TxStatusEnum.CACHED) {
+//            List<Transaction> txList = getLedgerService().getCacheTxList(TransactionConstant.TX_TYPE_SET_ALIAS);
+//            if (txList != null && tx.size() > 0) {
+//                for (Transaction trx : txList) {
+//                    if (trx.getHash().equals(tx.getHash())) {
+//                        continue;
+//                    }
+//                    Alias a = ((AliasTransaction) trx).getTxData();
+//                    if (alias.getAddress().equals(a.getAddress())) {
+//                        return ValidateResult.getFailedResult(ErrorCode.ACCOUNT_ALREADY_SET_ALIAS);
+//                    }
+//                    if (alias.getAlias().equals(a.getAlias())) {
+//                        return ValidateResult.getFailedResult("The alias has been occupied");
+//                    }
+//                }
+//            }
+//        }
 
         AliasPo aliasPo = getAliasDataService().get(alias.getAlias());
         if (aliasPo != null) {
