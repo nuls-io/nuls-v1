@@ -94,9 +94,7 @@ public class CacheLoader {
 
         Block block = blockService.getLocalBestBlock();
 
-        long bestBlockHeight = block.getHeader().getHeight();
-
-        List<AgentPo> list = agentDataService.getAllList(bestBlockHeight);
+        List<AgentPo> list = agentDataService.getAllList();
 
         List<Consensus<Agent>> agentList = new ArrayList<>();
 
@@ -110,9 +108,7 @@ public class CacheLoader {
     public List<Consensus<Deposit>> loadDepositList() {
         Block block = blockService.getLocalBestBlock();
 
-        long bestBlockHeight = block.getHeader().getHeight();
-
-        List<DepositPo> list = depositDataService.getAllList(bestBlockHeight);
+        List<DepositPo> list = depositDataService.getAllList();
 
         List<Consensus<Deposit>> depositList = new ArrayList<>();
 

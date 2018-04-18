@@ -55,7 +55,6 @@ import java.util.Map;
 public class StopAgentTxService implements TransactionService<StopAgentTransaction> {
 
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
-    private PocConsensusService pocConsensusService = NulsContext.getServiceBean(PocConsensusService.class);
     private AgentDataService agentDataService = NulsContext.getServiceBean(AgentDataService.class);
     private DepositDataService depositDataService = NulsContext.getServiceBean(DepositDataService.class);
 
@@ -105,7 +104,7 @@ public class StopAgentTxService implements TransactionService<StopAgentTransacti
         Transaction joinTx = ledgerService.getTx(tx.getTxData());
         RegisterAgentTransaction raTx = (RegisterAgentTransaction) joinTx;
 
-        List<Consensus<Deposit>> depositList = pocConsensusService.getEffectiveDepositList(null, raTx.getTxData().getHexHash(), block.getHeader().getHeight(), null);
+        List<Consensus<Deposit>> depositList = NulsContext.getServiceBean(PocConsensusService.class).getEffectiveDepositList(null, raTx.getTxData().getHexHash(), block.getHeader().getHeight(), null);
         for (Consensus<Deposit> depositConsensus : depositList) {
             if (!depositConsensus.getExtend().getAgentHash().equals(raTx.getTxData().getHexHash())) {
                 continue;
