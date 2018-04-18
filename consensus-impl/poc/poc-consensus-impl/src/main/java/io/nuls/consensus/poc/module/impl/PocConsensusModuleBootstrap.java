@@ -26,6 +26,7 @@ package io.nuls.consensus.poc.module.impl;
 import io.nuls.consensus.poc.handler.*;
 import io.nuls.consensus.poc.module.AbstractPocConsensusModule;
 import io.nuls.consensus.poc.protocol.context.ConsensusContext;
+import io.nuls.consensus.poc.protocol.event.notice.*;
 import io.nuls.consensus.poc.protocol.service.BlockService;
 import io.nuls.consensus.poc.service.impl.PocConsensusServiceImpl;
 import io.nuls.core.constant.ErrorCode;
@@ -40,6 +41,7 @@ import io.nuls.event.bus.service.intf.EventBusService;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.event.*;
+import io.nuls.protocol.event.manager.EventManager;
 import io.nuls.protocol.model.Block;
 import io.nuls.protocol.model.Transaction;
 
@@ -55,6 +57,13 @@ public class PocConsensusModuleBootstrap extends AbstractPocConsensusModule {
 
     @Override
     public void init() {
+        EventManager.putEvent(AssembledBlockNotice.class);
+        EventManager.putEvent(CancelConsensusNotice.class);
+        EventManager.putEvent(EntrustConsensusNotice.class);
+        EventManager.putEvent(PackedBlockNotice.class);
+        EventManager.putEvent(RegisterAgentNotice.class);
+        EventManager.putEvent(StopConsensusNotice.class);
+
         this.waitForDependencyInited(NulsConstant.MODULE_ID_PROTOCOL);
         this.registerService(PocConsensusServiceImpl.class);
     }
