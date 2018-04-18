@@ -84,8 +84,6 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
     @Override
     public void start() {
         this.checkGenesisBlock();
-
-
         this.initHandlers();
         NulsContext.getServiceBean(DownloadService.class).start();
         Log.info("the protocol module is started!");
