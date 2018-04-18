@@ -1,6 +1,6 @@
 package io.nuls.module.version;
 
-import io.nuls.core.chain.intf.NulsVersion;
+import io.nuls.core.model.intf.NulsVersion;
 import io.nuls.core.utils.spring.lite.annotation.MavenInfo;
 
 /**
