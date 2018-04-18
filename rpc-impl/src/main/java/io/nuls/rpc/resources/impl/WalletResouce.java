@@ -39,7 +39,8 @@ import io.nuls.protocol.model.Na;
 import io.nuls.rpc.entity.RpcResult;
 import io.nuls.rpc.resources.form.AccountParamForm;
 import io.nuls.rpc.resources.form.TransferForm;
-import io.swagger.annotations.Api;
+import io.nuls.rpc.resources.form.WalletPasswordForm;
+import io.swagger.annotations.*;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
@@ -91,7 +92,12 @@ public class WalletResouce {
     @POST
     @Path("/reset")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult password(AccountParamForm form) {
+    @ApiOperation(value = "重置钱包密码", notes = "Nuls_RPC_API文档[3.4.2]")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = RpcResult.class)
+    })
+    public RpcResult password(@ApiParam(name = "重置钱包密码表单数据", value = "JSONFormat", required = true)
+                                          WalletPasswordForm form) {
         Result result = this.accountService.changePassword(form.getPassword(), form.getNewPassword());
         if (result.isSuccess()) {
             NulsContext.setCachedPasswordOfWallet(form.getNewPassword());
