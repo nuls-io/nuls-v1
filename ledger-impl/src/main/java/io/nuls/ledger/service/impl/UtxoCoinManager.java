@@ -82,47 +82,7 @@ public class UtxoCoinManager {
      * @return
      */
     public List<UtxoOutput> getAccountUnSpend(String address, Na value) {
-        return null;
-//        lock.lock();
-//        List<UtxoOutput> unSpends = new ArrayList<>();
-//        try {
-//            UtxoBalance balance = (UtxoBalance) ledgerCacheService.getBalance(address);
-//            if (balance == null || balance.getUsable().isLessThan(value)) {
-//                return unSpends;
-//            }
-//
-//            //check use-able is enough , find unSpend utxo
-//            boolean enough = false;
-//            Na amount = Na.ZERO;
-//            for (int i = 0; i < balance.getUnSpends().size(); i++) {
-//                UtxoOutput output = balance.getUnSpends().get(i);
-//                boolean update = ledgerCacheService.updateUtxoStatus(output.getKey(), UtxoOutput.UTXO_CONFIRM_LOCK, UtxoOutput.UTXO_CONFIRM_UNLOCK);
-//                //other tx locked this utxo
-//                if (!update) {
-//                    continue;
-//                }
-//                unSpends.add(output);
-//                amount = amount.add(Na.valueOf(output.getValue()));
-//                if (amount.isGreaterThan(value)) {
-//                    enough = true;
-//                    break;
-//                }
-//            }
-//            if (!enough) {
-//                for (UtxoOutput output : unSpends) {
-//                    ledgerCacheService.updateUtxoStatus(output.getKey(), UtxoOutput.UTXO_CONFIRM_UNLOCK, UtxoOutput.UTXO_CONFIRM_LOCK);
-//                }
-//                unSpends = new ArrayList<>();
-//            }
-//        } catch (Exception e) {
-//            Log.error(e);
-//            for (UtxoOutput output : unSpends) {
-//                ledgerCacheService.updateUtxoStatus(output.getKey(), UtxoOutput.UTXO_CONFIRM_UNLOCK, UtxoOutput.UTXO_CONFIRM_LOCK);
-//            }
-//        } finally {
-//            lock.unlock();
-//        }
-//        return unSpends;
+       return null;
     }
 
     public List<UtxoOutput> getAccountsUnSpend(List<String> addressList, Na value) {

@@ -171,8 +171,16 @@ public class UtxoTransactionDaoImpl implements UtxoTransactionDataService {
 
     @Override
     @DbSession
-    public int saveLocalList(List<TransactionLocalPo> poList) {
-        return txLocalDao.save(poList);
+    public void saveLocalList(List<TransactionLocalPo> poList) {
+        for (TransactionLocalPo localPo : poList) {
+            TransactionLocalPo po = getLocaltx(localPo.getHash());
+            if (po != null) {
+                po.setStatus(1);
+                save(po);
+            } else {
+                save(localPo);
+            }
+        }
     }
 
     @Override

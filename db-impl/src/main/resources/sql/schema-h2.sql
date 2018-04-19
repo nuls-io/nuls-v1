@@ -127,8 +127,10 @@ CREATE TABLE IF NOT EXISTS `transaction_local` (
   `fee` bigint(19) NOT NULL,
   `transferType` int(1) DEFAULT NULL,
   `txData` varbinary(1024) DEFAULT NULL,
+  `coinData` varbinary(1024) DEFAULT NULL,
   `scriptSig` varbinary(255) DEFAULT NULL,
   `size` int(9) DEFAULT NULL,
+  `status` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`hash`)
 ) ;
 

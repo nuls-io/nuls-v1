@@ -543,7 +543,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @DbSession
     public void unlockTxSave(String txHash) {
         Log.info("-------------- exit agent unlockTxSave  ------------------txHash:" + txHash);
-//        txDao.unlockTxOutput(txHash);
+        txDao.unlockTxOutput(txHash);
 //        String key = txHash + "-" + 0;
 //        UtxoOutput output = ledgerCacheService.getUtxo(key);
 //        output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT);
@@ -554,6 +554,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @DbSession
     public void unlockTxRollback(String txHash) {
         Log.info("-------------- exit agent unlockTxRollback  ------------------txHash:" + txHash);
+        txDao.lockTxOutput(txHash);
 //        UtxoOutput output = ledgerCacheService.getUtxo(txHash + "-" + 0);
 //        if (output != null) {
 //            if (OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT == output.getStatus()) {
