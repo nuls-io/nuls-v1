@@ -135,7 +135,7 @@ public class DownloadProcessor extends Thread {
 
             boolean success = downResult != null && downResult.booleanValue() && storageResult != null && storageResult.booleanValue();
 
-            if(success && checkIsNewest()) {
+            if(success && checkIsNewest(newestInfos)) {
                 downloadStatus = DownloadStatus.SUCCESS;
             } else if(downloadStatus != DownloadStatus.WAIT){
                 downloadStatus = DownloadStatus.FAILED;
@@ -148,12 +148,32 @@ public class DownloadProcessor extends Thread {
         }
     }
 
-    private boolean checkIsNewest() {
+    private boolean checkIsNewest(NetworkNewestBlockInfos downloadInfos) {
+        long downloadBestHeight = downloadInfos.getNetBestHeight();
+        long time = TimeService.currentTimeMillis();
+        long timeout = 60*1000L;
+        long localBestHeight = 0L;
+
+        while(true) {
+            if(TimeService.currentTimeMillis() - time > timeout) {
+                break;
+            }
+            // TODO 只需要最新的区块头信息
+            long bestHeight = blockService.getBestBlock().getHeader().getHeight();
+            if(bestHeight >= downloadBestHeight) {
+                break;
+            } else if(bestHeight != localBestHeight) {
+                localBestHeight = bestHeight;
+                time = TimeService.currentTimeMillis();
+            }
+            try {
+                Thread.sleep(100l);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
         NetworkNewestBlockInfos newestInfos = getNetworkNewestBlockInfos();
-//        if(!blockService.getBestBlock().getHeader().getHash().getDigestHex().equals(newestInfos.getNetBestHash())) {
-//            downloadStatus = DownloadStatus.WAIT;
-//            return false;
-//        }
         if(newestInfos.getNetBestHeight() > blockService.getLocalBestBlock().getHeader().getHeight()) {
             downloadStatus = DownloadStatus.WAIT;
             return false;
