@@ -45,6 +45,7 @@ public class AgentPo {
     private Integer status;
     private long blockHeight;
     private long delHeight;
+    private String txHash;
 
     public long getDelHeight() {
         return delHeight;
@@ -132,5 +133,13 @@ public class AgentPo {
 
     public void setAgentName(String agentName) {
         this.agentName = agentName;
+    }
+
+    public String getTxHash() {
+        return txHash;
+    }
+
+    public void setTxHash(String txHash) {
+        this.txHash = txHash;
     }
 }

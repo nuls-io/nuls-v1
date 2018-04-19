@@ -56,6 +56,7 @@ public class Agent extends BaseNulsData {
     private double creditVal;
 
     private long totalDeposit;
+    private String txHash;
 
     @Override
     public int size() {
@@ -168,5 +169,13 @@ public class Agent extends BaseNulsData {
 
     public void setTotalDeposit(long totalDeposit) {
         this.totalDeposit = totalDeposit;
+    }
+
+    public void setTxHash(String txHash) {
+        this.txHash = txHash;
+    }
+
+    public String getTxHash() {
+        return txHash;
     }
 }

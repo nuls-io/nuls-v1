@@ -102,13 +102,13 @@ public class MainControlScheduler {
         ChainProcess chainProcess = new ChainProcess(chainManager);
         threadPool.scheduleAtFixedRate(new ChainProcessTask(chainProcess), 1000L,500L, TimeUnit.MILLISECONDS);
 
-        ConsensusProcess consensusProcess = new ConsensusProcess(chainManager, roundManager, txMemoryPool, blockProcess);
+        ConsensusProcess consensusProcess = new ConsensusProcess(chainManager, roundManager, txMemoryPool, blockQueueProvider);
         threadPool.scheduleAtFixedRate(new ConsensusProcessTask(consensusProcess), 1000L,1000L, TimeUnit.MILLISECONDS);
 
         DownloadBlockProcess downloadBlockProcess = new DownloadBlockProcess();
         DownloadBlockProvider downloadBlockProvider = new DownloadBlockProvider();
         isolatedBlocksProcess.setDownloadBlockProvider(downloadBlockProvider);
-        downloadBlockProcess.setBlockProcess(blockProcess);
+        downloadBlockProcess.setBlockQueueProvider(blockQueueProvider);
         threadPool.scheduleAtFixedRate(new DownloadBlockProcessTask(downloadBlockProcess, downloadBlockProvider), 1000L,1000L, TimeUnit.MILLISECONDS);
 
         initDatas();

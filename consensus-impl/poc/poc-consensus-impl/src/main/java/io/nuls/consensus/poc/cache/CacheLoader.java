@@ -39,6 +39,7 @@ import io.nuls.db.entity.AgentPo;
 import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.db.entity.DepositPo;
 import io.nuls.db.entity.PunishLogPo;
+import io.nuls.protocol.base.utils.BlockHeaderTool;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.event.entity.Consensus;
 import io.nuls.protocol.model.Block;
@@ -84,7 +85,7 @@ public class CacheLoader {
         List<BlockHeaderPo> list = blockService.getBlockHeaderListByRound(roundData.getRoundIndex() - size + 1, roundData.getRoundIndex());
         for (BlockHeaderPo blockHeaderPo : list) {
             try {
-                blockHeaderList.add(ConsensusTool.fromPojo(blockHeaderPo));
+                blockHeaderList.add(BlockHeaderTool.fromPojo(blockHeaderPo));
             } catch (NulsException e) {
                 Log.error(e);
             }

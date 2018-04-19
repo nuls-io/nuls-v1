@@ -97,4 +97,5 @@ public interface UtxoTransactionDataService {
     void unlockTxOutput(String txHash);
 
     void lockTxOutput(String txHash);
+
 }

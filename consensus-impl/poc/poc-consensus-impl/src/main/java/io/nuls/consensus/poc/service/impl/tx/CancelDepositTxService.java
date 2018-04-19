@@ -27,6 +27,7 @@ import io.nuls.consensus.poc.protocol.constant.ConsensusStatusEnum;
 import io.nuls.consensus.poc.protocol.model.Deposit;
 import io.nuls.consensus.poc.protocol.tx.CancelDepositTransaction;
 import io.nuls.consensus.poc.protocol.tx.PocJoinConsensusTransaction;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.dao.DepositDataService;
@@ -105,8 +106,12 @@ public class CancelDepositTxService implements TransactionService<CancelDepositT
 
     @Override
     public ValidateResult conflictDetect(CancelDepositTransaction tx, List<Transaction> txList) {
-        // todo auto-generated method stub(niels)
-        return null;
+        for (Transaction transaction : txList) {
+            if (transaction.getHash().equals(tx.getHash())) {
+                return ValidateResult.getFailedResult(ErrorCode.FAILED, "transaction Duplication");
+            }
+        }
+        return ValidateResult.getSuccessResult();
     }
 
 }

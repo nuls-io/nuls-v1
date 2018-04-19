@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS `agent` (
   `del_height` bigint(18) DEFAULT 0,
   `status` INT DEFAULT 0,
   `start_time` bigint(14) NOT NULL,
+   `tx_hash` varchar(70) NOT NULL,
   `commission_rate` decimal(14) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

@@ -38,6 +38,7 @@ import io.nuls.consensus.poc.protocol.model.block.BlockData;
 import io.nuls.consensus.poc.protocol.model.block.BlockRoundData;
 import io.nuls.consensus.poc.protocol.tx.YellowPunishTransaction;
 import io.nuls.consensus.poc.protocol.utils.ConsensusTool;
+import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.consensus.poc.provider.ConsensusSystemProvider;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.date.DateUtil;
@@ -72,7 +73,7 @@ public class ConsensusProcess {
     private RoundManager roundManager;
     private TxMemoryPool txMemoryPool;
 
-    private BlockProcess blockProcess;
+    private BlockQueueProvider blockQueueProvider;
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
@@ -80,18 +81,18 @@ public class ConsensusProcess {
 
     private boolean hasPacking;
 
-    public ConsensusProcess(ChainManager chainManager, RoundManager roundManager, TxMemoryPool txMemoryPool, BlockProcess blockProcess) {
+    public ConsensusProcess(ChainManager chainManager, RoundManager roundManager, TxMemoryPool txMemoryPool, BlockQueueProvider blockQueueProvider) {
         this.chainManager = chainManager;
         this.roundManager = roundManager;
         this.txMemoryPool = txMemoryPool;
-        this.blockProcess = blockProcess;
+        this.blockQueueProvider = blockQueueProvider;
     }
 
     public void process() {
 
         boolean canPackage = checkCanPackage();
 
-        if(!canPackage || false) {
+        if (!canPackage || false) {
             return;
         }
 
@@ -103,12 +104,12 @@ public class ConsensusProcess {
         // TODO load config
 
         // wait consensus ready running
-        if(ConsensusSystemProvider.getConsensusStatus().ordinal() <= ConsensusStatus.WAIT_START.ordinal()) {
+        if (ConsensusSystemProvider.getConsensusStatus().ordinal() <= ConsensusStatus.WAIT_START.ordinal()) {
             return false;
         }
 
         // check network status
-        if(networkService.getAvailableNodes().size() == 0) {
+        if (networkService.getAvailableNodes().size() == 0) {
             return false;
         }
 
@@ -119,7 +120,7 @@ public class ConsensusProcess {
 
         MeetingRound round = chainManager.getMasterChain().resetRound(true);
 
-        if(round == null) {
+        if (round == null) {
             return;
         }
 
@@ -134,16 +135,16 @@ public class ConsensusProcess {
             hasPacking = true;
             try {
                 Log.debug("当前网络时间： " + DateUtil.convertDate(new Date(TimeService.currentTimeMillis())) + " , 我的打包开始时间: " +
-                        DateUtil.convertDate(new Date(member.getPackStartTime()))+ " , 我的打包结束时间: " +
+                        DateUtil.convertDate(new Date(member.getPackStartTime())) + " , 我的打包结束时间: " +
                         DateUtil.convertDate(new Date(member.getPackEndTime())) + " , 当前轮开始时间: " +
-                        DateUtil.convertDate(new Date(round.getStartTime()))+ " , 当前轮结束开始时间: " +
+                        DateUtil.convertDate(new Date(round.getStartTime())) + " , 当前轮结束开始时间: " +
                         DateUtil.convertDate(new Date(round.getEndTime())));
                 packing(member, round);
             } catch (Exception e) {
                 Log.error(e);
             }
 
-            while(member.getPackEndTime() > TimeService.currentTimeMillis()) {
+            while (member.getPackEndTime() > TimeService.currentTimeMillis()) {
                 try {
                     Thread.sleep(500l);
                 } catch (InterruptedException e) {
@@ -183,7 +184,7 @@ public class ConsensusProcess {
         }
 
         boolean success = saveBlock(block);
-        if(success) {
+        if (success) {
             broadcastSmallBlock(block);
         } else {
             Log.error("make a block, but save block error");
@@ -246,7 +247,7 @@ public class ConsensusProcess {
     }
 
     private boolean saveBlock(Block block) throws IOException {
-        return blockProcess.addBlock(new BlockContainer(block, BlockContainerStatus.RECEIVED));
+        return blockQueueProvider.put(new BlockContainer(block, BlockContainerStatus.RECEIVED), true);
     }
 
     private void broadcastSmallBlock(Block block) {
@@ -289,13 +290,13 @@ public class ConsensusProcess {
 
         long totalSize = 0L;
 
-        while(true) {
+        while (true) {
             if ((self.getPackEndTime() - TimeService.currentTimeMillis()) <= 500L) {
                 break;
             }
             Transaction tx = txMemoryPool.get();
 
-            if(tx == null) {
+            if (tx == null) {
                 try {
                     Thread.sleep(100l);
                 } catch (InterruptedException e) {
@@ -308,7 +309,7 @@ public class ConsensusProcess {
                 txMemoryPool.add(tx, false);
                 break;
             }
-            if(outHashList.contains(tx.getHash())) {
+            if (outHashList.contains(tx.getHash())) {
                 continue;
             }
             Transaction repeatTx = ledgerService.getTx(tx.getHash());
@@ -316,7 +317,12 @@ public class ConsensusProcess {
                 continue;
             }
             outHashList.add(tx.getHash());
-            ValidateResult result = tx.verify();
+            ValidateResult result = ledgerService.conflictDetectTx(tx, packingTxList);
+            if (result.isFailed()) {
+                Log.debug(result.getMessage());
+                continue;
+            }
+            result = tx.verify();
             if (result.isFailed()) {
                 Log.debug(result.getMessage());
                 continue;

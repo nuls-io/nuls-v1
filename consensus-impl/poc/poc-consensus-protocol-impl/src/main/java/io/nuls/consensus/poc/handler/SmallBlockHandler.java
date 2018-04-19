@@ -124,15 +124,8 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
         Block block = ConsensusTool.assemblyBlock(header, txMap, smallBlock.getTxHashList());
 //        boolean needForward = blockManager.addBlock(block, true, fromId);
 
-        boolean needForward = consensusService.newBlock(block, networkService.getNode(fromId));
-        if (needForward) {
-            SmallBlockEvent newBlockEvent = new SmallBlockEvent();
-            newBlockEvent.setEventBody(smallBlock);
-            List<String> addressList = eventBroadcaster.broadcastHashAndCache(newBlockEvent, fromId);
-//            for (String address : addressList) {
-//                BlockLog.debug("forward blockHeader:(" + address + ")" + header.getHeight() + ", hash:" + header.getHash() + ", preHash:" + header.getPreHash() + ", packing:" + Address.fromHashs(header.getPackingAddress()));
-//            }
-        }
+        consensusService.newBlock(block, networkService.getNode(fromId));
+
 
         AssembledBlockNotice notice = new AssembledBlockNotice();
         notice.setEventBody(header);

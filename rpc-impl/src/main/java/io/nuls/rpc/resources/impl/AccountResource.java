@@ -69,7 +69,7 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = ArrayList.class)
     })
-    public RpcResult create(@ApiParam(name = "账户表单数据", value = "JSONFormat", required = true)
+    public RpcResult create(@ApiParam(name = "form", value = "账户表单数据", required = true)
                                         AccountCreateForm form) {
         Result<List<String>> accountResult = accountService.createAccount(form.getCount(), form.getPassword());
         RpcResult result = new RpcResult(accountResult);
@@ -118,7 +118,7 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = RpcResult.class)
     })
-    public RpcResult alias(@ApiParam(name = "设置别名表单数据", value = "JSONFormat", required = true)
+    public RpcResult alias(@ApiParam(name = "form", value = "设置别名表单数据", required = true)
                                        AccountAliasForm form) {
         if (!Address.validAddress(form.getAddress())) {
             return RpcResult.getFailed(ErrorCode.ADDRESS_ERROR);
@@ -242,7 +242,7 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = String.class)
     })
-    public RpcResult getPrikey(@ApiParam(name = "查询私钥表单数据", value = "JSON格式", required = true)
+    public RpcResult getPrikey(@ApiParam(name = "form", value = "查询私钥表单数据", required = true)
                                        AccountAPForm form) {
         if (!Address.validAddress(form.getAddress()) || !StringUtils.validPassword(form.getPassword())) {
             return RpcResult.getFailed(ErrorCode.ADDRESS_ERROR);

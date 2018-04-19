@@ -47,7 +47,6 @@ import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.entity.OutPutStatusEnum;
-import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
@@ -473,13 +472,20 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public void conflictDetectTx(Transaction tx, List<Transaction> txList) throws NulsException {
+    public ValidateResult conflictDetectTx(Transaction tx, List<Transaction> txList) throws NulsException {
         AssertUtil.canNotEmpty(tx, ErrorCode.NULL_PARAMETER);
-        List<TransactionService> serviceList = getServiceList(tx.getClass());
-        for (TransactionService service : serviceList) {
-            service.conflictDetect(tx, txList);
+        if (null == txList || txList.isEmpty()) {
+            return ValidateResult.getSuccessResult();
         }
-        tx.setStatus(TxStatusEnum.AGREED);
+        List<TransactionService> serviceList = getServiceList(tx.getClass());
+        ValidateResult result = null;
+        for (TransactionService service : serviceList) {
+            result = service.conflictDetect(tx, txList);
+            if (result.isFailed()) {
+                break;
+            }
+        }
+        return result;
     }
 
     @Override
@@ -623,5 +629,17 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     public void resetLedgerCache() {
 //        ledgerCacheService.clear();
 //        UtxoCoinManager.getInstance().cacheAllUnSpendUtxo();
+    }
+
+    @Override
+    public List<Transaction> getWaitingTxList() {
+        // todo auto-generated method stub(Vivi)
+        return null;
+    }
+
+    @Override
+    public void deleteLocalTx(String txHash) {
+        // todo auto-generated method stub(niels)
+        //删除本地未打包节点，如果一大包 ，则终止
     }
 }

@@ -25,6 +25,7 @@ package io.nuls.consensus.poc.handler;
 
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.SeverityLevelEnum;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.entity.NodePo;
@@ -76,6 +77,15 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
                 networkService.blackNode(fromId, NodePo.BLACK);
             }
             return;
+        }
+        try {
+            result = ledgerService.conflictDetectTx(tx,ledgerService.getWaitingTxList());
+            if(result.isFailed()){
+                return;
+            }
+        } catch (NulsException e) {
+            Log.error(e);
+            return ;
         }
         boolean isMine = ledgerService.checkTxIsMySend(tx);
         try {

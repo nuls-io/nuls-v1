@@ -66,7 +66,14 @@ public class WalletResouce {
     @POST
     @Path("/unlock")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult unlock(@FormParam("password") String password, @FormParam("unlockTime") Integer unlockTime) {
+    @ApiOperation(value = "解锁钱包 [3.4.3]")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = RpcResult.class)
+    })
+    public RpcResult unlock(@ApiParam(name="password", value="密码", required = true)
+                                @FormParam("password") String password,
+                            @ApiParam(name="unlockTime", value="解锁时间(秒)", required = true)
+                                @FormParam("unlockTime") Integer unlockTime) {
         AssertUtil.canNotEmpty(password, ErrorCode.NULL_PARAMETER);
         AssertUtil.canNotEmpty(unlockTime);
         if (unlockTime > MAX_UNLOCK_TIME) {
@@ -79,7 +86,12 @@ public class WalletResouce {
     @POST
     @Path("/encrypt")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult password(@FormParam("password") String password) {
+    @ApiOperation(value = "加密钱包 [3.4.1]")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = RpcResult.class)
+    })
+    public RpcResult password(@ApiParam(name="password", value="密码", required = true)
+                                  @FormParam("password") String password) {
         Result result = this.accountService.encryptAccount(password);
         if (result.isSuccess()) {
             NulsContext.setCachedPasswordOfWallet(password);
@@ -94,7 +106,7 @@ public class WalletResouce {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = RpcResult.class)
     })
-    public RpcResult password(@ApiParam(name = "重置钱包密码表单数据", value = "JSONFormat", required = true)
+    public RpcResult password(@ApiParam(name = "form", value = "重置钱包密码表单数据", required = true)
                                           WalletPasswordForm form) {
         Result result = this.accountService.changePassword(form.getPassword(), form.getNewPassword());
         if (result.isSuccess()) {
@@ -107,7 +119,12 @@ public class WalletResouce {
     @POST
     @Path("/transfer")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult transfer(TransferForm form) {
+    @ApiOperation(value = "转账交易 [3.4.4]", notes = "result.data: hash (交易hash)")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = String.class)
+    })
+    public RpcResult transfer(@ApiParam(name = "form", value = "转账交易表单数据", required = true)
+                                          TransferForm form) {
         AssertUtil.canNotEmpty(form.getToAddress());
         AssertUtil.canNotEmpty(form.getAmount());
 
@@ -124,7 +141,7 @@ public class WalletResouce {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = RpcResult.class)
     })
-    public RpcResult backup(@ApiParam(name = "钱包备份表单数据", value = "JSONFormat")
+    public RpcResult backup(@ApiParam(name = "form", value = "钱包备份表单数据")
                                         AccountAPForm form) {
         if (StringUtils.isNotBlank(form.getAddress()) && !Address.validAddress(form.getAddress())) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
@@ -149,7 +166,7 @@ public class WalletResouce {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = RpcResult.class)
     })
-    public RpcResult importAccount(@ApiParam(name = "导入账户表单数据", value = "JSONFormat", required = true)
+    public RpcResult importAccount(@ApiParam(name = "form", value = "导入账户表单数据", required = true)
                                                AccountImportForm form) {
         if (!StringUtils.validPassword(form.getPassword()) ||
                 StringUtils.isBlank(form.getPrikey()) ||
@@ -171,6 +188,10 @@ public class WalletResouce {
     @Path("/imports")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @ApiOperation(value = "导入钱包 [3.4.8]")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = RpcResult.class)
+    })
     public RpcResult importAccountFile(@FormDataParam("file") InputStream in,
                                        @FormDataParam("file") FormDataContentDisposition disposition,
                                        @FormDataParam("password") String password) {
