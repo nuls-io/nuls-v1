@@ -25,7 +25,7 @@ package io.nuls.ledger.thread;
 
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.utils.log.Log;
-import io.nuls.ledger.service.impl.LedgerCacheService;
+//import io.nuls.ledger.service.impl.LedgerCacheService;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.protocol.context.NulsContext;
 
@@ -36,7 +36,7 @@ import io.nuls.protocol.context.NulsContext;
 public class SmallChangeThread implements Runnable {
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
-    private LedgerCacheService ledgerCacheService = LedgerCacheService.getInstance();
+//    private LedgerCacheService ledgerCacheService = LedgerCacheService.getInstance();
     private static final SmallChangeThread INSTANCE = new SmallChangeThread();
 
     private SmallChangeThread() {

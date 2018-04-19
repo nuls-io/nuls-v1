@@ -202,23 +202,16 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
     }
 
     public boolean isUsable() {
-        return OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT == status;
+        return OutPutStatusEnum.UTXO_UNSPENT == status;
     }
 
     public boolean isSpend() {
-        return OutPutStatusEnum.UTXO_CONFIRMED_SPENT == status;
+        return OutPutStatusEnum.UTXO_SPENT == status;
     }
 
     public boolean isLocked() {
-        return OutPutStatusEnum.UTXO_CONFIRMED_CONSENSUS_LOCK == status ||
-                OutPutStatusEnum.UTXO_CONFIRMED_TIME_LOCK == status;
-    }
-
-    public boolean isConfirm() {
-        return OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT == status ||
-                OutPutStatusEnum.UTXO_CONFIRMED_TIME_LOCK == status ||
-                OutPutStatusEnum.UTXO_CONFIRMED_SPENT == status ||
-                OutPutStatusEnum.UTXO_CONFIRMED_CONSENSUS_LOCK == status;
+        return OutPutStatusEnum.UTXO_CONSENSUS_LOCK == status ||
+                OutPutStatusEnum.UTXO_TIME_LOCK == status;
     }
 
     public byte[] getOwner() {
