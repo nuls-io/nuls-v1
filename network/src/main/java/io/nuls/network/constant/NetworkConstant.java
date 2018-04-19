@@ -42,8 +42,9 @@ public interface NetworkConstant {
     String NETWORK_SERVER_PORT = "network.server.port";
     String NETWORK_EXTER_PORT = "network.external.port";
     String NETWORK_MAGIC = "network.magic";
-    String NETWORK_NODE_MAX_IN = "net.node.max.in";
-    String NETWORK_NODE_MAX_OUT = "net.node.max.out";
+    String NETWORK_NODE_MAX_IN = "network.max.in";
+    String NETWORK_NODE_MAX_OUT = "network.max.out";
+    String NETWORK_SEED_IP = "network.seed.ip";
 
     String NETWORK_NODE_IN_GROUP = "inNodes";
     String NETWORK_NODE_OUT_GROUP = "outNodes";

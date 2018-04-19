@@ -32,14 +32,13 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeGroup;
-import io.nuls.network.entity.param.AbstractNetworkParam;
+import io.nuls.network.entity.param.NetworkParam;
 import io.nuls.network.service.impl.netty.NioChannelMap;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author vivi
@@ -49,7 +48,7 @@ public class BroadcastHandler {
 
     private NodesManager nodesManager;
 
-    private AbstractNetworkParam network;
+    private NetworkParam network;
 
     private static BroadcastHandler instance = new BroadcastHandler();
 
@@ -101,7 +100,7 @@ public class BroadcastHandler {
 
     public BroadcastResult broadcastToNode(BaseEvent event, String nodeId, boolean asyn) {
         try {
-            NulsMessage message = new NulsMessage(network.packetMagic(), event.serialize());
+            NulsMessage message = new NulsMessage(network.getPacketMagic(), event.serialize());
             Node node = nodesManager.getNode(nodeId);
             if (node == null) {
                 return new BroadcastResult(false, "node not found");
@@ -114,7 +113,7 @@ public class BroadcastHandler {
 
     public BroadcastResult broadcastToNode(BaseEvent event, Node node, boolean asyn) {
         try {
-            NulsMessage message = new NulsMessage(network.packetMagic(), event.serialize());
+            NulsMessage message = new NulsMessage(network.getPacketMagic(), event.serialize());
             return broadcast(message, node, asyn);
         } catch (IOException e) {
             return new BroadcastResult(false, "event.serialize() error");
@@ -339,7 +338,7 @@ public class BroadcastHandler {
         NulsMessage message;
         BroadcastResult result = new BroadcastResult();
         try {
-            message = new NulsMessage(network.packetMagic(), event.serialize());
+            message = new NulsMessage(network.getPacketMagic(), event.serialize());
             int successCount = 0;
             for (Node node : nodeList) {
                 if (excludeNodeId != null && node.getId().equals(excludeNodeId)) {
@@ -388,7 +387,7 @@ public class BroadcastHandler {
         return new BroadcastResult(true, "OK");
     }
 
-    public void setNetwork(AbstractNetworkParam network) {
+    public void setNetwork(NetworkParam network) {
         this.network = network;
     }
 

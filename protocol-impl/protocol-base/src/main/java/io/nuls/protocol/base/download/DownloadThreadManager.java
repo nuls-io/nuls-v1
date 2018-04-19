@@ -217,7 +217,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
         }
 
         if(newestInfos.getNetBestHeight() < localBestBlock.getHeader().getHeight()) {
-            if(DoubleUtils.div(newestInfos.getNodes().size(), networkService.getAvailableNodes().size(), 2) >= 0.8d && networkService.getAvailableNodes().size() >= networkService.getNetworkParam().maxOutCount()) {
+            if(DoubleUtils.div(newestInfos.getNodes().size(), networkService.getAvailableNodes().size(), 2) >= 0.8d && networkService.getAvailableNodes().size() >= networkService.getNetworkParam().getMaxOutCount()) {
                 for (long i = localBestBlock.getHeader().getHeight(); i <= newestInfos.getNetBestHeight(); i--) {
                     blockService.rollbackBlock(localBestBlock.getHeader().getHash().getDigestHex());
                     localBestBlock = blockService.getBestBlock();
