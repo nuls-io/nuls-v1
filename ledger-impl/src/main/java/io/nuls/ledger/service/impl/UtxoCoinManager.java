@@ -24,10 +24,14 @@
 package io.nuls.ledger.service.impl;
 
 import io.nuls.core.utils.log.Log;
+import io.nuls.db.dao.TransactionLocalDataService;
 import io.nuls.db.dao.UtxoOutputDataService;
+import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.ledger.entity.UtxoBalance;
+import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.UtxoOutput;
+import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.ledger.util.UtxoTransactionTool;
 import io.nuls.ledger.util.UtxoTransferTool;
 import io.nuls.protocol.context.NulsContext;
@@ -48,6 +52,7 @@ public class UtxoCoinManager {
     private static UtxoCoinManager instance = new UtxoCoinManager();
 
     private UtxoCoinManager() {
+
     }
 
     public static UtxoCoinManager getInstance() {
@@ -55,6 +60,8 @@ public class UtxoCoinManager {
     }
 
     private UtxoOutputDataService outputDataService = NulsContext.getServiceBean(UtxoOutputDataService.class);
+
+    private TransactionLocalDataService localDataService = NulsContext.getServiceBean(TransactionLocalDataService.class);
 
     private Lock lock = new ReentrantLock();
 
@@ -82,20 +89,23 @@ public class UtxoCoinManager {
      * @return
      */
     public List<UtxoOutput> getAccountUnSpend(String address, Na value) {
-       return null;
+        List<UtxoOutput> unSpends = new ArrayList<>();
+        List<UtxoOutputPo> poList = outputDataService.getAccountUnSpend(address);
+        for (int i = 0; i < poList.size(); i++) {
+
+        }
+        return null;
     }
 
     public List<UtxoOutput> getAccountsUnSpend(List<String> addressList, Na value) {
         List<UtxoOutput> unSpends = new ArrayList<>();
+        List<UtxoOutput> localUnSpends = getUnSpendByLocalTx();
         try {
             //check use-able is enough , find unSpend utxo
             Na amount = Na.ZERO;
             boolean enough = false;
             for (String address : addressList) {
                 List<UtxoOutputPo> poList = outputDataService.getAccountUnSpend(address);
-                if (poList == null || poList.isEmpty()) {
-                    continue;
-                }
                 for (int i = 0; i < poList.size(); i++) {
                     UtxoOutputPo output = poList.get(i);
                     if (output.isLocked()) {
@@ -108,6 +118,18 @@ public class UtxoCoinManager {
                         break;
                     }
                 }
+                for (int i = 0; i < localUnSpends.size(); i++) {
+                    UtxoOutput output = localUnSpends.get(i);
+                    if (!output.getAddress().equals(address) || !output.isUsable()) {
+                        continue;
+                    }
+                    amount = amount.add(Na.valueOf(output.getValue()));
+                    if (amount.isGreaterOrEquals(value)) {
+                        enough = true;
+                        break;
+                    }
+                }
+
                 if (enough) {
                     break;
                 }
@@ -120,6 +142,22 @@ public class UtxoCoinManager {
             unSpends = new ArrayList<>();
         }
         return unSpends;
+    }
+
+
+    private List<UtxoOutput> getUnSpendByLocalTx() {
+        List<UtxoOutput> outputs = new ArrayList<>();
+        try {
+            List<TransactionLocalPo> poList = localDataService.getUnConfirmTxs();
+            for (TransactionLocalPo localPo : poList) {
+                AbstractCoinTransaction tx = (AbstractCoinTransaction) UtxoTransferTool.toTransaction(localPo);
+                UtxoData utxoData = (UtxoData) tx.getCoinData();
+                outputs.addAll(utxoData.getOutputs());
+            }
+        } catch (Exception e) {
+            Log.error(e);
+        }
+        return outputs;
     }
 
 }
