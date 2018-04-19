@@ -32,12 +32,14 @@ import io.nuls.core.utils.network.IpUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.NodeDataService;
 import io.nuls.db.entity.NodePo;
+import io.nuls.db.service.intf.KVStorageService;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeGroup;
 import io.nuls.network.entity.NodeTransferTool;
 import io.nuls.network.entity.param.AbstractNetworkParam;
 import io.nuls.network.message.entity.VersionEvent;
+import io.nuls.network.service.NetworkService;
 import io.nuls.network.service.impl.netty.NioChannelMap;
 import io.nuls.protocol.context.NulsContext;
 
@@ -478,6 +480,7 @@ public class NodesManager implements Runnable {
                // Log.info(node.toString() + ",blockHeight:" + node.getVersionMessage().getBestBlockHeight());
             //}
 
+            KVStorageService storageService = NulsContext.getServiceBean(KVStorageService.class);
             if(firstUnConnectedNodes.size() > 20) {
                 firstUnConnectedNodes.clear();
             }

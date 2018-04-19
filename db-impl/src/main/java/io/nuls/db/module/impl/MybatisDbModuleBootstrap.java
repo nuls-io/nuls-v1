@@ -30,6 +30,7 @@ import io.nuls.db.dao.impl.mybatis.*;
 import io.nuls.db.dao.impl.mybatis.session.SessionManager;
 import io.nuls.db.exception.DBException;
 import io.nuls.db.module.AbstractDBModule;
+import io.nuls.db.service.impl.LevelDBStorageServiceImpl;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
@@ -63,6 +64,11 @@ public class MybatisDbModuleBootstrap extends AbstractDBModule {
     }
 
 
+    private void initLevelDBStorage() {
+
+    }
+
+
     private void initSqlSessionFactory() throws IOException, SQLException {
         String resource = "mybatis/mybatis-config.xml";
         InputStream in = Resources.getResourceAsStream(resource);
@@ -89,6 +95,7 @@ public class MybatisDbModuleBootstrap extends AbstractDBModule {
         this.registerService(SubChainDaoImpl.class);
         this.registerService(AccountTxDaoImpl.class);
         this.registerService(UtxoTransactionDaoImpl.class);
+        this.registerService(LevelDBStorageServiceImpl.class);
     }
 
     @Override

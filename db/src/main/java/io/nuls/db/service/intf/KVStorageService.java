@@ -21,21 +21,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.kvstorage.module;
+package io.nuls.db.service.intf;
 
-
-import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.module.BaseModuleBootstrap;
+import io.nuls.core.model.Result;
 
 /**
  * @Desription:
  * @Author: PierreLuo
  * @Date: 2018/4/18
  */
-public abstract class AbstractKVStorageModule extends BaseModuleBootstrap {
+public interface KVStorageService {
 
-    protected AbstractKVStorageModule() {
-        super(NulsConstant.MODULE_ID_KVSTORAGE);
-    }
+    Result createArea(String areaName);
+
+    String[] listArea();
+
+    Result put(String area, byte[] key, byte[] value);
+
+    Result put(String area, String key, String value);
+
+    Result put(String area, byte[] key, String value);
+
+    Result delete(String area, String key);
+
+    byte[] get(String area, String key);
 
 }
