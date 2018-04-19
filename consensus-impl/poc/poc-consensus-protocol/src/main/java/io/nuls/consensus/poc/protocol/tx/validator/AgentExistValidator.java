@@ -24,9 +24,11 @@
 package io.nuls.consensus.poc.protocol.tx.validator;
 
 import io.nuls.consensus.poc.protocol.tx.PocJoinConsensusTransaction;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.dao.AgentDataService;
+import io.nuls.db.entity.AgentPo;
 import io.nuls.protocol.context.NulsContext;
 
 /**
@@ -48,14 +50,10 @@ public class AgentExistValidator implements NulsDataValidator<PocJoinConsensusTr
 
     @Override
     public ValidateResult validate(PocJoinConsensusTransaction tx) {
-//        Consensus<Agent> ca = cacheManager.getAgentById(tx.getTxData().getExtend().getAgentHash());
-//        if(ca==null){
-//            AgentPo po = agentDataService.get(tx.getTxData().getExtend().getAgentHash());
-//            ca = ConsensusTool.fromPojo(po);
-//        }
-//        if (ca == null) {
-//            return ValidateResult.getFailedResult(ErrorCode.ORPHAN_TX,"Agent is not exist!");
-//        }
+        AgentPo ca = agentDataService.get(tx.getTxData().getExtend().getAgentHash());
+        if (ca == null) {
+            return ValidateResult.getFailedResult(ErrorCode.ORPHAN_TX,"Agent is not exist!");
+        }
         return ValidateResult.getSuccessResult();
     }
 }

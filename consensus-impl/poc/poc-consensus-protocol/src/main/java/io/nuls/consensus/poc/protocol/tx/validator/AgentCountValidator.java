@@ -24,10 +24,17 @@
 
 package io.nuls.consensus.poc.protocol.tx.validator;
 
+import io.nuls.consensus.poc.protocol.context.ConsensusContext;
 import io.nuls.consensus.poc.protocol.model.Agent;
 import io.nuls.consensus.poc.protocol.tx.RegisterAgentTransaction;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
+import io.nuls.db.dao.AgentDataService;
+import io.nuls.db.entity.AgentPo;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.event.entity.Consensus;
+
+import java.util.List;
 
 /**
  * date 2018/3/23.
@@ -36,38 +43,40 @@ import io.nuls.core.validate.ValidateResult;
  */
 public class AgentCountValidator implements NulsDataValidator<RegisterAgentTransaction> {
 
+    private AgentDataService agentDataService = NulsContext.getServiceBean(AgentDataService.class);
+
     @Override
     public ValidateResult validate(RegisterAgentTransaction tx) {
         ValidateResult result = ValidateResult.getSuccessResult();
         Agent agent = tx.getTxData().getExtend();
         String agentName = agent.getAgentName();
-        //+2原因：验证的交易可能属于a高度，从cache中获取它之前的抵押时，只能获取某个高度之前的，所以是当前最新高度a-1之后的第二个高度
-//        List<Consensus<Agent>> caList = consensusCacheManager.getAliveAgentList(NulsContext.getInstance().getBestHeight()+2);
-//        if (caList != null) {
-//            for (Consensus<Agent> ca : caList) {
-//                if (ca.getHexHash().equals(tx.getTxData().getHexHash())) {
-//                    continue;
-//                }
-//                if (ca.getAddress().equals(tx.getTxData().getAddress())) {
-//                    return ValidateResult.getFailedResult("An address can only create one agent");
-//                }
-//                if (ca.getAddress().equals(agent.getPackingAddress())) {
-//                    return ValidateResult.getFailedResult("The address can only create one agent");
-//                }
-//                if (agent.getPackingAddress().equals(ca.getAddress())) {
-//                    return ValidateResult.getFailedResult("The packingAddress is an agentAddress");
-//                }
-//                if (agent.getPackingAddress().equals(ca.getExtend().getPackingAddress())) {
-//                    return ValidateResult.getFailedResult("The packingAddress is busy!");
-//                }
-//                if (agentName.equals(ca.getExtend().getAgentName())) {
-//                    return ValidateResult.getFailedResult("AgentName repetition!");
-//                }
-//                if(consensusManager.getSeedNodeList().contains(tx.getTxData().getAddress())||consensusManager.getSeedNodeList().contains(agent.getPackingAddress())){
-//                    return ValidateResult.getFailedResult("The address is a seed address");
-//                }
-//            }
-//        }
+
+        List<AgentPo> caList = agentDataService.getEffectiveList(null,NulsContext.getInstance().getBestHeight(),null);
+        if (caList != null) {
+            for (AgentPo ca : caList) {
+                if (ca.getId().equals(tx.getTxData().getHexHash())) {
+                    continue;
+                }
+                if (ca.getAgentAddress().equals(tx.getTxData().getAddress())) {
+                    return ValidateResult.getFailedResult("An address can only create one agent");
+                }
+                if (ca.getAgentAddress().equals(agent.getPackingAddress())) {
+                    return ValidateResult.getFailedResult("The address can only create one agent");
+                }
+                if (agent.getPackingAddress().equals(ca.getAgentAddress())) {
+                    return ValidateResult.getFailedResult("The packingAddress is an agentAddress");
+                }
+                if (agent.getPackingAddress().equals(ca.getPackingAddress())) {
+                    return ValidateResult.getFailedResult("The packingAddress is busy!");
+                }
+                if (agentName.equals(ca.getAgentName())) {
+                    return ValidateResult.getFailedResult("AgentName repetition!");
+                }
+                if(ConsensusContext.getSeedNodeList().contains(tx.getTxData().getAddress())||ConsensusContext.getSeedNodeList().contains(agent.getPackingAddress())){
+                    return ValidateResult.getFailedResult("The address is a seed address");
+                }
+            }
+        }
         return result;
     }
 }

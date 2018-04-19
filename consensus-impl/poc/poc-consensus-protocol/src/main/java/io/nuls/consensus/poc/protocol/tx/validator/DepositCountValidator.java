@@ -23,9 +23,18 @@
  */
 package io.nuls.consensus.poc.protocol.tx.validator;
 
+import io.nuls.consensus.poc.protocol.constant.PocConsensusConstant;
+import io.nuls.consensus.poc.protocol.model.Deposit;
 import io.nuls.consensus.poc.protocol.tx.PocJoinConsensusTransaction;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
+import io.nuls.db.dao.DepositDataService;
+import io.nuls.db.entity.DepositPo;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.event.entity.Consensus;
+
+import java.util.List;
 
 /**
  * @author Niels
@@ -34,7 +43,7 @@ import io.nuls.core.validate.ValidateResult;
 public class DepositCountValidator implements NulsDataValidator<PocJoinConsensusTransaction> {
 
     private static final DepositCountValidator INSTANCE = new DepositCountValidator();
-
+    private DepositDataService depositDataService = NulsContext.getServiceBean(DepositDataService.class);
     private DepositCountValidator() {
     }
 
@@ -45,11 +54,11 @@ public class DepositCountValidator implements NulsDataValidator<PocJoinConsensus
 
     @Override
     public ValidateResult validate(PocJoinConsensusTransaction tx) {
-//        Consensus<Deposit> cd = tx.getTxData();
-//        List<Consensus<Deposit>> list = consensusCacheManager.getDepositListByAgentId(cd.getExtend().getAgentHash(), NulsContext.getInstance().getBestHeight());
-//        if (null != list && list.size() >= PocConsensusConstant.MAX_ACCEPT_NUM_OF_DEPOSIT) {
-//            return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_OVER_COUNT);
-//        }
+        Consensus<Deposit> cd = tx.getTxData();
+        List<DepositPo> list = depositDataService.getEffectiveList(null,NulsContext.getInstance().getBestHeight(),cd.getExtend().getAgentHash(), null);
+        if (null != list && list.size() >= PocConsensusConstant.MAX_ACCEPT_NUM_OF_DEPOSIT) {
+            return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_OVER_COUNT);
+        }
         return ValidateResult.getSuccessResult();
     }
 }

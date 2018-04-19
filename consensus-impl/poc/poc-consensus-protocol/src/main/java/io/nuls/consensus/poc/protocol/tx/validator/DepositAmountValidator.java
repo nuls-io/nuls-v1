@@ -24,10 +24,20 @@
 package io.nuls.consensus.poc.protocol.tx.validator;
 
 import io.nuls.consensus.poc.protocol.constant.PocConsensusConstant;
+import io.nuls.consensus.poc.protocol.model.Deposit;
 import io.nuls.consensus.poc.protocol.tx.PocJoinConsensusTransaction;
+import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.SeverityLevelEnum;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
+import io.nuls.db.dao.DepositDataService;
+import io.nuls.db.entity.DepositPo;
+import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.model.Na;
+
+import java.util.List;
 
 /**
  * @author Niels
@@ -36,6 +46,8 @@ import io.nuls.protocol.model.Na;
 public class DepositAmountValidator implements NulsDataValidator<PocJoinConsensusTransaction> {
 
     private static final DepositAmountValidator INSTANCE = new DepositAmountValidator();
+
+    private DepositDataService depositDataService = NulsContext.getServiceBean(DepositDataService.class);
 
     private DepositAmountValidator() {
     }
@@ -48,29 +60,30 @@ public class DepositAmountValidator implements NulsDataValidator<PocJoinConsensu
     public ValidateResult validate(PocJoinConsensusTransaction data) {
         Na limit = PocConsensusConstant.ENTRUSTER_DEPOSIT_LOWER_LIMIT;
         Na max = PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT;
-        //+2原因：验证的交易可能属于a高度，从cache中获取它之前的抵押时，只能获取某个高度之前的，所以是当前最新高度a-1之后的第二个高度
-//        List<Consensus<Deposit>> list = consensusCacheManager.getDepositListByAgentId(data.getTxData().getExtend().getAgentHash(), NulsContext.getInstance().getBestHeight()+2);
-//        if (list == null) {
-//            return ValidateResult.getSuccessResult();
-//        }
-//        Na total = Na.ZERO;
-//        for (Consensus<Deposit> cd : list) {
-//            total = total.add(cd.getExtend().getDeposit());
-//        }
-//        if (limit.isGreaterThan(data.getTxData().getExtend().getDeposit())) {
-//            return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_NOT_ENOUGH);
-//        }
-//        if (max.isLessThan(total)) {
-//            return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_TOO_MUCH);
-//        }
-//
-//        try {
-//            if (!data.getTxData().getExtend().getDeposit().equals(data.getCoinData().getTotalNa())) {
-//                return ValidateResult.getFailedResult(SeverityLevelEnum.FLAGRANT_FOUL, ErrorCode.DEPOSIT_ERROR);
-//            }
-//        } catch (NulsException e) {
-//            return ValidateResult.getFailedResult(ErrorCode.ORPHAN_TX);
-//        }
+        List<DepositPo> list = depositDataService.getEffectiveList(null, NulsContext.getInstance().getBestHeight(), data.getTxData().getExtend().getAgentHash(), null);
+        if (list == null) {
+            return ValidateResult.getSuccessResult();
+        }
+        Na total = Na.ZERO;
+        for (DepositPo cd : list) {
+            total = total.add(Na.valueOf(cd.getDeposit()));
+        }
+        if (limit.isGreaterThan(data.getTxData().getExtend().getDeposit())) {
+            return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_NOT_ENOUGH);
+        }
+        if (max.isLessThan(total)) {
+            return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_TOO_MUCH);
+        }
+
+        try {
+            if (!data.getTxData().getExtend().getDeposit().equals(data.getCoinData().getTotalNa())) {
+                return ValidateResult.getFailedResult(SeverityLevelEnum.FLAGRANT_FOUL, ErrorCode.DEPOSIT_ERROR);
+            }
+        } catch (NulsException e) {
+            Log.error(e);
+            return ValidateResult.getFailedResult(e.getMessage());
+        }
+
         return ValidateResult.getSuccessResult();
     }
 
