@@ -65,7 +65,7 @@ public class AccountResource {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "创建账户 [3.3.1]")
+    @ApiOperation(value = "创建账户 [3.3.1]", notes = "result.data: Page<AccountDto>")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = ArrayList.class)
     })
@@ -131,6 +131,10 @@ public class AccountResource {
     @GET
     @Path("/list")
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "查询账户列表 [3.3.4]", notes = "result.data: Page<AccountDto>")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = AccountDto.class)
+    })
     public RpcResult accountList(@ApiParam(name="pageNumber",value="页码")
                                      @QueryParam("pageNumber") int pageNumber,
                                  @ApiParam(name="pageSize",value="每页条数")
@@ -160,7 +164,12 @@ public class AccountResource {
     @GET
     @Path("/balance/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult getBalance(@PathParam("address") String address) {
+    @ApiOperation(value = "查询账户余额 [3.3.3]")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = BalanceDto.class)
+    })
+    public RpcResult getBalance(@ApiParam(name="address", value="账户地址", required = true)
+                                    @PathParam("address") String address) {
         if (!Address.validAddress(address)) {
             return RpcResult.getFailed(ErrorCode.ADDRESS_ERROR);
         }
@@ -173,6 +182,10 @@ public class AccountResource {
     @GET
     @Path("/balances")
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "查询当前钱包所有账户余额(合计) [3.3.9]")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = BalanceDto.class)
+    })
     public RpcResult getBalance() {
         Balance balance = ledgerService.getBalance(null);
         RpcResult result = RpcResult.getSuccess();
@@ -183,7 +196,13 @@ public class AccountResource {
     @GET
     @Path("/utxo/")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult getUtxo(@QueryParam("address") String address,
+    @ApiOperation(value = "查询账户足够数量的未花费输出 [3.3.5]", notes = "result.data: List<OutputDto>")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = OutputDto.class)
+    })
+    public RpcResult getUtxo(@ApiParam(name="address", value="账户地址", required = true)
+                                 @QueryParam("address") String address,
+                             @ApiParam(name="amount", value="Nuls数量", required = true)
                              @QueryParam("amount") long amount) {
         if (!Address.validAddress(address) || amount <= 0 || amount > Na.MAX_NA_VALUE) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
@@ -236,7 +255,12 @@ public class AccountResource {
     @GET
     @Path("/assets/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult getAssets(@PathParam("address") String address) {
+    @ApiOperation(value = "查询账户资产 [3.3.8]", notes = "result.data: List<AssetDto>")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = AssetDto.class)
+    })
+    public RpcResult getAssets(@ApiParam(name="address", value="账户地址", required = true)
+                                   @PathParam("address") String address) {
         if (!Address.validAddress(address)) {
             return RpcResult.getFailed(ErrorCode.ADDRESS_ERROR);
         }
@@ -252,12 +276,11 @@ public class AccountResource {
     @GET
     @Path("/address")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult getAddress(@QueryParam("publicKey") String publicKey, @QueryParam("subChainId") Integer subChainId) {
-
+    public RpcResult getAddress(@QueryParam("publicKey") String publicKey,
+                                @QueryParam("subChainId") Integer subChainId) {
         if (subChainId < 1 || subChainId >= 65535) {
             return RpcResult.getFailed(ErrorCode.CHAIN_ID_ERROR);
         }
-
         Address address = new Address((short) subChainId.intValue(), Hex.decode(publicKey));
         RpcResult result = RpcResult.getSuccess();
         result.setData(address.toString());
