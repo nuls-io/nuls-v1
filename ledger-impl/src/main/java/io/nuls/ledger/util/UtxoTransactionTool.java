@@ -58,12 +58,6 @@ public class UtxoTransactionTool {
 
     private Lock lock = new ReentrantLock();
 
-    public static final int APPROVE = 1;
-
-    public static final int COMMIT = 2;
-
-    public static final int ROLLBACK = 3;
-
     private UtxoTransactionTool() {
 
     }
@@ -300,16 +294,12 @@ public class UtxoTransactionTool {
                 if (output.getLockTime() >= genesisTime && output.getLockTime() <= currentTime) {
                     if (OutPutStatusEnum.UTXO_CONFIRMED_TIME_LOCK.equals(output.getStatus())) {
                         output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT);
-                    } else if (OutPutStatusEnum.UTXO_UNCONFIRMED_TIME_LOCK.equals(output.getStatus())) {
-                        output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRMED_UNSPENT);
                     }
                 }
                 // check lock by height
                 else if (output.getLockTime() < genesisTime && output.getLockTime() >= bestHeight) {
                     if (OutPutStatusEnum.UTXO_CONFIRMED_TIME_LOCK.equals(output.getStatus())) {
                         output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT);
-                    } else if (OutPutStatusEnum.UTXO_UNCONFIRMED_TIME_LOCK.equals(output.getStatus())) {
-                        output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRMED_UNSPENT);
                     }
                 }
             }
