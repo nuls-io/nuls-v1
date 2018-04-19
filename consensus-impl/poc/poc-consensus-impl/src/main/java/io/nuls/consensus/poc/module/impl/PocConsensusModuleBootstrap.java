@@ -23,6 +23,7 @@
  */
 package io.nuls.consensus.poc.module.impl;
 
+import io.nuls.consensus.poc.block.validator.PocBlockValidatorManager;
 import io.nuls.consensus.poc.handler.*;
 import io.nuls.consensus.poc.module.AbstractPocConsensusModule;
 import io.nuls.consensus.poc.protocol.context.ConsensusContext;
@@ -78,6 +79,9 @@ public class PocConsensusModuleBootstrap extends AbstractPocConsensusModule {
 
         this.waitForDependencyInited(NulsConstant.MODULE_ID_PROTOCOL);
         this.registerService(PocConsensusServiceImpl.class);
+
+        PocBlockValidatorManager.initHeaderValidators();
+        PocBlockValidatorManager.initBlockValidators();
     }
 
     protected final void registerTransaction(int txType, Class<? extends Transaction> txClass, Class<? extends TransactionService> txServiceClass) {
