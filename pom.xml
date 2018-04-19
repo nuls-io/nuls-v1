@@ -42,8 +42,6 @@
         <module>consensus-impl/poc/poc-consensus-protocol-impl</module>
         <module>protocol</module>
         <module>protocol-impl/protocol-base</module>
-        <module>kvstorage</module>
-        <module>kvstorage-impl</module>
     </modules>
     <build>
         <finalName>nuls</finalName>
