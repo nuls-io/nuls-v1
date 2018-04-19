@@ -41,8 +41,7 @@ import io.nuls.protocol.model.Na;
 import io.nuls.rpc.entity.*;
 import io.nuls.rpc.resources.form.AccountAliasForm;
 import io.nuls.rpc.resources.form.AccountCreateForm;
-import io.nuls.rpc.resources.form.AccountParamForm;
-import io.nuls.rpc.resources.form.AccountPrikeyForm;
+import io.nuls.rpc.resources.form.AccountAPForm;
 import io.swagger.annotations.*;
 
 import javax.ws.rs.*;
@@ -66,7 +65,7 @@ public class AccountResource {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "创建账户", notes = "Nuls_RPC_API文档[3.3.1]")
+    @ApiOperation(value = "创建账户 [3.3.1]")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = ArrayList.class)
     })
@@ -83,7 +82,7 @@ public class AccountResource {
     @GET
     @Path("/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "查询账户信息", notes = "Nuls_RPC_API文档[3.3.2]")
+    @ApiOperation(value = "查询账户信息 [3.3.2]")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = AccountDto.class)
     })
@@ -115,7 +114,7 @@ public class AccountResource {
     @POST
     @Path("/alias")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "设置别名", notes = "Nuls_RPC_API文档[3.3.6]")
+    @ApiOperation(value = "设置别名 [3.3.6]")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = RpcResult.class)
     })
@@ -220,12 +219,12 @@ public class AccountResource {
     @POST
     @Path("/prikey")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "查询私钥", notes = "Nuls_RPC_API文档[3.3.7] 查询账户私钥，只能查询本地创建或导入的账户")
+    @ApiOperation(value = "查询账户私钥，只能查询本地创建或导入的账户 [3.3.7]")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = String.class)
     })
     public RpcResult getPrikey(@ApiParam(name = "查询私钥表单数据", value = "JSON格式", required = true)
-                                           AccountPrikeyForm form) {
+                                       AccountAPForm form) {
         if (!Address.validAddress(form.getAddress()) || !StringUtils.validPassword(form.getPassword())) {
             return RpcResult.getFailed(ErrorCode.ADDRESS_ERROR);
         }

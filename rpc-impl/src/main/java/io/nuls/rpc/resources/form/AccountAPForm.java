@@ -8,8 +8,8 @@ import io.swagger.annotations.ApiModelProperty;
  * @author: Charlie
  * @date: 2018/4/18
  */
-@ApiModel(value = "查询私钥表单数据")
-public class AccountPrikeyForm {
+@ApiModel(value = "账户地址和密码表单数据")
+public class AccountAPForm {
 
     @ApiModelProperty(name = "address", value = "账户地址", required = true)
     private String address;

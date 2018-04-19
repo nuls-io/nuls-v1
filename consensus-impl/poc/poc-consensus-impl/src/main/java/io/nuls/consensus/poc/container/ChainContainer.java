@@ -232,10 +232,6 @@ public class ChainContainer implements Cloneable {
             }
         }
 
-        if (currentRound == null) {
-            currentRound = resetRound(!isDownload);
-        }
-
         boolean hasChangeRound = false;
 
         // Verify that the block round and time are correct
@@ -258,7 +254,9 @@ public class ChainContainer implements Cloneable {
                 Log.error("block height " + blockHeader.getHeight() + " is the block of the future and received in advance!");
                 return false;
             }
-            currentRound = getNextRound(roundData, !isDownload);
+            MeetingRound tempRound = getNextRound(roundData, !isDownload);
+            tempRound.setPreRound(currentRound);
+            currentRound = tempRound;
             hasChangeRound = true;
         }
 
@@ -473,8 +471,7 @@ public class ChainContainer implements Cloneable {
             newChainContainer.rollback();
         }
 
-        newChainContainer.getRoundList().clear();
-        newChainContainer.resetRound(false);
+        newChainContainer.initRound();
 
         return newChainContainer;
     }
@@ -534,6 +531,26 @@ public class ChainContainer implements Cloneable {
             Lockers.ROUND_LOCK.unlock();
         }
     }
+    public MeetingRound initRound() {
+        MeetingRound currentRound = resetRound(false);
+
+        if(currentRound.getPreRound() == null) {
+
+            BlockRoundData roundData = null;
+            List<BlockHeader> blockHeaderList = chain.getBlockHeaderList();
+            for(int i = blockHeaderList.size() - 1 ; i >= 0 ; i--) {
+                BlockHeader blockHeader = blockHeaderList.get(i);
+                roundData = new BlockRoundData(blockHeader.getExtend());
+                if(roundData.getRoundIndex() < currentRound.getIndex()) {
+                    break;
+                }
+            }
+            MeetingRound preRound = getNextRound(roundData, false);
+            currentRound.setPreRound(preRound);
+        }
+
+        return currentRound;
+    }
 
     public MeetingRound resetRound(boolean isRealTime) {
 
@@ -541,13 +558,10 @@ public class ChainContainer implements Cloneable {
 
         if (isRealTime) {
             if (round == null || round.getEndTime() < TimeService.currentTimeMillis()) {
-                round = getNextRound(null, true);
-                Lockers.ROUND_LOCK.lock();
-                try {
-                    roundList.add(round);
-                } finally {
-                    Lockers.ROUND_LOCK.unlock();
-                }
+                MeetingRound nextRound = getNextRound(null, true);
+                nextRound.setPreRound(round);
+                roundList.add(nextRound);
+                round = nextRound;
             }
             return round;
         }
@@ -558,14 +572,10 @@ public class ChainContainer implements Cloneable {
             return round;
         }
 
-        round = getNextRound(null, false);
-        Lockers.ROUND_LOCK.lock();
-        try {
-            roundList.add(round);
-        } finally {
-            Lockers.ROUND_LOCK.unlock();
-        }
-        return round;
+        MeetingRound nextRound = getNextRound(null, false);
+        nextRound.setPreRound(round);
+        roundList.add(nextRound);
+        return nextRound;
     }
 
     public MeetingRound getNextRound(BlockRoundData roundData, boolean isRealTime) {
@@ -825,13 +835,12 @@ public class ChainContainer implements Cloneable {
                 }
                 if (currentRoundIndex < startRoundIndex) {
                     firstBlockHeader = blockHeaderList.get(i + 1);
-//                    firstBlockHeader = blockHeaderList.get(i);
                     break;
                 }
             }
         }
         if (firstBlockHeader == null) {
-            firstBlockHeader = chain.getEndBlockHeader();
+            firstBlockHeader = chain.getStartBlockHeader();
             Log.warn("the first block of pre round not found");
         }
         return firstBlockHeader;
