@@ -41,6 +41,8 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @Desription:
@@ -85,13 +87,6 @@ public class LevelDBManager {
                 }
 
             }
-
-
-            String area = "pierre-test";
-            String key = "testkey";
-            createArea(area);
-            String value = "testvalue_1";
-            put(area, key, value);
         }
     }
 
@@ -106,7 +101,6 @@ public class LevelDBManager {
         if (AREAS.containsKey(areaName)) {
             return new Result(true, "KV_AREA_EXISTS");
         }
-        //TODO 特殊字符校验
         if(!checkPathLegal(areaName)) {
             return new Result(false, "KV_AREA_CREATE_ERROR");
         }
@@ -146,7 +140,11 @@ public class LevelDBManager {
     }
 
     private static boolean checkPathLegal(String areaName) {
-        return true;
+        if(StringUtils.isBlank(areaName)) {
+            return false;
+        }
+        String regex = "^[a-zA-Z0-9_\\-]+$";
+        return areaName.matches(regex);
     }
 
     private static boolean baseCheckArea(String areaName) {
