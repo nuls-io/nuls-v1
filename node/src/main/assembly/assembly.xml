@@ -23,6 +23,15 @@
             <fileMode>0644</fileMode>
 		</fileSet>
 		<fileSet>
+			<directory>../db-impl/src/main/resources</directory>
+			<outputDirectory>/conf</outputDirectory>
+			<includes>
+				<include>db_config.properties</include>
+			</includes>
+            <directoryMode>0744</directoryMode>
+            <fileMode>0644</fileMode>
+		</fileSet>
+		<fileSet>
 			<directory>src/main/script</directory>
 			<outputDirectory>/</outputDirectory>
 			<directoryMode>0755</directoryMode>
