@@ -164,4 +164,8 @@ public class MainControlScheduler {
     public TxMemoryPool getTxMemoryPool() {
         return txMemoryPool;
     }
+
+    public ChainManager getChainManager() {
+        return chainManager;
+    }
 }

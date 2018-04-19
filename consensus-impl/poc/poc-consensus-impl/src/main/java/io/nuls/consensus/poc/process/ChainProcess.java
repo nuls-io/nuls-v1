@@ -375,7 +375,7 @@ public class ChainProcess {
 
         for(Block rollbackBlock : rollbackBlockList) {
             try {
-                boolean success = blockService.rollbackBlock(rollbackBlock.getHeader().getHash().getDigestHex());
+                boolean success = blockService.rollbackBlock(rollbackBlock);
                 if(success) {
                     rollbackList.add(rollbackBlock);
                 }
@@ -438,7 +438,7 @@ public class ChainProcess {
             //回退状态
             Collections.reverse(successList);
             for(Block rollBlock : successList) {
-                blockService.rollbackBlock(rollBlock.getHeader().getHash().getDigestHex());
+                blockService.rollbackBlock(rollBlock);
             }
 
             Collections.reverse(rollbackBlockList);
