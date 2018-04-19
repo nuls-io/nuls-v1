@@ -194,6 +194,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             List<UtxoOutputPo> outputPoList = new ArrayList<>();
             for (int i = 0; i < utxoData.getOutputs().size(); i++) {
                 UtxoOutput output = utxoData.getOutputs().get(i);
+                output.setTxHash(tx.getHash());
                 UtxoOutputPo outputPo = UtxoTransferTool.toOutputPojo(output);
                 outputPoList.add(outputPo);
                 addressSet.add(Address.fromHashs(output.getAddress()).getBase58());

@@ -24,7 +24,6 @@
 package io.nuls.ledger.service.impl;
 
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -46,7 +45,6 @@ import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.entity.Balance;
-import io.nuls.ledger.entity.OutPutStatusEnum;
 import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
@@ -70,9 +68,7 @@ import io.nuls.protocol.utils.TransactionManager;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -446,7 +442,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     public void rollbackTx(Transaction tx, Block block) throws NulsException {
         AssertUtil.canNotEmpty(tx, ErrorCode.NULL_PARAMETER);
-        if (tx.getStatus() == TxStatusEnum.CACHED) {
+        if (tx.getStatus() == TxStatusEnum.UNCONFIRM) {
             return;
         }
         BlockLog.debug("rollback tx ==================================================", tx.getHash());
@@ -454,16 +450,16 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         for (TransactionService service : serviceList) {
             service.onRollback(tx, block);
         }
-        tx.setStatus(TxStatusEnum.CACHED);
+        tx.setStatus(TxStatusEnum.UNCONFIRM);
     }
 
     @Override
     @DbSession
     public void commitTx(Transaction tx, Block block) throws NulsException {
         AssertUtil.canNotEmpty(tx, ErrorCode.NULL_PARAMETER);
-        if (tx.getStatus() != TxStatusEnum.AGREED) {
-            return;
-        }
+//        if (tx.getStatus() != TxStatusEnum.AGREED) {
+//            return;
+//        }
         List<TransactionService> serviceList = getServiceList(tx.getClass());
         for (TransactionService service : serviceList) {
             service.onCommit(tx, block);

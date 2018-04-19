@@ -31,11 +31,7 @@ public enum TxStatusEnum {
     /**
      * not packaged
      */
-    CACHED,
-    /**
-     * packaged
-     */
-    AGREED,
+    UNCONFIRM,
     /**
      * six block confirmed
      */

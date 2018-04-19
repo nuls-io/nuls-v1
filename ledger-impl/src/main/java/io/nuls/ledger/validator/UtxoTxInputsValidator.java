@@ -61,13 +61,13 @@ public class UtxoTxInputsValidator implements NulsDataValidator<AbstractCoinTran
             UtxoInput input = data.getInputs().get(i);
             UtxoOutput output = input.getFrom();
 
-            if (output == null && tx.getStatus() == TxStatusEnum.CACHED) {
+            if (output == null && tx.getStatus() == TxStatusEnum.UNCONFIRM) {
                 return ValidateResult.getFailedResult(ErrorCode.ORPHAN_TX);
             } else if (output == null) {
                 return ValidateResult.getFailedResult(ErrorCode.UTXO_NOT_FOUND);
             }
 
-            if (tx.getStatus() == TxStatusEnum.CACHED) {
+            if (tx.getStatus() == TxStatusEnum.UNCONFIRM) {
                 if (tx.getType() == TransactionConstant.TX_TYPE_STOP_AGENT) {
                     if (output.getStatus() != OutPutStatusEnum.UTXO_CONSENSUS_LOCK) {
                         return ValidateResult.getFailedResult(ErrorCode.UTXO_STATUS_CHANGE);
@@ -75,11 +75,12 @@ public class UtxoTxInputsValidator implements NulsDataValidator<AbstractCoinTran
                 } else if (!output.isUsable()) {
                     return ValidateResult.getFailedResult(ErrorCode.UTXO_STATUS_CHANGE);
                 }
-            } else if (tx.getStatus() == TxStatusEnum.AGREED) {
-                if (!output.isSpend()) {
-                    return ValidateResult.getFailedResult(ErrorCode.UTXO_STATUS_CHANGE);
-                }
             }
+//            else if (tx.getStatus() == TxStatusEnum.AGREED) {
+//                if (!output.isSpend()) {
+//                    return ValidateResult.getFailedResult(ErrorCode.UTXO_STATUS_CHANGE);
+//                }
+//            }
 
             byte[] owner = output.getOwner();
             P2PKHScriptSig p2PKHScriptSig = null;

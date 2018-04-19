@@ -83,7 +83,7 @@ public class AliasValidator implements NulsDataValidator<AliasTransaction> {
             return ValidateResult.getFailedResult(ErrorCode.INVALID_INPUT);
         }
 //
-//        if (tx.getStatus() == TxStatusEnum.CACHED) {
+//        if (tx.getStatus() == TxStatusEnum.UNCONFIRM) {
 //            List<Transaction> txList = getLedgerService().getCacheTxList(TransactionConstant.TX_TYPE_SET_ALIAS);
 //            if (txList != null && tx.size() > 0) {
 //                for (Transaction trx : txList) {

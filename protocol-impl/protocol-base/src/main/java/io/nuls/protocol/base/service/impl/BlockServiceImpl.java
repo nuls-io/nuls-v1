@@ -24,9 +24,7 @@
 package io.nuls.protocol.base.service.impl;
 
 import io.nuls.account.entity.Address;
-import io.nuls.consensus.poc.protocol.model.block.BlockRoundData;
 import io.nuls.consensus.poc.protocol.service.BlockService;
-import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -41,7 +39,6 @@ import io.nuls.protocol.constant.TxStatusEnum;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.model.Block;
 import io.nuls.protocol.model.BlockHeader;
-import io.nuls.protocol.model.NulsDigestData;
 import io.nuls.protocol.model.Transaction;
 
 import java.io.IOException;
@@ -196,7 +193,7 @@ public class BlockServiceImpl implements BlockService {
         }
         for (; i >= 0; i--) {
             Transaction tx = txs.get(i);
-            if (tx.getStatus() == TxStatusEnum.CACHED || ledgerService.checkTxIsMySend(tx)) {
+            if (tx.getStatus() == TxStatusEnum.UNCONFIRM || ledgerService.checkTxIsMySend(tx)) {
                 continue;
             }
             try {

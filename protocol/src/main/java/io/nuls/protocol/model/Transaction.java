@@ -62,7 +62,7 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData {
 
     protected T txData;
 
-    protected TxStatusEnum status = TxStatusEnum.CACHED;
+    protected TxStatusEnum status = TxStatusEnum.UNCONFIRM;
 
     public static final int TRANSFER_RECEIVE = 1;
     public static final int TRANSFER_SEND = 0;

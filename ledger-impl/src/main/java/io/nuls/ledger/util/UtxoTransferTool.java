@@ -25,7 +25,6 @@ package io.nuls.ledger.util;
 
 import io.nuls.core.cfg.NulsConfig;
 import io.nuls.core.utils.crypto.Hex;
-import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.entity.TransactionLocalPo;
@@ -38,7 +37,6 @@ import io.nuls.ledger.entity.UtxoInput;
 import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.protocol.constant.TxStatusEnum;
-import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.model.Na;
 import io.nuls.protocol.model.NulsDigestData;
 import io.nuls.protocol.model.Transaction;
@@ -181,7 +179,7 @@ public class UtxoTransferTool {
             po.setFee(tx.getFee().getValue());
         }
 
-        if (tx.getStatus() == TxStatusEnum.CACHED) {
+        if (tx.getStatus() == TxStatusEnum.UNCONFIRM) {
             po.setStatus(TransactionLocalPo.UNCONFIRM);
         } else {
             po.setStatus(TransactionLocalPo.CONFIRM);
@@ -231,7 +229,7 @@ public class UtxoTransferTool {
             tx.parseTxData(new NulsByteBuffer(po.getTxData()));
         }
         if (po.getStatus() == TransactionLocalPo.UNCONFIRM) {
-            tx.setStatus(TxStatusEnum.CACHED);
+            tx.setStatus(TxStatusEnum.UNCONFIRM);
             AbstractCoinTransaction transaction = (AbstractCoinTransaction) tx;
             transaction.parseCoinData(new NulsByteBuffer(po.getCoinData()));
             UtxoTransactionTool.getInstance().setTxhashToUtxo(tx);
