@@ -27,16 +27,26 @@
 package io.nuls.rpc.resources.form;
 
 import io.nuls.core.utils.str.StringUtils;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author Niels
  * @date 2018/3/14
  */
+@ApiModel(value = "申请参与共识表单数据")
 public class DepositForm {
+
+    @ApiModelProperty(name = "address", value = "参与共识账户地址", required = true)
     private String address;
 
+    @ApiModelProperty(name = "agentId", value = "共识节点id", required = true)
     private String agentId;
+
+    @ApiModelProperty(name = "deposit", value = "参与共识的金额", required = true)
     private long deposit;
+
+    @ApiModelProperty(name = "password", value = "密码", required = true)
     private String password;
 
     public String getAddress() {

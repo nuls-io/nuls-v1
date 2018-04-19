@@ -107,7 +107,8 @@ public class PocConsensusResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = Map.class)
     })
-    public RpcResult getInfo(@PathParam("address") String address) {
+    public RpcResult getInfo(@ApiParam(name="address", value="钱包账户地", required = true)
+                                 @PathParam("address") String address) {
 
         if (!Address.validAddress(StringUtils.formatStringPara(address))) {
             return RpcResult.getFailed(ErrorCode.ADDRESS_ERROR);
@@ -126,7 +127,8 @@ public class PocConsensusResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = String.class)
     })
-    public RpcResult createAgent(CreateAgentForm form) throws NulsException {
+    public RpcResult createAgent(@ApiParam(name="form", value="创建节点表单数据", required = true)
+                                             CreateAgentForm form) throws NulsException {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getAgentAddress());
         AssertUtil.canNotEmpty(form.getAgentName());
@@ -157,7 +159,8 @@ public class PocConsensusResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = String.class)
     })
-    public RpcResult depositToAgent(DepositForm form) throws NulsException {
+    public RpcResult depositToAgent(@ApiParam(name="form", value="申请参与共识表单数据", required = true)
+                                                DepositForm form) throws NulsException {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getAddress());
         AssertUtil.canNotEmpty(form.getAgentId());
@@ -182,7 +185,8 @@ public class PocConsensusResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = String.class)
     })
-    public RpcResult stopAgent(StopAgentForm form) throws NulsException, IOException {
+    public RpcResult stopAgent(@ApiParam(name="form", value="删除共识节点表单数据", required = true)
+                                           StopAgentForm form) throws NulsException, IOException {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getAddress());
         AssertUtil.canNotEmpty(form.getPassword());
@@ -399,7 +403,8 @@ public class PocConsensusResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = String.class)
     })
-    public RpcResult exitConsensus(WithdrawForm form) {
+    public RpcResult exitConsensus(@ApiParam(name="form", value="退出共识表单数据", required = true)
+                                               WithdrawForm form) {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getTxHash());
         AssertUtil.canNotEmpty(form.getPassword());
