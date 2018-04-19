@@ -45,7 +45,7 @@ import io.nuls.rpc.entity.OutputDto;
 import io.nuls.rpc.entity.RpcResult;
 import io.nuls.rpc.entity.TransactionDto;
 import io.nuls.rpc.resources.form.TxForm;
-import io.swagger.annotations.Api;
+import io.swagger.annotations.*;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -64,7 +64,11 @@ public class TransactionResource {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult forwardTransaction(TxForm form) {
+    @ApiOperation(value = "发送交易数据包 [3.5.4]")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = Boolean.class)
+    })
+    public RpcResult forwardTransaction(@ApiParam(name = "form", value = "交易数据", required = true)  TxForm form) {
         Transaction tx = null;
         try {
             tx = form.getTx();
@@ -88,7 +92,12 @@ public class TransactionResource {
     @GET
     @Path("/hash/{hash}")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult load(@PathParam("hash") String hash) {
+    @ApiOperation(value = "根据hash查询交易 [3.5.1]")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = TransactionDto.class)
+    })
+    public RpcResult load(@ApiParam(name="hash", value="交易hash", required = true)
+                              @PathParam("hash") String hash) {
         RpcResult result = null;
         if (StringUtils.isBlank(hash)) {
             return RpcResult.getFailed(ErrorCode.NULL_PARAMETER);
@@ -116,7 +125,14 @@ public class TransactionResource {
     @GET
     @Path("/bySpent/{fromHash}/{fromIndex}")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult load(@PathParam("fromHash") String fromHash, @PathParam("fromIndex") int fromIndex) {
+    @ApiOperation(value = "根据已花费UTXO获取交易 [3.5.5]")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = TransactionDto.class)
+    })
+    public RpcResult load(@ApiParam(name="fromHash", value="交易hash", required = true)
+                              @PathParam("fromHash") String fromHash,
+                          @ApiParam(name="fromIndex", value="索引", required = true)
+                                @PathParam("fromIndex") int fromIndex) {
         RpcResult result = null;
         if (StringUtils.isBlank(fromHash) || fromIndex < 0 || fromIndex > 500) {
             return RpcResult.getFailed(ErrorCode.NULL_PARAMETER);
@@ -132,9 +148,21 @@ public class TransactionResource {
     @GET
     @Path("/list")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult list(@QueryParam("blockHeight") Long blockHeight,
-                          @QueryParam("address") String address, @QueryParam("type") int type,
-                          @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
+    @ApiOperation(value = "查询单个账户交易列表 [3.5.2]",
+            notes = "result.data.page.list: List<TransactionDto>, pageNumber和pageSize要么同时缺省，要么都必须大于0，同时缺省时则返回查询到的所有结果")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = TransactionDto.class)
+    })
+    public RpcResult list(@ApiParam(name="blockHeight", value="交易所在的区块高度，缺省时为所有区块")
+                              @QueryParam("blockHeight") Long blockHeight,
+                          @ApiParam(name="address", value="账户地址，缺省时为所有账户")
+                                @QueryParam("address") String address,
+                          @ApiParam(name="type", value="交易类型，缺省时默认为所有类型")
+                              @QueryParam("type") int type,
+                          @ApiParam(name="pageNumber", value="页码")
+                              @QueryParam("pageNumber") int pageNumber,
+                          @ApiParam(name="pageSize", value="每页条数")
+                              @QueryParam("pageSize") int pageSize) {
         if (blockHeight == null && StringUtils.isBlank(address) && type == 0 && pageNumber == 0 && pageSize == 0) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
@@ -191,9 +219,17 @@ public class TransactionResource {
     @GET
     @Path("/locked")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult list(@QueryParam("address") String address,
-                          @QueryParam("pageNumber") int pageNumber,
-                          @QueryParam("pageSize") int pageSize) {
+    @ApiOperation(value = "查询我的锁定金额列表 [3.5.3]",
+            notes = "result.data.page.list: List<OutputDto>")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = OutputDto.class)
+    })
+    public RpcResult list(@ApiParam(name="address", value="账户地址")
+                              @QueryParam("address") String address,
+                          @ApiParam(name="pageNumber", value="页码")
+                                @QueryParam("pageNumber") int pageNumber,
+                          @ApiParam(name="pageSize", value="每页条数")
+                                @QueryParam("pageSize") int pageSize) {
         if (!Address.validAddress(address)) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }

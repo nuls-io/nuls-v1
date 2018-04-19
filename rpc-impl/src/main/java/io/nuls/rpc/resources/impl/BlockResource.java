@@ -169,7 +169,7 @@ public class BlockResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = BlockDto.class)
     })
-    public RpcResult getBlock(@ApiParam(name="hash", value="区块hash", required = true)
+    public RpcResult getBlock(@ApiParam(name="height", value="区块高度", required = true)
                                   @PathParam("height") Long height) {
         RpcResult result;
         if (height < 0) {
