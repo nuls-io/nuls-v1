@@ -42,7 +42,7 @@ public class AgentPo {
 
     private Long startTime;
     private Double commissionRate;
-    private int status;
+    private Integer status;
     private long blockHeight;
     private long delHeight;
 
@@ -118,11 +118,11 @@ public class AgentPo {
         this.commissionRate = commissionRate;
     }
 
-    public void setStatus(int status) {
+    public void setStatus(Integer status) {
         this.status = status;
     }
 
-    public int getStatus() {
+    public Integer getStatus() {
         return status;
     }
 
