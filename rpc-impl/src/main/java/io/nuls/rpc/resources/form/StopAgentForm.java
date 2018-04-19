@@ -27,13 +27,20 @@
 package io.nuls.rpc.resources.form;
 
 import io.nuls.core.utils.str.StringUtils;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author Niels
  * @date 2018/3/14
  */
+@ApiModel(value = "删除共识节点表单数据")
 public class StopAgentForm {
+
+    @ApiModelProperty(name = "address", value = "共识节点地址", required = true)
     private String address;
+
+    @ApiModelProperty(name = "password", value = "密码", required = true)
     private String password;
 
     public String getAddress() {

@@ -92,7 +92,7 @@ public class MainControlScheduler {
         IsolatedBlocksProcess isolatedBlocksProcess = new IsolatedBlocksProcess(chainManager);
         threadPool.scheduleAtFixedRate(new IsolatedBlocksProcessTask(isolatedBlocksProcess, isolatedBlocksProvider), 1000L,1000L, TimeUnit.MILLISECONDS);
 
-        BlockProcess blockProcess = new BlockProcess(chainManager, isolatedBlocksProvider);
+        BlockProcess blockProcess = new BlockProcess(chainManager, isolatedBlocksProvider, txMemoryPool);
         isolatedBlocksProcess.setBlockProcess(blockProcess);
         threadPool.scheduleAtFixedRate(new BlockProcessTask(blockProcess, blockQueueProvider), 1000L,100L, TimeUnit.MILLISECONDS);
 
@@ -163,5 +163,9 @@ public class MainControlScheduler {
 
     public TxMemoryPool getTxMemoryPool() {
         return txMemoryPool;
+    }
+
+    public ChainManager getChainManager() {
+        return chainManager;
     }
 }

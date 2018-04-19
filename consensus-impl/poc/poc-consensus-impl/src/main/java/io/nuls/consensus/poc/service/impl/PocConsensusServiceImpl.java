@@ -166,6 +166,15 @@ public class PocConsensusServiceImpl implements PocConsensusService {
     }
 
     @Override
+    public boolean rollbackBlock() throws NulsException {
+        boolean success = blockService.rollbackBlock();
+        if(success) {
+            success = mainControlScheduler.getChainManager().getMasterChain().rollback();
+        }
+        return success;
+    }
+
+    @Override
     public void addProvider(QueueProvider blockQueueProvider, QueueProvider txQueueProvider) {
         this.blockQueueProvider = blockQueueProvider;
         this.txQueueProvider = txQueueProvider;

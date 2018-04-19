@@ -113,6 +113,10 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
         coinDataProvider.afterParse(coinData, this);
     }
 
+    public void parseCoinData(NulsByteBuffer byteBuffer) throws NulsException {
+        this.coinData = coinDataProvider.parse(byteBuffer);
+    }
+
     public CoinDataProvider getCoinDataProvider() {
         return coinDataProvider;
     }

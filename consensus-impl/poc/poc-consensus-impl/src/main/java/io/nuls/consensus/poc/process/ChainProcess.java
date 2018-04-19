@@ -27,17 +27,25 @@ package io.nuls.consensus.poc.process;
 import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.model.Chain;
+import io.nuls.consensus.poc.protocol.model.Agent;
+import io.nuls.consensus.poc.protocol.model.Deposit;
+import io.nuls.consensus.poc.protocol.model.MeetingRound;
+import io.nuls.consensus.poc.protocol.model.block.BlockRoundData;
 import io.nuls.consensus.poc.protocol.service.BlockService;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.ChainLog;
 import io.nuls.core.utils.log.Log;
+import io.nuls.db.entity.PunishLogPo;
 import io.nuls.poc.constant.ConsensusStatus;
 import io.nuls.poc.service.intf.ConsensusService;
 import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.event.entity.Consensus;
 import io.nuls.protocol.model.Block;
 import io.nuls.protocol.model.BlockHeader;
 
 import java.io.IOException;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -48,7 +56,8 @@ import java.util.List;
  */
 public class ChainProcess {
 
-    private long time = 0l;
+    private long time = 0L;
+    private long lastClearTime = 0L;
 
     private ChainManager chainManager;
 
@@ -366,7 +375,7 @@ public class ChainProcess {
 
         for(Block rollbackBlock : rollbackBlockList) {
             try {
-                boolean success = blockService.rollbackBlock(rollbackBlock.getHeader().getHash().getDigestHex());
+                boolean success = blockService.rollbackBlock(rollbackBlock);
                 if(success) {
                     rollbackList.add(rollbackBlock);
                 }
@@ -429,7 +438,7 @@ public class ChainProcess {
             //回退状态
             Collections.reverse(successList);
             for(Block rollBlock : successList) {
-                blockService.rollbackBlock(rollBlock.getHeader().getHash().getDigestHex());
+                blockService.rollbackBlock(rollBlock);
             }
 
             Collections.reverse(rollbackBlockList);
@@ -441,6 +450,99 @@ public class ChainProcess {
     }
 
     private void clearExpiredChain() {
-        //TODO
+
+        if(TimeService.currentTimeMillis() - lastClearTime < 60 * 1000L) {
+            return;
+        }
+        lastClearTime = TimeService.currentTimeMillis();
+
+        //clear the master data
+        clearMasterDatas();
+
+        //clear the expired chain
+        long bestHeight = chainManager.getBestBlockHeight();
+
+        Iterator<ChainContainer> it = chainManager.getChains().iterator();
+        while(it.hasNext()) {
+            ChainContainer chain = it.next();
+            if(checkChainIsExpired(chain, bestHeight)) {
+                it.remove();
+            }
+        }
+
+        it = chainManager.getIsolatedChains().iterator();
+        while(it.hasNext()) {
+            ChainContainer isolatedChain = it.next();
+            if(checkChainIsExpired(isolatedChain, bestHeight)) {
+                it.remove();
+            }
+        }
+
+    }
+
+    private boolean checkChainIsExpired(ChainContainer isolatedChain, long bestHeight) {
+        if(bestHeight - isolatedChain.getChain().getEndBlockHeader().getHeight() > 100) {
+            return true;
+        }
+        return false;
+    }
+
+    private void clearMasterDatas() {
+        clearMasterChainRound();
+        clearMasterChainData();
+    }
+
+    private void clearMasterChainData() {
+        Chain masterChain = chainManager.getMasterChain().getChain();
+        long bestHeight = masterChain.getEndBlockHeader().getHeight();
+
+        List<BlockHeader> blockHeaderList = masterChain.getBlockHeaderList();
+        List<Block> blockList = masterChain.getBlockList();
+
+        if(blockHeaderList.size() > 30000) {
+            blockHeaderList = blockHeaderList.subList(blockHeaderList.size() - 30000, blockHeaderList.size());
+        }
+        if(blockList.size() > 100) {
+            blockList = blockList.subList(blockList.size() - 100, blockList.size());
+        }
+
+        List<Consensus<Agent>> agentList = masterChain.getAgentList();
+        List<Consensus<Deposit>> depositList = masterChain.getDepositList();
+
+        Iterator<Consensus<Agent>> ait = agentList.iterator();
+        while(ait.hasNext()) {
+            Consensus<Agent> agent = ait.next();
+            if(agent.getDelHeight() > 0L && (bestHeight - 1000) > agent.getDelHeight() ) {
+                ait.remove();
+            }
+        }
+
+        Iterator<Consensus<Deposit>> dit = depositList.iterator();
+        while(dit.hasNext()) {
+            Consensus<Deposit> deposit = dit.next();
+            if(deposit.getDelHeight() > 0L && (bestHeight - 1000) > deposit.getDelHeight() ) {
+                dit.remove();
+            }
+        }
+
+        BlockRoundData roundData = new BlockRoundData(chainManager.getBestBlock().getHeader().getExtend());
+
+        List<PunishLogPo> yellowList = masterChain.getYellowPunishList();
+        Iterator<PunishLogPo> yit = yellowList.iterator();
+        while(yit.hasNext()) {
+            PunishLogPo punishLog = yit.next();
+            if(punishLog.getRoundIndex() < roundData.getPackingIndexOfRound() - 200){
+                yit.remove();
+            }
+        }
+    }
+
+    private void clearMasterChainRound() {
+        List<MeetingRound> roundList = chainManager.getMasterChain().getRoundList();
+        if(roundList.size() > 5) {
+            roundList = roundList.subList(roundList.size() - 5, roundList.size());
+            MeetingRound round = roundList.get(0);
+            round.setPreRound(null);
+        }
     }
 }

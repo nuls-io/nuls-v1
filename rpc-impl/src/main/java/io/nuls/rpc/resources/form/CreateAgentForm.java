@@ -27,18 +27,35 @@
 package io.nuls.rpc.resources.form;
 
 import io.nuls.core.utils.str.StringUtils;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author Niels
  * @date 2018/3/14
  */
+@ApiModel(value = "创建共识(代理)节点表单数据")
 public class CreateAgentForm {
+
+    @ApiModelProperty(name = "agentAddress", value = "申请账户的地址", required = true)
     private String agentAddress;
+
+    @ApiModelProperty(name = "packingAddress", value = "打包地址", required = true)
     private String packingAddress;
+
+    @ApiModelProperty(name = "commissionRate", value = "佣金比例", required = true)
     private double commissionRate;
-    private long   deposit;
+
+    @ApiModelProperty(name = "deposit", value = "参与共识需要的总金额", required = true)
+    private long deposit;
+
+    @ApiModelProperty(name = "remark", value = "节点备注", required = true)
     private String remark;
+
+    @ApiModelProperty(name = "agentName", value = "节点名称", required = true)
     private String agentName;
+
+    @ApiModelProperty(name = "password", value = "密码", required = true)
     private String password;
 
     public double getCommissionRate() {

@@ -46,6 +46,7 @@ import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.params.OperationType;
 import io.nuls.ledger.entity.tx.CoinBaseTransaction;
+import io.nuls.protocol.constant.TransactionConstant;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.event.entity.Consensus;
 import io.nuls.protocol.model.*;
@@ -367,6 +368,22 @@ public class ConsensusTool {
         }
         block.setTxs(txs);
         return block;
+    }
+
+    public static SmallBlock getSmallBlock(Block block) {
+        SmallBlock smallBlock = new SmallBlock();
+        smallBlock.setHeader(block.getHeader());
+        List<NulsDigestData> txHashList = new ArrayList<>();
+        for (Transaction tx : block.getTxs()) {
+            txHashList.add(tx.getHash());
+            if (tx.getType() == TransactionConstant.TX_TYPE_COIN_BASE ||
+                    tx.getType() == TransactionConstant.TX_TYPE_YELLOW_PUNISH ||
+                    tx.getType() == TransactionConstant.TX_TYPE_RED_PUNISH) {
+                smallBlock.addConsensusTx(tx);
+            }
+        }
+        smallBlock.setTxHashList(txHashList);
+        return smallBlock;
     }
 }
 

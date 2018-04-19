@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -69,24 +69,14 @@ public class UtxoTransferTool {
             //todo
             Log.error(e);
         }
-        long currentTime = TimeService.currentTimeMillis();
-        long genesisTime = NulsContext.getInstance().getGenesisBlock().getHeader().getTime();
-        long bestHeight = NulsContext.getInstance().getNetBestBlockHeight();
-
         if (po.getStatus() == UtxoOutputPo.USABLE) {
-            if (po.getLockTime() > 0) {
-                if (po.getLockTime() >= genesisTime && po.getLockTime() > currentTime) {
-                    output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_TIME_LOCK);
-                } else if (po.getLockTime() < genesisTime && po.getLockTime() > bestHeight) {
-                    output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_TIME_LOCK);
-                } else {
-                    output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT);
-                }
+            if (po.isTimeLocked()) {
+                output.setStatus(OutPutStatusEnum.UTXO_TIME_LOCK);
             } else {
-                output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT);
+                output.setStatus(OutPutStatusEnum.UTXO_UNSPENT);
             }
         } else if (po.getStatus() == UtxoOutputPo.LOCKED) {
-            output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_CONSENSUS_LOCK);
+            output.setStatus(OutPutStatusEnum.UTXO_CONSENSUS_LOCK);
         } else if (po.getStatus() == UtxoOutputPo.SPENT) {
             output.setStatus(OutPutStatusEnum.UTXO_SPENT);
         }
@@ -112,7 +102,7 @@ public class UtxoTransferTool {
         }
         if (OutPutStatusEnum.UTXO_SPENT == output.getStatus()) {
             po.setStatus(UtxoOutputPo.SPENT);
-        } else if (OutPutStatusEnum.UTXO_CONFIRMED_CONSENSUS_LOCK == output.getStatus()) {
+        } else if (OutPutStatusEnum.UTXO_CONSENSUS_LOCK == output.getStatus()) {
             po.setStatus(UtxoOutputPo.LOCKED);
         } else {
             po.setStatus(UtxoOutputPo.USABLE);
@@ -191,6 +181,16 @@ public class UtxoTransferTool {
             po.setFee(tx.getFee().getValue());
         }
 
+        if (tx.getStatus() == TxStatusEnum.CACHED) {
+            po.setStatus(TransactionLocalPo.UNCONFIRM);
+        } else {
+            po.setStatus(TransactionLocalPo.CONFIRM);
+        }
+
+        if (tx instanceof AbstractCoinTransaction) {
+            po.setCoinData(((AbstractCoinTransaction) tx).getCoinData().serialize());
+        }
+
         return po;
     }
 
@@ -230,8 +230,16 @@ public class UtxoTransferTool {
         if (null != po.getTxData()) {
             tx.parseTxData(new NulsByteBuffer(po.getTxData()));
         }
-        tx.setStatus(TxStatusEnum.CONFIRMED);
-        transferCoinData(tx, po.getInputs(), po.getOutputs());
+        if (po.getStatus() == TransactionLocalPo.UNCONFIRM) {
+            tx.setStatus(TxStatusEnum.CACHED);
+            AbstractCoinTransaction transaction = (AbstractCoinTransaction) tx;
+            transaction.parseCoinData(new NulsByteBuffer(po.getCoinData()));
+            UtxoTransactionTool.getInstance().setTxhashToUtxo(tx);
+        } else {
+            tx.setStatus(TxStatusEnum.CONFIRMED);
+            transferCoinData(tx, po.getInputs(), po.getOutputs());
+        }
+
         return tx;
     }
 

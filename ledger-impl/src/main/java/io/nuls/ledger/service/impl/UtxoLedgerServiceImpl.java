@@ -24,6 +24,7 @@
 package io.nuls.ledger.service.impl;
 
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -81,8 +82,6 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class UtxoLedgerServiceImpl implements LedgerService {
 
-
-    private LedgerCacheService ledgerCacheService = LedgerCacheService.getInstance();
     @Autowired
     private UtxoTransactionDataService txDao;
     @Autowired
@@ -226,26 +225,46 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     public Balance getBalance(String address) {
-        if (StringUtils.isNotBlank(address)) {
-            Balance balance = ledgerCacheService.getBalance(address);
-            return balance;
-        } else {
-            Balance allBalance = new Balance();
-            long usable = 0;
-            long locked = 0;
-            for (String addr : NulsContext.LOCAL_ADDRESS_LIST) {
-                Balance balance = ledgerCacheService.getBalance(addr);
-                if (null != balance) {
-                    usable += balance.getUsable().getValue();
-                    locked += balance.getLocked().getValue();
-                }
+        List<UtxoOutputPo> poList = outputDataService.getAccountUnSpend(address);
+        Balance balance = new Balance();
+        long usable = 0;
+        long locked = 0;
+
+        for (UtxoOutputPo po : poList) {
+            if (po.isLocked()) {
+                locked += po.getValue();
+            } else {
+                usable += po.getValue();
             }
-            allBalance.setUsable(Na.valueOf(usable));
-            allBalance.setLocked(Na.valueOf(locked));
-            allBalance.setBalance(Na.valueOf(usable + locked));
-            return allBalance;
         }
+
+        balance.setUsable(Na.valueOf(usable));
+        balance.setLocked(Na.valueOf(locked));
+        balance.setBalance(Na.valueOf(usable + locked));
+        return balance;
     }
+
+//    public Balance getBalance(String address) {
+//        if (StringUtils.isNotBlank(address)) {
+//            Balance balance = ledgerCacheService.getBalance(address);
+//            return balance;
+//        } else {
+//            Balance allBalance = new Balance();
+//            long usable = 0;
+//            long locked = 0;
+//            for (String addr : NulsContext.LOCAL_ADDRESS_LIST) {
+//                Balance balance = ledgerCacheService.getBalance(addr);
+//                if (null != balance) {
+//                    usable += balance.getUsable().getValue();
+//                    locked += balance.getLocked().getValue();
+//                }
+//            }
+//            allBalance.setUsable(Na.valueOf(usable));
+//            allBalance.setLocked(Na.valueOf(locked));
+//            allBalance.setBalance(Na.valueOf(usable + locked));
+//            return allBalance;
+//        }
+//    }
 
     @Override
     public Na getTxFee(int txType) {
@@ -278,7 +297,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             if (result.isFailed()) {
                 throw new NulsException(result.getErrorCode());
             }
-
             TransactionEvent event = new TransactionEvent();
             event.setEventBody(tx);
             eventBroadcaster.publishToLocal(event);
@@ -294,7 +312,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         CoinTransferData coinData = new CoinTransferData(OperationType.TRANSFER, amount, addressList, toAddress, getTxFee(TransactionConstant.TX_TYPE_TRANSFER));
         return transfer(coinData, password, remark);
     }
-
 
     @Override
     public Result lock(String address, String password, Na amount, long unlockTime, String remark) {
@@ -456,6 +473,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
+    public void conflictDetectTx(Transaction tx, List<Transaction> txList) throws NulsException {
     public ValidateResult conflictDetectTx(Transaction tx, List<Transaction> txList) throws NulsException {
         AssertUtil.canNotEmpty(tx, ErrorCode.NULL_PARAMETER);
         if (null == txList || txList.isEmpty()) {
@@ -513,22 +531,20 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     public void unlockTxApprove(String txHash) {
-        boolean b = true;
-        int index = 0;
-        while (b) {
-            UtxoOutput output = ledgerCacheService.getUtxo(txHash + "-" + index);
-            if (output != null) {
-                if (OutPutStatusEnum.UTXO_UNCONFIRMED_CONSENSUS_LOCK == output.getStatus()) {
-                    output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRMED_UNSPENT);
-                } else if (OutPutStatusEnum.UTXO_CONFIRMED_CONSENSUS_LOCK == output.getStatus()) {
-                    output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT);
-                }
-                UtxoTransactionTool.getInstance().calcBalance(output.getAddress(), false);
-                index++;
-            } else {
-                b = false;
-            }
-        }
+//        boolean b = true;
+//        int index = 0;
+//        while (b) {
+//            UtxoOutput output = ledgerCacheService.getUtxo(txHash + "-" + index);
+//            if (output != null) {
+//                if (OutPutStatusEnum.UTXO_CONFIRMED_CONSENSUS_LOCK == output.getStatus()) {
+//                    output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT);
+//                }
+//                UtxoTransactionTool.getInstance().calcBalance(output.getAddress(), false);
+//                index++;
+//            } else {
+//                b = false;
+//            }
+//        }
     }
 
     @Override
@@ -536,36 +552,35 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     public void unlockTxSave(String txHash) {
         Log.info("-------------- exit agent unlockTxSave  ------------------txHash:" + txHash);
         txDao.unlockTxOutput(txHash);
-        String key = txHash + "-" + 0;
-        UtxoOutput output = ledgerCacheService.getUtxo(key);
-        output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT);
-        UtxoTransactionTool.getInstance().calcBalance(output.getAddress(), false);
+//        String key = txHash + "-" + 0;
+//        UtxoOutput output = ledgerCacheService.getUtxo(key);
+//        output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT);
+//        UtxoTransactionTool.getInstance().calcBalance(output.getAddress(), false);
     }
 
     @Override
     @DbSession
     public void unlockTxRollback(String txHash) {
         Log.info("-------------- exit agent unlockTxRollback  ------------------txHash:" + txHash);
-        UtxoOutput output = ledgerCacheService.getUtxo(txHash + "-" + 0);
-        if (output != null) {
-            if (OutPutStatusEnum.UTXO_UNCONFIRMED_UNSPENT == output.getStatus()) {
-                output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRMED_CONSENSUS_LOCK);
-            } else if (OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT == output.getStatus()) {
-                output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_CONSENSUS_LOCK);
-            }
-            UtxoTransactionTool.getInstance().calcBalance(output.getAddress(), false);
-        } else {
-            Map<String, Object> keyMap = new HashMap<>();
-            keyMap.put("tx_hash", txHash);
-            keyMap.put("out_index", 0);
-            UtxoOutputPo po = outputDataService.get(keyMap);
-            if (po != null) {
-                po.setStatus(UtxoOutputPo.LOCKED);
-                outputDataService.update(po);
-            }
-            output = UtxoTransferTool.toOutput(po);
-            ledgerCacheService.putUtxo(output.getKey(), output);
-        }
+        txDao.lockTxOutput(txHash);
+//        UtxoOutput output = ledgerCacheService.getUtxo(txHash + "-" + 0);
+//        if (output != null) {
+//            if (OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT == output.getStatus()) {
+//                output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_CONSENSUS_LOCK);
+//            }
+//            UtxoTransactionTool.getInstance().calcBalance(output.getAddress(), false);
+//        } else {
+//            Map<String, Object> keyMap = new HashMap<>();
+//            keyMap.put("tx_hash", txHash);
+//            keyMap.put("out_index", 0);
+//            UtxoOutputPo po = outputDataService.get(keyMap);
+//            if (po != null) {
+//                po.setStatus(UtxoOutputPo.LOCKED);
+//                outputDataService.update(po);
+//            }
+//            output = UtxoTransferTool.toOutput(po);
+//            ledgerCacheService.putUtxo(output.getKey(), output);
+//        }
     }
 
     @Override
@@ -614,8 +629,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     public void resetLedgerCache() {
-        ledgerCacheService.clear();
-        UtxoCoinManager.getInstance().cacheAllUnSpendUtxo();
+//        ledgerCacheService.clear();
+//        UtxoCoinManager.getInstance().cacheAllUnSpendUtxo();
     }
 
     @Override

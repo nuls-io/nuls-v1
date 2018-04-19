@@ -56,7 +56,8 @@ public interface BlockService {
 
     boolean saveBlock(Block block) throws IOException;
 
-    boolean rollbackBlock(String hash) throws NulsException;
+    boolean rollbackBlock(Block block) throws NulsException;
+    boolean rollbackBlock() throws NulsException;
 
     Page<BlockHeaderPo> getBlockHeaderList(String nodeAddress, int type, int pageNumber, int pageSize);
 
@@ -79,4 +80,5 @@ public interface BlockService {
     Map<String,Object> getSumTxCount(String packingAddress, long startRoundIndex, long endRoundIndex);
 
     List<BlockHeaderPo> getBlockHeaderListByRound(long startRoundIndex, long endRoundIndex);
+
 }
