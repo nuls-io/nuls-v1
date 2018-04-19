@@ -28,6 +28,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.date.TimeService;
+import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.db.dao.impl.mybatis.mapper.UtxoOutputMapper;
 import io.nuls.db.dao.impl.mybatis.util.Condition;
@@ -148,7 +149,10 @@ public class UtxoOutputDaoImpl extends BaseDaoImpl<UtxoOutputMapper, Map<String,
     public List<UtxoOutputPo> getAccountUnSpend(String address) {
         Searchable searchable = new Searchable();
         searchable.addCondition("status", SearchOperator.ne, 2);
-        searchable.addCondition("address", SearchOperator.eq, address);
+        if(StringUtils.isNotBlank(address)) {
+            searchable.addCondition("address", SearchOperator.eq, address);
+        }
+
         PageHelper.orderBy("status asc, value asc");
         return getMapper().selectList(searchable);
     }
