@@ -24,21 +24,24 @@
 
 package io.nuls.consensus.poc.process;
 
+import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.constant.BlockContainerStatus;
 import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.model.Chain;
+import io.nuls.consensus.poc.protocol.event.notice.PackedBlockNotice;
 import io.nuls.consensus.poc.protocol.service.BlockService;
+import io.nuls.consensus.poc.protocol.utils.ConsensusTool;
 import io.nuls.consensus.poc.provider.ConsensusSystemProvider;
 import io.nuls.consensus.poc.provider.IsolatedBlocksProvider;
 import io.nuls.core.utils.log.ChainLog;
 import io.nuls.core.utils.log.Log;
+import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.poc.constant.ConsensusStatus;
 import io.nuls.protocol.context.NulsContext;
-import io.nuls.protocol.model.Block;
-import io.nuls.protocol.model.BlockHeader;
-import io.nuls.protocol.model.NulsDigestData;
+import io.nuls.protocol.event.SmallBlockEvent;
+import io.nuls.protocol.model.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -49,13 +52,16 @@ import java.util.List;
 public class BlockProcess {
 
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
+    private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
 
     private ChainManager chainManager;
     private IsolatedBlocksProvider isolatedBlocksProvider;
+    private TxMemoryPool txMemoryPool;
 
-    public BlockProcess(ChainManager chainManager, IsolatedBlocksProvider isolatedBlocksProvider) {
+    public BlockProcess(ChainManager chainManager, IsolatedBlocksProvider isolatedBlocksProvider, TxMemoryPool txMemoryPool) {
         this.chainManager = chainManager;
         this.isolatedBlocksProvider = isolatedBlocksProvider;
+        this.txMemoryPool = txMemoryPool;
     }
 
     public boolean addBlock(BlockContainer blockContainer) throws IOException {
@@ -71,6 +77,8 @@ public class BlockProcess {
             }
             if(success) {
                 NulsContext.getInstance().setBestBlock(block);
+                //remove tx from memory pool
+                removeTxFromMemoryPool(block);
                 // 转发区块
                 forwardingBlock(blockContainer);
                 return true;
@@ -98,8 +106,20 @@ public class BlockProcess {
         return false;
     }
 
+    private void removeTxFromMemoryPool(Block block) {
+        for(Transaction tx : block.getTxs()) {
+            txMemoryPool.remove(tx.getHash().getDigestHex());
+        }
+    }
+
     private void forwardingBlock(BlockContainer blockContainer) {
-        //TODO
+        if(blockContainer.getStatus() == BlockContainerStatus.DOWNLOADING) {
+            return;
+        }
+        SmallBlockEvent event = new SmallBlockEvent();
+        SmallBlock smallBlock = ConsensusTool.getSmallBlock(blockContainer.getBlock());
+        event.setEventBody(smallBlock);
+        eventBroadcaster.broadcastHashAndCacheAysn(event, blockContainer.getNode().getId());
     }
 
     private boolean checkAndAddForkChain(Block block) {

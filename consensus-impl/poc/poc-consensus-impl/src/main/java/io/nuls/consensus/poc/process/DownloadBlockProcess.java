@@ -38,18 +38,20 @@ public class DownloadBlockProcess {
             addBlock(new BlockContainer(preBlock, blockContainer.getNode(), BlockContainerStatus.DOWNLOADING));
             return true;
         } else {
-            //ChainLog.debug("get pre block fail {} - {}", preBlock.getHeader().getHeight(), preBlock.getHeader().getHash().getDigestHex());
+            ChainLog.debug("get pre block fail {} - {}", blockContainer.getBlock().getHeader().getHeight() - 1, blockContainer.getBlock().getHeader().getPreHash().getDigestHex());
 
             //失败情况的处理，从其它所以可用的节点去获取，如果都不成功，那么就失败，包括本次失败的节点，再次获取一次
             for(Node node : networkService.getAvailableNodes()) {
-                if(node.getVersionMessage().getBestBlockHeight() >= blockContainer.getBlock().getHeader().getHeight()) {
-                    preBlock = new DownloadUtils().getBlockByHash(blockContainer.getBlock().getHeader().getPreHash().getDigestHex(), blockContainer.getNode());
-                    if(preBlock != null) {
-                        addBlock(new BlockContainer(preBlock, node, BlockContainerStatus.DOWNLOADING));
-                        return true;
-                    }
+                preBlock = new DownloadUtils().getBlockByHash(blockContainer.getBlock().getHeader().getPreHash().getDigestHex(), blockContainer.getNode());
+                if(preBlock != null) {
+                    addBlock(new BlockContainer(preBlock, node, BlockContainerStatus.DOWNLOADING));
+                    ChainLog.debug("get pre block retry success {} - {}", preBlock.getHeader().getHeight() - 1, preBlock.getHeader().getPreHash().getDigestHex());
+
+                    return true;
                 }
             }
+            ChainLog.debug("get pre block complete failure {} - {}", blockContainer.getBlock().getHeader().getHeight() - 1, blockContainer.getBlock().getHeader().getPreHash().getDigestHex());
+
             return false;
         }
     }
