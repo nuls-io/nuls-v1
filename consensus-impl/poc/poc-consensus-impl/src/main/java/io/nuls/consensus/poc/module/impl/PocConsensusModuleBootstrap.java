@@ -80,8 +80,7 @@ public class PocConsensusModuleBootstrap extends AbstractPocConsensusModule {
         this.waitForDependencyInited(NulsConstant.MODULE_ID_PROTOCOL);
         this.registerService(PocConsensusServiceImpl.class);
 
-        PocBlockValidatorManager.initHeaderValidators();
-        PocBlockValidatorManager.initBlockValidators();
+        PocBlockValidatorManager.initValidators();
     }
 
     protected final void registerTransaction(int txType, Class<? extends Transaction> txClass, Class<? extends TransactionService> txServiceClass) {

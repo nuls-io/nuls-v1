@@ -28,6 +28,7 @@ import io.nuls.consensus.poc.block.validator.header.HeaderHashValidator;
 import io.nuls.consensus.poc.block.validator.header.HeaderSignValidator;
 import io.nuls.protocol.utils.BlockHeaderValidatorManager;
 import io.nuls.protocol.utils.BlockValidatorManager;
+import io.nuls.protocol.utils.SmallBlockValidatorManager;
 
 /**
  * @author Niels
@@ -35,15 +36,28 @@ import io.nuls.protocol.utils.BlockValidatorManager;
  */
 public class PocBlockValidatorManager {
 
-    public static void initHeaderValidators(){
-        BlockHeaderValidatorManager.addBlockDefValitor(HeaderFieldValidator.getInstance());
-        BlockHeaderValidatorManager.addBlockDefValitor(HeaderHashValidator.getInstance());
-        BlockHeaderValidatorManager.addBlockDefValitor(HeaderContinuityValidator.getInstance());
-        BlockHeaderValidatorManager.addBlockDefValitor(HeaderSignValidator.getInstance());
-//        BlockHeaderValidatorManager.addBlockDefValitor(HeaderPackerValidator.getInstance());
+    public static void initValidators() {
+        initBlockValidators();
+        initHeaderValidators();
+        initSmallBlockValidators();
     }
 
-    public static void initBlockValidators() {
+    private static void initHeaderValidators() {
+
+        BlockHeaderValidatorManager.addBlockDefValitor(HeaderFieldValidator.getInstance());
+//        BlockHeaderValidatorManager.addBlockDefValitor(HeaderHashValidator.getInstance());
+//        BlockHeaderValidatorManager.addBlockDefValitor(HeaderContinuityValidator.getInstance());
+        BlockHeaderValidatorManager.addBlockDefValitor(HeaderSignValidator.getInstance());
+//        BlockHeaderValidatorManager.addBlockDefValitor(HeaderPackerValidator.getInstance());
+//
+//        BlockValidatorManager.addBlockDefValitor(BlockMerkleValidator.getInstance());
+    }
+
+    private static void initSmallBlockValidators() {
+        SmallBlockValidatorManager.addBlockDefValitor(new SmallBlockValidator());
+    }
+
+    private static void initBlockValidators() {
 
         BlockValidatorManager.addBlockDefValitor(BlockMaxSizeValidator.getInstance());
 

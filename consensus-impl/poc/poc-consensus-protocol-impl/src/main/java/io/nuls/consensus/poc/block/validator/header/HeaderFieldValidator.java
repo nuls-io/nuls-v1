@@ -23,6 +23,8 @@
  */
 package io.nuls.consensus.poc.block.validator.header;
 
+import io.nuls.account.entity.Address;
+import io.nuls.account.util.AccountTool;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.protocol.model.BlockHeader;
@@ -32,6 +34,8 @@ import io.nuls.protocol.model.BlockHeader;
  * @date 2018/1/11
  */
 public class HeaderFieldValidator implements NulsDataValidator<BlockHeader> {
+
+    private static final int HEADER_EXTENDS_MAS_SIZE = 32;
 
     private static final HeaderFieldValidator INSTANCE = new HeaderFieldValidator();
     private static final String ERROR_MESSAGE = "block header field check failed";
@@ -56,7 +60,11 @@ public class HeaderFieldValidator implements NulsDataValidator<BlockHeader> {
                 failed = true;
                 break;
             }
-            if (null==data.getPackingAddress()) {
+            if (null==data.getPackingAddress()&&!Address.validAddress(Address.fromHashs(data.getPackingAddress()).getBase58())) {
+                failed = true;
+                break;
+            }
+            if(null!=data.getExtend()&&data.getExtend().length>HEADER_EXTENDS_MAS_SIZE){
                 failed = true;
                 break;
             }

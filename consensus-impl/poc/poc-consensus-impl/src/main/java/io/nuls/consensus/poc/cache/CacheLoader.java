@@ -27,6 +27,7 @@ package io.nuls.consensus.poc.cache;
 import io.nuls.consensus.poc.protocol.constant.PunishType;
 import io.nuls.consensus.poc.protocol.model.Agent;
 import io.nuls.consensus.poc.protocol.model.Deposit;
+import io.nuls.consensus.poc.protocol.model.block.BlockRoundData;
 import io.nuls.consensus.poc.protocol.service.BlockService;
 import io.nuls.consensus.poc.protocol.utils.ConsensusTool;
 import io.nuls.core.exception.NulsException;
@@ -75,10 +76,12 @@ public class CacheLoader {
     public List<BlockHeader> loadBlockHeaders(int size) {
         Block block = blockService.getLocalBestBlock();
 
-        long bestBlockHeight = block.getHeader().getHeight();
+        BlockRoundData roundData = new BlockRoundData(block.getHeader().getExtend());
+
 
         List<BlockHeader> blockHeaderList = new ArrayList<>();
-        List<BlockHeaderPo> list = blockService.getBlockHeaderList(bestBlockHeight - size + 1, bestBlockHeight);
+        //todo round
+        List<BlockHeaderPo> list = blockService.getBlockHeaderListByRound(roundData.getRoundIndex() - size + 1, roundData.getRoundIndex());
         for (BlockHeaderPo blockHeaderPo : list) {
             try {
                 blockHeaderList.add(ConsensusTool.fromPojo(blockHeaderPo));

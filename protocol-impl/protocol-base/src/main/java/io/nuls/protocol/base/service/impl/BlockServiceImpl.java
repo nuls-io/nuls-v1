@@ -251,4 +251,9 @@ public class BlockServiceImpl implements BlockService {
     public Map<String, Object> getSumTxCount(String packingAddress, long startRoundIndex, long endRoundIndex) {
         return blockStorageService.getSumTxCount(packingAddress, startRoundIndex, endRoundIndex);
     }
+
+    @Override
+    public List<BlockHeaderPo> getBlockHeaderListByRound(long startRoundIndex, long endRoundIndex) {
+        return this.blockStorageService.getBlockHeaderListByRound(startRoundIndex,endRoundIndex);
+    }
 }
