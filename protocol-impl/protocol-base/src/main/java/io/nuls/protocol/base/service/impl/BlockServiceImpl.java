@@ -138,11 +138,13 @@ public class BlockServiceImpl implements BlockService {
         return true;
     }
 
-
     @Override
+    public boolean rollbackBlock() throws NulsException{
+        return rollbackBlock(getBestBlock());
+    }
+
     @DbSession
-    public boolean rollbackBlock(String hash) {
-        Block block = this.getBlock(hash);
+    public boolean rollbackBlock(Block block) throws NulsException {
         if (null == block) {
             return false;
         }
@@ -152,7 +154,6 @@ public class BlockServiceImpl implements BlockService {
         NulsContext.getInstance().setBestBlock(this.getBestBlock());
         return true;
     }
-
 
     @Override
     public Page<BlockHeaderPo> getBlockHeaderList(String nodeAddress, int type, int pageNumber, int pageSize) {

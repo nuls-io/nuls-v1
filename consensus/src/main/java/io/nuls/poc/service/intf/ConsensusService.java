@@ -23,6 +23,7 @@
  */
 package io.nuls.poc.service.intf;
 
+import io.nuls.core.exception.NulsException;
 import io.nuls.network.entity.Node;
 import io.nuls.poc.constant.ConsensusStatus;
 import io.nuls.protocol.model.BaseNulsData;
@@ -81,4 +82,10 @@ public interface ConsensusService {
      * @return BaseNulsData
      */
     BaseNulsData getAndRemoveOfMemoryTxs(String hash);
+
+    /**
+     * 回滚最新区块，同时回滚共识服务内存中链的状态
+     * @return boolean
+     */
+    boolean rollbackBlock() throws NulsException;
 }

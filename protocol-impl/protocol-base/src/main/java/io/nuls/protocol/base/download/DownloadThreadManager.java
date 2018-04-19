@@ -39,6 +39,7 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.queue.service.impl.QueueService;
 import io.nuls.network.entity.Node;
 import io.nuls.network.service.NetworkService;
+import io.nuls.poc.service.intf.ConsensusService;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.model.Block;
 
@@ -57,7 +58,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
     private DownloadUtils downloadUtils = new DownloadUtils();
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
-    private DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
+    private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
 
     private NetworkNewestBlockInfos newestInfos;
     private QueueService<Block> blockQueue;
@@ -219,7 +220,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
         if(newestInfos.getNetBestHeight() < localBestBlock.getHeader().getHeight()) {
             if(DoubleUtils.div(newestInfos.getNodes().size(), networkService.getAvailableNodes().size(), 2) >= 0.8d && networkService.getAvailableNodes().size() >= networkService.getNetworkParam().getMaxOutCount()) {
                 for (long i = localBestBlock.getHeader().getHeight(); i <= newestInfos.getNetBestHeight(); i--) {
-                    blockService.rollbackBlock(localBestBlock.getHeader().getHash().getDigestHex());
+                    consensusService.rollbackBlock();
                     localBestBlock = blockService.getBestBlock();
                 }
             } else {
@@ -251,7 +252,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
         }
 
         if(newestInfos.getNodes().size() >= PocConsensusConstant.ALIVE_MIN_NODE_COUNT) {
-            blockService.rollbackBlock(localBestBlock.getHeader().getHash().getDigestHex());
+            blockService.rollbackBlock();
         } else {
             resetNetwork("the number of available nodes is insufficient for rollback blocks");
             return;
