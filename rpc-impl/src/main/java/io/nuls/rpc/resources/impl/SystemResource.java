@@ -34,6 +34,9 @@ import io.nuls.rpc.entity.HelpInfoDto;
 import io.nuls.rpc.entity.RpcResult;
 import io.nuls.rpc.entity.VersionDto;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -67,6 +70,10 @@ public class SystemResource {
     @GET
     @Path("/version")
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "查询系统版本信息 [3.1.1]")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = VersionDto.class)
+    })
     public RpcResult getVersion() {
         VersionDto rpcVersion = new VersionDto();
         rpcVersion.setMyVersion(NulsConfig.VERSION);
