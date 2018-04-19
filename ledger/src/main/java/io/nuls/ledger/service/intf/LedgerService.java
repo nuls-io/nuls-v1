@@ -26,6 +26,7 @@ package io.nuls.ledger.service.intf;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.Result;
+import io.nuls.core.validate.ValidateResult;
 import io.nuls.ledger.entity.Balance;
 import io.nuls.protocol.model.Block;
 import io.nuls.protocol.model.Na;
@@ -77,6 +78,8 @@ public interface LedgerService {
 
     boolean saveLocalTx(Transaction tx) throws IOException;
 
+    void deleteLocalTx(String txHash);
+
     void saveTxInLocal(String address);
 
     boolean checkTxIsMine(Transaction tx);
@@ -91,7 +94,9 @@ public interface LedgerService {
 
     void commitTx(Transaction tx, Block block) throws NulsException;
 
-    void conflictDetectTx(Transaction tx, List<Transaction> txList) throws NulsException;
+    ValidateResult conflictDetectTx(Transaction tx, List<Transaction> txList) throws NulsException;
+
+    List<Transaction> getWaitingTxList();
 
     void deleteTx(Transaction tx);
 
@@ -103,8 +108,6 @@ public interface LedgerService {
 
     /**
      * get the last 24 hours coinbase transaction reward
-     *
-     * @return
      */
     long getLastDayTimeReward();
 

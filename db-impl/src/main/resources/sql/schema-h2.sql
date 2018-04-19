@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS `agent` (
   `remark` varchar(255) NOT NULL,
   `del_height` bigint(18) DEFAULT 0,
   `status` INT DEFAULT 0,
+   `tx_hash` varchar(70) NOT NULL,
   `start_time` bigint(14) NOT NULL,
   `commission_rate` decimal(14) NOT NULL,
   PRIMARY KEY (`id`)

@@ -135,6 +135,19 @@ public class BlockServiceImpl implements BlockService {
         }
         ledgerService.saveTxList(block.getTxs());
         blockStorageService.save(block);
+        List<Transaction> localTxList = this.ledgerService.getWaitingTxList();
+        if (null != localTxList && !localTxList.isEmpty()) {
+            for (Transaction tx : localTxList) {
+                try {
+                    ValidateResult result = ledgerService.conflictDetectTx(tx, block.getTxs());
+                    if (result.isFailed()) {
+                        ledgerService.deleteLocalTx(tx.getHash().getDigestHex());
+                    }
+                } catch (NulsException e) {
+                    Log.error(e);
+                }
+            }
+        }
         return true;
     }
 
@@ -182,10 +195,7 @@ public class BlockServiceImpl implements BlockService {
         }
         for (; i >= 0; i--) {
             Transaction tx = txs.get(i);
-//todo            if (tx.getType() != TransactionConstant.TX_TYPE_COIN_BASE && tx.getType() != TransactionConstant.TX_TYPE_YELLOW_PUNISH && tx.getType() != TransactionConstant.TX_TYPE_RED_PUNISH) {
-//                txCacheManager.putTxToOrphanCache(tx);
-//            }
-            if (tx.getStatus() == TxStatusEnum.AGREED && !ledgerService.checkTxIsMySend(tx)) {
+            if (tx.getStatus() == TxStatusEnum.CACHED || ledgerService.checkTxIsMySend(tx)) {
                 continue;
             }
             try {
@@ -193,9 +203,7 @@ public class BlockServiceImpl implements BlockService {
             } catch (NulsException e) {
                 Log.error(e);
             }
-
         }
-
     }
 
     @Override

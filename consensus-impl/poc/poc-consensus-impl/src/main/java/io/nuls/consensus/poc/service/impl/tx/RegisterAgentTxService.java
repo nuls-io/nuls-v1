@@ -26,8 +26,10 @@ package io.nuls.consensus.poc.service.impl.tx;
 import io.nuls.consensus.poc.protocol.constant.ConsensusStatusEnum;
 import io.nuls.consensus.poc.protocol.event.notice.RegisterAgentNotice;
 import io.nuls.consensus.poc.protocol.model.Agent;
+import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
 import io.nuls.consensus.poc.protocol.tx.RegisterAgentTransaction;
 import io.nuls.consensus.poc.protocol.utils.ConsensusTool;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.dao.AgentDataService;
 import io.nuls.db.dao.DepositDataService;
@@ -36,6 +38,7 @@ import io.nuls.db.entity.DepositPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.db.transactional.annotation.PROPAGATION;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
+import io.nuls.protocol.constant.TransactionConstant;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.event.entity.Consensus;
 import io.nuls.protocol.model.Block;
@@ -72,7 +75,7 @@ public class RegisterAgentTxService implements TransactionService<RegisterAgentT
         Consensus<Agent> ca = tx.getTxData();
         ca.getExtend().setBlockHeight(tx.getBlockHeight());
         ca.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
-
+        ca.getExtend().setTxHash(tx.getHash().getDigestHex());
         AgentPo po = ConsensusTool.agentToPojo(ca);
         agentDataService.save(po);
 
@@ -83,8 +86,33 @@ public class RegisterAgentTxService implements TransactionService<RegisterAgentT
 
     @Override
     public ValidateResult conflictDetect(RegisterAgentTransaction tx, List<Transaction> txList) {
-        // todo auto-generated method stub(niels)
-        return null;
+        if (null == txList || txList.isEmpty()) {
+            return ValidateResult.getSuccessResult();
+        }
+        for (Transaction transaction : txList) {
+            if(transaction.getHash().equals(tx.getHash())){
+                return ValidateResult.getFailedResult(ErrorCode.FAILED,"transaction Duplication");
+            }
+            switch (transaction.getType()) {
+                case TransactionConstant.TX_TYPE_REGISTER_AGENT:
+                    RegisterAgentTransaction registerAgentTransaction = (RegisterAgentTransaction) transaction;
+                    if(registerAgentTransaction.getTxData().getAddress().equals(tx.getTxData().getAddress())||
+                            registerAgentTransaction.getTxData().getAddress().equals(tx.getTxData().getExtend().getPackingAddress())||
+                            registerAgentTransaction.getTxData().getExtend().getPackingAddress().equals(tx.getTxData().getAddress())
+                            ||registerAgentTransaction.getTxData().getExtend().getPackingAddress().equals(tx.getTxData().getExtend().getPackingAddress())){
+                        return ValidateResult.getFailedResult(ErrorCode.FAILED, "there is a agent has same address!");
+                    }
+                    break;
+                case TransactionConstant.TX_TYPE_RED_PUNISH:
+                    RedPunishTransaction redPunishTransaction = (RedPunishTransaction) transaction;
+                    if (redPunishTransaction.getTxData().getAddress().equals(tx.getTxData().getAddress())) {
+                        return ValidateResult.getFailedResult(ErrorCode.LACK_OF_CREDIT, "there is a new Red Punish Transaction!");
+                    }
+                    break;
+            }
+        }
+
+        return ValidateResult.getSuccessResult();
     }
 }
 

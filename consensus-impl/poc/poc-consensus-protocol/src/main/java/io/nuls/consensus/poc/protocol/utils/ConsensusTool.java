@@ -65,52 +65,52 @@ import java.util.Map;
 public class ConsensusTool {
     private static  AccountService accountService = NulsContext.getServiceBean(AccountService.class);
 
-    public static final BlockHeaderPo toPojo(BlockHeader header) {
-        BlockHeaderPo po = new BlockHeaderPo();
-        po.setTxCount(header.getTxCount());
-        po.setPreHash(header.getPreHash().getDigestHex());
-        po.setMerkleHash(header.getMerkleHash().getDigestHex());
-        po.setHeight(header.getHeight());
-        po.setCreateTime(header.getTime());
-        po.setHash(header.getHash().getDigestHex());
-        po.setSize(header.getSize());
-        if (null != header.getScriptSig()) {
-            try {
-                po.setScriptSig(header.getScriptSig().serialize());
-            } catch (IOException e) {
-                Log.error(e);
-            }
-        }
-        po.setTxCount(header.getTxCount());
-        po.setConsensusAddress(Address.fromHashs(header.getPackingAddress()).getBase58());
-        po.setExtend(header.getExtend());
-        BlockRoundData data = new BlockRoundData();
-        try {
-            data.parse(header.getExtend());
-        } catch (NulsException e) {
-            Log.error(e);
-        }
-        po.setRoundIndex(data.getRoundIndex());
-        return po;
-    }
+//    public static final BlockHeaderPo toPojo(BlockHeader header) {
+//        BlockHeaderPo po = new BlockHeaderPo();
+//        po.setTxCount(header.getTxCount());
+//        po.setPreHash(header.getPreHash().getDigestHex());
+//        po.setMerkleHash(header.getMerkleHash().getDigestHex());
+//        po.setHeight(header.getHeight());
+//        po.setCreateTime(header.getTime());
+//        po.setHash(header.getHash().getDigestHex());
+//        po.setSize(header.getSize());
+//        if (null != header.getScriptSig()) {
+//            try {
+//                po.setScriptSig(header.getScriptSig().serialize());
+//            } catch (IOException e) {
+//                Log.error(e);
+//            }
+//        }
+//        po.setTxCount(header.getTxCount());
+//        po.setConsensusAddress(Address.fromHashs(header.getPackingAddress()).getBase58());
+//        po.setExtend(header.getExtend());
+//        BlockRoundData data = new BlockRoundData();
+//        try {
+//            data.parse(header.getExtend());
+//        } catch (NulsException e) {
+//            Log.error(e);
+//        }
+//        po.setRoundIndex(data.getRoundIndex());
+//        return po;
+//    }
 
-    public static final BlockHeader fromPojo(BlockHeaderPo po) throws NulsException {
-        if (null == po) {
-            return null;
-        }
-        BlockHeader header = new BlockHeader();
-        header.setHash(NulsDigestData.fromDigestHex(po.getHash()));
-        header.setMerkleHash(NulsDigestData.fromDigestHex(po.getMerkleHash()));
-        header.setPackingAddress(Address.fromHashs(po.getConsensusAddress()).getHash());
-        header.setTxCount(po.getTxCount());
-        header.setPreHash(NulsDigestData.fromDigestHex(po.getPreHash()));
-        header.setTime(po.getCreateTime());
-        header.setHeight(po.getHeight());
-        header.setExtend(po.getExtend());
-        header.setSize(po.getSize());
-        header.setScriptSig((new NulsByteBuffer(po.getScriptSig()).readNulsData(new P2PKHScriptSig())));
-        return header;
-    }
+//    public static final BlockHeader fromPojo(BlockHeaderPo po) throws NulsException {
+//        if (null == po) {
+//            return null;
+//        }
+//        BlockHeader header = new BlockHeader();
+//        header.setHash(NulsDigestData.fromDigestHex(po.getHash()));
+//        header.setMerkleHash(NulsDigestData.fromDigestHex(po.getMerkleHash()));
+//        header.setPackingAddress(Address.fromHashs(po.getConsensusAddress()).getHash());
+//        header.setTxCount(po.getTxCount());
+//        header.setPreHash(NulsDigestData.fromDigestHex(po.getPreHash()));
+//        header.setTime(po.getCreateTime());
+//        header.setHeight(po.getHeight());
+//        header.setExtend(po.getExtend());
+//        header.setSize(po.getSize());
+//        header.setScriptSig((new NulsByteBuffer(po.getScriptSig()).readNulsData(new P2PKHScriptSig())));
+//        return header;
+//    }
 
     public static Consensus<Agent> fromPojo(AgentPo po) {
         if (null == po) {
@@ -125,6 +125,7 @@ public class ConsensusTool {
         agent.setStatus(po.getStatus());
         agent.setAgentName(po.getAgentName());
         agent.setBlockHeight(po.getBlockHeight());
+        agent.setTxHash(po.getTxHash());
         Consensus<Agent> ca = new ConsensusAgentImpl();
         ca.setDelHeight(po.getDelHeight());
         ca.setAddress(po.getAgentAddress());
@@ -167,6 +168,7 @@ public class ConsensusTool {
         po.setAgentName(bean.getExtend().getAgentName());
         po.setCommissionRate(bean.getExtend().getCommissionRate());
         po.setDelHeight(bean.getDelHeight());
+        po.setTxHash(bean.getExtend().getTxHash());
         return po;
     }
 

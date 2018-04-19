@@ -24,21 +24,30 @@
 package io.nuls.consensus.poc.service.impl.tx;
 
 import io.nuls.consensus.poc.protocol.constant.ConsensusStatusEnum;
+import io.nuls.consensus.poc.protocol.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.protocol.event.notice.EntrustConsensusNotice;
 import io.nuls.consensus.poc.protocol.model.Deposit;
 import io.nuls.consensus.poc.protocol.tx.PocJoinConsensusTransaction;
+import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
+import io.nuls.consensus.poc.protocol.tx.RegisterAgentTransaction;
+import io.nuls.consensus.poc.protocol.tx.StopAgentTransaction;
 import io.nuls.consensus.poc.protocol.utils.ConsensusTool;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.dao.AgentDataService;
 import io.nuls.db.dao.DepositDataService;
+import io.nuls.db.entity.AgentPo;
 import io.nuls.db.entity.DepositPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.db.transactional.annotation.PROPAGATION;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
+import io.nuls.ledger.service.intf.LedgerService;
+import io.nuls.protocol.constant.TransactionConstant;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.event.entity.Consensus;
 import io.nuls.protocol.model.Block;
+import io.nuls.protocol.model.NulsDigestData;
 import io.nuls.protocol.model.Transaction;
 import io.nuls.protocol.service.intf.TransactionService;
 
@@ -50,9 +59,10 @@ import java.util.List;
  */
 @DbSession(transactional = PROPAGATION.NONE)
 public class JoinConsensusTxService implements TransactionService<PocJoinConsensusTransaction> {
-//    private ConsensusCacheManager manager = ConsensusCacheManager.getInstance();
     private DepositDataService depositDataService = NulsContext.getServiceBean(DepositDataService.class);
-    private AgentDataService accountDataService = NulsContext.getServiceBean(AgentDataService.class);
+    private AgentDataService agentDataService = NulsContext.getServiceBean(AgentDataService.class);
+
+    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
 
     @Override
     @DbSession
@@ -86,8 +96,53 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
 
     @Override
     public ValidateResult conflictDetect(PocJoinConsensusTransaction tx, List<Transaction> txList) {
-        // todo auto-generated method stub(niels)
-        return null;
+        if (null == txList || txList.isEmpty()) {
+            return ValidateResult.getSuccessResult();
+        }
+        AgentPo agent = agentDataService.get(tx.getTxData().getExtend().getAgentHash());
+        if (null == agent) {
+            return ValidateResult.getFailedResult("the agent is not exist!");
+        }
+        RegisterAgentTransaction registerAgentTransaction = (RegisterAgentTransaction) this.ledgerService.getTx(NulsDigestData.fromDigestHex(agent.getTxHash()));
+        if(null==registerAgentTransaction){
+            return ValidateResult.getFailedResult(ErrorCode.DATA_ERROR,"the agent's txHash is wrong!");
+        }
+        Long value = 0L;
+        for (Transaction transaction : txList) {
+            if(transaction.getHash().equals(tx.getHash())){
+                return ValidateResult.getFailedResult(ErrorCode.FAILED,"transaction Duplication");
+            }
+            switch (transaction.getType()) {
+                case TransactionConstant.TX_TYPE_STOP_AGENT:
+                    StopAgentTransaction stopAgentTransaction = (StopAgentTransaction) transaction;
+                    if (stopAgentTransaction.getHash().getDigestHex().equals(agent.getTxHash())) {
+                        return ValidateResult.getFailedResult(ErrorCode.FAILED, "the agent has been stoped!");
+                    }
+                    break;
+                case TransactionConstant.TX_TYPE_JOIN_CONSENSUS:
+                    PocJoinConsensusTransaction pocJoinConsensusTransaction = (PocJoinConsensusTransaction) transaction;
+                    value += pocJoinConsensusTransaction.getTxData().getExtend().getDeposit().getValue();
+                    break;
+                case TransactionConstant.TX_TYPE_RED_PUNISH:
+                    RedPunishTransaction redPunishTransaction = (RedPunishTransaction) transaction;
+                    if (redPunishTransaction.getTxData().getAddress().equals(agent.getAgentAddress())) {
+                        return ValidateResult.getFailedResult(ErrorCode.LACK_OF_CREDIT, "there is a new Red Punish Transaction of the agent address!");
+                    }
+                    break;
+            }
+        }
+        if(value>0L){
+            List<DepositPo> list = this.depositDataService.getEffectiveList(null,NulsContext.getInstance().getBestHeight(),agent.getId(),null);
+            Long allready = 0L;
+            for(DepositPo po :list){
+                allready += po.getDeposit();
+            }
+            if((allready+value+tx.getTxData().getExtend().getDeposit().getValue())> PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT.getValue()){
+                return ValidateResult.getFailedResult("there is too much deposit of the agent!");
+            }
+        }
+        return ValidateResult.getSuccessResult();
     }
+
 
 }

@@ -24,12 +24,14 @@
 package io.nuls.consensus.poc.service.impl.tx;
 
 import io.nuls.consensus.poc.protocol.constant.ConsensusStatusEnum;
+import io.nuls.consensus.poc.protocol.event.notice.CancelConsensusNotice;
 import io.nuls.consensus.poc.protocol.model.Agent;
 import io.nuls.consensus.poc.protocol.model.Deposit;
 import io.nuls.consensus.poc.protocol.tx.RegisterAgentTransaction;
 import io.nuls.consensus.poc.protocol.tx.StopAgentTransaction;
 import io.nuls.consensus.poc.protocol.utils.ConsensusTool;
 import io.nuls.consensus.poc.service.PocConsensusService;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.dao.AgentDataService;
@@ -38,6 +40,7 @@ import io.nuls.db.entity.AgentPo;
 import io.nuls.db.entity.DepositPo;
 import io.nuls.db.entity.UpdateDepositByAgentIdParam;
 import io.nuls.db.transactional.annotation.DbSession;
+import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.event.entity.Consensus;
@@ -68,6 +71,7 @@ public class StopAgentTxService implements TransactionService<StopAgentTransacti
         Consensus<Agent> ca = raTx.getTxData();
         ca.getExtend().setBlockHeight(raTx.getBlockHeight());
         ca.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
+        ca.getExtend().setTxHash(raTx.getHash().getDigestHex());
         AgentPo agentPo = ConsensusTool.agentToPojo(ca);
         agentPo.setBlockHeight(joinTx.getBlockHeight());
         agentPo.setDelHeight(0L);
@@ -92,7 +96,7 @@ public class StopAgentTxService implements TransactionService<StopAgentTransacti
             }
         }
 
-//todo            CancelConsensusNotice notice = new CancelConsensusNotice();
+//            CancelConsensusNotice notice = new CancelConsensusNotice();
 //            notice.setEventBody(tx);
 //            NulsContext.getServiceBean(EventBroadcaster.class).publishToLocal(notice);
 
@@ -129,8 +133,12 @@ public class StopAgentTxService implements TransactionService<StopAgentTransacti
 
     @Override
     public ValidateResult conflictDetect(StopAgentTransaction tx, List<Transaction> txList) {
-        // todo auto-generated method stub(niels)
-        return null;
+        for (Transaction transaction : txList) {
+            if (transaction.getHash().equals(tx.getHash())) {
+                return ValidateResult.getFailedResult(ErrorCode.FAILED, "transaction Duplication");
+            }
+        }
+        return ValidateResult.getSuccessResult();
     }
 
 }

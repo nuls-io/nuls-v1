@@ -46,6 +46,7 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.tx.CoinBaseTransaction;
+import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.network.service.NetworkService;
 import io.nuls.poc.constant.ConsensusStatus;
 import io.nuls.protocol.constant.ProtocolConstant;
@@ -74,6 +75,7 @@ public class ConsensusProcess {
     private BlockProcess blockProcess;
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
+    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
 
 
     private boolean hasPacking;
@@ -89,7 +91,7 @@ public class ConsensusProcess {
 
         boolean canPackage = checkCanPackage();
 
-        if(!canPackage || false) {
+        if (!canPackage || false) {
             return;
         }
 
@@ -101,12 +103,12 @@ public class ConsensusProcess {
         // TODO load config
 
         // wait consensus ready running
-        if(ConsensusSystemProvider.getConsensusStatus().ordinal() <= ConsensusStatus.WAIT_START.ordinal()) {
+        if (ConsensusSystemProvider.getConsensusStatus().ordinal() <= ConsensusStatus.WAIT_START.ordinal()) {
             return false;
         }
 
         // check network status
-        if(networkService.getAvailableNodes().size() == 0) {
+        if (networkService.getAvailableNodes().size() == 0) {
             return false;
         }
 
@@ -117,7 +119,7 @@ public class ConsensusProcess {
 
         MeetingRound round = chainManager.getMasterChain().resetRound(true);
 
-        if(round == null) {
+        if (round == null) {
             return;
         }
 
@@ -132,16 +134,16 @@ public class ConsensusProcess {
             hasPacking = true;
             try {
                 Log.debug("当前网络时间： " + DateUtil.convertDate(new Date(TimeService.currentTimeMillis())) + " , 我的打包开始时间: " +
-                        DateUtil.convertDate(new Date(member.getPackStartTime()))+ " , 我的打包结束时间: " +
+                        DateUtil.convertDate(new Date(member.getPackStartTime())) + " , 我的打包结束时间: " +
                         DateUtil.convertDate(new Date(member.getPackEndTime())) + " , 当前轮开始时间: " +
-                        DateUtil.convertDate(new Date(round.getStartTime()))+ " , 当前轮结束开始时间: " +
+                        DateUtil.convertDate(new Date(round.getStartTime())) + " , 当前轮结束开始时间: " +
                         DateUtil.convertDate(new Date(round.getEndTime())));
                 packing(member, round);
             } catch (Exception e) {
                 Log.error(e);
             }
 
-            while(member.getPackEndTime() > TimeService.currentTimeMillis()) {
+            while (member.getPackEndTime() > TimeService.currentTimeMillis()) {
                 try {
                     Thread.sleep(500l);
                 } catch (InterruptedException e) {
@@ -181,7 +183,7 @@ public class ConsensusProcess {
         }
 
         boolean success = saveBlock(block);
-        if(success) {
+        if (success) {
             broadcastSmallBlock(block);
         } else {
             Log.error("make a block, but save block error");
@@ -299,13 +301,13 @@ public class ConsensusProcess {
 
         long totalSize = 0L;
 
-        while(true) {
+        while (true) {
             if ((self.getPackEndTime() - TimeService.currentTimeMillis()) <= 500L) {
                 break;
             }
             Transaction tx = txMemoryPool.get();
 
-            if(tx == null) {
+            if (tx == null) {
                 try {
                     Thread.sleep(100l);
                 } catch (InterruptedException e) {
@@ -318,11 +320,16 @@ public class ConsensusProcess {
                 txMemoryPool.add(tx, false);
                 break;
             }
-            if(outHashList.contains(tx.getHash())) {
+            if (outHashList.contains(tx.getHash())) {
                 continue;
             }
             outHashList.add(tx.getHash());
-            ValidateResult result = tx.verify();
+            ValidateResult result = ledgerService.conflictDetectTx(tx, packingTxList);
+            if (result.isFailed()) {
+                Log.debug(result.getMessage());
+                continue;
+            }
+            result = tx.verify();
             if (result.isFailed()) {
                 Log.debug(result.getMessage());
                 continue;
